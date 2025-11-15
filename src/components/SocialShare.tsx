@@ -57,7 +57,7 @@ export function SocialShare() {
                 >
                   <Share2 className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
                 </motion.div>
-                <h2 id="social-share-heading" className="text-2xl md:text-4xl text-[#333333]">Spread the Word</h2>
+                <h2 id="social-share-heading" className="text-2xl md:text-4xl text-[#333333] font-bold">Spread the Word</h2>
               </div>
               <p className="text-[#666666] text-base md:text-lg">
                 Help us reach every corner of India. Share this campaign with your friends, family, and community.
@@ -177,7 +177,7 @@ export function SocialShare() {
               >
                 <Users className="w-8 h-8 text-white" aria-hidden="true" />
               </motion.div>
-              <h2 className="text-white text-2xl md:text-4xl">
+              <h2 className="text-white text-2xl md:text-4xl font-bold">
                 Join the Movement
               </h2>
             </div>

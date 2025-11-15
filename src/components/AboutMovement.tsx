@@ -17,7 +17,7 @@ export function AboutMovement() {
               viewport={{ once: true }}
               className="space-y-6 order-2 md:order-1"
             >
-              <h2 id="about-heading" className="text-3xl md:text-5xl text-[#333333] leading-tight">
+              <h2 id="about-heading" className="text-3xl md:text-5xl text-[#333333] leading-tight font-bold">
                 A National Movement of Compassion
               </h2>
               

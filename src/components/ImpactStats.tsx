@@ -75,7 +75,7 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="impact-stats-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4">
+            <h2 id="impact-stats-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4 font-bold">
               Our Growing Movement
             </h2>
             <p className="text-[#666666] text-base md:text-lg">

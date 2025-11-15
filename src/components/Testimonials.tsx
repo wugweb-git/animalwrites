@@ -59,7 +59,7 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="testimonials-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4">Voices From Across India</h2>
+            <h2 id="testimonials-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4 font-bold">Voices From Across India</h2>
             <p className="text-[#666666] text-base md:text-lg">
               Real people, real stories, one united movement
             </p>

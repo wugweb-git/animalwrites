@@ -47,7 +47,7 @@ export function HowToJoin() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="how-to-join-heading" className="text-3xl md:text-5xl text-[#333333] mb-4 md:mb-6">
+            <h2 id="how-to-join-heading" className="text-3xl md:text-5xl text-[#333333] mb-4 md:mb-6 font-bold">
               How You Can Join
             </h2>
             <p className="text-lg md:text-xl text-[#666666] max-w-2xl mx-auto">

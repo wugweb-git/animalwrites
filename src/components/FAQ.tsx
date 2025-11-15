@@ -56,7 +56,7 @@ export function FAQ() {
           >
             <div className="inline-flex items-center gap-3 mb-4">
               <HelpCircle className="w-8 h-8 text-[#333333]" aria-hidden="true" />
-              <h2 id="faq-heading" className="text-3xl md:text-4xl text-[#333333]">
+              <h2 id="faq-heading" className="text-3xl md:text-4xl text-[#333333] font-bold">
                 Frequently Asked Questions
               </h2>
             </div>

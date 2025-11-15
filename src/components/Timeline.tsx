@@ -51,7 +51,7 @@ export function Timeline() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="timeline-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
+            <h2 id="timeline-heading" className="text-2xl md:text-4xl text-[#333333] mb-4 font-bold">
               Campaign Timeline
             </h2>
             <p className="text-[#666666] text-base md:text-lg">
@@ -130,7 +130,7 @@ export function Timeline() {
                           >
                             {milestone.date}
                           </p>
-                          <h3 className="text-[#333333] text-base md:text-lg mb-2">
+                          <h3 className="text-[#333333] text-base md:text-lg mb-2 font-bold">
                             {milestone.title}
                           </h3>
                           <p className="text-[#666666] text-sm leading-relaxed">

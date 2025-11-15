@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Calendar, TrendingUp, Users, Heart, Megaphone, FileText } from "lucide-react";
+import { Calendar, Mail, Newspaper, Users, Heart, Target } from "lucide-react";
 
 export function WhatHappensNext() {
   const nextSteps = [
@@ -7,70 +7,70 @@ export function WhatHappensNext() {
       icon: Calendar,
       title: "November 29, 2025 - The Big Day",
       description: "Thousands of citizens across India walk to their nearest post offices to mail letters to the Supreme Court.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
-      icon: FileText,
+      icon: Mail,
       title: "Letter Delivery & Documentation",
       description: "All letters are tracked and documented. We'll create a public record of participation numbers city-wise.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
-      icon: Megaphone,
+      icon: Newspaper,
       title: "Media Amplification",
       description: "National and regional media coverage highlighting citizen participation and the movement's scale.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
       icon: Users,
       title: "Follow-up Advocacy",
       description: "Coordination with animal welfare organizations and legal experts to track the Supreme Court's response.",
-      color: "#D32F2F",
-    },
-    {
-      icon: TrendingUp,
-      title: "Long-term Impact",
-      description: "Building awareness about ABC programs, community involvement in street dog welfare, and sustainable coexistence models.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
       icon: Heart,
+      title: "Long-term Impact",
+      description: "Building awareness about ABC programs, community involvement in street dog welfare, and sustainable coexistence models.",
+      color: "#F59E0B",
+    },
+    {
+      icon: Target,
       title: "Community Building",
       description: "Creating lasting networks of animal welfare volunteers and advocates across every city in India.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
   ];
 
   const timelineSteps = [
     {
-      icon: FileText,
+      icon: Mail,
       title: "Letter Delivery & Documentation",
       description: "All letters are tracked and documented. We'll create a public record of participation numbers city-wise.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
-      icon: Megaphone,
+      icon: Newspaper,
       title: "Media Amplification",
       description: "National and regional media coverage highlighting citizen participation and the movement's scale.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
       icon: Users,
       title: "Follow-up Advocacy",
       description: "Coordination with animal welfare organizations and legal experts to track the Supreme Court's response.",
-      color: "#D32F2F",
-    },
-    {
-      icon: TrendingUp,
-      title: "Long-term Impact",
-      description: "Building awareness about ABC programs, community involvement in street dog welfare, and sustainable coexistence models.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
     {
       icon: Heart,
+      title: "Long-term Impact",
+      description: "Building awareness about ABC programs, community involvement in street dog welfare, and sustainable coexistence models.",
+      color: "#F59E0B",
+    },
+    {
+      icon: Target,
       title: "Community Building",
       description: "Creating lasting networks of animal welfare volunteers and advocates across every city in India.",
-      color: "#D32F2F",
+      color: "#F59E0B",
     },
   ];
 
@@ -85,7 +85,7 @@ export function WhatHappensNext() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="what-happens-next-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
+            <h2 id="what-happens-next-heading" className="text-2xl md:text-4xl text-[#333333] mb-4 font-bold">
               What Happens After November 29th?
             </h2>
             <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto">

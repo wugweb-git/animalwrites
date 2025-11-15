@@ -64,7 +64,7 @@ export function VolunteerSignup() {
               >
                 <Users className="w-8 h-8 text-[#333333]" aria-hidden="true" />
               </motion.div>
-              <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-[#333333]">Volunteer With Us</h2>
+              <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-[#333333] font-bold">Volunteer With Us</h2>
             </div>
             <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto">
               Want to do more? Join our volunteer team and help coordinate this movement in your city. 
@@ -82,7 +82,7 @@ export function VolunteerSignup() {
               >
                 <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl">
+                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl font-bold">
                       <MapPin className="w-5 h-5" aria-hidden="true" />
                       City Coordinators Needed
                     </CardTitle>
@@ -121,7 +121,7 @@ export function VolunteerSignup() {
               >
                 <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl">
+                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl font-bold">
                       <Mail className="w-5 h-5" aria-hidden="true" />
                       Other Ways to Help
                     </CardTitle>
@@ -161,7 +161,7 @@ export function VolunteerSignup() {
             >
               <Card className="border-2 border-[#F59E0B]/30 hover:border-[#F59E0B] transition-colors">
                 <CardHeader>
-                  <CardTitle className="text-[#F59E0B] text-lg md:text-xl">Sign Up to Volunteer</CardTitle>
+                  <CardTitle className="text-[#F59E0B] text-lg md:text-xl font-bold">Sign Up to Volunteer</CardTitle>
                   <CardDescription className="text-sm md:text-base">
                     Fill out this form and we'll get in touch with you
                   </CardDescription>

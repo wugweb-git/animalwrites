@@ -52,7 +52,7 @@ export function WhyThisMatters() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="why-matters-heading" className="text-3xl md:text-5xl text-[#333333] mb-4 md:mb-6">
+            <h2 id="why-matters-heading" className="text-3xl md:text-5xl text-[#333333] mb-4 md:mb-6 font-bold">
               Why This Matters
             </h2>
             <p className="text-lg md:text-xl text-[#666666] max-w-3xl mx-auto">
@@ -111,7 +111,7 @@ export function WhyThisMatters() {
                   <Scale className="w-5 h-5 text-white" aria-hidden="true" />
                   <span className="text-white">Your Constitutional Right</span>
                 </motion.div>
-                <h3 className="text-2xl md:text-3xl text-[#333333] mb-4">
+                <h3 className="text-2xl md:text-3xl text-[#333333] mb-4 font-bold">
                   Why Letters to the Supreme Court Work
                 </h3>
                 <p className="text-base md:text-lg text-[#666666] max-w-2xl mx-auto">

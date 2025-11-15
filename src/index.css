@@ -117,6 +117,7 @@
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
+    --font-weight-bold: 700;
     --tracking-wide: .025em;
     --tracking-wider: .05em;
     --leading-tight: 1.25;
@@ -1247,10 +1248,6 @@
     border-color: oklab(32.1092% 2.98023e-8 0 / .2);
   }
 
-  .border-\[\#D32F2F\]\/20 {
-    border-color: oklab(56.7989% .179295 .089025 / .2);
-  }
-
   .border-\[\#F59E0B\] {
     border-color: #f59e0b;
   }
@@ -1736,6 +1733,11 @@
     line-height: var(--leading-tight);
   }
 
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
+
   .font-medium {
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
@@ -1774,10 +1776,6 @@
 
   .text-\[\#999999\] {
     color: #999;
-  }
-
-  .text-\[\#D32F2F\] {
-    color: #d32f2f;
   }
 
   .text-\[\#F59E0B\] {
@@ -2075,12 +2073,6 @@
   @media (hover: hover) {
     .hover\:border-\[\#333333\]\/40:hover {
       border-color: oklab(32.1092% 2.98023e-8 0 / .4);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:border-\[\#D32F2F\]:hover {
-      border-color: #d32f2f;
     }
   }
 

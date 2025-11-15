@@ -98,7 +98,7 @@ export function CountdownTimer() {
                 >
                   <Calendar className="w-5 h-5 md:w-6 md:h-6 text-white" aria-hidden="true" />
                 </motion.div>
-                <h2 id="countdown-heading" className="text-white text-xl md:text-2xl">
+                <h2 id="countdown-heading" className="text-white text-xl md:text-2xl font-bold">
                   Time Until Campaign Day
                 </h2>
               </div>

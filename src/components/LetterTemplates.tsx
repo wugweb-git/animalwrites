@@ -164,7 +164,7 @@ With highest regards,
                       <CardHeader>
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <CardTitle className="text-[#333333] text-2xl">{template.title}</CardTitle>
+                            <CardTitle className="text-[#333333] text-2xl font-bold">{template.title}</CardTitle>
                             <CardDescription className="text-[#666666] text-base">
                               Tone: {template.tone}
                             </CardDescription>

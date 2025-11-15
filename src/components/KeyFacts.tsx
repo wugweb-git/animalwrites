@@ -52,7 +52,7 @@ export function KeyFacts() {
               <CheckCircle className="w-5 h-5 text-[#333333]" aria-hidden="true" />
               <span className="text-[#333333]">Evidence-Based</span>
             </motion.div>
-            <h2 id="key-facts-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
+            <h2 id="key-facts-heading" className="text-2xl md:text-4xl text-[#333333] mb-4 font-bold">
               The Facts Speak for Themselves
             </h2>
             <p className="text-[#666666] text-base md:text-lg max-w-2xl mx-auto">
@@ -108,7 +108,7 @@ export function KeyFacts() {
             viewport={{ once: true }}
             className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#F59E0B]/20"
           >
-            <h3 className="text-[#F59E0B] text-lg md:text-xl mb-6 md:mb-8 text-center">Why ABC Programs Work</h3>
+            <h3 className="text-[#F59E0B] text-lg md:text-xl mb-6 md:mb-8 text-center font-bold">Why ABC Programs Work</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {[
                 {
