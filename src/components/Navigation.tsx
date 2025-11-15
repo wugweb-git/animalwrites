@@ -1,0 +1,127 @@
+import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
+import { Button } from "./ui/button";
+import { motion, AnimatePresence } from "motion/react";
+import logo from "figma:asset/6e61e5eae124a3f5fb754a70be5c91c75e29cc82.png";
+
+export function Navigation() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const navLinks = [
+    { label: "Why It Matters", id: "why-matters" },
+    { label: "How to Join", id: "how-to-join" },
+    { label: "Write Letter", id: "letter-templates" },
+    { label: "Find GPO", id: "local-support" },
+    { label: "FAQ", id: "faq" },
+    { label: "Volunteer", id: "volunteer" },
+  ];
+
+  return (
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm transition-shadow duration-300"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2 rounded-lg p-1"
+            aria-label="Scroll to top - Animal Writes home"
+          >
+            <img src={logo} alt="Animal Writes logo" className="h-10 w-10 md:h-12 md:w-12" />
+            <span className="text-[#333333] tracking-wide hidden sm:inline">ANIMAL WRITES</span>
+          </button>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => scrollToSection(link.id)}
+                className="text-sm text-[#666666] hover:text-[#D32F2F] transition-colors focus:outline-none focus:text-[#D32F2F] focus:underline underline-offset-4"
+                aria-label={`Navigate to ${link.label}`}
+              >
+                {link.label}
+              </button>
+            ))}
+            <Button
+              onClick={() => scrollToSection("letter-templates")}
+              className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+              size="sm"
+              aria-label="Navigate to write letter section"
+            >
+              Write Now
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-[#666666] hover:text-[#D32F2F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D32F2F] rounded-lg"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              id="mobile-menu"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden border-t border-gray-100 overflow-hidden"
+              role="menu"
+            >
+              <div className="flex flex-col gap-1 py-4">
+                {navLinks.map((link) => (
+                  <button
+                    key={link.id}
+                    onClick={() => scrollToSection(link.id)}
+                    className="text-left px-4 py-3 text-[#666666] hover:text-[#D32F2F] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D32F2F]"
+                    role="menuitem"
+                    aria-label={`Navigate to ${link.label}`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+                <Button
+                  onClick={() => scrollToSection("letter-templates")}
+                  className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                  role="menuitem"
+                  aria-label="Navigate to write letter section"
+                >
+                  Write Now
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </nav>
+  );
+}
