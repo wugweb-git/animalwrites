@@ -75,7 +75,7 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="impact-stats-heading" className="text-[#D32F2F] text-2xl md:text-4xl mb-4">
+            <h2 id="impact-stats-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4">
               Our Growing Movement
             </h2>
             <p className="text-[#666666] text-base md:text-lg">
@@ -90,9 +90,9 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="mt-12 text-center"
           >
-            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-5 md:p-6 border-2 border-[#D32F2F]/30">
+            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-5 md:p-6 border-2 border-[#F59E0B]/30">
               <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#D32F2F]">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
+                <strong className="text-[#F59E0B]">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
               </p>
             </div>
           </motion.div>

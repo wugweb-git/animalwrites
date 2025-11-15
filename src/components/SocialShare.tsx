@@ -55,7 +55,7 @@ export function SocialShare() {
                   animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Share2 className="w-8 h-8 text-[#D32F2F]" aria-hidden="true" />
+                  <Share2 className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
                 </motion.div>
                 <h2 id="social-share-heading" className="text-2xl md:text-4xl text-[#333333]">Spread the Word</h2>
               </div>
@@ -114,7 +114,7 @@ export function SocialShare() {
                 <Button
                   onClick={copyToClipboard}
                   variant="outline"
-                  className="border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white flex items-center gap-2 px-4 md:px-6 py-5 md:py-6 focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                  className="border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white flex items-center gap-2 px-4 md:px-6 py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                   aria-label={copied ? "Link copied" : "Copy link"}
                 >
                   <AnimatePresence mode="wait">
@@ -151,13 +151,13 @@ export function SocialShare() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-[#FFF8F3] rounded-2xl p-5 md:p-6 border-2 border-[#D32F2F]/20 mt-auto"
+              className="bg-[#FFF8F3] rounded-2xl p-5 md:p-6 border-2 border-[#F59E0B]/20 mt-auto"
             >
               <p className="text-center text-[#333333] text-sm md:text-base">
                 <strong>Tag your posts:</strong>{" "}
-                <span className="text-[#D32F2F]">#SaveIndianStreetDogs</span> •{" "}
-                <span className="text-[#D32F2F]">#NoDogsNoVotes</span> •{" "}
-                <span className="text-[#D32F2F]">#AnimalWrites</span>
+                <span className="text-[#F59E0B]">#SaveIndianStreetDogs</span> •{" "}
+                <span className="text-[#F59E0B]">#NoDogsNoVotes</span> •{" "}
+                <span className="text-[#F59E0B]">#AnimalWrites</span>
               </p>
             </motion.div>
           </motion.div>
@@ -168,7 +168,7 @@ export function SocialShare() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-[#D32F2F] to-[#B71C1C] rounded-3xl p-8 md:p-12 shadow-2xl text-center flex flex-col justify-center"
+            className="bg-gradient-to-br from-[#333333] to-[#1a1a1a] rounded-3xl p-8 md:p-12 shadow-2xl text-center flex flex-col justify-center"
           >
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <motion.div
@@ -191,7 +191,7 @@ export function SocialShare() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-[#D32F2F] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#D32F2F]"
+                className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333]"
               >
                 <a
                   href="https://facebook.com/AnimalWritesIndia"

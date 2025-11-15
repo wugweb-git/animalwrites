@@ -80,7 +80,7 @@ export function WhyThisMatters() {
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <reason.icon className="w-7 h-7 md:w-8 md:h-8 text-[#D32F2F]" aria-hidden="true" />
+                    <reason.icon className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B]" aria-hidden="true" />
                   </motion.div>
                   <h3 className="text-lg md:text-xl text-[#333333] mb-2 md:mb-3 text-center sm:text-left">{reason.title}</h3>
                   <p className="text-sm md:text-base text-[#666666] leading-relaxed text-center sm:text-left">{reason.description}</p>
@@ -98,13 +98,13 @@ export function WhyThisMatters() {
             className="mb-12 md:mb-16"
           >
             <motion.div
-              className="bg-white rounded-2xl p-8 md:p-12 border-2 border-[#D32F2F]/20 shadow-xl"
-              whileHover={{ borderColor: "rgba(211, 47, 47, 0.4)" }}
+              className="bg-white rounded-2xl p-8 md:p-12 border-2 border-[#F59E0B]/20 shadow-xl"
+              whileHover={{ borderColor: "rgba(245, 158, 11, 0.4)" }}
               transition={{ duration: 0.3 }}
             >
               <div className="text-center mb-8">
                 <motion.div
-                  className="inline-flex items-center gap-2 bg-[#D32F2F] px-5 py-2 rounded-full mb-6"
+                  className="inline-flex items-center gap-2 bg-[#F59E0B] px-5 py-2 rounded-full mb-6"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
@@ -134,16 +134,16 @@ export function WhyThisMatters() {
                       whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <point.icon className="w-8 h-8 text-[#D32F2F]" aria-hidden="true" />
+                      <point.icon className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
                     </motion.div>
                     <p className="text-sm md:text-base text-[#666666] leading-relaxed">{point.text}</p>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="bg-[#FFF8F3] rounded-xl p-6 md:p-8 border-l-4 border-[#D32F2F]">
+              <div className="bg-[#FFF8F3] rounded-xl p-6 md:p-8 border-l-4 border-[#F59E0B]">
                 <p className="text-center text-base md:text-lg text-[#333333]">
-                  Use the uniform title: <strong className="text-[#D32F2F]">"IN RE: Compassion, Kindness & Humanity"</strong> to help the Court consolidate all letters into one national plea.
+                  Use the uniform title: <strong className="text-[#F59E0B]">"IN RE: Compassion, Kindness & Humanity"</strong> to help the Court consolidate all letters into one national plea.
                 </p>
               </div>
             </motion.div>

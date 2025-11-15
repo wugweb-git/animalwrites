@@ -80,9 +80,9 @@ export function VolunteerSignup() {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-2 border-[#D32F2F]/20 hover:border-[#D32F2F] transition-colors">
+                <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#D32F2F] flex items-center gap-2 text-lg md:text-xl">
+                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl">
                       <MapPin className="w-5 h-5" aria-hidden="true" />
                       City Coordinators Needed
                     </CardTitle>
@@ -119,9 +119,9 @@ export function VolunteerSignup() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-2 border-[#D32F2F]/20 hover:border-[#D32F2F] transition-colors">
+                <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#D32F2F] flex items-center gap-2 text-lg md:text-xl">
+                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl">
                       <Mail className="w-5 h-5" aria-hidden="true" />
                       Other Ways to Help
                     </CardTitle>
@@ -159,9 +159,9 @@ export function VolunteerSignup() {
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <Card className="border-2 border-[#D32F2F]/30 hover:border-[#D32F2F] transition-colors">
+              <Card className="border-2 border-[#F59E0B]/30 hover:border-[#F59E0B] transition-colors">
                 <CardHeader>
-                  <CardTitle className="text-[#D32F2F] text-lg md:text-xl">Sign Up to Volunteer</CardTitle>
+                  <CardTitle className="text-[#F59E0B] text-lg md:text-xl">Sign Up to Volunteer</CardTitle>
                   <CardDescription className="text-sm md:text-base">
                     Fill out this form and we'll get in touch with you
                   </CardDescription>
@@ -206,7 +206,7 @@ export function VolunteerSignup() {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             placeholder="Enter your full name"
-                            className="border-2 border-gray-200 focus:border-[#D32F2F] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
                             aria-required="true"
                           />
                         </div>
@@ -220,7 +220,7 @@ export function VolunteerSignup() {
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             placeholder="your.email@example.com"
-                            className="border-2 border-gray-200 focus:border-[#D32F2F] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
                             aria-required="true"
                           />
                         </div>
@@ -234,7 +234,7 @@ export function VolunteerSignup() {
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             placeholder="Your city name"
-                            className="border-2 border-gray-200 focus:border-[#D32F2F] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
                             aria-required="true"
                           />
                         </div>
@@ -247,7 +247,7 @@ export function VolunteerSignup() {
                             onValueChange={(value) => setFormData({ ...formData, role: value })}
                           >
                             <SelectTrigger 
-                              className="border-2 border-gray-200 focus:border-[#D32F2F] transition-colors"
+                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
                               aria-label="Select volunteer role"
                             >
                               <SelectValue placeholder="Select a role" />
@@ -290,11 +290,11 @@ export function VolunteerSignup() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="mt-12 bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#D32F2F]/20"
+            className="mt-12 bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20"
           >
             <div className="text-center">
               <p className="text-[#333333] text-base md:text-lg mb-4">
-                <strong className="text-[#D32F2F]">Can't volunteer but want to help?</strong>
+                <strong className="text-[#F59E0B]">Can't volunteer but want to help?</strong>
               </p>
               <p className="text-[#666666] text-sm md:text-base">
                 Share this campaign with everyone you know, write your letter, and encourage others to participate. 

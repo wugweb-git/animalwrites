@@ -45,7 +45,7 @@ export function KeyFacts() {
             className="text-center mb-12"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 border border-[#D32F2F]/20"
+              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 border border-[#F59E0B]/20"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
@@ -70,7 +70,7 @@ export function KeyFacts() {
                 viewport={{ once: true }}
               >
                 <motion.div
-                  className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-[#D32F2F] hover:shadow-lg transition-all h-full"
+                  className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-[#F59E0B] hover:shadow-lg transition-all h-full"
                   whileHover={{ y: -5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
@@ -85,7 +85,7 @@ export function KeyFacts() {
                     <div className="flex-1">
                       <h3 className="text-[#333333] mb-2 text-base md:text-lg">{fact.title}</h3>
                       <motion.div
-                        className="text-2xl md:text-3xl text-[#D32F2F] mb-3"
+                        className="text-2xl md:text-3xl text-[#F59E0B] mb-3"
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
@@ -106,9 +106,9 @@ export function KeyFacts() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#D32F2F]/20"
+            className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#F59E0B]/20"
           >
-            <h3 className="text-[#D32F2F] text-lg md:text-xl mb-6 md:mb-8 text-center">Why ABC Programs Work</h3>
+            <h3 className="text-[#F59E0B] text-lg md:text-xl mb-6 md:mb-8 text-center">Why ABC Programs Work</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {[
                 {

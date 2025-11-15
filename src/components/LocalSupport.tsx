@@ -208,12 +208,12 @@ export function LocalSupport() {
             className="text-center mb-12"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 border border-[#D32F2F]/20"
+              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 border border-[#F59E0B]/20"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <MapPin className="w-5 h-5 text-[#D32F2F]" aria-hidden="true" />
-              <span className="text-[#D32F2F]">Find Your GPO</span>
+              <MapPin className="w-5 h-5 text-[#F59E0B]" aria-hidden="true" />
+              <span className="text-[#F59E0B]">Find Your GPO</span>
             </motion.div>
             <h2 id="gpo-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
               Find Your Nearest Post Office
@@ -238,7 +238,7 @@ export function LocalSupport() {
                 placeholder="Search by city, state, or pincode..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 py-5 md:py-6 text-base md:text-lg border-2 border-gray-200 focus:border-[#D32F2F] rounded-xl transition-colors"
+                className="pl-12 py-5 md:py-6 text-base md:text-lg border-2 border-gray-200 focus:border-[#F59E0B] rounded-xl transition-colors"
                 aria-label="Search for post offices"
               />
             </div>
@@ -258,7 +258,7 @@ export function LocalSupport() {
           {filteredGPOs.length > 0 ? (
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <Building2 className="w-6 h-6 text-[#D32F2F]" aria-hidden="true" />
+                <Building2 className="w-6 h-6 text-[#F59E0B]" aria-hidden="true" />
                 <h3 className="text-[#333333] text-lg md:text-xl">
                   Post Offices ({filteredGPOs.length})
                 </h3>
@@ -272,9 +272,9 @@ export function LocalSupport() {
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     viewport={{ once: true }}
                   >
-                    <Card className="border-2 border-gray-200 hover:border-[#D32F2F] hover:shadow-lg transition-all h-full">
+                    <Card className="border-2 border-gray-200 hover:border-[#F59E0B] hover:shadow-lg transition-all h-full">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-[#D32F2F] flex items-center gap-2 text-lg md:text-xl">
+                        <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl">
                           <Building2 className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                           <span>{location.city}</span>
                         </CardTitle>
@@ -293,7 +293,7 @@ export function LocalSupport() {
                               <Phone className="w-4 h-4 text-[#999999] flex-shrink-0" aria-hidden="true" />
                               <a 
                                 href={`tel:${location.phone}`} 
-                                className="hover:text-[#D32F2F] transition-colors font-mono"
+                                className="hover:text-[#F59E0B] transition-colors font-mono"
                                 aria-label={`Call ${location.city} post office at ${location.phone}`}
                               >
                                 {location.phone}
@@ -308,7 +308,7 @@ export function LocalSupport() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white transition-colors"
+                            className="w-full border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white transition-colors"
                             asChild
                           >
                             <a 
@@ -345,7 +345,7 @@ export function LocalSupport() {
                       variant="outline"
                       size="lg"
                       onClick={() => setShowAll(!showAll)}
-                      className="border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white px-8"
+                      className="border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white px-8"
                       aria-label={showAll ? "Show less post offices" : `Show all ${filteredGPOs.length} post offices`}
                     >
                       {showAll ? (
@@ -387,9 +387,9 @@ export function LocalSupport() {
                 }
               </p>
               {searchTerm && (
-                <div className="bg-[#FFF8F3] rounded-xl p-4 max-w-lg mx-auto mb-6 border border-[#D32F2F]/20">
+                <div className="bg-[#FFF8F3] rounded-xl p-4 max-w-lg mx-auto mb-6 border border-[#F59E0B]/20">
                   <p className="text-[#666666] text-sm mb-2">
-                    <strong className="text-[#D32F2F]">Search tips:</strong>
+                    <strong className="text-[#F59E0B]">Search tips:</strong>
                   </p>
                   <ul className="text-left text-sm text-[#666666] space-y-1">
                     <li>• Try searching by major city name (e.g., "Mumbai", "Delhi")</li>
@@ -407,7 +407,7 @@ export function LocalSupport() {
                   <Button
                     variant="outline"
                     onClick={() => setSearchTerm("")}
-                    className="border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white"
+                    className="border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white"
                     aria-label="Clear search and show all post offices"
                   >
                     Clear Search
@@ -425,8 +425,8 @@ export function LocalSupport() {
             viewport={{ once: true }}
             className="mt-12 space-y-6"
           >
-            <div className="bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#D32F2F]/20 hover:border-[#D32F2F]/40 transition-colors">
-              <h3 className="text-[#D32F2F] text-lg md:text-xl mb-4 text-center">Don't See Your City?</h3>
+            <div className="bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20 hover:border-[#F59E0B]/40 transition-colors">
+              <h3 className="text-[#F59E0B] text-lg md:text-xl mb-4 text-center">Don't See Your City?</h3>
               <p className="text-[#666666] text-center mb-6 text-sm md:text-base">
                 You can search for "General Post Office" or "GPO" in your city on Google Maps, or visit the India Post website for more locations.
               </p>
@@ -437,7 +437,7 @@ export function LocalSupport() {
                 >
                   <Button
                     variant="outline"
-                    className="border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white w-full sm:w-auto"
+                    className="border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white w-full sm:w-auto"
                     asChild
                   >
                     <a 
@@ -455,7 +455,7 @@ export function LocalSupport() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
-                    className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white w-full sm:w-auto"
+                    className="bg-[#333333] hover:bg-[#1a1a1a] text-white w-full sm:w-auto"
                     asChild
                   >
                     <a 

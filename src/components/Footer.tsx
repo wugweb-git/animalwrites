@@ -44,7 +44,7 @@ export function Footer() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Heart className="w-4 h-4 text-[#D32F2F] inline" aria-hidden="true" />
+                <Heart className="w-4 h-4 text-[#333333] inline" aria-hidden="true" />
               </motion.div>
             </motion.p>
 
@@ -60,7 +60,7 @@ export function Footer() {
                 href="https://wugweb.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-[#D32F2F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D32F2F] rounded px-2 py-1"
+                className="hover:text-[#333333] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded px-2 py-1"
                 aria-label="Visit wugweb website"
               >
                 Created by wugweb

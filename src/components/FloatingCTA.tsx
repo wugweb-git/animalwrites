@@ -42,7 +42,7 @@ export function FloatingCTA() {
           aria-label="Quick action banner"
         >
           <motion.div
-            className="bg-white rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-[#D32F2F]/20 relative"
+            className="bg-white rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-[#333333]/20 relative"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400 }}
           >

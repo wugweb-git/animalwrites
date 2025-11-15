@@ -111,7 +111,7 @@ export function WhatHappensNext() {
                 className="flex gap-4 md:gap-6 items-start"
               >
                 <motion.div
-                  className="flex-shrink-0 bg-[#D32F2F] text-white rounded-full w-10 h-10 md:w-12 md:h-12 flex items-center justify-center shadow-lg"
+                  className="flex-shrink-0 bg-[#333333] text-white rounded-full w-10 h-10 md:w-12 md:h-12 flex items-center justify-center shadow-lg"
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
@@ -131,10 +131,10 @@ export function WhatHappensNext() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1 }}
             viewport={{ once: true }}
-            className="text-center bg-[#FFF8F3] rounded-2xl p-8 md:p-10 border-2 border-[#D32F2F]/20"
+            className="text-center bg-[#FFF8F3] rounded-2xl p-8 md:p-10 border-2 border-[#F59E0B]/20"
           >
             <p className="text-[#666666] text-sm md:text-base">
-              <strong className="text-[#D32F2F]">Stay Connected:</strong> Follow us on Facebook for post-campaign updates and ongoing initiatives.
+              <strong className="text-[#F59E0B]">Stay Connected:</strong> Follow us on Facebook for post-campaign updates and ongoing initiatives.
             </p>
           </motion.div>
         </div>

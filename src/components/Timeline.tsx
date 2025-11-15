@@ -61,7 +61,7 @@ export function Timeline() {
 
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#D32F2F]/20" aria-hidden="true" />
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-[#F59E0B]/20" aria-hidden="true" />
 
             <div className="space-y-8 md:space-y-12">
               {milestones.map((milestone, index) => (
@@ -77,12 +77,12 @@ export function Timeline() {
                 >
                   {/* Timeline dot */}
                   <motion.div
-                    className="absolute left-4 md:left-1/2 w-8 h-8 -ml-4 bg-white border-4 border-[#D32F2F] rounded-full z-10 flex items-center justify-center"
+                    className="absolute left-4 md:left-1/2 w-8 h-8 -ml-4 bg-white border-4 border-[#F59E0B] rounded-full z-10 flex items-center justify-center"
                     whileHover={{ scale: 1.2 }}
                     transition={{ type: "spring", stiffness: 400 }}
                   >
                     {milestone.status === "completed" && (
-                      <div className="w-3 h-3 bg-[#D32F2F] rounded-full" />
+                      <div className="w-3 h-3 bg-[#F59E0B] rounded-full" />
                     )}
                   </motion.div>
 
@@ -97,16 +97,16 @@ export function Timeline() {
                     <div
                       className={`bg-gradient-to-br ${
                         milestone.status === "completed"
-                          ? "from-[#FFF8F3] to-white border-[#D32F2F]"
-                          : "from-white to-[#FFF8F3] border-[#D32F2F]/30"
+                          ? "from-[#FFF8F3] to-white border-[#F59E0B]"
+                          : "from-white to-[#FFF8F3] border-[#F59E0B]/30"
                       } border-2 rounded-2xl p-5 md:p-6 shadow-md hover:shadow-lg transition-all`}
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <motion.div
                           className={`p-2 rounded-full ${
                             milestone.status === "completed"
-                              ? "bg-[#D32F2F]"
-                              : "bg-[#D32F2F]/20"
+                              ? "bg-[#F59E0B]"
+                              : "bg-[#F59E0B]/20"
                           }`}
                           whileHover={{ rotate: 360 }}
                           transition={{ duration: 0.6 }}
@@ -115,7 +115,7 @@ export function Timeline() {
                             className={`w-5 h-5 ${
                               milestone.status === "completed"
                                 ? "text-white"
-                                : "text-[#D32F2F]"
+                                : "text-[#F59E0B]"
                             }`}
                             aria-hidden="true"
                           />
@@ -124,7 +124,7 @@ export function Timeline() {
                           <p
                             className={`text-sm ${
                               milestone.status === "completed"
-                                ? "text-[#D32F2F]"
+                                ? "text-[#F59E0B]"
                                 : "text-[#666666]"
                             } mb-1`}
                           >
@@ -145,7 +145,7 @@ export function Timeline() {
                           whileInView={{ width: "100%" }}
                           transition={{ duration: 0.8, delay: 0.3 }}
                           viewport={{ once: true }}
-                          className="h-1 bg-gradient-to-r from-[#D32F2F] to-[#B71C1C] rounded-full mt-4"
+                          className="h-1 bg-gradient-to-r from-[#F59E0B] to-[#D97706] rounded-full mt-4"
                           aria-label="Completed milestone indicator"
                         />
                       )}
@@ -161,10 +161,10 @@ export function Timeline() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="mt-12 text-center bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#D32F2F]/20"
+            className="mt-12 text-center bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20"
           >
             <p className="text-[#333333] text-base md:text-lg">
-              <strong className="text-[#D32F2F]">Be part of history!</strong> Join us on November 29th and help create a movement that will be remembered for generations.
+              <strong className="text-[#F59E0B]">Be part of history!</strong> Join us on November 29th and help create a movement that will be remembered for generations.
             </p>
           </motion.div>
         </div>

@@ -105,7 +105,7 @@ export function HowToJoin() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#D32F2F]/20 hover:border-[#D32F2F]/40 transition-colors"
+            className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#333333]/20 hover:border-[#333333]/40 transition-colors"
           >
             <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
               <motion.div

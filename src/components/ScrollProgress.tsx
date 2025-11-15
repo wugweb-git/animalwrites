@@ -10,7 +10,7 @@ export function ScrollProgress() {
 
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-[#D32F2F] origin-left z-50"
+      className="fixed top-0 left-0 right-0 h-1 bg-[#333333] origin-left z-50"
       style={{ scaleX }}
       role="progressbar"
       aria-label="Page scroll progress"

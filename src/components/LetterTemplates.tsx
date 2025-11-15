@@ -160,7 +160,7 @@ With highest regards,
                   const displayContent = isExpanded ? template.content : getPreview(template.content);
                   
                   return (
-                    <Card key={index} className="border-2 border-gray-200 hover:border-[#D32F2F] transition-colors shadow-lg">
+                    <Card key={index} className="border-2 border-gray-200 hover:border-[#F59E0B] transition-colors shadow-lg">
                       <CardHeader>
                         <div className="flex items-start justify-between gap-4">
                           <div>
@@ -173,7 +173,7 @@ With highest regards,
                             variant="outline"
                             size="sm"
                             onClick={() => copyToClipboard(template.content, index)}
-                            className="flex items-center gap-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white flex-shrink-0"
+                            className="flex items-center gap-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white flex-shrink-0"
                             aria-label={`Copy ${template.title} template`}
                           >
                             {copiedIndex === index ? (
@@ -218,7 +218,7 @@ With highest regards,
                           <Button
                             variant="ghost"
                             onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFF8F3] flex items-center gap-2"
+                            className="text-[#F59E0B] hover:text-[#D97706] hover:bg-[#FFF8F3] flex items-center gap-2"
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Collapse ${template.title}` : `Read full ${template.title}`}
                           >
@@ -243,7 +243,7 @@ With highest regards,
             </TabsContent>
 
             <TabsContent value="tips">
-              <Card className="border-2 border-[#D32F2F] shadow-lg">
+              <Card className="border-2 border-[#F59E0B] shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-[#333333] text-2xl">Key Points to Include in Your Letter</CardTitle>
                   <CardDescription className="text-[#666666]">
@@ -253,8 +253,8 @@ With highest regards,
                 <CardContent>
                   <div className="space-y-4">
                     {talkingPoints.map((point, index) => (
-                      <div key={index} className="flex items-start gap-4 p-4 bg-[#FFF8F3] rounded-lg border border-[#D32F2F]/20">
-                        <div className="flex-shrink-0 w-8 h-8 bg-[#D32F2F] text-white rounded-full flex items-center justify-center">
+                      <div key={index} className="flex items-start gap-4 p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                        <div className="flex-shrink-0 w-8 h-8 bg-[#333333] text-white rounded-full flex items-center justify-center">
                           {index + 1}
                         </div>
                         <p className="text-[#333333] pt-1">{point}</p>
