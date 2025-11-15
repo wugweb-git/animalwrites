@@ -40,7 +40,7 @@ export function AboutMovement() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="bg-[#FFF8F3] rounded-xl p-5 md:p-6 border-l-4 border-[#D32F2F]"
+                className="bg-[#FFF8F3] rounded-xl p-5 md:p-6 border-l-4 border-[#F59E0B]"
               >
                 <p className="text-[#333333] italic text-sm md:text-base">
                   This is not a protest — it's a peaceful national letter movement for justice and empathy.
@@ -71,7 +71,7 @@ export function AboutMovement() {
                     {/* Stack of envelopes illustration */}
                     <div className="space-y-4">
                       <motion.div
-                        className="bg-[#D32F2F] rounded-lg p-4 md:p-6 shadow-lg"
+                        className="bg-[#333333] rounded-lg p-4 md:p-6 shadow-lg"
                         initial={{ rotate: 3, y: 0 }}
                         whileHover={{ rotate: 6, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
@@ -94,7 +94,7 @@ export function AboutMovement() {
                       </motion.div>
                       
                       <motion.div
-                        className="bg-[#F5F5F5] rounded-lg p-4 md:p-6 shadow-lg border-2 border-[#D32F2F]/20"
+                        className="bg-[#F5F5F5] rounded-lg p-4 md:p-6 shadow-lg border-2 border-[#F59E0B]/20"
                         initial={{ rotate: -2, y: 0 }}
                         whileHover={{ rotate: -4, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
@@ -110,14 +110,14 @@ export function AboutMovement() {
                             ✉️
                           </motion.span>
                           <div className="flex-1">
-                            <div className="h-2 bg-[#D32F2F]/20 rounded mb-2"></div>
-                            <div className="h-2 bg-[#D32F2F]/20 rounded w-2/3"></div>
+                            <div className="h-2 bg-[#F59E0B]/20 rounded mb-2"></div>
+                            <div className="h-2 bg-[#F59E0B]/20 rounded w-2/3"></div>
                           </div>
                         </div>
                       </motion.div>
                       
                       <motion.div
-                        className="bg-white rounded-lg p-4 md:p-6 border-2 border-[#D32F2F] shadow-lg"
+                        className="bg-white rounded-lg p-4 md:p-6 border-2 border-[#F59E0B] shadow-lg"
                         initial={{ rotate: 0, y: 0 }}
                         whileHover={{ rotate: 2, y: -5 }}
                         transition={{ type: "spring", stiffness: 300 }}
@@ -133,8 +133,8 @@ export function AboutMovement() {
                             ✉️
                           </motion.span>
                           <div className="flex-1">
-                            <div className="h-2 bg-[#D32F2F]/30 rounded mb-2"></div>
-                            <div className="h-2 bg-[#D32F2F]/30 rounded w-4/5"></div>
+                            <div className="h-2 bg-[#F59E0B]/30 rounded mb-2"></div>
+                            <div className="h-2 bg-[#F59E0B]/30 rounded w-4/5"></div>
                           </div>
                         </div>
                       </motion.div>
@@ -148,7 +148,7 @@ export function AboutMovement() {
                       viewport={{ once: true }}
                       className="text-center"
                     >
-                      <p className="text-[#D32F2F] text-sm md:text-base">
+                      <p className="text-[#F59E0B] text-sm md:text-base">
                         Thousands of letters. One voice. United for compassion.
                       </p>
                     </motion.div>

@@ -34,20 +34,8 @@ export function FAQ() {
       answer: "Sending a letter within India typically costs ₹5-10 depending on weight and speed of delivery. This small investment helps save millions of lives and ensures your voice reaches the highest court of the land.",
     },
     {
-      question: "Can I send multiple letters?",
-      answer: "Yes! You can send one letter representing your personal views, and encourage family members and friends to send their own letters too. However, each letter should be unique and sincere—mass-produced identical letters may be less effective.",
-    },
-    {
       question: "What happens after we send the letters?",
       answer: "The Supreme Court will receive thousands of letters from concerned citizens across India. This collective voice can influence the Court's consideration of the matter and demonstrate widespread public concern. We will also share updates on the campaign's impact through our social media channels.",
-    },
-    {
-      question: "I love the cause but can't write a letter. How else can I help?",
-      answer: "You can still make a difference! Share this campaign on social media, talk to friends and family about it, volunteer to help others write or mail their letters, or donate to animal welfare organizations working on ABC programs. Every bit of support counts!",
-    },
-    {
-      question: "Is this campaign affiliated with any political party?",
-      answer: "No. Animal Writes is a non-political, citizen-led movement focused solely on animal welfare and humane solutions. We welcome support from people of all political backgrounds who share our concern for India's street dogs.",
     },
   ];
 
@@ -67,7 +55,7 @@ export function FAQ() {
             className="text-center mb-12"
           >
             <div className="inline-flex items-center gap-3 mb-4">
-              <HelpCircle className="w-8 h-8 text-[#D32F2F]" aria-hidden="true" />
+              <HelpCircle className="w-8 h-8 text-[#333333]" aria-hidden="true" />
               <h2 id="faq-heading" className="text-3xl md:text-4xl text-[#333333]">
                 Frequently Asked Questions
               </h2>
@@ -88,10 +76,10 @@ export function FAQ() {
               >
                 <AccordionItem
                   value={`item-${index}`}
-                  className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#D32F2F] hover:shadow-md transition-all duration-300"
+                  className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#F59E0B] hover:shadow-md transition-all duration-300"
                 >
                   <AccordionTrigger
-                    className="text-left text-[#333333] hover:text-[#D32F2F] py-5"
+                    className="text-left text-[#333333] hover:text-[#F59E0B] py-5"
                     aria-label={`Question ${index + 1}: ${faq.question}`}
                   >
                     <span className="pr-4">{faq.question}</span>
@@ -109,11 +97,11 @@ export function FAQ() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="mt-12 bg-[#FFF8F3] rounded-2xl p-8 border-2 border-[#D32F2F]/20"
+            className="mt-12 bg-[#FFF8F3] rounded-2xl p-8 border-2 border-[#F59E0B]/20"
           >
             <p className="text-center text-[#333333] leading-relaxed">
-              <strong className="text-[#D32F2F]">Still have questions?</strong> Feel free to reach out to us on social media
-              using <span className="text-[#D32F2F] font-semibold">#AnimalWrites</span> or contact your local animal welfare organizations
+              <strong className="text-[#F59E0B]">Still have questions?</strong> Feel free to reach out to us on social media
+              using <span className="text-[#F59E0B] font-semibold">#AnimalWrites</span> or contact your local animal welfare organizations
               for more information.
             </p>
           </motion.div>

@@ -1,5 +1,6 @@
-import { AlertCircle, Building2, Heart } from "lucide-react";
+import { AlertCircle, Building2, Heart, Scale, Mail, Users } from "lucide-react";
 import { motion } from "motion/react";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function WhyThisMatters() {
   const reasons = [
@@ -20,6 +21,21 @@ export function WhyThisMatters() {
     },
   ];
 
+  const legalPoints = [
+    {
+      icon: Scale,
+      text: "Constitutional right recognized in SP Gupta vs Union of India",
+    },
+    {
+      icon: Mail,
+      text: "Handwritten letters carry legal weight and seriousness",
+    },
+    {
+      icon: Users,
+      text: "Nationwide peaceful civic action creates powerful visibility",
+    },
+  ];
+
   return (
     <section 
       id="why-matters" 
@@ -28,6 +44,7 @@ export function WhyThisMatters() {
     >
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
+          {/* Main Heading */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -43,7 +60,8 @@ export function WhyThisMatters() {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-12">
+          {/* Three Key Reasons */}
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16">
             {reasons.map((reason, index) => (
               <motion.div
                 key={index}
@@ -71,43 +89,63 @@ export function WhyThisMatters() {
             ))}
           </div>
 
+          {/* Simplified Legal Foundation */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
+            className="mb-12 md:mb-16"
           >
             <motion.div
-              className="bg-[#D32F2F] rounded-2xl p-6 md:p-12 text-center shadow-xl relative overflow-hidden"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              className="bg-white rounded-2xl p-8 md:p-12 border-2 border-[#D32F2F]/20 shadow-xl"
+              whileHover={{ borderColor: "rgba(211, 47, 47, 0.4)" }}
+              transition={{ duration: 0.3 }}
             >
-              {/* Animated background decoration */}
-              <div className="absolute inset-0 opacity-10" aria-hidden="true">
-                {[...Array(10)].map((_, i) => (
+              <div className="text-center mb-8">
+                <motion.div
+                  className="inline-flex items-center gap-2 bg-[#D32F2F] px-5 py-2 rounded-full mb-6"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Scale className="w-5 h-5 text-white" aria-hidden="true" />
+                  <span className="text-white">Your Constitutional Right</span>
+                </motion.div>
+                <h3 className="text-2xl md:text-3xl text-[#333333] mb-4">
+                  Why Letters to the Supreme Court Work
+                </h3>
+                <p className="text-base md:text-lg text-[#666666] max-w-2xl mx-auto">
+                  The Supreme Court can take cognizance based on citizen letters — this is a rare and powerful constitutional tool available to every Indian.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6 md:gap-8 mb-8">
+                {legalPoints.map((point, index) => (
                   <motion.div
-                    key={i}
-                    className="absolute w-3 h-3 bg-white rounded-full"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                    }}
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      delay: i * 0.3,
-                      ease: "easeInOut",
-                    }}
-                  />
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="flex flex-col items-center text-center"
+                  >
+                    <motion.div
+                      className="bg-[#FFF8F3] rounded-full w-16 h-16 flex items-center justify-center mb-4"
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <point.icon className="w-8 h-8 text-[#D32F2F]" aria-hidden="true" />
+                    </motion.div>
+                    <p className="text-sm md:text-base text-[#666666] leading-relaxed">{point.text}</p>
+                  </motion.div>
                 ))}
               </div>
-              <p className="text-white text-xl md:text-3xl leading-relaxed italic relative z-10">
-                "India believes in coexistence, not cruelty. Let thousands of letters flood the Supreme Court as a reminder that justice must be humane."
-              </p>
+
+              <div className="bg-[#FFF8F3] rounded-xl p-6 md:p-8 border-l-4 border-[#D32F2F]">
+                <p className="text-center text-base md:text-lg text-[#333333]">
+                  Use the uniform title: <strong className="text-[#D32F2F]">"IN RE: Compassion, Kindness & Humanity"</strong> to help the Court consolidate all letters into one national plea.
+                </p>
+              </div>
             </motion.div>
           </motion.div>
         </div>

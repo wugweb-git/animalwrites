@@ -42,6 +42,9 @@ export function Testimonials() {
     },
   ];
 
+  // Duplicate testimonials for seamless infinite scroll
+  const duplicatedTestimonials = [...testimonials, ...testimonials];
+
   return (
     <section 
       className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3]"
@@ -56,46 +59,58 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="testimonials-heading" className="text-[#D32F2F] text-2xl md:text-4xl mb-4">Voices From Across India</h2>
+            <h2 id="testimonials-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4">Voices From Across India</h2>
             <p className="text-[#666666] text-base md:text-lg">
               Real people, real stories, one united movement
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <motion.div
-                  whileHover={{ y: -8, boxShadow: "0 20px 30px -10px rgba(0,0,0,0.15)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
+          <div className="overflow-hidden relative">
+            <motion.div
+              className="flex gap-4 md:gap-6"
+              animate={{
+                x: [0, -((350 + 24) * testimonials.length)],
+              }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 30,
+                  ease: "linear",
+                },
+              }}
+            >
+              {duplicatedTestimonials.map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-[300px] md:w-[350px]"
                 >
-                  <Card className="border-2 border-[#D32F2F]/20 hover:border-[#D32F2F] transition-colors h-full">
-                    <CardContent className="p-5 md:p-6 flex flex-col h-full">
-                      <motion.div
-                        whileHover={{ rotate: 180, scale: 1.2 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        <Quote className="w-7 h-7 md:w-8 md:h-8 text-[#D32F2F] mb-4 opacity-50" aria-hidden="true" />
-                      </motion.div>
-                      <p className="text-[#666666] italic mb-6 flex-grow text-sm md:text-base leading-relaxed">
-                        "{testimonial.quote}"
-                      </p>
-                      <div className="border-t-2 border-[#D32F2F]/10 pt-4">
-                        <p className="text-[#333333] font-medium text-sm md:text-base">{testimonial.author}</p>
-                        <p className="text-xs md:text-sm text-[#666666]">{testimonial.location}</p>
-                        <p className="text-xs text-[#D32F2F] mt-1">{testimonial.role}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </motion.div>
-            ))}
+                  <motion.div
+                    whileHover={{ y: -8, boxShadow: "0 20px 30px -10px rgba(0,0,0,0.15)" }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors h-full">
+                      <CardContent className="p-5 md:p-6 flex flex-col h-full">
+                        <motion.div
+                          whileHover={{ rotate: 180, scale: 1.2 }}
+                          transition={{ duration: 0.6 }}
+                        >
+                          <Quote className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B] mb-4 opacity-50" aria-hidden="true" />
+                        </motion.div>
+                        <p className="text-[#666666] italic mb-6 flex-grow text-sm md:text-base leading-relaxed">
+                          "{testimonial.quote}"
+                        </p>
+                        <div className="border-t-2 border-[#F59E0B]/10 pt-4">
+                          <p className="text-[#333333] font-medium text-sm md:text-base">{testimonial.author}</p>
+                          <p className="text-xs md:text-sm text-[#666666]">{testimonial.location}</p>
+                          <p className="text-xs text-[#F59E0B] mt-1">{testimonial.role}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
           <motion.div
@@ -105,9 +120,9 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="mt-10 md:mt-12 text-center"
           >
-            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-6 md:p-8 border-2 border-[#D32F2F]/30">
+            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-6 md:p-8 border-2 border-[#F59E0B]/30">
               <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#D32F2F]">Your voice matters too.</strong> Add it to thousands of others. 
+                <strong className="text-[#F59E0B]">Your voice matters too.</strong> Add it to thousands of others. 
                 Write your letter today.
               </p>
             </div>

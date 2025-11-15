@@ -44,7 +44,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2 rounded-lg p-1"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 rounded-lg p-1"
             aria-label="Scroll to top - Animal Writes home"
           >
             <img src={logo} alt="Animal Writes logo" className="h-10 w-10 md:h-12 md:w-12" />
@@ -57,7 +57,7 @@ export function Navigation() {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="text-sm text-[#666666] hover:text-[#D32F2F] transition-colors focus:outline-none focus:text-[#D32F2F] focus:underline underline-offset-4"
+                className="text-sm text-[#666666] hover:text-[#F59E0B] transition-colors focus:outline-none focus:text-[#F59E0B] focus:underline underline-offset-4"
                 aria-label={`Navigate to ${link.label}`}
               >
                 {link.label}
@@ -65,7 +65,7 @@ export function Navigation() {
             ))}
             <Button
               onClick={() => scrollToSection("letter-templates")}
-              className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+              className="bg-[#333333] hover:bg-[#1a1a1a] text-white focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
               size="sm"
               aria-label="Navigate to write letter section"
             >
@@ -76,7 +76,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-[#666666] hover:text-[#D32F2F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D32F2F] rounded-lg"
+            className="md:hidden p-2 text-[#666666] hover:text-[#F59E0B] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu"
@@ -102,7 +102,7 @@ export function Navigation() {
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className="text-left px-4 py-3 text-[#666666] hover:text-[#D32F2F] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D32F2F]"
+                    className="text-left px-4 py-3 text-[#666666] hover:text-[#F59E0B] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#F59E0B]"
                     role="menuitem"
                     aria-label={`Navigate to ${link.label}`}
                   >
@@ -111,7 +111,7 @@ export function Navigation() {
                 ))}
                 <Button
                   onClick={() => scrollToSection("letter-templates")}
-                  className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                   role="menuitem"
                   aria-label="Navigate to write letter section"
                 >

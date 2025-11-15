@@ -37,7 +37,7 @@ export function BackToTop() {
           exit={{ opacity: 0, scale: 0, y: 100 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           onClick={scrollToTop}
-          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-40 bg-[#D32F2F] text-white p-3 md:p-4 rounded-full shadow-lg hover:bg-[#B71C1C] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+          className="fixed bottom-20 md:bottom-8 right-4 md:right-8 z-40 bg-[#333333] text-white p-3 md:p-4 rounded-full shadow-lg hover:bg-[#1a1a1a] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           aria-label="Scroll back to top"

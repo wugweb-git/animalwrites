@@ -10,7 +10,7 @@ export function Confetti({ trigger }: ConfettiProps) {
 
   useEffect(() => {
     if (trigger) {
-      const colors = ["#D32F2F", "#FFF8F3", "#FFD700", "#FF6B6B", "#4ECDC4"];
+      const colors = ["#333333", "#FFF8F3", "#F59E0B", "#D97706", "#78716C"];
       const newParticles = Array.from({ length: 50 }, (_, i) => ({
         id: i,
         x: Math.random() * window.innerWidth,

@@ -48,7 +48,7 @@ export function FloatingCTA() {
           >
             <motion.button
               onClick={handleDismiss}
-              className="absolute -top-3 -right-3 bg-[#333333] text-white rounded-full p-2 hover:bg-[#D32F2F] transition-colors focus:outline-none focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2 shadow-lg"
+              className="absolute -top-3 -right-3 bg-[#333333] text-white rounded-full p-2 hover:bg-[#1a1a1a] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 shadow-lg"
               aria-label="Dismiss call to action"
               whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
@@ -58,7 +58,7 @@ export function FloatingCTA() {
             
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <motion.div
-                className="bg-[#D32F2F] rounded-full p-3 flex-shrink-0"
+                className="bg-[#333333] rounded-full p-3 flex-shrink-0"
                 animate={{
                   scale: [1, 1.1, 1],
                   rotate: [0, 5, -5, 0],
@@ -81,7 +81,7 @@ export function FloatingCTA() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
-                  className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white whitespace-nowrap focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white whitespace-nowrap focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                   onClick={handleCTAClick}
                   aria-label="Navigate to write letter section"
                 >

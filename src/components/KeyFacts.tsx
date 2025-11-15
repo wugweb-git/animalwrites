@@ -49,8 +49,8 @@ export function KeyFacts() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <CheckCircle className="w-5 h-5 text-[#D32F2F]" aria-hidden="true" />
-              <span className="text-[#D32F2F]">Evidence-Based</span>
+              <CheckCircle className="w-5 h-5 text-[#333333]" aria-hidden="true" />
+              <span className="text-[#333333]">Evidence-Based</span>
             </motion.div>
             <h2 id="key-facts-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
               The Facts Speak for Themselves
@@ -80,7 +80,7 @@ export function KeyFacts() {
                       whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <fact.icon className="w-6 h-6 text-[#D32F2F]" aria-hidden="true" />
+                      <fact.icon className="w-6 h-6 text-[#333333]" aria-hidden="true" />
                     </motion.div>
                     <div className="flex-1">
                       <h3 className="text-[#333333] mb-2 text-base md:text-lg">{fact.title}</h3>
@@ -136,7 +136,7 @@ export function KeyFacts() {
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <CheckCircle className="w-5 h-5 text-[#D32F2F] flex-shrink-0 mt-1" aria-hidden="true" />
+                    <CheckCircle className="w-5 h-5 text-[#333333] flex-shrink-0 mt-1" aria-hidden="true" />
                   </motion.div>
                   <div>
                     <p className="text-[#333333] mb-1 font-medium">{item.title}</p>

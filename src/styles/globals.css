@@ -8,7 +8,7 @@
   --card-foreground: #333333;
   --popover: #ffffff;
   --popover-foreground: #333333;
-  --primary: #D32F2F;
+  --primary: #F59E0B;
   --primary-foreground: #ffffff;
   --secondary: #F5F5F5;
   --secondary-foreground: #333333;
@@ -24,8 +24,8 @@
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #D32F2F;
-  --chart-1: #D32F2F;
+  --ring: #F59E0B;
+  --chart-1: #F59E0B;
   --chart-2: #666666;
   --chart-3: #333333;
   --chart-4: #FFF8F3;
@@ -33,15 +33,15 @@
   --radius: 0.75rem;
   --sidebar: #F5F5F5;
   --sidebar-foreground: #333333;
-  --sidebar-primary: #D32F2F;
+  --sidebar-primary: #F59E0B;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #FFF8F3;
   --sidebar-accent-foreground: #333333;
   --sidebar-border: rgba(0, 0, 0, 0.08);
-  --sidebar-ring: #D32F2F;
+  --sidebar-ring: #F59E0B;
   
   /* Campaign specific colors */
-  --india-post-red: #D32F2F;
+  --india-post-yellow: #F59E0B;
   --soft-grey: #F5F5F5;
   --charcoal: #333333;
   --warm-beige: #FFF8F3;
@@ -217,12 +217,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D32F2F;
+  background: #F59E0B;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B71C1C;
+  background: #D97706;
 }
 
 /* Focus visible improvements for keyboard navigation */

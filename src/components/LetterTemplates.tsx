@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { FileText, Copy, Check, Download } from "lucide-react";
+import { FileText, Copy, Check, Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function LetterTemplates() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const templates = [
     {
@@ -116,6 +117,11 @@ With highest regards,
     }
   };
 
+  const getPreview = (content: string) => {
+    const lines = content.split('\n');
+    return lines.slice(0, 8).join('\n') + (lines.length > 8 ? '\n...' : '');
+  };
+
   const talkingPoints = [
     "Emphasize that you are not against public safety, but seeking humane solutions",
     "Mention the lack of infrastructure (shelters, resources) for mass relocation",
@@ -128,12 +134,12 @@ With highest regards,
   ];
 
   return (
-    <section id="letter-templates" className="py-20 md:py-28 bg-[#F5F5F5]">
+    <section id="letter-templates" className="py-16 md:py-24 bg-[#F5F5F5]">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-4">
-              <FileText className="w-8 h-8 text-[#D32F2F]" />
+              <FileText className="w-8 h-8 text-[#333333]" />
               <h2 className="text-4xl md:text-5xl text-[#333333]">Letter Templates & Guidance</h2>
             </div>
             <p className="text-xl text-[#666666] max-w-3xl mx-auto">
@@ -143,51 +149,96 @@ With highest regards,
 
           <Tabs defaultValue="templates" className="mb-12">
             <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white">
-              <TabsTrigger value="templates" className="data-[state=active]:bg-[#D32F2F] data-[state=active]:text-white">Templates</TabsTrigger>
-              <TabsTrigger value="tips" className="data-[state=active]:bg-[#D32F2F] data-[state=active]:text-white">Talking Points</TabsTrigger>
+              <TabsTrigger value="templates" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white">Templates</TabsTrigger>
+              <TabsTrigger value="tips" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white">Talking Points</TabsTrigger>
             </TabsList>
 
             <TabsContent value="templates">
               <div className="grid md:grid-cols-1 gap-6">
-                {templates.map((template, index) => (
-                  <Card key={index} className="border-2 border-gray-200 hover:border-[#D32F2F] transition-colors shadow-lg">
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <CardTitle className="text-[#333333] text-2xl">{template.title}</CardTitle>
-                          <CardDescription className="text-[#666666] text-base">
-                            Tone: {template.tone}
-                          </CardDescription>
+                {templates.map((template, index) => {
+                  const isExpanded = expandedIndex === index;
+                  const displayContent = isExpanded ? template.content : getPreview(template.content);
+                  
+                  return (
+                    <Card key={index} className="border-2 border-gray-200 hover:border-[#D32F2F] transition-colors shadow-lg">
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <CardTitle className="text-[#333333] text-2xl">{template.title}</CardTitle>
+                            <CardDescription className="text-[#666666] text-base">
+                              Tone: {template.tone}
+                            </CardDescription>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(template.content, index)}
+                            className="flex items-center gap-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white flex-shrink-0"
+                            aria-label={`Copy ${template.title} template`}
+                          >
+                            {copiedIndex === index ? (
+                              <>
+                                <Check className="w-4 h-4" aria-hidden="true" />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4" aria-hidden="true" />
+                                Copy
+                              </>
+                            )}
+                          </Button>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => copyToClipboard(template.content, index)}
-                          className="flex items-center gap-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white"
-                        >
-                          {copiedIndex === index ? (
-                            <>
-                              <Check className="w-4 h-4" />
-                              Copied!
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-4 h-4" />
-                              Copy
-                            </>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="bg-white rounded-lg p-6 border border-gray-200 relative">
+                          <AnimatePresence mode="wait">
+                            <motion.pre
+                              key={isExpanded ? 'expanded' : 'collapsed'}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="whitespace-pre-wrap text-sm text-[#333333] font-sans leading-relaxed"
+                            >
+                              {displayContent}
+                            </motion.pre>
+                          </AnimatePresence>
+                          
+                          {!isExpanded && (
+                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
                           )}
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="bg-white rounded-lg p-6 border border-gray-200">
-                        <pre className="whitespace-pre-wrap text-sm text-[#333333] font-sans leading-relaxed">
-                          {template.content}
-                        </pre>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        </div>
+                        
+                        <motion.div
+                          className="mt-4 flex justify-center"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                            className="text-[#D32F2F] hover:text-[#B71C1C] hover:bg-[#FFF8F3] flex items-center gap-2"
+                            aria-expanded={isExpanded}
+                            aria-label={isExpanded ? `Collapse ${template.title}` : `Read full ${template.title}`}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                                Show Less
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                                Read Full Template
+                              </>
+                            )}
+                          </Button>
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
 
@@ -223,33 +274,6 @@ With highest regards,
             </TabsContent>
           </Tabs>
 
-          <div className="bg-[#FFF8F3] rounded-2xl p-8 border border-[#D32F2F]/20">
-            <div className="text-center space-y-4">
-              <h3 className="text-[#D32F2F] text-2xl">Important Reminders</h3>
-              <ul className="text-[#666666] space-y-2 max-w-2xl mx-auto text-left">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F]">•</span>
-                  <span>Write in your own words—authenticity is powerful</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F]">•</span>
-                  <span>Be respectful and courteous throughout your letter</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F]">•</span>
-                  <span>Include your name and city (address is optional)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F]">•</span>
-                  <span>Use clean, legible handwriting or typed letters are also acceptable</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#D32F2F]">•</span>
-                  <span>Post your letter on or before 29 November 2025</span>
-                </li>
-              </ul>
-            </div>
-          </div>
         </div>
       </div>
     </section>

@@ -1,9 +1,25 @@
 import { useEffect } from "react";
+import logo from "figma:asset/6e61e5eae124a3f5fb754a70be5c91c75e29cc82.png";
 
 export function MetaTags() {
   useEffect(() => {
     // Set document title
     document.title = "Animal Writes - India's Largest Letter Petition Campaign for Street Dogs";
+
+    // Set favicon
+    const setFavicon = () => {
+      let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+      
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      
+      link.href = logo;
+    };
+    
+    setFavicon();
 
     // Create or update meta tags
     const setMetaTag = (name: string, content: string, property?: boolean) => {
@@ -38,8 +54,8 @@ export function MetaTags() {
     setMetaTag("twitter:title", "Animal Writes - India's Largest Letter Petition Campaign");
     setMetaTag("twitter:description", "Join thousands across India on Nov 29, 2025. Write for coexistence, not cruelty. #SaveIndianStreetDogs #AnimalWrites");
     
-    // Theme color
-    setMetaTag("theme-color", "#D32F2F");
+    // Theme color - Changed to yellow
+    setMetaTag("theme-color", "#F59E0B");
     
     // Mobile app capable
     setMetaTag("mobile-web-app-capable", "yes");

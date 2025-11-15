@@ -1,4 +1,4 @@
-import { Share2, Twitter, Facebook, MessageCircle, Copy, Check } from "lucide-react";
+import { Share2, Twitter, Facebook, MessageCircle, Copy, Check, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -36,17 +36,18 @@ export function SocialShare() {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-white"
+      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#F5F5F5]"
       aria-labelledby="social-share-heading"
     >
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+          {/* Spread the Word Section */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="bg-[#F5F5F5] rounded-3xl p-8 md:p-14 shadow-lg"
+            className="bg-white rounded-3xl p-8 md:p-12 shadow-lg border-2 border-gray-100 flex flex-col"
           >
             <div className="text-center mb-8 md:mb-10">
               <div className="inline-flex items-center gap-3 mb-4">
@@ -150,7 +151,7 @@ export function SocialShare() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-5 md:p-6 border-2 border-[#D32F2F]/20"
+              className="bg-[#FFF8F3] rounded-2xl p-5 md:p-6 border-2 border-[#D32F2F]/20 mt-auto"
             >
               <p className="text-center text-[#333333] text-sm md:text-base">
                 <strong>Tag your posts:</strong>{" "}
@@ -158,6 +159,51 @@ export function SocialShare() {
                 <span className="text-[#D32F2F]">#NoDogsNoVotes</span> •{" "}
                 <span className="text-[#D32F2F]">#AnimalWrites</span>
               </p>
+            </motion.div>
+          </motion.div>
+
+          {/* Join the Movement Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-br from-[#D32F2F] to-[#B71C1C] rounded-3xl p-8 md:p-12 shadow-2xl text-center flex flex-col justify-center"
+          >
+            <div className="inline-flex items-center justify-center gap-3 mb-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Users className="w-8 h-8 text-white" aria-hidden="true" />
+              </motion.div>
+              <h2 className="text-white text-2xl md:text-4xl">
+                Join the Movement
+              </h2>
+            </div>
+            <p className="text-white/90 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
+              Follow the official campaign page for updates, resources, and to connect with thousands of compassionate citizens across India
+            </p>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                asChild
+                size="lg"
+                className="bg-white text-[#D32F2F] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#D32F2F]"
+              >
+                <a
+                  href="https://facebook.com/AnimalWritesIndia"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3"
+                  aria-label="Follow Animal Writes India on Facebook"
+                >
+                  <Facebook className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
+                  <span className="hidden sm:inline">facebook.com/</span>AnimalWritesIndia
+                </a>
+              </Button>
             </motion.div>
           </motion.div>
         </div>

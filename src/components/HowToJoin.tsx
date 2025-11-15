@@ -1,6 +1,7 @@
 import { FileText, MapPin, Send, Users } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/button";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function HowToJoin() {
   const scrollToSection = (id: string) => {
@@ -71,7 +72,7 @@ export function HowToJoin() {
                   <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
                     <div className="flex-shrink-0 mx-auto sm:mx-0">
                       <motion.div
-                        className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#D32F2F] text-white flex items-center justify-center text-2xl md:text-4xl shadow-lg"
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#333333] text-white flex items-center justify-center text-2xl md:text-4xl shadow-lg"
                         whileHover={{ 
                           rotate: [0, -10, 10, -10, 0],
                           scale: 1.1 
@@ -87,7 +88,7 @@ export function HowToJoin() {
                           whileHover={{ scale: 1.2, rotate: 10 }}
                           transition={{ type: "spring", stiffness: 400 }}
                         >
-                          <step.icon className="w-6 h-6 text-[#D32F2F]" aria-hidden="true" />
+                          <step.icon className="w-6 h-6 text-[#333333]" aria-hidden="true" />
                         </motion.div>
                         <h3 className="text-xl md:text-3xl text-[#333333]">{step.title}</h3>
                       </div>
@@ -113,7 +114,7 @@ export function HowToJoin() {
                 transition={{ duration: 0.6 }}
               >
                 <div className="bg-white rounded-full p-4 md:p-6 shadow-lg">
-                  <Users className="w-10 h-10 md:w-12 md:h-12 text-[#D32F2F]" aria-hidden="true" />
+                  <Users className="w-10 h-10 md:w-12 md:h-12 text-[#333333]" aria-hidden="true" />
                 </div>
               </motion.div>
               <div className="flex-1 text-center md:text-left">
@@ -128,7 +129,7 @@ export function HowToJoin() {
               >
                 <Button
                   onClick={() => scrollToSection("volunteer")}
-                  className="bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-6 md:px-8 py-5 md:py-6 text-base md:text-lg focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white px-6 md:px-8 py-5 md:py-6 text-base md:text-lg focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                   aria-label="Navigate to volunteer signup section"
                 >
                   Join Leadership Circle

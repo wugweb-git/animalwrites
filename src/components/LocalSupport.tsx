@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Search, Building2, Phone, Navigation, Users } from "lucide-react";
+import { MapPin, Search, Building2, Phone, Navigation, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -16,6 +16,7 @@ interface GPOLocation {
 
 export function LocalSupport() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   const gpoLocations: GPOLocation[] = [
     {
@@ -187,6 +188,10 @@ export function LocalSupport() {
       location.pincode.includes(searchTerm)
   );
 
+  // Show only 3 by default, unless searching or showAll is true
+  const displayedGPOs = searchTerm || showAll ? filteredGPOs : filteredGPOs.slice(0, 3);
+  const hasMore = filteredGPOs.length > 3;
+
   return (
     <section 
       id="local-support" 
@@ -259,7 +264,7 @@ export function LocalSupport() {
                 </h3>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {filteredGPOs.map((location, index) => (
+                {displayedGPOs.map((location, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
@@ -322,6 +327,42 @@ export function LocalSupport() {
                   </motion.div>
                 ))}
               </div>
+              
+              {/* Show More/Less Button */}
+              {hasMore && !searchTerm && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  viewport={{ once: true }}
+                  className="text-center mt-8"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => setShowAll(!showAll)}
+                      className="border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white px-8"
+                      aria-label={showAll ? "Show less post offices" : `Show all ${filteredGPOs.length} post offices`}
+                    >
+                      {showAll ? (
+                        <>
+                          <ChevronUp className="w-5 h-5 mr-2" aria-hidden="true" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-5 h-5 mr-2" aria-hidden="true" />
+                          Show All ({filteredGPOs.length} Post Offices)
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              )}
             </div>
           ) : (
             <motion.div
@@ -339,12 +380,25 @@ export function LocalSupport() {
                 <MapPin className="w-16 h-16 md:w-20 md:h-20 text-gray-300 mx-auto mb-4" aria-hidden="true" />
               </motion.div>
               <p className="text-[#333333] text-lg md:text-xl mb-2">No results found</p>
-              <p className="text-[#666666] mb-6 text-sm md:text-base max-w-md mx-auto">
+              <p className="text-[#666666] mb-4 text-sm md:text-base max-w-md mx-auto">
                 {searchTerm 
-                  ? `No post offices found matching "${searchTerm}". Try searching by city name, state, or pincode.`
+                  ? `No post offices found matching "${searchTerm}".`
                   : "Start typing to search for post offices"
                 }
               </p>
+              {searchTerm && (
+                <div className="bg-[#FFF8F3] rounded-xl p-4 max-w-lg mx-auto mb-6 border border-[#D32F2F]/20">
+                  <p className="text-[#666666] text-sm mb-2">
+                    <strong className="text-[#D32F2F]">Search tips:</strong>
+                  </p>
+                  <ul className="text-left text-sm text-[#666666] space-y-1">
+                    <li>• Try searching by major city name (e.g., "Mumbai", "Delhi")</li>
+                    <li>• Use state name (e.g., "Maharashtra", "Karnataka")</li>
+                    <li>• Enter 6-digit pincode</li>
+                    <li>• If your city isn't listed, search for the nearest major city</li>
+                  </ul>
+                </div>
+              )}
               {searchTerm && (
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -417,35 +471,6 @@ export function LocalSupport() {
                 </motion.div>
               </div>
             </div>
-
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-[#D32F2F] transition-colors text-center"
-            >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Users className="w-10 h-10 md:w-12 md:h-12 text-[#D32F2F] mx-auto mb-4" aria-hidden="true" />
-              </motion.div>
-              <p className="text-[#333333] text-base md:text-lg mb-2">
-                Want to be a city coordinator?
-              </p>
-              <p className="text-[#666666] text-sm md:text-base">
-                DM us on{" "}
-                <a
-                  href="https://facebook.com/AnimalWritesIndia"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#D32F2F] hover:underline focus:outline-none focus:ring-2 focus:ring-[#D32F2F] rounded"
-                  aria-label="Message us on Facebook to become a city coordinator"
-                >
-                  Facebook
-                </a>{" "}
-                to join the national leadership circle.
-              </p>
-            </motion.div>
           </motion.div>
         </div>
       </div>

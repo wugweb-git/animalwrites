@@ -6,6 +6,7 @@ import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { motion, AnimatePresence } from "motion/react";
+import { Confetti } from "./Confetti";
 
 export function VolunteerSignup() {
   const [formData, setFormData] = useState({
@@ -15,12 +16,17 @@ export function VolunteerSignup() {
     role: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real application, this would send data to a backend
     console.log("Volunteer signup:", formData);
     setSubmitted(true);
+    setShowConfetti(true);
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 3000);
     setTimeout(() => {
       setSubmitted(false);
       setFormData({ name: "", email: "", city: "", role: "" });
@@ -56,7 +62,7 @@ export function VolunteerSignup() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Users className="w-8 h-8 text-[#D32F2F]" aria-hidden="true" />
+                <Users className="w-8 h-8 text-[#333333]" aria-hidden="true" />
               </motion.div>
               <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-[#333333]">Volunteer With Us</h2>
             </div>
@@ -99,7 +105,7 @@ export function VolunteerSignup() {
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         viewport={{ once: true }}
                       >
-                        <span className="text-[#D32F2F] text-lg" aria-hidden="true">✓</span>
+                        <span className="text-[#333333] text-lg" aria-hidden="true">✓</span>
                         <span>{item}</span>
                       </motion.div>
                     ))}
@@ -138,7 +144,7 @@ export function VolunteerSignup() {
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         viewport={{ once: true }}
                       >
-                        <span className="text-[#D32F2F] text-lg" aria-hidden="true">✓</span>
+                        <span className="text-[#333333] text-lg" aria-hidden="true">✓</span>
                         <span>{item}</span>
                       </motion.div>
                     ))}
@@ -262,7 +268,7 @@ export function VolunteerSignup() {
                         >
                           <Button
                             type="submit"
-                            className="w-full bg-[#D32F2F] hover:bg-[#B71C1C] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#D32F2F] focus:ring-offset-2"
+                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                           >
                             Join as Volunteer
                           </Button>
@@ -298,6 +304,7 @@ export function VolunteerSignup() {
           </motion.div>
         </div>
       </div>
+      {showConfetti && <Confetti />}
     </section>
   );
 }

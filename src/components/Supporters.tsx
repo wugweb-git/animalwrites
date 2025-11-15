@@ -53,10 +53,12 @@ export function Supporters() {
     },
   ];
 
+  // Duplicate supporters for seamless infinite scroll
+  const duplicatedSupporters = [...supporters, ...supporters];
+
   return (
     <section 
-      className="py-16 md:py-20 bg-[#FFF8F3]" 
-      id="supporters"
+      className="py-16 md:py-24 bg-[#FFF8F3]" 
       aria-labelledby="supporters-heading"
     >
       <div className="container mx-auto px-4">
@@ -77,9 +79,9 @@ export function Supporters() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Heart className="w-5 h-5 text-[#D32F2F]" fill="#D32F2F" aria-hidden="true" />
+                <Heart className="w-5 h-5 text-[#F59E0B]" fill="#F59E0B" aria-hidden="true" />
               </motion.div>
-              <span className="text-[#D32F2F]">Standing Together</span>
+              <span className="text-[#F59E0B]">Standing Together</span>
             </motion.div>
             
             <h2 id="supporters-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
@@ -90,40 +92,50 @@ export function Supporters() {
             </p>
           </motion.div>
 
-          {/* Supporter Logos Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {supporters.map((supporter, index) => (
-              <motion.a
-                key={index}
-                href={supporter.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -8 }}
-                className="bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#D32F2F] group"
-                aria-label={`Visit ${supporter.name}`}
-              >
-                {/* Logo Image */}
-                <div className="w-full aspect-square mb-3 overflow-hidden rounded-lg">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ImageWithFallback
-                      src={supporter.logoUrl}
-                      alt={supporter.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </motion.div>
-                </div>
-                <p className="text-xs md:text-sm text-center text-[#666666] group-hover:text-[#D32F2F] transition-colors">
-                  {supporter.name}
-                </p>
-              </motion.a>
-            ))}
+          {/* Supporter Logos Auto-Scroll */}
+          <div className="overflow-hidden relative">
+            <motion.div
+              className="flex gap-4 md:gap-6"
+              animate={{
+                x: [0, -((200 + 24) * supporters.length)],
+              }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 25,
+                  ease: "linear",
+                },
+              }}
+            >
+              {duplicatedSupporters.map((supporter, index) => (
+                <a
+                  key={index}
+                  href={supporter.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 w-[180px] md:w-[200px] bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#F59E0B] group"
+                  aria-label={`Visit ${supporter.name}`}
+                >
+                  {/* Logo Image */}
+                  <div className="w-full aspect-square mb-3 overflow-hidden rounded-lg">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ImageWithFallback
+                        src={supporter.logoUrl}
+                        alt={supporter.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
+                  </div>
+                  <p className="text-xs md:text-sm text-center text-[#666666] group-hover:text-[#F59E0B] transition-colors">
+                    {supporter.name}
+                  </p>
+                </a>
+              ))}
+            </motion.div>
           </div>
 
           {/* Add Your Organization CTA */}
@@ -134,7 +146,7 @@ export function Supporters() {
             viewport={{ once: true }}
             className="text-center mt-10 md:mt-12"
           >
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-[#D32F2F]/20">
+            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20">
               <p className="text-[#666666] mb-4 text-sm md:text-base">
                 Does your organization support this movement?
               </p>
@@ -142,7 +154,7 @@ export function Supporters() {
                 href="https://www.facebook.com/AnimalWritesIndia"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[#D32F2F] hover:underline focus:outline-none focus:ring-2 focus:ring-[#D32F2F] rounded px-2 py-1"
+                className="inline-flex items-center gap-2 text-[#F59E0B] hover:underline focus:outline-none focus:ring-2 focus:ring-[#F59E0B] rounded px-2 py-1"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

@@ -73,8 +73,8 @@ export function Resources() {
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <Download className="w-5 h-5 text-[#D32F2F]" aria-hidden="true" />
-              <span className="text-[#D32F2F]">Download & Share</span>
+              <Download className="w-5 h-5 text-[#333333]" aria-hidden="true" />
+              <span className="text-[#333333]">Download & Share</span>
             </motion.div>
             <h2 id="resources-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
               Campaign Resources
@@ -104,7 +104,7 @@ export function Resources() {
                       whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <resource.icon className="w-6 h-6 text-[#D32F2F]" aria-hidden="true" />
+                      <resource.icon className="w-6 h-6 text-[#333333]" aria-hidden="true" />
                     </motion.div>
                     <div className="flex-1">
                       <h3 className="text-[#333333] mb-2 text-base md:text-lg">{resource.title}</h3>
@@ -115,7 +115,7 @@ export function Resources() {
                       >
                         <Button
                           variant="outline"
-                          className="w-full border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white transition-colors"
+                          className="w-full border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white transition-colors"
                           aria-label={`${resource.action} - ${resource.title}`}
                         >
                           <Download className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -154,7 +154,7 @@ export function Resources() {
                     whileHover={{ scale: 1.2, rotate: -15 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ExternalLink className="w-5 h-5 text-[#D32F2F] flex-shrink-0 mt-1" aria-hidden="true" />
+                    <ExternalLink className="w-5 h-5 text-[#333333] flex-shrink-0 mt-1" aria-hidden="true" />
                   </motion.div>
                   <div className="flex-1">
                     <p className="text-[#333333] mb-1 text-sm md:text-base">{link.title}</p>
