@@ -195,7 +195,7 @@ export function LocalSupport() {
   return (
     <section 
       id="local-support" 
-      className="py-16 md:py-24 bg-gray-50"
+      className="py-16 md:py-24 bg-gray-50 hidden"
       aria-labelledby="gpo-heading"
     >
       <div className="container mx-auto px-4">

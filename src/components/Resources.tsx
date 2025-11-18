@@ -55,7 +55,7 @@ export function Resources() {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-white" 
+      className="py-16 md:py-24 bg-white hidden" 
       id="resources"
       aria-labelledby="resources-heading"
     >

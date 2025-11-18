@@ -42,7 +42,7 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3]"
+      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3] hidden"
       aria-labelledby="faq-heading"
     >
       <div className="container mx-auto px-4">

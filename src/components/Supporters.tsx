@@ -12,44 +12,69 @@ export function Supporters() {
   
   const supporters = [
     { 
-      name: "Nawab Tails Rescue", 
-      url: "https://www.instagram.com/nawabitailsrescue",
-      logoUrl: "https://images.unsplash.com/photo-1584867818838-5312e821fe15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmltYWwlMjBzaGVsdGVyJTIwbG9nb3xlbnwxfHx8fDE3NjMyMTQwOTN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      name: "Supporter Organization 1", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=1A272uEHib6hW1LH1FyESUtFOMHpc8toF"
     },
     { 
-      name: "Animal Shelter Organization", 
+      name: "Supporter Organization 2", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1592275142414-8588d1e87e11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjByZXNjdWUlMjBvcmdhbml6YXRpb258ZW58MXx8fHwxNzYzMjE0MDkzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1Y5HqpQPrIps0iCehT4g1v5ib-JlRpQKf"
     },
     { 
-      name: "Animal Welfare NGO", 
+      name: "Supporter Organization 3", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1762783667040-0d38c74c75c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmltYWwlMjB3ZWxmYXJlJTIwbmdvfGVufDF8fHx8MTc2MzIxNDA5M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1YU__H-uvgwncbQSWOA-it9ZWHCOh4mce"
     },
     { 
-      name: "Pet Care Foundation", 
+      name: "Supporter Organization 4", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1563460716037-460a3ad24ba9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBjYXJlJTIwb3JnYW5pemF0aW9ufGVufDF8fHx8MTc2MzIxNDA5M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1Fb0MLsuU5hpT-LmGIsbRtEcmWmAIDxeA"
     },
     { 
-      name: "Animal Rights Collective", 
+      name: "Supporter Organization 5", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1635951279634-1143dc8c4038?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmltYWwlMjByaWdodHMlMjBjaGFyaXR5fGVufDF8fHx8MTc2MzIxNDA5NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1vr5w0-Bot56VhmnuX8FduTFKLRvfX6QD"
     },
     { 
-      name: "Dog Rescue Initiative", 
+      name: "Supporter Organization 6", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1444212477490-ca407925329e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBjaGFyaXR5JTIwb3JnYW5pemF0aW9ufGVufDF8fHx8MTc2MzIxNDA5NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1Uz8Ky89wN1eK8sExy3MteI-s1By45-aH"
     },
     { 
-      name: "Compassion Street Dogs", 
+      name: "Supporter Organization 7", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1584867818838-5312e821fe15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmltYWwlMjBzaGVsdGVyJTIwbG9nb3xlbnwxfHx8fDE3NjMyMTQwOTN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1CxbjaMKP2R9phFKyz_-ep0eZs48xJS0i"
     },
     { 
-      name: "Stray Support Network", 
+      name: "Supporter Organization 8", 
       url: "#",
-      logoUrl: "https://images.unsplash.com/photo-1592275142414-8588d1e87e11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjByZXNjdWUlMjBvcmdhbml6YXRpb258ZW58MXx8fHwxNzYzMjE0MDkzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      logoUrl: "https://drive.google.com/uc?export=view&id=1-iQwlEIOKRPpPUwAACd8f8EmUM4fk_eo"
+    },
+    { 
+      name: "Supporter Organization 9", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=10xZg2AazmTfK9UpuOxnC12KtkgWRgQEg"
+    },
+    { 
+      name: "Supporter Organization 10", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=13xi_oQF6Z4lo9-TsKQQED3QHDh7tFG5P"
+    },
+    { 
+      name: "Supporter Organization 11", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=16-xyn98rWppfCVXTqIk31dNmUG5S7mrS"
+    },
+    { 
+      name: "Supporter Organization 12", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=1B5BcD3yIRkW0RP3mNYaoHUyM_H5tEu8l"
+    },
+    { 
+      name: "Supporter Organization 13", 
+      url: "#",
+      logoUrl: "https://drive.google.com/uc?export=view&id=1sA5cuL2lSadz93DvIxYTiEuO4k81q37f"
     },
   ];
 
@@ -114,54 +139,18 @@ export function Supporters() {
                   href={supporter.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 w-[180px] md:w-[200px] bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#F59E0B] group"
+                  className="flex-shrink-0 w-[180px] h-[180px] md:w-[200px] md:h-[200px]"
                   aria-label={`Visit ${supporter.name}`}
                 >
-                  {/* Logo Image */}
-                  <div className="w-full aspect-square mb-3 overflow-hidden rounded-lg">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <ImageWithFallback
-                        src={supporter.logoUrl}
-                        alt={supporter.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </motion.div>
-                  </div>
-                  <p className="text-xs md:text-sm text-center text-[#666666] group-hover:text-[#F59E0B] transition-colors">
-                    {supporter.name}
-                  </p>
+                  <ImageWithFallback
+                    src={supporter.logoUrl}
+                    alt={supporter.name}
+                    className="w-full h-full object-contain"
+                  />
                 </a>
               ))}
             </motion.div>
           </div>
-
-          {/* Add Your Organization CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="text-center mt-10 md:mt-12"
-          >
-            <div className="bg-white rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20">
-              <p className="text-[#666666] mb-4 text-sm md:text-base">
-                Does your organization support this movement?
-              </p>
-              <motion.a
-                href="https://www.facebook.com/AnimalWritesIndia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[#F59E0B] hover:underline focus:outline-none focus:ring-2 focus:ring-[#F59E0B] rounded px-2 py-1"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Contact us to be featured
-              </motion.a>
-            </div>
-          </motion.div>
         </div>
       </div>
     </section>

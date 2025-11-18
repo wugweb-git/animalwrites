@@ -6,6 +6,32 @@ export function MetaTags() {
     // Set document title
     document.title = "Animal Writes - India's Largest Letter Petition Campaign for Street Dogs";
 
+    // Install Google Analytics (gtag.js)
+    const installGtag = () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+        return;
+      }
+
+      // Create and append gtag script
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-4P5YMJ04RL';
+      document.head.appendChild(script);
+
+      // Initialize gtag
+      const inlineScript = document.createElement('script');
+      inlineScript.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4P5YMJ04RL');
+      `;
+      document.head.appendChild(inlineScript);
+    };
+
+    installGtag();
+
     // Set favicon
     const setFavicon = () => {
       let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
