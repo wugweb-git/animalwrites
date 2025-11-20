@@ -112,7 +112,7 @@ export function WhyThisMatters() {
                   <span className="text-white">Your Constitutional Right</span>
                 </motion.div>
                 <h3 className="text-2xl md:text-3xl text-[#333333] mb-4 font-bold">
-                  Why Letters to the Supreme Court Work
+                  Why Letters to the Supreme Court Work?
                 </h3>
                 <p className="text-base md:text-lg text-[#666666] max-w-2xl mx-auto">
                   The Supreme Court can take cognizance based on citizen letters — this is a rare and powerful constitutional tool available to every Indian.

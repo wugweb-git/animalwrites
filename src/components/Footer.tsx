@@ -15,7 +15,7 @@ export function Footer() {
             viewport={{ once: true }}
             className="text-gray-300 text-base md:text-lg"
           >
-            Part of the Animal Writes Movement
+            India Writes for Animal Rights
           </motion.p>
 
           <div className="border-t border-gray-600 pt-6 md:pt-8">

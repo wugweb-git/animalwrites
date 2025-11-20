@@ -120,13 +120,13 @@ export function Hero() {
                 </div>
                 <div className="flex items-center gap-3 justify-center md:justify-start">
                   <motion.div
-                    whileHover={{ scale: 1.2 }}
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-xs md:text-sm border border-gray-200"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 400 }}
                   >
                     <Heart className="w-5 h-5 text-[#F59E0B]" aria-hidden="true" />
                   </motion.div>
-                  <span>All GPOs Across India</span>
+                  <span>All GPOs and HPOs</span>
                 </div>
               </motion.div>
 

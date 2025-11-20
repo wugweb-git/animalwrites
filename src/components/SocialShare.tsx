@@ -1,4 +1,4 @@
-import { Share2, Twitter, Facebook, MessageCircle, Copy, Check, Users } from "lucide-react";
+import { Share2, Twitter, Facebook, MessageCircle, Copy, Check, Users, Instagram } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -184,27 +184,75 @@ export function SocialShare() {
             <p className="text-white/90 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
               Follow the official campaign page for updates, resources, and to connect with thousands of compassionate citizens across India
             </p>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                asChild
-                size="lg"
-                className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333]"
+            
+            {/* Social Media Links */}
+            <div className="flex flex-col gap-4 mb-6">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <a
-                  href="https://facebook.com/AnimalWritesIndia"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3"
-                  aria-label="Follow Animal Writes India on Facebook"
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
                 >
-                  <Facebook className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
-                  <span className="hidden sm:inline">facebook.com/</span>AnimalWritesIndia
-                </a>
-              </Button>
-            </motion.div>
+                  <a
+                    href="https://www.facebook.com/AnimalWritesIndia/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3"
+                    aria-label="Follow Animal Writes India on Facebook"
+                  >
+                    <Facebook className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
+                    <span className="hidden sm:inline">facebook.com/</span>AnimalWritesIndia
+                  </a>
+                </Button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
+                >
+                  <a
+                    href="https://www.instagram.com/animalwrites_india/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3"
+                    aria-label="Follow Animal Writes India on Instagram"
+                  >
+                    <Instagram className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
+                    <span className="hidden sm:inline">instagram.com/</span>animalwrites_india
+                  </a>
+                </Button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-[#25D366] hover:bg-[#20bd5a] text-white text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
+                >
+                  <a
+                    href="https://chat.whatsapp.com/EzE1VZTszFoLDwqEOCClxR"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3"
+                    aria-label="Join Animal Writes India WhatsApp Group"
+                  >
+                    <MessageCircle className="w-5 h-5 md:w-6 md:h-6" aria-hidden="true" />
+                    Join WhatsApp Group
+                  </a>
+                </Button>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>

@@ -109,11 +109,11 @@ export function Supporters() {
               <span className="text-[#F59E0B]">Standing Together</span>
             </motion.div>
             
-            <h2 id="supporters-heading" className="text-2xl md:text-4xl text-[#333333] mb-4 font-bold">
+            <h2 id="supporters-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
               Supported By
             </h2>
             <p className="text-[#666666] text-base md:text-lg max-w-2xl mx-auto">
-              Animal shelters, NGOs, and rescue organizations across India united for compassion
+              Animal Lovers, Animal Activists, Animal Welfare Organisations, Every human who knows 'humanity'
             </p>
           </motion.div>
 
