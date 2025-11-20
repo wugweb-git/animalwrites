@@ -14,67 +14,67 @@ export function Supporters() {
     { 
       name: "Supporter Organization 1", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1A272uEHib6hW1LH1FyESUtFOMHpc8toF"
+      logoUrl: "https://vedanshu.design/AW/l1.jpeg"
     },
     { 
       name: "Supporter Organization 2", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1Y5HqpQPrIps0iCehT4g1v5ib-JlRpQKf"
+      logoUrl: "https://vedanshu.design/AW/l2.jpeg"
     },
     { 
       name: "Supporter Organization 3", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1YU__H-uvgwncbQSWOA-it9ZWHCOh4mce"
+      logoUrl: "https://vedanshu.design/AW/l3.jpeg"
     },
     { 
       name: "Supporter Organization 4", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1Fb0MLsuU5hpT-LmGIsbRtEcmWmAIDxeA"
+      logoUrl: "https://vedanshu.design/AW/l4.jpeg"
     },
     { 
       name: "Supporter Organization 5", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1vr5w0-Bot56VhmnuX8FduTFKLRvfX6QD"
+      logoUrl: "https://vedanshu.design/AW/l5.jpeg"
     },
     { 
       name: "Supporter Organization 6", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1Uz8Ky89wN1eK8sExy3MteI-s1By45-aH"
+      logoUrl: "https://vedanshu.design/AW/l6.jpeg"
     },
     { 
       name: "Supporter Organization 7", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1CxbjaMKP2R9phFKyz_-ep0eZs48xJS0i"
+      logoUrl: "https://vedanshu.design/AW/l7.jpeg"
     },
     { 
       name: "Supporter Organization 8", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1-iQwlEIOKRPpPUwAACd8f8EmUM4fk_eo"
+      logoUrl: "https://vedanshu.design/AW/l8.jpeg"
     },
     { 
       name: "Supporter Organization 9", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=10xZg2AazmTfK9UpuOxnC12KtkgWRgQEg"
+      logoUrl: "https://vedanshu.design/AW/l9.jpeg"
     },
     { 
       name: "Supporter Organization 10", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=13xi_oQF6Z4lo9-TsKQQED3QHDh7tFG5P"
+      logoUrl: "https://vedanshu.design/AW/l10.jpeg"
     },
     { 
       name: "Supporter Organization 11", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=16-xyn98rWppfCVXTqIk31dNmUG5S7mrS"
+      logoUrl: "https://vedanshu.design/AW/l11.jpeg"
     },
     { 
       name: "Supporter Organization 12", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1B5BcD3yIRkW0RP3mNYaoHUyM_H5tEu8l"
+      logoUrl: "https://vedanshu.design/AW/l12.jpeg"
     },
     { 
       name: "Supporter Organization 13", 
       url: "#",
-      logoUrl: "https://drive.google.com/uc?export=view&id=1sA5cuL2lSadz93DvIxYTiEuO4k81q37f"
+      logoUrl: "https://vedanshu.design/AW/l13.jpeg"
     },
   ];
 

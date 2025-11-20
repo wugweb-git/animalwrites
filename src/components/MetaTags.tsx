@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import logo from "figma:asset/6e61e5eae124a3f5fb754a70be5c91c75e29cc82.png";
 
 export function MetaTags() {
   useEffect(() => {
@@ -42,7 +41,7 @@ export function MetaTags() {
         document.head.appendChild(link);
       }
       
-      link.href = logo;
+      link.href = "https://vedanshu.design/AW/logo";
     };
     
     setFavicon();

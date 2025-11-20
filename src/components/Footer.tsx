@@ -32,7 +32,7 @@ export function Footer() {
               <p className="text-[#666666] mt-3 text-sm md:text-base">— Mahatma Gandhi</p>
             </motion.div>
 
-            <motion.p
+            <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -46,7 +46,7 @@ export function Footer() {
               >
                 <Heart className="w-4 h-4 text-[#333333] inline" aria-hidden="true" />
               </motion.div>
-            </motion.p>
+            </motion.div>
 
             {/* Wugweb backlink */}
             <motion.div

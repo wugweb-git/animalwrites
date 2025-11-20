@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
-import logo from "figma:asset/6e61e5eae124a3f5fb754a70be5c91c75e29cc82.png";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const logo = "https://vedanshu.design/AW/logo";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,12 +26,12 @@ export function Navigation() {
   };
 
   const navLinks = [
+    { label: "About", id: "about-movement" },
     { label: "Why It Matters", id: "why-matters" },
     { label: "How to Join", id: "how-to-join" },
-    { label: "Write Letter", id: "letter-templates" },
-    { label: "Find GPO", id: "local-support" },
+    { label: "Letter Templates", id: "letter-templates" },
+    { label: "Find GPO/HPO", id: "local-support" },
     { label: "FAQ", id: "faq" },
-    { label: "Volunteer", id: "volunteer" },
   ];
 
   return (

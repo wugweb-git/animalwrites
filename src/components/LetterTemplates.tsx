@@ -11,99 +11,32 @@ export function LetterTemplates() {
 
   const templates = [
     {
-      title: "Compassionate Citizen",
-      tone: "Personal & Emotional",
-      content: `To,
-The Chief Justice of India
-The Hon'ble Supreme Court of India
-Tilak Marg, New Delhi - 110001
-
-Respected Sir/Madam,
-
-Subject: Urgent Reconsideration of Street Dog Relocation Order
-
-I write to you as a concerned citizen who believes deeply in the values of compassion and coexistence that define our nation.
-
-The recent order calling for the removal or relocation of stray dogs, while well-intentioned for public safety, is not practically executable. India lacks the infrastructure and government-run shelters to house millions of street dogs humanely.
-
-These animals are not merely strays—they are guardians of our neighborhoods, companions to many, and sentient beings deserving of dignity. Forced relocation will cause immense suffering to both animals and communities.
-
-I humbly urge the Hon'ble Court to reconsider this directive and explore humane alternatives such as:
-• Strengthened ABC (Animal Birth Control) programs
-• Community-led care initiatives  
-• Public awareness campaigns for peaceful coexistence
-
-Justice, I believe, must be compassionate. India has always been a land that respects all life.
-
-With deepest respect,
-[Your Name]
-[Your City]
-[Date]`,
+      title: "English",
+      tone: "Formal Legal Letter",
+      content: `By Speed Post 
+ To, The Hon'ble Chief Justice of India and His Companion Judges, Supreme Court of India, Tilak Marg, New Delhi – 110001
+Subject: Letter Petition in Re: "India Writes for Animal Rights"
+May it please Your Lordships and Ladyship,
+I write as a concerned citizen regarding the recent orders of the Hon'ble Supreme Court concerning community animals, particularly the order dated 07.11.2025 passed in Suo Motu W.P. (Civil) No. 5/2025. It is respectfully submitted that the said order appears neither legally sound nor scientifically informed, and may not address the issues it seeks to resolve.
+A matter of serious concern is that the order was passed without hearing the interventionists and their counsel, violating basic principles of natural justice. Regardless of differing views on the subject, such a process risks undermining public confidence in the Court as the guardian of justice. Moreover, the order conflicts with the ABC Rules, 2023 and binding constitutional bench judgments.
+Scientifically and practically, the directions are unworkable given the lack of funds and infrastructure, and may reverse the slow but steady progress achieved by animal caregivers despite institutional indifference. The intervenors have already highlighted several scientific, legal, and logical shortcomings in the current approach. Instead of fostering unity in addressing the issue, the order risks creating an avoidable divide between human and animal interests, when compassionate coexistence is both possible and necessary. Importantly, sustainable, humane, and legally sound solutions have already been placed before the Court but remain unconsidered.
+In view of the above, it is prayed that the operation of the order dated 07.11.2025 be stayed and the matter be heard afresh by a constitutional bench.
+Respectfully,
+Name: Address: Phone: Email:`,
     },
     {
-      title: "Practical Approach",
-      tone: "Logical & Solution-Focused",
-      content: `To,
-The Chief Justice of India
-The Hon'ble Supreme Court of India
-Tilak Marg, New Delhi - 110001
-
-Respected Sir/Madam,
-
-Subject: Request for Practical Review of Street Dog Management Order
-
-I am writing to bring to your attention the practical challenges in implementing the recent order regarding stray dog relocation.
-
-Ground Realities:
-1. India has an estimated 60+ million stray dogs with no infrastructure to house them
-2. Relocation without proper facilities will lead to mass suffering and public health crises
-3. The current directive lacks a clear, humane, and legally sound implementation pathway
-
-Evidence-Based Solutions:
-• ABC (Animal Birth Control) programs have proven effective in Kerala and other states
-• Community stewardship models reduce conflict and improve public safety
-• Scientific sterilization is more cost-effective than relocation
-
-I respectfully urge the Hon'ble Court to consider a revised approach that balances public safety with animal welfare, backed by scientific evidence and practical feasibility.
-
-Your consideration of this matter would serve both justice and humanity.
-
-Respectfully submitted,
-[Your Name]
-[Your City]
-[Date]`,
-    },
-    {
-      title: "Legal Perspective",
-      tone: "Constitutional & Rights-Based",
-      content: `To,
-The Chief Justice of India
-The Hon'ble Supreme Court of India
-Tilak Marg, New Delhi - 110001
-
-Respected Sir/Madam,
-
-Subject: Constitutional Concerns Regarding Street Dog Relocation Directive
-
-I write as a citizen deeply committed to constitutional values and the rule of law.
-
-Article 51A(g) of our Constitution mandates compassion towards all living creatures. The Prevention of Cruelty to Animals Act, 1960, and the Animal Birth Control Rules, 2001, provide a legal framework for humane street dog management.
-
-The recent relocation order, while addressing public safety concerns, may inadvertently conflict with:
-• Existing animal welfare legislation
-• Practical implementation capabilities
-• The spirit of compassion enshrined in our Constitution
-
-I respectfully submit that a more nuanced approach—one that upholds both public safety and animal welfare—would better serve the constitutional vision of a humane society.
-
-Alternative measures such as strengthened ABC programs, community education, and local accountability could achieve the desired outcomes without mass displacement.
-
-I trust the Hon'ble Court will consider a path that honors both the letter and spirit of our laws.
-
-With highest regards,
-[Your Name]
-[Your City]
-[Date]`,
+      title: "Hindi",
+      tone: "औपचारिक कानूनी पत्र",
+      content: `द्वारा स्पीड पोस्ट
+सेवा में, माननीय भारत के मुख्य न्यायाधीश महोदय एवं उनके सहयोगी न्यायमूर्ति, भारत का सर्वोच्च न्यायालय, तिलक मार्ग, नई दिल्ली – 110001
+विषय: "इंडिया राइट्स फॉर एनिमल राइट्स" विषयक पत्र याचिका
+मान्यवर न्यायाधीशगण,
+मैं एक चिंतित नागरिक के रूप में यह पत्र लिख रहा/रही हूँ, जो सामुदायिक पशुओं से संबंधित माननीय सर्वोच्च न्यायालय के हालिया आदेशों—विशेष रूप से दिनांक 07.11.2025 को पारित स्वतः संज्ञान वाद (सिविल) संख्या 5/2025—के संदर्भ में है। विनम्रतापूर्वक निवेदन है कि उपर्युक्त आदेश न तो विधिक रूप से सुदृढ़ प्रतीत होता है, न वैज्ञानिक दृष्टि से उचित है, तथा न ही यह संबंधित समस्या के समाधान में सहायक हो सकेगा।
+गंभीर चिंता का विषय यह है कि यह आदेश हस्तक्षेपकर्ताओं एवं उनके अधिवक्ताओं को सुने बिना पारित किया गया, जो प्राकृतिक न्याय के मूल सिद्धांतों के विपरीत है। विषय पर मतभेद होने के बावजूद इस प्रकार की प्रक्रिया न्यायालय के प्रति जनता के विश्वास को प्रभावित कर सकती है। इसके अतिरिक्त, यह आदेश एबीसी नियमावली, 2023 तथा संविधान पीठों के बाध्यकारी निर्णयों के भी प्रतिकूल है।
+वैज्ञानिक एवं व्यावहारिक दृष्टि से भी ये दिशा-निर्देश अव्यावहारिक हैं, क्योंकि उपलब्ध संसाधन, ढांचा एवं वित्तीय क्षमता अत्यंत सीमित हैं। इससे उन पशु-सेवकों के वर्षों के अथक प्रयासों को भी क्षति पहुँच सकती है जिन्होंने संस्थागत उदासीनता के बावजूद सुधार लाने का कार्य किया है। हस्तक्षेपकर्ताओं द्वारा प्रस्तुत अनेक वैज्ञानिक, विधिक एवं तर्कसंगत आपत्तियाँ भी विचाराधीन नहीं की गई हैं। यह आदेश देश को समाधान की दिशा में एकजुट करने के बजाय मनुष्यों एवं पशुओं के बीच अनावश्यक विभाजन उत्पन्न कर सकता है, जबकि करुणामय सह-अस्तित्व पूर्णतः संभव है। महत्वपूर्ण यह भी है कि टिकाऊ, मानवीय एवं विधिसम्मत समाधान पहले ही न्यायालय के समक्ष प्रस्तुत किए जा चुके हैं, जिन पर विचार किया जाना आवश्यक है।
+उपरोक्त तथ्यों के प्रकाश में प्रार्थना है कि दिनांक 07.11.2025 के आदेश के संचालन पर तत्क्षण स्थगन प्रदान किया जाए तथा विषय को संविधान पीठ के समक्ष पुनः सुनवाई हेतु रखा जाए।
+सादर,
+नाम: पता: फोन: ईमेल:`,
     },
   ];
 

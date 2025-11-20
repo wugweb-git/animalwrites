@@ -11,6 +11,7 @@ import { Resources } from "./components/Resources";
 import { ImpactStats } from "./components/ImpactStats";
 import { Testimonials } from "./components/Testimonials";
 import { Supporters } from "./components/Supporters";
+import { CampaignGallery } from "./components/CampaignGallery";
 import { PressMedia } from "./components/PressMedia";
 import { FAQ } from "./components/FAQ";
 import { VolunteerSignup } from "./components/VolunteerSignup";
@@ -53,7 +54,6 @@ export default function App() {
         {/* Why & Context */}
         <WhyThisMatters />
         <VisualImpact />
-        <KeyFacts />
         <ImpactStats />
         <Timeline />
         
@@ -69,6 +69,7 @@ export default function App() {
         {/* Social Proof & Community */}
         <Testimonials />
         <Supporters />
+        <CampaignGallery />
         <PressMedia />
         
         {/* Resources & Next Steps */}
