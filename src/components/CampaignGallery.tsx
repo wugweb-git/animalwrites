@@ -72,18 +72,6 @@ export function CampaignGallery() {
                   alt={image.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#333333]/80 via-[#333333]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center p-6">
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    whileHover={{ y: 0, opacity: 1 }}
-                    className="flex items-center gap-2 text-white"
-                  >
-                    <Heart className="w-5 h-5 text-[#F59E0B]" fill="#F59E0B" aria-hidden="true" />
-                    <span className="text-sm">Together for Change</span>
-                  </motion.div>
-                </div>
               </motion.div>
             ))}
           </div>
