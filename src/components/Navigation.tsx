@@ -28,9 +28,10 @@ export function Navigation() {
   const navLinks = [
     { label: "About", id: "about-movement" },
     { label: "Why It Matters", id: "why-matters" },
+    { label: "Timeline", id: "timeline" },
     { label: "How to Join", id: "how-to-join" },
-    { label: "Letter Templates", id: "letter-templates" },
-    { label: "Find GPO/HPO", id: "local-support" },
+    { label: "Gallery", id: "gallery" },
+    { label: "Volunteer", id: "volunteer" },
     { label: "FAQ", id: "faq" },
   ];
 

@@ -21,6 +21,7 @@ export function CampaignGallery() {
 
   return (
     <section 
+      id="gallery"
       className="py-16 md:py-24 bg-white" 
       aria-labelledby="gallery-heading"
     >

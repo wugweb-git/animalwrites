@@ -143,7 +143,7 @@ export function WhyThisMatters() {
 
               <div className="bg-[#FFF8F3] rounded-xl p-6 md:p-8 border-l-4 border-[#F59E0B]">
                 <p className="text-center text-base md:text-lg text-[#333333]">
-                  Use the uniform title: <strong className="text-[#F59E0B]">"IN RE: Compassion, Kindness & Humanity"</strong> to help the Court consolidate all letters into one national plea.
+                  Use the uniform title: <strong className="text-[#F59E0B]">"IN RE: India Writes for Animal Rights"</strong> to help the Court consolidate all letters into one national plea.
                 </p>
               </div>
             </motion.div>
