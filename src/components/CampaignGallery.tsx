@@ -4,19 +4,19 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function CampaignGallery() {
   const images = [
-    { url: "https://vedanshu.design/AW/im1.jpeg", alt: "Campaign moment 1" },
-    { url: "https://vedanshu.design/AW/im2.jpeg", alt: "Campaign moment 2" },
-    { url: "https://vedanshu.design/AW/im3.jpeg", alt: "Campaign moment 3" },
-    { url: "https://vedanshu.design/AW/im4.jpeg", alt: "Campaign moment 4" },
-    { url: "https://vedanshu.design/AW/im5.jpeg", alt: "Campaign moment 5" },
-    { url: "https://vedanshu.design/AW/im6.jpeg", alt: "Campaign moment 6" },
-    { url: "https://vedanshu.design/AW/im7.jpeg", alt: "Campaign moment 7" },
-    { url: "https://vedanshu.design/AW/im8.jpeg", alt: "Campaign moment 8" },
-    { url: "https://vedanshu.design/AW/im9.jpeg", alt: "Campaign moment 9" },
-    { url: "https://vedanshu.design/AW/im10.jpeg", alt: "Campaign moment 10" },
-    { url: "https://vedanshu.design/AW/im11.jpeg", alt: "Campaign moment 11" },
-    { url: "https://vedanshu.design/AW/im12.jpeg", alt: "Campaign moment 12" },
-    { url: "https://vedanshu.design/AW/im13.jpeg", alt: "Campaign moment 13" },
+    { url: "https://vedanshu.design/AW/im1.jpeg", alt: "Animal Writes supporters gathering for street dog welfare campaign in India" },
+    { url: "https://vedanshu.design/AW/im2.jpeg", alt: "Citizens participating in Animal Writes letter petition movement for animal rights" },
+    { url: "https://vedanshu.design/AW/im3.jpeg", alt: "Community members writing letters to Supreme Court advocating for street dogs" },
+    { url: "https://vedanshu.design/AW/im4.jpeg", alt: "Animal Writes campaign event promoting humane coexistence with street dogs" },
+    { url: "https://vedanshu.design/AW/im5.jpeg", alt: "Volunteers at Animal Writes movement supporting animal welfare in India" },
+    { url: "https://vedanshu.design/AW/im6.jpeg", alt: "Animal rights activists gathering for street dog protection campaign" },
+    { url: "https://vedanshu.design/AW/im7.jpeg", alt: "Citizens united for Animal Writes letter petition to Indian Supreme Court" },
+    { url: "https://vedanshu.design/AW/im8.jpeg", alt: "Community engagement in Animal Writes campaign for compassionate animal welfare" },
+    { url: "https://vedanshu.design/AW/im9.jpeg", alt: "Animal Writes supporters advocating for ABC program and street dog rights" },
+    { url: "https://vedanshu.design/AW/im10.jpeg", alt: "Grassroots mobilization for Animal Writes national letter campaign 2025" },
+    { url: "https://vedanshu.design/AW/im11.jpeg", alt: "Animal welfare advocates participating in India's largest petition movement" },
+    { url: "https://vedanshu.design/AW/im12.jpeg", alt: "Animal Writes campaign volunteers promoting humane treatment of street dogs" },
+    { url: "https://vedanshu.design/AW/im13.jpeg", alt: "Community gathering for Animal Writes movement supporting animal rights in India" },
   ];
 
   return (
@@ -66,7 +66,7 @@ export function CampaignGallery() {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.03 }}
-                className="relative group overflow-hidden rounded-xl shadow-lg aspect-square"
+                className={`relative group overflow-hidden rounded-xl shadow-lg aspect-square ${index === 12 ? 'hidden' : ''}`}
               >
                 <ImageWithFallback
                   src={image.url}

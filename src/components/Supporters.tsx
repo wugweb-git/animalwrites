@@ -14,67 +14,80 @@ export function Supporters() {
     { 
       name: "Supporter Organization 1", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l1.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l1.jpeg",
+      altText: "Animal welfare organization supporting Animal Writes campaign"
     },
     { 
       name: "Supporter Organization 2", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l2.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l2.jpeg",
+      altText: "Animal rights NGO backing street dog protection movement"
     },
     { 
       name: "Supporter Organization 3", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l3.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l3.jpeg",
+      altText: "Partner organization advocating for humane animal treatment"
     },
     { 
       name: "Supporter Organization 4", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l4.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l4.jpeg",
+      altText: "Supporting partner for India's largest letter petition campaign"
     },
     { 
       name: "Supporter Organization 5", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l5.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l5.jpeg",
+      altText: "Animal compassion advocate supporting Animal Writes"
     },
     { 
       name: "Supporter Organization 6", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l6.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l6.jpeg",
+      altText: "Nonprofit organization supporting street dog welfare in India"
     },
     { 
       name: "Supporter Organization 7", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l7.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l7.jpeg",
+      altText: "Animal welfare supporter backing Supreme Court petition movement"
     },
     { 
       name: "Supporter Organization 8", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l8.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l8.jpeg",
+      altText: "Community partner for animal rights campaign India"
     },
     { 
       name: "Supporter Organization 9", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l9.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l9.jpeg",
+      altText: "Supporting organization for compassionate coexistence movement"
     },
     { 
       name: "Supporter Organization 10", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l10.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l10.jpeg",
+      altText: "Animal protection advocate supporting Animal Writes initiative"
     },
     { 
       name: "Supporter Organization 11", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l11.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l11.jpeg",
+      altText: "Collaborating partner for street dog advocacy campaign"
     },
     { 
       name: "Supporter Organization 12", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l12.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l12.jpeg",
+      altText: "Supporting partner for nationwide animal welfare movement"
     },
     { 
       name: "Supporter Organization 13", 
       url: "#",
-      logoUrl: "https://vedanshu.design/AW/l13.jpeg"
+      logoUrl: "https://vedanshu.design/AW/l13.jpeg",
+      altText: "Animal rights supporter backing November 29 campaign"
     },
   ];
 
@@ -144,7 +157,7 @@ export function Supporters() {
                 >
                   <ImageWithFallback
                     src={supporter.logoUrl}
-                    alt={supporter.name}
+                    alt={supporter.altText}
                     className="w-full h-full object-contain"
                   />
                 </a>

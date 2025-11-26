@@ -1,0 +1,71 @@
+# Animal Writes - Robots.txt
+# India's Largest Letter Petition Campaign for Street Dogs
+# Last Updated: November 26, 2025
+
+# Allow all search engines to crawl the entire site
+User-agent: *
+Allow: /
+
+# Crawl-delay for respectful crawling (optional)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://animalwrites.in/sitemap.xml
+
+# Block specific user agents (if needed in future)
+# User-agent: BadBot
+# Disallow: /
+
+# Disallow crawling of specific paths (none for now, allow all)
+# Disallow: /private/
+# Disallow: /admin/
+
+# Google-specific directives
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Bing-specific directives
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Social Media Crawlers
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Archive crawlers
+User-agent: ia_archiver
+Allow: /
+
+# SEO and Analytics crawlers
+User-agent: AhrefsBot
+Crawl-delay: 2
+Allow: /
+
+User-agent: SemrushBot
+Crawl-delay: 2
+Allow: /
+
+User-agent: MJ12bot
+Crawl-delay: 2
+Allow: /
+
+User-agent: DotBot
+Crawl-delay: 2
+Allow: /

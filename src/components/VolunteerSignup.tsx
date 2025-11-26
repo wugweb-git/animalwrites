@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { motion, AnimatePresence } from "motion/react";
 import { Confetti } from "./Confetti";
+import { projectId, publicAnonKey } from "../utils/supabase/info";
 
 export function VolunteerSignup() {
   const [formData, setFormData] = useState({
@@ -17,20 +18,51 @@ export function VolunteerSignup() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, this would send data to a backend
-    console.log("Volunteer signup:", formData);
-    setSubmitted(true);
-    setShowConfetti(true);
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 3000);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: "", email: "", city: "", role: "" });
-    }, 5000);
+    setIsSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-7a8516f4/volunteer-signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${publicAnonKey}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit volunteer signup");
+      }
+
+      console.log("Volunteer signup successful:", result);
+      setSubmitted(true);
+      setShowConfetti(true);
+      
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 3000);
+      
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({ name: "", email: "", city: "", role: "" });
+      }, 5000);
+    } catch (error) {
+      console.error("Error submitting volunteer signup:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to submit. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const roles = [
@@ -270,9 +302,15 @@ export function VolunteerSignup() {
                             type="submit"
                             className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                           >
-                            Join as Volunteer
+                            {isSubmitting ? "Submitting..." : "Join as Volunteer"}
                           </Button>
                         </motion.div>
+
+                        {errorMessage && (
+                          <p className="text-xs text-red-500 text-center mt-2">
+                            {errorMessage}
+                          </p>
+                        )}
 
                         <p className="text-xs text-[#999999] text-center">
                           By signing up, you agree to be contacted about volunteer opportunities for this campaign.

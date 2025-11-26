@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square70x70logo src="https://vedanshu.design/AW/logo"/>
+      <square150x150logo src="https://vedanshu.design/AW/logo"/>
+      <square310x310logo src="https://vedanshu.design/AW/logo"/>
+      <wide310x150logo src="https://vedanshu.design/AW/logo"/>
+      <TileColor>#F59E0B</TileColor>
+    </tile>
+  </msapplication>
+</browserconfig>

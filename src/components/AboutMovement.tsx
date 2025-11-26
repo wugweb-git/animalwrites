@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 export function AboutMovement() {
   return (
     <section 
+      id="about-movement"
       className="py-16 md:py-24 bg-white"
       aria-labelledby="about-heading"
     >

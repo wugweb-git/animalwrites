@@ -26,8 +26,23 @@ import { Timeline } from "./components/Timeline";
 import { BackToTop } from "./components/BackToTop";
 import { WhatHappensNext } from "./components/WhatHappensNext";
 import { VisualImpact } from "./components/VisualImpact";
+import { VolunteerAdmin } from "./components/VolunteerAdmin";
 
 export default function App() {
+  // Check if admin page should be shown
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdminPage = urlParams.get('admin') === 'volunteers';
+
+  // Show admin page if requested
+  if (isAdminPage) {
+    return (
+      <div className="min-h-screen bg-white">
+        <MetaTags />
+        <VolunteerAdmin />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <MetaTags />

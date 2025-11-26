@@ -32,7 +32,6 @@ export function Navigation() {
     { label: "How to Join", id: "how-to-join" },
     { label: "Gallery", id: "gallery" },
     { label: "Volunteer", id: "volunteer" },
-    { label: "FAQ", id: "faq" },
   ];
 
   return (
@@ -48,7 +47,7 @@ export function Navigation() {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 rounded-lg p-1"
             aria-label="Scroll to top - Animal Writes home"
           >
-            <img src={logo} alt="Animal Writes logo" className="h-10 w-10 md:h-12 md:w-12" />
+            <img src={logo} alt="Animal Writes - India's largest letter petition campaign for street dogs logo" className="h-10 w-10 md:h-12 md:w-12" />
             <span className="text-[#333333] tracking-wide hidden sm:inline">ANIMAL WRITES</span>
           </button>
 
