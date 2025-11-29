@@ -16,6 +16,7 @@ export function VolunteerSignup() {
     city: "",
     role: "",
   });
+  const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,6 +26,12 @@ export function VolunteerSignup() {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage("");
+
+    if (!consent) {
+      setErrorMessage("Please accept the consent to proceed");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -56,6 +63,7 @@ export function VolunteerSignup() {
       setTimeout(() => {
         setSubmitted(false);
         setFormData({ name: "", email: "", city: "", role: "" });
+        setConsent(false);
       }, 5000);
     } catch (error) {
       console.error("Error submitting volunteer signup:", error);
@@ -294,13 +302,29 @@ export function VolunteerSignup() {
                           </Select>
                         </div>
 
+                        <div className="flex items-start gap-3 p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                          <input
+                            type="checkbox"
+                            id="consent"
+                            checked={consent}
+                            onChange={(e) => setConsent(e.target.checked)}
+                            className="mt-1 h-4 w-4 text-[#F59E0B] focus:ring-[#F59E0B] border-gray-300 rounded cursor-pointer"
+                            required
+                            aria-required="true"
+                          />
+                          <Label htmlFor="consent" className="text-xs md:text-sm text-[#666666] cursor-pointer">
+                            I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
+                          </Label>
+                        </div>
+
                         <motion.div
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <Button
                             type="submit"
-                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
+                            disabled={!consent || isSubmitting}
+                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isSubmitting ? "Submitting..." : "Join as Volunteer"}
                           </Button>

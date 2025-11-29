@@ -75,7 +75,7 @@ export function WhatHappensNext() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3]" aria-labelledby="what-happens-next-heading">
+    <section id="what-happens-next" className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3]" aria-labelledby="what-happens-next-heading">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div

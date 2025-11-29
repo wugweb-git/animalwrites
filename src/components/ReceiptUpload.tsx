@@ -15,6 +15,7 @@ export function ReceiptUpload() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -64,6 +65,14 @@ export function ReceiptUpload() {
       // Validate all fields
       if (!formData.fullName || !formData.email || !formData.city || !selectedFile) {
         setErrorMessage("Please fill in all fields and upload a receipt image");
+        setSubmitStatus("error");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Validate consent
+      if (!consent) {
+        setErrorMessage("Please accept the consent to proceed");
         setSubmitStatus("error");
         setIsSubmitting(false);
         return;
@@ -123,6 +132,7 @@ export function ReceiptUpload() {
         setFormData({ fullName: "", email: "", city: "" });
         setSelectedFile(null);
         setPreviewUrl(null);
+        setConsent(false);
         setSubmitStatus("idle");
       }, 3000);
     } catch (error) {
@@ -275,6 +285,23 @@ export function ReceiptUpload() {
                   </div>
                 </div>
 
+                {/* Consent Checkbox */}
+                <div className="flex items-start gap-3 p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                  <input
+                    type="checkbox"
+                    id="receipt-consent"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-1 h-4 w-4 text-[#F59E0B] focus:ring-[#F59E0B] border-gray-300 rounded cursor-pointer"
+                    required
+                    aria-required="true"
+                    disabled={isSubmitting}
+                  />
+                  <Label htmlFor="receipt-consent" className="text-xs md:text-sm text-[#666666] cursor-pointer">
+                    I consent to sharing my receipt and information with the Animal Writes campaign. I understand this data will be used to track campaign impact and may be displayed publicly to inspire participation. My personal information will be kept confidential.
+                  </Label>
+                </div>
+
                 {/* Status Messages */}
                 {submitStatus === "success" && (
                   <motion.div
@@ -303,7 +330,7 @@ export function ReceiptUpload() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile}
+                  disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile || !consent}
                   className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-6 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (

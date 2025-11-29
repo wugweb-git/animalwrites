@@ -30,6 +30,7 @@ export function Navigation() {
     { label: "Why It Matters", id: "why-matters" },
     { label: "Timeline", id: "timeline" },
     { label: "How to Join", id: "how-to-join" },
+    { label: "What's Next", id: "what-happens-next" },
     { label: "Gallery", id: "gallery" },
     { label: "Volunteer", id: "volunteer" },
   ];
