@@ -7,6 +7,55 @@ import { Label } from "./ui/label";
 import { motion } from "motion/react";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
 
+// Helper function to compress image
+const compressImage = async (file: File, maxSizeMB = 2): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Calculate new dimensions (max 1920px width)
+        const maxWidth = 1920;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to blob with compression
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error('Failed to compress image'));
+            }
+          },
+          'image/jpeg',
+          0.85 // Quality 85%
+        );
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+};
+
 export function ReceiptUpload() {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -25,33 +74,47 @@ export function ReceiptUpload() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        setErrorMessage("Please upload an image file (JPG, PNG, etc.)");
+        setErrorMessage("Please upload an image file (JPG, PNG, HEIC, etc.)");
         setSubmitStatus("error");
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrorMessage("File size must be less than 5MB");
+      // Validate file size (max 20MB before compression)
+      if (file.size > 20 * 1024 * 1024) {
+        setErrorMessage("File size must be less than 20MB");
         setSubmitStatus("error");
         return;
       }
 
-      setSelectedFile(file);
-      setSubmitStatus("idle");
-      setErrorMessage("");
+      try {
+        // Compress image if larger than 2MB
+        let processedFile = file;
+        if (file.size > 2 * 1024 * 1024) {
+          console.log(`Compressing image from ${(file.size / 1024 / 1024).toFixed(2)}MB...`);
+          processedFile = await compressImage(file);
+          console.log(`Compressed to ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
+        }
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setSelectedFile(processedFile);
+        setSubmitStatus("idle");
+        setErrorMessage("");
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(processedFile);
+      } catch (error) {
+        console.error("Error processing image:", error);
+        setErrorMessage("Failed to process image. Please try another photo.");
+        setSubmitStatus("error");
+      }
     }
   };
 
@@ -231,15 +294,14 @@ export function ReceiptUpload() {
                     <input
                       id="receipt"
                       type="file"
-                      accept="image/*"
-                      capture="environment"
+                      accept="image/*,image/heic,image/heif"
                       onChange={handleFileSelect}
                       className="hidden"
                       disabled={isSubmitting}
                     />
                     <label
                       htmlFor="receipt"
-                      className="cursor-pointer flex flex-col items-center gap-4"
+                      className="cursor-pointer flex flex-col items-center gap-4 w-full"
                     >
                       {previewUrl ? (
                         <motion.div
@@ -271,13 +333,16 @@ export function ReceiptUpload() {
                         </motion.div>
                       ) : (
                         <>
-                          <Upload className="w-14 h-14 text-[#F59E0B]" />
+                          <Camera className="w-14 h-14 text-[#F59E0B]" />
                           <div>
                             <p className="text-[#333333] font-medium text-lg">
-                              Click to upload or take a photo
+                              📸 Choose Photo or Take New
                             </p>
                             <p className="text-base text-[#666666] mt-2">
-                              JPG, PNG or HEIC (Max 5MB)
+                              JPG, PNG or HEIC • Up to 20MB
+                            </p>
+                            <p className="text-sm text-[#999999] mt-1">
+                              Large images auto-compressed
                             </p>
                           </div>
                         </>
