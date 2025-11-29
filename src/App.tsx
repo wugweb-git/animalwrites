@@ -6,6 +6,7 @@ import { WhyThisMatters } from "./components/WhyThisMatters";
 import { KeyFacts } from "./components/KeyFacts";
 import { HowToJoin } from "./components/HowToJoin";
 import { LetterTemplates } from "./components/LetterTemplates";
+import { ReceiptUpload } from "./components/ReceiptUpload";
 import { LocalSupport } from "./components/LocalSupport";
 import { Resources } from "./components/Resources";
 import { ImpactStats } from "./components/ImpactStats";
@@ -27,18 +28,30 @@ import { BackToTop } from "./components/BackToTop";
 import { WhatHappensNext } from "./components/WhatHappensNext";
 import { VisualImpact } from "./components/VisualImpact";
 import { VolunteerAdmin } from "./components/VolunteerAdmin";
+import { ReceiptAdmin } from "./components/ReceiptAdmin";
 
 export default function App() {
   // Check if admin page should be shown
   const urlParams = new URLSearchParams(window.location.search);
-  const isAdminPage = urlParams.get('admin') === 'volunteers';
+  const isVolunteerAdmin = urlParams.get('admin') === 'volunteers';
+  const isReceiptAdmin = urlParams.get('admin') === 'receipts';
 
-  // Show admin page if requested
-  if (isAdminPage) {
+  // Show volunteer admin page if requested
+  if (isVolunteerAdmin) {
     return (
       <div className="min-h-screen bg-white">
         <MetaTags />
         <VolunteerAdmin />
+      </div>
+    );
+  }
+
+  // Show receipt admin page if requested
+  if (isReceiptAdmin) {
+    return (
+      <div className="min-h-screen bg-white">
+        <MetaTags />
+        <ReceiptAdmin />
       </div>
     );
   }
@@ -75,6 +88,7 @@ export default function App() {
         {/* How to Participate */}
         <HowToJoin />
         <LetterTemplates />
+        <ReceiptUpload />
         <LocalSupport />
         <FAQ />
         

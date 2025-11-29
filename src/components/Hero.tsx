@@ -1,4 +1,4 @@
-import { Mail, Heart, PenLine } from "lucide-react";
+import { Mail, Heart, PenLine, Camera } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
@@ -156,6 +156,19 @@ export function Hero() {
                   >
                     <PenLine className="w-5 h-5 mr-2" aria-hidden="true" />
                     Write Your Letter
+                  </Button>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    onClick={() => scrollToSection("upload-receipt")}
+                    className="bg-[#333333] hover:bg-[#1a1a1a] text-white px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg shadow-lg hover:shadow-xl transition-all w-full sm:w-auto border-2 border-[#F59E0B]"
+                    aria-label="Navigate to upload receipt section"
+                  >
+                    <Camera className="w-5 h-5 mr-2" aria-hidden="true" />
+                    Upload Receipt
                   </Button>
                 </motion.div>
               </motion.div>

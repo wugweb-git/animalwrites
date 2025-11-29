@@ -64,6 +64,14 @@ export function Navigation() {
               </button>
             ))}
             <Button
+              onClick={() => scrollToSection("upload-receipt")}
+              className="bg-[#F59E0B] hover:bg-[#D97706] text-white focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
+              size="sm"
+              aria-label="Navigate to upload receipt section"
+            >
+              Upload Receipt
+            </Button>
+            <Button
               onClick={() => scrollToSection("letter-templates")}
               className="bg-[#333333] hover:bg-[#1a1a1a] text-white focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
               size="sm"
@@ -109,6 +117,14 @@ export function Navigation() {
                     {link.label}
                   </button>
                 ))}
+                <Button
+                  onClick={() => scrollToSection("upload-receipt")}
+                  className="bg-[#F59E0B] hover:bg-[#D97706] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
+                  role="menuitem"
+                  aria-label="Navigate to upload receipt section"
+                >
+                  Upload Receipt
+                </Button>
                 <Button
                   onClick={() => scrollToSection("letter-templates")}
                   className="bg-[#333333] hover:bg-[#1a1a1a] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
