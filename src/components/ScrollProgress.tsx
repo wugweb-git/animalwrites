@@ -1,21 +1,41 @@
-import { motion, useScroll, useSpring } from "motion/react";
+import { useState, useEffect } from "react";
 
 export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let ticking = false;
+    const updateProgress = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollTop = window.scrollY;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollPercent = (scrollTop / docHeight) * 100;
+          setProgress(scrollPercent);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress(); // Initial calculation
+    return () => window.removeEventListener("scroll", updateProgress);
+  }, []);
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 right-0 h-1 bg-[#333333] origin-left z-50"
-      style={{ scaleX }}
+    <div
+      className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50"
       role="progressbar"
       aria-label="Page scroll progress"
       aria-valuemin={0}
       aria-valuemax={100}
-    />
+      aria-valuenow={Math.round(progress)}
+    >
+      <div
+        className="h-full bg-[#333333] transition-all duration-100"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
   );
 }

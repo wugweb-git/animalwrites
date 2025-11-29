@@ -1062,10 +1062,6 @@
     transform-origin: var(--radix-select-content-transform-origin);
   }
 
-  .origin-left {
-    transform-origin: 0;
-  }
-
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -1468,6 +1464,10 @@
 
   .bg-gray-100 {
     background-color: var(--color-gray-100);
+  }
+
+  .bg-gray-200 {
+    background-color: var(--color-gray-200);
   }
 
   .bg-green-50 {
@@ -1912,6 +1912,10 @@
     color: #999;
   }
 
+  .text-\[\#D97706\] {
+    color: #d97706;
+  }
+
   .text-\[\#F59E0B\] {
     color: #f59e0b;
   }
@@ -2139,6 +2143,11 @@
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
 
+  .duration-100 {
+    --tw-duration: .1s;
+    transition-duration: .1s;
+  }
+
   .duration-200 {
     --tw-duration: .2s;
     transition-duration: .2s;
@@ -2280,6 +2289,21 @@
   }
 
   @media (hover: hover) {
+    .hover\:scale-110:hover {
+      --tw-scale-x: 110%;
+      --tw-scale-y: 110%;
+      --tw-scale-z: 110%;
+      scale: var(--tw-scale-x) var(--tw-scale-y);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:rotate-90:hover {
+      rotate: 90deg;
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:border-\[\#333333\]\/40:hover {
       border-color: oklab(32.1092% 2.98023e-8 0 / .4);
     }
@@ -2410,6 +2434,12 @@
     .hover\:to-\[\#D97706\]:hover {
       --tw-gradient-to: #d97706;
       --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-\[\#B45309\]:hover {
+      color: #b45309;
     }
   }
 
@@ -2631,6 +2661,20 @@
 
   .focus-visible\:outline-ring:focus-visible {
     outline-color: var(--ring);
+  }
+
+  .active\:scale-90:active {
+    --tw-scale-x: 90%;
+    --tw-scale-y: 90%;
+    --tw-scale-z: 90%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
+  }
+
+  .active\:scale-95:active {
+    --tw-scale-x: 95%;
+    --tw-scale-y: 95%;
+    --tw-scale-z: 95%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
   }
 
   .disabled\:pointer-events-none:disabled {
@@ -3740,6 +3784,57 @@ html {
   white-space: normal;
   position: static;
   overflow: visible;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: .3s ease-out slide-up;
+}
+
+.animate-fade-in {
+  animation: .3s ease-out fade-in;
+}
+
+.animate-scale-in {
+  animation: .3s ease-out scale-in;
+}
+
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
 }
 
 @property --tw-translate-x {
