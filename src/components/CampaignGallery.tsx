@@ -72,6 +72,8 @@ export function CampaignGallery() {
                   src={image.url}
                   alt={image.alt}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  width={600}
+                  height={600}
                 />
               </motion.div>
             ))}

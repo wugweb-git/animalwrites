@@ -159,6 +159,8 @@ export function Supporters() {
                     src={supporter.logoUrl}
                     alt={supporter.altText}
                     className="w-full h-full object-contain"
+                    width={200}
+                    height={100}
                   />
                 </a>
               ))}

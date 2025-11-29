@@ -94,7 +94,7 @@ export function VolunteerAdmin() {
             <div className="flex items-center gap-3">
               <Users className="w-8 h-8 text-[#F59E0B]" />
               <div>
-                <h1 className="text-2xl md:text-4xl text-[#333333]">Volunteer Signups</h1>
+                <h2 className="text-2xl md:text-4xl text-[#333333]">Volunteer Signups</h2>
                 <p className="text-[#666666] text-sm md:text-base">
                   {volunteers.length} volunteer{volunteers.length !== 1 ? "s" : ""} registered
                 </p>

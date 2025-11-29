@@ -219,9 +219,13 @@ export function Hero() {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=80&w=1080"
+                    src="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=80&w=800"
                     alt="Indian street dog symbolizing compassion and the animal lives Animal Writes campaign seeks to protect through Supreme Court petition"
                     className="w-full h-full object-cover aspect-square"
+                    loading="eager"
+                    fetchpriority="high"
+                    width={800}
+                    height={800}
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
                     <p className="text-white text-center text-lg">

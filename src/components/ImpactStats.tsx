@@ -75,8 +75,8 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="impact-stats-heading" className="text-[#F59E0B] text-2xl md:text-4xl mb-4 font-bold">
-              Our Growing Movement
+            <h2 id="impact-stats-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">
+              <span className="text-[#F59E0B]">Our Growing</span> Movement
             </h2>
             <p className="text-[#666666] text-base md:text-lg">
               Join thousands of compassionate citizens making their voices heard

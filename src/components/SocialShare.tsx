@@ -177,9 +177,9 @@ export function SocialShare() {
               >
                 <Users className="w-8 h-8 text-white" aria-hidden="true" />
               </motion.div>
-              <h2 className="text-white text-2xl md:text-4xl font-bold">
+              <h3 className="text-white text-2xl md:text-4xl font-bold">
                 Join the Movement
-              </h2>
+              </h3>
             </div>
             <p className="text-white/90 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
               Follow the official campaign page for updates, resources, and to connect with thousands of compassionate citizens across India

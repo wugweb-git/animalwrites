@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Mail, MapPin, CheckCircle2 } from "lucide-react";
+import { Users, Mail, MapPin, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -102,11 +102,11 @@ export function VolunteerSignup() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Users className="w-8 h-8 text-[#333333]" aria-hidden="true" />
+                <Users className="w-7 h-7 md:w-8 md:h-8 text-[#333333]" aria-hidden="true" />
               </motion.div>
               <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-[#333333] font-bold">Volunteer With Us</h2>
             </div>
-            <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto">
+            <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
               Want to do more? Join our volunteer team and help coordinate this movement in your city. 
               Together, we can reach every corner of India.
             </p>
@@ -238,7 +238,7 @@ export function VolunteerSignup() {
                         className="space-y-5 md:space-y-6"
                       >
                         <div className="space-y-2">
-                          <Label htmlFor="name">Full Name *</Label>
+                          <Label htmlFor="name" className="text-sm md:text-base">Full Name *</Label>
                           <Input
                             id="name"
                             type="text"
@@ -246,13 +246,13 @@ export function VolunteerSignup() {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             placeholder="Enter your full name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email Address *</Label>
+                          <Label htmlFor="email" className="text-sm md:text-base">Email Address *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -260,13 +260,13 @@ export function VolunteerSignup() {
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             placeholder="your.email@example.com"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="city">City *</Label>
+                          <Label htmlFor="city" className="text-sm md:text-base">City *</Label>
                           <Input
                             id="city"
                             type="text"
@@ -274,20 +274,20 @@ export function VolunteerSignup() {
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             placeholder="Your city name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="role">How Would You Like to Help? *</Label>
+                          <Label htmlFor="role" className="text-sm md:text-base">How Would You Like to Help? *</Label>
                           <Select
                             required
                             value={formData.role}
                             onValueChange={(value) => setFormData({ ...formData, role: value })}
                           >
                             <SelectTrigger 
-                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors"
+                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
                               aria-label="Select volunteer role"
                             >
                               <SelectValue placeholder="Select a role" />
@@ -302,19 +302,21 @@ export function VolunteerSignup() {
                           </Select>
                         </div>
 
-                        <div className="flex items-start gap-3 p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-                          <input
-                            type="checkbox"
-                            id="consent"
-                            checked={consent}
-                            onChange={(e) => setConsent(e.target.checked)}
-                            className="mt-1 h-4 w-4 text-[#F59E0B] focus:ring-[#F59E0B] border-gray-300 rounded cursor-pointer"
-                            required
-                            aria-required="true"
-                          />
-                          <Label htmlFor="consent" className="text-xs md:text-sm text-[#666666] cursor-pointer">
-                            I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
-                          </Label>
+                        <div className="p-3 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                          <label htmlFor="consent" className="flex items-start gap-3 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              id="consent"
+                              checked={consent}
+                              onChange={(e) => setConsent(e.target.checked)}
+                              className="mt-0.5 h-5 w-5 md:h-4 md:w-4 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                              required
+                              aria-required="true"
+                            />
+                            <span className="text-sm md:text-sm text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors">
+                              I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
+                            </span>
+                          </label>
                         </div>
 
                         <motion.div
@@ -324,21 +326,22 @@ export function VolunteerSignup() {
                           <Button
                             type="submit"
                             disabled={!consent || isSubmitting}
-                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-6 md:py-6 text-base md:text-base focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] touch-manipulation"
                           >
                             {isSubmitting ? "Submitting..." : "Join as Volunteer"}
                           </Button>
                         </motion.div>
 
                         {errorMessage && (
-                          <p className="text-xs text-red-500 text-center mt-2">
-                            {errorMessage}
-                          </p>
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+                          >
+                            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-red-800">{errorMessage}</p>
+                          </motion.div>
                         )}
-
-                        <p className="text-xs text-[#999999] text-center">
-                          By signing up, you agree to be contacted about volunteer opportunities for this campaign.
-                        </p>
                       </motion.form>
                     )}
                   </AnimatePresence>

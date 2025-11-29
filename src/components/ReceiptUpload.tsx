@@ -150,18 +150,18 @@ export function ReceiptUpload() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-4">
-              <Camera className="w-8 h-8 text-[#F59E0B]" />
-              <h2 className="text-4xl md:text-5xl text-[#333333]">Share Your Impact</h2>
+              <Camera className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B]" />
+              <h2 className="text-3xl md:text-5xl text-[#333333]">Share Your Impact</h2>
             </div>
-            <p className="text-xl text-[#666666] max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-[#666666] max-w-2xl mx-auto leading-relaxed">
               Posted your letter? Amazing! Upload your post office receipt to inspire others and help us track our collective impact.
             </p>
           </div>
 
           <Card className="border-2 border-[#F59E0B]/20 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-[#FFF8F3] to-white">
-              <CardTitle className="text-[#333333] text-2xl">Upload Your Receipt</CardTitle>
-              <CardDescription className="text-[#666666]">
+              <CardTitle className="text-[#333333] text-xl md:text-2xl">Upload Your Receipt</CardTitle>
+              <CardDescription className="text-[#666666] text-sm md:text-base">
                 Help us celebrate every voice that stands for compassion
               </CardDescription>
             </CardHeader>
@@ -169,7 +169,7 @@ export function ReceiptUpload() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-[#333333]">
+                  <Label htmlFor="fullName" className="text-[#333333] text-sm md:text-base">
                     Full Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -180,14 +180,14 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B]"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#333333]">
+                  <Label htmlFor="email" className="text-[#333333] text-sm md:text-base">
                     Email <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -198,14 +198,14 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="your.email@example.com"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B]"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* City */}
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-[#333333]">
+                  <Label htmlFor="city" className="text-[#333333] text-sm md:text-base">
                     City <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -216,17 +216,17 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Your city name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B]"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* File Upload */}
                 <div className="space-y-2">
-                  <Label htmlFor="receipt" className="text-[#333333]">
+                  <Label htmlFor="receipt" className="text-[#333333] text-sm md:text-base">
                     Receipt Photo <span className="text-red-500">*</span>
                   </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#F59E0B] transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center hover:border-[#F59E0B] transition-colors min-h-[120px] flex items-center justify-center">
                     <input
                       id="receipt"
                       type="file"
@@ -249,9 +249,9 @@ export function ReceiptUpload() {
                           <img
                             src={previewUrl}
                             alt="Receipt preview"
-                            className="max-h-64 mx-auto rounded-lg border border-gray-200"
+                            className="max-h-48 md:max-h-64 max-w-full mx-auto rounded-lg border border-gray-200 object-contain"
                           />
-                          <p className="text-sm text-[#666666]">
+                          <p className="text-sm text-[#666666] break-all px-2">
                             {selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(0)} KB)
                           </p>
                           <Button
@@ -263,16 +263,16 @@ export function ReceiptUpload() {
                               setSelectedFile(null);
                               setPreviewUrl(null);
                             }}
-                            className="border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white"
+                            className="border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white min-h-[44px] px-6 text-base touch-manipulation"
                           >
                             Change Photo
                           </Button>
                         </motion.div>
                       ) : (
                         <>
-                          <Upload className="w-12 h-12 text-[#F59E0B]" />
+                          <Upload className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" />
                           <div>
-                            <p className="text-[#333333] font-medium">
+                            <p className="text-[#333333] font-medium text-base">
                               Click to upload or take a photo
                             </p>
                             <p className="text-sm text-[#666666] mt-1">
@@ -286,20 +286,22 @@ export function ReceiptUpload() {
                 </div>
 
                 {/* Consent Checkbox */}
-                <div className="flex items-start gap-3 p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-                  <input
-                    type="checkbox"
-                    id="receipt-consent"
-                    checked={consent}
-                    onChange={(e) => setConsent(e.target.checked)}
-                    className="mt-1 h-4 w-4 text-[#F59E0B] focus:ring-[#F59E0B] border-gray-300 rounded cursor-pointer"
-                    required
-                    aria-required="true"
-                    disabled={isSubmitting}
-                  />
-                  <Label htmlFor="receipt-consent" className="text-xs md:text-sm text-[#666666] cursor-pointer">
-                    I consent to sharing my receipt and information with the Animal Writes campaign. I understand this data will be used to track campaign impact and may be displayed publicly to inspire participation. My personal information will be kept confidential.
-                  </Label>
+                <div className="p-3 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                  <label htmlFor="receipt-consent" className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      id="receipt-consent"
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                      className="mt-0.5 h-5 w-5 md:h-4 md:w-4 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                      required
+                      aria-required="true"
+                      disabled={isSubmitting}
+                    />
+                    <span className="text-sm md:text-sm text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors">
+                      I consent to sharing my receipt and information with the Animal Writes campaign. I understand this data will be used to track campaign impact and may be displayed publicly to inspire participation. My personal information will be kept confidential.
+                    </span>
+                  </label>
                 </div>
 
                 {/* Status Messages */}
@@ -307,10 +309,10 @@ export function ReceiptUpload() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
+                    className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg"
                   >
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <p className="text-green-800">
+                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-green-800 text-sm md:text-base">
                       Thank you! Your receipt has been uploaded successfully. You're making a difference! 🐕
                     </p>
                   </motion.div>
@@ -320,10 +322,10 @@ export function ReceiptUpload() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg"
+                    className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg"
                   >
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                    <p className="text-red-800">{errorMessage}</p>
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-red-800 text-sm md:text-base">{errorMessage}</p>
                   </motion.div>
                 )}
 
@@ -331,7 +333,7 @@ export function ReceiptUpload() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile || !consent}
-                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-6 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-6 text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] touch-manipulation"
                 >
                   {isSubmitting ? (
                     <>
@@ -346,7 +348,7 @@ export function ReceiptUpload() {
                   )}
                 </Button>
 
-                <p className="text-sm text-[#666666] text-center">
+                <p className="text-xs md:text-sm text-[#666666] text-center leading-relaxed px-2">
                   🔒 Your information and images are securely stored and will be kept private. Used only to track campaign impact.
                 </p>
               </form>
@@ -354,9 +356,9 @@ export function ReceiptUpload() {
           </Card>
 
           {/* Info Box */}
-          <div className="mt-8 p-6 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-            <h3 className="text-[#333333] font-semibold mb-3">Why share your receipt?</h3>
-            <ul className="space-y-2 text-[#666666] text-sm">
+          <div className="mt-8 p-4 md:p-6 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+            <h3 className="text-[#333333] font-semibold mb-3 text-base md:text-lg">Why share your receipt?</h3>
+            <ul className="space-y-2 text-[#666666] text-sm md:text-base">
               <li className="flex items-start gap-2">
                 <Check className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
                 <span>Help us track the real-world impact of this movement</span>

@@ -110,7 +110,7 @@ export function ReceiptAdmin() {
             <div className="flex items-center gap-3">
               <Camera className="w-10 h-10 text-[#F59E0B]" />
               <div>
-                <h1 className="text-3xl md:text-4xl text-[#333333]">Receipt Admin Dashboard</h1>
+                <h2 className="text-3xl md:text-4xl text-[#333333]">Receipt Admin Dashboard</h2>
                 <p className="text-[#666666]">View and manage uploaded post office receipts</p>
               </div>
             </div>
