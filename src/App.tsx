@@ -39,20 +39,13 @@ const OurMessage = lazy(() => import("./components/OurMessage").then(m => ({ def
 const VolunteerAdmin = lazy(() => import("./components/VolunteerAdmin").then(m => ({ default: m.VolunteerAdmin })));
 const ReceiptAdmin = lazy(() => import("./components/ReceiptAdmin").then(m => ({ default: m.ReceiptAdmin })));
 
-// Loading fallback component
+// Minimal loading fallback - no spinner for better performance
 const PageLoader = () => (
-  <div className="min-h-screen bg-white flex items-center justify-center">
-    <div className="text-center">
-      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#F59E0B] border-r-transparent"></div>
-      <p className="mt-4 text-[#666666]">Loading...</p>
-    </div>
-  </div>
+  <div className="min-h-screen bg-white" aria-busy="true" aria-live="polite" />
 );
 
 const SectionLoader = () => (
-  <div className="py-16 md:py-24 flex items-center justify-center">
-    <div className="inline-block h-6 w-6 animate-spin rounded-full border-3 border-solid border-[#F59E0B] border-r-transparent"></div>
-  </div>
+  <div className="py-8" aria-busy="true" aria-live="polite" />
 );
 
 export default function App() {
@@ -136,33 +129,49 @@ export default function App() {
         {/* Get Involved */}
         <VolunteerSignup />
         
-        {/* Social Proof & Community - Lazy loaded for performance */}
-        <Suspense fallback={<SectionLoader />}>
-          <Testimonials />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <Supporters />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <CampaignGallery />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <PressMedia />
-        </Suspense>
+        {/* Social Proof & Community - Lazy loaded for performance with content-visibility */}
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <Testimonials />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <Supporters />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <CampaignGallery />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <PressMedia />
+          </Suspense>
+        </div>
         
-        {/* Resources & Next Steps */}
-        <Suspense fallback={<SectionLoader />}>
-          <Resources />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <WhatHappensNext />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <SocialShare />
-        </Suspense>
-        <Suspense fallback={<SectionLoader />}>
-          <OurMessage />
-        </Suspense>
+        {/* Resources & Next Steps - Deferred with content-visibility */}
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <Resources />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <WhatHappensNext />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <SocialShare />
+          </Suspense>
+        </div>
+        <div className="content-visibility-auto">
+          <Suspense fallback={<SectionLoader />}>
+            <OurMessage />
+          </Suspense>
+        </div>
         
         {/* Footer & Utils */}
         <Footer />

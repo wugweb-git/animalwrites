@@ -1,6 +1,5 @@
 import { Mail, Heart, PenLine, Camera } from "lucide-react";
 import { Button } from "./ui/button";
-import { motion } from "motion/react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function Hero() {
@@ -10,9 +9,6 @@ export function Hero() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  // Detect reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
     <section
@@ -99,15 +95,16 @@ export function Hero() {
             <div className="flex justify-center items-center order-first md:order-last">
               <div className="relative w-full max-w-md">
                 <div className="absolute inset-0 bg-[#F59E0B] opacity-10 rounded-3xl blur-2xl" aria-hidden="true" />
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white hover:shadow-3xl transition-shadow">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white hover:shadow-3xl transition-shadow" style={{ width: '100%', maxWidth: '448px', aspectRatio: '1' }}>
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=80&w=600"
+                    src="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=60&w=448"
                     alt="Indian street dog symbolizing compassion and the animal lives Animal Writes campaign seeks to protect through Supreme Court petition"
-                    className="w-full h-full object-cover aspect-square"
+                    className="w-full h-full object-cover"
                     loading="eager"
                     fetchpriority="high"
-                    width={600}
-                    height={600}
+                    width={448}
+                    height={448}
+                    style={{ display: 'block' }}
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
                     <p className="text-white text-center text-lg">

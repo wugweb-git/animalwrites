@@ -100,7 +100,8 @@ export function MetaTags() {
       // Preconnect to critical third-party origins
       const preconnectOrigins = [
         { href: 'https://www.googletagmanager.com', crossorigin: false },
-        { href: 'https://vedanshu.design', crossorigin: true }
+        { href: 'https://vedanshu.design', crossorigin: true },
+        { href: 'https://images.unsplash.com', crossorigin: true }
       ];
 
       preconnectOrigins.forEach(origin => {
@@ -115,21 +116,27 @@ export function MetaTags() {
         }
       });
 
-      // Preload critical images
-      const preloadImage = (href: string) => {
+      // Preload critical images with high priority
+      const preloadImage = (href: string, fetchpriority = 'auto') => {
         if (!document.querySelector(`link[rel="preload"][href="${href}"]`)) {
           const link = document.createElement('link');
           link.rel = 'preload';
           link.as = 'image';
           link.href = href;
-          document.head.appendChild(link);
+          if (fetchpriority !== 'auto') {
+            link.setAttribute('fetchpriority', fetchpriority);
+          }
+          link.crossOrigin = 'anonymous';
+          // Insert at the beginning of head for highest priority
+          document.head.insertBefore(link, document.head.firstChild);
         }
       };
 
-      // Preload hero image with WebP for better performance - smaller size for faster LCP
-      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=80&w=600');
+      // Preload hero image with WebP for better performance - optimized size and quality for fastest LCP
+      // Using fetchpriority="high" and inserting first for maximum priority
+      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=60&w=448', 'high');
       // Preload logo
-      preloadImage('https://vedanshu.design/AW/logo');
+      preloadImage('https://vedanshu.design/AW/logo', 'high');
     };
 
     addResourceHints();
@@ -149,346 +156,286 @@ export function MetaTags() {
     };
 
     // Basic meta tags
-    setMetaTag("description", "Join India's largest citizen-led letter petition movement on November 29, 2025. Walk to your nearest GPO/HPO and post letters to the Supreme Court advocating for humane coexistence with street dogs.");
-    setMetaTag("keywords", "animal rights India, street dogs petition, Supreme Court India, animal welfare campaign, save Indian street dogs, GPO letter campaign, animal rights movement, compassionate coexistence, ABC program India, stray dog relocation, letter petition India, animal activism, street dog welfare, November 29 campaign");
-    setMetaTag("author", "Animal Writes Movement");
-    setMetaTag("viewport", "width=device-width, initial-scale=1.0");
+    setMetaTag("description", "Join India's largest letter petition campaign on November 29, 2025. Thousands will walk to post offices across India to mail handwritten letters to the Supreme Court, urging reconsideration of the stray dog removal order. Write your letter for compassion and coexistence.");
+    setMetaTag("keywords", "Animal Writes, letter petition, street dogs India, animal welfare, Supreme Court petition, stray dogs, GPO India, animal rights campaign, November 29 2025, handwritten letters, compassion movement, coexistence");
+    setMetaTag("author", "Animal Writes Campaign");
     setMetaTag("robots", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
-    setMetaTag("googlebot", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
-    setMetaTag("bingbot", "index, follow");
-    
-    // Geographic targeting
-    setMetaTag("geo.region", "IN");
-    setMetaTag("geo.placename", "India");
-    setMetaTag("geo.position", "20.593684;78.96288");
-    
-    // Language and content
-    setMetaTag("language", "English");
-    setMetaTag("revisit-after", "7 days");
-    setMetaTag("rating", "General");
-    setMetaTag("distribution", "global");
-    
-    // Content categorization
-    setMetaTag("category", "Animal Rights, Social Activism, Petition Campaign");
-    setMetaTag("coverage", "Worldwide");
-    setMetaTag("target", "all");
-    
-    // Article/Publication meta
-    setMetaTag("article:publisher", "Animal Writes Movement", true);
-    setMetaTag("article:author", "Animal Writes Team", true);
-    setMetaTag("article:section", "Animal Rights", true);
-    setMetaTag("article:tag", "animal welfare, street dogs, petition, India, Supreme Court", true);
-    
-    // Canonical URL
-    const setCanonicalUrl = () => {
-      let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "canonical";
-        document.head.appendChild(link);
-      }
-      link.href = window.location.origin + window.location.pathname;
-    };
-    setCanonicalUrl();
-    
-    // Add alternate links for sitemap
-    const setSitemapLink = () => {
-      let link = document.querySelector("link[rel='sitemap']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "sitemap";
-        link.type = "application/xml";
-        link.title = "Sitemap";
-        document.head.appendChild(link);
-      }
-      link.href = `${window.location.origin}/sitemap.xml`;
-    };
-    setSitemapLink();
-    
-    // Add Web App Manifest
-    const setManifestLink = () => {
-      let link = document.querySelector("link[rel='manifest']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "manifest";
-        document.head.appendChild(link);
-      }
-      link.href = `${window.location.origin}/manifest.json`;
-    };
-    setManifestLink();
-    
-    // Social sharing image
-    const ogImageUrl = "https://vedanshu.design/AW/logo";
-    
-    // Open Graph tags for social sharing
-    setMetaTag("og:title", "Animal Writes - India's Largest Letter Petition Campaign for Street Dogs", true);
-    setMetaTag("og:description", "Join thousands across India on Nov 29, 2025. Walk to your GPO and write to the Supreme Court for humane coexistence with street dogs. Be part of India's largest citizen-led animal rights movement.", true);
-    setMetaTag("og:type", "website", true);
-    setMetaTag("og:url", window.location.href, true);
-    setMetaTag("og:image", ogImageUrl, true);
-    setMetaTag("og:image:width", "1200", true);
-    setMetaTag("og:image:height", "630", true);
-    setMetaTag("og:image:alt", "Animal Writes - India's Largest Letter Petition Campaign Logo", true);
-    setMetaTag("og:site_name", "Animal Writes", true);
-    setMetaTag("og:locale", "en_IN", true);
-    
-    // Twitter Card tags
-    setMetaTag("twitter:card", "summary_large_image");
-    setMetaTag("twitter:title", "Animal Writes - India's Largest Letter Petition Campaign");
-    setMetaTag("twitter:description", "Join thousands across India on Nov 29, 2025. Write for coexistence, not cruelty. Walk to your GPO and be part of history. #SaveIndianStreetDogs #AnimalWrites");
-    setMetaTag("twitter:image", ogImageUrl);
-    setMetaTag("twitter:image:alt", "Animal Writes - India's Largest Letter Petition Campaign Logo");
-    
-    // Theme color - Changed to yellow
+    setMetaTag("viewport", "width=device-width, initial-scale=1.0, viewport-fit=cover");
     setMetaTag("theme-color", "#F59E0B");
     
-    // Mobile app capable
-    setMetaTag("mobile-web-app-capable", "yes");
+    // Enhanced SEO meta tags
+    setMetaTag("googlebot", "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
+    setMetaTag("bingbot", "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1");
+    setMetaTag("coverage", "Worldwide");
+    setMetaTag("distribution", "Global");
+    setMetaTag("rating", "General");
+    setMetaTag("revisit-after", "7 days");
+    setMetaTag("target", "all");
+    setMetaTag("HandheldFriendly", "True");
+    setMetaTag("MobileOptimized", "width");
     setMetaTag("apple-mobile-web-app-capable", "yes");
-    setMetaTag("apple-mobile-web-app-status-bar-style", "default");
+    setMetaTag("apple-mobile-web-app-status-bar-style", "black-translucent");
     setMetaTag("apple-mobile-web-app-title", "Animal Writes");
+    setMetaTag("application-name", "Animal Writes");
+    setMetaTag("msapplication-TileColor", "#F59E0B");
+    setMetaTag("msapplication-config", "none");
     
-    // Security and Privacy Headers
-    setMetaTag("referrer", "strict-origin-when-cross-origin");
-    setMetaTag("format-detection", "telephone=no");
+    // Geo tags
+    setMetaTag("geo.region", "IN");
+    setMetaTag("geo.placename", "India");
+    setMetaTag("geo.position", "20.5937;78.9629");
+    setMetaTag("ICBM", "20.5937, 78.9629");
     
-    // HTTP-EQUIV Meta Tags for additional technical SEO
-    const setHttpEquivTag = (httpEquiv: string, content: string) => {
-      let meta = document.querySelector(`meta[http-equiv="${httpEquiv}"]`) as HTMLMetaElement;
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.httpEquiv = httpEquiv;
-        document.head.appendChild(meta);
-      }
-      meta.content = content;
-    };
+    // Language and locale
+    setMetaTag("language", "English");
+    setMetaTag("content-language", "en");
+
+    // Open Graph (Facebook, LinkedIn)
+    setMetaTag("og:type", "website", true);
+    setMetaTag("og:url", "https://animalwrites.in/", true);
+    setMetaTag("og:site_name", "Animal Writes - India's Largest Letter Petition Campaign", true);
+    setMetaTag("og:title", "Animal Writes - Join India's Largest Letter Petition for Street Dogs", true);
+    setMetaTag("og:description", "On November 29, 2025, thousands across India will walk to their nearest post office to mail handwritten letters to the Supreme Court. Join the movement for compassion and coexistence.", true);
+    setMetaTag("og:image", "https://vedanshu.design/AW/og-image", true);
+    setMetaTag("og:image:secure_url", "https://vedanshu.design/AW/og-image", true);
+    setMetaTag("og:image:type", "image/png", true);
+    setMetaTag("og:image:width", "1200", true);
+    setMetaTag("og:image:height", "630", true);
+    setMetaTag("og:image:alt", "Animal Writes Campaign - Write letters for street dogs", true);
+    setMetaTag("og:locale", "en_IN", true);
+    setMetaTag("og:locale:alternate", "en_US", true);
+
+    // Twitter Card
+    setMetaTag("twitter:card", "summary_large_image");
+    setMetaTag("twitter:url", "https://animalwrites.in/");
+    setMetaTag("twitter:title", "Animal Writes - Join India's Largest Letter Petition for Street Dogs");
+    setMetaTag("twitter:description", "On November 29, 2025, thousands across India will walk to their nearest post office to mail handwritten letters to the Supreme Court. Join the movement for compassion.");
+    setMetaTag("twitter:image", "https://vedanshu.design/AW/og-image");
+    setMetaTag("twitter:image:alt", "Animal Writes Campaign - Write letters for street dogs");
+    setMetaTag("twitter:creator", "@AnimalWrites");
+    setMetaTag("twitter:site", "@AnimalWrites");
     
-    setHttpEquivTag("X-UA-Compatible", "IE=edge");
-    setHttpEquivTag("content-type", "text/html; charset=UTF-8");
-    
-    // Add JSON-LD Structured Data
-    const addStructuredData = () => {
-      // Remove existing schema if present
-      const existingSchema = document.querySelector('script[type="application/ld+json"]');
-      if (existingSchema) {
-        existingSchema.remove();
-      }
+    // Additional Twitter tags
+    setMetaTag("twitter:label1", "Event Date");
+    setMetaTag("twitter:data1", "November 29, 2025");
+    setMetaTag("twitter:label2", "Location");
+    setMetaTag("twitter:data2", "All GPOs & HPOs across India");
 
-      const structuredData = {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Organization",
-            "@id": `${window.location.origin}/#organization`,
-            "name": "Animal Writes",
-            "url": window.location.origin,
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://vedanshu.design/AW/logo",
-              "width": 512,
-              "height": 512
-            },
-            "description": "India's largest citizen-led letter petition movement for animal rights and humane coexistence with street dogs",
-            "foundingDate": "2025",
-            "contactPoint": {
-              "@type": "ContactPoint",
-              "contactType": "Customer Service",
-              "availableLanguage": ["English", "Hindi"]
-            },
-            "sameAs": [
-              "https://www.instagram.com/animalwrites.in/",
-              "https://www.facebook.com/share/g/15h2tcaWvM/",
-              "https://x.com/AnimalWritesIN"
-            ]
-          },
-          {
-            "@type": "WebSite",
-            "@id": `${window.location.origin}/#website`,
-            "url": window.location.origin,
-            "name": "Animal Writes",
-            "description": "Join India's largest letter petition movement for animal rights",
-            "publisher": {
-              "@id": `${window.location.origin}/#organization`
-            },
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": `${window.location.origin}/?s={search_term_string}`
-              },
-              "query-input": "required name=search_term_string"
-            },
-            "inLanguage": "en-IN"
-          },
-          {
-            "@type": "WebPage",
-            "@id": `${window.location.href}#webpage`,
-            "url": window.location.href,
-            "name": "Animal Writes - India's Largest Letter Petition Campaign for Street Dogs",
-            "isPartOf": {
-              "@id": `${window.location.origin}/#website`
-            },
-            "about": {
-              "@id": `${window.location.origin}/#organization`
-            },
-            "datePublished": "2025-11-01T00:00:00+05:30",
-            "dateModified": new Date().toISOString(),
-            "description": "Join India's largest citizen-led letter petition movement on November 29, 2025. Walk to your nearest GPO/HPO and post letters to the Supreme Court advocating for humane coexistence with street dogs.",
-            "inLanguage": "en-IN"
-          },
-          {
-            "@type": "BreadcrumbList",
-            "@id": `${window.location.href}#breadcrumb`,
-            "itemListElement": [
-              {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": window.location.origin
-              },
-              {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Campaign",
-                "item": `${window.location.origin}/#about`
-              },
-              {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "How to Join",
-                "item": `${window.location.origin}/#how-to-join`
-              }
-            ]
-          },
-          {
-            "@type": "Event",
-            "@id": `${window.location.origin}/#event`,
-            "name": "Animal Writes - National GPO Letter Campaign",
-            "description": "Thousands of citizens across India will walk to their nearest GPO/HPO to post handwritten letters to the Supreme Court of India advocating for humane coexistence with street dogs",
-            "startDate": "2025-11-29T09:00:00+05:30",
-            "endDate": "2025-11-29T17:00:00+05:30",
-            "eventStatus": "https://schema.org/EventScheduled",
-            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-            "location": {
-              "@type": "Place",
-              "name": "General Post Offices and Head Post Offices across India",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "IN"
-              }
-            },
-            "organizer": {
-              "@id": `${window.location.origin}/#organization`
-            },
-            "image": "https://vedanshu.design/AW/logo",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "INR",
-              "availability": "https://schema.org/InStock",
-              "url": window.location.href,
-              "validFrom": "2025-11-01T00:00:00+05:30"
-            },
-            "performer": {
-              "@id": `${window.location.origin}/#organization`
-            }
-          },
-          {
-            "@type": "FAQPage",
-            "@id": `${window.location.origin}/#faqpage`,
-            "mainEntity": [
-              {
-                "@type": "Question",
-                "name": "What is Animal Writes?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Animal Writes is India's largest citizen-led letter petition movement where thousands of people will walk to their nearest GPO/HPO on November 29, 2025, to post handwritten letters to the Supreme Court of India advocating for humane coexistence with street dogs."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "When is the campaign?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "The national campaign day is November 29, 2025. Citizens across India will walk to their nearest General Post Office (GPO) or Head Post Office (HPO) to post their letters to the Supreme Court."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "How can I participate?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Write a letter using our templates or your own words, address it to the Supreme Court of India, and post it via Speed Post from your nearest GPO/HPO on November 29, 2025. Share your participation on social media with #SaveIndianStreetDogs and #AnimalWrites."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Is there a fee to participate?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Participation in Animal Writes is completely free. You only need to cover the cost of posting your letter via Speed Post at your local GPO/HPO."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What should I write in my letter?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "You can use our provided letter templates or write your own heartfelt message to the Supreme Court. Express your support for humane coexistence with street dogs and the importance of the ABC (Animal Birth Control) program in India."
-                }
-              }
-            ]
-          },
-          {
-            "@type": "CampaignAction",
-            "@id": `${window.location.origin}/#campaign`,
-            "name": "Animal Writes Campaign",
-            "description": "A nationwide campaign to advocate for animal rights through citizen letters to the Supreme Court of India",
-            "agent": {
-              "@id": `${window.location.origin}/#organization`
-            },
-            "actionStatus": "https://schema.org/ActiveActionStatus",
-            "startTime": "2025-11-01T00:00:00+05:30",
-            "endTime": "2025-11-29T23:59:59+05:30",
-            "target": {
-              "@type": "EntryPoint",
-              "urlTemplate": `${window.location.origin}/#how-to-join`,
-              "actionPlatform": [
-                "http://schema.org/DesktopWebPlatform",
-                "http://schema.org/MobileWebPlatform"
-              ]
-            }
-          }
-        ]
-      };
-
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify(structuredData);
-      document.head.appendChild(script);
-    };
-
-    addStructuredData();
-
-    // Additional Apple Touch Icons for better iOS integration
-    const addAppleIcons = () => {
-      const logoUrl = "https://vedanshu.design/AW/logo";
-      const sizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
-      
-      sizes.forEach(size => {
-        if (!document.querySelector(`link[rel="apple-touch-icon"][sizes="${size}x${size}"]`)) {
-          const link = document.createElement('link');
-          link.rel = 'apple-touch-icon';
-          link.sizes = `${size}x${size}`;
-          link.href = logoUrl;
-          document.head.appendChild(link);
+    // Structured data - Event
+    const eventSchema = {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "name": "Animal Writes - National Letter Petition Campaign",
+      "description": "India's largest letter petition movement where thousands of citizens walk to their nearest GPO to post handwritten letters to the Supreme Court urging reconsideration of the stray dog removal order.",
+      "startDate": "2025-11-29T09:00:00+05:30",
+      "endDate": "2025-11-29T18:00:00+05:30",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "location": {
+        "@type": "Place",
+        "name": "General Post Offices and Head Post Offices across India",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "IN",
+          "addressRegion": "Multiple States"
         }
-      });
+      },
+      "image": "https://vedanshu.design/AW/og-image",
+      "organizer": {
+        "@type": "Organization",
+        "name": "Animal Writes Campaign",
+        "url": "https://animalwrites.in/"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR",
+        "availability": "https://schema.org/InStock",
+        "url": "https://animalwrites.in/",
+        "validFrom": "2025-10-01T00:00:00+05:30"
+      }
     };
+
+    // Structured data - Organization
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Animal Writes",
+      "alternateName": "Animal Writes Campaign",
+      "url": "https://animalwrites.in/",
+      "logo": "https://vedanshu.design/AW/logo",
+      "description": "India's largest letter petition movement for street dog welfare and coexistence",
+      "sameAs": [
+        "https://twitter.com/AnimalWrites",
+        "https://facebook.com/AnimalWrites",
+        "https://instagram.com/AnimalWrites"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "availableLanguage": ["English", "Hindi"]
+      }
+    };
+
+    // Structured data - Website
+    const websiteSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Animal Writes",
+      "url": "https://animalwrites.in/",
+      "description": "India's largest letter petition campaign for street dog welfare",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Animal Writes Campaign"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://animalwrites.in/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    };
+
+    // Structured data - Cause
+    const causeSchema = {
+      "@context": "https://schema.org",
+      "@type": "SocialEvent",
+      "name": "Animal Writes Letter Petition Campaign",
+      "description": "A peaceful civic movement where citizens across India write and post letters to the Supreme Court advocating for compassionate treatment of street dogs",
+      "url": "https://animalwrites.in/",
+      "startDate": "2025-11-29",
+      "image": "https://vedanshu.design/AW/og-image"
+    };
+
+    // Structured data - BreadcrumbList
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://animalwrites.in/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "About Campaign",
+          "item": "https://animalwrites.in/#about-movement"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "How to Join",
+          "item": "https://animalwrites.in/#how-to-join"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Letter Templates",
+          "item": "https://animalwrites.in/#letter-templates"
+        }
+      ]
+    };
+
+    // Structured data - FAQPage
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Animal Writes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Animal Writes is India's largest letter petition campaign where thousands of citizens walk to their nearest GPO on November 29, 2025, to post handwritten letters to the Supreme Court of India urging reconsideration of the stray dog removal/relocation order."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When is the Animal Writes campaign happening?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The campaign is happening on November 29, 2025. Participants will walk to their local General Post Offices (GPOs) and Head Post Offices (HPOs) across India to mail their letters."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I participate in Animal Writes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can participate by: 1) Writing a handwritten letter using our templates, 2) Walking to your nearest GPO or HPO on November 29, 2025, 3) Posting your letter to the Supreme Court of India, and 4) Uploading your postal receipt to show your participation."
+          }
+        }
+      ]
+    };
+
+    // Structured data - Action
+    const actionSchema = {
+      "@context": "https://schema.org",
+      "@type": "Action",
+      "name": "Join Animal Writes Campaign",
+      "description": "Participate in India's largest letter petition for street dog welfare",
+      "url": "https://animalwrites.in/#how-to-join",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://animalwrites.in/#letter-templates",
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform"
+        ]
+      }
+    };
+
+    // Insert all structured data
+    const schemas = [eventSchema, organizationSchema, websiteSchema, causeSchema, breadcrumbSchema, faqSchema, actionSchema];
     
-    addAppleIcons();
+    schemas.forEach((schema, index) => {
+      const scriptId = `structured-data-${index}`;
+      let script = document.getElementById(scriptId) as HTMLScriptElement;
+      
+      if (!script) {
+        script = document.createElement('script');
+        script.id = scriptId;
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      
+      script.textContent = JSON.stringify(schema);
+    });
+
+    // Canonical URL
+    let canonical = document.querySelector("link[rel='canonical']") as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = "https://animalwrites.in/";
+
+    // Alternate language versions
+    const alternateLangs = [
+      { lang: "en-IN", href: "https://animalwrites.in/" },
+      { lang: "en", href: "https://animalwrites.in/" },
+      { lang: "x-default", href: "https://animalwrites.in/" }
+    ];
+
+    alternateLangs.forEach(({ lang, href }) => {
+      const linkId = `alternate-${lang}`;
+      let link = document.getElementById(linkId) as HTMLLinkElement;
+      
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "alternate";
+        link.hrefLang = lang;
+        document.head.appendChild(link);
+      }
+      
+      link.href = href;
+    });
 
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 }

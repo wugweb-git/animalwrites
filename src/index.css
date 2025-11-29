@@ -739,6 +739,10 @@
     margin-left: calc(var(--spacing) * 12);
   }
 
+  .block {
+    display: block;
+  }
+
   .flex {
     display: flex;
   }
@@ -1268,11 +1272,6 @@
     border-width: 2px;
   }
 
-  .border-3 {
-    border-style: var(--tw-border-style);
-    border-width: 3px;
-  }
-
   .border-4 {
     border-style: var(--tw-border-style);
     border-width: 4px;
@@ -1301,11 +1300,6 @@
   .border-dashed {
     --tw-border-style: dashed;
     border-style: dashed;
-  }
-
-  .border-solid {
-    --tw-border-style: solid;
-    border-style: solid;
   }
 
   .border-\[\#333333\] {
@@ -1380,10 +1374,6 @@
     .border-white\/20 {
       border-color: color-mix(in oklab, var(--color-white) 20%, transparent);
     }
-  }
-
-  .border-r-transparent {
-    border-right-color: #0000;
   }
 
   .bg-\[\#1DA1F2\] {
