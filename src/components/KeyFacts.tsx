@@ -85,7 +85,7 @@ export function KeyFacts() {
                     <div className="flex-1">
                       <h3 className="text-[#333333] mb-2 text-base md:text-lg">{fact.title}</h3>
                       <motion.div
-                        className="text-2xl md:text-3xl text-[#F59E0B] mb-3"
+                        className="text-2xl md:text-3xl text-[#D97706] mb-3"
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
@@ -108,7 +108,7 @@ export function KeyFacts() {
             viewport={{ once: true }}
             className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#F59E0B]/20"
           >
-            <h3 className="text-[#F59E0B] text-lg md:text-xl mb-6 md:mb-8 text-center font-bold">Why ABC Programs Work</h3>
+            <h3 className="text-[#D97706] text-lg md:text-xl mb-6 md:mb-8 text-center font-bold">Why ABC Programs Work</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {[
                 {

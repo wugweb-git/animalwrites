@@ -81,7 +81,7 @@ export function OurMessage() {
                 viewport={{ once: true }}
                 className="pt-6 md:pt-8 border-t border-gray-200"
               >
-                <p className="text-xs md:text-sm uppercase tracking-wider text-[#F59E0B] mb-2">
+                <p className="text-xs md:text-sm uppercase tracking-wider text-[#D97706] mb-2">
                   Join the Movement
                 </p>
                 <p className="text-[#666666] text-sm md:text-lg">

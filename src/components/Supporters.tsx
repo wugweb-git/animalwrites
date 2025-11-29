@@ -119,7 +119,7 @@ export function Supporters() {
               >
                 <Heart className="w-5 h-5 text-[#F59E0B]" fill="#F59E0B" aria-hidden="true" />
               </motion.div>
-              <span className="text-[#F59E0B]">Standing Together</span>
+              <span className="text-[#D97706]">Standing Together</span>
             </motion.div>
             
             <h2 id="supporters-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">

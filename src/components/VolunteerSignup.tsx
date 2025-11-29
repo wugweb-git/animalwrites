@@ -122,7 +122,7 @@ export function VolunteerSignup() {
               >
                 <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl font-bold">
+                    <CardTitle className="text-[#D97706] flex items-center gap-2 text-lg md:text-xl font-bold">
                       <MapPin className="w-5 h-5" aria-hidden="true" />
                       City Coordinators Needed
                     </CardTitle>
@@ -161,7 +161,7 @@ export function VolunteerSignup() {
               >
                 <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
                   <CardHeader>
-                    <CardTitle className="text-[#F59E0B] flex items-center gap-2 text-lg md:text-xl font-bold">
+                    <CardTitle className="text-[#D97706] flex items-center gap-2 text-lg md:text-xl font-bold">
                       <Mail className="w-5 h-5" aria-hidden="true" />
                       Other Ways to Help
                     </CardTitle>
@@ -201,7 +201,7 @@ export function VolunteerSignup() {
             >
               <Card className="border-2 border-[#F59E0B]/30 hover:border-[#F59E0B] transition-colors">
                 <CardHeader>
-                  <CardTitle className="text-[#F59E0B] text-lg md:text-xl font-bold">Sign Up to Volunteer</CardTitle>
+                  <CardTitle className="text-[#D97706] text-lg md:text-xl font-bold">Sign Up to Volunteer</CardTitle>
                   <CardDescription className="text-sm md:text-base">
                     Fill out this form and we'll get in touch with you
                   </CardDescription>
@@ -359,7 +359,7 @@ export function VolunteerSignup() {
           >
             <div className="text-center">
               <p className="text-[#333333] text-base md:text-lg mb-4">
-                <strong className="text-[#F59E0B]">Can't volunteer but want to help?</strong>
+                <strong className="text-[#D97706]">Can't volunteer but want to help?</strong>
               </p>
               <p className="text-[#666666] text-sm md:text-base">
                 Share this campaign with everyone you know, write your letter, and encourage others to participate. 

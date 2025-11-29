@@ -176,7 +176,7 @@ export function VolunteerAdmin() {
                       <Mail className="w-4 h-4 text-[#F59E0B]" />
                       <a 
                         href={`mailto:${volunteer.email}`}
-                        className="hover:text-[#F59E0B] transition-colors"
+                        className="hover:text-[#D97706] transition-colors"
                       >
                         {volunteer.email}
                       </a>

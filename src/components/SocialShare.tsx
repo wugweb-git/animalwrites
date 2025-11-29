@@ -155,9 +155,9 @@ export function SocialShare() {
             >
               <p className="text-center text-[#333333] text-sm md:text-base">
                 <strong>Tag your posts:</strong>{" "}
-                <span className="text-[#F59E0B]">#SaveIndianStreetDogs</span> •{" "}
-                <span className="text-[#F59E0B]">#NoDogsNoVotes</span> •{" "}
-                <span className="text-[#F59E0B]">#AnimalWrites</span>
+                <span className="text-[#D97706]">#SaveIndianStreetDogs</span> •{" "}
+                <span className="text-[#D97706]">#NoDogsNoVotes</span> •{" "}
+                <span className="text-[#D97706]">#AnimalWrites</span>
               </p>
             </motion.div>
           </motion.div>

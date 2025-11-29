@@ -73,7 +73,7 @@ export function Navigation() {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="text-sm text-[#666666] hover:text-[#F59E0B] transition-colors focus:outline-none focus:text-[#F59E0B] focus:underline underline-offset-4"
+                className="text-sm text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:text-[#D97706] focus:underline underline-offset-4"
                 aria-label={`Navigate to ${link.label}`}
               >
                 {link.label}
@@ -100,7 +100,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-[#666666] hover:text-[#F59E0B] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
+            className="md:hidden p-2 text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu"
@@ -126,7 +126,7 @@ export function Navigation() {
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className="text-left px-4 py-3 text-[#666666] hover:text-[#F59E0B] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#F59E0B]"
+                    className="text-left px-4 py-3 text-[#666666] hover:text-[#D97706] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D97706]"
                     role="menuitem"
                     aria-label={`Navigate to ${link.label}`}
                   >

@@ -115,7 +115,7 @@ export function Timeline() {
                             className={`w-5 h-5 ${
                               milestone.status === "completed"
                                 ? "text-white"
-                                : "text-[#F59E0B]"
+                                : "text-[#D97706]"
                             }`}
                             aria-hidden="true"
                           />
@@ -124,7 +124,7 @@ export function Timeline() {
                           <p
                             className={`text-sm ${
                               milestone.status === "completed"
-                                ? "text-[#F59E0B]"
+                                ? "text-[#D97706]"
                                 : "text-[#666666]"
                             } mb-1`}
                           >
@@ -164,7 +164,7 @@ export function Timeline() {
             className="mt-12 text-center bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20"
           >
             <p className="text-[#333333] text-base md:text-lg">
-              <strong className="text-[#F59E0B]">Be part of history!</strong> Join us on November 29th and help create a movement that will be remembered for generations.
+              <strong className="text-[#D97706]">Be part of history!</strong> Join us on November 29th and help create a movement that will be remembered for generations.
             </p>
           </motion.div>
         </div>

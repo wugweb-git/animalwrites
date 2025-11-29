@@ -2440,12 +2440,6 @@
   }
 
   @media (hover: hover) {
-    .hover\:text-\[\#F59E0B\]:hover {
-      color: #f59e0b;
-    }
-  }
-
-  @media (hover: hover) {
     .hover\:text-accent-foreground:hover {
       color: var(--accent-foreground);
     }
@@ -2551,8 +2545,8 @@
     padding-block: calc(var(--spacing) * 2);
   }
 
-  .focus\:text-\[\#F59E0B\]:focus {
-    color: #f59e0b;
+  .focus\:text-\[\#D97706\]:focus {
+    color: #d97706;
   }
 
   .focus\:text-accent-foreground:focus {

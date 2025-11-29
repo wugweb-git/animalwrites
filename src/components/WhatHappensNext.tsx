@@ -134,7 +134,7 @@ export function WhatHappensNext() {
             className="text-center bg-[#FFF8F3] rounded-2xl p-8 md:p-10 border-2 border-[#F59E0B]/20"
           >
             <p className="text-[#666666] text-sm md:text-base">
-              <strong className="text-[#F59E0B]">Stay Connected:</strong> Follow us on Facebook for post-campaign updates and ongoing initiatives.
+              <strong className="text-[#D97706]">Stay Connected:</strong> Follow us on Facebook for post-campaign updates and ongoing initiatives.
             </p>
           </motion.div>
         </div>

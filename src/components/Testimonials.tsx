@@ -59,7 +59,7 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="testimonials-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">Voices <span className="text-[#F59E0B]">From Across</span> India</h2>
+            <h2 id="testimonials-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">Voices <span className="text-[#D97706]">From Across</span> India</h2>
             <p className="text-[#666666] text-base md:text-lg">
               Real people, real stories, one united movement
             </p>
@@ -103,7 +103,7 @@ export function Testimonials() {
                         <div className="border-t-2 border-[#F59E0B]/10 pt-4">
                           <p className="text-[#333333] font-medium text-sm md:text-base">{testimonial.author}</p>
                           <p className="text-xs md:text-sm text-[#666666]">{testimonial.location}</p>
-                          <p className="text-xs text-[#F59E0B] mt-1">{testimonial.role}</p>
+                          <p className="text-xs text-[#D97706] mt-1">{testimonial.role}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -122,7 +122,7 @@ export function Testimonials() {
           >
             <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-6 md:p-8 border-2 border-[#F59E0B]/30">
               <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#F59E0B]">Your voice matters too.</strong> Add it to thousands of others. 
+                <strong className="text-[#D97706]">Your voice matters too.</strong> Add it to thousands of others. 
                 Write your letter today.
               </p>
             </div>

@@ -136,7 +136,7 @@ export function Resources() {
             viewport={{ once: true }}
             className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#F59E0B]/20"
           >
-            <h3 className="text-[#F59E0B] text-lg md:text-xl mb-6 text-center font-bold">Useful Legal & Reference Links</h3>
+            <h3 className="text-[#D97706] text-lg md:text-xl mb-6 text-center font-bold">Useful Legal & Reference Links</h3>
             <div className="grid sm:grid-cols-2 gap-4">
               {usefulLinks.map((link, index) => (
                 <motion.a
@@ -173,8 +173,8 @@ export function Resources() {
             className="mt-6 md:mt-8 bg-white rounded-2xl p-5 md:p-6 border-2 border-[#F59E0B]/20"
           >
             <p className="text-center text-[#666666] text-sm md:text-base">
-              <span className="text-[#F59E0B]">Need more resources?</span> Contact us on social media 
-              using <span className="text-[#F59E0B] font-medium">#AnimalWrites</span> and we'll do our best to help.
+              <span className="text-[#D97706]">Need more resources?</span> Contact us on social media 
+              using <span className="text-[#D97706] font-medium">#AnimalWrites</span> and we'll do our best to help.
             </p>
           </motion.div>
         </div>
