@@ -54,16 +54,25 @@ export function Footer() {
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
-              className="text-gray-500 text-xs pt-4 border-t border-gray-700"
+              className="pt-6 border-t border-gray-700 mt-6"
             >
               <a 
                 href="https://wugweb.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:text-[#333333] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded px-2 py-1"
-                aria-label="Visit wugweb website"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-[#F59E0B] hover:to-[#D97706] text-white px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                aria-label="Visit wugweb website - Created by wugweb"
               >
-                Created by wugweb
+                <motion.img 
+                  src="https://media.designrush.com/agencies/713808/conversions/Wugweb-logo-profile.jpg"
+                  alt="Wugweb logo"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="h-8 w-auto object-contain"
+                />
+                <div className="text-left">
+                  <div className="text-sm font-semibold">Created by wugweb</div>
+                </div>
               </a>
             </motion.div>
           </div>
