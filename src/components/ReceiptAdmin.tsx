@@ -10,8 +10,10 @@ interface Receipt {
   city: string;
   fileName: string;
   fileType: string;
-  receiptImage: string;
+  storagePath: string;
+  receiptImageUrl: string | null;
   submittedAt: string;
+  error?: string;
 }
 
 export function ReceiptAdmin() {
@@ -76,13 +78,27 @@ export function ReceiptAdmin() {
     window.URL.revokeObjectURL(url);
   };
 
-  const downloadImage = (receipt: Receipt) => {
-    const a = document.createElement("a");
-    a.href = receipt.receiptImage;
-    a.download = receipt.fileName || `receipt-${receipt.email}.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const downloadImage = async (receipt: Receipt) => {
+    if (!receipt.receiptImageUrl) {
+      alert("Image URL not available. Please refresh the page.");
+      return;
+    }
+
+    try {
+      const response = await fetch(receipt.receiptImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = receipt.fileName || `receipt-${receipt.email}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+      alert("Failed to download image. Please try again.");
+    }
   };
 
   return (
@@ -142,22 +158,27 @@ export function ReceiptAdmin() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4">
-            <Button
-              onClick={exportToCSV}
-              disabled={receipts.length === 0}
-              className="bg-[#F59E0B] hover:bg-[#D97706] text-white"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export to CSV
-            </Button>
-            <Button
-              onClick={fetchReceipts}
-              variant="outline"
-              className="border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white"
-            >
-              Refresh Data
-            </Button>
+          <div className="space-y-2">
+            <div className="flex gap-4">
+              <Button
+                onClick={exportToCSV}
+                disabled={receipts.length === 0}
+                className="bg-[#F59E0B] hover:bg-[#D97706] text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export to CSV
+              </Button>
+              <Button
+                onClick={fetchReceipts}
+                variant="outline"
+                className="border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white"
+              >
+                Refresh Data
+              </Button>
+            </div>
+            <p className="text-xs text-[#666666]">
+              💡 Image preview links expire after 1 hour. Click "Refresh Data" to reload if images are not visible.
+            </p>
           </div>
         </div>
 
@@ -192,16 +213,24 @@ export function ReceiptAdmin() {
                   {/* Receipt Image Thumbnail */}
                   <div 
                     className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden cursor-pointer group"
-                    onClick={() => setSelectedImage(receipt.receiptImage)}
+                    onClick={() => receipt.receiptImageUrl && setSelectedImage(receipt.receiptImageUrl)}
                   >
-                    <img
-                      src={receipt.receiptImage}
-                      alt={`Receipt from ${receipt.fullName}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
+                    {receipt.receiptImageUrl ? (
+                      <>
+                        <img
+                          src={receipt.receiptImageUrl}
+                          alt={`Receipt from ${receipt.fullName}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-red-500">
+                        <p className="text-sm">Image unavailable</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Details */}
@@ -222,11 +251,15 @@ export function ReceiptAdmin() {
                     onClick={() => downloadImage(receipt)}
                     variant="outline"
                     size="sm"
-                    className="w-full border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white"
+                    disabled={!receipt.receiptImageUrl}
+                    className="w-full border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white disabled:opacity-50"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download Image
                   </Button>
+                  {receipt.error && (
+                    <p className="text-xs text-red-500 text-center">{receipt.error}</p>
+                  )}
                 </CardContent>
               </Card>
             ))}

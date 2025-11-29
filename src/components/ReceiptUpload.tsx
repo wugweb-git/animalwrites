@@ -320,7 +320,7 @@ export function ReceiptUpload() {
                 </Button>
 
                 <p className="text-sm text-[#666666] text-center">
-                  Your information will be kept private and used only to track campaign impact.
+                  🔒 Your information and images are securely stored and will be kept private. Used only to track campaign impact.
                 </p>
               </form>
             </CardContent>

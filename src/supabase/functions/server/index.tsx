@@ -1,8 +1,46 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 import * as kv from "./kv_store.tsx";
+
 const app = new Hono();
+
+// Initialize Supabase client
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
+
+// Initialize storage bucket on startup
+const RECEIPTS_BUCKET = "make-7a8516f4-receipts";
+
+async function initializeStorage() {
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === RECEIPTS_BUCKET);
+    
+    if (!bucketExists) {
+      const { error } = await supabase.storage.createBucket(RECEIPTS_BUCKET, {
+        public: false,
+        fileSizeLimit: 5242880, // 5MB
+      });
+      
+      if (error) {
+        console.error("Error creating storage bucket:", error);
+      } else {
+        console.log(`Storage bucket '${RECEIPTS_BUCKET}' created successfully`);
+      }
+    } else {
+      console.log(`Storage bucket '${RECEIPTS_BUCKET}' already exists`);
+    }
+  } catch (error) {
+    console.error("Error initializing storage:", error);
+  }
+}
+
+// Initialize storage on startup
+initializeStorage();
 
 // Enable logger
 app.use('*', logger(console.log));
@@ -111,12 +149,33 @@ app.post("/make-server-7a8516f4/receipts", async (c) => {
     const receiptTimestamp = timestamp || new Date().toISOString();
     const receiptKey = `receipt:${receiptTimestamp}:${email}`;
 
-    // Store receipt data (including base64 image)
+    // Convert base64 to binary for storage
+    const base64Data = receiptImage.split(",")[1] || receiptImage;
+    const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+    // Generate unique filename for storage
+    const fileExtension = fileName?.split(".").pop() || "jpg";
+    const storagePath = `${receiptTimestamp}-${email.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExtension}`;
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from(RECEIPTS_BUCKET)
+      .upload(storagePath, binaryData, {
+        contentType: fileType || "image/jpeg",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage upload error:", uploadError);
+      throw new Error(`Failed to upload image to storage: ${uploadError.message}`);
+    }
+
+    // Store receipt metadata in KV store (without the image data)
     const receiptData = {
       fullName,
       email,
       city,
-      receiptImage, // base64 encoded image
+      storagePath, // Reference to the file in storage
       fileName,
       fileType,
       submittedAt: receiptTimestamp,
@@ -124,7 +183,7 @@ app.post("/make-server-7a8516f4/receipts", async (c) => {
 
     await kv.set(receiptKey, receiptData);
 
-    console.log(`Receipt uploaded: ${fullName} from ${city} (${fileName})`);
+    console.log(`Receipt uploaded: ${fullName} from ${city} (${fileName}) -> Storage: ${storagePath}`);
 
     return c.json({
       success: true,
@@ -156,10 +215,42 @@ app.get("/make-server-7a8516f4/receipts", async (c) => {
       .map((item) => item.value)
       .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
 
+    // Generate signed URLs for each receipt image (valid for 1 hour)
+    const receiptsWithUrls = await Promise.all(
+      sortedReceipts.map(async (receipt) => {
+        try {
+          const { data: signedUrlData, error: urlError } = await supabase.storage
+            .from(RECEIPTS_BUCKET)
+            .createSignedUrl(receipt.storagePath, 3600); // 1 hour expiry
+
+          if (urlError) {
+            console.error(`Error generating signed URL for ${receipt.storagePath}:`, urlError);
+            return {
+              ...receipt,
+              receiptImageUrl: null,
+              error: "Failed to generate image URL",
+            };
+          }
+
+          return {
+            ...receipt,
+            receiptImageUrl: signedUrlData.signedUrl,
+          };
+        } catch (error) {
+          console.error(`Error processing receipt ${receipt.email}:`, error);
+          return {
+            ...receipt,
+            receiptImageUrl: null,
+            error: "Failed to process receipt",
+          };
+        }
+      })
+    );
+
     return c.json({
       success: true,
-      count: sortedReceipts.length,
-      receipts: sortedReceipts,
+      count: receiptsWithUrls.length,
+      receipts: receiptsWithUrls,
     });
   } catch (error) {
     console.error("Error fetching receipts:", error);
