@@ -854,8 +854,8 @@
     height: calc(var(--spacing) * 40);
   }
 
-  .h-\[180px\] {
-    height: 180px;
+  .h-\[90px\] {
+    height: 90px;
   }
 
   .h-\[calc\(100\%-1px\)\] {
@@ -3109,8 +3109,8 @@
   }
 
   @media (width >= 48rem) {
-    .md\:h-\[200px\] {
-      height: 200px;
+    .md\:h-\[100px\] {
+      height: 100px;
     }
   }
 

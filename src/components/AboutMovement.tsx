@@ -149,7 +149,7 @@ export function AboutMovement() {
                       viewport={{ once: true }}
                       className="text-center"
                     >
-                      <p className="text-[#F59E0B] text-sm md:text-base">
+                      <p className="text-[#D97706] text-sm md:text-base">
                         Thousands of letters. One voice. United for compassion.
                       </p>
                     </motion.div>

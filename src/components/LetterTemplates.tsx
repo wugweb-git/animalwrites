@@ -169,7 +169,7 @@ Name: Address: Phone: Email:`,
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-3 mb-4">
               <FileText className="w-8 h-8 text-[#333333]" />
-              <h2 className="text-4xl md:text-5xl text-[#333333]">Letter Templates & Guidance</h2>
+              <h2 id="letter-templates-heading" className="text-4xl md:text-5xl text-[#333333]">Letter Templates & Guidance</h2>
             </div>
             <p className="text-xl text-[#666666] max-w-3xl mx-auto">
               Use these templates as inspiration or starting points. Feel free to personalize them with your own experiences and thoughts.

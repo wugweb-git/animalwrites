@@ -152,13 +152,13 @@ export function Supporters() {
                   href={supporter.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 w-[180px] h-[180px] md:w-[200px] md:h-[200px]"
+                  className="flex-shrink-0 w-[180px] h-[90px] md:w-[200px] md:h-[100px] flex items-center justify-center"
                   aria-label={`Visit ${supporter.name}`}
                 >
                   <ImageWithFallback
                     src={supporter.logoUrl}
                     alt={supporter.altText}
-                    className="w-full h-full object-contain"
+                    className="max-w-full max-h-full object-contain"
                     width={200}
                     height={100}
                   />
