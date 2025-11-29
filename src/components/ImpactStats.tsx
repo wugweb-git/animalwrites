@@ -76,7 +76,7 @@ export function ImpactStats() {
             className="text-center mb-12"
           >
             <h2 id="impact-stats-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">
-              <span className="text-[#D97706]">Our Growing</span> Movement
+              <span className="text-[#333333]">Our Growing</span> Movement
             </h2>
             <p className="text-[#666666] text-base md:text-lg">
               Join thousands of compassionate citizens making their voices heard
@@ -92,7 +92,7 @@ export function ImpactStats() {
           >
             <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-5 md:p-6 border-2 border-[#F59E0B]/30">
               <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#D97706]">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
+                <strong className="text-[#333333]">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
               </p>
             </div>
           </motion.div>

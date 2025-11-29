@@ -213,7 +213,7 @@ export function LocalSupport() {
               transition={{ type: "spring", stiffness: 400 }}
             >
               <MapPin className="w-5 h-5 text-[#F59E0B]" aria-hidden="true" />
-              <span className="text-[#D97706]">Find Your GPO</span>
+              <span className="text-[#333333]">Find Your GPO</span>
             </motion.div>
             <h2 id="gpo-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
               Find Your Nearest Post Office
@@ -274,7 +274,7 @@ export function LocalSupport() {
                   >
                     <Card className="border-2 border-gray-200 hover:border-[#F59E0B] hover:shadow-lg transition-all h-full">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-[#D97706] flex items-center gap-2 text-lg md:text-xl">
+                        <CardTitle className="text-[#333333] flex items-center gap-2 text-lg md:text-xl">
                           <Building2 className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                           <span>{location.city}</span>
                         </CardTitle>
@@ -293,7 +293,7 @@ export function LocalSupport() {
                               <Phone className="w-4 h-4 text-[#999999] flex-shrink-0" aria-hidden="true" />
                               <a 
                                 href={`tel:${location.phone}`} 
-                                className="hover:text-[#D97706] transition-colors font-mono"
+                                className="hover:text-[#333333] transition-colors font-mono"
                                 aria-label={`Call ${location.city} post office at ${location.phone}`}
                               >
                                 {location.phone}
@@ -389,7 +389,7 @@ export function LocalSupport() {
               {searchTerm && (
                 <div className="bg-[#FFF8F3] rounded-xl p-4 max-w-lg mx-auto mb-6 border border-[#F59E0B]/20">
                   <p className="text-[#666666] text-sm mb-2">
-                    <strong className="text-[#D97706]">Search tips:</strong>
+                    <strong className="text-[#333333]">Search tips:</strong>
                   </p>
                   <ul className="text-left text-sm text-[#666666] space-y-1">
                     <li>• Try searching by major city name (e.g., "Mumbai", "Delhi")</li>

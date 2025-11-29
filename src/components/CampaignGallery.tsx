@@ -45,7 +45,7 @@ export function CampaignGallery() {
               >
                 <Camera className="w-5 h-5 text-[#F59E0B]" aria-hidden="true" />
               </motion.div>
-              <span className="text-[#D97706]">Our Movement</span>
+              <span className="text-[#333333]">Our Movement</span>
             </motion.div>
             
             <h2 id="gallery-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">

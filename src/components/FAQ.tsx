@@ -79,7 +79,7 @@ export function FAQ() {
                   className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#F59E0B] hover:shadow-md transition-all duration-300"
                 >
                   <AccordionTrigger
-                    className="text-left text-[#333333] hover:text-[#D97706] py-5"
+                    className="text-left text-[#333333] hover:text-[#333333] py-5"
                     aria-label={`Question ${index + 1}: ${faq.question}`}
                   >
                     <span className="pr-4">{faq.question}</span>
@@ -100,8 +100,8 @@ export function FAQ() {
             className="mt-12 bg-[#FFF8F3] rounded-2xl p-8 border-2 border-[#F59E0B]/20"
           >
             <p className="text-center text-[#333333] leading-relaxed">
-              <strong className="text-[#D97706]">Still have questions?</strong> Feel free to reach out to us on social media
-              using <span className="text-[#D97706] font-semibold">#AnimalWrites</span> or contact your local animal welfare organizations
+              <strong className="text-[#333333]">Still have questions?</strong> Feel free to reach out to us on social media
+              using <span className="text-[#333333] font-semibold">#AnimalWrites</span> or contact your local animal welfare organizations
               for more information.
             </p>
           </motion.div>

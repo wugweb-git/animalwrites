@@ -63,6 +63,7 @@ export function Navigation() {
               height={48}
               loading="eager"
               decoding="async"
+              crossOrigin="anonymous"
             />
             <span className="text-[#333333] tracking-wide hidden sm:inline">ANIMAL WRITES</span>
           </button>
@@ -73,7 +74,7 @@ export function Navigation() {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="text-sm text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:text-[#D97706] focus:underline underline-offset-4"
+                className="text-sm text-[#666666] hover:text-[#333333] transition-colors focus:outline-none focus:text-[#333333] focus:underline underline-offset-4"
                 aria-label={`Navigate to ${link.label}`}
               >
                 {link.label}

@@ -60,7 +60,7 @@ export function Footer() {
                 href="https://wugweb.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-[#F59E0B] hover:to-[#D97706] text-white px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-900 hover:to-black text-white px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-[#333333]"
                 aria-label="Visit wugweb website - Created by wugweb"
               >
                 <motion.img 
@@ -68,7 +68,7 @@ export function Footer() {
                   alt="Wugweb logo"
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="h-8 w-auto object-contain"
+                  className="h-12 w-auto object-contain"
                 />
                 <div className="text-left">
                   <div className="text-sm font-semibold">Created by wugweb</div>

@@ -247,7 +247,7 @@ Name: Address: Phone: Email:`,
                           <Button
                             variant="ghost"
                             onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                            className="text-[#D97706] hover:text-[#D97706] hover:bg-[#FFF8F3] flex items-center gap-2"
+                            className="text-[#333333] hover:text-[#333333] hover:bg-[#FFF8F3] flex items-center gap-2"
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Collapse ${template.title}` : `Read full ${template.title}`}
                           >

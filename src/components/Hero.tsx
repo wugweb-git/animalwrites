@@ -34,19 +34,19 @@ export function Hero() {
                 >
                   Animal Writes
                 </h1>
-                <p className="text-lg sm:text-xl md:text-2xl text-[#D97706]">
+                <p className="text-lg sm:text-xl md:text-2xl text-[#666666]">
                   India's Largest Letter Petition Campaign
                 </p>
               </div>
 
               <div className="space-y-3 text-base sm:text-lg text-[#666666]">
                 <div className="flex items-center gap-3 justify-center md:justify-start">
-                  <Mail className="w-5 h-5 text-[#D97706]" aria-hidden="true" />
+                  <Mail className="w-5 h-5 text-[#333333]" aria-hidden="true" />
                   <span>29 November 2025</span>
                 </div>
                 <div className="flex items-center gap-3 justify-center md:justify-start">
                   <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full text-xs md:text-sm border border-gray-200">
-                    <Heart className="w-5 h-5 text-[#D97706]" aria-hidden="true" />
+                    <Heart className="w-5 h-5 text-[#333333]" aria-hidden="true" />
                   </div>
                   <span>All GPOs and HPOs</span>
                 </div>
@@ -79,7 +79,7 @@ export function Hero() {
                 <span>Want to lead in your city?</span>
                 <button
                   onClick={() => scrollToSection("volunteer")}
-                  className="text-[#D97706] hover:text-[#B45309] underline underline-offset-2 hover:underline-offset-4 transition-all focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 rounded"
+                  className="text-[#333333] hover:text-[#1a1a1a] underline underline-offset-2 hover:underline-offset-4 transition-all focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 rounded"
                   aria-label="Navigate to volunteer section"
                 >
                   Become a coordinator
@@ -95,14 +95,16 @@ export function Hero() {
             <div className="flex justify-center items-center order-first md:order-last">
               <div className="relative w-full max-w-md">
                 <div className="absolute inset-0 bg-[#F59E0B] opacity-10 rounded-3xl blur-2xl" aria-hidden="true" />
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white hover:shadow-3xl transition-shadow bg-gray-200" style={{ width: '100%', maxWidth: '280px', aspectRatio: '1' }}>
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white hover:shadow-3xl transition-shadow bg-gray-200" style={{ width: '100%', maxWidth: '250px', aspectRatio: '1', contentVisibility: 'auto' }}>
                   <picture>
                     <source
                       media="(max-width: 640px)"
-                      srcSet="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=30&w=280&auto=format&dpr=1"
+                      type="image/webp"
+                      srcSet="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=25&w=250&auto=format&dpr=1"
                     />
                     <source
                       media="(min-width: 641px)"
+                      type="image/webp"
                       srcSet="https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=50&w=400&auto=format&dpr=1"
                     />
                     <ImageWithFallback
@@ -111,8 +113,8 @@ export function Hero() {
                       className="w-full h-full object-cover"
                       loading="eager"
                       fetchpriority="high"
-                      width={280}
-                      height={280}
+                      width={250}
+                      height={250}
                       style={{ display: 'block' }}
                     />
                   </picture>
