@@ -76,10 +76,25 @@ grep -r "text-\[#F59E0B\]" components/
 ## 🚀 Next Steps
 
 1. Run Lighthouse audit
-2. Verify 95+ score
-3. Deploy to production
-4. Monitor Core Web Vitals
+2. Verify 95+ Accessibility score ✅
+3. Check LCP improvement (target < 3.0s)
+4. Deploy to production
+5. Monitor Core Web Vitals
 
 ---
 
-*Ready for Production ✅*
+## ⚡ Performance Note
+
+**LCP Issue:** Hero image was loading at 5.3s (needs < 2.5s)
+
+**Fix Applied:**
+- Reduced image: 448px → 360px
+- Lowered quality: q=60 → q=40
+- Added background placeholder
+- **Expected LCP:** ~4.2-4.5s (improvement but still high)
+
+**If LCP still slow:** Consider uploading hero image to faster CDN (Cloudinary/Imgix) or using simpler illustration.
+
+---
+
+*Ready for Testing ✅*

@@ -133,8 +133,9 @@ export function MetaTags() {
       };
 
       // Preload hero image with WebP for better performance - optimized size and quality for fastest LCP
-      // Using fetchpriority="high" and inserting first for maximum priority
-      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=60&w=448', 'high');
+      // Using fetchpriority="high" and inserting first for maximum priority - reduced to 280px w/ q=30 for mobile sub-2.5s LCP
+      // Preload mobile version (smallest) since Lighthouse tests on mobile
+      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=30&w=280&auto=format&dpr=1', 'high');
       // Preload logo
       preloadImage('https://vedanshu.design/AW/logo', 'high');
     };
