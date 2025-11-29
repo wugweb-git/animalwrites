@@ -82,7 +82,7 @@ Email (if any) :`,
 
 (vii) असंतुलित है, क्योंकि आदेश में केवल परिणामों की चर्चा है, कारणों की नहीं। इसमें पशु-क्रूरता, फीडर हिंसा, मीडिया रिपोर्टिंग के मानकों, अनियंत्रित प्रजनन और परित्याग, तथा अवैज्ञानिक कचरा प्रबंधन जैसे मूल मुद्दों को शामिल नहीं किया गया है—जबकि ये सभी समाधान का अनिवार्य हिस्सा हैं।
 
-ये केवल कुछ समस्याएूँ हैं, जो एक सामान्य नागरिक होने के नाते मेरी समझ में आती हैं। सबसे महत्वपूर्ण यह कि मैं अपने देश को कृत्रिम रूप से पशु कल्याण और मानव कल्याण के बीच बंटता हुआ नहीं देखना चाहता/चाहती। दोनों एक-दूसरे के पूरक हैं, विरोधी नहीं। समाधान एक करुणामय, वैज्ञानिक और मानवीय दृष्टिकोण में है—ना कि बहिष्कार में या प्रयोगों में और निश्चित ही निर्वासन में नहीं।
+ये केवल कुछ समस्याएूँ हैं, जो एक सामान्य नागरिक होने के नाते मेरी समझ में आती हैं। सबसे महत्वपूर्ण यह कि मैं अपने देश को कृत्रिम रूप से पशु कल्याण और मानव कल्याण के बीच बंटता हुआ नहीं देखना चाहता/चाहती। दोनों एक-दूसरे के पूरक हैं, विरोधी नहीं। सम��धान एक करुणामय, वैज्ञानिक और मानवीय दृष्टिकोण में है—ना कि बहिष्कार में या प्रयोगों में और निश्चित ही निर्वासन में नहीं।
 
 अतः मेरी विनम्र प्रार्थना है कि माननीय न्यायालय दिनांक 07.11.2025 के आदेश पर स्थगन (रोक) लगाए तथा उसे पुनर्विचार, पुनर्मूल्यांकन एवं पुनरावलोकन हेतु कृपया वापस ले।
 
@@ -148,7 +148,8 @@ Name: Address: Phone: Email:`,
 
   const getPreview = (content: string) => {
     const lines = content.split('\n');
-    return lines.slice(0, 8).join('\n') + (lines.length > 8 ? '\n...' : '');
+    // Show only 5 lines on mobile for better UX
+    return lines.slice(0, 5).join('\n') + (lines.length > 5 ? '...' : '');
   };
 
   const talkingPoints = [
@@ -166,20 +167,20 @@ Name: Address: Phone: Email:`,
     <section id="letter-templates" className="py-16 md:py-24 bg-[#F5F5F5]">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <FileText className="w-8 h-8 text-[#333333]" />
-              <h2 id="letter-templates-heading" className="text-4xl md:text-5xl text-[#333333]">Letter Templates & Guidance</h2>
+          <div className="text-center mb-12">
+            <div className="flex flex-col items-center gap-3 mb-6">
+              <FileText className="w-10 h-10 text-[#333333]" />
+              <h2 id="letter-templates-heading" className="text-3xl md:text-5xl text-[#333333]">Letter Templates</h2>
             </div>
-            <p className="text-xl text-[#666666] max-w-3xl mx-auto">
-              Use these templates as inspiration or starting points. Feel free to personalize them with your own experiences and thoughts.
+            <p className="text-lg md:text-xl text-[#666666] max-w-3xl mx-auto px-4">
+              Use these templates as inspiration. Feel free to personalize with your own thoughts.
             </p>
           </div>
 
           <Tabs defaultValue="templates" className="mb-12">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white">
-              <TabsTrigger value="templates" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white">Templates</TabsTrigger>
-              <TabsTrigger value="tips" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white">Talking Points</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white h-14">
+              <TabsTrigger value="templates" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white text-base md:text-base py-3">Templates</TabsTrigger>
+              <TabsTrigger value="tips" className="data-[state=active]:bg-[#333333] data-[state=active]:text-white text-base md:text-base py-3">Talking Points</TabsTrigger>
             </TabsList>
 
             <TabsContent value="templates">
@@ -191,28 +192,27 @@ Name: Address: Phone: Email:`,
                   return (
                     <Card key={index} className="border-2 border-gray-200 hover:border-[#F59E0B] transition-colors shadow-lg">
                       <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <CardTitle className="text-[#333333] text-2xl font-bold">{template.title}</CardTitle>
-                            <CardDescription className="text-[#666666] text-base">
+                        <div className="flex flex-col md:flex-row items-start md:justify-between gap-4">
+                          <div className="flex-1">
+                            <CardTitle className="text-[#333333] text-xl md:text-2xl">{template.title}</CardTitle>
+                            <CardDescription className="text-[#666666] text-base mt-1">
                               Tone: {template.tone}
                             </CardDescription>
                           </div>
                           <Button
                             variant="outline"
-                            size="sm"
                             onClick={() => copyToClipboard(template.content, index)}
-                            className="flex items-center gap-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white flex-shrink-0"
+                            className="flex items-center gap-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white flex-shrink-0 px-6 py-6 text-base w-full md:w-auto"
                             aria-label={`Copy ${template.title} template`}
                           >
                             {copiedIndex === index ? (
                               <>
-                                <Check className="w-4 h-4" aria-hidden="true" />
+                                <Check className="w-5 h-5" aria-hidden="true" />
                                 Copied!
                               </>
                             ) : (
                               <>
-                                <Copy className="w-4 h-4" aria-hidden="true" />
+                                <Copy className="w-5 h-5" aria-hidden="true" />
                                 Copy
                               </>
                             )}
@@ -220,7 +220,7 @@ Name: Address: Phone: Email:`,
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="bg-white rounded-lg p-6 border border-gray-200 relative">
+                        <div className="bg-white rounded-lg p-4 md:p-6 border border-gray-200 relative">
                           <AnimatePresence mode="wait">
                             <motion.pre
                               key={isExpanded ? 'expanded' : 'collapsed'}
@@ -228,37 +228,37 @@ Name: Address: Phone: Email:`,
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.2 }}
-                              className="whitespace-pre-wrap text-sm text-[#333333] font-sans leading-relaxed"
+                              className="whitespace-pre-wrap text-base md:text-sm text-[#333333] font-sans leading-relaxed"
                             >
                               {displayContent}
                             </motion.pre>
                           </AnimatePresence>
                           
                           {!isExpanded && (
-                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 right-0 h-32 md:h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
                           )}
                         </div>
                         
                         <motion.div
                           className="mt-4 flex justify-center"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                            className="text-[#333333] hover:text-[#333333] hover:bg-[#FFF8F3] flex items-center gap-2"
+                            className="text-[#333333] hover:text-white hover:bg-[#333333] border-[#333333] flex items-center gap-2 px-8 py-6 text-lg w-full md:w-auto"
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? `Collapse ${template.title}` : `Read full ${template.title}`}
                           >
                             {isExpanded ? (
                               <>
-                                <ChevronUp className="w-4 h-4" aria-hidden="true" />
+                                <ChevronUp className="w-5 h-5" aria-hidden="true" />
                                 Show Less
                               </>
                             ) : (
                               <>
-                                <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                                <ChevronDown className="w-5 h-5" aria-hidden="true" />
                                 Read Full Template
                               </>
                             )}

@@ -52,10 +52,10 @@ export function WhyThisMatters() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="why-matters-heading" className="text-3xl md:text-5xl text-[#333333] mb-4 md:mb-6 font-bold">
+            <h2 id="why-matters-heading" className="text-4xl md:text-5xl text-[#333333] mb-6 md:mb-6">
               Why This Matters
             </h2>
-            <p className="text-lg md:text-xl text-[#666666] max-w-3xl mx-auto">
+            <p className="text-xl md:text-xl text-[#666666] max-w-3xl mx-auto">
               This is not a protest — it's a peaceful national letter movement for justice and empathy.
             </p>
           </motion.div>
@@ -71,19 +71,19 @@ export function WhyThisMatters() {
                 viewport={{ once: true }}
               >
                 <motion.div
-                  className="bg-white rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all h-full"
+                  className="bg-white rounded-2xl p-8 md:p-8 shadow-lg hover:shadow-xl transition-all h-full"
                   whileHover={{ y: -5, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <motion.div
-                    className="bg-[#FFF8F3] rounded-full w-14 h-14 md:w-16 md:h-16 flex items-center justify-center mb-4 md:mb-6 mx-auto sm:mx-0"
+                    className="bg-[#FFF8F3] rounded-full w-16 h-16 flex items-center justify-center mb-6 mx-auto sm:mx-0"
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <reason.icon className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B]" aria-hidden="true" />
+                    <reason.icon className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
                   </motion.div>
-                  <h3 className="text-lg md:text-xl text-[#333333] mb-2 md:mb-3 text-center sm:text-left">{reason.title}</h3>
-                  <p className="text-sm md:text-base text-[#666666] leading-relaxed text-center sm:text-left">{reason.description}</p>
+                  <h3 className="text-xl md:text-xl text-[#333333] mb-3 text-center sm:text-left">{reason.title}</h3>
+                  <p className="text-base md:text-base text-[#666666] leading-relaxed text-center sm:text-left">{reason.description}</p>
                 </motion.div>
               </motion.div>
             ))}

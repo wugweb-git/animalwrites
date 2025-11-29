@@ -238,7 +238,7 @@ export function VolunteerSignup() {
                         className="space-y-5 md:space-y-6"
                       >
                         <div className="space-y-2">
-                          <Label htmlFor="name" className="text-sm md:text-base">Full Name *</Label>
+                          <Label htmlFor="name" className="text-base md:text-base">Full Name *</Label>
                           <Input
                             id="name"
                             type="text"
@@ -246,13 +246,13 @@ export function VolunteerSignup() {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             placeholder="Enter your full name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="email" className="text-sm md:text-base">Email Address *</Label>
+                          <Label htmlFor="email" className="text-base md:text-base">Email Address *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -260,13 +260,13 @@ export function VolunteerSignup() {
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             placeholder="your.email@example.com"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="city" className="text-sm md:text-base">City *</Label>
+                          <Label htmlFor="city" className="text-base md:text-base">City *</Label>
                           <Input
                             id="city"
                             type="text"
@@ -274,20 +274,20 @@ export function VolunteerSignup() {
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             placeholder="Your city name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
+                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="role" className="text-sm md:text-base">How Would You Like to Help? *</Label>
+                          <Label htmlFor="role" className="text-base md:text-base">How Would You Like to Help? *</Label>
                           <Select
                             required
                             value={formData.role}
                             onValueChange={(value) => setFormData({ ...formData, role: value })}
                           >
                             <SelectTrigger 
-                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-12 md:h-10 text-base"
+                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
                               aria-label="Select volunteer role"
                             >
                               <SelectValue placeholder="Select a role" />
@@ -302,18 +302,18 @@ export function VolunteerSignup() {
                           </Select>
                         </div>
 
-                        <div className="p-3 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-                          <label htmlFor="consent" className="flex items-start gap-3 cursor-pointer group">
+                        <div className="p-5 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                          <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                             <input
                               type="checkbox"
                               id="consent"
                               checked={consent}
                               onChange={(e) => setConsent(e.target.checked)}
-                              className="mt-0.5 h-5 w-5 md:h-4 md:w-4 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                              className="mt-1 h-6 w-6 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
                               required
                               aria-required="true"
                             />
-                            <span className="text-sm md:text-sm text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors">
+                            <span className="text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors text-[13px]">
                               I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
                             </span>
                           </label>
@@ -326,7 +326,7 @@ export function VolunteerSignup() {
                           <Button
                             type="submit"
                             disabled={!consent || isSubmitting}
-                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-6 md:py-6 text-base md:text-base focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] touch-manipulation"
+                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-7 text-lg focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                           >
                             {isSubmitting ? "Submitting..." : "Join as Volunteer"}
                           </Button>

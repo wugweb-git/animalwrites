@@ -34,9 +34,23 @@ export function MetaTags() {
 
     installGtag();
 
-    // Set favicon - Multiple formats for better browser compatibility
+    // Set favicon - Using SVG data URL for reliability
     const setFavicon = () => {
-      const logoUrl = "https://vedanshu.design/AW/logo";
+      // Create an SVG favicon with the paw print logo
+      const faviconSVG = `
+        <svg width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="#F59E0B"/>
+          <circle cx="50" cy="50" r="42" fill="#333333"/>
+          <ellipse cx="50" cy="55" rx="12" ry="15" fill="#F59E0B"/>
+          <ellipse cx="38" cy="42" rx="6" ry="8" fill="#F59E0B" transform="rotate(-15 38 42)"/>
+          <ellipse cx="45" cy="38" rx="6" ry="8" fill="#F59E0B" transform="rotate(-5 45 38)"/>
+          <ellipse cx="55" cy="38" rx="6" ry="8" fill="#F59E0B" transform="rotate(5 55 38)"/>
+          <ellipse cx="62" cy="42" rx="6" ry="8" fill="#F59E0B" transform="rotate(15 62 42)"/>
+          <path d="M 30 70 L 50 78 L 70 70 L 70 75 L 50 83 L 30 75 Z" fill="#F59E0B" opacity="0.8"/>
+        </svg>
+      `;
+      
+      const faviconDataUrl = `data:image/svg+xml,${encodeURIComponent(faviconSVG)}`;
       
       // Standard favicon
       let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
@@ -45,7 +59,7 @@ export function MetaTags() {
         link.rel = "icon";
         document.head.appendChild(link);
       }
-      link.href = logoUrl;
+      link.href = faviconDataUrl;
       
       // Shortcut icon (for older browsers)
       let shortcutIcon = document.querySelector("link[rel='shortcut icon']") as HTMLLinkElement;
@@ -54,17 +68,17 @@ export function MetaTags() {
         shortcutIcon.rel = "shortcut icon";
         document.head.appendChild(shortcutIcon);
       }
-      shortcutIcon.href = logoUrl;
+      shortcutIcon.href = faviconDataUrl;
       
       // Icon with type specified
       let typedIcon = document.querySelector("link[rel='icon'][type]") as HTMLLinkElement;
       if (!typedIcon) {
         typedIcon = document.createElement("link");
         typedIcon.rel = "icon";
-        typedIcon.type = "image/png";
+        typedIcon.type = "image/svg+xml";
         document.head.appendChild(typedIcon);
       }
-      typedIcon.href = logoUrl;
+      typedIcon.href = faviconDataUrl;
       
       // Apple touch icon (also uses the logo)
       let appleTouchIcon = document.querySelector("link[rel='apple-touch-icon']:not([sizes])") as HTMLLinkElement;
@@ -73,7 +87,7 @@ export function MetaTags() {
         appleTouchIcon.rel = "apple-touch-icon";
         document.head.appendChild(appleTouchIcon);
       }
-      appleTouchIcon.href = logoUrl;
+      appleTouchIcon.href = faviconDataUrl;
     };
     
     setFavicon();
@@ -84,7 +98,6 @@ export function MetaTags() {
       const dnsPrefetchDomains = [
         'https://www.googletagmanager.com',
         'https://www.google-analytics.com',
-        'https://vedanshu.design',
         'https://images.unsplash.com'
       ];
 
@@ -100,7 +113,6 @@ export function MetaTags() {
       // Preconnect to critical third-party origins
       const preconnectOrigins = [
         { href: 'https://www.googletagmanager.com', crossorigin: false },
-        { href: 'https://vedanshu.design', crossorigin: true },
         { href: 'https://images.unsplash.com', crossorigin: true }
       ];
 
@@ -133,9 +145,9 @@ export function MetaTags() {
       };
 
       // Preload hero image with WebP for better performance - optimized size and quality for fastest LCP
-      // Using fetchpriority="high" and inserting first for maximum priority - reduced to 250px w/ q=25 for mobile sub-2.5s LCP
-      // Preload mobile version (smallest) since Lighthouse tests on mobile - targets ~8-10KB file size
-      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=25&w=250&auto=format&dpr=1', 'high');
+      // Using fetchpriority="high" and inserting first for maximum priority - 400px w/ q=40 for mobile balance
+      // Preload mobile version (smallest) since Lighthouse tests on mobile - targets ~18-22KB file size for quality
+      preloadImage('https://images.unsplash.com/photo-1732812088418-f2fe47b11448?crop=entropy&cs=tinysrgb&fit=max&fm=webp&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBzdHJlZXQlMjBkb2clMjBjb21wYXNzaW9ufGVufDF8fHx8MTc2MzIxOTQyMHww&ixlib=rb-4.1.0&q=40&w=400&auto=format&dpr=1', 'high');
       // Preload logo
       preloadImage('https://vedanshu.design/AW/logo', 'high');
     };

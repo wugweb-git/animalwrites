@@ -17,25 +17,50 @@ const RECEIPTS_BUCKET = "make-7a8516f4-receipts";
 
 async function initializeStorage() {
   try {
-    const { data: buckets } = await supabase.storage.listBuckets();
+    console.log("Initializing storage bucket...");
+    
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    
+    if (listError) {
+      console.error("Error listing storage buckets:", {
+        message: listError.message,
+        name: listError.name,
+        details: listError,
+      });
+      return;
+    }
+    
+    console.log("Available buckets:", buckets?.map(b => b.name).join(", ") || "none");
+    
     const bucketExists = buckets?.some(bucket => bucket.name === RECEIPTS_BUCKET);
     
     if (!bucketExists) {
-      const { error } = await supabase.storage.createBucket(RECEIPTS_BUCKET, {
+      console.log(`Creating storage bucket: ${RECEIPTS_BUCKET}`);
+      
+      const { data: createData, error: createError } = await supabase.storage.createBucket(RECEIPTS_BUCKET, {
         public: false,
         fileSizeLimit: 5242880, // 5MB
+        allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/heic"],
       });
       
-      if (error) {
-        console.error("Error creating storage bucket:", error);
+      if (createError) {
+        console.error("Error creating storage bucket:", {
+          message: createError.message,
+          name: createError.name,
+          details: createError,
+        });
       } else {
-        console.log(`Storage bucket '${RECEIPTS_BUCKET}' created successfully`);
+        console.log(`Storage bucket '${RECEIPTS_BUCKET}' created successfully:`, createData);
       }
     } else {
       console.log(`Storage bucket '${RECEIPTS_BUCKET}' already exists`);
     }
   } catch (error) {
-    console.error("Error initializing storage:", error);
+    console.error("Error initializing storage (caught exception):", {
+      error,
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 }
 
@@ -153,22 +178,51 @@ app.post("/make-server-7a8516f4/receipts", async (c) => {
     const base64Data = receiptImage.split(",")[1] || receiptImage;
     const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-    // Generate unique filename for storage
+    // Generate unique filename for storage - add random string to prevent collisions
+    const randomString = Math.random().toString(36).substring(2, 10);
     const fileExtension = fileName?.split(".").pop() || "jpg";
-    const storagePath = `${receiptTimestamp}-${email.replace(/[^a-zA-Z0-9]/g, "_")}.${fileExtension}`;
+    const cleanEmail = email.replace(/[^a-zA-Z0-9]/g, "_");
+    const storagePath = `${Date.now()}-${randomString}-${cleanEmail}.${fileExtension}`;
 
-    // Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
+    // Verify bucket exists before uploading
+    try {
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      if (listError) {
+        console.error("Error listing buckets:", listError);
+        throw new Error(`Storage access error: ${listError.message}`);
+      }
+      
+      const bucketExists = buckets?.some(bucket => bucket.name === RECEIPTS_BUCKET);
+      if (!bucketExists) {
+        console.error(`Bucket ${RECEIPTS_BUCKET} does not exist`);
+        throw new Error("Storage bucket not initialized. Please contact support.");
+      }
+    } catch (verifyError) {
+      console.error("Bucket verification failed:", verifyError);
+      throw new Error(`Storage verification failed: ${verifyError instanceof Error ? verifyError.message : "Unknown error"}`);
+    }
+
+    // Upload to Supabase Storage with upsert: true to handle duplicates
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from(RECEIPTS_BUCKET)
       .upload(storagePath, binaryData, {
         contentType: fileType || "image/jpeg",
-        upsert: false,
+        upsert: true, // Allow overwriting if filename somehow collides
+        cacheControl: "3600",
       });
 
     if (uploadError) {
-      console.error("Supabase Storage upload error:", uploadError);
+      console.error("Supabase Storage upload error details:", {
+        message: uploadError.message,
+        name: uploadError.name,
+        cause: uploadError.cause,
+        bucket: RECEIPTS_BUCKET,
+        path: storagePath,
+      });
       throw new Error(`Failed to upload image to storage: ${uploadError.message}`);
     }
+
+    console.log("Storage upload successful:", uploadData);
 
     // Store receipt metadata in KV store (without the image data)
     const receiptData = {

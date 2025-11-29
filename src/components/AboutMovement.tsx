@@ -18,11 +18,11 @@ export function AboutMovement() {
               viewport={{ once: true }}
               className="space-y-6 order-2 md:order-1"
             >
-              <h2 id="about-heading" className="text-3xl md:text-5xl text-[#333333] leading-tight font-bold">
+              <h2 id="about-heading" className="text-4xl md:text-5xl text-[#333333] leading-tight">
                 A National Movement of Compassion
               </h2>
               
-              <div className="space-y-4 text-base md:text-lg text-[#666666] leading-relaxed">
+              <div className="space-y-5 text-lg md:text-lg text-[#666666] leading-relaxed">
                 <p>
                   On 29th November, thousands across India will walk to their local General Post Offices 
                   to post handwritten letters to the Hon'ble Supreme Court of India.
@@ -41,9 +41,9 @@ export function AboutMovement() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="bg-[#FFF8F3] rounded-xl p-5 md:p-6 border-l-4 border-[#F59E0B]"
+                className="bg-[#FFF8F3] rounded-xl p-6 md:p-6 border-l-4 border-[#F59E0B]"
               >
-                <p className="text-[#333333] italic text-sm md:text-base">
+                <p className="text-[#333333] italic text-base md:text-base">
                   This is not a protest — it's a peaceful national letter movement for justice and empathy.
                 </p>
               </motion.div>

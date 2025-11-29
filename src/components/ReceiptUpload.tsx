@@ -118,7 +118,8 @@ export function ReceiptUpload() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit receipt");
+        console.error("Receipt upload failed:", errorData);
+        throw new Error(errorData.details || errorData.error || "Failed to submit receipt");
       }
 
       const result = await response.json();
@@ -169,7 +170,7 @@ export function ReceiptUpload() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-[#333333] text-sm md:text-base">
+                  <Label htmlFor="fullName" className="text-[#333333] text-base">
                     Full Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -180,14 +181,14 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#333333] text-sm md:text-base">
+                  <Label htmlFor="email" className="text-[#333333] text-base">
                     Email <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -198,14 +199,14 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="your.email@example.com"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* City */}
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-[#333333] text-sm md:text-base">
+                  <Label htmlFor="city" className="text-[#333333] text-base">
                     City <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -216,17 +217,17 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Your city name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-12 md:h-10 text-base"
+                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* File Upload */}
                 <div className="space-y-2">
-                  <Label htmlFor="receipt" className="text-[#333333] text-sm md:text-base">
+                  <Label htmlFor="receipt" className="text-[#333333] text-base">
                     Receipt Photo <span className="text-red-500">*</span>
                   </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-6 text-center hover:border-[#F59E0B] transition-colors min-h-[120px] flex items-center justify-center">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 md:p-6 text-center hover:border-[#F59E0B] transition-colors min-h-[150px] flex items-center justify-center">
                     <input
                       id="receipt"
                       type="file"
@@ -270,12 +271,12 @@ export function ReceiptUpload() {
                         </motion.div>
                       ) : (
                         <>
-                          <Upload className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" />
+                          <Upload className="w-14 h-14 text-[#F59E0B]" />
                           <div>
-                            <p className="text-[#333333] font-medium text-base">
+                            <p className="text-[#333333] font-medium text-lg">
                               Click to upload or take a photo
                             </p>
-                            <p className="text-sm text-[#666666] mt-1">
+                            <p className="text-base text-[#666666] mt-2">
                               JPG, PNG or HEIC (Max 5MB)
                             </p>
                           </div>
@@ -286,19 +287,19 @@ export function ReceiptUpload() {
                 </div>
 
                 {/* Consent Checkbox */}
-                <div className="p-3 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-                  <label htmlFor="receipt-consent" className="flex items-start gap-3 cursor-pointer group">
+                <div className="p-5 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                  <label htmlFor="receipt-consent" className="flex items-start gap-4 cursor-pointer group">
                     <input
                       type="checkbox"
                       id="receipt-consent"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
-                      className="mt-0.5 h-5 w-5 md:h-4 md:w-4 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                      className="mt-1 h-6 w-6 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
                       required
                       aria-required="true"
                       disabled={isSubmitting}
                     />
-                    <span className="text-sm md:text-sm text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors">
+                    <span className="text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors text-[12px]">
                       I consent to sharing my receipt and information with the Animal Writes campaign. I understand this data will be used to track campaign impact and may be displayed publicly to inspire participation. My personal information will be kept confidential.
                     </span>
                   </label>
@@ -333,7 +334,7 @@ export function ReceiptUpload() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile || !consent}
-                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-6 text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] touch-manipulation"
+                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-7 text-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                 >
                   {isSubmitting ? (
                     <>

@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
+import { Logo } from "./Logo";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const logo = "https://vedanshu.design/AW/logo";
 
   useEffect(() => {
     let ticking = false;
@@ -55,17 +55,11 @@ export function Navigation() {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 rounded-lg p-1"
             aria-label="Scroll to top - Animal Writes home"
           >
-            <img 
-              src={logo} 
-              alt="Animal Writes - India's largest letter petition campaign for street dogs logo" 
-              className="h-10 w-10 md:h-12 md:w-12"
-              width={48}
-              height={48}
-              loading="eager"
-              decoding="async"
-              crossOrigin="anonymous"
+            <Logo 
+              size={64}
+              className="h-12 w-12 md:h-16 md:w-16"
             />
-            <span className="text-[#333333] tracking-wide hidden sm:inline">ANIMAL WRITES</span>
+            <span className="text-[#333333] tracking-wide text-base md:text-lg hidden sm:inline">ANIMAL WRITES</span>
           </button>
 
           {/* Desktop Navigation */}
@@ -101,12 +95,12 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
+            className="md:hidden p-3 text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu"
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
           </button>
         </div>
 
@@ -122,12 +116,12 @@ export function Navigation() {
               className="md:hidden border-t border-gray-100 overflow-hidden"
               role="menu"
             >
-              <div className="flex flex-col gap-1 py-4">
+              <div className="flex flex-col gap-2 py-6 px-4">
                 {navLinks.map((link) => (
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className="text-left px-4 py-3 text-[#666666] hover:text-[#D97706] hover:bg-[#FFF8F3] rounded-lg transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D97706]"
+                    className="text-left px-6 py-4 text-lg text-[#666666] hover:text-[#D97706] hover:bg-[#FFF8F3] rounded-xl transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D97706]"
                     role="menuitem"
                     aria-label={`Navigate to ${link.label}`}
                   >
@@ -136,7 +130,7 @@ export function Navigation() {
                 ))}
                 <Button
                   onClick={() => scrollToSection("upload-receipt")}
-                  className="bg-[#F59E0B] hover:bg-[#D97706] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
+                  className="bg-[#F59E0B] hover:bg-[#D97706] text-white mt-4 py-6 text-lg focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
                   role="menuitem"
                   aria-label="Navigate to upload receipt section"
                 >
@@ -144,7 +138,7 @@ export function Navigation() {
                 </Button>
                 <Button
                   onClick={() => scrollToSection("letter-templates")}
-                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white mx-4 mt-2 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
+                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white mt-2 py-6 text-lg focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
                   role="menuitem"
                   aria-label="Navigate to write letter section"
                 >
