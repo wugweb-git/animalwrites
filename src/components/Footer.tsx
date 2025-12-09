@@ -1,22 +1,22 @@
 import { Mail, Heart, Instagram, Facebook, Youtube, MapPin, Phone, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
-import { Logo } from "./Logo";
+import Vector from "../imports/Vector";
 import { VisitorCounter } from "./VisitorCounter";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-gradient-to-b from-[#333333] to-[#222222] text-white relative overflow-hidden">
+    <footer className="bg-gradient-to-b from-primary to-primary/95 text-white relative overflow-hidden">
       {/* Decorative top wave */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F59E0B] via-[#D97706] to-[#F59E0B]" aria-hidden="true" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-[var(--accent-hover)] to-accent" aria-hidden="true" />
       
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-5" aria-hidden="true">
         {[...Array(15)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-[#F59E0B] rounded-full"
+            className="absolute w-2 h-2 bg-accent rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -48,16 +48,12 @@ export function Footer() {
             className="lg:col-span-1"
           >
             <div className="flex flex-col items-start gap-4">
-              <Logo 
-                size={80}
-                className="h-16 w-16 md:h-20 md:w-20"
-              />
-              <div>
-                <h2 className="text-2xl md:text-3xl text-white mb-2">Animal Writes</h2>
-                <p className="text-[#F59E0B] text-sm md:text-base mb-4">
-                  India Writes for Animal Rights
-                </p>
+              <div className="h-12 w-40 md:h-16 md:w-56" style={{ '--fill-0': 'white' } as React.CSSProperties}>
+                <Vector />
               </div>
+              <p className="text-accent text-sm md:text-base mb-2">
+                India Writes for Animal Rights
+              </p>
               <p className="text-gray-300 text-sm leading-relaxed">
                 A peaceful nationwide movement of compassion and civic responsibility to protect India's voiceless animals.
               </p>
@@ -68,7 +64,7 @@ export function Footer() {
                   href="https://www.instagram.com/animalwrites_india/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F59E0B] flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                  className="w-10 h-10 rounded-[var(--radius-full)] bg-white/10 hover:bg-accent flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   aria-label="Follow us on Instagram"
                 >
                   <Instagram className="w-5 h-5" />
@@ -77,7 +73,7 @@ export function Footer() {
                   href="https://x.com/AnimalWrites"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F59E0B] flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                  className="w-10 h-10 rounded-[var(--radius-full)] bg-white/10 hover:bg-accent flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   aria-label="Follow us on X (formerly Twitter)"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -88,7 +84,7 @@ export function Footer() {
                   href="https://www.facebook.com/AnimalWritesIndia/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F59E0B] flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                  className="w-10 h-10 rounded-[var(--radius-full)] bg-white/10 hover:bg-accent flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   aria-label="Follow us on Facebook"
                 >
                   <Facebook className="w-5 h-5" />
@@ -97,7 +93,7 @@ export function Footer() {
                   href="https://youtube.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F59E0B] flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#333333]"
+                  className="w-10 h-10 rounded-[var(--radius-full)] bg-white/10 hover:bg-accent flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   aria-label="Subscribe on YouTube"
                 >
                   <Youtube className="w-5 h-5" />
@@ -113,7 +109,7 @@ export function Footer() {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-[#F59E0B] text-lg mb-4">Quick Links</h3>
+            <h3 className="text-accent mb-4">Quick Links</h3>
             <ul className="space-y-3">
               {[
                 { label: "About the Movement", href: "#about" },
@@ -126,9 +122,9 @@ export function Footer() {
                 <li key={index}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-[#F59E0B] transition-colors duration-200 text-sm inline-flex items-center gap-2 group"
+                    className="text-gray-300 hover:text-accent transition-colors duration-200 text-sm inline-flex items-center gap-2 group"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-[#F59E0B] transition-colors" aria-hidden="true" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover:bg-accent transition-colors" aria-hidden="true" />
                     {link.label}
                   </a>
                 </li>
@@ -143,21 +139,21 @@ export function Footer() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-[#F59E0B] text-lg mb-4">Campaign Phases</h3>
+            <h3 className="text-accent mb-4">Campaign Phases</h3>
             <ul className="space-y-3">
               <li className="text-gray-300 text-sm flex items-start gap-2">
-                <span className="text-[#F59E0B] mt-1">✓</span>
+                <span className="text-accent mt-1">✓</span>
                 <span><strong>Phase 1.0:</strong> 2.5 Lakh+ letters to Supreme Court</span>
               </li>
               <li className="text-gray-300 text-sm flex items-start gap-2">
-                <span className="text-[#F59E0B] mt-1">→</span>
+                <span className="text-accent mt-1">→</span>
                 <span><strong>Phase 2.0:</strong> Pashu Bachao, Vote Badhao</span>
               </li>
             </ul>
             
-            <div className="mt-6 p-4 bg-white/5 rounded-lg border border-[#F59E0B]/20">
+            <div className="mt-6 p-4 bg-white/5 rounded-[var(--radius-lg)] border border-accent/20">
               <h4 className="text-white text-sm mb-2 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />
+                <Heart className="w-4 h-4 text-accent" aria-hidden="true" />
                 Our Mission
               </h4>
               <p className="text-gray-400 text-xs leading-relaxed">
@@ -173,22 +169,22 @@ export function Footer() {
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-[#F59E0B] text-lg mb-4">Get In Touch</h3>
+            <h3 className="text-accent mb-4">Get In Touch</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-[#F59E0B] mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <Mail className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Email us</p>
                   <a 
                     href="mailto:contact@animalwrites.in" 
-                    className="text-gray-300 hover:text-[#F59E0B] transition-colors text-sm"
+                    className="text-gray-300 hover:text-accent transition-colors text-sm"
                   >
                     contact@animalwrites.in
                   </a>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-[#F59E0B] mt-0.5 flex-shrink-0" aria-hidden="true" />
+                <MapPin className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Movement HQ</p>
                   <p className="text-gray-300 text-sm">New Delhi, India</p>
@@ -196,11 +192,11 @@ export function Footer() {
               </li>
             </ul>
 
-            <div className="mt-6 p-4 bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-lg">
-              <p className="text-[#F59E0B] text-xs mb-2 uppercase tracking-wider">Join the Movement</p>
+            <div className="mt-6 p-4 bg-accent/10 border border-accent/30 rounded-[var(--radius-lg)]">
+              <p className="text-accent text-xs mb-2 uppercase tracking-wider">Join the Movement</p>
               <a 
                 href="#volunteer"
-                className="inline-flex items-center gap-2 text-white hover:text-[#F59E0B] transition-colors text-sm group"
+                className="inline-flex items-center gap-2 text-white hover:text-accent transition-colors text-sm group"
               >
                 Become a Volunteer
                 <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -222,21 +218,21 @@ export function Footer() {
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
               <p className="text-gray-400 text-sm text-center md:text-left">
                 © {currentYear} Animal Writes. All rights reserved. Made with{" "}
-                <Heart className="w-4 h-4 inline text-[#F59E0B]" aria-hidden="true" /> for India's animals.
+                <Heart className="w-4 h-4 inline text-accent" aria-hidden="true" /> for India's animals.
               </p>
               
               {/* Legal Links */}
               <div className="flex items-center gap-4 text-sm">
                 <a 
                   href="#terms" 
-                  className="text-gray-400 hover:text-[#F59E0B] transition-colors duration-200"
+                  className="text-gray-400 hover:text-accent transition-colors duration-200"
                 >
                   Terms & Conditions
                 </a>
                 <span className="text-gray-600">|</span>
                 <a 
                   href="#privacy" 
-                  className="text-gray-400 hover:text-[#F59E0B] transition-colors duration-200"
+                  className="text-gray-400 hover:text-accent transition-colors duration-200"
                 >
                   Privacy Policy
                 </a>
@@ -253,7 +249,7 @@ export function Footer() {
                 href="https://wugweb.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 bg-[#333333] hover:bg-gradient-to-r hover:from-[#F59E0B] hover:to-[#D97706] text-white px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2 focus:ring-offset-[#222222] group flex-shrink-0"
+                className="inline-flex items-center gap-3 bg-primary hover:bg-gradient-to-r hover:from-accent hover:to-[var(--accent-hover)] text-white px-5 py-2.5 rounded-[var(--radius-full)] transition-all duration-300 hover:shadow-[var(--elevation-lg)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary/95 group flex-shrink-0"
                 aria-label="Visit wugweb website - Website created by wugweb"
               >
                 <motion.img 

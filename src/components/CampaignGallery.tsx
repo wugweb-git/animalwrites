@@ -22,7 +22,7 @@ export function CampaignGallery() {
   return (
     <section 
       id="gallery"
-      className="py-16 md:py-24 bg-white" 
+      className="py-16 md:py-24 bg-background" 
       aria-labelledby="gallery-heading"
     >
       <div className="container mx-auto px-4">
@@ -35,7 +35,7 @@ export function CampaignGallery() {
             className="text-center mb-12 md:mb-16"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 shadow-sm"
+              className="inline-flex items-center gap-2 bg-[var(--surface-warm)] px-4 py-2 rounded-[var(--radius-full)] mb-4 shadow-[var(--elevation-sm)]"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
@@ -43,15 +43,15 @@ export function CampaignGallery() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Camera className="w-5 h-5 text-[#F59E0B]" aria-hidden="true" />
+                <Camera className="w-5 h-5 text-accent" aria-hidden="true" />
               </motion.div>
-              <span className="text-[#333333]">Our Movement</span>
+              <span className="text-primary">Our Movement</span>
             </motion.div>
             
-            <h2 id="gallery-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
+            <h2 id="gallery-heading" className="text-primary mb-4">
               Moments From Previous Campaigns
             </h2>
-            <p className="text-[#666666] text-base md:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
               A glimpse of the compassion and unity that drives our movement forward
             </p>
           </motion.div>
@@ -66,7 +66,7 @@ export function CampaignGallery() {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.03 }}
-                className={`relative group overflow-hidden rounded-xl shadow-lg aspect-square ${index === 12 ? 'hidden' : ''}`}
+                className={`relative group overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--elevation-lg)] aspect-square ${index === 12 ? 'hidden' : ''}`}
               >
                 <ImageWithFallback
                   src={image.url}
@@ -87,7 +87,7 @@ export function CampaignGallery() {
             viewport={{ once: true }}
             className="mt-12 md:mt-16 text-center"
           >
-            <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto">
+            <p className="text-muted-foreground text-base md:text-lg max-w-3xl mx-auto">
               Every letter, every voice, every act of compassion brings us closer to a more humane society. Join us in making history on November 29th, 2025.
             </p>
           </motion.div>

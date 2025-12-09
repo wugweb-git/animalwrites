@@ -39,31 +39,31 @@ export function ImpactStats() {
       icon: Users,
       value: "10,000+",
       label: "Citizens Committed",
-      color: "text-[#333333]",
+      color: "text-primary",
     },
     {
       icon: MapPin,
       value: "100+",
       label: "Cities Participating",
-      color: "text-[#333333]",
+      color: "text-primary",
     },
     {
       icon: Mail,
       value: "∞",
       label: "Letters of Hope",
-      color: "text-[#333333]",
+      color: "text-primary",
     },
     {
       icon: Heart,
       value: "1",
       label: "United Movement",
-      color: "text-[#333333]",
+      color: "text-primary",
     },
   ];
 
   return (
     <section
-      className="py-16 md:py-24 bg-white"
+      className="py-16 md:py-24 bg-background"
       aria-labelledby="impact-stats-heading"
     >
       <div className="container mx-auto px-4">
@@ -75,10 +75,10 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="impact-stats-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">
-              <span className="text-[#333333]">Our Growing</span> Movement
+            <h2 id="impact-stats-heading" className="text-primary mb-4">
+              <span className="text-primary">Our Growing</span> Movement
             </h2>
-            <p className="text-[#666666] text-base md:text-lg">
+            <p className="text-muted-foreground text-base md:text-lg">
               Join thousands of compassionate citizens making their voices heard
             </p>
           </motion.div>
@@ -94,7 +94,7 @@ export function ImpactStats() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
-                  className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#FFF8F3] to-white rounded-xl border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-all hover:shadow-lg"
+                  className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[var(--surface-warm)] to-background rounded-[var(--radius-xl)] border-2 border-accent/20 hover:border-accent transition-all hover:shadow-[var(--elevation-lg)]"
                 >
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
@@ -102,10 +102,10 @@ export function ImpactStats() {
                   >
                     <Icon className={`w-10 h-10 md:w-12 md:h-12 ${stat.color} mb-4`} aria-hidden="true" />
                   </motion.div>
-                  <p className="text-3xl md:text-4xl text-[#333333] mb-2">
+                  <p className="text-3xl md:text-4xl text-primary mb-2">
                     {stat.value}
                   </p>
-                  <p className="text-sm md:text-base text-[#666666] text-center">
+                  <p className="text-sm md:text-base text-muted-foreground text-center">
                     {stat.label}
                   </p>
                 </motion.div>
@@ -120,9 +120,9 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center"
           >
-            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-5 md:p-6 border-2 border-[#F59E0B]/30">
-              <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#333333]">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
+            <div className="inline-block bg-gradient-to-r from-[var(--surface-warm)] to-background rounded-[var(--radius-xl)] p-5 md:p-6 border-2 border-accent/30">
+              <p className="text-primary text-base md:text-lg">
+                <strong className="text-primary">Together, we are unstoppable.</strong> Every letter counts. Every voice matters.
               </p>
             </div>
           </motion.div>

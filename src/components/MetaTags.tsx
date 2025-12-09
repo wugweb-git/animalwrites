@@ -3,7 +3,7 @@ import { useEffect } from "react";
 export function MetaTags() {
   useEffect(() => {
     // Set document title
-    document.title = "Animal Writes - India's Largest Letter Petition Campaign for Street Dogs";
+    document.title = "Animal Writes - India's Largest Letter Petition Campaign - 2.5 Lakh Letters Delivered | Join Phase 2.0";
     
     // Set HTML lang attribute
     document.documentElement.lang = "en";
@@ -169,7 +169,7 @@ export function MetaTags() {
     };
 
     // Basic meta tags
-    setMetaTag("description", "Join India's largest letter petition campaign on November 29, 2025. Thousands will walk to post offices across India to mail handwritten letters to the Supreme Court, urging reconsideration of the stray dog removal order. Write your letter for compassion and coexistence.");
+    setMetaTag("description", "Animal Writes - India's largest letter petition campaign achieved historic success! Over 2.5 lakh handwritten letters delivered to Supreme Court on November 29, 2025. Join Phase 2.0: Pashu Bachao Vote Badhao to make animal welfare a democratic priority across India.");
     setMetaTag("keywords", "Animal Writes, letter petition, street dogs India, animal welfare, Supreme Court petition, stray dogs, GPO India, animal rights campaign, November 29 2025, handwritten letters, compassion movement, coexistence");
     setMetaTag("author", "Animal Writes Campaign");
     setMetaTag("robots", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");

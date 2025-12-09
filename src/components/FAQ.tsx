@@ -50,7 +50,7 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3] hidden"
+      className="py-16 md:py-24 bg-gradient-to-b from-background to-[var(--surface-warm)] hidden"
       aria-labelledby="faq-heading"
     >
       <div className="container mx-auto px-4">
@@ -63,12 +63,12 @@ export function FAQ() {
             className="text-center mb-12"
           >
             <div className="inline-flex items-center gap-3 mb-4">
-              <HelpCircle className="w-8 h-8 text-[#333333]" aria-hidden="true" />
-              <h2 id="faq-heading" className="text-3xl md:text-4xl text-[#333333] font-bold">
+              <HelpCircle className="w-8 h-8 text-primary" aria-hidden="true" />
+              <h2 id="faq-heading" className="text-primary">
                 Frequently Asked Questions
               </h2>
             </div>
-            <p className="text-[#666666] text-lg">
+            <p className="text-muted-foreground">
               Got questions? We've got answers. Here's everything you need to know about the campaign.
             </p>
           </motion.div>
@@ -82,18 +82,18 @@ export function FAQ() {
             className="mb-8"
           >
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666666]" aria-hidden="true" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" aria-hidden="true" />
               <Input
                 type="text"
                 placeholder="Search questions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-6 text-base border-2 border-gray-200 focus:border-[#F59E0B] rounded-xl"
+                className="pl-12 py-6 text-base border-2 border-border focus:border-accent rounded-[var(--radius-xl)]"
                 aria-label="Search FAQ questions"
               />
             </div>
             {searchQuery && (
-              <p className="text-sm text-[#666666] mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 {filteredFaqs.length} {filteredFaqs.length === 1 ? 'result' : 'results'} found
               </p>
             )}
@@ -105,10 +105,10 @@ export function FAQ() {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <p className="text-[#666666] text-lg">No questions found matching "{searchQuery}"</p>
+              <p className="text-muted-foreground">No questions found matching "{searchQuery}"</p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="text-[#F59E0B] hover:text-[#D97706] underline mt-2"
+                className="text-accent hover:text-[var(--accent-hover)] underline mt-2"
               >
                 Clear search
               </button>
@@ -125,15 +125,15 @@ export function FAQ() {
                 >
                   <AccordionItem
                     value={`item-${index}`}
-                    className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#F59E0B] hover:shadow-md transition-all duration-300"
+                    className="bg-card border-2 border-border rounded-[var(--radius-xl)] px-6 hover:border-accent hover:shadow-[var(--elevation-md)] transition-all duration-300"
                   >
                     <AccordionTrigger
-                      className="text-left text-[#333333] hover:text-[#333333] py-5"
+                      className="text-left text-primary hover:text-primary py-5"
                       aria-label={`Question ${index + 1}: ${faq.question}`}
                     >
                       <span className="pr-4">{faq.question}</span>
                     </AccordionTrigger>
-                    <AccordionContent className="text-[#666666] leading-relaxed pb-5">
+                    <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -147,11 +147,11 @@ export function FAQ() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="mt-12 bg-[#FFF8F3] rounded-2xl p-8 border-2 border-[#F59E0B]/20"
+            className="mt-12 bg-[var(--surface-warm)] rounded-[var(--radius-2xl)] p-8 border-2 border-accent/20"
           >
-            <p className="text-center text-[#333333] leading-relaxed">
-              <strong className="text-[#333333]">Still have questions?</strong> Feel free to reach out to us on social media
-              using <span className="text-[#333333] font-semibold">#AnimalWrites</span> or contact your local animal welfare organizations
+            <p className="text-center text-primary leading-relaxed">
+              <strong className="text-primary">Still have questions?</strong> Feel free to reach out to us on social media
+              using <span className="text-primary">#{'\u200B'}AnimalWrites</span> or contact your local animal welfare organizations
               for more information.
             </p>
           </motion.div>

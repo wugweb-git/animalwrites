@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 export function CountdownTimer() {
   return (
     <section 
-      className="py-12 md:py-16 bg-gradient-to-br from-[#333333] via-[#444444] to-[#333333] relative overflow-hidden"
+      className="py-12 md:py-16 bg-gradient-to-br from-primary via-primary/90 to-primary relative overflow-hidden"
       aria-labelledby="phase-two-heading"
     >
       {/* Animated background pattern */}
@@ -13,7 +13,7 @@ export function CountdownTimer() {
           {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-[#F59E0B] rounded-full"
+              className="absolute w-2 h-2 bg-accent rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -44,7 +44,7 @@ export function CountdownTimer() {
             className="mb-8"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#F59E0B] rounded-full px-5 md:px-7 py-2.5 md:py-3 mb-6"
+              className="inline-flex items-center gap-2 bg-accent rounded-[var(--radius-full)] px-5 md:px-7 py-2.5 md:py-3 mb-6"
               animate={{ 
                 scale: [1, 1.05, 1],
               }}
@@ -60,14 +60,14 @@ export function CountdownTimer() {
               </span>
             </motion.div>
             
-            <h2 id="phase-two-heading" className="text-white text-3xl md:text-5xl lg:text-6xl mb-4">
+            <h2 id="phase-two-heading" className="text-white mb-4">
               Pashu Bachao, Vote Badhao
             </h2>
-            <p className="text-[#F59E0B] text-xl md:text-2xl mb-4 italic">
+            <p className="text-accent text-xl md:text-2xl mb-4 italic">
               (Save Animals, Increase Votes)
             </p>
             <p className="text-white/90 text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
-              After 2.5 lakh letters to the Supreme Court, we're taking the next step. Politicians respond to votes. Let's show them that <span className="text-[#F59E0B]">animal welfare is electoral power</span>.
+              After 2.5 lakh letters to the Supreme Court, we're taking the next step. Politicians respond to votes. Let's show them that <span className="text-accent">animal welfare is electoral power</span>.
             </p>
           </motion.div>
 
@@ -80,7 +80,7 @@ export function CountdownTimer() {
             className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 mt-8"
           >
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              className="bg-white/10 backdrop-blur-sm rounded-[var(--radius-xl)] p-5 md:p-7 border border-accent/30 hover:border-accent/60 transition-colors"
               whileHover={{ scale: 1.03, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -89,16 +89,16 @@ export function CountdownTimer() {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 className="inline-block mb-4"
               >
-                <Vote className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
+                <Vote className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-xl md:text-2xl mb-2">Register to Vote</h3>
+              <h3 className="text-white mb-2">Register to Vote</h3>
               <p className="text-white/80 text-sm md:text-base leading-relaxed">
                 Ensure you're registered and ready to make animal welfare a voting issue
               </p>
             </motion.div>
 
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              className="bg-white/10 backdrop-blur-sm rounded-[var(--radius-xl)] p-5 md:p-7 border border-accent/30 hover:border-accent/60 transition-colors"
               whileHover={{ scale: 1.03, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -107,16 +107,16 @@ export function CountdownTimer() {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 className="inline-block mb-4"
               >
-                <Users className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
+                <Users className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-xl md:text-2xl mb-2">Build the Movement</h3>
+              <h3 className="text-white mb-2">Build the Movement</h3>
               <p className="text-white/80 text-sm md:text-base leading-relaxed">
                 Connect with fellow voters who care about animals and amplify our voice
               </p>
             </motion.div>
 
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              className="bg-white/10 backdrop-blur-sm rounded-[var(--radius-xl)] p-5 md:p-7 border border-accent/30 hover:border-accent/60 transition-colors"
               whileHover={{ scale: 1.03, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
@@ -125,9 +125,9 @@ export function CountdownTimer() {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 className="inline-block mb-4"
               >
-                <TrendingUp className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
+                <TrendingUp className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-xl md:text-2xl mb-2">Hold Leaders Accountable</h3>
+              <h3 className="text-white mb-2">Hold Leaders Accountable</h3>
               <p className="text-white/80 text-sm md:text-base leading-relaxed">
                 Make candidates pledge their commitment to animal welfare policies
               </p>

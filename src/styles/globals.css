@@ -1,87 +1,117 @@
-@custom-variant dark (&:is(.dark *));
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap');
 
 :root {
+  /* The default font size for the application */
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: #333333;
-  --card: #ffffff;
-  --card-foreground: #333333;
-  --popover: #ffffff;
-  --popover-foreground: #333333;
-  --primary: #F59E0B;
-  --primary-foreground: #ffffff;
-  --secondary: #F5F5F5;
-  --secondary-foreground: #333333;
-  --muted: #F5F5F5;
-  --muted-foreground: #666666;
-  --accent: #FFF8F3;
-  --accent-foreground: #333333;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --input: transparent;
-  --input-background: #F5F5F5;
-  --switch-background: #cbced4;
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --ring: #F59E0B;
-  --chart-1: #F59E0B;
-  --chart-2: #666666;
-  --chart-3: #333333;
-  --chart-4: #FFF8F3;
-  --chart-5: #F5F5F5;
-  --radius: 0.75rem;
-  --sidebar: #F5F5F5;
-  --sidebar-foreground: #333333;
-  --sidebar-primary: #F59E0B;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #FFF8F3;
-  --sidebar-accent-foreground: #333333;
-  --sidebar-border: rgba(0, 0, 0, 0.08);
-  --sidebar-ring: #F59E0B;
   
-  /* Campaign specific colors */
-  --india-post-yellow: #F59E0B;
-  --soft-grey: #F5F5F5;
-  --charcoal: #333333;
-  --warm-beige: #FFF8F3;
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 3rem;
+  
+  /* Font weights */
+  --font-weight-regular: 400;
   --font-weight-medium: 500;
-  --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* The default background color for the application. */
+  --background: rgba(255, 255, 255, 1.00);
+  /* The default color for elements or text that appears on top of the background. */
+  --foreground: rgba(0, 0, 0, 1.00);
+  /* The background color for cards, modals, and other containers. */
+  --card: rgba(255, 255, 255, 1.00);
+  /* The default color for text or elements that appear on top of cards, modals and other background containers. */
+  --card-foreground: rgba(41, 38, 33, 1.00);
+  /* The background color for dropdowns and tooltips. */
+  --popover: rgba(255, 255, 255, 1.00);
+  /* The default color for text or elements that appear on top of dropdowns and tooltips. */
+  --popover-foreground: rgba(0, 0, 0, 1.00);
+  /* The primary color used for buttons, links, and other interactive elements. */
+  --primary: rgba(43, 43, 43, 1.00);
+  /* The default color for text or elements that appear on top of primary colored elements. */
+  --primary-foreground: rgba(255, 255, 255, 1.00);
+  /* The secondary color used for secondary(but NOT-DESTRUCTIVE) buttons and interactive elements. */
+  --secondary: rgba(223, 223, 223, 1.00);
+  /* The default color for text or elements that appear on top of secondary colored elements. */
+  --secondary-foreground: rgba(0, 0, 0, 1.00);
+  /* The muted color used for less prominent elements, such as disabled buttons or disabled text. */
+  --muted: rgba(244, 244, 244, 1.00);
+  /* The default color for text or elements that appear on top of muted colored elements. */
+  --muted-foreground: rgba(125, 125, 125, 1.00);
+  /* The accent color used for highlights, links, and other interactive elements. */
+  --accent: rgba(255, 190, 26, 1.00);
+  /* The default color for text or elements that appear on top of accent colored elements. */
+  --accent-foreground: rgba(0, 0, 0, 1.00);
+  /* The color used for background in destructive actions, such as delete buttons or error messages. */
+  --destructive: rgba(239, 67, 67, 1.00);
+  /* The default color for text or elements that appear on top of destructive colored elements. */
+  --destructive-foreground: rgba(255, 255, 255, 1.00);
+  /* The default border color for elements such as inputs, buttons, and other containers. */
+  --border: rgba(223, 223, 223, 1.00);
+  /* The default background color for input fields once the text has been filled. Should be either transparent or match the input-background. */
+  --input: rgba(255, 255, 255, 1.00);
+  /* The default background color for input fields, text areas, and other input elements. */
+  --input-background: rgba(255, 255, 255, 1.00);
+  /* The default color for focus rings, outlines, and other focus indicators. */
+  --ring: rgba(255, 190, 26, 1.00);
+  /* Shadow for small elevations, such as cards or modals. */
+  --elevation-sm: 0px 6px 6px -6px rgba(0, 0, 0, 0.16), 0px 0px 1px 0px rgba(0, 0, 0, 0.4);
+  /* The color for chart elements, such as a bar or line in a chart. */
+  --chart-1: rgba(68, 68, 68, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-2: rgba(244, 244, 244, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-3: rgba(186, 186, 186, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-4: rgba(255, 190, 26, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-5: rgba(239, 67, 67, 1.00);
+  /* The default border radius for small elements. */
+  --radius-sm: 4px;
+  /* The default border radius for medium elements. */
+  --radius-md: 8px;
+  /* The default border radius for large elements. */
+  --radius-lg: 12px;
+  /* The default border radius for circular elements. */
+  --radius-full: 9999px;
+  /* The background color for sidebars, navigation menus, and other persistent elements. */
+  --sidebar: rgba(255, 255, 255, 1.00);
+  /* The default color for text or elements that appear on top of sidebars, navigation menus, and other persistent elements. */
+  --sidebar-foreground: rgba(48, 51, 53, 1.00);
+  /* The primary color used for buttons, links, and other interactive elements in sidebars and navigation menus. */
+  --sidebar-primary: rgba(244, 244, 244, 1.00);
+  /* The default color for text or elements that appear on top of primary colored elements in sidebars and navigation menus. */
+  --sidebar-primary-foreground: rgba(48, 51, 53, 1.00);
+  /* The accent color used for highlights, links, and other interactive elements in sidebars and navigation menus. */
+  --sidebar-accent: rgba(255, 190, 26, 1.00);
+  /* The default color for text or elements that appear on top of accent colored elements in sidebars and navigation menus. */
+  --sidebar-accent-foreground: rgba(0, 0, 0, 1.00);
+  /* The default border color for elements in sidebars and navigation menus. */
+  --sidebar-border: rgba(223, 223, 223, 1.00);
+  /* The default color for focus rings, outlines, and other focus indicators in sidebars and navigation menus. */
+  --sidebar-ring: rgba(255, 190, 26, 1.00);
+  
+  /* Additional color tokens for hover states and surfaces */
+  --accent-hover: rgba(217, 119, 6, 1.00);
+  --primary-hover: rgba(26, 26, 26, 1.00);
+  --surface-warm: rgba(255, 248, 243, 1.00);
+  
+  /* Additional radius tokens */
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  
+  /* Additional elevation tokens */
+  --elevation-md: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --elevation-lg: 0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --elevation-xl: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --elevation-2xl: 0px 30px 60px -15px rgba(0, 0, 0, 0.3);
+  --elevation-3xl: 0px 35px 70px -20px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
@@ -104,17 +134,16 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-input-background: var(--input-background);
-  --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -123,6 +152,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --shadow-sm: var(--elevation-sm);
+  
+  /* Additional tokens */
+  --color-accent-hover: var(--accent-hover);
+  --color-primary-hover: var(--primary-hover);
+  --color-surface-warm: var(--surface-warm);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+  --shadow-xl: var(--elevation-xl);
+  --shadow-2xl: var(--elevation-2xl);
+  --shadow-3xl: var(--elevation-3xl);
 }
 
 @layer base {
@@ -132,177 +175,74 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: var(--font-size);
   }
 }
 
-/**
- * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
- */
-@layer base {
-  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
-    h1 {
-      font-size: var(--text-2xl);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+h1 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25;
+}
 
-    h2 {
-      font-size: var(--text-xl);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+h2 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 36px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
 
-    h3 {
-      font-size: var(--text-lg);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+h3 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 24px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
 
-    h4 {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+h4 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.5;
+}
 
-    p {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-normal);
-      line-height: 1.5;
-    }
+p {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
 
-    label {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+span {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
 
-    button {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-medium);
-      line-height: 1.5;
-    }
+label {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
 
-    input {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-normal);
-      line-height: 1.5;
-    }
-  }
+button {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+}
+
+input {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
 }
 
 html {
   font-size: var(--font-size);
-  scroll-behavior: smooth;
-}
-
-/* Reduced motion for accessibility - Respect user's motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Custom scrollbar styling */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #F5F5F5;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #F59E0B;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #D97706;
-}
-
-/* Focus visible improvements for keyboard navigation */
-:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-/* Screen reader only utility class */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Make sr-only content visible when focused (for skip links) */
-.sr-only:focus,
-.sr-only:active {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: inherit;
-  margin: inherit;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
-/* Performance: CSS-only animations to replace Motion animations */
-@keyframes slide-up {
-  from {
-    transform: translateY(100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scale-in {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.3s ease-out;
-}
-
-/* Content visibility for performance - defer rendering of off-screen content */
-.content-visibility-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 500px;
 }

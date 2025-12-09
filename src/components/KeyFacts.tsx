@@ -45,17 +45,17 @@ export function KeyFacts() {
             className="text-center mb-12"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#FFF8F3] px-4 py-2 rounded-full mb-4 border border-[#F59E0B]/20"
+              className="inline-flex items-center gap-2 bg-[var(--surface-warm)] px-4 py-2 rounded-[var(--radius-full)] mb-4 border border-accent/20"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <CheckCircle className="w-5 h-5 text-[#333333]" aria-hidden="true" />
-              <span className="text-[#333333]">Evidence-Based</span>
+              <CheckCircle className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span className="text-primary">Evidence-Based</span>
             </motion.div>
-            <h2 id="key-facts-heading" className="text-2xl md:text-4xl text-[#333333] mb-4 font-bold">
+            <h2 id="key-facts-heading" className="text-primary mb-4">
               The Facts Speak for Themselves
             </h2>
-            <p className="text-[#666666] text-base md:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
               Understanding the ground reality and viable solutions
             </p>
           </motion.div>
@@ -70,22 +70,22 @@ export function KeyFacts() {
                 viewport={{ once: true }}
               >
                 <motion.div
-                  className="bg-white rounded-2xl p-6 md:p-8 border-2 border-gray-200 hover:border-[#F59E0B] hover:shadow-lg transition-all h-full"
+                  className="bg-card rounded-[var(--radius-2xl)] p-6 md:p-8 border-2 border-border hover:border-accent hover:shadow-[var(--elevation-lg)] transition-all h-full"
                   whileHover={{ y: -5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <div className="flex items-start gap-4 mb-4">
                     <motion.div
-                      className="bg-[#FFF8F3] rounded-full p-3"
+                      className="bg-[var(--surface-warm)] rounded-[var(--radius-full)] p-3"
                       whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <fact.icon className="w-6 h-6 text-[#333333]" aria-hidden="true" />
+                      <fact.icon className="w-6 h-6 text-primary" aria-hidden="true" />
                     </motion.div>
                     <div className="flex-1">
-                      <h3 className="text-[#333333] mb-2 text-base md:text-lg">{fact.title}</h3>
+                      <h3 className="text-primary mb-2 text-base md:text-lg">{fact.title}</h3>
                       <motion.div
-                        className="text-2xl md:text-3xl text-[#333333] mb-3"
+                        className="text-2xl md:text-3xl text-primary mb-3"
                         initial={{ scale: 0.8, opacity: 0 }}
                         whileInView={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
@@ -95,7 +95,7 @@ export function KeyFacts() {
                       </motion.div>
                     </div>
                   </div>
-                  <p className="text-[#666666] leading-relaxed text-sm md:text-base">{fact.description}</p>
+                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{fact.description}</p>
                 </motion.div>
               </motion.div>
             ))}
@@ -106,9 +106,9 @@ export function KeyFacts() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="bg-[#FFF8F3] rounded-2xl p-6 md:p-12 border-2 border-[#F59E0B]/20"
+            className="bg-[var(--surface-warm)] rounded-[var(--radius-2xl)] p-6 md:p-12 border-2 border-accent/20"
           >
-            <h3 className="text-[#333333] text-lg md:text-xl mb-6 md:mb-8 text-center font-bold">Why ABC Programs Work</h3>
+            <h3 className="text-primary mb-6 md:mb-8 text-center">Why ABC Programs Work</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {[
                 {
@@ -136,11 +136,12 @@ export function KeyFacts() {
                     whileHover={{ scale: 1.2, rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <CheckCircle className="w-5 h-5 text-[#333333] flex-shrink-0 mt-1" aria-hidden="true" />
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" aria-hidden="true" />
                   </motion.div>
                   <div>
-                    <p className="text-[#333333] mb-1 font-medium">{item.title}</p>
-                    <p className="text-[#666666] text-sm md:text-base">
+                    <p className="text-primary mb-1">
+{item.title}</p>
+                    <p className="text-muted-foreground text-sm md:text-base">
                       {item.desc}
                     </p>
                   </div>

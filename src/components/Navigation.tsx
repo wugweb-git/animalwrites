@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
-import { Logo } from "./Logo";
+import Vector from "../imports/Vector";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,7 +44,7 @@ export function Navigation() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm transition-shadow duration-300"
+      className="fixed top-0 left-0 right-0 z-50 bg-primary backdrop-blur-sm shadow-[var(--elevation-md)] transition-shadow duration-300"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -52,14 +52,12 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 rounded-lg p-1"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary rounded-[var(--radius-lg)] p-2"
             aria-label="Scroll to top - Animal Writes home"
           >
-            <Logo 
-              size={64}
-              className="h-12 w-12 md:h-16 md:w-16"
-            />
-            <span className="text-[#333333] tracking-wide text-base md:text-lg hidden sm:inline">ANIMAL WRITES</span>
+            <div className="h-10 w-24 md:h-12 md:w-32" style={{ '--fill-0': 'white' } as React.CSSProperties}>
+              <Vector />
+            </div>
           </button>
 
           {/* Desktop Navigation */}
@@ -68,7 +66,7 @@ export function Navigation() {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className="text-sm text-[#666666] hover:text-[#333333] transition-colors focus:outline-none focus:text-[#333333] focus:underline underline-offset-4"
+                className="text-sm text-white/70 hover:text-white transition-colors focus:outline-none focus:text-white focus:underline underline-offset-4"
                 aria-label={`Navigate to ${link.label}`}
               >
                 {link.label}
@@ -76,7 +74,7 @@ export function Navigation() {
             ))}
             <Button
               onClick={() => scrollToSection("upload-receipt")}
-              className="bg-[#F59E0B] hover:bg-[#D97706] text-white focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
+              className="bg-accent hover:bg-[var(--accent-hover)] text-white focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
               size="sm"
               aria-label="Navigate to upload receipt section"
             >
@@ -84,7 +82,7 @@ export function Navigation() {
             </Button>
             <Button
               onClick={() => scrollToSection("letter-templates")}
-              className="bg-[#333333] hover:bg-[#1a1a1a] text-white focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
+              className="bg-white hover:bg-white/90 text-primary focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
               size="sm"
               aria-label="Navigate to write letter section"
             >
@@ -95,7 +93,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-3 text-[#666666] hover:text-[#D97706] transition-colors focus:outline-none focus:ring-2 focus:ring-[#333333] rounded-lg"
+            className="md:hidden p-3 text-white/70 hover:text-accent transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded-[var(--radius-lg)]"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu"
@@ -113,7 +111,7 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden border-t border-gray-100 overflow-hidden"
+              className="md:hidden border-t border-white/10 overflow-hidden"
               role="menu"
             >
               <div className="flex flex-col gap-2 py-6 px-4">
@@ -121,7 +119,7 @@ export function Navigation() {
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className="text-left px-6 py-4 text-lg text-[#666666] hover:text-[#D97706] hover:bg-[#FFF8F3] rounded-xl transition-colors focus:outline-none focus:bg-[#FFF8F3] focus:text-[#D97706]"
+                    className="text-left px-6 py-4 text-lg text-white/70 hover:text-accent hover:bg-white/10 rounded-[var(--radius-xl)] transition-colors focus:outline-none focus:bg-white/10 focus:text-accent"
                     role="menuitem"
                     aria-label={`Navigate to ${link.label}`}
                   >
@@ -130,7 +128,7 @@ export function Navigation() {
                 ))}
                 <Button
                   onClick={() => scrollToSection("upload-receipt")}
-                  className="bg-[#F59E0B] hover:bg-[#D97706] text-white mt-4 py-6 text-lg focus:ring-2 focus:ring-[#F59E0B] focus:ring-offset-2"
+                  className="bg-accent hover:bg-[var(--accent-hover)] text-white mt-4 py-6 text-lg focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   role="menuitem"
                   aria-label="Navigate to upload receipt section"
                 >
@@ -138,7 +136,7 @@ export function Navigation() {
                 </Button>
                 <Button
                   onClick={() => scrollToSection("letter-templates")}
-                  className="bg-[#333333] hover:bg-[#1a1a1a] text-white mt-2 py-6 text-lg focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
+                  className="bg-white hover:bg-white/90 text-primary mt-2 py-6 text-lg focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
                   role="menuitem"
                   aria-label="Navigate to write letter section"
                 >

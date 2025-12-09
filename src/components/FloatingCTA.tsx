@@ -43,26 +43,26 @@ export function FloatingCTA() {
       role="complementary"
       aria-label="Quick action banner"
     >
-      <div className="bg-white rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-[#333333]/20 relative hover:shadow-3xl transition-shadow">
+      <div className="bg-card rounded-[var(--radius-2xl)] shadow-[var(--elevation-2xl)] p-4 md:p-5 border-2 border-primary/20 relative hover:shadow-[var(--elevation-3xl)] transition-shadow">
         <button
           onClick={handleDismiss}
-          className="absolute -top-3 -right-3 bg-[#333333] text-white rounded-full p-2 hover:bg-[#1a1a1a] hover:rotate-90 active:scale-90 transition-all focus:outline-none focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 shadow-lg"
+          className="absolute -top-3 -right-3 bg-primary text-white rounded-[var(--radius-full)] p-2 hover:bg-[var(--primary-hover)] hover:rotate-90 active:scale-90 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-[var(--elevation-lg)]"
           aria-label="Dismiss call to action"
         >
           <X className="w-4 h-4" aria-hidden="true" />
         </button>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="bg-[#333333] rounded-full p-3 flex-shrink-0">
+          <div className="bg-primary rounded-[var(--radius-full)] p-3 flex-shrink-0">
             <Mail className="w-6 h-6 text-white" aria-hidden="true" />
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <p className="text-[#333333] font-semibold">Ready to make a difference?</p>
-            <p className="text-xs sm:text-sm text-[#666666]">Join thousands across India</p>
+            <p className="text-primary">Ready to make a difference?</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Join thousands across India</p>
           </div>
           
           <Button
-            className="bg-[#333333] hover:bg-[#1a1a1a] text-white whitespace-nowrap focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 hover:scale-105 active:scale-95 transition-transform"
+            className="bg-primary hover:bg-[var(--primary-hover)] text-white whitespace-nowrap focus:ring-2 focus:ring-primary focus:ring-offset-2 hover:scale-105 active:scale-95 transition-transform"
             onClick={handleCTAClick}
             aria-label="Navigate to write letter section"
           >
