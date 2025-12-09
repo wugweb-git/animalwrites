@@ -1,4 +1,4 @@
-import { Share2, Twitter, Facebook, MessageCircle, Copy, Check, Users, Instagram } from "lucide-react";
+import { Share2, Facebook, MessageCircle, Copy, Check, Users, Instagram } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,11 +17,6 @@ export function SocialShare() {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
-  };
-
-  const shareOnTwitter = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-    window.open(url, "_blank");
   };
 
   const shareOnFacebook = () => {
@@ -65,20 +60,6 @@ export function SocialShare() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-6 md:mb-8">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={shareOnTwitter}
-                  className="bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white flex items-center gap-2 px-4 md:px-6 py-5 md:py-6 focus:ring-2 focus:ring-[#1DA1F2] focus:ring-offset-2"
-                  aria-label="Share on Twitter"
-                >
-                  <Twitter className="w-5 h-5" aria-hidden="true" />
-                  <span className="hidden sm:inline">Share on</span> Twitter
-                </Button>
-              </motion.div>
-
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

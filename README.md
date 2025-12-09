@@ -1,7 +1,7 @@
 
-  # Animal Writes Campaign Website
+  # Animal Writes
 
-  This is a code bundle for Animal Writes Campaign Website. The original project is available at https://www.figma.com/design/eGgjyzHrsENKXnII60MJzY/Animal-Writes-Campaign-Website.
+  This is a code bundle for Animal Writes. The original project is available at https://www.figma.com/design/eGgjyzHrsENKXnII60MJzY/Animal-Writes.
 
   ## Running the code
 

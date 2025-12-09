@@ -27,14 +27,28 @@ export function Timeline() {
     {
       date: "November 29, 2025",
       title: "The Big Day - National GPO Walk",
-      description: "Thousands walk to post offices across India to mail letters to the Supreme Court",
-      status: "upcoming" as const,
+      description: "Thousands walked to post offices across India to mail letters to the Supreme Court",
+      status: "completed" as const,
+      icon: CheckCircle2,
+    },
+    {
+      date: "December 2, 2025",
+      title: "2.5 Lakhs Letters Delivered!",
+      description: "Historic achievement - Over 2,50,000 handwritten letters successfully sent to Supreme Court",
+      status: "completed" as const,
+      icon: CheckCircle2,
+    },
+    {
+      date: "December 2025 - Ongoing",
+      title: "Phase 2.0: Pashu Bachao Vote Badhao",
+      description: "Electoral engagement and voter registration campaign to amplify animal welfare through democratic participation",
+      status: "current" as const,
       icon: Calendar,
     },
     {
-      date: "December 2025",
-      title: "Follow-up & Awareness",
-      description: "Continue spreading awareness and document the movement's impact",
+      date: "2026 & Beyond",
+      title: "Sustained Advocacy & Impact",
+      description: "Continuing awareness campaigns, policy monitoring, and building a compassionate India",
       status: "upcoming" as const,
       icon: Clock,
     },
@@ -98,13 +112,15 @@ export function Timeline() {
                       className={`bg-gradient-to-br ${
                         milestone.status === "completed"
                           ? "from-[#FFF8F3] to-white border-[#F59E0B]"
+                          : milestone.status === "current"
+                          ? "from-[#F59E0B]/10 to-white border-[#F59E0B] shadow-lg"
                           : "from-white to-[#FFF8F3] border-[#F59E0B]/30"
                       } border-2 rounded-2xl p-5 md:p-6 shadow-md hover:shadow-lg transition-all`}
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <motion.div
                           className={`p-2 rounded-full ${
-                            milestone.status === "completed"
+                            milestone.status === "completed" || milestone.status === "current"
                               ? "bg-[#F59E0B]"
                               : "bg-[#F59E0B]/20"
                           }`}
@@ -113,7 +129,7 @@ export function Timeline() {
                         >
                           <milestone.icon
                             className={`w-5 h-5 ${
-                              milestone.status === "completed"
+                              milestone.status === "completed" || milestone.status === "current"
                                 ? "text-white"
                                 : "text-[#D97706]"
                             }`}
@@ -123,7 +139,7 @@ export function Timeline() {
                         <div className="flex-1">
                           <p
                             className={`text-sm ${
-                              milestone.status === "completed"
+                              milestone.status === "completed" || milestone.status === "current"
                                 ? "text-[#D97706]"
                                 : "text-[#666666]"
                             } mb-1`}
@@ -161,10 +177,10 @@ export function Timeline() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             viewport={{ once: true }}
-            className="mt-12 text-center bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20"
+            className="mt-12 text-center bg-gradient-to-r from-[#F59E0B] to-[#D97706] rounded-2xl p-6 md:p-8 shadow-xl"
           >
-            <p className="text-[#333333] text-base md:text-lg">
-              <strong className="text-[#D97706]">Be part of history!</strong> Join us on November 29th and help create a movement that will be remembered for generations.
+            <p className="text-white text-base md:text-lg">
+              <strong>Historic achievement unlocked! 🎉</strong> Over 2.5 lakh letters delivered to the Supreme Court. Now join Phase 2.0 - <strong>Pashu Bachao Vote Badhao</strong> to amplify animal welfare through electoral engagement!
             </p>
           </motion.div>
         </div>

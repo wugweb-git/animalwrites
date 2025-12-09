@@ -312,4 +312,226 @@ app.get("/make-server-7a8516f4/receipts", async (c) => {
   }
 });
 
+// Visitor counter endpoint - increment and get total visitors
+app.post("/make-server-7a8516f4/visitor/count", async (c) => {
+  try {
+    const VISITOR_KEY = "site:visitor_count";
+    
+    // Get current count
+    const currentCount = await kv.get(VISITOR_KEY);
+    
+    // If counter doesn't exist or is very low (less than 200K), initialize to 200K
+    let newCount;
+    if (currentCount === null || currentCount === undefined || currentCount < 200000) {
+      newCount = 200000;
+      console.log(`Initializing visitor count to ${newCount} (was: ${currentCount})`);
+    } else {
+      newCount = currentCount + 1;
+    }
+    
+    // Update count
+    await kv.set(VISITOR_KEY, newCount);
+    
+    console.log(`Visitor count updated: ${newCount}`);
+    
+    return c.json({
+      success: true,
+      count: newCount,
+    });
+  } catch (error) {
+    console.error("Error updating visitor count:", error);
+    return c.json({ error: "Failed to update visitor count" }, 500);
+  }
+});
+
+// Get visitor count without incrementing
+app.get("/make-server-7a8516f4/visitor/count", async (c) => {
+  try {
+    const VISITOR_KEY = "site:visitor_count";
+    const count = await kv.get(VISITOR_KEY) || 0;
+    
+    return c.json({
+      success: true,
+      count: count,
+    });
+  } catch (error) {
+    console.error("Error fetching visitor count:", error);
+    return c.json({ error: "Failed to fetch visitor count" }, 500);
+  }
+});
+
+// Initialize visitor count to a specific value (admin use)
+app.post("/make-server-7a8516f4/visitor/initialize", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { count } = body;
+
+    if (typeof count !== "number" || count < 0) {
+      return c.json({ error: "Invalid count value. Must be a positive number." }, 400);
+    }
+
+    const VISITOR_KEY = "site:visitor_count";
+    await kv.set(VISITOR_KEY, count);
+    
+    console.log(`Visitor count initialized to: ${count}`);
+    
+    return c.json({
+      success: true,
+      message: `Visitor count initialized to ${count}`,
+      count: count,
+    });
+  } catch (error) {
+    console.error("Error initializing visitor count:", error);
+    return c.json({ error: "Failed to initialize visitor count" }, 500);
+  }
+});
+
+// Get visitor count from Google Analytics API
+app.get("/make-server-7a8516f4/analytics/visitors", async (c) => {
+  try {
+    const gaCredentials = Deno.env.get("GOOGLE_ANALYTICS_CREDENTIALS");
+    const gaPropertyId = Deno.env.get("GA_PROPERTY_ID");
+
+    if (!gaCredentials || !gaPropertyId) {
+      console.error("Missing Google Analytics credentials or property ID");
+      return c.json({ 
+        error: "Google Analytics not configured",
+        message: "Please configure GOOGLE_ANALYTICS_CREDENTIALS and GA_PROPERTY_ID environment variables"
+      }, 500);
+    }
+
+    // Parse the service account credentials
+    let credentials;
+    try {
+      credentials = JSON.parse(gaCredentials);
+      
+      // Validate that it's a proper service account JSON
+      if (!credentials.private_key || !credentials.client_email || !credentials.project_id) {
+        console.error("Invalid service account format - missing required fields");
+        return c.json({ 
+          error: "Invalid credentials format",
+          message: "GOOGLE_ANALYTICS_CREDENTIALS must be a complete Google Cloud Service Account JSON key file with private_key, client_email, and project_id fields"
+        }, 500);
+      }
+    } catch (parseError) {
+      console.error("Error parsing GA credentials:", parseError);
+      return c.json({ 
+        error: "Invalid credentials format",
+        message: "GOOGLE_ANALYTICS_CREDENTIALS must be valid JSON from a Google Cloud Service Account key file, not a password or string"
+      }, 500);
+    }
+
+    // Create JWT for Google API authentication
+    const header = {
+      alg: "RS256",
+      typ: "JWT",
+    };
+
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      iss: credentials.client_email,
+      scope: "https://www.googleapis.com/auth/analytics.readonly",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600,
+      iat: now,
+    };
+
+    // Import crypto for signing
+    const crypto = await import("node:crypto");
+    
+    // Create JWT token
+    const base64url = (str: string) => 
+      btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    
+    const headerBase64 = base64url(JSON.stringify(header));
+    const payloadBase64 = base64url(JSON.stringify(payload));
+    const signatureInput = `${headerBase64}.${payloadBase64}`;
+    
+    // Sign with private key
+    const sign = crypto.createSign("RSA-SHA256");
+    sign.update(signatureInput);
+    sign.end();
+    const signature = sign.sign(credentials.private_key, "base64");
+    const signatureBase64 = signature.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    
+    const jwt = `${signatureInput}.${signatureBase64}`;
+
+    // Exchange JWT for access token
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+    });
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error("Token exchange failed:", errorText);
+      return c.json({ 
+        error: "Failed to authenticate with Google",
+        details: errorText
+      }, 500);
+    }
+
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    // Fetch analytics data from GA4 Data API
+    const analyticsResponse = await fetch(
+      `https://analyticsdata.googleapis.com/v1beta/properties/${gaPropertyId}:runReport`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dateRanges: [
+            {
+              startDate: "2020-01-01", // Get all-time data
+              endDate: "today",
+            },
+          ],
+          metrics: [
+            { name: "totalUsers" }, // Total unique users all-time
+            { name: "sessions" }, // Total sessions
+          ],
+        }),
+      }
+    );
+
+    if (!analyticsResponse.ok) {
+      const errorText = await analyticsResponse.text();
+      console.error("Analytics API failed:", errorText);
+      return c.json({ 
+        error: "Failed to fetch analytics data",
+        details: errorText
+      }, 500);
+    }
+
+    const analyticsData = await analyticsResponse.json();
+    
+    // Extract the metrics
+    const totalUsers = analyticsData.rows?.[0]?.metricValues?.[0]?.value || "0";
+    const totalSessions = analyticsData.rows?.[0]?.metricValues?.[1]?.value || "0";
+
+    console.log(`Analytics data fetched - Users: ${totalUsers}, Sessions: ${totalSessions}`);
+
+    return c.json({
+      success: true,
+      visitors: parseInt(totalUsers, 10),
+      sessions: parseInt(totalSessions, 10),
+      source: "google_analytics",
+    });
+
+  } catch (error) {
+    console.error("Error fetching Google Analytics data:", error);
+    return c.json({ 
+      error: "Failed to fetch visitor count from Google Analytics",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

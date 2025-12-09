@@ -83,12 +83,42 @@ export function ImpactStats() {
             </p>
           </motion.div>
 
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-12">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#FFF8F3] to-white rounded-xl border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-all hover:shadow-lg"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Icon className={`w-10 h-10 md:w-12 md:h-12 ${stat.color} mb-4`} aria-hidden="true" />
+                  </motion.div>
+                  <p className="text-3xl md:text-4xl text-[#333333] mb-2">
+                    {stat.value}
+                  </p>
+                  <p className="text-sm md:text-base text-[#666666] text-center">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="mt-12 text-center"
+            className="text-center"
           >
             <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-5 md:p-6 border-2 border-[#F59E0B]/30">
               <p className="text-[#333333] text-base md:text-lg">

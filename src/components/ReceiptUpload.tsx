@@ -68,6 +68,7 @@ export function ReceiptUpload() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -150,7 +151,11 @@ export function ReceiptUpload() {
         return;
       }
 
+      // Simulate upload progress
+      setUploadProgress(10);
+
       // Convert image to base64
+      setUploadProgress(30);
       const base64Image = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
@@ -158,7 +163,10 @@ export function ReceiptUpload() {
         reader.readAsDataURL(selectedFile);
       });
 
+      setUploadProgress(50);
+
       // Submit to backend
+      setUploadProgress(70);
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-7a8516f4/receipts`,
         {
@@ -187,6 +195,8 @@ export function ReceiptUpload() {
 
       const result = await response.json();
       console.log("Receipt uploaded successfully:", result);
+
+      setUploadProgress(100);
 
       // Success!
       setSubmitStatus("success");
@@ -399,19 +409,29 @@ export function ReceiptUpload() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile || !consent}
-                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-7 text-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-7 text-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation relative overflow-hidden"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-5 h-5 mr-2" />
-                      Upload Receipt
-                    </>
+                  {isSubmitting && uploadProgress > 0 && (
+                    <motion.div
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${uploadProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                      className="absolute left-0 top-0 bottom-0 bg-[#D97706] opacity-50"
+                    />
                   )}
+                  <span className="relative z-10">
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin inline" />
+                        Uploading... {uploadProgress}%
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 mr-2 inline" />
+                        Upload Receipt
+                      </>
+                    )}
+                  </span>
                 </Button>
 
                 <p className="text-xs md:text-sm text-[#666666] text-center leading-relaxed px-2">

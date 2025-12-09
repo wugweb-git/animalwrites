@@ -1,11 +1,11 @@
-import { Calendar, Heart, Users, Mail } from "lucide-react";
+import { Vote, TrendingUp, Users, Target } from "lucide-react";
 import { motion } from "motion/react";
 
 export function CountdownTimer() {
   return (
     <section 
-      className="py-8 md:py-12 bg-[#333333] relative overflow-hidden"
-      aria-labelledby="campaign-day-heading"
+      className="py-12 md:py-16 bg-gradient-to-br from-[#333333] via-[#444444] to-[#333333] relative overflow-hidden"
+      aria-labelledby="phase-two-heading"
     >
       {/* Animated background pattern */}
       <div className="absolute inset-0 opacity-10" aria-hidden="true">
@@ -13,7 +13,7 @@ export function CountdownTimer() {
           {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-white rounded-full"
+              className="absolute w-2 h-2 bg-[#F59E0B] rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -35,16 +35,16 @@ export function CountdownTimer() {
 
       <div className="container mx-auto px-6 md:px-12 lg:px-16 relative z-10">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Main Announcement */}
+          {/* Phase 2.0 Announcement */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="mb-6"
+            className="mb-8"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-[#F59E0B] rounded-full px-4 md:px-6 py-2 md:py-3 mb-4"
+              className="inline-flex items-center gap-2 bg-[#F59E0B] rounded-full px-5 md:px-7 py-2.5 md:py-3 mb-6"
               animate={{ 
                 scale: [1, 1.05, 1],
               }}
@@ -54,75 +54,97 @@ export function CountdownTimer() {
                 ease: "easeInOut" 
               }}
             >
-              <Calendar className="w-5 h-5 md:w-6 md:h-6 text-white" aria-hidden="true" />
+              <Target className="w-5 h-5 md:w-6 md:h-6 text-white" aria-hidden="true" />
               <span className="text-white text-sm md:text-base uppercase tracking-wide">
-                Today is Campaign Day
+                Phase 2.0 Now Live
               </span>
             </motion.div>
             
-            <h2 id="campaign-day-heading" className="text-white text-3xl md:text-5xl mb-4">
-              The Day Has Arrived
+            <h2 id="phase-two-heading" className="text-white text-3xl md:text-5xl lg:text-6xl mb-4">
+              Pashu Bachao, Vote Badhao
             </h2>
-            <p className="text-white/90 text-base md:text-xl max-w-3xl mx-auto">
-              Thousands of citizens across India are walking to their nearest GPO today to post handwritten letters to the Supreme Court. Join the movement.
+            <p className="text-[#F59E0B] text-xl md:text-2xl mb-4 italic">
+              (Save Animals, Increase Votes)
+            </p>
+            <p className="text-white/90 text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
+              After 2.5 lakh letters to the Supreme Court, we're taking the next step. Politicians respond to votes. Let's show them that <span className="text-[#F59E0B]">animal welfare is electoral power</span>.
             </p>
           </motion.div>
 
-          {/* Action Stats/Icons */}
+          {/* What's Next Stats/Icons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 mt-8"
           >
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-lg p-4 md:p-6 border border-white/20"
-              whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-              transition={{ type: "spring", stiffness: 400 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              whileHover={{ scale: 1.03, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-block mb-3"
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-block mb-4"
               >
-                <Mail className="w-8 h-8 md:w-10 md:h-10 text-[#F59E0B]" aria-hidden="true" />
+                <Vote className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-lg md:text-xl mb-1">Write Your Letter</h3>
-              <p className="text-white/80 text-sm md:text-base">Express your voice through words</p>
+              <h3 className="text-white text-xl md:text-2xl mb-2">Register to Vote</h3>
+              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+                Ensure you're registered and ready to make animal welfare a voting issue
+              </p>
             </motion.div>
 
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-lg p-4 md:p-6 border border-white/20"
-              whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-              transition={{ type: "spring", stiffness: 400 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              whileHover={{ scale: 1.03, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-block mb-3"
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-block mb-4"
               >
-                <Users className="w-8 h-8 md:w-10 md:h-10 text-[#F59E0B]" aria-hidden="true" />
+                <Users className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-lg md:text-xl mb-1">Walk to Your GPO</h3>
-              <p className="text-white/80 text-sm md:text-base">Join thousands across the nation</p>
+              <h3 className="text-white text-xl md:text-2xl mb-2">Build the Movement</h3>
+              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+                Connect with fellow voters who care about animals and amplify our voice
+              </p>
             </motion.div>
 
             <motion.div
-              className="bg-white/10 backdrop-blur-sm rounded-lg p-4 md:p-6 border border-white/20"
-              whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
-              transition={{ type: "spring", stiffness: 400 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-5 md:p-7 border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 transition-colors"
+              whileHover={{ scale: 1.03, y: -5 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="inline-block mb-3"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="inline-block mb-4"
               >
-                <Heart className="w-8 h-8 md:w-10 md:h-10 text-[#F59E0B]" aria-hidden="true" />
+                <TrendingUp className="w-10 h-10 md:w-12 md:h-12 text-[#F59E0B]" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-lg md:text-xl mb-1">Make an Impact</h3>
-              <p className="text-white/80 text-sm md:text-base">Every letter speaks for voiceless animals</p>
+              <h3 className="text-white text-xl md:text-2xl mb-2">Hold Leaders Accountable</h3>
+              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+                Make candidates pledge their commitment to animal welfare policies
+              </p>
             </motion.div>
+          </motion.div>
+
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-10 md:mt-12"
+          >
+            <p className="text-white/70 text-sm md:text-base max-w-2xl mx-auto">
+              Our collective voice sent 2.5 lakh letters. Now let's convert that compassion into electoral power and create lasting change for India's animals.
+            </p>
           </motion.div>
         </div>
       </div>

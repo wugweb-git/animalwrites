@@ -1,13 +1,17 @@
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Search } from "lucide-react";
+import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { motion } from "framer-motion";
+import { Input } from "./ui/input";
+import { motion } from "motion/react";
 
 export function FAQ() {
+  const [searchQuery, setSearchQuery] = useState("");
+
   const faqs = [
     {
       question: "Why handwritten letters? Can I send an email instead?",
@@ -39,6 +43,10 @@ export function FAQ() {
     },
   ];
 
+  const filteredFaqs = faqs.filter((faq) =>
+    faq.question.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <section
       id="faq"
@@ -65,32 +73,74 @@ export function FAQ() {
             </p>
           </motion.div>
 
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                viewport={{ once: true }}
+          {/* Search Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="mb-8"
+          >
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666666]" aria-hidden="true" />
+              <Input
+                type="text"
+                placeholder="Search questions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 py-6 text-base border-2 border-gray-200 focus:border-[#F59E0B] rounded-xl"
+                aria-label="Search FAQ questions"
+              />
+            </div>
+            {searchQuery && (
+              <p className="text-sm text-[#666666] mt-2">
+                {filteredFaqs.length} {filteredFaqs.length === 1 ? 'result' : 'results'} found
+              </p>
+            )}
+          </motion.div>
+
+          {filteredFaqs.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <p className="text-[#666666] text-lg">No questions found matching "{searchQuery}"</p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-[#F59E0B] hover:text-[#D97706] underline mt-2"
               >
-                <AccordionItem
-                  value={`item-${index}`}
-                  className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#F59E0B] hover:shadow-md transition-all duration-300"
+                Clear search
+              </button>
+            </motion.div>
+          ) : (
+            <Accordion type="single" collapsible className="space-y-4">
+              {filteredFaqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  viewport={{ once: true }}
                 >
-                  <AccordionTrigger
-                    className="text-left text-[#333333] hover:text-[#333333] py-5"
-                    aria-label={`Question ${index + 1}: ${faq.question}`}
+                  <AccordionItem
+                    value={`item-${index}`}
+                    className="bg-white border-2 border-gray-200 rounded-xl px-6 hover:border-[#F59E0B] hover:shadow-md transition-all duration-300"
                   >
-                    <span className="pr-4">{faq.question}</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-[#666666] leading-relaxed pb-5">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
+                    <AccordionTrigger
+                      className="text-left text-[#333333] hover:text-[#333333] py-5"
+                      aria-label={`Question ${index + 1}: ${faq.question}`}
+                    >
+                      <span className="pr-4">{faq.question}</span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-[#666666] leading-relaxed pb-5">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

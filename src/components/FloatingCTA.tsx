@@ -39,7 +39,7 @@ export function FloatingCTA() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 left-4 md:left-auto md:bottom-6 md:right-6 z-50 max-w-md md:max-w-lg animate-slide-up"
+      className="fixed bottom-20 right-4 left-4 md:left-auto md:bottom-6 md:right-6 z-50 max-w-md md:max-w-lg animate-slide-up"
       role="complementary"
       aria-label="Quick action banner"
     >

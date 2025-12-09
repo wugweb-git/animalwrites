@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Hero } from "./components/Hero";
 import { Navigation } from "./components/Navigation";
+import { StatsBanner } from "./components/StatsBanner";
 import { CountdownTimer } from "./components/CountdownTimer";
 import { AboutMovement } from "./components/AboutMovement";
 import { WhyThisMatters } from "./components/WhyThisMatters";
@@ -12,6 +13,7 @@ import { ScrollProgress } from "./components/ScrollProgress";
 import { MetaTags } from "./components/MetaTags";
 import { BackToTop } from "./components/BackToTop";
 import { Footer } from "./components/Footer";
+import { InitializeCounter } from "./pages/InitializeCounter";
 
 // Lazy load above-the-fold but not critical
 const VisualImpact = lazy(() => import("./components/VisualImpact").then(m => ({ default: m.VisualImpact })));
@@ -53,6 +55,17 @@ export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const isVolunteerAdmin = urlParams.get('admin') === 'volunteers';
   const isReceiptAdmin = urlParams.get('admin') === 'receipts';
+  const isCounterInit = urlParams.get('admin') === 'counter';
+
+  // Show counter initialization page if requested
+  if (isCounterInit) {
+    return (
+      <div className="min-h-screen bg-white">
+        <MetaTags />
+        <InitializeCounter />
+      </div>
+    );
+  }
 
   // Show volunteer admin page if requested
   if (isVolunteerAdmin) {
@@ -94,8 +107,9 @@ export default function App() {
       <ScrollProgress />
       
       <Navigation />
+      <StatsBanner />
       
-      <main id="main-content" className="pt-16 md:pt-20">
+      <main id="main-content" className="pt-24 md:pt-28">
         {/* Hero & Awareness */}
         <Hero />
         <CountdownTimer />
