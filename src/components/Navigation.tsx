@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Camera, PenLine } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import Vector from "../imports/Vector";
@@ -78,6 +78,7 @@ export function Navigation() {
               size="sm"
               aria-label="Navigate to upload receipt section"
             >
+              <Camera className="w-4 h-4 mr-2" aria-hidden="true" />
               Upload Receipt
             </Button>
             <Button
@@ -86,6 +87,7 @@ export function Navigation() {
               size="sm"
               aria-label="Navigate to write letter section"
             >
+              <PenLine className="w-4 h-4 mr-2" aria-hidden="true" />
               Write Now
             </Button>
           </div>
@@ -132,6 +134,7 @@ export function Navigation() {
                   role="menuitem"
                   aria-label="Navigate to upload receipt section"
                 >
+                  <Camera className="w-5 h-5 mr-2" aria-hidden="true" />
                   Upload Receipt
                 </Button>
                 <Button
@@ -140,6 +143,7 @@ export function Navigation() {
                   role="menuitem"
                   aria-label="Navigate to write letter section"
                 >
+                  <PenLine className="w-5 h-5 mr-2" aria-hidden="true" />
                   Write Now
                 </Button>
               </div>
