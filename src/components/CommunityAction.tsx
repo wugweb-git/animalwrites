@@ -85,8 +85,13 @@ export function CommunityAction() {
               <img
                 src="https://wugweb.online/gandhi.png"
                 alt="Mahatma Gandhi"
-                className="h-full w-auto object-contain object-bottom"
-                style={{ maxHeight: '355px' }}
+                className="object-cover object-bottom"
+                style={{ 
+                  height: '100%',
+                  width: 'auto',
+                  minWidth: '300px',
+                  maxWidth: '450px'
+                }}
               />
             </div>
 
