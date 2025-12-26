@@ -144,12 +144,17 @@ export function Resources() {
             className="text-center mb-12"
           >
             <motion.div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-full)] mb-4"
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6"
+              style={{
+                backgroundColor: 'var(--surface-warm)',
+                borderRadius: 'var(--radius-full)',
+                boxShadow: 'var(--elevation-sm)'
+              }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
-              <Globe className="w-4 h-4 text-foreground" aria-hidden="true" />
-              <span className="text-foreground" style={{ fontSize: '14px', fontWeight: 'var(--font-weight-regular)' }}>In The News</span>
+              <Globe className="w-5 h-5" style={{ color: 'var(--foreground)' }} aria-hidden="true" />
+              <span style={{ color: 'var(--foreground)', fontSize: '14px', fontWeight: 'var(--font-weight-regular)' }}>In The News</span>
             </motion.div>
             <h2 id="resources-heading" className="text-foreground mb-3">
               Media Coverage

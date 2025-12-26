@@ -224,8 +224,8 @@ export function ReceiptUpload() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-4">
-              <Camera className="w-7 h-7 md:w-8 md:h-8 text-accent" />
-              <h2 id="upload-receipt-heading" className="text-3xl md:text-5xl text-foreground">Share Your Impact</h2>
+              <Camera className="w-8 h-8" style={{ color: 'var(--accent)' }} />
+              <h2 id="upload-receipt-heading" style={{ color: 'var(--foreground)' }}>Share Your Impact</h2>
             </div>
             <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Posted your letter? Amazing! Upload your post office receipt to inspire others and help us track our collective impact.

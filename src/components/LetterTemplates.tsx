@@ -169,8 +169,8 @@ Name: Address: Phone: Email:`,
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="flex flex-col items-center gap-3 mb-6">
-              <FileText className="w-10 h-10 text-primary" />
-              <h2 id="letter-templates-heading" className="text-primary">Letter Templates</h2>
+              <FileText className="w-8 h-8" style={{ color: 'var(--primary)' }} />
+              <h2 id="letter-templates-heading" style={{ color: 'var(--primary)' }}>Letter Templates</h2>
             </div>
             <p className="text-muted-foreground max-w-3xl mx-auto px-4">
               Use these templates as inspiration. Feel free to personalize with your own thoughts.

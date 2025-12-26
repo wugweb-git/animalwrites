@@ -102,9 +102,9 @@ export function VolunteerSignup() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Users className="w-7 h-7 md:w-8 md:h-8 text-foreground" aria-hidden="true" />
+                <Users className="w-8 h-8" style={{ color: 'var(--foreground)' }} aria-hidden="true" />
               </motion.div>
-              <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-foreground font-bold">Volunteer With Us</h2>
+              <h2 id="volunteer-heading" style={{ color: 'var(--foreground)' }}>Volunteer With Us</h2>
             </div>
             <p className="text-muted-foreground text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
               Want to do more? Join our volunteer team and help coordinate this movement in your city. 
@@ -313,7 +313,7 @@ export function VolunteerSignup() {
                               required
                               aria-required="true"
                             />
-                            <span className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-[13px]">
+                            <span className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors italic" style={{ fontSize: '12px' }}>
                               I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
                             </span>
                           </label>

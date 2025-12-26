@@ -63,8 +63,8 @@ export function FAQ() {
             className="text-center mb-12"
           >
             <div className="inline-flex items-center gap-3 mb-4">
-              <HelpCircle className="w-8 h-8 text-primary" aria-hidden="true" />
-              <h2 id="faq-heading" className="text-primary">
+              <HelpCircle className="w-8 h-8" style={{ color: 'var(--primary)' }} aria-hidden="true" />
+              <h2 id="faq-heading" style={{ color: 'var(--primary)' }}>
                 Frequently Asked Questions
               </h2>
             </div>

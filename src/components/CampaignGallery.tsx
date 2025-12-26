@@ -43,15 +43,15 @@ export function CampaignGallery() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Camera className="w-5 h-5 text-accent" aria-hidden="true" />
+                <Camera className="w-5 h-5" style={{ color: 'var(--accent)' }} aria-hidden="true" />
               </motion.div>
-              <span className="text-primary">Our Movement</span>
+              <span style={{ color: 'var(--primary)' }}>Our Movement</span>
             </motion.div>
             
-            <h2 id="gallery-heading" className="text-primary mb-4">
+            <h2 id="gallery-heading" style={{ color: 'var(--primary)' }} className="mb-4">
               Moments From Previous Campaigns
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p style={{ color: 'var(--muted-foreground)' }} className="max-w-2xl mx-auto">
               A glimpse of the compassion and unity that drives our movement forward
             </p>
           </motion.div>

@@ -109,7 +109,12 @@ export function Supporters() {
             className="text-center mb-12"
           >
             <motion.div
-              className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full mb-4 shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 mb-4"
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 'var(--radius-full)',
+                boxShadow: 'var(--elevation-sm)'
+              }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400 }}
             >
@@ -117,15 +122,15 @@ export function Supporters() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Heart className="w-5 h-5 text-accent" fill="accent" aria-hidden="true" />
+                <Heart className="w-5 h-5" style={{ color: 'var(--accent)', fill: 'var(--accent)' }} aria-hidden="true" />
               </motion.div>
-              <span className="text-accent-hover">Standing Together</span>
+              <span style={{ color: 'var(--accent-hover)' }}>Standing Together</span>
             </motion.div>
             
-            <h2 id="supporters-heading" className="text-foreground mb-4">
+            <h2 id="supporters-heading" style={{ color: 'var(--foreground)' }} className="mb-4">
               Supported By
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p style={{ color: 'var(--muted-foreground)' }} className="max-w-2xl mx-auto">
               Animal Lovers, Animal Activists, Animal Welfare Organisations, Every human who knows 'humanity'
             </p>
           </motion.div>

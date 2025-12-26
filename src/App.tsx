@@ -34,8 +34,7 @@ const PressMedia = lazy(() => import("./components/PressMedia").then(m => ({ def
 // Lazy load footer area components
 const Resources = lazy(() => import("./components/Resources").then(m => ({ default: m.Resources })));
 const WhatHappensNext = lazy(() => import("./components/WhatHappensNext").then(m => ({ default: m.WhatHappensNext })));
-const SocialShare = lazy(() => import("./components/SocialShare").then(m => ({ default: m.SocialShare })));
-const OurMessage = lazy(() => import("./components/OurMessage").then(m => ({ default: m.OurMessage })));
+const CommunityAction = lazy(() => import("./components/CommunityAction").then(m => ({ default: m.CommunityAction })));
 
 // Lazy load admin pages - rarely accessed
 const VolunteerAdmin = lazy(() => import("./components/VolunteerAdmin").then(m => ({ default: m.VolunteerAdmin })));
@@ -178,12 +177,7 @@ export default function App() {
         </div>
         <div className="content-visibility-auto">
           <Suspense fallback={<SectionLoader />}>
-            <SocialShare />
-          </Suspense>
-        </div>
-        <div className="content-visibility-auto">
-          <Suspense fallback={<SectionLoader />}>
-            <OurMessage />
+            <CommunityAction />
           </Suspense>
         </div>
         
