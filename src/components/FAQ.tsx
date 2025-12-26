@@ -50,7 +50,7 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-16 md:py-24 bg-gradient-to-b from-background to-[var(--surface-warm)] hidden"
+      className="py-16 md:py-24 bg-gradient-to-b from-background to-[var(--surface-warm)]"
       aria-labelledby="faq-heading"
     >
       <div className="container mx-auto px-4">
@@ -88,7 +88,7 @@ export function FAQ() {
                 placeholder="Search questions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-6 text-base border-2 border-border focus:border-accent rounded-[var(--radius-xl)]"
+                className="pl-12 py-6 border-2 border-border focus:border-accent rounded-[var(--radius-xl)]"
                 aria-label="Search FAQ questions"
               />
             </div>
@@ -108,7 +108,7 @@ export function FAQ() {
               <p className="text-muted-foreground">No questions found matching "{searchQuery}"</p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="text-accent hover:text-[var(--accent-hover)] underline mt-2"
+                className="text-accent hover:text-accent-hover underline mt-2"
               >
                 Clear search
               </button>

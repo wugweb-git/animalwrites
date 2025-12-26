@@ -96,7 +96,7 @@ export function Supporters() {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-[#FFF8F3]" 
+      className="py-16 md:py-24 bg-surface-warm" 
       aria-labelledby="supporters-heading"
     >
       <div className="container mx-auto px-4">
@@ -117,15 +117,15 @@ export function Supporters() {
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Heart className="w-5 h-5 text-[#F59E0B]" fill="#F59E0B" aria-hidden="true" />
+                <Heart className="w-5 h-5 text-accent" fill="accent" aria-hidden="true" />
               </motion.div>
-              <span className="text-[#D97706]">Standing Together</span>
+              <span className="text-accent-hover">Standing Together</span>
             </motion.div>
             
-            <h2 id="supporters-heading" className="text-2xl md:text-4xl text-[#333333] mb-4">
+            <h2 id="supporters-heading" className="text-foreground mb-4">
               Supported By
             </h2>
-            <p className="text-[#666666] text-base md:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Animal Lovers, Animal Activists, Animal Welfare Organisations, Every human who knows 'humanity'
             </p>
           </motion.div>

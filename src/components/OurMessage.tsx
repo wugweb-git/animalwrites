@@ -3,12 +3,12 @@ import { motion } from "motion/react";
 
 export function OurMessage() {
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-b from-white via-[#FFF8F3] to-white relative overflow-hidden">
+    <section className="py-12 md:py-16 bg-gradient-to-b from-white via-surface-warm to-white relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 opacity-30" aria-hidden="true">
-        <div className="absolute top-20 left-10 w-20 h-20 bg-[#F59E0B]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-32 h-32 bg-[#D97706]/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-[#F59E0B]/5 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-20 h-20 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent-hover/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-accent/5 rounded-full blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -18,11 +18,11 @@ export function OurMessage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-white rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-[#F59E0B]/20 relative overflow-hidden"
+            className="bg-white rounded-3xl p-6 md:p-10 shadow-2xl border-2 border-accent/20 relative overflow-hidden"
           >
             {/* Decorative corner accents */}
-            <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-[#F59E0B] rounded-tl-3xl" aria-hidden="true" />
-            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-[#F59E0B] rounded-br-3xl" aria-hidden="true" />
+            <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-accent rounded-tl-3xl" aria-hidden="true" />
+            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-accent rounded-br-3xl" aria-hidden="true" />
 
             <div className="text-center space-y-4 md:space-y-5">
               {/* Gandhi Quote */}
@@ -31,11 +31,11 @@ export function OurMessage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="bg-gradient-to-br from-[#FFF8F3] via-[#FFF0E0] to-[#FFF8F3] rounded-2xl p-5 md:p-7 relative border-2 border-[#F59E0B]/20 shadow-lg"
+                className="bg-gradient-to-br from-surface-warm via-[#FFF0E0] to-surface-warm rounded-2xl p-5 md:p-7 relative border-2 border-accent/20 shadow-lg"
               >
                 {/* Gandhi silhouette icon */}
                 <motion.div
-                  className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] p-3 shadow-lg"
+                  className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-accent to-accent-hover p-3 shadow-lg"
                   animate={{ 
                     boxShadow: [
                       "0 5px 15px rgba(245, 158, 11, 0.3)",
@@ -59,11 +59,11 @@ export function OurMessage() {
                   </svg>
                 </motion.div>
                 
-                <Quote className="w-6 h-6 md:w-7 md:h-7 text-[#F59E0B] mx-auto mb-3 opacity-40" aria-hidden="true" />
-                <p className="text-[#333333] italic text-base md:text-xl leading-relaxed mb-3">
+                <Quote className="w-6 h-6 md:w-7 md:h-7 text-accent mx-auto mb-3 opacity-40" aria-hidden="true" />
+                <p className="text-foreground italic leading-relaxed mb-3">
                   "The greatness of a nation and its moral progress can be judged by the way its animals are treated."
                 </p>
-                <p className="text-[#D97706] text-sm md:text-base">
+                <p className="text-accent-hover">
                   — Mahatma Gandhi
                 </p>
               </motion.div>
@@ -73,10 +73,10 @@ export function OurMessage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="text-2xl md:text-5xl text-[#333333] leading-tight px-4"
+                className="text-2xl md:text-5xl text-foreground leading-tight px-4"
               >
                 <span className="inline-block">Write your heart.</span>{" "}
-                <span className="inline-block text-[#F59E0B]">Seal it with compassion.</span>{" "}
+                <span className="inline-block text-accent">Seal it with compassion.</span>{" "}
                 <span className="inline-block">Post for justice.</span>
               </motion.h2>
 
@@ -97,7 +97,7 @@ export function OurMessage() {
                     🐕
                   </div>
                   <motion.div
-                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-[#F59E0B]/30 rounded-full blur-sm"
+                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-accent/30 rounded-full blur-sm"
                     animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 2, repeat: Infinity }}
                     aria-hidden="true"
@@ -131,7 +131,7 @@ export function OurMessage() {
                     🇮🇳
                   </div>
                   <motion.div
-                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-[#F59E0B]/30 rounded-full blur-sm"
+                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-accent/30 rounded-full blur-sm"
                     animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 3, repeat: Infinity, delay: 0.6 }}
                     aria-hidden="true"
@@ -144,10 +144,10 @@ export function OurMessage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
-                className="pt-4 md:pt-5 mt-4 border-t-2 border-dashed border-[#F59E0B]/30"
+                className="pt-4 md:pt-5 mt-4 border-t-2 border-dashed border-accent/30"
               >
                 <motion.div
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white px-3 py-1.5 rounded-full text-xs uppercase tracking-wider mb-3 shadow-lg"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-accent to-accent-hover text-white px-3 py-1.5 rounded-full uppercase tracking-wider mb-3 shadow-lg"
                   animate={{
                     boxShadow: [
                       "0 4px 15px rgba(245, 158, 11, 0.3)",
@@ -170,7 +170,7 @@ export function OurMessage() {
                       transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
                       viewport={{ once: true }}
                       whileHover={{ scale: 1.05, y: -2 }}
-                      className="inline-block bg-[#FFF8F3] border-2 border-[#F59E0B]/30 text-[#D97706] px-3 py-1.5 rounded-full text-xs md:text-sm hover:border-[#F59E0B] hover:shadow-md transition-all cursor-pointer"
+                      className="inline-block bg-surface-warm border-2 border-accent/30 text-accent-hover px-3 py-1.5 rounded-full hover:border-accent hover:shadow-md transition-all cursor-pointer"
                     >
                       {tag}
                     </motion.span>

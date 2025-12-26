@@ -219,23 +219,23 @@ export function ReceiptUpload() {
   };
 
   return (
-    <section id="upload-receipt" className="py-16 md:py-24 bg-white">
+    <section id="upload-receipt" className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-3 mb-4">
-              <Camera className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B]" />
-              <h2 id="upload-receipt-heading" className="text-3xl md:text-5xl text-[#333333]">Share Your Impact</h2>
+              <Camera className="w-7 h-7 md:w-8 md:h-8 text-accent" />
+              <h2 id="upload-receipt-heading" className="text-3xl md:text-5xl text-foreground">Share Your Impact</h2>
             </div>
-            <p className="text-base md:text-xl text-[#666666] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Posted your letter? Amazing! Upload your post office receipt to inspire others and help us track our collective impact.
             </p>
           </div>
 
-          <Card className="border-2 border-[#F59E0B]/20 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-[#FFF8F3] to-white">
-              <CardTitle className="text-[#333333] text-xl md:text-2xl">Upload Your Receipt</CardTitle>
-              <CardDescription className="text-[#666666] text-sm md:text-base">
+          <Card className="border-2 border-accent/20 shadow-[var(--elevation-xl)] bg-card">
+            <CardHeader className="bg-gradient-to-r from-[var(--surface-warm)] to-background">
+              <CardTitle className="text-foreground text-xl md:text-2xl">Upload Your Receipt</CardTitle>
+              <CardDescription className="text-muted-foreground text-sm md:text-base">
                 Help us celebrate every voice that stands for compassion
               </CardDescription>
             </CardHeader>
@@ -243,8 +243,8 @@ export function ReceiptUpload() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-[#333333] text-base">
-                    Full Name <span className="text-red-500">*</span>
+                  <Label htmlFor="fullName" className="text-foreground text-base">
+                    Full Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="fullName"
@@ -254,15 +254,15 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Enter your full name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
+                    className="border-border focus:border-accent focus:ring-accent h-14 text-lg bg-input-background"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#333333] text-base">
-                    Email <span className="text-red-500">*</span>
+                  <Label htmlFor="email" className="text-foreground text-base">
+                    Email <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="email"
@@ -272,15 +272,15 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="your.email@example.com"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
+                    className="border-border focus:border-accent focus:ring-accent h-14 text-lg bg-input-background"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* City */}
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-[#333333] text-base">
-                    City <span className="text-red-500">*</span>
+                  <Label htmlFor="city" className="text-foreground text-base">
+                    City <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="city"
@@ -290,17 +290,17 @@ export function ReceiptUpload() {
                     onChange={handleInputChange}
                     placeholder="Your city name"
                     required
-                    className="border-gray-300 focus:border-[#F59E0B] focus:ring-[#F59E0B] h-14 text-lg"
+                    className="border-border focus:border-accent focus:ring-accent h-14 text-lg bg-input-background"
                     disabled={isSubmitting}
                   />
                 </div>
 
                 {/* File Upload */}
                 <div className="space-y-2">
-                  <Label htmlFor="receipt" className="text-[#333333] text-base">
-                    Receipt Photo <span className="text-red-500">*</span>
+                  <Label htmlFor="receipt" className="text-foreground text-base">
+                    Receipt Photo <span className="text-destructive">*</span>
                   </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 md:p-6 text-center hover:border-[#F59E0B] transition-colors min-h-[150px] flex items-center justify-center">
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 md:p-6 text-center hover:border-accent transition-colors min-h-[150px] flex items-center justify-center bg-input-background">
                     <input
                       id="receipt"
                       type="file"
@@ -322,9 +322,9 @@ export function ReceiptUpload() {
                           <img
                             src={previewUrl}
                             alt="Receipt preview"
-                            className="max-h-48 md:max-h-64 max-w-full mx-auto rounded-lg border border-gray-200 object-contain"
+                            className="max-h-48 md:max-h-64 max-w-full mx-auto rounded-lg border border-border object-contain"
                           />
-                          <p className="text-sm text-[#666666] break-all px-2">
+                          <p className="text-sm text-muted-foreground break-all px-2">
                             {selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(0)} KB)
                           </p>
                           <Button
@@ -336,22 +336,22 @@ export function ReceiptUpload() {
                               setSelectedFile(null);
                               setPreviewUrl(null);
                             }}
-                            className="border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white min-h-[44px] px-6 text-base touch-manipulation"
+                            className="border-foreground text-foreground hover:bg-foreground hover:text-background min-h-[44px] px-6 text-base touch-manipulation"
                           >
                             Change Photo
                           </Button>
                         </motion.div>
                       ) : (
                         <>
-                          <Camera className="w-14 h-14 text-[#F59E0B]" />
+                          <Camera className="w-14 h-14 text-accent" />
                           <div>
-                            <p className="text-[#333333] font-medium text-lg">
+                            <p className="text-foreground font-medium text-lg">
                               📸 Choose Photo or Take New
                             </p>
-                            <p className="text-base text-[#666666] mt-2">
+                            <p className="text-base text-muted-foreground mt-2">
                               JPG, PNG or HEIC • Up to 20MB
                             </p>
-                            <p className="text-sm text-[#999999] mt-1">
+                            <p className="text-sm text-muted-foreground/70 mt-1">
                               Large images auto-compressed
                             </p>
                           </div>
@@ -362,19 +362,19 @@ export function ReceiptUpload() {
                 </div>
 
                 {/* Consent Checkbox */}
-                <div className="p-5 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                <div className="p-5 md:p-4 bg-[var(--surface-warm)] rounded-lg border border-accent/20">
                   <label htmlFor="receipt-consent" className="flex items-start gap-4 cursor-pointer group">
                     <input
                       type="checkbox"
                       id="receipt-consent"
                       checked={consent}
                       onChange={(e) => setConsent(e.target.checked)}
-                      className="mt-1 h-6 w-6 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                      className="mt-1 h-6 w-6 text-accent focus:ring-accent focus:ring-offset-2 border-border rounded cursor-pointer flex-shrink-0"
                       required
                       aria-required="true"
                       disabled={isSubmitting}
                     />
-                    <span className="text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors text-[12px]">
+                    <span className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-[12px]">
                       I consent to sharing my receipt and information with the Animal Writes campaign. I understand this data will be used to track campaign impact and may be displayed publicly to inspire participation. My personal information will be kept confidential.
                     </span>
                   </label>
@@ -400,8 +400,8 @@ export function ReceiptUpload() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg"
                   >
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-red-800 text-sm md:text-base">{errorMessage}</p>
+                    <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <p className="text-destructive text-sm md:text-base">{errorMessage}</p>
                   </motion.div>
                 )}
 
@@ -409,14 +409,14 @@ export function ReceiptUpload() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || !formData.fullName || !formData.email || !formData.city || !selectedFile || !consent}
-                  className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-white py-7 text-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation relative overflow-hidden"
+                  className="w-full bg-accent hover:bg-accent-hover text-white py-7 text-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation relative overflow-hidden"
                 >
                   {isSubmitting && uploadProgress > 0 && (
                     <motion.div
                       initial={{ width: "0%" }}
                       animate={{ width: `${uploadProgress}%` }}
                       transition={{ duration: 0.3 }}
-                      className="absolute left-0 top-0 bottom-0 bg-[#D97706] opacity-50"
+                      className="absolute left-0 top-0 bottom-0 bg-accent-hover opacity-50"
                     />
                   )}
                   <span className="relative z-10">
@@ -434,7 +434,7 @@ export function ReceiptUpload() {
                   </span>
                 </Button>
 
-                <p className="text-xs md:text-sm text-[#666666] text-center leading-relaxed px-2">
+                <p className="text-xs md:text-sm text-muted-foreground text-center leading-relaxed px-2">
                   🔒 Your information and images are securely stored and will be kept private. Used only to track campaign impact.
                 </p>
               </form>
@@ -442,23 +442,23 @@ export function ReceiptUpload() {
           </Card>
 
           {/* Info Box */}
-          <div className="mt-8 p-4 md:p-6 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
-            <h3 className="text-[#333333] font-semibold mb-3 text-base md:text-lg">Why share your receipt?</h3>
-            <ul className="space-y-2 text-[#666666] text-sm md:text-base">
+          <div className="mt-8 p-4 md:p-6 bg-[var(--surface-warm)] rounded-lg border border-accent/20">
+            <h3 className="text-foreground font-semibold mb-3 text-base md:text-lg">Why share your receipt?</h3>
+            <ul className="space-y-2 text-muted-foreground text-sm md:text-base">
               <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                 <span>Help us track the real-world impact of this movement</span>
               </li>
               <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                 <span>Inspire others to take action when they see participation numbers grow</span>
               </li>
               <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                 <span>Create a public record of citizen engagement for this cause</span>
               </li>
               <li className="flex items-start gap-2">
-                <Check className="w-4 h-4 text-[#F59E0B] flex-shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
                 <span>Your receipt is proof that you stood up for compassion</span>
               </li>
             </ul>

@@ -119,7 +119,7 @@ export function Navigation() {
                   <button
                     key={link.id}
                     onClick={() => scrollToSection(link.id)}
-                    className="text-left px-6 py-4 text-lg text-white/70 hover:text-accent hover:bg-white/10 rounded-[var(--radius-xl)] transition-colors focus:outline-none focus:bg-white/10 focus:text-accent"
+                    className="text-left px-6 py-4 text-white/70 hover:text-accent hover:bg-white/10 rounded-[var(--radius-xl)] transition-colors focus:outline-none focus:bg-white/10 focus:text-accent"
                     role="menuitem"
                     aria-label={`Navigate to ${link.label}`}
                   >
@@ -128,7 +128,7 @@ export function Navigation() {
                 ))}
                 <Button
                   onClick={() => scrollToSection("upload-receipt")}
-                  className="bg-accent hover:bg-[var(--accent-hover)] text-white mt-4 py-6 text-lg focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
+                  className="bg-accent hover:bg-[var(--accent-hover)] text-white mt-4 py-6 focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary"
                   role="menuitem"
                   aria-label="Navigate to upload receipt section"
                 >
@@ -136,7 +136,7 @@ export function Navigation() {
                 </Button>
                 <Button
                   onClick={() => scrollToSection("letter-templates")}
-                  className="bg-white hover:bg-white/90 text-primary mt-2 py-6 text-lg focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+                  className="bg-white hover:bg-white/90 text-primary mt-2 py-6 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
                   role="menuitem"
                   aria-label="Navigate to write letter section"
                 >

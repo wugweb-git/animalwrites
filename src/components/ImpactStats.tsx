@@ -75,10 +75,10 @@ export function ImpactStats() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="impact-stats-heading" className="text-primary mb-4">
-              <span className="text-primary">Our Growing</span> Movement
+            <h2 className="mb-2 text-primary">
+              Our Growing <span className="text-foreground" style={{ fontSize: 'inherit', fontWeight: 'inherit', lineHeight: 'inherit' }}>Movement</span>
             </h2>
-            <p className="text-muted-foreground text-base md:text-lg">
+            <p className="text-muted-foreground">
               Join thousands of compassionate citizens making their voices heard
             </p>
           </motion.div>

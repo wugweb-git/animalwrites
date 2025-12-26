@@ -47,7 +47,7 @@ export function Testimonials() {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#FFF8F3] hidden"
+      className="py-16 md:py-24 bg-gradient-to-b from-white to-surface-warm hidden"
       aria-labelledby="testimonials-heading"
     >
       <div className="container mx-auto px-4">
@@ -59,8 +59,8 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 id="testimonials-heading" className="text-[#333333] text-2xl md:text-4xl mb-4 font-bold">Voices <span className="text-[#D97706]">From Across</span> India</h2>
-            <p className="text-[#666666] text-base md:text-lg">
+            <h2 id="testimonials-heading" className="text-foreground mb-4">Voices <span className="text-accent-hover">From Across</span> India</h2>
+            <p className="text-muted-foreground">
               Real people, real stories, one united movement
             </p>
           </motion.div>
@@ -89,21 +89,21 @@ export function Testimonials() {
                     whileHover={{ y: -8, boxShadow: "0 20px 30px -10px rgba(0,0,0,0.15)" }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors h-full">
+                    <Card className="border-2 border-accent/20 hover:border-accent transition-colors h-full">
                       <CardContent className="p-5 md:p-6 flex flex-col h-full">
                         <motion.div
                           whileHover={{ rotate: 180, scale: 1.2 }}
                           transition={{ duration: 0.6 }}
                         >
-                          <Quote className="w-7 h-7 md:w-8 md:h-8 text-[#F59E0B] mb-4 opacity-50" aria-hidden="true" />
+                          <Quote className="w-7 h-7 md:w-8 md:h-8 text-accent mb-4 opacity-50" aria-hidden="true" />
                         </motion.div>
-                        <p className="text-[#666666] italic mb-6 flex-grow text-sm md:text-base leading-relaxed">
+                        <p className="text-muted-foreground italic mb-6 flex-grow leading-relaxed">
                           "{testimonial.quote}"
                         </p>
-                        <div className="border-t-2 border-[#F59E0B]/10 pt-4">
-                          <p className="text-[#333333] font-medium text-sm md:text-base">{testimonial.author}</p>
-                          <p className="text-xs md:text-sm text-[#666666]">{testimonial.location}</p>
-                          <p className="text-xs text-[#D97706] mt-1">{testimonial.role}</p>
+                        <div className="border-t-2 border-accent/10 pt-4">
+                          <p className="text-foreground">{testimonial.author}</p>
+                          <p className="text-muted-foreground">{testimonial.location}</p>
+                          <p className="text-accent-hover mt-1">{testimonial.role}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -120,9 +120,9 @@ export function Testimonials() {
             viewport={{ once: true }}
             className="mt-10 md:mt-12 text-center"
           >
-            <div className="inline-block bg-gradient-to-r from-[#FFF8F3] to-white rounded-xl p-6 md:p-8 border-2 border-[#F59E0B]/30">
-              <p className="text-[#333333] text-base md:text-lg">
-                <strong className="text-[#D97706]">Your voice matters too.</strong> Add it to thousands of others. 
+            <div className="inline-block bg-gradient-to-r from-surface-warm to-white rounded-xl p-6 md:p-8 border-2 border-accent/30">
+              <p className="text-foreground text-base md:text-lg">
+                <strong className="text-accent-hover">Your voice matters too.</strong> Add it to thousands of others. 
                 Write your letter today.
               </p>
             </div>

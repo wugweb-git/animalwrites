@@ -85,7 +85,7 @@ export function VolunteerSignup() {
   return (
     <section 
       id="volunteer" 
-      className="py-16 md:py-24 bg-gradient-to-b from-[#FFF8F3] to-white"
+      className="py-16 md:py-24 bg-gradient-to-b from-[var(--surface-warm)] to-background"
       aria-labelledby="volunteer-heading"
     >
       <div className="container mx-auto px-4">
@@ -102,11 +102,11 @@ export function VolunteerSignup() {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Users className="w-7 h-7 md:w-8 md:h-8 text-[#333333]" aria-hidden="true" />
+                <Users className="w-7 h-7 md:w-8 md:h-8 text-foreground" aria-hidden="true" />
               </motion.div>
-              <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-[#333333] font-bold">Volunteer With Us</h2>
+              <h2 id="volunteer-heading" className="text-2xl md:text-4xl text-foreground font-bold">Volunteer With Us</h2>
             </div>
-            <p className="text-[#666666] text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
               Want to do more? Join our volunteer team and help coordinate this movement in your city. 
               Together, we can reach every corner of India.
             </p>
@@ -120,17 +120,17 @@ export function VolunteerSignup() {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
+                <Card className="border-2 border-accent/20 hover:border-accent transition-colors bg-card">
                   <CardHeader>
-                    <CardTitle className="text-[#D97706] flex items-center gap-2 text-lg md:text-xl font-bold">
+                    <CardTitle className="text-accent-hover flex items-center gap-2 text-lg md:text-xl font-bold">
                       <MapPin className="w-5 h-5" aria-hidden="true" />
                       City Coordinators Needed
                     </CardTitle>
-                    <CardDescription className="text-sm md:text-base">
+                    <CardDescription className="text-sm md:text-base text-muted-foreground">
                       Lead the movement in your city and inspire others to participate
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3 text-[#666666] text-sm md:text-base">
+                  <CardContent className="space-y-3 text-muted-foreground text-sm md:text-base">
                     {[
                       "Organize local meetups and GPO visits",
                       "Share information about the campaign in your community",
@@ -145,7 +145,7 @@ export function VolunteerSignup() {
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         viewport={{ once: true }}
                       >
-                        <span className="text-[#333333] text-lg" aria-hidden="true">✓</span>
+                        <span className="text-foreground text-lg" aria-hidden="true">✓</span>
                         <span>{item}</span>
                       </motion.div>
                     ))}
@@ -159,17 +159,17 @@ export function VolunteerSignup() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-2 border-[#F59E0B]/20 hover:border-[#F59E0B] transition-colors">
+                <Card className="border-2 border-accent/20 hover:border-accent transition-colors bg-card">
                   <CardHeader>
-                    <CardTitle className="text-[#D97706] flex items-center gap-2 text-lg md:text-xl font-bold">
+                    <CardTitle className="text-accent-hover flex items-center gap-2 text-lg md:text-xl font-bold">
                       <Mail className="w-5 h-5" aria-hidden="true" />
                       Other Ways to Help
                     </CardTitle>
-                    <CardDescription className="text-sm md:text-base">
+                    <CardDescription className="text-sm md:text-base text-muted-foreground">
                       Every role is crucial to our success
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3 text-[#666666] text-sm md:text-base">
+                  <CardContent className="space-y-3 text-muted-foreground text-sm md:text-base">
                     {[
                       "Social media management and content creation",
                       "Translation to regional languages",
@@ -184,7 +184,7 @@ export function VolunteerSignup() {
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         viewport={{ once: true }}
                       >
-                        <span className="text-[#333333] text-lg" aria-hidden="true">✓</span>
+                        <span className="text-foreground text-lg" aria-hidden="true">✓</span>
                         <span>{item}</span>
                       </motion.div>
                     ))}
@@ -199,10 +199,10 @@ export function VolunteerSignup() {
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <Card className="border-2 border-[#F59E0B]/30 hover:border-[#F59E0B] transition-colors">
+              <Card className="border-2 border-accent/30 hover:border-accent transition-colors bg-card">
                 <CardHeader>
-                  <CardTitle className="text-[#D97706] text-lg md:text-xl font-bold">Sign Up to Volunteer</CardTitle>
-                  <CardDescription className="text-sm md:text-base">
+                  <CardTitle className="text-accent-hover text-lg md:text-xl font-bold">Sign Up to Volunteer</CardTitle>
+                  <CardDescription className="text-sm md:text-base text-muted-foreground">
                     Fill out this form and we'll get in touch with you
                   </CardDescription>
                 </CardHeader>
@@ -224,7 +224,7 @@ export function VolunteerSignup() {
                           <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
                         </motion.div>
                         <h3 className="text-green-700 text-xl mb-2">Thank You!</h3>
-                        <p className="text-[#666666] text-sm md:text-base">
+                        <p className="text-muted-foreground text-sm md:text-base">
                           Your volunteer registration has been received. We'll reach out to you soon with more details.
                         </p>
                       </motion.div>
@@ -238,7 +238,7 @@ export function VolunteerSignup() {
                         className="space-y-5 md:space-y-6"
                       >
                         <div className="space-y-2">
-                          <Label htmlFor="name" className="text-base md:text-base">Full Name *</Label>
+                          <Label htmlFor="name" className="text-base md:text-base text-foreground">Full Name *</Label>
                           <Input
                             id="name"
                             type="text"
@@ -246,13 +246,13 @@ export function VolunteerSignup() {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             placeholder="Enter your full name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
+                            className="border-2 border-border focus:border-accent transition-colors h-14 text-lg bg-input-background"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="email" className="text-base md:text-base">Email Address *</Label>
+                          <Label htmlFor="email" className="text-base md:text-base text-foreground">Email Address *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -260,13 +260,13 @@ export function VolunteerSignup() {
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             placeholder="your.email@example.com"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
+                            className="border-2 border-border focus:border-accent transition-colors h-14 text-lg bg-input-background"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="city" className="text-base md:text-base">City *</Label>
+                          <Label htmlFor="city" className="text-base md:text-base text-foreground">City *</Label>
                           <Input
                             id="city"
                             type="text"
@@ -274,20 +274,20 @@ export function VolunteerSignup() {
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             placeholder="Your city name"
-                            className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
+                            className="border-2 border-border focus:border-accent transition-colors h-14 text-lg bg-input-background"
                             aria-required="true"
                           />
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="role" className="text-base md:text-base">How Would You Like to Help? *</Label>
+                          <Label htmlFor="role" className="text-base md:text-base text-foreground">How Would You Like to Help? *</Label>
                           <Select
                             required
                             value={formData.role}
                             onValueChange={(value) => setFormData({ ...formData, role: value })}
                           >
                             <SelectTrigger 
-                              className="border-2 border-gray-200 focus:border-[#F59E0B] transition-colors h-14 text-lg"
+                              className="border-2 border-border focus:border-accent transition-colors h-14 text-lg bg-input-background"
                               aria-label="Select volunteer role"
                             >
                               <SelectValue placeholder="Select a role" />
@@ -302,18 +302,18 @@ export function VolunteerSignup() {
                           </Select>
                         </div>
 
-                        <div className="p-5 md:p-4 bg-[#FFF8F3] rounded-lg border border-[#F59E0B]/20">
+                        <div className="p-5 md:p-4 bg-[var(--surface-warm)] rounded-lg border border-accent/20">
                           <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                             <input
                               type="checkbox"
                               id="consent"
                               checked={consent}
                               onChange={(e) => setConsent(e.target.checked)}
-                              className="mt-1 h-6 w-6 text-[#F59E0B] focus:ring-[#F59E0B] focus:ring-offset-2 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                              className="mt-1 h-6 w-6 text-accent focus:ring-accent focus:ring-offset-2 border-border rounded cursor-pointer flex-shrink-0"
                               required
                               aria-required="true"
                             />
-                            <span className="text-[#666666] leading-relaxed group-hover:text-[#333333] transition-colors text-[13px]">
+                            <span className="text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors text-[13px]">
                               I consent to being contacted by the Animal Writes campaign team regarding volunteer opportunities and campaign updates. I understand my information will be used solely for this campaign and will be kept confidential.
                             </span>
                           </label>
@@ -326,7 +326,7 @@ export function VolunteerSignup() {
                           <Button
                             type="submit"
                             disabled={!consent || isSubmitting}
-                            className="w-full bg-[#333333] hover:bg-[#1a1a1a] text-white py-7 text-lg focus:ring-2 focus:ring-[#333333] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-7 text-lg focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                           >
                             {isSubmitting ? "Submitting..." : "Join as Volunteer"}
                           </Button>
@@ -338,8 +338,8 @@ export function VolunteerSignup() {
                             animate={{ opacity: 1, y: 0 }}
                             className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
                           >
-                            <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-800">{errorMessage}</p>
+                            <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-destructive">{errorMessage}</p>
                           </motion.div>
                         )}
                       </motion.form>
@@ -355,13 +355,13 @@ export function VolunteerSignup() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
-            className="mt-12 bg-[#FFF8F3] rounded-2xl p-6 md:p-8 border-2 border-[#F59E0B]/20"
+            className="mt-12 bg-[var(--surface-warm)] rounded-2xl p-6 md:p-8 border-2 border-accent/20"
           >
             <div className="text-center">
-              <p className="text-[#333333] text-base md:text-lg mb-4">
-                <strong className="text-[#D97706]">Can't volunteer but want to help?</strong>
+              <p className="text-foreground text-base md:text-lg mb-4">
+                <strong className="text-accent-hover">Can't volunteer but want to help?</strong>
               </p>
-              <p className="text-[#666666] text-sm md:text-base">
+              <p className="text-muted-foreground text-sm md:text-base">
                 Share this campaign with everyone you know, write your letter, and encourage others to participate. 
                 Every action, no matter how small, creates ripples of change.
               </p>

@@ -31,7 +31,7 @@ export function SocialShare() {
 
   return (
     <section 
-      className="py-16 md:py-24 bg-gradient-to-b from-white to-[#F5F5F5]"
+      className="py-16 md:py-24 bg-gradient-to-b from-white to-muted"
       aria-labelledby="social-share-heading"
     >
       <div className="container mx-auto px-4">
@@ -50,11 +50,11 @@ export function SocialShare() {
                   animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Share2 className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
+                  <Share2 className="w-8 h-8 text-accent" aria-hidden="true" />
                 </motion.div>
-                <h2 id="social-share-heading" className="text-2xl md:text-4xl text-[#333333] font-bold">Spread the Word</h2>
+                <h2 id="social-share-heading" className="text-foreground">Spread the Word</h2>
               </div>
-              <p className="text-[#666666] text-base md:text-lg">
+              <p className="text-muted-foreground">
                 Help us reach every corner of India. Share this campaign with your friends, family, and community.
               </p>
             </div>
@@ -95,7 +95,7 @@ export function SocialShare() {
                 <Button
                   onClick={copyToClipboard}
                   variant="outline"
-                  className="border-2 border-[#333333] text-[#333333] hover:bg-[#333333] hover:text-white flex items-center gap-2 px-4 md:px-6 py-5 md:py-6 focus:ring-2 focus:ring-[#333333] focus:ring-offset-2"
+                  className="border-2 border-primary text-primary hover:bg-primary hover:text-white flex items-center gap-2 px-4 md:px-6 py-5 md:py-6 focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label={copied ? "Link copied" : "Copy link"}
                 >
                   <AnimatePresence mode="wait">
@@ -132,13 +132,13 @@ export function SocialShare() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="bg-[#FFF8F3] rounded-2xl p-5 md:p-6 border-2 border-[#F59E0B]/20 mt-auto"
+              className="bg-surface-warm rounded-2xl p-5 md:p-6 border-2 border-accent/20 mt-auto"
             >
-              <p className="text-center text-[#333333] text-sm md:text-base">
+              <p className="text-center text-foreground text-sm md:text-base">
                 <strong>Tag your posts:</strong>{" "}
-                <span className="text-[#D97706]">#SaveIndianStreetDogs</span> •{" "}
-                <span className="text-[#D97706]">#NoDogsNoVotes</span> •{" "}
-                <span className="text-[#D97706]">#AnimalWrites</span>
+                <span className="text-accent-hover">#SaveIndianStreetDogs</span> •{" "}
+                <span className="text-accent-hover">#NoDogsNoVotes</span> •{" "}
+                <span className="text-accent-hover">#AnimalWrites</span>
               </p>
             </motion.div>
           </motion.div>
@@ -149,7 +149,7 @@ export function SocialShare() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-[#333333] to-[#1a1a1a] rounded-3xl p-8 md:p-12 shadow-2xl text-center flex flex-col justify-center"
+            className="bg-gradient-to-br from-primary to-primary-hover rounded-3xl p-8 md:p-12 shadow-2xl text-center flex flex-col justify-center"
           >
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <motion.div
@@ -158,11 +158,11 @@ export function SocialShare() {
               >
                 <Users className="w-8 h-8 text-white" aria-hidden="true" />
               </motion.div>
-              <h3 className="text-white text-2xl md:text-4xl font-bold">
+              <h3 className="text-white">
                 Join the Movement
               </h3>
             </div>
-            <p className="text-white/90 text-base md:text-lg mb-6 md:mb-8 max-w-2xl mx-auto">
+            <p className="text-white/90 mb-6 md:mb-8 max-w-2xl mx-auto">
               Follow the official campaign page for updates, resources, and to connect with thousands of compassionate citizens across India
             </p>
             
@@ -175,7 +175,7 @@ export function SocialShare() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
+                  className="bg-white text-primary hover:bg-white/90 px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary w-full"
                 >
                   <a
                     href="https://www.facebook.com/AnimalWritesIndia/"
@@ -197,7 +197,7 @@ export function SocialShare() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-white text-[#333333] hover:bg-white/90 text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
+                  className="bg-white text-primary hover:bg-white/90 px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary w-full"
                 >
                   <a
                     href="https://www.instagram.com/animalwrites_india/"
@@ -219,7 +219,7 @@ export function SocialShare() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-[#25D366] hover:bg-[#20bd5a] text-white text-base md:text-lg px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#333333] w-full"
+                  className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-6 md:px-8 py-5 md:py-6 h-auto focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary w-full"
                 >
                   <a
                     href="https://chat.whatsapp.com/EzE1VZTszFoLDwqEOCClxR"

@@ -72,7 +72,7 @@ export function HowToJoin() {
                   <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
                     <div className="flex-shrink-0 mx-auto sm:mx-0">
                       <motion.div
-                        className="w-16 h-16 md:w-20 md:h-20 rounded-[var(--radius-full)] bg-primary text-white flex items-center justify-center text-2xl md:text-4xl shadow-[var(--elevation-lg)]"
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-[var(--radius-full)] bg-primary text-white flex items-center justify-center shadow-[var(--elevation-lg)]"
                         whileHover={{ 
                           rotate: [0, -10, 10, -10, 0],
                           scale: 1.1 
@@ -129,7 +129,7 @@ export function HowToJoin() {
               >
                 <Button
                   onClick={() => scrollToSection("volunteer")}
-                  className="bg-primary hover:bg-[var(--primary-hover)] text-white px-6 md:px-8 py-5 md:py-6 text-base md:text-lg focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  className="bg-primary hover:bg-[var(--primary-hover)] text-white px-6 md:px-8 py-5 md:py-6 focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label="Navigate to volunteer signup section"
                 >
                   Join Leadership Circle

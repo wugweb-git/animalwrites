@@ -39,7 +39,7 @@ export function WhyThisMatters() {
   return (
     <section 
       id="why-matters" 
-      className="py-16 md:py-24 bg-[#F5F5F5]"
+      className="py-16 md:py-24 bg-muted/30"
       aria-labelledby="why-matters-heading"
     >
       <div className="container mx-auto px-4">
@@ -52,10 +52,10 @@ export function WhyThisMatters() {
             viewport={{ once: true }}
             className="text-center mb-12 md:mb-16"
           >
-            <h2 id="why-matters-heading" className="text-4xl md:text-5xl text-[#333333] mb-6 md:mb-6">
+            <h2 id="why-matters-heading" className="text-4xl md:text-5xl text-foreground mb-6 md:mb-6">
               Why This Matters
             </h2>
-            <p className="text-xl md:text-xl text-[#666666] max-w-3xl mx-auto">
+            <p className="text-xl md:text-xl text-muted-foreground max-w-3xl mx-auto">
               This is not a protest — it's a peaceful national letter movement for justice and empathy.
             </p>
           </motion.div>
@@ -71,19 +71,19 @@ export function WhyThisMatters() {
                 viewport={{ once: true }}
               >
                 <motion.div
-                  className="bg-white rounded-2xl p-8 md:p-8 shadow-lg hover:shadow-xl transition-all h-full"
+                  className="bg-card rounded-2xl p-8 md:p-8 shadow-[var(--elevation-lg)] hover:shadow-[var(--elevation-xl)] transition-all h-full"
                   whileHover={{ y: -5, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <motion.div
-                    className="bg-[#FFF8F3] rounded-full w-16 h-16 flex items-center justify-center mb-6 mx-auto sm:mx-0"
+                    className="bg-[var(--surface-warm)] rounded-full w-16 h-16 flex items-center justify-center mb-6 mx-auto sm:mx-0"
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <reason.icon className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
+                    <reason.icon className="w-8 h-8 text-accent" aria-hidden="true" />
                   </motion.div>
-                  <h3 className="text-xl md:text-xl text-[#333333] mb-3 text-center sm:text-left">{reason.title}</h3>
-                  <p className="text-base md:text-base text-[#666666] leading-relaxed text-center sm:text-left">{reason.description}</p>
+                  <h3 className="text-xl md:text-xl text-foreground mb-3 text-center sm:text-left">{reason.title}</h3>
+                  <p className="text-base md:text-base text-muted-foreground leading-relaxed text-center sm:text-left">{reason.description}</p>
                 </motion.div>
               </motion.div>
             ))}
@@ -98,23 +98,23 @@ export function WhyThisMatters() {
             className="mb-12 md:mb-16"
           >
             <motion.div
-              className="bg-white rounded-2xl p-8 md:p-12 border-2 border-[#F59E0B]/20 shadow-xl"
+              className="bg-card rounded-2xl p-8 md:p-12 border-2 border-accent/20 shadow-[var(--elevation-xl)]"
               whileHover={{ borderColor: "rgba(245, 158, 11, 0.4)" }}
               transition={{ duration: 0.3 }}
             >
               <div className="text-center mb-8">
                 <motion.div
-                  className="inline-flex items-center gap-2 bg-[#F59E0B] px-5 py-2 rounded-full mb-6"
+                  className="inline-flex items-center gap-2 bg-accent px-5 py-2 rounded-full mb-6"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <Scale className="w-5 h-5 text-white" aria-hidden="true" />
-                  <span className="text-white">Your Constitutional Right</span>
+                  <Scale className="w-5 h-5 text-accent-foreground" aria-hidden="true" />
+                  <span className="text-accent-foreground">Your Constitutional Right</span>
                 </motion.div>
-                <h3 className="text-2xl md:text-3xl text-[#333333] mb-4 font-bold">
+                <h3 className="text-2xl md:text-3xl text-foreground mb-4 font-bold">
                   Why Letters to the Supreme Court Work?
                 </h3>
-                <p className="text-base md:text-lg text-[#666666] max-w-2xl mx-auto">
+                <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
                   The Supreme Court can take cognizance based on citizen letters — this is a rare and powerful constitutional tool available to every Indian.
                 </p>
               </div>
@@ -130,20 +130,20 @@ export function WhyThisMatters() {
                     className="flex flex-col items-center text-center"
                   >
                     <motion.div
-                      className="bg-[#FFF8F3] rounded-full w-16 h-16 flex items-center justify-center mb-4"
+                      className="bg-[var(--surface-warm)] rounded-full w-16 h-16 flex items-center justify-center mb-4"
                       whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.6 }}
                     >
-                      <point.icon className="w-8 h-8 text-[#F59E0B]" aria-hidden="true" />
+                      <point.icon className="w-8 h-8 text-accent" aria-hidden="true" />
                     </motion.div>
-                    <p className="text-sm md:text-base text-[#666666] leading-relaxed">{point.text}</p>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{point.text}</p>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="bg-[#FFF8F3] rounded-xl p-6 md:p-8 border-l-4 border-[#F59E0B]">
-                <p className="text-center text-base md:text-lg text-[#333333]">
-                  Use the uniform title: <strong className="text-[#D97706]">"IN RE: India Writes for Animal Rights"</strong> to help the Court consolidate all letters into one national plea.
+              <div className="bg-[var(--surface-warm)] rounded-xl p-6 md:p-8 border-l-4 border-accent">
+                <p className="text-center text-base md:text-lg text-foreground">
+                  Use the uniform title: <strong className="text-accent-hover">"IN RE: India Writes for Animal Rights"</strong> to help the Court consolidate all letters into one national plea.
                 </p>
               </div>
             </motion.div>

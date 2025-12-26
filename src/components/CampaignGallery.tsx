@@ -51,7 +51,7 @@ export function CampaignGallery() {
             <h2 id="gallery-heading" className="text-primary mb-4">
               Moments From Previous Campaigns
             </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               A glimpse of the compassion and unity that drives our movement forward
             </p>
           </motion.div>
@@ -87,7 +87,7 @@ export function CampaignGallery() {
             viewport={{ once: true }}
             className="mt-12 md:mt-16 text-center"
           >
-            <p className="text-muted-foreground text-base md:text-lg max-w-3xl mx-auto">
+            <p className="text-muted-foreground max-w-3xl mx-auto">
               Every letter, every voice, every act of compassion brings us closer to a more humane society. Join us in making history on November 29th, 2025.
             </p>
           </motion.div>

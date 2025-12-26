@@ -58,7 +58,7 @@ export function FloatingCTA() {
           </div>
           <div className="flex-1 text-center sm:text-left">
             <p className="text-primary">Ready to make a difference?</p>
-            <p className="text-xs sm:text-sm text-muted-foreground">Join thousands across India</p>
+            <p className="text-muted-foreground">Join thousands across India</p>
           </div>
           
           <Button

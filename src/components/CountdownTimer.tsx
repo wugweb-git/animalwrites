@@ -55,7 +55,7 @@ export function CountdownTimer() {
               }}
             >
               <Target className="w-5 h-5 md:w-6 md:h-6 text-white" aria-hidden="true" />
-              <span className="text-white text-sm md:text-base uppercase tracking-wide">
+              <span className="text-white uppercase tracking-wide">
                 Phase 2.0 Now Live
               </span>
             </motion.div>
@@ -63,10 +63,10 @@ export function CountdownTimer() {
             <h2 id="phase-two-heading" className="text-white mb-4">
               Pashu Bachao, Vote Badhao
             </h2>
-            <p className="text-accent text-xl md:text-2xl mb-4 italic">
+            <p className="text-accent mb-4 italic">
               (Save Animals, Increase Votes)
             </p>
-            <p className="text-white/90 text-base md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-white/90 max-w-3xl mx-auto leading-relaxed">
               After 2.5 lakh letters to the Supreme Court, we're taking the next step. Politicians respond to votes. Let's show them that <span className="text-accent">animal welfare is electoral power</span>.
             </p>
           </motion.div>
@@ -92,7 +92,7 @@ export function CountdownTimer() {
                 <Vote className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
               <h3 className="text-white mb-2">Register to Vote</h3>
-              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+              <p className="text-white/80 leading-relaxed">
                 Ensure you're registered and ready to make animal welfare a voting issue
               </p>
             </motion.div>
@@ -110,7 +110,7 @@ export function CountdownTimer() {
                 <Users className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
               <h3 className="text-white mb-2">Build the Movement</h3>
-              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+              <p className="text-white/80 leading-relaxed">
                 Connect with fellow voters who care about animals and amplify our voice
               </p>
             </motion.div>
@@ -128,7 +128,7 @@ export function CountdownTimer() {
                 <TrendingUp className="w-10 h-10 md:w-12 md:h-12 text-accent" aria-hidden="true" />
               </motion.div>
               <h3 className="text-white mb-2">Hold Leaders Accountable</h3>
-              <p className="text-white/80 text-sm md:text-base leading-relaxed">
+              <p className="text-white/80 leading-relaxed">
                 Make candidates pledge their commitment to animal welfare policies
               </p>
             </motion.div>
@@ -142,7 +142,7 @@ export function CountdownTimer() {
             viewport={{ once: true }}
             className="mt-10 md:mt-12"
           >
-            <p className="text-white/70 text-sm md:text-base max-w-2xl mx-auto">
+            <p className="text-white/70 max-w-2xl mx-auto">
               Our collective voice sent 2.5 lakh letters. Now let's convert that compassion into electoral power and create lasting change for India's animals.
             </p>
           </motion.div>

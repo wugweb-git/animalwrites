@@ -55,7 +55,7 @@ export function KeyFacts() {
             <h2 id="key-facts-heading" className="text-primary mb-4">
               The Facts Speak for Themselves
             </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Understanding the ground reality and viable solutions
             </p>
           </motion.div>
@@ -83,7 +83,7 @@ export function KeyFacts() {
                       <fact.icon className="w-6 h-6 text-primary" aria-hidden="true" />
                     </motion.div>
                     <div className="flex-1">
-                      <h3 className="text-primary mb-2 text-base md:text-lg">{fact.title}</h3>
+                      <h3 className="text-primary mb-2">{fact.title}</h3>
                       <motion.div
                         className="text-2xl md:text-3xl text-primary mb-3"
                         initial={{ scale: 0.8, opacity: 0 }}
@@ -95,7 +95,7 @@ export function KeyFacts() {
                       </motion.div>
                     </div>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{fact.description}</p>
+                  <p className="text-muted-foreground leading-relaxed">{fact.description}</p>
                 </motion.div>
               </motion.div>
             ))}
