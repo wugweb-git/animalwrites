@@ -3,8 +3,6 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import svgQuotePaths from "../imports/svg-u67olcqmrd";
-import imgBlobBackground from "figma:asset/c3d6919b6048ba69e7232b37dcaafb9fc40064b8.png";
-import imgGandhi from "figma:asset/447627dc0a902810db417b5ea9d0b569a93db83b.png";
 
 export function CommunityAction() {
   const [copied, setCopied] = useState(false);
@@ -77,21 +75,15 @@ export function CommunityAction() {
               maxWidth: '1095px',
               height: '355px',
               borderRadius: 'var(--radius-xl)',
-              boxShadow: 'var(--elevation-lg)'
+              boxShadow: 'var(--elevation-lg)',
+              background: 'linear-gradient(135deg, #FFF5EB 0%, #FFE4C4 30%, #FFDAB3 60%, #FFD4A3 100%)'
             }}
           >
-            {/* Blob Background Image */}
-            <img
-              src={imgBlobBackground}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-              aria-hidden="true"
-            />
             
             {/* Gandhi Image positioned on the right */}
             <div className="absolute right-0 bottom-0 h-full flex items-end justify-end">
               <img
-                src={imgGandhi}
+                src="https://wugweb.online/gandhi.png"
                 alt="Mahatma Gandhi"
                 className="h-full w-auto object-contain object-bottom"
                 style={{ maxHeight: '355px' }}
@@ -219,7 +211,7 @@ export function CommunityAction() {
             {/* Gandhi Image */}
             <div className="flex justify-center pb-0">
               <img
-                src={imgGandhi}
+                src="https://wugweb.online/gandhi.png"
                 alt="Mahatma Gandhi"
                 className="w-auto object-contain"
                 style={{ maxHeight: '280px' }}
