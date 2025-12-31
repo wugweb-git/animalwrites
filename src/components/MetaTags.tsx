@@ -8,31 +8,24 @@ export function MetaTags() {
     // Set HTML lang attribute
     document.documentElement.lang = "en";
 
-    // Install Google Analytics (gtag.js)
-    const installGtag = () => {
-      // Check if script already exists
-      if (document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+    // Install Google Tag Manager
+    const installGTM = () => {
+      if (document.querySelector('script[src*="googletagmanager.com/gtm.js"]')) {
         return;
       }
 
-      // Create and append gtag script
       const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-4P5YMJ04RL';
-      document.head.appendChild(script);
-
-      // Initialize gtag
-      const inlineScript = document.createElement('script');
-      inlineScript.innerHTML = `
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-4P5YMJ04RL');
+      script.innerHTML = `
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-W9D28GKV');
       `;
-      document.head.appendChild(inlineScript);
+      document.head.insertBefore(script, document.head.firstChild);
     };
-
-    installGtag();
+    
+    installGTM();
 
     // Set favicon - Using SVG data URL for reliability
     const setFavicon = () => {
@@ -98,7 +91,6 @@ export function MetaTags() {
       // DNS Prefetch for external domains
       const dnsPrefetchDomains = [
         'https://www.googletagmanager.com',
-        'https://www.google-analytics.com',
         'https://images.unsplash.com'
       ];
 
@@ -451,5 +443,14 @@ export function MetaTags() {
 
   }, []);
 
-  return null;
+  return (
+    <noscript>
+      <iframe 
+        src="https://www.googletagmanager.com/ns.html?id=GTM-W9D28GKV"
+        height="0" 
+        width="0" 
+        style={{ display: 'none', visibility: 'hidden' }}
+      />
+    </noscript>
+  );
 }

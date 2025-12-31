@@ -2,6 +2,7 @@ import { Mail, Heart, Instagram, Facebook, Youtube, MapPin, Phone, ExternalLink 
 import { motion } from "motion/react";
 import Vector from "../imports/Vector";
 import { VisitorCounter } from "./VisitorCounter";
+import { LegalModal } from "./LegalModal";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -223,19 +224,10 @@ export function Footer() {
               
               {/* Legal Links */}
               <div className="flex items-center gap-4 text-[length:var(--text-sm)]">
-                <a 
-                  href="#terms" 
-                  className="text-primary-foreground/60 hover:text-accent transition-colors duration-200"
-                >
-                  Terms & Conditions
-                </a>
-                <span className="text-primary-foreground/40">|</span>
-                <a 
-                  href="#privacy" 
-                  className="text-primary-foreground/60 hover:text-accent transition-colors duration-200"
-                >
-                  Privacy Policy
-                </a>
+                <LegalModal 
+                  triggerText="Terms & Privacy" 
+                  triggerClassName="text-primary-foreground/60 hover:text-accent transition-colors duration-200"
+                />
               </div>
             </div>
 
