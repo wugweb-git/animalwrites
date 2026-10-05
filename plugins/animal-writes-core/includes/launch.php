@@ -143,7 +143,7 @@ add_action(
 add_action(
 	'init',
 	function () {
-		if ( '1' === get_option( 'aw_home_patterns' ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		if ( (int) get_option( 'aw_home_patterns' ) >= 1 || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return;
 		}
 		$home = (int) get_option( 'page_on_front' );
@@ -173,4 +173,33 @@ add_action(
 		update_option( 'aw_home_patterns', '1', false );
 	},
 	101
+);
+
+/**
+ * One-time (v2): the homepage hero becomes the animal-writes/hero pattern (English-only headline).
+ * Replaces the aw-hero group, which runs from its opening comment to the help-finder pattern reference.
+ */
+add_action(
+	'init',
+	function () {
+		if ( (int) get_option( 'aw_home_patterns' ) >= 2 || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		$home = (int) get_option( 'page_on_front' );
+		$post = $home ? get_post( $home ) : null;
+		if ( ! $post ) {
+			return;
+		}
+		$c     = $post->post_content;
+		$start = strpos( $c, '<!-- wp:group {"align":"full","className":"aw-hero"' );
+		$end   = strpos( $c, '<!-- wp:pattern {"slug":"animal-writes/help-finder"} /-->' );
+		if ( false !== $start && false !== $end && $end > $start ) {
+			$c = substr( $c, 0, $start ) . "<!-- wp:pattern {\"slug\":\"animal-writes/hero\"} /-->\n\n" . substr( $c, $end );
+			global $wpdb;
+			$wpdb->update( $wpdb->posts, array( 'post_content' => $c ), array( 'ID' => $home ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			clean_post_cache( $home );
+		}
+		update_option( 'aw_home_patterns', '2', false );
+	},
+	102
 );
