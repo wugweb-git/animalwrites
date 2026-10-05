@@ -15,16 +15,12 @@
 	/* 2. Sticky help bar: hide while scrolling down, show on scroll up or near the top. */
 	var bar = document.querySelector('.aw-sticky-help');
 	if (bar) {
-		var lastY = window.scrollY, ticking = false;
+		var lastY = window.scrollY;
 		window.addEventListener('scroll', function () {
-			if (ticking) return;
-			ticking = true;
-			requestAnimationFrame(function () {
-				var y = window.scrollY;
-				bar.classList.toggle('is-hidden', y > lastY && y > 240);
-				lastY = y;
-				ticking = false;
-			});
+			var y = window.scrollY;
+			if (Math.abs(y - lastY) < 8) return; // ignore jitter
+			bar.classList.toggle('is-hidden', y > lastY && y > 240);
+			lastY = y;
 		}, { passive: true });
 		bar.addEventListener('focusin', function () { bar.classList.remove('is-hidden'); });
 	}
@@ -42,6 +38,7 @@
 			b.type = 'button';
 			b.setAttribute('aria-label', 'Card ' + (i + 1) + ' of ' + items.length);
 			b.addEventListener('click', function () {
+				setCurrent(i);
 				track.scrollTo({ left: item.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft), behavior: reduce ? 'auto' : 'smooth' });
 			});
 			dots.appendChild(b);
@@ -53,9 +50,13 @@
 				var d = Math.abs(item.offsetLeft - track.offsetLeft - left);
 				if (d < bestDist) { bestDist = d; best = i; }
 			});
-			Array.prototype.forEach.call(dots.children, function (b, i) { b.setAttribute('aria-current', i === best ? 'true' : 'false'); });
+			setCurrent(best);
 		}
-		track.addEventListener('scroll', function () { requestAnimationFrame(mark); }, { passive: true });
+		function setCurrent(n) {
+			Array.prototype.forEach.call(dots.children, function (b, i) { b.setAttribute('aria-current', i === n ? 'true' : 'false'); });
+		}
+		var settle;
+		track.addEventListener('scroll', function () { clearTimeout(settle); settle = setTimeout(mark, 90); }, { passive: true });
 		mark();
 	});
 
