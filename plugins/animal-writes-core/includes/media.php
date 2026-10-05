@@ -50,7 +50,7 @@ add_filter(
 		if ( $url ) {
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}
-		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1">' . $inner . '</a>' : $inner;
+		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $inner . '</a>' : $inner;
 		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $url ? ' has-remote' : '' ) . ( $doc ? ' aw-doc-cover' : '' ) . '">' . $inner . '</figure>';
 	},
 	10,

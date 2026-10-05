@@ -28,21 +28,21 @@ function aw_share_html( $post_id ) {
 	foreach ( $links as $name => $href ) {
 		$out .= '<a class="aw-share-' . strtolower( $name ) . '" href="' . esc_url( $href ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $name ) . '</a>';
 	}
-	$out .= '<button type="button" class="aw-share-copy" data-url="' . esc_attr( $url ) . '" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.dataset.url).then(()=>{this.textContent=\'' . esc_js( __( 'Link copied', 'animal-writes-core' ) ) . '\';setTimeout(()=>{this.textContent=\'' . esc_js( __( 'Copy link', 'animal-writes-core' ) ) . '\'},2000)})">' . esc_html__( 'Copy link', 'animal-writes-core' ) . '</button></div>';
+	$out .= '<button type="button" class="aw-share-copy" data-url="' . esc_attr( $url ) . '" data-done="' . esc_attr__( 'Link copied', 'animal-writes-core' ) . '">' . esc_html__( 'Copy link', 'animal-writes-core' ) . '</button></div>';
 	return $out;
 }
 
-// After the main content area of single items (template-agnostic: hooks the last block of <main>).
+// After the content of single items, inside <main>.
 add_filter(
-	'render_block_core/template-part',
+	'render_block_core/post-content',
 	function ( $content, $block ) {
 		static $done = false;
 		$types = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_campaign', 'aw_resource', 'aw_opportunity', 'aw_listing' );
-		if ( $done || ( $block['attrs']['slug'] ?? '' ) !== 'footer' || ! is_singular( $types ) ) {
+		if ( $done || ! is_singular( $types ) ) {
 			return $content;
 		}
 		$done = true;
-		return '<div class="aw-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>' . $content;
+		return $content . '<div class="aw-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>';
 	},
 	10,
 	2

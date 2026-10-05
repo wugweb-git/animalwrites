@@ -125,3 +125,9 @@ add_action(
 			. '</nav>' . "\n";
 	}
 );
+
+// Empty states sit under the page's h1, so their heading is an h2 (the pattern ships an h3).
+add_filter(
+	'render_block_core/query-no-results',
+	fn( $html ) => preg_replace( array( '/<h3\b/', '/<\/h3>/' ), array( '<h2', '</h2>' ), $html )
+);

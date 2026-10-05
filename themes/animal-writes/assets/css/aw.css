@@ -541,3 +541,7 @@ main > .aw-section-band:first-child { margin-block-start: 0; }
 .aw-section-visual > * { min-width: 0; }
 .aw-section-visual .aw-placard { aspect-ratio: 4/5; height: auto; overflow: hidden; }
 .aw-doc-cover img, .aw-section-visual img[src*="-pdf"] { object-position: top; background: #fff; }
+
+/* a11y: #9a5b00 on kraft is 4.3:1; use ink. */
+.aw-section-count { color: var(--aw-color-ink); }
+.aw-share-copy { cursor: pointer; }

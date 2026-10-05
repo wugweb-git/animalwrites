@@ -59,6 +59,17 @@
 		mark();
 	});
 
+	/* Copy link (share bar). */
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest('.aw-share-copy');
+		if (!b || !navigator.clipboard) return;
+		var label = b.textContent;
+		navigator.clipboard.writeText(b.dataset.url).then(function () {
+			b.textContent = b.dataset.done;
+			setTimeout(function () { b.textContent = label; }, 2000);
+		});
+	});
+
 	/* 4. Shared form validation for every .aw-form: inline errors, summary, loading state. */
 	var MSG = {
 		valueMissing: 'This is required.',
