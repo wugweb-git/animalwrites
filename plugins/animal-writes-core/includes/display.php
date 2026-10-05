@@ -70,3 +70,29 @@ add_action(
 	},
 	20
 );
+
+/**
+ * News, Legal Watch and Research lists are ordered by source date (newest first), then by date added.
+ * Items without a source date are kept (named meta clause with NOT EXISTS).
+ */
+add_action(
+	'pre_get_posts',
+	function ( $q ) {
+		if ( is_admin() ) {
+			return;
+		}
+		$types = (array) $q->get( 'post_type' );
+		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal', 'aw_research' ) ) ) {
+			return;
+		}
+		$q->set(
+			'meta_query',
+			array(
+				'relation'    => 'OR',
+				'source_date' => array( 'key' => 'aw_source_date', 'compare' => 'EXISTS' ),
+				'no_date'     => array( 'key' => 'aw_source_date', 'compare' => 'NOT EXISTS' ),
+			)
+		);
+		$q->set( 'orderby', array( 'source_date' => 'DESC', 'date' => 'DESC' ) );
+	}
+);
