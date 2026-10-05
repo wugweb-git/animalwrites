@@ -854,3 +854,10 @@ body { background: var(--aw-color-canvas); }
 .aw-ed-timeline span { display: block; margin-top: var(--aw-space-1); font-size: var(--aw-type-sm); color: rgba(255,255,255,.75); }
 
 @media (prefers-reduced-motion: reduce) { .aw-ed-act, .aw-ed-act > .aw-ico, .aw-ed-more .aw-ico, .aw-ed-steps .aw-ico { transition: none; } .aw-ed-act:hover { transform: none; } }
+@media (max-width: 767px) {
+	.aw-ed-hero { min-height: 0; }
+	.aw-ed-hero-copy { padding: var(--aw-space-9) var(--aw-space-gutter) var(--aw-space-7); }
+	.aw-ed-hero-media img { object-position: 60% 50%; }
+	.aw-ed-hero-actions .aw-btn { flex: 1 1 100%; }
+	.aw-ed-act { min-height: 11rem; padding: var(--aw-space-5); }
+}
