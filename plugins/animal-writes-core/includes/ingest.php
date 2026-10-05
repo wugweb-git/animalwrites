@@ -4,6 +4,8 @@
  *
  * POST /wp-json/aw/v1/ingest  (Application Password auth, user needs edit_posts)
  * Everything lands as "pending" (Pending Review). Nothing is ever auto-published.
+ * Terms (topics, source_type, city, listing_type) are only assigned if they already exist;
+ * unknown ones are skipped and returned in "ignored_terms".
  *
  * Body (JSON):
  * {
@@ -44,6 +46,36 @@ function aw_find_by_source( $post_type, $url ) {
 		)
 	);
 	return $ids ? (int) $ids[0] : 0;
+}
+
+/**
+ * Assign only terms that already exist (matched by slug, then name). Never creates terms.
+ *
+ * @param int    $post_id  Post ID.
+ * @param array  $values   Term names or slugs as received.
+ * @param string $taxonomy Taxonomy.
+ * @param array  $ignored  Collects unknown values, keyed by taxonomy.
+ */
+function aw_assign_existing_terms( $post_id, array $values, $taxonomy, array &$ignored ) {
+	$ids = array();
+	foreach ( $values as $value ) {
+		$value = sanitize_text_field( (string) $value );
+		if ( '' === $value ) {
+			continue;
+		}
+		$term = get_term_by( 'slug', sanitize_title( $value ), $taxonomy );
+		if ( ! $term ) {
+			$term = get_term_by( 'name', $value, $taxonomy );
+		}
+		if ( $term ) {
+			$ids[] = (int) $term->term_id;
+		} else {
+			$ignored[ $taxonomy ][] = $value;
+		}
+	}
+	if ( $ids ) {
+		wp_set_object_terms( $post_id, array_unique( $ids ), $taxonomy );
+	}
 }
 
 /**
@@ -97,15 +129,17 @@ function aw_ingest( WP_REST_Request $req ) {
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
 
-	$topics = (array) $req->get_param( 'topics' );
+	$ignored = array();
+
+	$topics = array_filter( (array) $req->get_param( 'topics' ), 'is_scalar' );
 	if ( $topics ) {
-		wp_set_object_terms( $post_id, array_map( 'sanitize_text_field', $topics ), 'aw_topic' );
+		aw_assign_existing_terms( $post_id, $topics, 'aw_topic', $ignored );
 	}
 	if ( $req->get_param( 'source_type' ) && in_array( $type, array( 'aw_legal', 'aw_research' ), true ) ) {
-		wp_set_object_terms( $post_id, sanitize_text_field( (string) $req->get_param( 'source_type' ) ), 'aw_source_type' );
+		aw_assign_existing_terms( $post_id, array( $req->get_param( 'source_type' ) ), 'aw_source_type', $ignored );
 	}
 	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
-		wp_set_object_terms( $post_id, sanitize_title( (string) $req->get_param( 'city' ) ), 'aw_city' );
+		aw_assign_existing_terms( $post_id, array( $req->get_param( 'city' ) ), 'aw_city', $ignored );
 	}
 
 	if ( 'aw_listing' === $type ) {
@@ -116,13 +150,20 @@ function aw_ingest( WP_REST_Request $req ) {
 			}
 		}
 		if ( ! empty( $l['listing_type'] ) ) {
-			wp_set_object_terms( $post_id, sanitize_title( (string) $l['listing_type'] ), 'aw_listing_type' );
+			aw_assign_existing_terms( $post_id, array( $l['listing_type'] ), 'aw_listing_type', $ignored );
 		}
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 		update_post_meta( $post_id, 'aw_featured', 0 );
 	}
 
-	return new WP_REST_Response( array( 'status' => 'created', 'id' => $post_id ), 201 );
+	return new WP_REST_Response(
+		array(
+			'status'        => 'created',
+			'id'            => $post_id,
+			'ignored_terms' => (object) $ignored,
+		),
+		201
+	);
 }
 
 add_action(
