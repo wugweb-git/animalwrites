@@ -37,6 +37,7 @@ require_once AW_CORE_DIR . 'includes/seo.php';
 require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/share.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
+require_once AW_CORE_DIR . 'includes/campaigns.php';
 
 register_activation_hook(
 	__FILE__,
