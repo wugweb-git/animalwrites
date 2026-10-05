@@ -18,6 +18,22 @@ To change the look, change a token and rebuild. Example: rounder cards = edit `r
 
 WordPress presets (`theme.json` palette, font sizes, spacing) remain for the block editor; `settings.custom.radius` maps to the same `--aw-radius-*` variables so editor and front end agree.
 
+## Colour rule
+**Wugweb yellow `#ffbe1a`** is the only accent and is used for **fills only**: primary buttons, the most urgent action, badges, rules and highlights (always with ink text, 11:1). **Links and text accents are blue `#0062b8`** (6.1:1 on white, 5.5:1 on canvas, 4.9:1 on kraft); the focus ring is blue on light surfaces and yellow on dark ones. On dark surfaces links are white.
+
+## Product systems
+One generic archive template is replaced by four systems, each built for what people do with the content (`plugins/animal-writes-core/includes/systems.php`, styles in `aw.css` section 10):
+
+| System | Pages | View |
+|---|---|---|
+| Help | Directory, Knowledge Centre, Resources | Scannable organisation rows (mark, area, verification state, type, Call, View); guides as tasks (photo, icon, updated date, reading time); resources by format and language |
+| Intelligence | Legal Watch, News, Research Library | Case register (large date, issuer badge by court or body, topic, summary, source, document flag, issuer filters); news with a lead story, side stories and grid, topic filters; document library (kind, year, issuer, Read / PDF) |
+| Action | Opportunities, Get involved | Opportunity cards with type, place, organisation, checked date, Apply and Details; type filters |
+| Archive | Campaign Hub | The 1.0 documentary, other campaigns, an invitation to bring a campaign |
+| Trust | Every news, legal, research, opportunity and listing page | `[aw_trust]`: issuer, source link, published and added dates, document flag, editorial note; for listings, verification state and AWBI recognition |
+
+Directory order: featured, verified, curated partners (with logos), then A–Z.
+
 ## Scales
 
 ### Colour
