@@ -50,3 +50,52 @@ add_filter(
 	10,
 	3
 );
+
+/**
+ * Research documents: show the mirrored PDF inline (Acts, Rules and judgments may be reproduced
+ * under s.52(1)(q) of the Copyright Act, 1957), with download and official-source links.
+ */
+add_filter(
+	'render_block_core/post-excerpt',
+	function ( $content ) {
+		if ( ! is_singular( 'aw_research' ) || ! in_the_loop() && ! is_main_query() ) {
+			return $content;
+		}
+		$post_id = get_queried_object_id();
+		$fid     = (int) get_post_meta( $post_id, 'aw_file_id', true );
+		$pdf     = $fid ? wp_get_attachment_url( $fid ) : '';
+		if ( ! $pdf ) {
+			return $content;
+		}
+		$title  = get_the_title( $post_id );
+		$source = (string) get_post_meta( $post_id, 'aw_source_url', true );
+		$size   = size_format( (int) filesize( get_attached_file( $fid ) ), 1 );
+		$viewer = sprintf(
+			'<div class="wp-block-file aw-pdf"><object class="wp-block-file__embed" data="%1$s#view=FitH" type="application/pdf" aria-label="%2$s"><p>%3$s</p></object>'
+			. '<p class="aw-pdf-actions"><a class="wp-block-file__button wp-element-button" href="%1$s" download>Download PDF (%4$s)</a>'
+			. ( $source ? ' <a href="%5$s">Official source</a>' : '' ) . '</p></div>',
+			esc_url( $pdf ),
+			esc_attr( $title ),
+			esc_html__( 'Your browser cannot show this PDF here. Use the download link below.', 'animal-writes-core' ),
+			esc_html( $size ),
+			esc_url( $source )
+		);
+		return $content . $viewer;
+	}
+);
+
+/**
+ * Letter templates: a print button and a clean printed page.
+ */
+add_filter(
+	'render_block_core/post-content',
+	function ( $content ) {
+		if ( ! is_singular( 'aw_resource' ) ) {
+			return $content;
+		}
+		$button = '<p class="aw-print"><button type="button" class="wp-element-button" onclick="window.print()">'
+			. esc_html__( 'Print this letter', 'animal-writes-core' ) . '</button> <span>'
+			. esc_html__( 'Sign it, then post it by Speed Post.', 'animal-writes-core' ) . '</span></p>';
+		return $button . $content;
+	}
+);
