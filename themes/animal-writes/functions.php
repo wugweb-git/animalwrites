@@ -34,7 +34,7 @@ add_action(
 add_action(
 	'init',
 	function () {
-		$sig = md5( implode( ',', array_map( 'basename', (array) glob( get_stylesheet_directory() . '/patterns/*.php' ) ) ) );
+		$sig = md5( implode( ',', array_map( fn( $f ) => basename( $f ) . ':' . filemtime( $f ), (array) glob( get_stylesheet_directory() . '/patterns/*.php' ) ) ) );
 		if ( get_option( 'aw_pattern_sig' ) !== $sig ) {
 			wp_get_theme()->delete_pattern_cache();
 			update_option( 'aw_pattern_sig', $sig, false );

@@ -92,3 +92,29 @@ add_shortcode(
 			. '</div>' . $visual . '</div></header>';
 	}
 );
+
+/**
+ * [aw_stats] Live counts for the homepage hero: organisations, states and UTs covered, legal updates, guides and documents.
+ * Cached for an hour.
+ */
+add_shortcode(
+	'aw_stats',
+	function () {
+		$stats = get_transient( 'aw_stats' );
+		if ( false === $stats ) {
+			$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'fields' => 'ids' ) );
+			$stats  = array(
+				array( (int) wp_count_posts( 'aw_listing' )->publish, 'organisations listed', '/directory/' ),
+				array( is_array( $states ) ? count( $states ) : 0, 'states and UTs covered', '/directory/' ),
+				array( (int) wp_count_posts( 'aw_legal' )->publish, 'court and government updates', '/legal-watch/' ),
+				array( (int) wp_count_posts( 'aw_research' )->publish + (int) wp_count_posts( 'aw_guide' )->publish, 'laws, rules and guides', '/research/' ),
+			);
+			set_transient( 'aw_stats', $stats, HOUR_IN_SECONDS );
+		}
+		$out = '<ul class="aw-stats" aria-label="Animal Writes in numbers">';
+		foreach ( $stats as $s ) {
+			$out .= '<li><a href="' . esc_url( $s[2] ) . '"><strong>' . esc_html( number_format_i18n( $s[0] ) ) . '</strong> <span>' . esc_html( $s[1] ) . '</span></a></li>';
+		}
+		return $out . '</ul>';
+	}
+);
