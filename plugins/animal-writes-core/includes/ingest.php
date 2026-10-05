@@ -160,6 +160,10 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_featured', 0 );
 	}
 
+	if ( in_array( $type, array( 'aw_legal', 'aw_research' ), true ) && function_exists( 'aw_mirror_gov_pdf' ) ) {
+		aw_mirror_gov_pdf( $post_id, $source_url );
+	}
+
 	return new WP_REST_Response(
 		array(
 			'status'        => 'created',

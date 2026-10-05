@@ -52,13 +52,13 @@ add_filter(
 );
 
 /**
- * Research documents: show the mirrored PDF inline (Acts, Rules and judgments may be reproduced
+ * Research and Legal Watch documents: show the mirrored PDF inline (Acts, Rules and judgments may be reproduced
  * under s.52(1)(q) of the Copyright Act, 1957), with download and official-source links.
  */
 add_filter(
 	'render_block_core/post-excerpt',
 	function ( $content ) {
-		if ( ! is_singular( 'aw_research' ) || ! in_the_loop() && ! is_main_query() ) {
+		if ( ! is_singular( array( 'aw_research', 'aw_legal' ) ) ) {
 			return $content;
 		}
 		$post_id = get_queried_object_id();
@@ -99,3 +99,32 @@ add_filter(
 		return $button . $content;
 	}
 );
+
+/**
+ * Keep a copy of a government PDF (gov.in / nic.in) so it can be read inside the page.
+ *
+ * @param int    $post_id Post ID.
+ * @param string $url     Source URL.
+ * @return int Attachment ID or 0.
+ */
+function aw_mirror_gov_pdf( $post_id, $url ) {
+	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$/i', $host ) || get_post_meta( $post_id, 'aw_file_id', true ) ) {
+		return 0;
+	}
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$tmp = download_url( $url, 60 );
+	if ( is_wp_error( $tmp ) ) {
+		return 0;
+	}
+	$title = get_the_title( $post_id );
+	$fid   = media_handle_sideload( array( 'name' => sanitize_title( $title ) . '.pdf', 'tmp_name' => $tmp ), $post_id, $title );
+	if ( is_wp_error( $fid ) ) {
+		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	update_post_meta( $post_id, 'aw_file_id', (int) $fid );
+	return (int) $fid;
+}
