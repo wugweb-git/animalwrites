@@ -64,6 +64,15 @@ add_action(
 		if ( is_singular() && has_post_thumbnail() ) {
 			$image = get_the_post_thumbnail_url( null, 'large' );
 		}
+		if ( ! $image && is_singular() ) {
+			$image = (string) get_post_meta( get_queried_object_id(), 'aw_source_image', true );
+		}
+		$large = (bool) $image;
+		if ( ! $image ) {
+			$default = (int) get_option( 'aw_default_share_image' );
+			$image   = $default ? (string) wp_get_attachment_image_url( $default, 'full' ) : '';
+			$large   = (bool) $image;
+		}
 		if ( ! $image ) {
 			$image = get_site_icon_url( 512 );
 		}
@@ -77,7 +86,7 @@ add_action(
 			'<meta property="og:url" content="%s">'          => $url,
 			'<meta property="og:image" content="%s">'        => $image,
 			'<meta property="og:locale" content="%s">'       => 'en_IN',
-			'<meta name="twitter:card" content="%s">'        => $image && has_post_thumbnail() ? 'summary_large_image' : 'summary',
+			'<meta name="twitter:card" content="%s">'        => $large ? 'summary_large_image' : 'summary',
 			'<meta name="twitter:site" content="%s">'        => '@AnimalWrites',
 		);
 		echo "<!-- Animal Writes SEO -->\n";
