@@ -38,6 +38,8 @@ require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/share.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
+require_once AW_CORE_DIR . 'includes/visits.php';
+require_once AW_CORE_DIR . 'includes/ads.php';
 
 register_activation_hook(
 	__FILE__,
