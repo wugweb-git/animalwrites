@@ -24,3 +24,11 @@ add_filter(
 	10,
 	3
 );
+
+// Content is written for India: <html lang="en-IN">.
+add_filter(
+	'language_attributes',
+	function ( $output ) {
+		return preg_replace( '/lang="en-US"/', 'lang="en-IN"', $output );
+	}
+);
