@@ -64,7 +64,7 @@ add_action(
  * media-restore/ folder, or the official source for government PDFs), then let WordPress rebuild
  * thumbnails and PDF previews. A few files per page view, so no request runs long.
  */
-const AW_MEDIA_RESTORE_VERSION = '2';
+const AW_MEDIA_RESTORE_VERSION = '3';
 
 add_action(
 	'init',
@@ -85,7 +85,7 @@ add_action(
 		foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
 			$rel  = (string) get_post_meta( $id, '_wp_attached_file', true );
 			$dest = trailingslashit( $uploads['basedir'] ) . $rel;
-			$orig = str_replace( '-scaled.', '.', $rel );
+			$orig = preg_replace( '/(-scaled)+\./', '.', $rel );
 			if ( $orig !== $rel && isset( $manifest[ $orig ] ) && ! file_exists( trailingslashit( $uploads['basedir'] ) . $orig ) && $done < 4 ) {
 				$full = trailingslashit( $uploads['basedir'] ) . $orig;
 				if ( copy( $repo . basename( $manifest[ $orig ] ), $full ) ) {
