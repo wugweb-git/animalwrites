@@ -197,7 +197,7 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-check input { width: 1.5rem; height: 1.5rem; margin-top: 0.15rem; flex: none; accent-color: var(--aw-color-ink); }
 .aw-form input[type=file] { padding: var(--aw-space-3); border-style: dashed; background: var(--aw-color-surface-soft); }
 .aw-hp { position: absolute !important; left: -9999px; }
-.aw-form-error, .aw-form-summary {
+.aw-form-summary {
 	border-left: 4px solid var(--aw-color-danger); background: var(--aw-color-danger-soft);
 	padding: var(--aw-space-3) var(--aw-space-4); border-radius: var(--aw-radius-control); margin-bottom: var(--aw-space-4);
 }
@@ -219,22 +219,23 @@ body.single-aw_research .aw-lead-media { display: none; }
 .wp-block-post-terms__separator { display: none; }
 .wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--aw-space-2); }
 
-/* 4.6 Section header (archives): title + description + count + visual */
-.aw-section-head { display: grid; gap: var(--aw-space-5); align-items: end; margin-bottom: var(--aw-space-6); }
+/* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
+.aw-section-band { background: var(--aw-color-surface); padding: var(--aw-space-section) var(--aw-space-gutter) var(--aw-space-6); margin: 0 0 var(--aw-space-6) !important; }
+.aw-section-head { display: grid; gap: var(--aw-space-5); align-items: end; max-width: var(--aw-width-wide); margin-inline: auto; }
 .aw-section-head .wp-block-query-title { margin: 0; }
 .aw-section-desc { font-size: var(--aw-type-lead); color: var(--aw-color-muted); margin: var(--aw-space-3) 0 0; }
-.aw-section-count { font-weight: var(--aw-weight-strong); color: var(--aw-color-accent-ink); font-size: var(--aw-type-sm); margin: var(--aw-space-2) 0 0; }
-.aw-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--aw-space-2); }
-.aw-section-visual img, .aw-section-visual .aw-placard {
-	display: block; max-width: 100%;
-	width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--aw-radius-media);
-}
-.aw-section-visual .aw-placard { font-size: var(--aw-type-h4); aspect-ratio: 4/5; }
+.aw-section-count { font-weight: var(--aw-weight-strong); color: var(--aw-color-ink); font-size: var(--aw-type-sm); margin: var(--aw-space-2) 0 0; } /* ink: accent-ink on kraft is only 4.3:1 */
+.aw-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--aw-space-2); min-width: 0; }
+.aw-section-visual > * { min-width: 0; }
 .aw-section-visual > :nth-child(2) { transform: translateY(var(--aw-space-5)); }
+.aw-section-visual img, .aw-section-visual .aw-placard { display: block; width: 100%; max-width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--aw-radius-media); }
+.aw-section-visual img[style*="contain"] { border: 1px solid var(--aw-color-line); }
+.aw-section-visual .aw-placard { font-size: var(--aw-type-h4); height: auto; overflow: hidden; background-color: var(--aw-color-raised); border: 2px solid var(--aw-color-ink); }
+/* Documents show the top of their first page (masthead) */
+.aw-doc-cover img, .aw-section-visual img[src*="cover-"], .aw-section-visual img[src*="-pdf"], .type-aw_research .wp-block-post-featured-image img, .single-aw_research .wp-block-post-featured-image img { object-position: top; background: var(--aw-color-bg); }
 @media (min-width: 768px) {
 	.aw-section-head { grid-template-columns: 1.3fr 1fr; }
 }
-.aw-section-band { background: var(--aw-color-surface); padding-block: var(--aw-space-section) var(--aw-space-6); margin-bottom: var(--aw-space-6); }
 
 /* 5. Site chrome ------------------------------------------------------------- */
 .aw-announce a { color: inherit; font-weight: var(--aw-weight-strong); }
@@ -459,11 +460,6 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-claim { margin-block: var(--aw-space-7); padding: var(--aw-space-5); border-radius: var(--aw-radius-card); background: var(--aw-color-surface-soft); border: 1px solid var(--aw-color-line); }
 .aw-claim summary { cursor: pointer; font-weight: var(--aw-weight-strong); min-height: var(--aw-size-target); display: flex; align-items: center; }
 .aw-claim details[open] > summary { margin-bottom: var(--aw-space-4); }
-.aw-badge {
-	display: inline-flex; align-items: center; gap: var(--aw-space-1); padding: 2px var(--aw-space-3); border-radius: var(--aw-radius-pill);
-	font-size: var(--aw-type-xs); font-weight: var(--aw-weight-strong); background: var(--aw-color-surface); color: var(--aw-color-ink);
-}
-.aw-badge--verified { background: var(--aw-color-success-soft); color: var(--aw-color-success); }
 
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--aw-color-line); }
@@ -527,23 +523,6 @@ body.single-aw_research .aw-lead-media { display: none; }
 	.wp-block-post-template.is-layout-grid { gap: var(--aw-space-4); }
 }
 
-/* Section band sits flush under the header and spans the full width */
-.aw-section-band { padding-inline: var(--aw-space-gutter); margin-top: 0 !important; }
-main > .aw-section-band:first-child { margin-block-start: 0; }
-.aw-section-band .aw-section-head { max-width: var(--aw-width-wide); margin-inline: auto; margin-bottom: 0; }
-.aw-section-visual img[style*="contain"] { border: 1px solid var(--aw-color-line); }
-
-.aw-section-visual .aw-placard { background-color: var(--aw-color-raised); border: 2px solid var(--aw-color-ink); height: auto; }
-
-/* Research documents: show the top of the first page (masthead) */
-.type-aw_research .wp-block-post-featured-image img, .aw-section-visual img[src*="cover-"], .single-aw_research .wp-block-post-featured-image img { object-position: top; }
-.aw-section-visual { min-width: 0; }
-.aw-section-visual > * { min-width: 0; }
-.aw-section-visual .aw-placard { aspect-ratio: 4/5; height: auto; overflow: hidden; }
-.aw-doc-cover img, .aw-section-visual img[src*="-pdf"] { object-position: top; background: #fff; }
-
-/* a11y: #9a5b00 on kraft is 4.3:1; use ink. */
-.aw-section-count { color: var(--aw-color-ink); }
 .aw-share-copy { cursor: pointer; }
 
 /* Directory search and filters */
@@ -559,3 +538,13 @@ main > .aw-section-band:first-child { margin-block-start: 0; }
 .aw-dir-clear { color: var(--aw-color-accent-ink); font-weight: var(--aw-weight-strong); }
 @media (min-width: 768px) { .aw-dir-filter { grid-template-columns: 1fr 1fr 1fr; } .aw-dir-q { grid-column: 1 / -1; } }
 @media (min-width: 1200px) { .aw-dir-filter { grid-template-columns: 2fr 1fr 1fr 1fr; } .aw-dir-q { grid-column: auto; } .aw-dir-check, .aw-dir-actions { grid-column: span 2; } }
+
+/* Directory home visual: busiest states as type (real counts; no map) */
+.aw-states ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--aw-space-2); }
+.aw-states a { display: flex; flex-direction: column; justify-content: flex-end; min-height: 5.5rem; height: 100%; padding: var(--aw-space-3); border-radius: var(--aw-radius-media); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); color: var(--aw-color-ink); text-decoration: none; transition: transform var(--aw-motion-base) var(--aw-motion-ease), box-shadow var(--aw-motion-base) var(--aw-motion-ease), background-color var(--aw-motion-fast) var(--aw-motion-ease); }
+.aw-states li:first-child a { background: var(--aw-color-ink); color: var(--aw-color-on-ink); border-color: var(--aw-color-ink); }
+.aw-states a:hover { transform: translateY(var(--aw-motion-lift)); box-shadow: var(--aw-elevation-2); }
+.aw-states a:focus-visible { outline: 3px solid var(--aw-color-focus); outline-offset: 2px; }
+.aw-states-n { font-family: var(--aw-font-display); font-size: var(--aw-type-h3); line-height: var(--aw-leading-display); }
+.aw-states-name { font-size: var(--aw-type-xs); font-weight: var(--aw-weight-strong); line-height: 1.25; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .aw-states a { transition: none; } .aw-states a:hover { transform: none; } }

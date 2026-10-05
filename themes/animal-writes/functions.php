@@ -21,3 +21,11 @@ add_action(
 	},
 	20
 );
+
+// Reusable sections (patterns/*.php) appear under their own category in the block inserter.
+add_action(
+	'init',
+	function () {
+		register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes sections', 'animal-writes' ) ) );
+	}
+);

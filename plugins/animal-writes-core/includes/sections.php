@@ -77,6 +77,14 @@ add_shortcode(
 			}
 		}
 		$visual = $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
+		if ( 'aw_listing' === $type && is_post_type_archive( 'aw_listing' ) && ! get_query_var( 'aw_city' ) && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			// Directory home: the states with the most organisations, set as type. Real counts, no map.
+			$items = '';
+			foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC', 'number' => 9 ) ) as $st ) {
+				$items .= '<li><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span class="aw-states-n">' . esc_html( number_format_i18n( $st->count ) ) . '</span> <span class="aw-states-name">' . esc_html( $st->name ) . '</span></a></li>';
+			}
+			$visual = $items ? '<nav class="aw-states" aria-label="Browse by state"><ul>' . $items . '</ul></nav>' : $visual;
+		}
 		return '<header class="aw-section-band alignfull"><div class="aw-section-head alignwide"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="aw-section-desc">' . esc_html( $desc ) . '</p>' : '' )

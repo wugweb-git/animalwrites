@@ -134,3 +134,43 @@ add_action(
 	},
 	100
 );
+
+/**
+ * One-time: the homepage's repeatable sections become references to the theme patterns that now
+ * hold them (themes/animal-writes/patterns/*.php), so one edit updates every page that uses them.
+ * A section is swapped only if the page still contains it exactly as the pattern file has it.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_home_patterns' ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		$home = (int) get_option( 'page_on_front' );
+		$post = $home ? get_post( $home ) : null;
+		if ( ! $post ) {
+			return;
+		}
+		$content = $post->post_content;
+		$swapped = 0;
+		foreach ( array( 'help-finder', 'latest-decisions-news', 'campaign-photo-band', 'section-index', 'lend-a-hand' ) as $slug ) {
+			$file = get_stylesheet_directory() . "/patterns/{$slug}.php";
+			if ( ! is_readable( $file ) ) {
+				continue;
+			}
+			$body = trim( (string) preg_replace( '/^<\?php.*?\?>\s*/s', '', (string) file_get_contents( $file ) ) ); // phpcs:ignore
+			if ( $body && false !== strpos( $content, $body ) ) {
+				$content = str_replace( $body, '<!-- wp:pattern {"slug":"animal-writes/' . $slug . '"} /-->', $content );
+				$swapped++;
+			}
+		}
+		if ( $swapped ) {
+			// Direct write: a visitor's request has no unfiltered_html, so wp_update_post would run kses over the page.
+			global $wpdb;
+			$wpdb->update( $wpdb->posts, array( 'post_content' => $content ), array( 'ID' => $home ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			clean_post_cache( $home );
+		}
+		update_option( 'aw_home_patterns', '1', false );
+	},
+	101
+);
