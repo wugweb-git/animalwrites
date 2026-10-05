@@ -1,0 +1,29 @@
+<!-- wp:template-part {"slug":"header","tagName":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
+<!-- wp:paragraph {"className":"is-style-kits-label","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"sponsored_label"}}}}} -->
+<p class="is-style-kits-label"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-terms {"term":"aw_topic"} /-->
+
+<!-- wp:post-title {"level":1} /-->
+
+<!-- wp:paragraph {"className":"has-text-muted-color has-text-color","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"source_meta"}}}},"textColor":"text-muted"} -->
+<p class="has-text-muted-color has-text-color"></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-excerpt {"fontSize":"large"} /-->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"source_url"}},"text":{"source":"animal-writes/field","args":{"key":"source_link_label"}}}},"linkTarget":"_blank","rel":"noreferrer noopener"} -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">Read at source</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:post-terms {"term":"aw_topic"} /-->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer","area":"footer"} /-->

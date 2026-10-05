@@ -1,0 +1,54 @@
+<?php
+/**
+ * Plugin Name: Animal Writes Core
+ * Description: Content types, directory, ingest endpoint and guardrails for Animal Writes 2.0. Theme-independent.
+ * Version: 0.1.0
+ * Requires at least: 6.5
+ * Requires PHP: 7.4
+ * Author: Wugweb
+ * Author URI: https://wugweb.com
+ * License: GPL-2.0-or-later
+ * Text Domain: animal-writes-core
+ *
+ * @package animal-writes-core
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'AW_CORE_VERSION', '0.1.0' );
+define( 'AW_CORE_DIR', plugin_dir_path( __FILE__ ) );
+
+/** Days after which a verified listing is flagged for re-verification. */
+if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
+	define( 'AW_REVERIFY_DAYS', 180 );
+}
+
+require_once AW_CORE_DIR . 'includes/content-types.php';
+require_once AW_CORE_DIR . 'includes/meta.php';
+require_once AW_CORE_DIR . 'includes/directory.php';
+require_once AW_CORE_DIR . 'includes/bindings.php';
+require_once AW_CORE_DIR . 'includes/ingest.php';
+require_once AW_CORE_DIR . 'includes/guardrails.php';
+require_once AW_CORE_DIR . 'includes/cron.php';
+
+register_activation_hook(
+	__FILE__,
+	function () {
+		aw_register_content_types();
+		aw_directory_rewrites();
+		aw_register_meta();
+		aw_backfill_featured_flag();
+		flush_rewrite_rules();
+		aw_cron_schedule();
+	}
+);
+
+register_deactivation_hook(
+	__FILE__,
+	function () {
+		aw_cron_unschedule();
+		flush_rewrite_rules();
+	}
+);
