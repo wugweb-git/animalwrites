@@ -3,7 +3,7 @@
 Local build. Not deployed anywhere.
 
 - `themes/animal-writes/` — child theme of **Kits by Wugweb** (brand palette + pillar templates).
-- `plugins/animal-writes-core/` — content types, directory, ingest endpoint, guardrails. Theme-independent.
+- `plugins/animal-writes-core/` — content types, directory, ingest endpoint, analytics. Theme-independent.
 
 Requires the parent theme `kits-by-wugweb` (in the Kits-WP folder).
 
