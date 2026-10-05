@@ -861,3 +861,5 @@ body { background: var(--aw-color-canvas); }
 	.aw-ed-hero-actions .aw-btn { flex: 1 1 100%; }
 	.aw-ed-act { min-height: 11rem; padding: var(--aw-space-5); }
 }
+.aw-ed-hero-copy { box-sizing: border-box; }
+@media (max-width: 767px) { .aw-ed-hero-media::after { background: linear-gradient(180deg, rgba(20,20,20,.35) 0%, rgba(20,20,20,.7) 40%, rgba(20,20,20,.92) 100%); } }
