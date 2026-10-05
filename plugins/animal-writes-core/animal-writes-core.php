@@ -33,6 +33,7 @@ require_once AW_CORE_DIR . 'includes/ingest.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/analytics.php';
 require_once AW_CORE_DIR . 'includes/display.php';
+require_once AW_CORE_DIR . 'includes/seo.php';
 
 register_activation_hook(
 	__FILE__,
