@@ -527,3 +527,9 @@ main > .aw-section-band:first-child { margin-block-start: 0; }
 .aw-section-visual img[style*="contain"] { border: 1px solid var(--aw-color-line); }
 
 .aw-section-visual .aw-placard { background-color: var(--aw-color-raised); border: 2px solid var(--aw-color-ink); height: auto; }
+
+/* Research documents: show the top of the first page (masthead) */
+.type-aw_research .wp-block-post-featured-image img, .aw-section-visual img[src*="cover-"], .single-aw_research .wp-block-post-featured-image img { object-position: top; }
+.aw-section-visual { min-width: 0; }
+.aw-section-visual > * { min-width: 0; }
+.aw-section-visual .aw-placard { aspect-ratio: 4/5; height: auto; overflow: hidden; }
