@@ -15,6 +15,7 @@
 <!-- /wp:html -->
 <!-- wp:query {"queryId":33,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"aw-cards aw-cards-3"} -->
 <div class="wp-block-query aw-cards aw-cards-3"><!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
+<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9"} /-->
 <!-- wp:post-terms {"term":"aw_opportunity_type"} /-->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-excerpt {"excerptLength":18} /-->
