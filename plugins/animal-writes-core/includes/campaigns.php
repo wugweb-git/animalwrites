@@ -297,7 +297,7 @@ function aw_receipt_submit() {
 	$campaign = sanitize_title( wp_unslash( $_POST['campaign'] ?? '' ) );
 	$v        = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'state'   => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
 		'city'    => sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) ),
 		'letters' => (string) (int) ( $_POST['letters'] ?? 1 ),

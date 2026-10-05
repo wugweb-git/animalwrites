@@ -128,7 +128,7 @@ function aw_claim_submit() {
 	$v = array(
 		'name'  => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
 		'role'  => sanitize_key( wp_unslash( $_POST['role'] ?? '' ) ),
-		'email' => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+		'email' => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
 	);

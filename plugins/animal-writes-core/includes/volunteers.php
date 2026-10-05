@@ -92,7 +92,7 @@ function aw_volunteer_submit() {
 	$rl   = aw_form_guard( $form, $back, 'volunteer', $done );
 	$v    = array(
 		'name'  => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-		'email' => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+		'email' => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'state' => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
 		'city'  => sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) ),
