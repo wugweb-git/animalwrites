@@ -2,9 +2,10 @@
 
 <!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
-<!-- wp:query-title {"type":"archive","align":"wide"} /-->
+<!-- wp:shortcode -->
+[aw_section_head]
+<!-- /wp:shortcode -->
 
-<!-- wp:term-description {"align":"wide"} /-->
 
 <!-- wp:query {"queryId":20,"query":{"inherit":true,"postType":"aw_listing","perPage":24},"align":"wide"} -->
 <div class="wp-block-query alignwide"><!-- wp:post-template {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"18rem"}} -->
@@ -19,7 +20,7 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:post-title {"level":3,"isLink":true,"fontSize":"x-large"} /-->
+<!-- wp:post-title {"level":2,"isLink":true} /-->
 
 <!-- wp:post-terms {"term":"aw_listing_type"} /-->
 

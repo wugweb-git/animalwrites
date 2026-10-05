@@ -41,6 +41,7 @@ require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/visits.php';
 require_once AW_CORE_DIR . 'includes/ads.php';
 require_once AW_CORE_DIR . 'includes/testimonials.php';
+require_once AW_CORE_DIR . 'includes/sections.php';
 
 register_activation_hook(
 	__FILE__,

@@ -518,3 +518,8 @@ body.single-aw_research .aw-lead-media { display: none; }
 	.aw-listing-card > .aw-logo { grid-column: 1; grid-row: 1 / span 4; max-width: 72px; margin: 0; }
 	.wp-block-post-template.is-layout-grid { gap: var(--aw-space-4); }
 }
+
+/* Section band sits flush under the header and spans the full width */
+.aw-section-band { margin-inline: calc(50% - 50vw); padding-inline: var(--aw-space-gutter); }
+.aw-section-band .aw-section-head { max-width: var(--aw-width-wide); margin-inline: auto; margin-bottom: 0; }
+.aw-section-visual img[style*="contain"] { border: 1px solid var(--aw-color-line); }
