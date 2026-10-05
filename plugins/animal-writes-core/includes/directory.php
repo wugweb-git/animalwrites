@@ -128,3 +128,99 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 	}
 	return home_url( $path );
 }
+
+/* ---------- Search and filters: [aw_directory_filter] ---------- */
+
+/**
+ * Turn the filter form (state, district, type) into the clean directory URL, keeping q and verified.
+ */
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! aw_is_directory_view() || ! isset( $_GET['aw_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+		$g     = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
+		$type  = sanitize_title( $g['type'] ?? '' );
+		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? get_term_link( $type, 'aw_listing_type' ) : get_post_type_archive_link( 'aw_listing' ) );
+		$extra = array_filter(
+			array(
+				'q'        => sanitize_text_field( $g['q'] ?? '' ),
+				'verified' => empty( $g['verified'] ) ? '' : '1',
+			)
+		);
+		wp_safe_redirect( add_query_arg( $extra, is_wp_error( $base ) ? get_post_type_archive_link( 'aw_listing' ) : $base ) );
+		exit;
+	}
+);
+
+/**
+ * Name search and verified-only on directory queries.
+ *
+ * @param WP_Query $q Query.
+ */
+add_action(
+	'pre_get_posts',
+	function ( $q ) {
+		if ( ! aw_is_directory_query( $q ) ) {
+			return;
+		}
+		$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( '' !== $text ) {
+			$q->set( 's', $text );
+			$q->set( 'search_columns', array( 'post_title' ) );
+		}
+		if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$q->set( 'meta_query', array( array( 'key' => 'aw_verified', 'value' => '1' ) ) );
+		}
+	},
+	20
+);
+
+/**
+ * Search bar with state, district, type and verified filters. Works without JavaScript;
+ * with it, the district list narrows to the chosen state.
+ *
+ * @return string
+ */
+function aw_directory_filter() {
+	$cur_city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
+	$cur_type = (string) get_query_var( 'aw_listing_type' );
+	$state    = $cur_city ? ( $cur_city->parent ? get_term( $cur_city->parent, 'aw_city' ) : $cur_city ) : null;
+	$district = $cur_city && $cur_city->parent ? $cur_city : null;
+	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
+
+	$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
+	$s_opts = '<option value="">All states</option>';
+	$d_opts = '<option value="">All districts</option>';
+	foreach ( $states as $st ) {
+		$s_opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $state && $state->term_id === $st->term_id, true, false ) . '>' . esc_html( $st->name ) . '</option>';
+		$kids    = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => $st->term_id, 'hide_empty' => false, 'orderby' => 'name' ) );
+		if ( $kids ) {
+			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '">';
+			foreach ( $kids as $k ) {
+				$d_opts .= '<option value="' . esc_attr( $k->slug ) . '"' . selected( $district && $district->term_id === $k->term_id, true, false ) . '>' . esc_html( $k->name ) . '</option>';
+			}
+			$d_opts .= '</optgroup>';
+		}
+	}
+	$t_opts = '<option value="">All types</option>';
+	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
+		$t_opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur_type, $t->slug, false ) . '>' . esc_html( $t->name ) . '</option>';
+	}
+	$active = $cur_city || $cur_type || $text || $verified;
+
+	return '<form class="aw-dir-filter" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
+		. '<input type="hidden" name="aw_filter" value="1">'
+		. '<p class="aw-dir-q"><label for="aw-dir-q">Search by name</label><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="For example, Blue Cross" autocomplete="off"></p>'
+		. '<p><label for="aw-dir-state">State</label><select id="aw-dir-state" name="state">' . $s_opts . '</select></p>'
+		. '<p><label for="aw-dir-district">District</label><select id="aw-dir-district" name="district">' . $d_opts . '</select></p>'
+		. '<p><label for="aw-dir-type">Type</label><select id="aw-dir-type" name="type">' . $t_opts . '</select></p>'
+		. '<p class="aw-dir-check"><label class="aw-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label></p>'
+		. '<p class="aw-dir-actions"><button type="submit" class="wp-element-button">Search</button>'
+		. ( $active ? ' <a class="aw-dir-clear" href="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">Clear filters</a>' : '' ) . '</p>'
+		. '</form>';
+}
+add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );

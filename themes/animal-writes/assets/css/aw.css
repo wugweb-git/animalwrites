@@ -545,3 +545,17 @@ main > .aw-section-band:first-child { margin-block-start: 0; }
 /* a11y: #9a5b00 on kraft is 4.3:1; use ink. */
 .aw-section-count { color: var(--aw-color-ink); }
 .aw-share-copy { cursor: pointer; }
+
+/* Directory search and filters */
+.aw-dir-filter { display: grid; gap: var(--aw-space-3) var(--aw-space-4); grid-template-columns: 1fr; align-items: end; margin: var(--aw-space-6) auto; max-width: var(--wp--style--global--wide-size, 1200px); padding: var(--aw-space-5); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); box-shadow: var(--aw-elevation-1); }
+.aw-dir-filter p { margin: 0; }
+.aw-dir-filter label { display: block; font-weight: var(--aw-weight-strong); font-size: var(--aw-type-sm); margin-bottom: var(--aw-space-1); color: var(--aw-color-ink); }
+.aw-dir-filter :is(input[type=search], select) { width: 100%; min-height: var(--aw-size-control); padding-inline: var(--aw-space-3); border: var(--aw-border-control) solid var(--aw-color-line); border-radius: var(--aw-radius-control); background: var(--aw-color-bg); font: inherit; color: var(--aw-color-text); transition: box-shadow var(--aw-motion-fast) var(--aw-motion-ease), border-color var(--aw-motion-fast) var(--aw-motion-ease); }
+.aw-dir-filter :is(input[type=search], select):hover { border-color: var(--aw-color-muted); }
+.aw-dir-filter :is(input[type=search], select):focus-visible { outline: none; border-color: var(--aw-color-ink); box-shadow: 0 0 0 4px var(--aw-color-accent); }
+.aw-dir-filter .aw-check { font-weight: var(--aw-weight-regular); font-size: var(--aw-type-base); margin: 0; }
+.aw-dir-actions { display: flex; gap: var(--aw-space-4); align-items: center; }
+.aw-dir-actions button { min-height: var(--aw-size-control); }
+.aw-dir-clear { color: var(--aw-color-accent-ink); font-weight: var(--aw-weight-strong); }
+@media (min-width: 768px) { .aw-dir-filter { grid-template-columns: 1fr 1fr 1fr; } .aw-dir-q { grid-column: 1 / -1; } }
+@media (min-width: 1200px) { .aw-dir-filter { grid-template-columns: 2fr 1fr 1fr 1fr; } .aw-dir-q { grid-column: auto; } .aw-dir-check, .aw-dir-actions { grid-column: span 2; } }
