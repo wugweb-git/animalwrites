@@ -85,7 +85,7 @@ add_action(
 		foreach ( get_posts( array( 'post_type' => 'attachment', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
 			$rel  = (string) get_post_meta( $id, '_wp_attached_file', true );
 			$dest = trailingslashit( $uploads['basedir'] ) . $rel;
-			if ( ! $rel || file_exists( $dest ) ) {
+			if ( ! $rel || file_exists( $dest ) || get_post_meta( $id, '_aw_restore_failed', true ) ) {
 				continue;
 			}
 			if ( $done >= 4 ) {
