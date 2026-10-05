@@ -150,6 +150,11 @@ p, li { max-width: var(--aw-measure); text-wrap: pretty; }
 	.aw-cards-lead .wp-block-post-template > li:first-child .aw-placard { font-size: var(--aw-type-h2); }
 }
 
+/* Card grids: a fixed 1 / 2 / 3 columns (core's auto-fill left an empty fourth column) */
+.aw-cards .wp-block-post-template.is-layout-grid { grid-template-columns: 1fr !important; gap: var(--aw-space-grid); }
+@media (min-width: 768px) { .aw-cards .wp-block-post-template.is-layout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (min-width: 1200px) { .aw-cards .wp-block-post-template.is-layout-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+
 /* 4.3 Media — remote image, placard fallback, logo, lead image. States: loading, loaded, failed (placard). */
 .aw-card-media, .wp-block-post-featured-image {
 	margin: 0 0 var(--aw-space-3);
@@ -303,7 +308,9 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-dark .aw-link-cta:hover { background: var(--aw-color-accent); border-color: var(--aw-color-accent); color: var(--aw-color-on-accent); }
 
 /* 4.10 Tile — icon + title + one line + arrow; elevated link card (section index, quick links). */
-.aw-tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--aw-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr)); }
+.aw-tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--aw-space-grid); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-tiles li { max-width: none; display: flex; }
 .aw-tile { flex: 1; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "ico title arrow" "ico desc arrow"; column-gap: var(--aw-space-4); row-gap: var(--aw-space-1); align-items: start; padding: var(--aw-space-5); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); box-shadow: var(--aw-elevation-1); color: var(--aw-color-text); text-decoration: none; transition: transform var(--aw-motion-base) var(--aw-motion-ease), box-shadow var(--aw-motion-base) var(--aw-motion-ease), border-color var(--aw-motion-base) var(--aw-motion-ease); }
 .aw-tile > .aw-ico:first-child { grid-area: ico; --aw-ico-size: 1.5rem; padding: 0.625rem; box-sizing: content-box; border-radius: var(--aw-radius-control); background: var(--aw-color-surface); color: var(--aw-color-ink); -webkit-mask: none; mask: none; position: relative; }
