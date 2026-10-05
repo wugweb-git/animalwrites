@@ -230,6 +230,13 @@ Header (one banner landmark), announce bar, primary nav (underline grows on hove
 ### Share bar
 WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link confirms with "Link copied" for 2 seconds.
 
+### Reusable sections (patterns)
+Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
+`help-finder` (state finder + emergency note), `latest-decisions-news`, `campaign-photo-band`, `section-index`, `lend-a-hand`, `campaign` (campaign kit layout).
+
+### Directory states panel
+The directory home's header visual: the nine states with the most organisations, set as type (count in Tiro, name below), each linking to its state page. Real counts from the taxonomy; no map. Busiest state in ink, the rest raised; hover lifts, reduced motion respected.
+
 ### Other components
 PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, testimonials (shown only with consent), ad slots, details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
 
