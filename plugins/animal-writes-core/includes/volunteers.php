@@ -63,7 +63,7 @@ function aw_volunteer_form() {
 	?>
 	<form class="aw-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<?php if ( $error ) : ?>
-			<p class="aw-form-error" role="alert"><?php echo 'limit' === $error ? esc_html__( 'Too many sign-ups from this connection. Please try again later.', 'animal-writes-core' ) : esc_html__( 'Please fill in your name, a valid email, your state, and tick the consent box.', 'animal-writes-core' ); ?></p>
+			<p class="aw-form-error" role="alert"><?php echo 'limit' === $error ? esc_html__( 'Too many sign-ups from this connection. Please try again later.', 'animal-writes-core' ) : esc_html__( 'Please fill in your name, a valid email and your state.', 'animal-writes-core' ); ?></p>
 		<?php endif; ?>
 		<input type="hidden" name="action" value="aw_volunteer">
 		<?php wp_nonce_field( 'aw_volunteer', 'aw_vol_nonce' ); ?>
@@ -81,15 +81,7 @@ function aw_volunteer_form() {
 				<label class="aw-check"><input type="checkbox" name="roles[]" value="<?php echo esc_attr( $k ); ?>"> <?php echo esc_html( $label ); ?></label>
 			<?php endforeach; ?>
 		</fieldset>
-		<label class="aw-check aw-consent"><input type="checkbox" name="consent" value="1" required>
-			<?php
-			printf(
-				/* translators: %s: privacy policy link */
-				esc_html__( 'I agree that Animal Writes may store these details and contact me about volunteering, as described in the %s. I can withdraw at any time.', 'animal-writes-core' ),
-				'<a href="/privacy-policy/">' . esc_html__( 'Privacy Policy', 'animal-writes-core' ) . '</a>'
-			);
-			?>
-		</label>
+		<?php /* Phase 2: explicit consent checkbox (DPDP Act). */ ?>
 		<p><button type="submit" class="wp-element-button"><?php esc_html_e( 'Sign up to volunteer', 'animal-writes-core' ); ?></button></p>
 	</form>
 	<?php
@@ -125,9 +117,8 @@ function aw_volunteer_submit() {
 	$state   = sanitize_title( wp_unslash( $_POST['state'] ?? '' ) );
 	$city    = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
 	$roles   = array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['roles'] ?? array() ) ) ) );
-	$consent = ! empty( $_POST['consent'] );
 	$term    = $state ? get_term_by( 'slug', $state, 'aw_city' ) : null;
-	if ( '' === $name || ! is_email( $email ) || ! $term || ! $consent ) {
+	if ( '' === $name || ! is_email( $email ) || ! $term ) {
 		$fail( 'missing' );
 	}
 	$id = wp_insert_post(
@@ -137,7 +128,7 @@ function aw_volunteer_submit() {
 	if ( is_wp_error( $id ) ) {
 		$fail( 'invalid' );
 	}
-	foreach ( array( 'aw_v_name' => $name, 'aw_v_email' => $email, 'aw_v_phone' => $phone, 'aw_v_state' => $term->name, 'aw_v_city' => $city, 'aw_v_roles' => implode( ', ', $roles ), 'aw_v_consent_at' => gmdate( 'c' ) ) as $k => $v ) {
+	foreach ( array( 'aw_v_name' => $name, 'aw_v_email' => $email, 'aw_v_phone' => $phone, 'aw_v_state' => $term->name, 'aw_v_city' => $city, 'aw_v_roles' => implode( ', ', $roles ) ) as $k => $v ) {
 		update_post_meta( $id, $k, $v );
 	}
 	set_transient( $ip_key, $count + 1, HOUR_IN_SECONDS );
