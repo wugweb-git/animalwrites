@@ -48,13 +48,24 @@ function aw_directory_order( $q ) {
 		return;
 	}
 	$q->set( 'post_type', 'aw_listing' );
-	// Every listing carries aw_featured (see aw_backfill_featured_flag), so an inner join is safe.
-	$q->set( 'meta_key', 'aw_featured' );
+	// Featured first, then verified, then A–Z. Every listing carries aw_featured; aw_verified may be missing.
+	$q->set(
+		'meta_query',
+		array(
+			'feat' => array( 'key' => 'aw_featured', 'type' => 'NUMERIC' ),
+			'ver'  => array(
+				'relation' => 'OR',
+				'ver_yes'  => array( 'key' => 'aw_verified', 'compare' => 'EXISTS' ),
+				array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
+			),
+		)
+	);
 	$q->set(
 		'orderby',
 		array(
-			'meta_value_num' => 'DESC',
-			'title'          => 'ASC',
+			'feat'    => 'DESC',
+			'ver_yes' => 'DESC',
+			'title'   => 'ASC',
 		)
 	);
 	$q->set( 'posts_per_page', 24 );
@@ -172,7 +183,9 @@ add_action(
 			$q->set( 'search_columns', array( 'post_title' ) );
 		}
 		if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$q->set( 'meta_query', array( array( 'key' => 'aw_verified', 'value' => '1' ) ) );
+			$mq = (array) $q->get( 'meta_query' );
+			$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
+			$q->set( 'meta_query', $mq );
 		}
 	},
 	20
