@@ -525,3 +525,5 @@ body.single-aw_research .aw-lead-media { display: none; }
 main > .aw-section-band:first-child { margin-block-start: 0; }
 .aw-section-band .aw-section-head { max-width: var(--aw-width-wide); margin-inline: auto; margin-bottom: 0; }
 .aw-section-visual img[style*="contain"] { border: 1px solid var(--aw-color-line); }
+
+.aw-section-visual .aw-placard { background-color: var(--aw-color-raised); border: 2px solid var(--aw-color-ink); height: auto; }

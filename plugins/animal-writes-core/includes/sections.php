@@ -63,7 +63,10 @@ add_shortcode(
 				$tiles .= '<img src="/wp-content/uploads/2026/10/' . esc_attr( $f ) . '" alt="" loading="lazy">';
 			}
 		} else {
-			$posts = array_slice( (array) $wp_query->posts, 0, 3 );
+			// Prefer items with a real image; fall back to placards only to fill the three tiles.
+			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => is_tax() ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
+			$with  = array_filter( $pool, fn( $p ) => get_post_meta( $p->ID, 'aw_source_image', true ) || has_post_thumbnail( $p ) );
+			$posts = array_slice( array_merge( $with, array_diff_key( $pool, $with ) ), 0, 3 );
 			foreach ( $posts as $p ) {
 				$tiles .= aw_section_tile( $p );
 			}
