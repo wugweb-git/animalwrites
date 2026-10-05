@@ -29,6 +29,9 @@ const AW_SECTION_DESC = array(
  */
 function aw_section_tile( $p ) {
 	$img = (string) get_post_meta( $p->ID, 'aw_source_image', true );
+	if ( ! $img && ( $fid = (int) get_post_meta( $p->ID, 'aw_file_id', true ) ) ) {
+		$img = (string) wp_get_attachment_image_url( $fid, 'large' );
+	}
 	if ( ! $img && has_post_thumbnail( $p ) ) {
 		$img = (string) get_the_post_thumbnail_url( $p, 'medium_large' );
 	}
@@ -65,7 +68,7 @@ add_shortcode(
 		} else {
 			// Prefer items with a real image; fall back to placards only to fill the three tiles.
 			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => is_tax() ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
-			$with  = array_filter( $pool, fn( $p ) => get_post_meta( $p->ID, 'aw_source_image', true ) || has_post_thumbnail( $p ) );
+			$with  = array_filter( $pool, fn( $p ) => get_post_meta( $p->ID, 'aw_source_image', true ) || get_post_meta( $p->ID, 'aw_file_id', true ) || has_post_thumbnail( $p ) );
 			$posts = array_slice( array_merge( $with, array_diff_key( $pool, $with ) ), 0, 3 );
 			foreach ( $posts as $p ) {
 				$tiles .= aw_section_tile( $p );

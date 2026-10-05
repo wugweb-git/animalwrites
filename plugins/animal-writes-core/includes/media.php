@@ -38,6 +38,12 @@ add_filter(
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
 		$url    = (string) get_post_meta( $post_id, 'aw_source_image', true );
+		$doc    = '';
+		if ( ! $url ) {
+			$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
+			$doc = $fid ? (string) wp_get_attachment_image_url( $fid, 'large' ) : ''; // First page of the official PDF.
+			$url = $doc;
+		}
 		$inner  = $url
 			? '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'aw-img-failed\')">'
 			: aw_placard_html( $post_id );
@@ -45,7 +51,7 @@ add_filter(
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}
 		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1">' . $inner . '</a>' : $inner;
-		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $url ? ' has-remote' : '' ) . '">' . $inner . '</figure>';
+		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $url ? ' has-remote' : '' ) . ( $doc ? ' aw-doc-cover' : '' ) . '">' . $inner . '</figure>';
 	},
 	10,
 	3

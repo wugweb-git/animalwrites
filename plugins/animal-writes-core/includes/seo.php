@@ -66,6 +66,10 @@ add_action(
 		}
 		if ( ! $image && is_singular() ) {
 			$image = (string) get_post_meta( get_queried_object_id(), 'aw_source_image', true );
+			$fid   = (int) get_post_meta( get_queried_object_id(), 'aw_file_id', true );
+			if ( ! $image && $fid ) {
+				$image = (string) wp_get_attachment_image_url( $fid, 'large' );
+			}
 		}
 		$large = (bool) $image;
 		if ( ! $image ) {
