@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Animal Writes Core
- * Description: Content types, directory, ingest endpoint and guardrails for Animal Writes 2.0. Theme-independent.
+ * Description: Content types, directory and ingest endpoint for Animal Writes 2.0. Theme-independent.
  * Version: 0.1.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
@@ -30,7 +30,6 @@ require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/ingest.php';
-require_once AW_CORE_DIR . 'includes/guardrails.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/analytics.php';
 

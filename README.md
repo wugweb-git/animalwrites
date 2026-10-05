@@ -49,7 +49,6 @@ Everything lands as **Pending Review**. Duplicates (same source URL) return `{"s
 ```
 
 ## Guardrails
-- No ads on Legal Watch or emergency listing types (`animal-ambulance`, `emergency-rescue`, `veterinary-hospital`): body class `aw-no-ads`, and any block with class `kits-ad-slot` is removed. Ad code should check `aw_ads_allowed()`.
 - Sponsored items show "Sponsored by …" automatically.
 - Imported listings are never verified. Daily job expires Featured and flags listings verified more than 180 days ago (`aw_needs_reverify`).
 
