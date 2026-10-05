@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_HTACCESS_VERSION = '1';
+const AW_HTACCESS_VERSION = '2';
 
 add_action(
 	'init',
@@ -42,6 +42,12 @@ add_action(
 			'RewriteRule . /index.php [L]',
 			'</IfModule>',
 		);
+		// Start from a clean file each time: drop earlier copies of our block and any unmarked duplicates.
+		if ( file_exists( $file ) ) {
+			$clean = preg_replace( '/# BEGIN Animal Writes redirects.*?# END Animal Writes redirects\n?/s', '', (string) file_get_contents( $file ) ); // phpcs:ignore
+			$clean = str_replace( implode( "\n", $redirects ) . "\n", '', $clean );
+			file_put_contents( $file, ltrim( $clean ) ); // phpcs:ignore
+		}
 		$ok = insert_with_markers( $file, 'Animal Writes redirects', $redirects )
 			&& insert_with_markers( $file, 'WordPress', $wp_rules );
 		if ( ! $ok ) {
