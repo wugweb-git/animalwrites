@@ -32,17 +32,21 @@ function aw_share_html( $post_id ) {
 	return $out;
 }
 
-// After the content of single items, inside <main>.
+// At the end of <main> on single items, after the content and any call to action.
 add_filter(
-	'render_block_core/post-content',
+	'render_block_core/group',
 	function ( $content, $block ) {
 		static $done = false;
 		$types = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_campaign', 'aw_resource', 'aw_opportunity', 'aw_listing' );
-		if ( $done || ! is_singular( $types ) ) {
+		if ( $done || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) {
+			return $content;
+		}
+		$pos = strrpos( $content, '</main>' );
+		if ( false === $pos ) {
 			return $content;
 		}
 		$done = true;
-		return $content . '<div class="aw-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>';
+		return substr( $content, 0, $pos ) . '<div class="aw-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>' . substr( $content, $pos );
 	},
 	10,
 	2

@@ -38,6 +38,11 @@ add_filter(
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
 		$url    = (string) get_post_meta( $post_id, 'aw_source_image', true );
+		// The item's own page leads with a real photo only: a placard would repeat the title,
+		// and a document's first page is already shown by the PDF viewer below.
+		if ( ! $url && is_singular() && get_queried_object_id() === $post_id && ! $link ) {
+			return '';
+		}
 		$doc    = '';
 		if ( ! $url ) {
 			$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
