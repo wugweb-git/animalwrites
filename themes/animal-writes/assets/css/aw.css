@@ -296,7 +296,7 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-bg-kraft { background: var(--aw-color-surface); }
 
 /* 4.9 Section header — title + description left, one CTA right. */
-.aw-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--aw-space-3) var(--aw-space-6); margin-bottom: var(--aw-space-6); max-width: none; }
+.aw-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--aw-space-3) var(--aw-space-6); margin-bottom: var(--aw-space-6); }
 .aw-sec-head h2 { margin: 0; }
 .aw-sec-head p { margin: var(--aw-space-2) 0 0; font-size: var(--aw-type-lead); color: var(--aw-color-muted); max-width: 60ch; }
 .aw-link-cta { display: inline-flex; align-items: center; gap: var(--aw-space-2); min-height: var(--aw-size-target); padding: 0 var(--aw-space-4); border-radius: var(--aw-radius-pill); border: 1.5px solid var(--aw-color-ink); color: var(--aw-color-ink); font-weight: var(--aw-weight-strong); font-size: var(--aw-type-sm); text-decoration: none; white-space: nowrap; transition: background-color var(--aw-motion-fast) var(--aw-motion-ease), color var(--aw-motion-fast) var(--aw-motion-ease); }
@@ -642,3 +642,9 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-states-n { font-family: var(--aw-font-display); font-weight: var(--aw-weight-bold); letter-spacing: var(--aw-tracking-heading); font-size: var(--aw-type-h3); line-height: var(--aw-leading-display); }
 .aw-states-name { font-size: var(--aw-type-xs); font-weight: var(--aw-weight-strong); line-height: 1.25; overflow-wrap: anywhere; }
 @media (prefers-reduced-motion: reduce) { .aw-states a { transition: none; } .aw-states a:hover { transform: none; } }
+
+/* Header nav: one line at tablet widths */
+@media (min-width: 600px) and (max-width: 1199px) {
+	.aw-site-header .wp-block-navigation__container { gap: var(--aw-space-4) !important; flex-wrap: nowrap; }
+	.aw-site-header .wp-block-navigation-item__content { font-size: var(--aw-type-sm); white-space: nowrap; }
+}
