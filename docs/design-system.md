@@ -45,7 +45,19 @@ WordPress presets (`theme.json` palette, font sizes, spacing) remain for the blo
 Contrast (WCAG 2.1 AA, checked): text `#1e1e1e` on white 16.7:1, on kraft 13.2:1; muted `#5f5f5f` on white 6.4:1, on kraft 5.1:1; accent-ink `#9a5b00` on white 5.4:1 but on kraft only 4.3:1, so it is used on white only (on kraft use ink). Marigold `#ffa500` is never used for text on light backgrounds; it is a fill (buttons with ink text, 9.3:1) and the focus ring.
 
 ### Type
-Display and headings: Tiro Devanagari Hindi (also renders the Hindi hero line). Body and UI: Inter Tight. Both self-hosted (woff2).
+One family: **Inter** (variable 400–700, self-hosted woff2). Hierarchy comes from size, weight and tracking, never from a second typeface.
+
+| Style | Used for | Size token | Weight | Line height | Tracking |
+|---|---|---|---|---|---|
+| Display | Homepage hero (`.aw-hero-title`, `.aw-display`) | `type-display` | 700 | 1.06 | −0.035em |
+| H1 | Page and archive titles | `type-h1` | 700 | 1.06 | −0.035em |
+| H2 | Section titles (`.aw-sec-head h2`) | `type-h2` | 700 | 1.2 | −0.02em |
+| H3 | Card titles, sub-sections | `type-h3` | 600 | 1.3 | −0.015em |
+| H4 | Tile titles, small headings, form legends | `type-h4` | 600 | 1.2 | −0.01em |
+| Lead | Section descriptions, intros (`.aw-lead`, large paragraphs) | `type-lead` | 400, muted | 1.5 | — |
+| Body | Paragraphs, lists | `type-base` | 400 | 1.6 | −0.006em |
+| Small | Excerpts, meta, footer links | `type-sm` | 400–500 | 1.55 | — |
+| Caption | Dates, counts, chips, footer headings | `type-xs` | 500–600 | — | — |
 
 | Token | sm (0) | md (768) | lg (1200) |
 |---|---|---|---|
@@ -114,7 +126,7 @@ Hierarchy: controls (inputs, buttons) are tightest, cards and media softer, the 
 | `--aw-elevation-3` | 0 16px 40px rgba(20,20,20,.16) | = | = |
 | `--aw-elevation-offset` | 8px 8px 0 var(--aw-color-accent) | 14px 14px 0 var(--aw-color-accent) | 14px 14px 0 var(--aw-color-accent) |
 
-`elevation-1` resting card, `elevation-2` hover, `elevation-3` overlays. `elevation-offset` is the marigold block shadow behind the hero photo.
+`elevation-1` every resting card, tile and filter panel (with a 1px `color-line` border); `elevation-2` hover and the state finder; `elevation-3` overlays. `elevation-offset` is the marigold block shadow behind the hero photo.
 
 ### Motion
 | Token | sm (0) | md (768) | lg (1200) |
@@ -236,6 +248,21 @@ Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes
 
 ### Directory states panel
 The directory home's header visual: the nine states with the most organisations, set as type (count in Tiro, name below), each linking to its state page. Real counts from the taxonomy; no map. Busiest state in ink, the rest raised; hover lifts, reduced motion respected.
+
+### Section (`.aw-section` + background)
+Every homepage band is a full-width section with `space-section` padding on one of three backgrounds: white, **canvas** (`color-canvas`, warm off-white) or **kraft** (`color-surface`), plus the dark campaign band. White cards on canvas or kraft give clear separation; adjacent sections never share a background.
+
+### Section header (`.aw-sec-head`)
+H2 + one-line lead on the left; one CTA on the right (`.aw-link-cta`: pill, ink outline, arrow icon that nudges on hover, fills ink on hover). Wraps under the title on small screens.
+
+### Tile (`.aw-tile` in `.aw-tiles`)
+Icon in a kraft square (turns marigold on hover) + H4 title + one-line description + arrow. Raised surface, border, `elevation-1`; hover lifts to `elevation-2`. Grid: 1 / 2 / 3 columns. Used for the section index; reusable for any set of links.
+
+### Icons (`.aw-ico .aw-ico--name`)
+Lucide line icons (ISC licence) as CSS masks, so each is one `<span>` that takes the text colour: arrow-right, arrow-up-right, directory, legal, news, knowledge, research, opportunities, campaign, resources, helpline, mail, phone, search, instagram, facebook, x. Always `aria-hidden="true"` next to visible text or an `aria-label`.
+
+### Footer
+Brand column (wordmark, one line, email with icon, social icon buttons), Explore (two columns), Animal Writes links; bottom bar with copyright, visit count, Terms, Privacy, Disclaimer and **Powered by Wugweb** (pill, links to wugweb.com).
 
 ### Other components
 PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, testimonials (shown only with consent), ad slots, details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
