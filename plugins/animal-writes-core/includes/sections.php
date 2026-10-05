@@ -49,8 +49,10 @@ add_shortcode(
 		$type  = (string) get_query_var( 'post_type' );
 		$type  = $type ? $type : ( is_tax() ? (string) ( get_taxonomy( get_queried_object()->taxonomy )->object_type[0] ?? '' ) : '' );
 		$title = is_tax() ? single_term_title( '', false ) : post_type_archive_title( '', false );
-		if ( is_tax( 'aw_city' ) && 'aw_listing' === $type ) {
-			$title = sprintf( 'Help in %s', single_term_title( '', false ) );
+		if ( 'aw_listing' === $type && ( get_query_var( 'aw_city' ) || get_query_var( 'aw_listing_type' ) ) ) {
+			$city  = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
+			$ltype = get_query_var( 'aw_listing_type' ) ? get_term_by( 'slug', get_query_var( 'aw_listing_type' ), 'aw_listing_type' ) : null;
+			$title = $ltype ? ( $city ? $ltype->name . ' in ' . $city->name : $ltype->name ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
 		if ( is_tax( 'aw_city' ) ) {
@@ -78,7 +80,7 @@ add_shortcode(
 		return '<header class="aw-section-band alignfull"><div class="aw-section-head alignwide"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="aw-section-desc">' . esc_html( $desc ) . '</p>' : '' )
-			. ( $count ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( $noun[ $type ] ?? 'items' ) ) . '</p>' : '' )
+			. ( $count ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )
 			. '</div>' . $visual . '</div></header>';
 	}
 );

@@ -193,11 +193,21 @@ function aw_directory_filter() {
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
 
 	$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
+	$all    = get_transient( 'aw_dir_districts' );
+	if ( false === $all ) {
+		$all = array();
+		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => false, 'orderby' => 'name', 'childless' => true, 'parent' => '' ) ) as $k ) {
+			if ( $k->parent ) {
+				$all[ $k->parent ][] = $k;
+			}
+		}
+		set_transient( 'aw_dir_districts', $all, DAY_IN_SECONDS );
+	}
 	$s_opts = '<option value="">All states</option>';
 	$d_opts = '<option value="">All districts</option>';
 	foreach ( $states as $st ) {
 		$s_opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $state && $state->term_id === $st->term_id, true, false ) . '>' . esc_html( $st->name ) . '</option>';
-		$kids    = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => $st->term_id, 'hide_empty' => false, 'orderby' => 'name' ) );
+		$kids    = $all[ $st->term_id ] ?? array();
 		if ( $kids ) {
 			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '">';
 			foreach ( $kids as $k ) {
