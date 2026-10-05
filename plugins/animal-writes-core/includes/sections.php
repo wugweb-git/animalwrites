@@ -118,3 +118,32 @@ add_shortcode(
 		return $out . '</ul>';
 	}
 );
+
+/**
+ * [aw_find_help] Directory discovery for the homepage: total, a search box with a state picker,
+ * and every state and union territory as a typographic index with its organisation count.
+ */
+add_shortcode(
+	'aw_find_help',
+	function () {
+		$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
+		$total  = (int) wp_count_posts( 'aw_listing' )->publish;
+		$opts   = '<option value="">All states and UTs</option>';
+		$items  = '';
+		$with   = 0;
+		foreach ( (array) $states as $st ) {
+			$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
+			if ( $st->count ) {
+				$with++;
+			}
+			$items .= '<li' . ( $st->count ? '' : ' class="is-empty"' ) . '><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span class="n">' . esc_html( number_format_i18n( $st->count ) ) . '</span> <span class="s">' . esc_html( $st->name ) . '</span></a></li>';
+		}
+		return '<div class="aw-ed-find-head"><h2>Find help near you</h2><p class="aw-ed-big"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p></div>'
+			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
+			. '<input type="hidden" name="aw_filter" value="1">'
+			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="aw-ico aw-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
+			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
+			. '<button type="submit" class="aw-btn">Search</button></form>'
+			. '<nav class="aw-ed-states" aria-label="Browse by state"><ul>' . $items . '</ul></nav>';
+	}
+);

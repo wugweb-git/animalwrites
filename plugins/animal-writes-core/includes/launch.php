@@ -274,3 +274,38 @@ add_filter(
 	20,
 	3
 );
+
+/**
+ * One-time (v3): the homepage becomes the editorial sequence HELP → KNOW → ACT → FOLLOW.
+ * The previous content is kept as a revision-style backup in the aw_home_backup option.
+ */
+add_action(
+	'init',
+	function () {
+		if ( (int) get_option( 'aw_home_patterns' ) >= 3 || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		$home = (int) get_option( 'page_on_front' );
+		$post = $home ? get_post( $home ) : null;
+		if ( ! $post ) {
+			return;
+		}
+		add_option( 'aw_home_backup', $post->post_content, '', false );
+		$seq = array( 'hero', 'help-now', 'whats-happening', '#ad', 'animal-law', 'find-help', 'learn', 'take-action', 'aw1-story', '#testimonials' );
+		$out = '';
+		foreach ( $seq as $s ) {
+			if ( '#ad' === $s ) {
+				$out .= "<!-- wp:shortcode -->\n[aw_ad slot=\"home\"]\n<!-- /wp:shortcode -->\n\n";
+			} elseif ( '#testimonials' === $s ) {
+				$out .= "<!-- wp:shortcode -->\n[aw_testimonials count=\"3\"]\n<!-- /wp:shortcode -->\n";
+			} else {
+				$out .= '<!-- wp:pattern {"slug":"animal-writes/' . $s . "\"} /-->\n\n";
+			}
+		}
+		global $wpdb;
+		$wpdb->update( $wpdb->posts, array( 'post_content' => $out ), array( 'ID' => $home ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		clean_post_cache( $home );
+		update_option( 'aw_home_patterns', '3', false );
+	},
+	104
+);

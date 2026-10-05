@@ -3,36 +3,20 @@
  * Title: Homepage hero
  * Slug: animal-writes/hero
  * Categories: animal-writes
- * Description: Headline, one-line promise, primary actions, quick help for emergencies, live counts and the placard photograph.
+ * Description: Full-bleed campaign photograph with the identity line, the promise and two actions.
  * Inserter: yes
  *
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"align":"full","className":"aw-hero","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull aw-hero"><!-- wp:html -->
-<div class="aw-hero-grid">
-	<div class="aw-hero-copy">
-		<h1 class="aw-hero-title">Not strays. Ours.</h1>
-		<p class="aw-hero-lead">Find shelters, vets and rescuers near you, follow the court decisions that affect India’s animals, and take part in the campaigns that change them.</p>
-		<div class="aw-hero-actions">
-			<a class="aw-btn aw-btn--lg" href="/directory/"><span class="aw-ico aw-ico--directory" aria-hidden="true"></span> Find help near you</a>
-			<a class="aw-btn aw-btn--outline aw-btn--lg" href="/legal-watch/">Latest court decisions</a>
-		</div>
-		<ul class="aw-quick" aria-label="Urgent help">
-			<li><a href="/knowledge/found-an-injured-animal-what-to-do/"><span class="aw-ico aw-ico--injured" aria-hidden="true"></span><span>Found an injured animal</span></a></li>
-			<li><a href="/knowledge/how-to-report-animal-cruelty/"><span class="aw-ico aw-ico--alert" aria-hidden="true"></span><span>Report cruelty</span></a></li>
-			<li><a href="/helplines/"><span class="aw-ico aw-ico--phone" aria-hidden="true"></span><span>Helplines</span></a></li>
-		</ul>
-	</div>
-	<figure class="aw-hero-media">
-		<img src="/wp-content/uploads/2026/10/aw1-im8-768x1024.jpeg" alt="A boy holds a hand-lettered placard with a drawing of a dog." width="768" height="1024" loading="eager" fetchpriority="high" decoding="async">
-		<figcaption>Animal Writes 1.0, 29 November 2025. His placard reads: “He’s not a stray, he’s ours.”</figcaption>
-	</figure>
+<!-- wp:group {"align":"full","className":"aw-ed-hero","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<div class="wp-block-group alignfull aw-ed-hero"><!-- wp:html -->
+<figure class="aw-ed-hero-media"><img src="/wp-content/uploads/2026/10/aw1-im5-2048x1155.jpeg" srcset="/wp-content/uploads/2026/10/aw1-im5-1024x578.jpeg 1024w, /wp-content/uploads/2026/10/aw1-im5-1536x866.jpeg 1536w, /wp-content/uploads/2026/10/aw1-im5-2048x1155.jpeg 2048w" sizes="100vw" alt="Hundreds of people seated together holding placards for India’s community dogs." width="2048" height="1155" fetchpriority="high" decoding="async"><figcaption>Animal Writes 1.0, 29 November 2025</figcaption></figure>
+<div class="aw-ed-hero-copy">
+<h1 class="aw-ed-hero-title">Not strays.<br>Ours.</h1>
+<p class="aw-ed-hero-sub">India’s independent animal-welfare information platform.</p>
+<div class="aw-ed-hero-actions"><a class="aw-btn aw-btn--lg" href="/directory/">Find help</a><a class="aw-btn aw-btn--lg aw-btn--ghost" href="/legal-watch/">Understand the law</a></div>
 </div>
 <!-- /wp:html -->
-
-<!-- wp:shortcode -->
-[aw_stats]
-<!-- /wp:shortcode --></div>
+</div>
 <!-- /wp:group -->

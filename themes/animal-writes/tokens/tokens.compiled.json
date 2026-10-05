@@ -6,9 +6,9 @@
   },
   "tokens": {
     "color-bg": {
-      "sm": "#ffffff",
-      "md": "#ffffff",
-      "lg": "#ffffff"
+      "sm": "#f6f3ee",
+      "md": "#f6f3ee",
+      "lg": "#f6f3ee"
     },
     "color-surface": {
       "sm": "#efe4cf",
@@ -266,19 +266,19 @@
       "lg": "10px"
     },
     "radius-card": {
-      "sm": "14px",
-      "md": "16px",
-      "lg": "16px"
+      "sm": "10px",
+      "md": "10px",
+      "lg": "10px"
     },
     "radius-media": {
-      "sm": "12px",
-      "md": "16px",
-      "lg": "16px"
+      "sm": "8px",
+      "md": "8px",
+      "lg": "8px"
     },
     "radius-hero": {
-      "sm": "18px",
-      "md": "24px",
-      "lg": "24px"
+      "sm": "12px",
+      "md": "12px",
+      "lg": "12px"
     },
     "radius-pill": {
       "sm": "999px",
@@ -409,6 +409,16 @@
       "sm": "#f6f3ee",
       "md": "#f6f3ee",
       "lg": "#f6f3ee"
+    },
+    "type-mega": {
+      "sm": "3.25rem",
+      "md": "5.5rem",
+      "lg": "7.5rem"
+    },
+    "type-section": {
+      "sm": "2rem",
+      "md": "3rem",
+      "lg": "4rem"
     }
   }
 }
