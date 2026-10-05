@@ -401,9 +401,9 @@ body.single-aw_research .aw-lead-media { display: none; }
 /* 6. Page components --------------------------------------------------------- */
 
 /* Hero — copy + actions + quick help on the left, photo on the right, live counts below */
-.aw-hero { padding-block: var(--aw-space-7) var(--aw-space-6) !important; background: linear-gradient(180deg, var(--aw-color-bg) 0%, var(--aw-color-canvas) 100%); }
+.aw-hero { padding-block: var(--aw-space-6) var(--aw-space-6) !important; background: linear-gradient(180deg, var(--aw-color-bg) 0%, var(--aw-color-canvas) 100%); }
 .aw-hero-grid { display: grid; gap: var(--aw-space-6); align-items: center; }
-@media (min-width: 900px) { .aw-hero-grid { grid-template-columns: 1.15fr 0.85fr; gap: var(--aw-space-8); } }
+@media (min-width: 900px) { .aw-hero-grid { grid-template-columns: 1.25fr 0.75fr; gap: var(--aw-space-8); } }
 .aw-hero-title { margin: 0 0 var(--aw-space-4); }
 .aw-hero-lead { font-size: var(--aw-type-lead); line-height: 1.5; color: var(--aw-color-muted); margin: 0 0 var(--aw-space-6); max-width: 46ch; }
 .aw-hero-actions { display: flex; flex-wrap: wrap; gap: var(--aw-space-3); margin-bottom: var(--aw-space-6); }
@@ -417,7 +417,7 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-quick a .aw-ico { color: var(--aw-color-danger); --aw-ico-size: 1.1em; }
 .aw-quick a:hover { transform: translateY(-2px); box-shadow: var(--aw-elevation-2); }
 .aw-hero-media { margin: 0; position: relative; }
-.aw-hero-media img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--aw-radius-hero); box-shadow: var(--aw-elevation-3); }
+.aw-hero-media img { display: block; width: 100%; aspect-ratio: 4 / 5; max-height: min(68vh, 540px); object-fit: cover; object-position: 50% 15%; border-radius: var(--aw-radius-hero); box-shadow: var(--aw-elevation-3); }
 .aw-hero-media figcaption { position: absolute; left: var(--aw-space-4); right: var(--aw-space-4); bottom: var(--aw-space-4); padding: var(--aw-space-3) var(--aw-space-4); border-radius: var(--aw-radius-card); background: rgba(20, 20, 20, 0.78); backdrop-filter: blur(6px); color: var(--aw-color-on-ink); font-size: var(--aw-type-xs); line-height: 1.45; }
 .aw-stats { list-style: none; margin: var(--aw-space-7) 0 0; padding: var(--aw-space-5); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--aw-space-4); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); box-shadow: var(--aw-elevation-1); }
 @media (min-width: 768px) { .aw-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
