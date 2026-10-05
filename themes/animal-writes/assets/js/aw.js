@@ -71,6 +71,7 @@
 	};
 	function fieldLabel(el) {
 		var l = el.id && document.querySelector('label[for="' + el.id + '"]');
+		if (l) { l = l.cloneNode(true); l.querySelectorAll('.aw-optional').forEach(function (o) { o.remove(); }); }
 		return (l ? l.textContent : el.getAttribute('aria-label') || el.name || 'Field').trim();
 	}
 	function errorEl(el) {
