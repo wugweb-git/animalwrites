@@ -286,14 +286,14 @@ add_shortcode(
 			$fid   = (int) get_post_meta( $id, 'aw_file_id', true );
 			$pdf   = $fid ? wp_get_attachment_url( $fid ) : '';
 			$thumb = get_the_post_thumbnail_url( $id, 'medium' );
-			$out  .= '<article class="aw-doc-row" role="listitem">'
+			$out  .= '<div class="aw-doc-row" role="listitem">'
 				. '<div class="aw-doc-cover">' . ( $thumb ? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy">' : aw_i( 'research' ) ) . '</div>'
 				. '<div class="aw-doc-body"><p class="aw-doc-tags"><span class="aw-kind aw-kind--' . esc_attr( strtolower( $kind ) ) . '">' . esc_html( $kind ) . '</span>' . ( $year ? '<span>' . esc_html( $year ) . '</span>' : '' ) . ( $by ? '<span>' . esc_html( $by ) . '</span>' : '' ) . '</p>'
 				. '<h2 class="aw-doc-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( $title ) . '</a></h2>'
 				. '<p class="aw-doc-sum">' . esc_html( aw_text( $id, 24 ) ) . '</p></div>'
 				. '<div class="aw-doc-actions"><a class="aw-btn aw-btn--sm aw-btn--outline" href="' . esc_url( get_permalink() ) . '">Read</a>'
 				. ( $pdf ? '<a class="aw-btn aw-btn--sm" href="' . esc_url( $pdf ) . '" download>PDF</a>' : '' ) . '</div>'
-				. '</article>';
+				. '</div>';
 		}
 		wp_reset_postdata();
 		return $out . '</div>' . aw_pager();

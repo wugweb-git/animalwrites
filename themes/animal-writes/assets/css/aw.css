@@ -1051,3 +1051,5 @@ body { background: var(--aw-color-canvas); }
 /* Shared button size used in rows */
 .aw-btn .aw-ico { --aw-ico-size: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .aw-task, .aw-res-card, .aw-story-media img, .aw-case > .aw-ico { transition: none; } .aw-task:hover, .aw-res-card:hover { transform: none; } }
+/* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
+a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover { color: var(--aw-color-on-accent) !important; }
