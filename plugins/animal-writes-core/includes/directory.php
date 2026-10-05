@@ -48,24 +48,30 @@ function aw_directory_order( $q ) {
 		return;
 	}
 	$q->set( 'post_type', 'aw_listing' );
-	// Featured first, then verified, then A–Z. Every listing carries aw_featured; aw_verified may be missing.
+	// Featured first, then verified, then curated (with a logo), then A–Z. Every listing carries aw_featured; aw_verified may be missing.
 	$q->set(
 		'meta_query',
 		array(
 			'feat' => array( 'key' => 'aw_featured', 'type' => 'NUMERIC' ),
 			'ver'  => array(
 				'relation' => 'OR',
-				'ver_yes'  => array( 'key' => 'aw_verified', 'compare' => 'EXISTS' ),
+				'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
 				array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
+			),
+			'logo' => array(
+				'relation' => 'OR',
+				'has_logo' => array( 'key' => '_thumbnail_id', 'compare' => 'EXISTS' ),
+				array( 'key' => '_thumbnail_id', 'compare' => 'NOT EXISTS' ),
 			),
 		)
 	);
 	$q->set(
 		'orderby',
 		array(
-			'feat'    => 'DESC',
-			'ver_yes' => 'DESC',
-			'title'   => 'ASC',
+			'feat'     => 'DESC',
+			'ver_yes'  => 'DESC',
+			'has_logo' => 'DESC',
+			'title'    => 'ASC',
 		)
 	);
 	$q->set( 'posts_per_page', 24 );
