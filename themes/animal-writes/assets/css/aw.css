@@ -678,3 +678,8 @@ body.single-aw_research .aw-lead-media { display: none; }
 	.aw-site-header .wp-block-navigation__container { gap: var(--aw-space-4) !important; flex-wrap: nowrap; }
 	.aw-site-header .wp-block-navigation-item__content { font-size: var(--aw-type-sm); white-space: nowrap; }
 }
+
+/* Photo credit under a lead image (required by CC BY / BY-SA) */
+.wp-block-post-featured-image:has(.aw-credit) { aspect-ratio: auto !important; overflow: visible; }
+.aw-credit { margin-top: var(--aw-space-2); font-size: var(--aw-type-xs); color: var(--aw-color-muted); }
+.aw-credit a { color: inherit; }

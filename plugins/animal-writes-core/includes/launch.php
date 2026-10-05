@@ -203,3 +203,74 @@ add_action(
 	},
 	102
 );
+
+/**
+ * One-time: lead photos for guides, opportunities and resources.
+ * Openly licensed photos (media-restore/photos/photos.json) become attachments with a credit caption;
+ * Animal Writes' own campaign photos are reused by attachment ID. Posts that already have an image are left alone.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_lead_photos' ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		$dir  = dirname( AW_CORE_DIR, 2 ) . '/media-restore/photos/';
+		$plan = is_readable( $dir . 'photos.json' ) ? json_decode( (string) file_get_contents( $dir . 'photos.json' ), true ) : null; // phpcs:ignore
+		if ( ! $plan ) {
+			return;
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		foreach ( (array) $plan['own'] as $post_id => $att ) {
+			if ( ! has_post_thumbnail( (int) $post_id ) && wp_attachment_is_image( (int) $att ) ) {
+				set_post_thumbnail( (int) $post_id, (int) $att );
+			}
+		}
+		foreach ( (array) $plan['photos'] as $post_id => $p ) {
+			$post_id = (int) $post_id;
+			if ( has_post_thumbnail( $post_id ) || ! is_readable( $dir . basename( $p['file'] ) ) ) {
+				continue;
+			}
+			$tmp = wp_tempnam( $p['file'] );
+			copy( $dir . basename( $p['file'] ), $tmp );
+			$name = sanitize_title( get_the_title( $post_id ) ) . '.jpg';
+			$att  = media_handle_sideload( array( 'name' => $name, 'tmp_name' => $tmp ), $post_id, get_the_title( $post_id ) );
+			if ( is_wp_error( $att ) ) {
+				continue;
+			}
+			$credit = sprintf(
+				'Photo: <a href="%1$s">%2$s</a> by %3$s, <a href="%4$s">%5$s</a>',
+				esc_url( $p['source'] ),
+				esc_html( $p['title'] ),
+				esc_html( $p['creator'] ),
+				esc_url( $p['license_url'] ),
+				esc_html( $p['license'] )
+			);
+			wp_update_post( array( 'ID' => $att, 'post_excerpt' => $credit ) );
+			update_post_meta( $att, '_wp_attachment_image_alt', '' );
+			set_post_thumbnail( $post_id, $att );
+		}
+		update_option( 'aw_lead_photos', '1', false );
+	},
+	103
+);
+
+/** On an item's own page, show its photo credit (attachment caption) under the lead image. */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $html, $block, $instance ) {
+		$post_id = $instance->context['postId'] ?? 0;
+		if ( ! $html || ! is_singular() || (int) $post_id !== get_queried_object_id() ) {
+			return $html;
+		}
+		$caption = wp_get_attachment_caption( (int) get_post_thumbnail_id( $post_id ) );
+		if ( ! $caption ) {
+			return $html;
+		}
+		return str_replace( '</figure>', '<figcaption class="aw-credit">' . wp_kses( $caption, array( 'a' => array( 'href' => true ) ) ) . '</figcaption></figure>', $html );
+	},
+	20,
+	3
+);
