@@ -194,7 +194,7 @@ body.single-aw_research .aw-lead-media { display: none; }
 .aw-field-error:empty::before { content: none; }
 .aw-form fieldset { border: 0; padding: 0; margin: 0 0 var(--aw-space-4); }
 .aw-check { display: flex !important; gap: var(--aw-space-3); align-items: flex-start; font-weight: var(--aw-weight-regular) !important; min-height: var(--aw-size-target); padding-block: var(--aw-space-2); cursor: pointer; }
-.aw-check input { width: 1.25rem; height: 1.25rem; margin-top: 0.15rem; flex: none; accent-color: var(--aw-color-ink); }
+.aw-check input { width: 1.5rem; height: 1.5rem; margin-top: 0.15rem; flex: none; accent-color: var(--aw-color-ink); }
 .aw-form input[type=file] { padding: var(--aw-space-3); border-style: dashed; background: var(--aw-color-surface-soft); }
 .aw-hp { position: absolute !important; left: -9999px; }
 .aw-form-error, .aw-form-summary {

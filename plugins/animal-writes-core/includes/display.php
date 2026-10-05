@@ -131,3 +131,9 @@ add_filter(
 	'render_block_core/query-no-results',
 	fn( $html ) => preg_replace( array( '/<h3\b/', '/<\/h3>/' ), array( '<h2', '</h2>' ), $html )
 );
+
+// Search results list items under the page h1: their titles are h2 (the parent template uses h3).
+add_filter(
+	'render_block_core/post-title',
+	fn( $html ) => is_search() ? preg_replace( array( '/^(\s*)<h3\b/', '/<\/h3>(\s*)$/' ), array( '$1<h2', '</h2>$1' ), $html ) : $html
+);
