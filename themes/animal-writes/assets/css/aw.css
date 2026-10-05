@@ -26,7 +26,7 @@ body {
 a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1px; transition: color var(--aw-motion-fast) var(--aw-motion-ease); }
 a:hover { color: var(--aw-color-link); text-decoration-thickness: 2px; }
 /* Links inside running text are blue (yellow is for fills only) */
-:is(.wp-block-post-content, .entry-content, .aw-ed-law-side, .aw-ed-help-note, .aw-more, .aw-field-hint) a:not(.wp-element-button):not(.aw-btn) { color: var(--aw-color-link); }
+:is(.wp-block-post-content, .entry-content, .aw-ed-help-note, .aw-more, .aw-field-hint) :is(p, li, td, figcaption) > a:not([class]) { color: var(--aw-color-link); }
 /* On dark surfaces the focus ring and links switch to light colours */
 :is(.aw-dark, .aw-ed-help, .aw-ed-story, .aw-ed-hero, .aw-site-footer) { --aw-color-focus: #ffbe1a; --aw-color-link: #ffffff; }
 .wp-site-blocks > main { margin-block-start: 0; }
