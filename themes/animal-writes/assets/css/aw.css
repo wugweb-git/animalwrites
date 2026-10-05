@@ -541,7 +541,8 @@ body.single-aw_research .aw-lead-media { display: none; }
 
 /* Directory home visual: busiest states as type (real counts; no map) */
 .aw-states ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--aw-space-2); }
-.aw-states a { display: flex; flex-direction: column; justify-content: flex-end; min-height: 5.5rem; height: 100%; padding: var(--aw-space-3); border-radius: var(--aw-radius-media); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); color: var(--aw-color-ink); text-decoration: none; transition: transform var(--aw-motion-base) var(--aw-motion-ease), box-shadow var(--aw-motion-base) var(--aw-motion-ease), background-color var(--aw-motion-fast) var(--aw-motion-ease); }
+.aw-states li { min-width: 0; display: flex; }
+.aw-states a { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--aw-space-1); min-height: 5.5rem; padding: var(--aw-space-3); border-radius: var(--aw-radius-media); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); color: var(--aw-color-ink); text-decoration: none; transition: transform var(--aw-motion-base) var(--aw-motion-ease), box-shadow var(--aw-motion-base) var(--aw-motion-ease), background-color var(--aw-motion-fast) var(--aw-motion-ease); }
 .aw-states li:first-child a { background: var(--aw-color-ink); color: var(--aw-color-on-ink); border-color: var(--aw-color-ink); }
 .aw-states a:hover { transform: translateY(var(--aw-motion-lift)); box-shadow: var(--aw-elevation-2); }
 .aw-states a:focus-visible { outline: 3px solid var(--aw-color-focus); outline-offset: 2px; }
