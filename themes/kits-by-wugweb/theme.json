@@ -17,7 +17,7 @@
 				{ "slug": "secondary", "name": "Secondary", "color": "#191919" },
 				{ "slug": "background", "name": "Background", "color": "#ffffff" },
 				{ "slug": "surface", "name": "Surface", "color": "#f4f4f4" },
-				{ "slug": "text", "name": "Text", "color": "#1a1a1a" },
+				{ "slug": "foreground", "name": "Foreground", "color": "#1a1a1a" },
 				{ "slug": "text-muted", "name": "Text muted", "color": "#7d7d7d" },
 				{ "slug": "border", "name": "Border", "color": "#dfdfdf" },
 				{ "slug": "success", "name": "Success", "color": "#16a249" },
@@ -76,7 +76,7 @@
 	"styles": {
 		"color": {
 			"background": "var(--wp--preset--color--background)",
-			"text": "var(--wp--preset--color--text)"
+			"text": "var(--wp--preset--color--foreground)"
 		},
 		"typography": {
 			"fontFamily": "var(--wp--preset--font-family--base)",
@@ -105,7 +105,7 @@
 			"h5": { "typography": { "fontSize": "var(--wp--preset--font-size--large)" } },
 			"h6": { "typography": { "fontSize": "var(--wp--preset--font-size--medium)" } },
 			"link": {
-				"color": { "text": "var(--wp--preset--color--text)" },
+				"color": { "text": "var(--wp--preset--color--foreground)" },
 				"typography": { "textDecoration": "underline" },
 				":hover": { "typography": { "textDecoration": "none" } }
 			},

@@ -8,7 +8,7 @@
 				{ "slug": "secondary", "name": "Ink", "color": "#141414" },
 				{ "slug": "background", "name": "Background", "color": "#fffbf7" },
 				{ "slug": "surface", "name": "Surface warm", "color": "#fff5eb" },
-				{ "slug": "text", "name": "Text", "color": "#1e1e1e" },
+				{ "slug": "foreground", "name": "Foreground", "color": "#1e1e1e" },
 				{ "slug": "text-muted", "name": "Text muted", "color": "#6e6e6e" },
 				{ "slug": "border", "name": "Border", "color": "#e6e6e6" },
 				{ "slug": "success", "name": "Success", "color": "#16a249" },
