@@ -44,6 +44,7 @@ require_once AW_CORE_DIR . 'includes/ads.php';
 require_once AW_CORE_DIR . 'includes/testimonials.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
+require_once AW_CORE_DIR . 'includes/launch.php';
 
 register_activation_hook(
 	__FILE__,
