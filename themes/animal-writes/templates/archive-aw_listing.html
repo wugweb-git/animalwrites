@@ -11,43 +11,11 @@
 <!-- /wp:shortcode -->
 
 
-<!-- wp:query {"queryId":20,"query":{"inherit":true,"postType":"aw_listing","perPage":24},"align":"wide"} -->
-<div class="wp-block-query alignwide"><!-- wp:post-template {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"18rem"}} -->
-<!-- wp:group {"className":"is-style-kits-card aw-listing-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card aw-listing-card"><!-- wp:post-featured-image {"isLink":true,"className":"aw-logo"} /--><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"}},"layout":{"type":"flex","flexWrap":"wrap"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"className":"is-style-kits-label","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"featured_label"}}}}} -->
-<p class="is-style-kits-label"></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"is-style-kits-label","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"verified_label"}}}}} -->
-<p class="is-style-kits-label"></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:group {"align":"wide","className":"aw-system","layout":{"type":"default"}} -->
+<div class="wp-block-group alignwide aw-system"><!-- wp:shortcode -->
+[aw_directory_results]
+<!-- /wp:shortcode --></div>
 <!-- /wp:group -->
-
-<!-- wp:post-title {"level":2,"isLink":true} /-->
-
-<!-- wp:post-terms {"term":"aw_listing_type"} /-->
-
-<!-- wp:paragraph {"className":"has-text-muted-color has-text-color","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"area"}}}},"textColor":"text-muted"} -->
-<p class="has-text-muted-color has-text-color"></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:post-excerpt {"excerptLength":20} /--></div>
-<!-- /wp:group -->
-<!-- /wp:post-template -->
-
-<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->
-<!-- wp:query-pagination-previous /-->
-
-<!-- wp:query-pagination-numbers /-->
-
-<!-- wp:query-pagination-next /-->
-<!-- /wp:query-pagination -->
-
-<!-- wp:query-no-results -->
-<!-- wp:pattern {"slug":"kits-by-wugweb/empty-state"} /-->
-<!-- /wp:query-no-results --></div>
-<!-- /wp:query -->
 </main>
 <!-- /wp:group -->
 

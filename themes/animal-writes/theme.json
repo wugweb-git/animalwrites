@@ -6,13 +6,13 @@
 			"palette": [
 				{
 					"slug": "primary",
-					"name": "Marigold",
-					"color": "#ffa500"
+					"name": "Wugweb yellow",
+					"color": "#ffbe1a"
 				},
 				{
 					"slug": "primary-dark",
-					"name": "Accent dark (text)",
-					"color": "#9a5b00"
+					"name": "Link blue",
+					"color": "#0062b8"
 				},
 				{
 					"slug": "secondary",

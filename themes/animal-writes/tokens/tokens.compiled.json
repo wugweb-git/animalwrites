@@ -46,14 +46,14 @@
       "lg": "#e4ddd0"
     },
     "color-accent": {
-      "sm": "#ffa500",
-      "md": "#ffa500",
-      "lg": "#ffa500"
+      "sm": "#ffbe1a",
+      "md": "#ffbe1a",
+      "lg": "#ffbe1a"
     },
     "color-accent-ink": {
-      "sm": "#9a5b00",
-      "md": "#9a5b00",
-      "lg": "#9a5b00"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     },
     "color-on-accent": {
       "sm": "#141414",
@@ -86,9 +86,9 @@
       "lg": "#eef8f1"
     },
     "color-focus": {
-      "sm": "#ffa500",
-      "md": "#ffa500",
-      "lg": "#ffa500"
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     },
     "color-whatsapp": {
       "sm": "#1f7a44",
@@ -419,6 +419,11 @@
       "sm": "2rem",
       "md": "3rem",
       "lg": "4rem"
+    },
+    "color-link": {
+      "sm": "#0062b8",
+      "md": "#0062b8",
+      "lg": "#0062b8"
     }
   }
 }

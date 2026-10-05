@@ -5,7 +5,7 @@
 	"settings": {
 		"color": {
 			"palette": [
-				{ "slug": "primary", "name": "Accent", "color": "#ffa500" },
+				{ "slug": "primary", "name": "Accent", "color": "#ffbe1a" },
 				{ "slug": "secondary", "name": "Ink", "color": "#141414" },
 				{ "slug": "background", "name": "Background", "color": "#fffbf7" },
 				{ "slug": "surface", "name": "Surface warm", "color": "#fff5eb" },

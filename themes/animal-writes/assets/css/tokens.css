@@ -8,15 +8,15 @@
   --aw-color-text: #1e1e1e;
   --aw-color-muted: #5f5f5f;
   --aw-color-line: #e4ddd0;
-  --aw-color-accent: #ffa500;
-  --aw-color-accent-ink: #9a5b00;
+  --aw-color-accent: #ffbe1a;
+  --aw-color-accent-ink: #0062b8;
   --aw-color-on-accent: #141414;
   --aw-color-on-ink: #ffffff;
   --aw-color-danger: #c8102e;
   --aw-color-danger-soft: #fff2f4;
   --aw-color-success: #137a3b;
   --aw-color-success-soft: #eef8f1;
-  --aw-color-focus: #ffa500;
+  --aw-color-focus: #0062b8;
   --aw-color-whatsapp: #1f7a44;
   --aw-font-display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --aw-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -83,6 +83,7 @@
   --aw-color-canvas: #f6f3ee;
   --aw-type-mega: 3.25rem;
   --aw-type-section: 2rem;
+  --aw-color-link: #0062b8;
 }
 @media (min-width: 768px) {
   :root {
