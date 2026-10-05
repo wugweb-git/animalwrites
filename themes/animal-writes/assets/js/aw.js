@@ -89,6 +89,7 @@
 	}
 	function message(el) {
 		var v = el.validity;
+		if (v.customError) return el.validationMessage;
 		if (el.dataset.error && !v.valid) return el.dataset.error;
 		if (v.valueMissing) return el.type === 'checkbox' ? 'Please tick this box.' : MSG.valueMissing;
 		if (v.typeMismatch) return MSG.typeMismatch[el.type] || MSG.patternMismatch;
@@ -97,6 +98,10 @@
 	}
 	function check(el, show) {
 		if (!el.willValidate || el.type === 'hidden' || el.closest('.aw-hp')) return true;
+		if (el.type === 'file' && el.dataset.maxBytes) {
+			var big = Array.prototype.some.call(el.files, function (f) { return f.size > +el.dataset.maxBytes; });
+			el.setCustomValidity(big ? 'The file is larger than ' + Math.round(el.dataset.maxBytes / 1048576) + ' MB.' : '');
+		}
 		var ok = el.checkValidity();
 		if (show || el.getAttribute('aria-invalid') === 'true') {
 			el.setAttribute('aria-invalid', ok ? 'false' : 'true');
@@ -107,9 +112,12 @@
 	}
 	document.querySelectorAll('form.aw-form').forEach(function (form) {
 		form.setAttribute('novalidate', '');
+		var served = form.querySelector('.aw-form-summary');
+		if (served) served.focus(); // Errors returned by the server (no-JS path or server-only rules).
 		form.addEventListener('focusout', function (e) {
 			if (e.target.matches('input, select, textarea') && e.target.value !== '') check(e.target, true);
 		});
+		form.addEventListener('change', function (e) { if (e.target.type === 'file') check(e.target, true); });
 		form.addEventListener('input', function (e) {
 			if (e.target.getAttribute('aria-invalid') === 'true') check(e.target, true);
 		});

@@ -123,32 +123,25 @@ add_shortcode(
 	function ( $atts ) {
 		$a        = shortcode_atts( array( 'campaign' => '' ), $atts );
 		$campaign = sanitize_title( $a['campaign'] );
-		if ( isset( $_GET['posted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return '<div class="aw-form-done" role="status"><h3>Thank you. Your letter is counted.</h3><p>Share the campaign so more people post theirs.</p></div>';
+		if ( isset( $_GET['aw_done'] ) && 'receipt' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return '<div class="aw-form-done" role="status" tabindex="-1"><h3>Thank you. Your letter is counted.</h3><p>Share the campaign so more people post theirs.</p></div>';
 		}
-		$error  = isset( $_GET['receipt_error'] ) ? sanitize_key( $_GET['receipt_error'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		$msgs   = array(
-			'missing' => 'Please add your name, a valid email, your state, and at least one photo or link.',
-			'file'    => 'Each file must be a JPG, PNG, WebP, HEIC image or a PDF, up to 10 MB, and at most 5 files.',
-			'limit'   => 'Too many uploads from this connection. Please try again later.',
-			'invalid' => 'Something went wrong. Please try again.',
-		);
-		$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
-		$opts   = '';
+		$form   = 'aw_receipt';
+		$fstate = aw_form_state( $form );
+		$states = array( '' => 'Choose a state' );
+		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
+			$states[ $t->slug ] = $t->name;
+		}
+		$opts = '';
 		foreach ( AW_R_LABELS as $k => $l ) {
 			$opts .= '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
 		}
 		ob_start();
+		echo aw_form_open( $form, array( 'class' => 'aw-form aw-receipt', 'enctype' => 'multipart/form-data', 'data-max-files' => AW_R_MAX_FILES, 'data-max-bytes' => AW_R_MAX_BYTES ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 		?>
-		<form class="aw-form aw-receipt" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-max-files="<?php echo (int) AW_R_MAX_FILES; ?>" data-max-bytes="<?php echo (int) AW_R_MAX_BYTES; ?>">
-			<?php if ( $error && isset( $msgs[ $error ] ) ) : ?><p class="aw-form-error" role="alert"><?php echo esc_html( $msgs[ $error ] ); ?></p><?php endif; ?>
-			<input type="hidden" name="action" value="aw_receipt">
 			<input type="hidden" name="campaign" value="<?php echo esc_attr( $campaign ); ?>">
-			<?php wp_nonce_field( 'aw_receipt', 'aw_r_nonce' ); ?>
-			<input type="hidden" name="aw_t" value="<?php echo esc_attr( time() ); ?>">
-			<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>
 
-			<fieldset class="aw-uploads">
+			<fieldset class="aw-uploads" id="aw-receipt-photos" tabindex="-1">
 				<legend>Photos of your receipt, envelope or letter</legend>
 				<p class="aw-note">Up to 5 files: JPG, PNG, WebP, HEIC or PDF, 10 MB each. Photos are made smaller before sending. Screenshots work too: choose them, or paste with Ctrl/Cmd+V.</p>
 				<div class="aw-upload-buttons">
@@ -157,6 +150,7 @@ add_shortcode(
 				</div>
 				<input type="file" name="photos[]" multiple class="aw-real-files" hidden>
 				<ul class="aw-file-list" aria-live="polite"></ul>
+				<span class="aw-field-error" id="aw-receipt-photos-error" aria-live="polite"><?php echo esc_html( $fstate['errors']['photos'] ?? '' ); ?></span>
 				<template class="aw-label-options"><?php echo $opts; // phpcs:ignore ?></template>
 				<noscript><input type="file" name="photos[]" multiple accept="image/jpeg,image/png,image/webp,application/pdf"></noscript>
 			</fieldset>
@@ -165,17 +159,17 @@ add_shortcode(
 				<legend>Or add links (optional)</legend>
 				<p class="aw-note">A link to a photo or PDF, for example from Google Drive or Google Photos. Up to 3.</p>
 				<?php for ( $i = 0; $i < AW_R_MAX_LINKS; $i++ ) : ?>
-					<div class="aw-link-row"><input type="url" name="links[]" placeholder="https://" inputmode="url" aria-label="Link <?php echo (int) $i + 1; ?>"><select name="link_labels[]" aria-label="What is link <?php echo (int) $i + 1; ?>?"><?php echo $opts; // phpcs:ignore ?></select></div>
+					<div class="aw-link-row"><input type="url" name="links[]" id="aw-receipt-link-<?php echo (int) $i; ?>" placeholder="https://" inputmode="url" aria-label="Link <?php echo (int) $i + 1; ?>" value="<?php echo esc_attr( $fstate['values']['links'][ $i ] ?? '' ); ?>"><select name="link_labels[]" aria-label="What is link <?php echo (int) $i + 1; ?>?"><?php echo $opts; // phpcs:ignore ?></select></div>
 				<?php endfor; ?>
 			</fieldset>
 
-			<p><label for="aw-r-letters">How many letters did you post?</label><input id="aw-r-letters" name="letters" type="number" min="1" max="500" value="1" inputmode="numeric"></p>
-			<p><label for="aw-r-name">Your name</label><input id="aw-r-name" name="name" required autocomplete="name" maxlength="120"></p>
-			<p><label for="aw-r-email">Email</label><input id="aw-r-email" name="email" type="email" required autocomplete="email" maxlength="160"></p>
-			<p><label for="aw-r-state">State or union territory</label><select id="aw-r-state" name="state" required><option value="">Choose a state</option>
-				<?php foreach ( $states as $s ) : ?><option value="<?php echo esc_attr( $s->slug ); ?>"><?php echo esc_html( $s->name ); ?></option><?php endforeach; ?>
-			</select></p>
-			<p><label for="aw-r-city">City or town</label><input id="aw-r-city" name="city" maxlength="80" autocomplete="address-level2"></p>
+			<?php
+			echo aw_field( $form, array( 'name' => 'letters', 'label' => 'How many letters did you post?', 'type' => 'number', 'required' => true, 'value' => '1', 'attrs' => array( 'min' => 1, 'max' => 500, 'inputmode' => 'numeric' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 120 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo aw_field( $form, array( 'name' => 'state', 'label' => 'State or union territory', 'type' => 'select', 'required' => true, 'options' => $states ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo aw_field( $form, array( 'name' => 'city', 'label' => 'City or town', 'attrs' => array( 'autocomplete' => 'address-level2', 'maxlength' => 80 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+			?>
 			<p class="aw-note">Your photos are kept private and only used to count letters. They are never published, and location data is removed.</p>
 			<p><button type="submit" class="wp-element-button">Count my letter</button></p>
 		</form>
@@ -199,6 +193,12 @@ document.querySelectorAll('form.aw-receipt').forEach(function(form){
   var list=form.querySelector('.aw-file-list'), real=form.querySelector('.aw-real-files');
   var opts=form.querySelector('.aw-label-options').innerHTML;
   var OK=/^(image\/(jpeg|png|webp|heic|heif)|application\/pdf)$/;
+  var err=form.querySelector('#aw-receipt-photos-error');
+  function say(msg){err.textContent=msg;}
+  form.addEventListener('aw:validate',function(e){
+    var hasLink=Array.prototype.some.call(form.querySelectorAll('input[name="links[]"]'),function(l){return l.value.trim()!=='';});
+    if(!items.length&&!hasLink){say('Add at least one photo, screenshot or link.');e.preventDefault();}
+  });
   function shrink(file){
     if(!/^image\/(jpeg|png|webp)$/.test(file.type)) return Promise.resolve(file);
     return new Promise(function(res){
@@ -228,13 +228,15 @@ document.querySelectorAll('form.aw-receipt').forEach(function(form){
     var dt=new DataTransfer(); items.forEach(function(it){dt.items.add(it.file);}); real.files=dt.files;
   }
   function add(files){
+    var problems=[];
     Array.prototype.forEach.call(files,function(f){
-      if(items.length>=MAX){alert('You can add up to '+MAX+' files.');return;}
-      if(!OK.test(f.type)){alert(f.name+': use a photo (JPG, PNG, WebP, HEIC) or a PDF.');return;}
-      if(f.size>MAXB){alert(f.name+' is larger than 10 MB.');return;}
+      if(items.length>=MAX){problems.push('You can add up to '+MAX+' files; '+f.name+' was not added.');return;}
+      if(!OK.test(f.type)){problems.push(f.name+': use a photo (JPG, PNG, WebP, HEIC) or a PDF.');return;}
+      if(f.size>MAXB){problems.push(f.name+' is larger than 10 MB.');return;}
       var it={file:f,label:items.length?'other':'receipt'}; items.push(it);
       shrink(f).then(function(small){it.file=small;render();});
     });
+    say(problems.join(' '));
     render();
   }
   form.querySelectorAll('.aw-pick').forEach(function(inp){inp.addEventListener('change',function(){add(inp.files);inp.value='';});});
@@ -285,40 +287,49 @@ function aw_store_receipt_file( $tmp, $name ) {
 }
 
 function aw_receipt_submit() {
-	$back = wp_get_referer() ? remove_query_arg( array( 'posted', 'receipt_error' ), wp_get_referer() ) : home_url( '/' );
-	$fail = function ( $code ) use ( $back ) {
-		wp_safe_redirect( add_query_arg( 'receipt_error', $code, $back ) . '#count-my-letter' );
-		exit;
+	$form = 'aw_receipt';
+	$back = aw_form_back( '/' );
+	$done = add_query_arg( 'aw_done', 'receipt', $back ) . '#count-my-letter';
+	$rl   = aw_form_guard( $form, $back, 'count-my-letter', $done, 10 );
+	$fail = function ( $errors, $notice = '' ) use ( $form, $back, &$v ) {
+		aw_form_fail( $form, $errors, $v, $back, 'count-my-letter', $notice );
 	};
-	if ( ! isset( $_POST['aw_r_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_r_nonce'] ) ), 'aw_receipt' ) ) {
-		$fail( 'invalid' );
-	}
-	if ( ! empty( $_POST['aw_website'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
-		wp_safe_redirect( add_query_arg( 'posted', 1, $back ) . '#count-my-letter' );
-		exit;
-	}
-	$ip_key = 'aw_rc_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
-	$count  = (int) get_transient( $ip_key );
-	if ( $count >= 10 ) {
-		$fail( 'limit' );
-	}
 	$campaign = sanitize_title( wp_unslash( $_POST['campaign'] ?? '' ) );
-	$name     = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
-	$email    = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
-	$state    = get_term_by( 'slug', sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ), 'aw_city' );
-	$city     = sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) );
-	$letters  = min( 500, max( 1, (int) ( $_POST['letters'] ?? 1 ) ) );
-	$labels   = array_map( 'sanitize_key', (array) wp_unslash( $_POST['labels'] ?? array() ) );
-	if ( '' === $name || ! is_email( $email ) || ! $state ) {
-		$fail( 'missing' );
+	$v        = array(
+		'name'    => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
+		'email'   => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+		'state'   => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
+		'city'    => sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) ),
+		'letters' => (string) (int) ( $_POST['letters'] ?? 1 ),
+		'links'   => array_map( fn( $l ) => esc_url_raw( trim( (string) $l ) ), array_slice( (array) wp_unslash( $_POST['links'] ?? array() ), 0, AW_R_MAX_LINKS ) ),
+	);
+	$errors = aw_form_validate(
+		array( 'name' => array( 'required', 'max:120' ), 'email' => array( 'required', 'email' ), 'state' => array( 'required' ), 'city' => array( 'max:80' ) ),
+		$v,
+		array( 'name' => 'Your name', 'email' => 'Email', 'state' => 'State or union territory', 'city' => 'City or town' )
+	);
+	$state = $v['state'] ? get_term_by( 'slug', $v['state'], 'aw_city' ) : null;
+	if ( $v['state'] && ! $state ) {
+		$errors['state'] = 'State or union territory: choose one from the list.';
 	}
+	if ( (int) $v['letters'] < 1 || (int) $v['letters'] > 500 ) {
+		$errors['letters'] = 'How many letters: enter a number from 1 to 500.';
+	}
+	if ( $errors ) {
+		$fail( $errors );
+	}
+	$name    = $v['name'];
+	$email   = $v['email'];
+	$city    = $v['city'];
+	$letters = (int) $v['letters'];
+	$labels  = array_map( 'sanitize_key', (array) wp_unslash( $_POST['labels'] ?? array() ) );
 	$stored = array();
 	// Uploaded files.
 	$f = $_FILES['photos'] ?? null; // phpcs:ignore
 	if ( $f && is_array( $f['name'] ) ) {
 		$n = count( array_filter( $f['name'] ) );
 		if ( $n > AW_R_MAX_FILES ) {
-			$fail( 'file' );
+			$fail( array( 'photos' => 'Photos: add at most ' . AW_R_MAX_FILES . ' files.' ) );
 		}
 		foreach ( $f['name'] as $i => $orig ) {
 			if ( '' === $orig || UPLOAD_ERR_OK !== $f['error'][ $i ] ) {
@@ -326,7 +337,7 @@ function aw_receipt_submit() {
 			}
 			$file = aw_store_receipt_file( $f['tmp_name'][ $i ], $orig );
 			if ( ! $file ) {
-				$fail( 'file' );
+				$fail( array( 'photos' => 'Photos: ' . sanitize_file_name( $orig ) . ' must be a JPG, PNG, WebP, HEIC image or a PDF, up to 10 MB.' ) );
 			}
 			$label    = isset( AW_R_LABELS[ $labels[ $i ] ?? '' ] ) ? $labels[ $i ] : 'other';
 			$stored[] = array( 'file' => $file, 'label' => $label, 'from' => 'upload' );
@@ -357,18 +368,18 @@ function aw_receipt_submit() {
 		}
 	}
 	if ( ! $stored ) {
-		$fail( 'missing' );
+		$fail( array( 'photos' => 'Photos: add at least one photo, screenshot or link.' ) );
 	}
 	$id = wp_insert_post( array( 'post_type' => 'aw_receipt', 'post_status' => 'private', 'post_title' => $name . ' (' . $state->name . ')' ), true );
 	if ( is_wp_error( $id ) ) {
-		$fail( 'invalid' );
+		$fail( array(), 'Your upload could not be saved. Please try again.' );
 	}
 	foreach ( array( 'aw_r_campaign' => $campaign, 'aw_r_name' => $name, 'aw_r_email' => $email, 'aw_r_state' => $state->slug, 'aw_r_city' => $city, 'aw_r_letters' => $letters, 'aw_r_files' => $stored ) as $k => $v ) {
 		update_post_meta( $id, $k, $v );
 	}
 	delete_transient( 'aw_counts_' . md5( $campaign ) );
-	set_transient( $ip_key, $count + 1, HOUR_IN_SECONDS );
-	wp_safe_redirect( add_query_arg( 'posted', 1, $back ) . '#count-my-letter' );
+	aw_form_count( $rl );
+	wp_safe_redirect( $done );
 	exit;
 }
 add_action( 'admin_post_nopriv_aw_receipt', 'aw_receipt_submit' );

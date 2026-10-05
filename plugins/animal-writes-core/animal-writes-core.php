@@ -36,12 +36,14 @@ require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/seo.php';
 require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/share.php';
+require_once AW_CORE_DIR . 'includes/forms.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/visits.php';
 require_once AW_CORE_DIR . 'includes/ads.php';
 require_once AW_CORE_DIR . 'includes/testimonials.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
+require_once AW_CORE_DIR . 'includes/claims.php';
 
 register_activation_hook(
 	__FILE__,
