@@ -683,3 +683,5 @@ body.single-aw_research .aw-lead-media { display: none; }
 .wp-block-post-featured-image:has(.aw-credit) { aspect-ratio: auto !important; overflow: visible; }
 .aw-credit { margin-top: var(--aw-space-2); font-size: var(--aw-type-xs); color: var(--aw-color-muted); }
 .aw-credit a { color: inherit; }
+/* Lead image on an item's own page: wide, capped height, rounded, elevated */
+body.single main .wp-block-post-featured-image:not(.aw-logo) img { width: 100%; max-height: min(56vh, 480px); object-fit: cover; border-radius: var(--aw-radius-hero); box-shadow: var(--aw-elevation-2); }
