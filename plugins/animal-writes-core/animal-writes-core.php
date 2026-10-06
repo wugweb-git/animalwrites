@@ -25,6 +25,12 @@ if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 	define( 'AW_REVERIFY_DAYS', 180 );
 }
 
+// Real cron: WordPress's scheduled tasks are run every 15 minutes by the "WordPress cron" workflow in
+// animal-writes-workers (calls wp-cron.php), so page views no longer trigger them.
+if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+	define( 'DISABLE_WP_CRON', true );
+}
+
 require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
