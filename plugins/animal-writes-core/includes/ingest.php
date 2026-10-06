@@ -112,6 +112,14 @@ function aw_ingest( WP_REST_Request $req ) {
 		return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
 	}
 
+	// Sourcing policy (News → Sourcing): blocked publishers and, when switched on, the keyword filter.
+	if ( 'aw_listing' !== $type && function_exists( 'aw_sourcing_gate' ) ) {
+		$verdict = aw_sourcing_gate( $source_url, (string) $req->get_param( 'source_name' ), (string) $req->get_param( 'feed' ), $title . ' ' . $summary );
+		if ( $verdict ) {
+			return new WP_REST_Response( array( 'status' => $verdict ), 200 );
+		}
+	}
+
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => $type,
