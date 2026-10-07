@@ -41,7 +41,7 @@ add_filter(
 add_filter(
 	'kits_seo_fallback_image',
 	function ( $image, $id ) {
-		$image = (string) get_post_meta( $id, 'aw_source_image', true );
+		$image = function_exists( 'aw_item_image' ) ? aw_item_image( $id ) : '';
 		$fid   = (int) get_post_meta( $id, 'aw_file_id', true );
 		return ( ! $image && $fid ) ? (string) wp_get_attachment_image_url( $fid, 'large' ) : $image;
 	},

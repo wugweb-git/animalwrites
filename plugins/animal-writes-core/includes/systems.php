@@ -233,7 +233,7 @@ add_shortcode(
  * @return string
  */
 function aw_story( $id, $size = 'card' ) {
-	$img   = (string) get_post_meta( $id, 'aw_source_image', true );
+	$img   = aw_item_image( $id, 'lead' === $size ? 'large' : 'medium_large' );
 	$img   = $img ? $img : (string) get_the_post_thumbnail_url( $id, 'large' );
 	$src   = (string) get_post_meta( $id, 'aw_source_name', true );
 	$topic = aw_first_term( $id, 'aw_topic' );

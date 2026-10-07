@@ -144,7 +144,7 @@ function aw_article_schema( $id ) {
 		$at = 'Legislation';
 	}
 	$src_date = (string) get_post_meta( $id, 'aw_source_date', true );
-	$image    = (string) get_post_meta( $id, 'aw_source_image', true );
+	$image    = function_exists( 'aw_item_image' ) ? aw_item_image( $id ) : '';
 	$image    = $image ? $image : (string) get_the_post_thumbnail_url( $id, 'large' );
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = (string) get_post_meta( $id, 'aw_source_name', true );

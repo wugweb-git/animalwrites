@@ -10,6 +10,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Our own image for an item: news and Legal Watch use the photo chosen for their topic (stored in the media library,
+ * openly licensed), never the publisher's photo. Legal items with a hosted government PDF keep its first page.
+ * Topic photos are set in the option aw_topic_images = array( topic-slug => attachment ID, 'default' => ID ).
+ *
+ * @param int    $post_id Post ID.
+ * @param string $size    Image size.
+ * @return string URL, or '' when there is none (callers then show the placard).
+ */
+function aw_item_image( $post_id, $size = 'large' ) {
+	$type = get_post_type( $post_id );
+	if ( ! in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
+		return '';
+	}
+	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
+	if ( 'aw_legal' === $type && $fid ) {
+		return (string) wp_get_attachment_image_url( $fid, $size );
+	}
+	$map    = (array) get_option( 'aw_topic_images', array() );
+	$topics = wp_get_object_terms( $post_id, 'aw_topic', array( 'fields' => 'slugs' ) );
+	$topics = is_wp_error( $topics ) ? array() : $topics;
+	foreach ( $topics as $slug ) {
+		if ( ! empty( $map[ $slug ] ) ) {
+			return (string) wp_get_attachment_image_url( (int) $map[ $slug ], $size );
+		}
+	}
+	// Items without a topic get the general photo; a topic with no fitting photo yet shows the placard instead.
+	return ( ! $topics && ! empty( $map['default'] ) ) ? (string) wp_get_attachment_image_url( (int) $map['default'], $size ) : '';
+}
+
+/**
  * Placard fallback: the source name, set large on kraft.
  *
  * @param int $post_id Post ID.
@@ -37,14 +67,14 @@ add_filter(
 			return $content;
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
-		$url    = (string) get_post_meta( $post_id, 'aw_source_image', true );
+		$url    = aw_item_image( $post_id );
 		// The item's own page leads with a real photo only: a placard would repeat the title,
 		// and a document's first page is already shown by the PDF viewer below.
 		if ( ! $url && is_singular() && get_queried_object_id() === $post_id && ! $link ) {
 			return '';
 		}
 		$doc    = '';
-		if ( ! $url ) {
+		if ( ! $url && ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal' ), true ) ) {
 			$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
 			$doc = $fid ? (string) wp_get_attachment_image_url( $fid, 'large' ) : ''; // First page of the official PDF.
 			$url = $doc;
