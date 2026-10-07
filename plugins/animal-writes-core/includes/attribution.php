@@ -104,7 +104,9 @@ function aw_rel_time_html( $id ) {
 	} else {
 		$label = wp_date( wp_date( 'Y' ) === wp_date( 'Y', $ts ) ? 'j M' : 'j M Y', $ts );
 	}
-	return '<time class="aw-rel-time" datetime="' . esc_attr( gmdate( 'c', $ts ) ) . '" title="' . esc_attr( wp_date( 'j F Y, g:i a', $ts ) ) . '">' . esc_html( $label ) . '</time>';
+	$src   = (string) get_post_meta( $id, 'aw_source_date', true );
+	$exact = ! $src || wp_date( 'Y-m-d', (int) get_post_time( 'U', true, $id ) ) === $src; // only the date is known otherwise
+	return '<time class="aw-rel-time" datetime="' . esc_attr( $exact ? gmdate( 'c', $ts ) : $src ) . '" title="' . esc_attr( wp_date( $exact ? 'j F Y, g:i a' : 'j F Y', $ts ) ) . '">' . esc_html( $label ) . '</time>';
 }
 
 add_shortcode( 'aw_rel_time', fn() => aw_rel_time_html( (int) get_the_ID() ) );
