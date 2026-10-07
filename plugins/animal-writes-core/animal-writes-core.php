@@ -57,6 +57,7 @@ require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
 require_once AW_CORE_DIR . 'includes/sitemap.php';
 require_once AW_CORE_DIR . 'includes/schema.php';
+require_once AW_CORE_DIR . 'includes/newsletter.php';
 
 register_activation_hook(
 	__FILE__,
