@@ -345,7 +345,7 @@ add_shortcode(
 		$find  = function ( $key, $type, $extra = array() ) use ( $id ) {
 			return get_posts(
 				array_merge(
-					array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 10, 'meta_key' => $key, 'meta_value' => (string) $id, 'orderby' => 'date', 'order' => 'DESC' ), // phpcs:ignore
+					array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 30, 'meta_key' => $key, 'meta_value' => (string) $id, 'orderby' => 'date', 'order' => 'DESC' ), // phpcs:ignore
 					$extra
 				)
 			);
