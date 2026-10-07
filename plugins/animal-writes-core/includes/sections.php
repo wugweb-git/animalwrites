@@ -55,9 +55,6 @@ add_shortcode(
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
-		if ( get_query_var( 'aw_acts' ) ) {
-			$desc = (string) get_option( 'aw_acts_intro', '' ); // its own intro, written by the owner (Legal Watch > Acts & Rules intro)
-		}
 		if ( is_tax( 'aw_city' ) ) {
 			$desc = 'Shelters, vets, ambulances and rescue groups listed here. Unverified listings are marked; organisations can correct their details.';
 		}
@@ -124,8 +121,8 @@ add_shortcode(
 			$stats  = array(
 				array( (int) wp_count_posts( 'aw_listing' )->publish, 'organisations listed', '/directory/' ),
 				array( is_array( $states ) ? count( $states ) : 0, 'states and UTs covered', '/directory/' ),
-				array( (int) wp_count_posts( 'aw_legal' )->publish, 'court and government updates', '/legal-watch/' ),
-				array( (int) wp_count_posts( 'aw_research' )->publish + (int) wp_count_posts( 'aw_guide' )->publish, 'laws, rules and guides', '/research/' ),
+				array( (int) wp_count_posts( 'aw_legal' )->publish, 'official documents and templates', '/library/' ),
+				array( (int) wp_count_posts( 'aw_guide' )->publish, 'guides and resources', '/resources/' ),
 			);
 			set_transient( 'aw_stats', $stats, HOUR_IN_SECONDS );
 		}

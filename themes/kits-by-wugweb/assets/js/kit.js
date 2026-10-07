@@ -187,3 +187,19 @@
 		if (typeof window.gtag === 'function') window.gtag('event', 'menu_click', data); // GA4 through Site Kit
 	}, { capture: true });
 })();
+
+/* Header search: the icon opens a search field in place (it stays a link to the search page without JavaScript). */
+(function () {
+	document.querySelectorAll('[data-search-toggle]').forEach(function (btn) {
+		var form = document.getElementById(btn.getAttribute('aria-controls'));
+		if (!form) return;
+		var input = form.querySelector('input');
+		function set(open) {
+			form.hidden = !open;
+			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (open) input.focus();
+		}
+		btn.addEventListener('click', function (e) { e.preventDefault(); set(form.hidden); });
+		form.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); btn.focus(); } });
+	});
+})();

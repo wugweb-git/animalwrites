@@ -24,7 +24,7 @@
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 <!-- wp:html -->
-<a class="aw-ed-more" href="/knowledge/">Knowledge Centre <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
+<a class="aw-ed-more" href="/resources/">Resources <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
 <!-- /wp:html -->
 </div>
 <!-- /wp:group -->
@@ -32,13 +32,13 @@
 <div class="wp-block-group aw-ed-col"><!-- wp:html -->
 <h3 class="aw-ed-col-title">Laws and rules</h3>
 <!-- /wp:html -->
-<!-- wp:query {"queryId":45,"query":{"perPage":4,"pages":0,"offset":0,"postType":"aw_research","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-titles"} -->
+<!-- wp:query {"queryId":45,"query":{"perPage":4,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"aw_legal_kind":[1030,1031]}},"className":"aw-ed-titles"} -->
 <div class="wp-block-query aw-ed-titles"><!-- wp:post-template -->
 <!-- wp:post-title {"level":4,"isLink":true} /-->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 <!-- wp:html -->
-<a class="aw-ed-more" href="/research/">Research Library <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
+<a class="aw-ed-more" href="/library/?kind=act">Library <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
 <!-- /wp:html -->
 </div>
 <!-- /wp:group -->
@@ -46,13 +46,13 @@
 <div class="wp-block-group aw-ed-col"><!-- wp:html -->
 <h3 class="aw-ed-col-title">Letters and templates</h3>
 <!-- /wp:html -->
-<!-- wp:query {"queryId":46,"query":{"perPage":4,"pages":0,"offset":0,"postType":"aw_resource","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-titles"} -->
+<!-- wp:query {"queryId":46,"query":{"perPage":4,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"aw_legal_kind":[1045]}},"className":"aw-ed-titles"} -->
 <div class="wp-block-query aw-ed-titles"><!-- wp:post-template -->
 <!-- wp:post-title {"level":4,"isLink":true} /-->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 <!-- wp:html -->
-<a class="aw-ed-more" href="/resources/">Resources <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
+<a class="aw-ed-more" href="/library/?kind=template">Library <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
 <!-- /wp:html -->
 </div>
 <!-- /wp:group -->

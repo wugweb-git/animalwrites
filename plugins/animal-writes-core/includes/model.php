@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification' );
+const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template' );
 const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
 const AW_SECONDARY_TOPICS = 2;
 
@@ -55,8 +55,8 @@ add_action(
 		);
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal', 'aw_research' ), $args( 'Legal types', 'Legal type' ) );
 		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_research', 'aw_news' ), $args( 'Courts', 'Court' ) );
-		register_taxonomy( 'aw_resource_type', array( 'aw_resource' ), $args( 'Resource types', 'Resource type' ) );
-		register_taxonomy( 'aw_language', array( 'aw_resource' ), $args( 'Languages', 'Language' ) );
+		register_taxonomy( 'aw_resource_type', array( 'aw_resource', 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
+		register_taxonomy( 'aw_language', array( 'aw_resource', 'aw_legal' ), $args( 'Languages', 'Language' ) );
 		register_taxonomy_for_object_type( 'aw_city', 'aw_legal' ); // Legal Watch: filter by state
 	},
 	11

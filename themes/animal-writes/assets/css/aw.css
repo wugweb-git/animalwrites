@@ -517,3 +517,25 @@ body { background: var(--aw-color-canvas); }
 .aw-search-results li { margin-block: var(--kit-space-3, .75rem); }
 .aw-search-results p { margin: var(--kit-space-1, .25rem) 0 0; color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
 .aw-search-type { display: inline-block; font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin-inline-end: var(--kit-space-2, .5rem); }
+
+/* Volunteer sign-up above the footer: same treatment as the newsletter row. */
+.aw-footer-volunteer { padding-block: var(--kit-space-6, 1.5rem); border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+.aw-footer-volunteer .aw-form { display: grid; gap: var(--kit-space-3, .75rem); max-width: 44rem; }
+@media (min-width: 768px) { .aw-footer-volunteer .aw-form { grid-template-columns: 1fr 1fr; align-items: end; } .aw-footer-volunteer fieldset, .aw-footer-volunteer .aw-field--checkbox, .aw-footer-volunteer .aw-captcha, .aw-footer-volunteer .aw-form > p:last-child, .aw-footer-volunteer .aw-form-summary, .aw-footer-volunteer .aw-form-done { grid-column: 1 / -1; } }
+.aw-footer-volunteer label, .aw-footer-volunteer legend, .aw-footer-volunteer .aw-optional { color: inherit; }
+.aw-footer-volunteer input[type="email"], .aw-footer-volunteer input[type="text"], .aw-footer-volunteer input[type="tel"], .aw-footer-volunteer select { background: var(--kit-color-surface); color: var(--kit-color-ink); }
+.aw-footer-volunteer fieldset { border: 0; padding: 0; margin: 0; }
+.aw-byline { color: var(--kit-color-muted); font-size: var(--kit-type-sm); margin-top: var(--kit-space-2, .5rem); }
+
+/* Banner slot: fixed proportions so nothing shifts while it loads (16:5 wide, 4:3 on phones). */
+.aw-banner { position: relative; margin-block: 0 var(--kit-space-5, 1.25rem); }
+.aw-banner picture, .aw-banner img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 5; object-fit: cover; border-radius: var(--kit-radius-card); }
+@media (max-width: 767px) { .aw-banner picture, .aw-banner img { aspect-ratio: 4 / 3; } }
+.aw-banner-text { position: absolute; inset: auto var(--kit-space-4, 1rem) var(--kit-space-6, 1.5rem); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); font-size: var(--kit-type-h, 1.25rem); font-weight: var(--kit-weight-strong); max-width: 40ch; }
+.aw-banner-credit { margin: var(--kit-space-1, .25rem) 0 0; font-size: var(--kit-type-xs, .75rem); color: var(--kit-color-muted); }
+.aw-banner-credit a { color: inherit; }
+/* Media & PR list */
+.aw-press { list-style: none; padding: 0; display: grid; gap: var(--kit-space-4, 1rem); }
+.aw-press li { display: grid; gap: var(--kit-space-1, .25rem); padding-bottom: var(--kit-space-4, 1rem); border-bottom: 1px solid var(--kit-color-line); }
+.aw-press a { font-weight: var(--kit-weight-strong); }
+.aw-press-meta { color: var(--kit-color-muted); font-size: var(--kit-type-sm); }

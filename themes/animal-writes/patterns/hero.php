@@ -15,7 +15,7 @@
 <div class="aw-ed-hero-copy">
 <h1 class="aw-ed-hero-title">Not strays.<br>Ours.</h1>
 <p class="aw-ed-hero-sub">India’s independent animal-welfare information platform.</p>
-<div class="aw-ed-hero-actions"><a class="aw-btn aw-btn--lg" href="/directory/">Find help</a><a class="aw-btn aw-btn--lg aw-btn--ghost" href="/legal-watch/">Understand the law</a></div>
+<div class="aw-ed-hero-actions"><a class="aw-btn aw-btn--lg" href="/directory/">Find help</a><a class="aw-btn aw-btn--lg aw-btn--ghost" href="/library/">Understand the law</a></div>
 </div>
 <!-- /wp:html -->
 </div>

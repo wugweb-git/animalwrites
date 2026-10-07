@@ -12,16 +12,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Remember that $old_url now lives at post $post_id. */
-function aw_redirect_add( $old_url, $post_id ) {
+/** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/#volunteer'). */
+function aw_redirect_add( $old_url, $target ) {
 	$path = trim( (string) wp_parse_url( $old_url, PHP_URL_PATH ), '/' );
 	if ( '' === $path ) {
 		return;
 	}
 	$map          = (array) get_option( 'aw_redirects', array() );
-	$map[ $path ] = (int) $post_id;
+	$map[ $path ] = is_numeric( $target ) ? (int) $target : (string) $target;
 	update_option( 'aw_redirects', $map, false );
 }
+
+/** Whole sections that moved (7 Oct 2026): old prefix => new prefix. Items keep their slug. */
+const AW_MOVED_SECTIONS = array( 'knowledge' => 'resources', 'legal-watch' => 'library', 'research' => 'resources' );
 
 add_action(
 	'template_redirect',
@@ -31,9 +34,21 @@ add_action(
 		}
 		$path = trim( (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$map  = (array) get_option( 'aw_redirects', array() );
-		$id   = (int) ( $map[ $path ] ?? $map[ rawurldecode( $path ) ] ?? 0 );
-		if ( $id && 'publish' === get_post_status( $id ) ) {
-			wp_safe_redirect( get_permalink( $id ), 301, 'Animal Writes' );
+		$to   = $map[ $path ] ?? $map[ rawurldecode( $path ) ] ?? null;
+		if ( is_int( $to ) && 'publish' === get_post_status( $to ) ) {
+			wp_safe_redirect( get_permalink( $to ), 301, 'Animal Writes' );
+			exit;
+		}
+		if ( is_string( $to ) && '' !== $to ) {
+			wp_safe_redirect( home_url( $to ), 301, 'Animal Writes' );
+			exit;
+		}
+		// A moved section: same path under its new name (one hop; the item URLs above are checked first).
+		$first = strtok( $path, '/' );
+		if ( isset( AW_MOVED_SECTIONS[ $first ] ) ) {
+			$rest = substr( $path, strlen( $first ) );
+			$dest = 'research' === $first && '' === trim( $rest, '/' ) ? '/resources/' : '/' . AW_MOVED_SECTIONS[ $first ] . $rest . ( '' === $rest ? '' : '' ) . '/';
+			wp_safe_redirect( home_url( preg_replace( '#/+#', '/', $dest ) ), 301, 'Animal Writes' );
 			exit;
 		}
 	},

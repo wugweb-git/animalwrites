@@ -143,6 +143,8 @@ function aw_article_schema( $id ) {
 	$at    = 'Article';
 	if ( 'aw_legal' === $type && has_term( array( 'act', 'rule', 'notification', 'circular' ), 'aw_legal_kind', $id ) ) {
 		$at = 'Legislation';
+	} elseif ( 'aw_legal' === $type && has_term( 'template', 'aw_legal_kind', $id ) ) {
+		$at = 'Article';
 	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 		$at = 'NewsArticle';
 	} elseif ( 'aw_research' === $type && preg_match( '/\b(Act|Rules?)\b/', $title ) ) {
@@ -247,7 +249,7 @@ function aw_job_schema( $id ) {
 	$org      = (string) get_post_meta( $id, 'aw_org_name', true );
 	$org_id   = (int) get_post_meta( $id, 'aw_organisation', true );
 	$org      = $org ? $org : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
-	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
+	$deadline = function_exists( 'aw_opportunity_closes' ) ? aw_opportunity_closes( $id ) : (string) get_post_meta( $id, 'aw_deadline', true );
 	$desc     = trim( (string) get_post_field( 'post_content', $id ) );
 	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : get_the_title( $id ) );
 	$data     = array(

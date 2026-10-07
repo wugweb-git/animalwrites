@@ -114,10 +114,10 @@ function aw_empty( $text ) {
  * list is canonical to the plain list (indexing.php). Places filter by state (children included).
  */
 const AW_LIST_FILTERS = array(
-	'aw_legal'       => array( array( 'issuer', 'aw_source_type', 'Filter by issuer' ), array( 'court', 'aw_court', 'Filter by court' ), array( 'state', 'aw_city', 'Filter by state' ), array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'issuer', 'aw_source_type', 'Filter by issuer' ), array( 'court', 'aw_court', 'Filter by court' ), array( 'state', 'aw_city', 'Filter by state' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_news'        => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_research'    => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_guide'       => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_resource'    => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Filter by kind of opportunity' ), array( 'state', 'aw_city', 'Filter by location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
@@ -143,7 +143,7 @@ add_action(
 			return;
 		}
 		foreach ( AW_LIST_SIZES as $type => $size ) {
-			if ( ! $q->is_post_type_archive( $type ) || $q->get( 'aw_acts' ) ) {
+			if ( ! $q->is_post_type_archive( $type ) ) {
 				continue;
 			}
 			$q->set( 'posts_per_page', $size );
@@ -243,7 +243,7 @@ add_shortcode(
 	'aw_legal_index',
 	function () {
 		global $wp_query;
-		$out = get_query_var( 'aw_acts' ) ? '' : aw_list_filters( 'aw_legal' );
+		$out = aw_list_filters( 'aw_legal' );
 		if ( ! $wp_query->have_posts() ) {
 			return $out . aw_empty( 'No updates match this filter yet.' );
 		}
@@ -256,7 +256,7 @@ add_shortcode(
 			$src   = (string) get_post_meta( $id, 'aw_source_name', true );
 			$doc   = (bool) get_post_meta( $id, 'aw_file_id', true );
 			// Acts and Rules show the year of the law (from its title), not the date we added them.
-			$year  = get_query_var( 'aw_acts' ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title(), $ym ) ? $ym[0] : '';
+			$year  = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title(), $ym ) ? $ym[0] : '';
 			$date  = $year ? '<div class="aw-case-date"><span class="d">' . esc_html( $year ) . '</span></div>'
 				: '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>';
 			$out  .= '<article class="aw-case">'
@@ -370,7 +370,7 @@ add_shortcode(
 	function () {
 		global $wp_query;
 		$icons = array( 'injur' => 'injured', 'cruel' => 'alert', 'birth' => 'knowledge', 'abc' => 'knowledge', 'caring' => 'opportunities', 'communit' => 'opportunities' );
-		$out   = '<div class="aw-tasks">';
+		$out   = aw_list_filters( 'aw_guide' ) . '<div class="aw-tasks">';
 		while ( $wp_query->have_posts() ) {
 			$wp_query->the_post();
 			$id   = get_the_ID();
@@ -394,7 +394,7 @@ add_shortcode(
 		$out .= '<div class="aw-also"><h2>Also useful</h2><ul class="aw-tiles">'
 			. '<li><a class="aw-tile" href="/helplines/">' . aw_i( 'helpline' ) . '<strong>Helplines</strong><span class="aw-tile-desc">Official numbers for every state.</span>' . aw_i( 'arrow-right' ) . '</a></li>'
 			. '<li><a class="aw-tile" href="/directory/">' . aw_i( 'directory' ) . '<strong>Find an organisation</strong><span class="aw-tile-desc">Shelters, vets and rescuers near you.</span>' . aw_i( 'arrow-right' ) . '</a></li>'
-			. '<li><a class="aw-tile" href="/research/">' . aw_i( 'research' ) . '<strong>The law in full</strong><span class="aw-tile-desc">Acts, Rules and judgments, from the official source.</span>' . aw_i( 'arrow-right' ) . '</a></li>'
+			. '<li><a class="aw-tile" href="/library/?kind=act">' . aw_i( 'research' ) . '<strong>The law in full</strong><span class="aw-tile-desc">Acts, Rules and judgments, from the official source.</span>' . aw_i( 'arrow-right' ) . '</a></li>'
 			. '</ul></div>';
 		return $out;
 	}

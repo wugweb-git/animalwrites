@@ -45,10 +45,11 @@ function aw_meta_schema() {
 		'aw_org_name'        => array( 'string', array( 'aw_opportunity' ), 'Organisation' ),
 		'aw_apply_url'       => array( 'string', array( 'aw_opportunity' ), 'Apply URL' ),
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
+		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
 
 		// Resources.
-		'aw_file_url'        => array( 'string', array( 'aw_resource' ), 'Downloadable file URL' ),
+		'aw_file_url'        => array( 'string', array( 'aw_resource', 'aw_legal' ), 'Downloadable file URL' ),
 		'aw_requires_email'  => array( 'boolean', array( 'aw_resource' ), 'Gate download behind newsletter signup' ),
 	);
 }
@@ -62,7 +63,7 @@ function aw_meta_schema() {
  */
 function aw_sanitize_meta( $value, $key ) {
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline' );
+	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );

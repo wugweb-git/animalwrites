@@ -121,7 +121,7 @@ add_action(
 		}
 		echo '<nav class="aw-sticky-help" aria-label="' . esc_attr__( 'Quick help', 'animal-writes-core' ) . '">'
 			. '<a class="aw-sh-primary" href="/directory/">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</a>'
-			. '<a class="aw-sh-secondary" href="/knowledge/found-an-injured-animal-what-to-do/">' . esc_html__( 'Injured animal?', 'animal-writes-core' ) . '</a>'
+			. '<a class="aw-sh-secondary" href="/resources/found-an-injured-animal-what-to-do/">' . esc_html__( 'Injured animal?', 'animal-writes-core' ) . '</a>'
 			. '</nav>' . "\n";
 	}
 );

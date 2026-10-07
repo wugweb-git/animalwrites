@@ -134,7 +134,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
-		if ( ! is_singular( 'aw_resource' ) ) {
+		if ( ! is_singular( 'aw_resource' ) && ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'aw_legal_kind', get_queried_object_id() ) ) ) {
 			return $content;
 		}
 		$button = '<p class="aw-print"><button type="button" class="wp-element-button" onclick="window.print()">'

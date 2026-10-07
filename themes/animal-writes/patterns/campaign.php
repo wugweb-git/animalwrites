@@ -59,7 +59,7 @@
 <h2 class="wp-block-heading" id="letters">Letter templates</h2>
 <!-- /wp:heading -->
 
-<!-- wp:query {"queryId":61,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_resource","order":"asc","orderBy":"date","inherit":false},"className":"aw-cards aw-cards-3"} -->
+<!-- wp:query {"queryId":61,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_legal","order":"asc","orderBy":"date","inherit":false,"taxQuery":{"aw_legal_kind":[1045]}},"className":"aw-cards aw-cards-3"} -->
 <div class="wp-block-query aw-cards aw-cards-3"><!-- wp:post-template -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 

@@ -20,12 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_post_types() {
 	return array(
 		'aw_news'        => array( 'News item', 'News', 'news', array( 'title', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
-		'aw_legal'       => array( 'Legal update', 'Legal Watch', 'legal-watch', array( 'title', 'excerpt', 'custom-fields', 'revisions' ) ),
-		'aw_research'    => array( 'Research item', 'Research Library', 'research', array( 'title', 'excerpt', 'custom-fields', 'revisions' ) ),
-		'aw_guide'       => array( 'Guide', 'Knowledge Centre', 'knowledge', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
+		'aw_legal'       => array( 'Library item', 'Library', 'library', array( 'title', 'editor', 'excerpt', 'custom-fields', 'revisions' ) ),
+		'aw_research'    => array( 'Research item (old)', 'Research (old)', 'research', array( 'title', 'excerpt', 'custom-fields', 'revisions' ) ),
+		'aw_guide'       => array( 'Resource', 'Resources', 'resources', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_campaign'    => array( 'Campaign', 'Campaign Hub', 'campaigns', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_opportunity' => array( 'Opportunity', 'Opportunities', 'opportunities', array( 'title', 'editor', 'excerpt', 'custom-fields', 'revisions' ) ),
-		'aw_resource'    => array( 'Resource', 'Resources', 'resources', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
+		'aw_resource'    => array( 'Template (old)', 'Templates (old)', 'old-resources', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_listing'     => array( 'Listing', 'Directory', 'directory', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 	);
 }
@@ -53,10 +53,12 @@ function aw_register_content_types() {
 					'add_new_item'  => sprintf( 'Add %s', $singular ),
 					'edit_item'     => sprintf( 'Edit %s', $singular ),
 				),
-				'public'       => true,
+				// Research and the old Resources type were folded into Resources and Library (7 Oct 2026); kept for admin only.
+				'public'       => ! in_array( $type, array( 'aw_research', 'aw_resource' ), true ),
+				'show_ui'      => true,
 				'show_in_rest' => true,
-				'has_archive'  => $slug,
-				'rewrite'      => $rewrite,
+				'has_archive'  => in_array( $type, array( 'aw_research', 'aw_resource' ), true ) ? false : $slug,
+				'rewrite'      => in_array( $type, array( 'aw_research', 'aw_resource' ), true ) ? false : $rewrite,
 				'supports'     => $supports,
 				'menu_icon'    => 'dashicons-pets',
 			)

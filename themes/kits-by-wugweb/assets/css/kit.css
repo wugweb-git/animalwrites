@@ -377,7 +377,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-site-footer ,.kit-site-footer { padding-block: var(--kit-space-8) var(--kit-space-5) !important; }
 .aw-footer-grid ,.kit-footer-grid { display: grid; gap: var(--kit-space-7); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.2fr 1.4fr 1fr .8fr 1.4fr; } }
+@media (min-width: 1024px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.3fr 1.3fr 1fr 1fr; } }
 .aw-footer-brand p ,.kit-footer-brand p { margin: var(--kit-space-4) 0; color: rgba(255,255,255,.75); font-size: var(--kit-type-sm); max-width: 32ch; }
 .aw-footer-mail ,.kit-footer-mail { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-medium); font-size: var(--kit-type-sm); }
 .aw-socials ,.kit-socials { display: flex; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
@@ -652,3 +652,13 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 
 /* Forms: an empty paragraph left by auto-formatting never takes up space */
 .aw-form > p:empty ,.kit-form > p:empty { display: none; }
+
+.aw-footer-helplines a ,.kit-footer-helplines a { gap: var(--kit-space-1); }
+.screen-reader-text { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Header search field (opens from the icon) */
+.aw-hsearch ,.kit-hsearch { display: flex; }
+.aw-hsearch[hidden] ,.kit-hsearch[hidden] { display: none; }
+.aw-hsearch input ,.kit-hsearch input { min-height: var(--kit-size-target); width: min(16rem, 50vw); padding: 0 var(--kit-space-3); border-radius: var(--kit-radius-control); border: 1px solid rgba(255,255,255,.35); background: var(--kit-color-surface); color: var(--kit-color-ink); }
+.aw-header-utility ,.kit-header-utility { position: relative; }
+@media (max-width: 599px) { .aw-hsearch:not([hidden]) ,.kit-hsearch:not([hidden]) { position: absolute; right: 0; top: calc(100% + 8px); width: calc(100vw - 32px); z-index: 20; } .aw-hsearch input ,.kit-hsearch input { width: 100%; } }

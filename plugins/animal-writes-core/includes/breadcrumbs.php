@@ -5,7 +5,6 @@
  *
  * Organisation:      Directory › State › District › Organisation
  * District × type:   Directory › State › District › Type
- * Act or Rule:       Legal Watch › Acts & Rules › Item
  * Other items:       Section › Item
  * Topic:             Topics › Topic
  *
@@ -51,9 +50,6 @@ function aw_breadcrumbs() {
 		$type = get_post_type( $id );
 		$obj  = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, get_post_type_archive_link( $type ) );
-		if ( 'aw_legal' === $type && has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) ) {
-			$trail[] = array( 'Acts & Rules', home_url( '/legal-watch/acts-and-rules/' ) );
-		}
 		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
 	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && get_query_var( 'aw_city' ) ) {
 		$city  = get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' );
@@ -62,8 +58,6 @@ function aw_breadcrumbs() {
 		if ( $tslug && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
 			$trail[] = array( aw_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
 		}
-	} elseif ( get_query_var( 'aw_acts' ) ) {
-		$trail = array( array( 'Legal Watch', get_post_type_archive_link( 'aw_legal' ) ), array( 'Acts & Rules', home_url( '/legal-watch/acts-and-rules/' ) ) );
 	} elseif ( is_tax( 'aw_topic' ) ) {
 		$trail = array( array( 'Topics', home_url( '/topics/' ) ), array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) );
 	}

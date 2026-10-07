@@ -63,6 +63,7 @@ require_once AW_CORE_DIR . 'includes/redirects.php';
 require_once AW_CORE_DIR . 'includes/indexing.php';
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
+require_once AW_CORE_DIR . 'includes/media-pr.php';
 
 register_activation_hook(
 	__FILE__,
