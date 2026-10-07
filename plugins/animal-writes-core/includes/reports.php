@@ -4,7 +4,6 @@
  *
  * No account needed: a reason, optional details, and the shared spam guard (nonce, honeypot, timing, rate limit).
  * Reports are private aw_report posts that only administrators can see, with New / Resolved status.
- * Visible strings are placeholders ([...]) until final copy is supplied.
  *
  * @package animal-writes-core
  */
@@ -16,12 +15,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Reasons: key => placeholder label. */
 function aw_report_reasons() {
 	return array(
-		'contact'   => '[Reason: contact details are wrong]',
-		'location'  => '[Reason: location is wrong]',
-		'closed'    => '[Reason: closed or not operating]',
-		'duplicate' => '[Reason: duplicate listing]',
-		'not_org'   => '[Reason: not an animal organisation]',
-		'other'     => '[Reason: other]',
+		'contact'   => 'Phone, email or website is wrong',
+		'location'  => 'Location is wrong',
+		'closed'    => 'Closed or no longer operating',
+		'duplicate' => 'Listed more than once',
+		'not_org'   => 'Not an animal welfare organisation',
+		'other'     => 'Something else',
 	);
 }
 
@@ -53,16 +52,16 @@ function aw_report_box() {
 	}
 	$form = 'aw_report';
 	if ( isset( $_GET['aw_done'] ) && 'report' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<section class="aw-report" id="report"><div class="aw-form-done" role="status" tabindex="-1"><p>[Report received confirmation]</p></div></section>';
+		return '<section class="aw-report" id="report"><div class="aw-form-done" role="status" tabindex="-1"><p>Thank you. We will check this listing and correct it.</p></div></section>';
 	}
 	$state = aw_form_state( $form );
 	$open  = $state['errors'] || $state['notice'];
-	$html  = '<section class="aw-report" id="report"><details' . ( $open ? ' open' : '' ) . '><summary>[Report an error]</summary>';
+	$html  = '<section class="aw-report" id="report"><details' . ( $open ? ' open' : '' ) . '><summary>Report an error on this listing</summary>';
 	$html .= aw_form_open( $form, array( 'class' => 'aw-form aw-report-form' ) );
 	$html .= '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">';
-	$html .= aw_field( $form, array( 'name' => 'reason', 'label' => '[What is wrong?]', 'type' => 'select', 'required' => true, 'options' => array( '' => '[Choose one]' ) + aw_report_reasons() ) );
-	$html .= aw_field( $form, array( 'name' => 'details', 'label' => '[Details]', 'type' => 'textarea', 'hint' => '[Details hint]', 'attrs' => array( 'maxlength' => 1000 ) ) );
-	$html .= '<p><button type="submit" class="wp-element-button">[Send report]</button></p></form></details></section>';
+	$html .= aw_field( $form, array( 'name' => 'reason', 'label' => 'What is wrong?', 'type' => 'select', 'required' => true, 'options' => array( '' => 'Choose one' ) + aw_report_reasons() ) );
+	$html .= aw_field( $form, array( 'name' => 'details', 'label' => 'Details', 'type' => 'textarea', 'hint' => 'Optional. Tell us the correct details if you know them.', 'attrs' => array( 'maxlength' => 1000 ) ) );
+	$html .= '<p><button type="submit" class="wp-element-button">Send report</button></p></form></details></section>';
 	return $html;
 }
 add_shortcode( 'aw_report_box', 'aw_report_box' );
@@ -75,22 +74,22 @@ function aw_report_submit() {
 	$done    = add_query_arg( 'aw_done', 'report', $back ) . '#report';
 	$rl      = aw_form_guard( $form, $back, 'report', $done, 10 );
 	if ( ! $listing || 'aw_listing' !== $listing->post_type || 'publish' !== $listing->post_status ) {
-		aw_form_fail( $form, array(), array(), $back, 'report', '[Listing not found]' );
+		aw_form_fail( $form, array(), array(), $back, 'report', 'This listing could not be found.' );
 	}
 	$v = array(
 		'reason'  => sanitize_key( wp_unslash( $_POST['reason'] ?? '' ) ),
 		'details' => sanitize_textarea_field( wp_unslash( $_POST['details'] ?? '' ) ),
 	);
-	$errors = aw_form_validate( array( 'reason' => array( 'required' ), 'details' => array( 'max:1000' ) ), $v, array( 'reason' => '[What is wrong?]', 'details' => '[Details]' ) );
+	$errors = aw_form_validate( array( 'reason' => array( 'required' ), 'details' => array( 'max:1000' ) ), $v, array( 'reason' => 'What is wrong?', 'details' => 'Details' ) );
 	if ( $v['reason'] && ! isset( aw_report_reasons()[ $v['reason'] ] ) ) {
-		$errors['reason'] = '[What is wrong?]: [choose one of the options]';
+		$errors['reason'] = 'What is wrong?: choose one of the options.';
 	}
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'report' );
 	}
 	$id = wp_insert_post( array( 'post_type' => 'aw_report', 'post_status' => 'private', 'post_title' => $listing->post_title ), true );
 	if ( is_wp_error( $id ) ) {
-		aw_form_fail( $form, array(), $v, $back, 'report', '[Could not save, try again]' );
+		aw_form_fail( $form, array(), $v, $back, 'report', 'Your report could not be saved. Please try again.' );
 	}
 	update_post_meta( $id, 'aw_r_listing', $listing->ID );
 	update_post_meta( $id, 'aw_r_reason', $v['reason'] );
