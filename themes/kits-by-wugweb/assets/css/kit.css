@@ -120,6 +120,12 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	animation: kit-spin 700ms linear infinite;
 }
 
+/* 4.1b Button sizes and outline (moved with the button component) */
+.aw-btn, .kit-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2); min-height: var(--kit-size-control); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); border: 2px solid var(--kit-color-accent); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-base); text-decoration: none; box-shadow: var(--kit-elevation-1); }
+.aw-btn--lg, .kit-btn--lg { min-height: 52px; padding: 0 var(--kit-space-6); }
+.aw-btn--sm, .kit-btn--sm { min-height: 40px; padding: 0 var(--kit-space-4); font-size: var(--kit-type-sm); }
+.aw-btn--outline, .kit-btn--outline { background: var(--kit-color-raised); border-color: var(--kit-color-ink); color: var(--kit-color-ink); }
+
 /* 4.2 Card — one component for news, legal, research, guide, opportunity, listing, resource.
    Anatomy: media (flush top) / chips / title (h3 style) / excerpt / date. Surface: raised + border + elevation-1.
    States: hover & focus-within (lift + elevation-2 + media zoom), empty (query no-results). */

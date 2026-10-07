@@ -11,10 +11,6 @@
 .aw-hero-title { margin: 0 0 var(--aw-space-4); }
 .aw-hero-lead { font-size: var(--aw-type-lead); line-height: 1.5; color: var(--aw-color-muted); margin: 0 0 var(--aw-space-6); max-width: 46ch; }
 .aw-hero-actions { display: flex; flex-wrap: wrap; gap: var(--aw-space-3); margin-bottom: var(--aw-space-6); }
-.aw-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--aw-space-2); min-height: var(--aw-size-control); padding: 0 var(--aw-space-5); border-radius: var(--aw-radius-pill); border: 2px solid var(--aw-color-accent); background: var(--aw-color-accent); color: var(--aw-color-on-accent); font-weight: var(--aw-weight-strong); font-size: var(--aw-type-base); text-decoration: none; box-shadow: var(--aw-elevation-1); }
-.aw-btn--lg { min-height: 52px; padding: 0 var(--aw-space-6); }
-.aw-btn--sm { min-height: 40px; padding: 0 var(--aw-space-4); font-size: var(--aw-type-sm); }
-.aw-btn--outline { background: var(--aw-color-raised); border-color: var(--aw-color-ink); color: var(--aw-color-ink); }
 .aw-quick { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--aw-space-2); }
 .aw-quick li { max-width: none; }
 .aw-quick a { display: inline-flex; align-items: center; gap: var(--aw-space-2); min-height: var(--aw-size-target); padding: 0 var(--aw-space-4) 0 var(--aw-space-3); border-radius: var(--aw-radius-pill); background: var(--aw-color-raised); border: 1px solid var(--aw-color-line); box-shadow: var(--aw-elevation-1); color: var(--aw-color-ink); font-size: var(--aw-type-sm); font-weight: var(--aw-weight-strong); text-decoration: none; transition: transform var(--aw-motion-base) var(--aw-motion-ease), box-shadow var(--aw-motion-base) var(--aw-motion-ease); }
