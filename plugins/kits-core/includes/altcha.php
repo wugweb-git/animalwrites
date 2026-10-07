@@ -102,14 +102,26 @@ add_action(
 	0
 );
 
-/** Widget markup for a form; the script loads only on pages that have one. */
+/**
+ * Widget markup for a form. The script (67 KB) loads only when someone starts using a form on the page, so pages
+ * with a form in the footer stay light.
+ */
 function kits_altcha_widget() {
 	static $done = false;
 	if ( ! $done ) {
 		$done = true;
-		wp_enqueue_script( 'kits-altcha', home_url( '/?kits_altcha_js=1' ), array(), '2.3.0', array( 'in_footer' => true, 'strategy' => 'defer' ) );
-		// Sit just above the form's send button rather than at the top of the form.
-		wp_add_inline_script( 'kits-altcha', "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.aw-captcha').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});});", 'before' );
+		$src  = add_query_arg( array( 'kits_altcha_js' => 1, 'ver' => '2.3.0' ), home_url( '/' ) );
+		add_action(
+			'wp_footer',
+			function () use ( $src ) {
+				// Sit just above the form's send button; load the widget on first touch of any form that has one.
+				echo "<script>(function(){function place(){document.querySelectorAll('.aw-captcha').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});}"
+					. "var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.src=" . wp_json_encode( $src ) . ";s.defer=true;document.head.appendChild(s);}"
+					. "if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',place);}else{place();}"
+					. "['focusin','pointerdown'].forEach(function(ev){document.addEventListener(ev,function(e){var f=e.target.closest&&e.target.closest('form');if(f&&f.querySelector('.aw-captcha'))load();},{passive:true});});})();</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+			},
+			20
+		);
 	}
-	return '<div class="aw-captcha"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" auto="onfocus" hidefooter hidelogo></altcha-widget></div>';
+	return '<div class="aw-captcha"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" hidefooter hidelogo></altcha-widget></div>';
 }

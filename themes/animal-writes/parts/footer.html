@@ -1,5 +1,13 @@
 <!-- wp:group {"align":"full","className":"aw-dark aw-site-footer","backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull aw-dark aw-site-footer has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:html -->
+<div class="wp-block-group alignfull aw-dark aw-site-footer has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:group {"anchor":"newsletter","className":"aw-footer-newsletter","layout":{"type":"constrained"}} -->
+<div id="newsletter" class="wp-block-group aw-footer-newsletter"><!-- wp:heading {"level":2,"className":"aw-footer-head"} -->
+<h2 class="wp-block-heading aw-footer-head">Newsletter</h2>
+<!-- /wp:heading -->
+<!-- wp:shortcode -->
+[aw_newsletter]
+<!-- /wp:shortcode --></div>
+<!-- /wp:group -->
+<!-- wp:html -->
 <div class="aw-footer-grid">
 	<div class="aw-footer-brand">
 		<a class="aw-wordmark" href="/" aria-label="Animal Writes home"><img src="/wp-content/themes/animal-writes/assets/wordmark-light.svg" alt="Animal Writes" width="170" height="55"></a>

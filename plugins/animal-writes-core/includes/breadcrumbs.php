@@ -62,6 +62,8 @@ function aw_breadcrumbs() {
 		if ( $type && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
 			$trail[] = array( $type->name, aw_directory_url( $city->slug, $type->slug ) );
 		}
+	} elseif ( get_query_var( 'aw_acts' ) ) {
+		$trail = array( array( 'Legal Watch', get_post_type_archive_link( 'aw_legal' ) ), array( 'Acts & Rules', home_url( '/legal-watch/acts-and-rules/' ) ) );
 	} elseif ( is_tax( 'aw_topic' ) ) {
 		$trail = array( array( 'Topics', home_url( '/topics/' ) ), array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) );
 	}

@@ -118,7 +118,7 @@ add_shortcode( 'aw_newsletter', 'aw_newsletter_form' );
 
 function aw_newsletter_submit() {
 	$form = 'aw_newsletter';
-	$back = aw_form_back( '/get-involved/' );
+	$back = aw_form_back( '/' );
 	$done = add_query_arg( 'aw_done', 'nl_check', $back ) . '#newsletter';
 	$rl   = aw_form_guard( $form, $back, 'newsletter', $done );
 	$v    = array(
@@ -172,7 +172,7 @@ add_action(
 			$note = 'nl_unsub';
 		}
 		nocache_headers();
-		wp_safe_redirect( add_query_arg( 'aw_done', $note, home_url( '/get-involved/' ) ) . '#newsletter' );
+		wp_safe_redirect( add_query_arg( 'aw_done', $note, home_url( '/' ) ) . '#newsletter' ); // the sign-up sits in the footer of every page
 		exit;
 	}
 );
