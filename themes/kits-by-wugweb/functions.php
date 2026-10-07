@@ -38,6 +38,17 @@ function kits_enqueue_styles() {
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_styles' );
 
 /**
+ * Kits components and interactions (token-driven; a child theme restyles them by overriding --kit-* tokens).
+ */
+function kits_enqueue_components() {
+	$dir = get_template_directory();
+	$uri = get_template_directory_uri();
+	wp_enqueue_style( 'kit-components', $uri . '/assets/css/kit.css', array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/assets/css/kit.css' ) );
+	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array(), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+}
+add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
+
+/**
  * Pattern category for all Kits patterns.
  */
 function kits_pattern_categories() {
