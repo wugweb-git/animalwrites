@@ -10,6 +10,12 @@ NEW="$DIR/animal-writes-1.0-volunteers.json.gpg"
 TOOL="$(cd "$(dirname "$0")" && pwd)/aw1_archive.py"
 HOST="ssh -i $HOME/.ssh/hostinger_aw -p 65002 u544169507@46.28.45.135"
 
+echo "0/4  Opening the archive (gpg asks for the archive passphrase)"
+if ! OPEN=$(gpg --quiet -d "$OLD" | python3 "$TOOL" count 2>&1 >/dev/null); then
+  echo "STOP: the archive did not open (wrong passphrase?). Nothing was changed. Run the script again."; exit 1
+fi
+echo "     $OPEN"
+
 echo "1/4  Importing 1.0 volunteers into animalwrites.in (counts only)"
 gpg --quiet -d "$OLD" | python3 "$TOOL" volunteers | $HOST 'cd ~/domains/animalwrites.in/public_html && wp aw-volunteers import --source=v1_campaign'
 
