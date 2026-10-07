@@ -24,6 +24,10 @@ add_action( 'after_setup_theme', 'kits_setup' );
  * Front-end styles that theme.json cannot express.
  */
 function kits_enqueue_styles() {
+	$dir = get_template_directory();
+	$uri = get_template_directory_uri();
+	// Design tokens (--kit-*): neutral defaults; a child theme overrides them with its own token file.
+	wp_enqueue_style( 'kit-tokens', $uri . '/assets/css/kit-tokens.css', array( 'global-styles' ), (string) filemtime( $dir . '/assets/css/kit-tokens.css' ) );
 	wp_enqueue_style(
 		'kits',
 		get_template_directory_uri() . '/assets/css/kits.css',

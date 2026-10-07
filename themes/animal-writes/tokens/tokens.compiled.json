@@ -301,9 +301,9 @@
       "lg": "0 20px 48px rgba(20,20,20,.18)"
     },
     "elevation-offset": {
-      "sm": "8px 8px 0 var(--aw-color-accent)",
-      "md": "14px 14px 0 var(--aw-color-accent)",
-      "lg": "14px 14px 0 var(--aw-color-accent)"
+      "sm": "8px 8px 0 var(--kit-color-accent)",
+      "md": "14px 14px 0 var(--kit-color-accent)",
+      "lg": "14px 14px 0 var(--kit-color-accent)"
     },
     "motion-fast": {
       "sm": "120ms",
