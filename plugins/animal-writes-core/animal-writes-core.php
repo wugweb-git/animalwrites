@@ -25,11 +25,9 @@ if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 	define( 'AW_REVERIFY_DAYS', 180 );
 }
 
-// Real cron: WordPress's scheduled tasks are run every 15 minutes by the "WordPress cron" workflow in
-// animal-writes-workers (calls wp-cron.php), so page views no longer trigger them.
-if ( ! defined( 'DISABLE_WP_CRON' ) ) {
-	define( 'DISABLE_WP_CRON', true );
-}
+// Cron: WordPress runs its scheduled tasks on page requests that reach PHP. The "WordPress cron" workflow in
+// animal-writes-workers also calls wp-cron.php as a backup; GitHub throttles that schedule, so it can't be the only
+// trigger (on 2026-10-07 it fired once in 6 hours).
 
 // Kits Core (shared site features). Loaded from the sibling plugin folder when it is not active on its own.
 if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php' ) ) {
