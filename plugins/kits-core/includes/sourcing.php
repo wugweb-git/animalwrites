@@ -10,11 +10,22 @@
  * - The workers read the same policy from GET /wp-json/aw/v1/sourcing-policy before each run, so blocked or
  *   irrelevant items are skipped before they are summarised; the endpoint enforces it again on arrival.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/** Post types fed by sources (news-like). Sites set them with the kits_sourced_post_types filter. */
+function kits_sourced_types() {
+	return (array) apply_filters( 'kits_sourced_post_types', array( 'post' ) );
+}
+
+/** The post type whose admin menu holds the Sourcing screen (the first sourced type). */
+function kits_sourcing_menu_type() {
+	$t = kits_sourced_types();
+	return (string) reset( $t );
 }
 
 const AW_PUB_OPTION = 'aw_publishers';
@@ -66,7 +77,7 @@ add_action(
 		}
 		// Hosts already in the content, with their counts.
 		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('aw_news','aw_legal')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', kits_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( $rows as $r ) {
 			$h = aw_host( $r->url );
 			if ( ! $h ) {
@@ -216,7 +227,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'edit.php?post_type=aw_news', 'Sourcing', 'Sourcing', AW_SRC_CAP, 'aw-sourcing', 'aw_sourcing_page' );
+		add_submenu_page( 'edit.php?post_type=' . kits_sourcing_menu_type(), 'Sourcing', 'Sourcing', AW_SRC_CAP, 'aw-sourcing', 'aw_sourcing_page' );
 	}
 );
 
@@ -255,7 +266,7 @@ add_action(
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
 		}
-		wp_safe_redirect( add_query_arg( array( 'post_type' => 'aw_news', 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'edit.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'post_type' => kits_sourcing_menu_type(), 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'edit.php' ) ) );
 		exit;
 	}
 );
@@ -276,36 +287,42 @@ add_action(
 	}
 );
 
-foreach ( array( 'aw_news', 'aw_legal' ) as $aw_pt ) {
-	add_filter(
-		"manage_{$aw_pt}_posts_columns",
-		function ( $cols ) {
-			$cols['aw_publisher'] = 'Publisher';
-			return $cols;
+// Publisher column on the sourced types' admin lists (registered once the site's filters are in place).
+add_action(
+	'admin_init',
+	function () {
+		foreach ( kits_sourced_types() as $aw_pt ) {
+			add_filter(
+				"manage_{$aw_pt}_posts_columns",
+				function ( $cols ) {
+					$cols['aw_publisher'] = 'Publisher';
+					return $cols;
+				}
+			);
+			add_action(
+				"manage_{$aw_pt}_posts_custom_column",
+				function ( $col, $id ) {
+					if ( 'aw_publisher' !== $col ) {
+						return;
+					}
+					$host = aw_host( get_post_meta( $id, 'aw_source_url', true ) );
+					if ( ! $host ) {
+						return;
+					}
+					$st = aw_publishers()[ $host ]['status'] ?? 'neutral';
+					echo esc_html( $host ) . ' <span class="aw-pub-st aw-pub-st--' . esc_attr( $st ) . '">' . esc_html( ucfirst( $st ) ) . '</span>';
+				},
+				10,
+				2
+			);
 		}
-	);
-	add_action(
-		"manage_{$aw_pt}_posts_custom_column",
-		function ( $col, $id ) {
-			if ( 'aw_publisher' !== $col ) {
-				return;
-			}
-			$host = aw_host( get_post_meta( $id, 'aw_source_url', true ) );
-			if ( ! $host ) {
-				return;
-			}
-			$st = aw_publishers()[ $host ]['status'] ?? 'neutral';
-			echo esc_html( $host ) . ' <span class="aw-pub-st aw-pub-st--' . esc_attr( $st ) . '">' . esc_html( ucfirst( $st ) ) . '</span>';
-		},
-		10,
-		2
-	);
-}
+	}
+);
 
 add_filter(
 	'post_row_actions',
 	function ( $actions, $post ) {
-		if ( ! in_array( $post->post_type, array( 'aw_news', 'aw_legal' ), true ) || ! current_user_can( AW_SRC_CAP ) ) {
+		if ( ! in_array( $post->post_type, kits_sourced_types(), true ) || ! current_user_can( AW_SRC_CAP ) ) {
 			return $actions;
 		}
 		$host = aw_host( get_post_meta( $post->ID, 'aw_source_url', true ) );
@@ -323,7 +340,7 @@ add_action(
 	'admin_notices',
 	function () {
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'edit.php?post_type=aw_news&page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'edit.php?post_type=' . kits_sourcing_menu_type() . '&page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
 	}
 );
@@ -341,7 +358,7 @@ function aw_sourcing_page() {
 		return;
 	}
 	$tab  = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base = admin_url( 'edit.php?post_type=aw_news&page=aw-sourcing' );
+	$base = admin_url( 'edit.php?post_type=' . kits_sourcing_menu_type() . '&page=aw-sourcing' );
 	echo '<div class="wrap"><h1>Sourcing</h1>';
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';

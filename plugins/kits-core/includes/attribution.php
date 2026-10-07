@@ -8,7 +8,7 @@
  * - Favicons fetched once per publisher host into the media library by a cron job; letter fallback until then.
  * - News and legal slugs never end with the publisher (e.g. -bollyspice-com); old URLs 301 via WordPress's old-slug redirect.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -116,7 +116,7 @@ add_filter(
 	'render_block_core/post-date',
 	function ( $html, $block, $instance ) {
 		$id = (int) ( $instance->context['postId'] ?? 0 );
-		if ( ! $id || 'aw_news' !== get_post_type( $id ) || ( is_singular() && get_queried_object_id() === $id ) ) {
+		if ( ! $id || kits_sourcing_menu_type() !== get_post_type( $id ) || ( is_singular() && get_queried_object_id() === $id ) ) {
 			return $html;
 		}
 		return '<div class="wp-block-post-date aw-card-time">' . aw_rel_time_html( $id ) . '</div>';
@@ -218,7 +218,7 @@ function aw_clean_news_slug( $slug, $id ) {
 add_filter(
 	'wp_insert_post_data',
 	function ( $data, $postarr ) {
-		if ( ! in_array( $data['post_type'], array( 'aw_news', 'aw_legal' ), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
+		if ( ! in_array( $data['post_type'], kits_sourced_types(), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
 			return $data;
 		}
 		$clean = aw_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
