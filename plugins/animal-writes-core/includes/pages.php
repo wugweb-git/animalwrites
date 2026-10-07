@@ -195,3 +195,22 @@ add_filter(
 	},
 	20
 );
+
+/* ---------- Footer topics list ---------- */
+
+add_shortcode(
+	'aw_topics_list',
+	function () {
+		$terms = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'orderby' => 'name' ) );
+		if ( ! $terms || is_wp_error( $terms ) ) {
+			return '';
+		}
+		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li><a href="' . esc_url( get_term_link( $t ) ) . '">' . esc_html( $t->name ) . '</a></li>', $terms ) ) . '</ul>';
+	}
+);
+
+// Template parts keep their links in HTML blocks; let those carry our shortcodes too.
+add_filter(
+	'render_block_core/html',
+	fn( $html ) => false !== strpos( $html, '[aw_' ) ? do_shortcode( $html ) : $html
+);

@@ -376,7 +376,8 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 /* Footer: brand + two link columns, then a bar with legal links and the Wugweb credit */
 .aw-site-footer ,.kit-site-footer { padding-block: var(--kit-space-8) var(--kit-space-5) !important; }
 .aw-footer-grid ,.kit-footer-grid { display: grid; gap: var(--kit-space-7); grid-template-columns: 1fr; }
-@media (min-width: 768px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.4fr 1.6fr 1fr; } }
+@media (min-width: 768px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.3fr 1fr 1fr 1.6fr; } }
 .aw-footer-brand p ,.kit-footer-brand p { margin: var(--kit-space-4) 0; color: rgba(255,255,255,.75); font-size: var(--kit-type-sm); max-width: 32ch; }
 .aw-footer-mail ,.kit-footer-mail { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-medium); font-size: var(--kit-type-sm); }
 .aw-socials ,.kit-socials { display: flex; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
@@ -421,7 +422,19 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content ,.kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content { color: var(--kit-color-ink) !important; padding: var(--kit-space-2) var(--kit-space-3) !important; border-radius: var(--kit-radius-control); font-size: var(--kit-type-sm); }
 .aw-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover ,.kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover { background: var(--kit-color-canvas); }
 .aw-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content::after ,.kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content::after { display: none; }
-@media (max-width: 599px) { .aw-header-cta ,.kit-header-cta { display: none; } }
+@media (max-width: 599px) { .aw-header-cta:not(.aw-header-emergency) ,.kit-header-cta:not(.kit-header-emergency) { display: none; } }
+/* Header utility: Search and Emergency, always visible */
+.aw-header-utility ,.kit-header-utility { display: flex; align-items: center; gap: var(--kit-space-3); }
+.aw-header-search ,.kit-header-search { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); min-width: var(--kit-size-target); justify-content: center; color: var(--kit-color-on-ink); text-decoration: none; font-size: var(--kit-type-sm); }
+.aw-header-search:hover ,.kit-header-search:hover { text-decoration: underline; text-underline-offset: 4px; }
+.aw-header-search:focus-visible, .aw-header-emergency:focus-visible ,.kit-header-search:focus-visible, .kit-header-emergency:focus-visible { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
+@media (max-width: 599px) { .aw-header-search-label ,.kit-header-search-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
+/* Secondary menu item ("For organisations"): set apart from the primary items */
+.kit-menu-secondary > .wp-block-navigation-item__content { opacity: .8; }
+@media (min-width: 600px) { .kit-menu-secondary { margin-inline-start: var(--kit-space-3); padding-inline-start: var(--kit-space-4); border-inline-start: 1px solid rgba(255,255,255,.25); } }
+/* Footer topics: two compact columns */
+.aw-footer-topics .aw-footer-list ,.kit-footer-topics .kit-footer-list { columns: 2; column-gap: var(--kit-space-5); }
+.aw-footer-head a ,.kit-footer-head a { color: inherit; text-decoration: none; }
 
 /* Carousel (card rows on small screens) — controls added by aw.js */
 @media (max-width: 767px) {

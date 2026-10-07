@@ -171,3 +171,19 @@
 		});
 	});
 })();
+
+/* Menu clicks: one analytics event per click on a header, menu or footer link (GA4 through gtag, or GTM's dataLayer). */
+(function () {
+	document.addEventListener('click', function (e) {
+		var a = e.target.closest && e.target.closest('a[href]');
+		if (!a) return;
+		var zone = a.closest('[data-menu]');
+		var area = zone ? zone.getAttribute('data-menu')
+			: a.closest('.kit-menu-secondary') ? 'secondary'
+			: a.closest('.wp-block-navigation') && a.closest('header, .aw-site-header, .kit-site-header') ? 'primary' : '';
+		if (!area) return;
+		var data = { menu_area: area, link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 100), link_url: a.getAttribute('href') };
+		if (typeof window.gtag === 'function') window.gtag('event', 'menu_click', data);
+		else (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'menu_click' }, data));
+	}, { capture: true });
+})();
