@@ -86,6 +86,11 @@ add_shortcode(
 				$tiles .= aw_section_tile( $p );
 			}
 		}
+		// A category page leads with its own photo (set on the category screen in WP Admin).
+		$cat_img = ( is_tax() && function_exists( 'aw_topic_image_id' ) ) ? aw_topic_image_id( get_queried_object() ) : 0;
+		if ( $cat_img ) {
+			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="aw-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
+		}
 		$visual = $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
 		if ( 'aw_listing' === $type && is_post_type_archive( 'aw_listing' ) && ! get_query_var( 'aw_city' ) && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			// Directory home: the states with the most organisations, set as type. Real counts, no map.

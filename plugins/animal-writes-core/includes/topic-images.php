@@ -1,6 +1,8 @@
 <?php
 /**
- * Topic photos, set in WP Admin: News → Topics → edit a topic → "Topic photo" (pick or upload from the media library).
+ * Category photos, set in WP Admin on each category screen (Topics, Listing types, Opportunity types): add or edit
+ * a category's name, slug, write-up (Description) and photo (pick or upload from the media library).
+ * Topic photos are also used on news and Legal Watch items in that topic.
  * News and Legal Watch items show their topic's photo (see aw_item_image() in media.php). Stored as term meta
  * `aw_topic_image` (attachment ID). The general photos for items without a topic stay in the option aw_topic_images['default'].
  *
@@ -11,9 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Attachment ID of a topic's photo (term meta; older option mapping as fallback). */
+/** Category screens that get the photo field. */
+const AW_PHOTO_TAXONOMIES = array( 'aw_topic', 'aw_listing_type', 'aw_opportunity_type' );
+
+/** Attachment ID of a category's photo (term meta; for topics, the older option mapping as fallback). */
 function aw_topic_image_id( $term ) {
-	$term = is_object( $term ) ? $term : get_term( $term, 'aw_topic' );
+	$term = is_object( $term ) ? $term : get_term( $term );
 	if ( ! $term || is_wp_error( $term ) ) {
 		return 0;
 	}
@@ -33,26 +38,32 @@ function aw_topic_image_field( $id ) {
 	echo '<p><img src="' . esc_url( (string) $src ) . '" alt="" style="max-width:300px;height:auto;' . ( $src ? '' : 'display:none' ) . '"></p>';
 	echo '<p><button type="button" class="button aw-topic-image-pick">Choose photo</button> ';
 	echo '<button type="button" class="button-link-delete aw-topic-image-clear"' . ( $src ? '' : ' style="display:none"' ) . '>Remove</button></p>';
-	echo '<p class="description">Shown on news and Legal Watch items in this topic. Use a photo you have the rights to (your own, or openly licensed). Landscape, at least 1200 px wide.</p>';
+	echo '<p class="description">Shown at the top of this category\'s page (and, for topics, on news and Legal Watch items in it). Use a photo you have the rights to (your own, or openly licensed). Landscape, at least 1200 px wide.</p>';
 	echo '</div>';
 }
 
-add_action(
-	'aw_topic_add_form_fields',
-	function () {
-		echo '<div class="form-field"><label>Topic photo</label>';
-		aw_topic_image_field( 0 );
-		echo '</div>';
-	}
-);
-add_action(
-	'aw_topic_edit_form_fields',
-	function ( $term ) {
-		echo '<tr class="form-field"><th scope="row"><label>Topic photo</label></th><td>';
-		aw_topic_image_field( aw_topic_image_id( $term ) );
-		echo '</td></tr>';
-	}
-);
+foreach ( AW_PHOTO_TAXONOMIES as $aw_tx ) {
+	add_action(
+		"{$aw_tx}_add_form_fields",
+		function () {
+			echo '<div class="form-field"><label>Photo</label>';
+			aw_topic_image_field( 0 );
+			echo '</div>';
+		}
+	);
+	add_action(
+		"{$aw_tx}_edit_form_fields",
+		function ( $term ) {
+			echo '<tr class="form-field"><th scope="row"><label>Photo</label></th><td>';
+			aw_topic_image_field( aw_topic_image_id( $term ) );
+			echo '</td></tr>';
+		}
+	);
+	add_action( "created_{$aw_tx}", 'aw_topic_image_save' );
+	add_action( "edited_{$aw_tx}", 'aw_topic_image_save' );
+	add_filter( "manage_edit-{$aw_tx}_columns", fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_topic_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
+	add_filter( "manage_{$aw_tx}_custom_column", 'aw_topic_image_column', 10, 3 );
+}
 
 /** Save the field (term edit screens only; WordPress checks the term nonce before these hooks run). */
 function aw_topic_image_save( $term_id ) {
@@ -65,19 +76,19 @@ function aw_topic_image_save( $term_id ) {
 	} else {
 		delete_term_meta( $term_id, 'aw_topic_image' );
 	}
-	$map  = (array) get_option( 'aw_topic_images', array() ); // keep the fallback mapping in step
-	$slug = get_term( $term_id, 'aw_topic' )->slug;
-	unset( $map[ $slug ] );
-	update_option( 'aw_topic_images', $map, false );
+	$term = get_term( $term_id );
+	if ( $term && 'aw_topic' === $term->taxonomy ) {
+		$map = (array) get_option( 'aw_topic_images', array() ); // keep the fallback mapping in step
+		unset( $map[ $term->slug ] );
+		update_option( 'aw_topic_images', $map, false );
+	}
 }
-add_action( 'created_aw_topic', 'aw_topic_image_save' );
-add_action( 'edited_aw_topic', 'aw_topic_image_save' );
 
 // Media picker script on the Topics screens.
 add_action(
 	'admin_enqueue_scripts',
 	function ( $hook ) {
-		if ( ! in_array( $hook, array( 'edit-tags.php', 'term.php' ), true ) || 'aw_topic' !== ( $_GET['taxonomy'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! in_array( $hook, array( 'edit-tags.php', 'term.php' ), true ) || ! in_array( $_GET['taxonomy'] ?? '', AW_PHOTO_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 		wp_enqueue_media();
@@ -86,7 +97,7 @@ add_action(
 			"jQuery(function($){
 				$(document).on('click','.aw-topic-image-pick',function(e){
 					e.preventDefault(); var box=$(this).closest('.aw-topic-image');
-					var frame=wp.media({title:'Topic photo',button:{text:'Use this photo'},library:{type:'image'},multiple:false});
+					var frame=wp.media({title:'Category photo',button:{text:'Use this photo'},library:{type:'image'},multiple:false});
 					frame.on('select',function(){ var a=frame.state().get('selection').first().toJSON();
 						box.find('input').val(a.id); box.find('img').attr('src',(a.sizes&&a.sizes.medium?a.sizes.medium.url:a.url)).show(); box.find('.aw-topic-image-clear').show(); });
 					frame.open();
@@ -98,17 +109,11 @@ add_action(
 	}
 );
 
-// Topics list: a thumbnail column.
-add_filter( 'manage_edit-aw_topic_columns', fn( $c ) => array_slice( $c, 0, 1, true ) + array( 'aw_topic_image' => 'Photo' ) + array_slice( $c, 1, null, true ) );
-add_filter(
-	'manage_aw_topic_custom_column',
-	function ( $out, $col, $term_id ) {
-		if ( 'aw_topic_image' !== $col ) {
-			return $out;
-		}
-		$id = aw_topic_image_id( $term_id );
-		return $id ? wp_get_attachment_image( $id, array( 60, 34 ) ) : '—';
-	},
-	10,
-	3
-);
+/** Thumbnail column on the category lists. */
+function aw_topic_image_column( $out, $col, $term_id ) {
+	if ( 'aw_topic_image' !== $col ) {
+		return $out;
+	}
+	$id = aw_topic_image_id( $term_id );
+	return $id ? wp_get_attachment_image( $id, array( 60, 34 ) ) : '—';
+}
