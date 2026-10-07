@@ -1,6 +1,15 @@
 # Promotion plan: Animal Writes child → Kits master (`kits-by-wugweb`)
 
-Status: **proposal, nothing moved.** Approve or edit the "Move" column; each row is moved separately and tested on animalwrites.in before the next.
+Status: **approved 2026-10-07; steps 1, 2, 3 and 5 done** (step 4, attribution + sourcing into Kits Core, remains optional).
+Every step was checked against a baseline of computed styles and boxes for every visible element on 18 pages at 1280px and 375px:
+identical except the live visit counter. SEO/GTM head output byte-identical after step 3.
+
+Where things are now:
+- Kits theme: `tools/build-tokens.py` (engine), `tokens/tokens.json` (neutral defaults) → `assets/css/kit-tokens.css` (`--kit-*`);
+  `assets/css/kit.css` (components, chrome, motion, print, editorial building blocks; every rule answers to `.kit-*` and `.aw-*`);
+  `assets/js/kit.js` (interactions); header/footer parts and patterns `three-big-actions`, `lead-list` with placeholder text.
+- Kits Core plugin (`plugins/kits-core`): forms, share, SEO, GTM, ads + ads.txt, visit counter, configured by `kits_*` filters.
+- Animal Writes: brand token values, domain CSS (`aw.css`, 1081 → about 480 lines), district filter JS, `includes/kits-config.php`.
 
 ## Principle
 

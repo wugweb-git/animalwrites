@@ -1,11 +1,17 @@
-<!-- wp:group {"tagName":"header","align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}},"border":{"bottom":{"color":"var:preset|color|border","width":"1px"}}},"layout":{"type":"constrained","contentSize":"1200px"}} -->
-<header class="wp-block-group alignfull" style="border-bottom-color:var(--wp--preset--color--border);border-bottom-width:1px;padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+<!-- wp:group {"align":"full","className":"kit-dark kit-site-header","backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<div class="wp-block-group alignfull kit-dark kit-site-header has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 <div class="wp-block-group"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 <div class="wp-block-group"><!-- wp:site-logo {"width":40} /-->
 
-<!-- wp:site-title {"level":0,"style":{"typography":{"fontWeight":"600"}},"fontSize":"large"} /--></div>
+<!-- wp:site-title {"level":0,"style":{"typography":{"fontWeight":"700"}}} /--></div>
 <!-- /wp:group -->
 
-<!-- wp:navigation {"overlayMenu":"mobile","layout":{"type":"flex","justifyContent":"right"}} /--></div>
-<!-- /wp:group --></header>
+<!-- wp:group {"className":"kit-header-right","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group kit-header-right"><!-- wp:navigation {"textColor":"background","overlayBackgroundColor":"secondary","overlayTextColor":"background","overlayMenu":"mobile","showSubmenuIcon":true,"layout":{"type":"flex","justifyContent":"right"},"fontSize":"small"} /-->
+
+<!-- wp:html -->
+<a class="kit-btn kit-btn--sm kit-header-cta" href="#">[Primary action]</a>
+<!-- /wp:html --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
