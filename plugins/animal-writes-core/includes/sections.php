@@ -51,8 +51,8 @@ add_shortcode(
 		$title = is_tax() ? single_term_title( '', false ) : post_type_archive_title( '', false );
 		if ( 'aw_listing' === $type && ( get_query_var( 'aw_city' ) || get_query_var( 'aw_listing_type' ) ) ) {
 			$city  = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
-			$ltype = get_query_var( 'aw_listing_type' ) ? get_term_by( 'slug', get_query_var( 'aw_listing_type' ), 'aw_listing_type' ) : null;
-			$title = $ltype ? ( $city ? $ltype->name . ' in ' . $city->name : $ltype->name ) : 'Help in ' . ( $city ? $city->name : '' );
+			$tname = function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '';
+			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
 		if ( is_tax( 'aw_city' ) ) {

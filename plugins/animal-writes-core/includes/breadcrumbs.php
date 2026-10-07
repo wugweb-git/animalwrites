@@ -58,9 +58,9 @@ function aw_breadcrumbs() {
 	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && get_query_var( 'aw_city' ) ) {
 		$city  = get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' );
 		$trail = array_merge( array( $dir ), $place( $city ) );
-		$type  = get_query_var( 'aw_listing_type' ) ? get_term_by( 'slug', (string) get_query_var( 'aw_listing_type' ), 'aw_listing_type' ) : null;
-		if ( $type && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
-			$trail[] = array( $type->name, aw_directory_url( $city->slug, $type->slug ) );
+		$tslug = (string) get_query_var( 'aw_type_slug' );
+		if ( $tslug && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
+			$trail[] = array( aw_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
 		}
 	} elseif ( get_query_var( 'aw_acts' ) ) {
 		$trail = array( array( 'Legal Watch', get_post_type_archive_link( 'aw_legal' ) ), array( 'Acts & Rules', home_url( '/legal-watch/acts-and-rules/' ) ) );

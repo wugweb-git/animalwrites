@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function aw_directory_rewrites() {
 	add_rewrite_tag( '%aw_dir%', '(.+?)' );
+	add_rewrite_tag( '%aw_type_slug%', '([^/]+)' );
 	add_rewrite_rule( '^directory/(?!org/|page/|feed/)(.+?)/?$', 'index.php?aw_dir=$matches[1]', 'top' );
 }
 add_action( 'init', 'aw_directory_rewrites', 20 );
@@ -30,6 +31,37 @@ function aw_dir_place( $slug ) {
 		$cache[ $slug ] = $t && ! is_wp_error( $t ) ? $t : null;
 	}
 	return $cache[ $slug ];
+}
+
+/** "Veterinary" is one filter for people; the listings keep their separate veterinary types. */
+const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office', 'bird-hospital' );
+
+/** A listing-type slug from a URL or filter: a real type, or "veterinary". */
+function aw_listing_type_ok( $slug ) {
+	return 'veterinary' === $slug || (bool) get_term_by( 'slug', $slug, 'aw_listing_type' );
+}
+
+/** What to query for a type slug: the type itself, or every veterinary type. */
+function aw_listing_type_query( $slug ) {
+	return 'veterinary' === $slug ? implode( ',', AW_VET_TYPES ) : $slug;
+}
+
+/** Display name of a type slug. */
+function aw_listing_type_name( $slug ) {
+	if ( 'veterinary' === $slug ) {
+		return 'Veterinary';
+	}
+	$t = get_term_by( 'slug', $slug, 'aw_listing_type' );
+	return $t ? $t->name : '';
+}
+
+/** Name of the listing type the current directory page shows, if any. */
+function aw_current_type_name() {
+	$slug = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : get_query_var( 'aw_listing_type' ) );
+	if ( '' === $slug ) {
+		$slug = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	return false !== strpos( $slug, ',' ) ? 'Veterinary' : ( $slug ? aw_listing_type_name( $slug ) : '' );
 }
 
 /** Turn /directory/... into a listing query, or send older URL shapes to the new one. */
@@ -46,7 +78,7 @@ add_filter(
 			$paged = (int) $seg[ $n - 1 ];
 			$seg   = array_slice( $seg, 0, -2 );
 		}
-		$type_ok = fn( $slug ) => (bool) get_term_by( 'slug', $slug, 'aw_listing_type' );
+		$type_ok = 'aw_listing_type_ok';
 		$go      = function ( $url ) use ( $paged ) {
 			if ( $paged > 1 ) {
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
@@ -66,7 +98,7 @@ add_filter(
 			$out['aw_city'] = $a->slug;
 			$type           = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			if ( $type && $type_ok( $type ) ) {
-				$out['aw_listing_type'] = $type; // filtered state list
+				$out['aw_listing_type'] = aw_listing_type_query( $type ); // filtered state list
 			}
 		} elseif ( 2 === count( $seg ) && $a ) {
 			$bp = aw_dir_place( $b );
@@ -83,7 +115,8 @@ add_filter(
 				return array( 'error' => '404' );
 			}
 			$out['aw_city']         = $bp->slug;
-			$out['aw_listing_type'] = $c;
+			$out['aw_listing_type'] = aw_listing_type_query( $c );
+			$out['aw_type_slug']    = $c;
 		} else {
 			return array( 'error' => '404' );
 		}
@@ -165,18 +198,18 @@ function aw_directory_title( $title ) {
 		return $title;
 	}
 	$city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
-	$type = get_query_var( 'aw_listing_type' ) ? get_term_by( 'slug', get_query_var( 'aw_listing_type' ), 'aw_listing_type' ) : null;
+	$tname = aw_current_type_name();
 
-	if ( $city && $type ) {
+	if ( $city && $tname ) {
 		/* translators: 1: listing type, 2: city. */
-		return sprintf( __( '%1$s in %2$s', 'animal-writes-core' ), $type->name, $city->name );
+		return sprintf( __( '%1$s in %2$s', 'animal-writes-core' ), $tname, $city->name );
 	}
 	if ( $city ) {
 		/* translators: %s: city. */
 		return sprintf( __( 'Animal welfare directory: %s', 'animal-writes-core' ), $city->name );
 	}
-	if ( $type ) {
-		return $type->name;
+	if ( $tname ) {
+		return $tname;
 	}
 	return $title;
 }
@@ -231,7 +264,7 @@ add_action(
 		$g     = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
 		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
 		$type  = sanitize_title( $g['type'] ?? '' );
-		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? get_term_link( $type, 'aw_listing_type' ) : get_post_type_archive_link( 'aw_listing' ) );
+		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? ( 'veterinary' === $type ? add_query_arg( 'type', 'veterinary', get_post_type_archive_link( 'aw_listing' ) ) : get_term_link( $type, 'aw_listing_type' ) ) : get_post_type_archive_link( 'aw_listing' ) );
 		$extra = array_filter(
 			array(
 				'q'        => sanitize_text_field( $g['q'] ?? '' ),
@@ -253,6 +286,10 @@ add_action(
 	function ( $q ) {
 		if ( ! aw_is_directory_query( $q ) ) {
 			return;
+		}
+		$gtype = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( $gtype && ! $q->get( 'aw_listing_type' ) && aw_listing_type_ok( $gtype ) ) {
+			$q->set( 'aw_listing_type', aw_listing_type_query( $gtype ) ); // a filtered list; canonical stays the unfiltered page
 		}
 		$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( '' !== $text ) {
@@ -306,9 +343,16 @@ function aw_directory_filter() {
 			$d_opts .= '</optgroup>';
 		}
 	}
-	$t_opts = '<option value="">All types</option>';
-	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
-		$t_opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur_type, $t->slug, false ) . '>' . esc_html( $t->name ) . '</option>';
+	// Types that have listings; the veterinary types are one "Veterinary" choice.
+	$opts = array();
+	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
+		$opts[ in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug ] = in_array( $t->slug, AW_VET_TYPES, true ) ? 'Veterinary' : $t->name;
+	}
+	asort( $opts );
+	$cur_type = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : ( false !== strpos( $cur_type, ',' ) ? 'veterinary' : $cur_type ) );
+	$t_opts   = '<option value="">All types</option>';
+	foreach ( $opts as $slug => $name ) {
+		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $name ) . '</option>';
 	}
 	$active = $cur_city || $cur_type || $text || $verified;
 
