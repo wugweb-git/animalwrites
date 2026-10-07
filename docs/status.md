@@ -36,11 +36,11 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | News & Updates | 18 | NGO announcements, rescue stories and research highlights have no source yet |
 | Legal Watch | 11 | no actual order or judgment documents in the stream (Acts and Rules are in Research) |
 | Research Library | 10 (PCA Act 1960; ABC Rules 2023; Pet Shop 2018; Dog Breeding 2017; Performing Animals 2001; Slaughter House 2001; Transport on Foot 2001; Transport of Animals 1978; SC judgment of 22 Aug 2025; WHO rabies fact sheet) | policy papers, reports, RTIs |
-| Knowledge Centre | 4 guides (injured animal, reporting cruelty, ABC explained, community dogs) | a guide to the laws, adoption, feeding, coexistence, FAQs |
+| Knowledge Centre | 9 guides (injured animal, reporting cruelty, ABC explained, community dogs, the laws in plain words, adoption, feeding, living alongside animals, FAQs) | more topics as needed |
 | Campaign Hub | 1 (1.0 case study + campaign kit) | awareness, adoption, sterilisation drives, fundraisers |
-| Opportunities | 4 (entered by hand) | NGO jobs, internships, fellowships, grants, CSR; no automated sourcing |
-| Resources | 6 (1.0 letter templates) | complaint and RTI templates, adoption agreements, toolkits, printables |
-| Directory | 3,700 | see section 3 |
+| Opportunities | 18 (4 by hand; WWF-India and Wildlife SOS sourced automatically, AWBI notices watched) | grants and CSR calls (NGOBox, DevNetJobs after terms check) |
+| Resources | 8 (1.0 letter templates; police complaint and RTI templates) | adoption agreements, toolkits, printables |
+| Directory | 4,819 | see section 3 |
 
 **Added beyond the PDF:**
 - helplines (112, 1962, AWBI, state boards);
@@ -57,10 +57,10 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 
 | # | Planned | Now |
 |---|---|---|
-| 1 | Coverage: NGOs, shelters, rescue, vets, ambulances, wildlife, feeders | **3,700 listings**: AWBI organisations 3,630 (Gaushala 1,692), ABC centres 64 (29 new from the AWBI ABC list of 29 Jun 2026, 35 AWBI organisations marked), 1962 Mobile Veterinary Units 28 (one per state, DAHD 18 Mar 2025), 13 1.0 supporter NGOs. Shelters, vet hospitals, rescue, wildlife: 0 |
+| 1 | Coverage: NGOs, shelters, rescue, vets, ambulances, wildlife, feeders | **4,819 listings**: AWBI organisations 3,630 (Gaushala 1,692); ABC centres 64; 1962 Mobile Veterinary Units 28; **government district veterinary offices 191** (UP 75, Maharashtra 34, Telangana 33, Karnataka 30, West Bengal 19); **Kerala government veterinary hospitals 191 and dispensaries 737**; 13 1.0 supporter NGOs. Shelters, rescue groups, wildlife rescue: 0 |
 | 2 | Find by city, state, category, services | ✅ state/district pages, filters, search, homepage state finder. ❌ services field empty |
-| 3 | City × type SEO pages | ✅ 823 place × type pages in the sitemap |
-| 4 | Contact details | ⚠️ 28 with a phone number (1962). The AWBI and ABC lists contain no phone, email or website |
+| 3 | City × type SEO pages | ✅ every place × type page with listings is in the sitemap (grows with each import) |
+| 4 | Contact details | ⚠️ **324 with a phone** (official numbers only: 1962 units, district offices, Malappuram institutions), **1,092 with an official email**. The AWBI and ABC lists contain no contacts. Officers' names and personal mobiles are never stored |
 | 5 | Verification status + date | ✅ built; every listing shows "Not yet confirmed" plus its source and list date. 0 verified |
 | 6 | Claim/update workflow | ✅ on every listing, admin-approved. 0 claims |
 | 7 | Contact verification process | ❌ not defined (owner) |
@@ -70,7 +70,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | 11 | Structured data | ✅ NGO or VeterinaryCare on listings, ItemList on directory pages |
 | 12 | Logos and photos | ⚠️ 13 supporter logos only |
 | 13 | Map / near me | ❌ no coordinates |
-| 14 | Seeding from public sources | AWBI list, AWBI ABC list, DAHD 1962. **Not available:** Tamil Nadu vet list (needs a data.gov.in API key); other states (only on state sites, so a per-state import); NGO Darpan (captcha, unclear terms) |
+| 14 | Seeding from public sources | AWBI list, AWBI ABC list, DAHD 1962, five states' district vet offices, Kerala institutions. **Not used:** Haryana (2,900 names, no phones, PDF too irregular to parse reliably); Punjab (2020, personal mobiles); Tamil Nadu (needs a data.gov.in API key); Bihar, MP, Rajasthan, Gujarat, AP (nothing usable published); NGO Darpan (captcha, unclear terms) |
 | 15 | 1.0 supporters' locations | waiting for the next NGO data (they are ordinary NGOs, not partners) |
 | 16 | Homeward mapping | deferred |
 
@@ -80,13 +80,16 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 
 | Module | What comes in | Source | How often | Who |
 |---|---|---|---|---|
-| News | title, source, date, link, image URL, our summary | Google News keyword feeds, The Hindu RSS | every 6 h | workers, then human review |
-| Legal Watch | same, plus PDFs for government notices | AWBI pages, PIB (via Google News), LiveLaw, Bar & Bench, SC Observer | every 6 h | workers, then human review |
+| News | title, source, date, link, image URL, our summary | Google News keyword feeds, The Hindu RSS | every 6 h | workers, then **automatic review** (below) |
+| Legal Watch | same, plus PDFs for government notices | AWBI pages, PIB (via Google News), LiveLaw, Bar & Bench, SC Observer | every 6 h | workers, then **automatic review** |
+| Opportunities | title, organisation, place, deadline, link (factual line, no AI wording) | WWF-India careers, AWBI notifications (workers); Wildlife SOS careers (fetched by the site daily) | every 6 h / daily | published directly |
 | Research | full PDFs | AWBI, SC, WHO | one-off | Claude Code |
 | Directory | name, code, area, type, phone where published | AWBI lists, DAHD | one-off per list | Claude Code (`tools/directory`) |
 | Directory updates | changes | the organisations | on request | claim form + admin |
 | States/districts | 36 + 820 | LGD | one-off | Claude Code |
 | Helplines, guides, campaigns, opportunities, resources | content | government sources, 1.0, by hand | one-off | Claude Code |
+
+**Automatic review (owner's decision, 7 Oct 2026):** a news or legal item goes live when it passes every check: relevance (owner's keyword lists), not a web story/video/gallery, not the same story as one published in the last 7 days, legal items from a legal or government source, a sane summary. Anything else waits in Pending with the reason in the "Review" column; the owner reviews only those.
 
 **Sourcing controls:**
 - **Where:** WP Admin → News → Sourcing.
@@ -131,7 +134,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
   - token engine with neutral defaults;
   - all generic components, states, motion and print rules;
   - header and footer parts, and placeholder patterns.
-- **Kits Core plugin:** forms, share, SEO, ads, visit counter.
+- **Kits Core plugin:** forms, share, SEO, ads, visit counter, source attribution and sourcing controls (Kits step 4, 7 Oct; Animal Writes sets its news and legal types through `kits_sourced_post_types`).
 - **Animal Writes child:** brand token values and domain styles only.
 - **Docs:** `docs/design-system.md` (scales, states, component specs) and `docs/accessibility-audit.md`.
 - **Accessibility:** 0 WCAG 2.1 AA automated failures (20 pages × desktop and phone, 7 Oct). Visual QA found no sideways scrolling, no broken images and no text overflow.
@@ -162,9 +165,6 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 3. Directory business: Featured pricing and a sales process; who verifies a listing, and how.
 4. Anthropic console monthly limit; `noreply@animalwrites.in` mailbox.
 
-**In progress (Claude Code, approved 7 Oct):**
-- Phone numbers: per-state vet hospital lists from state Animal Husbandry sites, larger states first. Availability is reported before import.
-- Thin sections: drafts for the Knowledge Centre (laws, adoption, feeding, coexistence, FAQs) and Resources (complaint, RTI templates), for owner approval; Opportunities sourcing.
 
 **Deferred:**
 - GTM container content
@@ -179,5 +179,5 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 **Waiting, no action needed:** AdSense review, and ads.txt switching to "Authorized".
 
 **Optional:**
-- Kits step 4 (attribution and sourcing into Kits Core)
 - own topic images instead of hotlinked publisher images
+- more opportunity sources (NGOBox, DevNetJobs) once their terms are read
