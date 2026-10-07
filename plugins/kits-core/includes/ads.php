@@ -23,7 +23,9 @@ function aw_ad( $slot ) {
 	if ( '' === trim( $code ) || 'head' === $slot || apply_filters( 'kits_ads_skip', false, $slot ) ) {
 		return '';
 	}
-	return '<aside class="aw-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="aw-ad-label">Advertisement</p>' . $code . '</aside>';
+	// One line inside a block element, so wpautop in list shortcodes adds no <p>/<br> around the network code.
+	$code = (string) preg_replace( '/\s*[\r\n]+\s*/', ' ', $code );
+	return '<aside class="aw-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="aw-ad-label">Advertisement</p><div class="aw-ad-unit">' . $code . '</div></aside>';
 }
 
 /** The section-list ad, once per page (themes with their own list markup call this at the end of the list). */
