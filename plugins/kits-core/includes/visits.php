@@ -3,7 +3,7 @@
  * Honest visitor counter: one count per browser session, bots excluded, nothing personal stored.
  * Counting runs in the browser (so cached pages still count). Shown in the footer.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -100,7 +100,7 @@ add_action(
 	function () {
 		wp_add_dashboard_widget(
 			'aw_visits',
-			'Animal Writes visits',
+			get_bloginfo( 'name' ) . ' visits',
 			function () {
 				echo '<p><strong>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_total', 0 ) ) ) . '</strong> visits since ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . '</p><table class="widefat striped"><tbody>';
 				for ( $i = 0; $i < 14; $i++ ) {

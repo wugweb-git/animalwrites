@@ -7,7 +7,7 @@
  * .aw-form-summary at the top of the form. With JavaScript off, the server returns the same
  * errors through a short-lived token (?aw_err=), so every visitor sees the same messages.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

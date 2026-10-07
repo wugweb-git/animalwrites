@@ -4,7 +4,7 @@
  * Slots: homepage (between sections), article (after the story), archive (after the 6th card).
  * Also serves /ads.txt from the same settings page.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,7 +55,7 @@ add_filter(
 	'render_block_core/post-excerpt',
 	function ( $content ) {
 		static $done = false;
-		if ( $done || ! is_singular( array( 'aw_news', 'aw_legal', 'aw_research' ) ) ) {
+		if ( $done || ! is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) ) {
 			return $content;
 		}
 		$done = true;

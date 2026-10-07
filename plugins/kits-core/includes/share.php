@@ -2,7 +2,7 @@
 /**
  * Share buttons: plain links (no third-party scripts, no tracking) plus copy-link.
  *
- * @package animal-writes-core
+ * @package kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ add_filter(
 	'render_block_core/group',
 	function ( $content, $block ) {
 		static $done = false;
-		$types = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_campaign', 'aw_resource', 'aw_opportunity', 'aw_listing' );
+		$types = (array) apply_filters( 'kits_share_post_types', array( 'post' ) );
 		if ( $done || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) {
 			return $content;
 		}

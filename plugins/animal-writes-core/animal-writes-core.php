@@ -31,23 +31,22 @@ if ( ! defined( 'DISABLE_WP_CRON' ) ) {
 	define( 'DISABLE_WP_CRON', true );
 }
 
+// Kits Core (shared site features). Loaded from the sibling plugin folder when it is not active on its own.
+if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php' ) ) {
+	require_once dirname( AW_CORE_DIR ) . '/kits-core/kits-core.php';
+}
+require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/ingest.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
-require_once AW_CORE_DIR . 'includes/analytics.php';
 require_once AW_CORE_DIR . 'includes/display.php';
-require_once AW_CORE_DIR . 'includes/seo.php';
 require_once AW_CORE_DIR . 'includes/media.php';
-require_once AW_CORE_DIR . 'includes/share.php';
-require_once AW_CORE_DIR . 'includes/forms.php';
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
-require_once AW_CORE_DIR . 'includes/visits.php';
-require_once AW_CORE_DIR . 'includes/ads.php';
 require_once AW_CORE_DIR . 'includes/testimonials.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
