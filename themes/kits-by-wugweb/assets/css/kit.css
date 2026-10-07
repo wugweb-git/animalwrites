@@ -28,7 +28,7 @@ a:hover { color: var(--kit-color-link); text-decoration-thickness: 2px; }
 /* Links inside running text are blue (yellow is for fills only) */
 :is(.wp-block-post-content, .entry-content, .aw-ed-help-note, .aw-more, .aw-field-hint) :is(p, li, td, figcaption) > a:not([class]) ,:is(.wp-block-post-content, .entry-content, .kit-ed-help-note, .kit-more, .kit-field-hint) :is(p, li, td, figcaption) > a:not([class]) { color: var(--kit-color-link); }
 /* On dark surfaces the focus ring and links switch to light colours */
-:is(.aw-dark, .aw-ed-help, .aw-ed-story, .aw-ed-hero, .aw-site-footer) ,:is(.kit-dark, .kit-ed-help, .kit-ed-story, .kit-ed-hero, .kit-site-footer) { --aw-color-focus: #ffbe1a; --aw-color-link: #ffffff; }
+:is(.aw-dark, .aw-ed-help, .aw-ed-story, .aw-ed-hero, .aw-site-footer) ,:is(.kit-dark, .kit-ed-help, .kit-ed-story, .kit-ed-hero, .kit-site-footer) { --kit-color-focus: #ffbe1a; --aw-color-focus: #ffbe1a; --kit-color-link: #ffffff; --aw-color-link: #ffffff; }
 .wp-site-blocks > main { margin-block-start: 0; }
 
 /* 2. Typography ------------------------------------------------------------- */
@@ -285,7 +285,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 }
 
 /* 4.7 Icons — Lucide-style line icons (ISC licence) as CSS masks: <span class="aw-ico aw-ico--name" aria-hidden="true"></span>.
-   Inherit currentColor; size 1.25em (override with --aw-ico-size). */
+   Inherit currentColor; size 1.25em (override with --kit-ico-size). */
 .aw-ico ,.kit-ico { display: inline-block; flex: none; width: var(--kit-ico-size, 1.25em); height: var(--kit-ico-size, 1.25em); background-color: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; vertical-align: -0.2em; }
 .aw-ico--arrow-right ,.kit-ico--arrow-right { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22/%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22/%3E%3C/svg%3E"); }
 .aw-ico--arrow-up-right ,.kit-ico--arrow-up-right { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207h10v10%22/%3E%3Cpath%20d%3D%22M7%2017%2017%207%22/%3E%3C/svg%3E"); }
@@ -335,7 +335,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 @media (min-width: 1200px) { .aw-tiles ,.kit-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-tiles li ,.kit-tiles li { max-width: none; display: flex; }
 .aw-tile ,.kit-tile { flex: 1; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "ico title arrow" "ico desc arrow"; column-gap: var(--kit-space-4); row-gap: var(--kit-space-1); align-items: start; padding: var(--kit-space-5); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); color: var(--kit-color-text); text-decoration: none; transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease), border-color var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-tile > .aw-ico:first-child ,.kit-tile > .kit-ico:first-child { grid-area: ico; --aw-ico-size: 1.5rem; padding: 0.625rem; box-sizing: content-box; border-radius: var(--kit-radius-control); background: var(--kit-color-surface); color: var(--kit-color-ink); -webkit-mask: none; mask: none; position: relative; }
+.aw-tile > .aw-ico:first-child ,.kit-tile > .kit-ico:first-child { grid-area: ico; --kit-ico-size: 1.5rem; --aw-ico-size: 1.5rem; padding: 0.625rem; box-sizing: content-box; border-radius: var(--kit-radius-control); background: var(--kit-color-surface); color: var(--kit-color-ink); -webkit-mask: none; mask: none; position: relative; }
 .aw-tile > .aw-ico:first-child::after ,.kit-tile > .kit-ico:first-child::after { content: ""; position: absolute; inset: 0.625rem; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-tile strong ,.kit-tile strong { grid-area: title; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); letter-spacing: -0.01em; }
 .aw-tile span.aw-tile-desc ,.kit-tile span.kit-tile-desc { grid-area: desc; font-size: var(--kit-type-sm); color: var(--kit-color-muted); line-height: 1.5; }
@@ -551,7 +551,7 @@ body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single ma
 .aw-trust a ,.kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-medium); }
 
 /* Shared button size used in rows */
-.aw-btn .aw-ico ,.kit-btn .kit-ico { --aw-ico-size: 1.1em; }
+.aw-btn .aw-ico ,.kit-btn .kit-ico { --kit-ico-size: 1.1em; --aw-ico-size: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .aw-task, .aw-res-card, .aw-story-media img, .aw-case > .aw-ico ,.kit-task, .kit-res-card, .kit-story-media img, .kit-case > .kit-ico { transition: none; } .aw-task:hover, .aw-res-card:hover ,.kit-task:hover, .kit-res-card:hover { transform: none; } }
 /* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
 a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover ,a.kit-btn:not(.kit-btn--outline):not(.kit-btn--ghost), a.kit-btn:not(.kit-btn--outline):not(.kit-btn--ghost):hover { color: var(--kit-color-on-accent) !important; }
