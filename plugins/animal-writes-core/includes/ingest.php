@@ -161,6 +161,7 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	if ( 'aw_opportunity' === $type ) {
 		update_post_meta( $post_id, 'aw_org_name', sanitize_text_field( (string) $req->get_param( 'org_name' ) ) );
+		aw_link_opportunity_org( $post_id );
 		update_post_meta( $post_id, 'aw_apply_url', $source_url );
 		$deadline = aw_sanitize_meta( (string) $req->get_param( 'deadline' ), 'aw_deadline' );
 		if ( $deadline ) {
@@ -229,3 +230,20 @@ add_action(
 		);
 	}
 );
+
+/**
+ * Link an opportunity to its organisation's directory listing (exact name match), so the organisation's profile
+ * lists it. Leaves it unlinked when there is no listing of that name, or more than one.
+ *
+ * @param int $post_id Opportunity.
+ */
+function aw_link_opportunity_org( $post_id ) {
+	$name = trim( (string) get_post_meta( $post_id, 'aw_org_name', true ) );
+	if ( '' === $name || get_post_meta( $post_id, 'aw_organisation', true ) ) {
+		return;
+	}
+	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'title' => $name, 'numberposts' => 2, 'fields' => 'ids' ) );
+	if ( 1 === count( $ids ) ) {
+		add_post_meta( $post_id, 'aw_organisation', (int) $ids[0] );
+	}
+}
