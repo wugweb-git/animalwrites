@@ -3,7 +3,7 @@
  * Sitemap (WordPress core /wp-sitemap.xml), tuned for Animal Writes:
  * - no users list and no default blog posts or categories (unused);
  * - places point at the directory pages (/directory/{place}/), not the generic /location/ archive;
- * - a "directory" sitemap lists every place × listing-type page that has listings (e.g. Gaushala in Delhi).
+ * - a "directory" sitemap lists district × listing-type pages with at least 3 listings (indexing.php).
  * Retention rules (news age, closed opportunities) live in retention.php.
  *
  * @package animal-writes-core
@@ -56,7 +56,7 @@ add_filter(
 	3
 );
 
-/** Place × listing-type pairs that have published listings. */
+/** District × listing-type pairs with enough listings to be indexed (no state × type pages exist). */
 function aw_sitemap_directory_pairs() {
 	$pairs = get_transient( 'aw_sitemap_dir_pairs' );
 	if ( false !== $pairs ) {
@@ -64,7 +64,7 @@ function aw_sitemap_directory_pairs() {
 	}
 	global $wpdb;
 	$pairs = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		"SELECT c.slug AS city, t.slug AS type, MAX(p.post_modified_gmt) AS modified
+		$wpdb->prepare( "SELECT c.slug AS city, t.slug AS type, MAX(p.post_modified_gmt) AS modified, COUNT(DISTINCT p.ID) AS n
 		 FROM {$wpdb->posts} p
 		 JOIN {$wpdb->term_relationships} rc ON rc.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tc ON tc.term_taxonomy_id = rc.term_taxonomy_id AND tc.taxonomy = 'aw_city'
@@ -72,8 +72,8 @@ function aw_sitemap_directory_pairs() {
 		 JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
-		 WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'
-		 GROUP BY c.slug, t.slug ORDER BY c.slug, t.slug",
+		 WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND tc.parent <> 0
+		 GROUP BY c.slug, t.slug HAVING n >= %d ORDER BY c.slug, t.slug", defined( 'AW_THIN_DISTRICT_TYPE' ) ? AW_THIN_DISTRICT_TYPE : 3 ), // phpcs:ignore
 		ARRAY_A
 	);
 	set_transient( 'aw_sitemap_dir_pairs', $pairs, 12 * HOUR_IN_SECONDS );

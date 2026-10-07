@@ -1,6 +1,6 @@
 <?php
 /**
- * Directory: /directory/, /directory/{city}/, /directory/{city}/{type}/ with featured-first ordering.
+ * Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/, featured first.
  *
  * Singles live at /directory/org/{slug}/.
  *
@@ -12,16 +12,87 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * City and city × type rewrite rules.
+ * Directory place URLs: /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/.
+ * There are no state × type pages: /directory/{state}/?type= is a filtered state list (canonical: the state page).
+ * Older patterns (/directory/{district}/, /directory/{place}/{type}/) get one 301 to the new URL.
  */
 function aw_directory_rewrites() {
-	$skip = '(?!org/|page/|feed/)';
-	add_rewrite_rule( '^directory/' . $skip . '([^/]+)/([^/]+)/page/([0-9]+)/?$', 'index.php?post_type=aw_listing&aw_city=$matches[1]&aw_listing_type=$matches[2]&paged=$matches[3]', 'top' );
-	add_rewrite_rule( '^directory/' . $skip . '([^/]+)/([^/]+)/?$', 'index.php?post_type=aw_listing&aw_city=$matches[1]&aw_listing_type=$matches[2]', 'top' );
-	add_rewrite_rule( '^directory/' . $skip . '([^/]+)/page/([0-9]+)/?$', 'index.php?post_type=aw_listing&aw_city=$matches[1]&paged=$matches[2]', 'top' );
-	add_rewrite_rule( '^directory/' . $skip . '([^/]+)/?$', 'index.php?post_type=aw_listing&aw_city=$matches[1]', 'top' );
+	add_rewrite_tag( '%aw_dir%', '(.+?)' );
+	add_rewrite_rule( '^directory/(?!org/|page/|feed/)(.+?)/?$', 'index.php?aw_dir=$matches[1]', 'top' );
 }
 add_action( 'init', 'aw_directory_rewrites', 20 );
+
+/** A place (state or district) by slug, cached for the request. */
+function aw_dir_place( $slug ) {
+	static $cache = array();
+	if ( ! array_key_exists( $slug, $cache ) ) {
+		$t              = get_term_by( 'slug', $slug, 'aw_city' );
+		$cache[ $slug ] = $t && ! is_wp_error( $t ) ? $t : null;
+	}
+	return $cache[ $slug ];
+}
+
+/** Turn /directory/... into a listing query, or send older URL shapes to the new one. */
+add_filter(
+	'request',
+	function ( $vars ) {
+		if ( empty( $vars['aw_dir'] ) ) {
+			return $vars;
+		}
+		$seg   = array_values( array_filter( explode( '/', strtolower( (string) $vars['aw_dir'] ) ) ) );
+		$paged = 0;
+		$n     = count( $seg );
+		if ( $n >= 2 && 'page' === $seg[ $n - 2 ] && ctype_digit( $seg[ $n - 1 ] ) ) {
+			$paged = (int) $seg[ $n - 1 ];
+			$seg   = array_slice( $seg, 0, -2 );
+		}
+		$type_ok = fn( $slug ) => (bool) get_term_by( 'slug', $slug, 'aw_listing_type' );
+		$go      = function ( $url ) use ( $paged ) {
+			if ( $paged > 1 ) {
+				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
+			}
+			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
+			exit;
+		};
+		$out = array( 'post_type' => 'aw_listing' );
+		$a   = isset( $seg[0] ) ? aw_dir_place( $seg[0] ) : null;
+		$b   = $seg[1] ?? '';
+		$c   = $seg[2] ?? '';
+		if ( 1 === count( $seg ) && $a ) {
+			if ( $a->parent ) {
+				$go( aw_directory_url( $a->slug ) ); // old /directory/{district}/
+			}
+			$out['aw_city'] = $a->slug;
+			$type           = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			if ( $type && $type_ok( $type ) ) {
+				$out['aw_listing_type'] = $type; // filtered state list
+			}
+		} elseif ( 2 === count( $seg ) && $a ) {
+			$bp = aw_dir_place( $b );
+			if ( ! $a->parent && $bp && (int) $bp->parent === (int) $a->term_id ) {
+				$out['aw_city'] = $bp->slug;
+			} elseif ( $type_ok( $b ) ) {
+				$go( aw_directory_url( $a->slug, $b ) ); // old /directory/{place}/{type}/
+			} else {
+				return array( 'error' => '404' );
+			}
+		} elseif ( 3 === count( $seg ) && $a && ! $a->parent ) {
+			$bp = aw_dir_place( $b );
+			if ( ! $bp || (int) $bp->parent !== (int) $a->term_id || ! $type_ok( $c ) ) {
+				return array( 'error' => '404' );
+			}
+			$out['aw_city']         = $bp->slug;
+			$out['aw_listing_type'] = $c;
+		} else {
+			return array( 'error' => '404' );
+		}
+		if ( $paged ) {
+			$out['paged'] = $paged;
+		}
+		return $out;
+	}
+);
 
 /**
  * Is this a directory listing query (archive, city or city × type)?
@@ -128,16 +199,22 @@ add_filter( 'document_title_parts', 'aw_directory_document_title' );
 /**
  * Directory URL helper for themes/menus.
  *
- * @param string $city_slug City slug.
- * @param string $type_slug Optional listing type slug.
+ * @param string $city_slug State or district slug.
+ * @param string $type_slug Optional listing type slug (district pages only; a state gets ?type=).
  * @return string
  */
 function aw_directory_url( $city_slug, $type_slug = '' ) {
-	$path = 'directory/' . sanitize_title( $city_slug ) . '/';
-	if ( $type_slug ) {
-		$path .= sanitize_title( $type_slug ) . '/';
+	$place = aw_dir_place( sanitize_title( $city_slug ) );
+	$type  = sanitize_title( $type_slug );
+	if ( ! $place ) {
+		return home_url( 'directory/' );
 	}
-	return home_url( $path );
+	if ( ! $place->parent ) {
+		$url = home_url( 'directory/' . $place->slug . '/' );
+		return $type ? add_query_arg( 'type', $type, $url ) : $url; // no state × type pages
+	}
+	$state = get_term( $place->parent, 'aw_city' );
+	return home_url( 'directory/' . $state->slug . '/' . $place->slug . '/' . ( $type ? $type . '/' : '' ) );
 }
 
 /* ---------- Search and filters: [aw_directory_filter] ---------- */
