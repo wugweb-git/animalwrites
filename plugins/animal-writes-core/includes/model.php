@@ -325,3 +325,49 @@ add_action(
 	},
 	20
 );
+
+/* ---------- Organisation profile (restructure Phase 8) ---------- */
+
+/**
+ * [aw_org_links]: on a listing, what links to it — campaigns it organised or joined, its open opportunities and
+ * news that mentions it — plus "Claim or update this listing". Each group shows only when it has something.
+ */
+add_shortcode(
+	'aw_org_links',
+	function () {
+		$id = get_the_ID();
+		if ( ! $id || 'aw_listing' !== get_post_type( $id ) ) {
+			return '';
+		}
+		$find  = function ( $key, $type, $extra = array() ) use ( $id ) {
+			return get_posts(
+				array_merge(
+					array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 10, 'meta_key' => $key, 'meta_value' => (string) $id, 'orderby' => 'date', 'order' => 'DESC' ), // phpcs:ignore
+					$extra
+				)
+			);
+		};
+		$open   = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => array( aw_open_opportunities_meta_query() ) ) : array(); // phpcs:ignore
+		$groups = array(
+			'Campaigns organised' => $find( 'aw_organiser', 'aw_campaign' ),
+			'Campaigns joined'    => $find( 'aw_participant', 'aw_campaign' ),
+			'Open opportunities'  => $find( 'aw_organisation', 'aw_opportunity', $open ),
+			'In the news'         => $find( 'aw_rel_org', 'aw_news' ),
+		);
+		$html = '';
+		foreach ( $groups as $label => $posts ) {
+			if ( ! $posts ) {
+				continue;
+			}
+			$html .= '<section class="aw-org-links-group"><h2>' . esc_html( $label ) . '</h2><ul>';
+			foreach ( $posts as $p ) {
+				$html .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
+			}
+			$html .= '</ul></section>';
+		}
+		$html .= '<p class="aw-org-claim"><a href="#claim">Claim or update this listing</a> · <a href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">or write to us</a></p>';
+		// The claim form sits in a closed panel; following the link opens it.
+		$html .= "<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#claim\"]');var d=a&&document.querySelector('#claim details');if(d){d.open=true;}});</script>";
+		return '<div class="aw-org-links">' . $html . '</div>';
+	}
+);
