@@ -69,13 +69,13 @@ function aw_review_reason( $id ) {
 			return 'legal item from a non-legal source (' . $host . ')';
 		}
 	}
-	// 5. Near-duplicate of a story from the last 7 days (published or already waiting).
+	// 5. Near-duplicate of a story published in the last 7 days.
 	$mine = aw_title_words( $post->post_title );
 	if ( count( $mine ) >= 3 ) {
 		$recent = get_posts(
 			array(
 				'post_type'   => $type,
-				'post_status' => array( 'publish', 'pending' ),
+				'post_status' => 'publish', // compare with what readers already see, not with items still waiting
 				'date_query'  => array( array( 'after' => '7 days ago' ) ),
 				'exclude'     => array( $id ),
 				'numberposts' => 200,
