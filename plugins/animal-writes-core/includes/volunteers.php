@@ -110,16 +110,20 @@ function aw_volunteer_submit() {
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
 	}
-	$id = wp_insert_post(
-		array( 'post_type' => 'aw_volunteer', 'post_status' => 'private', 'post_title' => $v['name'] . ' (' . $term->name . ')' ),
-		true
+	// Stored in the volunteers table (one row per email; signing up again updates it).
+	aw_vol_upsert(
+		array(
+			'name'                 => $v['name'],
+			'email'                => $v['email'],
+			'phone'                => $v['phone'],
+			'city_text'            => $v['city'],
+			'state_slug'           => $term->slug,
+			'role'                 => implode( ', ', $v['roles'] ),
+			'source'               => 'v2_form',
+			'consent_scope'        => 'volunteering',
+			'consent_text_version' => 'v2-form-no-checkbox',
+		)
 	);
-	if ( is_wp_error( $id ) ) {
-		aw_form_fail( $form, array(), $v, $back, 'volunteer', 'Your sign-up could not be saved. Please try again.' );
-	}
-	foreach ( array( 'aw_v_name' => $v['name'], 'aw_v_email' => $v['email'], 'aw_v_phone' => $v['phone'], 'aw_v_state' => $term->name, 'aw_v_city' => $v['city'], 'aw_v_roles' => implode( ', ', $v['roles'] ) ) as $k => $val ) {
-		update_post_meta( $id, $k, $val );
-	}
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'New volunteer: ' . $term->name, "A new volunteer signed up.\nState: {$term->name}\nCity: {$v['city']}\nView in WP Admin > Volunteers." );
 	wp_safe_redirect( $done );

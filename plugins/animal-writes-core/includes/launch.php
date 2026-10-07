@@ -341,3 +341,6 @@ add_action(
 	},
 	105
 );
+
+// Impact figure: 1.0 proof-of-posting submissions, counted before the receipt records were deleted (2026-10-07).
+add_action( 'init', fn() => add_option( 'aw_impact_aw1_receipts', 16754, '', false ) );
