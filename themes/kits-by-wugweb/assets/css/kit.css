@@ -649,3 +649,6 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 	.aw-site-header .aw-wordmark img ,.kit-site-header .kit-wordmark img { width: 112px; height: auto; }
 	.aw-header-emergency ,.kit-header-emergency { padding-inline: var(--kit-space-3); }
 }
+
+/* Forms: an empty paragraph left by auto-formatting never takes up space */
+.aw-form > p:empty ,.kit-form > p:empty { display: none; }
