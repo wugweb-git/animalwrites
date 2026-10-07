@@ -181,7 +181,7 @@ function aw_field( $form, $f ) {
 }
 
 /**
- * Check nonce, honeypot, timing and the per-connection rate limit for a submission.
+ * Check nonce, honeypot, timing, the ALTCHA answer and the per-connection rate limit for a submission.
  * Bots get a fake success; people over the limit get a form-level message.
  *
  * @param string $form    Form key.
@@ -199,11 +199,30 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 		wp_safe_redirect( $done );
 		exit;
 	}
+	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Please tick the box above the send button, wait for the check to finish, then send again.' );
+	}
 	$key = 'aw_rl_' . $form . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 	if ( (int) get_transient( $key ) >= $per_hour ) {
 		aw_form_fail( $form, array(), array(), $back, $anchor, 'Too many submissions from this connection. Please try again in an hour.' );
 	}
 	return $key;
+}
+
+/**
+ * What the visitor typed, so a failed check doesn't empty the form (text fields only; never files).
+ *
+ * @return array<string,mixed>
+ */
+function aw_form_kept_values() {
+	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'aw_website', 'altcha' );
+	$out  = array();
+	foreach ( wp_unslash( $_POST ) as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! in_array( $k, $skip, true ) ) {
+			$out[ $k ] = is_array( $v ) ? array_map( 'sanitize_text_field', $v ) : sanitize_textarea_field( (string) $v );
+		}
+	}
+	return $out;
 }
 
 /**
