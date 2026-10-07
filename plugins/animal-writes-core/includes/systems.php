@@ -74,12 +74,22 @@ function aw_text( $id, $words = 28 ) {
  * @return string
  */
 function aw_filter_chips( $tax, $param, $label, $type ) {
-	$terms = get_terms( array( 'taxonomy' => $tax, 'hide_empty' => true, 'object_ids' => get_posts( array( 'post_type' => $type, 'numberposts' => -1, 'fields' => 'ids' ) ) ) );
+	$args = array( 'taxonomy' => $tax, 'hide_empty' => true, 'object_ids' => get_posts( array( 'post_type' => $type, 'numberposts' => -1, 'fields' => 'ids' ) ) );
+	$terms = get_terms( $args );
+	if ( 'aw_city' === $tax && $terms && ! is_wp_error( $terms ) ) {
+		// Filter by state: a state shows when it or one of its districts has items.
+		$ids = array();
+		foreach ( $terms as $t ) {
+			$ids[] = $t->parent ? $t->parent : $t->term_id;
+		}
+		$terms = get_terms( array( 'taxonomy' => 'aw_city', 'include' => array_unique( $ids ), 'orderby' => 'name', 'hide_empty' => false ) );
+	}
 	if ( ! $terms || is_wp_error( $terms ) ) {
 		return '';
 	}
 	$cur  = sanitize_title( wp_unslash( $_GET[ $param ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base = get_post_type_archive_link( $type );
+	// Keep the other active filters when one row changes.
+	$base = add_query_arg( array_diff_key( function_exists( 'aw_active_filters' ) ? aw_active_filters( $type ) : array(), array( $param => '' ) ), get_post_type_archive_link( $type ) );
 	$out  = '<nav class="aw-chips-nav" aria-label="' . esc_attr( $label ) . '"><a href="' . esc_url( $base ) . '"' . ( $cur ? '' : ' aria-current="true"' ) . '>All</a>';
 	foreach ( $terms as $t ) {
 		$out .= '<a href="' . esc_url( add_query_arg( $param, $t->slug, $base ) ) . '"' . ( $cur === $t->slug ? ' aria-current="true"' : '' ) . '>' . esc_html( $t->name ) . '</a>';
@@ -99,35 +109,67 @@ function aw_empty( $text ) {
 	return '<div class="aw-empty"><p>' . esc_html( $text ) . '</p></div>';
 }
 
-// Archive filters (?issuer= ?topic= ?type=) and sizes.
+/**
+ * List filters: post type => list of [query parameter, taxonomy, label]. Several can apply at once; every filtered
+ * list is canonical to the plain list (indexing.php). Places filter by state (children included).
+ */
+const AW_LIST_FILTERS = array(
+	'aw_legal'       => array( array( 'issuer', 'aw_source_type', 'Filter by issuer' ), array( 'court', 'aw_court', 'Filter by court' ), array( 'state', 'aw_city', 'Filter by state' ), array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_news'        => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_research'    => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_guide'       => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_resource'    => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Filter by kind of opportunity' ), array( 'state', 'aw_city', 'Filter by location' ) ),
+	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+);
+const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_research' => 40, 'aw_guide' => 40, 'aw_resource' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
+
+/** Active filters on this request: param => term slug. */
+function aw_active_filters( $type ) {
+	$out = array();
+	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
+		$v = sanitize_title( wp_unslash( $_GET[ $f[0] ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( $v ) {
+			$out[ $f[0] ] = $v;
+		}
+	}
+	return $out;
+}
+
 add_action(
 	'pre_get_posts',
 	function ( $q ) {
 		if ( is_admin() || ! $q->is_main_query() ) {
 			return;
 		}
-		$map = array(
-			'aw_legal'       => array( 'issuer', 'aw_source_type', 20 ),
-			'aw_news'        => array( 'topic', 'aw_topic', 13 ),
-			'aw_research'    => array( 'topic', 'aw_topic', 40 ),
-			'aw_guide'       => array( 'topic', 'aw_topic', 40 ),
-			'aw_resource'    => array( 'topic', 'aw_topic', 40 ),
-			'aw_opportunity' => array( 'type', 'aw_opportunity_type', 24 ),
-			'aw_campaign'    => array( 'topic', 'aw_topic', 20 ),
-		);
-		foreach ( $map as $type => $m ) {
-			if ( ! $q->is_post_type_archive( $type ) ) {
+		foreach ( AW_LIST_SIZES as $type => $size ) {
+			if ( ! $q->is_post_type_archive( $type ) || $q->get( 'aw_acts' ) ) {
 				continue;
 			}
-			$q->set( 'posts_per_page', $m[2] );
-			$v = sanitize_title( wp_unslash( $_GET[ $m[0] ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			if ( $v ) {
-				$q->set( 'tax_query', array( array( 'taxonomy' => $m[1], 'field' => 'slug', 'terms' => $v ) ) );
+			$q->set( 'posts_per_page', $size );
+			$tq = array();
+			foreach ( AW_LIST_FILTERS[ $type ] as $f ) {
+				$v = aw_active_filters( $type )[ $f[0] ] ?? '';
+				if ( $v ) {
+					$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
+				}
+			}
+			if ( $tq ) {
+				$q->set( 'tax_query', array_merge( array( 'relation' => 'AND' ), $tq ) );
 			}
 		}
 	},
 	30
 );
+
+/** Every filter row for a list (rows with no terms in use are left out). */
+function aw_list_filters( $type ) {
+	$out = '';
+	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
+		$out .= aw_filter_chips( $f[1], $f[0], $f[2], $type );
+	}
+	return $out;
+}
 
 /* ---------- TRUST: source, dates, verification ---------- */
 
@@ -201,7 +243,7 @@ add_shortcode(
 	'aw_legal_index',
 	function () {
 		global $wp_query;
-		$out = aw_filter_chips( 'aw_source_type', 'issuer', 'Filter by court or issuer', 'aw_legal' );
+		$out = get_query_var( 'aw_acts' ) ? '' : aw_list_filters( 'aw_legal' );
 		if ( ! $wp_query->have_posts() ) {
 			return $out . aw_empty( 'No updates match this filter yet.' );
 		}
@@ -263,7 +305,7 @@ add_shortcode(
 	'aw_news_index',
 	function () {
 		global $wp_query;
-		$out = aw_filter_chips( 'aw_topic', 'topic', 'Filter by topic', 'aw_news' );
+		$out = aw_list_filters( 'aw_news' );
 		if ( ! $wp_query->have_posts() ) {
 			return $out . aw_empty( 'No stories on this topic yet.' );
 		}
@@ -294,9 +336,9 @@ add_shortcode(
 	function () {
 		global $wp_query;
 		if ( ! $wp_query->have_posts() ) {
-			return aw_empty( 'No documents yet.' );
+			return aw_list_filters( 'aw_research' ) . aw_empty( 'No documents yet.' );
 		}
-		$out = '<div class="aw-docs" role="list">';
+		$out = aw_list_filters( 'aw_research' ) . '<div class="aw-docs" role="list">';
 		while ( $wp_query->have_posts() ) {
 			$wp_query->the_post();
 			$id    = get_the_ID();
@@ -364,7 +406,7 @@ add_shortcode(
 	'aw_resources_index',
 	function () {
 		global $wp_query;
-		$out = '<div class="aw-res">';
+		$out = aw_list_filters( 'aw_resource' ) . '<div class="aw-res">';
 		while ( $wp_query->have_posts() ) {
 			$wp_query->the_post();
 			$id    = get_the_ID();
@@ -430,7 +472,7 @@ add_shortcode(
 	'aw_opps_index',
 	function () {
 		global $wp_query;
-		$out = aw_filter_chips( 'aw_opportunity_type', 'type', 'Filter by kind of opportunity', 'aw_opportunity' );
+		$out = aw_list_filters( 'aw_opportunity' );
 		if ( ! $wp_query->have_posts() ) {
 			return $out . aw_empty( 'No open opportunities of this kind right now.' );
 		}

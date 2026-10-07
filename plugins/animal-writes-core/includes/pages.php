@@ -237,14 +237,87 @@ function aw_acts_intro_screen() {
 	echo '</form></div>';
 }
 
-// The site search answers at /search/?q= (the address search engines are given); WordPress search runs on ?s=.
+/* ---------- Site search at /search/?q= (noindex; see wp_robots above) ---------- */
+
+const AW_SEARCH_TYPES = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_resource', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'page' );
+
+// WordPress's own search (?s=) goes to the search page, so there is one search address.
 add_action(
 	'template_redirect',
 	function () {
-		$q = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( '' !== $q && is_page( 'search' ) ) {
-			wp_safe_redirect( add_query_arg( 's', rawurlencode( $q ), home_url( '/' ) ) );
+		if ( is_search() && ! is_admin() ) {
+			wp_safe_redirect( add_query_arg( 'q', rawurlencode( (string) get_search_query( false ) ), home_url( '/search/' ) ), 301 );
 			exit;
 		}
+	}
+);
+
+add_shortcode(
+	'aw_search',
+	function () {
+		$q    = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$page = max( 1, absint( $_GET['pg'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$html = '<form class="aw-search-form" role="search" method="get" action="' . esc_url( home_url( '/search/' ) ) . '">'
+			. '<label for="aw-search-q">Search</label><input type="search" id="aw-search-q" name="q" value="' . esc_attr( $q ) . '" autocomplete="off"> '
+			. '<button type="submit" class="wp-element-button">Search</button></form>';
+		if ( '' === $q ) {
+			return $html;
+		}
+		$res = new WP_Query( array( 's' => $q, 'post_type' => AW_SEARCH_TYPES, 'post_status' => 'publish', 'posts_per_page' => 20, 'paged' => $page ) );
+		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( _n( '%s result', '%s results', $res->found_posts ), number_format_i18n( $res->found_posts ) ) ) . '</p>';
+		if ( $res->have_posts() ) {
+			$html .= '<ol class="aw-search-results">';
+			foreach ( $res->posts as $p ) {
+				$obj   = get_post_type_object( $p->post_type );
+				$html .= '<li><span class="aw-search-type">' . esc_html( 'page' === $p->post_type ? 'Page' : $obj->labels->name ) . '</span> '
+					. '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a>'
+					. ( function_exists( 'aw_text' ) && 'aw_listing' !== $p->post_type ? '<p>' . esc_html( aw_text( $p->ID, 24 ) ) . '</p>' : '' ) . '</li>';
+			}
+			$html .= '</ol>';
+			if ( $res->max_num_pages > 1 ) {
+				$html .= '<nav class="aw-pager" aria-label="Pages">'
+					. ( $page > 1 ? '<a href="' . esc_url( add_query_arg( array( 'q' => $q, 'pg' => $page - 1 ), home_url( '/search/' ) ) ) . '">Previous</a>' : '' )
+					. ( $page < $res->max_num_pages ? '<a href="' . esc_url( add_query_arg( array( 'q' => $q, 'pg' => $page + 1 ), home_url( '/search/' ) ) ) . '">Next</a>' : '' ) . '</nav>';
+			}
+		}
+		return $html;
+	}
+);
+
+/* ---------- Topic hub (/topic/{slug}/) ---------- */
+
+add_shortcode(
+	'aw_topic_hub',
+	function () {
+		$term = get_queried_object();
+		if ( ! $term || empty( $term->taxonomy ) || 'aw_topic' !== $term->taxonomy ) {
+			return '';
+		}
+		$groups = array( 'aw_guide' => 'Knowledge', 'aw_news' => 'News', 'aw_legal' => 'Legal', 'aw_research' => 'Research', 'aw_resource' => 'Resources', 'aw_campaign' => 'Campaigns' );
+		$html   = '';
+		foreach ( $groups as $type => $label ) {
+			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'tax_query' => array( array( 'taxonomy' => 'aw_topic', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
+			if ( ! $posts ) {
+				continue;
+			}
+			$all   = add_query_arg( 'topic', $term->slug, get_post_type_archive_link( $type ) );
+			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul>';
+			foreach ( $posts as $p ) {
+				$html .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
+			}
+			$html .= '</ul><p><a href="' . esc_url( $all ) . '">All ' . esc_html( strtolower( $label ) ) . ' on this topic</a></p></section>';
+		}
+		$types = function_exists( 'aw_topic_help_types' ) ? aw_topic_help_types( $term->term_id ) : array();
+		$links = '';
+		foreach ( $types as $tid ) {
+			$t = get_term( $tid, 'aw_listing_type' );
+			if ( $t && ! is_wp_error( $t ) && $t->count ) {
+				$links .= '<li><a href="' . esc_url( add_query_arg( 'type', $t->slug, home_url( '/directory/' ) ) ) . '">' . esc_html( $t->name ) . '</a></li>';
+			}
+		}
+		if ( $links ) {
+			$html .= '<section class="aw-hub-group aw-hub-help"><h2>Find help</h2><ul>' . $links . '</ul></section>';
+		}
+		return '<div class="aw-hub">' . $html . '</div>';
 	}
 );

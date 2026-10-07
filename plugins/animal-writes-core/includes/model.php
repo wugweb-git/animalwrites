@@ -55,6 +55,9 @@ add_action(
 		);
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal', 'aw_research' ), $args( 'Legal types', 'Legal type' ) );
 		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_research', 'aw_news' ), $args( 'Courts', 'Court' ) );
+		register_taxonomy( 'aw_resource_type', array( 'aw_resource' ), $args( 'Resource types', 'Resource type' ) );
+		register_taxonomy( 'aw_language', array( 'aw_resource' ), $args( 'Languages', 'Language' ) );
+		register_taxonomy_for_object_type( 'aw_city', 'aw_legal' ); // Legal Watch: filter by state
 	},
 	11
 );

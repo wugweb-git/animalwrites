@@ -4,7 +4,9 @@
  * the checks go live; only doubtful ones wait for a person).
  *
  * An item is published when every check passes; otherwise it stays Pending with the reason in `aw_review`
- * (shown in the admin list). Nothing is deleted.
+ * (shown in the admin list). Checks: publisher on the allow list, a topic, a real summary, not a thin format, relevant,
+ * legal items from a legal source. The same event as a story published in the last 7 days is not published again:
+ * its publisher is added to that story as "also reported by" and the item is kept private. Nothing is deleted.
  *
  * @package animal-writes-core
  */
@@ -41,6 +43,17 @@ function aw_review_reason( $id ) {
 	$host  = function_exists( 'aw_host' ) ? aw_host( $url ) : (string) wp_parse_url( $url, PHP_URL_HOST );
 	$words = str_word_count( wp_strip_all_tags( $post->post_excerpt ) );
 
+	// 0. A publisher on the allow list (News > Sourcing); new publishers wait for a person.
+	if ( function_exists( 'aw_publishers' ) ) {
+		$rec = aw_publishers()[ $host ] ?? array();
+		if ( 'allow' !== ( $rec['status'] ?? '' ) ) {
+			return 'publisher not on the allow list (' . $host . ')';
+		}
+	}
+	// 0b. At least one topic.
+	if ( ! wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'ids' ) ) ) {
+		return 'no topic';
+	}
 	// 1. Summary looks like a summary.
 	if ( $words < 15 || $words > 90 ) {
 		return "summary length ({$words} words)";
@@ -104,6 +117,20 @@ function aw_auto_review( $id ) {
 		return '';
 	}
 	$reason = aw_review_reason( $id );
+	// Same event as a published story: credit this publisher on that story instead of publishing a second copy.
+	if ( preg_match( '/^same story as #(\d+)/', $reason, $m ) ) {
+		$keep = (int) $m[1];
+		$also = (array) get_post_meta( $keep, 'aw_also_reported', true );
+		$url  = (string) get_post_meta( $id, 'aw_source_url', true );
+		if ( $url && ! in_array( $url, wp_list_pluck( $also, 'url' ), true ) && $url !== (string) get_post_meta( $keep, 'aw_source_url', true ) ) {
+			$also[] = array( 'name' => (string) get_post_meta( $id, 'aw_source_name', true ), 'url' => $url );
+			update_post_meta( $keep, 'aw_also_reported', array_values( array_filter( $also ) ) );
+		}
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'private' ) );
+		update_post_meta( $id, 'aw_merged_into', $keep );
+		update_post_meta( $id, 'aw_review', 'merged into #' . $keep . ' as "also reported by" ' . wp_date( 'Y-m-d H:i' ) );
+		return 'merged';
+	}
 	if ( '' === $reason ) {
 		wp_update_post( array( 'ID' => $id, 'post_status' => 'publish' ) );
 		update_post_meta( $id, 'aw_review', 'auto-published ' . wp_date( 'Y-m-d H:i' ) );
