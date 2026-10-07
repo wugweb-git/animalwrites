@@ -243,6 +243,10 @@ function aw_job_schema( $id ) {
 	}
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
 	$area = (string) get_post_meta( $id, 'aw_area', true );
+	$org_listing = (int) get_post_meta( $id, 'aw_organisation', true );
+	if ( ! $state && ! $district && ! $area && $org_listing ) {
+		list( $state, $district ) = aw_listing_place( $org_listing ); // the organisation's own location
+	}
 	if ( ! $state && ! $district && ! $area ) {
 		return array(); // a job posting needs a place
 	}
