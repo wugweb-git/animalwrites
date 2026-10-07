@@ -11,8 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_campaign', 'aw_resource', 'aw_opportunity', 'aw_listing' );
 
-// Google Tag Manager: same container as Animal Writes 1.0, so GA4 history continues; production hosts only.
-add_filter( 'kits_gtm_id', fn() => 'GTM-W9D28GKV' );
+// Google Tag Manager: off. Site Kit's Google tag (GT-TXZHFR39) is the single analytics tag; the 1.0 container
+// GTM-W9D28GKV only held the same Google tags, so loading both counted every page view twice (2026-10-07).
+add_filter( 'kits_gtm_id', fn() => '' );
 add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in' );
 
 add_filter( 'kits_share_post_types', fn() => AW_CONTENT_TYPES );
