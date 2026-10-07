@@ -11,12 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide', 'aw_campaign', 'aw_resource', 'aw_opportunity', 'aw_listing' );
 
-// Google Tag Manager: the Animal Writes 2.0 container (GTM-TB3FCFQB, created 2026-10-07; empty at the time).
-// GA4 page views come from Site Kit's Google tag (GT-TXZHFR39 -> G-4P5YMJ04RL). Do not add a GA4 tag inside this
-// container unless Site Kit's Analytics snippet is turned off, or every page view counts twice.
-// The old 1.0 container GTM-W9D28GKV is not loaded: it held the same GA4 tag and caused double counting.
-// If Site Kit's Tag Manager module loads a container, this plugin's copy steps aside automatically.
-add_filter( 'kits_gtm_id', fn() => 'GTM-TB3FCFQB' );
+// Tags: Site Kit only (Analytics GT-TXZHFR39 -> G-4P5YMJ04RL, AdSense, Tag Manager GTM-TB3FCFQB). Kits Core prints
+// no GTM of its own, so nothing loads twice. Do not put a GA4 tag inside GTM-TB3FCFQB while Site Kit Analytics is on.
+add_filter( 'kits_gtm_id', fn() => '' );
 add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in' );
 
 add_filter( 'kits_share_post_types', fn() => AW_CONTENT_TYPES );
