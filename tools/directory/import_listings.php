@@ -55,6 +55,9 @@ foreach ( $rows as $r ) {
 	if ( ! empty( $r['phone'] ) ) {
 		update_post_meta( $id, 'aw_phone', $r['phone'] );
 	}
+	if ( ! empty( $r['email'] ) && is_email( $r['email'] ) ) {
+		update_post_meta( $id, 'aw_email', sanitize_email( $r['email'] ) ); // official office email only
+	}
 	if ( ! empty( $r['address_private'] ) ) {
 		update_post_meta( $id, 'aw_import_address', $r['address_private'] ); // for checking claims; not shown publicly
 	}
