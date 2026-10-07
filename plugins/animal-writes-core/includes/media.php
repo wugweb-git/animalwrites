@@ -31,8 +31,9 @@ function aw_item_image( $post_id, $size = 'large' ) {
 	$topics = wp_get_object_terms( $post_id, 'aw_topic', array( 'fields' => 'slugs' ) );
 	$topics = is_wp_error( $topics ) ? array() : $topics;
 	foreach ( $topics as $slug ) {
-		if ( ! empty( $map[ $slug ] ) ) {
-			return (string) wp_get_attachment_image_url( (int) $map[ $slug ], $size );
+		$tid = function_exists( 'aw_topic_image_id' ) ? aw_topic_image_id( get_term_by( 'slug', $slug, 'aw_topic' ) ) : (int) ( $map[ $slug ] ?? 0 );
+		if ( $tid ) {
+			return (string) wp_get_attachment_image_url( $tid, $size );
 		}
 	}
 	// Items without a topic get the general photo; a topic with no fitting photo yet shows the placard instead.
