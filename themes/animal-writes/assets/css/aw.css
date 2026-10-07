@@ -1072,3 +1072,10 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-ed-lead .aw-src { margin-top: var(--aw-space-2); }
 :is(.aw-ed-list, .aw-ed-lead) .aw-card-time { padding-right: 0; min-height: 0; }
 .is-layout-constrained > .aw-src { max-width: var(--wp--style--global--content-size, 720px); margin-left: auto !important; margin-right: auto !important; }
+
+/* Report an error (listing pages): same disclosure treatment as the claim panel, quieter */
+.aw-report { margin-block: var(--aw-space-4) var(--aw-space-7); }
+.aw-report summary { cursor: pointer; display: inline-flex; align-items: center; min-height: var(--aw-size-target); font-size: var(--aw-type-sm); font-weight: var(--aw-weight-strong); color: var(--aw-color-muted); text-decoration: underline; text-underline-offset: 3px; }
+.aw-report summary::-webkit-details-marker { display: none; }
+.aw-report details[open] { padding: var(--aw-space-5); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); background: var(--aw-color-raised); }
+.aw-report summary:focus-visible { outline: 3px solid var(--aw-color-focus); outline-offset: 3px; border-radius: var(--aw-radius-control); }

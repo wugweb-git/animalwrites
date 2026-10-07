@@ -54,6 +54,8 @@ require_once AW_CORE_DIR . 'includes/launch.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/sourcing.php';
 require_once AW_CORE_DIR . 'includes/attribution.php';
+require_once AW_CORE_DIR . 'includes/reports.php';
+require_once AW_CORE_DIR . 'includes/schema.php';
 
 register_activation_hook(
 	__FILE__,
