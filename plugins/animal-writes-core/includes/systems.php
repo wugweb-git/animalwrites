@@ -147,6 +147,13 @@ add_shortcode(
 			if ( $code ) {
 				$rows[] = array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . $code . ' (list as on 31 May 2026)' );
 			}
+			$sname = (string) get_post_meta( $id, 'aw_source_name', true );
+			if ( $sname ) {
+				$surl   = (string) get_post_meta( $id, 'aw_source_url', true );
+				$sdate  = (string) get_post_meta( $id, 'aw_source_date', true );
+				$label  = $surl ? '<a href="' . esc_url( $surl ) . '" rel="noopener nofollow">' . esc_html( $sname ) . '</a>' : esc_html( $sname );
+				$rows[] = array( 'arrow-up-right', 'Source: ' . $label . ( $sdate ? esc_html( ' (list as on ' . wp_date( 'j M Y', strtotime( $sdate ) ) . ')' ) : '' ), true );
+			}
 			$cls = $verified ? 'is-verified' : 'is-unverified';
 		} else {
 			$src  = (string) get_post_meta( $id, 'aw_source_url', true );
@@ -390,13 +397,13 @@ add_shortcode(
 				. '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>'
 				. '<div class="aw-org-body"><h2 class="aw-org-name"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( $name ) . '</a></h2>'
 				. '<p class="aw-org-meta">' . ( $area ? aw_i( 'directory' ) . esc_html( $area ) : '' ) . '</p>'
-				. '<p class="aw-org-tags">' . ( $verified ? '<span class="aw-state aw-state--ok">' . aw_i( 'check' ) . 'Verified</span>' : '<span class="aw-state">From AWBI records</span>' )
+				. '<p class="aw-org-tags">' . ( $verified ? '<span class="aw-state aw-state--ok">' . aw_i( 'check' ) . 'Verified</span>' : '<span class="aw-state">From ' . esc_html( (string) get_post_meta( $id, 'aw_source_name', true ) ?: 'AWBI' ) . ' records</span>' )
 				. ( $featured ? '<span class="aw-state aw-state--feat">Featured</span>' : '' );
 			foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
 				$out .= '<span class="aw-type">' . esc_html( $t->name ) . '</span>';
 			}
 			$out .= '</p></div><div class="aw-org-actions">'
-				. ( $phone ? '<a class="aw-btn aw-btn--sm aw-btn--outline" href="tel:' . esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ) . '">' . aw_i( 'phone' ) . 'Call</a>' : '' )
+				. ( $phone ? '<a class="aw-btn aw-btn--sm aw-btn--outline" href="' . esc_attr( aw_tel_url( $phone ) ) . '">' . aw_i( 'phone' ) . 'Call</a>' : '' )
 				. '<a class="aw-org-go" href="' . esc_url( get_permalink() ) . '" aria-label="' . esc_attr( 'View ' . $name ) . '">' . aw_i( 'arrow-right' ) . '</a></div></article>';
 		}
 		wp_reset_postdata();

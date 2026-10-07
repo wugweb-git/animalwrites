@@ -50,7 +50,7 @@ function aw_listing_place( $id ) {
 function aw_listing_schema( $id ) {
 	list( $state, $district ) = aw_listing_place( $id );
 	$org = array(
-		'@type' => 'NGO',
+		'@type' => has_term( array( 'veterinary-hospital', 'veterinary-dispensary', 'mobile-veterinary-unit' ), 'aw_listing_type', $id ) ? 'VeterinaryCare' : 'NGO',
 		'@id'   => get_permalink( $id ) . '#organization',
 		'name'  => get_the_title( $id ),
 		'url'   => get_permalink( $id ),

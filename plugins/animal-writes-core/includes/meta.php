@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function aw_meta_schema() {
-	$cards = array( 'aw_news', 'aw_legal', 'aw_research' );
+	$cards = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_listing' ); // listings: the public list a record came from
 	$all   = array_keys( aw_post_types() );
 
 	return array(

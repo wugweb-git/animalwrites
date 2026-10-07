@@ -39,11 +39,28 @@ function aw_normalise_phone( $raw ) {
 	if ( '' === $digits ) {
 		return '';
 	}
-	$digits = ltrim( $digits, '0' );
+	if ( strlen( $digits ) <= 5 ) {
+		return $digits; // short helpline code such as 1962: dialled as is
+	}
+	$digits = ltrim( $digits, '0' ); // trunk prefix of STD landlines and mobiles
 	if ( 10 === strlen( $digits ) ) {
 		$digits = '91' . $digits;
 	}
 	return $digits;
+}
+
+/**
+ * tel: link for a phone number (short codes stay local, others get +91).
+ *
+ * @param string $raw Raw number.
+ * @return string
+ */
+function aw_tel_url( $raw ) {
+	$d = aw_normalise_phone( $raw );
+	if ( '' === $d ) {
+		return '';
+	}
+	return 'tel:' . ( strlen( $d ) <= 5 ? '' : '+' ) . $d;
 }
 
 /**
@@ -90,8 +107,7 @@ function aw_binding_value( $key, $post_id ) {
 		case 'phone':
 			return $m( 'aw_phone' );
 		case 'phone_url':
-			$d = aw_normalise_phone( $m( 'aw_phone' ) );
-			return $d ? 'tel:+' . $d : '';
+			return aw_tel_url( $m( 'aw_phone' ) );
 		case 'whatsapp_url':
 			$d = aw_normalise_phone( $m( 'aw_whatsapp' ) );
 			return $d ? 'https://wa.me/' . $d : '';
