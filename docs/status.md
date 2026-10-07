@@ -27,7 +27,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | 1.0 receipts | Personal data and photos dropped; the total count (16,754) is kept. |
 | Retention | **Archive, never delete** (section 5). |
 | Tags | Site Kit is the only tag source. |
-| Homeward, FTP password | Deferred. |
+| FTP password | Closed (7 Oct). |
 
 ## 2. Pillars: plan (2.0 PDF) vs now
 
@@ -72,7 +72,6 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | 13 | Map / near me | ❌ no coordinates |
 | 14 | Seeding from public sources | AWBI list, AWBI ABC list, DAHD 1962, five states' district vet offices, Kerala institutions. **Not used:** Haryana (2,900 names, no phones, PDF too irregular to parse reliably); Punjab (2020, personal mobiles); Tamil Nadu (needs a data.gov.in API key); Bihar, MP, Rajasthan, Gujarat, AP (nothing usable published); NGO Darpan (captcha, unclear terms) |
 | 15 | 1.0 supporters' locations | waiting for the next NGO data (they are ordinary NGOs, not partners) |
-| 16 | Homeward mapping | deferred |
 
 **How the imports work:** `tools/directory/README.md` (idempotent, never deletes, unverified, source shown). The sources are also listed in `animal-writes-workers/SOURCES.md`.
 
@@ -168,13 +167,9 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 
 **Deferred:**
 - GTM container content
-- WhatsApp sign-up post for 1.0 volunteers
 - email list, newsletter and 1.0 opt-in email
 - CAPTCHA
 - DPDP consent checkboxes
-- Looker Studio
-- Homeward
-- FTP/hPanel password
 
 **Waiting, no action needed:** AdSense review, and ads.txt switching to "Authorized".
 

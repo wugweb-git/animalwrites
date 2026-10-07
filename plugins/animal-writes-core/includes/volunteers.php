@@ -76,7 +76,7 @@ function aw_volunteer_form() {
 		$html .= '<label class="aw-check"><input type="checkbox" name="roles[]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $picked, true ), true, false ) . '> ' . esc_html( $label ) . '</label>';
 	}
 	$html .= '</fieldset>';
-	/* Phase 2: explicit consent checkbox (DPDP Act). */
+	$html .= aw_field( $form, array( 'name' => 'consent', 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.', 'type' => 'checkbox', 'required' => true ) );
 	$html .= '<p><button type="submit" class="wp-element-button">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></p></form>';
 	return $html;
 }
@@ -96,12 +96,13 @@ function aw_volunteer_submit() {
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'state' => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
 		'city'  => sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) ),
+		'consent' => empty( $_POST['consent'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 		'roles' => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['roles'] ?? array() ) ) ) ),
 	);
 	$errors = aw_form_validate(
-		array( 'name' => array( 'required', 'max:120' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'state' => array( 'required' ), 'city' => array( 'max:80' ) ),
+		array( 'name' => array( 'required', 'max:120' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'state' => array( 'required' ), 'city' => array( 'max:80' ), 'consent' => array( 'required' ) ),
 		$v,
-		array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone or WhatsApp', 'state' => 'State or union territory', 'city' => 'City or district' )
+		array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone or WhatsApp', 'state' => 'State or union territory', 'city' => 'City or district', 'consent' => 'Agreement' )
 	);
 	$term = $v['state'] ? get_term_by( 'slug', $v['state'], 'aw_city' ) : null;
 	if ( $v['state'] && ! $term ) {
@@ -121,7 +122,7 @@ function aw_volunteer_submit() {
 			'role'                 => implode( ', ', $v['roles'] ),
 			'source'               => 'v2_form',
 			'consent_scope'        => 'volunteering',
-			'consent_text_version' => 'v2-form-no-checkbox',
+			'consent_text_version' => 'v2-form-consent-1',
 		)
 	);
 	aw_form_count( $rl );
