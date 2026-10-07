@@ -475,6 +475,10 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-ad ,.kit-ad { margin: var(--kit-space-7) auto; max-width: var(--kit-width-content); text-align: center; border-block: 1px solid var(--kit-color-line); padding: var(--kit-space-3) 0; }
 .aw-ad-label ,.kit-ad-label { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin: 0 0 var(--kit-space-2); max-width: none; }
 .aw-ad-item ,.kit-ad-item { grid-column: 1 / -1; }
+/* An ad box takes no space until the network actually fills it (unapproved site, no ad to show). */
+:is(.aw-ad, .kit-ad):has(ins.adsbygoogle:not([data-ad-status="filled"])) { margin: 0 auto; border-block: 0; }
+:is(.aw-ad, .kit-ad):has(ins.adsbygoogle:not([data-ad-status="filled"])) :is(.aw-ad-label, .kit-ad-label) { display: none; }
+:is(.aw-ad, .kit-ad) ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; overflow: hidden; }
 
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--kit-color-line); }
