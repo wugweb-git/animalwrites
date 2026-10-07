@@ -476,3 +476,6 @@ body { background: var(--aw-color-canvas); }
 .aw-report summary::-webkit-details-marker { display: none; }
 .aw-report details[open] { padding: var(--aw-space-5); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); background: var(--aw-color-raised); }
 .aw-report summary:focus-visible { outline: 3px solid var(--aw-color-focus); outline-offset: 3px; border-radius: var(--aw-radius-control); }
+
+/* Title links in directory rows and the document library: at least 24px tall to tap (WCAG 2.5.8). */
+.aw-org-name a, .aw-doc-title a { display: inline-block; padding-block: 2px; }
