@@ -1071,3 +1071,4 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-ed-list .aw-src { grid-area: terms; margin: 0; }
 .aw-ed-lead .aw-src { margin-top: var(--aw-space-2); }
 :is(.aw-ed-list, .aw-ed-lead) .aw-card-time { padding-right: 0; min-height: 0; }
+.is-layout-constrained > .aw-src { max-width: var(--wp--style--global--content-size, 720px); margin-left: auto !important; margin-right: auto !important; }
