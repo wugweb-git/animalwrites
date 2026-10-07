@@ -14,16 +14,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_AD_SLOTS = array(
 	'home'    => 'Homepage, between sections',
 	'article' => 'After a story, guide or page',
-	'archive' => 'Section lists, after the 6th item',
+	'archive' => 'Section lists, after the 6th item (or at the end of the list)',
 	'head'    => 'Site-wide code in <head> (network script, auto ads)',
 );
 
 function aw_ad( $slot ) {
 	$code = (string) get_option( 'aw_ad_' . $slot, '' );
-	if ( '' === trim( $code ) || 'head' === $slot ) {
+	if ( '' === trim( $code ) || 'head' === $slot || apply_filters( 'kits_ads_skip', false, $slot ) ) {
 		return '';
 	}
 	return '<aside class="aw-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="aw-ad-label">Advertisement</p>' . $code . '</aside>';
+}
+
+/** The section-list ad, once per page (themes with their own list markup call this at the end of the list). */
+function kits_list_ad() {
+	static $done = false;
+	if ( $done || is_admin() || ! ( is_archive() || is_home() ) ) {
+		return '';
+	}
+	$ad = aw_ad( 'archive' );
+	$done = (bool) $ad;
+	return $ad;
 }
 
 add_shortcode( 'aw_ad', fn( $a ) => aw_ad( sanitize_key( $a['slot'] ?? 'home' ) ) );
@@ -71,12 +82,8 @@ add_filter(
 		if ( is_admin() || ! ( is_archive() || is_home() ) ) {
 			return $content;
 		}
-		$ad = aw_ad( 'archive' );
-		if ( ! $ad ) {
-			return $content;
-		}
 		$parts = explode( '</li>', $content );
-		if ( count( $parts ) > 7 ) {
+		if ( count( $parts ) > 7 && ( $ad = kits_list_ad() ) ) { // phpcs:ignore
 			$parts[5] .= '</li><li class="aw-ad-item">' . $ad;
 		}
 		return implode( '</li>', $parts );

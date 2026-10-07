@@ -90,7 +90,8 @@ function aw_filter_chips( $tax, $param, $label, $type ) {
 /** Pagination for the main query. */
 function aw_pager() {
 	$links = paginate_links( array( 'type' => 'array', 'prev_text' => 'Previous', 'next_text' => 'Next' ) );
-	return $links ? '<nav class="aw-pager" aria-label="Pages">' . implode( '', $links ) . '</nav>' : '';
+	$ad = function_exists( 'kits_list_ad' ) ? kits_list_ad() : ''; // section-list ad at the end of the list
+	return $ad . ( $links ? '<nav class="aw-pager" aria-label="Pages">' . implode( '', $links ) . '</nav>' : '' );
 }
 
 /** Empty state. */

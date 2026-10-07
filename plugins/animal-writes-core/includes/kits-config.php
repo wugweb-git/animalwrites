@@ -17,6 +17,7 @@ add_filter( 'kits_gtm_id', fn() => '' );
 add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in' );
 
 add_filter( 'kits_share_post_types', fn() => AW_CONTENT_TYPES );
+add_filter( 'kits_ads_skip', fn( $skip ) => $skip || is_page( 'helplines' ) ); // no ads where people look for emergency help
 add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_research' ) );
 
 add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign' ) );
