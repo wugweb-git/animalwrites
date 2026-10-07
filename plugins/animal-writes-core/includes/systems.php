@@ -213,8 +213,12 @@ add_shortcode(
 			$topic = aw_first_term( $id, 'aw_topic' );
 			$src   = (string) get_post_meta( $id, 'aw_source_name', true );
 			$doc   = (bool) get_post_meta( $id, 'aw_file_id', true );
+			// Acts and Rules show the year of the law (from its title), not the date we added them.
+			$year  = get_query_var( 'aw_acts' ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title(), $ym ) ? $ym[0] : '';
+			$date  = $year ? '<div class="aw-case-date"><span class="d">' . esc_html( $year ) . '</span></div>'
+				: '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>';
 			$out  .= '<article class="aw-case">'
-				. '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>'
+				. $date
 				. '<div class="aw-case-body"><div class="aw-case-tags">'
 				. ( $iss ? '<span class="aw-issuer aw-issuer--' . esc_attr( $iss->slug ) . '">' . esc_html( $iss->name ) . '</span>' : '' )
 				. ( $topic ? '<span class="aw-case-topic">' . esc_html( $topic->name ) . '</span>' : '' ) . '</div>'

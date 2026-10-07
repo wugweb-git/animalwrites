@@ -55,6 +55,9 @@ add_shortcode(
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
+		if ( get_query_var( 'aw_acts' ) ) {
+			$desc = (string) get_option( 'aw_acts_intro', '' ); // its own intro, written by the owner (Legal Watch > Acts & Rules intro)
+		}
 		if ( is_tax( 'aw_city' ) ) {
 			$desc = 'Shelters, vets, ambulances and rescue groups listed here. Unverified listings are marked; organisations can correct their details.';
 		}

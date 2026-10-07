@@ -183,7 +183,7 @@
 			: a.closest('.wp-block-navigation') && a.closest('header, .aw-site-header, .kit-site-header') ? 'primary' : '';
 		if (!area) return;
 		var data = { menu_area: area, link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 100), link_url: a.getAttribute('href') };
-		if (typeof window.gtag === 'function') window.gtag('event', 'menu_click', data);
-		else (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'menu_click' }, data));
+		(window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'menu_click' }, data)); // for GTM
+		if (typeof window.gtag === 'function') window.gtag('event', 'menu_click', data); // GA4 through Site Kit
 	}, { capture: true });
 })();

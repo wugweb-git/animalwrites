@@ -214,3 +214,37 @@ add_filter(
 	'render_block_core/html',
 	fn( $html ) => false !== strpos( $html, '[aw_' ) ? do_shortcode( $html ) : $html
 );
+
+/* ---------- Acts & Rules intro (owner-written) ---------- */
+
+add_action(
+	'admin_menu',
+	function () {
+		add_submenu_page( 'edit.php?post_type=aw_legal', 'Acts & Rules intro', 'Acts & Rules intro', 'edit_pages', 'aw-acts-intro', 'aw_acts_intro_screen' );
+	}
+);
+
+function aw_acts_intro_screen() {
+	if ( isset( $_POST['aw_acts_intro'] ) && check_admin_referer( 'aw_acts_intro' ) ) {
+		update_option( 'aw_acts_intro', sanitize_textarea_field( wp_unslash( $_POST['aw_acts_intro'] ) ), false );
+		echo '<div class="notice notice-success"><p>Saved.</p></div>';
+	}
+	echo '<div class="wrap"><h1>Acts &amp; Rules intro</h1><form method="post">';
+	wp_nonce_field( 'aw_acts_intro' );
+	echo '<p>Shown under the title of <a href="' . esc_url( home_url( '/legal-watch/acts-and-rules/' ) ) . '" target="_blank">Acts &amp; Rules</a>. Leave empty to show nothing.</p>';
+	echo '<textarea name="aw_acts_intro" rows="4" class="large-text">' . esc_textarea( (string) get_option( 'aw_acts_intro', '' ) ) . '</textarea>';
+	submit_button();
+	echo '</form></div>';
+}
+
+// The site search answers at /search/?q= (the address search engines are given); WordPress search runs on ?s=.
+add_action(
+	'template_redirect',
+	function () {
+		$q = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( '' !== $q && is_page( 'search' ) ) {
+			wp_safe_redirect( add_query_arg( 's', rawurlencode( $q ), home_url( '/' ) ) );
+			exit;
+		}
+	}
+);

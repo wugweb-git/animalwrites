@@ -377,7 +377,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-site-footer ,.kit-site-footer { padding-block: var(--kit-space-8) var(--kit-space-5) !important; }
 .aw-footer-grid ,.kit-footer-grid { display: grid; gap: var(--kit-space-7); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.3fr 1fr 1fr 1.6fr; } }
+@media (min-width: 1024px) { .aw-footer-grid ,.kit-footer-grid { grid-template-columns: 1.2fr 1.4fr 1fr .8fr 1.4fr; } }
 .aw-footer-brand p ,.kit-footer-brand p { margin: var(--kit-space-4) 0; color: rgba(255,255,255,.75); font-size: var(--kit-type-sm); max-width: 32ch; }
 .aw-footer-mail ,.kit-footer-mail { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-medium); font-size: var(--kit-type-sm); }
 .aw-socials ,.kit-socials { display: flex; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }

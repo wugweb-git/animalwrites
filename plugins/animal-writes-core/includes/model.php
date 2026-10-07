@@ -365,9 +365,7 @@ add_shortcode(
 			}
 			$html .= '</ul></section>';
 		}
-		$html .= '<p class="aw-org-claim"><a href="#claim">Claim or update this listing</a> · <a href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">or write to us</a></p>';
-		// The claim form sits in a closed panel; following the link opens it.
-		$html .= "<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href=\"#claim\"]');var d=a&&document.querySelector('#claim details');if(d){d.open=true;}});</script>";
+		$html .= '<p class="aw-org-claim"><a href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Claim or update this listing</a></p>';
 		return '<div class="aw-org-links">' . $html . '</div>';
 	}
 );
