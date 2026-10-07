@@ -618,3 +618,13 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-ed-list .wp-block-post-title ,.kit-ed-list .wp-block-post-title { grid-area: title; font-size: var(--kit-type-h4) !important; line-height: 1.3 !important; margin: var(--kit-space-2) 0 !important; }
 .aw-ed-list .wp-block-post-date ,.kit-ed-list .wp-block-post-date { grid-area: date; padding-right: 0 !important; min-height: 0 !important; }
 
+
+/* Breadcrumbs: a quiet trail above the page title. */
+.kit-crumbs { margin: 0 0 var(--kit-space-2, .5rem); font-size: var(--kit-type-sm, .875rem); color: var(--kit-color-muted); }
+.kit-crumbs ol { display: flex; flex-wrap: wrap; gap: 0 .4em; margin: 0; padding: 0; list-style: none; }
+.kit-crumbs li { display: inline-flex; align-items: center; min-width: 0; }
+.kit-crumbs li + li::before { content: "›"; margin-right: .4em; color: var(--kit-color-muted); }
+.kit-crumbs a { color: inherit; text-decoration: underline; text-underline-offset: .15em; text-decoration-color: var(--kit-color-line); }
+.kit-crumbs a:hover { color: var(--kit-color-ink); text-decoration-color: currentColor; }
+.kit-crumbs a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; border-radius: 2px; }
+.kit-crumbs [aria-current] { color: var(--kit-color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }

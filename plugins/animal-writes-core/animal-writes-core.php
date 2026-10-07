@@ -61,6 +61,7 @@ require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
 require_once AW_CORE_DIR . 'includes/redirects.php';
 require_once AW_CORE_DIR . 'includes/indexing.php';
+require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 
 register_activation_hook(
 	__FILE__,

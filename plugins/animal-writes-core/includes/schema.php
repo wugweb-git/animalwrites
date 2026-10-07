@@ -5,6 +5,9 @@
  * - Listing pages: Organization (NGO) with name, URL, logo, locality/region (no street address), contact details
  *   when present, the official website as sameAs, and the AWBI recognition code as an identifier.
  * - Directory pages (all, state, district, type): ItemList of the organisations on the page, in order.
+ * - Every page: the publisher (Organization) and the site (WebSite with site search), and the breadcrumb trail.
+ * - News: NewsArticle. Legal Watch: Legislation for Acts, Rules, Notifications and Circulars, else NewsArticle.
+ *   Guides: Article, plus FAQPage when the guide is written as questions. Jobs, internships, fellowships: JobPosting.
  *
  * @package animal-writes-core
  */
@@ -138,7 +141,9 @@ function aw_article_schema( $id ) {
 	$type  = get_post_type( $id );
 	$title = wp_strip_all_tags( get_the_title( $id ) );
 	$at    = 'Article';
-	if ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
+	if ( 'aw_legal' === $type && has_term( array( 'act', 'rule', 'notification', 'circular' ), 'aw_legal_kind', $id ) ) {
+		$at = 'Legislation';
+	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 		$at = 'NewsArticle';
 	} elseif ( 'aw_research' === $type && preg_match( '/\b(Act|Rules?)\b/', $title ) ) {
 		$at = 'Legislation';
@@ -167,6 +172,14 @@ function aw_article_schema( $id ) {
 		$data['author'] = array( '@id' => home_url( '/#organization' ) ); // the summary or guide is ours
 	} else {
 		$data['legislationJurisdiction'] = 'IN';
+		$kind = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
+		if ( $kind ) {
+			$data['legislationType'] = $kind->name;
+		}
+		$iss = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_source_type' ) : null;
+		if ( $iss ) {
+			$data['legislationPassedBy'] = array( '@type' => 'Organization', 'name' => $iss->name );
+		}
 	}
 	if ( $src_url ) {
 		// The original item we summarise or host.
@@ -175,56 +188,105 @@ function aw_article_schema( $id ) {
 	return array_filter( $data );
 }
 
-/** Home > Section > Page. */
-function aw_breadcrumb_schema( $id ) {
-	$type  = get_post_type( $id );
-	$items = array( array( 'Home', home_url( '/' ) ) );
-	$arch  = get_post_type_archive_link( $type );
-	$obj   = get_post_type_object( $type );
-	if ( $arch && $obj ) {
-		$items[] = array( $obj->labels->name, $arch );
+/** BreadcrumbList for the current page, from the same trail people see (breadcrumbs.php). */
+function aw_breadcrumb_schema() {
+	$trail = function_exists( 'aw_breadcrumbs' ) ? aw_breadcrumbs() : array();
+	if ( ! $trail ) {
+		return array();
 	}
-	$items[] = array( wp_strip_all_tags( get_the_title( $id ) ), get_permalink( $id ) );
-	$list    = array();
-	foreach ( $items as $i => $it ) {
-		$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => $it[0], 'item' => $it[1] );
+	$list = array();
+	foreach ( $trail as $i => $it ) {
+		$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => wp_strip_all_tags( $it[0] ), 'item' => $it[1] );
 	}
 	return array( '@type' => 'BreadcrumbList', 'itemListElement' => $list );
 }
 
+/** The site itself, with site search (shown on every page). */
+function aw_website_schema() {
+	return array(
+		'@type'           => 'WebSite',
+		'@id'             => home_url( '/#website' ),
+		'name'            => get_bloginfo( 'name' ),
+		'url'             => home_url( '/' ),
+		'inLanguage'      => 'en-IN',
+		'publisher'       => array( '@id' => home_url( '/#organization' ) ),
+		'potentialAction' => array(
+			'@type'       => 'SearchAction',
+			'target'      => home_url( '/?s={search_term_string}' ),
+			'query-input' => 'required name=search_term_string',
+		),
+	);
+}
+
+/** FAQPage for a guide whose headings are questions, each followed by its answer. */
+function aw_faq_schema( $id ) {
+	$html = (string) apply_filters( 'the_content', get_post_field( 'post_content', $id ) );
+	if ( ! preg_match_all( '#<h[23][^>]*>(.*?\?)\s*</h[23]>(.*?)(?=<h[23]|$)#si', $html, $m, PREG_SET_ORDER ) || count( $m ) < 2 ) {
+		return array();
+	}
+	$qs = array();
+	foreach ( $m as $row ) {
+		$answer = trim( wp_strip_all_tags( $row[2] ) );
+		if ( '' !== $answer ) {
+			$qs[] = array( '@type' => 'Question', 'name' => wp_strip_all_tags( $row[1] ), 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $answer ) );
+		}
+	}
+	return count( $qs ) >= 2 ? array( '@type' => 'FAQPage', '@id' => get_permalink( $id ) . '#faq', 'mainEntity' => $qs ) : array();
+}
+
+/** JobPosting for jobs, internships and fellowships that have a place. */
+function aw_job_schema( $id ) {
+	if ( ! has_term( array( 'job', 'internship', 'fellowship' ), 'aw_opportunity_type', $id ) ) {
+		return array();
+	}
+	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
+	$area = (string) get_post_meta( $id, 'aw_area', true );
+	if ( ! $state && ! $district && ! $area ) {
+		return array(); // a job posting needs a place
+	}
+	$org      = (string) get_post_meta( $id, 'aw_org_name', true );
+	$org_id   = (int) get_post_meta( $id, 'aw_organisation', true );
+	$org      = $org ? $org : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
+	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
+	$desc     = trim( (string) get_post_field( 'post_content', $id ) );
+	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : get_the_title( $id ) );
+	$data     = array(
+		'@type'              => 'JobPosting',
+		'@id'                => get_permalink( $id ) . '#job',
+		'title'              => wp_strip_all_tags( get_the_title( $id ) ),
+		'description'        => wp_kses_post( $desc ),
+		'datePosted'         => get_the_date( 'c', $id ),
+		'url'                => get_permalink( $id ),
+		'employmentType'     => has_term( 'internship', 'aw_opportunity_type', $id ) ? 'INTERN' : null,
+		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => $org, 'sameAs' => (string) get_post_meta( $id, 'aw_website', true ) ) ) : null,
+		'jobLocation'        => array(
+			'@type'   => 'Place',
+			'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district ? $district : $area, 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
+		),
+		'validThrough'       => $deadline ? $deadline . 'T23:59:59+05:30' : null,
+	);
+	return array_filter( $data );
+}
+
+// One graph per page: the publisher and the site on every page, plus the page's own item and its breadcrumb trail.
 add_action(
 	'wp_head',
 	function () {
-		if ( is_front_page() ) {
-			aw_jsonld(
-				array(
-					'@context' => 'https://schema.org',
-					'@graph'   => array(
-						aw_publisher_schema(),
-						array(
-							'@type'           => 'WebSite',
-							'@id'             => home_url( '/#website' ),
-							'name'            => get_bloginfo( 'name' ),
-							'url'             => home_url( '/' ),
-							'inLanguage'      => 'en-IN',
-							'publisher'       => array( '@id' => home_url( '/#organization' ) ),
-							'potentialAction' => array(
-								'@type'       => 'SearchAction',
-								'target'      => home_url( '/?s={search_term_string}' ),
-								'query-input' => 'required name=search_term_string',
-							),
-						),
-					),
-				)
-			);
+		if ( is_404() ) {
 			return;
 		}
+		$graph = array( aw_publisher_schema(), aw_website_schema() );
 		if ( is_singular( array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide' ) ) ) {
-			$id = get_queried_object_id();
-			aw_jsonld( array( '@context' => 'https://schema.org', '@graph' => array( aw_article_schema( $id ), aw_breadcrumb_schema( $id ), aw_publisher_schema() ) ) );
-		} elseif ( is_singular( array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw_resource' ) ) ) {
-			aw_jsonld( array( '@context' => 'https://schema.org' ) + aw_breadcrumb_schema( get_queried_object_id() ) );
+			$id      = get_queried_object_id();
+			$graph[] = aw_article_schema( $id );
+			if ( 'aw_guide' === get_post_type( $id ) ) {
+				$graph[] = aw_faq_schema( $id );
+			}
+		} elseif ( is_singular( 'aw_opportunity' ) ) {
+			$graph[] = aw_job_schema( get_queried_object_id() );
 		}
+		$graph[] = aw_breadcrumb_schema();
+		aw_jsonld( array( '@context' => 'https://schema.org', '@graph' => array_values( array_filter( $graph ) ) ) );
 	},
 	31
 );
