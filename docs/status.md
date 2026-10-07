@@ -23,7 +23,10 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | News attribution | Google News pattern: favicon + source on cards (plain text); the source is linked on the detail page. |
 | Ingestion | Metadata + our 2–3 line summary only, never full articles. Government PDFs are the exception and are hosted. Items are reviewed by a person before publishing. |
 | Databases | One MySQL database. Volunteers live in their own table (`aw_volunteers`). |
-| Email list | Our own database (self-hosted), not Brevo. Sending route later. |
+| Email list | Our own database (self-hosted), not Brevo. Sent through the site's own mailbox (`noreply@animalwrites.in`, WP Admin → Settings → Mail). |
+| CAPTCHA | ALTCHA: self-hosted proof-of-work, no keys, on every form. |
+| Featured listings | Free for now, through the claim form; 90 days, then off automatically. |
+| Listing verification | The claim form plus the admin's Approve. |
 | 1.0 receipts | Personal data and photos dropped; the total count (16,754) is kept. |
 | Retention | **Archive, never delete** (section 5). |
 | Tags | Site Kit is the only tag source. |
@@ -63,10 +66,10 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | 4 | Contact details | ⚠️ **324 with a phone** (official numbers only: 1962 units, district offices, Malappuram institutions), **1,092 with an official email**. The AWBI and ABC lists contain no contacts. Officers' names and personal mobiles are never stored |
 | 5 | Verification status + date | ✅ built; every listing shows "Not yet confirmed" plus its source and list date. 0 verified |
 | 6 | Claim/update workflow | ✅ on every listing, admin-approved. 0 claims |
-| 7 | Contact verification process | ❌ not defined (owner) |
+| 7 | Contact verification process | ✅ claim form + admin Approve (owner's decision) |
 | 8 | Periodic re-verification | ✅ daily job flags listings verified more than 180 days ago |
 | 9 | Report an error | ✅ on every listing. 0 reports |
-| 10 | Featured profiles | ✅ logic works. 0 featured, no pricing (owner) |
+| 10 | Featured profiles | ✅ free for now: "Also feature this listing" box on the claim form, 90 days on approval. 0 featured |
 | 11 | Structured data | ✅ NGO or VeterinaryCare on listings, ItemList on directory pages |
 | 12 | Logos and photos | ⚠️ 13 supporter logos only |
 | 13 | Map / near me | ❌ no coordinates |
@@ -116,7 +119,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Analytics | GA4 through Site Kit's Google tag (GT-TXZHFR39). Old GTM-W9D28GKV removed, which ended double counting |
 | GTM | container GTM-TB3FCFQB created; content and attaching it are deferred |
 | AdSense | code loaded by Site Kit; 3 slots (homepage, after article, section lists); none on /helplines/; empty slots take no space. Site in review; ads.txt correct (`/ads.txt` returns 200) |
-| Cache and images | LiteSpeed Cache + Hostinger CDN, WebP. News images are hotlinked from publishers (own images optional) |
+| Cache and images | LiteSpeed Cache + Hostinger CDN, WebP. News and Legal Watch show our own topic photos (11 of 18 topics have one) |
 | Background jobs | run on page visits, with the GitHub workflow as backup; 0 overdue |
 
 ## 7. Data
@@ -126,7 +129,8 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Live site | Hostinger MySQL | live |
 | Volunteers | `aw_volunteers` (admin list, export, delete) | **88** 1.0 volunteers recovered (from the session log and campaign screenshots); the 2.0 form writes here |
 | 1.0 Supabase export (18,222 rows: volunteers + receipts) | — | **lost.** Exported and checksum-verified on 5 Oct, then the project was deleted and every local copy was gone by 7 Oct. Two whole-disk scans found nothing; Supabase can't restore it |
-| Consent | — | 1.0 volunteers signed up for the campaign, not 2.0 updates, so they must opt in before any email (DPDP Act) |
+| Consent | volunteer and newsletter forms | consent tick box on both (DPDP). 1.0 volunteers must opt in before any newsletter: the invitation in WP Admin → Newsletter carries a confirm link |
+| Newsletter subscribers | `aw_subscribers` (WP Admin → Newsletter: counts, CSV export, send) | sign-up on Get involved with email confirmation; 0 so far |
 
 ## 8. Theme and design system
 - **Kits master:**
@@ -151,28 +155,19 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Visitor counter, countdown, confetti, admin pages, testimonials | dropped |
 | Exposed 1.0 endpoints | function deleted |
 
-## 10. Notion (done by Cowork)
-- **Animal Writes 2.0:** build status set to live; Stack and Technology set to WordPress; duplicate Strategic Review removed; guardrail and hosted-documents changes noted.
-- **"Animal Writes 3.0"** renamed Homeward.
-- **⏳ Pending page** created.
+## 10. Notion
+- **🐾 Animal Writes 2.0:** build status and a **Pending** section (merged from the ⏳ Pending page, which now points there), updated 7 Oct.
+- **Topic write-ups and photos** table: the owner fills it in; Claude copies it to WP Admin → Topics.
 
 ## 11. Pending
 
 **Owner, open:**
-1. Submit `wp-sitemap.xml` in Search Console.
-2. A data.gov.in API key, only for the Tamil Nadu vet list.
-3. Directory business: Featured pricing and a sales process; who verifies a listing, and how.
-4. Anthropic console monthly limit; `noreply@animalwrites.in` mailbox.
-
-
-**Deferred:**
-- GTM container content
-- email list, newsletter and 1.0 opt-in email
-- CAPTCHA
-- DPDP consent checkboxes
+1. Mail: the `noreply@animalwrites.in` password in WP Admin → Settings → Mail.
+2. The 1.0 invitation text, sent from WP Admin → Newsletter.
+3. Submit `wp-sitemap.xml` in Search Console.
+4. Topic write-ups and photos (Notion table).
+5. Optional: data.gov.in API key (Tamil Nadu); Anthropic console monthly limit.
 
 **Waiting, no action needed:** AdSense review, and ads.txt switching to "Authorized".
 
-**Optional:**
-- own topic images instead of hotlinked publisher images
-- more opportunity sources (NGOBox, DevNetJobs) once their terms are read
+**Later:** more directory states; GTM container content; a second photo search after the owner's pictures.
