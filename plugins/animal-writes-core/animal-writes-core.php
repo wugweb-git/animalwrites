@@ -39,6 +39,7 @@ require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/ingest.php';
+require_once AW_CORE_DIR . 'includes/opportunities-site.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/media.php';
