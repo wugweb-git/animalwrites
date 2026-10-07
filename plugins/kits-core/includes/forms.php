@@ -101,7 +101,8 @@ function aw_form_open( $form, $attrs = array() ) {
 	$html .= '<input type="hidden" name="action" value="' . esc_attr( $form ) . '">'
 		. wp_nonce_field( $form, '_aw_nonce', true, false )
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
-		. '<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>';
+		. '<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
+		. kits_altcha_widget();
 	return $html;
 }
 
