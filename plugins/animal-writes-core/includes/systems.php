@@ -231,10 +231,10 @@ function aw_story( $id, $size = 'card' ) {
 	return '<article class="aw-story aw-story--' . esc_attr( $size ) . '">'
 		. '<div class="aw-story-media' . ( $img ? '' : ' is-failed' ) . '">' . $media . '<span class="aw-story-ph">' . esc_html( $topic ? $topic->name : 'News' ) . '</span></div>'
 		. '<div class="aw-story-body">'
-		. '<p class="aw-story-kicker">' . esc_html( $topic ? $topic->name : 'News' ) . '</p>'
+		. aw_source_row_html( $id )
 		. '<h2 class="aw-story-title"><a href="' . esc_url( get_permalink( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a></h2>'
 		. ( 'lead' === $size ? '<p class="aw-story-sum">' . esc_html( aw_text( $id, 40 ) ) . '</p>' : '' )
-		. '<p class="aw-story-meta">' . ( $src ? esc_html( $src ) . ' · ' : '' ) . esc_html( aw_src_date( $id ) ) . '</p>'
+		. '<p class="aw-story-meta">' . aw_rel_time_html( $id ) . '</p>'
 		. '</div></article>';
 }
 

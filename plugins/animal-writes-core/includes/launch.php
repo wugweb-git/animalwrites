@@ -309,3 +309,35 @@ add_action(
 	},
 	104
 );
+
+/**
+ * One-time: news and legal slugs that end with the publisher are cleaned. For published items WordPress records
+ * the old slug, so the old URL 301s to the new one (wp_old_slug_redirect). Runs as an administrator so
+ * wp_update_post does not filter the content.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_slugs_clean' ) || ! function_exists( 'aw_clean_news_slug' ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			return;
+		}
+		update_option( 'aw_slugs_clean', '1', false ); // set first: never loops
+		$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'fields' => 'ID' ) );
+		$prev   = get_current_user_id();
+		wp_set_current_user( (int) ( $admins[0] ?? 0 ) );
+		$changed = array();
+		foreach ( get_posts( array( 'post_type' => array( 'aw_news', 'aw_legal' ), 'post_status' => 'any', 'numberposts' => -1 ) ) as $p ) {
+			if ( ! $p->post_name ) {
+				continue;
+			}
+			$clean = aw_clean_news_slug( $p->post_name, $p->ID );
+			if ( $clean !== $p->post_name ) {
+				wp_update_post( array( 'ID' => $p->ID, 'post_name' => $clean ) );
+				$changed[] = $p->post_name . ' -> ' . get_post_field( 'post_name', $p->ID );
+			}
+		}
+		wp_set_current_user( $prev );
+		update_option( 'aw_slugs_clean_log', $changed, false );
+	},
+	105
+);

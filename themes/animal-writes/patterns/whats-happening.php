@@ -17,7 +17,9 @@
 <div class="wp-block-group aw-ed-news-grid"><!-- wp:query {"queryId":41,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-lead"} -->
 <div class="wp-block-query aw-ed-lead"><!-- wp:post-template -->
 <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"3/2"} /-->
-<!-- wp:post-terms {"term":"aw_topic"} /-->
+<!-- wp:shortcode -->
+[aw_source_row]
+<!-- /wp:shortcode -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-excerpt {"excerptLength":36} /-->
 <!-- wp:post-date /-->
@@ -26,7 +28,9 @@
 <!-- wp:query {"queryId":42,"query":{"perPage":4,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-list"} -->
 <div class="wp-block-query aw-ed-list"><!-- wp:post-template -->
 <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->
-<!-- wp:post-terms {"term":"aw_topic"} /-->
+<!-- wp:shortcode -->
+[aw_source_row]
+<!-- /wp:shortcode -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-date /-->
 <!-- /wp:post-template --></div>

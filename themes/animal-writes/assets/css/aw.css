@@ -1053,3 +1053,21 @@ body { background: var(--aw-color-canvas); }
 @media (prefers-reduced-motion: reduce) { .aw-task, .aw-res-card, .aw-story-media img, .aw-case > .aw-ico { transition: none; } .aw-task:hover, .aw-res-card:hover { transform: none; } }
 /* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
 a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover { color: var(--aw-color-on-accent) !important; }
+
+/* News attribution (Google News pattern): favicon + publisher above the headline, relative time below */
+.aw-src { display: flex; align-items: center; gap: var(--aw-space-2); margin: var(--aw-space-3) 0 var(--aw-space-1); font-size: var(--aw-type-xs); font-weight: var(--aw-weight-strong); color: var(--aw-color-ink); max-width: none; }
+.aw-src-icon { width: 16px; height: 16px; flex: none; border-radius: 3px; object-fit: contain; background: #fff; }
+.aw-src-icon--letter { display: inline-flex; align-items: center; justify-content: center; background: var(--aw-color-ink); color: var(--aw-color-on-ink); font-size: 10px; font-weight: var(--aw-weight-bold); line-height: 1; }
+.aw-src-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aw-src--link a { display: inline-flex; align-items: center; gap: var(--aw-space-2); min-height: var(--aw-size-target); color: var(--aw-color-ink); text-decoration: none; }
+.aw-src--link a:hover .aw-src-name { text-decoration: underline; text-underline-offset: 3px; }
+.aw-src--link a::after { content: none !important; }
+.aw-src--link { font-size: var(--aw-type-sm); margin-bottom: 0; }
+.aw-rel-time { font-size: var(--aw-type-xs); font-weight: var(--aw-weight-medium); color: var(--aw-color-muted); }
+.aw-item-time { margin: 0 0 var(--aw-space-4); }
+.aw-card-time { margin-top: auto; padding-right: 48px; min-height: 36px; display: flex; align-items: center; }
+.aw-story-body > .aw-src:first-child { margin-top: var(--aw-space-4); }
+.aw-story--row .aw-story-body > .aw-src:first-child { margin-top: 0; }
+.aw-ed-list .aw-src { grid-area: terms; margin: 0; }
+.aw-ed-lead .aw-src { margin-top: var(--aw-space-2); }
+:is(.aw-ed-list, .aw-ed-lead) .aw-card-time { padding-right: 0; min-height: 0; }
