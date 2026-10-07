@@ -36,7 +36,9 @@ function aw_item_image( $post_id, $size = 'large' ) {
 		}
 	}
 	// Items without a topic get the general photo; a topic with no fitting photo yet shows the placard instead.
-	return ( ! $topics && ! empty( $map['default'] ) ) ? (string) wp_get_attachment_image_url( (int) $map['default'], $size ) : '';
+	// 'default' may list several general photos; items rotate through them so neighbouring cards differ.
+	$general = array_values( array_filter( array_map( 'intval', (array) ( $map['default'] ?? array() ) ) ) );
+	return ( ! $topics && $general ) ? (string) wp_get_attachment_image_url( $general[ $post_id % count( $general ) ], $size ) : '';
 }
 
 /**

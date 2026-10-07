@@ -70,8 +70,18 @@ add_shortcode(
 		} else {
 			// Prefer items with a real image; fall back to placards only to fill the three tiles.
 			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => is_tax() ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
-			$with  = array_filter( $pool, fn( $p ) => aw_item_image( $p->ID ) || get_post_meta( $p->ID, 'aw_file_id', true ) || has_post_thumbnail( $p ) );
-			$posts = array_slice( array_merge( $with, array_diff_key( $pool, $with ) ), 0, 3 );
+			// Three tiles, each a different picture: one item per distinct image, then placards to fill.
+			$seen  = array();
+			$with  = array();
+			foreach ( $pool as $p ) {
+				$key = aw_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
+				if ( $key && ! isset( $seen[ $key ] ) ) {
+					$seen[ $key ] = true;
+					$with[]       = $p;
+				}
+			}
+			$rest  = array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
+			$posts = array_slice( array_merge( $with, $rest ), 0, 3 );
 			foreach ( $posts as $p ) {
 				$tiles .= aw_section_tile( $p );
 			}
