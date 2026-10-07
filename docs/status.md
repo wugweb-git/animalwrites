@@ -155,6 +155,23 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Visitor counter, countdown, confetti, admin pages, testimonials | dropped |
 | Exposed 1.0 endpoints | function deleted |
 
+## 9b. Restructure (7 Oct 2026, phases 1–9 done)
+
+| Phase | Result |
+|---|---|
+| 1 Classification (read-only) | 4,819 listings: 81 possible duplicate groups (199 listings, same name + district), 1 shared phone, 430 name-suggested retypes (Gaushala 355), 0 with more than 3 types, 1,139 with a contact / 3,680 without |
+| 2 Model | legal type, court, primary topic (+2), topic → listing types, relations shown on both sides in WP Admin, private internal "Animal Writes" organisation |
+| 3 Reclassify | 6 Legal Watch → News, 203 merged into 202, 9 Research → Legal Watch; 16 one-hop 301s; PIB links of 146 and 7509 fixed (workers bug fixed) |
+| 4 URLs + indexing | /directory/{state}/{district}/{type}/; 1,535 old URLs 301 in one hop; /location/ → directory; noindex for type/issuer/opportunity-type archives, district × type under 3 listings, search; filtered lists canonical to the list; sitemap 1,026 URLs, all 200 and indexable |
+| 5 Breadcrumbs + schema | visible trail + BreadcrumbList; Organization and WebSite on every page; Legislation, FAQPage, JobPosting |
+| 6 Pages | /emergency/, /topics/, /corrections/, /search/ (noindex), /for-organisations/, /legal-watch/acts-and-rules/; contact form (?about=); Get involved = volunteering; newsletter in the footer |
+| 7 Navigation | header Search + Emergency; Get help, Explore, Take action, Topics, About; For organisations; footer Newsletter, About, Policies, Topics; menu_click event to GA4 |
+| 8 Organisation profile | campaigns organised and joined, open opportunities, news mentions, claim link |
+| 9 Empty terms | filters show only types with listings, one Veterinary choice; Helpline type removed |
+
+**Still gated (owner):** applying the Phase 1 retypes and merges. Thin profiles stay indexed (owner's decision). News indexing unchanged (6 months indexed).
+**Copy needed:** the new pages carry "Copy needed" markers that only logged-in editors see.
+
 ## 10. Notion
 - **🐾 Animal Writes 2.0:** build status and a **Pending** section (merged from the ⏳ Pending page, which now points there), updated 7 Oct.
 - **Topic write-ups and photos** table: the owner fills it in; Claude copies it to WP Admin → Topics.
