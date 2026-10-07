@@ -43,7 +43,9 @@ add_filter(
 	'wp_robots',
 	function ( $robots ) {
 		$tax = array_filter( AW_NOINDEX_TAXONOMIES, fn( $t ) => is_tax( $t ) );
-		if ( ( $tax && 'aw_listing' !== get_query_var( 'post_type' ) ) || is_search() || aw_is_thin_directory_page() ) {
+		// A directory place page is also a listing-type query; only the bare type archive (/directory-type/…) is excluded.
+		$type_archive = $tax && ! get_query_var( 'aw_city' );
+		if ( $type_archive || is_search() || aw_is_thin_directory_page() ) {
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 			unset( $robots['max-image-preview'] );
