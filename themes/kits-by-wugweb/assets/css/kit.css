@@ -641,3 +641,11 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .kit-crumbs a:hover { color: var(--kit-color-ink); text-decoration-color: currentColor; }
 .kit-crumbs a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; border-radius: 2px; }
 .kit-crumbs [aria-current] { color: var(--kit-color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }
+/* Phones: wordmark, search, Emergency and the menu button all fit on one row */
+@media (max-width: 599px) {
+	.aw-header-right ,.kit-header-right { gap: var(--kit-space-1) !important; }
+	.aw-header-right > .wp-block-navigation ,.kit-header-right > .wp-block-navigation { order: 2; }
+	.aw-header-utility ,.kit-header-utility { gap: var(--kit-space-1); }
+	.aw-site-header .aw-wordmark img ,.kit-site-header .kit-wordmark img { width: 112px; height: auto; }
+	.aw-header-emergency ,.kit-header-emergency { padding-inline: var(--kit-space-3); }
+}
