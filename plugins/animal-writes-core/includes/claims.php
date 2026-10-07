@@ -4,7 +4,8 @@
  *
  * Requests are private aw_claim posts, readable by administrators only. An administrator
  * reviews current against proposed values and approves, which applies the changes and marks
- * the listing verified today, or rejects. Nothing changes on the public listing until then.
+ * the listing verified today (and features it, free, when the claimant asked), or rejects. Nothing changes on the
+ * public listing until then.
  *
  * @package animal-writes-core
  */
@@ -32,6 +33,9 @@ const AW_CLAIM_FIELDS = array(
 );
 
 const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
+
+/** Featured listings are free for now: an approved claim that asks for it is featured for this many days. */
+const AW_FEATURE_DAYS = 90;
 
 add_action(
 	'init',
@@ -106,6 +110,9 @@ function aw_claim_box() {
 	$html .= aw_field( $form, array( 'name' => 'logo', 'label' => 'Logo', 'type' => 'file', 'hint' => 'PNG, JPG or WebP, up to 2 MB.', 'attrs' => array( 'accept' => 'image/png,image/jpeg,image/webp', 'data-max-bytes' => AW_CLAIM_LOGO_BYTES ) ) );
 	$html .= aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000 ) ) );
 	$html .= '</fieldset>';
+	if ( ! get_post_meta( $listing->ID, 'aw_featured', true ) ) {
+		$html .= aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing at the top of the directory (free for now, ' . AW_FEATURE_DAYS . ' days)', 'type' => 'checkbox' ) );
+	}
 
 	$html .= '<p><button type="submit" class="wp-element-button">Send for review</button></p></form></details></section>';
 	return $html;
@@ -131,6 +138,7 @@ function aw_claim_submit() {
 		'email' => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+		'feature' => empty( $_POST['feature'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 	);
 	$rules  = array( 'name' => array( 'required', 'max:120' ), 'role' => array( 'required' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'notes' => array( 'max:1000' ) );
 	$labels = array( 'name' => 'Your name', 'role' => 'Your role here', 'email' => 'Your email', 'phone' => 'Your phone', 'notes' => 'Anything else' );
@@ -161,7 +169,7 @@ function aw_claim_submit() {
 	}
 
 	$proposed = array_filter( array_intersect_key( $v, AW_CLAIM_FIELDS ), fn( $x ) => '' !== $x );
-	if ( ! $errors && ! $proposed && ! $has_logo && '' === $v['notes'] ) {
+	if ( ! $errors && ! $proposed && ! $has_logo && '' === $v['notes'] && '' === $v['feature'] ) {
 		$errors['notes'] = 'Anything else: tell us at least one detail to confirm or change.';
 	}
 	if ( $errors ) {
@@ -188,13 +196,13 @@ function aw_claim_submit() {
 	}
 	update_post_meta( $id, 'aw_c_listing', $listing->ID );
 	update_post_meta( $id, 'aw_c_status', 'pending' );
-	foreach ( array( 'name', 'role', 'email', 'phone', 'notes' ) as $k ) {
+	foreach ( array( 'name', 'role', 'email', 'phone', 'notes', 'feature' ) as $k ) {
 		update_post_meta( $id, 'aw_c_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
 	update_post_meta( $id, 'aw_c_logo', $file );
 	aw_form_count( $rl );
-	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing.\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
+	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
 	wp_safe_redirect( $done );
 	exit;
 }
@@ -214,6 +222,9 @@ add_action(
 			$n = array_map( fn( $k ) => AW_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
 			if ( get_post_meta( $id, 'aw_c_logo', true ) ) {
 				$n[] = 'Logo';
+			}
+			if ( get_post_meta( $id, 'aw_c_feature', true ) ) {
+				$n[] = 'Featured';
 			}
 			echo esc_html( $n ? implode( ', ', $n ) : 'Notes only' );
 		}
@@ -253,13 +264,17 @@ function aw_claim_review_box( $post ) {
 		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
 		echo '<tr><td>Logo</td><td>' . get_the_post_thumbnail( $lid, 'thumbnail' ) . '</td><td><img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto"></td></tr>';
 	}
+	$feature = (bool) get_post_meta( $post->ID, 'aw_c_feature', true );
+	if ( $feature ) {
+		echo '<tr><td>Featured</td><td>' . esc_html( get_post_meta( $lid, 'aw_featured', true ) ? 'Yes, until ' . get_post_meta( $lid, 'aw_featured_until', true ) : 'No' ) . '</td><td><strong>Yes, for ' . (int) AW_FEATURE_DAYS . ' days (free)</strong></td></tr>';
+	}
 	echo '</tbody></table>';
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
 	if ( $notes ) {
 		echo '<p><strong>Notes:</strong><br>' . nl2br( esc_html( $notes ) ) . '</p>';
 	}
 	if ( 'pending' === $status ) {
-		foreach ( array( 'approve' => 'Approve: apply changes and mark verified', 'reject' => 'Reject' ) as $do => $label ) {
+		foreach ( array( 'approve' => 'Approve: apply changes and mark verified' . ( $feature ? ', and feature it' : '' ), 'reject' => 'Reject' ) as $do => $label ) {
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'aw_claim_decide', 'claim' => $post->ID, 'do' => $do ), admin_url( 'admin-post.php' ) ), 'aw_claim_decide_' . $post->ID );
 			echo '<a class="button ' . ( 'approve' === $do ? 'button-primary' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a> ';
 		}
@@ -317,6 +332,10 @@ add_action(
 			update_post_meta( $lid, 'aw_verified', true );
 			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 			update_post_meta( $lid, 'aw_needs_reverify', false );
+			if ( get_post_meta( $id, 'aw_c_feature', true ) ) {
+				update_post_meta( $lid, 'aw_featured', 1 );
+				update_post_meta( $lid, 'aw_featured_until', wp_date( 'Y-m-d', time() + AW_FEATURE_DAYS * DAY_IN_SECONDS ) );
+			}
 			update_post_meta( $id, 'aw_c_status', 'approved' );
 		} else {
 			update_post_meta( $id, 'aw_c_status', 'rejected' );
