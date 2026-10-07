@@ -147,6 +147,10 @@ add_shortcode(
 			if ( $code ) {
 				$rows[] = array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . $code . ' (list as on 31 May 2026)' );
 			}
+			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
+			if ( $abc ) {
+				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . wp_date( 'j M Y', strtotime( $abc ) ) );
+			}
 			$sname = (string) get_post_meta( $id, 'aw_source_name', true );
 			if ( $sname ) {
 				$surl   = (string) get_post_meta( $id, 'aw_source_url', true );
