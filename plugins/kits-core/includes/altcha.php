@@ -87,12 +87,27 @@ add_action(
 	}
 );
 
+// kits-core can sit outside wp-content/plugins (and outside the web root), so WordPress serves the script itself.
+add_action(
+	'init',
+	function () {
+		if ( ! isset( $_GET['kits_altcha_js'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+		header( 'Content-Type: application/javascript; charset=utf-8' );
+		header( 'Cache-Control: public, max-age=31536000, immutable' );
+		readfile( KITS_CORE_DIR . 'assets/altcha.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		exit;
+	},
+	0
+);
+
 /** Widget markup for a form; the script loads only on pages that have one. */
 function kits_altcha_widget() {
 	static $done = false;
 	if ( ! $done ) {
 		$done = true;
-		wp_enqueue_script( 'kits-altcha', plugins_url( 'assets/altcha.js', KITS_CORE_DIR . 'kits-core.php' ), array(), '2.3.0', array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		wp_enqueue_script( 'kits-altcha', home_url( '/?kits_altcha_js=1' ), array(), '2.3.0', array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		// Sit just above the form's send button rather than at the top of the form.
 		wp_add_inline_script( 'kits-altcha', "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.aw-captcha').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});});", 'before' );
 	}
