@@ -20,6 +20,7 @@ add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_
 
 add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign' ) );
 add_filter( 'kits_seo_twitter_site', fn() => '@AnimalWrites' );
+add_filter( 'kits_seo_locale', fn() => 'en_IN' );
 add_filter(
 	'kits_seo_archive_descriptions',
 	fn() => array(

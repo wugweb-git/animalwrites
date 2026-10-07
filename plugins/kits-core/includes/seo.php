@@ -76,7 +76,7 @@ add_action(
 			'<meta property="og:description" content="%s">'  => $desc,
 			'<meta property="og:url" content="%s">'          => $url,
 			'<meta property="og:image" content="%s">'        => $image,
-			'<meta property="og:locale" content="%s">'       => str_replace( '-', '_', get_bloginfo( 'language' ) ),
+			'<meta property="og:locale" content="%s">'       => (string) apply_filters( 'kits_seo_locale', str_replace( '-', '_', get_bloginfo( 'language' ) ) ),
 			'<meta name="twitter:card" content="%s">'        => $large ? 'summary_large_image' : 'summary',
 			'<meta name="twitter:site" content="%s">'        => (string) apply_filters( 'kits_seo_twitter_site', '' ),
 		);
