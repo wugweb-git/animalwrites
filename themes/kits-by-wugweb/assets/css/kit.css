@@ -142,11 +142,11 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 }
 .wp-block-post-template > li:has(> .is-style-kits-card) { padding: 0 !important; }
 .wp-block-post-template > li > .is-style-kits-card { margin: 0 !important; padding: var(--kit-space-5) !important; background: none !important; border: 0 !important; box-shadow: none !important; height: 100%; }
-.wp-block-post-template > li > *:not(.wp-block-post-featured-image):not(.aw-card-media):not(.is-style-kits-card) ,.wp-block-post-template > li > *:not(.wp-block-post-featured-image):not(.kit-card-media):not(.is-style-kits-card) { margin-inline: var(--kit-space-5); }
+.wp-block-post-template > li > *:not(.wp-block-post-featured-image):not(.aw-card-media):not(.is-style-kits-card) ,.wp-block-post-template > li > *:not(.wp-block-post-featured-image):not(.kit-card-media):not(.aw-card-media):not(.is-style-kits-card) { margin-inline: var(--kit-space-5); }
 .wp-block-post-template > li:hover, .wp-block-post-template > li:focus-within { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2) !important; }
 .wp-block-post-template > li > :is(.wp-block-post-featured-image, .aw-card-media) ,.wp-block-post-template > li > :is(.wp-block-post-featured-image, .kit-card-media) { border-radius: 0; margin: 0 0 var(--kit-space-4); }
 .wp-block-post-template > li > :is(.wp-block-post-featured-image, .aw-card-media):last-child ,.wp-block-post-template > li > :is(.wp-block-post-featured-image, .kit-card-media):last-child { margin-bottom: 0; }
-.wp-block-post-template > li > :first-child:not(.wp-block-post-featured-image):not(.aw-card-media) ,.wp-block-post-template > li > :first-child:not(.wp-block-post-featured-image):not(.kit-card-media) { margin-top: var(--kit-space-5); }
+.wp-block-post-template > li > :first-child:not(.wp-block-post-featured-image):not(.aw-card-media) ,.wp-block-post-template > li > :first-child:not(.wp-block-post-featured-image):not(.kit-card-media):not(.aw-card-media) { margin-top: var(--kit-space-5); }
 .wp-block-post-template .wp-block-post-title { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); line-height: 1.3; letter-spacing: -0.015em; margin-block: var(--kit-space-2); }
 .wp-block-post-template .wp-block-post-title a { display: block; text-decoration: none; color: var(--kit-color-ink); }
 .wp-block-post-template .wp-block-post-title a::after { content: ""; position: absolute; inset: 0; } /* whole card is the target */
@@ -532,7 +532,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-credit ,.kit-credit { margin-top: var(--kit-space-2); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 .aw-credit a ,.kit-credit a { color: inherit; }
 /* Lead image on an item's own page: wide, capped height, rounded, elevated */
-body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single main .wp-block-post-featured-image:not(.kit-logo) img { width: 100%; max-height: min(56vh, 480px); object-fit: cover; border-radius: var(--kit-radius-hero); box-shadow: var(--kit-elevation-2); }
+body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single main .wp-block-post-featured-image:not(.kit-logo):not(.aw-logo) img { width: 100%; max-height: min(56vh, 480px); object-fit: cover; border-radius: var(--kit-radius-hero); box-shadow: var(--kit-elevation-2); }
 
 /* Shared: filter chips, kinds, states, pager, empty */
 .aw-chips-nav ,.kit-chips-nav { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-6); }
@@ -560,4 +560,4 @@ body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single ma
 .aw-btn .aw-ico ,.kit-btn .kit-ico { --kit-ico-size: 1.1em; --aw-ico-size: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .aw-task, .aw-res-card, .aw-story-media img, .aw-case > .aw-ico ,.kit-task, .kit-res-card, .kit-story-media img, .kit-case > .kit-ico { transition: none; } .aw-task:hover, .aw-res-card:hover ,.kit-task:hover, .kit-res-card:hover { transform: none; } }
 /* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
-a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover ,a.kit-btn:not(.kit-btn--outline):not(.kit-btn--ghost), a.kit-btn:not(.kit-btn--outline):not(.kit-btn--ghost):hover { color: var(--kit-color-on-accent) !important; }
+a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover ,a.kit-btn:not(.kit-btn--outline):not(.aw-btn--outline):not(.kit-btn--ghost):not(.aw-btn--ghost), a.kit-btn:not(.kit-btn--outline):not(.aw-btn--outline):not(.kit-btn--ghost):not(.aw-btn--ghost):hover { color: var(--kit-color-on-accent) !important; }
