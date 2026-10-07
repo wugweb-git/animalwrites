@@ -170,6 +170,11 @@ add_shortcode(
 				$host   = $name ? $name : wp_parse_url( $src, PHP_URL_HOST );
 				$rows[] = array( 'arrow-up-right', 'Source: <a href="' . esc_url( $src ) . '" rel="noopener">' . esc_html( $host ) . '</a>', true );
 			}
+			foreach ( (array) get_post_meta( $id, 'aw_also_reported', true ) as $also ) {
+				if ( ! empty( $also['url'] ) ) {
+					$rows[] = array( 'arrow-up-right', 'Also reported by <a href="' . esc_url( $also['url'] ) . '" rel="noopener">' . esc_html( $also['name'] ?? wp_parse_url( $also['url'], PHP_URL_HOST ) ) . '</a>', true );
+				}
+			}
 			$rows[] = array( 'calendar', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . aw_src_date( $id ) . ' · added ' : 'Added ' ) . get_the_date( 'j M Y', $id ) );
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
 				$rows[] = array( 'research', 'Official document attached below' );

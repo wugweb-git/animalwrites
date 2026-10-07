@@ -36,7 +36,8 @@ function aw_find_by_source( $post_type, $url ) {
 	}
 	$ids = get_posts(
 		array(
-			'post_type'      => $post_type,
+			// Every section, not just $post_type: an item moved from Legal Watch to News must not come back as a new Legal item.
+			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'aw_research', 'aw_opportunity' ),
 			'post_status'    => 'any',
 			'meta_key'       => 'aw_source_url',
 			'meta_value'     => $url,
