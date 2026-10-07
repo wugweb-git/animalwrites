@@ -90,10 +90,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		'legal'    => 'aw_legal',
 		'research' => 'aw_research',
 		'listing'  => 'aw_listing',
+		'opportunity' => 'aw_opportunity',
 	);
 	$type = $map[ $req->get_param( 'type' ) ] ?? '';
 	if ( ! $type ) {
-		return new WP_Error( 'aw_bad_type', 'type must be news, legal, research or listing', array( 'status' => 400 ) );
+		return new WP_Error( 'aw_bad_type', 'type must be news, legal, research, listing or opportunity', array( 'status' => 400 ) );
 	}
 
 	$title      = sanitize_text_field( (string) $req->get_param( 'title' ) );
@@ -113,7 +114,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	// Sourcing policy (News → Sourcing): blocked publishers and, when switched on, the keyword filter.
-	if ( 'aw_listing' !== $type && function_exists( 'aw_sourcing_gate' ) ) {
+	if ( function_exists( 'aw_sourcing_gate' ) && function_exists( 'kits_sourced_types' ) && in_array( $type, kits_sourced_types(), true ) ) {
 		$verdict = aw_sourcing_gate( $source_url, (string) $req->get_param( 'source_name' ), (string) $req->get_param( 'feed' ), $title . ' ' . $summary );
 		if ( $verdict ) {
 			return new WP_REST_Response( array( 'status' => $verdict ), 200 );
@@ -123,9 +124,12 @@ function aw_ingest( WP_REST_Request $req ) {
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => $type,
-			'post_status'  => 'pending',
+			// Opportunities from approved sources are factual listings (title, organisation, place, deadline, link)
+			// and go live directly (owner's decision, 7 Oct 2026). Everything else waits for review.
+			'post_status'  => 'aw_opportunity' === $type ? 'publish' : 'pending',
 			'post_title'   => $title,
 			'post_excerpt' => $summary,
+			'post_content' => 'aw_opportunity' === $type ? '<!-- wp:paragraph --><p>' . esc_html( $summary ) . '</p><!-- /wp:paragraph -->' : '',
 		),
 		true
 	);
@@ -152,6 +156,29 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
 		aw_assign_existing_terms( $post_id, array( $req->get_param( 'city' ) ), 'aw_city', $ignored );
+	}
+
+	if ( 'aw_opportunity' === $type ) {
+		update_post_meta( $post_id, 'aw_org_name', sanitize_text_field( (string) $req->get_param( 'org_name' ) ) );
+		update_post_meta( $post_id, 'aw_apply_url', $source_url );
+		$deadline = aw_sanitize_meta( (string) $req->get_param( 'deadline' ), 'aw_deadline' );
+		if ( $deadline ) {
+			update_post_meta( $post_id, 'aw_deadline', $deadline );
+		}
+		if ( $req->get_param( 'opportunity_type' ) ) {
+			aw_assign_existing_terms( $post_id, array( $req->get_param( 'opportunity_type' ) ), 'aw_opportunity_type', $ignored );
+		}
+		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): link every part that names a known state or district.
+		$cities = array();
+		foreach ( preg_split( '#\s*[/,&]\s*|\s+and\s+#i', (string) $req->get_param( 'place' ) ) as $part ) {
+			$t = $part ? get_term_by( 'name', trim( $part ), 'aw_city' ) : false;
+			if ( $t ) {
+				$cities[] = (int) $t->term_id;
+			}
+		}
+		if ( $cities ) {
+			wp_set_object_terms( $post_id, array_unique( $cities ), 'aw_city' );
+		}
 	}
 
 	if ( 'aw_listing' === $type ) {
