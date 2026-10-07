@@ -199,6 +199,9 @@ function aw_ingest( WP_REST_Request $req ) {
 		aw_mirror_gov_pdf( $post_id, $source_url );
 	}
 
+	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).
+	$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+
 	return new WP_REST_Response(
 		array(
 			'status'        => 'created',
