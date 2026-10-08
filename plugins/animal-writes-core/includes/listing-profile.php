@@ -110,9 +110,13 @@ function aw_block_org_details( $a, $id ) {
 		$photos .= '<figure>' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</figure>';
 	}
 	$facts = '';
-	foreach ( array( 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_animals' => 'Animals helped', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	foreach ( array( 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( $m( $k ) ) {
-			$facts .= '<div><dt>' . esc_html( $label ) . '</dt><dd>' . esc_html( $m( $k ) ) . '</dd></div>';
+			$note = '';
+			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
+				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . esc_html( wp_date( 'j M Y', strtotime( $m( 'aw_services_on' ) ) ) ) : '' ) . '</span>';
+			}
+			$facts .= '<div><dt>' . esc_html( $label ) . '</dt><dd>' . esc_html( $m( $k ) ) . $note . '</dd></div>';
 		}
 	}
 	if ( '' === $links . $photos . $facts ) {
@@ -121,6 +125,19 @@ function aw_block_org_details( $a, $id ) {
 	return '<section class="aw-org-details" aria-label="About the organisation">'
 		. ( $links ? '<div class="aw-org-details-links">' . $links . '</div>' : '' )
 		. ( $photos ? '<div class="aw-org-gallery">' . $photos . '</div>' : '' )
-		. ( $facts ? '<dl class="aw-org-facts">' . $facts . '</dl>' : '' )
+		. ( $facts ? '<h2 class="aw-profile-h">Details</h2><dl class="aw-org-facts">' . $facts . '</dl>' : '' )
 		. '</section>';
 }
+
+// The description gets its heading ("About"), so the page reads: name, details, about.
+add_filter(
+	'the_content',
+	function ( $content ) {
+		if ( ! is_singular( 'aw_listing' ) || ! in_the_loop() || ! is_main_query() || '' === trim( wp_strip_all_tags( $content ) ) ) {
+			return $content;
+		}
+		return '<h2 class="aw-profile-h">About</h2>' . $content;
+	},
+	5
+);
+
