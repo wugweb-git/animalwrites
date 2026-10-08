@@ -862,3 +862,88 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 .kit-crumbs-more { color: var(--kit-color-muted); }
 /* Band head spans the content box (it is a flex child; auto margins would shrink and centre it) */
 .kit-section-band .kit-section-head { width: 100%; margin-inline: 0; grid-template-columns: minmax(0, 1fr) !important; }
+
+/* ======================================================================================================
+   Components (owner, 8 Oct 2026)
+   ====================================================================================================== */
+:root {
+	--kit-ico-calendar: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2218%22%20height%3D%2218%22%20x%3D%223%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22M16%202v4%22/%3E%3Cpath%20d%3D%22M8%202v4%22/%3E%3Cpath%20d%3D%22M3%2010h18%22/%3E%3C/svg%3E"); --kit-ico-user: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2021v-2a4%204%200%200%200-4-4H9a4%204%200%200%200-4%204v2%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22/%3E%3C/svg%3E"); --kit-ico-clock: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22/%3E%3Cpath%20d%3D%22M12%206v6l4%202%22/%3E%3C/svg%3E"); --kit-ico-pin: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2011a3%203%200%201%200%206%200a3%203%200%200%200%20-6%200%22%2F%3E%3Cpath%20d%3D%22M17.657%2016.657l-4.243%204.243a2%202%200%200%201%20-2.827%200l-4.244%20-4.243a8%208%200%201%201%2011.314%200z%22%2F%3E%3C%2Fsvg%3E");
+	--kit-ico-phone: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M22%2016.92v3a2%202%200%200%201-2.18%202%2019.79%2019.79%200%200%201-8.63-3.07%2019.5%2019.5%200%200%201-6-6%2019.79%2019.79%200%200%201-3.07-8.67A2%202%200%200%201%204.11%202h3a2%202%200%200%201%202%201.72%2012.84%2012.84%200%200%200%20.7%202.81%202%202%200%200%201-.45%202.11L8.09%209.91a16%2016%200%200%200%206%206l1.27-1.27a2%202%200%200%201%202.11-.45%2012.84%2012.84%200%200%200%202.81.7A2%202%200%200%201%2022%2016.92z%22/%3E%3C/svg%3E"); --kit-ico-mail: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2220%22%20height%3D%2216%22%20x%3D%222%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22m22%207-8.97%205.7a1.94%201.94%200%200%201-2.06%200L2%207%22/%3E%3C/svg%3E"); --kit-ico-wa: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021l1.65%20-3.8a9%209%200%201%201%203.4%202.9l-5.05%20.9%22%2F%3E%3Cpath%20d%3D%22M9%2010a.5%20.5%200%200%200%201%200v-1a.5%20.5%200%200%200%20-1%200v1a5%205%200%200%200%205%205h1a.5%20.5%200%200%200%200%20-1h-1a.5%20.5%200%200%200%200%201%22%2F%3E%3C%2Fsvg%3E"); --kit-ico-link: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E");
+	--kit-ico-search: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2211%22%20cy%3D%2211%22%20r%3D%228%22/%3E%3Cpath%20d%3D%22m21%2021-4.3-4.3%22/%3E%3C/svg%3E"); --kit-ico-send: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14.536%2021.686a.5.5%200%200%200%20.937-.024l6.5-19a.496.496%200%200%200-.635-.635l-19%206.5a.5.5%200%200%200-.024.937l7.93%203.18a2%202%200%200%201%201.112%201.11z%22/%3E%3Cpath%20d%3D%22m21.854%202.147-10.94%2010.939%22/%3E%3C/svg%3E"); --kit-ico-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); --kit-ico-alert: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m21.73%2018-8-14a2%202%200%200%200-3.48%200l-8%2014A2%202%200%200%200%204%2021h16a2%202%200%200%200%201.73-3%22/%3E%3Cpath%20d%3D%22M12%209v4%22/%3E%3Cpath%20d%3D%22M12%2017h.01%22/%3E%3C/svg%3E");
+	--kit-ico-prev: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%2019-7-7%207-7%22/%3E%3Cpath%20d%3D%22M19%2012H5%22/%3E%3C/svg%3E"); --kit-ico-next: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22/%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22/%3E%3C/svg%3E"); --kit-ico-download: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2015v4a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2v-4%22/%3E%3Cpath%20d%3D%22m7%2010%205%205%205-5%22/%3E%3Cpath%20d%3D%22M12%2015V3%22/%3E%3C/svg%3E"); --kit-ico-person: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2021v-2a4%204%200%200%200-4-4H9a4%204%200%200%200-4%204v2%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22/%3E%3C/svg%3E");
+}
+/* Tags are nouns, each kind its own tint; one font, size, weight and height for all; links never underline */
+.kit-tag, .kit-chip, .wp-block-post-terms a, .aw-profile-badge, .taxonomy-aw_place a {
+	display: inline-flex; align-items: center; gap: var(--s-1); min-height: 1.75rem; padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm);
+	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
+}
+.kit-tag--category, .taxonomy-aw_topic a { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
+.kit-tag--type, .taxonomy-aw_listing_type a, .taxonomy-aw_legal_kind a, .taxonomy-aw_resource_type a, .taxonomy-aw_opportunity_type a, .aw-org-tags > .kit-tag:not([class*="--"]) { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
+.kit-tag--issuer, .kit-tag--info.aw-issuer, .aw-case-tags > .kit-tag--info, .aw-case-tags > .kit-tag--ink { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
+.kit-tag--place, .taxonomy-aw_place a { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
+:is(.kit-chip, .wp-block-post-terms a, .taxonomy-aw_place a):hover { filter: brightness(.92); text-decoration: none !important; }
+.kit-tag .kit-ico, .kit-chip .kit-ico { --kit-ico-size: 1em; }
+.taxonomy-aw_place a::before { content: ""; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-pin) center / contain no-repeat; mask: var(--kit-ico-pin) center / contain no-repeat; }
+
+/* Logo in a tight tile: publishers, press, sources (AWBI, Google Maps, departments, the organisation) */
+.aw-src-icon, .aw-datasrc-logo img { width: 16px !important; height: 16px !important; object-fit: contain; border-radius: 3px; background: transparent; border: 0; padding: 0; }
+.aw-src-icon:not(.aw-src-icon--letter), .aw-datasrc-logo { box-sizing: content-box; padding: 3px !important; background: var(--kit-color-raised) !important; border: 1px solid var(--kit-color-line) !important; border-radius: var(--radius-sm) !important; }
+.aw-datasrc-logo { display: inline-flex; width: 16px !important; height: 16px !important; align-items: center; justify-content: center; }
+.aw-datasrcs.is-full { grid-template-columns: max-content minmax(0, 1fr); }
+
+/* Meta always with an icon: date, author / posted by, reading time, place */
+.wp-block-post-date, .aw-law-date, .aw-posted-by, .aw-press-handle, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--s-1); }
+.wp-block-post-date::before, .aw-law-date::before, .aw-posted-by::before, .aw-press-handle::before, .kit-meta::before {
+	content: "" !important; display: inline-block !important; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
+}
+.aw-posted-by::before, .aw-press-handle::before { -webkit-mask-image: var(--kit-ico-user); mask-image: var(--kit-ico-user); }
+.kit-ed-rows :is(.wp-block-post-date, .aw-law-date) { flex-direction: row !important; align-items: center !important; }
+
+/* Previous / Next: one pager everywhere — outlined pill buttons with arrows, numbers as 44px squares */
+.wp-block-query-pagination, .kit-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--kit-space-2); }
+:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .wp-block-post-navigation-link a, .kit-pager .prev, .kit-pager .next) {
+	display: inline-flex !important; align-items: center; gap: var(--s-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important;
+	border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-pill) !important; background: transparent; color: var(--kit-color-ink); font-weight: var(--kit-weight-medium); text-decoration: none !important;
+}
+:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .wp-block-post-navigation-link a, .kit-pager .prev, .kit-pager .next):hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
+.wp-block-query-pagination-previous::before, .wp-block-post-navigation-link.post-navigation-link-previous a::before, .kit-pager .prev::before,
+.wp-block-query-pagination-next::after, .wp-block-post-navigation-link.post-navigation-link-next a::after, .kit-pager .next::after {
+	content: ""; width: 1em; height: 1em; flex: none; background: currentColor; -webkit-mask: var(--kit-ico-prev) center / contain no-repeat; mask: var(--kit-ico-prev) center / contain no-repeat;
+}
+.wp-block-query-pagination-next::after, .wp-block-post-navigation-link.post-navigation-link-next a::after, .kit-pager .next::after { -webkit-mask-image: var(--kit-ico-next); mask-image: var(--kit-ico-next); }
+.wp-block-query-pagination-previous-arrow, .wp-block-query-pagination-next-arrow { display: none; }
+.wp-block-query-pagination-numbers .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: var(--kit-size-target); min-height: var(--kit-size-target); border-radius: var(--radius-sm); text-decoration: none; }
+.wp-block-query-pagination-numbers .page-numbers.current { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+
+/* Buttons carry an icon by what they do (only when the button has no icon of its own) */
+:is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico)):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [type=submit], [data-ico])::before,
+#claim > summary::before, #report > summary::before, #volunteer > summary::before {
+	content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat; mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat;
+}
+[href^="tel:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-phone); }
+[href^="mailto:"]:is(.kit-btn, .wp-block-button__link), .aw-newsletter-form [type=submit] { --kit-btn-ico: var(--kit-ico-mail); }
+[href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
+.aw-dir-search [type=submit], .kit-hsearch [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
+#claim > summary, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
+#report > summary, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
+#volunteer > summary, .aw-volunteer-form [type=submit] { --kit-btn-ico: var(--kit-ico-person); }
+.kit-disclosure > summary { gap: var(--s-2); }
+.kit-disclosure[open] > summary::before { display: none; }
+
+/* Surfaces: white, grey and its shades — page grey, sections white or darker grey, cards white on grey */
+body { background: var(--kit-surface-page); }
+.kit-surface-section { background: var(--kit-surface-section); }
+.kit-surface-alt { background: var(--kit-surface-section-alt); }
+.kit-overlay { position: relative; isolation: isolate; }
+.kit-overlay::after { content: ""; position: absolute; inset: 0; background: var(--kit-overlay); z-index: 0; pointer-events: none; }
+.kit-overlay > * { position: relative; z-index: 1; }
+
+/* Share (Scriptless Social Sharing plugin): Kits buttons — outlined pills with the network icon; WhatsApp filled */
+.scriptlesssocialsharing { margin: var(--kit-space-6) 0 0; padding-top: var(--kit-space-5); border-top: 1px solid var(--kit-color-line); max-width: var(--kit-width-wide); }
+.scriptlesssocialsharing__heading { margin: 0 0 var(--kit-space-3) !important; font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-regular) !important; color: var(--kit-color-muted); }
+.scriptlesssocialsharing__buttons { display: flex !important; flex-wrap: wrap; gap: var(--kit-space-2); width: auto !important; }
+.scriptlesssocialsharing__buttons a.button { display: inline-flex !important; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important; margin: 0 !important; border: 1px solid var(--kit-color-line) !important; border-radius: var(--kit-radius-pill) !important; background: transparent !important; color: var(--kit-color-ink) !important; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none !important; box-shadow: none !important; transition: background-color var(--kit-duration-spring) var(--kit-ease-spring), color var(--kit-duration-spring) var(--kit-ease-spring); }
+.scriptlesssocialsharing__buttons a.button:hover { background: var(--kit-color-ink) !important; color: var(--kit-color-on-ink) !important; border-color: var(--kit-color-ink) !important; }
+.scriptlesssocialsharing__buttons a.button.whatsapp { background: var(--kit-color-whatsapp) !important; border-color: var(--kit-color-whatsapp) !important; color: var(--kit-color-on-ink) !important; }
+.scriptlesssocialsharing__buttons svg, .scriptlesssocialsharing__icon { width: 1.125em !important; height: 1.125em !important; fill: currentColor; }
+.scriptlesssocialsharing__buttons a.button::after { content: none !important; }

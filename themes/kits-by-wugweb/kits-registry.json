@@ -53,13 +53,13 @@
     "kit-tags"
    ],
    "states": [
-    "neutral",
-    "accent",
-    "ink",
-    "success",
-    "warning",
-    "danger",
-    "info"
+    "category (blue)",
+    "type (grey)",
+    "issuer (green)",
+    "place (violet, pin icon)",
+    "plain",
+    "with icon",
+    "link (no underline)"
    ],
    "tokens": [
     "kit-color-ink (6% tint)",
@@ -994,7 +994,7 @@
   {
    "name": "Share",
    "type": "component",
-   "status": "live",
+   "status": "replaced",
    "classes": [
     "kit-share",
     "kit-sh"
@@ -1018,7 +1018,8 @@
     "link": "n/a",
     "alt": "n/a",
     "schema": "none"
-   }
+   },
+   "note": "Sharing is the Scriptless Social Sharing plugin, styled with Kits tokens."
   },
   {
    "name": "Table",
@@ -1323,6 +1324,77 @@
     "target": "n/a",
     "motion": "none",
     "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Meta line (date, author, reading time, place)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-meta"
+   ],
+   "states": [
+    "date (calendar)",
+    "author (person)",
+    "time (clock)",
+    "place (pin)"
+   ],
+   "tokens": [
+    "kit-color-muted",
+    "kit-type-xs"
+   ],
+   "a11y": {
+    "element": "<span>/<time> with a decorative icon",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "icon aria-hidden; text carries the meaning"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "datePublished / author where the item has them"
+   }
+  },
+  {
+   "name": "Surfaces and overlay",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-surface",
+    "kit-overlay"
+   ],
+   "states": [
+    "page grey",
+    "section white",
+    "section darker grey",
+    "card white",
+    "image with dark overlay"
+   ],
+   "tokens": [
+    "kit-surface-page",
+    "kit-surface-section",
+    "kit-surface-section-alt",
+    "kit-surface-card",
+    "kit-overlay"
+   ],
+   "a11y": {
+    "element": "background utilities",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "text on overlay meets 4.5:1"
    },
    "seo": {
     "heading": "none",
