@@ -13,7 +13,7 @@ const { state } = store( 'kits/dropdown', {
 			state.openId = state.openId === ctx.id ? '' : ctx.id;
 			if ( state.openId === ctx.id ) {
 				const { ref } = getElement();
-				requestAnimationFrame( () => ref.closest( '.kit-dd' )?.querySelector( '.kit-dd-panel input, .kit-dd-panel a' )?.focus() );
+				setTimeout( () => ref.closest( '.kit-dd' )?.querySelector( '.kit-dd-panel input, .kit-dd-panel a' )?.focus(), 60 ); // after the panel is shown
 			}
 		},
 		keys( event ) {
