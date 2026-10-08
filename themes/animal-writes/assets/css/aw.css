@@ -791,3 +791,5 @@ body { background: var(--kit-color-canvas); }
 	.aw-case-date.has-cover .aw-case-cover { width: 2rem; aspect-ratio: 3 / 4; }
 	.aw-case-tags .kit-tag { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 1.75rem; }
 }
+/* Home hero: the section owns the gutter — the copy box (max 1200, centred) only pads where the window is narrower than 1200 + 2 gutters */
+.aw-ed-hero-copy { padding-inline: max(0px, calc(var(--kit-space-gutter) - max(0px, (100vw - var(--kit-width-wide)) / 2))) !important; }
