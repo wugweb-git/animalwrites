@@ -356,26 +356,86 @@
 	}, { capture: true });
 })();
 
-/* Header search: the icon opens a search field in place (it stays a link to the search page without JavaScript). */
+/* Header search (every width): the icon opens a field across the whole header row; the menu and contact step aside.
+   Esc, the close button or a click outside closes it and puts focus back on the icon. Without JavaScript the icon is a
+   link to the search page. */
 (function () {
 	document.querySelectorAll('[data-search-toggle]').forEach(function (btn) {
 		var form = document.getElementById(btn.getAttribute('aria-controls'));
-		if (!form) return;
+		var header = btn.closest('.kit-site-header');
+		if (!form || !header) return;
 		var input = form.querySelector('input');
-		function set(open) {
+		var close = form.querySelector('.kit-hsearch-close');
+		if (!close) {
+			close = document.createElement('button');
+			close.type = 'button';
+			close.className = 'kit-hsearch-close';
+			close.setAttribute('aria-label', 'Close search');
+			close.innerHTML = '<span class="kit-ico kit-ico--x" aria-hidden="true"></span>';
+			form.appendChild(close);
+		}
+		function set(open, back) {
 			form.hidden = !open;
+			header.classList.toggle('is-searching', open);
 			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-			if (open) input.focus();
+			if (open) input.focus(); else if (back) btn.focus();
 		}
 		btn.addEventListener('click', function (e) { e.preventDefault(); set(form.hidden); });
-		form.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); btn.focus(); } });
+		close.addEventListener('click', function () { set(false, true); });
+		form.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false, true); });
+		document.addEventListener('click', function (e) { if (!form.hidden && !form.contains(e.target) && e.target !== btn && !btn.contains(e.target)) set(false); });
 	});
 })();
 
-/* Filters (kits_filter_bar): below 640px the groups fold into a "Filters" sheet (focus kept inside, Esc closes);
+/* Sticky nav: the announcement bar scrolls away, the nav stays at the top (its height is measured, as it can wrap). */
+(function () {
+	var bar = document.querySelector('.kit-announce');
+	function measure() { document.documentElement.style.setProperty('--kit-announce-h', (bar ? bar.offsetHeight : 0) + 'px'); }
+	measure();
+	window.addEventListener('resize', measure, { passive: true });
+})();
+
+/* Mobile menu: the page behind does not move (position: fixed, scroll restored — iOS ignores overflow: hidden), and the
+   close button sits exactly where the open button was. */
+(function () {
+	var html = document.documentElement, y = 0;
+	var openBtn = document.querySelector('.kit-site-header .wp-block-navigation__responsive-container-open');
+	new MutationObserver(function () {
+		var open = html.classList.contains('has-modal-open');
+		if (open && !html.classList.contains('kit-scroll-locked')) {
+			y = window.scrollY;
+			if (openBtn) {
+				var r = openBtn.getBoundingClientRect();
+				html.style.setProperty('--kit-toggle-top', r.top + 'px');
+				html.style.setProperty('--kit-toggle-left', r.left + 'px');
+			}
+			document.body.style.top = -y + 'px';
+			html.classList.add('kit-scroll-locked');
+		} else if (!open && html.classList.contains('kit-scroll-locked')) {
+			html.classList.remove('kit-scroll-locked');
+			document.body.style.top = '';
+			window.scrollTo(0, y);
+		}
+	}).observe(html, { attributes: true, attributeFilter: ['class'] });
+})();
+
+/* Page scroll flow: main lists its sections in order; each top-level section gets data-scroll-index 1…n. */
+(function () {
+	var main = document.getElementById('main');
+	if (!main) return;
+	var root = main.querySelector(':scope > .wp-block-post-content') || main;
+	var ids = [];
+	Array.prototype.forEach.call(root.querySelectorAll(':scope > section, :scope > .alignfull, :scope > header, :scope > .wp-block-group'), function (s, i) {
+		s.setAttribute('data-scroll-index', i + 1);
+		if (s.id) ids.push(s.id);
+	});
+	main.setAttribute('data-scroll-flow', ids.join(' '));
+})();
+
+/* Filters (kits_filter_bar): below 768px the groups fold into a "Filters" sheet (focus kept inside, Esc closes);
    groups with many options show the first eight until "Show more". */
 (function () {
-	var phone = window.matchMedia('(max-width: 639px)');
+	var phone = window.matchMedia('(max-width: 767px)');
 	document.querySelectorAll('.kit-filter-sheet').forEach(function (sheet) {
 		var summary = sheet.querySelector('summary');
 		function layout() {

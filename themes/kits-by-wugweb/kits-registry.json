@@ -1270,6 +1270,66 @@
     "schema": "none"
    },
    "note": "/kits-demo/, private."
+  },
+  {
+   "name": "Layout grid",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-grid"
+   ],
+   "states": [
+    "4 columns (small)",
+    "8 (medium, 768)",
+    "12 (large, 1200)"
+   ],
+   "tokens": [
+    "kit-grid-columns",
+    "kit-grid-gap"
+   ],
+   "a11y": {
+    "element": "CSS grid utility",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Scroll lock (menu open)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-scroll"
+   ],
+   "states": [
+    "locked",
+    "released (scroll position restored)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on <html> while the mobile menu is open",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
   }
  ],
  "nav": [

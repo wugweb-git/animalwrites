@@ -177,7 +177,7 @@ function kits_system_page() {
 			$sw = preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span style="display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:6px;background:' . esc_attr( $r ) . '"></span>' : '';
 			echo '<tr><td><code>--' . esc_html( $k ) . '</code></td><td><code>' . esc_html( $v ) . '</code></td><td>' . $sw . '<code>' . esc_html( $r ) . '</code></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
-		echo '</tbody></table><p>Base values (phones). Sizes that change at 640px and 1200px are fluid (clamp) or set in the token file.</p></div>';
+		echo '</tbody></table><p>Base values (phones). Sizes that change at 768px and 1200px are fluid (clamp) or set in the token file.</p></div>';
 		return;
 	}
 	if ( 'contrast' === $tab ) {

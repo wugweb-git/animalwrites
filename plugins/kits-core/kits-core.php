@@ -25,6 +25,7 @@ require_once KITS_CORE_DIR . 'includes/form-kit.php';
 require_once KITS_CORE_DIR . 'includes/primitives.php';
 require_once KITS_CORE_DIR . 'includes/demo.php';
 require_once KITS_CORE_DIR . 'includes/system-screen.php';
+require_once KITS_CORE_DIR . 'includes/landmarks.php';
 require_once KITS_CORE_DIR . 'includes/mail.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
 require_once KITS_CORE_DIR . 'includes/seo-fields.php';

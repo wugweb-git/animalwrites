@@ -137,7 +137,7 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 	$html = '<form class="kit-filterbar" method="get" action="' . esc_url( $clear ) . '" data-kit-filterbar>' . $hidden;
 	if ( '' !== trim( $groups ) ) {
 		$html .= '<details class="kit-filter-sheet" open><summary>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
-			. '<div class="kit-filters" role="group" aria-label="Filters">' . $groups
+			. '<div class="kit-filters" role="toolbar" aria-label="Filters">' . $groups
 			. '<noscript><button type="submit" class="kit-btn kit-btn--sm">Apply</button></noscript>'
 			. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $clear ) . '">Reset</a><button type="submit" class="kit-btn" data-kit-sheet-close>Apply</button></div>'
 			. '</div></details>';

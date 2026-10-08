@@ -82,7 +82,7 @@ add_action(
 function aw_block_breadcrumb() {
 	global $post;
 	if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $post ) { // editor preview: the trail of this page
-		$trail = '<li><a href="' . esc_url( home_url( '/' ) ) . '">Home</a></li>';
+		$trail = '<li class="kit-crumbs-home"><a href="' . esc_url( home_url( '/' ) ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
 		foreach ( array_reverse( get_post_ancestors( $post ) ) as $a ) {
 			$trail .= '<li><a href="' . esc_url( get_permalink( $a ) ) . '">' . esc_html( get_the_title( $a ) ) . '</a></li>';
 		}
@@ -108,6 +108,7 @@ function aw_block_hub_count( $a ) {
 
 /** Three pictures from the section (campaign photos for Campaigns). */
 function aw_block_hub_visual( $a ) {
+	return ''; // owner, 8 Oct 2026: no supporting pictures in page top bands
 	$type = (string) ( $a['postType'] ?? '' );
 	if ( ! $type ) {
 		return '';

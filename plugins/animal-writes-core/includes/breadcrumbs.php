@@ -83,6 +83,14 @@ function aw_breadcrumbs_html() {
 	$last = count( $trail ) - 1;
 	$html = '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>';
 	foreach ( $trail as $i => $c ) {
+		if ( $last > 3 && $i > 0 && $i < $last - 1 ) { // longer than Home + 2 levels: the middle folds into "…" (schema keeps the full trail)
+			$html .= 1 === $i ? '<li class="kit-crumbs-more"><span aria-hidden="true">…</span><span class="screen-reader-text">' . esc_html( implode( ', ', array_map( fn( $x ) => wp_strip_all_tags( $x[0] ), array_slice( $trail, 1, $last - 2 ) ) ) ) . '</span></li>' : '';
+			continue;
+		}
+		if ( 0 === $i && $i !== $last ) { // Home is an icon
+			$html .= '<li class="kit-crumbs-home"><a href="' . esc_url( $c[1] ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
+			continue;
+		}
 		$html .= $i === $last
 			? '<li><span aria-current="page">' . esc_html( wp_strip_all_tags( $c[0] ) ) . '</span></li>'
 			: '<li><a href="' . esc_url( $c[1] ) . '">' . esc_html( wp_strip_all_tags( $c[0] ) ) . '</a></li>';

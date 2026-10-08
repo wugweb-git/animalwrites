@@ -90,7 +90,7 @@
 .kit-filter-more { background: none; border: 0; padding: 0 var(--s-2); min-height: var(--kit-size-target); font: inherit; font-size: var(--fluid-body-sm); color: var(--kit-color-link); text-decoration: underline; cursor: pointer; }
 .kit-filter-sheet > summary { display: none; }
 .kit-filter-sheet-actions { display: none; }
-/* Phones (kit.js adds .is-sheet below 640px; without JavaScript the groups stay inline) */
+/* Phones (kit.js adds .is-sheet below 768px; without JavaScript the groups stay inline) */
 .kit-filter-sheet.is-sheet { margin: 0 0 var(--s-6); }
 .kit-filter-sheet.is-sheet > summary {
 	display: inline-flex; align-items: center; gap: var(--s-2); list-style: none;
@@ -154,7 +154,7 @@
 .kit-filter-sheet.is-sheet .kit-filters { display: grid; gap: var(--s-3); }
 .kit-filter-sheet.is-sheet .kit-dd-btn { width: 100%; justify-content: space-between; }
 .kit-filter-sheet.is-sheet .kit-dd-panel { position: static; box-shadow: none; max-height: none; min-width: 0; max-width: none; padding: var(--s-2) 0 0; }
-@media (max-width: 639px) { .kit-dd--sort .kit-dd-current { display: none; } }
+@media (max-width: 767px) { .kit-dd--sort .kit-dd-current { display: none; } }
 @media (prefers-reduced-motion: reduce) { .kit-dd-btn .kit-ico { transition: none; } }
 
 /* ---------- 5. Active filters bar ---------- */
@@ -291,7 +291,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 
 /* ---------- 14. Banner (pattern kits-by-wugweb/banner): 16:5 wide, 4:3 on phones ---------- */
 .wp-block-cover.kit-banner { min-height: 0 !important; aspect-ratio: 16 / 5; border-radius: var(--kit-radius-hero); overflow: hidden; margin-block: 0 var(--s-8); }
-@media (max-width: 639px) { .wp-block-cover.kit-banner { aspect-ratio: 4 / 3; } }
+@media (max-width: 767px) { .wp-block-cover.kit-banner { aspect-ratio: 4 / 3; } }
 
 /* ---------- 15. Breadcrumb (same as .kit-crumbs) ---------- */
 .kit-breadcrumb { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
@@ -329,9 +329,9 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 /* Button: primary yellow, dark text, 44px, radius --r-2; loading = spinner + label */
 :is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; }
 .kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-/* Layout: one column under 640px, at most two; the button bottom-left */
+/* Layout: one column under 768px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: 1fr; }
-@media (min-width: 640px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kit-form-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: flex-start; margin-top: var(--s-2); }
 /* On a dark band (newsletter) */
 .kit-form--on-dark .kit-field > label, .kit-form--on-dark .kit-checkbox, .kit-form--on-dark .kit-check-group > legend { color: var(--neutral-0); }

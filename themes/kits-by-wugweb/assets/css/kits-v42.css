@@ -48,9 +48,9 @@
   --opacity-80: 80%;
   --opacity-100: 100%;
   --opacity-disabled: var(--opacity-40);
-  --fluid-display: clamp(2.25rem, 1.9943rem + 1.0909vw, 2.8125rem);
+  --fluid-display: clamp(2.5rem, 1.3636rem + 4.8485vw, 5rem);
   --weight-display: 800;
-  --fluid-h1: clamp(1.75rem, 1.5227rem + 0.9697vw, 2.25rem);
+  --fluid-h1: clamp(2rem, 1.5455rem + 1.9394vw, 3rem);
   --weight-h1: 700;
   --fluid-h2: clamp(1.5rem, 1.3864rem + 0.4848vw, 1.75rem);
   --weight-h2: 600;
