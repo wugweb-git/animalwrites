@@ -166,7 +166,20 @@ function aw_block_publisher( $a, $id ) {
 		$name = $pub ? $pub : ( 'web' !== $plat && $plat ? ( AW_PRESS_PLATFORMS[ $plat ] ?? '' ) : '' );
 		return $name ? '<p class="aw-src">' . ( $icon ? $icon : ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) ) . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
 	}
-	return function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
+	return aw_news_meta_row( $id );
+}
+
+/**
+ * The news card's meta, one row on every news card (News, home, topic pages): publisher (logo tile + name) on the
+ * left, when it was published (calendar icon, relative time) after it.
+ *
+ * @param int $id Post ID.
+ * @return string
+ */
+function aw_news_meta_row( $id ) {
+	$src  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
+	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date aw-card-time">' . aw_rel_time_html( $id ) . '</span>' : '';
+	return '' === $src . $time ? '' : '<div class="aw-card-meta">' . $src . $time . '</div>';
 }
 
 /** Library: the law's year (Acts, Rules), the source date, or the template icon. */

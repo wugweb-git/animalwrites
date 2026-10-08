@@ -290,7 +290,7 @@ add_shortcode(
 			$all   = add_query_arg( 'topic', $term->slug, aw_hub_url( $type ) );
 			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul>';
 			foreach ( $posts as $p ) {
-				$html .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
+				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
 			}
 			$html .= '</ul><p><a href="' . esc_url( $all ) . '">All ' . esc_html( strtolower( $label ) ) . ' on this topic</a></p></section>';
 		}

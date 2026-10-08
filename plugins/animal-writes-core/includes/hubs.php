@@ -406,9 +406,7 @@ function aw_hub_item( $type ) {
 
 <!-- wp:post-title {"level":2,"isLink":true,"className":"aw-story-title"} /-->
 
-<!-- wp:post-excerpt {"excerptLength":40,"className":"aw-story-sum"} /-->
-
-<!-- wp:post-date {"className":"aw-story-meta"} /--></div>
+<!-- wp:post-excerpt {"excerptLength":40,"className":"aw-story-sum"} /--></div>
 <!-- /wp:group --></article>
 <!-- /wp:group -->';
 		case 'aw_legal':

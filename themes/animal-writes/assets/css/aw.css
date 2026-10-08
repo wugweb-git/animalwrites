@@ -825,3 +825,12 @@ body { background: var(--kit-color-canvas); }
 .kit-ed-rows :is(.wp-block-post-date, .aw-law-date) { flex-direction: row !important; align-items: center !important; }
 /* Mobile menu: the wordmark on the same left edge as the links, where it sits in the header */
 .kit-site-header .wp-block-navigation__responsive-container.is-menu-open::before { content: ""; position: fixed; top: calc(var(--kit-toggle-top, 28px) + 22px - 24px); left: var(--kit-space-gutter); width: 150px; height: 48px; background: url("../wordmark-light.svg") left center / contain no-repeat; }
+
+/* News card meta: publisher and date on one row (every news card) */
+.aw-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-4); margin: var(--kit-space-3) 0 var(--kit-space-1); min-width: 0; }
+.aw-card-meta > .aw-src { margin: 0 !important; min-width: 0; }
+.aw-card-meta > .aw-card-time { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+.aw-story-body > .aw-card-meta:first-child { margin-top: var(--kit-space-4); }
+.aw-story--row .aw-story-body > .aw-card-meta:first-child { margin-top: 0; }
+.kit-ed-list .aw-card-meta { grid-area: terms; margin: 0; }
+.aw-hub-group li > .aw-card-meta { margin: 0 0 var(--kit-space-1); }
