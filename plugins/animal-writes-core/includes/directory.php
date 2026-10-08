@@ -79,7 +79,7 @@ add_filter(
 			if ( $paged > 1 ) {
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
 			}
-			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'service' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
@@ -169,8 +169,16 @@ function aw_directory_query_vars( $v ) {
 		$g    = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$type = ( $g && aw_listing_type_ok( $g ) ) ? aw_listing_type_query( $g ) : ''; // a filtered list; canonical stays the unfiltered page
 	}
+	$tq = array();
 	if ( '' !== $type ) {
-		$v['tax_query'] = array( array( 'taxonomy' => 'aw_listing_type', 'field' => 'slug', 'terms' => explode( ',', $type ) ) );
+		$tq[] = array( 'taxonomy' => 'aw_listing_type', 'field' => 'slug', 'terms' => explode( ',', $type ) );
+	}
+	$service = sanitize_title( wp_unslash( $_GET['service'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( '' !== $service && term_exists( $service, 'aw_service' ) ) {
+		$tq[] = array( 'taxonomy' => 'aw_service', 'field' => 'slug', 'terms' => array( $service ) );
+	}
+	if ( $tq ) {
+		$v['tax_query'] = $tq;
 	}
 	$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $text ) {
@@ -331,6 +339,7 @@ add_action(
 			array(
 				'q'        => sanitize_text_field( $g['q'] ?? '' ),
 				'verified' => empty( $g['verified'] ) ? '' : '1',
+				'service'  => sanitize_title( $g['service'] ?? '' ),
 			)
 		);
 		wp_safe_redirect( add_query_arg( $extra, $base ) );
@@ -355,6 +364,18 @@ function aw_verified_count() {
  *
  * @return string
  */
+/** Services choice: only services that at least 3 listings offer (the rest would lead to near-empty lists). */
+function aw_directory_service_field( $field ) {
+	$cur  = sanitize_title( wp_unslash( $_GET['service'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$opts = '';
+	foreach ( get_terms( array( 'taxonomy' => 'aw_service', 'hide_empty' => true ) ) as $t ) {
+		if ( (int) $t->count >= 3 ) {
+			$opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur, $t->slug, false ) . '>' . esc_html( $t->name . ' (' . number_format_i18n( $t->count ) . ')' ) . '</option>';
+		}
+	}
+	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="service"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
+}
+
 function aw_directory_filter() {
 	$cur_city = aw_current_place();
 	$cur_type = (string) get_query_var( 'aw_dir_type' );
@@ -410,6 +431,7 @@ function aw_directory_filter() {
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="type">' . $t_opts . '</select>', 'type' )
+		. aw_directory_service_field( $field )
 		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label>' : '' )
 		. '</div></details>'
 		. '<div class="aw-dir-submit"><input type="hidden" name="aw_filter" value="1"><button type="submit" class="kit-btn">Search</button></div>'

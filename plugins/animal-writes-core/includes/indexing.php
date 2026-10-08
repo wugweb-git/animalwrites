@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_THIN_DISTRICT_TYPE = 3; // a district × type page needs this many listings to be indexed
-const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_opportunity_type', 'aw_legal_kind', 'aw_resource_type' );
+const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_opportunity_type', 'aw_legal_kind', 'aw_resource_type', 'aw_service' );
 
 /** District × type page with too few listings to be worth indexing. */
 function aw_is_thin_directory_page() {

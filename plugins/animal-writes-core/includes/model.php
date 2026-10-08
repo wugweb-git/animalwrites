@@ -24,6 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template' );
 const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
 const AW_SECONDARY_TOPICS = 2;
+/** Services a listing offers: a fixed list (owner, 9 Oct 2026). Shown as tags; a Directory filter once 3+ listings use one. */
+const AW_SERVICES = array( 'rescue' => 'Rescue', 'treatment' => 'Treatment / vet care', 'shelter' => 'Shelter', 'adoption' => 'Adoption', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance', 'boarding-foster' => 'Boarding / foster', 'wildlife-rescue' => 'Wildlife rescue', 'legal-help' => 'Legal help', 'cattle-care' => 'Cattle care' );
 
 /**
  * Post-to-post relations: meta key => from types, target post type, label, label on the other side, max links (0 = any).
@@ -55,10 +57,28 @@ add_action(
 		);
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
 		register_taxonomy( 'aw_resource_type', array( 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
+		register_taxonomy( 'aw_service', array( 'aw_listing' ), $args( 'Services', 'Service' ) );
 		// Language is no longer used on the Library (Phase 12 B4); each item keeps its old value in the meta aw_language_legacy.
 		// Places (State filter) come from the LGD codes on each item (places.php).
 	},
 	11
+);
+
+/** The fixed services list (added once; names follow AW_SERVICES). */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_services_seeded' ) ) {
+			return;
+		}
+		foreach ( AW_SERVICES as $slug => $name ) {
+			if ( ! term_exists( $slug, 'aw_service' ) ) {
+				wp_insert_term( $name, 'aw_service', array( 'slug' => $slug ) );
+			}
+		}
+		update_option( 'aw_services_seeded', '1', false );
+	},
+	21
 );
 
 /** Seed the fixed terms once (adds terms only; no item is tagged). */

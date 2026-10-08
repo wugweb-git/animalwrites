@@ -29,7 +29,7 @@ const AW_CLAIM_FIELDS = array(
 	'aw_email'    => array( 'Public email', 'email' ),
 	'aw_website'  => array( 'Website', 'url' ),
 	'aw_area'     => array( 'Area or locality', 'max:120' ),
-	'aw_services' => array( 'Services (separate with commas)', 'max:300' ),
+	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (AW_SERVICES); saved as service tags
 );
 
 const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
@@ -63,6 +63,18 @@ add_action(
  * @param WP_Post $listing Listing.
  * @return string
  */
+/** Services as tick boxes from the fixed list; the listing's current services start ticked. */
+function aw_claim_services_field( $form, $listing ) {
+	$state = aw_form_state( $form );
+	$kept  = isset( $state['values']['aw_services'] ) ? explode( ',', (string) $state['values']['aw_services'] ) : wp_get_object_terms( $listing->ID, 'aw_service', array( 'fields' => 'slugs' ) );
+	$kept  = is_wp_error( $kept ) ? array() : $kept;
+	$boxes = '';
+	foreach ( AW_SERVICES as $slug => $name ) {
+		$boxes .= '<label class="kit-checkbox"><input type="checkbox" name="aw_services[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, $kept, true ), true, false ) . '> ' . esc_html( $name ) . '</label>';
+	}
+	return '<fieldset class="kit-field kit-check-group aw-claim-services"><legend>Services</legend>' . $boxes . '</fieldset>';
+}
+
 function aw_claim_form( $listing ) {
 	$form = 'aw_claim';
 	if ( isset( $_GET['aw_done'] ) && 'claim' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
@@ -81,7 +93,7 @@ function aw_claim_form( $listing ) {
 		. kits_dict_field( $form, 'email', array( 'name' => 'aw_email', 'label' => 'Public email', 'required' => false, 'attrs' => $keep( 'aw_email' ) ) )
 		. kits_dict_field( $form, 'website', array( 'name' => 'aw_website', 'attrs' => $keep( 'aw_website' ) ) )
 		. kits_dict_field( $form, 'area', array( 'name' => 'aw_area', 'attrs' => $keep( 'aw_area' ) ) )
-		. aw_field( $form, array( 'name' => 'aw_services', 'label' => 'Services (separate with commas)', 'type' => 'textarea', 'attrs' => array( 'maxlength' => 300, 'rows' => 3 ) ) )
+		. aw_claim_services_field( $form, $listing )
 		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
 		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
 		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) );
@@ -118,7 +130,7 @@ function aw_claim_submit() {
 	$rules  = array( 'name' => array( 'required', 'max:80' ), 'role' => array( 'required' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'notes' => array( 'max:1000' ) );
 	$labels = array( 'name' => 'Your name', 'role' => 'Your role here', 'email' => 'Your email', 'phone' => 'Your phone', 'notes' => 'Anything else' );
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
-		$raw       = (string) wp_unslash( $_POST[ $key ] ?? '' );
+		$raw       = 'aw_services' === $key ? implode( ',', array_intersect( array_map( 'sanitize_title', (array) wp_unslash( $_POST['aw_services'] ?? array() ) ), array_keys( AW_SERVICES ) ) ) : (string) wp_unslash( $_POST[ $key ] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$v[ $key ] = 'aw_website' === $key ? esc_url_raw( kits_clean_url( $raw ) ) : ( 'phone' === $def[1] ? trim( sanitize_text_field( $raw ) ) : sanitize_text_field( $raw ) );
 		if ( 'aw_website' === $key && '' !== trim( $raw ) && '' === $v[ $key ] ) {
 			$v[ $key ] = trim( $raw ); // Keep what they typed so validation can say what is wrong.
@@ -293,7 +305,11 @@ add_action(
 		if ( 'approve' === ( $_GET['do'] ?? '' ) && 'aw_listing' === get_post_type( $lid ) ) {
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
-					update_post_meta( $lid, $key, $val );
+					if ( 'aw_services' === $key ) {
+						wp_set_object_terms( $lid, array_intersect( explode( ',', (string) $val ), array_keys( AW_SERVICES ) ), 'aw_service' );
+					} else {
+						update_post_meta( $lid, $key, $val );
+					}
 					if ( 'aw_services' === $key ) { // services are what the organisation says it offers; record that
 						update_post_meta( $lid, 'aw_services_source', 'the organisation' );
 						update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );

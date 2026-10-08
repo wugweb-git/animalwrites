@@ -208,7 +208,8 @@
    "classes": [
     "aw-org-details",
     "aw-org-gallery",
-    "aw-org-facts"
+    "aw-org-facts",
+    "aw-org-services"
    ],
    "states": [
     "links only",
@@ -470,7 +471,8 @@
     "aw-claim-form",
     "aw-newsletter-form",
     "aw-volunteer-form",
-    "aw-report-form"
+    "aw-report-form",
+    "aw-claim-services"
    ],
    "states": [
     "default",

@@ -119,7 +119,10 @@ function aw_listing_schema( $id ) {
 		$org['openingHours'] = $m( 'aw_hours' ); // free-text hours: places (LocalBusiness) only, so only on VeterinaryCare
 	}
 
-	if ( $m( 'aw_services' ) ) {
+	$svc = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) );
+	if ( $svc && ! is_wp_error( $svc ) ) {
+		$org['knowsAbout'] = array_values( $svc ); // the fixed services list
+	} elseif ( $m( 'aw_services' ) ) {
 		$org['knowsAbout'] = array_values( array_filter( array_map( 'trim', preg_split( '/[,;\n]+/', wp_strip_all_tags( $m( 'aw_services' ) ) ) ) ) );
 	}
 	$types = get_the_terms( $id, 'aw_listing_type' );
