@@ -1,0 +1,232 @@
+/* Kits primitives (Phase 11 B.2): one component per role. Values come from tokens only:
+   v4.2 (--s-*, --r-*/--radius-*, --fluid-*, --opacity-*) and the semantic --kit-* tokens a child theme overrides.
+   Rules for every interactive primitive: visible focus ring (--kit-focus-width), hover only where hover exists,
+   disabled = --opacity-disabled + aria-disabled, targets at least --kit-size-target, reduced motion = opacity only. */
+
+/* ---------- shared focus ---------- */
+:is(.kit-chip, .wp-block-post-terms a, .kit-filter-pill, .kit-btn, .kit-segment button, .kit-filter-active button, .kit-field :is(input, select, textarea), .kit-checkbox input, .kit-filter-sheet > summary):focus-visible {
+	outline: var(--kit-focus-width) solid var(--kit-color-focus);
+	outline-offset: var(--kit-focus-offset);
+}
+
+/* ---------- 1. Tag: static metadata, not interactive ---------- */
+.kit-tag {
+	display: inline-flex; align-items: center; gap: var(--s-1);
+	padding: var(--s-1) var(--s-2);
+	border-radius: var(--radius-xs);
+	background: var(--kit-color-surface-soft); color: var(--kit-color-text);
+	box-shadow: inset 0 0 0 1px var(--kit-color-line);
+	font-size: var(--fluid-label); font-weight: var(--kit-weight-medium); line-height: 1.2;
+	cursor: default;
+}
+.kit-tag--accent { background: var(--kit-color-accent); color: var(--kit-color-on-accent); box-shadow: none; }
+.kit-tag--ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); box-shadow: none; }
+.kit-tag--success { background: var(--kit-color-success-soft); color: var(--kit-color-success); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-tag--warning { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-tag--danger { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-tag--info { background: var(--kit-color-info-soft); color: var(--kit-color-info); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
+
+/* ---------- 2. Link chip: a tag that navigates (also topic links from the core post-terms block) ---------- */
+.kit-chip, .wp-block-post-terms a {
+	position: relative;
+	display: inline-flex; align-items: center;
+	min-height: var(--s-8); padding: 0 var(--s-3);
+	border-radius: var(--radius-full);
+	background: var(--kit-color-raised); color: var(--kit-color-ink);
+	border: 1px solid var(--kit-color-line);
+	font-size: var(--fluid-label); font-weight: var(--kit-weight-medium);
+	text-decoration: none;
+	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* 44px hit area */
+.kit-chip:visited, .wp-block-post-terms a:visited { color: var(--kit-color-ink); }
+.kit-chip:active { background: var(--kit-color-surface); }
+@media (hover: hover) { :is(.kit-chip, .wp-block-post-terms a):hover { border-color: var(--kit-color-ink); background: var(--kit-color-surface-soft); } }
+.kit-chip--on-ink { background: transparent; color: var(--kit-color-on-ink); border-color: color-mix(in srgb, var(--kit-color-on-ink) 35%, transparent); }
+.kit-chip--on-ink:visited { color: var(--kit-color-on-ink); }
+@media (hover: hover) { .kit-chip--on-ink:hover { background: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent); border-color: var(--kit-color-on-ink); } }
+
+/* ---------- 3. Filter pill: toggles a filter value ---------- */
+.kit-filter-pill {
+	display: inline-flex; align-items: center; gap: var(--s-2);
+	min-height: var(--kit-size-target); padding: 0 var(--s-4);
+	border-radius: var(--radius-full);
+	border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); color: var(--kit-color-ink);
+	font: inherit; font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-medium);
+	text-decoration: none; cursor: pointer;
+	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.kit-filter-pill::before { content: none; }
+.kit-filter-pill[aria-pressed=true], .kit-filter-pill[aria-checked=true], .kit-filter-pill[aria-current] {
+	background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-bold);
+}
+.kit-filter-pill:is([aria-pressed=true], [aria-checked=true], [aria-current])::before { /* selected is not colour only: a check mark */
+	content: ""; width: 0.9em; height: 0.9em; background: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+	        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (hover: hover) {
+	.kit-filter-pill:hover { border-color: var(--kit-color-ink); }
+	.kit-filter-pill:is([aria-pressed=true], [aria-checked=true], [aria-current]):hover { background: var(--kit-color-text); }
+}
+.kit-filter-pill[aria-disabled=true] { opacity: var(--opacity-disabled); cursor: not-allowed; pointer-events: none; }
+.kit-filter-pill.is-loading { opacity: var(--opacity-60); cursor: progress; }
+.kit-filter-pill .kit-count { color: inherit; opacity: var(--opacity-80); }
+
+/* ---------- 4. Filter group + phone sheet ---------- */
+.kit-filters { display: grid; gap: var(--s-4); margin: 0 0 var(--s-8); }
+.kit-filter-group { border: 0; margin: 0; padding: 0; min-width: 0; }
+.kit-filter-group > legend, .kit-filter-group > .kit-filter-label {
+	padding: 0; margin: 0 0 var(--s-2);
+	font-size: var(--fluid-label); font-weight: var(--weight-label); color: var(--kit-color-muted);
+}
+.kit-filter-options { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.kit-filter-group:not(.is-expanded) .kit-filter-options > .kit-filter-pill:nth-child(n+9) { display: none; }
+.kit-filter-more { background: none; border: 0; padding: 0 var(--s-2); min-height: var(--kit-size-target); font: inherit; font-size: var(--fluid-body-sm); color: var(--kit-color-link); text-decoration: underline; cursor: pointer; }
+.kit-filter-sheet > summary { display: none; }
+.kit-filter-sheet-actions { display: none; }
+/* Phones (kit.js adds .is-sheet below 640px; without JavaScript the groups stay inline) */
+.kit-filter-sheet.is-sheet { margin: 0 0 var(--s-6); }
+.kit-filter-sheet.is-sheet > summary {
+	display: inline-flex; align-items: center; gap: var(--s-2); list-style: none;
+	min-height: var(--kit-size-target); padding: 0 var(--s-4);
+	border: 1px solid var(--kit-color-ink); border-radius: var(--radius-full);
+	background: var(--kit-color-raised); color: var(--kit-color-ink); font-weight: var(--kit-weight-medium); cursor: pointer;
+}
+.kit-filter-sheet.is-sheet > summary::-webkit-details-marker { display: none; }
+.kit-filter-sheet.is-sheet[open] > .kit-filters {
+	position: fixed; inset: auto 0 0 0; z-index: var(--kit-z-overlay);
+	max-height: 85vh; overflow: auto; margin: 0;
+	padding: var(--s-6) var(--s-4) var(--s-4);
+	background: var(--kit-color-raised); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+	box-shadow: var(--kit-elevation-3);
+}
+.kit-filter-sheet.is-sheet[open]::before { content: ""; position: fixed; inset: 0; z-index: calc(var(--kit-z-overlay) - 1); background: color-mix(in srgb, var(--kit-color-ink) 45%, transparent); }
+.kit-filter-sheet.is-sheet[open] .kit-filter-sheet-actions { display: flex; gap: var(--s-2); position: sticky; bottom: calc(-1 * var(--s-4)); padding: var(--s-3) 0; background: var(--kit-color-raised); }
+.kit-filter-sheet.is-sheet[open] .kit-filter-sheet-actions .kit-btn { flex: 1; }
+
+/* ---------- 5. Active filters bar ---------- */
+.kit-filter-active { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: calc(-1 * var(--s-4)) 0 var(--s-6); }
+.kit-filter-active .kit-removable {
+	display: inline-flex; align-items: center; gap: var(--s-1);
+	padding-left: var(--s-3); border-radius: var(--radius-full);
+	background: var(--kit-color-surface-soft); box-shadow: inset 0 0 0 1px var(--kit-color-line);
+	font-size: var(--fluid-body-sm);
+}
+.kit-filter-active .kit-removable a {
+	display: inline-flex; align-items: center; justify-content: center;
+	min-width: var(--kit-size-target); min-height: var(--kit-size-target);
+	border-radius: var(--radius-full); color: var(--kit-color-ink); text-decoration: none; font-size: var(--fluid-body-lg); line-height: 1;
+}
+@media (hover: hover) { .kit-filter-active .kit-removable a:hover { background: var(--kit-color-surface); } }
+.kit-filter-active .kit-removable a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: calc(-1 * var(--kit-focus-width)); }
+.kit-filter-clear { font-size: var(--fluid-body-sm); color: var(--kit-color-link); min-height: var(--kit-size-target); display: inline-flex; align-items: center; }
+
+/* ---------- 6. Badge: state of the item ---------- */
+.kit-badge {
+	display: inline-flex; align-items: center; gap: var(--s-1);
+	padding: var(--s-1) var(--s-2); border-radius: var(--radius-xs);
+	font-size: var(--fluid-label); font-weight: var(--kit-weight-bold); line-height: 1.2;
+	background: var(--kit-color-surface); color: var(--kit-color-ink);
+}
+.kit-badge--verified { background: var(--kit-color-success-soft); color: var(--kit-color-success); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-badge--unconfirmed { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-badge--featured { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+.kit-badge--sponsored, .kit-badge--ad { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-badge--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); box-shadow: inset 0 0 0 1px currentColor; }
+.kit-badge--new { background: var(--kit-color-info-soft); color: var(--kit-color-info); box-shadow: inset 0 0 0 1px currentColor; }
+
+/* ---------- 7. Eyebrow / 8. Count ---------- */
+.kit-eyebrow { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-label); font-weight: var(--weight-label); color: var(--kit-color-muted); }
+.kit-count { font-variant-numeric: tabular-nums; color: var(--kit-color-muted); font-weight: var(--kit-weight-regular); }
+
+/* ---------- 9. Segmented control ---------- */
+.kit-segment { display: inline-flex; padding: var(--s-1); gap: var(--s-1); border-radius: var(--radius-full); background: var(--kit-color-surface); }
+.kit-segment button, .kit-segment a {
+	min-height: calc(var(--kit-size-target) - 2 * var(--s-1)); padding: 0 var(--s-4);
+	border: 0; border-radius: var(--radius-full); background: transparent; color: var(--kit-color-ink);
+	font: inherit; font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-medium); text-decoration: none; cursor: pointer;
+	display: inline-flex; align-items: center;
+}
+.kit-segment :is(button, a):is([aria-pressed=true], [aria-current]) { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); font-weight: var(--kit-weight-bold); }
+
+/* ---------- 10. Button ---------- */
+.kit-btn {
+	display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+	min-height: var(--kit-size-control); padding: 0 var(--s-6);
+	border: var(--kit-border-control) solid var(--kit-color-accent); border-radius: var(--kit-radius-control);
+	background: var(--kit-color-accent); color: var(--kit-color-on-accent);
+	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-strong); text-decoration: none; cursor: pointer;
+	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.kit-btn--secondary, .kit-btn--outline { background: var(--kit-color-raised); border-color: var(--kit-color-ink); color: var(--kit-color-ink); }
+.kit-btn--ghost { background: transparent; border-color: currentColor; color: inherit; }
+/* Filled buttons keep their own text colour inside dark areas that recolour links */
+a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { color: var(--kit-color-on-accent); }
+a.kit-btn--ink { color: var(--kit-color-on-ink); }
+.kit-btn--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-btn--sm { min-height: var(--kit-size-target); padding: 0 var(--s-4); font-size: var(--fluid-body-sm); }
+@media (hover: hover) {
+	.kit-btn:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+	.kit-btn--ink:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+	.kit-btn--ghost:hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+	a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink):hover { color: var(--kit-color-on-ink); }
+}
+.kit-btn:active { transform: translateY(1px); }
+.kit-btn:is([disabled], [aria-disabled=true]) { opacity: var(--opacity-disabled); cursor: not-allowed; transform: none; }
+.kit-btn.is-loading, .kit-btn[aria-busy=true] { position: relative; pointer-events: none; }
+.kit-btn.is-loading::before, .kit-btn[aria-busy=true]::before {
+	content: ""; width: 1em; height: 1em; border-radius: var(--radius-full);
+	border: var(--kit-border-control) solid currentColor; border-right-color: transparent;
+	animation: kit-spin 700ms linear infinite;
+}
+
+/* ---------- 11. Form field ---------- */
+.kit-field { margin: 0 0 var(--s-4); }
+.kit-field > label, .kit-field > .kit-field-label { display: block; margin: 0 0 var(--s-2); font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.kit-field .kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
+.kit-field-control { position: relative; }
+.kit-field-control > .kit-field-icon { position: absolute; left: var(--s-3); top: 50%; transform: translateY(-50%); color: var(--kit-color-muted); pointer-events: none; }
+.kit-field-control:has(> .kit-field-icon) :is(input, select) { padding-left: calc(var(--s-3) + 1.25rem + var(--s-2)); }
+.kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
+	width: 100%; box-sizing: border-box;
+	min-height: var(--kit-size-target); padding: 0 var(--s-3);
+	font: inherit; color: var(--kit-color-ink);
+	background: var(--kit-color-raised);
+	border: var(--kit-border-control) solid var(--kit-color-ink); border-radius: var(--kit-radius-control);
+	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.kit-field textarea { padding-block: var(--s-3); min-height: 7rem; }
+@media (hover: hover) { .kit-field :is(input, select, textarea):hover:not([disabled]):not([readonly]) { box-shadow: 0 0 0 var(--kit-focus-width) var(--kit-color-surface); } }
+.kit-field :is(input, select, textarea):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.kit-field :is(input, select, textarea)[aria-invalid=true] { border-color: var(--color-peach); }
+.kit-field :is(input, select, textarea).is-valid { border-color: var(--color-green); }
+.kit-field :is(input, select, textarea)[disabled] { opacity: var(--opacity-disabled); cursor: not-allowed; }
+.kit-field :is(input, textarea)[readonly] { background: var(--kit-color-surface-soft); border-style: dashed; }
+.kit-field-message { display: block; min-height: 1.4em; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); } /* reserved line: no jump */
+.kit-field-message:not(:empty)::before { content: "⚠ "; }
+.kit-field-hint { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
+
+/* ---------- 12. Checkbox ---------- */
+.kit-checkbox { display: flex; gap: var(--s-3); align-items: flex-start; min-height: var(--kit-size-target); padding-block: var(--s-2); cursor: pointer; font-weight: var(--kit-weight-regular); }
+.kit-checkbox input { width: var(--kit-size-check); height: var(--kit-size-check); margin: 0.1em 0 0; flex: none; accent-color: var(--kit-color-ink); }
+.kit-checkbox input[aria-invalid=true] { outline: var(--kit-border-control) solid var(--color-peach); outline-offset: var(--kit-focus-offset); }
+
+/* ---------- 13. Form status ---------- */
+.kit-form-status:empty { display: none; }
+.kit-form-status { margin: 0 0 var(--s-4); padding: var(--s-3) var(--s-4); border-radius: var(--kit-radius-control); border-left: var(--s-1) solid var(--kit-color-danger); background: var(--kit-color-danger-soft); color: var(--kit-color-ink); }
+.kit-form-status.is-success { border-left-color: var(--kit-color-success); background: var(--kit-color-success-soft); }
+
+/* ---------- 14. Banner (pattern kits-by-wugweb/banner): 16:5 wide, 4:3 on phones ---------- */
+.wp-block-cover.kit-banner { min-height: 0 !important; aspect-ratio: 16 / 5; border-radius: var(--kit-radius-hero); overflow: hidden; margin-block: 0 var(--s-8); }
+@media (max-width: 639px) { .wp-block-cover.kit-banner { aspect-ratio: 4 / 3; } }
+
+/* ---------- 15. Breadcrumb (same as .kit-crumbs) ---------- */
+.kit-breadcrumb { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+	:is(.kit-chip, .wp-block-post-terms a, .kit-filter-pill, .kit-btn, .kit-field :is(input, select, textarea)) { transition: opacity var(--kit-motion-fast) linear; }
+	.kit-btn:active { transform: none; }
+	.kit-btn.is-loading::before, .kit-btn[aria-busy=true]::before { animation: none; opacity: var(--opacity-60); }
+}

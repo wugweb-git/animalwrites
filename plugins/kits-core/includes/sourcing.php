@@ -242,7 +242,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'edit.php?post_type=' . kits_sourcing_menu_type(), 'Sourcing', 'Sourcing', AW_SRC_CAP, 'aw-sourcing', 'aw_sourcing_page' );
+		add_options_page( 'Sourcing', 'Sourcing', AW_SRC_CAP, 'aw-sourcing', 'aw_sourcing_page' ); // Settings → Sourcing
 	}
 );
 
@@ -281,7 +281,7 @@ add_action(
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
 		}
-		wp_safe_redirect( add_query_arg( array( 'post_type' => kits_sourcing_menu_type(), 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'edit.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) ) );
 		exit;
 	}
 );
@@ -355,7 +355,7 @@ add_action(
 	'admin_notices',
 	function () {
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'edit.php?post_type=' . kits_sourcing_menu_type() . '&page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
 	}
 );
@@ -373,7 +373,7 @@ function aw_sourcing_page() {
 		return;
 	}
 	$tab  = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base = admin_url( 'edit.php?post_type=' . kits_sourcing_menu_type() . '&page=aw-sourcing' );
+	$base = admin_url( 'options-general.php?page=aw-sourcing' );
 	echo '<div class="wrap"><h1>Sourcing</h1>';
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
@@ -394,7 +394,7 @@ function aw_sourcing_page() {
 		echo '</div>';
 		$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		submit_button( 'Save keywords' );
-		echo '</form><h2>Test a headline</h2><form method="get"><input type="hidden" name="post_type" value="aw_news"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline">';
+		echo '</form><h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline">';
 		submit_button( 'Test', 'secondary', '', false );
 		if ( $try ) {
 			$v = aw_relevance_verdict( $try );

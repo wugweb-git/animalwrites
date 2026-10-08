@@ -425,6 +425,41 @@
       "md": "3rem",
       "lg": "4rem"
     },
+    "focus-width": {
+      "sm": "3px",
+      "md": "3px",
+      "lg": "3px"
+    },
+    "focus-offset": {
+      "sm": "2px",
+      "md": "2px",
+      "lg": "2px"
+    },
+    "size-check": {
+      "sm": "1.25rem",
+      "md": "1.25rem",
+      "lg": "1.25rem"
+    },
+    "color-warning": {
+      "sm": "#8a5a00",
+      "md": "#8a5a00",
+      "lg": "#8a5a00"
+    },
+    "color-warning-soft": {
+      "sm": "#fff6e0",
+      "md": "#fff6e0",
+      "lg": "#fff6e0"
+    },
+    "color-info": {
+      "sm": "var(--color-blue)",
+      "md": "var(--color-blue)",
+      "lg": "var(--color-blue)"
+    },
+    "color-info-soft": {
+      "sm": "#eaf1fc",
+      "md": "#eaf1fc",
+      "lg": "#eaf1fc"
+    },
     "color-link": {
       "sm": "var(--color-blue)",
       "md": "var(--color-blue)",

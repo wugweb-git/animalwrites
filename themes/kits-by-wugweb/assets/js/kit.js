@@ -72,102 +72,136 @@
 		});
 	});
 
-	/* 4. Shared form validation for every .aw-form: inline errors, summary, loading state. */
-	var MSG = {
-		valueMissing: 'This is required.',
-		typeMismatch: { email: 'Enter an email address like name@example.com.', url: 'Enter a link starting with https://.' },
-		patternMismatch: 'Check the format.',
-		tooLong: 'This is too long.',
-		rangeUnderflow: 'Enter a larger number.',
-		rangeOverflow: 'Enter a smaller number.',
-		badInput: 'Enter a number.'
-	};
-	function fieldLabel(el) {
-		var l = el.id && document.querySelector('label[for="' + el.id + '"]');
-		if (l) { l = l.cloneNode(true); l.querySelectorAll('.aw-optional').forEach(function (o) { o.remove(); }); }
-		return (l ? l.textContent : el.getAttribute('aria-label') || el.name || 'Field').trim();
-	}
+	/* 4. Shared form behaviour for every .aw-form (Phase 11 F.1).
+	   Validate on submit; after the first submit, check a field again when it loses focus, and clear its message as
+	   soon as it is valid while typing. Focus the first invalid field; a summary only when there is more than one.
+	   Send with fetch() (the server answers in JSON and the form keeps what was typed); without JavaScript the normal
+	   POST gives the same messages. Messages come from data-msg-* on each field, set by the server. */
+	var GENERIC = 'Something went wrong. Your details are still here — try again.';
 	function errorEl(el) {
 		var id = (el.id || el.name.replace(/\W/g, '')) + '-error';
 		var e = document.getElementById(id);
 		if (!e) {
 			e = document.createElement('span');
-			e.className = 'aw-field-error';
+			e.className = 'kit-field-message aw-field-error';
 			e.id = id;
 			e.setAttribute('aria-live', 'polite');
-			(el.closest('.aw-check') || el).insertAdjacentElement('afterend', e);
+			(el.closest('.kit-field-control') || el.closest('.aw-check') || el).insertAdjacentElement('afterend', e);
 		}
 		var by = (el.getAttribute('aria-describedby') || '').split(' ').filter(Boolean);
 		if (by.indexOf(id) < 0) { by.push(id); el.setAttribute('aria-describedby', by.join(' ')); }
 		return e;
 	}
 	function message(el) {
-		var v = el.validity;
+		var v = el.validity, d = el.dataset;
 		if (v.customError) return el.validationMessage;
-		if (el.dataset.error && !v.valid) return el.dataset.error;
-		if (v.valueMissing) return el.type === 'checkbox' ? 'Please tick this box.' : MSG.valueMissing;
-		if (v.typeMismatch) return MSG.typeMismatch[el.type] || MSG.patternMismatch;
-		for (var k in MSG) { if (v[k] && typeof MSG[k] === 'string') return MSG[k]; }
+		if (v.valueMissing) return d.msgRequired || (el.type === 'email' ? 'Enter your email address' : el.type === 'checkbox' ? 'Please tick this box.' : 'This is required.');
+		if (v.typeMismatch && el.type === 'email') return d.msgEmail || 'Enter a full email address, like you@example.com';
+		if (v.typeMismatch && el.type === 'url') return d.msgUrl || 'Enter a link starting with https://.';
+		if (v.tooLong) return d.msgMax || 'This is too long.';
+		if (v.patternMismatch) return d.msgPattern || 'Check the format.';
 		return el.validationMessage;
 	}
-	function check(el, show) {
-		if (!el.willValidate || el.type === 'hidden' || el.closest('.aw-hp')) return true;
-		if (el.type === 'file' && el.dataset.maxBytes) {
-			var big = Array.prototype.some.call(el.files, function (f) { return f.size > +el.dataset.maxBytes; });
-			el.setCustomValidity(big ? 'The file is larger than ' + Math.round(el.dataset.maxBytes / 1048576) + ' MB.' : '');
-		}
+	function show(el, text) {
+		el.setAttribute('aria-invalid', text ? 'true' : 'false');
+		el.classList.toggle('is-valid', !text && el.value !== '' && el.type !== 'checkbox');
+		errorEl(el).textContent = text || '';
+	}
+	function check(el, display) {
+		if (!el.willValidate || el.type === 'hidden' || el.closest('.aw-hp') || !el.name) return true;
+		if (el.type === 'email') el.value = el.value.trim();
 		var ok = el.checkValidity();
-		if (show || el.getAttribute('aria-invalid') === 'true') {
-			el.setAttribute('aria-invalid', ok ? 'false' : 'true');
-			el.classList.toggle('is-valid', ok && el.value !== '');
-			errorEl(el).textContent = ok ? '' : message(el);
-		}
+		if (display) show(el, ok ? '' : message(el));
 		return ok;
+	}
+	function fields(form) { return Array.prototype.slice.call(form.querySelectorAll('input, select, textarea')); }
+	function status(form, text, ok) {
+		var st = form.querySelector('.kit-form-status');
+		if (!st) return;
+		st.classList.toggle('is-success', !!ok);
+		st.textContent = text || '';
+		if (text) st.focus();
+	}
+	function summary(form, bad) {
+		var old = form.querySelector('.aw-form-summary');
+		if (old) old.remove();
+		if (bad.length < 2) return;
+		var box = document.createElement('div');
+		box.className = 'aw-form-summary';
+		box.setAttribute('role', 'alert');
+		box.innerHTML = '<strong>Please fix these ' + bad.length + ' before sending:</strong><ul></ul>';
+		bad.forEach(function (el) {
+			var li = document.createElement('li'), a = document.createElement('a');
+			a.href = '#' + el.id; a.textContent = errorEl(el).textContent;
+			a.addEventListener('click', function (ev) { ev.preventDefault(); el.focus(); });
+			li.appendChild(a); box.querySelector('ul').appendChild(li);
+		});
+		var st = form.querySelector('.kit-form-status');
+		(st || form.firstChild).insertAdjacentElement(st ? 'afterend' : 'beforebegin', box);
+	}
+	function busy(btn, on) {
+		if (!btn) return;
+		btn.classList.toggle('is-loading', on);
+		if (on) btn.setAttribute('aria-busy', 'true'); else btn.removeAttribute('aria-busy');
+		btn.disabled = on;
+	}
+	function done(form, data) {
+		var box = document.createElement('div');
+		box.className = 'aw-form-done kit-form-done';
+		box.setAttribute('role', 'status');
+		box.tabIndex = -1;
+		var h = document.createElement('p'); h.className = 'aw-form-done-title'; h.textContent = data.title || ''; box.appendChild(h);
+		if (data.text) { var t = document.createElement('p'); t.textContent = data.text; box.appendChild(t); }
+		if (data.again) {
+			var again = document.createElement('button');
+			again.type = 'button'; again.className = 'kit-btn kit-btn--secondary'; again.textContent = data.again;
+			again.addEventListener('click', function () { form.reset(); fields(form).forEach(function (el) { show(el, ''); el.classList.remove('is-valid'); }); box.replaceWith(form); var f = form.querySelector('input:not([type=hidden]), select, textarea'); if (f) f.focus(); });
+			box.appendChild(again);
+		}
+		form.replaceWith(box);
+		box.focus();
 	}
 	document.querySelectorAll('form.kit-form, form.aw-form').forEach(function (form) {
 		form.setAttribute('novalidate', '');
-		var served = form.querySelector('.aw-form-summary');
-		if (served) served.focus(); // Errors returned by the server (no-JS path or server-only rules).
+		var submitted = false;
+		var served = form.querySelector('.aw-form-summary') || form.querySelector('.kit-form-status:not(:empty)') || form.querySelector('[aria-invalid=true]');
+		if (served) { submitted = true; served.focus(); } // errors returned by the server (no-JS path)
 		form.addEventListener('focusout', function (e) {
-			if (e.target.matches('input, select, textarea') && e.target.value !== '') check(e.target, true);
+			if (submitted && e.target.matches('input, select, textarea')) check(e.target, true);
 		});
-		form.addEventListener('change', function (e) { if (e.target.type === 'file') check(e.target, true); });
 		form.addEventListener('input', function (e) {
-			if (e.target.getAttribute('aria-invalid') === 'true') check(e.target, true);
+			var el = e.target;
+			if (el.getAttribute('aria-invalid') === 'true' && el.checkValidity()) show(el, ''); // clear as soon as it is valid
+		});
+		form.addEventListener('change', function (e) {
+			if (submitted && (e.target.type === 'checkbox' || e.target.tagName === 'SELECT')) check(e.target, true);
 		});
 		form.addEventListener('submit', function (e) {
-			var bad = [];
-			form.querySelectorAll('input, select, textarea').forEach(function (el) { if (!check(el, true)) bad.push(el); });
+			submitted = true;
+			status(form, '');
+			var bad = fields(form).filter(function (el) { return !check(el, true); });
 			var custom = form.dispatchEvent(new CustomEvent('aw:validate', { cancelable: true, detail: { errors: bad } }));
-			var summary = form.querySelector('.aw-form-summary');
-			if (bad.length || !custom) {
-				e.preventDefault();
-				if (!summary) {
-					summary = document.createElement('div');
-					summary.className = 'aw-form-summary';
-					summary.setAttribute('role', 'alert');
-					summary.tabIndex = -1;
-					form.insertBefore(summary, form.firstChild);
-				}
-				summary.innerHTML = '<strong>Please fix ' + (bad.length === 1 ? 'this' : 'these ' + bad.length) + ' before sending:</strong><ul></ul>';
-				var ul = summary.querySelector('ul');
-				bad.forEach(function (el) {
-					var li = document.createElement('li'), a = document.createElement('a');
-					a.href = '#' + el.id;
-					a.textContent = fieldLabel(el) + ': ' + message(el);
-					a.addEventListener('click', function (ev) { ev.preventDefault(); el.focus(); });
-					li.appendChild(a); ul.appendChild(li);
-				});
-				summary.focus();
-				return;
-			}
-			if (summary) summary.remove();
+			summary(form, bad);
+			if (bad.length || !custom) { e.preventDefault(); if (bad[0]) bad[0].focus(); return; }
 			var btn = form.querySelector('button[type=submit]');
-			if (btn) {
-				if (btn.classList.contains('is-loading')) { e.preventDefault(); return; }
-				btn.classList.add('is-loading');
-				btn.setAttribute('aria-busy', 'true');
-			}
+			if (btn && btn.classList.contains('is-loading')) { e.preventDefault(); return; }
+			if (!window.fetch || !window.FormData || form.enctype === 'multipart/form-data' && form.querySelector('input[type=file]')) { busy(btn, true); return; } // normal POST
+			e.preventDefault();
+			busy(btn, true);
+			fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-AW-Fetch': '1' }, credentials: 'same-origin' })
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					busy(btn, false);
+					if (data.ok) { done(form, data); return; }
+					var list = [];
+					Object.keys(data.errors || {}).forEach(function (name) {
+						var el = form.querySelector('[name="' + name + '"], [name="' + name + '[]"]');
+						if (el) { show(el, data.errors[name]); list.push(el); }
+					});
+					summary(form, list);
+					if (data.notice) status(form, data.notice); else if (list[0]) list[0].focus();
+				})
+				.catch(function () { busy(btn, false); status(form, form.dataset.genericError || GENERIC); });
 		});
 	});
 })();
@@ -201,5 +235,46 @@
 		}
 		btn.addEventListener('click', function (e) { e.preventDefault(); set(form.hidden); });
 		form.addEventListener('keydown', function (e) { if (e.key === 'Escape') { set(false); btn.focus(); } });
+	});
+})();
+
+/* Filters (kits_filter_bar): below 640px the groups fold into a "Filters" sheet (focus kept inside, Esc closes);
+   groups with many options show the first eight until "Show more". */
+(function () {
+	var phone = window.matchMedia('(max-width: 639px)');
+	document.querySelectorAll('.kit-filter-sheet').forEach(function (sheet) {
+		var summary = sheet.querySelector('summary');
+		function layout() {
+			sheet.classList.toggle('is-sheet', phone.matches);
+			if (phone.matches) sheet.removeAttribute('open'); else sheet.setAttribute('open', '');
+		}
+		layout();
+		phone.addEventListener('change', layout);
+		sheet.addEventListener('toggle', function () {
+			if (!sheet.classList.contains('is-sheet')) return;
+			if (sheet.open) {
+				var first = sheet.querySelector('.kit-filters a, .kit-filters button');
+				if (first) first.focus();
+			}
+		});
+		sheet.addEventListener('keydown', function (e) {
+			if (!sheet.classList.contains('is-sheet') || !sheet.open) return;
+			if (e.key === 'Escape') { sheet.open = false; summary.focus(); return; }
+			if (e.key !== 'Tab') return;
+			var f = Array.prototype.filter.call(sheet.querySelectorAll('.kit-filters a, .kit-filters button'), function (el) { return el.offsetParent !== null; });
+			if (!f.length) return;
+			if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+			else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+		});
+		var close = sheet.querySelector('[data-kit-sheet-close]');
+		if (close) close.addEventListener('click', function () { sheet.open = false; summary.focus(); });
+	});
+	document.querySelectorAll('.kit-filter-more').forEach(function (btn) {
+		var group = document.getElementById(btn.getAttribute('aria-controls'));
+		btn.addEventListener('click', function () {
+			var open = group.classList.toggle('is-expanded');
+			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+			btn.textContent = open ? btn.getAttribute('data-less') : btn.getAttribute('data-more');
+		});
 	});
 })();

@@ -79,13 +79,16 @@ function aw_listing_sources( $id ) {
  * @return string
  */
 function aw_source_labels( $id, $full = false ) {
-	$html = '';
+	$variant = array( 'awbi' => 'success', 'awbi-abc' => 'success', 'gov' => 'info', 'awol' => '', 'organisation' => 'accent' );
+	$html    = '';
 	foreach ( aw_listing_sources( $id ) as list( $slug, $mark, $label, $on, $link ) ) {
 		$title = $label . ( $on ? ', as on ' . wp_date( 'j M Y', strtotime( $on ) ) : '' );
-		$inner = '<span class="aw-src-mark" aria-hidden="true">' . esc_html( $mark ) . '</span>' . ( $full ? '<span class="aw-src-label">' . esc_html( $title ) . '</span>' : '<span class="screen-reader-text">' . esc_html( 'Source: ' . $title ) . '</span>' );
-		$html .= ( $full && $link )
-			? '<a class="aw-src aw-src--' . esc_attr( $slug ) . '" href="' . esc_url( $link ) . '" rel="noopener nofollow" title="' . esc_attr( $title ) . '">' . $inner . '</a>'
-			: '<span class="aw-src aw-src--' . esc_attr( $slug ) . '" title="' . esc_attr( $title ) . '">' . $inner . '</span>';
+		$tag   = '<span class="kit-tag aw-datasrc' . ( $variant[ $slug ] ? ' kit-tag--' . $variant[ $slug ] : '' ) . '" title="' . esc_attr( $title ) . '"><span class="aw-datasrc-mark" aria-hidden="true">' . esc_html( $mark ) . '</span><span class="screen-reader-text">' . esc_html( 'Source: ' . $title ) . '</span></span>';
+		if ( $full ) {
+			$text = $link ? '<a href="' . esc_url( $link ) . '" rel="noopener nofollow">' . esc_html( $title ) . '</a>' : esc_html( $title );
+			$tag  = '<span class="aw-datasrc-row">' . $tag . ' ' . $text . '</span>';
+		}
+		$html .= $tag;
 	}
-	return $html ? '<span class="aw-srcs">' . $html . '</span>' : '';
+	return $html ? '<span class="aw-datasrcs' . ( $full ? ' is-full' : '' ) . '">' . $html . '</span>' : '';
 }

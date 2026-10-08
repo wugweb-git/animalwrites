@@ -43,10 +43,46 @@ function aw_form_state( $form ) {
  * @param string $notice Optional form-level message.
  */
 function aw_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
+	if ( aw_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed
+		wp_send_json( array( 'ok' => false, 'errors' => (object) $errors, 'notice' => $notice ) );
+	}
 	$token = wp_generate_password( 16, false );
 	set_transient( 'aw_form_' . $token, array( 'form' => $form, 'errors' => $errors, 'values' => $values, 'notice' => $notice ), 10 * MINUTE_IN_SECONDS );
 	wp_safe_redirect( add_query_arg( 'aw_err', $token, $back ) . '#' . $anchor );
 	exit;
+}
+
+/** The form-level message when sending fails (a form can set its own with the kits_form_generic_error filter). */
+function aw_form_generic_error( $form ) {
+	return (string) apply_filters( 'kits_form_generic_error', 'Something went wrong. Your details are still here — try again.', $form );
+}
+
+/** Was this submitted by kit.js with fetch() (X-AW-Fetch header)? */
+function aw_form_is_fetch() {
+	return ! empty( $_SERVER['HTTP_X_AW_FETCH'] );
+}
+
+/**
+ * Success: JSON for fetch() (the form is replaced by the message in place), otherwise the usual redirect.
+ *
+ * @param string $url   Where a normal POST goes (with ?aw_done=...).
+ * @param string $title Heading of the success message.
+ * @param string $text  Line under it.
+ * @param array  $more  Extra fields for the page script (e.g. a "Send another" label).
+ */
+function aw_form_success( $url, $title, $text = '', $more = array() ) {
+	if ( aw_form_is_fetch() ) {
+		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more ) );
+	}
+	wp_safe_redirect( $url );
+	exit;
+}
+
+/** Email cleaned as the server checks it: trimmed, domain in lower case. */
+function aw_clean_email( $email ) {
+	$email = trim( (string) $email );
+	$at    = strrpos( $email, '@' );
+	return false === $at ? $email : substr( $email, 0, $at + 1 ) . strtolower( substr( $email, $at + 1 ) );
 }
 
 /**
@@ -75,6 +111,7 @@ function aw_form_open( $form, $attrs = array() ) {
 			'method' => 'post',
 			'action' => admin_url( 'admin-post.php' ),
 			'id'     => 'aw-form-' . $form,
+			'data-generic-error' => aw_form_generic_error( $form ),
 		),
 		$attrs
 	);
@@ -83,7 +120,9 @@ function aw_form_open( $form, $attrs = array() ) {
 		$html .= ' ' . esc_attr( $k ) . '="' . esc_attr( $v ) . '"';
 	}
 	$html .= '>';
-	if ( $state['errors'] || $state['notice'] ) {
+	// One status region per form: form-level errors and success (filled by the server or by kit.js).
+	$html .= '<div class="kit-form-status" role="status" aria-live="polite" tabindex="-1">' . ( $state['notice'] && ! $state['errors'] ? esc_html( $state['notice'] ) : '' ) . '</div>';
+	if ( count( $state['errors'] ) > 1 ) { // a summary only when there is more than one error
 		$html .= '<div class="aw-form-summary" role="alert" tabindex="-1">';
 		if ( $state['notice'] ) {
 			$html .= '<strong>' . esc_html( $state['notice'] ) . '</strong>';
@@ -126,7 +165,7 @@ function aw_field_id( $form, $name ) {
  * @return string
  */
 function aw_field( $form, $f ) {
-	$f     = array_merge( array( 'type' => 'text', 'required' => false, 'hint' => '', 'options' => array(), 'attrs' => array(), 'value' => '' ), $f );
+	$f     = array_merge( array( 'type' => 'text', 'required' => false, 'hint' => '', 'options' => array(), 'attrs' => array(), 'value' => '', 'icon' => '', 'messages' => array() ), $f );
 	$state = aw_form_state( $form );
 	$key   = rtrim( $f['name'], '[]' );
 	$id    = aw_field_id( $form, $f['name'] );
@@ -138,8 +177,14 @@ function aw_field( $form, $f ) {
 	}
 	$by[] = $id . '-error';
 
+	// Messages the page script shows (same words as the server): data-msg-required, data-msg-email, ...
+	$msgs = array();
+	foreach ( $f['messages'] as $rule => $text ) {
+		$msgs[ 'data-msg-' . $rule ] = $text;
+	}
 	$a = array_merge(
 		array( 'id' => $id, 'name' => $f['name'], 'aria-describedby' => implode( ' ', $by ) ),
+		$msgs,
 		$f['required'] ? array( 'required' => true ) : array(),
 		$err ? array( 'aria-invalid' => 'true' ) : array(),
 		$f['attrs']
@@ -170,15 +215,17 @@ function aw_field( $form, $f ) {
 			$control = '<input type="' . esc_attr( $f['type'] ) . '" value="' . esc_attr( (string) $val ) . '"' . $attr . '>';
 	}
 
-	$opt   = $f['required'] ? '' : ' <span class="aw-optional">(optional)</span>';
-	$hint  = $f['hint'] ? '<span class="aw-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
-	$error = '<span class="aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span>';
-	$cls   = 'aw-field aw-field--' . $f['type'] . ( $err ? ' is-invalid' : '' );
+	$opt   = $f['required'] ? '' : ' <span class="aw-optional kit-optional">(optional)</span>';
+	$hint  = $f['hint'] ? '<span class="aw-field-hint kit-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
+	// The message line is always there (reserved space), so showing an error never moves the layout.
+	$error = '<span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span>';
+	$cls   = 'kit-field aw-field aw-field--' . $f['type'] . ( $err ? ' is-invalid' : '' );
+	$icon  = $f['icon'] ? '<span class="aw-ico aw-ico--' . esc_attr( $f['icon'] ) . ' kit-field-icon" aria-hidden="true"></span>' : '';
 
 	if ( 'checkbox' === $f['type'] ) {
-		return '<p class="' . esc_attr( $cls ) . '"><label class="aw-check" for="' . esc_attr( $id ) . '">' . $control . ' ' . esc_html( $f['label'] ) . '</label>' . $error . $hint . '</p>';
+		return '<div class="' . esc_attr( $cls ) . '"><label class="kit-checkbox aw-check" for="' . esc_attr( $id ) . '">' . $control . ' <span>' . esc_html( $f['label'] ) . '</span></label>' . $error . $hint . '</div>';
 	}
-	return '<p class="' . esc_attr( $cls ) . '"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . $opt . '</label>' . $hint . $control . $error . '</p>';
+	return '<div class="' . esc_attr( $cls ) . '"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . $opt . '</label>' . $hint . '<div class="kit-field-control">' . $icon . $control . '</div>' . $error . '</div>';
 }
 
 /**
@@ -197,15 +244,14 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 		aw_form_fail( $form, array(), array(), $back, $anchor, 'This form expired. Please check your details and send it again.' );
 	}
 	if ( ! empty( $_POST['aw_website'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
-		wp_safe_redirect( $done );
-		exit;
+		aw_form_success( $done, '' ); // bots see a success
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Please tick the box above the send button, wait for the check to finish, then send again.' );
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, aw_form_generic_error( $form ) );
 	}
 	$key = 'aw_rl_' . $form . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 	if ( (int) get_transient( $key ) >= $per_hour ) {
-		aw_form_fail( $form, array(), array(), $back, $anchor, 'Too many submissions from this connection. Please try again in an hour.' );
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Too many attempts. Wait a minute and try again.' );
 	}
 	return $key;
 }
@@ -243,18 +289,18 @@ function aw_form_count( $key ) {
  * @param array $labels field => label, for messages.
  * @return array<string,string>
  */
-function aw_form_validate( $rules, $values, $labels ) {
+function aw_form_validate( $rules, $values, $labels, $messages = array() ) {
 	$errors = array();
 	foreach ( $rules as $field => $list ) {
 		$v     = $values[ $field ] ?? '';
 		$label = $labels[ $field ] ?? ucfirst( $field );
 		foreach ( $list as $rule ) {
 			if ( 'required' === $rule && ( '' === $v || array() === $v ) ) {
-				$errors[ $field ] = "{$label}: this is required.";
+				$errors[ $field ] = $messages[ $field ]['required'] ?? ( in_array( 'email', $list, true ) ? 'Enter your email address' : "{$label}: this is required." );
 			} elseif ( '' === $v ) {
 				continue;
-			} elseif ( 'email' === $rule && ! is_email( $v ) ) {
-				$errors[ $field ] = "{$label}: enter an email address like name@example.com.";
+			} elseif ( 'email' === $rule && ( ! is_email( $v ) || strlen( $v ) > 254 ) ) {
+				$errors[ $field ] = $messages[ $field ]['email'] ?? 'Enter a full email address, like you@example.com';
 			} elseif ( 'phone' === $rule && ! preg_match( '/^\+?[0-9 ]{8,15}$/', $v ) ) {
 				$errors[ $field ] = "{$label}: enter 8 to 15 digits, for example +91 98765 43210.";
 			} elseif ( 'url' === $rule && ! wp_http_validate_url( $v ) ) {

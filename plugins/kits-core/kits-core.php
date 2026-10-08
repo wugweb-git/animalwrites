@@ -21,6 +21,8 @@ define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
+require_once KITS_CORE_DIR . 'includes/primitives.php';
+require_once KITS_CORE_DIR . 'includes/demo.php';
 require_once KITS_CORE_DIR . 'includes/mail.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
 require_once KITS_CORE_DIR . 'includes/seo-fields.php';

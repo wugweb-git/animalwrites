@@ -16,7 +16,7 @@ const AW_SECTION_DESC = array(
 	'aw_guide'       => 'Practical guides for the moments that matter: an injured animal, a cruelty case, a community dog.',
 	'aw_campaign'    => 'Citizen campaigns for animals, starting with the letters of Animal Writes 1.0.',
 	'aw_opportunity' => 'Volunteer, foster or intern with people doing the work.',
-	'aw_listing'     => 'Shelters, vets, ambulances and rescue groups, by state and district.',
+	'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.', // OWNER to approve (Phase 11 E1)
 );
 
 /**
@@ -90,13 +90,10 @@ add_shortcode(
 			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="aw-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
 		}
 		$visual = $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
-		if ( 'aw_listing' === $type && is_post_type_archive( 'aw_listing' ) && ! get_query_var( 'aw_city' ) && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			// Directory home: the states with the most organisations, set as type. Real counts, no map.
-			$items = '';
-			foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC', 'number' => 9 ) ) as $st ) {
-				$items .= '<li><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span class="aw-states-n">' . esc_html( number_format_i18n( $st->count ) ) . '</span> <span class="aw-states-name">' . esc_html( $st->name ) . '</span></a></li>';
-			}
-			$visual = $items ? '<nav class="aw-states" aria-label="Browse by state"><ul>' . $items . '</ul></nav>' : $visual;
+		if ( 'aw_listing' === $type ) {
+			// Directory: the search bar is the main element and the count sits with the results (Phase 11 E1, E3).
+			$visual = '';
+			$count  = 0;
 		}
 		return '<header class="aw-section-band alignfull"><div class="aw-section-head alignwide"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
@@ -142,21 +139,20 @@ add_shortcode(
 		$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
 		$total  = (int) wp_count_posts( 'aw_listing' )->publish;
 		$opts   = '<option value="">All states and UTs</option>';
-		$items  = '';
 		$with   = 0;
 		foreach ( (array) $states as $st ) {
-			$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
-			if ( $st->count ) {
-				$with++;
+			if ( ! aw_state_count( $st ) ) {
+				continue; // states and UTs with no listings are left out, so the list and the count match (Phase 11 A2)
 			}
-			$items .= '<li' . ( $st->count ? '' : ' class="is-empty"' ) . '><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span class="n">' . esc_html( number_format_i18n( $st->count ) ) . '</span> <span class="s">' . esc_html( $st->name ) . '</span></a></li>';
+			$with++;
+			$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
 		}
 		return '<div class="aw-ed-find-head"><h2>Find help near you</h2><p class="aw-ed-big"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p></div>'
 			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
 			. '<input type="hidden" name="aw_filter" value="1">'
 			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="aw-ico aw-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
-			. '<button type="submit" class="aw-btn">Search</button></form>'
-			. '<nav class="aw-ed-states" aria-label="Browse by state"><ul>' . $items . '</ul></nav>';
+			. '<button type="submit" class="kit-btn">Search</button></form>'
+			. aw_browse_states();
 	}
 );

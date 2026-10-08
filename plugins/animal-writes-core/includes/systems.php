@@ -64,39 +64,6 @@ function aw_text( $id, $words = 28 ) {
 	return wp_trim_words( wp_strip_all_tags( get_the_excerpt( $id ) ), $words );
 }
 
-/**
- * Filter chips from a taxonomy (links that keep the current archive).
- *
- * @param string $tax    Taxonomy.
- * @param string $param  Query parameter.
- * @param string $label  Accessible label.
- * @param string $type   Post type counted.
- * @return string
- */
-function aw_filter_chips( $tax, $param, $label, $type ) {
-	$args = array( 'taxonomy' => $tax, 'hide_empty' => true, 'object_ids' => get_posts( array( 'post_type' => $type, 'numberposts' => -1, 'fields' => 'ids' ) ) );
-	$terms = get_terms( $args );
-	if ( 'aw_city' === $tax && $terms && ! is_wp_error( $terms ) ) {
-		// Filter by state: a state shows when it or one of its districts has items.
-		$ids = array();
-		foreach ( $terms as $t ) {
-			$ids[] = $t->parent ? $t->parent : $t->term_id;
-		}
-		$terms = get_terms( array( 'taxonomy' => 'aw_city', 'include' => array_unique( $ids ), 'orderby' => 'name', 'hide_empty' => false ) );
-	}
-	if ( ! $terms || is_wp_error( $terms ) ) {
-		return '';
-	}
-	$cur  = sanitize_title( wp_unslash( $_GET[ $param ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	// Keep the other active filters when one row changes.
-	$base = add_query_arg( array_diff_key( function_exists( 'aw_active_filters' ) ? aw_active_filters( $type ) : array(), array( $param => '' ) ), get_post_type_archive_link( $type ) );
-	$out  = '<nav class="aw-chips-nav" aria-label="' . esc_attr( $label ) . '"><a href="' . esc_url( $base ) . '"' . ( $cur ? '' : ' aria-current="true"' ) . '>All</a>';
-	foreach ( $terms as $t ) {
-		$out .= '<a href="' . esc_url( add_query_arg( $param, $t->slug, $base ) ) . '"' . ( $cur === $t->slug ? ' aria-current="true"' : '' ) . '>' . esc_html( $t->name ) . '</a>';
-	}
-	return $out . '</nav>';
-}
-
 /** Pagination for the main query. */
 function aw_pager() {
 	$links = paginate_links( array( 'type' => 'array', 'prev_text' => 'Previous', 'next_text' => 'Next' ) );
@@ -114,12 +81,15 @@ function aw_empty( $text ) {
  * list is canonical to the plain list (indexing.php). Places filter by state (children included).
  */
 const AW_LIST_FILTERS = array(
-	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'issuer', 'aw_source_type', 'Filter by issuer' ), array( 'court', 'aw_court', 'Filter by court' ), array( 'state', 'aw_city', 'Filter by state' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_news'        => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Filter by kind of opportunity' ), array( 'state', 'aw_city', 'Filter by location' ) ),
-	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
+	// Courts (Supreme Court, High Courts, NGT) are filtered under Court only; Issuer lists the other bodies.
+	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Kind' ), array( 'issuer', 'aw_source_type', 'Issuer' ), array( 'court', 'aw_court', 'Court' ), array( 'lang', 'aw_language', 'Language' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'aw_city', 'State' ) ),
+	'aw_news'        => array( array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'aw_city', 'Location' ) ),
+	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Kind' ), array( 'topic', 'aw_topic', 'Topic' ) ),
+	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Type' ), array( 'state', 'aw_city', 'Location' ) ),
+	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Topic' ) ),
 );
+/** Issuer values that are courts: they belong to the Court filter. */
+const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
 const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_guide' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
 /** Active filters on this request: param => term slug. */
@@ -160,13 +130,47 @@ add_action(
 	30
 );
 
-/** Every filter row for a list (rows with no terms in use are left out). */
+/**
+ * The filter bar for a list: one labelled group per filter, counts that respect the other active filters, values with
+ * no items hidden, a group hidden while it has one option, and the active filters with "Remove" and "Clear all".
+ */
 function aw_list_filters( $type ) {
-	$out = '';
+	$active = aw_active_filters( $type );
+	$all    = get_post_type_archive_link( $type );
+	$groups = '';
+	$chips  = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
-		$out .= aw_filter_chips( $f[1], $f[0], $f[2], $type );
+		list( $param, $tax, $label ) = $f;
+		$others = array_diff_key( $active, array( $param => '' ) );
+		$base   = add_query_arg( $others, $all );
+		// Items matching the other filters: the counts for this group.
+		$tq = array( 'relation' => 'AND' );
+		foreach ( AW_LIST_FILTERS[ $type ] as $g ) {
+			if ( isset( $others[ $g[0] ] ) ) {
+				$tq[] = array( 'taxonomy' => $g[1], 'field' => 'slug', 'terms' => $others[ $g[0] ], 'include_children' => true );
+			}
+		}
+		$ids = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$counts = array();
+		foreach ( $ids ? wp_get_object_terms( $ids, $tax, array( 'fields' => 'all_with_object_id' ) ) : array() as $t ) {
+			$key                         = ( 'aw_city' === $tax && $t->parent ) ? (int) $t->parent : (int) $t->term_id; // places: count by state
+			$counts[ $key ][ $t->object_id ] = 1;
+		}
+		$options = array( array( 'All', $base, ! isset( $active[ $param ] ), null ) );
+		$terms   = $counts ? get_terms( array( 'taxonomy' => $tax, 'include' => array_keys( $counts ), 'hide_empty' => false, 'orderby' => 'name' ) ) : array();
+		foreach ( is_wp_error( $terms ) ? array() : $terms as $t ) {
+			if ( 'aw_source_type' === $tax && in_array( $t->slug, AW_COURT_ISSUERS, true ) ) {
+				continue;
+			}
+			$on        = ( $active[ $param ] ?? '' ) === $t->slug;
+			$options[] = array( $t->name, add_query_arg( $param, $t->slug, $base ), $on, count( $counts[ $t->term_id ] ) );
+			if ( $on ) {
+				$chips[] = array( $label . ': ' . $t->name, $base );
+			}
+		}
+		$groups .= function_exists( 'kits_filter_group' ) ? kits_filter_group( $label, $options ) : '';
 	}
-	return $out;
+	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all ) : '';
 }
 
 /* ---------- TRUST: source, dates, verification ---------- */
@@ -253,8 +257,8 @@ add_shortcode(
 				$lang  = aw_first_term( $id, 'aw_language' );
 				$out  .= '<article class="aw-case aw-case--template">'
 					. '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>'
-					. '<div class="aw-case-body"><div class="aw-case-tags"><span class="aw-issuer aw-issuer--template">Template</span>'
-					. ( $lang ? '<span class="aw-case-topic">' . esc_html( $lang->name ) . '</span>' : '' ) . '</div>'
+					. '<div class="aw-case-body"><div class="aw-case-tags kit-tags">' . kits_tag( 'Template', 'accent' )
+					. ( $lang ? kits_tag( $lang->name ) : '' ) . '</div>'
 					. '<h2 class="aw-case-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a></h2>'
 					. '<p class="aw-case-sum">' . esc_html( aw_text( $id, 30 ) ) . '</p>'
 					. '</div>' . aw_i( 'arrow-right' ) . '</article>';
@@ -270,9 +274,9 @@ add_shortcode(
 				: '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>';
 			$out  .= '<article class="aw-case">'
 				. $date
-				. '<div class="aw-case-body"><div class="aw-case-tags">'
-				. ( $iss ? '<span class="aw-issuer aw-issuer--' . esc_attr( $iss->slug ) . '">' . esc_html( $iss->name ) . '</span>' : '' )
-				. ( $topic ? '<span class="aw-case-topic">' . esc_html( $topic->name ) . '</span>' : '' ) . '</div>'
+				. '<div class="aw-case-body"><div class="aw-case-tags kit-tags">'
+				. ( $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '' )
+				. ( $topic ? kits_tag( $topic->name ) : '' ) . '</div>'
 				. '<h2 class="aw-case-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a></h2>'
 				. '<p class="aw-case-sum">' . esc_html( aw_text( $id, 30 ) ) . '</p>'
 				. '<p class="aw-case-src">' . ( $src ? 'Source: ' . esc_html( $src ) : '' ) . ( $doc ? ' <span class="aw-doc">' . aw_i( 'research' ) . ' Official document</span>' : '' ) . '</p>'
@@ -387,10 +391,20 @@ add_shortcode(
 	'aw_directory_results',
 	function () {
 		global $wp_query;
+		$hub = get_post_type_archive_link( 'aw_listing' );
 		if ( ! $wp_query->have_posts() ) {
-			return aw_empty( 'No organisations match. Try another district, or clear the filters.' );
+			return '<div class="aw-empty"><p>No organisations match. Try another district, or clear the filters.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( $hub ) . '">Clear filters</a></p></div>';
 		}
-		$out = '<div class="aw-orgs">';
+		// Count line and sort (Phase 11 E3).
+		$n      = (int) $wp_query->found_posts;
+		$q      = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$where  = array_filter( array( $q ? '“' . $q . '”' : '', get_query_var( 'aw_city' ) ? (string) ( get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' )->name ?? '' ) : '', function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '' ) );
+		$line   = $where ? sprintf( _n( '%1$s result for %2$s', '%1$s results for %2$s', $n ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( _n( '%s organisation', '%s organisations', $n ), number_format_i18n( $n ) );
+		$sort   = 'details' === ( $_GET['sort'] ?? '' ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		$here   = remove_query_arg( array( 'sort', 'paged' ) );
+		$out    = '<div class="aw-dir-results-head"><p role="status">' . esc_html( $line ) . '</p>'
+			. '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav></div>';
+		$out   .= '<div class="aw-orgs">';
 		while ( $wp_query->have_posts() ) {
 			$wp_query->the_post();
 			$id       = get_the_ID();
@@ -407,13 +421,14 @@ add_shortcode(
 				. '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>'
 				. '<div class="aw-org-body"><h2 class="aw-org-name"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( $name ) . '</a></h2>'
 				. '<p class="aw-org-meta">' . ( $area ? aw_i( 'directory' ) . esc_html( $area ) : '' ) . '</p>'
-				. '<p class="aw-org-tags">' . ( $verified ? '<span class="aw-state aw-state--ok">' . aw_i( 'check' ) . 'Verified</span>' : '' ) . aw_source_labels( $id )
-				. ( $featured ? '<span class="aw-state aw-state--feat">Featured</span>' : '' );
+				. '<p class="aw-org-tags kit-tags">' . ( $verified ? kits_badge( 'Verified', 'verified' ) : '' ) . ( $featured ? kits_badge( 'Featured', 'featured' ) : '' ) . aw_source_labels( $id );
 			foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
-				$out .= '<span class="aw-type">' . esc_html( $t->name ) . '</span>';
+				$out .= kits_tag( $t->name );
 			}
-			$out .= '</p></div><div class="aw-org-actions">'
-				. ( $phone ? '<a class="aw-btn aw-btn--sm aw-btn--outline" href="' . esc_attr( aw_tel_url( $phone ) ) . '">' . aw_i( 'phone' ) . 'Call</a>' : '' )
+			$email = (string) get_post_meta( $id, 'aw_email', true );
+			$site  = (string) get_post_meta( $id, 'aw_website', true );
+			$out  .= '</p>' . ( $phone || $email || $site ? '<p class="aw-org-contact">' . ( $phone ? aw_i( 'phone' ) . '<span class="screen-reader-text">Phone</span>' : '' ) . ( $email ? aw_i( 'mail' ) . '<span class="screen-reader-text">Email</span>' : '' ) . ( $site ? aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">Website</span>' : '' ) . '</p>' : '' ) . '</div><div class="aw-org-actions">'
+				. ( $phone ? '<a class="kit-btn kit-btn--sm kit-btn--secondary" href="' . esc_attr( aw_tel_url( $phone ) ) . '">' . aw_i( 'phone' ) . 'Call</a>' : '' )
 				. '<a class="aw-org-go" href="' . esc_url( get_permalink() ) . '" aria-label="' . esc_attr( 'View ' . $name ) . '">' . aw_i( 'arrow-right' ) . '</a></div></article>';
 		}
 		wp_reset_postdata();
@@ -443,12 +458,12 @@ add_shortcode(
 			$img   = get_the_post_thumbnail_url( $id, 'medium_large' );
 			$out  .= '<article class="aw-opp">'
 				. ( $img ? '<div class="aw-opp-media"><img src="' . esc_url( $img ) . '" alt="" loading="lazy"></div>' : '' )
-				. '<div class="aw-opp-body"><p class="aw-opp-tags">' . ( $type ? '<span class="aw-kind">' . esc_html( $type->name ) . '</span>' : '' ) . ( $city ? '<span>' . aw_i( 'directory' ) . esc_html( $city->name ) . '</span>' : '' ) . '</p>'
+				. '<div class="aw-opp-body"><p class="aw-opp-tags kit-tags">' . ( $type ? kits_tag( $type->name, 'accent' ) : '' ) . ( $city ? '<span>' . aw_i( 'directory' ) . esc_html( $city->name ) . '</span>' : '' ) . '</p>'
 				. '<h2 class="aw-opp-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a></h2>'
 				. ( $org ? '<p class="aw-opp-org">' . esc_html( $org ) . '</p>' : '' )
 				. '<p class="aw-opp-sum">' . esc_html( aw_text( $id, 22 ) ) . '</p>'
 				. '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . esc_html( get_the_modified_date( 'j M Y' ) ) . ( $dl ? ' · Apply by ' . esc_html( wp_date( 'j M Y', strtotime( $dl ) ) ) : '' ) . '</p>'
-				. '<div class="aw-opp-actions">' . ( $apply ? '<a class="aw-btn aw-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener">Apply or sign up</a>' : '' ) . '<a class="aw-btn aw-btn--sm aw-btn--outline" href="' . esc_url( get_permalink() ) . '">Details</a></div>'
+				. '<div class="aw-opp-actions">' . ( $apply ? '<a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener">Apply or sign up</a>' : '' ) . '<a class="kit-btn kit-btn--sm kit-btn--secondary" href="' . esc_url( get_permalink() ) . '">Details</a></div>'
 				. '</div></article>';
 		}
 		wp_reset_postdata();
@@ -471,7 +486,7 @@ add_shortcode(
 			}
 			$out .= '</div></section>';
 		}
-		$out .= '<section class="aw-camp-next"><div><h2>Bring a campaign to Animal Writes</h2><p>Running a letter drive, petition or day of action for animals? Tell us and we will help you plan, publish and count it.</p></div><a class="aw-btn aw-btn--lg" href="/contact/">Talk to us</a></section>';
+		$out .= '<section class="aw-camp-next"><div><h2>Bring a campaign to Animal Writes</h2><p>Running a letter drive, petition or day of action for animals? Tell us and we will help you plan, publish and count it.</p></div><a class="kit-btn" href="/contact/">Talk to us</a></section>';
 		return $out;
 	}
 );

@@ -97,21 +97,24 @@ function aw_nl_mail( $to, $subject, $body, $token ) {
 
 function aw_newsletter_form() {
 	$done = sanitize_key( $_GET['aw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$to   = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$msgs = array(
-		'nl_check'     => 'Check your inbox and click the link in the email to confirm.',
-		'nl_confirmed' => 'Confirmed. You are on the list.',
-		'nl_unsub'     => 'You are unsubscribed and will not get these emails again.',
-		'nl_badlink'   => 'This link has expired or was already used.',
+		'nl_check'     => array( 'Check your inbox', $to ? sprintf( 'We\'ve sent a link to %s. Open it to confirm your subscription.', $to ) : '' ),
+		'nl_already'   => array( 'You\'re already subscribed', $to ? sprintf( 'Updates go to %s.', $to ) : '' ),
+		'nl_confirmed' => array( 'Confirmed. You are on the list.', '' ),
+		'nl_unsub'     => array( 'You are unsubscribed and will not get these emails again.', '' ),
+		'nl_badlink'   => array( 'This link has expired or was already used.', '' ),
 	);
 	if ( isset( $msgs[ $done ] ) ) {
-		return '<div class="aw-form-done" id="newsletter" role="status" tabindex="-1"><p>' . esc_html( $msgs[ $done ] ) . '</p></div>';
+		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html( $msgs[ $done ][0] ) . '</p>' . ( $msgs[ $done ][1] ? '<p>' . esc_html( $msgs[ $done ][1] ) . '</p>' : '' ) . '</div>';
 	}
 	$form  = 'aw_newsletter';
 	$html  = aw_form_open( $form, array( 'class' => 'aw-form aw-newsletter-form' ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 120 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'consent', 'label' => 'Email me Animal Writes updates. I can unsubscribe at any time.', 'type' => 'checkbox', 'required' => true ) );
-	$html .= '<p><button type="submit" class="wp-element-button">Subscribe</button></p></form>';
+	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ) ) );
+	$html .= '<div class="aw-nl-submit"><button type="submit" class="kit-btn">Subscribe</button></div>';
+	$html .= aw_field( $form, array( 'name' => 'consent', 'label' => 'Email me Animal Writes updates. I can unsubscribe at any time.', 'type' => 'checkbox', 'required' => true, 'messages' => array( 'required' => 'Tick the box to subscribe' ) ) );
+	$html .= '</form>';
 	return $html;
 }
 add_shortcode( 'aw_newsletter', 'aw_newsletter_form' );
@@ -122,29 +125,37 @@ function aw_newsletter_submit() {
 	$done = add_query_arg( 'aw_done', 'nl_check', $back ) . '#newsletter';
 	$rl   = aw_form_guard( $form, $back, 'newsletter', $done );
 	$v    = array(
-		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
-		'name'    => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
+		'email'   => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
+		'name'    => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
 		'consent' => empty( $_POST['consent'] ) ? '' : '1',
 	);
 	$errors = aw_form_validate(
-		array( 'email' => array( 'required', 'email' ), 'name' => array( 'max:120' ), 'consent' => array( 'required' ) ),
+		array( 'email' => array( 'required', 'email' ), 'name' => array( 'max:80' ), 'consent' => array( 'required' ) ),
 		$v,
-		array( 'email' => 'Email', 'name' => 'Your name', 'consent' => 'Agreement' )
+		array( 'email' => 'Email', 'name' => 'Your name', 'consent' => 'Agreement' ),
+		array( 'consent' => array( 'required' => 'Tick the box to subscribe' ) )
 	);
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'newsletter' );
 	}
+	$before = aw_nl_get( 'email', strtolower( $v['email'] ) );
+	if ( $before && 'active' === ( $before['status'] ?? '' ) ) {
+		aw_form_count( $rl );
+		aw_form_success( add_query_arg( array( 'aw_done' => 'nl_already', 'to' => $v['email'] ), $back ) . '#newsletter', 'You\'re already subscribed', sprintf( 'Updates go to %s.', $v['email'] ) );
+	}
 	$row = aw_nl_add( $v['email'], $v['name'], 'site', 'pending' );
-	if ( $row && 'pending' === $row['status'] ) {
+	if ( ! $row ) {
+		aw_form_fail( $form, array(), $v, $back, 'newsletter', 'Something went wrong. Your details are still here — try again.' );
+	}
+	if ( 'pending' === $row['status'] ) { // double opt-in: confirm by email
 		wp_mail(
 			$row['email'],
 			'Confirm your subscription to ' . get_bloginfo( 'name' ),
 			"Click this link to confirm that you want Animal Writes updates:\n" . aw_nl_link( 'confirm', $row['token'] ) . "\n\nIf you did not ask for this, ignore this email and you will not hear from us."
 		);
 	}
-	aw_form_count( $rl ); // Same answer whether or not the address was already on the list.
-	wp_safe_redirect( $done );
-	exit;
+	aw_form_count( $rl );
+	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Check your inbox', sprintf( 'We\'ve sent a link to %s. Open it to confirm your subscription.', $v['email'] ) );
 }
 add_action( 'admin_post_nopriv_aw_newsletter', 'aw_newsletter_submit' );
 add_action( 'admin_post_aw_newsletter', 'aw_newsletter_submit' );

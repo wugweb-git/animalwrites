@@ -117,3 +117,39 @@ function aw_topic_image_column( $out, $col, $term_id ) {
 	$id = aw_topic_image_id( $term_id );
 	return $id ? wp_get_attachment_image( $id, array( 60, 34 ) ) : '—';
 }
+
+/* ---------- Topic banner (Phase 11 G4): optional; empty = no banner on the topic page ---------- */
+
+add_action(
+	'aw_topic_edit_form_fields',
+	function ( $term ) {
+		$id = (int) get_term_meta( $term->term_id, 'aw_banner_image', true );
+		echo '<tr class="form-field"><th scope="row"><label for="aw_banner_image">Banner image</label></th><td><input type="number" min="0" id="aw_banner_image" name="aw_banner_image" value="' . esc_attr( $id ? (string) $id : '' ) . '" style="width:8em">'
+			. '<p class="description">Optional. Media ID of a wide image (16:5, up to 5 MB, WebP or AVIF) shown at the top of this topic\'s page. Leave empty for no banner.</p></td></tr>';
+	},
+	20
+);
+add_action(
+	'edited_aw_topic',
+	function ( $term_id ) {
+		if ( ! isset( $_POST['aw_banner_image'] ) || ! current_user_can( 'manage_categories' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+		$id = absint( wp_unslash( $_POST['aw_banner_image'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$id && wp_attachment_is_image( $id ) ? update_term_meta( $term_id, 'aw_banner_image', $id ) : delete_term_meta( $term_id, 'aw_banner_image' );
+	}
+);
+
+/** The topic page's banner (same markup and rules as the Banner pattern), or ''. */
+function aw_topic_banner_html() {
+	if ( ! is_tax( 'aw_topic' ) ) {
+		return '';
+	}
+	$id = (int) get_term_meta( get_queried_object_id(), 'aw_banner_image', true );
+	if ( ! $id ) {
+		return '';
+	}
+	return '<div class="wp-block-cover alignwide kit-banner"><span aria-hidden="true" class="wp-block-cover__background has-secondary-background-color has-background-dim-30 has-background-dim"></span>'
+		. wp_get_attachment_image( $id, 'full', false, array( 'class' => 'wp-block-cover__image-background', 'alt' => '', 'fetchpriority' => 'high', 'loading' => 'eager', 'data-object-fit' => 'cover' ) ) . '</div>';
+}
+add_filter( 'do_shortcode_tag', fn( $html, $tag ) => 'aw_section_head' === $tag ? aw_topic_banner_html() . $html : $html, 6, 2 );

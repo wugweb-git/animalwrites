@@ -84,6 +84,13 @@
   --kit-color-canvas: var(--neutral-1);
   --kit-type-mega: 2.75rem;
   --kit-type-section: 1.75rem;
+  --kit-focus-width: 3px;
+  --kit-focus-offset: 2px;
+  --kit-size-check: 1.25rem;
+  --kit-color-warning: #8a5a00;
+  --kit-color-warning-soft: #fff6e0;
+  --kit-color-info: var(--color-blue);
+  --kit-color-info-soft: #eaf1fc;
   --kit-color-link: var(--color-blue);
 }
 @media (min-width: 640px) {

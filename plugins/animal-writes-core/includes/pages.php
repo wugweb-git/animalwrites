@@ -55,13 +55,18 @@ add_shortcode(
 /* ---------- Contact form ---------- */
 
 const AW_CONTACT_ABOUT = array(
-	''            => 'Choose one',
-	'general'     => 'General',
-	'listing'     => 'Listing',
-	'featured'    => 'Featured',
-	'opportunity' => 'Opportunity',
-	'partner'     => 'Partnership',
-	'correction'  => 'Correction',
+	''            => 'What\'s this about?',
+	'general'     => 'General question',
+	'listing'     => 'List your organisation',
+	'featured'    => 'Get featured',
+	'opportunity' => 'Post an opportunity',
+	'partnership' => 'Partner with us',
+	'correction'  => 'Report a mistake',
+);
+/** Message placeholder by reason (Phase 11 H4). */
+const AW_CONTACT_PLACEHOLDER = array(
+	'listing'    => 'Organisation name, district, services, phone or email',
+	'correction' => 'Page link and what\'s wrong',
 );
 
 add_action(
@@ -86,21 +91,35 @@ add_action(
 
 function aw_contact_form() {
 	if ( isset( $_GET['aw_done'] ) && 'contact' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-done" id="write" role="status" tabindex="-1"><p>Message sent. We reply by email.</p></div>';
+		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		return '<div class="aw-form-done kit-form-done" id="write" role="status" tabindex="-1"><p class="aw-form-done-title">Message sent.</p>'
+			. ( $to ? '<p>' . esc_html( sprintf( 'We\'ll reply to %s.', $to ) ) . '</p>' : '' )
+			. '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink() ) . '#write">Send another</a></p></div>';
 	}
 	$form  = 'aw_contact';
 	$about = sanitize_key( wp_unslash( $_GET['about'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$about = 'partner' === $about ? 'partnership' : $about; // older links
 	$about = isset( AW_CONTACT_ABOUT[ $about ] ) ? $about : '';
-	$html  = aw_form_open( $form, array( 'id' => 'write' ) );
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Name', 'required' => true, 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 120 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
+	$state = aw_form_state( $form );
+	$pick  = (string) ( $state['values']['about'] ?? $about );
+	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'aw-form aw-contact-form' ) );
+	// Reason first; its options carry the message placeholder (aw.js swaps it when the reason changes).
+	$id    = aw_field_id( $form, 'about' );
+	$opts  = '';
+	foreach ( AW_CONTACT_ABOUT as $k => $label ) {
+		$opts .= '<option value="' . esc_attr( $k ) . '"' . selected( $pick, $k, false ) . ( isset( AW_CONTACT_PLACEHOLDER[ $k ] ) ? ' data-placeholder="' . esc_attr( AW_CONTACT_PLACEHOLDER[ $k ] ) . '"' : '' ) . '>' . esc_html( $label ) . '</option>';
+	}
+	$err   = $state['errors']['about'] ?? '';
+	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">Reason</label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="about" required data-msg-required="Choose what this is about" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $err ? ' aria-invalid="true"' : '' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
+	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Name', 'required' => true, 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80 ), 'messages' => array( 'required' => 'Enter your name' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
 	$html .= aw_field( $form, array( 'name' => 'org', 'label' => 'Organisation', 'attrs' => array( 'autocomplete' => 'organization', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'about', 'label' => 'Reason', 'type' => 'select', 'required' => true, 'options' => AW_CONTACT_ABOUT, 'value' => $about ) );
-	$html .= aw_field( $form, array( 'name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'attrs' => array( 'maxlength' => 3000, 'rows' => 6 ) ) );
-	$html .= '<p><button type="submit" class="wp-element-button">Send message</button></p></form>';
+	$html .= aw_field( $form, array( 'name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'attrs' => array( 'maxlength' => 3000, 'rows' => 6, 'placeholder' => AW_CONTACT_PLACEHOLDER[ $pick ] ?? '' ), 'messages' => array( 'required' => 'Write your message' ) ) );
+	$html .= '<p><button type="submit" class="kit-btn">Send message</button></p></form>';
 	return $html;
 }
 add_shortcode( 'aw_contact_form', 'aw_contact_form' );
+add_filter( 'kits_form_generic_error', fn( $text, $form ) => 'aw_contact' === $form ? 'Message not sent. Your text is still here — try again.' : $text, 10, 2 );
 
 function aw_contact_submit() {
 	$form = 'aw_contact';
@@ -109,18 +128,19 @@ function aw_contact_submit() {
 	$rl   = aw_form_guard( $form, $back, 'write', $done );
 	$v    = array(
 		'about'   => sanitize_key( wp_unslash( $_POST['about'] ?? '' ) ),
-		'name'    => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
-		'org'     => sanitize_text_field( wp_unslash( $_POST['org'] ?? '' ) ),
+		'name'    => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
+		'email'   => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
+		'org'     => trim( sanitize_text_field( wp_unslash( $_POST['org'] ?? '' ) ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ),
 	);
 	$errors = aw_form_validate(
-		array( 'about' => array( 'required' ), 'name' => array( 'required', 'max:120' ), 'email' => array( 'required', 'email' ), 'org' => array( 'max:160' ), 'message' => array( 'required', 'max:3000' ) ),
+		array( 'about' => array( 'required' ), 'name' => array( 'required', 'max:80' ), 'email' => array( 'required', 'email' ), 'org' => array( 'max:160' ), 'message' => array( 'required', 'max:3000' ) ),
 		$v,
-		array( 'about' => 'Reason', 'name' => 'Name', 'email' => 'Email', 'org' => 'Organisation', 'message' => 'Message' )
+		array( 'about' => 'Reason', 'name' => 'Name', 'email' => 'Email', 'org' => 'Organisation', 'message' => 'Message' ),
+		array( 'about' => array( 'required' => 'Choose what this is about' ), 'name' => array( 'required' => 'Enter your name' ), 'message' => array( 'required' => 'Write your message' ) )
 	);
-	if ( $v['about'] && ( ! isset( AW_CONTACT_ABOUT[ $v['about'] ] ) || '' === $v['about'] ) ) {
-		$errors['about'] = 'Reason: choose one of the options.';
+	if ( $v['about'] && ! isset( AW_CONTACT_ABOUT[ $v['about'] ] ) ) {
+		$errors['about'] = 'Choose what this is about';
 	}
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'write' );
@@ -128,15 +148,14 @@ function aw_contact_submit() {
 	$label = AW_CONTACT_ABOUT[ $v['about'] ];
 	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'], 'post_content' => $v['message'] ) );
 	if ( is_wp_error( $id ) || ! $id ) {
-		aw_form_fail( $form, array(), $v, $back, 'write', 'The message could not be saved. Please try again.' );
+		aw_form_fail( $form, array(), $v, $back, 'write', 'Message not sent. Your text is still here — try again.' );
 	}
 	foreach ( array( 'about', 'name', 'email', 'org' ) as $k ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	aw_form_count( $rl );
-	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
-	wp_safe_redirect( $done );
-	exit;
+	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
+	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Message sent.', sprintf( 'We\'ll reply to %s.', $v['email'] ), array( 'again' => 'Send another' ) );
 }
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
@@ -174,7 +193,7 @@ add_shortcode(
 		if ( ! $terms || is_wp_error( $terms ) ) {
 			return '';
 		}
-		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li><a href="' . esc_url( get_term_link( $t ) ) . '">' . esc_html( $t->name ) . '</a></li>', $terms ) ) . '</ul>';
+		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li>' . kits_chip( $t->name, get_term_link( $t ), 'on-ink' ) . '</li>', $terms ) ) . '</ul>';
 	}
 );
 
@@ -229,7 +248,7 @@ add_shortcode(
 				continue;
 			}
 			$total += $res->found_posts;
-			$out   .= '<section class="aw-search-group"><h2>' . esc_html( $label ) . ' <span class="aw-search-n">' . esc_html( number_format_i18n( $res->found_posts ) ) . '</span></h2><ol class="aw-search-results">';
+			$out   .= '<section class="aw-search-group"><h2 class="kit-eyebrow aw-search-head">' . esc_html( $label ) . ' ' . kits_count( $res->found_posts ) . '</h2><ol class="aw-search-results">';
 			foreach ( $res->posts as $p ) {
 				$out .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
 					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
@@ -298,3 +317,53 @@ add_filter(
 	20,
 	2
 );
+
+/* ---------- Contact: "Elsewhere" links (Phase 11 H5) ---------- */
+
+/** Links the owner adds in Settings → Contact links: list of [label, url]. Hidden while empty. */
+function aw_elsewhere_links() {
+	return array_values( array_filter( (array) get_option( 'aw_elsewhere', array() ), fn( $r ) => ! empty( $r['label'] ) && ! empty( $r['url'] ) ) );
+}
+add_shortcode(
+	'aw_elsewhere',
+	function () {
+		$links = aw_elsewhere_links();
+		if ( ! $links ) {
+			return '';
+		}
+		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
+		foreach ( $links as $l ) {
+			$html .= '<li><a href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $l['label'] ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
+		}
+		return $html . '</ul></section>';
+	}
+);
+add_action(
+	'admin_menu',
+	function () {
+		add_options_page( 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' );
+	}
+);
+function aw_elsewhere_screen() {
+	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {
+		$rows = array();
+		foreach ( (array) wp_unslash( $_POST['aw_elsewhere'] ) as $r ) {
+			$row = array( 'label' => sanitize_text_field( $r['label'] ?? '' ), 'url' => esc_url_raw( $r['url'] ?? '' ) );
+			if ( $row['label'] && $row['url'] ) {
+				$rows[] = $row;
+			}
+		}
+		update_option( 'aw_elsewhere', $rows, false );
+		echo '<div class="notice notice-success"><p>Saved.</p></div>';
+	}
+	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
+	echo '<div class="wrap"><h1>Contact links</h1><p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post">';
+	wp_nonce_field( 'aw_elsewhere' );
+	echo '<table class="widefat striped"><thead><tr><th>Label</th><th>Link</th></tr></thead><tbody>';
+	foreach ( $rows as $i => $r ) {
+		echo '<tr><td><input type="text" name="aw_elsewhere[' . (int) $i . '][label]" value="' . esc_attr( (string) ( $r['label'] ?? '' ) ) . '"></td><td><input type="url" class="large-text" name="aw_elsewhere[' . (int) $i . '][url]" value="' . esc_attr( (string) ( $r['url'] ?? '' ) ) . '"></td></tr>';
+	}
+	echo '</tbody></table>';
+	submit_button();
+	echo '</form></div>';
+}

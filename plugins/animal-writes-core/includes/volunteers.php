@@ -66,9 +66,9 @@ function aw_volunteer_form() {
 	$picked = (array) ( $state['values']['roles'] ?? array() );
 
 	$html  = aw_form_open( $form );
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 120 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'phone', 'label' => 'Phone or WhatsApp', 'type' => 'tel', 'attrs' => array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 20, 'pattern' => '\\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ), 'messages' => array( 'required' => 'Enter your name' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'phone', 'label' => 'Phone or WhatsApp', 'type' => 'tel', 'icon' => 'phone', 'attrs' => array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 20, 'pattern' => '\\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' ) ) );
 	$html .= aw_field( $form, array( 'name' => 'state', 'label' => 'State or union territory', 'type' => 'select', 'required' => true, 'options' => $states ) );
 	$html .= aw_field( $form, array( 'name' => 'city', 'label' => 'City or district', 'attrs' => array( 'autocomplete' => 'address-level2', 'maxlength' => 80 ) ) );
 	$html .= '<fieldset><legend>' . esc_html__( 'How would you like to help?', 'animal-writes-core' ) . '</legend>';
@@ -77,7 +77,7 @@ function aw_volunteer_form() {
 	}
 	$html .= '</fieldset>';
 	$html .= aw_field( $form, array( 'name' => 'consent', 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.', 'type' => 'checkbox', 'required' => true ) );
-	$html .= '<p><button type="submit" class="wp-element-button">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></p></form>';
+	$html .= '<p><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></p></form>';
 	return $html;
 }
 add_shortcode( 'aw_volunteer_form', 'aw_volunteer_form' );
@@ -91,8 +91,8 @@ function aw_volunteer_submit() {
 	$done = add_query_arg( 'aw_done', 'volunteer', $back ) . '#volunteer';
 	$rl   = aw_form_guard( $form, $back, 'volunteer', $done );
 	$v    = array(
-		'name'  => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
-		'email' => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
+		'name'  => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
+		'email' => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'state' => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
 		'city'  => sanitize_text_field( wp_unslash( $_POST['city'] ?? '' ) ),
@@ -100,9 +100,10 @@ function aw_volunteer_submit() {
 		'roles' => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['roles'] ?? array() ) ) ) ),
 	);
 	$errors = aw_form_validate(
-		array( 'name' => array( 'required', 'max:120' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'state' => array( 'required' ), 'city' => array( 'max:80' ), 'consent' => array( 'required' ) ),
+		array( 'name' => array( 'required', 'max:80' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'state' => array( 'required' ), 'city' => array( 'max:80' ), 'consent' => array( 'required' ) ),
 		$v,
-		array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone or WhatsApp', 'state' => 'State or union territory', 'city' => 'City or district', 'consent' => 'Agreement' )
+		array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone or WhatsApp', 'state' => 'State or union territory', 'city' => 'City or district', 'consent' => 'Agreement' ),
+		array( 'name' => array( 'required' => 'Enter your name' ) )
 	);
 	$term = $v['state'] ? get_term_by( 'slug', $v['state'], 'aw_city' ) : null;
 	if ( $v['state'] && ! $term ) {
@@ -127,8 +128,7 @@ function aw_volunteer_submit() {
 	);
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'New volunteer: ' . $term->name, "A new volunteer signed up.\nState: {$term->name}\nCity: {$v['city']}\nView in WP Admin > Volunteers." );
-	wp_safe_redirect( $done );
-	exit;
+	aw_form_success( $done, __( 'Thank you for signing up.', 'animal-writes-core' ), __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) );
 }
 add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
 add_action( 'admin_post_aw_volunteer', 'aw_volunteer_submit' );

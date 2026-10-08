@@ -164,14 +164,15 @@ function aw_directory_order( $q ) {
 			),
 		)
 	);
-	$q->set(
-		'orderby',
-		array(
-			'feat'    => 'DESC',
-			'ver_yes' => 'DESC',
-			'title'   => 'ASC',
-		)
-	);
+	$order = array( 'feat' => 'DESC', 'ver_yes' => 'DESC', 'title' => 'ASC' );
+	if ( 'details' === ( $_GET['sort'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		// "Most details first": listings with more ways to reach them (phone, WhatsApp, email, website) first.
+		$mq          = (array) $q->get( 'meta_query' );
+		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
+		$q->set( 'meta_query', $mq );
+		$order = array( 'feat' => 'DESC', 'score' => 'DESC', 'title' => 'ASC' );
+	}
+	$q->set( 'orderby', $order );
 	$q->set( 'posts_per_page', 24 );
 }
 add_action( 'pre_get_posts', 'aw_directory_order' );
@@ -305,9 +306,20 @@ add_action(
 	20
 );
 
+/** Number of verified listings (cached). "Verified only" appears once there is at least one. */
+function aw_verified_count() {
+	$n = get_transient( 'aw_verified_count' );
+	if ( false === $n ) {
+		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1' ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		set_transient( 'aw_verified_count', $n, HOUR_IN_SECONDS );
+	}
+	return (int) $n;
+}
+
 /**
- * Search bar with state, district, type and verified filters. Works without JavaScript;
- * with it, the district list narrows to the chosen state.
+ * Directory search bar (Phase 11 E2): Name · State · District · Type · Search, one baseline, 44px fields.
+ * District is off until a state is chosen and then lists only that state's districts, with counts; Type lists only
+ * types that have listings, with counts. Works without JavaScript (aw.js narrows the districts).
  *
  * @return string
  */
@@ -319,52 +331,120 @@ function aw_directory_filter() {
 	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
 
-	$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
-	$all    = get_transient( 'aw_dir_districts' );
+	$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'orderby' => 'name' ) );
+	$all    = get_transient( 'aw_dir_districts_n' );
 	if ( false === $all ) {
 		$all = array();
-		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => false, 'orderby' => 'name', 'childless' => true, 'parent' => '' ) ) as $k ) {
+		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => true, 'orderby' => 'name', 'childless' => true ) ) as $k ) {
 			if ( $k->parent ) {
-				$all[ $k->parent ][] = $k;
+				$all[ $k->parent ][] = array( $k->slug, $k->name, (int) $k->count );
 			}
 		}
-		set_transient( 'aw_dir_districts', $all, DAY_IN_SECONDS );
+		set_transient( 'aw_dir_districts_n', $all, DAY_IN_SECONDS );
 	}
 	$s_opts = '<option value="">All states</option>';
-	$d_opts = '<option value="">All districts</option>';
-	foreach ( $states as $st ) {
+	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
+	foreach ( is_wp_error( $states ) ? array() : $states as $st ) {
 		$s_opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $state && $state->term_id === $st->term_id, true, false ) . '>' . esc_html( $st->name ) . '</option>';
 		$kids    = $all[ $st->term_id ] ?? array();
 		if ( $kids ) {
-			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '">';
+			$d_opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '"' . ( $state && $state->term_id === $st->term_id ? '' : ' hidden disabled' ) . '>';
 			foreach ( $kids as $k ) {
-				$d_opts .= '<option value="' . esc_attr( $k->slug ) . '"' . selected( $district && $district->term_id === $k->term_id, true, false ) . '>' . esc_html( $k->name ) . '</option>';
+				$d_opts .= '<option value="' . esc_attr( $k[0] ) . '"' . selected( $district && $district->slug === $k[0], true, false ) . '>' . esc_html( $k[1] . ' (' . number_format_i18n( $k[2] ) . ')' ) . '</option>';
 			}
 			$d_opts .= '</optgroup>';
 		}
 	}
-	// Types that have listings; the veterinary types are one "Veterinary" choice.
+	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice.
 	$opts = array();
 	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
-		$opts[ in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug ] = in_array( $t->slug, AW_VET_TYPES, true ) ? 'Veterinary' : $t->name;
+		$key            = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
+		$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
+		$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
 	}
-	asort( $opts );
+	uasort( $opts, fn( $a, $b ) => strcmp( $a[0], $b[0] ) );
 	$cur_type = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : ( false !== strpos( $cur_type, ',' ) ? 'veterinary' : $cur_type ) );
 	$t_opts   = '<option value="">All types</option>';
-	foreach ( $opts as $slug => $name ) {
-		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $name ) . '</option>';
+	foreach ( $opts as $slug => $o ) {
+		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
-	$active = $cur_city || $cur_type || $text || $verified;
-
-	return '<form class="aw-dir-filter" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
+	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
+	return '<form class="aw-dir-search" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
 		. '<input type="hidden" name="aw_filter" value="1">'
-		. '<p class="aw-dir-q"><label for="aw-dir-q">Search by name</label><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="For example, Blue Cross" autocomplete="off"></p>'
-		. '<p><label for="aw-dir-state">State</label><select id="aw-dir-state" name="state">' . $s_opts . '</select></p>'
-		. '<p><label for="aw-dir-district">District</label><select id="aw-dir-district" name="district">' . $d_opts . '</select></p>'
-		. '<p><label for="aw-dir-type">Type</label><select id="aw-dir-type" name="type">' . $t_opts . '</select></p>'
-		. '<p class="aw-dir-check"><label class="aw-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label></p>'
-		. '<p class="aw-dir-actions"><button type="submit" class="wp-element-button">Search</button>'
-		. ( $active ? ' <a class="aw-dir-clear" href="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">Clear filters</a>' : '' ) . '</p>'
+		. $field( 'aw-dir-q', 'Name', '<span class="aw-ico aw-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
+		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
+		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
+		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="type">' . $t_opts . '</select>', 'type' )
+		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label>' : '' )
+		. '<div class="aw-dir-submit"><button type="submit" class="kit-btn">Search</button></div>'
 		. '</form>';
 }
 add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
+
+
+/* ---------- Contact score (sort "Most details first") ---------- */
+
+/** How many ways to reach a listing: phone, WhatsApp, email, website. */
+function aw_contact_score( $id ) {
+	$n = 0;
+	foreach ( array( 'aw_phone', 'aw_whatsapp', 'aw_email', 'aw_website' ) as $k ) {
+		$n += '' !== trim( (string) get_post_meta( $id, $k, true ) ) ? 1 : 0;
+	}
+	return $n;
+}
+/** Keep the score current when a contact field changes. */
+function aw_contact_score_sync( $mid, $id, $key ) {
+	if ( in_array( $key, array( 'aw_phone', 'aw_whatsapp', 'aw_email', 'aw_website' ), true ) && 'aw_listing' === get_post_type( $id ) ) {
+		update_post_meta( $id, 'aw_contact_score', aw_contact_score( $id ) );
+	}
+}
+add_action( 'updated_post_meta', 'aw_contact_score_sync', 10, 3 );
+add_action( 'added_post_meta', 'aw_contact_score_sync', 10, 3 );
+// Every listing needs the score so the sort can include it; fill it once.
+add_action(
+	'admin_init',
+	function () {
+		if ( '1' === get_option( 'aw_contact_score_done' ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		foreach ( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+			update_post_meta( $id, 'aw_contact_score', aw_contact_score( $id ) );
+		}
+		update_option( 'aw_contact_score_done', '1', false );
+	}
+);
+
+/**
+ * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
+ */
+function aw_browse_states() {
+	if ( aw_is_directory_view() && ( get_query_var( 'aw_city' ) || get_query_var( 'aw_listing_type' ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		return ''; // the hub and the home page only
+	}
+	$terms = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
+	$items = '';
+	foreach ( is_wp_error( $terms ) ? array() : $terms as $st ) {
+		$n = aw_state_count( $st );
+		if ( $n ) {
+			$items .= '<li><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span>' . esc_html( $st->name ) . '</span>' . kits_count( $n ) . '</a></li>';
+		}
+	}
+	return $items ? '<nav class="aw-browse-states" aria-labelledby="aw-browse-states-h"><h2 id="aw-browse-states-h">Browse by state</h2><ul>' . $items . '</ul></nav>' : '';
+}
+add_shortcode( 'aw_browse_states', 'aw_browse_states' );
+
+/** Listings in a state, its districts included (cached for an hour). */
+function aw_state_count( $state ) {
+	$all = get_transient( 'aw_state_counts' );
+	if ( false === $all ) {
+		$all = array();
+		global $wpdb;
+		$rows = $wpdb->get_results( "SELECT tr.object_id id, tt.term_id, tt.parent FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_city' JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( $rows as $r ) {
+			$all[ $r->parent ? (int) $r->parent : (int) $r->term_id ][ (int) $r->id ] = 1;
+		}
+		$all = array_map( 'count', $all );
+		set_transient( 'aw_state_counts', $all, HOUR_IN_SECONDS );
+	}
+	return (int) ( $all[ $state->term_id ] ?? 0 );
+}

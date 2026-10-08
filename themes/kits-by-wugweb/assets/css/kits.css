@@ -7,12 +7,11 @@
 	padding: var(--wp--preset--spacing--40);
 }
 
-.is-style-kits-label {
-	display: inline-block;
-	font-size: var(--wp--preset--font-size--small);
-	font-weight: 600;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
+.is-style-kits-label { /* = kit-eyebrow: small, sentence case, carries information */
+	display: block;
+	margin: 0 0 var(--s-2);
+	font-size: var(--fluid-label);
+	font-weight: var(--weight-label);
 	color: var(--wp--preset--color--text-muted);
 }
 

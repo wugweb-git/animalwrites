@@ -115,6 +115,13 @@
   --aw-tracking-body: var(--kit-tracking-body);
   --aw-type-mega: var(--kit-type-mega);
   --aw-type-section: var(--kit-type-section);
+  --aw-focus-width: var(--kit-focus-width);
+  --aw-focus-offset: var(--kit-focus-offset);
+  --aw-size-check: var(--kit-size-check);
+  --aw-color-warning: var(--kit-color-warning);
+  --aw-color-warning-soft: var(--kit-color-warning-soft);
+  --aw-color-info: var(--kit-color-info);
+  --aw-color-info-soft: var(--kit-color-info-soft);
 }
 @media (min-width: 640px) {
   :root {

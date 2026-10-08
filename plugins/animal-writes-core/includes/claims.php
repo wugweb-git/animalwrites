@@ -88,10 +88,10 @@ function aw_claim_box() {
 	$html .= '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">';
 
 	$html .= '<fieldset><legend>About you</legend>';
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 120 ) ) );
+	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ), 'messages' => array( 'required' => 'Enter your name' ) ) );
 	$html .= aw_field( $form, array( 'name' => 'role', 'label' => 'Your role here', 'type' => 'select', 'required' => true, 'options' => AW_CLAIM_ROLES ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Your email', 'type' => 'email', 'required' => true, 'hint' => 'We use this only to check this request. It is not shown on the page.', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'phone', 'label' => 'Your phone', 'type' => 'tel', 'attrs' => array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 20, 'pattern' => '\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' ) ) );
+	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Your email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ), 'hint' => 'We use this only to check this request. It is not shown on the page.', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
+	$html .= aw_field( $form, array( 'name' => 'phone', 'label' => 'Your phone', 'type' => 'tel', 'icon' => 'phone', 'attrs' => array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 20, 'pattern' => '\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' ) ) );
 	$html .= '</fieldset>';
 
 	$html .= '<fieldset><legend>Correct details</legend><p class="aw-field-hint">Leave a field empty to keep what is shown now.</p>';
@@ -114,7 +114,7 @@ function aw_claim_box() {
 		$html .= aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing at the top of the directory (free for now, ' . AW_FEATURE_DAYS . ' days)', 'type' => 'checkbox' ) );
 	}
 
-	$html .= '<p><button type="submit" class="wp-element-button">Send for review</button></p></form></details></section>';
+	$html .= '<p><button type="submit" class="kit-btn">Send for review</button></p></form></details></section>';
 	return $html;
 }
 add_shortcode( 'aw_claim_box', 'aw_claim_box' );
@@ -133,14 +133,14 @@ function aw_claim_submit() {
 	}
 
 	$v = array(
-		'name'  => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
+		'name'  => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
 		'role'  => sanitize_key( wp_unslash( $_POST['role'] ?? '' ) ),
-		'email' => trim( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
+		'email' => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
 		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
 		'feature' => empty( $_POST['feature'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 	);
-	$rules  = array( 'name' => array( 'required', 'max:120' ), 'role' => array( 'required' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'notes' => array( 'max:1000' ) );
+	$rules  = array( 'name' => array( 'required', 'max:80' ), 'role' => array( 'required' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'notes' => array( 'max:1000' ) );
 	$labels = array( 'name' => 'Your name', 'role' => 'Your role here', 'email' => 'Your email', 'phone' => 'Your phone', 'notes' => 'Anything else' );
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		$raw       = (string) wp_unslash( $_POST[ $key ] ?? '' );
@@ -151,7 +151,7 @@ function aw_claim_submit() {
 		$rules[ $key ]  = array( $def[1] );
 		$labels[ $key ] = $def[0];
 	}
-	$errors = aw_form_validate( $rules, $v, $labels );
+	$errors = aw_form_validate( $rules, $v, $labels, array( 'name' => array( 'required' => 'Enter your name' ) ) );
 	if ( $v['role'] && ! isset( AW_CLAIM_ROLES[ $v['role'] ] ) ) {
 		$errors['role'] = 'Your role here: choose one of the options.';
 	}

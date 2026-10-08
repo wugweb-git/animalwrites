@@ -3,10 +3,12 @@
  * Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title and given to search engines
  * as BreadcrumbList (schema.php).
  *
- * Organisation:      Directory › State › District › Organisation
- * District × type:   Directory › State › District › Type
- * Other items:       Section › Item
- * Topic:             Topics › Topic
+ * Organisation:      Home › Directory › State › District › Organisation
+ * District × type:   Home › Directory › State › District › Type
+ * Other items:       Home › Section › Item
+ * Section hub:       Home › Section
+ * Topic:             Home › Topics › Topic
+ * Page:              Home › (parent) › Page
  *
  * @package animal-writes-core
  */
@@ -60,7 +62,18 @@ function aw_breadcrumbs() {
 		}
 	} elseif ( is_tax( 'aw_topic' ) ) {
 		$trail = array( array( 'Topics', home_url( '/topics/' ) ), array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) );
+	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
+		$obj   = get_queried_object();
+		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );
+	} elseif ( is_page() && ! is_front_page() ) {
+		$id = get_queried_object_id();
+		foreach ( array_reverse( get_post_ancestors( $id ) ) as $a ) {
+			$trail[] = array( get_the_title( $a ), get_permalink( $a ) );
+		}
+		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
 	}
+	// Every trail starts at Home (Phase 11 B.15); the front page and 404 have none.
+	$trail = $trail ? array_merge( array( array( 'Home', home_url( '/' ) ) ), $trail ) : array();
 	if ( count( $trail ) < 2 ) {
 		$trail = array();
 	}

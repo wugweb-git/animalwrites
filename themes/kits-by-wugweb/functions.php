@@ -89,6 +89,7 @@ function kits_enqueue_components() {
 	$dir = get_template_directory();
 	$uri = get_template_directory_uri();
 	wp_enqueue_style( 'kit-components', $uri . '/assets/css/kit.css', array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/assets/css/kit.css' ) );
+	wp_enqueue_style( 'kit-primitives', $uri . '/assets/css/kit-primitives.css', array( 'kit-components' ), (string) filemtime( $dir . '/assets/css/kit-primitives.css' ) );
 	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array(), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
@@ -140,4 +141,28 @@ add_action(
 		}
 	},
 	1
+);
+
+/**
+ * Banner pattern (kit-banner): shows nothing until it has an image; the first banner on a page loads first.
+ */
+add_filter(
+	'render_block_core/cover',
+	function ( $html, $block ) {
+		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'kit-banner' ) ) {
+			return $html;
+		}
+		if ( empty( $block['attrs']['url'] ) || false === stripos( $html, '<img' ) ) {
+			return '';
+		}
+		static $first = true;
+		if ( $first ) {
+			$first = false;
+			$html  = preg_replace( '/<img(?![^>]*fetchpriority)/', '<img fetchpriority="high"', $html, 1 );
+			$html  = str_replace( 'loading="lazy"', 'loading="eager"', $html );
+		}
+		return $html;
+	},
+	10,
+	2
 );

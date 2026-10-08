@@ -61,7 +61,7 @@ function aw_report_box() {
 	$html .= '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">';
 	$html .= aw_field( $form, array( 'name' => 'reason', 'label' => 'What is wrong?', 'type' => 'select', 'required' => true, 'options' => array( '' => 'Choose one' ) + aw_report_reasons() ) );
 	$html .= aw_field( $form, array( 'name' => 'details', 'label' => 'Details', 'type' => 'textarea', 'hint' => 'Optional. Tell us the correct details if you know them.', 'attrs' => array( 'maxlength' => 1000 ) ) );
-	$html .= '<p><button type="submit" class="wp-element-button">Send report</button></p></form></details></section>';
+	$html .= '<p><button type="submit" class="kit-btn">Send report</button></p></form></details></section>';
 	return $html;
 }
 add_shortcode( 'aw_report_box', 'aw_report_box' );
@@ -96,8 +96,7 @@ function aw_report_submit() {
 	update_post_meta( $id, 'aw_r_details', $v['details'] );
 	update_post_meta( $id, 'aw_r_status', 'new' );
 	aw_form_count( $rl );
-	wp_safe_redirect( $done );
-	exit;
+	aw_form_success( $done, 'Thank you. We will check this listing and correct it.' );
 }
 add_action( 'admin_post_nopriv_aw_report', 'aw_report_submit' );
 add_action( 'admin_post_aw_report', 'aw_report_submit' );

@@ -214,10 +214,6 @@ function aw_campaign_schema( $id ) {
 /** BreadcrumbList for the current page, from the same trail people see (breadcrumbs.php). */
 function aw_breadcrumb_schema() {
 	$trail = function_exists( 'aw_breadcrumbs' ) ? aw_breadcrumbs() : array();
-	if ( ! $trail && is_post_type_archive( array_keys( aw_post_types() ) ) ) { // section hubs: Home › Section (search engines only)
-		$obj   = get_queried_object();
-		$trail = array( array( 'Home', home_url( '/' ) ), array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );
-	}
 	if ( ! $trail ) {
 		return array();
 	}
@@ -317,6 +313,23 @@ add_action(
 			$graph[] = aw_job_schema( get_queried_object_id() );
 		} elseif ( is_singular( 'aw_campaign' ) ) {
 			$graph[] = aw_campaign_schema( get_queried_object_id() );
+		} elseif ( is_page( 'contact' ) ) {
+			$graph[] = array(
+				'@type'      => 'ContactPage',
+				'@id'        => get_permalink() . '#page',
+				'url'        => get_permalink(),
+				'name'       => get_the_title(),
+				'inLanguage' => 'en-IN',
+				'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+				'mainEntity' => array(
+					'@type'        => 'Organization',
+					'@id'          => home_url( '/#organization' ),
+					'email'        => 'contact@animalwrites.in',
+					'contactPoint' => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in' ),
+				),
+			);
+		} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
+			$graph[] = aw_press_schema();
 		} elseif ( is_tax( 'aw_topic' ) ) {
 			$term    = get_queried_object();
 			$graph[] = array_filter(

@@ -78,8 +78,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 /* 4. Shared components ------------------------------------------------------- */
 
 /* 4.1 Button — variants: primary (default), outline, ink; states: hover, active, focus, disabled, loading */
-.wp-element-button, .wp-block-button__link, .aw-btn,
-.aw-form button[type=submit], .aw-finder button, .aw-print button , .kit-btn,
+.wp-element-button, .wp-block-button__link,
+.aw-form button[type=submit], .aw-finder button, .aw-print button,
 .kit-form button[type=submit], .kit-finder button, .kit-print button {
 	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2);
 	min-height: var(--kit-size-control);
@@ -94,37 +94,33 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
 		transform var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
 }
-.wp-element-button:hover, .wp-block-button__link:hover, .aw-btn:hover,
-.aw-form button[type=submit]:hover, .aw-finder button:hover, .aw-print button:hover , .kit-btn:hover,
+.wp-element-button:hover, .wp-block-button__link:hover,
+.aw-form button[type=submit]:hover, .aw-finder button:hover, .aw-print button:hover,
 .kit-form button[type=submit]:hover, .kit-finder button:hover, .kit-print button:hover {
 	background: var(--kit-color-ink); color: var(--kit-color-on-ink); box-shadow: var(--kit-elevation-2);
 }
-.wp-element-button:active, .wp-block-button__link:active, .aw-btn:active,
-.aw-form button[type=submit]:active, .aw-finder button:active , .kit-btn:active,
+.wp-element-button:active, .wp-block-button__link:active,
+.aw-form button[type=submit]:active, .aw-finder button:active,
 .kit-form button[type=submit]:active, .kit-finder button:active { transform: translateY(1px) scale(0.99); box-shadow: none; }
-.is-style-outline > .wp-block-button__link, .aw-btn--outline , .kit-btn--outline {
+.is-style-outline > .wp-block-button__link {
 	background: transparent; color: inherit; border-color: currentColor;
 }
-.is-style-outline > .wp-block-button__link:hover, .aw-btn--outline:hover , .kit-btn--outline:hover {
+.is-style-outline > .wp-block-button__link:hover {
 	background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink);
 }
-.aw-finder button, .aw-btn--ink ,.kit-finder button, .kit-btn--ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.aw-finder button:hover, .aw-btn--ink:hover ,.kit-finder button:hover, .kit-btn--ink:hover { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-:is(.wp-element-button, .aw-btn, button)[disabled], :is(.wp-element-button, .aw-btn, button)[aria-disabled=true] ,:is(.wp-element-button, .kit-btn, button)[disabled], :is(.wp-element-button, .kit-btn, button)[aria-disabled=true] {
+.aw-finder button, .kit-finder button { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.aw-finder button:hover, .kit-finder button:hover { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+:is(.wp-element-button, button)[disabled], :is(.wp-element-button, button)[aria-disabled=true] ,:is(.wp-element-button, button)[disabled], :is(.wp-element-button, button)[aria-disabled=true] {
 	opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
 }
-:is(.wp-element-button, .aw-btn, button).is-loading ,:is(.wp-element-button, .kit-btn, button).is-loading { position: relative; color: transparent !important; pointer-events: none; }
-:is(.wp-element-button, .aw-btn, button).is-loading::after ,:is(.wp-element-button, .kit-btn, button).is-loading::after {
+:is(.wp-element-button, button).is-loading ,:is(.wp-element-button, button).is-loading { position: relative; color: transparent !important; pointer-events: none; }
+:is(.wp-element-button, button).is-loading::after ,:is(.wp-element-button, button).is-loading::after {
 	content: ""; position: absolute; width: 1.1em; height: 1.1em; border-radius: 50%;
 	border: 2px solid var(--kit-color-on-accent); border-right-color: transparent;
 	animation: kit-spin 700ms linear infinite;
 }
 
 /* 4.1b Button sizes and outline (moved with the button component) */
-.aw-btn, .kit-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2); min-height: var(--kit-size-control); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); border: 2px solid var(--kit-color-accent); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-base); text-decoration: none; box-shadow: var(--kit-elevation-1); }
-.aw-btn--lg, .kit-btn--lg { min-height: 52px; padding: 0 var(--kit-space-6); }
-.aw-btn--sm, .kit-btn--sm { min-height: 40px; padding: 0 var(--kit-space-4); font-size: var(--kit-type-sm); }
-.aw-btn--outline, .kit-btn--outline { background: var(--kit-color-raised); border-color: var(--kit-color-ink); color: var(--kit-color-ink); }
 
 /* 4.2 Card — one component for news, legal, research, guide, opportunity, listing, resource.
    Anatomy: media (flush top) / chips / title (h3 style) / excerpt / date. Surface: raised + border + elevation-1.
@@ -232,7 +228,6 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-form :is(input, select, textarea)[aria-invalid=true] ,.kit-form :is(input, select, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); background: var(--kit-color-danger-soft); }
 .aw-form :is(input, select, textarea).is-valid ,.kit-form :is(input, select, textarea).is-valid { border-color: var(--kit-color-success); }
 .aw-field-error ,.kit-field-error { display: block; color: var(--kit-color-danger); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); margin-top: var(--kit-space-1); }
-.aw-field-error:empty ,.kit-field-error:empty { display: none; }
 .aw-field-hint ,.kit-field-hint { display: block; color: var(--kit-color-muted); font-size: var(--kit-type-sm); margin: calc(-1 * var(--kit-space-1)) 0 var(--kit-space-2); }
 .aw-optional ,.kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .aw-form fieldset > legend ,.kit-form fieldset > legend { font-family: var(--kit-font-display); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-h4); margin-bottom: var(--kit-space-3); }
@@ -240,8 +235,6 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-claim summary::after ,.kit-claim summary::after { content: "+"; margin-left: auto; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-claim details[open] > summary::after ,.kit-claim details[open] > summary::after { transform: rotate(45deg); }
 .aw-claim summary:focus-visible ,.kit-claim summary:focus-visible { outline: 3px solid var(--kit-color-accent); outline-offset: 4px; border-radius: var(--kit-radius-control); }
-.aw-field-error::before ,.kit-field-error::before { content: "⚠ "; }
-.aw-field-error:empty::before ,.kit-field-error:empty::before { content: none; }
 .aw-form fieldset ,.kit-form fieldset { border: 0; padding: 0; margin: 0 0 var(--kit-space-4); }
 .aw-check ,.kit-check { display: flex !important; gap: var(--kit-space-3); align-items: flex-start; font-weight: var(--kit-weight-regular) !important; min-height: var(--kit-size-target); padding-block: var(--kit-space-2); cursor: pointer; }
 .aw-check input ,.kit-check input { width: 1.5rem; height: 1.5rem; margin-top: 0.15rem; flex: none; accent-color: var(--kit-color-ink); }
@@ -258,17 +251,9 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 	animation: kit-rise var(--kit-motion-slow) var(--kit-motion-ease) both;
 }
 
-/* 4.5 Chip / label */
-.aw-chip, .taxonomy-aw_topic a, .wp-block-post-terms a ,.kit-chip{
-	display: inline-flex; align-items: center; min-height: 24px; padding: 0 var(--kit-space-2);
-	border-radius: var(--kit-radius-pill); background: var(--kit-color-surface-soft); border: 1px solid var(--kit-color-line);
-	font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); text-decoration: none; color: var(--kit-color-ink);
-	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease);
-}
-.wp-block-post-terms a:hover { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+/* 4.5 Topic links (core post-terms) look like kit-chip (kit-primitives.css); cards show at most two, smaller. */
 .wp-block-post-terms__separator { display: none; }
-.wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
-.wp-block-post-template .wp-block-post-terms a { font-size: 0.75rem; font-weight: var(--kit-weight-medium); background: var(--kit-color-canvas); border-color: transparent; color: var(--kit-color-text); }
+.wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--s-1); }
 .wp-block-post-template .wp-block-post-terms a:nth-of-type(n+3) { display: none; } /* two chips per card at most */
 .wp-block-post-template .wp-block-post-terms + .wp-block-post-terms { display: none; }
 
@@ -334,13 +319,13 @@ html { overflow-x: clip; }
 .aw-sec-head ,.kit-sec-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-3) var(--kit-space-6); margin-bottom: var(--kit-space-6); }
 .aw-sec-head h2 ,.kit-sec-head h2 { margin: 0; }
 .aw-sec-head p ,.kit-sec-head p { margin: var(--kit-space-2) 0 0; font-size: var(--kit-type-lead); color: var(--kit-color-muted); max-width: 60ch; }
-.aw-link-cta ,.kit-link-cta { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); border: 1.5px solid var(--kit-color-ink); color: var(--kit-color-ink); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-sm); text-decoration: none; white-space: nowrap; transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-link-cta .aw-ico ,.kit-link-cta .kit-ico { transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-link-cta:hover ,.kit-link-cta:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.aw-link-cta:hover .aw-ico ,.kit-link-cta:hover .kit-ico { transform: translateX(3px); }
-.aw-link-cta:focus-visible ,.kit-link-cta:focus-visible { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
-.aw-dark .aw-link-cta ,.kit-dark .kit-link-cta { border-color: var(--kit-color-on-ink); color: var(--kit-color-on-ink); }
-.aw-dark .aw-link-cta:hover ,.kit-dark .kit-link-cta:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+
+
+
+
+
+
+
 
 /* 4.10 Tile — icon + title + one line + arrow; elevated link card (section index, quick links). */
 .aw-tiles ,.kit-tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-grid); grid-template-columns: 1fr; }
@@ -559,12 +544,10 @@ html { overflow-x: clip; }
 /* Lead image on an item's own page: wide, capped height, rounded, elevated */
 body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single main .wp-block-post-featured-image:not(.kit-logo):not(.aw-logo) img { width: 100%; max-height: min(56vh, 480px); object-fit: cover; border-radius: var(--kit-radius-hero); box-shadow: var(--kit-elevation-2); }
 
-/* Shared: filter chips, kinds, states, pager, empty */
-.aw-chips-nav ,.kit-chips-nav { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-6); }
-.aw-chips-nav a ,.kit-chips-nav a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); color: var(--kit-color-ink); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none; transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-chips-nav a:hover ,.kit-chips-nav a:hover { border-color: var(--kit-color-ink); }
-.aw-chips-nav a[aria-current] ,.kit-chips-nav a[aria-current] { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.aw-kind ,.kit-kind { display: inline-flex; align-items: center; padding: 2px var(--kit-space-2); border-radius: 4px; background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-size: 0.75rem; font-weight: var(--kit-weight-bold); }
+
+
+
+
 .aw-pager ,.kit-pager { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-7); }
 .aw-pager .page-numbers ,.kit-pager .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: var(--kit-size-target); min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; font-weight: var(--kit-weight-medium); }
 .aw-pager .page-numbers.current ,.kit-pager .page-numbers.current { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
@@ -582,10 +565,10 @@ body.single main .wp-block-post-featured-image:not(.aw-logo) img ,body.single ma
 .aw-trust a ,.kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-medium); }
 
 /* Shared button size used in rows */
-.aw-btn .aw-ico ,.kit-btn .kit-ico { --kit-ico-size: 1.1em; --aw-ico-size: 1.1em; }
+.kit-btn .aw-ico, .kit-btn .kit-ico { --kit-ico-size: 1.1em; --aw-ico-size: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .aw-task, .aw-res-card, .aw-story-media img, .aw-case > .aw-ico ,.kit-task, .kit-res-card, .kit-story-media img, .kit-case > .kit-ico { transition: none; } .aw-task:hover, .aw-res-card:hover ,.kit-task:hover, .kit-res-card:hover { transform: none; } }
 /* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
-a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost):hover ,a.kit-btn:not(.kit-btn--outline):not(.aw-btn--outline):not(.kit-btn--ghost):not(.aw-btn--ghost), a.kit-btn:not(.kit-btn--outline):not(.aw-btn--outline):not(.kit-btn--ghost):not(.aw-btn--ghost):hover { color: var(--kit-color-on-accent) !important; }
+/* (filled-button text colour on dark areas: kit-primitives.css) */
 
 /* Editorial building blocks: section head, ghost button, "three big actions", lead + list, editorial queries */
 .aw-ed-head ,.kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); padding-top: var(--kit-space-4); border-top: 2px solid var(--kit-color-ink); margin-bottom: var(--kit-space-6); }
@@ -596,9 +579,6 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-ed-more:hover .aw-ico ,.kit-ed-more:hover .kit-ico { transform: translateX(3px); }
 
 /* Buttons used across the editorial page */
-.aw-btn--ghost ,.kit-btn--ghost { background: transparent; border-color: currentColor; color: inherit; box-shadow: none; }
-.aw-btn:hover ,.kit-btn:hover { filter: brightness(0.95); }
-.aw-btn--ghost:hover ,.kit-btn--ghost:hover { background: var(--kit-color-on-ink); color: var(--kit-color-ink); border-color: var(--kit-color-on-ink); filter: none; }
 
 /* 02 Need help now: three enormous actions on ink */
 .aw-ed-help ,.kit-ed-help { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
@@ -675,18 +655,14 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-footer-tags ,.kit-footer-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin-top: var(--kit-space-6); }
 .aw-footer-tags .aw-footer-head ,.kit-footer-tags .kit-footer-head { margin: 0 var(--kit-space-2) 0 0; }
 .aw-footer-tags .aw-footer-list ,.kit-footer-tags .kit-footer-list { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); columns: auto; }
-.aw-footer-tags .aw-footer-list a ,.kit-footer-tags .kit-footer-list a { min-height: 2rem; padding: 0 var(--kit-space-3); border: 1px solid rgba(255,255,255,.25); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-xs); text-decoration: none; }
-.aw-footer-tags .aw-footer-list a:hover ,.kit-footer-tags .kit-footer-list a:hover { background: rgba(255,255,255,.12); text-decoration: none; }
 .aw-footer-helplines strong ,.kit-footer-helplines strong { white-space: nowrap; }
 
 /* ---------- Phones: header, menu, filters (8 Oct 2026) ---------- */
 @media (max-width: 639px) {
 	/* Header button stays on one line */
 	.aw-header-cta ,.kit-header-cta { white-space: nowrap; padding-inline: var(--kit-space-3); font-size: var(--kit-type-xs); }
-	/* Filter chips: one swipeable row per filter instead of a wall of tags */
-	.aw-chips-nav ,.kit-chips-nav { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; margin-inline: calc(-1 * var(--kit-space-4)); padding: 0 var(--kit-space-4) var(--kit-space-1); margin-bottom: var(--kit-space-4); }
-	.aw-chips-nav::-webkit-scrollbar ,.kit-chips-nav::-webkit-scrollbar { display: none; }
-	.aw-chips-nav a ,.kit-chips-nav a { flex: 0 0 auto; white-space: nowrap; }
+	
+	
 }
 /* Menu overlay on phones: big, left-aligned rows that are easy to tap */
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { align-items: stretch !important; padding-top: var(--kit-space-7) !important; }
