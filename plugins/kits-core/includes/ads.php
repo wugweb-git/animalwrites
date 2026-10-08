@@ -153,3 +153,26 @@ add_action(
 		);
 	}
 );
+
+/**
+ * Page speed: AdSense (Site Kit) starts after the page has loaded, not during it, so its script and ad frames no longer
+ * hold back the page. The account stays verified through Google's meta tag in the head. Auto ads work as before.
+ */
+function kits_adsense_client() {
+	$s = (array) get_option( 'googlesitekit_adsense_settings', array() );
+	return ! empty( $s['useSnippet'] ) && preg_match( '/^ca-pub-\d+$/', (string) ( $s['clientID'] ?? '' ) ) ? (string) $s['clientID'] : '';
+}
+add_filter( 'googlesitekit_adsense_tag_blocked', fn( $b ) => is_admin() || '' === kits_adsense_client() ? $b : true );
+add_action(
+	'wp_head',
+	function () {
+		$c = kits_adsense_client();
+		if ( '' === $c || is_admin() ) {
+			return;
+		}
+		$src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . rawurlencode( $c ) . '&host=ca-host-pub-2644536267352236';
+		echo '<meta name="google-adsense-account" content="' . esc_attr( $c ) . '">' . "\n";
+		echo '<script>(function(){function go(){var s=document.createElement("script");s.async=true;s.crossOrigin="anonymous";s.src=' . wp_json_encode( $src ) . ';document.head.appendChild(s);}function later(){("requestIdleCallback" in window)?requestIdleCallback(go,{timeout:3000}):setTimeout(go,1500);}if(document.readyState==="complete"){later();}else{window.addEventListener("load",later,{once:true});}})();</script>' . "\n"; // phpcs:ignore WordPress.WP.EnqueuedResources
+	},
+	5
+);
