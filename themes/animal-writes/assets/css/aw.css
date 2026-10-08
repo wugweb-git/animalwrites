@@ -483,7 +483,11 @@ body { background: var(--aw-color-canvas); }
 .aw-footer-newsletter .aw-field--checkbox .kit-field-message { position: absolute; left: 0; top: 100%; margin: 0; }
 .aw-footer-newsletter .wp-block-cover__background { background-color: var(--color-ash) !important; }
 .aw-footer-newsletter .wp-block-cover__inner-container { width: 100%; max-width: var(--kit-width-wide); margin-inline: auto; }
-.aw-footer-newsletter .aw-footer-head { margin: 0 0 var(--s-3); }
+.aw-footer-newsletter .aw-nl-head { margin: 0 0 var(--s-3); font-size: var(--fluid-h3); font-weight: var(--weight-h3); line-height: 1.2; color: var(--kit-color-on-ink); }
+@media (min-width: 1024px) { /* heading beside the form so the strip stays under 200px */
+	.aw-footer-newsletter .wp-block-cover__inner-container { display: grid; grid-template-columns: auto 1fr; column-gap: var(--s-8); align-items: start; }
+	.aw-footer-newsletter .aw-nl-head { margin: calc(1.5em * 0.6) 0 0; padding-top: var(--s-6); }
+}
 .aw-footer-newsletter .aw-form { display: grid; gap: 0 var(--s-3); max-width: none; }
 .aw-footer-newsletter .kit-field { margin: 0; }
 .aw-footer-newsletter label, .aw-footer-newsletter .kit-optional { color: inherit; }

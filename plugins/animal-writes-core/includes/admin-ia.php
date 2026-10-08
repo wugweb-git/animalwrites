@@ -66,6 +66,9 @@ add_filter(
 		if ( in_array( $tax, AW_SHARED_TAXONOMIES, true ) ) {
 			$args['show_in_menu'] = false; // listed once, under Classification
 		}
+		if ( 'aw_topic' === $tax && is_admin() ) { // in WP Admin topics are called Categories; the site keeps "Topics"
+			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Categories', 'singular_name' => 'Category', 'menu_name' => 'Categories', 'all_items' => 'All categories', 'edit_item' => 'Edit category', 'add_new_item' => 'Add category', 'search_items' => 'Search categories' ) );
+		}
 		return $args;
 	},
 	10,
@@ -82,6 +85,11 @@ add_filter(
 			$args['show_ui']      = false;
 			$args['show_in_menu'] = false;
 			$args['show_in_rest'] = false; // not served by /wp-json either
+		}
+		if ( 'aw_press' === $type ) { // its own menu item, after Campaigns
+			$args['show_in_menu'] = true;
+			$args['menu_icon']    = 'dashicons-megaphone';
+			$args['labels']       = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Press coverage', 'menu_name' => 'Press coverage', 'all_items' => 'All coverage' ) );
 		}
 		if ( in_array( $type, array( 'aw_message', 'aw_claim' ), true ) ) {
 			$args['show_in_menu'] = 'aw-inbox';
@@ -226,6 +234,7 @@ add_filter(
 			'edit.php?post_type=aw_legal',
 			'edit.php?post_type=aw_opportunity',
 			'edit.php?post_type=aw_campaign',
+			'edit.php?post_type=aw_press',
 			'edit.php?post_type=page',
 			'upload.php',
 			'aw-classification',

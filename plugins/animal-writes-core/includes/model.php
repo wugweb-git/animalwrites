@@ -56,7 +56,7 @@ add_action(
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
 		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_news' ), $args( 'Courts', 'Court' ) );
 		register_taxonomy( 'aw_resource_type', array( 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
-		register_taxonomy( 'aw_language', array( 'aw_legal' ), $args( 'Languages', 'Language' ) );
+		// Language is no longer used on the Library (Phase 12 B4); each item keeps its old value in the meta aw_language_legacy.
 		register_taxonomy_for_object_type( 'aw_city', 'aw_legal' ); // Legal Watch: filter by state
 	},
 	11

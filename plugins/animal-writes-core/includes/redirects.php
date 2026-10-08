@@ -54,3 +54,16 @@ add_action(
 	},
 	0 // before WordPress guesses a redirect from the slug
 );
+
+
+// Language is gone from the Library (Phase 12 B4): old ?lang= filter links go to the same list without it.
+add_action(
+	'template_redirect',
+	function () {
+		if ( isset( $_GET['lang'] ) && is_post_type_archive( 'aw_legal' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( remove_query_arg( 'lang' ), 301 );
+			exit;
+		}
+	},
+	1
+);
