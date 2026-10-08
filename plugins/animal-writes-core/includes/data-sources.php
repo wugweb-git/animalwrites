@@ -28,6 +28,7 @@ function aw_data_sources() {
 		'gov'          => array( 'GOV', '', '', '' ), // label and link come from the listing's own source name and URL
 		'awol'         => array( 'AWOL', 'AWO List compiled by Saumya Garg', '2025-01-03', '' ),
 		'gmaps'        => array( 'MAPS', 'Google Maps', '', '' ), // link: the listing's own Google Maps link
+		'ngobase'      => array( 'NGOB', 'ngobase.org', '2026-10-09', '' ), // link: the organisation's ngobase.org profile
 		'organisation' => array( 'ORG', 'The organisation', '', '' ),
 	);
 }
@@ -69,6 +70,9 @@ function aw_listing_sources( $id ) {
 		}
 		if ( 'organisation' === $slug ) {
 			$on = (string) get_post_meta( $id, 'aw_verified_on', true );
+		}
+		if ( 'ngobase' === $slug ) {
+			$link = (string) get_post_meta( $id, 'aw_ngobase_url', true );
 		}
 		if ( 'gmaps' === $slug ) {
 			$link  = (string) ( get_post_meta( $id, 'aw_g_profile', true ) ? get_post_meta( $id, 'aw_g_profile', true ) : get_post_meta( $id, 'aw_maps_url', true ) );

@@ -56,6 +56,7 @@ function aw_meta_schema() {
 		'aw_hours_spec'      => array( 'string', array( 'aw_listing' ), 'Opening hours, one line per day range: "Mon-Fri 09:00-18:00"' ),
 		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
 		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
+		'aw_ngobase_url'     => array( 'string', array( 'aw_listing' ), 'ngobase.org profile' ),
 		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
 		'aw_youtube'         => array( 'string', array( 'aw_listing' ), 'YouTube' ),
 		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 4 media IDs, comma separated' ),
@@ -93,7 +94,7 @@ function aw_meta_schema() {
  * @return mixed
  */
 function aw_sanitize_meta( $value, $key ) {
-	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url' );
+	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url', 'aw_ngobase_url' );
 	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
