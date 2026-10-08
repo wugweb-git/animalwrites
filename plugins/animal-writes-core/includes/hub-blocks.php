@@ -102,7 +102,7 @@ function aw_block_hub_count( $a ) {
 		$n = (int) wp_count_posts( 'aw_campaign' )->publish; // all campaigns, the 1.0 story included
 		$word = 1 === $n ? 'campaign' : 'campaigns';
 	}
-	return $n ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $n ) . ' ' . $word ) . '</p>' : '';
+	return $n ? '<p class="kit-section-count">' . esc_html( number_format_i18n( $n ) . ' ' . $word ) . '</p>' : '';
 }
 
 /** Three pictures from the section (campaign photos for Campaigns). */
@@ -132,14 +132,14 @@ function aw_block_hub_visual( $a ) {
 			$tiles .= aw_section_tile( $p );
 		}
 	}
-	return $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
+	return $tiles ? '<div class="kit-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
 }
 
 /** Kits filter bar driving the hub Query Loop through URL query vars; the Directory gets its search bar. */
 function aw_block_list_filters( $a ) {
 	$type = (string) ( $a['postType'] ?? '' );
 	$out  = 'aw_listing' === $type ? aw_directory_filter() : ( function_exists( 'aw_list_filters' ) && isset( AW_LIST_FILTERS[ $type ] ) ? aw_list_filters( $type ) : '' );
-	return $out ? '<div class="aw-section-filters">' . $out . '</div>' : '';
+	return $out ? '<div class="kit-section-filters">' . $out . '</div>' : '';
 }
 
 /* ---------- News, Library, Resources ---------- */
@@ -331,7 +331,7 @@ function aw_block_press_media( $a, $id ) {
 	$media    = $thumb
 		? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')"><span class="aw-story-fallback">' . $fallback . '</span>'
 		: '<span class="aw-story-fallback">' . $fallback . '</span>';
-	return '<div class="aw-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>';
+	return '<div class="kit-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>';
 }
 
 /** Date and format tag (Article, Video …). */

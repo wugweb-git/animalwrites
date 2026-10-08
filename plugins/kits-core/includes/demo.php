@@ -41,8 +41,8 @@ function kits_demo_panel() {
 		return '<div class="kit-field"><label>' . esc_html( $label ) . ( 'Optional' === $state ? ' <span class="kit-optional">(optional)</span>' : '' ) . '</label><div class="kit-field-control">' . $control . '</div><span class="kit-field-message">' . esc_html( $msg ) . '</span></div>';
 	};
 	$o .= $h( '11 Form field' ) . '<div class="kit-demo-fields">'
-		. $f( 'Default', '', '<span class="aw-ico aw-ico--mail kit-field-icon" aria-hidden="true"></span><input type="email" placeholder="you@example.com">' )
-		. $f( 'Optional', 'Optional', '<span class="aw-ico aw-ico--name kit-field-icon" aria-hidden="true"></span><input type="text" placeholder="Asha">' )
+		. $f( 'Default', '', '<span class="kit-ico kit-ico--mail kit-field-icon" aria-hidden="true"></span><input type="email" placeholder="you@example.com">' )
+		. $f( 'Optional', 'Optional', '<span class="kit-ico kit-ico--name kit-field-icon" aria-hidden="true"></span><input type="text" placeholder="Asha">' )
 		. $f( 'Focus', '', '<input type="text" class="is-demo-focus" value="Focused">' )
 		. $f( 'Filled', '', '<input type="text" value="Blue Cross of India">' )
 		. $f( 'Invalid', '', '<input type="email" aria-invalid="true" value="asha@">', 'Enter a full email address, like you@example.com' )

@@ -14,7 +14,7 @@
 	} catch (e) {}
 
 	/* 2. Sticky help bar: hide while scrolling down, show on scroll up or near the top. */
-	var bar = document.querySelector('.kit-sticky-help, .aw-sticky-help');
+	var bar = document.querySelector('.kit-sticky-help, .kit-sticky-help');
 	if (bar) {
 		var lastY = window.scrollY;
 		window.addEventListener('scroll', function () {
@@ -27,11 +27,11 @@
 	}
 
 	/* 3. Carousels: position dots that also work as controls. */
-	document.querySelectorAll('.kit-cards .wp-block-post-template, .aw-cards .wp-block-post-template').forEach(function (track) {
+	document.querySelectorAll('.kit-cards .wp-block-post-template, .kit-cards .wp-block-post-template').forEach(function (track) {
 		var items = track.children;
 		if (items.length < 2) return;
 		var dots = document.createElement('div');
-		dots.className = 'aw-carousel-dots';
+		dots.className = 'kit-carousel-dots';
 		dots.setAttribute('role', 'group');
 		dots.setAttribute('aria-label', 'Choose a card');
 		Array.prototype.forEach.call(items, function (item, i) {
@@ -72,7 +72,7 @@
 		});
 	});
 
-	/* 4. Shared form behaviour for every .aw-form (Phase 11 F.1).
+	/* 4. Shared form behaviour for every .kit-form (Phase 11 F.1).
 	   Validate on submit; after the first submit, check a field again when it loses focus, and clear its message as
 	   soon as it is valid while typing. Focus the first invalid field; a summary only when there is more than one.
 	   Send with fetch() (the server answers in JSON and the form keeps what was typed); without JavaScript the normal
@@ -83,10 +83,10 @@
 		var e = document.getElementById(id);
 		if (!e) {
 			e = document.createElement('span');
-			e.className = 'kit-field-message aw-field-error';
+			e.className = 'kit-field-message kit-field-error';
 			e.id = id;
 			e.setAttribute('aria-live', 'polite');
-			(el.closest('.kit-field-control') || el.closest('.aw-check') || el).insertAdjacentElement('afterend', e);
+			(el.closest('.kit-field-control') || el.closest('.kit-check') || el).insertAdjacentElement('afterend', e);
 		}
 		var by = (el.getAttribute('aria-describedby') || '').split(' ').filter(Boolean);
 		if (by.indexOf(id) < 0) { by.push(id); el.setAttribute('aria-describedby', by.join(' ')); }
@@ -123,7 +123,7 @@
 		}
 	}
 	function check(el, display) {
-		if (!el.willValidate || el.type === 'hidden' || el.closest('.aw-hp') || !el.name) return true;
+		if (!el.willValidate || el.type === 'hidden' || el.closest('.kit-hp') || !el.name) return true;
 		if (el.type === 'email') el.value = el.value.trim();
 		custom(el);
 		var ok = el.checkValidity();
@@ -151,11 +151,11 @@
 		if (text) st.focus();
 	}
 	function summary(form, bad) {
-		var old = form.querySelector('.aw-form-summary');
+		var old = form.querySelector('.kit-form-summary');
 		if (old) old.remove();
 		if (bad.length < 2) return;
 		var box = document.createElement('div');
-		box.className = 'aw-form-summary';
+		box.className = 'kit-form-summary';
 		box.setAttribute('role', 'alert');
 		box.innerHTML = '<strong>Please fix these ' + bad.length + ' before sending:</strong><ul></ul>';
 		bad.forEach(function (el) {
@@ -175,7 +175,7 @@
 	}
 	function done(form, data) {
 		var box = document.createElement('div');
-		box.className = 'aw-form-done kit-form-done';
+		box.className = 'kit-form-done';
 		box.setAttribute('role', 'status');
 		box.tabIndex = -1;
 		var h = document.createElement('p'); h.className = 'aw-form-done-title'; h.textContent = data.title || ''; box.appendChild(h);
@@ -189,10 +189,10 @@
 		form.replaceWith(box);
 		box.focus();
 	}
-	document.querySelectorAll('form.kit-form, form.aw-form').forEach(function (form) {
+	document.querySelectorAll('form.kit-form, form.kit-form').forEach(function (form) {
 		form.setAttribute('novalidate', '');
 		var submitted = false;
-		var served = form.querySelector('.aw-form-summary') || form.querySelector('.kit-form-status:not(:empty)') || form.querySelector('[aria-invalid=true]');
+		var served = form.querySelector('.kit-form-summary') || form.querySelector('.kit-form-status:not(:empty)') || form.querySelector('[aria-invalid=true]');
 		if (served) { submitted = true; served.focus(); } // errors returned by the server (no-JS path)
 		form.addEventListener('focusout', function (e) {
 			if (submitted && e.target.matches('input, select, textarea')) check(e.target, true);
@@ -212,7 +212,7 @@
 			try {
 				var o = {};
 				form.querySelectorAll('input, select, textarea').forEach(function (el) {
-					if (!el.name || el.type === 'hidden' || el.type === 'file' || el.closest('.aw-hp')) return;
+					if (!el.name || el.type === 'hidden' || el.type === 'file' || el.closest('.kit-hp')) return;
 					if (el.type === 'checkbox') { if (el.checked) (o[el.name] = o[el.name] || []).push(el.value); } else o[el.name] = el.value;
 				});
 				sessionStorage.setItem(KEY, JSON.stringify(o));
@@ -220,7 +220,7 @@
 		}
 		try {
 			var kept = JSON.parse(sessionStorage.getItem(KEY) || 'null');
-			if (kept && !fields(form).some(function (el) { return el.type !== 'hidden' && el.type !== 'checkbox' && el.value && !el.closest('.aw-hp'); })) {
+			if (kept && !fields(form).some(function (el) { return el.type !== 'hidden' && el.type !== 'checkbox' && el.value && !el.closest('.kit-hp'); })) {
 				Object.keys(kept).forEach(function (name) {
 					form.querySelectorAll('[name="' + name + '"]').forEach(function (el) {
 						if (el.type === 'checkbox') el.checked = [].concat(kept[name]).indexOf(el.value) > -1; else if (el.type !== 'file') el.value = kept[name];
@@ -323,7 +323,7 @@
 			if (back) { go(cur - 1); return; }
 			if (!next) return;
 			var wrong = Array.prototype.slice.call(steps[cur].querySelectorAll('input, select, textarea')).filter(function (el) {
-				if (!el.willValidate || el.type === 'hidden' || !el.name || el.closest('.aw-hp')) return false;
+				if (!el.willValidate || el.type === 'hidden' || !el.name || el.closest('.kit-hp')) return false;
 				return !el.checkValidity();
 			});
 			if (wrong.length) {
@@ -348,7 +348,7 @@
 		var zone = a.closest('[data-menu]');
 		var area = zone ? zone.getAttribute('data-menu')
 			: a.closest('.kit-menu-secondary') ? 'secondary'
-			: a.closest('.wp-block-navigation') && a.closest('header, .aw-site-header, .kit-site-header') ? 'primary' : '';
+			: a.closest('.wp-block-navigation') && a.closest('header, .kit-site-header, .kit-site-header') ? 'primary' : '';
 		if (!area) return;
 		var data = { menu_area: area, link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 100), link_url: a.getAttribute('href') };
 		(window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'menu_click' }, data)); // for GTM
@@ -415,7 +415,7 @@
 (function () {
 	function mark(root) {
 		root.querySelectorAll('a[href^="http"]:not(.kit-link-ext)').forEach(function (a) {
-			if (a.host === location.host || a.querySelector('img, svg, .kit-ico, .aw-ico') || !a.textContent.trim() || a.closest('.wp-block-navigation, .aw-ad')) {
+			if (a.host === location.host || a.querySelector('img, svg, .kit-ico, .kit-ico') || !a.textContent.trim() || a.closest('.wp-block-navigation, .kit-ad')) {
 				return;
 			}
 			a.classList.add('kit-link-ext');

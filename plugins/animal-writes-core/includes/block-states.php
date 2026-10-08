@@ -27,7 +27,7 @@ add_filter(
 		$row = function ( $state, $id, $render ) {
 			$out = $id ? (string) call_user_func( $render, $id ) : '';
 			return '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $state ) . ( $id ? ' <a href="' . esc_url( get_permalink( $id ) ) . '">(item)</a>' : '' ) . '</p><div class="aw-state-out">'
-				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|aw-ico|kit-ico|<svg/', $out ) ? $out : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
+				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|kit-ico|kit-ico|<svg/', $out ) ? $out : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
 		};
 		$blocks = array(
 			'Document date (animal-writes/doc-date)' => array(
@@ -97,7 +97,7 @@ add_filter(
 		// Forms: closed, open and sent (the sent message as visitors see it after sending).
 		$out .= '<div><h3 class="kit-demo-h">Volunteer form (animal-writes/volunteer)</h3>'
 			. '<div class="aw-state-row"><p class="aw-state-name">Closed (behind the button)</p><div class="aw-state-out">' . kits_disclosure( 'aw-demo-vol', 'Register as a volunteer', '<p>The form.</p>' ) . '</div></div>'
-			. '<div class="aw-state-row"><p class="aw-state-name">Sent</p><div class="aw-state-out"><div class="aw-form-done kit-form-done" role="status"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>' . esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div></div></div></div>';
+			. '<div class="aw-state-row"><p class="aw-state-name">Sent</p><div class="aw-state-out"><div class="kit-form-done" role="status"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>' . esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div></div></div></div>';
 		return $html . $out . '</div>';
 	}
 );

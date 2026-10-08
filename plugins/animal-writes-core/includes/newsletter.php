@@ -106,13 +106,13 @@ function aw_newsletter_form() {
 		'nl_badlink'   => array( 'This link has expired or was already used.', '' ),
 	);
 	if ( isset( $msgs[ $done ] ) ) {
-		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html( $msgs[ $done ][0] ) . '</p>' . ( $msgs[ $done ][1] ? '<p>' . esc_html( $msgs[ $done ][1] ) . '</p>' : '' ) . '</div>';
+		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html( $msgs[ $done ][0] ) . '</p>' . ( $msgs[ $done ][1] ? '<p>' . esc_html( $msgs[ $done ][1] ) . '</p>' : '' ) . '</div>';
 	}
 	$form  = 'aw_newsletter';
-	$html  = aw_form_open( $form, array( 'class' => 'aw-form kit-form kit-form--on-dark aw-newsletter-form', 'data-altcha' => 'invisible' ) );
+	$html  = aw_form_open( $form, array( 'class' => 'kit-form kit-form--on-dark aw-newsletter-form', 'data-altcha' => 'invisible' ) );
 	$html .= kits_dict_field( $form, 'email' );
 	$html .= kits_dict_field( $form, 'name' );
-	$html .= '<div class="aw-nl-submit"><button type="submit" class="kit-btn">Subscribe</button></div>';
+	$html .= '<div class="kit-nl-submit"><button type="submit" class="kit-btn">Subscribe</button></div>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'Email me Animal Writes updates. I can unsubscribe at any time.', 'messages' => array( 'required' => 'Tick the box to subscribe' ) ) );
 	$html .= '</form>';
 	return $html;

@@ -60,7 +60,7 @@ function aw_placard_html( $post_id ) {
 	if ( ! $label ) {
 		$label = get_the_title( $post_id );
 	}
-	return '<div class="aw-placard" aria-hidden="true"><span>' . esc_html( $label ) . '</span></div>';
+	return '<div class="kit-placard" aria-hidden="true"><span>' . esc_html( $label ) . '</span></div>';
 }
 
 add_filter(
@@ -91,13 +91,13 @@ add_filter(
 			$url = $doc;
 		}
 		$inner  = $url
-			? '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'aw-img-failed\')">'
+			? '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">'
 			: aw_placard_html( $post_id );
 		if ( $url ) {
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}
 		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $inner . '</a>' : $inner;
-		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . ( $url ? ' has-remote' : '' ) . ( $doc ? ' aw-doc-cover' : '' ) . '">' . $inner . '</figure>';
+		return '<figure class="wp-block-post-featured-image kit-card-media' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . ( $url ? ' has-remote' : '' ) . ( $doc ? ' kit-doc-cover' : '' ) . '">' . $inner . '</figure>';
 	},
 	10,
 	3
@@ -183,7 +183,7 @@ add_filter(
 		if ( ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'aw_legal_kind', get_queried_object_id() ) ) ) {
 			return $content;
 		}
-		$button = '<p class="aw-print"><button type="button" class="wp-element-button" onclick="window.print()">'
+		$button = '<p class="kit-print"><button type="button" class="wp-element-button" onclick="window.print()">'
 			. esc_html__( 'Print this letter', 'animal-writes-core' ) . '</button> <span>'
 			. esc_html__( 'Sign it, then post it by Speed Post.', 'animal-writes-core' ) . '</span></p>';
 		return $button . $content;

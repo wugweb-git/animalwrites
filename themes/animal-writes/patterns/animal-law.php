@@ -15,10 +15,10 @@
 <!-- /wp:html -->
 <!-- wp:group {"className":"aw-ed-law-grid","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-law-grid"><!-- wp:html -->
-<div class="aw-ed-law-side"><p>Court decisions, government notices and the rules behind them, summarised in plain words and linked to the original documents.</p><ul class="aw-ed-links"><li><a href="/library/">Browse the Library <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/library/?kind=act">Read the Acts and Rules <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/resources/animal-birth-control-abc-explained/">Animal Birth Control, explained <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
+<div class="aw-ed-law-side"><p>Court decisions, government notices and the rules behind them, summarised in plain words and linked to the original documents.</p><ul class="aw-ed-links"><li><a href="/library/">Browse the Library <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/library/?kind=act">Read the Acts and Rules <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/resources/animal-birth-control-abc-explained/">Animal Birth Control, explained <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
 <!-- /wp:html -->
-<!-- wp:query {"queryId":43,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-rows"} -->
-<div class="wp-block-query aw-ed-rows"><!-- wp:post-template -->
+<!-- wp:query {"queryId":43,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-rows"} -->
+<div class="wp-block-query kit-ed-rows"><!-- wp:post-template -->
 <!-- wp:animal-writes/law-date /-->
 <!-- wp:post-terms {"term":"aw_topic"} /-->
 <!-- wp:post-title {"level":3,"isLink":true} /-->

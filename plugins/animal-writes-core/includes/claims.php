@@ -67,7 +67,7 @@ function aw_claim_form( $listing ) {
 	$form = 'aw_claim';
 	if ( isset( $_GET['aw_done'] ) && 'claim' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request sent.</p>' . ( $to ? '<p>' . esc_html( sprintf( 'We\'ll check it and email you at %s.', $to ) ) . '</p>' : '' ) . '</div>';
+		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request sent.</p>' . ( $to ? '<p>' . esc_html( sprintf( 'We\'ll check it and email you at %s.', $to ) ) . '</p>' : '' ) . '</div>';
 	}
 	$about  = kits_dict_field( $form, 'name', array( 'required' => true ) )
 		. kits_dict_field( $form, 'role', array( 'options' => AW_CLAIM_ROLES ) )
@@ -85,7 +85,7 @@ function aw_claim_form( $listing ) {
 		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
 		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
 		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) );
-	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'aw-form kit-form aw-claim-form', 'id' => 'aw-form-aw_claim' ) )
+	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim' ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
 		. kits_form_steps( array( array( 'About you', $about ), array( 'What should change', $change ) ), 'Send for review' )
 		. '</form>';

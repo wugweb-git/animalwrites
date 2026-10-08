@@ -83,7 +83,7 @@ add_action(
     fetch(<?php echo wp_json_encode( $api ); ?>,{method:'POST',credentials:'omit',keepalive:true});}
 }catch(e){}
 fetch(<?php echo wp_json_encode( $api ); ?>).then(function(r){return r.json()}).then(function(d){
-  var el=document.querySelectorAll('.aw-visits'); if(!d||!d.total) return;
+  var el=document.querySelectorAll('.kit-visits'); if(!d||!d.total) return;
   var since=d.since?new Date(d.since+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
   el.forEach(function(x){x.textContent=d.total.toLocaleString('en-IN')+' visits'+(since?' since '+since:'');});
 }).catch(function(){});

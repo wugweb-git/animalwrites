@@ -92,7 +92,7 @@ add_action(
 function aw_contact_form() {
 	if ( isset( $_GET['aw_done'] ) && 'contact' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-done kit-form-done" id="write" role="status" tabindex="-1"><p class="aw-form-done-title">Message sent.</p>'
+		return '<div class="kit-form-done" id="write" role="status" tabindex="-1"><p class="aw-form-done-title">Message sent.</p>'
 			. ( $to ? '<p>' . esc_html( sprintf( 'We\'ll reply to %s.', $to ) ) . '</p>' : '' )
 			. '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink() ) . '#write">Send another</a></p></div>';
 	}
@@ -102,7 +102,7 @@ function aw_contact_form() {
 	$about = isset( AW_CONTACT_ABOUT[ $about ] ) ? $about : '';
 	$state = aw_form_state( $form );
 	$pick  = (string) ( $state['values']['about'] ?? $about );
-	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'aw-form aw-contact-form' ) );
+	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'kit-form aw-contact-form' ) );
 	// Reason first; its options carry the message placeholder (aw.js swaps it when the reason changes).
 	$id    = aw_field_id( $form, 'about' );
 	$opts  = '';
@@ -110,7 +110,7 @@ function aw_contact_form() {
 		$opts .= '<option value="' . esc_attr( $k ) . '"' . selected( $pick, $k, false ) . ( isset( AW_CONTACT_PLACEHOLDER[ $k ] ) ? ' data-placeholder="' . esc_attr( AW_CONTACT_PLACEHOLDER[ $k ] ) . '"' : '' ) . '>' . esc_html( $label ) . '</option>';
 	}
 	$err   = $state['errors']['about'] ?? '';
-	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">What\'s this about?</label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="about" required data-msg-required="Choose what this is about" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $err ? ' aria-invalid="true"' : '' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
+	$html .= '<div class="kit-field kit-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">What\'s this about?</label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="about" required data-msg-required="Choose what this is about" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $err ? ' aria-invalid="true"' : '' ) . '>' . $opts . '</select></div><span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
 	$html .= kits_dict_field( $form, 'name', array( 'required' => true ) );
 	$html .= kits_dict_field( $form, 'email' );
 	$html .= kits_dict_field( $form, 'organisation', array( 'name' => 'org' ) );
@@ -253,7 +253,7 @@ add_shortcode(
 				$out .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
 					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
 				if ( 6 === ++$shown && function_exists( 'aw_ad' ) && ( $ad = aw_ad( 'results' ) ) ) { // phpcs:ignore
-					$out .= '<li class="aw-ad-item">' . $ad . '</li>';
+					$out .= '<li class="kit-ad-item">' . $ad . '</li>';
 				}
 			}
 			$out .= '</ol>';

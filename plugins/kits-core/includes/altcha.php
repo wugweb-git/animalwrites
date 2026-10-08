@@ -115,17 +115,17 @@ function kits_altcha_widget( $mode = '' ) {
 			'wp_footer',
 			function () use ( $src ) {
 				// Sit just above the form's send button; load the widget on first touch of any form that has one.
-				echo "<script>(function(){function place(){document.querySelectorAll('.aw-captcha').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});}"
+				echo "<script>(function(){function place(){document.querySelectorAll('.kit-captcha').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});}"
 					. "var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.src=" . wp_json_encode( $src ) . ";s.defer=true;document.head.appendChild(s);}"
 					. "if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',place);}else{place();}"
-					. "['focusin','pointerdown'].forEach(function(ev){document.addEventListener(ev,function(e){var f=e.target.closest&&e.target.closest('form');if(f&&f.querySelector('.aw-captcha'))load();},{passive:true});});})();</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+					. "['focusin','pointerdown'].forEach(function(ev){document.addEventListener(ev,function(e){var f=e.target.closest&&e.target.closest('form');if(f&&f.querySelector('.kit-captcha'))load();},{passive:true});});})();</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 			},
 			20
 		);
 	}
 	// "invisible": no check box; the check runs when the form is sent (auto="onsubmit"), same protection.
 	if ( 'invisible' === $mode ) {
-		return '<div class="aw-captcha aw-captcha--invisible"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" auto="onsubmit" hidefooter hidelogo></altcha-widget></div>';
+		return '<div class="kit-captcha kit-captcha--invisible"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" auto="onsubmit" hidefooter hidelogo></altcha-widget></div>';
 	}
-	return '<div class="aw-captcha"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" hidefooter hidelogo></altcha-widget></div>';
+	return '<div class="kit-captcha"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" hidefooter hidelogo></altcha-widget></div>';
 }

@@ -24,7 +24,7 @@ function aw_share_html( $post_id ) {
 		'Facebook' => 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $url ),
 		'X'        => 'https://x.com/intent/post?text=' . rawurlencode( $title ) . '&url=' . rawurlencode( $url ),
 	);
-	$out = '<div class="aw-share" role="group" aria-label="' . esc_attr__( 'Share', 'animal-writes-core' ) . '"><span class="aw-share-label">' . esc_html__( 'Share', 'animal-writes-core' ) . '</span>';
+	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'animal-writes-core' ) . '"><span class="kit-share-label">' . esc_html__( 'Share', 'animal-writes-core' ) . '</span>';
 	foreach ( $links as $name => $href ) {
 		$out .= '<a class="aw-share-' . strtolower( $name ) . '" href="' . esc_url( $href ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $name ) . '</a>';
 	}
@@ -46,7 +46,7 @@ add_filter(
 			return $content;
 		}
 		$done = true;
-		return substr( $content, 0, $pos ) . '<div class="aw-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>' . substr( $content, $pos );
+		return substr( $content, 0, $pos ) . '<div class="kit-share-wrap">' . aw_share_html( get_queried_object_id() ) . '</div>' . substr( $content, $pos );
 	},
 	10,
 	2

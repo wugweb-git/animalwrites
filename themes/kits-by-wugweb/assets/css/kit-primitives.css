@@ -271,10 +271,10 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-field-hint { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
 
 /* Forms: empty paragraphs and line breaks left by auto-formatting around shortcodes never take a place in the layout */
-:is(.aw-form, .kit-form) > :is(p:empty, br, p:has(> input[type=hidden]):not(:has(> :not(input[type=hidden])))) { display: none; } /* hidden fields still submit */
+:is(.kit-form, .kit-form) > :is(p:empty, br, p:has(> input[type=hidden]):not(:has(> :not(input[type=hidden])))) { display: none; } /* hidden fields still submit */
 
 /* ALTCHA in automatic mode: present (it must run) but not shown */
-.aw-captcha--invisible { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.kit-captcha--invisible { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
 /* ---------- 12. Checkbox ---------- */
 .kit-checkbox { display: flex; gap: var(--s-3); align-items: flex-start; min-height: var(--kit-size-target); padding-block: var(--s-2); cursor: pointer; font-weight: var(--kit-weight-regular); }
@@ -324,7 +324,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
 .kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
 /* Button: primary yellow, dark text, 44px, radius --r-2; loading = spinner + label */
-:is(.kit-form, .aw-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; border-radius: var(--r-2); }
+:is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; border-radius: var(--r-2); }
 .kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--color-yellow); border-color: var(--color-yellow); color: var(--neutral-10); }
 /* Layout: one column under 640px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: 1fr; }

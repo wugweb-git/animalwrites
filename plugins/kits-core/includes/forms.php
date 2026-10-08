@@ -4,8 +4,8 @@
  * expandable and multi-step patterns, and one set of messages for every form.
  *
  * Markup matches the client validator in the theme's aw.js: each field's error lives in
- * <span class="aw-field-error" id="{id}-error"> right after the control, and the summary is
- * .aw-form-summary at the top of the form. With JavaScript off, the server returns the same
+ * <span class="kit-field-error" id="{id}-error"> right after the control, and the summary is
+ * .kit-form-summary at the top of the form. With JavaScript off, the server returns the same
  * errors through a short-lived token (?aw_err=), so every visitor sees the same messages.
  *
  * @package kits-core
@@ -109,7 +109,7 @@ function aw_form_open( $form, $attrs = array() ) {
 	$altcha = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
 	$attrs = array_merge(
 		array(
-			'class'  => 'aw-form',
+			'class'  => 'kit-form',
 			'method' => 'post',
 			'action' => admin_url( 'admin-post.php' ),
 			'id'     => 'aw-form-' . $form,
@@ -125,7 +125,7 @@ function aw_form_open( $form, $attrs = array() ) {
 	// One status region per form: form-level errors and success (filled by the server or by kit.js).
 	$html .= '<div class="kit-form-status" role="status" aria-live="polite" tabindex="-1">' . ( $state['notice'] && ! $state['errors'] ? esc_html( $state['notice'] ) : '' ) . '</div>';
 	if ( count( $state['errors'] ) > 1 ) { // a summary only when there is more than one error
-		$html .= '<div class="aw-form-summary" role="alert" tabindex="-1">';
+		$html .= '<div class="kit-form-summary" role="alert" tabindex="-1">';
 		if ( $state['notice'] ) {
 			$html .= '<strong>' . esc_html( $state['notice'] ) . '</strong>';
 		}
@@ -143,7 +143,7 @@ function aw_form_open( $form, $attrs = array() ) {
 		. wp_nonce_field( $form, '_aw_nonce', true, false )
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
-		. '<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
+		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
 		. kits_altcha_widget( $altcha );
 	return $html;
 }
@@ -218,15 +218,15 @@ function aw_field( $form, $f ) {
 			$control = '<input type="' . esc_attr( $f['type'] ) . '" value="' . esc_attr( (string) $val ) . '"' . $attr . '>';
 	}
 
-	$opt   = $f['required'] ? '' : ' <span class="aw-optional kit-optional">(optional)</span>';
-	$hint  = $f['hint'] ? '<span class="aw-field-hint kit-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
+	$opt   = $f['required'] ? '' : ' <span class="kit-optional">(optional)</span>';
+	$hint  = $f['hint'] ? '<span class="kit-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
 	// The message line is always there (reserved space), so showing an error never moves the layout.
-	$error = '<span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span>';
-	$cls   = 'kit-field aw-field aw-field--' . $f['type'] . ( $err ? ' is-invalid' : '' );
-	$icon  = $f['icon'] ? '<span class="aw-ico aw-ico--' . esc_attr( $f['icon'] ) . ' kit-field-icon" aria-hidden="true"></span>' : '';
+	$error = '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span>';
+	$cls   = 'kit-field kit-field--' . $f['type'] . ( $err ? ' is-invalid' : '' );
+	$icon  = $f['icon'] ? '<span class="kit-ico kit-ico--' . esc_attr( $f['icon'] ) . ' kit-field-icon" aria-hidden="true"></span>' : '';
 
 	if ( 'checkbox' === $f['type'] ) {
-		return '<div class="' . esc_attr( $cls ) . '"><label class="kit-checkbox aw-check" for="' . esc_attr( $id ) . '">' . $control . ' <span>' . esc_html( $f['label'] ) . '</span></label>' . $error . $hint . '</div>';
+		return '<div class="' . esc_attr( $cls ) . '"><label class="kit-checkbox kit-check" for="' . esc_attr( $id ) . '">' . $control . ' <span>' . esc_html( $f['label'] ) . '</span></label>' . $error . $hint . '</div>';
 	}
 	return '<div class="' . esc_attr( $cls ) . '"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . $opt . '</label>' . $hint . '<div class="kit-field-control">' . $icon . $control . '</div>' . $error . '</div>';
 }

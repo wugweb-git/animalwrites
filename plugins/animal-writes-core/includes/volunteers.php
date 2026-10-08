@@ -55,14 +55,14 @@ add_action(
  */
 function aw_volunteer_form( $source = '' ) {
 	if ( isset( $_GET['aw_done'] ) && 'volunteer' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>'
+		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>'
 			. esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div>';
 	}
 	$form   = 'aw_volunteer';
 	$state  = aw_form_state( $form );
 	$picked = (array) ( $state['values']['roles'] ?? array() );
 	$err    = $state['errors']['roles'] ?? '';
-	$html   = aw_form_open( $form, array_filter( array( 'class' => 'aw-form kit-form aw-volunteer-form', 'data-source' => $source ) ) );
+	$html   = aw_form_open( $form, array_filter( array( 'class' => 'kit-form aw-volunteer-form', 'data-source' => $source ) ) );
 	$html  .= '<div class="kit-form-grid">';
 	$html  .= kits_dict_field( $form, 'name', array( 'required' => true ) );
 	$html  .= kits_dict_field( $form, 'email' );
@@ -74,7 +74,7 @@ function aw_volunteer_form( $source = '' ) {
 	foreach ( AW_VOL_ROLES as $k => $label ) {
 		$html .= '<label class="kit-checkbox"><input type="checkbox" name="roles[]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $picked, true ), true, false ) . '> <span>' . esc_html( $label ) . '</span></label>';
 	}
-	$html .= '<span class="kit-field-message aw-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
+	$html .= '<span class="kit-field-message kit-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.' ) );
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
 	return $html;

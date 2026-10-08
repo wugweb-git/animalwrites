@@ -87,9 +87,9 @@ add_shortcode(
 		// A category page leads with its own photo (set on the category screen in WP Admin).
 		$cat_img = ( is_tax() && function_exists( 'aw_topic_image_id' ) ) ? aw_topic_image_id( get_queried_object() ) : 0;
 		if ( $cat_img ) {
-			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="aw-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
+			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="kit-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
 		}
-		$visual = $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
+		$visual = $tiles ? '<div class="kit-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
 		if ( 'aw_listing' === $type ) {
 			// Directory: the search bar is the main element and the count sits with the results (Phase 11 E1, E3).
 			$visual = '';
@@ -103,11 +103,11 @@ add_shortcode(
 		} elseif ( is_post_type_archive() && function_exists( 'aw_list_filters' ) ) {
 			$filters = aw_list_filters( $type );
 		}
-		return '<header class="aw-section-band alignfull' . ( 'aw_listing' === $type ? ' aw-section-band--compact' : '' ) . '"><div class="aw-section-inner">' . $crumbs . '<div class="aw-section-head"><div>'
+		return '<header class="kit-section-band alignfull' . ( 'aw_listing' === $type ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $crumbs . '<div class="kit-section-head"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
-			. ( $desc ? '<p class="aw-section-desc">' . esc_html( $desc ) . '</p>' : '' )
-			. ( $count ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )
-			. '</div>' . $visual . '</div>' . ( $filters ? '<div class="aw-section-filters">' . $filters . '</div>' : '' ) . '</div></header>';
+			. ( $desc ? '<p class="kit-section-desc">' . esc_html( $desc ) . '</p>' : '' )
+			. ( $count ? '<p class="kit-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )
+			. '</div>' . $visual . '</div>' . ( $filters ? '<div class="kit-section-filters">' . $filters . '</div>' : '' ) . '</div></header>';
 	}
 );
 
@@ -155,10 +155,10 @@ add_shortcode(
 			$with++;
 			$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
 		}
-		return '<div class="aw-ed-find-head"><h2>Find help near you</h2><p class="aw-ed-big"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p></div>'
+		return '<div class="kit-ed-find-head"><h2>Find help near you</h2><p class="aw-ed-big"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p></div>'
 			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 			. '<input type="hidden" name="aw_filter" value="1">'
-			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="aw-ico aw-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
+			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
 			. '<button type="submit" class="kit-btn">Search</button></form>'
 			. aw_browse_states();

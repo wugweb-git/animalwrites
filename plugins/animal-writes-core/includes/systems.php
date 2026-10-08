@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function aw_i( $name ) {
-	return '<span class="aw-ico aw-ico--' . esc_attr( $name ) . '" aria-hidden="true"></span>';
+	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . '" aria-hidden="true"></span>';
 }
 
 /**
@@ -327,7 +327,7 @@ add_shortcode(
 		if ( ! $rows ) {
 			return '';
 		}
-		$out = '<aside class="aw-trust ' . $cls . '" aria-label="About this information"><ul>';
+		$out = '<aside class="kit-trust ' . $cls . '" aria-label="About this information"><ul>';
 		foreach ( $rows as $r ) {
 			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ) ) ) ) . '</span></li>';
 		}

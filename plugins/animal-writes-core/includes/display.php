@@ -61,7 +61,7 @@ add_action(
 	'wp_head',
 	function () {
 		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$sel  = 'a[href^="http"]:not([href*="//' . esc_attr( $host ) . '"]):not(:has(img)):not(:has(.aw-ico)):not(.wp-block-button__link)';
+		$sel  = 'a[href^="http"]:not([href*="//' . esc_attr( $host ) . '"]):not(:has(img)):not(:has(.kit-ico)):not(.wp-block-button__link)';
 		printf(
 			'<style id="aw-external-links">%1$s::after{content:"\2197" / "";display:inline-block;margin-left:.2em;font-size:.85em;text-decoration:none}.wp-block-button__link[href^="http"]:not([href*="//%2$s"])::after{content:"\2197" / "";margin-left:.35em}</style>' . "\n",
 			$sel, // phpcs:ignore WordPress.Security.EscapeOutput
@@ -118,9 +118,9 @@ add_action(
 		if ( is_admin() ) {
 			return;
 		}
-		echo '<nav class="aw-sticky-help" aria-label="' . esc_attr__( 'Quick help', 'animal-writes-core' ) . '">'
-			. '<a class="aw-sh-primary" href="/directory/">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</a>'
-			. '<a class="aw-sh-secondary" href="/resources/found-an-injured-animal-what-to-do/">' . esc_html__( 'Injured animal?', 'animal-writes-core' ) . '</a>'
+		echo '<nav class="kit-sticky-help" aria-label="' . esc_attr__( 'Quick help', 'animal-writes-core' ) . '">'
+			. '<a class="kit-sh-primary" href="/directory/">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</a>'
+			. '<a class="kit-sh-secondary" href="/resources/found-an-injured-animal-what-to-do/">' . esc_html__( 'Injured animal?', 'animal-writes-core' ) . '</a>'
 			. '</nav>' . "\n";
 	}
 );

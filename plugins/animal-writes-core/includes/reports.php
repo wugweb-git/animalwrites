@@ -48,9 +48,9 @@ add_action(
 function aw_report_form( $listing ) {
 	$form = 'aw_report';
 	if ( isset( $_GET['aw_done'] ) && 'report' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Thanks — we\'ll check it.</p></div>';
+		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Thanks — we\'ll check it.</p></div>';
 	}
-	return aw_form_open( $form, array( 'class' => 'aw-form kit-form aw-report-form', 'id' => 'aw-form-aw_report' ) )
+	return aw_form_open( $form, array( 'class' => 'kit-form aw-report-form', 'id' => 'aw-form-aw_report' ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
 		. aw_field( $form, array( 'name' => 'reason', 'label' => 'What is wrong?', 'type' => 'select', 'required' => true, 'options' => array( '' => 'Choose one' ) + aw_report_reasons(), 'messages' => array( 'required' => 'Choose what is wrong' ) ) )
 		. aw_field( $form, array( 'name' => 'details', 'label' => 'Details', 'type' => 'textarea', 'hint' => 'Tell us the correct details if you know them.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 4 ) ) )

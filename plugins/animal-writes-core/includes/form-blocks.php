@@ -44,7 +44,7 @@ function aw_block_volunteer( $a ) {
 	}
 	$done = true;
 	$form = aw_volunteer_form( aw_volunteer_source() );
-	if ( ! empty( $a['open'] ) || false !== strpos( $form, 'aw-form-done' ) ) {
+	if ( ! empty( $a['open'] ) || false !== strpos( $form, 'kit-form-done' ) ) {
 		return '<div class="aw-volunteer" id="volunteer">' . $form . '</div>';
 	}
 	return kits_disclosure( 'volunteer', 'Register as a volunteer', $form );

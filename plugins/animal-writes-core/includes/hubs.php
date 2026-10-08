@@ -367,18 +367,18 @@ function aw_hub_intro( $type ) {
 
 /** The section band of a hub Page: breadcrumb, H1, intro, count and pictures, then the filters or search. */
 function aw_hub_band( $type ) {
-	$compact = 'aw_listing' === $type ? ' aw-section-band--compact' : '';
+	$compact = 'aw_listing' === $type ? ' kit-section-band--compact' : '';
 	$plain   = in_array( $type, array( 'aw_listing', 'aw_press' ), true ); // no count or pictures in their band
-	return '<!-- wp:group {"tagName":"header","align":"full","className":"aw-section-band' . $compact . '","layout":{"type":"default"}} -->
-<header class="wp-block-group alignfull aw-section-band' . $compact . '"><!-- wp:group {"className":"aw-section-inner","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-section-inner"><!-- wp:animal-writes/breadcrumb /-->
+	return '<!-- wp:group {"tagName":"header","align":"full","className":"kit-section-band' . $compact . '","layout":{"type":"default"}} -->
+<header class="wp-block-group alignfull kit-section-band' . $compact . '"><!-- wp:group {"className":"kit-section-inner","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-section-inner"><!-- wp:animal-writes/breadcrumb /-->
 
-<!-- wp:group {"className":"aw-section-head","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-section-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<!-- wp:group {"className":"kit-section-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-section-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:post-title {"level":1,"className":"wp-block-query-title"} /-->
 
-<!-- wp:paragraph {"className":"aw-section-desc"} -->
-<p class="aw-section-desc">' . esc_html( aw_hub_intro( $type ) ) . '</p>
+<!-- wp:paragraph {"className":"kit-section-desc"} -->
+<p class="kit-section-desc">' . esc_html( aw_hub_intro( $type ) ) . '</p>
 <!-- /wp:paragraph -->
 
 ' . ( $plain ? '' : '<!-- wp:animal-writes/hub-count {"postType":"' . $type . '"} /-->' ) . '</div>
@@ -399,7 +399,7 @@ function aw_hub_item( $type ) {
 	switch ( $type ) {
 		case 'aw_news':
 			return '<!-- wp:group {"tagName":"article","className":"aw-story","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-story"><!-- wp:post-featured-image {"isLink":true,"className":"aw-story-media"} /-->
+<article class="wp-block-group aw-story"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
 
 <!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->
@@ -412,8 +412,8 @@ function aw_hub_item( $type ) {
 <!-- /wp:group --></article>
 <!-- /wp:group -->';
 		case 'aw_legal':
-			return '<!-- wp:group {"tagName":"article","className":"aw-case","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-case"><!-- wp:animal-writes/doc-date /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-case","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-case"><!-- wp:animal-writes/doc-date /-->
 
 <!-- wp:group {"className":"aw-case-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-case-body"><!-- wp:group {"className":"aw-case-tags kit-tags","layout":{"type":"default"}} -->
@@ -430,12 +430,12 @@ function aw_hub_item( $type ) {
 <!-- /wp:group -->
 
 <!-- wp:html -->
-<span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span>
+<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span>
 <!-- /wp:html --></article>
 <!-- /wp:group -->';
 		case 'aw_guide':
-			return '<!-- wp:group {"tagName":"article","className":"aw-task","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-task","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
 
 <!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-task-body"><!-- wp:animal-writes/task-icon /-->
@@ -469,7 +469,7 @@ function aw_hub_item( $type ) {
 <!-- /wp:group -->';
 		case 'aw_campaign':
 			return '<!-- wp:group {"tagName":"article","className":"aw-story aw-story--card","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-story aw-story--card"><!-- wp:post-featured-image {"isLink":true,"className":"aw-story-media"} /-->
+<article class="wp-block-group aw-story aw-story--card"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
 
 <!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-story-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-story-title"} /-->
@@ -484,8 +484,8 @@ function aw_hub_item( $type ) {
 <!-- wp:group {"className":"aw-org-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-org-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-org-name"} /-->
 
-<!-- wp:paragraph {"className":"aw-org-meta aw-ico--directory","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"area"}}}}} -->
-<p class="aw-org-meta aw-ico--directory"></p>
+<!-- wp:paragraph {"className":"aw-org-meta kit-ico--directory","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"area"}}}}} -->
+<p class="aw-org-meta kit-ico--directory"></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:animal-writes/badges /-->
@@ -524,7 +524,7 @@ function aw_hub_empty( $type ) {
 	);
 	return $t[ $type ] ? '<!-- wp:query-no-results -->
 <!-- wp:html -->
-<div class="aw-empty">' . $t[ $type ] . '</div>
+<div class="kit-empty">' . $t[ $type ] . '</div>
 <!-- /wp:html -->
 <!-- /wp:query-no-results -->' : '';
 }
@@ -543,7 +543,7 @@ function aw_hub_list( $type ) {
 ' : '' );
 	$pager = in_array( $type, array( 'aw_press', 'aw_campaign' ), true ) ? '' : '
 
-<!-- wp:query-pagination {"className":"aw-pager","layout":{"type":"flex","justifyContent":"center"}} -->
+<!-- wp:query-pagination {"className":"kit-pager","layout":{"type":"flex","justifyContent":"center"}} -->
 <!-- wp:query-pagination-previous {"label":"Previous"} /-->
 
 <!-- wp:query-pagination-numbers /-->
@@ -563,7 +563,7 @@ function aw_hub_list( $type ) {
 function aw_hub_after( $type ) {
 	if ( 'aw_guide' === $type ) {
 		return '<!-- wp:html -->
-<div class="aw-also"><h2>Also useful</h2><ul class="aw-tiles"><li><a class="aw-tile" href="#helplines"><span class="aw-ico aw-ico--helpline" aria-hidden="true"></span><strong>Helplines</strong><span class="aw-tile-desc">National helplines: 112, 1962 and AWBI.</span><span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="aw-tile" href="/directory/"><span class="aw-ico aw-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span class="aw-tile-desc">Shelters, vets and rescuers near you.</span><span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="aw-tile" href="/library/?kind=act"><span class="aw-ico aw-ico--research" aria-hidden="true"></span><strong>The law in full</strong><span class="aw-tile-desc">Acts, Rules and judgments, from the official source.</span><span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
+<div class="aw-also"><h2>Also useful</h2><ul class="kit-tiles"><li><a class="kit-tile" href="#helplines"><span class="kit-ico kit-ico--helpline" aria-hidden="true"></span><strong>Helplines</strong><span class="kit-tile-desc">National helplines: 112, 1962 and AWBI.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/directory/"><span class="kit-ico kit-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span class="kit-tile-desc">Shelters, vets and rescuers near you.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/library/?kind=act"><span class="kit-ico kit-ico--research" aria-hidden="true"></span><strong>The law in full</strong><span class="kit-tile-desc">Acts, Rules and judgments, from the official source.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
 <!-- /wp:html -->';
 	}
 	if ( 'aw_campaign' === $type ) {

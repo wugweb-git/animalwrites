@@ -442,7 +442,7 @@ function aw_place_fields( $form, $state_slug = '', $district_slug = '', $require
 		$opts .= '</optgroup>';
 	}
 	$err   = $state['errors']['district'] ?? '';
-	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">District <span class="aw-optional kit-optional">(optional)</span></label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="district" autocomplete="address-level2" data-none="Choose a state first" data-all="Choose a district" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $st_obj ? '' : ' disabled' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
+	$html .= '<div class="kit-field kit-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">District <span class="kit-optional">(optional)</span></label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="district" autocomplete="address-level2" data-none="Choose a state first" data-all="Choose a district" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $st_obj ? '' : ' disabled' ) . '>' . $opts . '</select></div><span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
 	return $html;
 }
 
