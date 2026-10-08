@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_NL_DB_VERSION = '1';
+const AW_NL_DB_VERSION = '2'; // 2: source holds the page a sign-up came from
 const AW_NL_CONSENT    = 'v2-newsletter-1';
 
 function aw_nl_table() {
@@ -36,7 +36,7 @@ add_action(
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			email varchar(190) NOT NULL,
 			name varchar(190) NOT NULL DEFAULT '',
-			source varchar(20) NOT NULL,
+			source varchar(120) NOT NULL,
 			status varchar(20) NOT NULL,
 			token char(32) NOT NULL,
 			consent_text_version varchar(40) NOT NULL DEFAULT '',
@@ -109,11 +109,11 @@ function aw_newsletter_form() {
 		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html( $msgs[ $done ][0] ) . '</p>' . ( $msgs[ $done ][1] ? '<p>' . esc_html( $msgs[ $done ][1] ) . '</p>' : '' ) . '</div>';
 	}
 	$form  = 'aw_newsletter';
-	$html  = aw_form_open( $form, array( 'class' => 'aw-form aw-newsletter-form', 'data-altcha' => 'invisible' ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ) ) );
+	$html  = aw_form_open( $form, array( 'class' => 'aw-form kit-form kit-form--on-dark aw-newsletter-form', 'data-altcha' => 'invisible' ) );
+	$html .= kits_dict_field( $form, 'email' );
+	$html .= kits_dict_field( $form, 'name' );
 	$html .= '<div class="aw-nl-submit"><button type="submit" class="kit-btn">Subscribe</button></div>';
-	$html .= aw_field( $form, array( 'name' => 'consent', 'label' => 'Email me Animal Writes updates. I can unsubscribe at any time.', 'type' => 'checkbox', 'required' => true, 'messages' => array( 'required' => 'Tick the box to subscribe' ) ) );
+	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'Email me Animal Writes updates. I can unsubscribe at any time.', 'messages' => array( 'required' => 'Tick the box to subscribe' ) ) );
 	$html .= '</form>';
 	return $html;
 }
@@ -143,9 +143,9 @@ function aw_newsletter_submit() {
 		aw_form_count( $rl );
 		aw_form_success( add_query_arg( array( 'aw_done' => 'nl_already', 'to' => $v['email'] ), $back ) . '#newsletter', 'You\'re already subscribed', sprintf( 'Updates go to %s.', $v['email'] ) );
 	}
-	$row = aw_nl_add( $v['email'], $v['name'], 'site', 'pending' );
+	$row = aw_nl_add( $v['email'], $v['name'], 'site:' . kits_submitted_source(), 'pending' ); // where they signed up (S5.8)
 	if ( ! $row ) {
-		aw_form_fail( $form, array(), $v, $back, 'newsletter', 'Something went wrong. Your details are still here — try again.' );
+		aw_form_fail( $form, array(), $v, $back, 'newsletter', aw_form_generic_error( $form ) );
 	}
 	if ( 'pending' === $row['status'] ) { // double opt-in: confirm by email
 		wp_mail(

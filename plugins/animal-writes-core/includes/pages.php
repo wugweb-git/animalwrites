@@ -110,16 +110,15 @@ function aw_contact_form() {
 		$opts .= '<option value="' . esc_attr( $k ) . '"' . selected( $pick, $k, false ) . ( isset( AW_CONTACT_PLACEHOLDER[ $k ] ) ? ' data-placeholder="' . esc_attr( AW_CONTACT_PLACEHOLDER[ $k ] ) . '"' : '' ) . '>' . esc_html( $label ) . '</option>';
 	}
 	$err   = $state['errors']['about'] ?? '';
-	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">Reason</label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="about" required data-msg-required="Choose what this is about" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $err ? ' aria-invalid="true"' : '' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Name', 'required' => true, 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80 ), 'messages' => array( 'required' => 'Enter your name' ) ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
-	$html .= aw_field( $form, array( 'name' => 'org', 'label' => 'Organisation', 'attrs' => array( 'autocomplete' => 'organization', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'attrs' => array( 'maxlength' => 3000, 'rows' => 6, 'placeholder' => AW_CONTACT_PLACEHOLDER[ $pick ] ?? '' ), 'messages' => array( 'required' => 'Write your message' ) ) );
-	$html .= '<p><button type="submit" class="kit-btn">Send message</button></p></form>';
+	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">What\'s this about?</label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="about" required data-msg-required="Choose what this is about" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $err ? ' aria-invalid="true"' : '' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
+	$html .= kits_dict_field( $form, 'name', array( 'required' => true ) );
+	$html .= kits_dict_field( $form, 'email' );
+	$html .= kits_dict_field( $form, 'organisation', array( 'name' => 'org' ) );
+	$html .= kits_dict_field( $form, 'message', array( 'required' => true, 'attrs' => array( 'placeholder' => AW_CONTACT_PLACEHOLDER[ $pick ] ?? '' ) ) );
+	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">Send message</button></div></form>';
 	return $html;
 }
 add_shortcode( 'aw_contact_form', 'aw_contact_form' );
-add_filter( 'kits_form_generic_error', fn( $text, $form ) => 'aw_contact' === $form ? 'Message not sent. Your text is still here — try again.' : $text, 10, 2 );
 
 function aw_contact_submit() {
 	$form = 'aw_contact';
@@ -133,12 +132,8 @@ function aw_contact_submit() {
 		'org'     => trim( sanitize_text_field( wp_unslash( $_POST['org'] ?? '' ) ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ),
 	);
-	$errors = aw_form_validate(
-		array( 'about' => array( 'required' ), 'name' => array( 'required', 'max:80' ), 'email' => array( 'required', 'email' ), 'org' => array( 'max:160' ), 'message' => array( 'required', 'max:3000' ) ),
-		$v,
-		array( 'about' => 'Reason', 'name' => 'Name', 'email' => 'Email', 'org' => 'Organisation', 'message' => 'Message' ),
-		array( 'about' => array( 'required' => 'Choose what this is about' ), 'name' => array( 'required' => 'Enter your name' ), 'message' => array( 'required' => 'Write your message' ) )
-	);
+	list( $rules, $msgs ) = kits_dict_rules( array( 'about' => 'reason', 'name' => 'name', 'email' => 'email', 'org' => 'organisation', 'message' => 'message' ), array( 'about', 'name', 'email', 'message' ) );
+	$errors               = aw_form_validate( $rules, $v, array( 'about' => 'What\'s this about?', 'name' => 'Your name', 'email' => 'Email', 'org' => 'Organisation', 'message' => 'Message' ), $msgs );
 	if ( $v['about'] && ! isset( AW_CONTACT_ABOUT[ $v['about'] ] ) ) {
 		$errors['about'] = 'Choose what this is about';
 	}
@@ -148,11 +143,12 @@ function aw_contact_submit() {
 	$label = AW_CONTACT_ABOUT[ $v['about'] ];
 	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'], 'post_content' => $v['message'] ) );
 	if ( is_wp_error( $id ) || ! $id ) {
-		aw_form_fail( $form, array(), $v, $back, 'write', 'Message not sent. Your text is still here — try again.' );
+		aw_form_fail( $form, array(), $v, $back, 'write', aw_form_generic_error( $form ) );
 	}
 	foreach ( array( 'about', 'name', 'email', 'org' ) as $k ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
+	update_post_meta( $id, 'aw_m_source', kits_submitted_source() ); // the page it was sent from (S5.8)
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
 	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Message sent.', sprintf( 'We\'ll reply to %s.', $v['email'] ), array( 'again' => 'Send another' ) );
@@ -160,7 +156,7 @@ function aw_contact_submit() {
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
 
-add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'About: sender', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'date' => 'Received' ) );
+add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'About: sender', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_source' => 'Sent from', 'date' => 'Received' ) );
 add_action(
 	'manage_aw_message_posts_custom_column',
 	function ( $col, $id ) {

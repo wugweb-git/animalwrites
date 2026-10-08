@@ -251,3 +251,53 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 	.kit-btn:active { transform: none; }
 	.kit-btn.is-loading::before, .kit-btn[aria-busy=true]::before { animation: none; opacity: var(--opacity-60); }
 }
+
+/* ---------- 16. Form standard (S5.2): one look for every form, from tokens ---------- */
+.kit-field > label, .kit-field > .kit-field-label, .kit-check-group > legend { font-size: var(--fluid-body-sm); font-weight: 500; color: var(--neutral-9); }
+.kit-field .kit-optional { font-weight: 400; color: var(--neutral-5); }
+.kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
+	min-height: 44px; padding: 0 var(--s-3); border-radius: var(--r-2);
+	background-color: var(--neutral-0); border: 1px solid var(--neutral-3); color: var(--neutral-10);
+}
+.kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]), .kit-field select { height: 44px; }
+.kit-field textarea { padding-block: var(--s-3); min-height: calc(5 * 1.5em + 2 * var(--s-3)); }
+.kit-field :is(input, textarea)::placeholder { color: var(--neutral-4); opacity: 1; }
+.kit-field-control > .kit-field-icon { --kit-ico-size: 18px; width: 18px; height: 18px; color: var(--neutral-5); }
+@media (hover: hover) { .kit-field :is(input, select, textarea):hover:not([disabled]):not([readonly]) { border-color: var(--neutral-5); box-shadow: none; } }
+.kit-field :is(input, select, textarea):focus, .kit-field :is(input, select, textarea):focus-visible { outline: none; border-color: var(--color-blue); box-shadow: 0 0 0 2px var(--color-blue); } /* the ring is never removed */
+.kit-field :is(input, select, textarea)[aria-invalid=true] { border-color: var(--color-peach); padding-right: calc(var(--s-3) + 18px + var(--s-2));
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
+	background-repeat: no-repeat; background-position: right var(--s-3) center; background-size: 18px; }
+.kit-field select[aria-invalid=true] { background-position: right calc(var(--s-3) + 1.25rem) center, right var(--s-3) center; }
+.kit-field :is(input, select, textarea).is-valid { border-color: var(--color-green); }
+.kit-field :is(input, select, textarea)[disabled] { opacity: var(--opacity-disabled); }
+.kit-field-hint { font-size: var(--fluid-caption); color: var(--neutral-5); }
+.kit-field-message:not(:empty)::before { content: none; } /* the alert icon sits in the field */
+.kit-check-group { border: 0; padding: 0; margin: 0 0 var(--s-4); min-width: 0; }
+.kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
+.kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
+/* Button: primary yellow, dark text, 44px, radius --r-2; loading = spinner + label */
+:is(.kit-form, .aw-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; border-radius: var(--r-2); }
+.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--color-yellow); border-color: var(--color-yellow); color: var(--neutral-10); }
+/* Layout: one column under 640px, at most two; the button bottom-left */
+.kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kit-form-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: flex-start; margin-top: var(--s-2); }
+/* On a dark band (newsletter) */
+.kit-form--on-dark .kit-field > label, .kit-form--on-dark .kit-checkbox, .kit-form--on-dark .kit-check-group > legend { color: var(--neutral-0); }
+.kit-form--on-dark .kit-field .kit-optional, .kit-form--on-dark .kit-field-hint { color: var(--neutral-3); }
+.kit-form--on-dark .kit-field-message { color: var(--color-peach); }
+/* Expandable form (S5.6) */
+.kit-disclosure { margin: 0; }
+.kit-disclosure > summary { list-style: none; display: inline-flex; width: auto; cursor: pointer; }
+.kit-disclosure > summary::-webkit-details-marker { display: none; }
+.kit-disclosure .kit-disclosure-close, .kit-disclosure[open] .kit-disclosure-open { display: none; }
+.kit-disclosure[open] .kit-disclosure-close { display: inline; }
+.kit-disclosure-body { margin-top: var(--s-4); }
+/* Multi-step form (S5.7): with JavaScript one step shows at a time; without, all steps show */
+.kit-step { border: 0; padding: 0; margin: 0 0 var(--s-4); min-width: 0; }
+.kit-step > legend { padding: 0; margin: 0 0 var(--s-3); font-size: var(--fluid-body-md); font-weight: 600; color: var(--neutral-10); }
+.kit-step-count { display: block; font-size: var(--fluid-caption); font-weight: 500; color: var(--neutral-5); }
+.kit-step-nav { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-2); }
+.kit-steps:not(.is-stepped) .kit-step-nav [data-step-next], .kit-steps:not(.is-stepped) .kit-step-nav [data-step-back] { display: none; }
+.kit-counter { margin-top: var(--s-1); }

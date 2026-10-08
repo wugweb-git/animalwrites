@@ -46,7 +46,7 @@ function aw_breadcrumbs() {
 		$type = get_post_type( $id );
 		$obj  = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
-		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
+		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && aw_current_place() ) {
 		$city  = aw_current_place();
 		$trail = array_merge( array( $dir ), $place( $city ) );
@@ -64,7 +64,7 @@ function aw_breadcrumbs() {
 		foreach ( array_reverse( get_post_ancestors( $id ) ) as $a ) {
 			$trail[] = array( get_the_title( $a ), get_permalink( $a ) );
 		}
-		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
+		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 	}
 	// Every trail starts at Home (Phase 11 B.15); the front page and 404 have none.
 	$trail = $trail ? array_merge( array( array( 'Home', home_url( '/' ) ) ), $trail ) : array();

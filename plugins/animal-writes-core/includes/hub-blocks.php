@@ -43,6 +43,8 @@ function aw_hub_blocks() {
 		'press-media'   => array( 'Press thumbnail', 'aw_block_press_media', array() ),
 		'press-meta'    => array( 'Press date and format', 'aw_block_press_meta', array() ),
 		'posted-by'     => array( 'Posted by', 'aw_block_posted_by', array() ),
+		'volunteer'     => array( 'Volunteer form', 'aw_block_volunteer', array( 'open' => array( 'type' => 'boolean', 'default' => false ) ) ),
+		'listing-help'  => array( 'Is this your organisation?', 'aw_block_listing_help', array() ),
 	);
 }
 

@@ -53,14 +53,6 @@
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 
-<!-- wp:heading {"anchor":"volunteer"} -->
-<h2 class="wp-block-heading" id="volunteer">Lead it in your city</h2>
-<!-- /wp:heading -->
-
-<!-- wp:shortcode -->
-[aw_volunteer_form]
-<!-- /wp:shortcode -->
-
 <!-- wp:heading -->
 <h2 class="wp-block-heading">Questions</h2>
 <!-- /wp:heading -->

@@ -706,3 +706,26 @@ body { background: var(--aw-color-canvas); }
 .aw-hub-list .wp-block-post-template .wp-block-post-excerpt__excerpt { display: block; -webkit-line-clamp: unset; overflow: visible; }
 .aw-hub-list .wp-block-post-template :is(.aw-case-sum, .aw-task-sum) { font-size: inherit; line-height: inherit; }
 .aw-hub-list .aw-org-contact { margin-top: var(--aw-space-2); }
+
+/* Volunteer banner (S6.2): photo left (~45%) with text and the form on the right; on phones a 120px photo strip on top. */
+.aw-vol-banner { display: grid; grid-template-columns: 1fr; overflow: hidden; border-radius: var(--r-4); background: var(--kit-color-surface); margin-block: var(--s-12); }
+.aw-vol-banner-photo { margin: 0 !important; }
+.aw-vol-banner-photo img { display: block; width: 100%; height: 120px; object-fit: cover; }
+.aw-vol-banner-body { padding: var(--s-6); }
+.aw-vol-banner-body > * { margin-block: 0 var(--s-4); }
+.aw-vol-banner-title { font-size: var(--kit-type-h2); margin-top: 0; }
+@media (min-width: 640px) {
+	.aw-vol-banner { grid-template-columns: 45fr 55fr; align-items: stretch; }
+	.aw-vol-banner-photo img { height: 100%; min-height: 320px; }
+	.aw-vol-banner-body { padding: var(--s-8); }
+}
+.aw-vol-banner .kit-disclosure[open] > summary { margin-bottom: 0; }
+
+/* Directory profile: "Is this your organisation?" (S7.1) */
+.aw-listing-help { margin-block: var(--s-10); padding: var(--s-6); border: 1px solid var(--kit-color-line); border-radius: var(--r-4); background: var(--kit-color-raised); }
+.aw-listing-help > h2 { font-size: var(--kit-type-h3); margin: 0 0 var(--s-2); }
+.aw-listing-help > p { margin: 0 0 var(--s-4); color: var(--kit-color-muted); }
+.aw-listing-help-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+.aw-listing-help-actions > .kit-disclosure { order: 1; }
+.aw-listing-help-actions > .kit-disclosure[open] { order: 2; flex-basis: 100%; } /* buttons stay in one row; the open form below */
+.aw-listing-help-actions > .kit-disclosure[open] > summary { order: -1; }

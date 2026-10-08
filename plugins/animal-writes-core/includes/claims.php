@@ -58,66 +58,41 @@ add_action(
 );
 
 /**
- * The claim panel for the current listing.
+ * The claim form (S7.2): step 1 "About you", step 2 "What should change" (all optional; empty keeps what is shown).
  *
+ * @param WP_Post $listing Listing.
  * @return string
  */
-function aw_claim_box() {
-	$listing = get_post();
-	if ( ! $listing || 'aw_listing' !== $listing->post_type ) {
-		return '';
-	}
-	$form     = 'aw_claim';
-	$state    = aw_form_state( $form );
-	$verified = (bool) get_post_meta( $listing->ID, 'aw_verified', true );
-
+function aw_claim_form( $listing ) {
+	$form = 'aw_claim';
 	if ( isset( $_GET['aw_done'] ) && 'claim' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<section class="aw-claim" id="claim"><div class="aw-form-done" role="status" tabindex="-1"><h2>Request received</h2>'
-			. '<p>We will check the details with you before anything on this page changes.</p></div></section>';
+		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request sent.</p>' . ( $to ? '<p>' . esc_html( sprintf( 'We\'ll check it and email you at %s.', $to ) ) . '</p>' : '' ) . '</div>';
 	}
-
-	$open  = $state['errors'] || $state['notice'];
-	$intro = $verified
-		? 'Details out of date? Send the correct ones and we will update this page after checking.'
-		: 'This listing comes from public records and has not been confirmed. If you run or work here, confirm the details and we will mark it verified.';
-
-	$html  = '<section class="aw-claim" id="claim" aria-labelledby="claim-title">';
-	$html .= '<details' . ( $open ? ' open' : '' ) . '><summary><span id="claim-title">' . esc_html( $verified ? 'Update this listing' : 'Is this your organisation?' ) . '</span></summary>';
-	$html .= '<p>' . esc_html( $intro ) . '</p>';
-	$html .= aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'aw-form aw-claim-form' ) );
-	$html .= '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">';
-
-	$html .= '<fieldset><legend>About you</legend>';
-	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'required' => true, 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ), 'messages' => array( 'required' => 'Enter your name' ) ) );
-	$html .= aw_field( $form, array( 'name' => 'role', 'label' => 'Your role here', 'type' => 'select', 'required' => true, 'options' => AW_CLAIM_ROLES ) );
-	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Your email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ), 'hint' => 'We use this only to check this request. It is not shown on the page.', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 160 ) ) );
-	$html .= aw_field( $form, array( 'name' => 'phone', 'label' => 'Your phone', 'type' => 'tel', 'icon' => 'phone', 'attrs' => array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 20, 'pattern' => '\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' ) ) );
-	$html .= '</fieldset>';
-
-	$html .= '<fieldset><legend>Correct details</legend><p class="aw-field-hint">Leave a field empty to keep what is shown now.</p>';
-	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
-		$current = (string) get_post_meta( $listing->ID, $key, true );
-		$type    = array( 'phone' => 'tel', 'email' => 'email', 'url' => 'url' )[ $def[1] ] ?? ( 'aw_services' === $key ? 'textarea' : 'text' );
-		$attrs   = array( 'placeholder' => $current ? $current : 'Not listed' );
-		if ( 'phone' === $def[1] ) {
-			$attrs += array( 'inputmode' => 'tel', 'pattern' => '\+?[0-9 ]{8,15}', 'data-error' => 'Enter 8 to 15 digits, for example +91 98765 43210.' );
-		}
-		if ( str_starts_with( $def[1], 'max:' ) ) {
-			$attrs['maxlength'] = (int) substr( $def[1], 4 );
-		}
-		$html .= aw_field( $form, array( 'name' => $key, 'label' => $def[0], 'type' => $type, 'attrs' => $attrs ) );
-	}
-	$html .= aw_field( $form, array( 'name' => 'logo', 'label' => 'Logo', 'type' => 'file', 'hint' => 'PNG, JPG or WebP, up to 2 MB.', 'attrs' => array( 'accept' => 'image/png,image/jpeg,image/webp', 'data-max-bytes' => AW_CLAIM_LOGO_BYTES ) ) );
-	$html .= aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000 ) ) );
-	$html .= '</fieldset>';
-	if ( ! get_post_meta( $listing->ID, 'aw_featured', true ) ) {
-		$html .= aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing at the top of the directory (free for now, ' . AW_FEATURE_DAYS . ' days)', 'type' => 'checkbox' ) );
-	}
-
-	$html .= '<p><button type="submit" class="kit-btn">Send for review</button></p></form></details></section>';
-	return $html;
+	$about  = kits_dict_field( $form, 'name', array( 'required' => true ) )
+		. kits_dict_field( $form, 'role', array( 'options' => AW_CLAIM_ROLES ) )
+		. kits_dict_field( $form, 'email', array( 'hint' => 'We use this only to check this request. It is not shown on the page.' ) )
+		. kits_dict_field( $form, 'phone' );
+	$cur    = fn( $k ) => (string) get_post_meta( $listing->ID, $k, true );
+	$keep   = fn( $k ) => array( 'placeholder' => '' !== $cur( $k ) ? $cur( $k ) : 'Not listed' );
+	$change = '<p class="kit-field-hint">Leave a field empty to keep what is shown now.</p>'
+		. kits_dict_field( $form, 'phone', array( 'name' => 'aw_phone', 'attrs' => $keep( 'aw_phone' ) ) )
+		. kits_dict_field( $form, 'whatsapp', array( 'name' => 'aw_whatsapp', 'attrs' => $keep( 'aw_whatsapp' ) ) )
+		. kits_dict_field( $form, 'email', array( 'name' => 'aw_email', 'label' => 'Public email', 'required' => false, 'attrs' => $keep( 'aw_email' ) ) )
+		. kits_dict_field( $form, 'website', array( 'name' => 'aw_website', 'attrs' => $keep( 'aw_website' ) ) )
+		. kits_dict_field( $form, 'area', array( 'name' => 'aw_area', 'attrs' => $keep( 'aw_area' ) ) )
+		. aw_field( $form, array( 'name' => 'aw_services', 'label' => 'Services (separate with commas)', 'type' => 'textarea', 'attrs' => array( 'maxlength' => 300, 'rows' => 3 ) ) )
+		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
+		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
+		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) );
+	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'aw-form kit-form aw-claim-form', 'id' => 'aw-form-aw_claim' ) )
+		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
+		. kits_form_steps( array( array( 'About you', $about ), array( 'What should change', $change ) ), 'Send for review' )
+		. '</form>';
 }
-add_shortcode( 'aw_claim_box', 'aw_claim_box' );
+
+/** Back-compat: [aw_claim_box] prints the listing card's claim form. */
+add_shortcode( 'aw_claim_box', fn() => get_post() ? aw_claim_form( get_post() ) : '' );
 
 /**
  * Handle a claim.
@@ -136,7 +111,7 @@ function aw_claim_submit() {
 		'name'  => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
 		'role'  => sanitize_key( wp_unslash( $_POST['role'] ?? '' ) ),
 		'email' => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
-		'phone' => trim( preg_replace( '/[^0-9+ ]/', '', (string) wp_unslash( $_POST['phone'] ?? '' ) ) ),
+		'phone' => trim( sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ) ),
 		'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
 		'feature' => empty( $_POST['feature'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 	);
@@ -144,16 +119,16 @@ function aw_claim_submit() {
 	$labels = array( 'name' => 'Your name', 'role' => 'Your role here', 'email' => 'Your email', 'phone' => 'Your phone', 'notes' => 'Anything else' );
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		$raw       = (string) wp_unslash( $_POST[ $key ] ?? '' );
-		$v[ $key ] = 'aw_website' === $key ? esc_url_raw( trim( $raw ) ) : ( 'phone' === $def[1] ? trim( preg_replace( '/[^0-9+ ]/', '', $raw ) ) : sanitize_text_field( $raw ) );
+		$v[ $key ] = 'aw_website' === $key ? esc_url_raw( kits_clean_url( $raw ) ) : ( 'phone' === $def[1] ? trim( sanitize_text_field( $raw ) ) : sanitize_text_field( $raw ) );
 		if ( 'aw_website' === $key && '' !== trim( $raw ) && '' === $v[ $key ] ) {
 			$v[ $key ] = trim( $raw ); // Keep what they typed so validation can say what is wrong.
 		}
 		$rules[ $key ]  = array( $def[1] );
 		$labels[ $key ] = $def[0];
 	}
-	$errors = aw_form_validate( $rules, $v, $labels, array( 'name' => array( 'required' => 'Enter your name' ) ) );
+	$errors = aw_form_validate( $rules, $v, $labels, array( 'name' => array( 'required' => 'Enter your name' ), 'role' => array( 'required' => 'Choose your role' ) ) );
 	if ( $v['role'] && ! isset( AW_CLAIM_ROLES[ $v['role'] ] ) ) {
-		$errors['role'] = 'Your role here: choose one of the options.';
+		$errors['role'] = 'Choose your role';
 	}
 
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -162,9 +137,9 @@ function aw_claim_submit() {
 		$ok = UPLOAD_ERR_OK === (int) $logo['error'] && is_uploaded_file( $logo['tmp_name'] );
 		$ft = $ok ? wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) ) : array();
 		if ( ! $ok || empty( $ft['type'] ) ) {
-			$errors['logo'] = 'Logo: use a PNG, JPG or WebP image.';
+			$errors['logo'] = 'Use a PNG, JPG or WebP under 2 MB.';
 		} elseif ( (int) $logo['size'] > AW_CLAIM_LOGO_BYTES ) {
-			$errors['logo'] = 'Logo: the file is larger than 2 MB.';
+			$errors['logo'] = 'Use a PNG, JPG or WebP under 2 MB.';
 		}
 	}
 
@@ -192,7 +167,7 @@ function aw_claim_submit() {
 		true
 	);
 	if ( is_wp_error( $id ) ) {
-		aw_form_fail( $form, array(), $v, $back, 'claim', 'The request could not be saved. Please try again.' );
+		aw_form_fail( $form, array(), $v, $back, 'claim', aw_form_generic_error( $form ) );
 	}
 	update_post_meta( $id, 'aw_c_listing', $listing->ID );
 	update_post_meta( $id, 'aw_c_status', 'pending' );
@@ -201,10 +176,16 @@ function aw_claim_submit() {
 	}
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
 	update_post_meta( $id, 'aw_c_logo', $file );
+	update_post_meta( $id, 'aw_c_source', kits_submitted_source() ); // the page it came from (S5.8)
+	foreach ( array( 'aw_phone', 'aw_whatsapp' ) as $pk ) { // phones as 10 digits
+		if ( isset( $proposed[ $pk ] ) && kits_clean_phone( $proposed[ $pk ] ) ) {
+			$proposed[ $pk ] = kits_clean_phone( $proposed[ $pk ] );
+		}
+	}
+	update_post_meta( $id, 'aw_c_proposed', $proposed );
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
-	wp_safe_redirect( $done );
-	exit;
+	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Request sent.', sprintf( 'We\'ll check it and email you at %s.', $v['email'] ) );
 }
 add_action( 'admin_post_nopriv_aw_claim', 'aw_claim_submit' );
 add_action( 'admin_post_aw_claim', 'aw_claim_submit' );
