@@ -75,17 +75,7 @@ function aw_register_content_types() {
 		)
 	);
 
-	register_taxonomy(
-		'aw_city',
-		array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw_news' ),
-		array(
-			'labels'            => array( 'name' => 'Locations', 'singular_name' => 'Location' ),
-			'hierarchical'      => true, // State > City.
-			'show_in_rest'      => true,
-			'show_admin_column' => true,
-			'rewrite'           => array( 'slug' => 'location', 'with_front' => false, 'hierarchical' => false ),
-		)
-	);
+	// Places are not a WordPress list: states and districts come from the LGD file (places.php).
 
 	register_taxonomy(
 		'aw_listing_type',
@@ -103,11 +93,13 @@ function aw_register_content_types() {
 		'aw_source_type',
 		array( 'aw_legal' ),
 		array(
-			'labels'            => array( 'name' => 'Source types', 'singular_name' => 'Source type' ),
-			'hierarchical'      => true, // e.g. Supreme Court, High Court, AWBI, Gazette.
-			'show_in_rest'      => true,
-			'show_admin_column' => true,
-			'rewrite'           => array( 'slug' => 'source', 'with_front' => false ),
+			'labels'             => array( 'name' => 'Issuers', 'singular_name' => 'Issuer' ),
+			'hierarchical'       => true, // e.g. Supreme Court, High Court, AWBI, Gazette. Courts are issuers too.
+			'public'             => true,
+			'publicly_queryable' => false, // a label on Library items ("Issued by …"), not a filter or a page
+			'rewrite'            => false,
+			'show_in_rest'       => true,
+			'show_admin_column'  => true,
 		)
 	);
 

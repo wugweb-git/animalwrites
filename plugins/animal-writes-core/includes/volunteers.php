@@ -59,7 +59,7 @@ function aw_volunteer_form() {
 	}
 	$form   = 'aw_volunteer';
 	$states = array( '' => 'Choose a state' );
-	foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
+	foreach ( aw_place_states() as $t ) {
 		$states[ $t->slug ] = $t->name;
 	}
 	$state  = aw_form_state( $form );
@@ -105,7 +105,8 @@ function aw_volunteer_submit() {
 		array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone or WhatsApp', 'state' => 'State or union territory', 'city' => 'City or district', 'consent' => 'Agreement' ),
 		array( 'name' => array( 'required' => 'Enter your name' ) )
 	);
-	$term = $v['state'] ? get_term_by( 'slug', $v['state'], 'aw_city' ) : null;
+	$term = $v['state'] ? aw_place_by_slug( $v['state'] ) : null;
+	$term = $term && 'state' === $term->kind ? $term : null;
 	if ( $v['state'] && ! $term ) {
 		$errors['state'] = 'State or union territory: choose one from the list.';
 	}

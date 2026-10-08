@@ -47,8 +47,8 @@ add_shortcode(
 		$type  = (string) get_query_var( 'post_type' );
 		$type  = $type ? $type : ( is_tax() ? (string) ( get_taxonomy( get_queried_object()->taxonomy )->object_type[0] ?? '' ) : '' );
 		$title = is_tax() ? single_term_title( '', false ) : post_type_archive_title( '', false );
-		if ( 'aw_listing' === $type && ( get_query_var( 'aw_city' ) || get_query_var( 'aw_listing_type' ) ) ) {
-			$city  = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
+		if ( 'aw_listing' === $type && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_listing_type' ) ) ) {
+			$city  = aw_current_place();
 			$tname = function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '';
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
@@ -120,10 +120,10 @@ add_shortcode(
 	function () {
 		$stats = get_transient( 'aw_stats' );
 		if ( false === $stats ) {
-			$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'fields' => 'ids' ) );
+			$states = array_filter( aw_place_states(), 'aw_place_count' );
 			$stats  = array(
 				array( (int) wp_count_posts( 'aw_listing' )->publish, 'organisations listed', '/directory/' ),
-				array( is_array( $states ) ? count( $states ) : 0, 'states and UTs covered', '/directory/' ),
+				array( count( $states ), 'states and UTs covered', '/directory/' ),
 				array( (int) wp_count_posts( 'aw_legal' )->publish, 'official documents and templates', '/library/' ),
 				array( (int) wp_count_posts( 'aw_guide' )->publish, 'guides and resources', '/resources/' ),
 			);
@@ -144,7 +144,7 @@ add_shortcode(
 add_shortcode(
 	'aw_find_help',
 	function () {
-		$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
+		$states = aw_place_states();
 		$total  = (int) wp_count_posts( 'aw_listing' )->publish;
 		$opts   = '<option value="">All states and UTs</option>';
 		$with   = 0;

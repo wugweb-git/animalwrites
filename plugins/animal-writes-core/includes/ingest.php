@@ -167,14 +167,22 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
-		foreach ( array( 'kind' => 'aw_legal_kind', 'court' => 'aw_court' ) as $param => $tax ) {
-			if ( $req->get_param( $param ) ) {
-				aw_assign_existing_terms( $post_id, array( $req->get_param( $param ) ), $tax, $ignored );
-			}
+		if ( $req->get_param( 'kind' ) ) {
+			aw_assign_existing_terms( $post_id, array( $req->get_param( 'kind' ) ), 'aw_legal_kind', $ignored );
+		}
+		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
+		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) ) {
+			aw_assign_existing_terms( $post_id, array( $req->get_param( 'court' ) ), 'aw_source_type', $ignored );
 		}
 	}
+	// Place: names are matched to the LGD file (places.php); an unknown name is ignored, never added.
 	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
-		aw_assign_existing_terms( $post_id, array( $req->get_param( 'city' ) ), 'aw_city', $ignored );
+		$places = aw_places_from_text( (string) $req->get_param( 'city' ) );
+		if ( $places ) {
+			aw_set_item_places( $post_id, $places );
+		} else {
+			$ignored[] = 'city: ' . sanitize_text_field( (string) $req->get_param( 'city' ) );
+		}
 	}
 
 	if ( 'aw_opportunity' === $type ) {
@@ -188,16 +196,10 @@ function aw_ingest( WP_REST_Request $req ) {
 		if ( $req->get_param( 'opportunity_type' ) ) {
 			aw_assign_existing_terms( $post_id, array( $req->get_param( 'opportunity_type' ) ), 'aw_opportunity_type', $ignored );
 		}
-		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): link every part that names a known state or district.
-		$cities = array();
-		foreach ( preg_split( '#\s*[/,&]\s*|\s+and\s+#i', (string) $req->get_param( 'place' ) ) as $part ) {
-			$t = $part ? get_term_by( 'name', trim( $part ), 'aw_city' ) : false;
-			if ( $t ) {
-				$cities[] = (int) $t->term_id;
-			}
-		}
-		if ( $cities ) {
-			wp_set_object_terms( $post_id, array_unique( $cities ), 'aw_city' );
+		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): every part that names an LGD state or district.
+		$places = aw_places_from_text( (string) $req->get_param( 'place' ) );
+		if ( $places ) {
+			aw_set_item_places( $post_id, $places );
 		}
 	}
 

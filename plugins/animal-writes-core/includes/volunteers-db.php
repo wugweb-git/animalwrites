@@ -72,7 +72,7 @@ function aw_vol_place( $city, $state_slug = '' ) {
 	if ( null === $districts ) {
 		$districts = array();
 		$states    = array();
-		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => false ) ) as $t ) {
+		foreach ( array_merge( aw_place_states(), aw_lgd()['districts'] ) as $t ) {
 			$key = preg_replace( '/[^a-z]/', '', strtolower( $t->name ) );
 			if ( $t->parent ) {
 				$districts[ $key ][] = $t;
@@ -88,7 +88,7 @@ function aw_vol_place( $city, $state_slug = '' ) {
 			}
 		}
 	}
-	$state = $state_slug ? get_term_by( 'slug', $state_slug, 'aw_city' ) : null;
+	$state = $state_slug ? aw_place_by_slug( $state_slug ) : null;
 	$key   = preg_replace( '/[^a-z]/', '', strtolower( (string) $city ) );
 	$cands = $districts[ $key ] ?? array();
 	if ( $state ) {
@@ -174,7 +174,7 @@ add_action(
 		}
 		$n = 0;
 		foreach ( get_posts( array( 'post_type' => 'aw_volunteer', 'post_status' => 'any', 'numberposts' => -1 ) ) as $p ) {
-			$state = get_term_by( 'name', (string) get_post_meta( $p->ID, 'aw_v_state', true ), 'aw_city' );
+			$state = aw_place_state_by_name( (string) get_post_meta( $p->ID, 'aw_v_state', true ) );
 			aw_vol_upsert(
 				array(
 					'name'                 => get_post_meta( $p->ID, 'aw_v_name', true ),
@@ -316,7 +316,7 @@ function aw_vol_admin_page() {
 	$page  = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	list( $rows, $total ) = aw_vol_query( $f, 50, ( $page - 1 ) * 50 );
 	$names = array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => false ) ) as $t ) {
+	foreach ( aw_lgd()['ids'] as $t ) {
 		$names[ $t->term_id ] = $t->name;
 	}
 	echo '<div class="wrap"><h1 class="wp-heading-inline">Volunteers</h1> <span class="subtitle">' . (int) $total . ' matching</span>';
@@ -330,7 +330,7 @@ function aw_vol_admin_page() {
 		echo '<option value="' . esc_attr( $s ) . '"' . selected( $f['status'], $s, false ) . '>' . esc_html( ucfirst( $s ) ) . '</option>';
 	}
 	echo '</select> <select name="state"><option value="0">All states</option>';
-	foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false ) ) as $st ) {
+	foreach ( aw_place_states() as $st ) {
 		echo '<option value="' . (int) $st->term_id . '"' . selected( $f['state'], $st->term_id, false ) . '>' . esc_html( $st->name ) . '</option>';
 	}
 	echo '</select> ';

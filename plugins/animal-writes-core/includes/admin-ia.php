@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SHARED_TAXONOMIES = array( 'aw_topic', 'aw_city' );
+const AW_SHARED_TAXONOMIES = array( 'aw_topic' ); // places are not a list any more (LGD file, places.php)
 
 /* ---------- Comments off, Posts hidden ---------- */
 
@@ -57,7 +57,7 @@ add_filter(
 	'register_taxonomy_args',
 	function ( $args, $tax ) {
 		$names = array(
-			'aw_legal_kind'  => array( 'Kind', 'Kind' ),
+			'aw_legal_kind'  => array( 'Library types', 'Library type' ),
 			'aw_source_type' => array( 'Issuers', 'Issuer' ),
 		);
 		if ( isset( $names[ $tax ] ) ) {
@@ -99,14 +99,7 @@ add_filter(
 	10,
 	2
 );
-// Courts belong to Library documents only (news items keep any court they had in the meta aw_court_legacy).
-add_action(
-	'init',
-	function () {
-		unregister_taxonomy_for_object_type( 'aw_court', 'aw_news' );
-	},
-	20
-);
+// Courts are issuers (model.php); the Court list is no longer registered.
 
 /* ---------- Menus ---------- */
 
@@ -179,7 +172,7 @@ add_action(
 			}
 		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
-		// Topics and Locations: only under Classification.
+		// Categories: only under Classification.
 		foreach ( array_keys( (array) $submenu ) as $parent ) {
 			foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 				foreach ( (array) $submenu[ $parent ] as $i => $item ) {

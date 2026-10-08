@@ -6,8 +6,8 @@
  * Additive only: no existing item is changed. Front-end display comes in later phases.
  *
  * - Legal sub-type: taxonomy aw_legal_kind (Act, Rule, Order, Judgment, Circular, Notification) on Legal Watch and Research.
- * - Issuer: the existing taxonomy aw_source_type. Court: taxonomy aw_court (Supreme Court, High Courts, NGT).
- *   Both new taxonomies have no public archive pages; they are used for labels and list filters.
+ * - Issuer: taxonomy aw_source_type, a label on Library items. Courts (Supreme Court, High Courts, NGT) are issuers;
+ *   the separate Court list (aw_court) was merged into it on 8 Oct 2026 (old value kept in the meta aw_court_legacy).
  * - Topic: meta aw_primary_topic (term ID) plus up to 2 more topics (secondary) per item.
  * - Topic → listing types: term meta aw_help_types on each topic (Topics screen).
  * - Relations: one post-meta row per linked ID, so the reverse side is a plain meta query.
@@ -54,10 +54,9 @@ add_action(
 			'show_admin_column'  => true,
 		);
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
-		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_news' ), $args( 'Courts', 'Court' ) );
 		register_taxonomy( 'aw_resource_type', array( 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
 		// Language is no longer used on the Library (Phase 12 B4); each item keeps its old value in the meta aw_language_legacy.
-		register_taxonomy_for_object_type( 'aw_city', 'aw_legal' ); // Legal Watch: filter by state
+		// Places (State filter) come from the LGD codes on each item (places.php).
 	},
 	11
 );
@@ -69,7 +68,7 @@ add_action(
 		if ( '1' === get_option( 'aw_model_seeded' ) ) {
 			return;
 		}
-		foreach ( array( 'aw_legal_kind' => AW_LEGAL_KINDS, 'aw_court' => AW_COURTS ) as $tax => $terms ) {
+		foreach ( array( 'aw_legal_kind' => AW_LEGAL_KINDS ) as $tax => $terms ) {
 			foreach ( $terms as $slug => $name ) {
 				if ( ! term_exists( $slug, $tax ) ) {
 					wp_insert_term( $name, $tax, array( 'slug' => $slug ) );
@@ -80,6 +79,55 @@ add_action(
 		update_option( 'aw_model_seeded', '1', false );
 	},
 	20
+);
+
+/**
+ * Court → Issuer, once (8 Oct 2026): each Library item with a court gets the issuer of the same name, and keeps the
+ * court in the meta aw_court_legacy. The Court list is no longer registered.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_court_to_issuer_done' ) ) {
+			return;
+		}
+		global $wpdb;
+		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug, t.name, p.post_type FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_court' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = tr.object_id" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$n    = 0;
+		foreach ( $rows as $r ) {
+			if ( ! in_array( $r->slug, (array) get_post_meta( (int) $r->id, 'aw_court_legacy' ), true ) ) {
+				add_post_meta( (int) $r->id, 'aw_court_legacy', $r->slug );
+			}
+			if ( 'aw_legal' !== $r->post_type ) {
+				continue; // news items lost the court earlier (meta only)
+			}
+			$issuer = get_term_by( 'slug', $r->slug, 'aw_source_type' );
+			if ( ! $issuer ) {
+				$made   = wp_insert_term( $r->name, 'aw_source_type', array( 'slug' => $r->slug ) );
+				$issuer = is_wp_error( $made ) ? null : get_term( $made['term_id'], 'aw_source_type' );
+			}
+			if ( $issuer ) {
+				wp_set_object_terms( (int) $r->id, array( (int) $issuer->term_id ), 'aw_source_type', true );
+				$n++;
+			}
+		}
+		update_option( 'aw_court_to_issuer_report', array( 'links' => count( $rows ), 'library_items' => $n ), false );
+		update_option( 'aw_court_to_issuer_done', '1', false );
+	},
+	30
+);
+
+/** [aw_issuer_label] "Issued by …" on a Library item (a label, not a link). */
+add_shortcode(
+	'aw_issuer_label',
+	function () {
+		$t = get_the_terms( get_the_ID(), 'aw_source_type' );
+		if ( ! $t || is_wp_error( $t ) ) {
+			return '';
+		}
+		$names = implode( ', ', wp_list_pluck( $t, 'name' ) );
+		return '<p class="kit-tags aw-issuer">' . ( function_exists( 'kits_tag' ) ? kits_tag( 'Issued by ' . $names ) : esc_html( 'Issued by ' . $names ) ) . '</p>';
+	}
 );
 
 /* ---------- Internal organisation ---------- */

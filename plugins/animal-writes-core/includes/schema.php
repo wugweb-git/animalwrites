@@ -32,16 +32,7 @@ function aw_jsonld( $data ) {
  * @return array{0: string, 1: string} state, district.
  */
 function aw_listing_place( $id ) {
-	$state    = '';
-	$district = '';
-	foreach ( (array) wp_get_object_terms( $id, 'aw_city' ) as $t ) {
-		if ( $t->parent ) {
-			$district = $t->name;
-		} else {
-			$state = $t->name;
-		}
-	}
-	return array( $state, $district );
+	return aw_item_place_names( $id ); // LGD places (places.php)
 }
 
 /**

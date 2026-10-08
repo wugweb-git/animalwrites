@@ -23,14 +23,9 @@ function aw_directory_rewrites() {
 }
 add_action( 'init', 'aw_directory_rewrites', 20 );
 
-/** A place (state or district) by slug, cached for the request. */
+/** A place (state or district) by slug, from the LGD file (places.php). */
 function aw_dir_place( $slug ) {
-	static $cache = array();
-	if ( ! array_key_exists( $slug, $cache ) ) {
-		$t              = get_term_by( 'slug', $slug, 'aw_city' );
-		$cache[ $slug ] = $t && ! is_wp_error( $t ) ? $t : null;
-	}
-	return $cache[ $slug ];
+	return aw_place_by_slug( $slug );
 }
 
 /** "Veterinary" is one filter for people; the listings keep their separate veterinary types. */
@@ -95,7 +90,7 @@ add_filter(
 			if ( $a->parent ) {
 				$go( aw_directory_url( $a->slug ) ); // old /directory/{district}/
 			}
-			$out['aw_city'] = $a->slug;
+			$out['aw_place'] = $a->slug;
 			$type           = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			if ( $type && $type_ok( $type ) ) {
 				$out['aw_listing_type'] = aw_listing_type_query( $type ); // filtered state list
@@ -103,7 +98,7 @@ add_filter(
 		} elseif ( 2 === count( $seg ) && $a ) {
 			$bp = aw_dir_place( $b );
 			if ( ! $a->parent && $bp && (int) $bp->parent === (int) $a->term_id ) {
-				$out['aw_city'] = $bp->slug;
+				$out['aw_place'] = $bp->slug;
 			} elseif ( $type_ok( $b ) ) {
 				$go( aw_directory_url( $a->slug, $b ) ); // old /directory/{place}/{type}/
 			} else {
@@ -114,7 +109,7 @@ add_filter(
 			if ( ! $bp || (int) $bp->parent !== (int) $a->term_id || ! $type_ok( $c ) ) {
 				return array( 'error' => '404' );
 			}
-			$out['aw_city']         = $bp->slug;
+			$out['aw_place']        = $bp->slug;
 			$out['aw_listing_type'] = aw_listing_type_query( $c );
 			$out['aw_type_slug']    = $c;
 		} else {
@@ -137,9 +132,7 @@ function aw_is_directory_query( $q ) {
 	if ( is_admin() || ! $q->is_main_query() ) {
 		return false;
 	}
-	return $q->is_post_type_archive( 'aw_listing' )
-		|| $q->is_tax( 'aw_listing_type' )
-		|| ( $q->is_tax( 'aw_city' ) && 'aw_listing' === $q->get( 'post_type' ) );
+	return $q->is_post_type_archive( 'aw_listing' ) || $q->is_tax( 'aw_listing_type' );
 }
 
 /**
@@ -183,9 +176,7 @@ add_action( 'pre_get_posts', 'aw_directory_order' );
  * @return bool
  */
 function aw_is_directory_view() {
-	return is_post_type_archive( 'aw_listing' )
-		|| is_tax( 'aw_listing_type' )
-		|| ( is_tax( 'aw_city' ) && 'aw_listing' === get_query_var( 'post_type' ) );
+	return is_post_type_archive( 'aw_listing' ) || is_tax( 'aw_listing_type' );
 }
 
 /**
@@ -198,7 +189,7 @@ function aw_directory_title( $title ) {
 	if ( ! aw_is_directory_view() ) {
 		return $title;
 	}
-	$city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
+	$city  = aw_current_place();
 	$tname = aw_current_type_name();
 
 	if ( $city && $tname ) {
@@ -247,7 +238,7 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 		$url = home_url( 'directory/' . $place->slug . '/' );
 		return $type ? add_query_arg( 'type', $type, $url ) : $url; // no state × type pages
 	}
-	$state = get_term( $place->parent, 'aw_city' );
+	$state = aw_place_by_id( $place->parent );
 	return home_url( 'directory/' . $state->slug . '/' . $place->slug . '/' . ( $type ? $type . '/' : '' ) );
 }
 
@@ -324,27 +315,27 @@ function aw_verified_count() {
  * @return string
  */
 function aw_directory_filter() {
-	$cur_city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' ) : null;
+	$cur_city = aw_current_place();
 	$cur_type = (string) get_query_var( 'aw_listing_type' );
-	$state    = $cur_city ? ( $cur_city->parent ? get_term( $cur_city->parent, 'aw_city' ) : $cur_city ) : null;
+	$state    = $cur_city ? aw_place_parent_state( $cur_city ) : null;
 	$district = $cur_city && $cur_city->parent ? $cur_city : null;
 	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
 
-	$states = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => true, 'orderby' => 'name' ) );
-	$all    = get_transient( 'aw_dir_districts_n' );
-	if ( false === $all ) {
-		$all = array();
-		foreach ( get_terms( array( 'taxonomy' => 'aw_city', 'hide_empty' => true, 'orderby' => 'name', 'childless' => true ) ) as $k ) {
-			if ( $k->parent ) {
-				$all[ $k->parent ][] = array( $k->slug, $k->name, (int) $k->count );
+	// States and districts with listings, with their counts (stored counts, places.php).
+	$states = array_filter( aw_place_states(), 'aw_place_count' );
+	$all    = array();
+	foreach ( $states as $st ) {
+		foreach ( aw_place_districts( $st->code ) as $k ) {
+			$n = aw_place_count( $k );
+			if ( $n ) {
+				$all[ $st->term_id ][] = array( $k->slug, $k->name, $n );
 			}
 		}
-		set_transient( 'aw_dir_districts_n', $all, DAY_IN_SECONDS );
 	}
 	$s_opts = '<option value="">All states</option>';
 	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
-	foreach ( is_wp_error( $states ) ? array() : $states as $st ) {
+	foreach ( $states as $st ) {
 		$s_opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $state && $state->term_id === $st->term_id, true, false ) . '>' . esc_html( $st->name ) . '</option>';
 		$kids    = $all[ $st->term_id ] ?? array();
 		if ( $kids ) {
@@ -417,12 +408,11 @@ add_action(
  * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
  */
 function aw_browse_states() {
-	if ( aw_is_directory_view() && ( get_query_var( 'aw_city' ) || get_query_var( 'aw_listing_type' ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_listing_type' ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
-	$terms = get_terms( array( 'taxonomy' => 'aw_city', 'parent' => 0, 'hide_empty' => false, 'orderby' => 'name' ) );
 	$items = '';
-	foreach ( is_wp_error( $terms ) ? array() : $terms as $st ) {
+	foreach ( aw_place_states() as $st ) {
 		$n = aw_state_count( $st );
 		if ( $n ) {
 			$items .= '<li><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span>' . esc_html( $st->name ) . '</span>' . kits_count( $n ) . '</a></li>';
@@ -432,20 +422,9 @@ function aw_browse_states() {
 }
 add_shortcode( 'aw_browse_states', 'aw_browse_states' );
 
-/** Listings in a state, its districts included (cached for an hour). */
+/** Listings in a state, its districts included (stored counts, places.php). */
 function aw_state_count( $state ) {
-	$all = get_transient( 'aw_state_counts' );
-	if ( false === $all ) {
-		$all = array();
-		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT tr.object_id id, tt.term_id, tt.parent FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_city' JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		foreach ( $rows as $r ) {
-			$all[ $r->parent ? (int) $r->parent : (int) $r->term_id ][ (int) $r->id ] = 1;
-		}
-		$all = array_map( 'count', $all );
-		set_transient( 'aw_state_counts', $all, HOUR_IN_SECONDS );
-	}
-	return (int) ( $all[ $state->term_id ] ?? 0 );
+	return aw_place_count( $state );
 }
 
 
@@ -454,12 +433,12 @@ function aw_state_count( $state ) {
  * hub, "… in {State}." or "… in {District}, {State}." (owner-approved copy, 8 Oct 2026).
  */
 function aw_directory_intro() {
-	$city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' ) : null;
+	$city = aw_current_place();
 	if ( ! $city ) {
 		return 'Animal welfare organisations, gaushalas and government vets across India.';
 	}
 	if ( $city->parent ) {
-		$state = get_term( $city->parent, 'aw_city' );
+		$state = aw_place_parent_state( $city );
 		return sprintf( 'Animal welfare organisations, gaushalas and government vets in %1$s, %2$s.', $city->name, $state->name );
 	}
 	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );

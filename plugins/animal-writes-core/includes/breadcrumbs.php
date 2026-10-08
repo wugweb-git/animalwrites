@@ -28,7 +28,7 @@ function aw_breadcrumbs() {
 	$place = function ( $term ) {
 		$out = array();
 		if ( $term && $term->parent ) {
-			$st    = get_term( $term->parent, 'aw_city' );
+			$st    = aw_place_by_id( $term->parent );
 			$out[] = array( $st->name, aw_directory_url( $st->slug ) );
 		}
 		if ( $term ) {
@@ -39,13 +39,7 @@ function aw_breadcrumbs() {
 
 	if ( is_singular( 'aw_listing' ) ) {
 		$id    = get_queried_object_id();
-		$terms = wp_get_object_terms( $id, 'aw_city' );
-		$best  = null;
-		foreach ( $terms as $t ) {
-			if ( ! $best || ( $t->parent && ! $best->parent ) ) {
-				$best = $t; // the district if there is one, else the state
-			}
-		}
+		$best  = aw_item_place( $id ); // the district if there is one, else the state
 		$trail = array_merge( array( $dir ), $place( $best ), array( array( get_the_title( $id ), get_permalink( $id ) ) ) );
 	} elseif ( is_singular( array_keys( aw_post_types() ) ) ) {
 		$id   = get_queried_object_id();
@@ -53,8 +47,8 @@ function aw_breadcrumbs() {
 		$obj  = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, get_post_type_archive_link( $type ) );
 		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
-	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && get_query_var( 'aw_city' ) ) {
-		$city  = get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' );
+	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && aw_current_place() ) {
+		$city  = aw_current_place();
 		$trail = array_merge( array( $dir ), $place( $city ) );
 		$tslug = (string) get_query_var( 'aw_type_slug' );
 		if ( $tslug && $city && $city->parent ) { // district × type; a state's ?type= list is the state page

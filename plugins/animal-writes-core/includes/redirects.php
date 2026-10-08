@@ -60,8 +60,9 @@ add_action(
 add_action(
 	'template_redirect',
 	function () {
-		if ( isset( $_GET['lang'] ) && is_post_type_archive( 'aw_legal' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( remove_query_arg( 'lang' ), 301 );
+		// Issuer and Court are labels now (8 Oct 2026): ?issuer= and ?court= links go to the list without them.
+		if ( ( isset( $_GET['lang'] ) || isset( $_GET['issuer'] ) || isset( $_GET['court'] ) ) && is_post_type_archive( 'aw_legal' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( remove_query_arg( array( 'lang', 'issuer', 'court' ) ), 301 );
 			exit;
 		}
 	},

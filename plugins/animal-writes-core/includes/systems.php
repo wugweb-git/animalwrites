@@ -77,22 +77,23 @@ function aw_empty( $text ) {
 }
 
 /**
- * List filters: post type => list of [query parameter, taxonomy, label]. Several can apply at once; every filtered
- * list is canonical to the plain list (indexing.php). Places filter by state (children included).
+ * List filters: post type => list of [query parameter, source, label]. The source is a taxonomy, "place" (the state,
+ * from the LGD codes; places.php) or "publisher" (the news publisher's site). One type per section is the main filter;
+ * Topic is the shared one; issuer, publisher name on cards and organisation are labels, not filters (8 Oct 2026).
+ * Several filters can apply at once; every filtered list is canonical to the plain list (indexing.php).
  */
 const AW_LIST_FILTERS = array(
-	// Courts (Supreme Court, High Courts, NGT) are filtered under Court only; Issuer lists the other bodies.
-	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Kind' ), array( 'issuer', 'aw_source_type', 'Issuer' ), array( 'court', 'aw_court', 'Court' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'aw_city', 'State' ) ),
-	'aw_news'        => array( array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'aw_city', 'Location' ) ),
-	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Kind' ), array( 'topic', 'aw_topic', 'Topic' ) ),
-	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Type' ), array( 'state', 'aw_city', 'Location' ) ),
+	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'State' ) ),
+	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
+	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Topic' ) ),
+	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Topic' ) ),
 );
-/** Issuer values that are courts: they belong to the Court filter. */
+/** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
 const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_guide' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
-/** Active filters on this request: param => term slug. */
+/** Active filters on this request: param => value slug. */
 function aw_active_filters( $type ) {
 	$out = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
@@ -101,6 +102,80 @@ function aw_active_filters( $type ) {
 			$out[ $f[0] ] = $v;
 		}
 	}
+	return $out;
+}
+
+/** Publisher key of a news item: its site (no www.), as a URL value. Stored as aw_publisher when the source is saved. */
+function aw_publisher_key( $id ) {
+	$host = function_exists( 'aw_host' ) ? aw_host( (string) get_post_meta( $id, 'aw_source_url', true ) ) : '';
+	return sanitize_title( $host );
+}
+
+/** Query clauses for active filters: [tax_query, meta_query]. */
+function aw_filter_clauses( $type, $active ) {
+	$tq = array( 'relation' => 'AND' );
+	$mq = array();
+	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
+		$v = $active[ $f[0] ] ?? '';
+		if ( '' === $v ) {
+			continue;
+		}
+		if ( 'place' === $f[1] ) {
+			$p    = aw_place_by_slug( $v );
+			$mq[] = $p ? aw_place_meta_clause( $p ) : array( 'key' => 'aw_state_code', 'value' => '-1' );
+		} elseif ( 'publisher' === $f[1] ) {
+			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v );
+		} else {
+			$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
+		}
+	}
+	return array( count( $tq ) > 1 ? $tq : array(), $mq );
+}
+
+/**
+ * Values of one filter among some items, with how many items have each: slug => [name, count].
+ *
+ * @param int[]  $ids    Post IDs.
+ * @param string $source Taxonomy, "place" or "publisher".
+ * @return array
+ */
+function aw_filter_values( $ids, $source ) {
+	$seen = array();
+	$name = array();
+	if ( ! $ids ) {
+		return array();
+	}
+	if ( 'place' === $source ) {
+		foreach ( $ids as $id ) {
+			foreach ( aw_item_codes( $id )[0] as $c ) {
+				$s = aw_place_state( $c );
+				if ( $s ) {
+					$seen[ $s->slug ][ $id ] = 1;
+					$name[ $s->slug ]        = $s->name;
+				}
+			}
+		}
+	} elseif ( 'publisher' === $source ) {
+		$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+		foreach ( $ids as $id ) {
+			$k = (string) get_post_meta( $id, 'aw_publisher', true );
+			if ( '' !== $k ) {
+				$host            = aw_host( (string) get_post_meta( $id, 'aw_source_url', true ) );
+				$seen[ $k ][ $id ] = 1;
+				$name[ $k ]      = $name[ $k ] ?? ( ! empty( $pubs[ $host ]['name'] ) ? $pubs[ $host ]['name'] : ( function_exists( 'aw_publisher_of' ) ? aw_publisher_of( $id )[0] : $host ) );
+			}
+		}
+	} else {
+		foreach ( wp_get_object_terms( $ids, $source, array( 'fields' => 'all_with_object_id' ) ) as $t ) {
+			$seen[ $t->slug ][ $t->object_id ] = 1;
+			$name[ $t->slug ]                  = $t->name;
+		}
+	}
+	$out = array();
+	foreach ( $seen as $slug => $set ) {
+		$out[ $slug ] = array( $name[ $slug ], count( $set ) );
+	}
+	uasort( $out, fn( $a, $b ) => strcasecmp( $a[0], $b[0] ) );
 	return $out;
 }
 
@@ -115,15 +190,12 @@ add_action(
 				continue;
 			}
 			$q->set( 'posts_per_page', $size );
-			$tq = array();
-			foreach ( AW_LIST_FILTERS[ $type ] as $f ) {
-				$v = aw_active_filters( $type )[ $f[0] ] ?? '';
-				if ( $v ) {
-					$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
-				}
-			}
+			list( $tq, $mq ) = aw_filter_clauses( $type, aw_active_filters( $type ) );
 			if ( $tq ) {
-				$q->set( 'tax_query', array_merge( array( 'relation' => 'AND' ), $tq ) );
+				$q->set( 'tax_query', $tq );
+			}
+			if ( $mq ) {
+				$q->set( 'meta_query', array_merge( (array) $q->get( 'meta_query' ), $mq ) );
 			}
 		}
 	},
@@ -145,38 +217,51 @@ function aw_list_filters( $type ) {
 	$groups = '';
 	$chips  = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
-		list( $param, $tax, $label ) = $f;
+		list( $param, $source, $label ) = $f;
 		$others = array_diff_key( $active, array( $param => '' ) );
 		$base   = add_query_arg( $others, $all );
 		// Items matching the other filters: the counts for this group.
-		$tq = array( 'relation' => 'AND' );
-		foreach ( AW_LIST_FILTERS[ $type ] as $g ) {
-			if ( isset( $others[ $g[0] ] ) ) {
-				$tq[] = array( 'taxonomy' => $g[1], 'field' => 'slug', 'terms' => $others[ $g[0] ], 'include_children' => true );
-			}
-		}
-		$ids = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$counts = array();
-		foreach ( $ids ? wp_get_object_terms( $ids, $tax, array( 'fields' => 'all_with_object_id' ) ) : array() as $t ) {
-			$key                         = ( 'aw_city' === $tax && $t->parent ) ? (int) $t->parent : (int) $t->term_id; // places: count by state
-			$counts[ $key ][ $t->object_id ] = 1;
-		}
+		list( $tq, $mq ) = aw_filter_clauses( $type, $others );
+		$ids     = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$options = array( array( 'All', $base, ! isset( $active[ $param ] ), null ) );
-		$terms   = $counts ? get_terms( array( 'taxonomy' => $tax, 'include' => array_keys( $counts ), 'hide_empty' => false, 'orderby' => 'name' ) ) : array();
-		foreach ( is_wp_error( $terms ) ? array() : $terms as $t ) {
-			if ( 'aw_source_type' === $tax && in_array( $t->slug, AW_COURT_ISSUERS, true ) ) {
-				continue;
-			}
-			$on        = ( $active[ $param ] ?? '' ) === $t->slug;
-			$options[] = array( $t->name, add_query_arg( $param, $t->slug, $base ), $on, count( $counts[ $t->term_id ] ) );
+		foreach ( aw_filter_values( $ids, $source ) as $slug => $v ) {
+			$on        = ( $active[ $param ] ?? '' ) === (string) $slug;
+			$options[] = array( $v[0], add_query_arg( $param, $slug, $base ), $on, $v[1] );
 			if ( $on ) {
-				$chips[] = array( $label . ': ' . $t->name, $base );
+				$chips[] = array( $label . ': ' . $v[0], $base );
 			}
 		}
 		$groups .= function_exists( 'kits_filter_group' ) ? kits_filter_group( $label, $options ) : '';
 	}
 	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all ) : '';
 }
+
+/** Keep the publisher key current when a news item's source changes. */
+function aw_publisher_sync( $mid, $id, $key ) {
+	if ( 'aw_source_url' === $key && 'aw_news' === get_post_type( $id ) ) {
+		$k = aw_publisher_key( $id );
+		'' === $k ? delete_post_meta( $id, 'aw_publisher' ) : update_post_meta( $id, 'aw_publisher', $k );
+	}
+}
+add_action( 'updated_post_meta', 'aw_publisher_sync', 10, 3 );
+add_action( 'added_post_meta', 'aw_publisher_sync', 10, 3 );
+// Fill the publisher key on every news item once.
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_publisher_key_done' ) ) {
+			return;
+		}
+		foreach ( get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+			$k = aw_publisher_key( $id );
+			if ( '' !== $k ) {
+				update_post_meta( $id, 'aw_publisher', $k );
+			}
+		}
+		update_option( 'aw_publisher_key_done', '1', false );
+	},
+	30
+);
 
 /* ---------- TRUST: source, dates, verification ---------- */
 
@@ -402,7 +487,7 @@ add_shortcode(
 		// Count line and sort (Phase 11 E3).
 		$n      = (int) $wp_query->found_posts;
 		$q      = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$where  = array_filter( array( $q ? '“' . $q . '”' : '', get_query_var( 'aw_city' ) ? (string) ( get_term_by( 'slug', get_query_var( 'aw_city' ), 'aw_city' )->name ?? '' ) : '', function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '' ) );
+		$where  = array_filter( array( $q ? '“' . $q . '”' : '', aw_current_place() ? aw_current_place()->name : '', function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '' ) );
 		$line   = $where ? sprintf( _n( '%1$s result for %2$s', '%1$s results for %2$s', $n ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( _n( '%s organisation', '%s organisations', $n ), number_format_i18n( $n ) );
 		$sort   = 'details' === ( $_GET['sort'] ?? '' ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 		$here   = remove_query_arg( array( 'sort', 'paged' ) );
@@ -458,7 +543,7 @@ add_shortcode(
 			$apply = (string) get_post_meta( $id, 'aw_apply_url', true );
 			$dl    = (string) get_post_meta( $id, 'aw_deadline', true );
 			$type  = aw_first_term( $id, 'aw_opportunity_type' );
-			$city  = aw_first_term( $id, 'aw_city' );
+			$city  = aw_item_place( $id );
 			$img   = get_the_post_thumbnail_url( $id, 'medium_large' );
 			$out  .= '<article class="aw-opp">'
 				. ( $img ? '<div class="aw-opp-media"><img src="' . esc_url( $img ) . '" alt="" loading="lazy"></div>' : '' )

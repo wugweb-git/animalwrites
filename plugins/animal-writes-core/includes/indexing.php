@@ -16,25 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_THIN_DISTRICT_TYPE = 3; // a district × type page needs this many listings to be indexed
-const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_source_type', 'aw_opportunity_type', 'aw_legal_kind', 'aw_court', 'aw_resource_type' );
-
-add_action(
-	'template_redirect',
-	function () {
-		if ( is_tax( 'aw_city' ) && 'aw_listing' !== get_query_var( 'post_type' ) ) {
-			wp_safe_redirect( aw_directory_url( get_queried_object()->slug ), 301, 'Animal Writes' );
-			exit;
-		}
-	},
-	1
-);
+const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_source_type', 'aw_opportunity_type', 'aw_legal_kind', 'aw_resource_type' );
 
 /** District × type page with too few listings to be worth indexing. */
 function aw_is_thin_directory_page() {
 	if ( ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || ! get_query_var( 'aw_listing_type' ) ) {
 		return false;
 	}
-	$place = get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' );
+	$place = aw_current_place();
 	global $wp_query;
 	return $place && $place->parent && (int) $wp_query->found_posts < AW_THIN_DISTRICT_TYPE;
 }
@@ -44,7 +33,7 @@ add_filter(
 	function ( $robots ) {
 		$tax = array_filter( AW_NOINDEX_TAXONOMIES, fn( $t ) => is_tax( $t ) );
 		// A directory place page is also a listing-type query; only the bare type archive (/directory-type/…) is excluded.
-		$type_archive = $tax && ! get_query_var( 'aw_city' );
+		$type_archive = $tax && ! get_query_var( 'aw_place' );
 		if ( $type_archive || is_search() || aw_is_thin_directory_page() ) {
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
