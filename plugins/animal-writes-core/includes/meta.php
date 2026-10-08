@@ -48,6 +48,9 @@ function aw_meta_schema() {
 		'aw_place_id'        => array( 'string', array( 'aw_listing' ), 'Google place ID' ),
 		'aw_g_rating'        => array( 'string', array( 'aw_listing' ), 'Google rating (out of 5)' ),
 		'aw_g_reviews'       => array( 'string', array( 'aw_listing' ), 'Number of Google reviews' ),
+		'aw_g_category'      => array( 'string', array( 'aw_listing' ), 'Google category (e.g. Animal shelter)' ),
+		'aw_g_profile'       => array( 'string', array( 'aw_listing' ), 'Google Business Profile link' ),
+		'aw_hours_spec'      => array( 'string', array( 'aw_listing' ), 'Opening hours, one line per day range: "Mon-Fri 09:00-18:00"' ),
 		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
 		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
 		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
@@ -83,7 +86,7 @@ function aw_meta_schema() {
  * @return mixed
  */
 function aw_sanitize_meta( $value, $key ) {
-	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url' );
+	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url' );
 	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
@@ -104,6 +107,9 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_founded' === $key ) {
 		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';
+	}
+	if ( 'aw_hours_spec' === $key ) { // keep line breaks
+		return sanitize_textarea_field( (string) $value );
 	}
 	if ( 'aw_email' === $key ) {
 		return sanitize_email( (string) $value );

@@ -72,7 +72,7 @@ function aw_listing_schema( $id ) {
 	if ( $m( 'aw_whatsapp' ) ) {
 		$org['contactPoint'] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $m( 'aw_whatsapp' ), 'availableLanguage' => array( 'en', 'hi' ) );
 	}
-	$same = array_values( array_filter( array( $site, $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ) ) ) );
+	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ) ) ) );
 	if ( $same ) {
 		$org['sameAs'] = $same;
 	}
@@ -93,8 +93,11 @@ function aw_listing_schema( $id ) {
 	if ( $m( 'aw_languages' ) ) {
 		$org['knowsLanguage'] = array_values( array_filter( array_map( 'trim', explode( ',', $m( 'aw_languages' ) ) ) ) );
 	}
-	if ( $m( 'aw_hours' ) && $vet ) {
-		$org['openingHours'] = $m( 'aw_hours' ); // openingHours belongs to places (LocalBusiness), so only on VeterinaryCare
+	$spec = aw_hours_spec( $m( 'aw_hours_spec' ) );
+	if ( $spec ) {
+		$org['openingHoursSpecification'] = $spec; // exact hours, e.g. from the Google profile
+	} elseif ( $m( 'aw_hours' ) && $vet ) {
+		$org['openingHours'] = $m( 'aw_hours' ); // free-text hours: places (LocalBusiness) only, so only on VeterinaryCare
 	}
 
 	if ( $m( 'aw_services' ) ) {
@@ -102,7 +105,7 @@ function aw_listing_schema( $id ) {
 	}
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
-		$org['keywords'] = implode( ', ', wp_list_pluck( $types, 'name' ) ); // additionalType must be a URL; the type names go here
+		$org['keywords'] = implode( ', ', array_filter( array_merge( wp_list_pluck( $types, 'name' ), array( $m( 'aw_g_category' ) ) ) ) ); // additionalType must be a URL; the type names (and Google's category) go here
 	}
 	$code = $m( 'aw_awbi_code' );
 	if ( $code ) {
@@ -361,3 +364,35 @@ add_action(
 	},
 	31
 );
+
+/**
+ * Exact opening hours ("Mon-Fri 09:00-18:00", one range per line) as schema.org OpeningHoursSpecification.
+ *
+ * @param string $text Lines.
+ * @return array
+ */
+function aw_hours_spec( $text ) {
+	$days = array( 'mon' => 'Monday', 'tue' => 'Tuesday', 'wed' => 'Wednesday', 'thu' => 'Thursday', 'fri' => 'Friday', 'sat' => 'Saturday', 'sun' => 'Sunday' );
+	$keys = array_keys( $days );
+	$out  = array();
+	foreach ( preg_split( '/[\r\n]+/', (string) $text ) as $line ) {
+		if ( ! preg_match( '/^\s*([a-z]{3})[a-z]*(?:\s*[-–]\s*([a-z]{3})[a-z]*)?\s+(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/i', $line, $mm ) ) {
+			continue;
+		}
+		$from = array_search( strtolower( $mm[1] ), $keys, true );
+		$to   = isset( $mm[2] ) && '' !== $mm[2] ? array_search( strtolower( $mm[2] ), $keys, true ) : $from;
+		if ( false === $from || false === $to ) {
+			continue;
+		}
+		$list = array();
+		for ( $i = $from; ; $i = ( $i + 1 ) % 7 ) {
+			$list[] = $days[ $keys[ $i ] ];
+			if ( $i === $to ) {
+				break;
+			}
+		}
+		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => $list, 'opens' => $mm[3], 'closes' => $mm[4] );
+	}
+	return $out;
+}
+

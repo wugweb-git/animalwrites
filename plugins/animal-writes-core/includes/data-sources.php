@@ -50,6 +50,9 @@ function aw_listing_sources( $id ) {
 	} elseif ( $name ) {
 		$slugs[] = false !== stripos( $name, 'google' ) ? 'gmaps' : 'gov'; // a Google profile is not a government list
 	}
+	if ( get_post_meta( $id, 'aw_g_profile', true ) ) {
+		$slugs[] = 'gmaps';
+	}
 	if ( get_post_meta( $id, 'aw_verified', true ) ) {
 		$slugs[] = 'organisation';
 	}
@@ -68,7 +71,8 @@ function aw_listing_sources( $id ) {
 			$on = (string) get_post_meta( $id, 'aw_verified_on', true );
 		}
 		if ( 'gmaps' === $slug ) {
-			$link = (string) get_post_meta( $id, 'aw_maps_url', true );
+			$link  = (string) ( get_post_meta( $id, 'aw_g_profile', true ) ? get_post_meta( $id, 'aw_g_profile', true ) : get_post_meta( $id, 'aw_maps_url', true ) );
+			$label = 'Google Business Profile';
 		}
 		$out[] = array( $slug, $mark, $label, $on, $link );
 	}

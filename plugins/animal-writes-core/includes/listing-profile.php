@@ -22,6 +22,7 @@ function aw_listing_fields() {
 			'aw_email'    => array( 'Email', 'email', '' ),
 			'aw_area'     => array( 'Area or landmark', 'text', 'No full street address' ),
 			'aw_hours'    => array( 'Opening hours', 'text', 'e.g. Mon–Sat 9 am – 6 pm; emergencies 24 hours' ),
+			'aw_hours_spec' => array( 'Opening hours (exact)', 'textarea', 'One line per day range, e.g. Mon-Fri 09:00-18:00 and Sat 10:00-14:00' ),
 		),
 		'Online'  => array(
 			'aw_website'   => array( 'Website', 'url', '' ),
@@ -31,6 +32,8 @@ function aw_listing_fields() {
 			'aw_place_id'  => array( 'Google place ID', 'text', '' ),
 			'aw_g_rating'  => array( 'Google rating', 'text', 'Out of 5, e.g. 4.6' ),
 			'aw_g_reviews' => array( 'Google reviews', 'text', 'How many reviews' ),
+			'aw_g_category' => array( 'Google category', 'text', 'As on the Google profile, e.g. Animal shelter' ),
+			'aw_g_profile'  => array( 'Google Business Profile link', 'url', 'The share.google link' ),
 			'aw_instagram' => array( 'Instagram', 'url', '' ),
 			'aw_facebook'  => array( 'Facebook', 'url', '' ),
 			'aw_x'         => array( 'X (Twitter)', 'url', '' ),
@@ -65,7 +68,9 @@ function aw_listing_details_box( $post ) {
 	foreach ( aw_listing_fields() as $group => $fields ) {
 		echo '<h3 style="margin:1.25em 0 .5em">' . esc_html( $group ) . '</h3><table class="form-table" role="presentation"><tbody>';
 		foreach ( $fields as $key => $f ) {
-			echo '<tr><th scope="row"><label for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label></th><td><input class="regular-text" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( (string) get_post_meta( $post->ID, $key, true ) ) . '">'
+			$val     = (string) get_post_meta( $post->ID, $key, true );
+			$control = 'textarea' === $f[1] ? '<textarea class="large-text" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>' : '<input class="regular-text" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">';
+			echo '<tr><th scope="row"><label for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label></th><td>' . $control // phpcs:ignore WordPress.Security.EscapeOutput
 				. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
