@@ -888,3 +888,86 @@ body { background: var(--kit-color-canvas); }
 /* Box headings: a faint rule, not yellow. */
 .aw-ed-col-title { border-bottom-color: var(--kit-color-line) !important; }
 .aw-ed-act-copy .aw-ed-templates, .kit-ed-act-copy .aw-ed-templates { margin: 0 0 var(--kit-space-5); }
+
+/* ======================================================================================================
+   Home (owner, 9 Oct 2026): every section fits one screen at 375×812, 768×1024 and 1440×900. Fewer items per
+   breakpoint, card lists scroll sideways on phones and tablets, and each section's "All …" link leads to the rest.
+   ====================================================================================================== */
+/* Need help now: three cards across on phones too (a sideways row) */
+@media (max-width: 767px) {
+	.kit-ed-acts { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-3); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter) var(--kit-space-2); scrollbar-width: none; }
+	.kit-ed-acts::-webkit-scrollbar { display: none; }
+	.kit-ed-acts > .kit-ed-act { flex: 0 0 78%; min-height: 9rem; scroll-snap-align: start; }
+}
+
+/* What's happening: phones and tablets = one sideways row of five stories; desktop = lead + three */
+@media (max-width: 1199px) {
+	.kit-ed-news-grid { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter) var(--kit-space-3); scrollbar-width: none; }
+	.kit-ed-news-grid::-webkit-scrollbar { display: none; }
+	.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
+	.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+	.kit-ed-news-grid .wp-block-post-featured-image { aspect-ratio: 16 / 9 !important; margin: 0 0 var(--kit-space-3) !important; width: 100%; }
+	.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
+	.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
+	.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h4) !important; margin: var(--kit-space-2) 0 0 !important; }
+}
+@media (min-width: 1200px) {
+	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
+	.kit-ed-lead .wp-block-post-featured-image { aspect-ratio: 16 / 9 !important; }
+}
+
+/* From the Library: phones and tablets = side text, then a sideways row of compact cards (Type · Date, title, issuer);
+   desktop = three cards beside the side text */
+@media (max-width: 1199px) {
+	.aw-ed-law-list .wp-block-post-template { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scrollbar-width: none; }
+	.aw-ed-law-list .wp-block-post-template::-webkit-scrollbar { display: none; }
+	.aw-ed-law-list .wp-block-post-template > li { flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; }
+	.aw-ed-law-list .kit-case { display: block; height: 100%; padding: var(--kit-space-4) !important; border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); background: var(--kit-surface-card, var(--kit-color-raised)); }
+	.aw-ed-law-list :is(.aw-case-cover, .aw-case-sum, .aw-case-tags .wp-block-post-terms, .aw-case-src, .aw-doc, .kit-case > .kit-ico) { display: none !important; }
+	.aw-ed-law-list .aw-case-date { margin-bottom: var(--kit-space-2); }
+	.aw-ed-law-side .aw-ed-links { margin-top: var(--kit-space-3); }
+	.aw-ed-law-title { margin-bottom: var(--kit-space-5) !important; }
+}
+@media (min-width: 1200px) {
+	.aw-ed-law-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
+	.aw-ed-law-list :is(.aw-case-src, .aw-case-tags .wp-block-post-terms) { display: none !important; }
+	.aw-ed-law-list .kit-case { padding-block: var(--kit-space-4) !important; }
+	.aw-ed-law-title { margin-bottom: var(--kit-space-5) !important; }
+}
+
+/* Find help near you: states scroll sideways in two rows on phones and tablets; six columns on desktop */
+@media (max-width: 1199px) {
+	.aw-ed-find .aw-browse-states ul { grid-auto-flow: column; grid-template-columns: none !important; grid-template-rows: repeat(2, auto); grid-auto-columns: minmax(11rem, max-content); overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter); }
+	.aw-ed-find .aw-browse-states ul::-webkit-scrollbar { display: none; }
+	.aw-ed-find .aw-browse-states { margin-top: var(--kit-space-7); }
+}
+@media (min-width: 1200px) { .aw-ed-find .aw-browse-states ul { grid-template-columns: repeat(6, minmax(0, 1fr)); } .aw-ed-find .aw-browse-states { margin-top: var(--kit-space-7); } }
+
+/* Take action: two opportunities; the photo only on desktop, as tall as the text beside it */
+.aw-ed-opps .wp-block-post-template > li:nth-child(n+3) { display: none !important; }
+@media (max-width: 1199px) { .aw-ed-act-media { display: none; } }
+@media (min-width: 1200px) { .aw-ed-act-media img { min-height: 0; max-height: 100%; } .aw-ed-act-media { position: relative; } .aw-ed-act-media img { position: absolute; inset: 0; } }
+.aw-ed-steps { margin: var(--kit-space-5) 0; }
+.aw-ed-steps a { padding-block: var(--kit-space-4); }
+
+/* Animal Writes 1.0: photos in one row (sideways on phones and tablets), numbers and timeline compact */
+@media (max-width: 1199px) {
+	.aw-ed-mosaic { display: flex !important; overflow-x: auto; gap: var(--kit-space-2); height: 9rem; margin: 0 calc(-1 * var(--kit-space-gutter)) var(--kit-space-6) !important; padding: 0 var(--kit-space-gutter); scrollbar-width: none; }
+	.aw-ed-mosaic::-webkit-scrollbar { display: none; }
+	.aw-ed-mosaic img { flex: 0 0 auto; width: auto !important; height: 100% !important; aspect-ratio: auto; }
+	.aw-ed-mosaic .m1 { aspect-ratio: 16 / 9; }
+	.aw-ed-mosaic :is(.m2, .m3, .m4, .m5) { aspect-ratio: 3 / 4; }
+	.aw-ed-timeline { display: flex !important; overflow-x: auto; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) 0; scrollbar-width: none; }
+	.aw-ed-timeline::-webkit-scrollbar { display: none; }
+	.aw-ed-timeline li { flex: 0 0 min(70%, 16rem); }
+	.aw-ed-numbers { gap: var(--kit-space-4); margin-bottom: var(--kit-space-6); }
+	.kit-ed-story-head p { margin-bottom: var(--kit-space-5); }
+}
+@media (min-width: 768px) and (max-width: 1199px) { .aw-ed-mosaic { height: 12rem; } .aw-ed-numbers { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1200px) {
+	.aw-ed-mosaic { grid-template-columns: 2fr repeat(4, minmax(0, 1fr)); grid-auto-rows: 10rem; margin-bottom: var(--kit-space-6); }
+	.aw-ed-mosaic :is(.m1, .m2, .m3, .m4, .m5) { grid-column: auto !important; grid-row: auto !important; }
+	.kit-ed-story-head { display: grid; grid-template-columns: 1fr 2fr; gap: var(--kit-space-7); align-items: start; }
+	.kit-ed-story-head p { margin: 0 0 var(--kit-space-6); }
+	.aw-ed-numbers, .aw-ed-timeline { margin-bottom: var(--kit-space-6); }
+}

@@ -62,6 +62,7 @@ const AW_CONTACT_ABOUT = array(
 	'opportunity' => 'Post an opportunity',
 	'partnership' => 'Partner with us',
 	'correction'  => 'Report a mistake',
+	'remove-data' => 'Remove my data',
 );
 /** Message placeholder by reason (Phase 11 H4). */
 const AW_CONTACT_PLACEHOLDER = array(
@@ -97,7 +98,7 @@ function aw_contact_form() {
 			. '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink() ) . '#write">Send another</a></p></div>';
 	}
 	$form  = 'aw_contact';
-	$about = sanitize_key( wp_unslash( $_GET['about'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$about = 'partner' === $about ? 'partnership' : $about; // older links
 	$about = isset( AW_CONTACT_ABOUT[ $about ] ) ? $about : '';
 	$state = aw_form_state( $form );
@@ -149,6 +150,16 @@ function aw_contact_submit() {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_m_source', kits_submitted_source() ); // the page it was sent from (S5.8)
+	if ( 'remove-data' === $v['about'] ) {
+		// DPDP: tagged for the Inbox, and WordPress's own confirmation email is sent. Nothing is deleted until the person
+		// opens that link (privacy-requests.php runs the erasers then, and the request record is the log).
+		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
+		$req = wp_create_user_request( $v['email'], 'remove_personal_data' );
+		if ( ! is_wp_error( $req ) ) {
+			wp_send_user_request( $req );
+			update_post_meta( $id, 'aw_m_request', (int) $req );
+		}
+	}
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
 	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Message sent.', sprintf( 'We\'ll reply to %s.', $v['email'] ), array( 'again' => 'Send another' ) );
@@ -156,7 +167,7 @@ function aw_contact_submit() {
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
 
-add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'About: sender', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_source' => 'Sent from', 'date' => 'Received' ) );
+add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'About: sender', 'aw_m_tag' => 'Tag', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_source' => 'Sent from', 'date' => 'Received' ) );
 add_action(
 	'manage_aw_message_posts_custom_column',
 	function ( $col, $id ) {
@@ -375,3 +386,14 @@ function aw_elsewhere_screen() {
 	submit_button();
 	echo '</form></div>';
 }
+
+// "Remove my data" is a Contact option now: the old page sends people there with the option chosen.
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_page( 'remove-my-data' ) ) {
+			wp_safe_redirect( home_url( '/contact/?type=remove-data#write' ), 301, 'Animal Writes' );
+			exit;
+		}
+	}
+);
