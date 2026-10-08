@@ -55,7 +55,7 @@ function aw_breadcrumbs() {
 			$trail[] = array( aw_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
 		}
 	} elseif ( is_tax( 'aw_topic' ) ) {
-		$trail = array( array( 'Topics', home_url( '/topics/' ) ), array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) );
+		$trail = array( array( 'Categories', home_url( '/topics/' ) ), array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) );
 	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
 		$obj   = get_queried_object();
 		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );

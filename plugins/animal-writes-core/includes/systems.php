@@ -66,11 +66,11 @@ function aw_text( $id, $words = 28 ) {
  * Several filters can apply at once; every filtered list is canonical to the plain list (indexing.php).
  */
 const AW_LIST_FILTERS = array(
-	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'State' ) ),
-	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
-	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Topic' ) ),
-	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
-	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Topic' ) ),
+	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'State' ) ),
+	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
+	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Category' ) ),
+	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
+	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Category' ) ),
 	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ), // Articles · Videos · Social posts
 );
 /** Issuer values that are courts (shown darker on Library cards). */

@@ -68,7 +68,7 @@ add_filter(
 		if ( in_array( $tax, AW_SHARED_TAXONOMIES, true ) ) {
 			$args['show_in_menu'] = false; // listed once, under Classification
 		}
-		if ( 'aw_topic' === $tax && is_admin() ) { // in WP Admin topics are called Categories; the site keeps "Topics"
+		if ( 'aw_topic' === $tax && is_admin() ) { // Categories, in WP Admin and on the site
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Categories', 'singular_name' => 'Category', 'menu_name' => 'Categories', 'all_items' => 'All categories', 'edit_item' => 'Edit category', 'add_new_item' => 'Add category', 'search_items' => 'Search categories' ) );
 		}
 		return $args;

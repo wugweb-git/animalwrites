@@ -67,7 +67,7 @@ function aw_register_content_types() {
 		'aw_topic',
 		$all,
 		array(
-			'labels'            => array( 'name' => 'Topics', 'singular_name' => 'Topic' ),
+			'labels'            => array( 'name' => 'Categories', 'singular_name' => 'Category' ), // shared by every section; URLs stay /topic/{slug}/
 			'hierarchical'      => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,

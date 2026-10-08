@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_VOL_DB_VERSION = '1';
+const AW_VOL_DB_VERSION = '2'; // 2: page_source and pincode columns (S5.8, S6.6)
 const AW_VOL_CAP        = 'edit_aw_volunteers';
 
 /** Table name. */
@@ -40,6 +40,8 @@ add_action(
 			state_id bigint(20) unsigned NULL,
 			district_id bigint(20) unsigned NULL,
 			city_text varchar(190) NOT NULL DEFAULT '',
+			pincode varchar(6) NOT NULL DEFAULT '',
+			page_source varchar(120) NOT NULL DEFAULT '',
 			role varchar(255) NOT NULL DEFAULT '',
 			source varchar(20) NOT NULL,
 			consent_scope varchar(40) NOT NULL,
@@ -121,6 +123,10 @@ function aw_vol_upsert( $v ) {
 	$t   = aw_vol_table();
 	$now = current_time( 'mysql', true );
 	list( $state_id, $district_id ) = aw_vol_place( (string) ( $v['city_text'] ?? '' ), (string) ( $v['state_slug'] ?? '' ) );
+	$picked = ! empty( $v['district_slug'] ) ? aw_place_by_slug( (string) $v['district_slug'] ) : null; // chosen from the LGD list
+	if ( $picked && 'district' === $picked->kind ) {
+		list( $state_id, $district_id ) = array( (int) $picked->parent, (int) $picked->term_id );
+	}
 	$row = array(
 		'name'                 => sanitize_text_field( (string) ( $v['name'] ?? '' ) ),
 		'email'                => $email,
@@ -128,6 +134,8 @@ function aw_vol_upsert( $v ) {
 		'state_id'             => $state_id,
 		'district_id'          => $district_id,
 		'city_text'            => sanitize_text_field( (string) ( $v['city_text'] ?? '' ) ),
+		'pincode'              => preg_replace( '/\D/', '', (string) ( $v['pincode'] ?? '' ) ),
+		'page_source'          => sanitize_text_field( (string) ( $v['page_source'] ?? '' ) ),
 		'role'                 => sanitize_text_field( (string) ( $v['role'] ?? '' ) ),
 		'source'               => in_array( $v['source'] ?? '', array( 'v1_campaign', 'v2_form' ), true ) ? $v['source'] : 'v2_form',
 		'consent_scope'        => in_array( $v['consent_scope'] ?? '', array( 'campaign_1_0', 'volunteering', 'volunteering_and_updates' ), true ) ? $v['consent_scope'] : 'volunteering',
@@ -144,7 +152,7 @@ function aw_vol_upsert( $v ) {
 	// Keep what is known; a newer sign-up fills gaps and widens consent (campaign_1_0 < volunteering < volunteering_and_updates).
 	$rank = array( 'campaign_1_0' => 1, 'volunteering' => 2, 'volunteering_and_updates' => 3 );
 	$upd  = array( 'updated_at' => $now );
-	foreach ( array( 'name', 'phone', 'state_id', 'district_id', 'city_text', 'role' ) as $k ) {
+	foreach ( array( 'name', 'phone', 'state_id', 'district_id', 'city_text', 'pincode', 'page_source', 'role' ) as $k ) {
 		if ( '' !== (string) $row[ $k ] && null !== $row[ $k ] && ( 'v2_form' === $row['source'] || '' === (string) $existing[ $k ] ) ) {
 			$upd[ $k ] = $row[ $k ];
 		}
@@ -337,11 +345,11 @@ function aw_vol_admin_page() {
 	submit_button( 'Filter', 'secondary', '', false );
 	$export = wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'aw_vol_export' ), array_filter( $f ) ), admin_url( 'admin-post.php' ) ), 'aw_vol_export' );
 	echo ' <a class="button" href="' . esc_url( $export ) . '">Export CSV (' . (int) $total . ')</a></p></form>';
-	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Place</th><th>Role</th><th>Source</th><th>Consent</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Place</th><th>Role</th><th>Source</th><th>Signed up on</th><th>Consent</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
 		$place = trim( ( $r['district_id'] ? ( $names[ $r['district_id'] ] ?? '' ) . ', ' : '' ) . ( $r['state_id'] ? ( $names[ $r['state_id'] ] ?? '' ) : '' ), ', ' );
 		$del   = wp_nonce_url( add_query_arg( array( 'action' => 'aw_vol_delete', 'id' => (int) $r['id'] ), admin_url( 'admin-post.php' ) ), 'aw_vol_delete_' . (int) $r['id'] );
-		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['phone'] ) . '</td><td>' . esc_html( $place ? $place : $r['city_text'] ) . '</td><td>' . esc_html( $r['role'] ) . '</td><td>' . esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ) . '</td><td>' . esc_html( $r['consent_scope'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td>'
+		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['phone'] ) . '</td><td>' . esc_html( $place ? $place : $r['city_text'] ) . '</td><td>' . esc_html( $r['role'] ) . '</td><td>' . esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ) . '</td><td>' . esc_html( (string) ( $r['page_source'] ?? '' ) ) . '</td><td>' . esc_html( $r['consent_scope'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td>'
 			. '<td><a href="' . esc_url( $del ) . '" style="color:#b32d2e" onclick="return confirm(\'Delete this volunteer permanently?\')">Delete</a></td></tr>';
 	}
 	if ( ! $rows ) {
@@ -366,9 +374,11 @@ add_action(
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="aw-volunteers-' . gmdate( 'Y-m-d' ) . '.csv"' );
 		$out = fopen( 'php://output', 'w' ); // phpcs:ignore
-		fputcsv( $out, array( 'id', 'name', 'email', 'phone', 'state_id', 'district_id', 'city_text', 'role', 'source', 'consent_scope', 'consent_text_version', 'consent_at', 'status', 'created_at', 'updated_at' ) );
+		$cols = array( 'id', 'name', 'email', 'phone', 'state_id', 'district_id', 'city_text', 'pincode', 'page_source', 'role', 'source', 'consent_scope', 'consent_text_version', 'consent_at', 'status', 'created_at', 'updated_at' );
+		fputcsv( $out, $cols );
 		foreach ( $rows as $r ) {
 			// Neutralise spreadsheet formulas in free text.
+			$r = array_map( fn( $c ) => $r[ $c ] ?? '', $cols ); // same order as the header, whatever the table's column order
 			fputcsv( $out, array_map( fn( $v ) => is_string( $v ) && preg_match( '/^[=+\-@]/', $v ) ? "'" . $v : $v, $r ) );
 		}
 		fclose( $out ); // phpcs:ignore

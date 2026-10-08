@@ -72,7 +72,7 @@ add_filter(
 			$tabs[ $slug ] = array( $t[0], fn() => aw_sources_tab( $slug ) );
 		}
 		$tabs['press']  = array( 'Press queries', 'aw_sources_press_tab' );
-		$tabs['topics'] = array( 'Topics', 'aw_sources_topics_tab' );
+		$tabs['topics'] = array( 'Categories', 'aw_sources_topics_tab' );
 		return $tabs;
 	}
 );

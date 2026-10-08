@@ -1,6 +1,7 @@
 <?php
 /**
- * Shared form component: field markup, spam guard and server-side per-field errors.
+ * Shared form component (S5): the field dictionary, field markup, spam guard, server-side per-field errors, the
+ * expandable and multi-step patterns, and one set of messages for every form.
  *
  * Markup matches the client validator in the theme's aw.js: each field's error lives in
  * <span class="aw-field-error" id="{id}-error"> right after the control, and the summary is
@@ -54,7 +55,7 @@ function aw_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
 
 /** The form-level message when sending fails (a form can set its own with the kits_form_generic_error filter). */
 function aw_form_generic_error( $form ) {
-	return (string) apply_filters( 'kits_form_generic_error', 'Something went wrong. Your details are still here — try again.', $form );
+	return (string) apply_filters( 'kits_form_generic_error', 'Couldn\'t send. Your details are still here — try again.', $form );
 }
 
 /** Was this submitted by kit.js with fetch() (X-AW-Fetch header)? */
@@ -141,6 +142,7 @@ function aw_form_open( $form, $attrs = array() ) {
 	$html .= '<input type="hidden" name="action" value="' . esc_attr( $form ) . '">'
 		. wp_nonce_field( $form, '_aw_nonce', true, false )
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
+		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
 		. '<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
 		. kits_altcha_widget( $altcha );
 	return $html;
@@ -242,17 +244,20 @@ function aw_field( $form, $f ) {
  */
 function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 	if ( ! isset( $_POST['_aw_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_aw_nonce'] ) ), $form ) ) {
-		aw_form_fail( $form, array(), array(), $back, $anchor, 'This form expired. Please check your details and send it again.' );
+		if ( aw_form_is_fetch() ) {
+			wp_send_json( array( 'ok' => false, 'code' => 'expired', 'errors' => (object) array(), 'notice' => 'This page has been open a while. Reload it and send again.' ) ); // kit.js gets a fresh key and sends once more
+		}
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}
 	if ( ! empty( $_POST['aw_website'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
 		aw_form_success( $done, '' ); // bots see a success
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, aw_form_generic_error( $form ) );
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Couldn\'t verify you\'re not a bot. Try again.' );
 	}
 	$key = 'aw_rl_' . $form . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 	if ( (int) get_transient( $key ) >= $per_hour ) {
-		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Too many attempts. Wait a minute and try again.' );
+		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'Too many tries. Wait a minute, then try again.' );
 	}
 	return $key;
 }
@@ -263,7 +268,7 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
  * @return array<string,mixed>
  */
 function aw_form_kept_values() {
-	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'aw_website', 'altcha' );
+	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'aw_website', 'altcha', 'aw_source' );
 	$out  = array();
 	foreach ( wp_unslash( $_POST ) as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! in_array( $k, $skip, true ) ) {
@@ -297,17 +302,19 @@ function aw_form_validate( $rules, $values, $labels, $messages = array() ) {
 		$label = $labels[ $field ] ?? ucfirst( $field );
 		foreach ( $list as $rule ) {
 			if ( 'required' === $rule && ( '' === $v || array() === $v ) ) {
-				$errors[ $field ] = $messages[ $field ]['required'] ?? ( in_array( 'email', $list, true ) ? 'Enter your email address' : "{$label}: this is required." );
+				$errors[ $field ] = $messages[ $field ]['required'] ?? ( in_array( 'email', $list, true ) ? 'Enter your email address' : 'Enter your ' . strtolower( preg_replace( '/^Your /i', '', $label ) ) );
 			} elseif ( '' === $v ) {
 				continue;
 			} elseif ( 'email' === $rule && ( ! is_email( $v ) || strlen( $v ) > 254 ) ) {
 				$errors[ $field ] = $messages[ $field ]['email'] ?? 'Enter a full email address, like you@example.com';
-			} elseif ( 'phone' === $rule && ! preg_match( '/^\+?[0-9 ]{8,15}$/', $v ) ) {
-				$errors[ $field ] = "{$label}: enter 8 to 15 digits, for example +91 98765 43210.";
-			} elseif ( 'url' === $rule && ! wp_http_validate_url( $v ) ) {
-				$errors[ $field ] = "{$label}: enter a link starting with https://.";
+			} elseif ( 'phone' === $rule && '' === kits_clean_phone( $v ) ) {
+				$errors[ $field ] = $messages[ $field ]['phone'] ?? 'Enter a 10-digit phone number, like 98765 43210';
+			} elseif ( 'pin' === $rule && ! preg_match( '/^[1-9][0-9]{5}$/', $v ) ) {
+				$errors[ $field ] = $messages[ $field ]['pin'] ?? 'Enter a 6-digit PIN code, like 682011';
+			} elseif ( 'url' === $rule && ! wp_http_validate_url( kits_clean_url( $v ) ) ) {
+				$errors[ $field ] = $messages[ $field ]['url'] ?? 'Enter a web address, like https://example.org';
 			} elseif ( str_starts_with( $rule, 'max:' ) && mb_strlen( (string) $v ) > (int) substr( $rule, 4 ) ) {
-				$errors[ $field ] = "{$label}: keep this under " . (int) substr( $rule, 4 ) . ' characters.';
+				$errors[ $field ] = "{$label}: keep this under " . number_format_i18n( (int) substr( $rule, 4 ) ) . ' characters.';
 			}
 			if ( isset( $errors[ $field ] ) ) {
 				break;

@@ -365,6 +365,87 @@ add_action(
 	1
 );
 
+/* ---------- PIN code → State and District (India Post, matched to LGD) ---------- */
+
+/**
+ * Look up a PIN code: India Post gives the post office's district and state names; they are matched to the LGD file.
+ * Returns [state, district, state_slug, district_slug, state_name, district_name, note] or an error message.
+ *
+ * @param string $pin PIN code.
+ * @return array|string
+ */
+function aw_pin_lookup( $pin ) {
+	$pin = preg_replace( '/\D/', '', (string) $pin );
+	if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
+		return 'Enter a 6-digit PIN code, like 682011';
+	}
+	$data = get_transient( 'aw_pin_' . $pin );
+	if ( false === $data ) {
+		$r = wp_remote_get( 'https://api.postalpincode.in/pincode/' . $pin, array( 'timeout' => 8 ) );
+		if ( is_wp_error( $r ) || 200 !== wp_remote_retrieve_response_code( $r ) ) {
+			return 'Couldn\'t find this PIN. Choose your state and district instead.';
+		}
+		$data = json_decode( wp_remote_retrieve_body( $r ), true );
+		set_transient( 'aw_pin_' . $pin, $data, WEEK_IN_SECONDS );
+	}
+	$po       = $data[0]['PostOffice'][0] ?? null;
+	$state    = $po ? aw_place_state_by_name( (string) ( $po['State'] ?? '' ) ) : null;
+	$district = $state ? aw_place_district_by_name( (string) ( $po['District'] ?? '' ), $state ) : null;
+	if ( ! $state ) {
+		return 'Couldn\'t find this PIN. Choose your state and district instead.';
+	}
+	return array(
+		'state'         => $state->code,
+		'district'      => $district ? $district->code : 0,
+		'state_slug'    => $state->slug,
+		'district_slug' => $district ? $district->slug : '',
+		'state_name'    => $state->name,
+		'district_name' => $district ? $district->name : '',
+		'note'          => $district ? '' : 'Choose your district.',
+	);
+}
+
+// The same lookup for public forms (volunteer, claim): no login, a few per minute per visitor.
+add_action( 'wp_ajax_nopriv_aw_pin', 'aw_pin_public' );
+add_action( 'wp_ajax_aw_pin', 'aw_pin_public' );
+function aw_pin_public() {
+	nocache_headers();
+	$key = 'aw_pin_rl_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$n   = (int) get_transient( $key );
+	if ( $n >= 30 ) {
+		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
+	}
+	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
+	$r = aw_pin_lookup( (string) wp_unslash( $_GET['pin'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
+}
+
+/** State and District fields from the LGD file (District follows State; a PIN field fills both). */
+function aw_place_fields( $form, $state_slug = '', $district_slug = '', $required_state = true ) {
+	$s_opts = array( '' => 'Choose a state' );
+	foreach ( aw_place_states() as $st ) {
+		$s_opts[ $st->slug ] = $st->name;
+	}
+	$state  = aw_form_state( $form );
+	$cur_s  = (string) ( $state['values']['state'] ?? $state_slug );
+	$cur_d  = (string) ( $state['values']['district'] ?? $district_slug );
+	$st_obj = $cur_s ? aw_place_by_slug( $cur_s ) : null;
+	$html   = kits_dict_field( $form, 'state', array( 'required' => $required_state, 'options' => $s_opts, 'attrs' => array( 'data-district-select' => aw_field_id( $form, 'district' ) ) ) );
+	$id     = aw_field_id( $form, 'district' );
+	$opts   = '<option value="">' . ( $st_obj ? 'Choose a district' : 'Choose a state first' ) . '</option>';
+	foreach ( aw_place_states() as $st ) {
+		$on    = $st_obj && $st_obj->code === $st->code;
+		$opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '"' . ( $on ? '' : ' hidden disabled' ) . '>';
+		foreach ( aw_place_districts( $st->code ) as $d ) {
+			$opts .= '<option value="' . esc_attr( $d->slug ) . '"' . selected( $cur_d, $d->slug, false ) . '>' . esc_html( $d->name ) . '</option>';
+		}
+		$opts .= '</optgroup>';
+	}
+	$err   = $state['errors']['district'] ?? '';
+	$html .= '<div class="kit-field aw-field aw-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">District <span class="aw-optional kit-optional">(optional)</span></label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="district" autocomplete="address-level2" data-none="Choose a state first" data-all="Choose a district" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $st_obj ? '' : ' disabled' ) . '>' . $opts . '</select></div><span class="kit-field-message aw-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
+	return $html;
+}
+
 /* ---------- Display ---------- */
 
 /** [aw_place_links] An item's places, each linked to its directory page (item pages). */

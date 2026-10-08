@@ -111,10 +111,7 @@ add_action(
 	}
 );
 
-/**
- * PIN lookup: India Post gives the post office's district and state names; they are matched to the LGD file.
- * Returns {state, district, state_name, district_name} or an error message.
- */
+/** PIN lookup for the Place box (editors): see aw_pin_lookup() in places.php. */
 add_action(
 	'wp_ajax_aw_pin_lookup',
 	function () {
@@ -122,37 +119,8 @@ add_action(
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_send_json_error( 'Not allowed.' );
 		}
-		$pin = preg_replace( '/\D/', '', (string) wp_unslash( $_GET['pin'] ?? '' ) );
-		if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
-			wp_send_json_error( 'Enter a 6-digit PIN code.' );
-		}
-		$data = get_transient( 'aw_pin_' . $pin );
-		if ( false === $data ) {
-			$r = wp_remote_get( 'https://api.postalpincode.in/pincode/' . $pin, array( 'timeout' => 10 ) );
-			if ( is_wp_error( $r ) || 200 !== wp_remote_retrieve_response_code( $r ) ) {
-				wp_send_json_error( 'India Post did not answer. Choose the state and district below.' );
-			}
-			$data = json_decode( wp_remote_retrieve_body( $r ), true );
-			set_transient( 'aw_pin_' . $pin, $data, WEEK_IN_SECONDS );
-		}
-		$po = $data[0]['PostOffice'][0] ?? null;
-		if ( ! $po ) {
-			wp_send_json_error( 'India Post has no post office for this PIN code. Check it, or choose below.' );
-		}
-		$state    = aw_place_state_by_name( (string) ( $po['State'] ?? '' ) );
-		$district = $state ? aw_place_district_by_name( (string) ( $po['District'] ?? '' ), $state ) : null;
-		if ( ! $state ) {
-			wp_send_json_error( 'India Post says "' . sanitize_text_field( $po['State'] ?? '' ) . '", which is not an LGD state name. Choose below.' );
-		}
-		wp_send_json_success(
-			array(
-				'state'         => $state->code,
-				'district'      => $district ? $district->code : 0,
-				'state_name'    => $state->name,
-				'district_name' => $district ? $district->name : '',
-				'note'          => $district ? '' : 'India Post says district "' . sanitize_text_field( $po['District'] ?? '' ) . '", which is not an LGD name: choose the district.',
-			)
-		);
+		$r = aw_pin_lookup( (string) wp_unslash( $_GET['pin'] ?? '' ) );
+		is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 	}
 );
 
