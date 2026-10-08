@@ -86,7 +86,10 @@ add_filter(
 		if ( 'aw_press' === $type ) { // its own menu item, after Campaigns
 			$args['show_in_menu'] = true;
 			$args['menu_icon']    = 'dashicons-megaphone';
-			$args['labels']       = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Press coverage', 'menu_name' => 'Press coverage', 'all_items' => 'All coverage' ) );
+			$args['labels']       = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Press coverage', 'menu_name' => 'Press coverage', 'all_items' => 'All coverage', 'add_new' => 'Add coverage', 'add_new_item' => 'Add coverage' ) );
+		}
+		if ( 'aw_message' === $type ) { // the contact form's messages
+			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Contact messages', 'menu_name' => 'Contact messages', 'all_items' => 'Contact messages' ) );
 		}
 		if ( in_array( $type, array( 'aw_message', 'aw_claim' ), true ) ) {
 			$args['show_in_menu'] = 'aw-inbox';
@@ -129,7 +132,6 @@ add_action(
 		global $submenu;
 		list( $msg, $claims ) = aw_inbox_counts();
 		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $msg + $claims ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-email', 26 );
-		add_menu_page( 'Audience', 'Audience', AW_VOL_CAP, 'aw-audience', '__return_null', 'dashicons-groups', 27 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
@@ -148,16 +150,14 @@ add_action(
 		// Hidden: Posts, Comments.
 		remove_menu_page( 'edit.php' );
 		remove_menu_page( 'edit-comments.php' );
-		// Newsletter and Volunteers move under Audience (their pages keep their URLs).
-		foreach ( array( 'aw-newsletter' => 'Newsletter', 'aw-volunteers' => 'Volunteers' ) as $slug => $label ) {
-			foreach ( $menu as $i => $item ) {
-				if ( $slug === $item[2] ) {
-					unset( $menu[ $i ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-					$submenu['aw-audience'][] = array( $label, AW_VOL_CAP, $slug, $label ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-				}
+		// Volunteer sign-ups go under Inbox; Newsletter stays its own item with its Subscribers list (pages keep their URLs).
+		foreach ( $menu as $i => $item ) {
+			if ( 'aw-volunteers' === $item[2] ) {
+				unset( $menu[ $i ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+				$submenu['aw-inbox'][] = array( 'Volunteer sign-ups', AW_VOL_CAP, 'aw-volunteers', 'Volunteer sign-ups' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 			}
 		}
-		remove_submenu_page( 'aw-audience', 'aw-audience' );
+		$submenu['aw-newsletter'] = array( array( 'Subscribers', AW_VOL_CAP, 'aw-newsletter', 'Subscribers' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
 		// Inbox: the two post-type lists (registered with show_in_menu = aw-inbox), with their own counts.
 		list( $msg, $claims ) = aw_inbox_counts();
@@ -169,6 +169,11 @@ add_action(
 			}
 		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
+		// Inbox order (S2.3): Contact messages · Listing claims · Reports · Volunteer sign-ups · Press to review.
+		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'aw-volunteers' => 4, 'edit.php?post_type=aw_press&post_status=pending' => 5 );
+		if ( isset( $submenu['aw-inbox'] ) ) {
+			usort( $submenu['aw-inbox'], fn( $x, $y ) => ( $rank[ $x[2] ] ?? 9 ) <=> ( $rank[ $y[2] ] ?? 9 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		}
 		// Categories: only under Classification.
 		foreach ( array_keys( (array) $submenu ) as $parent ) {
 			foreach ( AW_SHARED_TAXONOMIES as $tax ) {
@@ -194,11 +199,11 @@ add_filter(
 		if ( in_array( $screen->taxonomy, AW_SHARED_TAXONOMIES, true ) ) {
 			return 'aw-classification';
 		}
-		if ( in_array( $screen->post_type, array( 'aw_message', 'aw_claim' ), true ) ) {
+		if ( in_array( $screen->post_type, array( 'aw_message', 'aw_claim', 'aw_report' ), true ) ) {
 			return 'aw-inbox';
 		}
-		if ( in_array( $_GET['page'] ?? '', array( 'aw-newsletter', 'aw-volunteers' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return 'aw-audience';
+		if ( 'aw-volunteers' === ( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return 'aw-inbox';
 		}
 		return $parent;
 	}
@@ -212,7 +217,7 @@ add_filter(
 );
 
 // Menu order: the site's order, then WordPress's own screens.
-add_filter( 'custom_menu_order', '__return_true' );
+add_filter( 'custom_menu_order', '__return_true', PHP_INT_MAX );
 add_filter(
 	'menu_order',
 	function () {
@@ -229,7 +234,7 @@ add_filter(
 			'upload.php',
 			'aw-classification',
 			'aw-inbox',
-			'aw-audience',
+			'aw-newsletter',
 			'separator2',
 			'themes.php',
 			'plugins.php',
@@ -239,7 +244,8 @@ add_filter(
 			'googlesitekit-dashboard',
 			'litespeed',
 		);
-	}
+	},
+	PHP_INT_MAX
 );
 
 /* ---------- One-time data steps (no deletion) ---------- */

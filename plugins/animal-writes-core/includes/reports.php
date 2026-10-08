@@ -30,10 +30,10 @@ add_action(
 		register_post_type(
 			'aw_report',
 			array(
-				'labels'          => array( 'name' => 'Listing reports', 'singular_name' => 'Listing report', 'menu_name' => 'Listing reports' ),
+				'labels'          => array( 'name' => 'Reports', 'singular_name' => 'Report', 'menu_name' => 'Reports', 'all_items' => 'Reports' ),
 				'public'          => false,
 				'show_ui'         => true,
-				'show_in_menu'    => 'edit.php?post_type=aw_listing',
+				'show_in_menu'    => 'aw-inbox', // Inbox → Reports (S2.3)
 				'show_in_rest'    => false,
 				'supports'        => array( 'title' ),
 				'capability_type' => array( 'aw_volunteer', 'aw_volunteers' ), // administrators only, as for volunteers

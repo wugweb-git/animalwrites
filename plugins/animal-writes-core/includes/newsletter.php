@@ -1,6 +1,7 @@
 <?php
 /**
- * Newsletter: sign-up with email confirmation, a subscriber list, and sending from WP Admin > Newsletter.
+ * Newsletter: sign-up with email confirmation and the sign-up list (WP Admin > Audience > Newsletter, CSV export).
+ * Sending happens in an external mailing service, not in WordPress (S2.4).
  *
  * Table {prefix}aw_subscribers. Statuses: pending (signed up, not yet confirmed), invited (1.0 volunteer sent the
  * invitation, not yet confirmed), active (confirmed: the only status that receives newsletters), unsubscribed.
@@ -15,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_NL_DB_VERSION = '1';
-const AW_NL_BATCH      = 20; // emails per run, one run every 5 minutes
 const AW_NL_CONSENT    = 'v2-newsletter-1';
 
 function aw_nl_table() {
@@ -190,69 +190,16 @@ add_action(
 
 /* ---------- Sending ---------- */
 
-/** Who an audience reaches right now: list of [email, name, token]. */
-function aw_nl_audience( $audience ) {
-	global $wpdb;
-	$t = aw_nl_table();
-	if ( 'active' === $audience ) {
-		return $wpdb->get_results( "SELECT email, name, token FROM {$t} WHERE status = 'active' ORDER BY id", ARRAY_A ); // phpcs:ignore
-	}
-	if ( 'v1_invite' === $audience ) {
-		// 1.0 volunteers who are not on the list yet in any form (never re-invite, never email the unsubscribed).
-		$v = aw_vol_table();
-		return $wpdb->get_results( "SELECT v.email, v.name, '' AS token FROM {$v} v LEFT JOIN {$t} s ON s.email = v.email WHERE v.source = 'v1_campaign' AND v.status = 'active' AND s.id IS NULL ORDER BY v.id", ARRAY_A ); // phpcs:ignore
-	}
-	return array();
-}
-
-add_filter(
-	'cron_schedules',
-	function ( $s ) {
-		$s['aw_5min'] = array( 'interval' => 300, 'display' => 'Every 5 minutes' );
-		return $s;
-	}
-);
-
-/** Send the next batch of the running send, if any. */
-function aw_nl_run_batch() {
-	$job = get_option( 'aw_nl_job' );
-	if ( ! is_array( $job ) || 'sending' !== $job['state'] ) {
-		wp_clear_scheduled_hook( 'aw_nl_batch' );
-		return;
-	}
-	$batch = array_splice( $job['queue'], 0, AW_NL_BATCH );
-	foreach ( $batch as $p ) {
-		if ( 'v1_invite' === $job['audience'] ) {
-			$row = aw_nl_add( $p['email'], $p['name'], 'v1_invite', 'invited' );
-			if ( ! $row || 'invited' !== $row['status'] ) {
-				continue; // they joined some other way meanwhile
-			}
-			$body = $job['body'] . "\n\nTo get these updates, confirm here:\n" . aw_nl_link( 'confirm', $row['token'] );
-			$ok   = aw_nl_mail( $row['email'], $job['subject'], $body, $row['token'] );
-		} else {
-			$row = aw_nl_get( 'email', $p['email'] );
-			if ( ! $row || 'active' !== $row['status'] ) {
-				continue; // unsubscribed since the send started
-			}
-			$ok = aw_nl_mail( $row['email'], $job['subject'], $job['body'], $row['token'] );
-		}
-		$job[ $ok ? 'sent' : 'failed' ]++;
-	}
-	if ( ! $job['queue'] ) {
-		$job['state']    = 'done';
-		$job['finished'] = current_time( 'mysql' );
-		wp_clear_scheduled_hook( 'aw_nl_batch' );
-	}
-	update_option( 'aw_nl_job', $job, false );
-}
-add_action( 'aw_nl_batch', 'aw_nl_run_batch' );
+// Newsletters are sent from an external CRM (S2.4, 8 Oct 2026): WordPress keeps the sign-up list only. Any send
+// still scheduled from the old screen is cleared (its last draft and job stay in the options aw_nl_draft, aw_nl_job).
+add_action( 'init', fn() => wp_next_scheduled( 'aw_nl_batch' ) && wp_clear_scheduled_hook( 'aw_nl_batch' ) );
 
 /* ---------- Admin: WP Admin > Newsletter ---------- */
 
 add_action(
 	'admin_menu',
 	function () {
-		add_menu_page( 'Newsletter', 'Newsletter', AW_VOL_CAP, 'aw-newsletter', 'aw_nl_admin_page', 'dashicons-email-alt', 27 );
+		add_menu_page( 'Newsletter sign-ups', 'Newsletter', AW_VOL_CAP, 'aw-newsletter', 'aw_nl_admin_page', 'dashicons-email-alt', 27 );
 	}
 );
 
@@ -260,109 +207,26 @@ function aw_nl_admin_page() {
 	global $wpdb;
 	$t      = aw_nl_table();
 	$counts = wp_list_pluck( $wpdb->get_results( "SELECT status, COUNT(*) n FROM {$t} GROUP BY status", ARRAY_A ), 'n', 'status' ); // phpcs:ignore
-	$job    = get_option( 'aw_nl_job' );
-	$note   = sanitize_key( $_GET['nl'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$notes  = array(
-		'test'    => 'Test sent to ' . wp_get_current_user()->user_email . '.',
-		'started' => 'Sending started. It goes out in batches of ' . AW_NL_BATCH . ' every 5 minutes; this page shows progress.',
-		'busy'    => 'Another send is still running. Wait for it to finish.',
-		'empty'   => 'Nobody to send to in that audience.',
-		'stopped' => 'Sending stopped.',
-		'missing' => 'Write a subject and a message first.',
-	);
-	echo '<div class="wrap"><h1>Newsletter</h1>';
-	if ( isset( $notes[ $note ] ) ) {
-		echo '<div class="notice notice-info"><p>' . esc_html( $notes[ $note ] ) . '</p></div>';
-	}
-	if ( '' === kits_mail_settings()['pass'] ) {
-		echo '<div class="notice notice-warning"><p>Set up the mailbox first in <a href="' . esc_url( admin_url( 'options-general.php?page=kits-mail' ) ) . '">Settings &gt; Mail</a>.</p></div>';
-	}
-	echo '<p>Confirmed subscribers: <strong>' . (int) ( $counts['active'] ?? 0 ) . '</strong> · Waiting to confirm: ' . (int) ( $counts['pending'] ?? 0 )
-		. ' · 1.0 volunteers invited, not yet confirmed: ' . (int) ( $counts['invited'] ?? 0 ) . ' · Unsubscribed: ' . (int) ( $counts['unsubscribed'] ?? 0 )
-		. ' · 1.0 volunteers not yet invited: ' . count( aw_nl_audience( 'v1_invite' ) ) . '</p>';
+	$page   = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$rows   = $wpdb->get_results( $wpdb->prepare( "SELECT email, name, source, status, created_at FROM {$t} ORDER BY id DESC LIMIT 50 OFFSET %d", ( $page - 1 ) * 50 ), ARRAY_A ); // phpcs:ignore
+	$total  = (int) array_sum( $counts );
+	echo '<div class="wrap"><h1>Newsletter sign-ups</h1>';
+	echo '<p>Confirmed: <strong>' . (int) ( $counts['active'] ?? 0 ) . '</strong> · Waiting to confirm: ' . (int) ( $counts['pending'] ?? 0 )
+		. ' · Invited, not yet confirmed: ' . (int) ( $counts['invited'] ?? 0 ) . ' · Unsubscribed: ' . (int) ( $counts['unsubscribed'] ?? 0 ) . '</p>';
+	echo '<p class="description">Newsletters are sent from the external mailing service, not from WordPress.</p>';
 	$export = wp_nonce_url( admin_url( 'admin-post.php?action=aw_nl_export' ), 'aw_nl_export' );
-	echo '<p><a class="button" href="' . esc_url( $export ) . '">Export subscribers (CSV)</a></p>';
-
-	if ( is_array( $job ) ) {
-		echo '<h2>Last send</h2><p>' . esc_html( $job['subject'] ) . ' (' . esc_html( 'v1_invite' === $job['audience'] ? 'invitation to 1.0 volunteers' : 'confirmed subscribers' ) . '): '
-			. esc_html( 'sending' === $job['state'] ? 'sending' : ( 'stopped' === $job['state'] ? 'stopped' : 'finished ' . $job['finished'] ) ) . '. Sent ' . (int) $job['sent'] . ', failed ' . (int) $job['failed'] . ', waiting ' . count( $job['queue'] ) . '.</p>';
-		if ( 'sending' === $job['state'] ) {
-			echo '<p><a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_nl_stop' ), 'aw_nl_stop' ) ) . '">Stop sending</a></p>';
-		}
+	echo '<p><a class="button" href="' . esc_url( $export ) . '">Export sign-ups (CSV)</a></p>';
+	echo '<table class="widefat striped"><thead><tr><th>Email</th><th>Name</th><th>Source</th><th>Status</th><th>Signed up</th></tr></thead><tbody>';
+	foreach ( $rows as $r ) {
+		echo '<tr><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['source'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td></tr>';
 	}
-
-	$draft = (array) get_option( 'aw_nl_draft', array() );
-	echo '<h2>Write</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	wp_nonce_field( 'aw_nl_send' );
-	echo '<input type="hidden" name="action" value="aw_nl_send"><table class="form-table">';
-	echo '<tr><th><label for="aw-nl-audience">Send to</label></th><td><select id="aw-nl-audience" name="audience">'
-		. '<option value="active"' . selected( $draft['audience'] ?? '', 'active', false ) . '>Confirmed subscribers</option>'
-		. '<option value="v1_invite"' . selected( $draft['audience'] ?? '', 'v1_invite', false ) . '>Invitation to 1.0 volunteers (adds a confirm link; only those who confirm get newsletters)</option></select></td></tr>';
-	echo '<tr><th><label for="aw-nl-subject">Subject</label></th><td><input class="large-text" id="aw-nl-subject" name="subject" value="' . esc_attr( $draft['subject'] ?? '' ) . '"></td></tr>';
-	echo '<tr><th><label for="aw-nl-body">Message</label></th><td><textarea class="large-text" rows="14" id="aw-nl-body" name="body">' . esc_textarea( $draft['body'] ?? '' ) . '</textarea>'
-		. '<p class="description">Plain text. The unsubscribe link (and, for invitations, the confirm link) is added at the end automatically.</p></td></tr></table>';
-	echo '<p><button class="button" name="do" value="save">Save draft</button> <button class="button" name="do" value="test">Send a test to me</button> '
-		. '<button class="button button-primary" name="do" value="send" onclick="return confirm(\'Send this to everyone in the chosen audience now?\')">Send</button></p></form></div>';
+	echo '</tbody></table>';
+	$pages = (int) ceil( $total / 50 );
+	if ( $pages > 1 ) {
+		echo '<p>' . paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => $pages ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+	echo '</div>';
 }
-
-add_action(
-	'admin_post_aw_nl_send',
-	function () {
-		if ( ! current_user_can( AW_VOL_CAP ) || ! check_admin_referer( 'aw_nl_send' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$draft = array(
-			'audience' => 'v1_invite' === ( $_POST['audience'] ?? '' ) ? 'v1_invite' : 'active',
-			'subject'  => sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ),
-			'body'     => sanitize_textarea_field( wp_unslash( $_POST['body'] ?? '' ) ),
-		);
-		update_option( 'aw_nl_draft', $draft, false );
-		$do   = sanitize_key( $_POST['do'] ?? 'save' );
-		$note = '';
-		if ( in_array( $do, array( 'test', 'send' ), true ) && ( '' === $draft['subject'] || '' === $draft['body'] ) ) {
-			$note = 'missing';
-		} elseif ( 'test' === $do ) {
-			$body = $draft['body'] . ( 'v1_invite' === $draft['audience'] ? "\n\nTo get these updates, confirm here:\n(the person's own confirm link)" : '' );
-			wp_mail( wp_get_current_user()->user_email, '[Test] ' . $draft['subject'], $body . "\n\n--\nTo stop these emails: (the person's own unsubscribe link)" );
-			$note = 'test';
-		} elseif ( 'send' === $do ) {
-			$job = get_option( 'aw_nl_job' );
-			if ( is_array( $job ) && 'sending' === $job['state'] ) {
-				$note = 'busy';
-			} else {
-				$queue = aw_nl_audience( $draft['audience'] );
-				if ( ! $queue ) {
-					$note = 'empty';
-				} else {
-					update_option( 'aw_nl_job', $draft + array( 'queue' => $queue, 'sent' => 0, 'failed' => 0, 'state' => 'sending', 'started' => current_time( 'mysql' ), 'finished' => '' ), false );
-					if ( ! wp_next_scheduled( 'aw_nl_batch' ) ) {
-						wp_schedule_event( time(), 'aw_5min', 'aw_nl_batch' );
-					}
-					$note = 'started';
-				}
-			}
-		}
-		wp_safe_redirect( admin_url( 'admin.php?page=aw-newsletter' . ( $note ? '&nl=' . $note : '' ) ) );
-		exit;
-	}
-);
-
-add_action(
-	'admin_post_aw_nl_stop',
-	function () {
-		if ( ! current_user_can( AW_VOL_CAP ) || ! check_admin_referer( 'aw_nl_stop' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$job = get_option( 'aw_nl_job' );
-		if ( is_array( $job ) ) {
-			$job['state'] = 'stopped';
-			update_option( 'aw_nl_job', $job, false );
-		}
-		wp_clear_scheduled_hook( 'aw_nl_batch' );
-		wp_safe_redirect( admin_url( 'admin.php?page=aw-newsletter&nl=stopped' ) );
-		exit;
-	}
-);
 
 add_action(
 	'admin_post_aw_nl_export',
