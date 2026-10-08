@@ -872,3 +872,5 @@ body { background: var(--kit-color-canvas); }
 :is(main h2, main h3, main h4, main h5) a:hover, .aw-ed-steps a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
 /* Dividers in lists are the faint line, never ink. */
 .aw-ed-steps li, .aw-ed-steps li:last-child { border-color: var(--kit-color-line) !important; }
+/* Card titles fill the row (no balanced early wrap). */
+:is(.aw-case-title, .aw-story-title, .aw-org-name, .aw-task-title, .wp-block-post-template .wp-block-post-title) { text-wrap: pretty; }
