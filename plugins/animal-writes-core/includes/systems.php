@@ -75,18 +75,40 @@ const AW_LIST_FILTERS = array(
 );
 /** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
+/** Sort orders per list: key => label; the first is the default. */
+const AW_LIST_SORTS = array(
+	'aw_news'        => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
+	'aw_legal'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z' ),
+	'aw_guide'       => array( 'new' => 'Newest first', 'az' => 'A–Z' ),
+	'aw_opportunity' => array( 'closing' => 'Closing soon', 'new' => 'Newest first' ),
+	'aw_campaign'    => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
+	'aw_press'       => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
+);
 const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_guide' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
-/** Active filters on this request: param => value slug. */
+/** Active filters on this request: param => list of value slugs (topic=a,b or topic[]=a&topic[]=b). */
 function aw_active_filters( $type ) {
 	$out = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
-		$v = sanitize_title( wp_unslash( $_GET[ $f[0] ] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$raw = wp_unslash( $_GET[ $f[0] ] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$v   = array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
 		if ( $v ) {
 			$out[ $f[0] ] = $v;
 		}
 	}
 	return $out;
+}
+
+/** The sort order on this request (a key of AW_LIST_SORTS), the list's default when none or unknown. */
+function aw_active_sort( $type ) {
+	$sorts = AW_LIST_SORTS[ $type ] ?? array();
+	$s     = sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	return isset( $sorts[ $s ] ) ? $s : (string) array_key_first( $sorts );
+}
+
+/** URL parameters for a set of filters (lists joined with commas). */
+function aw_filter_args( $active ) {
+	return array_map( fn( $v ) => implode( ',', (array) $v ), $active );
 }
 
 /** Publisher key of a news item: its site (no www.), as a URL value. Stored as aw_publisher when the source is saved. */
@@ -100,17 +122,21 @@ function aw_filter_clauses( $type, $active ) {
 	$tq = array( 'relation' => 'AND' );
 	$mq = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
-		$v = $active[ $f[0] ] ?? '';
-		if ( '' === $v ) {
+		$v = (array) ( $active[ $f[0] ] ?? array() ); // several values of one filter: any of them
+		if ( ! $v ) {
 			continue;
 		}
 		if ( 'place' === $f[1] ) {
-			$p    = aw_place_by_slug( $v );
-			$mq[] = $p ? aw_place_meta_clause( $p ) : array( 'key' => 'aw_state_code', 'value' => '-1' );
+			$any = array( 'relation' => 'OR' );
+			foreach ( $v as $slug ) {
+				$p     = aw_place_by_slug( $slug );
+				$any[] = $p ? aw_place_meta_clause( $p ) : array( 'key' => 'aw_state_code', 'value' => '-1' );
+			}
+			$mq[] = $any;
 		} elseif ( 'publisher' === $f[1] ) {
-			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v );
+			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v, 'compare' => 'IN' );
 		} elseif ( 'press-format' === $f[1] ) {
-			$mq[] = array( 'key' => 'aw_press_group', 'value' => $v );
+			$mq[] = array( 'key' => 'aw_press_group', 'value' => $v, 'compare' => 'IN' );
 		} else {
 			$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
 		}
@@ -174,8 +200,8 @@ function aw_filter_values( $ids, $source ) {
 }
 
 /**
- * The filter bar for a list: one labelled group per filter, counts that respect the other active filters, values with
- * no items hidden, a group hidden while it has one option, and the active filters with "Remove" and "Clear all".
+ * The filter bar for a list: one dropdown per filter (several choices; counts respect the other active filters; values
+ * with no items hidden; a filter with one value hidden), Sort on the right, and the active filters as removable chips.
  */
 function aw_list_filters( $type ) {
 	static $shown = array();
@@ -184,27 +210,37 @@ function aw_list_filters( $type ) {
 	}
 	$shown[ $type ] = true;
 	$active = aw_active_filters( $type );
+	$sort   = aw_active_sort( $type );
+	$sorts  = AW_LIST_SORTS[ $type ] ?? array();
+	$keep   = $sort !== array_key_first( $sorts ) ? array( 'sort' => $sort ) : array();
 	$all    = aw_hub_url( $type );
 	$groups = '';
 	$chips  = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
 		list( $param, $source, $label ) = $f;
+		$mine   = $active[ $param ] ?? array();
 		$others = array_diff_key( $active, array( $param => '' ) );
-		$base   = add_query_arg( $others, $all );
-		// Items matching the other filters: the counts for this group.
+		// Items matching the other filters: the counts for this filter.
 		list( $tq, $mq ) = aw_filter_clauses( $type, $others );
 		$ids     = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$options = array( array( 'All', $base, ! isset( $active[ $param ] ), null ) );
+		$options = array();
 		foreach ( aw_filter_values( $ids, $source ) as $slug => $v ) {
-			$on        = ( $active[ $param ] ?? '' ) === (string) $slug;
-			$options[] = array( $v[0], add_query_arg( $param, $slug, $base ), $on, $v[1] );
+			$on        = in_array( (string) $slug, $mine, true );
+			$options[] = array( $v[0], (string) $slug, $on, $v[1] );
 			if ( $on ) {
-				$chips[] = array( $label . ': ' . $v[0], $base );
+				$rest    = array_values( array_diff( $mine, array( (string) $slug ) ) );
+				$without = $rest ? array_merge( $active, array( $param => $rest ) ) : $others;
+				$chips[] = array( $label . ': ' . $v[0], add_query_arg( aw_filter_args( $without ) + $keep, $all ) );
 			}
 		}
-		$groups .= function_exists( 'kits_filter_group' ) ? kits_filter_group( $label, $options ) : '';
+		$groups .= function_exists( 'kits_filter_dropdown' ) ? kits_filter_dropdown( $label, $param, $options ) : '';
 	}
-	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all ) : '';
+	$sort_opts = array();
+	foreach ( $sorts as $k => $l ) {
+		$sort_opts[] = array( $l, add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), $all ), $k === $sort );
+	}
+	$sort_html = function_exists( 'kits_sort_dropdown' ) ? kits_sort_dropdown( $sort_opts ) : '';
+	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, $sort_html, $keep ) : '';
 }
 
 /** Keep the publisher key current when a news item's source changes. */

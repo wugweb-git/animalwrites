@@ -173,9 +173,19 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 			$v['meta_query'] = $mq;
 		}
 	}
+	$sort = function_exists( 'aw_active_sort' ) ? aw_active_sort( $type ) : '';
+	if ( 'old' === $sort ) {
+		$v['orderby'] = array( 'date' => 'ASC' );
+	} elseif ( 'az' === $sort ) {
+		$v['orderby'] = array( 'title' => 'ASC' );
+	}
 	if ( 'aw_opportunity' === $type ) {
 		$v['meta_query']            = (array) ( $v['meta_query'] ?? array() );
 		$v['meta_query']['aw_open'] = aw_open_opportunities_meta_query();
+		if ( 'closing' === $sort ) { // the nearest closing date first; no date last
+			$v['meta_query']['closes'] = array( 'key' => 'aw_closes', 'compare' => 'EXISTS' );
+			$v['orderby']              = array( 'closes' => 'ASC', 'date' => 'DESC' );
+		}
 	} elseif ( 'aw_campaign' === $type ) {
 		$aw1 = get_page_by_path( 'animal-writes-1-0', OBJECT, 'aw_campaign' );
 		if ( $aw1 ) {
@@ -196,7 +206,7 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 				),
 			)
 		);
-		$v['orderby'] = array( 'has' => 'DESC', 'menu_order' => 'ASC' );
+		$v['orderby'] = array( 'has' => 'DESC', 'menu_order' => 'old' === $sort ? 'DESC' : 'ASC' );
 	}
 	return $v;
 }

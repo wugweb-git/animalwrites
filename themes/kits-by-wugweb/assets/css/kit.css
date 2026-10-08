@@ -264,7 +264,8 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 main > .aw-section-band:first-child, main > p:first-child + .aw-section-band { margin-top: 0 !important; }
 .aw-section-inner ,.kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-6); }
-.aw-section-filters { margin-top: var(--kit-space-6); }
+.aw-section-filters { margin-top: var(--kit-space-5); }
+.aw-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .aw-section-filters .kit-filters, .aw-section-filters .kit-filter-active { margin-bottom: 0; }
 /* Phones: drop the picture strip */
 @media (max-width: 639px) {
@@ -287,11 +288,24 @@ html { overflow-x: clip; }
 @media (min-width: 640px) {
 	.aw-section-head ,.kit-section-head { grid-template-columns: 1.3fr 1fr; }
 }
+/* Hub head: the same fixed height on every hub at each width (md 12rem, lg 15rem); title and intro at most two lines
+   each; the pictures fill the head's height and never set it. With the filter row the band stays under 60svh. */
+.aw-section-head .wp-block-query-title, .kit-section-head .wp-block-query-title, .aw-section-desc, .kit-section-desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+@media (min-width: 640px) {
+	:root { --kit-hub-head-h: 12rem; }
+	.aw-section-band .aw-section-head, .kit-section-band .kit-section-head { height: var(--kit-hub-head-h); align-items: stretch; }
+	.aw-section-band .aw-section-head > :first-child, .kit-section-band .kit-section-head > :first-child { display: flex; flex-direction: column; justify-content: flex-end; min-height: 0; overflow: hidden; }
+	.aw-section-band .aw-section-visual, .kit-section-band .kit-section-visual { height: 100%; align-items: start; }
+	.aw-section-band .aw-section-visual > *, .kit-section-band .kit-section-visual > * { height: calc(100% - var(--kit-space-5)); }
+	.aw-section-band .aw-section-visual :is(img, .aw-placard, .kit-placard), .kit-section-band .kit-section-visual :is(img, .kit-placard) { height: 100%; aspect-ratio: auto; }
+}
+@media (min-width: 1200px) { :root { --kit-hub-head-h: 15rem; } }
 
 /* 4.7 Icons — Lucide-style line icons (ISC licence) as CSS masks: <span class="aw-ico aw-ico--name" aria-hidden="true"></span>.
    Inherit currentColor; size 1.25em (override with --kit-ico-size). */
 .aw-ico ,.kit-ico { display: inline-block; flex: none; width: var(--kit-ico-size, 1.25em); height: var(--kit-ico-size, 1.25em); background-color: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; vertical-align: -0.2em; }
 .aw-ico--arrow-right ,.kit-ico--arrow-right { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22/%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22/%3E%3C/svg%3E"); }
+.aw-ico--chevron-down ,.kit-ico--chevron-down { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22/%3E%3C/svg%3E"); }
 .aw-ico--arrow-up-right ,.kit-ico--arrow-up-right { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207h10v10%22/%3E%3Cpath%20d%3D%22M7%2017%2017%207%22/%3E%3C/svg%3E"); }
 .aw-ico--directory ,.kit-ico--directory { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2010c0%204.993-5.539%2010.193-7.399%2011.799a1%201%200%200%201-1.202%200C9.539%2020.193%204%2014.993%204%2010a8%208%200%200%201%2016%200%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2210%22%20r%3D%223%22/%3E%3C/svg%3E"); }
 .aw-ico--legal ,.kit-ico--legal { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22M7%2021h10%22/%3E%3Cpath%20d%3D%22M12%203v18%22/%3E%3Cpath%20d%3D%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }

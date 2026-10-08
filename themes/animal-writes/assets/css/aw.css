@@ -672,7 +672,7 @@ body { background: var(--aw-color-canvas); }
 .aw-section-band :where(.aw-section-inner, .aw-section-head, .aw-section-head > .wp-block-group) > * { margin-block-start: 0; }
 .aw-section-band .aw-section-desc { margin-top: var(--kit-space-3); }
 .aw-section-band .aw-section-count { margin-top: var(--kit-space-2); }
-.aw-section-band .aw-section-filters { margin-top: var(--kit-space-6); }
+.aw-section-band .aw-section-filters { margin-top: var(--kit-space-5); }
 .aw-section-band .kit-crumbs li > a:not([class]) { color: inherit; } /* not the content-link blue */
 .aw-hub-list .wp-block-post-template > li { max-width: none; } /* not a prose list */
 .aw-hub-list .wp-block-post-template .wp-block-post-excerpt__excerpt { display: block; -webkit-line-clamp: unset; overflow: visible; }

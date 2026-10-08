@@ -387,7 +387,7 @@
 		sheet.addEventListener('toggle', function () {
 			if (!sheet.classList.contains('is-sheet')) return;
 			if (sheet.open) {
-				var first = sheet.querySelector('.kit-filters a, .kit-filters button');
+				var first = sheet.querySelector('.kit-filters summary, .kit-filters a, .kit-filters button, .kit-filters input');
 				if (first) first.focus();
 			}
 		});
@@ -395,13 +395,11 @@
 			if (!sheet.classList.contains('is-sheet') || !sheet.open) return;
 			if (e.key === 'Escape') { sheet.open = false; summary.focus(); return; }
 			if (e.key !== 'Tab') return;
-			var f = Array.prototype.filter.call(sheet.querySelectorAll('.kit-filters a, .kit-filters button'), function (el) { return el.offsetParent !== null; });
+			var f = Array.prototype.filter.call(sheet.querySelectorAll('.kit-filters summary, .kit-filters a, .kit-filters button, .kit-filters input'), function (el) { return el.offsetParent !== null; });
 			if (!f.length) return;
 			if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
 			else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
 		});
-		var close = sheet.querySelector('[data-kit-sheet-close]');
-		if (close) close.addEventListener('click', function () { sheet.open = false; summary.focus(); });
 	});
 	document.querySelectorAll('.kit-filter-more').forEach(function (btn) {
 		var group = document.getElementById(btn.getAttribute('aria-controls'));
@@ -449,3 +447,53 @@
 		mq.addEventListener('change', apply);
 	}
 })();
+
+/* Dropdowns (kits_filter_dropdown, kits_sort_dropdown): one open at a time; a click outside or Esc closes (focus back
+   on the button); arrow keys move through the options. Ticking a filter applies it at once, except in the phone sheet,
+   where "Apply" sends them together. Several values of one filter go as topic=a,b. */
+(function () {
+	var dds = Array.prototype.slice.call(document.querySelectorAll('details[data-kit-dd]'));
+	if (!dds.length) return;
+	function closeAll(except) { dds.forEach(function (d) { if (d !== except) d.open = false; }); }
+	dds.forEach(function (d) {
+		var btn = d.querySelector('summary');
+		d.addEventListener('toggle', function () { if (d.open && !d.closest('.is-sheet')) closeAll(d); });
+		d.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape' && d.open) { e.stopPropagation(); d.open = false; btn.focus(); return; }
+			if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+			var items = Array.prototype.slice.call(d.querySelectorAll('.kit-dd-panel input, .kit-dd-panel a'));
+			if (!items.length) return;
+			e.preventDefault();
+			if (!d.open) { d.open = true; items[0].focus(); return; }
+			var i = items.indexOf(document.activeElement);
+			items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+		});
+	});
+	document.addEventListener('click', function (e) { if (!e.target.closest('details[data-kit-dd]')) closeAll(null); });
+
+	function go(form) {
+		var params = new URLSearchParams(), lists = {};
+		Array.prototype.forEach.call(form.elements, function (el) {
+			if (!el.name || el.disabled) return;
+			if (el.type === 'checkbox') {
+				if (!el.checked) return;
+				var n = el.name.replace(/\[\]$/, '');
+				(lists[n] = lists[n] || []).push(el.value);
+			} else if (el.type === 'hidden') {
+				params.set(el.name, el.value);
+			}
+		});
+		Object.keys(lists).forEach(function (n) { params.set(n, lists[n].join(',')); });
+		var status = form.parentNode.querySelector('[data-kit-filter-status]');
+		if (status) status.textContent = 'Loading results';
+		var q = params.toString();
+		window.location.href = form.getAttribute('action').split('?')[0] + (q ? '?' + q : '');
+	}
+	document.querySelectorAll('form[data-kit-filterbar]').forEach(function (form) {
+		form.addEventListener('submit', function (e) { e.preventDefault(); go(form); });
+		form.addEventListener('change', function (e) {
+			if (e.target.classList.contains('kit-dd-check') && !e.target.closest('.is-sheet')) go(form);
+		});
+	});
+})();
+

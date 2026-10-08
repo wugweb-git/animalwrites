@@ -63,6 +63,48 @@ function aw_opportunity_set_review( $id ) {
 }
 add_action( 'save_post_aw_opportunity', 'aw_opportunity_set_review', 20 );
 
+/** Keep aw_closes (the closing date, or 9999-12-31 with none) for the "Closing soon" order. */
+function aw_opportunity_sync_closes( $id ) {
+	if ( 'aw_opportunity' === get_post_type( $id ) ) {
+		$d = aw_opportunity_closes( $id );
+		update_post_meta( $id, 'aw_closes', $d ? $d : '9999-12-31' );
+	}
+}
+add_action( 'save_post_aw_opportunity', 'aw_opportunity_sync_closes', 30 );
+add_action(
+	'updated_post_meta',
+	function ( $mid, $id, $key ) {
+		if ( in_array( $key, array( 'aw_deadline', 'aw_review_until' ), true ) ) {
+			aw_opportunity_sync_closes( $id );
+		}
+	},
+	10,
+	3
+);
+add_action(
+	'added_post_meta',
+	function ( $mid, $id, $key ) {
+		if ( in_array( $key, array( 'aw_deadline', 'aw_review_until' ), true ) ) {
+			aw_opportunity_sync_closes( $id );
+		}
+	},
+	10,
+	3
+);
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_closes_done' ) ) {
+			return;
+		}
+		foreach ( get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+			aw_opportunity_sync_closes( $id );
+		}
+		update_option( 'aw_closes_done', '1', false );
+	},
+	40
+);
+
 /** Open opportunities: the deadline is today or later; with no deadline, the review date is today or later. */
 function aw_open_opportunities_meta_query() {
 	$today = wp_date( 'Y-m-d' );

@@ -9,7 +9,10 @@
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
  *  kits_filter_group()   labelled group of filter pills (links; selected = aria-current)
- *  kits_filter_bar()     groups + phone "Filters" sheet + active filters with remove and "Clear all"
+ *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
+ *  kits_sort_dropdown()  "Sort" as a dropdown of links (one choice)
+ *  kits_filter_bar()     the filters in one row (dropdowns, Sort on the right), a "Filters" sheet on phones, and the
+ *                        active filters as removable chips with "Clear all"
  *
  * @package kits-core
  */
@@ -66,22 +69,80 @@ function kits_filter_group( $legend, $options, $show = 8 ) {
 }
 
 /**
- * Filter bar: groups (folded into a "Filters" sheet on phones by kit.js) and the active filters.
+ * One filter as a dropdown: a button (the filter's name, and how many are chosen) opening a list of checkboxes with
+ * counts. Values with no items are not listed; a filter with one value and nothing chosen is not shown.
  *
- * @param string $groups Groups' HTML (kits_filter_group).
- * @param array  $active List of [label, url without this value].
- * @param string $clear  URL with no filters.
+ * @param string $legend  Visible label ("Category").
+ * @param string $param   URL parameter ("topic"). Several choices are sent as topic=a,b (topic[]=a&topic[]=b without JavaScript).
+ * @param array  $options List of [label, value, selected (bool), count (int)].
  * @return string
  */
-function kits_filter_bar( $groups, $active, $clear ) {
-	if ( '' === trim( $groups ) && ! $active ) {
+function kits_filter_dropdown( $legend, $param, $options ) {
+	$options  = array_values( array_filter( $options, fn( $o ) => ! empty( $o[2] ) || (int) ( $o[3] ?? 0 ) > 0 ) );
+	$selected = count( array_filter( $options, fn( $o ) => ! empty( $o[2] ) ) );
+	if ( count( $options ) <= 1 && ! $selected ) {
 		return '';
 	}
-	$n    = count( $active );
-	$html = '<details class="kit-filter-sheet" open><summary>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
-		. '<div class="kit-filters" role="group" aria-label="Filters">' . $groups
-		. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $clear ) . '">Reset</a><button type="button" class="kit-btn" data-kit-sheet-close>Apply</button></div>'
-		. '</div></details>';
+	$id   = 'kit-dd-' . sanitize_key( $param ) . '-' . wp_unique_id();
+	$html = '<details class="kit-dd" data-kit-dd><summary class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '"><span class="kit-dd-label">' . esc_html( $legend ) . '</span>'
+		. ( $selected ? ' ' . kits_count( $selected ) . '<span class="screen-reader-text"> chosen</span>' : '' ) . '<span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></summary>'
+		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '"><legend class="screen-reader-text">' . esc_html( $legend ) . '</legend><ul class="kit-dd-list">';
+	foreach ( $options as $o ) {
+		$html .= '<li><label class="kit-dd-opt"><input type="checkbox" class="kit-dd-check" name="' . esc_attr( $param ) . '[]" value="' . esc_attr( $o[1] ) . '"' . checked( ! empty( $o[2] ), true, false ) . '>'
+			. '<span class="kit-dd-text">' . esc_html( $o[0] ) . '</span>' . kits_count( (int) $o[3] ) . '</label></li>';
+	}
+	return $html . '</ul></fieldset></details>';
+}
+
+/**
+ * "Sort" as a dropdown of links; the current order is marked.
+ *
+ * @param array $options List of [label, url, current (bool)].
+ * @return string
+ */
+function kits_sort_dropdown( $options ) {
+	if ( count( $options ) < 2 ) {
+		return '';
+	}
+	$cur  = array_values( array_filter( $options, fn( $o ) => ! empty( $o[2] ) ) );
+	$id   = 'kit-sort-' . wp_unique_id();
+	$html = '<details class="kit-dd kit-dd--sort" data-kit-dd><summary class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '"><span class="kit-dd-label">Sort<span class="kit-dd-current">: ' . esc_html( $cur ? $cur[0][0] : $options[0][0] ) . '</span></span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></summary>'
+		. '<ul class="kit-dd-panel kit-dd-list" id="' . esc_attr( $id ) . '">';
+	foreach ( $options as $o ) {
+		$html .= '<li><a class="kit-dd-opt" href="' . esc_url( $o[1] ) . '"' . ( ! empty( $o[2] ) ? ' aria-current="true"' : '' ) . '>' . esc_html( $o[0] ) . '</a></li>';
+	}
+	return $html . '</ul></details>';
+}
+
+/**
+ * Filter bar: the filters in one row (pills from kits_filter_group, or dropdowns from kits_filter_dropdown), Sort on the
+ * right, folded into a "Filters" sheet on phones by kit.js, and the active filters as removable chips with "Clear all".
+ *
+ * @param string $groups Filters' HTML.
+ * @param array  $active List of [label, url without this value].
+ * @param string $clear  URL with no filters (the form's address).
+ * @param string $sort   Sort dropdown's HTML (kits_sort_dropdown), or ''.
+ * @param array  $keep   Other URL parameters to keep when the filters are sent (name => value).
+ * @return string
+ */
+function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() ) {
+	if ( '' === trim( $groups ) && ! $active && '' === $sort ) {
+		return '';
+	}
+	$n      = count( $active );
+	$hidden = '';
+	foreach ( $keep as $k => $v ) {
+		$hidden .= '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
+	}
+	$html = '<form class="kit-filterbar" method="get" action="' . esc_url( $clear ) . '" data-kit-filterbar>' . $hidden;
+	if ( '' !== trim( $groups ) ) {
+		$html .= '<details class="kit-filter-sheet" open><summary>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
+			. '<div class="kit-filters" role="group" aria-label="Filters">' . $groups
+			. '<noscript><button type="submit" class="kit-btn kit-btn--sm">Apply</button></noscript>'
+			. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $clear ) . '">Reset</a><button type="submit" class="kit-btn" data-kit-sheet-close>Apply</button></div>'
+			. '</div></details>';
+	}
+	$html .= $sort . '</form><p class="screen-reader-text" role="status" aria-live="polite" data-kit-filter-status></p>';
 	if ( $active ) {
 		$html .= '<div class="kit-filter-active" aria-label="Active filters">';
 		foreach ( $active as $a ) {
