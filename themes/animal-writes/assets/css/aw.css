@@ -823,3 +823,5 @@ body { background: var(--kit-color-canvas); }
 }
 .aw-posted-by::before, .aw-press-handle::before { -webkit-mask-image: var(--kit-ico-user); mask-image: var(--kit-ico-user); }
 .kit-ed-rows :is(.wp-block-post-date, .aw-law-date) { flex-direction: row !important; align-items: center !important; }
+/* Mobile menu: the wordmark on the same left edge as the links, where it sits in the header */
+.kit-site-header .wp-block-navigation__responsive-container.is-menu-open::before { content: ""; position: fixed; top: calc(var(--kit-toggle-top, 28px) + 22px - 24px); left: var(--kit-space-gutter); width: 150px; height: 48px; background: url("../wordmark-light.svg") left center / contain no-repeat; }

@@ -952,3 +952,7 @@ body { background: var(--kit-surface-page); }
 .kit-faqs { max-width: 72ch; margin-top: var(--kit-space-6); }
 .kit-faq { border-top: 1px solid var(--kit-color-line); padding: var(--kit-space-3) 0; }
 .kit-faq summary { cursor: pointer; font-weight: var(--kit-weight-medium); min-height: var(--kit-size-target); display: flex; align-items: center; }
+/* Mobile menu: the list fills the screen so contact and legal sit at the bottom */
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { display: flex !important; flex-direction: column; min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container { display: flex !important; flex-direction: column; flex: 1 1 auto; }
