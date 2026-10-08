@@ -191,12 +191,9 @@ add_shortcode(
 			if ( $abc ) {
 				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . wp_date( 'j M Y', strtotime( $abc ) ) );
 			}
-			$sname = (string) get_post_meta( $id, 'aw_source_name', true );
-			if ( $sname ) {
-				$surl   = (string) get_post_meta( $id, 'aw_source_url', true );
-				$sdate  = (string) get_post_meta( $id, 'aw_source_date', true );
-				$label  = $surl ? '<a href="' . esc_url( $surl ) . '" rel="noopener nofollow">' . esc_html( $sname ) . '</a>' : esc_html( $sname );
-				$rows[] = array( 'arrow-up-right', 'Source: ' . $label . ( $sdate ? esc_html( ' (list as on ' . wp_date( 'j M Y', strtotime( $sdate ) ) . ')' ) : '' ), true );
+			$labels = aw_source_labels( $id, true );
+			if ( $labels ) {
+				$rows[] = array( 'arrow-up-right', 'Details from: ' . $labels, true );
 			}
 			$cls = $verified ? 'is-verified' : 'is-unverified';
 		} else {
@@ -410,7 +407,7 @@ add_shortcode(
 				. '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>'
 				. '<div class="aw-org-body"><h2 class="aw-org-name"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( $name ) . '</a></h2>'
 				. '<p class="aw-org-meta">' . ( $area ? aw_i( 'directory' ) . esc_html( $area ) : '' ) . '</p>'
-				. '<p class="aw-org-tags">' . ( $verified ? '<span class="aw-state aw-state--ok">' . aw_i( 'check' ) . 'Verified</span>' : '<span class="aw-state">From ' . esc_html( (string) get_post_meta( $id, 'aw_source_name', true ) ?: 'AWBI' ) . ' records</span>' )
+				. '<p class="aw-org-tags">' . ( $verified ? '<span class="aw-state aw-state--ok">' . aw_i( 'check' ) . 'Verified</span>' : '' ) . aw_source_labels( $id )
 				. ( $featured ? '<span class="aw-state aw-state--feat">Featured</span>' : '' );
 			foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
 				$out .= '<span class="aw-type">' . esc_html( $t->name ) . '</span>';

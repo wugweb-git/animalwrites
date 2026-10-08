@@ -167,7 +167,7 @@ function aw_doc_hostable( $post_id, $url ) {
 		return true;
 	}
 	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
-	return (bool) preg_match( '/(^|\.)(sci\.gov\.in|egazette\.gov\.in|egazette\.nic\.in|indiacode\.nic\.in|ecourts\.gov\.in)$/i', $host );
+	return (bool) preg_match( '/(^|\.)(sci\.gov\.in|egazette\.gov\.in|egazette\.nic\.in|indiacode\.nic\.in|indiacode\.gov\.in|ecourts\.gov\.in)$|^indian-(supreme|high)-court-judgments\.s3\.ap-south-1\.amazonaws\.com$/i', $host );
 }
 
 /**
@@ -187,7 +187,7 @@ add_filter(
 );
 
 /**
- * Keep a copy of a government PDF (gov.in / nic.in) we may host (aw_doc_hostable) so it can be read inside the page.
+ * Keep a copy of a government PDF (gov.in / nic.in, or the open judgment datasets) we may host (aw_doc_hostable) so it can be read inside the page.
  *
  * @param int    $post_id Post ID.
  * @param string $url     Source URL.
@@ -195,7 +195,7 @@ add_filter(
  */
 function aw_mirror_gov_pdf( $post_id, $url ) {
 	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
-	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$/i', $host ) || get_post_meta( $post_id, 'aw_file_id', true ) || ! aw_doc_hostable( $post_id, $url ) ) {
+	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$|^indian-(supreme|high)-court-judgments\.s3\.ap-south-1\.amazonaws\.com$/i', $host ) || get_post_meta( $post_id, 'aw_file_id', true ) || ! aw_doc_hostable( $post_id, $url ) ) {
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/media.php';
