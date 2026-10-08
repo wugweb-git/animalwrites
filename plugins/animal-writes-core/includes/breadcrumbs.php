@@ -122,7 +122,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-terms',
 	function ( $html, $block, $instance ) {
-		if ( ! is_singular() || (int) ( $instance->context['postId'] ?? 0 ) !== get_queried_object_id() ) {
+		if ( ! is_singular() || isset( $instance->context['queryId'] ) ) { // the page's own chips, not those in lists
 			return $html;
 		}
 		return aw_breadcrumbs_prepend( $html );
