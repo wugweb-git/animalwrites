@@ -479,6 +479,10 @@ function aw_sourcing_page() {
 	$filter = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	uasort( $pubs, fn( $a, $b ) => ( $b['count'] <=> $a['count'] ) ?: strcmp( (string) $b['last'], (string) $a['last'] ) );
 	$counts = array_count_values( array_map( fn( $p ) => $p['status'], $pubs ) );
+	// Add first, as everywhere in WordPress.
+	echo '<p class="aw-src-add"><label for="aw-new-host"><strong>Add a publisher</strong></label> <input type="text" id="aw-new-host" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status" aria-label="Status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
+	submit_button( 'Add', 'secondary', '', false );
+	echo '</p>';
 	echo '<ul class="subsubsub">';
 	foreach ( array( '' => 'All', 'neutral' => 'Neutral (new finds)', 'allow' => 'Allowed', 'block' => 'Blocked' ) as $k => $l ) {
 		$n = '' === $k ? count( $pubs ) : (int) ( $counts[ $k ] ?? 0 );
@@ -495,7 +499,5 @@ function aw_sourcing_page() {
 		}
 		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
 	}
-	echo '</tbody></table><h2>Add a publisher</h2><p><input type="text" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
-	submit_button( 'Add', 'secondary', '', false );
-	echo '</p></form></div>';
+	echo '</tbody></table></form></div>';
 }

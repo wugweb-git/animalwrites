@@ -56,7 +56,7 @@ function aw_register_content_types() {
 				'has_archive'  => $slug,
 				'rewrite'      => $rewrite,
 				'supports'     => $supports,
-				'menu_icon'    => 'dashicons-pets',
+				'menu_icon'    => array( 'aw_listing' => 'dashicons-location', 'aw_news' => 'dashicons-media-text', 'aw_guide' => 'dashicons-book', 'aw_legal' => 'dashicons-bank', 'aw_opportunity' => 'dashicons-businessperson', 'aw_campaign' => 'dashicons-flag' )[ $type ] ?? 'dashicons-pets', // one icon each
 			)
 		);
 	}

@@ -1,7 +1,7 @@
 <?php
 /**
  * Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
- * Publishers, Keywords and the Change log; this adds News feeds (RSS and Google News queries), Library sources
+ * Publishers (whose articles are accepted), Keywords (the one word list) and the Change log; this adds News feeds (RSS and Google News queries), Library sources
  * (AWBI, PIB, Gazette, courts), Opportunity sources, Press-discovery queries and Topics (keyword → topic).
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
@@ -104,9 +104,15 @@ function aw_sources_tab( $slug ) {
 	$c    = aw_sources_config();
 	$type = AW_SOURCE_TABS[ $slug ][1];
 	echo '<p>' . ( 'news' === $type ? 'RSS feeds and Google News searches. For a Google News search, write only the search words.' : ( 'legal' === $type ? 'Where Library documents and legal news come from. Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here.' : 'Where opportunities come from. Only their name and on/off can change here; new kinds of site need code.' ) )
-		. ' "Keyword check" keeps only items with a feed keyword (Keywords tab).</p>';
+		. ' "Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word).</p>';
 	echo '<table class="widefat striped"><thead><tr><th style="width:60px">On</th><th>Name</th><th>Feed URL or Google News search</th><th style="width:120px">Keyword check</th></tr></thead><tbody>';
 	$i = 0;
+	if ( 'opportunity' !== $type ) {
+		for ( $k = 0; $k < 1; $k++, $i++ ) { // an empty row to add a source, first
+			echo '<tr><td><input type="hidden" name="src[' . $i . '][id]" value=""><input type="checkbox" name="src[' . $i . '][on]" value="1" checked aria-label="On"></td><td><input type="text" class="regular-text" name="src[' . $i . '][name]" placeholder="New source name"></td><td><input type="text" class="large-text" name="src[' . $i . '][url]" placeholder="https://… feed, or Google News search words"></td><td><input type="checkbox" name="src[' . $i . '][filter]" value="1" checked aria-label="Keyword check"></td></tr>';
+		}
+	}
+
 	foreach ( (array) $c['sources'] as $s ) {
 		if ( ( $s['type'] ?? '' ) !== $type ) {
 			continue;
@@ -118,11 +124,6 @@ function aw_sources_tab( $slug ) {
 			. '<td>' . ( $editable ? '<input type="text" class="large-text" name="src[' . $i . '][url]" value="' . esc_attr( $q ? $q : $s['url'] ) . '">' . ( $q ? '<span class="description">Google News search</span>' : '' ) : '<code>' . esc_html( $s['url'] ) . '</code> <span class="description">(' . esc_html( $s['kind'] ) . ')</span>' ) . '</td>'
 			. '<td>' . ( $editable ? '<input type="checkbox" name="src[' . $i . '][filter]" value="1"' . checked( ! empty( $s['filter'] ), true, false ) . ' aria-label="Keyword check">' : '—' ) . '</td></tr>';
 		$i++;
-	}
-	if ( 'opportunity' !== $type ) {
-		for ( $k = 0; $k < 2; $k++, $i++ ) {
-			echo '<tr><td><input type="hidden" name="src[' . $i . '][id]" value=""><input type="checkbox" name="src[' . $i . '][on]" value="1" checked aria-label="On"></td><td><input type="text" class="regular-text" name="src[' . $i . '][name]" placeholder="New source name"></td><td><input type="text" class="large-text" name="src[' . $i . '][url]" placeholder="https://… feed, or Google News search words"></td><td><input type="checkbox" name="src[' . $i . '][filter]" value="1" checked aria-label="Keyword check"></td></tr>';
-		}
 	}
 	echo '</tbody></table>';
 	submit_button( 'Save' );
@@ -225,7 +226,6 @@ function aw_sources_topics_tab() {
 		$lines[] = $slug . ': ' . implode( ', ', (array) $words );
 	}
 	echo '<textarea name="topics" class="large-text code" rows="22">' . esc_textarea( implode( "\n", $lines ) ) . '</textarea>';
-	echo '<h2>Feed keywords</h2><p>Feeds with "Keyword check" keep only items containing one of these. One per line.</p><textarea name="feed_keywords" class="large-text code" rows="12">' . esc_textarea( implode( "\n", (array) $c['keywords'] ) ) . '</textarea>';
 	submit_button( 'Save' );
 }
 add_action(
@@ -243,10 +243,7 @@ add_action(
 		foreach ( array_unique( array_merge( array_keys( $old ), array_keys( $topics ) ) ) as $slug ) {
 			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $topics[ $slug ] ?? array() );
 		}
-		$kw            = array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['feed_keywords'] ?? '' ) ) ) ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$what[]        = kits_sourcing_diff( 'Feed keywords', $c['keywords'], $kw );
-		$c['topics']   = $topics;
-		$c['keywords'] = $kw;
+		$c['topics'] = $topics;
 		update_option( 'aw_sources', $c, false );
 		kits_sourcing_log( 'topics', implode( ' · ', array_filter( $what ) ) );
 	}
@@ -263,18 +260,20 @@ add_filter(
 		if ( empty( $c['live'] ) ) {
 			return $data;
 		}
+		$rel     = function_exists( 'aw_relevance' ) ? aw_relevance() : array();
+		$words   = array_values( array_unique( array_merge( (array) ( $rel['strong'] ?? array() ), (array) ( $rel['animal'] ?? array() ) ) ) );
 		$sources = array();
 		foreach ( (array) $c['sources'] as $s ) {
 			if ( empty( $s['on'] ) ) {
 				continue;
 			}
 			if ( ! empty( $s['filter'] ) ) {
-				$s['keywords'] = $c['keywords'];
+				$s['keywords'] = $words; // one keyword list: the Keywords tab's include and animal words
 			}
 			unset( $s['on'], $s['filter'] );
 			$sources[] = $s;
 		}
-		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $c['keywords'], 'sources' => $sources, 'topics' => $c['topics'], 'press' => $c['press'] );
+		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'topics' => $c['topics'], 'press' => $c['press'] );
 		return $data;
 	}
 );
