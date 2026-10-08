@@ -187,4 +187,11 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 
 **Waiting, no action needed:** AdSense review, and ads.txt switching to "Authorized".
 
+**Later (after the architecture work):**
+- Kits by Wugweb as a reusable, store-ready master theme (WordPress.org and marketplaces): configurable header and footer parts, one archive template instead of six, main shortcodes as blocks or master patterns, Animal Writes styles moved out of `kit.css`, `theme.json`-driven styles, translatable and escaped strings, GPL-only assets, screenshot, readme and demo content.
+- Accessibility re-audit of phases 6–10 (footer, volunteer block, tags row, search).
+- Directory audit: 32 likely-duplicate groups and 75 name-based retype suggestions.
+- Kerala import script: keep cut-off names from coming back.
+- Notion and this status doc: update to the Phase 10 structure.
+
 **Later:** more directory states; GTM container content; a second photo search after the owner's pictures.
