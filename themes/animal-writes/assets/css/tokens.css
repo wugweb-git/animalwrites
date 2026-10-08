@@ -171,7 +171,7 @@
   --aw-type-section: var(--kit-type-section);
   --aw-color-link: var(--kit-color-link);
 }
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   :root {
     --kit-type-lead: 1.1875rem;
     --kit-type-h4: 1.125rem;

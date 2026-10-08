@@ -86,7 +86,7 @@
   --kit-type-section: 1.75rem;
   --kit-color-link: #1d4ed8;
 }
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   :root {
     --kit-type-lead: 1.1875rem;
     --kit-type-h4: 1.125rem;

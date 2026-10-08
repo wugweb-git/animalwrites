@@ -138,7 +138,7 @@ function aw_banner_html( $key ) {
 		return '';
 	}
 	return '<div class="aw-banner"><picture>'
-		. '<source media="(max-width: 767px)" srcset="' . esc_url( $m[0] ) . '" width="' . (int) $m[1] . '" height="' . (int) $m[2] . '">'
+		. '<source media="(max-width: 639px)" srcset="' . esc_url( $m[0] ) . '" width="' . (int) $m[1] . '" height="' . (int) $m[2] . '">'
 		. '<img src="' . esc_url( $d[0] ) . '" width="' . (int) $d[1] . '" height="' . (int) $d[2] . '" alt="' . esc_attr( $b['alt'] ) . '" fetchpriority="high" decoding="async">'
 		. '</picture>' . ( ! empty( $b['text'] ) ? '<div class="aw-banner-text">' . wp_kses_post( $b['text'] ) . '</div>' : '' )
 		. '</div>';
@@ -154,8 +154,8 @@ add_action(
 		}
 		$d = wp_get_attachment_image_url( (int) $b['desktop'], 'full' );
 		$m = wp_get_attachment_image_url( (int) $b['mobile'], 'full' );
-		echo '<link rel="preload" as="image" href="' . esc_url( $m ) . '" media="(max-width: 767px)">' . "\n";
-		echo '<link rel="preload" as="image" href="' . esc_url( $d ) . '" media="(min-width: 768px)">' . "\n";
+		echo '<link rel="preload" as="image" href="' . esc_url( $m ) . '" media="(max-width: 639px)">' . "\n";
+		echo '<link rel="preload" as="image" href="' . esc_url( $d ) . '" media="(min-width: 640px)">' . "\n";
 	},
 	2
 );
