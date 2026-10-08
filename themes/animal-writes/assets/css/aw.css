@@ -982,3 +982,11 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-act-copy .kit-ed-desc { margin-bottom: 0; }
 }
 @media (min-width: 1200px) { .aw-ed-law-list .aw-case-sum { display: none !important; } }
+@media (max-width: 767px) {
+	.aw-ed-mosaic { height: 7.5rem; margin-bottom: var(--kit-space-5) !important; }
+	.kit-ed-story-head p { margin: var(--kit-space-3) 0 var(--kit-space-4); }
+	.kit-ed-story h2, .kit-ed-act-copy h2 { padding-top: var(--kit-space-3); }
+	.aw-ed-numbers { margin-bottom: var(--kit-space-5); }
+	.kit-ed-act-copy .aw-ed-templates { margin-bottom: var(--kit-space-3); }
+	.kit-ed-act-copy .aw-ed-col-title { margin-bottom: var(--kit-space-2); }
+}
