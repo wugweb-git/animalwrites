@@ -956,3 +956,8 @@ body { background: var(--kit-surface-page); }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { display: flex !important; flex-direction: column; min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container { display: flex !important; flex-direction: column; flex: 1 1 auto; }
+/* Mobile menu sizing: below the admin bar when signed in; the links start under the toggle row (logo + close) */
+.wp-block-navigation__responsive-container.is-menu-open { height: calc(100dvh - var(--wp-admin--admin-bar--height, 0px)); padding-top: calc(var(--kit-toggle-top, 28px) - var(--wp-admin--admin-bar--height, 0px) + 44px + var(--kit-space-5)) !important; }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { min-height: 100%; }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-close { height: 100%; }
