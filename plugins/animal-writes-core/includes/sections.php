@@ -156,7 +156,7 @@ add_shortcode(
 			$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
 		}
 		return '<div class="aw-ed-find-head"><h2>Find help near you</h2><p class="aw-ed-big"><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> organisations in <strong>' . (int) $with . '</strong> states and union territories</p></div>'
-			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
+			. '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 			. '<input type="hidden" name="aw_filter" value="1">'
 			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="aw-ico aw-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'

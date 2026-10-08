@@ -85,14 +85,13 @@ add_action(
 		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
 		}
-		$q->set(
-			'meta_query',
-			array(
-				'relation'    => 'OR',
-				'source_date' => array( 'key' => 'aw_source_date', 'compare' => 'EXISTS' ),
-				'no_date'     => array( 'key' => 'aw_source_date', 'compare' => 'NOT EXISTS' ),
-			)
+		$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Publisher, State)
+		$mq['aw_src'] = array(
+			'relation'    => 'OR',
+			'source_date' => array( 'key' => 'aw_source_date', 'compare' => 'EXISTS' ),
+			'no_date'     => array( 'key' => 'aw_source_date', 'compare' => 'NOT EXISTS' ),
 		);
+		$q->set( 'meta_query', $mq );
 		$q->set( 'orderby', array( 'source_date' => 'DESC', 'date' => 'DESC' ) );
 	}
 );

@@ -20,7 +20,7 @@ const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_source_type', 'aw_op
 
 /** District × type page with too few listings to be worth indexing. */
 function aw_is_thin_directory_page() {
-	if ( ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || ! get_query_var( 'aw_listing_type' ) ) {
+	if ( ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || ! get_query_var( 'aw_dir_type' ) ) {
 		return false;
 	}
 	$place = aw_current_place();

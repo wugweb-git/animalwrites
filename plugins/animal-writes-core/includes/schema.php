@@ -82,25 +82,6 @@ add_action(
 			aw_jsonld( array( '@context' => 'https://schema.org' ) + aw_listing_schema( get_queried_object_id() ) );
 			return;
 		}
-		if ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) {
-			global $wp_query;
-			$items = array();
-			$start = (int) max( 0, ( max( 1, (int) get_query_var( 'paged' ) ) - 1 ) * (int) $wp_query->get( 'posts_per_page' ) );
-			foreach ( $wp_query->posts as $i => $p ) {
-				$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => get_the_title( $p ) );
-			}
-			if ( $items ) {
-				aw_jsonld(
-					array(
-						'@context'        => 'https://schema.org',
-						'@type'           => 'ItemList',
-						'name'            => wp_strip_all_tags( get_the_archive_title() ),
-						'numberOfItems'   => (int) $wp_query->found_posts,
-						'itemListElement' => $items,
-					)
-				);
-			}
-		}
 	},
 	30
 );

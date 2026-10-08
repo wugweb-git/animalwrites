@@ -56,24 +56,6 @@ add_filter(
 );
 
 // Lists leave out archived news and closed opportunities.
-add_action(
-	'pre_get_posts',
-	function ( $q ) {
-		if ( is_admin() || ! $q->is_main_query() ) {
-			return;
-		}
-		if ( $q->is_post_type_archive( 'aw_news' ) ) {
-			$q->set( 'date_query', array( array( 'after' => AW_NEWS_ARCHIVE_AFTER . ' ago', 'inclusive' => true ) ) );
-		}
-		if ( $q->is_post_type_archive( 'aw_opportunity' ) ) {
-			$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Location is a meta filter)
-			$mq['aw_open'] = aw_open_opportunities_meta_query();
-			$q->set( 'meta_query', $mq );
-		}
-	},
-	40
-);
-
 /** Days an opportunity without a deadline stays open before it needs renewing. */
 const AW_OPP_REVIEW_DAYS = 30;
 

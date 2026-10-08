@@ -69,6 +69,10 @@ add_filter(
 		if ( '' !== trim( $content ) ) {
 			return $content; // A real featured image exists.
 		}
+		$cls = (string) ( $block['attrs']['className'] ?? '' );
+		if ( false !== strpos( $cls, 'aw-no-fallback' ) ) {
+			return ''; // lists that show a picture only when the item has one (Resources, Opportunities)
+		}
 		$post_id = $instance->context['postId'] ?? get_the_ID();
 		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_guide' ), true ) ) {
 			return $content;
@@ -93,7 +97,7 @@ add_filter(
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}
 		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $inner . '</a>' : $inner;
-		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $url ? ' has-remote' : '' ) . ( $doc ? ' aw-doc-cover' : '' ) . '">' . $inner . '</figure>';
+		return '<figure class="wp-block-post-featured-image aw-card-media' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . ( $url ? ' has-remote' : '' ) . ( $doc ? ' aw-doc-cover' : '' ) . '">' . $inner . '</figure>';
 	},
 	10,
 	3

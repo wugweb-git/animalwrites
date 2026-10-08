@@ -88,6 +88,7 @@ const AW_LIST_FILTERS = array(
 	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Topic' ) ),
 	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Topic' ) ),
+	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ),
 );
 /** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
@@ -125,6 +126,8 @@ function aw_filter_clauses( $type, $active ) {
 			$mq[] = $p ? aw_place_meta_clause( $p ) : array( 'key' => 'aw_state_code', 'value' => '-1' );
 		} elseif ( 'publisher' === $f[1] ) {
 			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v );
+		} elseif ( 'press-format' === $f[1] ) {
+			$mq[] = array( 'key' => 'aw_press_format', 'value' => $v );
 		} else {
 			$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
 		}
@@ -165,6 +168,14 @@ function aw_filter_values( $ids, $source ) {
 				$name[ $k ]      = $name[ $k ] ?? ( ! empty( $pubs[ $host ]['name'] ) ? $pubs[ $host ]['name'] : ( function_exists( 'aw_publisher_of' ) ? aw_publisher_of( $id )[0] : $host ) );
 			}
 		}
+	} elseif ( 'press-format' === $source ) {
+		foreach ( $ids as $id ) {
+			$k = (string) get_post_meta( $id, 'aw_press_format', true );
+			if ( '' !== $k ) {
+				$seen[ $k ][ $id ] = 1;
+				$name[ $k ]        = AW_PRESS_FORMATS[ $k ] ?? ucfirst( $k );
+			}
+		}
 	} else {
 		foreach ( wp_get_object_terms( $ids, $source, array( 'fields' => 'all_with_object_id' ) ) as $t ) {
 			$seen[ $t->slug ][ $t->object_id ] = 1;
@@ -179,29 +190,6 @@ function aw_filter_values( $ids, $source ) {
 	return $out;
 }
 
-add_action(
-	'pre_get_posts',
-	function ( $q ) {
-		if ( is_admin() || ! $q->is_main_query() ) {
-			return;
-		}
-		foreach ( AW_LIST_SIZES as $type => $size ) {
-			if ( ! $q->is_post_type_archive( $type ) ) {
-				continue;
-			}
-			$q->set( 'posts_per_page', $size );
-			list( $tq, $mq ) = aw_filter_clauses( $type, aw_active_filters( $type ) );
-			if ( $tq ) {
-				$q->set( 'tax_query', $tq );
-			}
-			if ( $mq ) {
-				$q->set( 'meta_query', array_merge( (array) $q->get( 'meta_query' ), $mq ) );
-			}
-		}
-	},
-	30
-);
-
 /**
  * The filter bar for a list: one labelled group per filter, counts that respect the other active filters, values with
  * no items hidden, a group hidden while it has one option, and the active filters with "Remove" and "Clear all".
@@ -213,7 +201,7 @@ function aw_list_filters( $type ) {
 	}
 	$shown[ $type ] = true;
 	$active = aw_active_filters( $type );
-	$all    = get_post_type_archive_link( $type );
+	$all    = aw_hub_url( $type );
 	$groups = '';
 	$chips  = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
@@ -480,7 +468,7 @@ add_shortcode(
 	'aw_directory_results',
 	function () {
 		global $wp_query;
-		$hub = get_post_type_archive_link( 'aw_listing' );
+		$hub = aw_hub_url( 'aw_listing' );
 		if ( ! $wp_query->have_posts() ) {
 			return '<div class="aw-empty"><p>No organisations match. Try another district, or clear the filters.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( $hub ) . '">Clear filters</a></p></div>';
 		}

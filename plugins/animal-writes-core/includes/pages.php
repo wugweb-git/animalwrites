@@ -281,7 +281,7 @@ add_shortcode(
 			if ( ! $posts ) {
 				continue;
 			}
-			$all   = add_query_arg( 'topic', $term->slug, get_post_type_archive_link( $type ) );
+			$all   = add_query_arg( 'topic', $term->slug, aw_hub_url( $type ) );
 			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul>';
 			foreach ( $posts as $p ) {
 				$html .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';

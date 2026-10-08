@@ -53,6 +53,8 @@ require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
 require_once AW_CORE_DIR . 'includes/testimonials.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
+require_once AW_CORE_DIR . 'includes/hubs.php';
+require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
 require_once AW_CORE_DIR . 'includes/launch.php';
 require_once AW_CORE_DIR . 'includes/systems.php';

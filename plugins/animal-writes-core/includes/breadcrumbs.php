@@ -45,7 +45,7 @@ function aw_breadcrumbs() {
 		$id   = get_queried_object_id();
 		$type = get_post_type( $id );
 		$obj  = get_post_type_object( $type );
-		$trail[] = array( $obj->labels->name, get_post_type_archive_link( $type ) );
+		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
 		$trail[] = array( get_the_title( $id ), get_permalink( $id ) );
 	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && aw_current_place() ) {
 		$city  = aw_current_place();

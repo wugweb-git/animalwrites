@@ -330,22 +330,6 @@ function aw_place_meta_clause( $place ) {
 		: array( 'key' => 'aw_district_code', 'value' => (string) $place->code );
 }
 
-add_action(
-	'pre_get_posts',
-	function ( $q ) {
-		if ( is_admin() || ! $q->is_main_query() ) {
-			return;
-		}
-		$place = $q->get( 'aw_place' ) ? aw_place_by_slug( (string) $q->get( 'aw_place' ) ) : null;
-		if ( $place ) {
-			$mq               = (array) $q->get( 'meta_query' );
-			$mq['aw_place'] = aw_place_meta_clause( $place );
-			$q->set( 'meta_query', $mq );
-		}
-	},
-	25
-);
-
 /* ---------- Old URLs ---------- */
 
 // The location list had archive pages at /location/{slug}/: each goes to its directory page.

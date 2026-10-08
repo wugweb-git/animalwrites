@@ -604,3 +604,86 @@ body { background: var(--aw-color-canvas); }
 
 /* Card title links are at least 24px tall to tap (WCAG 2.5.8), also when the title is one line (Phase 11 D). */
 :is(.aw-case-title, .aw-opp-title, .aw-org-name, .aw-story-title) a { display: inline-block; min-height: var(--s-6); }
+
+/* ===========================================================================
+   Hub Pages (Phase 12 Part D): band in the Page content, lists on core blocks.
+   The Post Template items carry the old card classes; the generic query-loop card (kit.css) is undone here.
+   =========================================================================== */
+.aw-hub > .wp-block-post-content { margin-block: 0; }
+.wp-block-post-content > .aw-section-band:first-child { margin-top: 0 !important; }
+.aw-hub-list .wp-block-post-template { list-style: none; margin: 0; padding: 0; }
+.aw-hub-list .wp-block-post-template > li { position: static; display: block; margin: 0; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0; box-shadow: none !important; overflow: visible; transform: none !important; }
+.aw-hub-list .wp-block-post-template > li::after { display: none; }
+.aw-hub-list .wp-block-post-template > li > * { margin: 0 !important; }
+.aw-hub-list .wp-block-post-template > li:has(.wp-block-post-title a:focus-visible) { outline: 0; }
+.aw-hub-list :is(.aw-story, .aw-story-body, .aw-case, .aw-case-body, .aw-task, .aw-task-body, .aw-opp, .aw-opp-body, .aw-org, .aw-org-body) > * { margin-block-start: 0; }
+.aw-hub-list .wp-block-post-title a:focus-visible { outline: 3px solid var(--kit-color-focus); outline-offset: 3px; }
+.aw-hub-list .wp-block-post-excerpt__excerpt { margin: 0; }
+.aw-hub-list .wp-block-post-terms { font-size: var(--kit-type-xs); }
+.aw-hub-list > .aw-pager { margin-top: var(--kit-space-7); }
+.aw-pager > a, .aw-pager .wp-block-query-pagination-numbers { display: inline-flex; gap: var(--kit-space-2); }
+.aw-pager > a { align-items: center; justify-content: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; font-weight: var(--kit-weight-medium); }
+
+/* News: on page 1 the first story leads, with three rows beside it; then the grid */
+.aw-news-list { display: grid; gap: var(--aw-space-7) var(--aw-space-grid); grid-template-columns: 1fr; }
+@media (min-width: 640px) { .aw-news-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-news-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-hub-list .aw-story-media { margin: 0; }
+.aw-hub-list .aw-src { margin: var(--aw-space-3) 0 var(--aw-space-1); }
+.aw-hub-list .aw-story-sum { display: none; }
+.aw-hub-list .aw-story-meta { margin: 0; min-height: 0; padding-right: 0; display: block; }
+.aw-hub-list .aw-story-meta::before { display: none; }
+.aw-hub-list .aw-story-title { margin: 0 0 var(--aw-space-2); }
+.is-first-page .aw-news-list > li:first-child { grid-column: 1 / -1; padding-bottom: var(--aw-space-7) !important; border-bottom: 2px solid var(--aw-color-ink) !important; }
+.is-first-page .aw-news-list > li:first-child .aw-story-media { aspect-ratio: 16/9; }
+.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--aw-type-headline, var(--aw-type-h1)) !important; line-height: 1.1 !important; letter-spacing: var(--aw-tracking-display) !important; }
+.is-first-page .aw-news-list > li:first-child .aw-story-sum { display: block; color: var(--aw-color-muted); font-size: var(--aw-type-lead); margin: 0 0 var(--aw-space-3); }
+.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 1 / -1; }
+.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { display: grid; grid-template-columns: 1fr 112px; gap: var(--aw-space-4); }
+.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story-media { order: 2; aspect-ratio: 1; }
+.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-src { margin-top: 0; }
+@media (min-width: 900px) {
+	.is-first-page .aw-news-list { grid-template-columns: repeat(12, minmax(0, 1fr)); row-gap: var(--aw-space-4); }
+	.is-first-page .aw-news-list > li { grid-column: span 6; }
+	.is-first-page .aw-news-list > li:first-child { grid-column: 1 / span 7; grid-row: 1 / span 3; border-bottom: 0 !important; padding-bottom: 0 !important; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 8 / span 5; }
+	.is-first-page .aw-news-list > li:nth-child(2) { grid-row: 1; }
+	.is-first-page .aw-news-list > li:nth-child(3) { grid-row: 2; border-top: 1px solid var(--aw-color-line) !important; padding-top: var(--aw-space-4) !important; }
+	.is-first-page .aw-news-list > li:nth-child(4) { grid-row: 3; border-top: 1px solid var(--aw-color-line) !important; padding-top: var(--aw-space-4) !important; }
+	.is-first-page .aw-news-list > li:nth-child(n+5) { margin-top: var(--aw-space-5) !important; }
+	.is-first-page .aw-news-list > li:nth-child(5) { border-top: 2px solid var(--aw-color-ink) !important; }
+}
+@media (min-width: 1200px) { .is-first-page .aw-news-list > li:nth-child(n+5) { grid-column: span 4; } }
+
+/* Library rows */
+.aw-hub-list .aw-case-tags { position: relative; z-index: 1; }
+.aw-hub-list .aw-case-sum p { margin: 0; }
+.aw-hub-list .aw-case-title { margin: 0 0 var(--aw-space-2); }
+
+/* Resources cards (the title link covers the card) */
+.aw-hub-list .aw-task { position: relative; }
+.aw-hub-list .aw-task-media { margin: 0; border-radius: 0; }
+.aw-task-title { font-size: var(--aw-type-h3) !important; font-weight: var(--aw-weight-bold); letter-spacing: -0.02em; line-height: 1.2 !important; margin: 0 !important; }
+.aw-task-title a { color: var(--aw-color-ink); text-decoration: none; }
+.aw-task-title a::after { content: ""; position: absolute; inset: 0; }
+.aw-hub-list .aw-task-sum { color: var(--aw-color-muted); font-size: inherit; }
+.aw-hub-list .aw-task-meta { margin: auto 0 0; }
+
+/* Opportunities cards */
+.aw-hub-list .aw-opp { position: relative; }
+.aw-hub-list .aw-opp-media { margin: 0; border-radius: 0; }
+.aw-hub-list .aw-opp-tags .wp-block-post-terms { margin: 0; }
+.aw-place { display: inline-flex; align-items: center; gap: var(--aw-space-1); }
+.aw-hub-list .aw-opp-title { margin: 0; }
+.aw-hub-list .aw-opp-trust { margin: var(--aw-space-2) 0 0; }
+.aw-hub-list .aw-opp-actions { position: relative; z-index: 1; margin-top: auto; }
+
+/* Directory rows */
+.aw-orgs > li.is-featured > .aw-org { background: linear-gradient(90deg, rgba(255,190,26,.14), transparent 60%); }
+.aw-hub-list .aw-org-name { margin: 0; }
+.aw-hub-list .aw-org-meta { margin: var(--aw-space-1) 0; }
+.aw-org-meta.aw-ico--directory::before { content: ""; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-hub-list .aw-org-tags, .aw-hub-list .aw-org-actions { position: relative; z-index: 1; }
+
+/* Campaigns */
+.aw-camp-more h2.wp-block-heading { font-size: var(--aw-type-h2); padding-top: var(--aw-space-4); border-top: 2px solid var(--aw-color-ink); }

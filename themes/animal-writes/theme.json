@@ -142,5 +142,21 @@
 				}
 			}
 		}
-	}
+	},
+	"customTemplates": [
+		{
+			"name": "page-wide",
+			"title": "Page — Wide",
+			"postTypes": [
+				"page"
+			]
+		},
+		{
+			"name": "page-hub",
+			"title": "Hub (section band + list)",
+			"postTypes": [
+				"page"
+			]
+		}
+	]
 }

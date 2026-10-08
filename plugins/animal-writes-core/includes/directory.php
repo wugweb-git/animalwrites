@@ -2,7 +2,8 @@
 /**
  * Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/, featured first.
  *
- * Singles live at /directory/org/{slug}/.
+ * Every one of these is the Directory Page (hubs.php) with the place and type as query vars (aw_place, aw_dir_type);
+ * its list is the hub Query Loop. Singles live at /directory/org/{slug}/.
  *
  * @package animal-writes-core
  */
@@ -52,7 +53,7 @@ function aw_listing_type_name( $slug ) {
 
 /** Name of the listing type the current directory page shows, if any. */
 function aw_current_type_name() {
-	$slug = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : get_query_var( 'aw_listing_type' ) );
+	$slug = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : get_query_var( 'aw_dir_type' ) );
 	if ( '' === $slug ) {
 		$slug = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
@@ -110,7 +111,7 @@ add_filter(
 				return array( 'error' => '404' );
 			}
 			$out['aw_place']        = $bp->slug;
-			$out['aw_listing_type'] = aw_listing_type_query( $c );
+			$out['aw_dir_type']     = aw_listing_type_query( $c );
 			$out['aw_type_slug']    = $c;
 		} else {
 			return array( 'error' => '404' );
@@ -122,62 +123,112 @@ add_filter(
 	}
 );
 
-/**
- * Is this a directory listing query (archive, city or city × type)?
- *
- * @param WP_Query $q Query.
- * @return bool
- */
-function aw_is_directory_query( $q ) {
-	if ( is_admin() || ! $q->is_main_query() ) {
-		return false;
+add_filter(
+	'query_vars',
+	function ( $v ) {
+		$v[] = 'aw_dir_type';
+		return $v;
 	}
-	return $q->is_post_type_archive( 'aw_listing' ) || $q->is_tax( 'aw_listing_type' );
-}
+);
 
 /**
- * Featured first, then alphabetical. Needs-reverify listings stay visible (flag is for ops).
+ * The Directory list query: place, type, name search, verified only, and the order (featured first, then verified,
+ * then A–Z; or "Most details first"). Used by the hub Query Loop (hubs.php).
  *
- * @param WP_Query $q Query.
+ * @param array $v Base query vars.
+ * @return array
  */
-function aw_directory_order( $q ) {
-	if ( ! aw_is_directory_query( $q ) ) {
-		return;
-	}
-	$q->set( 'post_type', 'aw_listing' );
-	// Featured first, then verified, then A–Z. No other listing is ranked above the rest. Every listing carries aw_featured; aw_verified may be missing.
-	$q->set(
-		'meta_query',
-		array(
-			'feat' => array( 'key' => 'aw_featured', 'type' => 'NUMERIC' ),
-			'ver'  => array(
-				'relation' => 'OR',
-				'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
-				array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
-			),
-		)
+function aw_directory_query_vars( $v ) {
+	$mq = (array) ( $v['meta_query'] ?? array() );
+	// Every listing carries aw_featured; aw_verified may be missing.
+	$mq['feat'] = array( 'key' => 'aw_featured', 'type' => 'NUMERIC' );
+	$mq['ver']  = array(
+		'relation' => 'OR',
+		'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
+		array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
 	);
 	$order = array( 'feat' => 'DESC', 'ver_yes' => 'DESC', 'title' => 'ASC' );
 	if ( 'details' === ( $_GET['sort'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		// "Most details first": listings with more ways to reach them (phone, WhatsApp, email, website) first.
-		$mq          = (array) $q->get( 'meta_query' );
 		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
-		$q->set( 'meta_query', $mq );
-		$order = array( 'feat' => 'DESC', 'score' => 'DESC', 'title' => 'ASC' );
+		$order       = array( 'feat' => 'DESC', 'score' => 'DESC', 'title' => 'ASC' );
 	}
-	$q->set( 'orderby', $order );
-	$q->set( 'posts_per_page', 24 );
+	$place = aw_current_place();
+	if ( $place ) {
+		$mq['aw_place'] = aw_place_meta_clause( $place );
+	}
+	if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
+	}
+	$type = (string) get_query_var( 'aw_dir_type' );
+	if ( '' === $type ) {
+		$g    = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$type = ( $g && aw_listing_type_ok( $g ) ) ? aw_listing_type_query( $g ) : ''; // a filtered list; canonical stays the unfiltered page
+	}
+	if ( '' !== $type ) {
+		$v['tax_query'] = array( array( 'taxonomy' => 'aw_listing_type', 'field' => 'slug', 'terms' => explode( ',', $type ) ) );
+	}
+	$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( '' !== $text ) {
+		$v['s']              = $text;
+		$v['search_columns'] = array( 'post_title' );
+	}
+	$v['meta_query'] = $mq;
+	$v['orderby']    = $order;
+	return $v;
 }
-add_action( 'pre_get_posts', 'aw_directory_order' );
 
 /**
- * Front-end check: directory archive, city or city × type page.
+ * Front-end check: the Directory Page (hub, place or place × type).
  *
  * @return bool
  */
 function aw_is_directory_view() {
-	return is_post_type_archive( 'aw_listing' ) || is_tax( 'aw_listing_type' );
+	return function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type();
 }
+
+/** H1 of the Directory view: "Directory", "Help in Kerala", "Gaushala in Ernakulam" or the type. */
+function aw_directory_h1() {
+	$city  = aw_current_place();
+	$tname = aw_current_type_name();
+	if ( ! $city && ! $tname ) {
+		return get_the_title( get_queried_object_id() );
+	}
+	return $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . $city->name;
+}
+
+// The Directory Page's H1 and intro follow the place and type.
+add_filter(
+	'render_block_core/post-title',
+	function ( $html, $block ) {
+		if ( 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! aw_is_directory_view() || ( ! aw_current_place() && ! aw_current_type_name() ) ) {
+			return $html;
+		}
+		return preg_replace( '#(<h1[^>]*>)(.*?)(</h1>)#s', '$1' . esc_html( aw_directory_h1() ) . '$3', $html, 1 );
+	},
+	5,
+	2
+);
+add_filter(
+	'render_block_core/paragraph',
+	function ( $html ) {
+		if ( ! aw_is_directory_view() || false === strpos( $html, 'aw-section-desc' ) || ! aw_current_place() ) {
+			return $html;
+		}
+		return preg_replace( '#(<p[^>]*aw-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( aw_directory_intro() ) . '$3', $html, 1 );
+	}
+);
+
+// Old type pages (/directory-type/{type}/) are the Directory filtered by type.
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_tax( 'aw_listing_type' ) ) {
+			wp_safe_redirect( add_query_arg( 'type', get_queried_object()->slug, aw_hub_url( 'aw_listing' ) ), 301, 'Animal Writes' );
+			exit;
+		}
+	},
+	1
+);
 
 /**
  * Archive titles for city / city × type pages, e.g. "Animal shelters in Delhi".
@@ -256,45 +307,16 @@ add_action(
 		$g     = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
 		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
 		$type  = sanitize_title( $g['type'] ?? '' );
-		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? ( 'veterinary' === $type ? add_query_arg( 'type', 'veterinary', get_post_type_archive_link( 'aw_listing' ) ) : get_term_link( $type, 'aw_listing_type' ) ) : get_post_type_archive_link( 'aw_listing' ) );
+		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'type', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
 		$extra = array_filter(
 			array(
 				'q'        => sanitize_text_field( $g['q'] ?? '' ),
 				'verified' => empty( $g['verified'] ) ? '' : '1',
 			)
 		);
-		wp_safe_redirect( add_query_arg( $extra, is_wp_error( $base ) ? get_post_type_archive_link( 'aw_listing' ) : $base ) );
+		wp_safe_redirect( add_query_arg( $extra, $base ) );
 		exit;
 	}
-);
-
-/**
- * Name search and verified-only on directory queries.
- *
- * @param WP_Query $q Query.
- */
-add_action(
-	'pre_get_posts',
-	function ( $q ) {
-		if ( ! aw_is_directory_query( $q ) ) {
-			return;
-		}
-		$gtype = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( $gtype && ! $q->get( 'aw_listing_type' ) && aw_listing_type_ok( $gtype ) ) {
-			$q->set( 'aw_listing_type', aw_listing_type_query( $gtype ) ); // a filtered list; canonical stays the unfiltered page
-		}
-		$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( '' !== $text ) {
-			$q->set( 's', $text );
-			$q->set( 'search_columns', array( 'post_title' ) );
-		}
-		if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$mq = (array) $q->get( 'meta_query' );
-			$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
-			$q->set( 'meta_query', $mq );
-		}
-	},
-	20
 );
 
 /** Number of verified listings (cached). "Verified only" appears once there is at least one. */
@@ -316,7 +338,10 @@ function aw_verified_count() {
  */
 function aw_directory_filter() {
 	$cur_city = aw_current_place();
-	$cur_type = (string) get_query_var( 'aw_listing_type' );
+	$cur_type = (string) get_query_var( 'aw_dir_type' );
+	if ( '' === $cur_type ) {
+		$cur_type = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
 	$state    = $cur_city ? aw_place_parent_state( $cur_city ) : null;
 	$district = $cur_city && $cur_city->parent ? $cur_city : null;
 	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -360,7 +385,7 @@ function aw_directory_filter() {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
-	return '<form class="aw-dir-search" role="search" method="get" action="' . esc_url( get_post_type_archive_link( 'aw_listing' ) ) . '">'
+	return '<form class="aw-dir-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 		. $field( 'aw-dir-q', 'Name', '<span class="aw-ico aw-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
@@ -408,7 +433,7 @@ add_action(
  * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
  */
 function aw_browse_states() {
-	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_listing_type' ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['type'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
 	$items = '';
@@ -443,4 +468,4 @@ function aw_directory_intro() {
 	}
 	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );
 }
-add_filter( 'kits_seo_description', fn( $d ) => ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) ? aw_directory_intro() : $d ); // phpcs:ignore WordPress.Security.NonceVerification
+add_filter( 'kits_seo_description', fn( $d ) => ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['type'] ) && empty( $_GET['q'] ) ) ? aw_directory_intro() : $d ); // phpcs:ignore WordPress.Security.NonceVerification
