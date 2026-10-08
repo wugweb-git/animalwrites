@@ -961,3 +961,5 @@ body { background: var(--kit-surface-page); }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { min-height: 100%; }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-close { height: 100%; }
+/* Mobile menu: fixed from under the admin bar (when signed in) to the bottom of the screen */
+.wp-block-navigation__responsive-container.is-menu-open { top: var(--wp-admin--admin-bar--height, 0px) !important; bottom: 0 !important; height: auto !important; }
