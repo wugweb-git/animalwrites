@@ -18,10 +18,11 @@
     "loading"
    ],
    "tokens": [
-    "kit-color-accent",
-    "kit-color-on-accent",
+    "kit-color-ink",
+    "kit-color-on-ink",
+    "kit-color-accent (on dark surfaces)",
     "kit-radius-pill",
-    "kit-size-target"
+    "kit-size-control"
    ],
    "a11y": {
     "element": "<button> for actions, <a> for navigation",
@@ -32,8 +33,8 @@
     "motion": "colour change only; transitions off with reduced motion",
     "sr": "visible label; icon-only buttons carry aria-label",
     "contrast": [
-     "kit-color-on-accent",
-     "kit-color-accent"
+     "kit-color-on-ink",
+     "kit-color-ink"
     ]
    },
    "seo": {
@@ -61,8 +62,8 @@
     "info"
    ],
    "tokens": [
-    "kit-color-line",
-    "kit-radius-pill"
+    "kit-color-ink (6% tint)",
+    "radius-sm"
    ],
    "a11y": {
     "element": "<span> (static label)",

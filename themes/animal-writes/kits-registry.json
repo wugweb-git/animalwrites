@@ -639,34 +639,6 @@
    }
   },
   {
-   "name": "Share (Animal Writes)",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "aw-share"
-   ],
-   "states": [
-    "default",
-    "copied"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "see Kits Share",
-    "aria": "none",
-    "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
-    "motion": "none",
-    "sr": "visible text"
-   },
-   "seo": {
-    "heading": "none",
-    "link": "n/a",
-    "alt": "n/a",
-    "schema": "none"
-   }
-  },
-  {
    "name": "Announcement text",
    "type": "component",
    "status": "live",
@@ -718,8 +690,7 @@
     "link": "n/a",
     "alt": "n/a",
     "schema": "none"
-   },
-   "note": "aw-footer-volunteer is no longer used."
+   }
   },
   {
    "name": "Buttons (Animal Writes)",
