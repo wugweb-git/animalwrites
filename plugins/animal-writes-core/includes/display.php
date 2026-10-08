@@ -53,23 +53,7 @@ add_filter(
 	3
 );
 
-/**
- * External links get a small ↗ after the text, so readers know they are leaving the site.
- * Internal links (same host or root-relative), mailto/tel and image links are left alone.
- */
-add_action(
-	'wp_head',
-	function () {
-		$host = wp_parse_url( home_url(), PHP_URL_HOST );
-		$sel  = 'a[href^="http"]:not([href*="//' . esc_attr( $host ) . '"]):not(:has(img)):not(:has(.kit-ico)):not(.wp-block-button__link)';
-		printf(
-			'<style id="aw-external-links">%1$s::after{content:"\2197" / "";display:inline-block;margin-left:.2em;font-size:.85em;text-decoration:none}.wp-block-button__link[href^="http"]:not([href*="//%2$s"])::after{content:"\2197" / "";margin-left:.35em}</style>' . "\n",
-			$sel, // phpcs:ignore WordPress.Security.EscapeOutput
-			esc_attr( $host )
-		);
-	},
-	20
-);
+// External links: one arrow, drawn by Kits (kit.js marks them, kit.css draws the icon). The older ↗ text rule was removed.
 
 /**
  * News, Legal Watch and Research lists are ordered by source date (newest first), then by date added.
