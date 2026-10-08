@@ -92,18 +92,17 @@ function aw_block_breadcrumb() {
 }
 
 function aw_block_hub_count( $a ) {
-	$type = (string) ( $a['postType'] ?? '' );
-	if ( ! isset( AW_HUBS[ $type ] ) || in_array( $type, array( 'aw_listing', 'aw_press' ), true ) ) {
-		return ''; // the Directory's count sits with its results; Media & PR has none
+	return ''; // owner, 9 Oct: the count sits above the pagination (hubs.php), not in the band
+}
+
+/** "23 stories": the number of items in a hub list with the current filters. */
+function aw_hub_count_label( $type ) {
+	$noun = array( 'aw_guide' => array( 'guide', 'guides' ), 'aw_opportunity' => array( 'opportunity', 'opportunities' ), 'aw_campaign' => array( 'campaign', 'campaigns' ), 'aw_legal' => array( 'document', 'documents' ), 'aw_news' => array( 'story', 'stories' ), 'aw_listing' => array( 'organisation', 'organisations' ), 'aw_press' => array( 'item', 'items' ) );
+	if ( ! isset( $noun[ $type ] ) ) {
+		return '';
 	}
-	$n    = aw_hub_total( $type );
-	$noun = array( 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
-	$word = 1 === $n ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ), 's' ) : $noun[ $type ];
-	if ( 'aw_campaign' === $type ) {
-		$n = (int) wp_count_posts( 'aw_campaign' )->publish; // all campaigns, the 1.0 story included
-		$word = 1 === $n ? 'campaign' : 'campaigns';
-	}
-	return $n ? '<p class="kit-section-count">' . esc_html( number_format_i18n( $n ) . ' ' . $word ) . '</p>' : '';
+	$n = 'aw_campaign' === $type ? (int) wp_count_posts( 'aw_campaign' )->publish : aw_hub_total( $type ); // all campaigns, the 1.0 story included
+	return $n ? number_format_i18n( $n ) . ' ' . $noun[ $type ][ 1 === $n ? 0 : 1 ] : '';
 }
 
 /** Three pictures from the section (campaign photos for Campaigns). */

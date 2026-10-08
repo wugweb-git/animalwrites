@@ -57,3 +57,8 @@ add_filter(
 		'aw-vol-banner' => array( 'volunteer-banner', 'Volunteer' ),
 	)
 );
+
+// End bar on items: categories bottom left, share bottom right.
+add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? $t : 'aw_topic', 10, 2 );
+add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
+

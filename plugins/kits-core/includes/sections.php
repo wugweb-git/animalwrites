@@ -122,3 +122,27 @@ add_filter(
 
 // The share plugin's heading comes straight after the page title: h2, so no level is skipped.
 add_filter( 'scriptlesssocialsharing_heading_element', fn() => 'h2' );
+
+/**
+ * End of an article: its tags bottom left (crawlable text links) and the share buttons bottom right, one row.
+ * The share plugin's own automatic placement is off for these types; it is printed here instead.
+ */
+add_filter(
+	'the_content',
+	function ( $content ) {
+		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+		$id   = get_the_ID();
+		$tax  = (string) apply_filters( 'kits_endbar_taxonomy', 'category', get_post_type( $id ) );
+		$tags = get_the_term_list( $id, $tax, '<div class="kit-endbar-tags wp-block-post-terms taxonomy-' . esc_attr( $tax ) . '">', '', '</div>' );
+		$tags = is_wp_error( $tags ) ? '' : (string) $tags;
+		$share = function_exists( 'scriptlesssocialsharing_do_buttons' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? (string) scriptlesssocialsharing_do_buttons( false ) : '';
+		if ( '' === $tags . $share ) {
+			return $content;
+		}
+		return $content . '<div class="kit-endbar">' . $tags . ( $share ? '<div class="kit-endbar-share"><span class="kit-endbar-label">Share</span>' . $share . '</div>' : '' ) . '</div>';
+	},
+	40
+);
+

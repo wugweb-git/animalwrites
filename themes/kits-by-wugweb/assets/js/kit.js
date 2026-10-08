@@ -528,7 +528,7 @@
 	document.querySelectorAll('form[data-kit-filterbar]').forEach(function (form) {
 		form.addEventListener('submit', function (e) { e.preventDefault(); go(form); });
 		form.addEventListener('change', function (e) {
-			if (e.target.classList.contains('kit-dd-check') && !e.target.closest('.is-sheet')) go(form);
+			if (e.target.classList.contains('kit-dd-check') && !e.target.closest('.is-sheet, .kit-dd--menu')) go(form); // the Filters menu waits for Apply
 		});
 	});
 })();

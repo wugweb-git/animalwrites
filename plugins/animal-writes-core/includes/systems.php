@@ -233,13 +233,16 @@ function aw_list_filters( $type ) {
 				$chips[] = array( $label . ': ' . $v[0], add_query_arg( aw_filter_args( $without ) + $keep, $all ) );
 			}
 		}
-		$groups .= function_exists( 'kits_filter_dropdown' ) ? kits_filter_dropdown( $label, $param, $options ) : '';
+		$groups .= count( AW_LIST_FILTERS[ $type ] ?? array() ) > 2 ? kits_filter_section( $label, $param, $options ) : kits_filter_dropdown( $label, $param, $options ); // more than two filters: one Filters menu
 	}
 	$sort_opts = array();
 	foreach ( $sorts as $k => $l ) {
 		$sort_opts[] = array( $l, add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), $all ), $k === $sort );
 	}
 	$sort_html = function_exists( 'kits_sort_dropdown' ) ? kits_sort_dropdown( $sort_opts ) : '';
+	if ( count( AW_LIST_FILTERS[ $type ] ?? array() ) > 2 ) {
+		$groups = kits_filter_menu( $groups, count( $chips ) );
+	}
 	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, $sort_html, $keep ) : '';
 }
 

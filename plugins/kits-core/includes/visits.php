@@ -49,7 +49,9 @@ add_action(
 					'methods'             => 'GET',
 					'permission_callback' => '__return_true',
 					'callback'            => function () {
-						$r = new WP_REST_Response( array( 'total' => (int) get_option( 'aw_visits_total', 0 ), 'since' => (string) get_option( 'aw_visits_since' ) ) );
+						$base  = (int) get_option( 'aw_visits_baseline', 0 ); // visits before this counter started (GA or the 1.0 site)
+						$since = (string) get_option( 'aw_visits_baseline_since' );
+						$r     = new WP_REST_Response( array( 'total' => $base + (int) get_option( 'aw_visits_total', 0 ), 'since' => $base && $since ? $since : (string) get_option( 'aw_visits_since' ) ) );
 						$r->header( 'Cache-Control', 'public, max-age=60' );
 						return $r;
 					},
@@ -108,7 +110,27 @@ add_action(
 					echo '<tr><td>' . esc_html( wp_date( 'j M', strtotime( $d ) ) ) . '</td><td>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_' . $d, 0 ) ) ) . '</td></tr>';
 				}
 				echo '</tbody></table><p class="description">One count per browser session; bots and logged-in editors excluded. Google Analytics remains the detailed source.</p>';
+				if ( current_user_can( 'manage_options' ) ) { // the count from day 0: add the visits before this counter started
+					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_visits_baseline">' . wp_nonce_field( 'aw_visits_baseline', '_wpnonce', true, false )
+						. '<p><label>Visits before ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . ' (from Google Analytics or the 1.0 site)<br><input type="number" min="0" name="base" value="' . (int) get_option( 'aw_visits_baseline', 0 ) . '"></label> '
+						. '<label>counted since<br><input type="date" name="since" value="' . esc_attr( (string) get_option( 'aw_visits_baseline_since' ) ) . '"></label></p><p><button class="button">Save</button></p></form>';
+				}
 			}
 		);
 	}
 );
+
+add_action(
+	'admin_post_aw_visits_baseline',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_visits_baseline' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		update_option( 'aw_visits_baseline', absint( $_POST['base'] ?? 0 ) );
+		$s = sanitize_text_field( wp_unslash( $_POST['since'] ?? '' ) );
+		update_option( 'aw_visits_baseline_since', preg_match( '/^\d{4}-\d{2}-\d{2}$/', $s ) ? $s : '' );
+		wp_safe_redirect( admin_url() );
+		exit;
+	}
+);
+

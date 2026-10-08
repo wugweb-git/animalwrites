@@ -643,3 +643,18 @@ add_action(
 add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_page( 'search' ) );
 add_filter( 'kits_ads_list_slot', fn( $slot ) => 'aw_listing' === aw_hub_type() ? 'directory' : $slot );
 add_filter( 'kits_ads_article_slot', fn( $slot ) => is_singular( 'aw_listing' ) ? 'profile' : $slot );
+
+// The list's count, centred above its pagination ("23 stories").
+add_filter(
+	'render_block_core/query-pagination',
+	function ( $html, $block, $instance ) {
+		$type = aw_hub_of_query( (int) ( $instance->context['queryId'] ?? 0 ) );
+		if ( ! $type || 'aw_listing' === $type || ! function_exists( 'aw_hub_count_label' ) ) { // the Directory shows its count with its results
+			return $html;
+		}
+		return '<p class="kit-list-count" role="status">' . esc_html( aw_hub_count_label( $type ) ) . '</p>' . $html;
+	},
+	10,
+	3
+);
+

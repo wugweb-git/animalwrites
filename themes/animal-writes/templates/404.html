@@ -1,0 +1,22 @@
+<!-- wp:template-part {"slug":"header","tagName":"header","area":"header"} /-->
+
+<!-- wp:group {"tagName":"main","className":"kit-error-page","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group kit-error-page" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)"><!-- wp:paragraph {"className":"kit-error-code"} -->
+<p class="kit-error-code">404</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":1} -->
+<h1 class="wp-block-heading">Page not found</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"className":"kit-error-lead"} -->
+<p class="kit-error-lead">This page doesn’t exist or has moved. Search the site, or go to a section.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:html -->
+<form class="kit-error-search" action="/search/" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><input id="kit-404-q" type="search" name="q" placeholder="Search" autocomplete="off"><button type="submit" class="kit-btn"><span class="kit-ico kit-ico--search" aria-hidden="true"></span>Search</button></form>
+<nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li><li><a href="/contact/">Contact</a></li><li><a href="/">Home</a></li></ul></nav>
+<!-- /wp:html --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer","area":"footer"} /-->

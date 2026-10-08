@@ -1438,6 +1438,94 @@
     "alt": "n/a",
     "schema": "FAQPage from the FAQ field"
    }
+  },
+  {
+   "name": "Error and empty pages (404, no results)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-error"
+   ],
+   "states": [
+    "404",
+    "search with no results"
+   ],
+   "tokens": [
+    "kit-type-display"
+   ],
+   "a11y": {
+    "element": "see states",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 Page not found",
+    "link": "section names",
+    "alt": "n/a",
+    "schema": "none (404 status)"
+   }
+  },
+  {
+   "name": "End bar (tags left, share right)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-endbar"
+   ],
+   "states": [
+    "tags and share",
+    "tags only",
+    "share only"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "see states",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "category names (crawlable)",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "List count",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-list-count"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [
+    "kit-type-sm"
+   ],
+   "a11y": {
+    "element": "<p role=status>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
   }
  ],
  "nav": [
