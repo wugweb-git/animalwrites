@@ -3,6 +3,10 @@
    Rules for every interactive primitive: visible focus ring (--kit-focus-width), hover only where hover exists,
    disabled = --opacity-disabled + aria-disabled, targets at least --kit-size-target, reduced motion = opacity only. */
 
+/* ---------- text for screen readers only ---------- */
+.screen-reader-text { border: 0; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute !important; width: 1px; word-wrap: normal !important; }
+.screen-reader-text:focus { clip-path: none; height: auto; width: auto; margin: 0; padding: var(--s-2) var(--s-3); z-index: var(--kit-z-overlay); background: var(--kit-color-raised); color: var(--kit-color-ink); }
+
 /* ---------- shared focus ---------- */
 :is(.kit-chip, .wp-block-post-terms a, .kit-filter-pill, .kit-btn, .kit-segment button, .kit-filter-active button, .kit-field :is(input, select, textarea), .kit-checkbox input, .kit-filter-sheet > summary):focus-visible {
 	outline: var(--kit-focus-width) solid var(--kit-color-focus);

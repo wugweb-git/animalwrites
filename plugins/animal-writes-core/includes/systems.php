@@ -237,7 +237,7 @@ add_shortcode(
 		}
 		$out = '<aside class="aw-trust ' . $cls . '" aria-label="About this information"><ul>';
 		foreach ( $rows as $r ) {
-			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true ) ) ) ) . '</span></li>';
+			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ) ) ) ) . '</span></li>';
 		}
 		return $out . '</ul></aside>';
 	}

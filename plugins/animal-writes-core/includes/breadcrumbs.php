@@ -118,6 +118,18 @@ add_filter(
 	10,
 	2
 );
+// On item pages the topic chips sit above the title: the trail goes before them, so it is always first.
+add_filter(
+	'render_block_core/post-terms',
+	function ( $html, $block, $instance ) {
+		if ( ! is_singular() || (int) ( $instance->context['postId'] ?? 0 ) !== get_queried_object_id() ) {
+			return $html;
+		}
+		return aw_breadcrumbs_prepend( $html );
+	},
+	10,
+	3
+);
 add_filter(
 	'do_shortcode_tag',
 	function ( $html, $tag ) {
