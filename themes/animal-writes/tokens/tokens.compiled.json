@@ -20,11 +20,6 @@
       "md": "#faf6ee",
       "lg": "#faf6ee"
     },
-    "color-raised": {
-      "sm": "#ffffff",
-      "md": "#ffffff",
-      "lg": "#ffffff"
-    },
     "color-ink": {
       "sm": "#141414",
       "md": "#141414",
@@ -45,11 +40,6 @@
       "md": "#e4ddd0",
       "lg": "#e4ddd0"
     },
-    "color-accent": {
-      "sm": "#ffbe1a",
-      "md": "#ffbe1a",
-      "lg": "#ffbe1a"
-    },
     "color-accent-ink": {
       "sm": "#0062b8",
       "md": "#0062b8",
@@ -59,11 +49,6 @@
       "sm": "#141414",
       "md": "#141414",
       "lg": "#141414"
-    },
-    "color-on-ink": {
-      "sm": "#ffffff",
-      "md": "#ffffff",
-      "lg": "#ffffff"
     },
     "color-danger": {
       "sm": "#c8102e",
@@ -145,125 +130,10 @@
       "md": "3rem",
       "lg": "3.5rem"
     },
-    "type-headline": {
-      "sm": "1.5rem",
-      "md": "2.25rem",
-      "lg": "3rem"
-    },
     "type-display": {
       "sm": "2.25rem",
       "md": "3.5rem",
       "lg": "4.25rem"
-    },
-    "type-stat": {
-      "sm": "1.75rem",
-      "md": "2rem",
-      "lg": "2rem"
-    },
-    "type-placard": {
-      "sm": "1.125rem",
-      "md": "1.25rem",
-      "lg": "1.25rem"
-    },
-    "leading-body": {
-      "sm": "1.6",
-      "md": "1.6",
-      "lg": "1.6"
-    },
-    "leading-heading": {
-      "sm": "1.2",
-      "md": "1.2",
-      "lg": "1.2"
-    },
-    "leading-display": {
-      "sm": "1.06",
-      "md": "1.06",
-      "lg": "1.06"
-    },
-    "weight-regular": {
-      "sm": "400",
-      "md": "400",
-      "lg": "400"
-    },
-    "weight-strong": {
-      "sm": "600",
-      "md": "600",
-      "lg": "600"
-    },
-    "measure": {
-      "sm": "68ch",
-      "md": "68ch",
-      "lg": "68ch"
-    },
-    "space-1": {
-      "sm": "0.25rem",
-      "md": "0.25rem",
-      "lg": "0.25rem"
-    },
-    "space-2": {
-      "sm": "0.5rem",
-      "md": "0.5rem",
-      "lg": "0.5rem"
-    },
-    "space-3": {
-      "sm": "0.75rem",
-      "md": "0.75rem",
-      "lg": "0.75rem"
-    },
-    "space-4": {
-      "sm": "1rem",
-      "md": "1rem",
-      "lg": "1rem"
-    },
-    "space-5": {
-      "sm": "1.5rem",
-      "md": "1.5rem",
-      "lg": "1.5rem"
-    },
-    "space-6": {
-      "sm": "2rem",
-      "md": "2rem",
-      "lg": "2rem"
-    },
-    "space-7": {
-      "sm": "3rem",
-      "md": "3rem",
-      "lg": "3rem"
-    },
-    "space-8": {
-      "sm": "4rem",
-      "md": "4rem",
-      "lg": "4rem"
-    },
-    "space-9": {
-      "sm": "6rem",
-      "md": "6rem",
-      "lg": "6rem"
-    },
-    "space-section": {
-      "sm": "3.5rem",
-      "md": "5rem",
-      "lg": "6rem"
-    },
-    "space-gutter": {
-      "sm": "1rem",
-      "md": "1.5rem",
-      "lg": "2rem"
-    },
-    "space-grid": {
-      "sm": "1rem",
-      "md": "1.5rem",
-      "lg": "1.75rem"
-    },
-    "width-content": {
-      "sm": "720px",
-      "md": "720px",
-      "lg": "720px"
-    },
-    "width-wide": {
-      "sm": "1200px",
-      "md": "1200px",
-      "lg": "1200px"
     },
     "radius-control": {
       "sm": "10px",
@@ -275,155 +145,10 @@
       "md": "10px",
       "lg": "10px"
     },
-    "radius-media": {
-      "sm": "8px",
-      "md": "8px",
-      "lg": "8px"
-    },
-    "radius-hero": {
-      "sm": "12px",
-      "md": "12px",
-      "lg": "12px"
-    },
-    "radius-pill": {
-      "sm": "999px",
-      "md": "999px",
-      "lg": "999px"
-    },
-    "elevation-1": {
-      "sm": "0 1px 2px rgba(20,20,20,.06), 0 2px 8px rgba(20,20,20,.06)",
-      "md": "0 1px 2px rgba(20,20,20,.06), 0 2px 8px rgba(20,20,20,.06)",
-      "lg": "0 1px 2px rgba(20,20,20,.06), 0 2px 8px rgba(20,20,20,.06)"
-    },
-    "elevation-2": {
-      "sm": "0 4px 10px rgba(20,20,20,.08), 0 14px 32px rgba(20,20,20,.10)",
-      "md": "0 4px 10px rgba(20,20,20,.08), 0 14px 32px rgba(20,20,20,.10)",
-      "lg": "0 4px 10px rgba(20,20,20,.08), 0 14px 32px rgba(20,20,20,.10)"
-    },
-    "elevation-3": {
-      "sm": "0 20px 48px rgba(20,20,20,.18)",
-      "md": "0 20px 48px rgba(20,20,20,.18)",
-      "lg": "0 20px 48px rgba(20,20,20,.18)"
-    },
-    "elevation-offset": {
-      "sm": "8px 8px 0 var(--kit-color-accent)",
-      "md": "14px 14px 0 var(--kit-color-accent)",
-      "lg": "14px 14px 0 var(--kit-color-accent)"
-    },
-    "motion-fast": {
-      "sm": "120ms",
-      "md": "120ms",
-      "lg": "120ms"
-    },
-    "motion-base": {
-      "sm": "200ms",
-      "md": "200ms",
-      "lg": "200ms"
-    },
-    "motion-slow": {
-      "sm": "320ms",
-      "md": "320ms",
-      "lg": "320ms"
-    },
-    "motion-ease": {
-      "sm": "cubic-bezier(.2,.7,.2,1)",
-      "md": "cubic-bezier(.2,.7,.2,1)",
-      "lg": "cubic-bezier(.2,.7,.2,1)"
-    },
-    "motion-lift": {
-      "sm": "-3px",
-      "md": "-3px",
-      "lg": "-3px"
-    },
-    "z-sticky": {
-      "sm": "50",
-      "md": "50",
-      "lg": "50"
-    },
-    "z-header": {
-      "sm": "40",
-      "md": "40",
-      "lg": "40"
-    },
-    "z-overlay": {
-      "sm": "100",
-      "md": "100",
-      "lg": "100"
-    },
-    "size-target": {
-      "sm": "44px",
-      "md": "44px",
-      "lg": "44px"
-    },
-    "size-control": {
-      "sm": "48px",
-      "md": "48px",
-      "lg": "48px"
-    },
-    "border-control": {
-      "sm": "2px",
-      "md": "2px",
-      "lg": "2px"
-    },
-    "card-columns": {
-      "sm": "1",
-      "md": "2",
-      "lg": "3"
-    },
-    "card-media-ratio": {
-      "sm": "16/9",
-      "md": "16/9",
-      "lg": "16/9"
-    },
-    "placard-ratio": {
-      "sm": "16/7",
-      "md": "16/9",
-      "lg": "16/9"
-    },
-    "carousel-item": {
-      "sm": "82%",
-      "md": "auto",
-      "lg": "auto"
-    },
-    "weight-medium": {
-      "sm": "500",
-      "md": "500",
-      "lg": "500"
-    },
-    "weight-bold": {
-      "sm": "700",
-      "md": "700",
-      "lg": "700"
-    },
-    "tracking-display": {
-      "sm": "-0.035em",
-      "md": "-0.035em",
-      "lg": "-0.035em"
-    },
-    "tracking-heading": {
-      "sm": "-0.02em",
-      "md": "-0.02em",
-      "lg": "-0.02em"
-    },
-    "tracking-body": {
-      "sm": "-0.006em",
-      "md": "-0.006em",
-      "lg": "-0.006em"
-    },
     "color-canvas": {
       "sm": "#f6f3ee",
       "md": "#f6f3ee",
       "lg": "#f6f3ee"
-    },
-    "type-mega": {
-      "sm": "2.75rem",
-      "md": "5.5rem",
-      "lg": "7.5rem"
-    },
-    "type-section": {
-      "sm": "1.75rem",
-      "md": "3rem",
-      "lg": "4rem"
     },
     "color-link": {
       "sm": "#0062b8",

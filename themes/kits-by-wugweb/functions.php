@@ -18,8 +18,50 @@ function kits_setup() {
 	add_theme_support( 'post-thumbnails' );
 	add_editor_style( 'assets/css/kits-v42.css' );
 	add_editor_style( 'assets/css/kits.css' );
+	if ( kits_uses_inter_tight() ) {
+		add_editor_style( kits_font_url() );
+	}
 }
 add_action( 'after_setup_theme', 'kits_setup' );
+
+/**
+ * Inter Tight from Google Fonts (400–800). A child theme that sets its own base font does not load it.
+ */
+function kits_font_url() {
+	return 'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap';
+}
+
+/** Whether the active base font family is Inter Tight. */
+function kits_uses_inter_tight() {
+	foreach ( (array) wp_get_global_settings( array( 'typography', 'fontFamilies', 'theme' ) ) as $family ) {
+		if ( 'base' === ( $family['slug'] ?? '' ) ) {
+			return false !== stripos( (string) ( $family['fontFamily'] ?? '' ), 'Inter Tight' );
+		}
+	}
+	return true;
+}
+
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( kits_uses_inter_tight() ) {
+			wp_enqueue_style( 'kits-font', kits_font_url(), array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+	},
+	5
+);
+add_filter(
+	'wp_resource_hints',
+	function ( $urls, $type ) {
+		if ( 'preconnect' === $type && kits_uses_inter_tight() ) {
+			$urls[] = 'https://fonts.googleapis.com';
+			$urls[] = array( 'href' => 'https://fonts.gstatic.com', 'crossorigin' );
+		}
+		return $urls;
+	},
+	10,
+	2
+);
 
 /**
  * Front-end styles that theme.json cannot express.
@@ -82,3 +124,20 @@ function kits_block_styles() {
 	);
 }
 add_action( 'init', 'kits_block_styles' );
+
+/**
+ * Theme pattern files are cached by WordPress; refresh the cache when the pattern files of the active theme
+ * (and its parent) change.
+ */
+add_action(
+	'init',
+	function () {
+		$files = array_merge( (array) glob( get_template_directory() . '/patterns/*.php' ), (array) glob( get_stylesheet_directory() . '/patterns/*.php' ) );
+		$sig   = md5( implode( ',', array_map( fn( $f ) => $f . ':' . filemtime( $f ), array_unique( $files ) ) ) );
+		if ( get_option( 'kits_pattern_sig' ) !== $sig ) {
+			wp_get_theme()->delete_pattern_cache();
+			update_option( 'kits_pattern_sig', $sig, false );
+		}
+	},
+	1
+);

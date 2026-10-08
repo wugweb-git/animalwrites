@@ -29,16 +29,3 @@ add_action(
 		register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes sections', 'animal-writes' ) ) );
 	}
 );
-
-// Theme pattern files are cached by WordPress; refresh the cache when the set of files changes.
-add_action(
-	'init',
-	function () {
-		$sig = md5( implode( ',', array_map( fn( $f ) => basename( $f ) . ':' . filemtime( $f ), (array) glob( get_stylesheet_directory() . '/patterns/*.php' ) ) ) );
-		if ( get_option( 'aw_pattern_sig' ) !== $sig ) {
-			wp_get_theme()->delete_pattern_cache();
-			update_option( 'aw_pattern_sig', $sig, false );
-		}
-	},
-	1
-);
