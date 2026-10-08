@@ -54,6 +54,6 @@ add_filter(
 		'kit-ed-hero'  => array( 'hero', 'Introduction' ),
 		'aw-ed-find'   => array( 'find-help', 'Find help near you' ),
 		'aw-system'    => array( 'list', 'List' ),
-		'aw-vol-banner' => array( 'volunteer', 'Volunteer' ),
+		'aw-vol-banner' => array( 'volunteer-banner', 'Volunteer' ),
 	)
 );

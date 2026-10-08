@@ -140,7 +140,7 @@ function aw_form_open( $form, $attrs = array() ) {
 		$html .= '</div>';
 	}
 	$html .= '<input type="hidden" name="action" value="' . esc_attr( $form ) . '">'
-		. wp_nonce_field( $form, '_aw_nonce', true, false )
+		. str_replace( ' id="_aw_nonce"', '', wp_nonce_field( $form, '_aw_nonce', true, false ) ) // several forms on a page: no repeated id
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
 		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
