@@ -190,6 +190,20 @@ add_filter(
 	}
 );
 
+// Items hidden from search engines are left out of the sitemap too.
+add_filter(
+	'wp_sitemaps_posts_query_args',
+	function ( $args ) {
+		$args['meta_query']   = (array) ( $args['meta_query'] ?? array() );
+		$args['meta_query'][] = array(
+			'relation' => 'OR',
+			array( 'key' => 'kits_noindex', 'compare' => 'NOT EXISTS' ),
+			array( 'key' => 'kits_noindex', 'value' => '1', 'compare' => '!=' ),
+		);
+		return $args;
+	}
+);
+
 // Canonical URL override.
 add_filter(
 	'get_canonical_url',
