@@ -103,7 +103,13 @@ function aw_binding_value( $key, $post_id ) {
 		case 'area':
 			return $m( 'aw_area' );
 		case 'services':
-			return $m( 'aw_services' );
+			// Services are the organisation's own description (claim) or a named list's; never ours. Shown with who said it.
+			if ( '' === $m( 'aw_services' ) ) {
+				return '';
+			}
+			$src = $m( 'aw_services_source' );
+			$on  = $m( 'aw_services_on' ) ? aw_format_date( $m( 'aw_services_on' ) ) : '';
+			return 'Services: ' . $m( 'aw_services' ) . ( $src ? ' (as stated by ' . $src . ( $on ? ', ' . $on : '' ) . ')' : '' ); // escaped by the binding source
 		case 'phone':
 			return $m( 'aw_phone' );
 		case 'phone_url':

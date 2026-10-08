@@ -39,7 +39,9 @@ function aw_meta_schema() {
 		'aw_email'           => array( 'string', array( 'aw_listing' ), 'Email' ),
 		'aw_website'         => array( 'string', array( 'aw_listing', 'aw_opportunity' ), 'Website' ),
 		'aw_area'            => array( 'string', array( 'aw_listing' ), 'Area / locality (no full address)' ),
-		'aw_services'        => array( 'string', array( 'aw_listing' ), 'Services offered (comma separated)' ),
+		'aw_services'        => array( 'string', array( 'aw_listing' ), 'Services offered, as stated by the organisation or a named list (comma separated)' ),
+		'aw_services_source' => array( 'string', array( 'aw_listing' ), 'Who stated the services (e.g. "the organisation", or the list name)' ),
+		'aw_services_on'     => array( 'string', array( 'aw_listing' ), 'Date the services were stated (YYYY-MM-DD)' ),
 
 		// Opportunities.
 		'aw_org_name'        => array( 'string', array( 'aw_opportunity' ), 'Organisation' ),

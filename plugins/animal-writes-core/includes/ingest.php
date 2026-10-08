@@ -13,6 +13,7 @@
  *   "title": "...", "summary": "2–3 lines in our own words",
  *   "source_url": "...", "source_name": "...", "source_date": "YYYY-MM-DD",
  *   "topics": ["..."], "source_type": "Supreme Court", "city": "delhi",
+ *   "kind": "judgment", "court": "supreme-court", "document_url": "https://...pdf"   (Library only),
  *   "listing": { "listing_type": "animal-shelter", "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
  * }
  *
@@ -155,6 +156,14 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
 		aw_assign_existing_terms( $post_id, array( $req->get_param( 'source_type' ) ), 'aw_source_type', $ignored );
 	}
+	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
+	if ( 'aw_legal' === $type ) {
+		foreach ( array( 'kind' => 'aw_legal_kind', 'court' => 'aw_court' ) as $param => $tax ) {
+			if ( $req->get_param( $param ) ) {
+				aw_assign_existing_terms( $post_id, array( $req->get_param( $param ) ), $tax, $ignored );
+			}
+		}
+	}
 	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
 		aw_assign_existing_terms( $post_id, array( $req->get_param( 'city' ) ), 'aw_city', $ignored );
 	}
@@ -198,7 +207,8 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	if ( 'aw_legal' === $type && function_exists( 'aw_mirror_gov_pdf' ) ) {
-		aw_mirror_gov_pdf( $post_id, $source_url );
+		$doc_url = esc_url_raw( (string) $req->get_param( 'document_url' ) ); // the PDF, when the source page is not the PDF itself
+		aw_mirror_gov_pdf( $post_id, $doc_url ? $doc_url : $source_url );
 	}
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).

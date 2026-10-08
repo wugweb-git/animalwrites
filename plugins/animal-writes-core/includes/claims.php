@@ -313,6 +313,10 @@ add_action(
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
 					update_post_meta( $lid, $key, $val );
+					if ( 'aw_services' === $key ) { // services are what the organisation says it offers; record that
+						update_post_meta( $lid, 'aw_services_source', 'the organisation' );
+						update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );
+					}
 				}
 			}
 			$logo = (string) get_post_meta( $id, 'aw_c_logo', true );

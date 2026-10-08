@@ -54,6 +54,21 @@ function aw_publishers() {
 	return is_array( $p ) ? $p : array();
 }
 
+/**
+ * A publisher's outside credibility rating (Media Bias/Fact Check: factual reporting · credibility), when recorded.
+ * Stored on the publisher record as rating, credibility and rating_url. Shown for information; it does not change the status.
+ *
+ * @param array $p Publisher record.
+ * @return string
+ */
+function aw_publisher_rating_html( $p ) {
+	if ( empty( $p['rating'] ) ) {
+		return '<span aria-label="Not rated">–</span>';
+	}
+	$txt = $p['rating'] . ( ! empty( $p['credibility'] ) ? ' · ' . $p['credibility'] . ' credibility' : '' );
+	return ! empty( $p['rating_url'] ) ? '<a href="' . esc_url( $p['rating_url'] ) . '" target="_blank" rel="noopener">' . esc_html( $txt ) . '</a>' : esc_html( $txt );
+}
+
 /** Relevance settings. */
 function aw_relevance() {
 	$r = get_option( AW_REL_OPTION );
@@ -402,12 +417,12 @@ function aw_sourcing_page() {
 	echo '<p>Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.</p>';
 	echo '<div class="tablenav top"><select name="bulk_status"><option value="">Change status to…</option><option value="block">Blocked</option><option value="neutral">Neutral</option><option value="allow">Allowed</option></select> ';
 	submit_button( 'Apply', 'action', '', false );
-	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Status</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
+	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Status</th><th>Rating</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
 	foreach ( $pubs as $h => $p ) {
 		if ( $filter && $filter !== $p['status'] ) {
 			continue;
 		}
-		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
+		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
 	}
 	echo '</tbody></table><h2>Add a publisher</h2><p><input type="text" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
 	submit_button( 'Add', 'secondary', '', false );
