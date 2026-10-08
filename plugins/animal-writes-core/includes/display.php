@@ -84,6 +84,7 @@ add_action(
 		);
 		$q->set( 'meta_query', $mq );
 		$q->set( 'orderby', array( 'source_date' => $dir, 'date' => $dir ) );
+		$q->set( 'aw_undated_last', true );
 	}
 );
 
@@ -157,3 +158,18 @@ foreach ( array( 'added_post_meta', 'updated_post_meta' ) as $aw_hook ) {
 	);
 }
 
+
+// Undated Library items (templates, sort date 0001-01-01) always come last, whichever way the list is sorted.
+add_filter(
+	'posts_orderby',
+	function ( $orderby, $q ) {
+		if ( ! $q->get( 'aw_undated_last' ) || ! $q->meta_query ) {
+			return $orderby;
+		}
+		$c = $q->meta_query->get_clauses();
+		$a = $c['source_date']['alias'] ?? '';
+		return $a ? "( CAST({$a}.meta_value AS CHAR) = '0001-01-01' ) ASC, " . $orderby : $orderby;
+	},
+	10,
+	2
+);
