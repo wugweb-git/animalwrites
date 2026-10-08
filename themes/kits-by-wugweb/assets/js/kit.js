@@ -262,7 +262,7 @@
 			if (!window.fetch || !window.FormData || form.enctype === 'multipart/form-data' && form.querySelector('input[type=file]')) { busy(btn, true); return; } // normal POST
 			e.preventDefault();
 			busy(btn, true);
-			fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-AW-Fetch': '1' }, credentials: 'same-origin' })
+			fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), headers: { 'X-AW-Fetch': '1' }, credentials: 'same-origin' })
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
 					busy(btn, false);
@@ -270,7 +270,7 @@
 					if (data.code === 'expired' && !form.dataset.retried) {
 						form.dataset.retried = '1';
 						var act = form.querySelector('input[name=action]');
-						return fetch(form.action.replace('admin-post.php', 'admin-ajax.php') + '?action=kits_form_nonce&form=' + encodeURIComponent(act ? act.value : ''), { credentials: 'same-origin' })
+						return fetch(form.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') + '?action=kits_form_nonce&form=' + encodeURIComponent(act ? act.value : ''), { credentials: 'same-origin' })
 							.then(function (r) { return r.json(); })
 							.then(function (k) { var n = form.querySelector('input[name=_aw_nonce]'); if (n && k.nonce) { n.value = k.nonce; form.requestSubmit(); } else status(form, data.notice); });
 					}

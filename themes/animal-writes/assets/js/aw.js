@@ -32,7 +32,7 @@
 			var v = pin.value.replace(/\D/g, '');
 			if (v.length !== 6 || v === last) return;
 			last = v;
-			fetch(f.action.replace('admin-post.php', 'admin-ajax.php') + '?action=aw_pin&pin=' + v, { credentials: 'same-origin' })
+			fetch(f.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') + '?action=aw_pin&pin=' + v, { credentials: 'same-origin' })
 				.then(function (r) { return r.json(); })
 				.then(function (r) {
 					if (!r.success) { if (msg) msg.textContent = r.data; return; }
