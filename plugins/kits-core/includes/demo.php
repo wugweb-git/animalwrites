@@ -1,7 +1,7 @@
 <?php
 /**
- * [kits_demo]: every Kits primitive in every state, on the master palette and on the site's own palette side by side
- * (Phase 11 B.3). Used on the private, noindex page /kits-demo/ (administrators only).
+ * [kits_demo]: every Kits primitive and component in every state, on the master palette and on the site's own palette
+ * side by side (Phase 11 B.3), then the site's own blocks in their states (filter kits_demo_sections). Used on the private, noindex page /kits-demo/ (administrators only).
  *
  * @package kits-core
  */
@@ -55,6 +55,31 @@ function kits_demo_panel() {
 	$o .= $h( '12 Checkbox' ) . '<label class="kit-checkbox"><input type="checkbox"> <span>Unchecked (consent starts unchecked)</span></label><label class="kit-checkbox"><input type="checkbox" checked> <span>Checked</span></label><label class="kit-checkbox"><input type="checkbox" aria-invalid="true"> <span>Invalid</span></label>';
 	$o .= $h( '13 Form status' ) . '<div class="kit-form-status">Something went wrong. Your details are still here — try again.</div><div class="kit-form-status is-success">Message sent.</div>';
 	$o .= $h( '15 Breadcrumb' ) . '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol><li><a href="#">Home</a></li><li><a href="#">Directory</a></li><li><span aria-current="page">Kerala</span></li></ol></nav>';
+	$dd   = array( array( 'Act', 'act', false, 9 ), array( 'Rule', 'rule', false, 7 ), array( 'Judgment', 'judgment', false, 1 ) );
+	$open = fn( $html ) => preg_replace( '/<details class="kit-dd"/', '<details class="kit-dd" open', $html, 1 );
+	$o   .= $h( '16 Filter dropdown: closed · chosen · open' ) . '<div class="kit-tags kit-demo-dd">' . kits_filter_dropdown( 'Kind', 'kind', $dd )
+		. kits_filter_dropdown( 'Kind', 'kind', array( array( 'Act', 'act', true, 9 ), array( 'Rule', 'rule', true, 7 ), array( 'Judgment', 'judgment', false, 1 ) ) ) . '</div>'
+		. '<div class="kit-demo-dd">' . $open( kits_filter_dropdown( 'Kind', 'kind', array( array( 'Act', 'act', true, 9 ), array( 'Rule', 'rule', false, 7 ), array( 'Judgment', 'judgment', false, 1 ) ) ) ) . '</div>';
+	$o   .= $h( '17 Sort: closed · open' ) . '<div class="kit-tags kit-demo-dd">' . kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ) ) ) . '</div>'
+		. '<div class="kit-demo-dd">' . str_replace( '<details class="kit-dd kit-dd--sort"', '<details class="kit-dd kit-dd--sort" open', kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ), array( 'A–Z', '#', false ) ) ) ) . '</div>';
+	if ( function_exists( 'kits_disclosure' ) ) {
+		$o .= $h( '18 Disclosure (a form behind a button): closed · open' ) . kits_disclosure( 'kit-demo-d1', 'Claim this listing', '<p>Form here.</p>' )
+			. str_replace( '<details class="kit-disclosure"', '<details class="kit-disclosure" open', kits_disclosure( 'kit-demo-d2', 'Report a mistake', '<p>Form here.</p>', 'secondary' ) );
+	}
+	if ( function_exists( 'kits_form_steps' ) ) {
+		$o .= $h( '19 Steps (step 1 of 2; without JavaScript both show)' ) . kits_form_steps( array( array( 'About you', '<p>Fields.</p>' ), array( 'What to change', '<p>Fields.</p>' ) ), 'Send' );
+	}
+	$o .= $h( '20 Pagination: current · link · next' ) . '<nav class="kit-pager" aria-label="Pagination"><span class="page-numbers current" aria-current="page">1</span><a class="page-numbers" href="#">2</a><a class="page-numbers" href="#">3</a><a class="page-numbers next" href="#">Next</a></nav>';
+	$o .= $h( '21 Empty state' ) . '<div class="kit-empty"><p>Nothing matches these filters. Remove one to see more.</p></div>';
+	$o .= $h( '22 Ad slot (label; empty slots print nothing)' ) . '<aside class="kit-ad" aria-label="Advertisement"><p class="kit-ad-label"><span class="kit-badge kit-badge--ad">Advertisement</span></p><div class="kit-demo-adbox">ad unit</div></aside>';
+	$o .= $h( '23 Links: internal · external (arrow) · visited' ) . '<p><a href="#">Internal link</a> · <a class="kit-link-ext" href="#">External site</a></p>';
+	$icons = array();
+	foreach ( array( get_template_directory() . '/assets/css/kit.css' ) as $f ) {
+		if ( is_readable( $f ) && preg_match_all( '/\.kit-ico--([a-z0-9-]+) \{/', (string) file_get_contents( $f ), $m ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+			$icons = array_unique( $m[1] );
+		}
+	}
+	$o .= $h( '24 Icons (' . count( $icons ) . ')' ) . '<ul class="kit-demo-icons">' . implode( '', array_map( fn( $i ) => '<li><span class="kit-ico kit-ico--' . esc_attr( $i ) . '" aria-hidden="true"></span><span>' . esc_html( $i ) . '</span></li>', $icons ) ) . '</ul>';
 	return $o;
 }
 
@@ -65,9 +90,10 @@ add_shortcode(
 			return '';
 		}
 		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1024px){.kit-demo{grid-template-columns:1fr 1fr}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
-			. '.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}</style>'
+			. '.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
 			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel() . '</section>'
-			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel() . '</section></div>';
+			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel() . '</section>'
+			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states
 	}
 );
 
