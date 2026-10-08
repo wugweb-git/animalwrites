@@ -715,8 +715,8 @@ html.has-modal-open .aw-sticky-help ,html.has-modal-open .kit-sticky-help { disp
 	.aw-header-utility ,.kit-header-utility { gap: var(--kit-space-2); }
 }
 
-/* Navigation: WordPress collapses the menu below 600px; Kits uses 640px (md), so keep the phone menu up to 639px. */
-@media (min-width: 600px) and (max-width: 639px) {
+/* Navigation: WordPress collapses the menu below 600px; Kits shows the full menu from lg (1200px) and the menu button below it. */
+@media (min-width: 600px) and (max-width: 1199px) {
 	.wp-block-navigation__responsive-container-open:not(.always-shown) { display: flex; }
 	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) { display: none; }
 }
