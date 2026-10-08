@@ -107,16 +107,20 @@ function aw_block_org_details( $a, $id ) {
 	}
 	$photos = '';
 	foreach ( array_slice( array_filter( array_map( 'absint', explode( ',', $m( 'aw_gallery' ) ) ) ), 0, 4 ) as $pid ) {
-		$photos .= '<figure>' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</figure>';
+		$cap     = trim( (string) wp_get_attachment_caption( $pid ) );
+		$cap     = $cap ? $cap : trim( (string) get_post_meta( $pid, '_wp_attachment_image_alt', true ) ); // the caption, else the description of the photo
+		$photos .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	$facts = '';
-	foreach ( array( 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	$icons = array( 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
+	foreach ( array( 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( $m( $k ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . esc_html( wp_date( 'j M Y', strtotime( $m( 'aw_services_on' ) ) ) ) : '' ) . '</span>';
 			}
-			$facts .= '<div><dt>' . esc_html( $label ) . '</dt><dd>' . esc_html( $m( $k ) ) . $note . '</dd></div>';
+			$val = 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k );
+			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . esc_html( $val ) . $note . '</dd></div>';
 		}
 	}
 	if ( '' === $links . $photos . $facts ) {

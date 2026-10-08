@@ -454,7 +454,7 @@ html { overflow-x: clip; }
 .kit-table tbody tr:hover { background: var(--kit-color-surface); }
 
 /* Share bar */
-.kit-share-wrap { max-width: var(--kit-width-content); margin: 0 auto; padding: 0 var(--kit-space-gutter) var(--kit-space-7); }
+.kit-share-wrap { max-width: var(--kit-width-content); padding: 0 0 var(--kit-space-7); } /* on the page frame like the content above (see One page grid) */
 .kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); border-top: 1px solid var(--kit-color-line); padding-top: var(--kit-space-5); }
 .kit-share-label { font-weight: var(--kit-weight-regular); margin-right: var(--kit-space-2); }
 .kit-share a ,.kit-share button {

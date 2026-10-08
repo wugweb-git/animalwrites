@@ -100,7 +100,7 @@ function aw_source_labels( $id, $full = false ) {
 }
 
 /** Hosts whose logo stands for a source. */
-const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://maps.google.com/' );
+const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://www.google.com/maps/' );
 
 /**
  * The logo of a source as an <img>: the list's site (AWBI, the department, Google Maps) or, for "The organisation", the

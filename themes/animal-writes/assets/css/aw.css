@@ -766,7 +766,9 @@ body { background: var(--kit-color-canvas); }
 .aw-org-details-links { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .aw-org-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2); }
 @media (min-width: 640px) { .aw-org-gallery { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.aw-org-gallery figure { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); }
+.aw-org-gallery figure { margin: 0; }
+.aw-org-photo { aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); }
+.aw-org-gallery figcaption { margin-top: var(--s-1); font-size: var(--kit-type-xs); color: var(--kit-color-muted); line-height: 1.4; }
 .aw-org-gallery img { display: block; width: 100%; height: 100% !important; object-fit: cover; }
 .aw-org-facts { display: grid; grid-template-columns: 1fr; gap: var(--kit-space-3) var(--kit-space-5); margin: 0; padding: var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 @media (min-width: 640px) { .aw-org-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -780,3 +782,11 @@ body { background: var(--kit-color-canvas); }
 .aw-org-fact-note { display: block; margin-top: 2px; font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 .aw-datasrc-logo { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: var(--radius-sm); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); }
 .aw-datasrc-logo img { width: 1.25rem; height: 1.25rem; object-fit: contain; border-radius: 3px; }
+
+/* Facts: an icon tile (tinted with the info colour) beside each label and value */
+.aw-org-fact { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: start; }
+.aw-org-fact-ico { grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-sm); background: var(--kit-color-info-soft); color: var(--kit-color-info); }
+.aw-org-fact-ico .kit-ico { --kit-ico-size: 1.125rem; }
+.aw-org-fact dt, .aw-org-fact dd { grid-column: 2; }
+/* "Is this your organisation?": a section heading, not a page title */
+.aw-listing-help h2 { font-size: var(--kit-type-h4) !important; font-weight: var(--kit-weight-strong); margin: 0 0 var(--kit-space-3); }
