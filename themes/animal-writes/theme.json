@@ -68,11 +68,11 @@
 		},
 		"custom": {
 			"radius": {
-				"control": "var(--aw-radius-control)",
-				"card": "var(--aw-radius-card)",
-				"media": "var(--aw-radius-media)",
-				"hero": "var(--aw-radius-hero)",
-				"pill": "var(--aw-radius-pill)"
+				"control": "var(--kit-radius-control)",
+				"card": "var(--kit-radius-card)",
+				"media": "var(--kit-radius-media)",
+				"hero": "var(--kit-radius-hero)",
+				"pill": "var(--kit-radius-pill)"
 			}
 		},
 		"typography": {
@@ -116,7 +116,7 @@
 		"elements": {
 			"button": {
 				"border": {
-					"radius": "var(--aw-radius-control)"
+					"radius": "var(--kit-radius-control)"
 				},
 				"color": {
 					"background": "var(--wp--preset--color--primary)",

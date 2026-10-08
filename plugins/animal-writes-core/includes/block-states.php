@@ -27,7 +27,7 @@ add_filter(
 		$row = function ( $state, $id, $render ) {
 			$out = $id ? (string) call_user_func( $render, $id ) : '';
 			return '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $state ) . ( $id ? ' <a href="' . esc_url( get_permalink( $id ) ) . '">(item)</a>' : '' ) . '</p><div class="aw-state-out">'
-				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || false !== strpos( $out, '<img' ) ? $out : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
+				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|aw-ico|kit-ico|<svg/', $out ) ? $out : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
 		};
 		$blocks = array(
 			'Document date (animal-writes/doc-date)' => array(
@@ -61,9 +61,9 @@ add_filter(
 				array( 'Initials (no logo)', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => '_thumbnail_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_org_mark( array(), $id ) ),
 			),
 			'Badges and labels (animal-writes/badges)' => array(
-				array( 'Verified', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
+				array( 'Verified', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
 				array( 'Featured', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_featured', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
-				array( 'Not confirmed (types and source only)', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
+				array( 'Not confirmed (types and source only)', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
 			),
 			'Contact icons (animal-writes/contact)' => array(
 				array( 'Phone, email and website', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_email', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_website', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
@@ -83,7 +83,7 @@ add_filter(
 				array( 'No picture', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => '_thumbnail_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_press_media( array(), $id ) . aw_block_press_meta( array(), $id ) ),
 			),
 			'Is this your organisation? (animal-writes/listing-help)' => array(
-				array( 'Not confirmed: note, Claim and Report', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_listing_help( array(), $id ) ),
+				array( 'Not confirmed: note, Claim and Report', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_listing_help( array(), $id ) ),
 			),
 		);
 		$out = '<h2>Animal Writes blocks in their states</h2><p>Each block drawn from a real item in that state. Form fields, buttons and dropdowns in every state are in the panels above.</p><style>.aw-state-grid{display:grid;gap:var(--s-6);grid-template-columns:repeat(auto-fill,minmax(22rem,1fr))}.aw-state-row{padding:var(--s-3) 0;border-top:1px solid var(--kit-color-line)}.aw-state-name{margin:0 0 var(--s-2);font-size:var(--fluid-label);color:var(--kit-color-muted)}</style><div class="aw-state-grid">';
