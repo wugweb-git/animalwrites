@@ -108,7 +108,7 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 :is(.wp-element-button, button):not(.kit-btn).is-loading { position: relative; color: transparent !important; pointer-events: none; }
 :is(.wp-element-button, button):not(.kit-btn).is-loading::after {
 	content: ""; position: absolute; width: 1.1em; height: 1.1em; border-radius: 50%;
-	border: 2px solid var(--kit-color-on-accent); border-right-color: transparent;
+	border: 1px solid var(--kit-color-on-accent); border-right-color: transparent;
 	animation: kit-spin 700ms linear infinite;
 }
 
@@ -151,8 +151,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 @media (min-width: 1200px) {
 	.kit-cards-lead .wp-block-post-template { grid-template-columns: repeat(3, 1fr); }
 	.kit-cards-lead .wp-block-post-template > li:first-child { grid-column: span 2; grid-row: span 2; }
-	.kit-cards-lead .wp-block-post-template > li:first-child .wp-block-post-title { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); }
-	.kit-cards-lead .wp-block-post-template > li:first-child .kit-placard { font-size: var(--kit-type-h2); }
+	.kit-cards-lead .wp-block-post-template > li:first-child .wp-block-post-title { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); }
+	.kit-cards-lead .wp-block-post-template > li:first-child .kit-placard { font-size: var(--kit-type-h3); }
 }
 
 /* Card grids: a fixed 1 / 2 / 3 columns (core's auto-fill left an empty fourth column) */
@@ -270,7 +270,7 @@ html { overflow-x: clip; }
 .kit-section-visual > :nth-child(2) { transform: translateY(var(--kit-space-5)); }
 .kit-section-visual img ,.kit-section-visual .kit-placard { display: block; width: 100%; max-width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--kit-radius-media); }
 .kit-section-visual img[style*="contain"] { border: 1px solid var(--kit-color-line); }
-.kit-section-visual .kit-placard { font-size: var(--kit-type-h4); height: auto; overflow: hidden; background-color: var(--kit-color-raised); border: 2px solid var(--kit-color-ink); }
+.kit-section-visual .kit-placard { font-size: var(--kit-type-h4); height: auto; overflow: hidden; background-color: var(--kit-color-raised); border: 1px solid var(--kit-color-line); }
 /* Documents show the top of their first page (masthead) */
 .kit-doc-cover img ,.kit-section-visual img[src*="cover-"] ,.kit-section-visual img[src*="-pdf"] ,.type-aw_research .wp-block-post-featured-image img ,.single-aw_research .wp-block-post-featured-image img { object-position: top; background: var(--kit-color-bg); }
 
@@ -396,7 +396,7 @@ html { overflow-x: clip; }
 	border-radius: var(--kit-radius-control); font-weight: var(--kit-weight-strong); text-decoration: none;
 }
 .kit-sh-primary { background: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
-.kit-sh-secondary { border: 2px solid color-mix(in srgb, var(--neutral-0) 60%, transparent); color: var(--kit-color-on-ink) !important; }
+.kit-sh-secondary { border: 1px solid color-mix(in srgb, var(--neutral-0) 60%, transparent); color: var(--kit-color-on-ink) !important; }
 @media (min-width: 640px) { .kit-sticky-help { display: none !important; } }
 @media (max-width: 639px) { body { padding-bottom: 64px; } }
 
@@ -447,18 +447,18 @@ html { overflow-x: clip; }
 /* Table */
 .kit-table table { border-collapse: collapse; width: 100%; }
 .kit-table th ,.kit-table td { text-align: left; padding: var(--kit-space-3); border-bottom: 1px solid var(--kit-color-line); vertical-align: top; }
-.kit-table th { border-bottom: 2px solid var(--kit-color-ink); }
+.kit-table th { border-bottom: 1px solid var(--kit-color-line); }
 .kit-table tbody tr:nth-child(even) { background: var(--kit-color-surface-soft); }
 .kit-table tbody tr:hover { background: var(--kit-color-surface); }
 
 /* Share bar */
 .kit-share-wrap { max-width: var(--kit-width-content); margin: 0 auto; padding: 0 var(--kit-space-gutter) var(--kit-space-7); }
-.kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); border-top: 2px solid var(--kit-color-ink); padding-top: var(--kit-space-5); }
+.kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); border-top: 1px solid var(--kit-color-line); padding-top: var(--kit-space-5); }
 .kit-share-label { font-weight: var(--kit-weight-regular); margin-right: var(--kit-space-2); }
 .kit-share a ,.kit-share button {
 	display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4);
 	border-radius: var(--kit-radius-pill); font: inherit; font-weight: var(--kit-weight-strong); text-decoration: none; cursor: pointer;
-	border: 2px solid var(--kit-color-ink); background: var(--kit-color-raised); color: var(--kit-color-ink);
+	border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); color: var(--kit-color-ink);
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease), transform var(--kit-motion-fast) var(--kit-motion-ease);
 }
 .kit-share a::after { content: none !important; }
@@ -562,7 +562,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 /* (filled-button text colour on dark areas: kit-primitives.css) */
 
 /* Editorial building blocks: section head, ghost button, "three big actions", lead + list, editorial queries */
-.kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); padding-top: var(--kit-space-4); border-top: 2px solid var(--kit-color-ink); margin-bottom: var(--kit-space-6); }
+.kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-line); margin-bottom: var(--kit-space-6); }
 .kit-ed-head h2 ,.kit-ed-act-copy h2 ,.kit-ed-find-head h2 ,.kit-ed-story-head h2 { font-size: var(--kit-type-h2); line-height: 1; letter-spacing: var(--kit-tracking-display); margin: 0; }
 .kit-ed-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-3) 0 0; max-width: 52ch; }
 .kit-ed-more { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-sm); color: var(--kit-color-ink); text-decoration: none; border-bottom: 1px solid currentColor; white-space: nowrap; }
@@ -752,3 +752,13 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-powered:hover strong { color: var(--kit-color-accent); text-decoration: underline; }
 .kit-footer :is(a, summary):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
+
+/* ---------- One page grid (8 Oct 2026) ----------
+   Header, hubs and footer sit on the 1200px frame. Single items and plain pages used to centre a 720px reading column
+   inside it, so their left edge moved from page to page. Now that column starts on the frame's left edge, like
+   everything else; wide and full-width blocks are unchanged. */
+main.is-layout-constrained > :where(:not(.alignwide):not(.alignfull)),
+main.is-layout-constrained > .wp-block-post-content.is-layout-constrained > :where(:not(.alignwide):not(.alignfull)) {
+	margin-left: max(0px, calc((100% - var(--kit-width-wide)) / 2)) !important;
+	margin-right: auto !important;
+}

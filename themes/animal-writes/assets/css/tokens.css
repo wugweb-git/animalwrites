@@ -17,8 +17,8 @@
   --kit-color-whatsapp: #1f7a44;
   --kit-font-display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --kit-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --kit-radius-control: 10px;
-  --kit-radius-card: 10px;
+  --kit-radius-control: 8px;
+  --kit-radius-card: 12px;
   --kit-color-canvas: #f6f3ee;
   --kit-color-link: #0062b8;
 }

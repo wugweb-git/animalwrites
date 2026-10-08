@@ -91,14 +91,14 @@
       "lg": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
     },
     "radius-control": {
-      "sm": "10px",
-      "md": "10px",
-      "lg": "10px"
+      "sm": "8px",
+      "md": "8px",
+      "lg": "8px"
     },
     "radius-card": {
-      "sm": "10px",
-      "md": "10px",
-      "lg": "10px"
+      "sm": "12px",
+      "md": "12px",
+      "lg": "12px"
     },
     "color-canvas": {
       "sm": "#f6f3ee",

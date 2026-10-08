@@ -28,7 +28,7 @@
   --kit-type-h3: var(--fluid-h3);
   --kit-type-h2: var(--fluid-h2);
   --kit-type-h1: var(--fluid-h1);
-  --kit-type-headline: var(--fluid-h2);
+  --kit-type-headline: var(--fluid-h3);
   --kit-type-display: var(--fluid-display);
   --kit-type-stat: var(--fluid-h3);
   --kit-type-placard: var(--fluid-h5);
@@ -47,14 +47,14 @@
   --kit-space-7: var(--s-12);
   --kit-space-8: 4rem;
   --kit-space-9: 6rem;
-  --kit-space-section: 3.5rem;
+  --kit-space-section: 3rem;
   --kit-space-gutter: 1rem;
   --kit-space-grid: 1rem;
   --kit-width-content: 720px;
   --kit-width-wide: 1200px;
-  --kit-radius-control: var(--radius-md);
+  --kit-radius-control: var(--radius-sm);
   --kit-radius-card: var(--radius-md);
-  --kit-radius-media: var(--radius-sm);
+  --kit-radius-media: var(--radius-md);
   --kit-radius-hero: var(--radius-md);
   --kit-radius-pill: var(--radius-full);
   --kit-elevation-1: 0 1px 2px rgba(20,20,20,.06), 0 2px 8px rgba(20,20,20,.06);
@@ -71,7 +71,7 @@
   --kit-z-overlay: 100;
   --kit-size-target: 44px;
   --kit-size-control: 48px;
-  --kit-border-control: 2px;
+  --kit-border-control: 1px;
   --kit-card-columns: 1;
   --kit-card-media-ratio: 16/9;
   --kit-placard-ratio: 16/7;
@@ -93,7 +93,7 @@
 }
 @media (min-width: 640px) {
   :root {
-    --kit-space-section: 5rem;
+    --kit-space-section: 4rem;
     --kit-space-gutter: 1.5rem;
     --kit-space-grid: 1.5rem;
     --kit-elevation-offset: 14px 14px 0 var(--kit-color-accent);
@@ -104,7 +104,7 @@
 }
 @media (min-width: 1200px) {
   :root {
-    --kit-space-section: 6rem;
+    --kit-space-section: 5rem;
     --kit-space-gutter: 2rem;
     --kit-space-grid: 1.75rem;
     --kit-card-columns: 3;

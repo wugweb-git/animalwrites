@@ -146,9 +146,9 @@
       "lg": "var(--fluid-h1)"
     },
     "type-headline": {
-      "sm": "var(--fluid-h2)",
-      "md": "var(--fluid-h2)",
-      "lg": "var(--fluid-h2)"
+      "sm": "var(--fluid-h3)",
+      "md": "var(--fluid-h3)",
+      "lg": "var(--fluid-h3)"
     },
     "type-display": {
       "sm": "var(--fluid-display)",
@@ -241,9 +241,9 @@
       "lg": "6rem"
     },
     "space-section": {
-      "sm": "3.5rem",
-      "md": "5rem",
-      "lg": "6rem"
+      "sm": "3rem",
+      "md": "4rem",
+      "lg": "5rem"
     },
     "space-gutter": {
       "sm": "1rem",
@@ -266,9 +266,9 @@
       "lg": "1200px"
     },
     "radius-control": {
-      "sm": "var(--radius-md)",
-      "md": "var(--radius-md)",
-      "lg": "var(--radius-md)"
+      "sm": "var(--radius-sm)",
+      "md": "var(--radius-sm)",
+      "lg": "var(--radius-sm)"
     },
     "radius-card": {
       "sm": "var(--radius-md)",
@@ -276,9 +276,9 @@
       "lg": "var(--radius-md)"
     },
     "radius-media": {
-      "sm": "var(--radius-sm)",
-      "md": "var(--radius-sm)",
-      "lg": "var(--radius-sm)"
+      "sm": "var(--radius-md)",
+      "md": "var(--radius-md)",
+      "lg": "var(--radius-md)"
     },
     "radius-hero": {
       "sm": "var(--radius-md)",
@@ -361,9 +361,9 @@
       "lg": "48px"
     },
     "border-control": {
-      "sm": "2px",
-      "md": "2px",
-      "lg": "2px"
+      "sm": "1px",
+      "md": "1px",
+      "lg": "1px"
     },
     "card-columns": {
       "sm": "1",

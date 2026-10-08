@@ -163,9 +163,11 @@ function aw_block_doc_date( $a, $id ) {
 	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
 		return '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>';
 	}
-	$year = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
-	return $year ? '<div class="aw-case-date"><span class="d">' . esc_html( $year ) . '</span></div>'
-		: '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>';
+	$year  = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
+	$thumb = (int) get_post_thumbnail_id( $id );
+	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => '', 'loading' => 'lazy' ) ) : ''; // the document's first page
+	$when  = $year ? '<span class="d">' . esc_html( $year ) . '</span>' : '<span class="d">' . esc_html( aw_src_date( $id, 'j M Y' ) ) . '</span>';
+	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
