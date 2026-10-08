@@ -69,6 +69,35 @@ function aw_publisher_rating_html( $p ) {
 	return ! empty( $p['rating_url'] ) ? '<a href="' . esc_url( $p['rating_url'] ) . '" target="_blank" rel="noopener">' . esc_html( $txt ) . '</a>' : esc_html( $txt );
 }
 
+/**
+ * Change log of the Sourcing screen: who changed what, when (newest first, last 300 kept).
+ *
+ * @param string $tab  Tab.
+ * @param string $what What changed, in words.
+ */
+function kits_sourcing_log( $tab, $what ) {
+	if ( '' === trim( $what ) ) {
+		return;
+	}
+	$log = (array) get_option( 'kits_sourcing_log', array() );
+	array_unshift( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ) );
+	update_option( 'kits_sourcing_log', array_slice( $log, 0, 300 ), false );
+}
+
+/** What changed between two lists, in words ("added: a, b; removed: c"). */
+function kits_sourcing_diff( $label, $old, $new ) {
+	$add = array_diff( (array) $new, (array) $old );
+	$del = array_diff( (array) $old, (array) $new );
+	$out = array();
+	if ( $add ) {
+		$out[] = 'added ' . implode( ', ', $add );
+	}
+	if ( $del ) {
+		$out[] = 'removed ' . implode( ', ', $del );
+	}
+	return $out ? $label . ': ' . implode( '; ', $out ) : '';
+}
+
 /** Relevance settings. */
 function aw_relevance() {
 	$r = get_option( AW_REL_OPTION );
@@ -227,10 +256,11 @@ add_action(
 					$pubs = aw_publishers();
 					$rel  = aw_relevance();
 					$by   = fn( $s ) => array_values( array_keys( array_filter( $pubs, fn( $p ) => ( $p['status'] ?? '' ) === $s ) ) );
-					return array(
+					$data = array(
 						'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
 						'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'], 'animal' => $rel['animal'], 'context' => $rel['context'], 'exclude' => $rel['exclude'] ),
 					);
+					return apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
 				},
 			)
 		);
@@ -254,8 +284,11 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? 'publishers' );
-		if ( 'keywords' === $tab ) {
+		if ( ! in_array( $tab, array( 'publishers', 'keywords' ), true ) ) {
+			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
+		} elseif ( 'keywords' === $tab ) {
 			$rel  = aw_relevance();
+			$old  = $rel;
 			$list = fn( $k ) => array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( wp_unslash( $_POST[ $k ] ?? '' ) ) ) ) ) ) );
 			$rel['enabled']          = ! empty( $_POST['enabled'] );
 			$rel['gnews_allow_only'] = ! empty( $_POST['gnews_allow_only'] );
@@ -263,6 +296,17 @@ add_action(
 				$rel[ $k ] = $list( $k );
 			}
 			update_option( AW_REL_OPTION, $rel, false );
+			$what = array();
+			foreach ( array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' ) as $k => $l ) {
+				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] );
+			}
+			if ( ! empty( $old['enabled'] ) !== $rel['enabled'] ) {
+				$what[] = 'keyword check ' . ( $rel['enabled'] ? 'on' : 'off' );
+			}
+			if ( ! empty( $old['gnews_allow_only'] ) !== $rel['gnews_allow_only'] ) {
+				$what[] = 'aggregators allowed-only ' . ( $rel['gnews_allow_only'] ? 'on' : 'off' );
+			}
+			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
 		} else {
 			$pubs   = aw_publishers();
 			$status = sanitize_key( $_POST['bulk_status'] ?? '' );
@@ -273,11 +317,15 @@ add_action(
 						$pubs[ $h ]['status'] = $status;
 					}
 				}
+				if ( $hosts ) {
+					kits_sourcing_log( 'publishers', implode( ', ', $hosts ) . ' → ' . $status );
+				}
 			}
 			$new = aw_host( 'https://' . preg_replace( '#^https?://#', '', sanitize_text_field( wp_unslash( $_POST['new_host'] ?? '' ) ) ) );
 			$ns  = sanitize_key( $_POST['new_status'] ?? 'block' );
 			if ( $new && in_array( $ns, array( 'allow', 'neutral', 'block' ), true ) ) {
 				$pubs[ $new ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $new ] ?? array(), array( 'status' => $ns ) );
+				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns );
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
 		}
@@ -297,6 +345,7 @@ add_action(
 		$pubs            = aw_publishers();
 		$pubs[ $host ]   = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => 'block' ) );
 		update_option( AW_PUB_OPTION, $pubs, false );
+		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)' );
 		wp_safe_redirect( add_query_arg( 'aw_blocked', rawurlencode( $host ), wp_get_referer() ? wp_get_referer() : admin_url() ) );
 		exit;
 	}
@@ -378,17 +427,39 @@ function aw_sourcing_page() {
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
 	}
-	echo '<nav class="nav-tab-wrapper"><a class="nav-tab' . ( 'keywords' !== $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base ) . '">Publishers</a><a class="nav-tab' . ( 'keywords' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base . '&tab=keywords' ) . '">Keywords</a></nav>';
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="' . esc_attr( 'keywords' === $tab ? 'keywords' : 'publishers' ) . '">';
+	// Tabs: Publishers, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback]), Change log.
+	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
+	$tabs  = array( 'publishers' => 'Publishers', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
+	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'publishers';
+	do_action( 'kits_sourcing_page_top' );
+	echo '<nav class="nav-tab-wrapper">';
+	foreach ( $tabs as $k => $l ) {
+		echo '<a class="nav-tab' . ( $tab === $k ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base . ( 'publishers' === $k ? '' : '&tab=' . $k ) ) . '">' . esc_html( $l ) . '</a>';
+	}
+	echo '</nav>';
+	if ( 'log' === $tab ) {
+		echo '<table class="widefat striped" style="margin-top:12px"><thead><tr><th>When</th><th>Who</th><th>Tab</th><th>What changed</th></tr></thead><tbody>';
+		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
+			echo '<tr><td>' . esc_html( $e['at'] ) . '</td><td>' . esc_html( $e['user'] ) . '</td><td>' . esc_html( $tabs[ $e['tab'] ] ?? $e['tab'] ) . '</td><td>' . esc_html( $e['what'] ) . '</td></tr>';
+		}
+		echo '</tbody></table></div>';
+		return;
+	}
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">';
 	wp_nonce_field( 'aw_sourcing' );
+	if ( isset( $extra[ $tab ] ) ) {
+		call_user_func( $extra[ $tab ][1] );
+		echo '</form></div>';
+		return;
+	}
 
 	if ( 'keywords' === $tab ) {
 		$r = aw_relevance();
-		echo '<p>An item is kept if it contains a <strong>strong</strong> term, or an <strong>animal</strong> term and a <strong>context</strong> term, and no <strong>exclude</strong> term. Items from Allowed publishers skip this check. One term per line; Hindi works.</p>';
+		echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. One term per line; Hindi works.</p>';
 		echo '<p><label><input type="checkbox" name="enabled" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> <strong>Relevance filter on</strong> (off: every item from a non-blocked publisher is kept)</label></p>';
 		echo '<p><label><input type="checkbox" name="gnews_allow_only" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> <strong>Only allowed publishers from aggregator feeds</strong> (Google News, Apple News and similar: items from Neutral publishers are refused). Keep off unless the allow list is complete.</label></p>';
 		echo '<div class="aw-src-lists">';
-		foreach ( array( 'strong' => 'Strong terms (one is enough)', 'animal' => 'Animal terms', 'context' => 'Context terms (with an animal term)', 'exclude' => 'Exclude terms (always drop)' ) as $k => $label ) {
+		foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $label ) {
 			echo '<p><label for="aw-' . esc_attr( $k ) . '"><strong>' . esc_html( $label ) . '</strong></label><br><textarea id="aw-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">' . esc_textarea( implode( "\n", (array) $r[ $k ] ) ) . '</textarea></p>';
 		}
 		echo '</div>';

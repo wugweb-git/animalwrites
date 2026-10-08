@@ -71,7 +71,7 @@ const AW_LIST_FILTERS = array(
 	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Topic' ) ),
 	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Topic' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Topic' ) ),
-	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ),
+	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ), // Articles · Videos · Social posts
 );
 /** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
@@ -110,7 +110,7 @@ function aw_filter_clauses( $type, $active ) {
 		} elseif ( 'publisher' === $f[1] ) {
 			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v );
 		} elseif ( 'press-format' === $f[1] ) {
-			$mq[] = array( 'key' => 'aw_press_format', 'value' => $v );
+			$mq[] = array( 'key' => 'aw_press_group', 'value' => $v );
 		} else {
 			$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
 		}
@@ -153,10 +153,10 @@ function aw_filter_values( $ids, $source ) {
 		}
 	} elseif ( 'press-format' === $source ) {
 		foreach ( $ids as $id ) {
-			$k = (string) get_post_meta( $id, 'aw_press_format', true );
-			if ( '' !== $k ) {
+			$k = (string) get_post_meta( $id, 'aw_press_group', true );
+			if ( isset( AW_PRESS_GROUPS[ $k ] ) ) {
 				$seen[ $k ][ $id ] = 1;
-				$name[ $k ]        = AW_PRESS_FORMATS[ $k ] ?? ucfirst( $k );
+				$name[ $k ]        = AW_PRESS_GROUPS[ $k ];
 			}
 		}
 	} else {

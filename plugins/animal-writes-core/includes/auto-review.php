@@ -107,6 +107,19 @@ function aw_review_reason( $id ) {
 }
 
 /**
+ * Which sourcing rule and keyword an item met (S3.4), kept on the item and shown in the admin list:
+ * "Publisher allowed (thehindu.com) · strong term: stray dog".
+ *
+ * @param int $id Post ID.
+ */
+function aw_record_match( $id ) {
+	$host = function_exists( 'aw_host' ) ? aw_host( (string) get_post_meta( $id, 'aw_source_url', true ) ) : '';
+	$st   = function_exists( 'aw_publishers' ) ? ( aw_publishers()[ $host ]['status'] ?? 'neutral' ) : '';
+	$word = function_exists( 'aw_relevance_verdict' ) ? aw_relevance_verdict( get_the_title( $id ) . ' ' . get_post_field( 'post_excerpt', $id ) )[1] : '';
+	update_post_meta( $id, 'aw_match', trim( 'Publisher ' . ( 'allow' === $st ? 'allowed' : ( 'block' === $st ? 'blocked' : 'not yet allowed' ) ) . ( $host ? ' (' . $host . ')' : '' ) . ' · ' . $word, ' ·' ) );
+}
+
+/**
  * Review one ingested item: publish it, or keep it Pending with the reason.
  *
  * @param int $id Post ID.
@@ -116,6 +129,7 @@ function aw_auto_review( $id ) {
 	if ( ! in_array( get_post_type( $id ), array( 'aw_news', 'aw_legal' ), true ) || 'pending' !== get_post_status( $id ) ) {
 		return '';
 	}
+	aw_record_match( $id );
 	$reason = aw_review_reason( $id );
 	// Same event as a published story: credit this publisher on that story instead of publishing a second copy.
 	if ( preg_match( '/^same story as #(\d+)/', $reason, $m ) ) {
@@ -148,6 +162,10 @@ foreach ( array( 'aw_news', 'aw_legal' ) as $aw_rt ) {
 		function ( $col, $id ) {
 			if ( 'aw_review' === $col ) {
 				echo esc_html( (string) get_post_meta( $id, 'aw_review', true ) );
+				$m = (string) get_post_meta( $id, 'aw_match', true );
+				if ( '' !== $m ) {
+					echo '<br><small>' . esc_html( $m ) . '</small>';
+				}
 			}
 		},
 		10,

@@ -17,7 +17,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_PRESS_FORMATS = array( 'article' => 'Article', 'video' => 'Video', 'tv' => 'TV', 'podcast' => 'Podcast' );
+const AW_PRESS_FORMATS = array(
+	'article'         => 'Article',
+	'video'           => 'Video',
+	'tv'              => 'TV',
+	'podcast'         => 'Podcast',
+	'instagram-post'  => 'Instagram post',
+	'instagram-reel'  => 'Instagram reel',
+	'facebook-post'   => 'Facebook post',
+	'facebook-video'  => 'Facebook video',
+	'x-post'          => 'X post',
+	'youtube-video'   => 'YouTube video',
+	'reddit-thread'   => 'Reddit thread',
+);
+/** The Media & PR filter groups (S4.5): format => group. */
+const AW_PRESS_GROUPS = array( 'articles' => 'Articles', 'videos' => 'Videos', 'social' => 'Social posts' );
+
+/** Filter group of a format: articles, videos or social. */
+function aw_press_group( $format ) {
+	if ( in_array( $format, array( 'video', 'tv', 'instagram-reel', 'facebook-video', 'youtube-video' ), true ) ) {
+		return 'videos';
+	}
+	if ( in_array( $format, array( 'instagram-post', 'facebook-post', 'x-post', 'reddit-thread' ), true ) ) {
+		return 'social';
+	}
+	return 'articles';
+}
+
+// Keep the group with the format, and fill it once for existing items.
+add_action( 'updated_post_meta', 'aw_press_group_sync', 10, 4 );
+add_action( 'added_post_meta', 'aw_press_group_sync', 10, 4 );
+function aw_press_group_sync( $mid, $id, $key, $value ) {
+	if ( 'aw_press_format' === $key ) {
+		update_post_meta( $id, 'aw_press_group', aw_press_group( (string) $value ) );
+	}
+}
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_press_group_done' ) ) {
+			return;
+		}
+		foreach ( get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+			update_post_meta( $id, 'aw_press_group', aw_press_group( (string) get_post_meta( $id, 'aw_press_format', true ) ) );
+		}
+		update_option( 'aw_press_group_done', '1', false );
+	},
+	30
+);
 const AW_PRESS_UA      = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 
 add_action(
@@ -44,6 +91,8 @@ function aw_press_fields() {
 		'aw_press_logo'       => 'Publisher logo (media ID)',
 		'aw_press_date'       => 'Date (YYYY-MM-DD)',
 		'aw_press_format'     => 'Format',
+		'aw_press_platform'   => 'Platform',
+		'aw_press_account'    => 'Account handle (e.g. @name, r/sub)',
 		'aw_press_thumb_src'  => 'Thumbnail source URL',
 		'aw_press_video'      => 'Video embed URL',
 		'aw_press_notes'      => 'Notes (not shown)',
@@ -66,6 +115,12 @@ add_action(
 						echo '<select id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '"><option value="">—</option>';
 						foreach ( AW_PRESS_FORMATS as $fk => $fl ) {
 							echo '<option value="' . esc_attr( $fk ) . '"' . selected( $v, $fk, false ) . '>' . esc_html( $fl ) . '</option>';
+						}
+						echo '</select>';
+					} elseif ( 'aw_press_platform' === $k ) {
+						echo '<select id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">';
+						foreach ( AW_PRESS_PLATFORMS as $pk => $pl ) {
+							echo '<option value="' . esc_attr( $pk ) . '"' . selected( $v ? $v : 'web', $pk, false ) . '>' . esc_html( 'web' === $pk ? 'Website' : $pl ) . '</option>';
 						}
 						echo '</select>';
 					} elseif ( 'aw_press_notes' === $k ) {
@@ -342,9 +397,9 @@ function aw_press_ingest( WP_REST_Request $req ) {
 		'aw_press_url'       => $url,
 		'aw_press_publisher' => sanitize_text_field( (string) $req->get_param( 'source_name' ) ),
 		'aw_press_date'      => preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $req->get_param( 'source_date' ) ) ? (string) $req->get_param( 'source_date' ) : '',
-		'aw_press_format'    => in_array( $req->get_param( 'format' ), array_keys( AW_PRESS_FORMATS ), true ) ? (string) $req->get_param( 'format' ) : '',
+		'aw_press_format'    => isset( AW_PRESS_FORMATS[ sanitize_title( (string) $req->get_param( 'format' ) ) ] ) ? sanitize_title( (string) $req->get_param( 'format' ) ) : '', // "Instagram reel" → instagram-reel
 		'aw_press_platform'  => isset( AW_PRESS_PLATFORMS[ $platform ] ) ? $platform : 'web',
-		'aw_press_account'   => sanitize_text_field( (string) $req->get_param( 'account' ) ),
+		'aw_press_account'   => sanitize_text_field( (string) ( $req->get_param( 'account_handle' ) ?: $req->get_param( 'account' ) ) ),
 		'aw_press_query'     => sanitize_text_field( (string) $req->get_param( 'query' ) ),
 		'aw_press_thumb_src' => esc_url_raw( (string) $req->get_param( 'image_url' ) ),
 	);

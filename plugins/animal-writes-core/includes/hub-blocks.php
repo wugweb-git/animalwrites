@@ -147,7 +147,10 @@ function aw_block_publisher( $a, $id ) {
 		$pub  = (string) get_post_meta( $id, 'aw_press_publisher', true );
 		$logo = (int) get_post_meta( $id, 'aw_press_logo', true );
 		$logo = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
-		return $pub ? '<p class="aw-src">' . ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) . '<span class="aw-src-name">' . esc_html( $pub ) . '</span></p>' : '';
+		$plat = (string) get_post_meta( $id, 'aw_press_platform', true );
+		$icon = in_array( $plat, array( 'instagram', 'facebook', 'x' ), true ) ? aw_i( $plat ) : '';
+		$name = $pub ? $pub : ( 'web' !== $plat && $plat ? ( AW_PRESS_PLATFORMS[ $plat ] ?? '' ) : '' );
+		return $name ? '<p class="aw-src">' . ( $icon ? $icon : ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) ) . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
 	}
 	return function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
 }
@@ -320,7 +323,9 @@ function aw_block_press_media( $a, $id ) {
 function aw_block_press_meta( $a, $id ) {
 	$date = (string) get_post_meta( $id, 'aw_press_date', true );
 	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
-	return '<p class="aw-story-meta kit-tags">' . ( $date ? '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time>' : '' ) . ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) . '</p>';
+	$handle = (string) get_post_meta( $id, 'aw_press_account', true );
+	$video  = $fmt && 'videos' === aw_press_group( $fmt );
+	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time>' : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
 }
 
 // Hub Pages in the editor: the H1 in the band is the title (no second title field above it).

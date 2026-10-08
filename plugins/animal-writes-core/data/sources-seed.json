@@ -1,0 +1,371 @@
+{
+ "defaults": {
+  "lookback_days": 14,
+  "max_items_per_source": 15
+ },
+ "keywords": [
+  "animal welfare",
+  "animal cruelty",
+  "cruelty to animals",
+  "stray",
+  "street dog",
+  "community dog",
+  "cattle",
+  "cow shelter",
+  "gaushala",
+  "wildlife",
+  "veterinary",
+  "rabies",
+  "animal birth control",
+  "ABC Rules",
+  "PCA Act",
+  "Prevention of Cruelty",
+  "AWBI",
+  "Animal Welfare Board",
+  "पशु",
+  "जानवर",
+  "पशुपालन",
+  "रेबीज"
+ ],
+ "sources": [
+  {
+   "id": "gnews-animal-welfare",
+   "name": "Google News – animal welfare India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://news.google.com/rss/search?q=%22animal+welfare%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "gnews-animal-cruelty",
+   "name": "Google News – animal cruelty India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://news.google.com/rss/search?q=%22animal+cruelty%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "the-hindu-environment",
+   "name": "The Hindu – Energy & Environment",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://www.thehindu.com/sci-tech/energy-and-environment/feeder/default.rss",
+   "on": true,
+   "filter": true
+  },
+  {
+   "id": "awbi-circulars",
+   "name": "Animal Welfare Board of India – Circulars",
+   "kind": "awbi",
+   "type": "legal",
+   "source_type": "awbi",
+   "url": "https://awbi.gov.in/circulars",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "awbi-notifications",
+   "name": "Animal Welfare Board of India – Notifications",
+   "kind": "awbi",
+   "type": "legal",
+   "source_type": "awbi",
+   "url": "https://awbi.gov.in/notifications",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "livelaw-top",
+   "name": "LiveLaw",
+   "kind": "rss",
+   "type": "legal",
+   "source_type": "auto-court",
+   "url": "https://www.livelaw.in/category/top-stories/google_feeds.xml",
+   "on": true,
+   "filter": true
+  },
+  {
+   "id": "barandbench",
+   "name": "Bar & Bench",
+   "kind": "rss",
+   "type": "legal",
+   "source_type": "auto-court",
+   "url": "https://www.barandbench.com/feed",
+   "on": true,
+   "filter": true
+  },
+  {
+   "id": "court-news-animals",
+   "name": "Court news (LiveLaw, Bar & Bench, SC Observer)",
+   "kind": "rss",
+   "type": "legal",
+   "source_type": "auto-court",
+   "url": "https://news.google.com/rss/search?q=(site:livelaw.in+OR+site:barandbench.com+OR+site:scobserver.in)+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray)&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": true
+  },
+  {
+   "id": "pib-releases",
+   "name": "Press Information Bureau",
+   "kind": "rss",
+   "type": "legal",
+   "source_type": "pib",
+   "url": "https://news.google.com/rss/search?q=site:pib.gov.in+(animal+OR+rabies+OR+veterinary+OR+livestock+OR+wildlife)&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": true
+  },
+  {
+   "id": "gazette-of-india",
+   "name": "Gazette of India",
+   "kind": "egazette",
+   "type": "legal",
+   "source_type": "gazette",
+   "url": "https://egazette.gov.in/",
+   "lookback_days": 30,
+   "ministries": [
+    "Ministry of Fisheries, Animal Husbandry and Dairying",
+    "Ministry of Environment, Forest and Climate Change"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "judgments-supreme-court",
+   "name": "Supreme Court judgments (open dataset, CC BY 4.0)",
+   "kind": "judgments-sc",
+   "type": "legal",
+   "url": "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/",
+   "lookback_days": 120,
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "opp-wwf-india",
+   "name": "WWF-India careers",
+   "org": "WWF-India",
+   "kind": "zoho",
+   "type": "opportunity",
+   "opportunity_type": "job",
+   "lookback_days": 120,
+   "url": "https://wwfindia.zohorecruit.com/jobs/careers",
+   "match": "title",
+   "keywords": [
+    "conservation",
+    "wildlife",
+    "biodiversity",
+    "species",
+    "raptor",
+    "tiger",
+    "elephant",
+    "rhino",
+    "bird",
+    "aquatic",
+    "wetland",
+    "river",
+    "marine",
+    "forest",
+    "habitat",
+    "veterinar",
+    "animal",
+    "brahmaputra"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "opp-awbi-notifications",
+   "name": "Animal Welfare Board of India – Notifications",
+   "org": "Animal Welfare Board of India",
+   "kind": "awbi",
+   "type": "opportunity",
+   "opportunity_type": "event",
+   "lookback_days": 120,
+   "url": "https://awbi.gov.in/Notifications",
+   "keywords": [
+    "invitation for",
+    "inviting",
+    "award",
+    "vacancy",
+    "vacancies",
+    "recruitment",
+    "internship",
+    "applications are invited",
+    "walk-in"
+   ],
+   "on": true,
+   "filter": false
+  }
+ ],
+ "topics": {
+  "community-dogs": [
+   "stray dog",
+   "street dog",
+   "community dog",
+   "stray dogs",
+   "street dogs",
+   "community animals",
+   "कुत्त"
+  ],
+  "animal-birth-control": [
+   "animal birth control",
+   "abc rules",
+   "abc programme",
+   "abc program",
+   "sterilis",
+   "steriliz",
+   "neuter"
+  ],
+  "rabies-public-health": [
+   "rabies",
+   "रेबीज",
+   "dog bite",
+   "anti-rabies",
+   "vaccination drive"
+  ],
+  "cruelty-prosecution": [
+   "cruelty",
+   "fir",
+   "arrested",
+   "prosecution",
+   "torture",
+   "abuse",
+   "poison"
+  ],
+  "feeders-caregivers": [
+   "feeder",
+   "feeding",
+   "caregiver"
+  ],
+  "cattle-gaushalas": [
+   "cattle",
+   "cow",
+   "gaushala",
+   "gaushalas",
+   "bovine",
+   "बैल",
+   "गाय"
+  ],
+  "transport-slaughter": [
+   "slaughter",
+   "transportation of animals",
+   "illegal transport",
+   "smuggl"
+  ],
+  "wildlife": [
+   "wildlife",
+   "tiger",
+   "leopard",
+   "elephant",
+   "pangolin",
+   "forest department",
+   "poach",
+   "sanctuary",
+   "national park"
+  ],
+  "birds": [
+   "bird",
+   "birds",
+   "avian",
+   "pigeon",
+   "kite",
+   "peacock"
+  ],
+  "pets-breeding": [
+   "pet shop",
+   "breeder",
+   "breeding",
+   "dog breed",
+   "pet"
+  ],
+  "adoption": [
+   "adopt",
+   "adoption"
+  ],
+  "performing-captive-animals": [
+   "circus",
+   "performing animals",
+   "captive",
+   "zoo",
+   "elephant ride"
+  ],
+  "laws-rules": [
+   "act",
+   "rules",
+   "amendment",
+   "notification",
+   "guidelines",
+   "circular",
+   "gazette"
+  ],
+  "courts-judgments": [
+   "supreme court",
+   "high court",
+   "court",
+   "judgment",
+   "bench",
+   "petition",
+   "tribunal"
+  ],
+  "policy-government": [
+   "ministry",
+   "government",
+   "minister",
+   "municipal",
+   "corporation",
+   "policy",
+   "scheme",
+   "cabinet"
+  ],
+  "disaster-rescue": [
+   "flood",
+   "cyclone",
+   "earthquake",
+   "disaster",
+   "rescue operation"
+  ],
+  "veterinary-care": [
+   "veterinary",
+   "vet",
+   "hospital",
+   "clinic"
+  ],
+  "campaigns-civic-action": [
+   "campaign",
+   "petition",
+   "protest",
+   "letter",
+   "signature",
+   "awareness"
+  ]
+ },
+ "press": {
+  "enabled": true,
+  "date_floor": "2025-11-01",
+  "every_days": 7,
+  "monthly_requests": 900,
+  "weekly_requests": 200,
+  "backfill_requests": 300,
+  "queries": [
+   "Animal Writes",
+   "AnimalWrites",
+   "#animalwrites",
+   "animalwrites.in",
+   "letter petition Supreme Court dogs",
+   "handwritten letters Supreme Court stray dogs",
+   "29 November post office letters Supreme Court",
+   "Ambika Shukla animal"
+  ],
+  "sites": [
+   "instagram.com",
+   "facebook.com",
+   "fb.watch",
+   "x.com",
+   "twitter.com",
+   "youtube.com",
+   "threads.net",
+   "linkedin.com",
+   "reddit.com"
+  ]
+ }
+}
