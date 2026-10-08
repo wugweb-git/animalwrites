@@ -25,10 +25,13 @@ function aw_share_html( $post_id ) {
 		'X'        => 'https://x.com/intent/post?text=' . rawurlencode( $title ) . '&url=' . rawurlencode( $url ),
 	);
 	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'animal-writes-core' ) . '"><span class="kit-share-label">' . esc_html__( 'Share', 'animal-writes-core' ) . '</span>';
+	$icons = array( 'WhatsApp' => 'brand-whatsapp', 'Facebook' => 'facebook', 'X' => 'x' );
 	foreach ( $links as $name => $href ) {
-		$out .= '<a class="aw-share-' . strtolower( $name ) . '" href="' . esc_url( $href ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $name ) . '</a>';
+		$ico   = '<span class="kit-ico kit-ico--' . $icons[ $name ] . '" aria-hidden="true"></span>';
+		$label = 'X' === $name ? '<span class="screen-reader-text">' . esc_html__( 'Share on X', 'animal-writes-core' ) . '</span>' : esc_html( $name ); // X: icon only (its name is its logo)
+		$out  .= '<a class="kit-share-' . strtolower( $name ) . ( 'X' === $name ? ' kit-share-icon' : '' ) . '" href="' . esc_url( $href ) . '" target="_blank" rel="noopener noreferrer">' . $ico . $label . '</a>';
 	}
-	$out .= '<button type="button" class="aw-share-copy" data-url="' . esc_attr( $url ) . '" data-done="' . esc_attr__( 'Link copied', 'animal-writes-core' ) . '">' . esc_html__( 'Copy link', 'animal-writes-core' ) . '</button></div>';
+	$out .= '<button type="button" class="kit-share-copy" data-url="' . esc_attr( $url ) . '" data-done="' . esc_attr__( 'Link copied', 'animal-writes-core' ) . '"><span class="kit-ico kit-ico--link" aria-hidden="true"></span>' . esc_html__( 'Copy link', 'animal-writes-core' ) . '</button></div>';
 	return $out;
 }
 

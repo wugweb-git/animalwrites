@@ -136,3 +136,15 @@ add_filter(
 	'render_block_core/post-title',
 	fn( $html ) => is_search() ? preg_replace( array( '/^(\s*)<h3\b/', '/<\/h3>(\s*)$/' ), array( '$1<h2', '</h2>$1' ), $html ) : $html
 );
+
+// Lists show published items only, also to signed-in editors (private items such as held duplicates stay out).
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $q ) {
+		if ( ! is_admin() ) {
+			$q['post_status'] = 'publish';
+		}
+		return $q;
+	},
+	99
+);

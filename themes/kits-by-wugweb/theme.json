@@ -59,12 +59,12 @@
 				{ "slug": "small", "name": "Small", "size": "clamp(0.8125rem, 0.7841rem + 0.1212vw, 0.875rem)", "fluid": false },
 				{ "slug": "medium", "name": "Medium", "size": "clamp(0.9375rem, 0.9091rem + 0.1212vw, 1rem)", "fluid": false },
 				{ "slug": "large", "name": "Large", "size": "clamp(1rem, 0.9432rem + 0.2424vw, 1.125rem)", "fluid": false },
-				{ "slug": "h5", "name": "Heading 5", "size": "clamp(1rem, 0.9148rem + 0.3636vw, 1.1875rem)", "fluid": false },
-				{ "slug": "x-large", "name": "Extra large", "size": "clamp(1.06rem, 0.9168rem + 0.6109vw, 1.375rem)", "fluid": false },
-				{ "slug": "2x-large", "name": "2X large", "size": "clamp(1.25rem, 1.0227rem + 0.9697vw, 1.75rem)", "fluid": false },
-				{ "slug": "3x-large", "name": "3X large", "size": "clamp(1.5rem, 1.1591rem + 1.4545vw, 2.25rem)", "fluid": false },
-				{ "slug": "4x-large", "name": "4X large", "size": "clamp(2rem, 1.5455rem + 1.9394vw, 3rem)", "fluid": false },
-				{ "slug": "display", "name": "Display", "size": "clamp(2.5rem, 1.3636rem + 4.8485vw, 5rem)", "fluid": false }
+				{ "slug": "h5", "name": "Heading 5", "size": "1rem", "fluid": false },
+				{ "slug": "x-large", "name": "Extra large", "size": "clamp(1.0625rem, 1.0341rem + 0.1212vw, 1.125rem)", "fluid": false },
+				{ "slug": "2x-large", "name": "2X large", "size": "clamp(1.25rem, 1.1932rem + 0.2424vw, 1.375rem)", "fluid": false },
+				{ "slug": "3x-large", "name": "3X large", "size": "clamp(1.5rem, 1.3864rem + 0.4848vw, 1.75rem)", "fluid": false },
+				{ "slug": "4x-large", "name": "4X large", "size": "clamp(1.75rem, 1.5227rem + 0.9697vw, 2.25rem)", "fluid": false },
+				{ "slug": "display", "name": "Display", "size": "clamp(2.25rem, 1.9943rem + 1.0909vw, 2.8125rem)", "fluid": false }
 			]
 		},
 		"spacing": {

@@ -217,7 +217,7 @@ function aw_block_task_icon( $a, $id ) {
 
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
-	return '<p class="aw-task-meta">' . aw_i( 'calendar' ) . ' Updated ' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . ' · ' . (int) $mins . ' min read</p>';
+	return '<p class="aw-task-meta"><span>' . aw_i( 'calendar' ) . 'Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */
@@ -253,7 +253,7 @@ function aw_block_posted_by( $a, $id ) {
 
 function aw_block_org_mark( $a, $id ) {
 	$logo     = get_the_post_thumbnail_url( $id, 'thumbnail' );
-	$words    = preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $id ) ) );
+	$words    = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $id ) ) ) ) ); // "1962 Mobile Veterinary Unit" → MV
 	$initials = mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) );
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';
 }

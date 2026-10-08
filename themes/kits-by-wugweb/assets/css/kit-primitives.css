@@ -219,6 +219,10 @@ a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):n
 a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-btn--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-btn--sm { min-height: var(--kit-size-target); padding: 0 var(--s-4); font-size: var(--fluid-body-sm); }
+/* Icon only: square, the icon in the middle; needs an aria-label (or screen-reader text) naming the action. */
+.kit-btn--icon { width: var(--kit-size-control); padding: 0; gap: 0; }
+.kit-btn--icon.kit-btn--sm { width: var(--kit-size-target); }
+.kit-btn .kit-ico { --kit-ico-size: 1.125em; }
 @media (hover: hover) {
 	.kit-btn:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 	.kit-btn--ink:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
@@ -239,7 +243,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 /* Auto-paragraphs around shortcode output must not add space inside a field */
 .kit-field > p:empty { display: none; }
 .kit-field > p { margin: 0; }
-.kit-field > label, .kit-field > .kit-field-label { display: block; margin: 0 0 var(--s-2); font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.kit-field > label, .kit-field > .kit-field-label { display: block; margin: 0 0 var(--s-2); font-weight: var(--kit-weight-regular); color: var(--kit-color-ink); }
 .kit-field .kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .kit-field-control { position: relative; }
 .kit-field-control > .kit-field-icon { position: absolute; left: var(--s-3); top: 50%; transform: translateY(-50%); color: var(--kit-color-muted); pointer-events: none; }
@@ -254,7 +258,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 }
 .kit-field textarea { padding-block: var(--s-3); min-height: 7rem; }
 /* Selects: same height and look as text fields in every browser (Safari draws native selects shorter) */
-.kit-field select {
+.kit-field select, :where(select:not([multiple]):not([size])) { /* every single select, in or out of a field */
 	-webkit-appearance: none; appearance: none; height: var(--kit-size-target); padding-right: calc(var(--s-3) + 1.25rem);
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 	background-repeat: no-repeat; background-position: right var(--s-3) center; background-size: 1rem;
@@ -300,7 +304,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 }
 
 /* ---------- 16. Form standard (S5.2): one look for every form, from tokens ---------- */
-.kit-field > label, .kit-field > .kit-field-label, .kit-check-group > legend { font-size: var(--fluid-body-sm); font-weight: 500; color: var(--neutral-9); }
+.kit-field > label, .kit-field > .kit-field-label, .kit-check-group > legend { font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
 .kit-field .kit-optional { font-weight: 400; color: var(--neutral-5); }
 .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
 	min-height: 44px; padding: 0 var(--s-3); border-radius: var(--r-2);

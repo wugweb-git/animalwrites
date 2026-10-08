@@ -65,10 +65,10 @@
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest('.kit-share-copy, .aw-share-copy');
 		if (!b || !navigator.clipboard) return;
-		var label = b.textContent;
+		var html = b.innerHTML; // icon + label
 		navigator.clipboard.writeText(b.dataset.url).then(function () {
 			b.textContent = b.dataset.done;
-			setTimeout(function () { b.textContent = label; }, 2000);
+			setTimeout(function () { b.innerHTML = html; }, 2000);
 		});
 	});
 
@@ -411,11 +411,12 @@
 	});
 })();
 
-/* External links: mark text links to other sites with an arrow (CSS) and a screen-reader note. Icon, image and logo links are left as they are. */
+/* External links: every link to another site that has words gets an arrow (CSS) and a screen-reader note; icon-only links,
+   share buttons and links that already show an arrow are left as they are. */
 (function () {
 	function mark(root) {
 		root.querySelectorAll('a[href^="http"]:not(.kit-link-ext)').forEach(function (a) {
-			if (a.host === location.host || a.querySelector('img, svg, .kit-ico, .kit-ico') || !a.textContent.trim() || a.closest('.wp-block-navigation, .kit-ad')) {
+			if (a.host === location.host || !a.textContent.trim() || a.querySelector('.kit-ico--arrow-up-right') || a.closest('.wp-block-navigation, .kit-ad, .kit-share, .kit-socials')) {
 				return;
 			}
 			a.classList.add('kit-link-ext');
