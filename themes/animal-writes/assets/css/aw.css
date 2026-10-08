@@ -455,7 +455,7 @@ body { background: var(--kit-color-canvas); }
 /* News attribution (Google News pattern): favicon + publisher above the headline, relative time below */
 .aw-src { display: flex; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-3) 0 var(--kit-space-1); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); max-width: none; }
 .aw-src-icon { width: 16px; height: 16px; flex: none; border-radius: 3px; object-fit: contain; background: var(--kit-color-raised); }
-.aw-src-icon--letter { display: inline-flex; align-items: center; justify-content: center; background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: 10px; font-weight: var(--kit-weight-bold); line-height: 1; }
+.aw-src-icon--letter { display: inline-flex; align-items: center; justify-content: center; background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-size: var(--fluid-caption); font-weight: var(--kit-weight-bold); line-height: 1; }
 .aw-src-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .aw-src--link a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-color-ink); text-decoration: none; }
 .aw-src--link a:hover .aw-src-name { text-decoration: underline; text-underline-offset: 3px; }
