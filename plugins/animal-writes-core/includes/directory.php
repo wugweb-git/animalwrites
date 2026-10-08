@@ -83,7 +83,7 @@ add_filter(
 			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
-		$out = array( 'post_type' => 'aw_listing' );
+		$out = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)
 		$a   = isset( $seg[0] ) ? aw_dir_place( $seg[0] ) : null;
 		$b   = $seg[1] ?? '';
 		$c   = $seg[2] ?? '';
@@ -94,7 +94,7 @@ add_filter(
 			$out['aw_place'] = $a->slug;
 			$type           = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			if ( $type && $type_ok( $type ) ) {
-				$out['aw_listing_type'] = aw_listing_type_query( $type ); // filtered state list
+				$out['aw_dir_type'] = aw_listing_type_query( $type ); // filtered state list
 			}
 		} elseif ( 2 === count( $seg ) && $a ) {
 			$bp = aw_dir_place( $b );
