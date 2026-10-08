@@ -87,4 +87,4 @@ function aw_fetch_site_opportunities() {
 	update_option( 'aw_site_opportunities_last', array( 'at' => wp_date( 'c' ), 'report' => $report ), false );
 	return $report;
 }
-add_action( 'aw_daily', 'aw_fetch_site_opportunities' );
+// Not fetched (owner, 9 Oct 2026): add_action( 'aw_daily', 'aw_fetch_site_opportunities' ); turns it back on.
