@@ -466,7 +466,11 @@
     "aw-report",
     "aw-contact-form",
     "aw-steps",
-    "aw-listing-help"
+    "aw-listing-help",
+    "aw-claim-form",
+    "aw-newsletter-form",
+    "aw-volunteer-form",
+    "aw-report-form"
    ],
    "states": [
     "default",

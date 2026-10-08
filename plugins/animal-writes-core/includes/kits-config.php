@@ -46,3 +46,14 @@ add_filter(
 	10,
 	2
 );
+
+// Section names for sections without a visible heading (shell spec: every section labelled).
+add_filter(
+	'kits_section_labels',
+	fn( $l ) => $l + array(
+		'kit-ed-hero'  => array( 'hero', 'Introduction' ),
+		'aw-ed-find'   => array( 'find-help', 'Find help near you' ),
+		'aw-system'    => array( 'list', 'List' ),
+		'aw-vol-banner' => array( 'volunteer', 'Volunteer' ),
+	)
+);

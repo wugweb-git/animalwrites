@@ -390,7 +390,7 @@ function aw_directory_filter() {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
-	return '<form class="aw-dir-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
+	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
 		. $field( 'aw-dir-q', 'Name', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
 		. '<details class="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="kit-btn kit-btn--secondary kit-btn--sm">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )

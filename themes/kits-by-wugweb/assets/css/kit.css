@@ -776,7 +776,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
    takes the room left over, so a taller filter row (the Directory search) shrinks the pictures, not the band. */
 @media (min-width: 768px) {
 	.kit-section-band { box-sizing: border-box; height: 446px; display: flex; flex-direction: column; overflow: hidden; }
-	.kit-section-band:not(:has(.kit-filterbar, .aw-dir-search)) { height: 346px; }
+	.kit-section-band:not(:has(.kit-filterbar, .kit-section-search)) { height: 346px; }
 	.kit-section-band > .kit-section-inner { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
 	.kit-section-band .kit-section-head, .kit-section-band .kit-section-head:has(.kit-section-visual) { flex: 1 1 auto; height: auto !important; min-height: 0; align-items: stretch; }
 	.kit-section-band .kit-section-head > :first-child { justify-content: flex-start; }
@@ -873,31 +873,31 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 	--kit-ico-prev: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%2019-7-7%207-7%22/%3E%3Cpath%20d%3D%22M19%2012H5%22/%3E%3C/svg%3E"); --kit-ico-next: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%2012h14%22/%3E%3Cpath%20d%3D%22m12%205%207%207-7%207%22/%3E%3C/svg%3E"); --kit-ico-download: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2015v4a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2v-4%22/%3E%3Cpath%20d%3D%22m7%2010%205%205%205-5%22/%3E%3Cpath%20d%3D%22M12%2015V3%22/%3E%3C/svg%3E"); --kit-ico-person: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2021v-2a4%204%200%200%200-4-4H9a4%204%200%200%200-4%204v2%22/%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22/%3E%3C/svg%3E");
 }
 /* Tags are nouns, each kind its own tint; one font, size, weight and height for all; links never underline */
-.kit-tag, .kit-chip, .wp-block-post-terms a, .aw-profile-badge, .taxonomy-aw_place a {
+.kit-tag, .kit-chip, .wp-block-post-terms a {
 	display: inline-flex; align-items: center; gap: var(--s-1); min-height: 1.75rem; padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm);
 	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
 }
-.kit-tag--category, .taxonomy-aw_topic a { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
-.kit-tag--type, .taxonomy-aw_listing_type a, .taxonomy-aw_legal_kind a, .taxonomy-aw_resource_type a, .taxonomy-aw_opportunity_type a, .aw-org-tags > .kit-tag:not([class*="--"]) { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
-.kit-tag--issuer, .kit-tag--info.aw-issuer, .aw-case-tags > .kit-tag--info, .aw-case-tags > .kit-tag--ink { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
-.kit-tag--place, .taxonomy-aw_place a { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
-:is(.kit-chip, .wp-block-post-terms a, .taxonomy-aw_place a):hover { filter: brightness(.92); text-decoration: none !important; }
+.kit-tag--category { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
+.kit-tag--type { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
+.kit-tag--issuer { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
+.kit-tag--place { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
+
 .kit-tag .kit-ico, .kit-chip .kit-ico { --kit-ico-size: 1em; }
-.taxonomy-aw_place a::before { content: ""; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-pin) center / contain no-repeat; mask: var(--kit-ico-pin) center / contain no-repeat; }
+
 
 /* Logo in a tight tile: publishers, press, sources (AWBI, Google Maps, departments, the organisation) */
-.aw-src-icon, .aw-datasrc-logo img { width: 16px !important; height: 16px !important; object-fit: contain; border-radius: 3px; background: transparent; border: 0; padding: 0; }
-.aw-src-icon:not(.aw-src-icon--letter), .aw-datasrc-logo { box-sizing: content-box; padding: 3px !important; background: var(--kit-color-raised) !important; border: 1px solid var(--kit-color-line) !important; border-radius: var(--radius-sm) !important; }
-.aw-datasrc-logo { display: inline-flex; width: 16px !important; height: 16px !important; align-items: center; justify-content: center; }
-.aw-datasrcs.is-full { grid-template-columns: max-content minmax(0, 1fr); }
+
+
+
+
 
 /* Meta always with an icon: date, author / posted by, reading time, place */
-.wp-block-post-date, .aw-law-date, .aw-posted-by, .aw-press-handle, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--s-1); }
-.wp-block-post-date::before, .aw-law-date::before, .aw-posted-by::before, .aw-press-handle::before, .kit-meta::before {
+.wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--s-1); }
+.wp-block-post-date::before, .kit-meta::before {
 	content: "" !important; display: inline-block !important; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
 }
-.aw-posted-by::before, .aw-press-handle::before { -webkit-mask-image: var(--kit-ico-user); mask-image: var(--kit-ico-user); }
-.kit-ed-rows :is(.wp-block-post-date, .aw-law-date) { flex-direction: row !important; align-items: center !important; }
+
+
 
 /* Previous / Next: one pager everywhere — outlined pill buttons with arrows, numbers as 44px squares */
 .wp-block-query-pagination, .kit-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--kit-space-2); }
@@ -917,16 +917,12 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 
 /* Buttons carry an icon by what they do (only when the button has no icon of its own) */
 :is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico)):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [type=submit], [data-ico])::before,
-#claim > summary::before, #report > summary::before, #volunteer > summary::before {
+.kit-disclosure[data-ico] > summary::before {
 	content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat; mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat;
 }
 [href^="tel:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-phone); }
-[href^="mailto:"]:is(.kit-btn, .wp-block-button__link), .aw-newsletter-form [type=submit] { --kit-btn-ico: var(--kit-ico-mail); }
+[href^="mailto:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-mail); }
 [href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
-.aw-dir-search [type=submit], .kit-hsearch [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
-#claim > summary, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
-#report > summary, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
-#volunteer > summary, .aw-volunteer-form [type=submit] { --kit-btn-ico: var(--kit-ico-person); }
 .kit-disclosure > summary { gap: var(--s-2); }
 .kit-disclosure[open] > summary::before { display: none; }
 
