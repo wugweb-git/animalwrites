@@ -66,7 +66,9 @@ add_action(
 			$q->set( 'date_query', array( array( 'after' => AW_NEWS_ARCHIVE_AFTER . ' ago', 'inclusive' => true ) ) );
 		}
 		if ( $q->is_post_type_archive( 'aw_opportunity' ) ) {
-			$q->set( 'meta_query', aw_open_opportunities_meta_query() );
+			$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Location is a meta filter)
+			$mq['aw_open'] = aw_open_opportunities_meta_query();
+			$q->set( 'meta_query', $mq );
 		}
 	},
 	40
