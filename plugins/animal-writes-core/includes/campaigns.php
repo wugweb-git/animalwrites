@@ -22,7 +22,7 @@ add_action(
 			array(
 				'labels'          => array( 'name' => 'Campaign receipts', 'singular_name' => 'Receipt', 'menu_name' => 'Receipts' ),
 				'public'          => false,
-				'show_ui'         => true,
+				'show_ui'         => false, // hidden from WP Admin (owner, 8 Oct 2026); the campaign form still stores receipts
 				'show_in_rest'    => false,
 				'menu_icon'       => 'dashicons-email-alt',
 				'supports'        => array( 'title' ),
