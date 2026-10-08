@@ -1691,7 +1691,7 @@
   "primary-nav": "live",
   "mega-menu": "not used",
   "mobile-bottom-nav": "not used",
-  "sticky-action-bar": "live",
+  "sticky-action-bar": "not used",
   "breadcrumbs": "live",
   "local-nav": "live",
   "footer-nav": "live",

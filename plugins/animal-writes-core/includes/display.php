@@ -111,19 +111,7 @@ add_action(
 	1
 );
 
-// Phones: a slim bar that keeps help one tap away (shown by CSS under 700px only).
-add_action(
-	'wp_footer',
-	function () {
-		if ( is_admin() || is_page( array( 'volunteer', 'contact' ) ) ) { // not over the forms on these pages
-			return;
-		}
-		echo '<nav class="kit-sticky-help" aria-label="' . esc_attr__( 'Quick help', 'animal-writes-core' ) . '">'
-			. '<a class="kit-sh-primary" href="/directory/">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</a>'
-			. '<a class="kit-sh-secondary" href="/resources/found-an-injured-animal-what-to-do/">' . esc_html__( 'Injured animal?', 'animal-writes-core' ) . '</a>'
-			. '</nav>' . "\n";
-	}
-);
+// The phone help bar was removed (owner, 8 Oct 2026).
 
 // Empty states sit under the page's h1, so their heading is an h2 (the pattern ships an h3).
 add_filter(

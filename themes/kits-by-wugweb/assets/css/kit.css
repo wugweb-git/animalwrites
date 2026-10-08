@@ -284,7 +284,6 @@ html { overflow-x: clip; }
 	:root { --kit-hub-head-h: 12rem; }
 	.kit-section-band .kit-section-head:has(.kit-section-visual) { height: var(--kit-hub-head-h); align-items: stretch; } /* fixed only where there are pictures */
 	.kit-section-band .kit-section-head > :first-child { display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; overflow: hidden; } /* title at the same place on every hub */
-	.kit-section-band--compact .kit-section-head { height: auto; } /* Directory: no pictures; its search sits right under the intro */
 	.kit-section-band .kit-section-visual { height: 100%; align-items: start; }
 	.kit-section-band .kit-section-visual > * { height: calc(100% - var(--kit-space-5)); }
 	.kit-section-band .kit-section-visual :is(img, .kit-placard, .kit-placard), .kit-section-band .kit-section-visual :is(img, .kit-placard) { height: 100%; aspect-ratio: auto; }
@@ -764,5 +763,3 @@ main.is-layout-constrained > .wp-block-post-content.is-layout-constrained > :whe
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(.is-style-outline *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .kit-form button[type=submit]):hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 
-/* Phones: the bottom help bar never covers the end of the page */
-@media (max-width: 639px) { body:has(.kit-sticky-help:not(.is-hidden)) { padding-bottom: 4.5rem; } }

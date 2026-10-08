@@ -108,11 +108,21 @@ function aw_block_hub_count( $a ) {
 /** Three pictures from the section (campaign photos for Campaigns). */
 function aw_block_hub_visual( $a ) {
 	$type = (string) ( $a['postType'] ?? '' );
-	if ( ! $type || in_array( $type, array( 'aw_listing', 'aw_press' ), true ) ) {
+	if ( ! $type ) {
 		return '';
 	}
 	$tiles = '';
-	if ( 'aw_campaign' === $type ) {
+	if ( 'aw_listing' === $type ) { // Directory: the photos of three categories it serves
+		foreach ( array( 'veterinary-care', 'community-dogs', 'cattle-gaushalas' ) as $slug ) {
+			$t   = get_term_by( 'slug', $slug, 'aw_topic' );
+			$tid = $t && function_exists( 'aw_topic_image_id' ) ? (int) aw_topic_image_id( $t ) : 0;
+			$tiles .= $tid ? (string) wp_get_attachment_image( $tid, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '';
+		}
+	} elseif ( 'aw_press' === $type ) { // Media & PR: the latest coverage pictures
+		foreach ( get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'publish', 'numberposts' => 3, 'meta_key' => '_thumbnail_id', 'fields' => 'ids' ) ) as $pid ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+			$tiles .= (string) get_the_post_thumbnail( $pid, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
+		}
+	} elseif ( 'aw_campaign' === $type ) {
 		foreach ( array( 'aw1-im8-768x1024.jpeg', 'aw1-im10-461x1024.jpeg', 'aw1-im12-768x1024.jpeg' ) as $f ) {
 			$tiles .= '<img src="/wp-content/uploads/2026/10/' . esc_attr( $f ) . '" alt="" loading="lazy">';
 		}
