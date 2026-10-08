@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """District veterinary offices from state Animal Husbandry websites -> rows for import_listings.php.
 
-Usage: python3 build_state_offices.py terms.json > offices.json   (fetches the pages live)
+Usage: python3 build_state_offices.py > offices.json   (fetches the pages live)
 
 Only office details are kept: office name, district, office address, official phone (landline or the department's
 CUG mobile series) and official email. Officers' names and personal mobiles are never stored.
@@ -141,8 +141,8 @@ def west_bengal():
     return out
 
 
-def main(terms_file):
-    places = Places(terms_file)
+def main():
+    places = Places()
     rows, report, seen = [], {}, set()
     for fn in (up, maharashtra, telangana, karnataka, west_bengal):
         try:
@@ -172,7 +172,7 @@ def main(terms_file):
             rows.append({
                 "key": key,
                 "name": o["name"], "types": ["veterinary-office"],
-                "state": st["term_id"], "district": dist["term_id"] if dist else 0, "area": area,
+                "state": st["code"], "district": dist["code"] if dist else 0, "area": area,
                 "phone": o["phone"], "email": o["email"], "address_private": "",
                 "content": note, "source_name": o["source_name"], "source_url": o["source_url"], "source_date": TODAY,
             })
@@ -183,4 +183,4 @@ def main(terms_file):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()

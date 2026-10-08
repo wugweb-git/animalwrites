@@ -29,7 +29,10 @@ foreach ( $rows as $r ) {
 	if ( ! $id || is_wp_error( $id ) ) {
 		continue;
 	}
-	wp_set_object_terms( $id, array_values( array_filter( array( (int) $r['state'], (int) $r['district'] ) ) ), 'aw_city' );
+	// Place: LGD codes (rows carry state and district codes); unknown codes are refused, never added.
+	if ( ! aw_set_item_places( $id, array( array( (int) $r['state'], (int) $r['district'] ) ) ) ) {
+		WP_CLI::warning( 'Place not in LGD for ' . $r['name'] . ': ' . $r['state'] . '/' . $r['district'] );
+	}
 	wp_set_object_terms( $id, $r['types'], 'aw_listing_type' );
 	update_post_meta( $id, 'aw_awbi_key', $key );
 	update_post_meta( $id, 'aw_awbi_code', $r['code'] );

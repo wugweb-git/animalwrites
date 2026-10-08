@@ -117,6 +117,62 @@ add_action(
 	30
 );
 
+/**
+ * Templates live in the Library (8 Oct 2026): the two letter-writing items in Resources become Library items of type
+ * Template, each with one 301 from its /resources/ URL. Resource types are Guide, How-to, FAQ, Research: Library items
+ * still tagged with a template resource type keep the value in the meta aw_resource_type_legacy, and the three
+ * template resource types (empty after this) are removed. Once.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_templates_to_library_done' ) || ! function_exists( 'aw_redirect_add' ) ) {
+			return;
+		}
+		$report = array( 'moved' => array(), 'cleaned' => 0, 'types_removed' => array() );
+		foreach ( array( 'handwritten-letter-format', 'key-points-to-include-in-your-letter' ) as $slug ) {
+			$p = get_page_by_path( $slug, OBJECT, 'aw_guide' );
+			if ( ! $p ) {
+				continue;
+			}
+			$old = wp_parse_url( get_permalink( $p ), PHP_URL_PATH );
+			foreach ( (array) get_the_terms( $p->ID, 'aw_resource_type' ) as $t ) {
+				if ( $t && ! is_wp_error( $t ) ) {
+					add_post_meta( $p->ID, 'aw_resource_type_legacy', $t->slug );
+				}
+			}
+			wp_delete_object_term_relationships( $p->ID, 'aw_resource_type' );
+			$name = wp_unique_post_slug( $p->post_name, $p->ID, $p->post_status, 'aw_legal', 0 );
+			wp_update_post( array( 'ID' => $p->ID, 'post_type' => 'aw_legal', 'post_name' => $name ) );
+			wp_set_object_terms( $p->ID, array( 'template' ), 'aw_legal_kind' );
+			aw_redirect_add( $old, $p->ID );
+			$report['moved'][] = array( $p->ID, $old, wp_parse_url( get_permalink( $p->ID ), PHP_URL_PATH ) );
+		}
+		// Library items still linked to a resource type (the list is not theirs): keep the value as meta, drop the link.
+		global $wpdb;
+		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_resource_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type <> 'aw_guide'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( $rows as $r ) {
+			add_post_meta( (int) $r->id, 'aw_resource_type_legacy', $r->slug );
+			wp_delete_object_term_relationships( (int) $r->id, 'aw_resource_type' );
+			$report['cleaned']++;
+		}
+		foreach ( array( 'complaint-template', 'letter-template', 'rti-template' ) as $slug ) {
+			$t = get_term_by( 'slug', $slug, 'aw_resource_type' );
+			if ( $t ) {
+				wp_update_term_count_now( array( $t->term_taxonomy_id ), 'aw_resource_type' );
+				$t = get_term( $t->term_id, 'aw_resource_type' );
+				if ( 0 === (int) $t->count ) {
+					wp_delete_term( $t->term_id, 'aw_resource_type' );
+					$report['types_removed'][] = $slug;
+				}
+			}
+		}
+		update_option( 'aw_templates_to_library_report', $report, false );
+		update_option( 'aw_templates_to_library_done', '1', false );
+	},
+	40
+);
+
 /** [aw_issuer_label] "Issued by …" on a Library item (a label, not a link). */
 add_shortcode(
 	'aw_issuer_label',

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """AWBI ABC project recognition list -> rows for import_listings.php.
 
-Usage: python3 build_abc.py abc.json terms.json awbi_codes.json > abc_import.json
+Usage: python3 build_abc.py abc.json awbi_codes.json > abc_import.json
   abc.json        output of parse_abc.py
-  terms.json      wp term list aw_city --fields=term_id,slug,name,parent --format=json
   awbi_codes.json wp post meta list of aw_awbi_code -> post ID (see README) to attach centres to existing listings
 
 A centre whose AWBI code matches an existing listing becomes an update of that listing (ABC type added, ABC centre
@@ -21,9 +20,9 @@ SOURCE = {
 }
 
 
-def main(abc_file, terms_file, codes_file):
+def main(abc_file, codes_file):
     rows = json.load(open(abc_file, encoding="utf-8"))
-    places = Places(terms_file)
+    places = Places()
     codes = json.load(open(codes_file, encoding="utf-8"))  # {"MH167/2016": 123, ...}
     out, skipped, by_code = [], [], {}
     for r in rows:
@@ -31,7 +30,7 @@ def main(abc_file, terms_file, codes_file):
         if not st:
             d = places.district_anywhere(r["district"]) or places.district_anywhere(r["state"])
             if d:
-                dist, st = d, next(s for s in places.states.values() if s["term_id"] == d["parent"])
+                dist, st = d, places.by_code[d["state"]]
         if not st:
             skipped.append(r["n"])
             continue
@@ -48,7 +47,7 @@ def main(abc_file, terms_file, codes_file):
             "key": f"abc|{r['org']}|{r['centre']}|{st['slug']}",
             "name": r["org"] if r["org"] else f"ABC centre, {r['centre']}",
             "types": ["abc-centre"],
-            "state": st["term_id"], "district": dist["term_id"] if dist else 0, "area": area,
+            "state": st["code"], "district": dist["code"] if dist else 0, "area": area,
             "phone": "", "address_private": r["centre"],
             "content": note, "abc_valid": r["valid"], **SOURCE,
         })
@@ -64,4 +63,4 @@ def main(abc_file, terms_file, codes_file):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    main(*sys.argv[1:3])

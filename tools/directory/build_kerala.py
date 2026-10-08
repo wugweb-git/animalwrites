@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Kerala government veterinary institutions (Animal Husbandry Department district pages) -> import rows.
 
-Usage: python3 build_kerala.py terms.json > kerala.json   (fetches ahd.kerala.gov.in/en/{district}/ live)
+Usage: python3 build_kerala.py > kerala.json   (fetches ahd.kerala.gov.in/en/{district}/ live)
 
 Main institutions only (hospitals, polyclinics, dispensaries, district centres); sub-centres are left out.
 Kept: institution name, district, address, official email; and the official mobile where the page publishes one
@@ -90,8 +90,8 @@ def district_rows(slug):
     return url, out
 
 
-def main(terms_file):
-    places = Places(terms_file)
+def main():
+    places = Places()
     today = datetime.date.today().isoformat()
     rows, seen, report = [], set(), {}
     for slug in DISTRICTS:
@@ -110,7 +110,7 @@ def main(terms_file):
             note = f"Government veterinary institution. Address: {o['address']}." if o["address"] else "Government veterinary institution."
             rows.append({
                 "key": key, "name": o["name"], "types": [o["type"]],
-                "state": st["term_id"], "district": dist["term_id"], "area": f"{dist['name']}, Kerala",
+                "state": st["code"], "district": dist["code"], "area": f"{dist['name']}, Kerala",
                 "phone": o["phone"], "email": o["email"], "address_private": "",
                 "content": note, "source_name": "Kerala Animal Husbandry Department", "source_url": url, "source_date": today,
             })
@@ -121,4 +121,4 @@ def main(terms_file):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main()

@@ -2,7 +2,7 @@
 """1962 Mobile Veterinary Units -> one listing per state that has units, for import_listings.php.
 
 Source: DAHD reply to Lok Sabha unstarred question 2854 (18 March 2025), Annexure I (units commissioned per state).
-Usage: pdftotext -layout LS2854.pdf mvu.txt && python3 build_1962.py mvu.txt terms.json > mvu_import.json
+Usage: pdftotext -layout LS2854.pdf mvu.txt && python3 build_1962.py mvu.txt > mvu_import.json
 Per-unit or per-district phone numbers are not published; units are dispatched by each state's 1962 call centre.
 """
 import json
@@ -18,10 +18,10 @@ SOURCE = {
 }
 
 
-def main(txt_file, terms_file):
+def main(txt_file):
     text = open(txt_file, encoding="utf-8").read()
     annex = text.split("Annexure –I")[-1].split("Annexure II")[0]
-    places = Places(terms_file)
+    places = Places()
     out, unknown = [], []
     for m in re.finditer(r"^\s*\d{1,2}\s+([A-Za-z&][A-Za-z& ]+?)\s{2,}(\d+)\s*$", annex, re.M):
         name, units = m.group(1).strip(), int(m.group(2))
@@ -33,7 +33,7 @@ def main(txt_file, terms_file):
             "key": f"mvu1962|{st['slug']}",
             "name": f"1962 Mobile Veterinary Unit, {st['name']}",
             "types": ["mobile-veterinary-unit"],
-            "state": st["term_id"], "district": 0, "area": st["name"],
+            "state": st["code"], "district": 0, "area": st["name"],
             "phone": "1962", "address_private": "",
             "content": f"{units} mobile veterinary units commissioned in {st['name']}, dispatched through the state's "
                        f"1962 call centre (DAHD reply to Lok Sabha unstarred question 2854, 18 March 2025).",
@@ -44,4 +44,4 @@ def main(txt_file, terms_file):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:3])
+    main(sys.argv[1])
