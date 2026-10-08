@@ -1692,6 +1692,28 @@
     "schema": "none"
    },
    "block": "animal-writes/whats-happening"
+  },
+  {
+   "name": "Local card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-local-card",
+    "aw-local-card-head",
+    "aw-local-card-actions"
+   ],
+   "states": [
+    "news: Organisations in {State}",
+    "directory district with fewer than 3 listings: Few listings in {District} yet"
+   ],
+   "a11y": {
+    "landmark": "aside, named by its heading"
+   },
+   "seo": {
+    "heading": "h2",
+    "link": "state Directory page",
+    "schema": "none"
+   }
   }
  ],
  "nav_status": {
