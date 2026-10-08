@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Boot a throwaway WordPress with this repo's themes and plugins, add one item of each kind, then load one URL per
-# page type. Fails on any PHP fatal, HTTP 500 or "critical error" page. Used by .github/workflows/deploy-check.yml.
+# page type. Fails on anything but 200, any PHP fatal or a "critical error" page. Used by .github/workflows/deploy-check.yml.
 set -euo pipefail
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 WP=/tmp/wp
@@ -21,6 +21,7 @@ wp plugin activate animal-writes-core --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
+wp post create --post_type=page --post_title="Search" --post_name=search --post_status=publish --post_content="[aw_search]" --quiet
 wp term create aw_topic "Community Dogs" --slug=community-dogs --quiet || true
 N=$(wp post create --post_type=aw_news --post_title="CI news item" --post_status=publish --porcelain)
 wp post meta add "$N" aw_source_url "https://www.thehindu.com/ci-item/" --quiet
@@ -44,7 +45,7 @@ URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /me
 FAIL=0
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")
-  if [ "$code" -ge 500 ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
+  if [ "$code" != "200" ] || grep -qiE 'critical error|Fatal error|Parse error' /tmp/page.html; then
     echo "FAIL $code $u"; FAIL=1
   else
     echo "ok   $code $u"

@@ -41,12 +41,15 @@ add_action(
 	}
 );
 
-// Testimonials are a 1.0 leftover: no output on the site (the shortcode stays registered so old content prints nothing).
+// Retired shortcodes still present in old content (Home): they print nothing. Testimonials were a 1.0 leftover
+// (0 items, exported to aw-private on 8 Oct 2026); [aw_banner] was replaced by the Banner pattern.
 add_action(
 	'init',
 	function () {
-		remove_shortcode( 'aw_testimonials' );
-		add_shortcode( 'aw_testimonials', '__return_empty_string' );
+		foreach ( array( 'aw_testimonials', 'aw_banner' ) as $tag ) {
+			remove_shortcode( $tag );
+			add_shortcode( $tag, '__return_empty_string' );
+		}
 	},
 	20
 );
@@ -80,11 +83,6 @@ add_filter(
 		if ( 'aw_campaign' === $type ) {
 			$args['labels']['name']      = 'Campaigns';
 			$args['labels']['menu_name'] = 'Campaigns';
-		}
-		if ( 'aw_testimonial' === $type ) { // 1.0 leftover, not shown on 2.0
-			$args['show_ui']      = false;
-			$args['show_in_menu'] = false;
-			$args['show_in_rest'] = false; // not served by /wp-json either
 		}
 		if ( 'aw_press' === $type ) { // its own menu item, after Campaigns
 			$args['show_in_menu'] = true;

@@ -20,6 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'AW_CORE_VERSION', '0.1.0' );
 define( 'AW_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
+// No theme or plugin file editor in WP Admin: all code changes go through GitHub (S0.2).
+if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
+	define( 'DISALLOW_FILE_EDIT', true );
+}
+
 /** Days after which a verified listing is flagged for re-verification. */
 if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 	define( 'AW_REVERIFY_DAYS', 180 );
@@ -51,12 +56,10 @@ require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
-require_once AW_CORE_DIR . 'includes/testimonials.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
-require_once AW_CORE_DIR . 'includes/launch.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
@@ -68,7 +71,6 @@ require_once AW_CORE_DIR . 'includes/redirects.php';
 require_once AW_CORE_DIR . 'includes/indexing.php';
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
-require_once AW_CORE_DIR . 'includes/media-pr.php';
 require_once AW_CORE_DIR . 'includes/press.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 
