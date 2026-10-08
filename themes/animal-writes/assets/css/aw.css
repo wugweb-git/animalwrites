@@ -477,7 +477,10 @@ body { background: var(--aw-color-canvas); }
 
 /* Footer newsletter (Phase 11 F.2): a photo band (Cover block, --color-ash overlay about 80%), at most about 200px tall
    on wide screens: heading, then Email · Your name · Subscribe in one row, consent below. Yellow only on the button. */
-.aw-footer-newsletter.wp-block-cover { min-height: 0 !important; padding: var(--s-6) var(--s-4); margin: 0 0 var(--s-8); color: var(--kit-color-on-ink); }
+.aw-footer-newsletter.wp-block-cover { min-height: 0 !important; padding: var(--s-4) var(--s-4) var(--s-6); margin: 0 0 var(--s-8); color: var(--kit-color-on-ink); }
+/* The consent line's message sits in the band's bottom padding: reserved, so nothing moves, but no extra height */
+.aw-footer-newsletter .aw-field--checkbox { position: relative; }
+.aw-footer-newsletter .aw-field--checkbox .kit-field-message { position: absolute; left: 0; top: 100%; margin: 0; }
 .aw-footer-newsletter .wp-block-cover__background { background-color: var(--color-ash) !important; }
 .aw-footer-newsletter .wp-block-cover__inner-container { width: 100%; max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-footer-newsletter .aw-footer-head { margin: 0 0 var(--s-3); }
