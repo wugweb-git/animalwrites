@@ -87,7 +87,9 @@ function aw_site_check_page() {
 	echo '<div class="wrap"><h1 class="wp-heading-inline">Check site</h1> <a class="page-title-action" href="' . esc_url( $run ) . '">Run the check</a><hr class="wp-header-end">';
 	echo '<p>Loads one page of every kind and reports any that do not open cleanly. Nothing is changed.</p>';
 	if ( ! is_array( $last ) ) {
-		echo '<p>Not run yet.</p></div>';
+		echo '<p>Not run yet.</p>';
+		do_action( 'aw_site_check_after' );
+		echo '</div>';
 		return;
 	}
 	$bad = array_filter( $last['rows'], fn( $r ) => '' !== $r[4] );
@@ -96,5 +98,7 @@ function aw_site_check_page() {
 	foreach ( $last['rows'] as $r ) {
 		echo '<tr><td>' . esc_html( $r[0] ) . '</td><td><a href="' . esc_url( home_url( $r[1] ) ) . '" target="_blank">' . esc_html( $r[1] ) . '</a></td><td>' . ( '' === $r[4] ? '✓ ' : '✗ ' ) . (int) $r[2] . '</td><td>' . (int) $r[3] . ' ms</td><td>' . esc_html( $r[4] ) . '</td></tr>';
 	}
-	echo '</tbody></table></div>';
+	echo '</tbody></table>';
+	do_action( 'aw_site_check_after' ); // e.g. the daily backup line
+	echo '</div>';
 }

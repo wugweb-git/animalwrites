@@ -63,6 +63,8 @@ require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
+require_once AW_CORE_DIR . 'includes/backups.php';
+require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';

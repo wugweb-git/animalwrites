@@ -42,7 +42,12 @@ jobs:
           find plugins themes tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l | grep -v '^No syntax errors' && exit 1 || true
       - name: Boot WordPress and load every page type
         run: bash tools/ci/smoke.sh
-      - name: Move the deploy branch to this commit
+      - name: Move the deploy branch to this commit, and mark it as a release
         if: github.ref == 'refs/heads/wordpress-dev'
         run: |
           git push origin "HEAD:refs/heads/wordpress"
+          # Each deploy is a release tag; the last 5 are kept for one-command rollback (rollback.yml).
+          tag="release-$(date -u +%Y%m%d-%H%M)-$(git rev-parse --short HEAD)"
+          git tag "$tag" && git push origin "refs/tags/$tag"
+          git fetch --tags --force
+          git tag -l 'release-*' --sort=-creatordate | tail -n +6 | while read t; do git push origin ":refs/tags/$t"; done

@@ -1,0 +1,33 @@
+# One-command rollback: puts the live site back on an earlier release (the deploy branch moves; Hostinger deploys it).
+#   gh workflow run rollback.yml                       → the release before the current one
+#   gh workflow run rollback.yml -f release=release-…  → a named release (gh release tags: git tag -l 'release-*')
+# The database is not rolled back: use the daily backup in ~/backups (see docs/rollback.md).
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release tag to go back to (empty = the one before the current release)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move the deploy branch back
+        run: |
+          git fetch --tags --force
+          target="${{ github.event.inputs.release }}"
+          if [ -z "$target" ]; then target=$(git tag -l 'release-*' --sort=-creatordate | sed -n 2p); fi
+          [ -n "$target" ] || { echo "No earlier release to go back to"; exit 1; }
+          echo "Rolling back to $target ($(git rev-parse --short "$target"))"
+          git push --force origin "$target^{commit}:refs/heads/wordpress"
+          # Keep work in progress from going live again by accident: wordpress-dev is left as it is; the next good push redeploys.
