@@ -394,7 +394,8 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-legal-links a ,.kit-legal-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: inherit; text-decoration: none; }
 .aw-powered ,.kit-powered { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); border: 1px solid rgba(255,255,255,.2); color: var(--kit-color-on-ink); text-decoration: none; transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-powered strong ,.kit-powered strong { font-weight: var(--kit-weight-bold); }
-.aw-powered:hover ,.kit-powered:hover { background: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.aw-powered:hover, .aw-powered:focus-visible ,.kit-powered:hover, .kit-powered:focus-visible,
+.aw-dark a.aw-powered:hover, .kit-dark a.kit-powered:hover { background: var(--kit-color-on-ink); color: var(--kit-color-ink); text-decoration: none; }
 .aw-site-footer :is(a, .aw-social):focus-visible ,.kit-site-footer :is(a, .kit-social):focus-visible { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
 .aw-visits:empty ,.kit-visits:empty { display: none; }
 
