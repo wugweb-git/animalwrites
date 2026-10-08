@@ -59,3 +59,21 @@ Menu (checked with WP-CLI as an administrator; not screenshot, no login): Dashbo
 
 ## 9. Newsletter, contrast, rich results
 Newsletter strip at 1024px: 386px → 265px (target 200px not met: the ALTCHA check box takes a row). Text on the band: white on ash at 80% over the photo ≈ 9:1 at worst. Rich Results Test: not run (Google's tool); JSON-LD types on /contact/: Organization, WebSite, ContactPage, BreadcrumbList.
+
+## Follow-up (8 Oct, afternoon) — each checked live with a ?ck= URL
+| # | Item | Result | Checked |
+|---|---|---|---|
+| 1 | Home copy | "From the Library", "Guides and research", "Browse the Library", "Read the Acts and Rules", "See all resources" live; old strings gone | /?ck= |
+| 2 | Directory intro + meta/og | hub "…across India."; Kerala "…in Kerala."; Ernakulam "…in Ernakulam, Kerala." in intro, meta description and og:description | /directory/, /directory/kerala/, /directory/kerala/ernakulam/ |
+| 3 | Contact | reply-time sentence removed; new meta description; Elsewhere: Instagram, Facebook, X (names + icons, new tab) | /contact/ |
+| 4 | About | "Legal Watch" → "Library" linked to /library/ | /about/ |
+| 5 | Filter groups | "Show all (13)" / "Show fewer" | /library/ |
+| 6 | Media & PR empty state | "No coverage yet." + "Written about Animal Writes? Send us the link." → /contact/?about=general (shows only with no items) | code |
+| 7 | Newsletter | heading removed; ALTCHA automatic on send (no box; check ran and returned a solution in the browser); height at 1024px 198px (was 386) | /contact/ |
+| 8 | Testimonials | not in the REST API: /wp-json/wp/v2/aw_testimonial → 404; export (0 items) in aw-private | /wp-json/… |
+| 9 | Media cards | shared story card (aw-story aw-story--card aw-story--external); no aw-press classes | /media/ |
+| 10 | Press discovery | worker job built (workers 9725640): Google Programmable Search, rotates queries, drafts to "Inbox → Press to review"; off: GOOGLE_CSE_KEY / GOOGLE_CSE_CX not set | gh secret list |
+| 11 | validator.schema.org | /contact/: BreadcrumbList + ContactPage, 0 errors 0 warnings; /media/: CollectionPage + BreadcrumbList, 0 errors 0 warnings | validator.schema.org |
+| — | Section band | edge to edge, no gap above or at the sides; breadcrumb, heading and search/filters inside it on one left edge; breadcrumb first on item pages | /directory/, /library/, news item |
+
+Not possible from here (needs an admin login): screenshots of WP Admin (menu, Press to review, Settings). /kits-demo/ is private (404 when logged out, by design); its render is in kits-demo-1440.png.
