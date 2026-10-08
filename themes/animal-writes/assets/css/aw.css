@@ -539,3 +539,6 @@ body { background: var(--aw-color-canvas); }
 .aw-press li { display: grid; gap: var(--kit-space-1, .25rem); padding-bottom: var(--kit-space-4, 1rem); border-bottom: 1px solid var(--kit-color-line); }
 .aw-press a { font-weight: var(--kit-weight-strong); }
 .aw-press-meta { color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
+
+/* Announcement bar: one line on phones (just the link) */
+@media (max-width: 599px) { .aw-announce-lead { display: none; } .aw-announce p { white-space: nowrap; } }
