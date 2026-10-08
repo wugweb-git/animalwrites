@@ -27,6 +27,7 @@ function aw_hub_blocks() {
 		'list-filters'  => array( 'List filters', 'aw_block_list_filters', $type_attr ),
 		'publisher'     => array( 'Publisher', 'aw_block_publisher', array() ),
 		'doc-date'      => array( 'Document date', 'aw_block_doc_date', array() ),
+		'type-date'     => array( 'Type and date (one line)', 'aw_block_type_date', array() ),
 		'law-date'      => array( 'Law date (one line)', 'aw_block_law_date', array() ),
 		'issuer'        => array( 'Issued by', 'aw_block_issuer', array() ),
 		'doc-link'      => array( 'Document source and PDF', 'aw_block_doc_link', array() ),
@@ -195,6 +196,20 @@ function aw_block_doc_date( $a, $id ) {
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$when  = '<span class="d">' . esc_html( implode( ' · ', array_filter( array( $kind, $date ) ) ) ) . '</span>'; // e.g. Act · 1960
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
+}
+
+/** "{Type} · {Date}" above a card title: a Resource's type and when it was last updated, or a Library item's kind and date. */
+function aw_block_type_date( $a, $id ) {
+	$type = get_post_type( $id );
+	$tax  = 'aw_guide' === $type ? 'aw_resource_type' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
+	$name = '';
+	if ( $tax ) {
+		$t    = wp_get_object_terms( $id, $tax, array( 'fields' => 'names' ) );
+		$name = is_wp_error( $t ) || ! $t ? '' : $t[0];
+	}
+	$date = 'aw_guide' === $type ? get_the_modified_date( 'j M Y', $id ) : ( function_exists( 'aw_src_date' ) ? aw_src_date( $id, 'j M Y' ) : get_the_date( 'j M Y', $id ) );
+	$text = implode( ' · ', array_filter( array( $name, $date ) ) );
+	return $text ? '<p class="aw-case-meta">' . esc_html( $text ) . '</p>' : '';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */

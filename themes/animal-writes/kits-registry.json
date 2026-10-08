@@ -940,6 +940,31 @@
    "block": "animal-writes/doc-date"
   },
   {
+   "name": "Type and date (one line)",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-case-meta"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "date as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/type-date"
+  },
+  {
    "name": "Law date (one line)",
    "type": "block",
    "status": "live",

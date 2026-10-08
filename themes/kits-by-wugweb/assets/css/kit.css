@@ -1068,3 +1068,11 @@ body { background: var(--kit-surface-page); }
 	:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary)::before,
 	:is(.kit-btn, .wp-block-button__link, .wp-element-button)::after, :is(.kit-btn, .wp-block-button__link, .wp-element-button) > .kit-ico { transition: none; transform: none !important; }
 }
+
+/* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
+   to a Query Loop; from 768px the list lays out as the section decides. */
+@media (max-width: 767px) {
+	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scrollbar-width: none; overscroll-behavior-x: contain; }
+	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
+	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
+}

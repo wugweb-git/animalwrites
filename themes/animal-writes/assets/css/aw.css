@@ -874,3 +874,17 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-steps li, .aw-ed-steps li:last-child { border-color: var(--kit-color-line) !important; }
 /* Card titles fill the row (no balanced early wrap). */
 :is(.aw-case-title, .aw-story-title, .aw-org-name, .aw-task-title, .wp-block-post-template .wp-block-post-title) { text-wrap: pretty; }
+
+/* Guides and research (owner, 9 Oct — option B): the three newest guides as the shared card ("Guide · date", title,
+   one-line summary, arrow; the whole card is the link). Three across from 768; a sideways row on phones. */
+.kit-case--text { grid-template-columns: minmax(0, 1fr) auto; }
+.aw-case-meta { margin: 0 0 var(--kit-space-1); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
+.aw-case-sum--one .wp-block-post-excerpt__excerpt, .aw-case-sum--one p { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.aw-ed-guides { margin-top: var(--kit-space-5); }
+.aw-ed-guides .wp-block-post-template > li > .kit-case { height: 100%; padding: var(--kit-space-5) 0; border-top: 1px solid var(--kit-color-line); border-bottom: 0; }
+@media (min-width: 768px) { .aw-ed-guides .wp-block-post-template { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-6); } .aw-ed-guides .aw-case-sum--one .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; } }
+@media (max-width: 767px) { .aw-ed-guides .wp-block-post-template > li > .kit-case { border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); padding: var(--kit-space-4); background: var(--kit-surface-card, var(--kit-color-raised)); } }
+.aw-ed-learn > .kit-ed-more { margin-top: var(--kit-space-4); }
+/* Box headings: a faint rule, not yellow. */
+.aw-ed-col-title { border-bottom-color: var(--kit-color-line) !important; }
+.aw-ed-act-copy .aw-ed-templates, .kit-ed-act-copy .aw-ed-templates { margin: 0 0 var(--kit-space-5); }
