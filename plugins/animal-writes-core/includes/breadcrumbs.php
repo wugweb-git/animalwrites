@@ -96,14 +96,19 @@ function aw_breadcrumbs_html() {
 	return $html . '</ol></nav>';
 }
 
-/** Put the trail once, just before the first heading area of the page (page title, section head or news source row). */
-function aw_breadcrumbs_prepend( $html ) {
+/** The trail, once per page ('' after the first call): the section band places it itself, inside the band. */
+function aw_breadcrumbs_claim() {
 	static $done = false;
 	if ( $done || is_admin() || ! aw_breadcrumbs() ) {
-		return $html;
+		return '';
 	}
 	$done = true;
-	return aw_breadcrumbs_html() . $html;
+	return aw_breadcrumbs_html();
+}
+
+/** Put the trail once, just before the first heading area of the page (page title or news source row). */
+function aw_breadcrumbs_prepend( $html ) {
+	return aw_breadcrumbs_claim() . $html;
 }
 add_filter(
 	'render_block_core/post-title',
@@ -116,7 +121,7 @@ add_filter(
 add_filter(
 	'do_shortcode_tag',
 	function ( $html, $tag ) {
-		return in_array( $tag, array( 'aw_section_head', 'aw_source_row' ), true ) ? aw_breadcrumbs_prepend( $html ) : $html;
+		return 'aw_source_row' === $tag ? aw_breadcrumbs_prepend( $html ) : $html; // section heads place it inside the band
 	},
 	10,
 	2

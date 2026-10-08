@@ -258,10 +258,16 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .wp-block-post-template .wp-block-post-terms + .wp-block-post-terms { display: none; }
 
 /* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
-.aw-section-band ,.kit-section-band { background: var(--kit-color-surface); padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-6); margin: 0 0 var(--kit-space-6) !important; }
-/* Phones: the band runs edge to edge and drops the picture strip */
+/* The band runs edge to edge at every width, flush under the header (no gap above or at the sides). It holds the
+   breadcrumb, the heading and the page's search or filters, all on the same left edge as the content below. */
+.aw-section-band ,.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--s-4) var(--kit-space-gutter) var(--kit-space-6); }
+main > .aw-section-band:first-child, main > p:first-child + .aw-section-band { margin-top: 0 !important; }
+.aw-section-inner ,.kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
+.aw-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-6); }
+.aw-section-filters { margin-top: var(--kit-space-6); }
+.aw-section-filters .kit-filters, .aw-section-filters .kit-filter-active { margin-bottom: 0; }
+/* Phones: drop the picture strip */
 @media (max-width: 639px) {
-	.aw-section-band ,.kit-section-band { width: auto; max-width: none !important; margin-inline: calc(50% - 50vw) !important; }
 	.aw-section-band .aw-section-visual ,.kit-section-band .kit-section-visual { display: none; }
 }
 html { overflow-x: clip; }

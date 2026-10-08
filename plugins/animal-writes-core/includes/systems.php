@@ -135,6 +135,11 @@ add_action(
  * no items hidden, a group hidden while it has one option, and the active filters with "Remove" and "Clear all".
  */
 function aw_list_filters( $type ) {
+	static $shown = array();
+	if ( isset( $shown[ $type ] ) ) {
+		return ''; // already in the section band
+	}
+	$shown[ $type ] = true;
 	$active = aw_active_filters( $type );
 	$all    = get_post_type_archive_link( $type );
 	$groups = '';

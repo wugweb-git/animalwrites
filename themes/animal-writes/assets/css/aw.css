@@ -133,12 +133,12 @@
    from 640px; stacked below 640px. Fields come from kit-field (44px, label above). */
 .aw-dir-search {
 	display: grid; gap: var(--s-3) var(--s-4); grid-template-columns: 1fr; align-items: end;
-	margin: var(--s-6) auto var(--s-8); max-width: var(--kit-width-wide);
+	margin: 0; max-width: var(--kit-width-wide);
 	padding: var(--s-6); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1);
 }
 .aw-dir-search .kit-field { margin: 0; min-width: 0; }
 .aw-dir-search > p:empty, .aw-dir-search > br { display: none; } /* left by auto-paragraphs around the shortcode */
-.aw-section-band--compact { padding-top: var(--s-8) !important; padding-bottom: var(--s-6) !important; } /* Directory: height = content (E1) */
+.aw-section-band--compact { padding-bottom: var(--s-8) !important; } /* Directory: height = content (E1) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }

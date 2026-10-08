@@ -95,11 +95,19 @@ add_shortcode(
 			$visual = '';
 			$count  = 0;
 		}
-		return '<header class="aw-section-band alignfull' . ( 'aw_listing' === $type ? ' aw-section-band--compact' : '' ) . '"><div class="aw-section-head alignwide"><div>'
+		// The band holds the breadcrumb, the heading and the page's search or filters (Directory search bar; list filters).
+		$crumbs  = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+		$filters = '';
+		if ( 'aw_listing' === $type && function_exists( 'aw_directory_filter' ) ) {
+			$filters = aw_directory_filter();
+		} elseif ( is_post_type_archive() && function_exists( 'aw_list_filters' ) ) {
+			$filters = aw_list_filters( $type );
+		}
+		return '<header class="aw-section-band alignfull' . ( 'aw_listing' === $type ? ' aw-section-band--compact' : '' ) . '"><div class="aw-section-inner">' . $crumbs . '<div class="aw-section-head"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="aw-section-desc">' . esc_html( $desc ) . '</p>' : '' )
 			. ( $count ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )
-			. '</div>' . $visual . '</div></header>';
+			. '</div>' . $visual . '</div>' . ( $filters ? '<div class="aw-section-filters">' . $filters . '</div>' : '' ) . '</div></header>';
 	}
 );
 
