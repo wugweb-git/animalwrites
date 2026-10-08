@@ -270,7 +270,7 @@ add_filter(
 				$args = array();
 				wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $args );
 				$n = max( 1, (int) ( $args[ $key ] ?? 1 ) );
-				unset( $args[ $key ] );
+				unset( $args[ $key ], $args['cst'] ); // cst: added by core pagination, not ours
 				$to = $n > 1 ? $base . 'page/' . $n . '/' : $base;
 				return 'href="' . esc_url( add_query_arg( array_map( 'rawurlencode', $args ), $to ) ) . '"';
 			},
