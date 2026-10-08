@@ -124,7 +124,7 @@ add_filter(
 
 /**
  * Library sort date (aw_doc_sort, Y-m-d): the document's own date, else the year in its title (Acts, Rules: "…, 1960"
- * sorts as 1960-01-01). Kept up to date on save; templates have none and sort last.
+ * sorts as 1960-01-01). Kept up to date on save; templates and undated items get 0001-01-01 and sort last.
  */
 function aw_doc_sort_sync( $id ) {
 	if ( 'aw_legal' !== get_post_type( $id ) ) {
@@ -134,7 +134,8 @@ function aw_doc_sort_sync( $id ) {
 	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && ! has_term( 'template', 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ) {
 		$d = $ym[0] . '-01-01';
 	}
-	preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? update_post_meta( $id, 'aw_doc_sort', $d ) : delete_post_meta( $id, 'aw_doc_sort' );
+	// Every item gets a value (undated ones and templates sort last): rows without the key would sort unpredictably.
+	update_post_meta( $id, 'aw_doc_sort', preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? $d : '0001-01-01' );
 }
 add_action( 'save_post_aw_legal', 'aw_doc_sort_sync', 20 );
 foreach ( array( 'added_post_meta', 'updated_post_meta' ) as $aw_hook ) {
