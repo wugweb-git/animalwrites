@@ -116,3 +116,36 @@ add_action(
 		echo ' Next: ' . esc_html( $n ? wp_date( 'j M Y, g:i a', $n ) : 'not scheduled' ) . '. Kept ' . (int) AW_BACKUP_KEEP_DAYS . ' days in ~/backups on the server.</p>';
 	}
 );
+
+/*
+ * Off-server copy (owner's choice, 8 Oct 2026: GitHub). The workers repository (private) downloads the latest
+ * automatic backup once a day and keeps it as a private release for 14 days. Only an application-password request
+ * from an account that can publish others' posts may download; nothing is listed or linked anywhere.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/backup/(?P<kind>db|code)',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => fn() => current_user_can( 'edit_others_posts' ) && did_action( 'application_password_did_authenticate' ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$files = (array) glob( aw_backup_dir() . '/auto-' . $req['kind'] . '-*.gz' );
+					rsort( $files ); // newest date first
+					$f = $files[0] ?? '';
+					if ( ! $f || ! is_readable( $f ) ) {
+						return new WP_Error( 'aw_no_backup', 'No backup yet.', array( 'status' => 404 ) );
+					}
+					nocache_headers();
+					header( 'Content-Type: application/gzip' );
+					header( 'Content-Disposition: attachment; filename="' . basename( $f ) . '"' );
+					header( 'Content-Length: ' . filesize( $f ) );
+					readfile( $f ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+					exit;
+				},
+			)
+		);
+	}
+);
