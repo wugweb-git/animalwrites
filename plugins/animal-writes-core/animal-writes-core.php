@@ -83,6 +83,7 @@ require_once AW_CORE_DIR . 'includes/block-states.php';
 require_once AW_CORE_DIR . 'includes/listing-profile.php';
 require_once AW_CORE_DIR . 'includes/privacy-requests.php';
 require_once AW_CORE_DIR . 'includes/local-cards.php';
+require_once AW_CORE_DIR . 'includes/thumbs.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 
 register_activation_hook(
