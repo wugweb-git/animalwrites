@@ -125,8 +125,10 @@
 }
 .kit-dd-btn::-webkit-details-marker { display: none; }
 .kit-dd-btn .kit-ico { --kit-ico-size: 1rem; transition: transform var(--kit-motion-fast) var(--kit-motion-ease); }
-.kit-dd[open] > .kit-dd-btn .kit-ico { transform: rotate(180deg); }
-.kit-dd-btn:has(.kit-count) { background: var(--kit-color-ink); color: var(--kit-color-on-ink); } /* something chosen */
+.kit-dd.is-open > .kit-dd-btn .kit-ico { transform: rotate(180deg); }
+.kit-dd-panel[hidden] { display: none !important; }
+button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
+.kit-dd-btn.is-chosen { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-dd-btn .kit-count { color: inherit; opacity: var(--opacity-80); }
 .kit-dd-btn:focus-visible, .kit-dd-opt:focus-visible, .kit-dd-opt:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 @media (hover: hover) { .kit-dd-btn:hover { box-shadow: inset 0 0 0 1px var(--kit-color-ink); } }

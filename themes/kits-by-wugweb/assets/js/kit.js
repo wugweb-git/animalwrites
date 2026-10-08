@@ -504,29 +504,9 @@
 	});
 })();
 
-/* Dropdowns (kits_filter_dropdown, kits_sort_dropdown): one open at a time; a click outside or Esc closes (focus back
-   on the button); arrow keys move through the options. Ticking a filter applies it at once, except in the phone sheet,
-   where "Apply" sends them together. Several values of one filter go as topic=a,b. */
+/* Filter bar: ticking a filter applies it at once, except in the phone sheet, where "Apply" sends them together.
+   Several values of one filter go as topic=a,b. (Opening and closing the dropdowns: kits/dropdown, Interactivity API.) */
 (function () {
-	var dds = Array.prototype.slice.call(document.querySelectorAll('details[data-kit-dd]'));
-	if (!dds.length) return;
-	function closeAll(except) { dds.forEach(function (d) { if (d !== except) d.open = false; }); }
-	dds.forEach(function (d) {
-		var btn = d.querySelector('summary');
-		d.addEventListener('toggle', function () { if (d.open && !d.closest('.is-sheet')) closeAll(d); });
-		d.addEventListener('keydown', function (e) {
-			if (e.key === 'Escape' && d.open) { e.stopPropagation(); d.open = false; btn.focus(); return; }
-			if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-			var items = Array.prototype.slice.call(d.querySelectorAll('.kit-dd-panel input, .kit-dd-panel a'));
-			if (!items.length) return;
-			e.preventDefault();
-			if (!d.open) { d.open = true; items[0].focus(); return; }
-			var i = items.indexOf(document.activeElement);
-			items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
-		});
-	});
-	document.addEventListener('click', function (e) { if (!e.target.closest('details[data-kit-dd]')) closeAll(null); });
-
 	function go(form) {
 		var params = new URLSearchParams(), lists = {};
 		Array.prototype.forEach.call(form.elements, function (el) {

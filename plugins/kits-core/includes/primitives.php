@@ -84,14 +84,14 @@ function kits_filter_dropdown( $legend, $param, $options ) {
 		return '';
 	}
 	$id   = 'kit-dd-' . sanitize_key( $param ) . '-' . wp_unique_id();
-	$html = '<details class="kit-dd" data-kit-dd><summary class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '"><span class="kit-dd-label">' . esc_html( $legend ) . '</span>'
-		. ( $selected ? ' ' . kits_count( $selected ) . '<span class="screen-reader-text"> chosen</span>' : '' ) . '<span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></summary>'
-		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '"><legend class="screen-reader-text">' . esc_html( $legend ) . '</legend><ul class="kit-dd-list">';
+	$html = kits_dd_open( $id, '' ) . '<button type="button" class="kit-dd-btn' . ( $selected ? ' is-chosen' : '' ) . '" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-dd-label">' . esc_html( $legend ) . '</span>'
+		. ( $selected ? ' ' . kits_count( $selected ) . '<span class="screen-reader-text"> chosen</span>' : '' ) . '<span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
+		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen"><legend class="screen-reader-text">' . esc_html( $legend ) . '</legend><ul class="kit-dd-list">';
 	foreach ( $options as $o ) {
 		$html .= '<li><label class="kit-dd-opt"><input type="checkbox" class="kit-dd-check" name="' . esc_attr( $param ) . '[]" value="' . esc_attr( $o[1] ) . '"' . checked( ! empty( $o[2] ), true, false ) . '>'
 			. '<span class="kit-dd-text">' . esc_html( $o[0] ) . '</span>' . kits_count( (int) $o[3] ) . '</label></li>';
 	}
-	return $html . '</ul></fieldset></details>';
+	return kits_dd_render( $html . '</ul></fieldset></div>' );
 }
 
 /**
@@ -106,12 +106,12 @@ function kits_sort_dropdown( $options ) {
 	}
 	$cur  = array_values( array_filter( $options, fn( $o ) => ! empty( $o[2] ) ) );
 	$id   = 'kit-sort-' . wp_unique_id();
-	$html = '<details class="kit-dd kit-dd--sort" data-kit-dd><summary class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '"><span class="kit-dd-label">Sort<span class="kit-dd-current">: ' . esc_html( $cur ? $cur[0][0] : $options[0][0] ) . '</span></span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></summary>'
-		. '<ul class="kit-dd-panel kit-dd-list" id="' . esc_attr( $id ) . '">';
+	$html = kits_dd_open( $id, 'kit-dd--sort' ) . '<button type="button" class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-dd-label">Sort<span class="kit-dd-current">: ' . esc_html( $cur ? $cur[0][0] : $options[0][0] ) . '</span></span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
+		. '<ul class="kit-dd-panel kit-dd-list" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen">';
 	foreach ( $options as $o ) {
 		$html .= '<li><a class="kit-dd-opt" href="' . esc_url( $o[1] ) . '"' . ( ! empty( $o[2] ) ? ' aria-current="true"' : '' ) . '>' . esc_html( $o[0] ) . '</a></li>';
 	}
-	return $html . '</ul></details>';
+	return kits_dd_render( $html . '</ul></div>' );
 }
 
 /**
@@ -152,3 +152,25 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 	}
 	return $html;
 }
+
+/* ---------- Dropdown on the Interactivity API (kits/dropdown, assets/js/dropdown.js) ---------- */
+
+add_action(
+	'init',
+	function () {
+		wp_register_script_module( 'kits-dropdown', plugins_url( 'assets/js/dropdown.js', KITS_CORE_DIR . 'kits-core.php' ), array( '@wordpress/interactivity' ), (string) filemtime( KITS_CORE_DIR . 'assets/js/dropdown.js' ) );
+	}
+);
+
+/** Opening tag of a dropdown (its own context: the id that is open). */
+function kits_dd_open( $id, $class ) {
+	return '<div class="kit-dd' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '" data-wp-interactive="kits/dropdown" ' . wp_interactivity_data_wp_context( array( 'id' => $id ) )
+		. ' data-wp-class--is-open="callbacks.isOpen" data-wp-on--keydown="actions.keys" data-wp-on-document--click="actions.outside">';
+}
+
+/** Process the directives (so the first paint is right) and load the module once. */
+function kits_dd_render( $html ) {
+	wp_enqueue_script_module( 'kits-dropdown' );
+	return function_exists( 'wp_interactivity_process_directives' ) ? wp_interactivity_process_directives( $html ) : $html;
+}
+
