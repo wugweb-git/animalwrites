@@ -55,7 +55,7 @@ add_shortcode(
 /* ---------- Contact form ---------- */
 
 const AW_CONTACT_ABOUT = array(
-	''            => 'What\'s this about?',
+	''            => 'Choose a reason',
 	'general'     => 'General question',
 	'listing'     => 'List your organisation',
 	'featured'    => 'Get featured',

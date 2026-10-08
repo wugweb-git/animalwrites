@@ -433,20 +433,15 @@
 	}
 })();
 
-/* Folded sections (data-kit-fold): open on wide screens, folded below lg (1200px); open without JavaScript. */
+/* Folded sections (data-kit-fold): open on wide screens, folded at or below the width given (default 1199px), unless
+   data-kit-keep-open (e.g. filters in use); open without JavaScript. */
 (function () {
-	var mq = window.matchMedia('(max-width: 1199px)');
-	function apply() {
-		document.querySelectorAll('details[data-kit-fold]').forEach(function (d) { d.open = !mq.matches; });
-	}
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', apply);
-	} else {
+	document.querySelectorAll('details[data-kit-fold]').forEach(function (d) {
+		var mq = window.matchMedia('(max-width: ' + (parseInt(d.getAttribute('data-kit-fold'), 10) || 1199) + 'px)');
+		function apply() { d.open = !mq.matches || d.hasAttribute('data-kit-keep-open'); }
 		apply();
-	}
-	if (mq.addEventListener) {
-		mq.addEventListener('change', apply);
-	}
+		if (mq.addEventListener) mq.addEventListener('change', apply);
+	});
 })();
 
 /* Dropdowns (kits_filter_dropdown, kits_sort_dropdown): one open at a time; a click outside or Esc closes (focus back

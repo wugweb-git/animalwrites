@@ -208,13 +208,13 @@
 	min-height: var(--kit-size-control); padding: 0 var(--s-6);
 	border: var(--kit-border-control) solid var(--kit-color-accent); border-radius: var(--kit-radius-pill);
 	background: var(--kit-color-accent); color: var(--kit-color-on-accent);
-	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-strong); text-decoration: none; cursor: pointer;
+	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-medium); text-decoration: none; cursor: pointer;
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
 }
-.kit-btn--secondary, .kit-btn--outline { background: var(--kit-color-raised); border-color: var(--kit-color-ink); color: var(--kit-color-ink); }
+.kit-btn--secondary, .kit-btn--outline { background: transparent; border-color: var(--kit-color-line); color: var(--kit-color-ink); }
 .kit-btn--ghost { background: transparent; border-color: currentColor; color: inherit; }
 /* Filled buttons keep their own text colour inside dark areas that recolour links */
-a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { color: var(--kit-color-on-accent); }
+a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { color: var(--kit-color-on-ink); }
 a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-btn--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-btn--sm { min-height: var(--kit-size-target); padding: 0 var(--s-4); font-size: var(--fluid-body-sm); }
@@ -223,7 +223,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-btn--icon.kit-btn--sm { width: var(--kit-size-target); }
 .kit-btn .kit-ico { --kit-ico-size: 1.125em; }
 @media (hover: hover) {
-	.kit-btn:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+	.kit-btn:hover { background: var(--neutral-8); border-color: var(--neutral-8); color: var(--kit-color-on-ink); }
 	.kit-btn--ink:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 	.kit-btn--ghost:hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 	a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink):hover { color: var(--kit-color-on-ink); }
@@ -327,8 +327,8 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
 .kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
 /* Button: primary yellow, dark text, 44px, radius --r-2; loading = spinner + label */
-:is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; border-radius: var(--r-2); }
-.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--color-yellow); border-color: var(--color-yellow); color: var(--neutral-10); }
+:is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; }
+.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 /* Layout: one column under 640px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: 1fr; }
 @media (min-width: 640px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

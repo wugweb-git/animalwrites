@@ -115,7 +115,7 @@ add_action(
 add_action(
 	'wp_footer',
 	function () {
-		if ( is_admin() ) {
+		if ( is_admin() || is_page( array( 'volunteer', 'contact' ) ) ) { // not over the forms on these pages
 			return;
 		}
 		echo '<nav class="kit-sticky-help" aria-label="' . esc_attr__( 'Quick help', 'animal-writes-core' ) . '">'

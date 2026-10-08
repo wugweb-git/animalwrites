@@ -556,8 +556,11 @@ body { background: var(--kit-color-canvas); }
 
 /* Data-source labels on organisations (kit-tag): mark on cards; mark + list name and date on the profile. */
 .aw-datasrcs { display: inline-flex; flex-wrap: wrap; gap: var(--s-1); vertical-align: middle; }
-.aw-datasrcs.is-full { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); }
-.aw-datasrc-mark { font-weight: var(--kit-weight-bold); letter-spacing: 0.04em; }
+/* "Details from": one row per source — a same-size type mark (AWBI, GOV, ORG…) and the source, aligned in two columns */
+.aw-datasrcs.is-full { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s-2) var(--s-3); align-items: center; margin-top: var(--s-2); }
+.aw-datasrcs.is-full .aw-datasrc-row { display: contents; }
+.aw-datasrcs.is-full .kit-tag { justify-content: center; min-width: 3.5rem; background: color-mix(in srgb, var(--kit-color-ink) 6%, transparent); color: var(--kit-color-text); }
+.aw-datasrc-mark { font-weight: var(--kit-weight-medium); letter-spacing: 0.02em; }
 .aw-datasrc-row { display: inline-flex; align-items: center; gap: var(--s-2); }
 
 /* Contact (Phase 11 H2): wide screens = text left (about 55%), form right and sticky; phones = intro, form, rows.
@@ -734,3 +737,17 @@ body { background: var(--kit-color-canvas); }
 .aw-profile-actions a[href^="mailto:"] { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2220%22%20height%3D%2216%22%20x%3D%222%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22m22%207-8.97%205.7a1.94%201.94%200%200%201-2.06%200L2%207%22/%3E%3C/svg%3E"); }
 .aw-profile-actions a[href*="wa.me"] { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021l1.65%20-3.8a9%209%200%201%201%203.4%202.9l-5.05%20.9%22%2F%3E%3Cpath%20d%3D%22M9%2010a.5%20.5%200%200%200%201%200v-1a.5%20.5%200%200%200%20-1%200v1a5%205%200%200%200%205%205h1a.5%20.5%200%200%200%200%20-1h-1a.5%20.5%200%200%200%200%201%22%2F%3E%3C%2Fsvg%3E"); }
 .aw-profile-actions a[href^="http"]:not([href*="wa.me"]) { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E"); }
+
+/* Directory search: on phones the name field and a "Filters" button (state, district, type fold away); wider, all in one row */
+.aw-dir-more > summary { list-style: none; cursor: pointer; }
+.aw-dir-more > summary::-webkit-details-marker { display: none; }
+.aw-dir-more-body { display: grid; gap: var(--kit-space-3); }
+@media (max-width: 639px) { .aw-dir-more[open] > summary { margin-bottom: var(--kit-space-3); } }
+@media (min-width: 640px) {
+	.aw-dir-more { grid-column: 1 / -1; }
+	.aw-dir-more > summary { display: none; }
+	.aw-dir-more-body { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) { .aw-dir-more { grid-column: span 3; } }
+/* Library rows on phones: labels on one line */
+@media (max-width: 639px) { .aw-case-tags { flex-wrap: nowrap; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); } }

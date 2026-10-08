@@ -81,21 +81,21 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	min-height: var(--kit-size-control);
 	padding: 0 var(--kit-space-5);
 	border: var(--kit-border-control) solid transparent;
-	border-radius: var(--kit-radius-control);
-	background: var(--kit-color-accent);
-	color: var(--kit-color-on-accent);
-	font: inherit; font-weight: var(--kit-weight-strong);
+	border-radius: var(--kit-radius-pill);
+	background: var(--kit-color-ink);
+	color: var(--kit-color-on-ink);
+	font: inherit; font-weight: var(--kit-weight-medium);
 	text-decoration: none;
 	cursor: pointer;
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
 		transform var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
 }
 .wp-element-button:hover ,.wp-block-button__link:hover ,.kit-form button[type=submit]:hover ,.kit-finder button:hover ,.kit-print button:hover {
-	background: var(--kit-color-ink); color: var(--kit-color-on-ink); box-shadow: var(--kit-elevation-2);
+	background: var(--neutral-8); color: var(--kit-color-on-ink);
 }
 .wp-element-button:active ,.wp-block-button__link:active ,.kit-form button[type=submit]:active ,.kit-finder button:active { transform: translateY(1px) scale(0.99); box-shadow: none; }
 .is-style-outline > .wp-block-button__link {
-	background: transparent; color: inherit; border-color: currentColor;
+	background: transparent; color: inherit; border-color: var(--kit-color-line);
 }
 .is-style-outline > .wp-block-button__link:hover {
 	background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink);
@@ -546,14 +546,13 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-empty p { margin-inline: auto; }
 
 /* TRUST panel on item pages */
-.kit-trust { margin: var(--kit-space-4) 0 var(--kit-space-6); padding: var(--kit-space-4) var(--kit-space-5); border-left: 4px solid var(--kit-color-ink); background: var(--kit-color-raised); border-radius: 0 var(--kit-radius-card) var(--kit-radius-card) 0; box-shadow: var(--kit-elevation-1); }
-.kit-trust.is-verified { border-left-color: var(--kit-color-success); }
-.kit-trust.is-unverified { border-left-color: var(--kit-color-accent); }
-.kit-trust ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-2); }
-.kit-trust li { display: flex; gap: var(--kit-space-3); align-items: flex-start; font-size: var(--kit-type-sm); max-width: none; }
-.kit-trust li .kit-ico { margin-top: 0.15em; color: var(--kit-color-muted); }
-.kit-trust.is-verified li:first-child .kit-ico { color: var(--kit-color-success); }
-.kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-medium); }
+.kit-trust { margin: var(--kit-space-4) 0 var(--kit-space-6); padding: var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); font-size: var(--kit-type-sm); line-height: 1.5; }
+.kit-trust ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); }
+.kit-trust li { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: start; max-width: none; margin: 0; }
+.kit-trust li > .kit-ico { --kit-ico-size: 1.25rem; margin-top: 0.05em; color: var(--kit-color-muted); }
+.kit-trust.is-verified li:first-child > .kit-ico { color: var(--kit-color-success); }
+.kit-trust.is-unverified li:first-child > .kit-ico { color: var(--kit-color-warning); }
+.kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-regular); }
 
 /* Shared button size used in rows */
 .kit-btn .kit-ico { --kit-ico-size: 1.1em; }
@@ -689,13 +688,13 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-ico--brand-whatsapp { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021l1.65%20-3.8a9%209%200%201%201%203.4%202.9l-5.05%20.9%22%2F%3E%3Cpath%20d%3D%22M9%2010a.5%20.5%200%200%200%201%200v-1a.5%20.5%200%200%200%20-1%200v1a5%205%200%200%200%205%205h1a.5%20.5%200%200%200%200%20-1h-1a.5%20.5%200%200%200%200%201%22%2F%3E%3C%2Fsvg%3E"); }
 
 /* External links: a small arrow after the text (kit.js marks links to other sites; icon and image links are left alone). */
-.kit-link-ext::after { content: ""; display: inline-block; width: .75em; height: .75em; margin-left: .2em; vertical-align: -.05em; background-color: currentColor; -webkit-mask: var(--kit-ext-ico) center / contain no-repeat; mask: var(--kit-ext-ico) center / contain no-repeat; --kit-ext-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207h10v10%22/%3E%3Cpath%20d%3D%22M7%2017%2017%207%22/%3E%3C/svg%3E"); }
+.kit-link-ext::after { content: ""; display: inline-block; width: .875em; height: .875em; margin-left: .25em; vertical-align: -.1em; background-color: currentColor; -webkit-mask: var(--kit-ext-ico) center / contain no-repeat; mask: var(--kit-ext-ico) center / contain no-repeat; --kit-ext-ico: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%207h10v10%22/%3E%3Cpath%20d%3D%22M7%2017%2017%207%22/%3E%3C/svg%3E"); }
 
 /* ---------- Footer (owner's reference design, 8 Oct 2026) ----------
    Four columns (brand · Helplines · Explore · site links), a newsletter row, Categories as plain links, and a bar with
    the policies. Phone: brand and Helplines full width, the two link lists side by side, Categories folded. */
 .kit-footer { --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); font-size: var(--kit-type-sm); }
-.kit-footer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-6) var(--kit-space-5); padding: var(--kit-space-7) 0 var(--kit-space-6); }
+.kit-footer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-6) var(--kit-space-5); padding: var(--kit-space-6) 0 var(--kit-space-5); }
 .kit-footer-brand, .kit-footer-grid > #helplines { grid-column: 1 / -1; }
 @media (min-width: 1200px) { .kit-footer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-7); } .kit-footer-brand, .kit-footer-grid > #helplines { grid-column: auto; } }
 .kit-footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: var(--kit-space-3); }
@@ -708,12 +707,12 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-list, .kit-legal-links, .kit-footer-inline { list-style: none; padding: 0; margin: 0; }
 .kit-footer-list li { margin: 0; }
 .kit-footer-list a { display: flex; align-items: center; min-height: var(--kit-size-target); color: var(--kit-color-on-ink); text-decoration: none; }
-@media (min-width: 1200px) { .kit-footer-list a { min-height: 2.25rem; } }
+@media (min-width: 1200px) { .kit-footer-list a { min-height: 2rem; } .kit-footer-grid > nav:nth-child(3) .kit-footer-list { columns: 2; column-gap: var(--kit-space-5); } .kit-footer-list li { break-inside: avoid; } }
 .kit-footer-helplines a { flex-direction: column; align-items: flex-start; justify-content: center; padding: var(--kit-space-1) 0; }
 .kit-footer-helplines strong { color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); white-space: nowrap; }
 .kit-footer-helplines span { color: var(--kit-footer-muted); font-size: var(--kit-type-xs); }
 .kit-footer :is(.kit-footer-list, .kit-footer-inline, .kit-legal-links) a:hover, .kit-footer-mail:hover { color: var(--kit-color-accent); text-decoration: underline; text-underline-offset: 3px; }
-.kit-footer-newsletter { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); padding: var(--kit-space-6) 0; border-top: 1px solid var(--kit-footer-rule); }
+.kit-footer-newsletter { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); padding: var(--kit-space-5) 0; border-top: 1px solid var(--kit-footer-rule); }
 .kit-footer-nl-head { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: var(--kit-color-on-ink); }
 .kit-footer-newsletter .kit-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); max-width: none; }
 .kit-footer-newsletter .kit-captcha { order: 10; }
@@ -731,19 +730,19 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 	.kit-footer-newsletter .kit-field--checkbox .kit-checkbox { min-height: 0; }
 }
 @media (min-width: 1200px) { .kit-footer-newsletter { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); column-gap: var(--kit-space-7); align-items: start; } .kit-footer-nl-head { padding-top: calc(1.5em + var(--kit-space-2)); } }
-.kit-footer-cats { padding: var(--kit-space-4) 0; border-top: 1px solid var(--kit-footer-rule); }
+.kit-footer-cats { padding: var(--kit-space-3) 0; border-top: 1px solid var(--kit-footer-rule); }
 .kit-footer-cats > summary { margin: 0; min-height: var(--kit-size-target); display: flex; align-items: center; cursor: pointer; list-style: none; }
 .kit-footer-cats > summary::-webkit-details-marker { display: none; }
 .kit-footer-cats > summary::after { content: "+"; margin-left: auto; font-size: 1.25em; line-height: 1; }
 .kit-footer-cats[open] > summary::after { content: "\2212"; }
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); padding-bottom: var(--kit-space-2); }
-.kit-footer-inline a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
+.kit-footer-inline a { display: inline-flex; align-items: center; min-height: 1.75rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
 @media (min-width: 1200px) {
 	.kit-footer-cats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); column-gap: var(--kit-space-7); align-items: start; }
 	.kit-footer-cats > summary { pointer-events: none; min-height: 2rem; }
 	.kit-footer-cats > summary::after, .kit-footer-cats[open] > summary::after { content: none; }
 }
-.kit-footer-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-2) var(--kit-space-5); padding: var(--kit-space-4) 0 var(--kit-space-6); border-top: 1px solid var(--kit-footer-rule); font-size: var(--kit-type-xs); color: var(--kit-footer-muted); }
+.kit-footer-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-2) var(--kit-space-5); padding: var(--kit-space-3) 0 var(--kit-space-5); border-top: 1px solid var(--kit-footer-rule); font-size: var(--kit-type-xs); color: var(--kit-footer-muted); }
 .kit-legal-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-legal-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: inherit; text-decoration: none; }
 .kit-powered { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); color: var(--kit-footer-muted); text-decoration: none; }
@@ -764,3 +763,10 @@ main.is-layout-constrained > .wp-block-post-content.is-layout-constrained > :whe
 
 /* Full-width bands follow each other with no gap (the page background showed through as a strip). */
 :where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
+
+/* Buttons: ink is the main button; yellow only on dark surfaces (header, hero, help band, footer), where ink would vanish. */
+:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(.is-style-outline *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .kit-form button[type=submit]):hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+
+/* Phones: the bottom help bar never covers the end of the page */
+@media (max-width: 639px) { body:has(.kit-sticky-help:not(.is-hidden)) { padding-bottom: 4.5rem; } }

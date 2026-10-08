@@ -43,36 +43,50 @@ function aw_listing_place( $id ) {
  */
 function aw_listing_schema( $id ) {
 	list( $state, $district ) = aw_listing_place( $id );
-	$org = array(
-		'@type' => has_term( array( 'veterinary-hospital', 'veterinary-dispensary', 'mobile-veterinary-unit', 'veterinary-office' ), 'aw_listing_type', $id ) ? 'VeterinaryCare' : 'NGO',
-		'@id'   => get_permalink( $id ) . '#organization',
-		'name'  => get_the_title( $id ),
-		'url'   => get_permalink( $id ),
+	$m    = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
+	$vet  = has_term( array( 'veterinary-hospital', 'veterinary-dispensary', 'mobile-veterinary-unit', 'veterinary-office' ), 'aw_listing_type', $id );
+	$site = $m( 'aw_website' );
+	$org  = array(
+		'@type'       => $vet ? 'VeterinaryCare' : 'NGO',
+		'@id'         => get_permalink( $id ) . '#organization',
+		'name'        => get_the_title( $id ),
+		'url'         => $site ? $site : get_permalink( $id ),                 // the organisation's own site when known
+		'mainEntityOfPage' => get_permalink( $id ),                           // this profile
+		'description' => wp_strip_all_tags( (string) get_the_excerpt( $id ) ),
 	);
 	$logo = get_the_post_thumbnail_url( $id, 'medium' );
 	if ( $logo ) {
-		$org['logo'] = $logo;
+		$org['logo']  = $logo;
+		$org['image'] = $logo;
 	}
 	if ( $state || $district ) {
-		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district, 'addressRegion' => $state, 'addressCountry' => 'IN' ) );
+		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $m( 'aw_area' ), 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
+		$org['areaServed'] = array_values( array_filter( array( $district ? array( '@type' => 'AdministrativeArea', 'name' => $district ) : null, $state ? array( '@type' => 'State', 'name' => $state ) : null ) ) );
 	}
-	$phone = (string) get_post_meta( $id, 'aw_phone', true );
-	$email = (string) get_post_meta( $id, 'aw_email', true );
-	$site  = (string) get_post_meta( $id, 'aw_website', true );
-	if ( $phone ) {
-		$org['telephone'] = $phone;
+	if ( $m( 'aw_phone' ) ) {
+		$org['telephone'] = $m( 'aw_phone' );
 	}
-	if ( $email ) {
-		$org['email'] = $email;
+	if ( $m( 'aw_email' ) ) {
+		$org['email'] = $m( 'aw_email' );
+	}
+	if ( $m( 'aw_whatsapp' ) ) {
+		$org['contactPoint'] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $m( 'aw_whatsapp' ), 'availableLanguage' => array( 'en', 'hi' ) );
 	}
 	if ( $site ) {
 		$org['sameAs'] = array( $site );
 	}
-	$code = (string) get_post_meta( $id, 'aw_awbi_code', true );
+	if ( $m( 'aw_services' ) ) {
+		$org['knowsAbout'] = array_values( array_filter( array_map( 'trim', preg_split( '/[,;\n]+/', wp_strip_all_tags( $m( 'aw_services' ) ) ) ) ) );
+	}
+	$types = get_the_terms( $id, 'aw_listing_type' );
+	if ( $types && ! is_wp_error( $types ) ) {
+		$org['additionalType'] = wp_list_pluck( $types, 'name' );
+	}
+	$code = $m( 'aw_awbi_code' );
 	if ( $code ) {
 		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
 	}
-	return $org;
+	return array_filter( $org );
 }
 
 add_action(
