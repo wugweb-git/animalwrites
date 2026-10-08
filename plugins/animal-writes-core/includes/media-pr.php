@@ -121,33 +121,9 @@ function aw_banner_key() {
 	return '';
 }
 
-// Banner crops of one photo (used when a place has a single photo, e.g. a topic's own photo).
-add_action(
-	'after_setup_theme',
-	function () {
-		add_image_size( 'aw_banner_wide', 1600, 500, true );
-		add_image_size( 'aw_banner_phone', 800, 600, true );
-	}
-);
-
-/** A complete banner (needs a desktop image, a mobile image and alt text), or null. Topics fall back to their photo. */
+/** A complete banner (needs a desktop image, a mobile image and alt text), or null. */
 function aw_banner( $key ) {
 	$b = ( (array) get_option( 'aw_banners', array() ) )[ $key ] ?? array();
-	if ( empty( $b['desktop'] ) && 0 === strpos( (string) $key, 'topic:' ) && function_exists( 'aw_topic_image_id' ) ) {
-		$term = get_term_by( 'slug', substr( $key, 6 ), 'aw_topic' );
-		$img  = $term ? aw_topic_image_id( $term ) : 0;
-		if ( $img ) {
-			$cap = trim( wp_strip_all_tags( (string) wp_get_attachment_caption( $img ) ) );
-			$b   = array(
-				'desktop'    => $img,
-				'mobile'     => $img,
-				'alt'        => (string) get_post_meta( $img, '_wp_attachment_image_alt', true ),
-				'text'       => '',
-				'credit'     => preg_match( '#^Photo:\s*(.+?)\s*/\s*Unsplash$#i', $cap, $m ) ? $m[1] : '',
-				'credit_raw' => preg_match( '#^Photo:#i', $cap ) ? '' : $cap,
-			);
-		}
-	}
 	return ( ! empty( $b['desktop'] ) && ! empty( $b['mobile'] ) && '' !== trim( (string) ( $b['alt'] ?? '' ) ) ) ? $b : null;
 }
 
@@ -156,9 +132,8 @@ function aw_banner_html( $key ) {
 	if ( ! $b ) {
 		return '';
 	}
-	$same = (int) $b['desktop'] === (int) $b['mobile'];
-	$d    = wp_get_attachment_image_src( (int) $b['desktop'], $same ? 'aw_banner_wide' : 'full' );
-	$m    = wp_get_attachment_image_src( (int) $b['mobile'], $same ? 'aw_banner_phone' : 'full' );
+	$d = wp_get_attachment_image_src( (int) $b['desktop'], 'full' );
+	$m = wp_get_attachment_image_src( (int) $b['mobile'], 'full' );
 	if ( ! $d || ! $m ) {
 		return '';
 	}
@@ -166,8 +141,6 @@ function aw_banner_html( $key ) {
 		. '<source media="(max-width: 767px)" srcset="' . esc_url( $m[0] ) . '" width="' . (int) $m[1] . '" height="' . (int) $m[2] . '">'
 		. '<img src="' . esc_url( $d[0] ) . '" width="' . (int) $d[1] . '" height="' . (int) $d[2] . '" alt="' . esc_attr( $b['alt'] ) . '" fetchpriority="high" decoding="async">'
 		. '</picture>' . ( ! empty( $b['text'] ) ? '<div class="aw-banner-text">' . wp_kses_post( $b['text'] ) . '</div>' : '' )
-		. ( ! empty( $b['credit'] ) ? '<p class="aw-banner-credit">Photo: ' . ( ! empty( $b['credit_url'] ) ? '<a href="' . esc_url( $b['credit_url'] ) . '" rel="noopener">' . esc_html( $b['credit'] ) . '</a>' : esc_html( $b['credit'] ) ) . ' / <a href="https://unsplash.com/" rel="noopener">Unsplash</a></p>' : '' )
-		. ( empty( $b['credit'] ) && ! empty( $b['credit_raw'] ) ? '<p class="aw-banner-credit">' . esc_html( $b['credit_raw'] ) . '</p>' : '' )
 		. '</div>';
 }
 
@@ -179,9 +152,8 @@ add_action(
 		if ( ! $b ) {
 			return;
 		}
-		$same = (int) $b['desktop'] === (int) $b['mobile'];
-		$d    = wp_get_attachment_image_url( (int) $b['desktop'], $same ? 'aw_banner_wide' : 'full' );
-		$m    = wp_get_attachment_image_url( (int) $b['mobile'], $same ? 'aw_banner_phone' : 'full' );
+		$d = wp_get_attachment_image_url( (int) $b['desktop'], 'full' );
+		$m = wp_get_attachment_image_url( (int) $b['mobile'], 'full' );
 		echo '<link rel="preload" as="image" href="' . esc_url( $m ) . '" media="(max-width: 767px)">' . "\n";
 		echo '<link rel="preload" as="image" href="' . esc_url( $d ) . '" media="(min-width: 768px)">' . "\n";
 	},
