@@ -129,6 +129,16 @@ function aw_ingest( WP_REST_Request $req ) {
 		}
 	}
 
+	// Backfill (owner, 9 Oct 2026): older items for review only — never before the floor, never published or merged here.
+	$backfill = (bool) $req->get_param( 'backfill' );
+	if ( $backfill ) {
+		$floor = (string) get_option( 'aw_backfill_floor', '2025-11-01' );
+		$day   = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
+		if ( 'aw_opportunity' === $type || ( $day && $day < $floor ) ) {
+			return new WP_REST_Response( array( 'status' => 'filtered' ), 200 );
+		}
+	}
+
 	$post_id = wp_insert_post(
 		array(
 			'post_type'    => $type,
@@ -228,7 +238,13 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( 'research' === $req->get_param( 'type' ) ) {
 		wp_set_object_terms( $post_id, 'research', 'aw_resource_type', false );
 	}
-	$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+	if ( $backfill ) {
+		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		update_post_meta( $post_id, 'aw_review', 'held: backfill (published ' . substr( (string) $req->get_param( 'source_date' ), 0, 10 ) . ') — owner review' );
+		$review = '';
+	} else {
+		$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+	}
 
 	return new WP_REST_Response(
 		array(
