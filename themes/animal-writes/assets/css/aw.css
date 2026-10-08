@@ -990,3 +990,4 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-act-copy .aw-ed-templates { margin-bottom: var(--kit-space-3); }
 	.kit-ed-act-copy .aw-ed-col-title { margin-bottom: var(--kit-space-2); }
 }
+@media (max-width: 767px) { .aw-ed-steps a { padding-block: var(--kit-space-2) var(--kit-space-3); } }
