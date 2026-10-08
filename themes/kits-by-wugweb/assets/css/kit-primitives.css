@@ -189,6 +189,9 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 
 /* ---------- 11. Form field ---------- */
 .kit-field { margin: 0 0 var(--s-4); }
+/* Auto-paragraphs around shortcode output must not add space inside a field */
+.kit-field > p:empty { display: none; }
+.kit-field > p { margin: 0; }
 .kit-field > label, .kit-field > .kit-field-label { display: block; margin: 0 0 var(--s-2); font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
 .kit-field .kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .kit-field-control { position: relative; }
