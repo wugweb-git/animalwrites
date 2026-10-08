@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function aw_item_image( $post_id, $size = 'large' ) {
 	$type = get_post_type( $post_id );
-	if ( ! in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
+	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'aw_guide' ), true ) ) { // guides: their category's photo
 		return '';
 	}
 	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );

@@ -461,7 +461,6 @@ add_shortcode(
 			}
 			$html .= '</ul></section>';
 		}
-		$html .= '<p class="aw-org-claim"><a href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Claim or update this listing</a></p>';
-		return '<div class="aw-org-links">' . $html . '</div>';
+		return $html ? '<div class="aw-org-links">' . $html . '</div>' : ''; // claiming is in the "Is this your organisation?" card
 	}
 );

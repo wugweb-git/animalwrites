@@ -12,26 +12,28 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:post-featured-image {"className":"kit-logo kit-logo-lg"} /-->
+<!-- wp:group {"className":"aw-profile-head","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-profile-head"><!-- wp:animal-writes/org-mark /-->
 
-<!-- wp:post-title {"level":1} /-->
+<!-- wp:group {"className":"aw-profile-id","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-profile-id"><!-- wp:post-title {"level":1} /-->
+
+<!-- wp:group {"className":"aw-profile-meta kit-tags","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-profile-meta kit-tags"><!-- wp:post-terms {"term":"aw_listing_type"} /-->
+
+<!-- wp:shortcode -->
+[aw_place_links]
+<!-- /wp:shortcode --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
 
 <!-- wp:shortcode -->
 [aw_trust]
 <!-- /wp:shortcode -->
 
-<!-- wp:post-terms {"term":"aw_listing_type"} /-->
-
-<!-- wp:shortcode -->
-[aw_place_links]
-<!-- /wp:shortcode -->
-
-<!-- wp:paragraph {"className":"has-text-muted-color has-text-color","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"area"}}}},"textColor":"text-muted"} -->
-<p class="has-text-muted-color has-text-color"></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"whatsapp_url"}}}},"linkTarget":"_blank","rel":"noreferrer noopener"} -->
+<!-- wp:buttons {"className":"aw-profile-actions"} -->
+<div class="wp-block-buttons aw-profile-actions"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"whatsapp_url"}}}},"linkTarget":"_blank","rel":"noreferrer noopener"} -->
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">WhatsApp</a></div>
 <!-- /wp:button -->
 

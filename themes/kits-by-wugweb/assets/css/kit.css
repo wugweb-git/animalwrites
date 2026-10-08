@@ -599,7 +599,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-ed-news-grid { display: grid; gap: var(--kit-space-6); }
 @media (min-width: 1200px) { .kit-ed-news-grid { grid-template-columns: 1.6fr 1fr; gap: var(--kit-space-7); } }
 .kit-ed-lead .wp-block-post-featured-image { border-radius: var(--kit-radius-media) !important; margin: 0 0 var(--kit-space-4) !important; aspect-ratio: 3/2; }
-.kit-ed-lead .wp-block-post-title { font-size: var(--kit-type-h1) !important; line-height: 1.05 !important; letter-spacing: var(--kit-tracking-display) !important; margin: var(--kit-space-3) 0 !important; }
+.kit-ed-lead .wp-block-post-title { font-size: var(--kit-type-h3) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading) !important; margin: var(--kit-space-3) 0 !important; }
 .kit-ed-lead .wp-block-post-excerpt { font-size: var(--kit-type-lead) !important; }
 .kit-ed-lead .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 4 !important; }
 .kit-ed-list .wp-block-post-template > li { display: grid !important; grid-template-columns: 1fr 120px; grid-template-areas: "terms img" "title img" "date img"; column-gap: var(--kit-space-4); align-content: start; padding: var(--kit-space-4) 0 !important; border-top: 1px solid var(--kit-color-ink) !important; }

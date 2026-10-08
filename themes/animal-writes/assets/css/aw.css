@@ -712,3 +712,24 @@ body { background: var(--kit-color-canvas); }
 .aw-listing-help-actions > .kit-disclosure[open] { order: 2; flex-basis: 100%; } /* buttons stay in one row; the open form below */
 .aw-listing-help-actions > .kit-disclosure[open] > summary { order: -1; }
 @media (max-width: 639px) { .kit-case:has(.aw-case-date.has-cover) { grid-template-columns: 4rem 1fr; } .aw-case-date.has-cover { flex-direction: column; } }
+
+/* Resources: a card shows a photo (its own or its category's) or none; never a box repeating the title */
+.aw-tasks .aw-task-media:has(.kit-placard) { display: none; }
+/* Library rows: "Issued by" and the category labels on one line, same height */
+.aw-case-tags { align-items: center; }
+.aw-case-tags > *, .aw-case-tags .wp-block-post-terms { margin: 0 !important; }
+
+/* Organisation page: logo and name, then type and place on one line, then the ways to reach them (icon + label). */
+.aw-profile-head { display: flex; align-items: center; gap: var(--kit-space-4); margin-block: 0 var(--kit-space-4); }
+.aw-profile-head .aw-org-mark { width: 4rem; height: 4rem; flex: none; }
+.aw-profile-id { min-width: 0; }
+.aw-profile-id > * { margin-block: 0; }
+.aw-profile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-2) !important; }
+.aw-profile-meta > *, .aw-profile-meta .wp-block-post-terms { margin: 0 !important; }
+.aw-profile-actions { gap: var(--kit-space-2); margin-block: var(--kit-space-5); }
+.aw-profile-actions .wp-block-button__link { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
+.aw-profile-actions .wp-block-button__link::before { content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-profile-actions a[href^="tel:"] { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M22%2016.92v3a2%202%200%200%201-2.18%202%2019.79%2019.79%200%200%201-8.63-3.07%2019.5%2019.5%200%200%201-6-6%2019.79%2019.79%200%200%201-3.07-8.67A2%202%200%200%201%204.11%202h3a2%202%200%200%201%202%201.72%2012.84%2012.84%200%200%200%20.7%202.81%202%202%200%200%201-.45%202.11L8.09%209.91a16%2016%200%200%200%206%206l1.27-1.27a2%202%200%200%201%202.11-.45%2012.84%2012.84%200%200%200%202.81.7A2%202%200%200%201%2022%2016.92z%22/%3E%3C/svg%3E"); }
+.aw-profile-actions a[href^="mailto:"] { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20width%3D%2220%22%20height%3D%2216%22%20x%3D%222%22%20y%3D%224%22%20rx%3D%222%22/%3E%3Cpath%20d%3D%22m22%207-8.97%205.7a1.94%201.94%200%200%201-2.06%200L2%207%22/%3E%3C/svg%3E"); }
+.aw-profile-actions a[href*="wa.me"] { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2021l1.65%20-3.8a9%209%200%201%201%203.4%202.9l-5.05%20.9%22%2F%3E%3Cpath%20d%3D%22M9%2010a.5%20.5%200%200%200%201%200v-1a.5%20.5%200%200%200%20-1%200v1a5%205%200%200%200%205%205h1a.5%20.5%200%200%200%200%20-1h-1a.5%20.5%200%200%200%200%201%22%2F%3E%3C%2Fsvg%3E"); }
+.aw-profile-actions a[href^="http"]:not([href*="wa.me"]) { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E"); }
