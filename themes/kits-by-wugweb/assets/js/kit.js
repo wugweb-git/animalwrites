@@ -585,7 +585,7 @@
 	bar.addEventListener('focusin', function (e) { if (e.target.matches(':focus-visible')) bar.classList.remove('kit-header-hidden'); });
 })();
 
-/* Analytics events (owner, 9 Oct 2026). Every event goes to the dataLayer (GTM). While GA4 is still placed directly by
+/* Analytics events (owner, 9 Oct 2026). Also button_click on every button. Every event goes to the dataLayer (GTM). While GA4 is still placed directly by
    Site Kit (window.kitsPage.gtag), the same event also goes to gtag, so GA4 receives it once either way.
    Events: form_submit_success, form_error, search, pin_search, filter_apply, sort_change, outbound_click, call_click,
    whatsapp_click, email_click, pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth. */
@@ -622,6 +622,14 @@
 		var q = e.target.querySelector && e.target.querySelector('input[name=q]');
 		if (q && /^\s*[1-9]\d{5}\s*$/.test(q.value)) track('pin_search', { pin: q.value.trim() });
 		if (e.target.matches && e.target.matches('.aw-dir-search')) track('filter_apply', { filters: new URLSearchParams(new FormData(e.target)).toString().slice(0, 200), hub: 'directory' });
+	}, true);
+
+	// Every button (and link styled as a button): button_click with its label (GTM, owner 9 Oct 2026)
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest && e.target.closest('button, [role=button], .kit-btn, .wp-block-button__link, .wp-element-button, summary.kit-btn, input[type=submit]');
+		if (!b || b.closest('.wp-block-post-template li a:not(.kit-btn)')) return;
+		var label = (b.getAttribute('aria-label') || b.textContent || b.value || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+		track('button_click', { label: label, href: (b.getAttribute('href') || '').slice(0, 200), area: b.closest('header') ? 'header' : b.closest('footer') ? 'footer' : b.closest('form') ? 'form' : 'page' });
 	}, true);
 
 	// Clicks

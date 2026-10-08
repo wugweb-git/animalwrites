@@ -12,4 +12,4 @@ File: `animalwrites-gtm-container.json` — for container GTM-TB3FCFQB.
 Contents: one Google tag (G-4P5YMJ04RL) carrying the page context (page_type, section, category, state, district,
 listing_type, issuer, publisher), and one GA4 event tag + trigger per event pushed by the site: form_submit_success,
 form_error, search, pin_search, filter_apply, sort_change, outbound_click, call_click, whatsapp_click, email_click,
-pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth, menu_click.
+pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth, menu_click, button_click.
