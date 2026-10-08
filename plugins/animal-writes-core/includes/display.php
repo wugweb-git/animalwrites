@@ -69,6 +69,12 @@ add_action(
 		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
 		}
+		// The visitor's sort: A–Z stays A–Z; "Oldest first" keeps the source date but ascending.
+		$asked = $q->get( 'orderby' );
+		if ( is_array( $asked ) && isset( $asked['title'] ) || 'title' === $asked ) {
+			return;
+		}
+		$dir          = is_array( $asked ) && 'ASC' === strtoupper( (string) ( $asked['date'] ?? '' ) ) || 'ASC' === strtoupper( (string) $q->get( 'order' ) ) && 'date' === $asked ? 'ASC' : 'DESC';
 		$key          = in_array( 'aw_legal', $types, true ) ? 'aw_doc_sort' : 'aw_source_date'; // Library: the document's date, or its year (Acts, Rules)
 		$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Publisher, State)
 		$mq['aw_src'] = array(
@@ -77,7 +83,7 @@ add_action(
 			'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
 		);
 		$q->set( 'meta_query', $mq );
-		$q->set( 'orderby', array( 'source_date' => 'DESC', 'date' => 'DESC' ) );
+		$q->set( 'orderby', array( 'source_date' => $dir, 'date' => $dir ) );
 	}
 );
 
