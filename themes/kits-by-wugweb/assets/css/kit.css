@@ -737,11 +737,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-cats[open] > summary::after { content: "\2212"; }
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); padding-bottom: var(--kit-space-2); }
 .kit-footer-inline a { display: inline-flex; align-items: center; min-height: 1.75rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
-@media (min-width: 1200px) {
-	.kit-footer-cats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); column-gap: var(--kit-space-7); align-items: start; }
-	.kit-footer-cats > summary { pointer-events: none; min-height: 2rem; }
-	.kit-footer-cats > summary::after, .kit-footer-cats[open] > summary::after { content: none; }
-}
+/* Categories fold at every width so the footer stays within one screen. */
 .kit-footer-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-2) var(--kit-space-5); padding: var(--kit-space-3) 0 var(--kit-space-5); border-top: 1px solid var(--kit-footer-rule); font-size: var(--kit-type-xs); color: var(--kit-footer-muted); }
 .kit-legal-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-legal-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); color: inherit; text-decoration: none; }

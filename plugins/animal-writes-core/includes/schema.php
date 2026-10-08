@@ -49,7 +49,7 @@ function aw_listing_schema( $id ) {
 	$org  = array(
 		'@type'       => $vet ? 'VeterinaryCare' : 'NGO',
 		'@id'         => get_permalink( $id ) . '#organization',
-		'name'        => get_the_title( $id ),
+		'name'        => wp_strip_all_tags( (string) get_post_field( 'post_title', $id ) ), // no "Private:" prefix
 		'url'         => $site ? $site : get_permalink( $id ),                 // the organisation's own site when known
 		'mainEntityOfPage' => get_permalink( $id ),                           // this profile
 		'description' => wp_strip_all_tags( (string) get_the_excerpt( $id ) ),
