@@ -80,7 +80,7 @@ function kits_enqueue_styles() {
 		'kits',
 		get_template_directory_uri() . '/assets/css/kits.css',
 		array(),
-		wp_get_theme( 'kits-by-wugweb' )->get( 'Version' )
+		(string) filemtime( get_template_directory() . '/assets/css/kits.css' ) // a new version on every change, so browsers never keep an old copy
 	);
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_styles' );

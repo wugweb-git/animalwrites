@@ -720,11 +720,12 @@ body { background: var(--kit-color-canvas); }
 .aw-case-tags > *, .aw-case-tags .wp-block-post-terms { margin: 0 !important; }
 
 /* Organisation page: logo and name, then type and place on one line, then the ways to reach them (icon + label). */
-.aw-profile-head { display: flex; align-items: center; gap: var(--kit-space-4); margin-block: 0 var(--kit-space-4); }
-.aw-profile-head .aw-org-mark { width: 4rem; height: 4rem; flex: none; }
-.aw-profile-id { min-width: 0; }
-.aw-profile-id > * { margin-block: 0; }
-.aw-profile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-2) !important; }
+.aw-profile-head { display: grid; grid-template-columns: 4rem minmax(0, 1fr); grid-template-areas: "crumbs crumbs" "mark title" "mark meta"; column-gap: var(--kit-space-4); align-items: center; margin-block: 0 var(--kit-space-4); }
+.aw-profile-head .aw-org-mark { grid-area: mark; width: 4rem; height: 4rem; }
+.aw-profile-id { display: contents; } /* breadcrumb above, name and labels beside the logo */
+.aw-profile-head .kit-crumbs { grid-area: crumbs; margin: 0 0 var(--kit-space-4); }
+.aw-profile-head h1 { grid-area: title; margin: 0; align-self: end; }
+.aw-profile-meta { grid-area: meta; align-self: start; display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-2) !important; }
 .aw-profile-meta > *, .aw-profile-meta .wp-block-post-terms { margin: 0 !important; }
 .aw-profile-actions { gap: var(--kit-space-2); margin-block: var(--kit-space-5); }
 .aw-profile-actions .wp-block-button__link { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
