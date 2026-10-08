@@ -82,7 +82,7 @@ add_action(
 			return;
 		}
 		$types = (array) $q->get( 'post_type' );
-		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal', 'aw_research' ) ) ) {
+		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
 		}
 		$q->set(

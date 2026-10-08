@@ -147,8 +147,6 @@ function aw_article_schema( $id ) {
 		$at = 'Article';
 	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 		$at = 'NewsArticle';
-	} elseif ( 'aw_research' === $type && preg_match( '/\b(Act|Rules?)\b/', $title ) ) {
-		$at = 'Legislation';
 	}
 	$src_date = (string) get_post_meta( $id, 'aw_source_date', true );
 	$image    = function_exists( 'aw_item_image' ) ? aw_item_image( $id ) : '';
@@ -282,7 +280,7 @@ add_action(
 			return;
 		}
 		$graph = array( aw_publisher_schema(), aw_website_schema() );
-		if ( is_singular( array( 'aw_news', 'aw_legal', 'aw_research', 'aw_guide' ) ) ) {
+		if ( is_singular( array( 'aw_news', 'aw_legal', 'aw_guide' ) ) ) {
 			$id      = get_queried_object_id();
 			$graph[] = aw_article_schema( $id );
 			if ( 'aw_guide' === get_post_type( $id ) ) {

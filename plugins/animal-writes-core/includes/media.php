@@ -66,7 +66,7 @@ add_filter(
 			return $content; // A real featured image exists.
 		}
 		$post_id = $instance->context['postId'] ?? get_the_ID();
-		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_research', 'aw_opportunity', 'aw_guide' ), true ) ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_guide' ), true ) ) {
 			return $content;
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
@@ -102,7 +102,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-excerpt',
 	function ( $content ) {
-		if ( ! is_singular( array( 'aw_research', 'aw_legal' ) ) ) {
+		if ( ! is_singular( 'aw_legal' ) ) {
 			return $content;
 		}
 		$post_id = get_queried_object_id();
@@ -134,7 +134,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
-		if ( ! is_singular( 'aw_resource' ) && ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'aw_legal_kind', get_queried_object_id() ) ) ) {
+		if ( ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'aw_legal_kind', get_queried_object_id() ) ) ) {
 			return $content;
 		}
 		$button = '<p class="aw-print"><button type="button" class="wp-element-button" onclick="window.print()">'

@@ -37,7 +37,7 @@ function aw_find_by_source( $post_type, $url ) {
 	$ids = get_posts(
 		array(
 			// Every section, not just $post_type: an item moved from Legal Watch to News must not come back as a new Legal item.
-			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'aw_research', 'aw_opportunity' ),
+			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_opportunity' ),
 			'post_status'    => 'any',
 			'meta_key'       => 'aw_source_url',
 			'meta_value'     => $url,
@@ -89,7 +89,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	$map = array(
 		'news'     => 'aw_news',
 		'legal'    => 'aw_legal',
-		'research' => 'aw_research',
+		'research' => 'aw_guide', // Resources; tagged Research below
 		'listing'  => 'aw_listing',
 		'opportunity' => 'aw_opportunity',
 	);
@@ -152,7 +152,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $topics ) {
 		aw_assign_existing_terms( $post_id, $topics, 'aw_topic', $ignored );
 	}
-	if ( $req->get_param( 'source_type' ) && in_array( $type, array( 'aw_legal', 'aw_research' ), true ) ) {
+	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
 		aw_assign_existing_terms( $post_id, array( $req->get_param( 'source_type' ) ), 'aw_source_type', $ignored );
 	}
 	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
@@ -197,11 +197,14 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_featured', 0 );
 	}
 
-	if ( in_array( $type, array( 'aw_legal', 'aw_research' ), true ) && function_exists( 'aw_mirror_gov_pdf' ) ) {
+	if ( 'aw_legal' === $type && function_exists( 'aw_mirror_gov_pdf' ) ) {
 		aw_mirror_gov_pdf( $post_id, $source_url );
 	}
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).
+	if ( 'research' === $req->get_param( 'type' ) ) {
+		wp_set_object_terms( $post_id, 'research', 'aw_resource_type', false );
+	}
 	$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
 
 	return new WP_REST_Response(

@@ -13,11 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SECTION_DESC = array(
 	'aw_news'        => 'Animal-welfare news from across India, summarised, with a link to every source.',
 	'aw_legal'       => 'Court orders, notifications and rules that affect animals, explained in plain words.',
-	'aw_research'    => 'The laws, rules and judgments that protect animals, readable here and linked to the official source.',
 	'aw_guide'       => 'Practical guides for the moments that matter: an injured animal, a cruelty case, a community dog.',
 	'aw_campaign'    => 'Citizen campaigns for animals, starting with the letters of Animal Writes 1.0.',
 	'aw_opportunity' => 'Volunteer, foster or intern with people doing the work.',
-	'aw_resource'    => 'Letter templates and tools you can copy, sign and post today.',
 	'aw_listing'     => 'Shelters, vets, ambulances and rescue groups, by state and district.',
 );
 
@@ -59,7 +57,7 @@ add_shortcode(
 			$desc = 'Shelters, vets, ambulances and rescue groups listed here. Unverified listings are marked; organisations can correct their details.';
 		}
 		$count = (int) $wp_query->found_posts;
-		$noun  = array( 'aw_listing' => 'organisations', 'aw_resource' => 'resources', 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_research' => 'documents', 'aw_legal' => 'updates', 'aw_news' => 'stories' );
+		$noun  = array( 'aw_listing' => 'organisations', 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
 
 		// Visual: campaign photos for campaigns; otherwise the first three items in this view.
 		$tiles = '';

@@ -21,11 +21,9 @@ function aw_post_types() {
 	return array(
 		'aw_news'        => array( 'News item', 'News', 'news', array( 'title', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_legal'       => array( 'Library item', 'Library', 'library', array( 'title', 'editor', 'excerpt', 'custom-fields', 'revisions' ) ),
-		'aw_research'    => array( 'Research item (old)', 'Research (old)', 'research', array( 'title', 'excerpt', 'custom-fields', 'revisions' ) ),
 		'aw_guide'       => array( 'Resource', 'Resources', 'resources', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_campaign'    => array( 'Campaign', 'Campaign Hub', 'campaigns', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_opportunity' => array( 'Opportunity', 'Opportunities', 'opportunities', array( 'title', 'editor', 'excerpt', 'custom-fields', 'revisions' ) ),
-		'aw_resource'    => array( 'Template (old)', 'Templates (old)', 'old-resources', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 		'aw_listing'     => array( 'Listing', 'Directory', 'directory', array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'revisions' ) ),
 	);
 }
@@ -53,12 +51,10 @@ function aw_register_content_types() {
 					'add_new_item'  => sprintf( 'Add %s', $singular ),
 					'edit_item'     => sprintf( 'Edit %s', $singular ),
 				),
-				// Research and the old Resources type were folded into Resources and Library (7 Oct 2026); kept for admin only.
-				'public'       => ! in_array( $type, array( 'aw_research', 'aw_resource' ), true ),
-				'show_ui'      => true,
+				'public'       => true,
 				'show_in_rest' => true,
-				'has_archive'  => in_array( $type, array( 'aw_research', 'aw_resource' ), true ) ? false : $slug,
-				'rewrite'      => in_array( $type, array( 'aw_research', 'aw_resource' ), true ) ? false : $rewrite,
+				'has_archive'  => $slug,
+				'rewrite'      => $rewrite,
 				'supports'     => $supports,
 				'menu_icon'    => 'dashicons-pets',
 			)
@@ -105,7 +101,7 @@ function aw_register_content_types() {
 
 	register_taxonomy(
 		'aw_source_type',
-		array( 'aw_legal', 'aw_research' ),
+		array( 'aw_legal' ),
 		array(
 			'labels'            => array( 'name' => 'Source types', 'singular_name' => 'Source type' ),
 			'hierarchical'      => true, // e.g. Supreme Court, High Court, AWBI, Gazette.

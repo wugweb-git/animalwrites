@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function aw_meta_schema() {
-	$cards = array( 'aw_news', 'aw_legal', 'aw_research', 'aw_listing', 'aw_opportunity' ); // listings and opportunities: where a record came from
+	$cards = array( 'aw_news', 'aw_legal', 'aw_listing', 'aw_opportunity' ); // listings and opportunities: where a record came from
 	$all   = array_keys( aw_post_types() );
 
 	return array(
@@ -49,8 +49,8 @@ function aw_meta_schema() {
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
 
 		// Resources.
-		'aw_file_url'        => array( 'string', array( 'aw_resource', 'aw_legal' ), 'Downloadable file URL' ),
-		'aw_requires_email'  => array( 'boolean', array( 'aw_resource' ), 'Gate download behind newsletter signup' ),
+		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
+		'aw_requires_email'  => array( 'boolean', array( 'aw_legal' ), 'Gate download behind newsletter signup' ),
 	);
 }
 

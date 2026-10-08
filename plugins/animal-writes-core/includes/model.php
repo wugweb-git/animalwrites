@@ -35,7 +35,7 @@ function aw_relations() {
 		'aw_organiser'    => array( array( 'aw_campaign' ), 'aw_listing', 'Organiser', 'Campaigns organised', 1 ),
 		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0 ),
 		'aw_organisation' => array( array( 'aw_opportunity' ), 'aw_listing', 'Organisation', 'Opportunities', 1 ),
-		'aw_rel_resource' => array( array( 'aw_guide' ), 'aw_resource', 'Resources', 'Guides using this', 0 ),
+		'aw_rel_resource' => array( array( 'aw_guide' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
 	);
 }
 
@@ -53,10 +53,10 @@ add_action(
 			'show_in_rest'       => true,
 			'show_admin_column'  => true,
 		);
-		register_taxonomy( 'aw_legal_kind', array( 'aw_legal', 'aw_research' ), $args( 'Legal types', 'Legal type' ) );
-		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_research', 'aw_news' ), $args( 'Courts', 'Court' ) );
-		register_taxonomy( 'aw_resource_type', array( 'aw_resource', 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
-		register_taxonomy( 'aw_language', array( 'aw_resource', 'aw_legal' ), $args( 'Languages', 'Language' ) );
+		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
+		register_taxonomy( 'aw_court', array( 'aw_legal', 'aw_news' ), $args( 'Courts', 'Court' ) );
+		register_taxonomy( 'aw_resource_type', array( 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
+		register_taxonomy( 'aw_language', array( 'aw_legal' ), $args( 'Languages', 'Language' ) );
 		register_taxonomy_for_object_type( 'aw_city', 'aw_legal' ); // Legal Watch: filter by state
 	},
 	11

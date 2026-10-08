@@ -116,13 +116,11 @@ function aw_empty( $text ) {
 const AW_LIST_FILTERS = array(
 	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'issuer', 'aw_source_type', 'Filter by issuer' ), array( 'court', 'aw_court', 'Filter by court' ), array( 'state', 'aw_city', 'Filter by state' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_news'        => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_research'    => array( array( 'kind', 'aw_legal_kind', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
-	'aw_resource'    => array( array( 'kind', 'aw_resource_type', 'Filter by type' ), array( 'lang', 'aw_language', 'Filter by language' ), array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Filter by kind of opportunity' ), array( 'state', 'aw_city', 'Filter by location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Filter by topic' ) ),
 );
-const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_research' => 40, 'aw_guide' => 40, 'aw_resource' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
+const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_guide' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
 /** Active filters on this request: param => term slug. */
 function aw_active_filters( $type ) {
@@ -331,37 +329,6 @@ add_shortcode(
 
 /* ---------- INTELLIGENCE: Research as a document library ---------- */
 
-add_shortcode(
-	'aw_library',
-	function () {
-		global $wp_query;
-		if ( ! $wp_query->have_posts() ) {
-			return aw_list_filters( 'aw_research' ) . aw_empty( 'No documents yet.' );
-		}
-		$out = aw_list_filters( 'aw_research' ) . '<div class="aw-docs" role="list">';
-		while ( $wp_query->have_posts() ) {
-			$wp_query->the_post();
-			$id    = get_the_ID();
-			$title = get_the_title();
-			$kind  = preg_match( '/judg?ment/i', $title ) ? 'Judgment' : ( preg_match( '/\bRules?\b/i', $title ) ? 'Rules' : ( preg_match( '/\bAct\b/i', $title ) ? 'Act' : 'Report' ) );
-			$year  = preg_match( '/\b(19|20)\d{2}\b/', $title, $m ) ? $m[0] : '';
-			$by    = (string) get_post_meta( $id, 'aw_source_name', true );
-			$fid   = (int) get_post_meta( $id, 'aw_file_id', true );
-			$pdf   = $fid ? wp_get_attachment_url( $fid ) : '';
-			$thumb = get_the_post_thumbnail_url( $id, 'medium' );
-			$out  .= '<div class="aw-doc-row" role="listitem">'
-				. '<div class="aw-doc-cover">' . ( $thumb ? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy">' : aw_i( 'research' ) ) . '</div>'
-				. '<div class="aw-doc-body"><p class="aw-doc-tags"><span class="aw-kind aw-kind--' . esc_attr( strtolower( $kind ) ) . '">' . esc_html( $kind ) . '</span>' . ( $year ? '<span>' . esc_html( $year ) . '</span>' : '' ) . ( $by ? '<span>' . esc_html( $by ) . '</span>' : '' ) . '</p>'
-				. '<h2 class="aw-doc-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( $title ) . '</a></h2>'
-				. '<p class="aw-doc-sum">' . esc_html( aw_text( $id, 24 ) ) . '</p></div>'
-				. '<div class="aw-doc-actions"><a class="aw-btn aw-btn--sm aw-btn--outline" href="' . esc_url( get_permalink() ) . '">Read</a>'
-				. ( $pdf ? '<a class="aw-btn aw-btn--sm" href="' . esc_url( $pdf ) . '" download>PDF</a>' : '' ) . '</div>'
-				. '</div>';
-		}
-		wp_reset_postdata();
-		return $out . '</div>' . aw_pager();
-	}
-);
 
 /* ---------- HELP: Knowledge as tasks ---------- */
 
@@ -402,29 +369,6 @@ add_shortcode(
 
 /* ---------- HELP: Resources by format and language ---------- */
 
-add_shortcode(
-	'aw_resources_index',
-	function () {
-		global $wp_query;
-		$out = aw_list_filters( 'aw_resource' ) . '<div class="aw-res">';
-		while ( $wp_query->have_posts() ) {
-			$wp_query->the_post();
-			$id    = get_the_ID();
-			$title = get_the_title();
-			$hindi = preg_match( '/[\x{0900}-\x{097F}]/u', $title ) || false !== stripos( $title, 'hindi' );
-			$kind  = preg_match( '/letter|पत्र|english|hindi/i', $title ) && ! preg_match( '/format|points/i', $title ) ? 'Letter template' : 'How-to';
-			$img   = get_the_post_thumbnail_url( $id, 'medium' );
-			$out  .= '<a class="aw-res-card" href="' . esc_url( get_permalink() ) . '">'
-				. ( $img ? '<span class="aw-res-media"><img src="' . esc_url( $img ) . '" alt="" loading="lazy"></span>' : '' )
-				. '<span class="aw-res-body"><span class="aw-res-tags"><span class="aw-kind">' . esc_html( $kind ) . '</span><span>' . ( $hindi ? 'हिंदी / Hindi' : 'English' ) . '</span><span>Printable</span></span>'
-				. '<strong' . ( $hindi && preg_match( '/[\x{0900}-\x{097F}]/u', $title ) ? ' lang="hi"' : '' ) . '>' . esc_html( $title ) . '</strong>'
-				. '<span class="aw-res-sum">' . esc_html( aw_text( $id, 18 ) ) . '</span>'
-				. '<span class="aw-res-cta">Open, copy or print ' . aw_i( 'arrow-right' ) . '</span></span></a>';
-		}
-		wp_reset_postdata();
-		return $out . '</div>';
-	}
-);
 
 /* ---------- HELP: Directory results as scannable rows ---------- */
 
