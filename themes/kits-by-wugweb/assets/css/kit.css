@@ -684,8 +684,8 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 /* Menu overlay on phones: big, left-aligned rows that are easy to tap */
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { align-items: stretch !important; padding-top: var(--kit-space-7) !important; }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__container { align-items: stretch !important; gap: 0 !important; width: 100%; }
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item { width: 100%; border-bottom: 1px solid rgba(255,255,255,.12); }
-.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content { display: flex !important; width: 100%; min-height: 56px; align-items: center; justify-content: flex-start; font-size: var(--kit-type-h, 1.25rem) !important; font-weight: var(--kit-weight-medium); padding-inline: var(--kit-space-2) !important; }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item { width: 100%; margin: 0 !important; padding: 0 !important; border-bottom: 1px solid rgba(255,255,255,.12); }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content { display: flex !important; width: 100%; min-height: 56px; align-items: center; justify-content: flex-start; font-size: var(--kit-type-h, 1.25rem) !important; font-weight: var(--kit-weight-medium); padding-inline: 0 !important; margin: 0 !important; }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-item__content::after { display: none !important; }
 /* While the menu is open the sticky help bar steps aside */
 html.has-modal-open .aw-sticky-help ,html.has-modal-open .kit-sticky-help { display: none !important; }
