@@ -78,6 +78,7 @@ require_once AW_CORE_DIR . 'includes/indexing.php';
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/press.php';
+require_once AW_CORE_DIR . 'includes/review-queue.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 
 register_activation_hook(
