@@ -1,0 +1,48 @@
+# Deploy gate (S0.1). Work is pushed to wordpress-dev. This job lints every PHP file, boots WordPress with the
+# themes and plugins, adds one item of each kind, and loads one URL per page type. Any PHP fatal, 500 or
+# "critical error" fails the job. Only when it passes is the wordpress branch (which Hostinger deploys) moved to
+# the tested commit.
+name: Deploy check
+
+on:
+  push:
+    branches: [wordpress-dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, gd, intl, zip
+          tools: wp-cli
+      - name: PHP lint (all files)
+        run: |
+          find plugins themes tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l | grep -v '^No syntax errors' && exit 1 || true
+      - name: Boot WordPress and load every page type
+        run: bash tools/ci/smoke.sh
+      - name: Move the deploy branch to this commit
+        if: github.ref == 'refs/heads/wordpress-dev'
+        run: |
+          git push origin "HEAD:refs/heads/wordpress"
