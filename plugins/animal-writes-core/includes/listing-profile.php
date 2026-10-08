@@ -100,7 +100,7 @@ add_action(
 function aw_block_org_details( $a, $id ) {
 	$m     = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$links = '';
-	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'opportunities', 'Volunteer' ) ) as $k => $l ) {
+	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ) ) as $k => $l ) {
 		if ( $m( $k ) ) {
 			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="noopener">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
 		}

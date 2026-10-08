@@ -412,11 +412,11 @@
 })();
 
 /* External links: every link to another site that has words gets an arrow (CSS) and a screen-reader note; icon-only links,
-   share buttons and links that already show an arrow are left as they are. */
+   buttons (they carry their own icon) and links that already show an arrow are left as they are. */
 (function () {
 	function mark(root) {
 		root.querySelectorAll('a[href^="http"]:not(.kit-link-ext)').forEach(function (a) {
-			if (a.host === location.host || !a.textContent.trim() || a.querySelector('.kit-ico--arrow-up-right') || a.closest('.wp-block-navigation, .kit-ad, .kit-share, .kit-socials')) {
+			if (a.host === location.host || !a.textContent.trim() || a.querySelector('.kit-ico--arrow-up-right') || a.closest('.wp-block-navigation, .kit-ad, .kit-share, .kit-socials') || a.matches('.kit-btn, .wp-block-button__link')) {
 				return;
 			}
 			a.classList.add('kit-link-ext');
