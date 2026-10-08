@@ -963,3 +963,5 @@ body { background: var(--kit-surface-page); }
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-close { height: 100%; }
 /* Mobile menu: fixed from under the admin bar (when signed in) to the bottom of the screen */
 .wp-block-navigation__responsive-container.is-menu-open { top: var(--wp-admin--admin-bar--height, 0px) !important; bottom: 0 !important; height: auto !important; }
+.wp-block-navigation__responsive-container.is-menu-open { padding-top: calc(var(--kit-toggle-top, 28px) - var(--wp-admin--admin-bar--height, 0px) + 44px) !important; }
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { padding-top: var(--kit-space-3) !important; margin-top: 0 !important; }
