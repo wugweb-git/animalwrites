@@ -257,12 +257,12 @@ function aw_press_card( $p ) {
 	$logo  = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
 	$thumb = (string) get_the_post_thumbnail_url( $p, 'medium_large' );
 	$video = (string) get_post_meta( $p->ID, 'aw_press_video', true );
-	$fallback = $logo ? '<img class="aw-press-logo-large" src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
+	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
 	$media = $thumb
-		? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')">' . '<span class="aw-press-fallback">' . $fallback . '</span>'
-		: '<span class="aw-press-fallback">' . $fallback . '</span>';
-	return '<article class="aw-story aw-story--card aw-press-card">'
-		. '<div class="aw-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-press-play" aria-hidden="true">▶</span>' : '' ) . '</div>'
+		? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')">' . '<span class="aw-story-fallback">' . $fallback . '</span>'
+		: '<span class="aw-story-fallback">' . $fallback . '</span>';
+	return '<article class="aw-story aw-story--card aw-story--external">'
+		. '<div class="aw-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>'
 		. '<div class="aw-story-body">'
 		. ( $pub ? '<p class="aw-src">' . ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) . '<span class="aw-src-name">' . esc_html( $pub ) . '</span></p>' : '' )
 		. '<h2 class="aw-story-title"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( get_the_title( $p ) ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></h2>'
@@ -280,9 +280,9 @@ add_action(
 			function () {
 				$items = aw_press_list();
 				if ( ! $items ) {
-					return '<div class="aw-empty"><p>' . esc_html( 'No coverage listed yet.' ) . '</p></div>'; // OWNER copy (Phase 11 I5)
+					return '<div class="aw-empty"><p><strong>No coverage yet.</strong></p><p>Written about Animal Writes? <a href="' . esc_url( home_url( '/contact/?about=general' ) ) . '">Send us the link.</a></p></div>';
 				}
-				return '<div class="aw-news-grid aw-press-grid">' . implode( '', array_map( 'aw_press_card', $items ) ) . '</div>';
+				return '<div class="aw-news-grid">' . implode( '', array_map( 'aw_press_card', $items ) ) . '</div>';
 			}
 		);
 	},
@@ -349,4 +349,98 @@ add_action(
 		}
 		update_option( 'aw_press_migrated', '1', false );
 	}
+);
+
+
+/* ---------- Press discovery (worker) → "Press: to review" ---------- */
+
+/** Platforms the worker reports. */
+const AW_PRESS_PLATFORMS = array( 'web' => 'Article', 'youtube' => 'YouTube', 'instagram' => 'Instagram', 'facebook' => 'Facebook', 'x' => 'X', 'threads' => 'Threads', 'linkedin' => 'LinkedIn', 'reddit' => 'Reddit' );
+
+/**
+ * A candidate from the press-discovery worker: kept as a pending press item (never published automatically).
+ * Duplicates by URL are refused, including items already rejected (trashed), so a rejected link never comes back.
+ *
+ * @param WP_REST_Request $req Request: url, title, publisher, account, platform, format, date, thumbnail, query.
+ * @return WP_REST_Response
+ */
+function aw_press_ingest( WP_REST_Request $req ) {
+	$url = esc_url_raw( (string) $req->get_param( 'source_url' ) );
+	if ( ! $url ) {
+		return new WP_REST_Response( array( 'status' => 'error', 'message' => 'source_url is required' ), 400 );
+	}
+	$dupe = get_posts( array( 'post_type' => 'aw_press', 'post_status' => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ), 'meta_key' => 'aw_press_url', 'meta_value' => $url, 'fields' => 'ids', 'numberposts' => 1 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( $dupe || ( function_exists( 'aw_find_by_source' ) && aw_find_by_source( 'aw_news', $url ) ) ) {
+		return new WP_REST_Response( array( 'status' => 'duplicate' ), 200 );
+	}
+	$id = wp_insert_post( array( 'post_type' => 'aw_press', 'post_status' => 'pending', 'post_title' => sanitize_text_field( (string) $req->get_param( 'title' ) ) ), true );
+	if ( is_wp_error( $id ) ) {
+		return new WP_REST_Response( array( 'status' => 'error' ), 500 );
+	}
+	$platform = sanitize_key( (string) $req->get_param( 'platform' ) );
+	$meta     = array(
+		'aw_press_url'       => $url,
+		'aw_press_publisher' => sanitize_text_field( (string) $req->get_param( 'source_name' ) ),
+		'aw_press_date'      => preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $req->get_param( 'source_date' ) ) ? (string) $req->get_param( 'source_date' ) : '',
+		'aw_press_format'    => in_array( $req->get_param( 'format' ), array_keys( AW_PRESS_FORMATS ), true ) ? (string) $req->get_param( 'format' ) : '',
+		'aw_press_platform'  => isset( AW_PRESS_PLATFORMS[ $platform ] ) ? $platform : 'web',
+		'aw_press_account'   => sanitize_text_field( (string) $req->get_param( 'account' ) ),
+		'aw_press_query'     => sanitize_text_field( (string) $req->get_param( 'query' ) ),
+		'aw_press_thumb_src' => esc_url_raw( (string) $req->get_param( 'image_url' ) ),
+	);
+	foreach ( $meta as $k => $v ) {
+		if ( '' !== $v ) {
+			update_post_meta( $id, $k, $v );
+		}
+	}
+	aw_press_fetch( $id ); // fill what the page itself says (thumbnail downloaded, never hotlinked)
+	if ( ! has_post_thumbnail( $id ) && $meta['aw_press_thumb_src'] ) {
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$att = media_sideload_image( $meta['aw_press_thumb_src'], $id, get_the_title( $id ), 'id' );
+		if ( ! is_wp_error( $att ) ) {
+			set_post_thumbnail( $id, $att );
+		}
+	}
+	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
+}
+
+// Inbox → "Press to review": the pending items, with a count. Publish = approve; Move to Trash = reject (never comes back).
+add_action(
+	'admin_menu',
+	function () {
+		$n = (int) ( wp_count_posts( 'aw_press' )->pending ?? 0 );
+		add_submenu_page( 'aw-inbox', 'Press to review', 'Press to review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), 'edit_pages', 'edit.php?post_type=aw_press&post_status=pending' );
+	},
+	20
+);
+add_filter( 'manage_aw_press_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'aw_thumb' => '', 'title' => 'Headline', 'aw_platform' => 'Platform', 'aw_account' => 'Publisher / account', 'aw_date' => 'Date', 'aw_query' => 'Found by', 'aw_link' => 'Link' ) );
+add_action(
+	'manage_aw_press_posts_custom_column',
+	function ( $col, $id ) {
+		switch ( $col ) {
+			case 'aw_thumb':
+				echo has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, array( 80, 45 ) ) : '—';
+				break;
+			case 'aw_platform':
+				echo esc_html( AW_PRESS_PLATFORMS[ get_post_meta( $id, 'aw_press_platform', true ) ?: 'web' ] ?? 'Article' );
+				break;
+			case 'aw_account':
+				echo esc_html( trim( get_post_meta( $id, 'aw_press_publisher', true ) . ' ' . get_post_meta( $id, 'aw_press_account', true ) ) );
+				break;
+			case 'aw_date':
+				echo esc_html( (string) get_post_meta( $id, 'aw_press_date', true ) );
+				break;
+			case 'aw_query':
+				echo esc_html( (string) get_post_meta( $id, 'aw_press_query', true ) );
+				break;
+			case 'aw_link':
+				$u = (string) get_post_meta( $id, 'aw_press_url', true );
+				echo $u ? '<a href="' . esc_url( $u ) . '" target="_blank" rel="noopener noreferrer">Open</a>' : '';
+				break;
+		}
+	},
+	10,
+	2
 );

@@ -11,7 +11,7 @@
 ?>
 <!-- wp:group {"align":"full","className":"aw-ed-learn","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <div class="wp-block-group alignfull aw-ed-learn"><!-- wp:html -->
-<header class="aw-ed-head"><div><h2>Learn</h2><p class="aw-ed-desc">Practical guides, the law in full, and letters you can send today.</p></div></header>
+<header class="aw-ed-head"><div><h2>Guides and research</h2><p class="aw-ed-desc">Practical guides, the law in full, and letters you can send today.</p></div></header>
 <!-- /wp:html -->
 <!-- wp:group {"className":"aw-ed-cols","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-cols"><!-- wp:group {"className":"aw-ed-col","layout":{"type":"default"}} -->
@@ -24,7 +24,7 @@
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 <!-- wp:html -->
-<a class="aw-ed-more" href="/resources/">Resources <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
+<a class="aw-ed-more" href="/resources/">See all resources <span class="aw-ico aw-ico--arrow-right" aria-hidden="true"></span></a>
 <!-- /wp:html -->
 </div>
 <!-- /wp:group -->

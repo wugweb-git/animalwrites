@@ -32,7 +32,7 @@ add_filter(
 		'aw_guide'       => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
 		'aw_campaign'    => 'Citizen campaigns for animals in India, starting with Animal Writes 1.0.',
 		'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
-		'aw_listing'     => 'Find shelters, vets, ambulances and rescue groups by state and district across India.',
+		'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.',
 	)
 );
 // Share image fallback: the publisher's image, else the first page of the official PDF.

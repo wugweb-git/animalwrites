@@ -109,7 +109,7 @@ function aw_newsletter_form() {
 		return '<div class="aw-form-done kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html( $msgs[ $done ][0] ) . '</p>' . ( $msgs[ $done ][1] ? '<p>' . esc_html( $msgs[ $done ][1] ) . '</p>' : '' ) . '</div>';
 	}
 	$form  = 'aw_newsletter';
-	$html  = aw_form_open( $form, array( 'class' => 'aw-form aw-newsletter-form' ) );
+	$html  = aw_form_open( $form, array( 'class' => 'aw-form aw-newsletter-form', 'data-altcha' => 'invisible' ) );
 	$html .= aw_field( $form, array( 'name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'icon' => 'mail', 'attrs' => array( 'autocomplete' => 'email', 'maxlength' => 254, 'placeholder' => 'you@example.com' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ) );
 	$html .= aw_field( $form, array( 'name' => 'name', 'label' => 'Your name', 'icon' => 'name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80, 'placeholder' => 'Asha' ) ) );
 	$html .= '<div class="aw-nl-submit"><button type="submit" class="kit-btn">Subscribe</button></div>';

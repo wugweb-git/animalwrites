@@ -185,6 +185,17 @@
 			if (bad.length || !custom) { e.preventDefault(); if (bad[0]) bad[0].focus(); return; }
 			var btn = form.querySelector('button[type=submit]');
 			if (btn && btn.classList.contains('is-loading')) { e.preventDefault(); return; }
+			// ALTCHA in automatic mode checks on send and then sends the form again: let it run first.
+			var auto = form.querySelector('altcha-widget[auto=onsubmit]'), solved = form.querySelector('input[name=altcha]');
+			if (auto && !(solved && solved.value)) {
+				if (!window.customElements || !customElements.get('altcha-widget')) {
+					e.preventDefault();
+					var first = form.querySelector('input:not([type=hidden])');
+					if (first) first.dispatchEvent(new Event('focusin', { bubbles: true })); // loads the widget
+					if (window.customElements) customElements.whenDefined('altcha-widget').then(function () { setTimeout(function () { form.requestSubmit(); }, 50); });
+				}
+				return; // the widget stops this send, checks, and sends again
+			}
 			if (!window.fetch || !window.FormData || form.enctype === 'multipart/form-data' && form.querySelector('input[type=file]')) { busy(btn, true); return; } // normal POST
 			e.preventDefault();
 			busy(btn, true);

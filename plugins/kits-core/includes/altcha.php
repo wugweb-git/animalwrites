@@ -106,7 +106,7 @@ add_action(
  * Widget markup for a form. The script (67 KB) loads only when someone starts using a form on the page, so pages
  * with a form in the footer stay light.
  */
-function kits_altcha_widget() {
+function kits_altcha_widget( $mode = '' ) {
 	static $done = false;
 	if ( ! $done ) {
 		$done = true;
@@ -122,6 +122,10 @@ function kits_altcha_widget() {
 			},
 			20
 		);
+	}
+	// "invisible": no check box; the check runs when the form is sent (auto="onsubmit"), same protection.
+	if ( 'invisible' === $mode ) {
+		return '<div class="aw-captcha aw-captcha--invisible"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" auto="onsubmit" hidefooter hidelogo></altcha-widget></div>';
 	}
 	return '<div class="aw-captcha"><altcha-widget challengeurl="' . esc_url( rest_url( 'kits/v1/altcha' ) ) . '" hidefooter hidelogo></altcha-widget></div>';
 }

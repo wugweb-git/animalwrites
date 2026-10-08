@@ -60,7 +60,7 @@ function kits_filter_group( $legend, $options, $show = 8 ) {
 	}
 	$html .= '</div>';
 	if ( count( $options ) > $show ) {
-		$html .= '<button type="button" class="kit-filter-more" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '" data-more="Show more" data-less="Show fewer">Show more</button>';
+		$html .= '<button type="button" class="kit-filter-more" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '" data-more="' . esc_attr( 'Show all (' . count( $options ) . ')' ) . '" data-less="Show fewer">' . esc_html( 'Show all (' . count( $options ) . ')' ) . '</button>';
 	}
 	return $html . '</fieldset>';
 }

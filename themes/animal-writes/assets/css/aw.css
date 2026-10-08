@@ -544,16 +544,16 @@ body { background: var(--aw-color-canvas); }
 .aw-banner-text { position: absolute; inset: auto var(--kit-space-4, 1rem) var(--kit-space-6, 1.5rem); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); font-size: var(--kit-type-h, 1.25rem); font-weight: var(--kit-weight-strong); max-width: 40ch; }
 .aw-banner-credit { margin: var(--kit-space-1, .25rem) 0 0; font-size: var(--kit-type-xs, .75rem); color: var(--kit-color-muted); }
 .aw-banner-credit a { color: inherit; }
-/* Media & PR cards (Phase 11 I2): News card anatomy; a broken or missing image shows the publisher logo. */
-.aw-press-card .aw-story-media { position: relative; }
-.aw-press-fallback { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; background: var(--kit-color-surface-soft); }
-.aw-press-card .aw-story-media.is-failed .aw-press-fallback { display: flex; }
-.aw-press-card .aw-story-media.is-failed > img:not(.aw-press-logo-large) { display: none; }
-.aw-press-logo-large { width: var(--s-12); height: var(--s-12); object-fit: contain; }
-.aw-press-play { position: absolute; left: var(--s-3); bottom: var(--s-3); display: inline-flex; align-items: center; justify-content: center; width: var(--s-10); height: var(--s-10); border-radius: var(--radius-full); background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.aw-press-card .aw-story-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the one link */
-.aw-press-card { position: relative; }
-.aw-press-card .aw-story-title .aw-ico { --aw-ico-size: 0.8em; vertical-align: baseline; }
+/* Story cards that link out (Media & PR): the shared News card; a missing or broken image shows the publisher logo. */
+.aw-story--external { position: relative; }
+.aw-story--external .aw-story-media { position: relative; }
+.aw-story-fallback { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; background: var(--kit-color-surface-soft); }
+.aw-story-media.is-failed .aw-story-fallback { display: flex; }
+.aw-story--external .aw-story-media.is-failed > img:not(.aw-story-logo) { display: none; }
+.aw-story-logo { width: var(--s-12); height: var(--s-12); object-fit: contain; }
+.aw-story-play { position: absolute; left: var(--s-3); bottom: var(--s-3); display: inline-flex; align-items: center; justify-content: center; width: var(--s-10); height: var(--s-10); border-radius: var(--radius-full); background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.aw-story--external .aw-story-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the one link */
+.aw-story--external .aw-story-title .aw-ico { --aw-ico-size: 0.8em; vertical-align: baseline; }
 
 /* Announcement bar: one line on phones (just the link) */
 @media (max-width: 639px) { .aw-announce-lead { display: none; } .aw-announce p { white-space: nowrap; } }

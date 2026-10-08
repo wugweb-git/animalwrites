@@ -122,9 +122,6 @@ add_filter(
 add_filter(
 	'render_block_core/post-terms',
 	function ( $html, $block, $instance ) {
-		if ( isset( $_GET['awdbg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			$html = '<!-- awdbg singular=' . (int) is_singular() . ' ctx=' . esc_html( implode( ',', array_keys( (array) $instance->context ) ) ) . ' -->' . $html;
-		}
 		if ( ! is_singular() || isset( $instance->context['queryId'] ) ) { // the page's own chips, not those in lists
 			return $html;
 		}
@@ -133,11 +130,5 @@ add_filter(
 	10,
 	3
 );
-add_filter(
-	'do_shortcode_tag',
-	function ( $html, $tag ) {
-		return 'aw_source_row' === $tag ? aw_breadcrumbs_prepend( $html ) : $html; // section heads place it inside the band
-	},
-	10,
-	2
-);
+// Shortcodes in a template run before its blocks, so the trail is placed by blocks (topic chips or the title) or by the
+// section band itself, never by a shortcode such as the publisher row.

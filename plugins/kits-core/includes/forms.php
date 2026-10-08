@@ -104,7 +104,8 @@ function aw_form_back( $fallback ) {
  * @return string
  */
 function aw_form_open( $form, $attrs = array() ) {
-	$state = aw_form_state( $form );
+	$state  = aw_form_state( $form );
+	$altcha = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
 	$attrs = array_merge(
 		array(
 			'class'  => 'aw-form',
@@ -141,7 +142,7 @@ function aw_form_open( $form, $attrs = array() ) {
 		. wp_nonce_field( $form, '_aw_nonce', true, false )
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<p class="aw-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
-		. kits_altcha_widget();
+		. kits_altcha_widget( $altcha );
 	return $html;
 }
 

@@ -447,3 +447,21 @@ function aw_state_count( $state ) {
 	}
 	return (int) ( $all[ $state->term_id ] ?? 0 );
 }
+
+
+/**
+ * The Directory's intro line for the current view (also its meta and share description):
+ * hub, "… in {State}." or "… in {District}, {State}." (owner-approved copy, 8 Oct 2026).
+ */
+function aw_directory_intro() {
+	$city = get_query_var( 'aw_city' ) ? get_term_by( 'slug', (string) get_query_var( 'aw_city' ), 'aw_city' ) : null;
+	if ( ! $city ) {
+		return 'Animal welfare organisations, gaushalas and government vets across India.';
+	}
+	if ( $city->parent ) {
+		$state = get_term( $city->parent, 'aw_city' );
+		return sprintf( 'Animal welfare organisations, gaushalas and government vets in %1$s, %2$s.', $city->name, $state->name );
+	}
+	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );
+}
+add_filter( 'kits_seo_description', fn( $d ) => ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) ? aw_directory_intro() : $d ); // phpcs:ignore WordPress.Security.NonceVerification

@@ -81,6 +81,7 @@ add_filter(
 		if ( 'aw_testimonial' === $type ) { // 1.0 leftover, not shown on 2.0
 			$args['show_ui']      = false;
 			$args['show_in_menu'] = false;
+			$args['show_in_rest'] = false; // not served by /wp-json either
 		}
 		if ( in_array( $type, array( 'aw_message', 'aw_claim' ), true ) ) {
 			$args['show_in_menu'] = 'aw-inbox';

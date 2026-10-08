@@ -38,6 +38,7 @@ function aw_seo_description() {
 	} elseif ( is_tax() || is_category() || is_tag() ) {
 		$desc = term_description() ?: single_term_title( '', false ) . ' on ' . get_bloginfo( 'name' ) . '.';
 	}
+	$desc = (string) apply_filters( 'kits_seo_description', $desc ); // a site can describe its own views (e.g. a directory place)
 	if ( '' === trim( $desc ) ) {
 		$desc = get_bloginfo( 'description' );
 	}

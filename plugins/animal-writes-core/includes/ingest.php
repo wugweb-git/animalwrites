@@ -87,6 +87,9 @@ function aw_assign_existing_terms( $post_id, array $values, $taxonomy, array &$i
  * @return WP_REST_Response|WP_Error
  */
 function aw_ingest( WP_REST_Request $req ) {
+	if ( 'press' === $req->get_param( 'type' ) && function_exists( 'aw_press_ingest' ) ) {
+		return aw_press_ingest( $req ); // coverage of Animal Writes found by the press-discovery worker: drafts to review
+	}
 	$map = array(
 		'news'     => 'aw_news',
 		'legal'    => 'aw_legal',

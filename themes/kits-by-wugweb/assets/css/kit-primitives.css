@@ -223,6 +223,9 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 /* Forms: empty paragraphs and line breaks left by auto-formatting around shortcodes never take a place in the layout */
 :is(.aw-form, .kit-form) > :is(p:empty, br, p:has(> input[type=hidden]):not(:has(> :not(input[type=hidden])))) { display: none; } /* hidden fields still submit */
 
+/* ALTCHA in automatic mode: present (it must run) but not shown */
+.aw-captcha--invisible { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
 /* ---------- 12. Checkbox ---------- */
 .kit-checkbox { display: flex; gap: var(--s-3); align-items: flex-start; min-height: var(--kit-size-target); padding-block: var(--s-2); cursor: pointer; font-weight: var(--kit-weight-regular); }
 .kit-checkbox input { width: var(--kit-size-check); height: var(--kit-size-check); margin: 0.1em 0 0; flex: none; accent-color: var(--kit-color-ink); }

@@ -13,7 +13,7 @@ $row  = fn( $title, $text ) => "<!-- wp:group {\"className\":\"aw-contact-row\",
 $sc   = fn( $code ) => "<!-- wp:shortcode -->\n$code\n<!-- /wp:shortcode -->\n";
 $body = "<!-- wp:group {\"align\":\"wide\",\"className\":\"aw-contact\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group alignwide aw-contact\">"
 	. "<!-- wp:group {\"className\":\"aw-contact-intro\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-contact-intro\">"
-	. $p( 'Email <a href="mailto:contact@animalwrites.in">contact@animalwrites.in</a>, or send us a message here. We reply within a few working days.' )
+	. $p( 'Email <a href="mailto:contact@animalwrites.in">contact@animalwrites.in</a>, or send us a message here.' )
 	. "</div>\n<!-- /wp:group -->\n"
 	. "<!-- wp:group {\"className\":\"aw-contact-form-col\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-contact-form-col\">" . $sc( '[aw_contact_form]' ) . "</div>\n<!-- /wp:group -->\n"
 	. "<!-- wp:group {\"className\":\"aw-contact-org\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-contact-org\">"
@@ -29,8 +29,8 @@ $body = "<!-- wp:group {\"align\":\"wide\",\"className\":\"aw-contact\",\"layout
 	. "</div>\n<!-- /wp:group -->\n"
 	. "</div>\n<!-- /wp:group -->\n";
 wp_update_post( array( 'ID' => $page->ID, 'post_title' => 'Contact us', 'post_content' => $body ) );
-if ( ! get_post_meta( $page->ID, 'kits_seo_desc', true ) ) {
-	update_post_meta( $page->ID, 'kits_seo_desc', 'Contact Animal Writes: add or update a directory listing, get featured, post an opportunity, partner with us or report a mistake.' ); // OWNER placeholder (Phase 11 H1)
+{
+	update_post_meta( $page->ID, 'kits_seo_desc', 'Contact Animal Writes to list your organisation, get featured in the Directory, post an opportunity, partner with us or report a mistake.' ); // owner-approved 8 Oct 2026
 }
 if ( ! get_post_meta( $page->ID, 'kits_seo_title', true ) ) {
 	update_post_meta( $page->ID, 'kits_seo_title', 'Contact us' ); // keeps "Contact us – Animal Writes"

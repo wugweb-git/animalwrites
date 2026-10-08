@@ -53,8 +53,8 @@ add_shortcode(
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
-		if ( is_tax( 'aw_city' ) ) {
-			$desc = 'Shelters, vets, ambulances and rescue groups listed here. Unverified listings are marked; organisations can correct their details.';
+		if ( 'aw_listing' === $type && function_exists( 'aw_directory_intro' ) ) {
+			$desc = aw_directory_intro();
 		}
 		$count = (int) $wp_query->found_posts;
 		$noun  = array( 'aw_listing' => 'organisations', 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
