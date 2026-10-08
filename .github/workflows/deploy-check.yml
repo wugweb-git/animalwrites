@@ -42,6 +42,8 @@ jobs:
           find plugins themes tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l | grep -v '^No syntax errors' && exit 1 || true
       - name: Kits registry (every component, block and pattern has an entry)
         run: python3 tools/ci/registry_check.py
+      - name: Footer height follows its content (no max-height, vh height or overflow hidden)
+        run: python3 tools/ci/footer_check.py
       - name: Boot WordPress and load every page type
         run: bash tools/ci/smoke.sh
       - name: Move the deploy branch to this commit, and mark it as a release
