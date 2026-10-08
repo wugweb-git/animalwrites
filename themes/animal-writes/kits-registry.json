@@ -173,6 +173,35 @@
    }
   },
   {
+   "name": "Organisation page header",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-profile"
+   ],
+   "states": [
+    "logo or initials",
+    "verified or not",
+    "with or without each contact way"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<h1> name; type and place as links; contact buttons are <a> (tel:, mailto:, WhatsApp, website)",
+    "aria": "icons aria-hidden; button text names the action",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "\"Call\", \"Email\", \"WhatsApp\", \"Website\""
+   },
+   "seo": {
+    "heading": "the page H1",
+    "link": "type and place pages",
+    "alt": "logo alt empty (name beside it)",
+    "schema": "Organization / VeterinaryCare"
+   }
+  },
+  {
    "name": "Directory search",
    "type": "component",
    "status": "live",
