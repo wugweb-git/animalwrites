@@ -137,6 +137,8 @@
 	padding: var(--s-6); background: var(--kit-color-raised); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1);
 }
 .aw-dir-search .kit-field { margin: 0; min-width: 0; }
+.aw-dir-search > p:empty, .aw-dir-search > br { display: none; } /* left by auto-paragraphs around the shortcode */
+.aw-section-band--compact { padding-top: var(--s-8) !important; padding-bottom: var(--s-6) !important; } /* Directory: height = content (E1) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
@@ -472,12 +474,27 @@ body { background: var(--aw-color-canvas); }
 /* Title links in directory rows and the document library: at least 24px tall to tap (WCAG 2.5.8). */
 .aw-org-name a, .aw-doc-title a { display: inline-block; padding-block: 2px; }
 
-/* Footer newsletter: one compact row on wide screens, stacked on phones. */
-.aw-footer-newsletter { padding-block: var(--kit-space-6, 1.5rem); border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent); margin-bottom: var(--kit-space-6, 1.5rem); }
-.aw-footer-newsletter .aw-form { display: grid; gap: var(--kit-space-3, .75rem); max-width: 44rem; }
-@media (min-width: 640px) { .aw-footer-newsletter .aw-form { grid-template-columns: 1fr 1fr; align-items: end; } .aw-footer-newsletter .aw-field--checkbox, .aw-footer-newsletter .aw-captcha, .aw-footer-newsletter .aw-form > p:last-child, .aw-footer-newsletter .aw-form-summary { grid-column: 1 / -1; } }
-.aw-footer-newsletter label, .aw-footer-newsletter .aw-optional { color: inherit; }
-.aw-footer-newsletter input[type="email"], .aw-footer-newsletter input[type="text"] { background: var(--kit-color-surface); color: var(--kit-color-ink); }
+/* Footer newsletter (Phase 11 F.2): a photo band (Cover block, --color-ash overlay about 80%), at most about 200px tall
+   on wide screens: heading, then Email · Your name · Subscribe in one row, consent below. Yellow only on the button. */
+.aw-footer-newsletter.wp-block-cover { min-height: 0 !important; padding: var(--s-6) var(--s-4); margin: 0 0 var(--s-8); color: var(--kit-color-on-ink); }
+.aw-footer-newsletter .wp-block-cover__background { background-color: var(--color-ash) !important; }
+.aw-footer-newsletter .wp-block-cover__inner-container { width: 100%; max-width: var(--kit-width-wide); margin-inline: auto; }
+.aw-footer-newsletter .aw-footer-head { margin: 0 0 var(--s-3); }
+.aw-footer-newsletter .aw-form { display: grid; gap: 0 var(--s-3); max-width: none; }
+.aw-footer-newsletter .kit-field { margin: 0; }
+.aw-footer-newsletter label, .aw-footer-newsletter .kit-optional { color: inherit; }
+.aw-footer-newsletter .kit-field :is(input[type=email], input[type=text]) { background: var(--kit-color-raised); color: var(--kit-color-ink); border-color: var(--kit-color-raised); }
+.aw-footer-newsletter .kit-field-message { color: var(--color-yellow); }
+.aw-footer-newsletter .aw-nl-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
+.aw-footer-newsletter .aw-captcha { order: 10; } /* the check box goes after the consent line, so Email · Name · Subscribe stay on one row */
+.aw-footer-newsletter .aw-form-done { background: transparent; border-left-color: var(--color-yellow); color: inherit; }
+.aw-footer-newsletter .aw-form-done-title { font-weight: var(--kit-weight-bold); font-size: var(--fluid-h4); margin: 0 0 var(--s-1); }
+@media (min-width: 640px) {
+	.aw-footer-newsletter .aw-form { grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr) auto; align-items: start; }
+	.aw-footer-newsletter .aw-nl-submit { padding-top: calc(1.5em + var(--s-2)); }
+	.aw-footer-newsletter .aw-field--checkbox, .aw-footer-newsletter .aw-captcha, .aw-footer-newsletter .aw-form-summary, .aw-footer-newsletter .kit-form-status { grid-column: 1 / -1; }
+	.aw-footer-newsletter .aw-field--checkbox .kit-checkbox { min-height: 0; padding-block: 0; }
+}
 
 /* Topics index (/topics/). */
 .aw-topics-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--kit-space-4, 1rem); list-style: none; padding: 0; margin: 0; }

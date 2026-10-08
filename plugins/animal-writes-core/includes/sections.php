@@ -95,7 +95,7 @@ add_shortcode(
 			$visual = '';
 			$count  = 0;
 		}
-		return '<header class="aw-section-band alignfull"><div class="aw-section-head alignwide"><div>'
+		return '<header class="aw-section-band alignfull' . ( 'aw_listing' === $type ? ' aw-section-band--compact' : '' ) . '"><div class="aw-section-head alignwide"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="aw-section-desc">' . esc_html( $desc ) . '</p>' : '' )
 			. ( $count ? '<p class="aw-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )

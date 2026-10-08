@@ -188,7 +188,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-field .kit-optional { font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .kit-field-control { position: relative; }
 .kit-field-control > .kit-field-icon { position: absolute; left: var(--s-3); top: 50%; transform: translateY(-50%); color: var(--kit-color-muted); pointer-events: none; }
-.kit-field-control:has(> .kit-field-icon) :is(input, select) { padding-left: calc(var(--s-3) + 1.25rem + var(--s-2)); }
+.kit-field .kit-field-control:has(> .kit-field-icon) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select) { padding-left: calc(var(--s-3) + 1.25rem + var(--s-2)); }
 .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
 	width: 100%; box-sizing: border-box;
 	min-height: var(--kit-size-target); padding: 0 var(--s-3);
@@ -207,6 +207,9 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-field-message { display: block; min-height: 1.4em; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); } /* reserved line: no jump */
 .kit-field-message:not(:empty)::before { content: "⚠ "; }
 .kit-field-hint { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
+
+/* Forms: empty paragraphs and line breaks left by auto-formatting around shortcodes never take a place in the layout */
+:is(.aw-form, .kit-form) > :is(p:empty, br, p:has(> input[type=hidden]):not(:has(> :not(input[type=hidden])))) { display: none; } /* hidden fields still submit */
 
 /* ---------- 12. Checkbox ---------- */
 .kit-checkbox { display: flex; gap: var(--s-3); align-items: flex-start; min-height: var(--kit-size-target); padding-block: var(--s-2); cursor: pointer; font-weight: var(--kit-weight-regular); }
