@@ -17,7 +17,10 @@ function kits_setup() {
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'post-thumbnails' );
 	add_editor_style( 'assets/css/kits-v42.css' );
+	add_editor_style( 'assets/css/kit-tokens.css' );
 	add_editor_style( 'assets/css/kits.css' );
+	add_editor_style( 'assets/css/kit.css' ); // components and primitives: the editor shows content as the site does
+	add_editor_style( 'assets/css/kit-primitives.css' );
 	if ( kits_uses_inter_tight() ) {
 		add_editor_style( kits_font_url() );
 	}

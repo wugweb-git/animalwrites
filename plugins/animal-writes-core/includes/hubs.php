@@ -357,6 +357,7 @@ function aw_hub_intro( $type ) {
 /** The section band of a hub Page: breadcrumb, H1, intro, count and pictures, then the filters or search. */
 function aw_hub_band( $type ) {
 	$compact = 'aw_listing' === $type ? ' aw-section-band--compact' : '';
+	$plain   = in_array( $type, array( 'aw_listing', 'aw_press' ), true ); // no count or pictures in their band
 	return '<!-- wp:group {"tagName":"header","align":"full","className":"aw-section-band' . $compact . '","layout":{"type":"default"}} -->
 <header class="wp-block-group alignfull aw-section-band' . $compact . '"><!-- wp:group {"className":"aw-section-inner","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-section-inner"><!-- wp:animal-writes/breadcrumb /-->
@@ -369,10 +370,10 @@ function aw_hub_band( $type ) {
 <p class="aw-section-desc">' . esc_html( aw_hub_intro( $type ) ) . '</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:animal-writes/hub-count {"postType":"' . $type . '"} /--></div>
+' . ( $plain ? '' : '<!-- wp:animal-writes/hub-count {"postType":"' . $type . '"} /-->' ) . '</div>
 <!-- /wp:group -->
 
-<!-- wp:animal-writes/hub-visual {"postType":"' . $type . '"} /--></div>
+' . ( $plain ? '' : '<!-- wp:animal-writes/hub-visual {"postType":"' . $type . '"} /-->' ) . '</div>
 <!-- /wp:group -->
 
 <!-- wp:animal-writes/list-filters {"postType":"' . $type . '"} /--></div>
@@ -583,7 +584,7 @@ function aw_hub_page_content( $type, $pattern_id ) {
  * Create the hub Pages and list patterns (once per version). A Page or pattern the owner has edited since it was
  * written here is left alone.
  */
-const AW_HUBS_VERSION = '1';
+const AW_HUBS_VERSION = '2';
 add_action(
 	'init',
 	function () {

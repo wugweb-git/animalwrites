@@ -22,6 +22,15 @@ add_action(
 	20
 );
 
+// The editor shows content with the site's own tokens and components (after the Kits styles).
+add_action(
+	'after_setup_theme',
+	function () {
+		add_editor_style( array( 'assets/css/tokens.css', 'assets/css/aw.css' ) );
+	},
+	11
+);
+
 // Reusable sections (patterns/*.php) appear under their own category in the block inserter.
 add_action(
 	'init',

@@ -48,7 +48,7 @@ function aw_hub_blocks() {
 add_action(
 	'init',
 	function () {
-		wp_register_script( 'aw-hub-blocks', plugins_url( 'assets/js/hub-blocks.js', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-server-side-render' ), AW_CORE_VERSION . '-1', true );
+		wp_register_script( 'aw-hub-blocks', plugins_url( 'assets/js/hub-blocks.js', AW_CORE_DIR . 'animal-writes-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-server-side-render' ), AW_CORE_VERSION . '-2', true );
 		$list = array();
 		foreach ( aw_hub_blocks() as $name => $b ) {
 			register_block_type(
@@ -75,6 +75,14 @@ add_action(
 /* ---------- Band ---------- */
 
 function aw_block_breadcrumb() {
+	global $post;
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $post ) { // editor preview: the trail of this page
+		$trail = '<li><a href="' . esc_url( home_url( '/' ) ) . '">Home</a></li>';
+		foreach ( array_reverse( get_post_ancestors( $post ) ) as $a ) {
+			$trail .= '<li><a href="' . esc_url( get_permalink( $a ) ) . '">' . esc_html( get_the_title( $a ) ) . '</a></li>';
+		}
+		return '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>' . $trail . '<li><span aria-current="page">' . esc_html( get_the_title( $post ) ) . '</span></li></ol></nav>';
+	}
 	return function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
 }
 
@@ -302,6 +310,19 @@ function aw_block_press_meta( $a, $id ) {
 	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
 	return '<p class="aw-story-meta kit-tags">' . ( $date ? '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time>' : '' ) . ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) . '</p>';
 }
+
+// Hub Pages in the editor: the H1 in the band is the title (no second title field above it).
+add_action(
+	'enqueue_block_assets',
+	function () {
+		$id = is_admin() ? (int) ( $_GET['post'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( $id && 'page-hub' === get_page_template_slug( $id ) ) {
+			wp_register_style( 'aw-hub-editor', false, array(), AW_CORE_VERSION );
+			wp_enqueue_style( 'aw-hub-editor' );
+			wp_add_inline_style( 'aw-hub-editor', '.editor-visual-editor__post-title-wrapper{display:none}' );
+		}
+	}
+);
 
 // A press item's title links to the coverage itself (new tab), not to an item page (press items have none).
 add_filter(
