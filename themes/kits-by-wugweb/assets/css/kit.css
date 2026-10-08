@@ -274,6 +274,9 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 
 /* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
 .aw-section-band ,.kit-section-band { background: var(--kit-color-surface); padding: var(--kit-space-section) var(--kit-space-gutter) var(--kit-space-6); margin: 0 0 var(--kit-space-6) !important; }
+/* The band runs edge to edge whatever container it sits in */
+.aw-section-band ,.kit-section-band { width: auto; max-width: none !important; margin-inline: calc(50% - 50vw) !important; }
+html { overflow-x: clip; }
 .aw-section-head ,.kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-section-head .wp-block-query-title ,.kit-section-head .wp-block-query-title { margin: 0; }
 .aw-section-desc ,.kit-section-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-3) 0 0; }
@@ -286,9 +289,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 .aw-section-visual .aw-placard ,.kit-section-visual .kit-placard { font-size: var(--kit-type-h4); height: auto; overflow: hidden; background-color: var(--kit-color-raised); border: 2px solid var(--kit-color-ink); }
 /* Documents show the top of their first page (masthead) */
 .aw-doc-cover img, .aw-section-visual img[src*="cover-"], .aw-section-visual img[src*="-pdf"], .type-aw_research .wp-block-post-featured-image img, .single-aw_research .wp-block-post-featured-image img ,.kit-doc-cover img, .kit-section-visual img[src*="cover-"], .kit-section-visual img[src*="-pdf"]{ object-position: top; background: var(--kit-color-bg); }
-@media (min-width: 768px) {
-	.aw-section-head ,.kit-section-head { grid-template-columns: 1.3fr 1fr; }
-}
+
 
 /* 4.7 Icons — Lucide-style line icons (ISC licence) as CSS masks: <span class="aw-ico aw-ico--name" aria-hidden="true"></span>.
    Inherit currentColor; size 1.25em (override with --kit-ico-size). */
