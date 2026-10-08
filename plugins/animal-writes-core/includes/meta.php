@@ -64,6 +64,7 @@ function aw_meta_schema() {
 		'aw_languages'       => array( 'string', array( 'aw_listing' ), 'Languages spoken (comma separated)' ),
 		'aw_donate_url'      => array( 'string', array( 'aw_listing' ), 'Donate link' ),
 		'aw_volunteer_url'   => array( 'string', array( 'aw_listing' ), 'Volunteer link' ),
+		'aw_rel_nofollow'    => array( 'string', array( 'aw_listing' ), 'Links marked nofollow (1)' ),
 
 		// Opportunities.
 		'aw_org_name'        => array( 'string', array( 'aw_opportunity' ), 'Organisation' ),
@@ -107,6 +108,9 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_founded' === $key ) {
 		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';
+	}
+	if ( 'aw_rel_nofollow' === $key ) {
+		return $value ? '1' : '';
 	}
 	if ( 'aw_hours_spec' === $key ) { // keep line breaks
 		return sanitize_textarea_field( (string) $value );

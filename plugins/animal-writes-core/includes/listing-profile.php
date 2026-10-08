@@ -47,6 +47,9 @@ function aw_listing_fields() {
 			'aw_services'     => array( 'Services', 'text', 'Comma separated, as the organisation states them' ),
 			'aw_languages'    => array( 'Languages', 'text', 'Comma separated' ),
 		),
+		'Links'   => array(
+			'aw_rel_nofollow' => array( 'Mark this organisation\'s links nofollow', 'checkbox', 'For sponsored or paid listings' ),
+		),
 		'Support' => array(
 			'aw_donate_url'    => array( 'Donate link', 'url', '' ),
 			'aw_volunteer_url' => array( 'Volunteer link', 'url', '' ),
@@ -69,7 +72,7 @@ function aw_listing_details_box( $post ) {
 		echo '<h3 style="margin:1.25em 0 .5em">' . esc_html( $group ) . '</h3><table class="form-table" role="presentation"><tbody>';
 		foreach ( $fields as $key => $f ) {
 			$val     = (string) get_post_meta( $post->ID, $key, true );
-			$control = 'textarea' === $f[1] ? '<textarea class="large-text" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>' : '<input class="regular-text" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">';
+			$control = 'checkbox' === $f[1] ? '<input type="checkbox" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . checked( $val, '1', false ) . '>' : ( 'textarea' === $f[1] ? '<textarea class="large-text" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>' : '<input class="regular-text" type="' . esc_attr( $f[1] ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">' );
 			echo '<tr><th scope="row"><label for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label></th><td>' . $control // phpcs:ignore WordPress.Security.EscapeOutput
 				. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' ) . '</td></tr>';
 		}
@@ -112,7 +115,8 @@ function aw_block_org_details( $a, $id ) {
 	$links = '';
 	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ) ) as $k => $l ) {
 		if ( $m( $k ) ) {
-			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="noopener">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
+			$rel    = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
+			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
 		}
 	}
 	$photos = '';

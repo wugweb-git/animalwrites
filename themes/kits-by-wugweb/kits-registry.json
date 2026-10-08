@@ -1402,6 +1402,42 @@
     "alt": "n/a",
     "schema": "none"
    }
+  },
+  {
+   "name": "AI summary, key takeaways and FAQs",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-ai-summary",
+    "kit-takeaways",
+    "kit-faqs",
+    "kit-faq"
+   ],
+   "states": [
+    "summary only",
+    "with takeaways",
+    "with FAQs",
+    "none (prints nothing)"
+   ],
+   "tokens": [
+    "kit-type-lead",
+    "kit-surface-card"
+   ],
+   "a11y": {
+    "element": "<p>, <section aria-labelledby> with <h2>, <details>/<summary>",
+    "aria": "sections named by their headings",
+    "keyboard": "Enter/Space opens a question",
+    "focus": "3px ring",
+    "target": "44px rows",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 (Key takeaways, Questions)",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "FAQPage from the FAQ field"
+   }
   }
  ],
  "nav": [

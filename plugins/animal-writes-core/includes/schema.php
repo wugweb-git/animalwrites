@@ -162,6 +162,8 @@ function aw_article_schema( $id ) {
 	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 		$at = 'NewsArticle';
 	}
+	$over     = trim( (string) get_post_meta( $id, 'kits_schema_type', true ) ); // editor's choice (SEO box)
+	$at       = $over ? $over : $at;
 	$src_date = (string) get_post_meta( $id, 'aw_source_date', true );
 	$image    = function_exists( 'aw_item_image' ) ? aw_item_image( $id ) : '';
 	$image    = $image ? $image : (string) get_the_post_thumbnail_url( $id, 'large' );
@@ -174,7 +176,7 @@ function aw_article_schema( $id ) {
 		'url'              => get_permalink( $id ),
 		'description'      => function_exists( 'aw_text' ) ? aw_text( $id, 40 ) : '',
 		'datePublished'    => $src_date ? $src_date : get_the_date( 'c', $id ),
-		'dateModified'     => get_the_modified_date( 'c', $id ),
+		'dateModified'     => get_post_meta( $id, 'kits_last_reviewed', true ) ? (string) get_post_meta( $id, 'kits_last_reviewed', true ) : get_the_modified_date( 'c', $id ),
 		'inLanguage'       => 'en-IN',
 		'publisher'        => array( '@id' => home_url( '/#organization' ) ),
 	);
@@ -257,6 +259,9 @@ function aw_website_schema() {
 
 /** FAQPage for a guide whose headings are questions, each followed by its answer. */
 function aw_faq_schema( $id ) {
+	if ( function_exists( 'kits_seo_faqs' ) && kits_seo_faqs( $id ) ) {
+		return array(); // the FAQ field's own FAQPage schema (kits-core) is printed instead
+	}
 	$html = (string) apply_filters( 'the_content', get_post_field( 'post_content', $id ) );
 	if ( ! preg_match_all( '#<h[23][^>]*>(.*?\?)\s*</h[23]>(.*?)(?=<h[23]|$)#si', $html, $m, PREG_SET_ORDER ) || count( $m ) < 2 ) {
 		return array();

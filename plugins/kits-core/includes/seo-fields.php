@@ -20,7 +20,35 @@ const KITS_SEO_POST_FIELDS = array(
 	'kits_og_title'  => 'Share title',
 	'kits_og_desc'   => 'Share description',
 	'kits_og_image'  => 'Share image (media ID, 1200×630)',
+	// Search and AI answers (owner, 8 Oct 2026)
+	'kits_noindex'          => 'Hide from search engines',
+	'kits_canonical'        => 'Canonical URL (only if another address is the original)',
+	'kits_focus_kw'         => 'Focus keyword',
+	'kits_secondary_kw'     => 'Secondary keywords (comma separated)',
+	'kits_search_intent'    => 'Search intent',
+	'kits_breadcrumb_label' => 'Breadcrumb label (empty: the title)',
+	'kits_ai_summary'       => 'Summary for AI answers (40–60 words, shown under the title)',
+	'kits_takeaways'        => 'Key takeaways (3–5, one per line, shown under the summary)',
+	'kits_faqs'             => 'FAQs (Q: question / A: answer, one per line; shown at the end and as FAQ schema)',
+	'kits_schema_type'      => 'Schema type',
+	'kits_last_reviewed'    => 'Last reviewed (date)',
 );
+
+/** Field kinds for the box: key => checkbox | url | textarea | date | select options. */
+function kits_seo_field_kinds() {
+	return array(
+		'kits_seo_desc'      => 'textarea',
+		'kits_og_desc'       => 'textarea',
+		'kits_noindex'       => 'checkbox',
+		'kits_canonical'     => 'url',
+		'kits_ai_summary'    => 'textarea',
+		'kits_takeaways'     => 'textarea',
+		'kits_faqs'          => 'textarea',
+		'kits_last_reviewed' => 'date',
+		'kits_search_intent' => array( '' => '—', 'informational' => 'Informational', 'commercial' => 'Commercial', 'navigational' => 'Navigational', 'transactional' => 'Transactional' ),
+		'kits_schema_type'   => (array) apply_filters( 'kits_schema_types', array( '' => 'Automatic', 'WebPage' => 'WebPage', 'AboutPage' => 'AboutPage', 'ContactPage' => 'ContactPage', 'CollectionPage' => 'CollectionPage', 'Article' => 'Article', 'NewsArticle' => 'NewsArticle', 'BlogPosting' => 'BlogPosting', 'HowTo' => 'HowTo', 'Legislation' => 'Legislation', 'CreativeWork' => 'CreativeWork' ) ),
+	);
+}
 
 /** The override for the current view: key => value. */
 function kits_seo_override( $key ) {
@@ -93,11 +121,24 @@ add_action(
 function kits_seo_box( $post ) {
 	wp_nonce_field( 'kits_seo_' . $post->ID, '_kits_seo' );
 	echo '<table class="form-table">';
+	$kinds = kits_seo_field_kinds();
 	foreach ( KITS_SEO_POST_FIELDS as $k => $label ) {
-		$v = (string) get_post_meta( $post->ID, $k, true );
-		echo '<tr><th><label for="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td>'
-			. ( in_array( $k, array( 'kits_seo_desc', 'kits_og_desc' ), true ) ? '<textarea class="large-text" rows="2" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">' . esc_textarea( $v ) . '</textarea>' : '<input class="large-text" type="text" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">' )
-			. '</td></tr>';
+		$v    = (string) get_post_meta( $post->ID, $k, true );
+		$kind = $kinds[ $k ] ?? 'text';
+		if ( is_array( $kind ) ) {
+			$ctl = '<select id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">';
+			foreach ( $kind as $ov => $ol ) {
+				$ctl .= '<option value="' . esc_attr( $ov ) . '"' . selected( $v, $ov, false ) . '>' . esc_html( $ol ) . '</option>';
+			}
+			$ctl .= '</select>';
+		} elseif ( 'checkbox' === $kind ) {
+			$ctl = '<input type="checkbox" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="1"' . checked( $v, '1', false ) . '>';
+		} elseif ( 'textarea' === $kind ) {
+			$ctl = '<textarea class="large-text" rows="' . ( in_array( $k, array( 'kits_faqs', 'kits_takeaways' ), true ) ? 5 : 2 ) . '" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">' . esc_textarea( $v ) . '</textarea>';
+		} else {
+			$ctl = '<input class="large-text" type="' . ( 'date' === $kind ? 'date' : ( 'url' === $kind ? 'url' : 'text' ) ) . '" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
+		}
+		echo '<tr><th><label for="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td>' . $ctl . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 	echo '</table><p class="description">Empty fields use the page title, excerpt and featured image.</p>';
 }
@@ -110,7 +151,22 @@ add_action(
 		}
 		foreach ( array_keys( KITS_SEO_POST_FIELDS ) as $k ) {
 			$v = wp_unslash( $_POST[ $k ] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$v = 'kits_og_image' === $k ? (string) absint( $v ) : ( in_array( $k, array( 'kits_seo_desc', 'kits_og_desc' ), true ) ? sanitize_textarea_field( $v ) : sanitize_text_field( $v ) );
+			$kind = kits_seo_field_kinds()[ $k ] ?? 'text';
+			if ( 'kits_og_image' === $k ) {
+				$v = (string) absint( $v );
+			} elseif ( 'textarea' === $kind ) {
+				$v = sanitize_textarea_field( $v );
+			} elseif ( 'url' === $kind ) {
+				$v = esc_url_raw( $v );
+			} elseif ( 'checkbox' === $kind ) {
+				$v = $v ? '1' : '';
+			} elseif ( 'date' === $kind ) {
+				$v = preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $v ) ? $v : '';
+			} elseif ( is_array( $kind ) ) {
+				$v = array_key_exists( (string) $v, $kind ) ? (string) $v : '';
+			} else {
+				$v = sanitize_text_field( $v );
+			}
 			if ( '' === $v || '0' === $v ) {
 				delete_post_meta( $post_id, $k );
 			} else {
@@ -119,3 +175,139 @@ add_action(
 		}
 	}
 );
+
+/* ---------- Output of the search and AI-answer fields ---------- */
+
+// Hide from search engines.
+add_filter(
+	'wp_robots',
+	function ( $r ) {
+		if ( is_singular() && '1' === kits_seo_override( 'kits_noindex' ) ) {
+			$r['noindex'] = true;
+			$r['follow']  = true;
+		}
+		return $r;
+	}
+);
+
+// Canonical URL override.
+add_filter(
+	'get_canonical_url',
+	function ( $url, $post ) {
+		$c = trim( (string) get_post_meta( $post->ID, 'kits_canonical', true ) );
+		return $c ? $c : $url;
+	},
+	10,
+	2
+);
+
+/** The FAQ pairs of a post: list of [question, answer]. */
+function kits_seo_faqs( $id ) {
+	$out = array();
+	$q   = '';
+	foreach ( preg_split( '/\R/', (string) get_post_meta( $id, 'kits_faqs', true ) ) as $line ) {
+		if ( preg_match( '/^\s*Q:\s*(.+)$/i', $line, $m ) ) {
+			$q = trim( $m[1] );
+		} elseif ( $q && preg_match( '/^\s*A:\s*(.+)$/i', $line, $m ) ) {
+			$out[] = array( $q, trim( $m[1] ) );
+			$q     = '';
+		}
+	}
+	return $out;
+}
+
+// AI summary and key takeaways under the page title; FAQs at the end of the content (visible, as the schema needs).
+add_filter(
+	'render_block_core/post-title',
+	function ( $html, $block ) {
+		static $done = false;
+		if ( $done || ! is_singular() || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! in_the_loop() && ! is_main_query() ) {
+			return $html;
+		}
+		$done = true;
+		$id   = get_queried_object_id();
+		$sum  = trim( (string) get_post_meta( $id, 'kits_ai_summary', true ) );
+		$tk   = array_filter( array_map( 'trim', preg_split( '/\R/', (string) get_post_meta( $id, 'kits_takeaways', true ) ) ) );
+		$out  = $sum ? '<p class="kit-ai-summary">' . esc_html( $sum ) . '</p>' : '';
+		if ( $tk ) {
+			$out .= '<section class="kit-takeaways" aria-labelledby="key-takeaways-title"><h2 id="key-takeaways-title" class="kit-takeaways-title">Key takeaways</h2><ul>' . implode( '', array_map( fn( $t ) => '<li>' . esc_html( $t ) . '</li>', array_slice( $tk, 0, 5 ) ) ) . '</ul></section>';
+		}
+		return $html . $out;
+	},
+	10,
+	2
+);
+add_filter(
+	'the_content',
+	function ( $content ) {
+		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+		$faqs = kits_seo_faqs( get_the_ID() );
+		if ( ! $faqs ) {
+			return $content;
+		}
+		$html = '<section class="kit-faqs" id="faqs" aria-labelledby="faqs-title"><h2 id="faqs-title">Questions</h2>';
+		foreach ( $faqs as $f ) {
+			$html .= '<details class="kit-faq"><summary>' . esc_html( $f[0] ) . '</summary><p>' . esc_html( $f[1] ) . '</p></details>';
+		}
+		return $content . $html . '</section>';
+	},
+	30
+);
+// FAQPage JSON-LD from the FAQ field (sites with their own schema can use kits_seo_faqs() instead).
+add_action(
+	'wp_head',
+	function () {
+		if ( ! is_singular() || ! apply_filters( 'kits_seo_print_faq_schema', true ) ) {
+			return;
+		}
+		$faqs = kits_seo_faqs( get_queried_object_id() );
+		if ( ! $faqs ) {
+			return;
+		}
+		$data = array(
+			'@context'   => 'https://schema.org',
+			'@type'      => 'FAQPage',
+			'mainEntity' => array_map( fn( $f ) => array( '@type' => 'Question', 'name' => $f[0], 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $f[1] ) ), $faqs ),
+		);
+		echo '<script type="application/ld+json">' . wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	},
+	35
+);
+
+// Breadcrumb label override (sites with their own breadcrumbs read kits_breadcrumb_label too).
+add_filter(
+	'aw_breadcrumb_label',
+	function ( $label, $id ) {
+		$b = trim( (string) get_post_meta( (int) $id, 'kits_breadcrumb_label', true ) );
+		return $b ? $b : $label;
+	},
+	20,
+	2
+);
+
+/* ---------- Component-level fields ---------- */
+
+// imageContext: an editor-facing note on the copy an image supports; never shown on the site.
+add_filter(
+	'attachment_fields_to_edit',
+	function ( $fields, $post ) {
+		$fields['kits_image_context'] = array( 'label' => 'Image context', 'input' => 'textarea', 'value' => (string) get_post_meta( $post->ID, 'kits_image_context', true ), 'helps' => 'Note for editors: the copy this image supports. Not shown on the site.' );
+		return $fields;
+	},
+	10,
+	2
+);
+add_filter(
+	'attachment_fields_to_save',
+	function ( $post, $att ) {
+		if ( isset( $att['kits_image_context'] ) ) {
+			update_post_meta( $post['ID'], 'kits_image_context', sanitize_textarea_field( $att['kits_image_context'] ) );
+		}
+		return $post;
+	},
+	10,
+	2
+);
+

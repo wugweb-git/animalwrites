@@ -93,7 +93,8 @@ function kits_enqueue_components() {
 	$uri = get_template_directory_uri();
 	wp_enqueue_style( 'kit-components', $uri . '/assets/css/kit.css', array( 'kit-tokens', 'kits' ), (string) filemtime( $dir . '/assets/css/kit.css' ) );
 	wp_enqueue_style( 'kit-primitives', $uri . '/assets/css/kit-primitives.css', array( 'kit-components' ), (string) filemtime( $dir . '/assets/css/kit-primitives.css' ) );
-	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array(), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+	wp_enqueue_script( 'gsap', $uri . '/assets/vendor/gsap.min.js', array(), '3.12.5', array( 'in_footer' => true, 'strategy' => 'defer' ) ); // load / scroll-in motion
+	wp_enqueue_script( 'kit-interactions', $uri . '/assets/js/kit.js', array( 'gsap' ), (string) filemtime( $dir . '/assets/js/kit.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
 
