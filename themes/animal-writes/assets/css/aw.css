@@ -860,7 +860,7 @@ body { background: var(--kit-color-canvas); }
 :is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-ed-law-title, .kit-ed-act-copy > h2, .kit-ed-help-title, .kit-ed-story-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head) {
 	font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading, -0.01em);
 }
-:is(.aw-case-title, .aw-story-title, .aw-ed-col-title, .aw-ed-steps strong, .kit-ed-lead .wp-block-post-title, main .entry-content h3, main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3, .aw-task-title) {
+:is(.aw-case-title, .aw-story-title, .aw-org-name, .aw-ed-col-title, .aw-ed-steps strong, .kit-ed-lead .wp-block-post-title, main .entry-content h3, main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3, .aw-task-title) {
 	font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong) !important; line-height: 1.25 !important;
 }
 :is(.kit-ed-list .wp-block-post-title, .kit-ed-titles .wp-block-post-title, main .entry-content h4, main h4.wp-block-heading, main .wp-block-post-template h4) {
