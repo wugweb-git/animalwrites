@@ -234,6 +234,7 @@ body { background: var(--aw-color-canvas); }
 
 /* 06 Learn: three columns, one system */
 .aw-ed-cols { display: grid; gap: var(--aw-space-6); }
+.aw-ed-cols > * { margin-block: 0 !important; } /* grid gap does the spacing; WordPress's block gap would push cards 2 and 3 down */
 @media (min-width: 900px) { .aw-ed-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-ed-col { display: flex; flex-direction: column; background: var(--aw-color-raised); border-radius: var(--aw-radius-card); padding: var(--aw-space-6); box-shadow: var(--aw-elevation-1); }
 .aw-ed-col-title { font-size: var(--aw-type-h3); margin: 0 0 var(--aw-space-4); padding-bottom: var(--aw-space-3); border-bottom: 2px solid var(--aw-color-accent); }

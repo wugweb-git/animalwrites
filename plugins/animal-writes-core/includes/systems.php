@@ -478,3 +478,25 @@ add_shortcode(
 		return $out;
 	}
 );
+
+/*
+ * Query blocks filtered by a taxonomy that has no public pages (e.g. the Library's "kind": act, rule, template).
+ * WordPress drops such filters ("taxQuery" needs a viewable taxonomy), so the home page's "Laws and rules" and
+ * "Letters and templates" columns showed the same items. Apply those filters here.
+ */
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $vars, $block ) {
+		$in = (array) ( $block->context['query']['taxQuery'] ?? array() );
+		$in = array_diff_key( $in, array( 'include' => 1, 'exclude' => 1 ) ) ? $in : (array) ( $in['include'] ?? array() );
+		foreach ( $in as $tax => $terms ) {
+			if ( taxonomy_exists( $tax ) && ! is_taxonomy_viewable( $tax ) && $terms ) {
+				$vars['tax_query']   = (array) ( $vars['tax_query'] ?? array() );
+				$vars['tax_query'][] = array( 'taxonomy' => $tax, 'terms' => array_filter( array_map( 'intval', (array) $terms ) ), 'include_children' => false );
+			}
+		}
+		return $vars;
+	},
+	10,
+	2
+);
