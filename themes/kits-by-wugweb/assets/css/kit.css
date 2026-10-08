@@ -774,3 +774,15 @@ main.is-layout-constrained > .wp-block-post-content.is-layout-constrained > :whe
 	.kit-footer-list a { min-height: 2.5rem; }
 	.kit-footer-grid { gap: var(--kit-space-5) var(--kit-space-5); padding-top: var(--kit-space-5); }
 }
+
+/* Hub band (owner, 8 Oct 2026): from 640px the band has a fixed height — it ends 550px down the page when it holds
+   filters or a search, 450px when it doesn't (header 104px + band 446px / 346px). Content sits top left; the head
+   takes the room left over, so a taller filter row (the Directory search) shrinks the pictures, not the band. */
+@media (min-width: 640px) {
+	.kit-section-band { box-sizing: border-box; height: 446px; display: flex; flex-direction: column; overflow: hidden; }
+	.kit-section-band:not(:has(.kit-filterbar, .aw-dir-search)) { height: 346px; }
+	.kit-section-band > .kit-section-inner { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
+	.kit-section-band .kit-section-head, .kit-section-band .kit-section-head:has(.kit-section-visual) { flex: 1 1 auto; height: auto !important; min-height: 0; align-items: stretch; }
+	.kit-section-band .kit-section-head > :first-child { justify-content: flex-start; }
+	.kit-section-band .aw-section-filters, .kit-section-band .kit-section-filters { flex: none; }
+}
