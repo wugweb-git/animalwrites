@@ -971,3 +971,14 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-story-head p { margin: 0 0 var(--kit-space-6); }
 	.aw-ed-numbers, .aw-ed-timeline { margin-bottom: var(--kit-space-6); }
 }
+/* Home, second pass: the last three sections over one screen */
+@media (max-width: 767px) {
+	.aw-ed-numbers { display: flex !important; overflow-x: auto; gap: var(--kit-space-5); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: 0 var(--kit-space-gutter); scrollbar-width: none; }
+	.aw-ed-numbers::-webkit-scrollbar { display: none; }
+	.aw-ed-numbers li { flex: 0 0 9.5rem; }
+	.aw-ed-steps { margin: var(--kit-space-4) 0; }
+	.aw-ed-steps a { padding-block: var(--kit-space-3); }
+	.aw-ed-opps .wp-block-post-template > li { padding-block: var(--kit-space-2) !important; }
+	.kit-ed-act-copy .kit-ed-desc { margin-bottom: 0; }
+}
+@media (min-width: 1200px) { .aw-ed-law-list .aw-case-sum { display: none !important; } }
