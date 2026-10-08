@@ -609,7 +609,7 @@ body { background: var(--aw-color-canvas); }
    Hub Pages (Phase 12 Part D): band in the Page content, lists on core blocks.
    The Post Template items carry the old card classes; the generic query-loop card (kit.css) is undone here.
    =========================================================================== */
-.aw-hub > .wp-block-post-content { margin-block: 0; }
+.aw-hub-page > .wp-block-post-content { margin-block: 0; }
 .wp-block-post-content > .aw-section-band:first-child { margin-top: 0 !important; }
 .aw-hub-list .wp-block-post-template { list-style: none; margin: 0; padding: 0; }
 .aw-hub-list .wp-block-post-template > li { position: static; display: block; margin: 0; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0; box-shadow: none !important; overflow: visible; transform: none !important; }
