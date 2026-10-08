@@ -205,18 +205,21 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 
 /** Number of items in a hub list with the current filters (cached per request). */
 function aw_hub_total( $type ) {
-	static $n = array();
-	if ( ! isset( $n[ $type ] ) ) {
-		$q          = new WP_Query( array_merge( aw_hub_query_vars( $type, 1 ), array( 'fields' => 'ids', 'posts_per_page' => 1 ) ) );
-		$n[ $type ] = (int) $q->found_posts;
-	}
-	return $n[ $type ];
+	return (int) aw_hub_query( $type )->found_posts;
 }
 
 /** The items on the current page of a hub list (for schema). */
 function aw_hub_posts( $type ) {
-	$q = new WP_Query( aw_hub_query_vars( $type, aw_hub_page() ) );
-	return $q->posts;
+	return aw_hub_query( $type )->posts;
+}
+
+/** One query per request for the count line and the schema (the list itself is core's Query Loop). */
+function aw_hub_query( $type ) {
+	static $q = array();
+	if ( ! isset( $q[ $type ] ) ) {
+		$q[ $type ] = new WP_Query( aw_hub_query_vars( $type, aw_hub_page() ) );
+	}
+	return $q[ $type ];
 }
 
 // Each hub Query Loop gets its items from the hub query.

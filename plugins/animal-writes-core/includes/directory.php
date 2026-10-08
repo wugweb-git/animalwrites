@@ -142,12 +142,17 @@ function aw_directory_query_vars( $v ) {
 	$mq = (array) ( $v['meta_query'] ?? array() );
 	// Every listing carries aw_featured; aw_verified may be missing.
 	$mq['feat'] = array( 'key' => 'aw_featured', 'type' => 'NUMERIC' );
-	$mq['ver']  = array(
-		'relation' => 'OR',
-		'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
-		array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
-	);
-	$order = array( 'feat' => 'DESC', 'ver_yes' => 'DESC', 'title' => 'ASC' );
+	$order      = array( 'feat' => 'DESC', 'title' => 'ASC' );
+	// Verified next, once any listing is verified. Until then the step changes nothing and its OR join (aw_verified is
+	// missing on most listings) made every Directory query about 300 ms slower.
+	if ( aw_verified_count() ) {
+		$mq['ver'] = array(
+			'relation' => 'OR',
+			'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
+			array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
+		);
+		$order = array( 'feat' => 'DESC', 'ver_yes' => 'DESC', 'title' => 'ASC' );
+	}
 	if ( 'details' === ( $_GET['sort'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
 		$order       = array( 'feat' => 'DESC', 'score' => 'DESC', 'title' => 'ASC' );
