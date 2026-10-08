@@ -249,6 +249,18 @@ add_shortcode(
 		while ( $wp_query->have_posts() ) {
 			$wp_query->the_post();
 			$id    = get_the_ID();
+			// Templates are tools, not documents: their own card, with no date and no source line.
+			if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+				$lang  = aw_first_term( $id, 'aw_language' );
+				$out  .= '<article class="aw-case aw-case--template">'
+					. '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>'
+					. '<div class="aw-case-body"><div class="aw-case-tags"><span class="aw-issuer aw-issuer--template">Template</span>'
+					. ( $lang ? '<span class="aw-case-topic">' . esc_html( $lang->name ) . '</span>' : '' ) . '</div>'
+					. '<h2 class="aw-case-title"><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a></h2>'
+					. '<p class="aw-case-sum">' . esc_html( aw_text( $id, 30 ) ) . '</p>'
+					. '</div>' . aw_i( 'arrow-right' ) . '</article>';
+				continue;
+			}
 			$iss   = aw_first_term( $id, 'aw_source_type' );
 			$topic = aw_first_term( $id, 'aw_topic' );
 			$src   = (string) get_post_meta( $id, 'aw_source_name', true );

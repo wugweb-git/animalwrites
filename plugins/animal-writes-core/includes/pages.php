@@ -199,34 +199,49 @@ add_action(
 	}
 );
 
+/** Escape text, then mark the searched words in it. */
+function aw_search_mark( $text, $words ) {
+	$html = esc_html( $text );
+	if ( $words ) {
+		$html = preg_replace( '/(' . implode( '|', array_map( fn( $w ) => preg_quote( esc_html( $w ), '/' ), $words ) ) . ')/iu', '<mark>$1</mark>', $html );
+	}
+	return $html;
+}
+
 add_shortcode(
 	'aw_search',
 	function () {
 		$q    = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$page = max( 1, absint( $_GET['pg'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$html = '<form class="aw-search-form" role="search" method="get" action="' . esc_url( home_url( '/search/' ) ) . '">'
 			. '<label for="aw-search-q">Search</label><input type="search" id="aw-search-q" name="q" value="' . esc_attr( $q ) . '" autocomplete="off"> '
 			. '<button type="submit" class="wp-element-button">Search</button></form>';
 		if ( '' === $q ) {
 			return $html;
 		}
-		$res = new WP_Query( array( 's' => $q, 'post_type' => AW_SEARCH_TYPES, 'post_status' => 'publish', 'posts_per_page' => 20, 'paged' => $page ) );
-		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( _n( '%s result', '%s results', $res->found_posts ), number_format_i18n( $res->found_posts ) ) ) . '</p>';
-		if ( $res->have_posts() ) {
-			$html .= '<ol class="aw-search-results">';
+		$words  = array_values( array_filter( preg_split( '/\s+/u', $q ), fn( $w ) => mb_strlen( $w ) >= 3 ) );
+		$groups = array( 'aw_news' => 'News', 'aw_guide' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'page' => 'Pages' );
+		$total  = 0;
+		$out    = '';
+		foreach ( $groups as $type => $label ) {
+			$per = 'aw_listing' === $type ? 8 : 20;
+			$res = new WP_Query( array( 's' => $q, 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => $per, 'no_found_rows' => false ) );
+			if ( ! $res->found_posts ) {
+				continue;
+			}
+			$total += $res->found_posts;
+			$out   .= '<section class="aw-search-group"><h2>' . esc_html( $label ) . ' <span class="aw-search-n">' . esc_html( number_format_i18n( $res->found_posts ) ) . '</span></h2><ol class="aw-search-results">';
 			foreach ( $res->posts as $p ) {
-				$obj   = get_post_type_object( $p->post_type );
-				$html .= '<li><span class="aw-search-type">' . esc_html( 'page' === $p->post_type ? 'Page' : $obj->labels->name ) . '</span> '
-					. '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a>'
-					. ( function_exists( 'aw_text' ) && 'aw_listing' !== $p->post_type ? '<p>' . esc_html( aw_text( $p->ID, 24 ) ) . '</p>' : '' ) . '</li>';
+				$out .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
+					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
 			}
-			$html .= '</ol>';
-			if ( $res->max_num_pages > 1 ) {
-				$html .= '<nav class="aw-pager" aria-label="Pages">'
-					. ( $page > 1 ? '<a href="' . esc_url( add_query_arg( array( 'q' => $q, 'pg' => $page - 1 ), home_url( '/search/' ) ) ) . '">Previous</a>' : '' )
-					. ( $page < $res->max_num_pages ? '<a href="' . esc_url( add_query_arg( array( 'q' => $q, 'pg' => $page + 1 ), home_url( '/search/' ) ) ) . '">Next</a>' : '' ) . '</nav>';
+			$out .= '</ol>';
+			if ( $res->found_posts > $per ) {
+				$more = 'aw_listing' === $type ? add_query_arg( 'q', rawurlencode( $q ), home_url( '/directory/' ) ) : '';
+				$out .= $more ? '<p class="aw-search-more"><a href="' . esc_url( $more ) . '">All ' . esc_html( number_format_i18n( $res->found_posts ) ) . ' in the Directory</a></p>' : '<p class="aw-search-more">Showing the first ' . (int) $per . '. Add a word to narrow the search.</p>';
 			}
+			$out .= '</section>';
 		}
+		$html .= '<p class="aw-search-count" role="status">' . esc_html( sprintf( _n( '%s result', '%s results', $total ), number_format_i18n( $total ) ) ) . '</p>' . $out;
 		return $html;
 	}
 );

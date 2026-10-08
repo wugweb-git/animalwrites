@@ -26,9 +26,10 @@
   --kit-type-lead: 1.125rem;
   --kit-type-h4: 1.0625rem;
   --kit-type-h3: 1.1875rem;
-  --kit-type-h2: 1.75rem;
-  --kit-type-h1: 2.25rem;
-  --kit-type-display: 2.5rem;
+  --kit-type-h2: 1.5rem;
+  --kit-type-h1: 2rem;
+  --kit-type-headline: 1.5rem;
+  --kit-type-display: 2.25rem;
   --kit-type-stat: 1.75rem;
   --kit-type-placard: 1.125rem;
   --kit-leading-body: 1.6;
@@ -81,8 +82,8 @@
   --kit-tracking-heading: -0.02em;
   --kit-tracking-body: -0.006em;
   --kit-color-canvas: #f8fafc;
-  --kit-type-mega: 3.25rem;
-  --kit-type-section: 2rem;
+  --kit-type-mega: 2.75rem;
+  --kit-type-section: 1.75rem;
   --kit-color-link: #1d4ed8;
 }
 @media (min-width: 768px) {
@@ -92,6 +93,7 @@
     --kit-type-h3: 1.3125rem;
     --kit-type-h2: 2.125rem;
     --kit-type-h1: 3rem;
+    --kit-type-headline: 2.25rem;
     --kit-type-display: 3.5rem;
     --kit-type-stat: 2rem;
     --kit-type-placard: 1.25rem;
@@ -113,6 +115,7 @@
     --kit-type-h3: 1.375rem;
     --kit-type-h2: 2.5rem;
     --kit-type-h1: 3.5rem;
+    --kit-type-headline: 3rem;
     --kit-type-display: 4.25rem;
     --kit-space-section: 6rem;
     --kit-space-gutter: 2rem;

@@ -193,5 +193,8 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 - Directory audit: 32 likely-duplicate groups and 75 name-based retype suggestions.
 - Kerala import script: keep cut-off names from coming back.
 - Notion and this status doc: update to the Phase 10 structure.
+- Legal and policy pages: corrections policy, privacy, terms, disclaimer, editorial policy text (owner).
+- Owner admin: delete Rank Math (inactive); switch the Search Console sitemap to `wp-sitemap.xml`.
+- Optional: data.gov.in key (Tamil Nadu vet list); Anthropic console spending limit; Google Rich Results Test run.
 
 **Later:** more directory states; GTM container content; a second photo search after the owner's pictures.
