@@ -669,3 +669,4 @@ a.aw-btn:not(.aw-btn--outline):not(.aw-btn--ghost), a.aw-btn:not(.aw-btn--outlin
 .aw-footer-tags .aw-footer-list ,.kit-footer-tags .kit-footer-list { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); columns: auto; }
 .aw-footer-tags .aw-footer-list a ,.kit-footer-tags .kit-footer-list a { min-height: 2rem; padding: 0 var(--kit-space-3); border: 1px solid rgba(255,255,255,.25); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-xs); text-decoration: none; }
 .aw-footer-tags .aw-footer-list a:hover ,.kit-footer-tags .kit-footer-list a:hover { background: rgba(255,255,255,.12); text-decoration: none; }
+.aw-footer-helplines strong ,.kit-footer-helplines strong { white-space: nowrap; }
