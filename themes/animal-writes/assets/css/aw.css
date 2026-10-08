@@ -743,7 +743,7 @@ body { background: var(--kit-color-canvas); }
 }
 @media (min-width: 1200px) { .aw-dir-more { grid-column: span 3; } }
 /* Library rows on phones: labels on one line */
-@media (max-width: 767px) { .aw-case-tags { flex-wrap: nowrap; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); } }
+@media (max-width: 767px) { .aw-case-tags { flex-wrap: nowrap; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); } .aw-case-tags .wp-block-post-terms { display: contents; } .aw-case-tags > .kit-tag { flex: none; max-width: 60%; } .aw-case-tags .wp-block-post-terms a { flex: none; } } /* phones: every label in one line */
 
 .aw-profile-badge { display: inline-flex; align-items: center; min-height: 1.75rem; padding: 0 var(--s-2); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--kit-color-success) 12%, transparent); color: var(--kit-color-success); font-size: var(--fluid-label); margin: 0 !important; }
 .aw-profile-badge:empty { display: none; }
