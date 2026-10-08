@@ -179,9 +179,10 @@ function kits_endbar( $id = 0 ) {
 	$tags  = get_the_term_list( $id, $tax, '<div class="kit-endbar-tags wp-block-post-terms taxonomy-' . esc_attr( $tax ) . '">', '', '</div>' );
 	$tags  = is_wp_error( $tags ) ? '' : (string) $tags;
 	$share = function_exists( 'scriptlesssocialsharing_do_buttons' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? (string) scriptlesssocialsharing_do_buttons( false ) : '';
+	$before = (string) apply_filters( 'kits_endbar_before', '' ); // e.g. the end-of-article ad
 	if ( '' === $tags . $share ) {
-		return '';
+		return $before;
 	}
-	return '<div class="kit-endbar">' . $tags . ( $share ? '<div class="kit-endbar-share"><span class="kit-endbar-label">Share</span>' . $share . '</div>' : '' ) . '</div>';
+	return $before . '<div class="kit-endbar">' . $tags . ( $share ? '<div class="kit-endbar-share"><span class="kit-endbar-label">Share</span>' . $share . '</div>' : '' ) . '</div>';
 }
 add_shortcode( 'kits_endbar', fn() => is_singular() ? kits_endbar( get_queried_object_id() ) : '' );

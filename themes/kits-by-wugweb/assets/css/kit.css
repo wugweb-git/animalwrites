@@ -1074,3 +1074,9 @@ body { background: var(--kit-surface-page); }
 header.wp-block-template-part:has(.kit-site-header) { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); will-change: transform; }
 header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-100% - var(--wp-admin--admin-bar--height, 0px))); }
 @media (prefers-reduced-motion: reduce) { header.wp-block-template-part:has(.kit-site-header) { transition: none; } }
+
+/* Ads in lists sit in a card of their own ("Ad" label); phones reserve 300×250 for it. A full row of space keeps every
+   ad clear of buttons, contact actions and form fields. */
+.kit-ad-item > .kit-ad { margin: 0; height: 100%; border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); padding: var(--kit-space-3); background: var(--kit-surface-card, var(--kit-color-raised)); }
+@media (max-width: 767px) { .kit-ad-item .kit-ad-unit { min-height: 250px; } }
+.kit-ad { margin-block: var(--kit-space-7); }

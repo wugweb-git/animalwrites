@@ -263,9 +263,6 @@ add_shortcode(
 			foreach ( $res->posts as $p ) {
 				$out .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
 					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
-				if ( 6 === ++$shown && function_exists( 'aw_ad' ) && ( $ad = aw_ad( 'results' ) ) ) { // phpcs:ignore
-					$out .= '<li class="kit-ad-item">' . $ad . '</li>';
-				}
 			}
 			$out .= '</ol>';
 			if ( $res->found_posts > $per ) {

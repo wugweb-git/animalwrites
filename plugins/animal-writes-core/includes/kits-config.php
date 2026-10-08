@@ -18,8 +18,51 @@ add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in
 
 add_filter( 'kits_share_post_types', fn() => array() ); // sharing: the Scriptless Social Sharing plugin (owner, 8 Oct 2026)
 add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) ); // first one holds the Sourcing menu
-add_filter( 'kits_ads_skip', fn( $skip ) => $skip || is_page( array( 'helplines', 'corrections' ) ) ); // no ads where people look for emergency help, or on corrections
-add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal' ) );
+/*
+ * Ads (owner, 9 Oct 2026). Articles: News, Library, Resources (in-content, end). Lists: News, Library, Resources (after
+ * items 6 and 18), Directory state and district pages (after item 5). Profiles: above "Is this your organisation?".
+ * None at all on forms, search, 404, crisis guides, government vets and MVUs, or Cruelty and Prosecution items.
+ */
+const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ); // help-now guides + the crisis guides
+add_filter(
+	'kits_ads_skip',
+	function ( $skip ) {
+		if ( $skip || is_search() || is_page( array( 'helplines', 'corrections', 'contact', 'volunteer', 'remove-my-data', 'search' ) ) ) {
+			return true;
+		}
+		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'aw_listing_type', get_queried_object_id() ) ) {
+			return true;
+		}
+		if ( is_singular( 'aw_guide' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
+			return true;
+		}
+		return is_singular() && has_term( 'cruelty-prosecution', 'aw_topic', get_queried_object_id() );
+	}
+);
+add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide' ) );
+add_filter( 'kits_ads_end_after_content_types', fn() => array( 'aw_guide' ) ); // guides have no end bar: the end ad follows the text
+add_filter(
+	'kits_ads_list_positions',
+	function ( $at, $slot ) {
+		if ( 'directory' === $slot ) {
+			return get_query_var( 'aw_place' ) ? array( 5 ) : array(); // state and district pages only
+		}
+		return in_array( function_exists( 'aw_hub_type' ) ? aw_hub_type() : '', array( 'aw_news', 'aw_legal', 'aw_guide' ), true ) ? $at : array();
+	},
+	10,
+	2
+);
+// Directory profiles: the ad sits above "Is this your organisation?".
+add_filter(
+	'render_block_animal-writes/listing-help',
+	function ( $html ) {
+		if ( ! is_singular( 'aw_listing' ) || ! function_exists( 'aw_ad' ) ) {
+			return $html;
+		}
+		$ad = aw_ad( 'profile' );
+		return ( '' !== $ad ? $ad : aw_ad( 'article' ) ) . $html;
+	}
+);
 
 add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign' ) );
 add_filter( 'kits_seo_twitter_site', fn() => '@AnimalWrites' );

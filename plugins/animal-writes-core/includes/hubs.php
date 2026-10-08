@@ -640,7 +640,6 @@ add_action(
 
 add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_page( 'search' ) );
 add_filter( 'kits_ads_list_slot', fn( $slot ) => 'aw_listing' === aw_hub_type() ? 'directory' : $slot );
-add_filter( 'kits_ads_article_slot', fn( $slot ) => is_singular( 'aw_listing' ) ? 'profile' : $slot );
 
 // The list's count, centred above its pagination ("23 stories").
 add_filter(
