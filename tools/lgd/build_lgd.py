@@ -69,7 +69,13 @@ def main(states_csv, districts_csv):
             if line.startswith(("ALIAS_STATE=", "ALIAS_DIST=")):
                 exec(line, {}, tables)
     aliases = {"state": dict(tables["ALIAS_STATE"], **{"orissa": "odisha", "nct of delhi": "delhi", "delhi ncr": "delhi", "andaman and nicobar": "andaman and nicobar islands", "dadra and nagar haveli": "the dadra and nagar haveli and daman and diu", "daman and diu": "the dadra and nagar haveli and daman and diu", "chandigarh ut": "chandigarh"}),
-               "district": tables["ALIAS_DIST"]}
+               "district": dict(tables["ALIAS_DIST"])}
+    # India Post writes Delhi's districts as "Central Delhi", "South West Delhi"; LGD as "Central", "South West".
+    for d in districts:
+        if d["State Code"] == "7":
+            n = d["District Name(In English)"].lower()
+            if not n.endswith("delhi"):
+                aliases["district"][n + " delhi"] = n
     m = re.search(r"(\d{2}[A-Za-z]{3}\d{4})", os.path.basename(districts_csv))
     data = {"source": "Local Government Directory (lgdirectory.gov.in)", "version": m.group(1) if m else "", "states": out_s, "districts": out_d, "aliases": aliases}
     json.dump(data, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
