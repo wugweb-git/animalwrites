@@ -144,7 +144,8 @@
 .aw-dir-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
 .aw-dir-check { grid-column: 1 / -1; }
 @media (min-width: 640px) { .aw-dir-search { grid-template-columns: repeat(4, minmax(0, 1fr)); } .aw-dir-q { grid-column: 1 / -1; } }
-@media (min-width: 1024px) { .aw-dir-search { grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)) auto; } .aw-dir-q { grid-column: auto; } .aw-dir-submit .kit-btn { width: auto; } }
+.aw-dir-search select { font-size: var(--fluid-body-sm); }
+@media (min-width: 1024px) { .aw-dir-search { grid-template-columns: minmax(9rem, 2fr) repeat(3, minmax(11.5rem, 1fr)) auto; } .aw-dir-q { grid-column: auto; } .aw-dir-submit .kit-btn { width: auto; } } /* "Choose a state first" fits whole */
 
 /* Directory results: count line and sort */
 .aw-dir-results-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); margin: 0 0 var(--s-4); }
