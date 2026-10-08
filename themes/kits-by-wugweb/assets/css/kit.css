@@ -710,6 +710,7 @@ html.has-modal-open .aw-sticky-help ,html.has-modal-open .kit-sticky-help { disp
 		border-radius: 999px; border: 1px solid rgba(255,255,255,.3); background: transparent; color: var(--kit-color-on-ink) !important;
 	}
 	.aw-header-contact ,.kit-header-contact { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
+	.aw-header-search .aw-ico, .aw-header-contact .aw-ico ,.kit-header-search .kit-ico, .kit-header-contact .kit-ico { --kit-ico-size: 20px; }
 	.aw-header-right ,.kit-header-right { gap: var(--kit-space-2) !important; }
 	.aw-header-utility ,.kit-header-utility { gap: var(--kit-space-2); }
 }
