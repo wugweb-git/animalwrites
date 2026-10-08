@@ -69,11 +69,12 @@ add_action(
 		if ( ! $types || array_diff( $types, array( 'aw_news', 'aw_legal' ) ) ) {
 			return;
 		}
+		$key          = in_array( 'aw_legal', $types, true ) ? 'aw_doc_sort' : 'aw_source_date'; // Library: the document's date, or its year (Acts, Rules)
 		$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Publisher, State)
 		$mq['aw_src'] = array(
 			'relation'    => 'OR',
-			'source_date' => array( 'key' => 'aw_source_date', 'compare' => 'EXISTS' ),
-			'no_date'     => array( 'key' => 'aw_source_date', 'compare' => 'NOT EXISTS' ),
+			'source_date' => array( 'key' => $key, 'compare' => 'EXISTS' ),
+			'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
 		);
 		$q->set( 'meta_query', $mq );
 		$q->set( 'orderby', array( 'source_date' => 'DESC', 'date' => 'DESC' ) );
@@ -120,3 +121,32 @@ add_filter(
 	},
 	99
 );
+
+/**
+ * Library sort date (aw_doc_sort, Y-m-d): the document's own date, else the year in its title (Acts, Rules: "…, 1960"
+ * sorts as 1960-01-01). Kept up to date on save; templates have none and sort last.
+ */
+function aw_doc_sort_sync( $id ) {
+	if ( 'aw_legal' !== get_post_type( $id ) ) {
+		return;
+	}
+	$d = (string) get_post_meta( $id, 'aw_source_date', true );
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && ! has_term( 'template', 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ) {
+		$d = $ym[0] . '-01-01';
+	}
+	preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? update_post_meta( $id, 'aw_doc_sort', $d ) : delete_post_meta( $id, 'aw_doc_sort' );
+}
+add_action( 'save_post_aw_legal', 'aw_doc_sort_sync', 20 );
+foreach ( array( 'added_post_meta', 'updated_post_meta' ) as $aw_hook ) {
+	add_action(
+		$aw_hook,
+		function ( $mid, $id, $key ) {
+			if ( 'aw_source_date' === $key ) {
+				aw_doc_sort_sync( $id );
+			}
+		},
+		10,
+		3
+	);
+}
+

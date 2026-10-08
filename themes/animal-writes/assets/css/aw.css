@@ -183,7 +183,7 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--neutral-9) 15%, transparent) 0%, color-mix(in srgb, var(--neutral-9) 35%, transparent) 45%, color-mix(in srgb, var(--neutral-9) 88%, transparent) 100%); }
 .aw-ed-hero-media figcaption { position: absolute; right: var(--kit-space-gutter); top: var(--kit-space-5); z-index: 1; font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: color-mix(in srgb, var(--neutral-0) 85%, transparent); }
 .aw-ed-hero-copy { position: relative; z-index: 1; width: 100%; max-width: var(--kit-width-wide) !important; margin: 0 auto; padding: var(--kit-space-9) var(--kit-space-gutter) var(--kit-space-8); }
-.aw-ed-hero-title { font-size: var(--kit-type-display) !important; line-height: 1.05; letter-spacing: -0.025em; color: var(--kit-color-on-ink) !important; margin: 0 0 var(--kit-space-5); }
+.aw-ed-hero-title { font-size: var(--kit-type-h1) !important; line-height: 1.05; letter-spacing: -0.025em; color: var(--kit-color-on-ink) !important; margin: 0 0 var(--kit-space-5); }
 .aw-ed-hero-sub { font-size: var(--kit-type-lead); color: color-mix(in srgb, var(--neutral-0) 90%, transparent); max-width: 40ch; margin: 0 0 var(--kit-space-6); }
 .aw-ed-hero-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); }
 
@@ -834,3 +834,14 @@ body { background: var(--kit-color-canvas); }
 .aw-story--row .aw-story-body > .aw-card-meta:first-child { margin-top: 0; }
 .kit-ed-list .aw-card-meta { grid-area: terms; margin: 0; }
 .aw-hub-group li > .aw-card-meta { margin: 0 0 var(--kit-space-1); }
+
+/* Library card (owner, 9 Oct): "{Type} · {Year}" above the title, title full width, summary, labels below, PDF link, arrow.
+   The first card starts at the top of the list (no empty band above it). */
+.aw-case-title { max-width: none; }
+.aw-case-body > .aw-case-tags { margin: var(--kit-space-1) 0 var(--kit-space-2); }
+.aw-hub-list .wp-block-post-template > li:first-child > .kit-case { padding-top: 0; }
+.aw-ed-law-list .kit-case { padding-block: var(--kit-space-5); }
+
+/* Icon + text meta labels: one text style and a tight gap everywhere (publisher, date, year, posted by). */
+:is(.aw-src, .aw-card-time, .wp-block-post-date, .kit-meta, .aw-law-date, .aw-posted-by, .aw-case-date .d) { gap: 6px !important; font-size: var(--kit-type-xs) !important; font-weight: var(--kit-weight-medium) !important; color: var(--kit-color-muted) !important; line-height: 1.3; }
+.aw-src .aw-src-name, .aw-card-time .aw-rel-time { font: inherit; color: inherit; }

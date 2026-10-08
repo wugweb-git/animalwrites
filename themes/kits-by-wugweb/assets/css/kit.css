@@ -773,14 +773,13 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 	.kit-footer-grid { gap: var(--kit-space-5) var(--kit-space-5); padding-top: var(--kit-space-5); }
 }
 
-/* Hub band (owner, 8 Oct 2026): from 768px the band has a fixed height — it ends 550px down the page when it holds
-   filters or a search, 450px when it doesn't (band height = end point minus the announcement bar and the 100px nav). Content sits top left; the head
-   takes the room left over, so a taller filter row (the Directory search) shrinks the pictures, not the band. */
+/* Hub band (owner, 9 Oct 2026): from 768px the band is as tall as its content, capped so it ends at most 550px down
+   the page when it holds filters or a search, 450px when it doesn't (cap = end point minus the announcement bar and the
+   nav). It is never padded out to reach the cap. Content sits top left. */
 @media (min-width: 768px) {
-	.kit-section-band { box-sizing: border-box; height: calc(550px - var(--kit-header-height) - var(--kit-announce-h, 34px)); display: flex; flex-direction: column; overflow: hidden; }
-	.kit-section-band:not(:has(.kit-filterbar, .kit-section-search)) { height: calc(450px - var(--kit-header-height) - var(--kit-announce-h, 34px)); }
-	.kit-section-band > .kit-section-inner { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
-	.kit-section-band .kit-section-head, .kit-section-band .kit-section-head:has(.kit-section-visual) { flex: 1 1 auto; height: auto !important; min-height: 0; align-items: stretch; }
+	.kit-section-band { box-sizing: border-box; max-height: calc(550px - var(--kit-header-height) - var(--kit-announce-h, 34px)); display: flex; flex-direction: column; }
+	.kit-section-band:not(:has(.kit-filterbar, .kit-section-search)) { max-height: calc(450px - var(--kit-header-height) - var(--kit-announce-h, 34px)); }
+	.kit-section-band > .kit-section-inner { width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
 	.kit-section-band .kit-section-head > :first-child { justify-content: flex-start; }
 	.kit-section-band .kit-section-filters { flex: none; }
 }
@@ -1056,7 +1055,8 @@ body { background: var(--kit-surface-page); }
 /* The menu button only below 1200px (from 1200px the full menu shows on one row). */
 @media (max-width: 1199px) { .kit-site-header .wp-block-navigation__responsive-container-open { display: inline-flex !important; } }
 @media (min-width: 1200px) { .kit-site-header .wp-block-navigation__responsive-container-open:not(.always-shown) { display: none !important; } }
-.kit-site-header .wp-block-navigation__responsive-container-close { display: inline-flex !important; }
+.kit-site-header .wp-block-navigation__responsive-container:not(.is-menu-open) .wp-block-navigation__responsive-container-close { display: none !important; }
+.kit-site-header .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-close { display: inline-flex !important; }
 
 /* Pagination: every block 1:1 (44 × 44). Previous / Next are arrow-only squares; their words stay for screen readers. */
 .kit-pager .page-numbers, .wp-block-query-pagination-numbers .page-numbers { width: var(--kit-size-target); min-width: var(--kit-size-target); height: var(--kit-size-target); padding: 0 !important; aspect-ratio: 1; }

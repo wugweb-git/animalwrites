@@ -190,7 +190,10 @@ function aw_block_doc_date( $a, $id ) {
 	$year  = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
 	$thumb = (int) get_post_thumbnail_id( $id );
 	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => '', 'loading' => 'lazy' ) ) : ''; // the document's first page
-	$when  = $year ? '<span class="d">' . esc_html( $year ) . '</span>' : '<span class="d">' . esc_html( aw_src_date( $id, 'j M Y' ) ) . '</span>';
+	$kind  = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
+	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
+	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
+	$when  = '<span class="d">' . esc_html( implode( ' · ', array_filter( array( $kind, $date ) ) ) ) . '</span>'; // e.g. Act · 1960
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
 

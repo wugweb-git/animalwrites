@@ -414,15 +414,15 @@ function aw_hub_item( $type ) {
 <article class="wp-block-group kit-case"><!-- wp:animal-writes/doc-date /-->
 
 <!-- wp:group {"className":"aw-case-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-case-body"><!-- wp:group {"className":"aw-case-tags kit-tags","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-case-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-case-title"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":30,"className":"aw-case-sum"} /-->
+
+<!-- wp:group {"className":"aw-case-tags kit-tags","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-case-tags kit-tags"><!-- wp:animal-writes/issuer /-->
 
 <!-- wp:post-terms {"term":"aw_topic"} /--></div>
 <!-- /wp:group -->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-case-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":30,"className":"aw-case-sum"} /-->
 
 <!-- wp:animal-writes/doc-link /--></div>
 <!-- /wp:group -->

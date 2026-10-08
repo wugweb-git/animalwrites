@@ -31,19 +31,39 @@ function aw_item_image( $post_id, $size = 'large' ) {
 	if ( 'aw_legal' === $type && $preview ) {
 		return (string) wp_get_attachment_image_url( $preview, 'full' );
 	}
+	// A fallback photo is used once per page: the next item with the same topic gets its other topic's photo, or the
+	// placard (its source name). An item asked for again on the same page keeps the photo it was given.
+	static $given = array(); // post ID => attachment ID (0 = placard)
+	static $used  = array(); // attachment ID => true
+	if ( isset( $given[ $post_id ] ) ) {
+		return $given[ $post_id ] ? (string) wp_get_attachment_image_url( $given[ $post_id ], $size ) : '';
+	}
 	$map    = (array) get_option( 'aw_topic_images', array() );
 	$topics = wp_get_object_terms( $post_id, 'aw_topic', array( 'fields' => 'slugs' ) );
 	$topics = is_wp_error( $topics ) ? array() : $topics;
+	$pool   = array();
 	foreach ( $topics as $slug ) {
-		$tid = function_exists( 'aw_topic_image_id' ) ? aw_topic_image_id( get_term_by( 'slug', $slug, 'aw_topic' ) ) : (int) ( $map[ $slug ] ?? 0 );
-		if ( $tid ) {
-			return (string) wp_get_attachment_image_url( $tid, $size );
+		$pool[] = function_exists( 'aw_topic_image_id' ) ? aw_topic_image_id( get_term_by( 'slug', $slug, 'aw_topic' ) ) : (int) ( $map[ $slug ] ?? 0 );
+	}
+	if ( ! $topics ) { // items without a topic: the general photos, starting at a different one per item
+		$general = array_values( array_filter( array_map( 'intval', (array) ( $map['default'] ?? array() ) ) ) );
+		$n       = count( $general );
+		for ( $i = 0; $i < $n; $i++ ) {
+			$pool[] = $general[ ( $post_id + $i ) % $n ];
 		}
 	}
-	// Items without a topic get the general photo; a topic with no fitting photo yet shows the placard instead.
-	// 'default' may list several general photos; items rotate through them so neighbouring cards differ.
-	$general = array_values( array_filter( array_map( 'intval', (array) ( $map['default'] ?? array() ) ) ) );
-	return ( ! $topics && $general ) ? (string) wp_get_attachment_image_url( $general[ $post_id % count( $general ) ], $size ) : '';
+	$tid = 0;
+	foreach ( array_filter( $pool ) as $cand ) {
+		if ( empty( $used[ $cand ] ) ) {
+			$tid = (int) $cand;
+			break;
+		}
+	}
+	$given[ $post_id ] = $tid;
+	if ( $tid ) {
+		$used[ $tid ] = true;
+	}
+	return $tid ? (string) wp_get_attachment_image_url( $tid, $size ) : '';
 }
 
 /**
