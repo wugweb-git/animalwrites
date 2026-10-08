@@ -594,3 +594,6 @@ body { background: var(--aw-color-canvas); }
 	.aw-contact-report { grid-column: 1; grid-row: 3; }
 	.aw-contact-form-col { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: var(--s-6); }
 }
+
+/* Card title links are at least 24px tall to tap (WCAG 2.5.8), also when the title is one line (Phase 11 D). */
+:is(.aw-case-title, .aw-opp-title, .aw-org-name, .aw-story-title) a { display: inline-block; min-height: var(--s-6); }
