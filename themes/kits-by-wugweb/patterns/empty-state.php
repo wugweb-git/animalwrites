@@ -2,7 +2,7 @@
 /**
  * Title: Empty state
  * Slug: kits-by-wugweb/empty-state
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"constrained","contentSize":"480px"}} -->

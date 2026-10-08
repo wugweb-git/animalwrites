@@ -98,13 +98,11 @@ function kits_enqueue_components() {
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );
 
 /**
- * Pattern category for all Kits patterns.
+ * Pattern categories (Editor → Patterns): Kits: Components and Kits: Lists.
  */
 function kits_pattern_categories() {
-	register_block_pattern_category(
-		'kits',
-		array( 'label' => __( 'Kits', 'kits-by-wugweb' ) )
-	);
+	register_block_pattern_category( 'kits-components', array( 'label' => __( 'Kits: Components', 'kits-by-wugweb' ) ) );
+	register_block_pattern_category( 'kits-lists', array( 'label' => __( 'Kits: Lists', 'kits-by-wugweb' ) ) );
 }
 add_action( 'init', 'kits_pattern_categories' );
 

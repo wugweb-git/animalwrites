@@ -2,7 +2,7 @@
 /**
  * Title: Topic hub — category list
  * Slug: kits-by-wugweb/topic-hub
- * Categories: kits
+ * Categories: kits-lists
  */
 ?>
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->

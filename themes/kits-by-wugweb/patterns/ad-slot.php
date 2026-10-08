@@ -2,7 +2,7 @@
 /**
  * Title: Ad slot
  * Slug: kits-by-wugweb/ad-slot
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"className":"kits-ad-slot","layout":{"type":"constrained"}} -->

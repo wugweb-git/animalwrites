@@ -2,7 +2,7 @@
 /**
  * Title: Call to action
  * Slug: kits-by-wugweb/cta
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained"}} -->

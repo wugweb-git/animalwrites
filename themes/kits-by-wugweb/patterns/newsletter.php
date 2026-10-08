@@ -2,7 +2,7 @@
 /**
  * Title: Newsletter signup
  * Slug: kits-by-wugweb/newsletter
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"constrained","contentSize":"560px"}} -->

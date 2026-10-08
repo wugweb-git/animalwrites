@@ -35,6 +35,6 @@ add_action(
 add_action(
 	'init',
 	function () {
-		register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes sections', 'animal-writes' ) ) );
+		register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes', 'animal-writes' ) ) );
 	}
 );

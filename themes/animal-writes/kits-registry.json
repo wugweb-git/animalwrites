@@ -1,0 +1,1671 @@
+{
+ "version": 1,
+ "owner": "Animal Writes",
+ "extends": "kits-by-wugweb",
+ "items": [
+  {
+   "name": "News card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-story",
+    "aw-news",
+    "aw-card"
+   ],
+   "states": [
+    "lead",
+    "row",
+    "no picture (logo or placeholder)",
+    "video (play mark)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li>; the title is the link",
+    "aria": "picture alt=\"\"; play mark aria-hidden",
+    "keyboard": "Tab to the title",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 (lead) / H3",
+    "link": "the headline",
+    "alt": "empty (headline says it)",
+    "schema": "NewsArticle on the item page"
+   }
+  },
+  {
+   "name": "Library row",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-case",
+    "aw-cases",
+    "aw-doc",
+    "aw-docs",
+    "aw-pdf",
+    "aw-law",
+    "aw-issuer"
+   ],
+   "states": [
+    "Act/Rule (year)",
+    "dated",
+    "template",
+    "with official PDF"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li>; the title is the link",
+    "aria": "date block aria-hidden when it repeats the title year",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "the document title; \"Official document (PDF)\"",
+    "alt": "n/a",
+    "schema": "Legislation / CreativeWork on the item page"
+   }
+  },
+  {
+   "name": "Resource card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-res",
+    "aw-task",
+    "aw-tasks"
+   ],
+   "states": [
+    "default",
+    "with picture",
+    "icon only"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li>; the title is the link",
+    "aria": "icon aria-hidden",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2/H3",
+    "link": "the guide title",
+    "alt": "empty",
+    "schema": "HowTo or Article on the item page"
+   }
+  },
+  {
+   "name": "Opportunity card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-opp",
+    "aw-opps",
+    "aw-posted",
+    "aw-cd",
+    "aw-countdown"
+   ],
+   "states": [
+    "open with deadline",
+    "open, no deadline",
+    "closing soon",
+    "closed (not listed)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li> with title link and buttons",
+    "aria": "deadline in a <time datetime>",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "title; \"Apply or sign up\"; \"Details\"",
+    "alt": "empty",
+    "schema": "JobPosting (validThrough) on the item page"
+   }
+  },
+  {
+   "name": "Organisation card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-org",
+    "aw-orgs",
+    "aw-listing",
+    "aw-place",
+    "aw-contact",
+    "aw-dir"
+   ],
+   "states": [
+    "verified",
+    "not confirmed",
+    "featured",
+    "logo or initials",
+    "with or without phone"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li>; name is the link; Call button",
+    "aria": "contact icons have screen-reader words (Phone, Email, Website)",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2/H3",
+    "link": "the organisation name; \"View {name}\"",
+    "alt": "logo alt empty (name beside it)",
+    "schema": "Organization / LocalBusiness on the profile"
+   }
+  },
+  {
+   "name": "Directory search",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-dir-search",
+    "aw-dir-q",
+    "aw-dir-submit",
+    "aw-dir-check",
+    "aw-dir-results-head",
+    "aw-browse-states",
+    "aw-state"
+   ],
+   "states": [
+    "empty",
+    "state chosen",
+    "district list loading",
+    "results"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form role=search> with labelled selects",
+    "aria": "district select disabled until a state is chosen (text says so)",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "48px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "results count as text",
+    "link": "state links in Browse by state",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Press item",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-press",
+    "aw-pub",
+    "aw-src"
+   ],
+   "states": [
+    "article",
+    "video",
+    "social post",
+    "no picture"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li>; headline links to the outside source",
+    "aria": "external link marked",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2/H3",
+    "link": "the headline (external)",
+    "alt": "empty",
+    "schema": "part of the ItemList"
+   }
+  },
+  {
+   "name": "Hub page frame",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-hub",
+    "aw-band",
+    "aw-system"
+   ],
+   "states": [
+    "default",
+    "filtered",
+    "empty"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<main> with the band and the list",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "one H1 (the band)",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "CollectionPage + ItemList"
+   }
+  },
+  {
+   "name": "Search results",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-search"
+   ],
+   "states": [
+    "results",
+    "no results"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form role=search>; results in <ol> per group",
+    "aria": "count is role=status",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 + one H2 per group",
+    "link": "item titles, search words marked",
+    "alt": "n/a",
+    "schema": "none (noindex)"
+   }
+  },
+  {
+   "name": "Helplines",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-helpline",
+    "aw-helplines",
+    "aw-emergency",
+    "aw-quick"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "list of tel: links",
+    "aria": "none",
+    "keyboard": "Tab; Enter dials",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "number then what it is"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "tel: links",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Home sections (Animal Writes)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-ed",
+    "aw-hero",
+    "aw-mosaic",
+    "aw-stats",
+    "aw-counts",
+    "aw-count",
+    "aw-t"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section>s with headings",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 hero, H2 per section",
+    "link": "descriptive",
+    "alt": "photos alt or empty when decorative",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Volunteer banner and form",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-vol",
+    "aw-volunteer",
+    "aw-banner"
+   ],
+   "states": [
+    "closed",
+    "open",
+    "error",
+    "sent"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "disclosure + form (see Form)",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "success message read out"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "n/a",
+    "alt": "photo alt empty",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Forms (Animal Writes)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-form",
+    "aw-report",
+    "aw-contact-form",
+    "aw-steps",
+    "aw-listing-help"
+   ],
+   "states": [
+    "default",
+    "error",
+    "sent",
+    "step 1/2"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "forms on the Form standard",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Claim, Report, Contact, Volunteer, Newsletter."
+  },
+  {
+   "name": "Campaign page",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-camp",
+    "aw-cards",
+    "aw-testimonial",
+    "aw-testimonials"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<article> sections",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 + H2",
+    "link": "descriptive",
+    "alt": "photos described",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Related and also-reported",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-rel",
+    "aw-also",
+    "aw-elsewhere",
+    "aw-byline",
+    "aw-item"
+   ],
+   "states": [
+    "default",
+    "empty (hidden)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<aside> with a list",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "item titles",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Category index",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-topic",
+    "aw-topics"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "list of links with counts",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 + names",
+    "link": "category names",
+    "alt": "pictures empty alt",
+    "schema": "CollectionPage"
+   }
+  },
+  {
+   "name": "Data sources",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-datasrc",
+    "aw-datasrcs"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "list",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "source names (external)",
+    "alt": "marks empty alt",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Ad slot (Animal Writes)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-ad"
+   ],
+   "states": [
+    "empty",
+    "filled"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "see Kits Ad slot",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Share (Animal Writes)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-share"
+   ],
+   "states": [
+    "default",
+    "copied"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "see Kits Share",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Announcement text",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-announce"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "text in the announcement bar",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Footer extras",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-footer"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "lists in the footer",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "aw-footer-volunteer is no longer used."
+  },
+  {
+   "name": "Buttons (Animal Writes)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-btn"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "see Kits Button",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Finder band",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-finder"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section> with a search form",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Helpers",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "aw-no",
+    "aw-copy",
+    "aw-motion",
+    "aw-h",
+    "aw-state-grid",
+    "aw-topic-image"
+   ],
+   "states": [
+    "n/a"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "utility or admin-screen classes",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Admin screens and small helpers; no front-end component."
+  },
+  {
+   "name": "Breadcrumb",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "the trail; last item aria-current"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "BreadcrumbList"
+   },
+   "block": "animal-writes/breadcrumb"
+  },
+  {
+   "name": "Hub count",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "count as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/hub-count"
+  },
+  {
+   "name": "Hub pictures",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "decorative, aria-hidden"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/hub-visual"
+  },
+  {
+   "name": "List filters",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "the filter bar (see Kits Filter bar)"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/list-filters"
+  },
+  {
+   "name": "Publisher",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "favicon alt empty; name as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "part of NewsArticle (publisher)"
+   },
+   "block": "animal-writes/publisher"
+  },
+  {
+   "name": "Document date",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "date as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/doc-date"
+  },
+  {
+   "name": "Law date (one line)",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "<time datetime>"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/law-date"
+  },
+  {
+   "name": "Issued by",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "label as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/issuer"
+  },
+  {
+   "name": "Document source and PDF",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "links say \"Official document (PDF)\""
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/doc-link"
+  },
+  {
+   "name": "Guide icon",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "aria-hidden"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/task-icon"
+  },
+  {
+   "name": "Updated and reading time",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "dateModified"
+   },
+   "block": "animal-writes/read-meta"
+  },
+  {
+   "name": "Place",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "icon aria-hidden; place name as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "address (profile)"
+   },
+   "block": "animal-writes/place"
+  },
+  {
+   "name": "Checked and deadline",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "<time datetime>"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "validThrough"
+   },
+   "block": "animal-writes/deadline"
+  },
+  {
+   "name": "Opportunity buttons",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "buttons with clear text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/opp-actions"
+  },
+  {
+   "name": "Organisation logo",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "logo alt empty; initials aria-hidden"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "logo"
+   },
+   "block": "animal-writes/org-mark"
+  },
+  {
+   "name": "Badges and labels",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "state as text"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/badges"
+  },
+  {
+   "name": "Contact icons",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "screen-reader words per icon"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "telephone, email, url"
+   },
+   "block": "animal-writes/contact"
+  },
+  {
+   "name": "Organisation buttons",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "\"Call\"; \"View {name}\""
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/org-actions"
+  },
+  {
+   "name": "Result count and sort",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "count role=status; sort as links"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/result-head"
+  },
+  {
+   "name": "Browse by state",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "<nav aria-labelledby>"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/browse-states"
+  },
+  {
+   "name": "Press thumbnail",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "alt empty"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/press-media"
+  },
+  {
+   "name": "Press date and format",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "<time>"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/press-meta"
+  },
+  {
+   "name": "Posted by",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "link to the profile"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "hiringOrganization"
+   },
+   "block": "animal-writes/posted-by"
+  },
+  {
+   "name": "Volunteer form",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "disclosure + form"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/volunteer"
+  },
+  {
+   "name": "Is this your organisation?",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "two disclosures in a group"
+   },
+   "seo": {
+    "heading": "H2 only where it shows a heading",
+    "link": "descriptive",
+    "alt": "see note",
+    "schema": "none"
+   },
+   "block": "animal-writes/listing-help"
+  },
+  {
+   "name": "Animal law",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/animal-law"
+  },
+  {
+   "name": "Animal Writes 1.0",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/aw1-story"
+  },
+  {
+   "name": "Campaign page",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/campaign"
+  },
+  {
+   "name": "Find help",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/find-help"
+  },
+  {
+   "name": "Need help now",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/help-now"
+  },
+  {
+   "name": "Homepage hero",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/hero"
+  },
+  {
+   "name": "Learn",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/learn"
+  },
+  {
+   "name": "Take action",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/take-action"
+  },
+  {
+   "name": "Volunteer banner",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/volunteer-banner"
+  },
+  {
+   "name": "What's happening",
+   "type": "pattern",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 per section (H1 only in the hero)",
+    "link": "descriptive",
+    "alt": "photos described or empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/whats-happening"
+  }
+ ],
+ "nav_status": {
+  "announcement-bar": "live",
+  "utility-nav": "live",
+  "primary-nav": "live",
+  "mega-menu": "not used",
+  "mobile-bottom-nav": "not used",
+  "sticky-action-bar": "live",
+  "breadcrumbs": "live",
+  "local-nav": "live",
+  "footer-nav": "live",
+  "pagination": "live"
+ }
+}

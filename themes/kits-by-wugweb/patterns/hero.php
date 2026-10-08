@@ -2,7 +2,7 @@
 /**
  * Title: Hero
  * Slug: kits-by-wugweb/hero
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|80","bottom":"var:preset|spacing|80"}}},"layout":{"type":"constrained"}} -->

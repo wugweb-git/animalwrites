@@ -2,7 +2,7 @@
 /**
  * Title: FAQ
  * Slug: kits-by-wugweb/faq
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:group {"layout":{"type":"constrained"}} -->

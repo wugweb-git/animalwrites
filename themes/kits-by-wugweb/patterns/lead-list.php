@@ -2,7 +2,7 @@
 /**
  * Title: Lead + list
  * Slug: kits-by-wugweb/lead-list
- * Categories: kits
+ * Categories: kits-lists
  * Description: Section head with a link, one lead post (large image and headline) and the next four as a ruled list.
  */
 ?>

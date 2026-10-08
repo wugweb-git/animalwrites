@@ -2,7 +2,7 @@
 /**
  * Title: Card grid — latest
  * Slug: kits-by-wugweb/card-grid
- * Categories: kits
+ * Categories: kits-lists
  */
 ?>
 <!-- wp:query {"queryId":10,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false},"align":"wide"} -->

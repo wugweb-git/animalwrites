@@ -2,7 +2,7 @@
 /**
  * Title: Sponsored label
  * Slug: kits-by-wugweb/sponsored-label
- * Categories: kits
+ * Categories: kits-components
  */
 ?>
 <!-- wp:paragraph {"className":"is-style-kits-label kits-sponsored"} -->

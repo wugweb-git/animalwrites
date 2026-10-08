@@ -2,7 +2,7 @@
 /**
  * Title: Banner
  * Slug: kits-by-wugweb/banner
- * Categories: kits
+ * Categories: kits-components
  * Description: A wide image with optional text on it: 16:5 on wide screens, 4:3 on phones. Shows nothing until an image is chosen. Source images up to 5 MB; WebP or AVIF.
  * Keywords: banner, hero, image
  * Inserter: yes

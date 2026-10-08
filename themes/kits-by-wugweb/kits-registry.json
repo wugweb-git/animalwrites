@@ -1,0 +1,1346 @@
+{
+ "version": 1,
+ "owner": "Kits",
+ "items": [
+  {
+   "name": "Button",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-btn"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus",
+    "active",
+    "disabled",
+    "loading"
+   ],
+   "tokens": [
+    "kit-color-accent",
+    "kit-color-on-accent",
+    "kit-radius-pill",
+    "kit-size-target"
+   ],
+   "a11y": {
+    "element": "<button> for actions, <a> for navigation",
+    "aria": "aria-busy=\"true\" while sending; disabled buttons use the disabled attribute",
+    "keyboard": "Tab; Enter (links); Enter or Space (buttons)",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px minimum height",
+    "motion": "colour change only; transitions off with reduced motion",
+    "sr": "visible label; icon-only buttons carry aria-label",
+    "contrast": [
+     "kit-color-on-accent",
+     "kit-color-accent"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what happens (\"Apply or sign up\", not \"Click here\")",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Tag",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-tag",
+    "kit-tags"
+   ],
+   "states": [
+    "neutral",
+    "accent",
+    "ink",
+    "success",
+    "warning",
+    "danger",
+    "info"
+   ],
+   "tokens": [
+    "kit-color-line",
+    "kit-radius-pill"
+   ],
+   "a11y": {
+    "element": "<span> (static label)",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-surface-soft"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Link chip",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-chip"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus",
+    "active",
+    "on ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "36px tall, 44px tap area with spacing",
+    "motion": "colour change only",
+    "sr": "category name as link text",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "the category name",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Badge",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-badge"
+   ],
+   "states": [
+    "verified",
+    "unconfirmed",
+    "featured",
+    "sponsored",
+    "ad",
+    "closed",
+    "new"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "state shown as text, not colour only",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-surface"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Eyebrow",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-eyebrow"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> or heading text",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "carries information (section or type); never decorative"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Count",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-count"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "the number is read with its label"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Form field",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-field",
+    "kit-optional"
+   ],
+   "states": [
+    "default",
+    "optional",
+    "focus",
+    "filled",
+    "invalid",
+    "valid",
+    "disabled",
+    "read-only"
+   ],
+   "tokens": [
+    "kit-size-control",
+    "kit-border-control",
+    "kit-radius-control",
+    "kit-color-danger",
+    "kit-color-success"
+   ],
+   "a11y": {
+    "element": "<label> + <input>/<select>/<textarea>",
+    "aria": "aria-invalid on error; aria-describedby links the message; required fields marked in text",
+    "keyboard": "Tab; typing; autocomplete set per field",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "48px control height",
+    "motion": "border colour change only",
+    "sr": "label always visible; \"(optional)\" in text; messages read when shown",
+    "contrast": [
+     "kit-color-text",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Checkbox",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-checkbox",
+    "kit-check"
+   ],
+   "states": [
+    "unchecked",
+    "checked",
+    "invalid",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<input type=checkbox> inside its <label>",
+    "aria": "aria-invalid on error",
+    "keyboard": "Tab; Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "whole label is the target (44px row)",
+    "motion": "none",
+    "sr": "the label text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Form",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-form",
+    "kit-captcha",
+    "kit-hp",
+    "kit-nl"
+   ],
+   "states": [
+    "default",
+    "sending",
+    "error summary",
+    "sent",
+    "expired page",
+    "no JavaScript"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form> with labelled fields",
+    "aria": "role=status for the result; the error summary takes focus",
+    "keyboard": "Tab order follows the visual order; Enter sends",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "errors listed at the top and beside each field; spam check is invisible; honeypot hidden from everyone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "One standard for every form (S5.2); behaviour in kit.js."
+  },
+  {
+   "name": "Form status and done message",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-form-status",
+    "kit-form-done",
+    "kit-form-summary"
+   ],
+   "states": [
+    "error",
+    "success",
+    "sent"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div>",
+    "aria": "role=status aria-live=polite; tabindex=-1 so focus can move to it",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "read out when it appears"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Filter pill and group",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-filter"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus",
+    "selected",
+    "disabled",
+    "loading"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<fieldset> + <legend>; pills are <a>",
+    "aria": "aria-current on the selected pill",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "selected shown by a tick and weight, not colour only"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "filter value as text",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Kept for small lists; hubs use the dropdown filter bar."
+  },
+  {
+   "name": "Filter bar (dropdowns, Sort, active chips)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-filterbar",
+    "kit-filters",
+    "kit-dd",
+    "kit-removable"
+   ],
+   "states": [
+    "closed",
+    "open",
+    "chosen (count)",
+    "sheet on phones",
+    "no JavaScript (Apply button)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form method=get>; each filter a <details>/<summary> with a <fieldset> of checkboxes; Sort a list of links",
+    "aria": "summary exposes expanded/collapsed; chosen count read as \"2 chosen\"; results status aria-live=polite",
+    "keyboard": "Enter/Space opens; arrow keys move through options; Esc closes and returns focus to the button",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons and rows",
+    "motion": "chevron turn off with reduced motion",
+    "sr": "each remove chip says \"Remove Category: Birds\"",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "Sort options are real links (crawlable)",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Segmented control",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-segment"
+   ],
+   "states": [
+    "default",
+    "current",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav> of links",
+    "aria": "aria-label names it; aria-current on the active one",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Breadcrumb",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-crumbs",
+    "kit-breadcrumb"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Breadcrumb\"> with an <ol>",
+    "aria": "aria-current=page on the last item",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "page names",
+    "alt": "n/a",
+    "schema": "BreadcrumbList"
+   }
+  },
+  {
+   "name": "Pagination",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-pager"
+   ],
+   "states": [
+    "current",
+    "link",
+    "next",
+    "previous"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Pagination\">",
+    "aria": "aria-current=page",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "numbers and Next/Previous",
+    "alt": "n/a",
+    "schema": "none; pages 2+ canonical to themselves"
+   }
+  },
+  {
+   "name": "Disclosure (form behind a button)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-disclosure"
+   ],
+   "states": [
+    "closed",
+    "open",
+    "reopened after an error"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<details>/<summary> styled as a button",
+    "aria": "expanded state from <details>; one open at a time in a group",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "button text changes to \"Close\" when open"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Steps",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-steps",
+    "kit-step"
+   ],
+   "states": [
+    "step 1",
+    "step 2",
+    "no JavaScript (all steps)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<fieldset> per step with <legend> \"Step 1 of 2 …\"",
+    "aria": "focus moves to the step heading",
+    "keyboard": "Next/Back buttons; Enter sends on the last step",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Icon",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-ico"
+   ],
+   "states": [
+    "default",
+    "in button",
+    "on ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> CSS mask",
+    "aria": "aria-hidden=\"true\" always",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "meaning given by nearby text, never the icon alone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Line icons (Lucide style, ISC)."
+  },
+  {
+   "name": "Link styles",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-link"
+   ],
+   "states": [
+    "internal",
+    "external (arrow)",
+    "visited",
+    "hover",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "external links get a screen-reader note \"(external site)\"",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "link text says where it goes"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive text; external marked",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Empty state",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-empty"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "says what to do next"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Text styles (display, lead, caption, note)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-display",
+    "kit-lead",
+    "kit-caption",
+    "kit-note",
+    "kit-hero-title"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [
+    "kit-type-display",
+    "kit-type-lead",
+    "kit-type-xs"
+   ],
+   "a11y": {
+    "element": "text elements",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-muted",
+     "kit-color-bg"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Background helpers",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-bg",
+    "kit-dark"
+   ],
+   "states": [
+    "canvas",
+    "kraft",
+    "ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "utility classes",
+    "aria": "on ink: focus ring turns yellow and links white",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-on-ink",
+     "kit-color-ink"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Site header",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-site-header",
+    "kit-header",
+    "kit-menu",
+    "kit-hsearch",
+    "kit-wordmark",
+    "kit-logo"
+   ],
+   "states": [
+    "default",
+    "menu open (below 1200px)",
+    "search open"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<header> with <nav aria-label=\"Main\">; search is a <form role=search>",
+    "aria": "menu button has aria-expanded and \"Open menu\"/\"Close menu\" labels; search toggle has aria-expanded/aria-controls",
+    "keyboard": "Tab; Enter; Esc closes search",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "logo link \"Animal Writes home\""
+   },
+   "seo": {
+    "heading": "none (the page H1 is in the content)",
+    "link": "section names",
+    "alt": "logo alt \"Animal Writes\"",
+    "schema": "WebSite (site-wide, SearchAction)"
+   }
+  },
+  {
+   "name": "Announcement bar",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-announce"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div> above the header",
+    "aria": "none",
+    "keyboard": "Tab to its link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "one sentence and one link"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Sticky action bar",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-sticky-help"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Quick help\">",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "each action labelled in text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Site footer",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-site-footer",
+    "kit-footer",
+    "kit-legal",
+    "kit-social",
+    "kit-socials",
+    "kit-powered",
+    "kit-visits",
+    "kit-credit"
+   ],
+   "states": [
+    "default",
+    "Categories folded (below 1200px)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<footer> with one <nav> per list, each with its own aria-label (Helplines, Explore, Animal Writes, Categories, Policies)",
+    "aria": "Categories fold is a <details>",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px rows on phones",
+    "motion": "none",
+    "sr": "social links labelled by network",
+    "contrast": [
+     "kit-color-on-ink",
+     "kit-color-ink"
+    ]
+   },
+   "seo": {
+    "heading": "H2 per column (small)",
+    "link": "page names; phone numbers as tel: links",
+    "alt": "logo alt",
+    "schema": "Organization (site-wide)"
+   }
+  },
+  {
+   "name": "Section band and hub head",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-section",
+    "kit-sec"
+   ],
+   "states": [
+    "default",
+    "with filters",
+    "with active filters",
+    "phone (no pictures)"
+   ],
+   "tokens": [
+    "kit-color-surface"
+   ],
+   "a11y": {
+    "element": "<header> holding breadcrumb, H1, intro, count and filters",
+    "aria": "pictures aria-hidden (decorative)",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "count read as text (\"22 documents\")"
+   },
+   "seo": {
+    "heading": "the page H1",
+    "link": "n/a",
+    "alt": "pictures are decorative (alt=\"\")",
+    "schema": "CollectionPage + ItemList (hubs)"
+   },
+   "note": "Fixed head height: 12rem from 640px, 15rem from 1200px."
+  },
+  {
+   "name": "Cards",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-card",
+    "kit-cards",
+    "kit-story",
+    "kit-doc",
+    "kit-case",
+    "kit-res",
+    "kit-tile",
+    "kit-tiles",
+    "kit-task",
+    "kit-placard",
+    "kit-img",
+    "kit-link-row"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus (via the title link)",
+    "no picture (placard)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<li> in a list; the title is the link",
+    "aria": "pictures alt=\"\" when the title says the same",
+    "keyboard": "Tab to the title link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "lift on hover off with reduced motion",
+    "sr": "one link per card (the title)"
+   },
+   "seo": {
+    "heading": "H2 or H3 by context",
+    "link": "the item title",
+    "alt": "empty when decorative",
+    "schema": "part of the list's ItemList"
+   },
+   "note": "Several card styles share these classes; one kit-card with variants is the next step."
+  },
+  {
+   "name": "Home editorial sections",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-ed",
+    "kit-hero",
+    "kit-finder"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section>s with H2 headings",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 in the hero, H2 per section",
+    "link": "descriptive",
+    "alt": "photos described or decorative",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Banner",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-banner"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section> with heading and link",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Share",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-share",
+    "kit-sh"
+   ],
+   "states": [
+    "default",
+    "copied"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "buttons and links",
+    "aria": "copy result announced (role=status)",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "each button names the network or action"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Table",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-table"
+   ],
+   "states": [
+    "default",
+    "scrolls sideways on phones"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<table> with <th scope>",
+    "aria": "none",
+    "keyboard": "scroll container is focusable when it scrolls",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Trust box",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-trust"
+   ],
+   "states": [
+    "sourced",
+    "verified",
+    "unconfirmed"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<aside>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "source, dates and status in words"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "the original source",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Carousel dots",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-carousel"
+   ],
+   "states": [
+    "default",
+    "current"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "buttons",
+    "aria": "aria-current on the visible slide",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Ad slot",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-ad"
+   ],
+   "states": [
+    "empty (prints nothing)",
+    "filled"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<aside aria-label=\"Advertisement\">",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "labelled \"Advertisement\" in text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Claim panel",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-claim"
+   ],
+   "states": [
+    "closed",
+    "open"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<details>",
+    "aria": "none",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "More link",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-more"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what it opens (\"All news\")",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Character counter",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-counter"
+   ],
+   "states": [
+    "default",
+    "near the limit"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> after a textarea",
+    "aria": "aria-live=polite near the limit",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Print button",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-print"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<button>",
+    "aria": "none",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "States sheet",
+   "type": "tool",
+   "status": "live",
+   "classes": [
+    "kit-demo"
+   ],
+   "states": [
+    "all"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "admin-only page",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "/kits-demo/, private."
+  }
+ ],
+ "nav": [
+  {
+   "name": "Announcement bar",
+   "slug": "announcement-bar",
+   "status": "live",
+   "where": "above the header",
+   "a11y": "plain <div>; one link"
+  },
+  {
+   "name": "Utility navigation",
+   "slug": "utility-nav",
+   "status": "live",
+   "where": "header top row: search, Contact us",
+   "a11y": "search toggle aria-expanded/aria-controls; Contact link labelled"
+  },
+  {
+   "name": "Primary navigation",
+   "slug": "primary-nav",
+   "status": "live",
+   "where": "header",
+   "a11y": "<nav aria-label=\"Main\">; menu button below 1200px"
+  },
+  {
+   "name": "Mega menu",
+   "slug": "mega-menu",
+   "status": "not used",
+   "where": "",
+   "a11y": ""
+  },
+  {
+   "name": "Mobile bottom navigation",
+   "slug": "mobile-bottom-nav",
+   "status": "not used",
+   "where": "",
+   "a11y": ""
+  },
+  {
+   "name": "Sticky action bar",
+   "slug": "sticky-action-bar",
+   "status": "live",
+   "where": "bottom of the screen on phones (Quick help)",
+   "a11y": "<nav aria-label=\"Quick help\">"
+  },
+  {
+   "name": "Breadcrumbs",
+   "slug": "breadcrumbs",
+   "status": "live",
+   "where": "top of the content",
+   "a11y": "<nav aria-label=\"Breadcrumb\">, aria-current on the page"
+  },
+  {
+   "name": "Local navigation",
+   "slug": "local-nav",
+   "status": "live",
+   "where": "in-page lists such as Browse by state",
+   "a11y": "<nav aria-labelledby> its heading"
+  },
+  {
+   "name": "Footer navigation",
+   "slug": "footer-nav",
+   "status": "live",
+   "where": "footer: Helplines, Explore, Animal Writes, Categories, Policies",
+   "a11y": "one <nav> per list, each with its own aria-label"
+  },
+  {
+   "name": "Pagination",
+   "slug": "pagination",
+   "status": "live",
+   "where": "under lists",
+   "a11y": "<nav aria-label=\"Pagination\">"
+  }
+ ]
+}

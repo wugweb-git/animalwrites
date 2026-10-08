@@ -2,7 +2,7 @@
 /**
  * Title: Three big actions
  * Slug: kits-by-wugweb/three-big-actions
- * Categories: kits
+ * Categories: kits-components
  * Description: A dark band with three large, linked actions; the first is filled with the accent colour.
  */
 ?>
