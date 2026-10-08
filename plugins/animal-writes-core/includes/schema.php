@@ -80,7 +80,7 @@ function aw_listing_schema( $id ) {
 	}
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
-		$org['additionalType'] = wp_list_pluck( $types, 'name' );
+		$org['keywords'] = implode( ', ', wp_list_pluck( $types, 'name' ) ); // additionalType must be a URL; the type names go here
 	}
 	$code = $m( 'aw_awbi_code' );
 	if ( $code ) {
