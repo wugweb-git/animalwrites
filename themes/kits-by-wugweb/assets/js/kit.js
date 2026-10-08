@@ -412,3 +412,40 @@
 		});
 	});
 })();
+
+/* External links: mark text links to other sites with an arrow (CSS) and a screen-reader note. Icon, image and logo links are left as they are. */
+(function () {
+	function mark(root) {
+		root.querySelectorAll('a[href^="http"]:not(.kit-link-ext)').forEach(function (a) {
+			if (a.host === location.host || a.querySelector('img, svg, .kit-ico, .aw-ico') || !a.textContent.trim() || a.closest('.wp-block-navigation, .aw-ad')) {
+				return;
+			}
+			a.classList.add('kit-link-ext');
+			var sr = document.createElement('span');
+			sr.className = 'screen-reader-text';
+			sr.textContent = ' (external site)';
+			a.appendChild(sr);
+		});
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function () { mark(document); });
+	} else {
+		mark(document);
+	}
+})();
+
+/* Folded sections (data-kit-fold): open on wide screens, folded below lg (1200px); open without JavaScript. */
+(function () {
+	var mq = window.matchMedia('(max-width: 1199px)');
+	function apply() {
+		document.querySelectorAll('details[data-kit-fold]').forEach(function (d) { d.open = !mq.matches; });
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', apply);
+	} else {
+		apply();
+	}
+	if (mq.addEventListener) {
+		mq.addEventListener('change', apply);
+	}
+})();

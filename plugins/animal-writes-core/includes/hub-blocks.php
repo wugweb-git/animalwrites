@@ -27,6 +27,7 @@ function aw_hub_blocks() {
 		'list-filters'  => array( 'List filters', 'aw_block_list_filters', $type_attr ),
 		'publisher'     => array( 'Publisher', 'aw_block_publisher', array() ),
 		'doc-date'      => array( 'Document date', 'aw_block_doc_date', array() ),
+		'law-date'      => array( 'Law date (one line)', 'aw_block_law_date', array() ),
 		'issuer'        => array( 'Issued by', 'aw_block_issuer', array() ),
 		'doc-link'      => array( 'Document source and PDF', 'aw_block_doc_link', array() ),
 		'task-icon'     => array( 'Guide icon', 'aw_block_task_icon', array() ),
@@ -165,6 +166,18 @@ function aw_block_doc_date( $a, $id ) {
 	$year = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
 	return $year ? '<div class="aw-case-date"><span class="d">' . esc_html( $year ) . '</span></div>'
 		: '<div class="aw-case-date"><span class="d">' . esc_html( aw_src_date( $id, 'j' ) ) . '</span><span class="m">' . esc_html( aw_src_date( $id, 'M Y' ) ) . '</span></div>';
+}
+
+/** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
+function aw_block_law_date( $a, $id ) {
+	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+		return '';
+	}
+	$d = (string) get_post_meta( $id, 'aw_source_date', true );
+	if ( $d ) {
+		return '<time class="aw-law-date" datetime="' . esc_attr( $d ) . '">' . esc_html( wp_date( 'jS F, Y', strtotime( $d . ' 12:00:00' ) ) ) . '</time>';
+	}
+	return preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? '<time class="aw-law-date" datetime="' . esc_attr( $ym[0] ) . '">' . esc_html( $ym[0] ) . '</time>' : '';
 }
 
 /** "Issued by …" (a label, not a filter); "Template" for templates. */

@@ -184,10 +184,13 @@ add_filter(
 
 add_shortcode(
 	'aw_topics_list',
-	function () {
+	function ( $a ) {
 		$terms = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'orderby' => 'name' ) );
 		if ( ! $terms || is_wp_error( $terms ) ) {
 			return '';
+		}
+		if ( 'links' === ( $a['style'] ?? '' ) ) { // plain text links (footer)
+			return '<ul class="kit-footer-inline">' . implode( '', array_map( fn( $t ) => '<li><a href="' . esc_url( get_term_link( $t ) ) . '">' . esc_html( $t->name ) . '</a></li>', $terms ) ) . '</ul>';
 		}
 		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li>' . kits_chip( $t->name, get_term_link( $t ), 'on-ink' ) . '</li>', $terms ) ) . '</ul>';
 	}
@@ -237,6 +240,7 @@ add_shortcode(
 		$groups = array( 'aw_news' => 'News', 'aw_guide' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'page' => 'Pages' );
 		$total  = 0;
 		$out    = '';
+		$shown  = 0;
 		foreach ( $groups as $type => $label ) {
 			$per = 'aw_listing' === $type ? 8 : 20;
 			$res = new WP_Query( array( 's' => $q, 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => $per, 'no_found_rows' => false ) );
@@ -248,6 +252,9 @@ add_shortcode(
 			foreach ( $res->posts as $p ) {
 				$out .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
 					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
+				if ( 6 === ++$shown && function_exists( 'aw_ad' ) && ( $ad = aw_ad( 'results' ) ) ) { // phpcs:ignore
+					$out .= '<li class="aw-ad-item">' . $ad . '</li>';
+				}
 			}
 			$out .= '</ol>';
 			if ( $res->found_posts > $per ) {

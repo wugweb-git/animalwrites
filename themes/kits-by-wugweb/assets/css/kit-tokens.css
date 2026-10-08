@@ -28,10 +28,10 @@
   --kit-type-h3: var(--fluid-h3);
   --kit-type-h2: var(--fluid-h2);
   --kit-type-h1: var(--fluid-h1);
-  --kit-type-headline: 1.5rem;
+  --kit-type-headline: var(--fluid-h2);
   --kit-type-display: var(--fluid-display);
-  --kit-type-stat: 1.75rem;
-  --kit-type-placard: 1.125rem;
+  --kit-type-stat: var(--fluid-h3);
+  --kit-type-placard: var(--fluid-h5);
   --kit-leading-body: 1.6;
   --kit-leading-heading: 1.2;
   --kit-leading-display: 1.06;
@@ -82,8 +82,6 @@
   --kit-tracking-heading: -0.02em;
   --kit-tracking-body: -0.006em;
   --kit-color-canvas: var(--neutral-1);
-  --kit-type-mega: 2.75rem;
-  --kit-type-section: 1.75rem;
   --kit-focus-width: 3px;
   --kit-focus-offset: 2px;
   --kit-size-check: 1.25rem;
@@ -95,9 +93,6 @@
 }
 @media (min-width: 640px) {
   :root {
-    --kit-type-headline: 2.25rem;
-    --kit-type-stat: 2rem;
-    --kit-type-placard: 1.25rem;
     --kit-space-section: 5rem;
     --kit-space-gutter: 1.5rem;
     --kit-space-grid: 1.5rem;
@@ -105,18 +100,13 @@
     --kit-card-columns: 2;
     --kit-placard-ratio: 16/9;
     --kit-carousel-item: auto;
-    --kit-type-mega: 5.5rem;
-    --kit-type-section: 3rem;
   }
 }
 @media (min-width: 1200px) {
   :root {
-    --kit-type-headline: 3rem;
     --kit-space-section: 6rem;
     --kit-space-gutter: 2rem;
     --kit-space-grid: 1.75rem;
     --kit-card-columns: 3;
-    --kit-type-mega: 7.5rem;
-    --kit-type-section: 4rem;
   }
 }

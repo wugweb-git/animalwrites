@@ -146,9 +146,9 @@
       "lg": "var(--fluid-h1)"
     },
     "type-headline": {
-      "sm": "1.5rem",
-      "md": "2.25rem",
-      "lg": "3rem"
+      "sm": "var(--fluid-h2)",
+      "md": "var(--fluid-h2)",
+      "lg": "var(--fluid-h2)"
     },
     "type-display": {
       "sm": "var(--fluid-display)",
@@ -156,14 +156,14 @@
       "lg": "var(--fluid-display)"
     },
     "type-stat": {
-      "sm": "1.75rem",
-      "md": "2rem",
-      "lg": "2rem"
+      "sm": "var(--fluid-h3)",
+      "md": "var(--fluid-h3)",
+      "lg": "var(--fluid-h3)"
     },
     "type-placard": {
-      "sm": "1.125rem",
-      "md": "1.25rem",
-      "lg": "1.25rem"
+      "sm": "var(--fluid-h5)",
+      "md": "var(--fluid-h5)",
+      "lg": "var(--fluid-h5)"
     },
     "leading-body": {
       "sm": "1.6",
@@ -414,16 +414,6 @@
       "sm": "var(--neutral-1)",
       "md": "var(--neutral-1)",
       "lg": "var(--neutral-1)"
-    },
-    "type-mega": {
-      "sm": "2.75rem",
-      "md": "5.5rem",
-      "lg": "7.5rem"
-    },
-    "type-section": {
-      "sm": "1.75rem",
-      "md": "3rem",
-      "lg": "4rem"
     },
     "focus-width": {
       "sm": "3px",

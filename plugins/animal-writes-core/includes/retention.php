@@ -2,10 +2,9 @@
 /**
  * Retention: nothing is ever deleted. Old items are archived instead, and stay reachable at their URL.
  *
- * - News, 6+ months old: noindex (still listed).
- * - News, 12+ months old: archived — noindex, left out of the news list and the sitemap.
+ * - News: permanent, listed and indexed at any age (owner's decision: old news stays in search).
  * - Opportunities past their deadline: closed — noindex, left out of the opportunities list and the sitemap.
- * - Legal Watch, research, guides, resources, campaigns, directory: permanent, unchanged.
+ * - Library, guides, resources, campaigns, directory: permanent, unchanged.
  *
  * @package animal-writes-core
  */
@@ -14,11 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_NEWS_NOINDEX_AFTER = '6 months';
-const AW_NEWS_ARCHIVE_AFTER = '12 months';
-
 /**
- * Retention state of a post: '' (normal), 'noindex', 'archived' or 'closed'.
+ * Retention state of a post: '' (normal) or 'closed' (an opportunity past its date).
  *
  * @param int|WP_Post $post Post.
  * @return string
@@ -28,13 +24,6 @@ function aw_retention_state( $post ) {
 	if ( ! $post ) {
 		return '';
 	}
-	if ( 'aw_news' === $post->post_type ) {
-		$t = (int) get_post_time( 'U', true, $post );
-		if ( $t < strtotime( '-' . AW_NEWS_ARCHIVE_AFTER ) ) {
-			return 'archived';
-		}
-		return $t < strtotime( '-' . AW_NEWS_NOINDEX_AFTER ) ? 'noindex' : '';
-	}
 	if ( 'aw_opportunity' === $post->post_type ) {
 		$dl = aw_opportunity_closes( $post->ID );
 		return ( $dl && $dl < wp_date( 'Y-m-d' ) ) ? 'closed' : '';
@@ -42,11 +31,11 @@ function aw_retention_state( $post ) {
 	return '';
 }
 
-// Archived, closed and older news pages ask search engines not to index them; links are still followed.
+// Closed opportunities ask search engines not to index them; links are still followed.
 add_filter(
 	'wp_robots',
 	function ( $robots ) {
-		if ( is_singular( array( 'aw_news', 'aw_opportunity' ) ) && aw_retention_state( get_queried_object() ) ) {
+		if ( is_singular( 'aw_opportunity' ) && aw_retention_state( get_queried_object() ) ) {
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 			unset( $robots['max-image-preview'] );
@@ -55,7 +44,7 @@ add_filter(
 	}
 );
 
-// Lists leave out archived news and closed opportunities.
+// Lists leave out closed opportunities.
 /** Days an opportunity without a deadline stays open before it needs renewing. */
 const AW_OPP_REVIEW_DAYS = 30;
 
@@ -100,9 +89,6 @@ function aw_open_opportunities_meta_query() {
 add_filter(
 	'wp_sitemaps_posts_query_args',
 	function ( $args, $post_type ) {
-		if ( 'aw_news' === $post_type ) {
-			$args['date_query'] = array( array( 'after' => AW_NEWS_NOINDEX_AFTER . ' ago', 'inclusive' => true ) );
-		}
 		if ( 'aw_opportunity' === $post_type ) {
 			$args['meta_query'] = aw_open_opportunities_meta_query();
 		}

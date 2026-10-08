@@ -1,7 +1,9 @@
 <?php
 /**
  * Ad slots. Admins paste network code (e.g. AdSense) in Settings > Ads; empty slots print nothing.
- * Slots: homepage (between sections), article (after the story), archive (after the 6th card).
+ * Slots: homepage (between sections), article (after the story), archive (lists, after the 6th card), directory (directory
+ * lists; falls back to archive), profile (directory entries; falls back to article), results (search, after the 6th result).
+ * A theme marks its own list pages with the kits_ads_is_list filter (for example lists built as Pages).
  * Also serves /ads.txt from the same settings page.
  *
  * @package kits-core
@@ -15,6 +17,9 @@ const AW_AD_SLOTS = array(
 	'home'    => 'Homepage, between sections',
 	'article' => 'After a story, guide or page',
 	'archive' => 'Section lists, after the 6th item (or at the end of the list)',
+	'directory' => 'Directory lists, after the 6th organisation (empty: the section-list ad)',
+	'profile' => 'Directory profiles, after the details (empty: the after-a-story ad)',
+	'results' => 'Search results, after the 6th result',
 	'head'    => 'Site-wide code in <head> (network script, auto ads)',
 );
 
@@ -28,13 +33,22 @@ function aw_ad( $slot ) {
 	return '<aside class="aw-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="aw-ad-label kit-ad-label"><span class="kit-badge kit-badge--ad">Advertisement</span></p><div class="aw-ad-unit">' . $code . '</div></aside>';
 }
 
+/** Is this a list page (archives, the blog, or a theme's own list Pages)? */
+function kits_ads_is_list() {
+	return (bool) apply_filters( 'kits_ads_is_list', is_archive() || is_home() );
+}
+
 /** The section-list ad, once per page (themes with their own list markup call this at the end of the list). */
 function kits_list_ad() {
 	static $done = false;
-	if ( $done || is_admin() || ! ( is_archive() || is_home() ) ) {
+	if ( $done || is_admin() || ! kits_ads_is_list() ) {
 		return '';
 	}
-	$ad = aw_ad( 'archive' );
+	$slot = (string) apply_filters( 'kits_ads_list_slot', 'archive' );
+	$ad   = aw_ad( $slot );
+	if ( '' === $ad && 'archive' !== $slot ) {
+		$ad = aw_ad( 'archive' );
+	}
 	$done = (bool) $ad;
 	return $ad;
 }
@@ -57,11 +71,13 @@ add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
 		static $done = false;
-		if ( $done || ! is_singular() || is_front_page() || ! in_the_loop() && ! is_main_query() ) {
+		if ( $done || ! is_singular() || is_front_page() || kits_ads_is_list() || ! in_the_loop() && ! is_main_query() ) {
 			return $content;
 		}
 		$done = true;
-		return $content . aw_ad( 'article' );
+		$slot = (string) apply_filters( 'kits_ads_article_slot', 'article' );
+		$ad   = aw_ad( $slot );
+		return $content . ( '' === $ad && 'article' !== $slot ? aw_ad( 'article' ) : $ad );
 	}
 );
 add_filter(
@@ -81,7 +97,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-template',
 	function ( $content ) {
-		if ( is_admin() || ! ( is_archive() || is_home() ) ) {
+		if ( is_admin() || ! kits_ads_is_list() ) {
 			return $content;
 		}
 		$parts = explode( '</li>', $content );

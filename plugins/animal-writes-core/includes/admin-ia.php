@@ -22,6 +22,18 @@ const AW_SHARED_TAXONOMIES = array( 'aw_topic' ); // places are not a list any m
 add_filter( 'comments_open', '__return_false', 20 );
 add_filter( 'pings_open', '__return_false', 20 );
 add_filter( 'comments_array', '__return_empty_array', 20 );
+// No comment feeds: not linked in the head, and the old addresses go to the home page.
+add_filter( 'feed_links_show_comments_feed', '__return_false' );
+add_filter( 'feed_links_extra_show_post_comments_feed', '__return_false' );
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_comment_feed() ) {
+			wp_safe_redirect( home_url( '/' ), 301 );
+			exit;
+		}
+	}
+);
 add_action(
 	'init',
 	function () {

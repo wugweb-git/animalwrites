@@ -19,7 +19,7 @@
 <!-- /wp:html -->
 <!-- wp:query {"queryId":43,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-ed-rows"} -->
 <div class="wp-block-query aw-ed-rows"><!-- wp:post-template -->
-<!-- wp:post-date /-->
+<!-- wp:animal-writes/law-date /-->
 <!-- wp:post-terms {"term":"aw_topic"} /-->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- /wp:post-template --></div>
