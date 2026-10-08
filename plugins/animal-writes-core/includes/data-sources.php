@@ -48,7 +48,7 @@ function aw_listing_sources( $id ) {
 	if ( 'AWBI ABC list' === $name ) {
 		$slugs[] = 'awbi-abc';
 	} elseif ( $name ) {
-		$slugs[] = 'gov';
+		$slugs[] = false !== stripos( $name, 'google' ) ? 'gmaps' : 'gov'; // a Google profile is not a government list
 	}
 	if ( get_post_meta( $id, 'aw_verified', true ) ) {
 		$slugs[] = 'organisation';

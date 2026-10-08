@@ -26,6 +26,11 @@ function aw_listing_fields() {
 		'Online'  => array(
 			'aw_website'   => array( 'Website', 'url', '' ),
 			'aw_maps_url'  => array( 'Google Maps link', 'url', 'Share → Copy link in Google Maps' ),
+			'aw_lat'       => array( 'Latitude', 'text', 'From Google Maps, e.g. 28.5797' ),
+			'aw_lng'       => array( 'Longitude', 'text', 'e.g. 77.3167' ),
+			'aw_place_id'  => array( 'Google place ID', 'text', '' ),
+			'aw_g_rating'  => array( 'Google rating', 'text', 'Out of 5, e.g. 4.6' ),
+			'aw_g_reviews' => array( 'Google reviews', 'text', 'How many reviews' ),
 			'aw_instagram' => array( 'Instagram', 'url', '' ),
 			'aw_facebook'  => array( 'Facebook', 'url', '' ),
 			'aw_x'         => array( 'X (Twitter)', 'url', '' ),
@@ -112,14 +117,14 @@ function aw_block_org_details( $a, $id ) {
 		$photos .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	$facts = '';
-	$icons = array( 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
-	foreach ( array( 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
+	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( $m( $k ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . esc_html( wp_date( 'j M Y', strtotime( $m( 'aw_services_on' ) ) ) ) : '' ) . '</span>';
 			}
-			$val = 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k );
+			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) );
 			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . esc_html( $val ) . $note . '</dd></div>';
 		}
 	}

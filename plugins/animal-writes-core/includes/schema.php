@@ -79,6 +79,10 @@ function aw_listing_schema( $id ) {
 	if ( $m( 'aw_maps_url' ) ) {
 		$org['hasMap'] = $m( 'aw_maps_url' );
 	}
+	if ( is_numeric( $m( 'aw_lat' ) ) && is_numeric( $m( 'aw_lng' ) ) ) {
+		$org['geo'] = array( '@type' => 'GeoCoordinates', 'latitude' => (float) $m( 'aw_lat' ), 'longitude' => (float) $m( 'aw_lng' ) );
+	}
+	// The Google rating is shown on the page only: Google does not accept third-party ratings in an organisation's schema.
 	$photos = array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_image_url( (int) $p, 'large' ), array_filter( explode( ',', $m( 'aw_gallery' ) ) ) ) ) );
 	if ( $photos ) {
 		$org['image'] = array_values( array_unique( array_merge( (array) ( $org['image'] ?? array() ), $photos ) ) );

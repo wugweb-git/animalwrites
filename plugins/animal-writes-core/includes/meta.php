@@ -43,6 +43,11 @@ function aw_meta_schema() {
 		'aw_services_source' => array( 'string', array( 'aw_listing' ), 'Who stated the services (e.g. "the organisation", or the list name)' ),
 		'aw_services_on'     => array( 'string', array( 'aw_listing' ), 'Date the services were stated (YYYY-MM-DD)' ),
 		'aw_maps_url'        => array( 'string', array( 'aw_listing' ), 'Google Maps link' ),
+		'aw_lat'             => array( 'string', array( 'aw_listing' ), 'Latitude (from Google Maps)' ),
+		'aw_lng'             => array( 'string', array( 'aw_listing' ), 'Longitude (from Google Maps)' ),
+		'aw_place_id'        => array( 'string', array( 'aw_listing' ), 'Google place ID' ),
+		'aw_g_rating'        => array( 'string', array( 'aw_listing' ), 'Google rating (out of 5)' ),
+		'aw_g_reviews'       => array( 'string', array( 'aw_listing' ), 'Number of Google reviews' ),
 		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
 		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
 		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
@@ -90,6 +95,12 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_gallery' === $key ) { // up to four media IDs
 		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 4 ) );
+	}
+	if ( in_array( $key, array( 'aw_lat', 'aw_lng', 'aw_g_rating' ), true ) ) {
+		return is_numeric( trim( (string) $value ) ) ? trim( (string) $value ) : '';
+	}
+	if ( 'aw_g_reviews' === $key ) {
+		return ctype_digit( trim( (string) $value ) ) ? trim( (string) $value ) : '';
 	}
 	if ( 'aw_founded' === $key ) {
 		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';
