@@ -986,8 +986,8 @@ body { background: var(--kit-surface-page); }
 
 /* Footer on phones: one screen (≤ 812px). Logo, mail and social icons in one row; helplines side by side; the two link
    lists in three columns; newsletter = email + Subscribe in one row (name is optional and hidden here); Categories
-   folded; policies inline in the bottom bar. */
-@media (max-width: 767px) {
+   folded; policies inline in the bottom bar. Tablets (to 1199px) use the same compact footer: one screen there too. */
+@media (max-width: 1199px) {
 	.kit-footer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-4) var(--kit-space-3); padding: var(--kit-space-5) 0 var(--kit-space-4); }
 	.kit-footer-brand { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
 	.kit-footer-brand > p { display: none; }
@@ -1044,8 +1044,8 @@ body { background: var(--kit-surface-page); }
 .kit-error-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-pill); text-decoration: none; color: var(--kit-color-ink); }
 .kit-error-links a:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 
-/* Phone footer, second pass (one screen, ≤ 812px): less top space, empty error lines take no room until an error shows. */
-@media (max-width: 767px) {
+/* Phone and tablet footer, second pass (one screen): less top space, empty error lines take no room until an error shows. */
+@media (max-width: 1199px) {
 	.kit-site-footer.kit-footer { padding-block: var(--kit-space-4) var(--kit-space-3) !important; }
 	.kit-site-footer .kit-footer-grid { padding-top: 0; padding-bottom: var(--kit-space-3); }
 	.kit-footer-newsletter .kit-field-error:empty { display: none; }
