@@ -542,3 +542,4 @@ body { background: var(--aw-color-canvas); }
 
 /* Announcement bar: one line on phones (just the link) */
 @media (max-width: 599px) { .aw-announce-lead { display: none; } .aw-announce p { white-space: nowrap; } }
+.aw-announce .aw-ico--megaphone { margin-right: .35em; }

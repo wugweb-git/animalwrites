@@ -16,6 +16,7 @@ function kits_setup() {
 	add_theme_support( 'editor-styles' );
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'post-thumbnails' );
+	add_editor_style( 'assets/css/kits-v42.css' );
 	add_editor_style( 'assets/css/kits.css' );
 }
 add_action( 'after_setup_theme', 'kits_setup' );
@@ -26,6 +27,8 @@ add_action( 'after_setup_theme', 'kits_setup' );
 function kits_enqueue_styles() {
 	$dir = get_template_directory();
 	$uri = get_template_directory_uri();
+	// Kits v4.2 tokens (bare names: --neutral-*, --color-*, --s-*, --r-*, --opacity-*, --fluid-*). Loads before kit-tokens so a child theme can override.
+	wp_enqueue_style( 'kits-v42', $uri . '/assets/css/kits-v42.css', array( 'global-styles' ), (string) filemtime( $dir . '/assets/css/kits-v42.css' ) );
 	// Design tokens (--kit-*): neutral defaults; a child theme overrides them with its own token file.
 	wp_enqueue_style( 'kit-tokens', $uri . '/assets/css/kit-tokens.css', array( 'global-styles' ), (string) filemtime( $dir . '/assets/css/kit-tokens.css' ) );
 	wp_enqueue_style(
