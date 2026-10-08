@@ -46,6 +46,7 @@ function aw_hub_blocks() {
 		'posted-by'     => array( 'Posted by', 'aw_block_posted_by', array() ),
 		'volunteer'     => array( 'Volunteer form', 'aw_block_volunteer', array( 'open' => array( 'type' => 'boolean', 'default' => false ) ) ),
 		'listing-help'  => array( 'Is this your organisation?', 'aw_block_listing_help', array() ),
+		'org-details'   => array( 'Organisation details', 'aw_block_org_details', array() ),
 	);
 }
 

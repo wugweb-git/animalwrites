@@ -202,6 +202,40 @@
    }
   },
   {
+   "name": "Organisation details",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-org-details",
+    "aw-org-gallery",
+    "aw-org-facts"
+   ],
+   "states": [
+    "links only",
+    "photos",
+    "facts",
+    "all",
+    "nothing filled (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section aria-label> with link buttons, <figure> photos and a <dl> of facts",
+    "aria": "icons aria-hidden; each link names its target",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "fact names read before values"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "Directions, Instagram, Donate…",
+    "alt": "photo alt from the media library",
+    "schema": "hasMap, sameAs, image, foundingDate, knowsLanguage, openingHours, identifier"
+   },
+   "block": "animal-writes/org-details"
+  },
+  {
    "name": "Directory search",
    "type": "component",
    "status": "live",

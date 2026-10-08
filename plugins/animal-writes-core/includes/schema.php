@@ -72,9 +72,27 @@ function aw_listing_schema( $id ) {
 	if ( $m( 'aw_whatsapp' ) ) {
 		$org['contactPoint'] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $m( 'aw_whatsapp' ), 'availableLanguage' => array( 'en', 'hi' ) );
 	}
-	if ( $site ) {
-		$org['sameAs'] = array( $site );
+	$same = array_values( array_filter( array( $site, $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ) ) ) );
+	if ( $same ) {
+		$org['sameAs'] = $same;
 	}
+	if ( $m( 'aw_maps_url' ) ) {
+		$org['hasMap'] = $m( 'aw_maps_url' );
+	}
+	$photos = array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_image_url( (int) $p, 'large' ), array_filter( explode( ',', $m( 'aw_gallery' ) ) ) ) ) );
+	if ( $photos ) {
+		$org['image'] = array_values( array_unique( array_merge( (array) ( $org['image'] ?? array() ), $photos ) ) );
+	}
+	if ( $m( 'aw_founded' ) ) {
+		$org['foundingDate'] = $m( 'aw_founded' );
+	}
+	if ( $m( 'aw_languages' ) ) {
+		$org['knowsLanguage'] = array_values( array_filter( array_map( 'trim', explode( ',', $m( 'aw_languages' ) ) ) ) );
+	}
+	if ( $m( 'aw_hours' ) && $vet ) {
+		$org['openingHours'] = $m( 'aw_hours' ); // openingHours belongs to places (LocalBusiness), so only on VeterinaryCare
+	}
+
 	if ( $m( 'aw_services' ) ) {
 		$org['knowsAbout'] = array_values( array_filter( array_map( 'trim', preg_split( '/[,;\n]+/', wp_strip_all_tags( $m( 'aw_services' ) ) ) ) ) );
 	}
@@ -85,6 +103,9 @@ function aw_listing_schema( $id ) {
 	$code = $m( 'aw_awbi_code' );
 	if ( $code ) {
 		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
+	}
+	if ( $m( 'aw_registration' ) ) { // Trust/Society number, 12A, 80G, NGO Darpan ID, as the organisation states them
+		$org['identifier'] = array_values( array_filter( array( $org['identifier'] ?? null, array( '@type' => 'PropertyValue', 'propertyID' => 'Registration', 'value' => $m( 'aw_registration' ) ) ) ) );
 	}
 	return array_filter( $org );
 }

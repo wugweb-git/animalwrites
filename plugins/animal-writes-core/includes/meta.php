@@ -42,6 +42,20 @@ function aw_meta_schema() {
 		'aw_services'        => array( 'string', array( 'aw_listing' ), 'Services offered, as stated by the organisation or a named list (comma separated)' ),
 		'aw_services_source' => array( 'string', array( 'aw_listing' ), 'Who stated the services (e.g. "the organisation", or the list name)' ),
 		'aw_services_on'     => array( 'string', array( 'aw_listing' ), 'Date the services were stated (YYYY-MM-DD)' ),
+		'aw_maps_url'        => array( 'string', array( 'aw_listing' ), 'Google Maps link' ),
+		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
+		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
+		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
+		'aw_youtube'         => array( 'string', array( 'aw_listing' ), 'YouTube' ),
+		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 4 media IDs, comma separated' ),
+		'aw_founded'         => array( 'string', array( 'aw_listing' ), 'Year established' ),
+		'aw_head'            => array( 'string', array( 'aw_listing' ), 'Head of the organisation (name and role, as the organisation publishes it)' ),
+		'aw_registration'    => array( 'string', array( 'aw_listing' ), 'Registration (Trust/Society number, 12A, 80G, NGO Darpan ID)' ),
+		'aw_animals'         => array( 'string', array( 'aw_listing' ), 'Animals helped (comma separated)' ),
+		'aw_hours'           => array( 'string', array( 'aw_listing' ), 'Opening hours' ),
+		'aw_languages'       => array( 'string', array( 'aw_listing' ), 'Languages spoken (comma separated)' ),
+		'aw_donate_url'      => array( 'string', array( 'aw_listing' ), 'Donate link' ),
+		'aw_volunteer_url'   => array( 'string', array( 'aw_listing' ), 'Volunteer link' ),
 
 		// Opportunities.
 		'aw_org_name'        => array( 'string', array( 'aw_opportunity' ), 'Organisation' ),
@@ -64,7 +78,7 @@ function aw_meta_schema() {
  * @return mixed
  */
 function aw_sanitize_meta( $value, $key ) {
-	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url' );
+	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url' );
 	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
@@ -73,6 +87,12 @@ function aw_sanitize_meta( $value, $key ) {
 	if ( in_array( $key, $date_keys, true ) ) {
 		$value = (string) $value;
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ? $value : '';
+	}
+	if ( 'aw_gallery' === $key ) { // up to four media IDs
+		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 4 ) );
+	}
+	if ( 'aw_founded' === $key ) {
+		return preg_match( '/^(18|19|20)\d{2}$/', trim( (string) $value ) ) ? trim( (string) $value ) : '';
 	}
 	if ( 'aw_email' === $key ) {
 		return sanitize_email( (string) $value );
