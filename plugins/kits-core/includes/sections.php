@@ -70,3 +70,55 @@ add_filter(
 	20,
 	2
 );
+
+/**
+ * Hand-written <section> elements (shortcodes, blocks) get the same treatment: an id, and a name from their first
+ * heading when they have none. Runs on every block's output; sections that already have both are left alone.
+ */
+add_filter(
+	'render_block',
+	function ( $html ) {
+		if ( is_admin() || false === strpos( $html, '<section' ) ) {
+			return $html;
+		}
+		return (string) preg_replace_callback(
+			'/<section\b([^>]*)>(.*?)(?=<section\b|<\/section>)/s',
+			function ( $m ) {
+				$attrs = $m[1];
+				$body  = $m[2];
+				if ( preg_match( '/\bid="/', $attrs ) && preg_match( '/aria-label(ledby)?="/', $attrs ) ) {
+					return $m[0];
+				}
+				$name = '';
+				if ( preg_match( '/aria-labelledby="([^"]+)"/', $attrs, $l ) ) {
+					$name = preg_replace( '/-(title|h|heading)$/', '', $l[1] );
+				} elseif ( preg_match( '/aria-label="([^"]+)"/', $attrs, $l ) ) {
+					$name = $l[1];
+				} elseif ( preg_match( '/<(h[2-4])\b([^>]*)>(.*?)<\/\1>/s', $body, $h ) ) {
+					$text = trim( wp_strip_all_tags( $h[3] ) );
+					$name = $text;
+					if ( preg_match( '/\bid="([^"]+)"/', $h[2], $hid ) ) {
+						$hid = $hid[1];
+					} else {
+						$hid  = kits_section_id( $text . '-title' );
+						$body = preg_replace( '/<' . $h[1] . '\b' . preg_quote( $h[2], '/' ) . '>/', '<' . $h[1] . ' id="' . esc_attr( $hid ) . '"' . $h[2] . '>', $body, 1 );
+					}
+					$attrs .= ' aria-labelledby="' . esc_attr( $hid ) . '"';
+				}
+				if ( '' === $name ) {
+					return $m[0];
+				}
+				if ( ! preg_match( '/\bid="/', $attrs ) ) {
+					$attrs = ' id="' . esc_attr( kits_section_id( $name ) ) . '"' . $attrs;
+				}
+				return '<section' . $attrs . '>' . $body;
+			},
+			$html
+		);
+	},
+	99
+);
+
+
+// The share plugin's heading comes straight after the page title: h2, so no level is skipped.
+add_filter( 'scriptlesssocialsharing_heading_element', fn() => 'h2' );
