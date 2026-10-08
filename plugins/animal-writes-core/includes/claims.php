@@ -96,7 +96,8 @@ function aw_claim_form( $listing ) {
 		. aw_claim_services_field( $form, $listing )
 		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
 		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
-		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) );
+		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) )
+		. ( function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : '' );
 	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim' ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
 		. kits_form_steps( array( array( 'About you', $about ), array( 'What should change', $change ) ), 'Send for review' )
@@ -197,6 +198,9 @@ function aw_claim_submit() {
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
+	if ( function_exists( 'aw_nl_optin' ) ) {
+		aw_nl_optin( $v['email'], $v['name'], 'claim' );
+	}
 	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Request sent.', sprintf( 'We\'ll check it and email you at %s.', $v['email'] ) );
 }
 add_action( 'admin_post_nopriv_aw_claim', 'aw_claim_submit' );

@@ -116,6 +116,7 @@ function aw_contact_form() {
 	$html .= kits_dict_field( $form, 'email' );
 	$html .= kits_dict_field( $form, 'organisation', array( 'name' => 'org' ) );
 	$html .= kits_dict_field( $form, 'message', array( 'required' => true, 'attrs' => array( 'placeholder' => AW_CONTACT_PLACEHOLDER[ $pick ] ?? '' ) ) );
+	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : ''; // unticked; only a tick subscribes
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">Send message</button></div></form>';
 	return $html;
 }
@@ -162,6 +163,9 @@ function aw_contact_submit() {
 	}
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
+	if ( function_exists( 'aw_nl_optin' ) ) {
+		aw_nl_optin( $v['email'], $v['name'], 'contact' );
+	}
 	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Message sent.', sprintf( 'We\'ll reply to %s.', $v['email'] ), array( 'again' => 'Send another' ) );
 }
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );

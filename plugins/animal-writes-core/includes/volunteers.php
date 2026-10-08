@@ -76,6 +76,7 @@ function aw_volunteer_form( $source = '' ) {
 	}
 	$html .= '<span class="kit-field-message kit-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.' ) );
+	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : ''; // newsletter: a separate, unticked choice
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
 	return $html;
 }
@@ -136,6 +137,9 @@ function aw_volunteer_submit() {
 	);
 	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'New volunteer: ' . $term->name, "A new volunteer signed up.\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
+	if ( function_exists( 'aw_nl_optin' ) ) {
+		aw_nl_optin( $v['email'], $v['name'], 'volunteer' );
+	}
 	aw_form_success( $done, __( 'Thank you for signing up.', 'animal-writes-core' ), __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) );
 }
 add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
