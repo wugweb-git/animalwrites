@@ -764,6 +764,12 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-powered strong { color: var(--kit-color-on-ink); font-weight: var(--kit-weight-medium); }
 .kit-powered:hover strong { color: var(--kit-color-accent); text-decoration: underline; }
 @media (min-width: 1200px) { .kit-footer-bar { flex-wrap: nowrap; white-space: nowrap; } .kit-footer-bar > nav { margin-left: auto; } .kit-powered { margin-left: 0; } }
+.kit-footer-brand .kit-visits { margin: 0; font-size: var(--kit-type-xs); color: var(--kit-footer-muted); }
+@media (min-width: 1200px) {
+	.kit-footer-bar { font-size: 13px; gap: var(--kit-space-4); }
+	.kit-footer-bar .kit-legal-links { flex-wrap: nowrap; gap: var(--kit-space-4); }
+}
+@media (min-width: 1200px) and (max-width: 1399px) { .kit-footer-bar { flex-wrap: wrap; } } /* the row needs ~1,300px */
 .kit-footer :is(a, summary):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
 
