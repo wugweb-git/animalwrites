@@ -247,47 +247,7 @@ function aw_press_list() {
 	return $items;
 }
 
-/** One card (News card anatomy): thumbnail · publisher + logo · date · headline · format tag. One external link. */
-function aw_press_card( $p ) {
-	$url   = (string) get_post_meta( $p->ID, 'aw_press_url', true );
-	$pub   = (string) get_post_meta( $p->ID, 'aw_press_publisher', true );
-	$date  = (string) get_post_meta( $p->ID, 'aw_press_date', true );
-	$fmt   = (string) get_post_meta( $p->ID, 'aw_press_format', true );
-	$logo  = (int) get_post_meta( $p->ID, 'aw_press_logo', true );
-	$logo  = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
-	$thumb = (string) get_the_post_thumbnail_url( $p, 'medium_large' );
-	$video = (string) get_post_meta( $p->ID, 'aw_press_video', true );
-	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
-	$media = $thumb
-		? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')">' . '<span class="aw-story-fallback">' . $fallback . '</span>'
-		: '<span class="aw-story-fallback">' . $fallback . '</span>';
-	return '<article class="aw-story aw-story--card aw-story--external">'
-		. '<div class="aw-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>'
-		. '<div class="aw-story-body">'
-		. ( $pub ? '<p class="aw-src">' . ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) . '<span class="aw-src-name">' . esc_html( $pub ) . '</span></p>' : '' )
-		. '<h2 class="aw-story-title"><a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( get_the_title( $p ) ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></h2>'
-		. '<p class="aw-story-meta kit-tags">' . ( $date ? '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time>' : '' ) . ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) . '</p>'
-		. '</div></article>';
-}
-
-// [aw_media_list]: the cards (replaces the old plain list).
-add_action(
-	'init',
-	function () {
-		remove_shortcode( 'aw_media_list' );
-		add_shortcode(
-			'aw_media_list',
-			function () {
-				$items = aw_press_list();
-				if ( ! $items ) {
-					return '<div class="aw-empty"><p><strong>No coverage yet.</strong></p><p>Written about Animal Writes? <a href="' . esc_url( home_url( '/contact/?about=general' ) ) . '">Send us the link.</a></p></div>';
-				}
-				return '<div class="aw-news-grid">' . implode( '', array_map( 'aw_press_card', $items ) ) . '</div>';
-			}
-		);
-	},
-	20
-);
+// The Media & PR list is the hub Query Loop on the Media & PR Page (hubs.php, hub-blocks.php).
 
 /** Media & PR page schema: CollectionPage + ItemList. */
 function aw_press_schema() {
