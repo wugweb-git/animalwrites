@@ -1526,6 +1526,26 @@
     "alt": "n/a",
     "schema": "none"
    }
+  },
+  {
+   "name": "Card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-card"
+   ],
+   "states": [
+    "hover: title underline",
+    "focus: card outline",
+    "arrow nudge"
+   ],
+   "a11y": {
+    "link": "the title link covers the card"
+   },
+   "seo": {
+    "heading": "card title",
+    "schema": "none"
+   }
   }
  ],
  "nav": [

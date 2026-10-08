@@ -398,8 +398,8 @@ function aw_hub_band( $type ) {
 function aw_hub_item( $type ) {
 	switch ( $type ) {
 		case 'aw_news':
-			return '<!-- wp:group {"tagName":"article","className":"aw-story","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-story"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-card aw-story","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card aw-story"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
 
 <!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->
@@ -410,8 +410,8 @@ function aw_hub_item( $type ) {
 <!-- /wp:group --></article>
 <!-- /wp:group -->';
 		case 'aw_legal':
-			return '<!-- wp:group {"tagName":"article","className":"kit-case","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-case"><!-- wp:animal-writes/doc-date /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-card kit-case","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-case"><!-- wp:animal-writes/doc-date /-->
 
 <!-- wp:group {"className":"aw-case-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-case-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-case-title"} /-->
@@ -432,8 +432,8 @@ function aw_hub_item( $type ) {
 <!-- /wp:html --></article>
 <!-- /wp:group -->';
 		case 'aw_guide':
-			return '<!-- wp:group {"tagName":"article","className":"kit-task","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-card kit-task","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
 
 <!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-task-body"><!-- wp:animal-writes/task-icon /-->
@@ -446,8 +446,8 @@ function aw_hub_item( $type ) {
 <!-- /wp:group --></article>
 <!-- /wp:group -->';
 		case 'aw_opportunity':
-			return '<!-- wp:group {"tagName":"article","className":"aw-opp","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-opp"><!-- wp:post-featured-image {"className":"aw-opp-media aw-no-fallback"} /-->
+			return '<!-- wp:group {"tagName":"article","className":"kit-card aw-opp","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card aw-opp"><!-- wp:post-featured-image {"className":"aw-opp-media aw-no-fallback"} /-->
 
 <!-- wp:group {"className":"aw-opp-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-opp-body"><!-- wp:group {"className":"aw-opp-tags kit-tags","layout":{"type":"default"}} -->

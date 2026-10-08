@@ -1080,3 +1080,14 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-ad-item > .kit-ad { margin: 0; height: 100%; border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); padding: var(--kit-space-3); background: var(--kit-surface-card, var(--kit-color-raised)); }
 @media (max-width: 767px) { .kit-ad-item .kit-ad-unit { min-height: 250px; } }
 .kit-ad { margin-block: var(--kit-space-7); }
+
+/* One card (owner, 9 Oct 2026): News, Resources, Library and Opportunities cards share one behaviour — the whole card
+   is the link, the title underlines on hover, keyboard focus outlines the card, and the arrow (where shown) nudges. */
+.kit-card { position: relative; }
+.kit-card :is(.wp-block-post-title, h2, h3) a { text-decoration: none; }
+.kit-card:hover :is(.wp-block-post-title, h2, h3) a { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.kit-card:has(a:focus-visible) { outline: var(--kit-focus-width, 2px) solid var(--kit-color-focus); outline-offset: 4px; border-radius: var(--kit-radius-card, 12px); }
+.kit-card :is(.wp-block-post-title, h2, h3) a:focus-visible { outline: 0; }
+.kit-card > .kit-ico--arrow-right { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
+.kit-card:hover > .kit-ico--arrow-right { transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) { .kit-card > .kit-ico--arrow-right { transition: none; transform: none !important; } }
