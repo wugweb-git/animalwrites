@@ -218,6 +218,8 @@ add_shortcode(
 			$rows[] = array( 'calendar', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . aw_src_date( $id ) . ' · added ' : 'Added ' ) . get_the_date( 'j M Y', $id ) );
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
 				$rows[] = array( 'research', 'Official document attached below' );
+			} elseif ( get_post_meta( $id, 'aw_doc_preview', true ) ) {
+				$rows[] = array( 'research', 'Official document linked below' );
 			}
 			if ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 				$rows[] = array( 'knowledge', 'Summary written by Animal Writes. Read the original before relying on it. <a href="/editorial-policy/">Editorial policy</a>', true );

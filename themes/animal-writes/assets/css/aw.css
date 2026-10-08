@@ -59,6 +59,9 @@
 .aw-pdf { margin-block: var(--aw-space-6); }
 .aw-pdf .wp-block-file__embed { width: 100%; height: min(80vh, 900px); border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); background: var(--aw-color-raised); }
 .aw-pdf-actions { display: flex; flex-wrap: wrap; gap: var(--aw-space-4); align-items: center; margin-top: var(--aw-space-4); }
+.aw-doc-preview { display: flex; flex-wrap: wrap; gap: var(--aw-space-6); align-items: center; margin-block: var(--aw-space-6); }
+.aw-doc-preview img { display: block; width: 240px; max-width: 100%; height: auto; border: 1px solid var(--aw-color-line); border-radius: var(--aw-radius-card); }
+.aw-doc-preview-text { flex: 1 1 240px; }
 @media (max-width: 767px) { .aw-pdf .wp-block-file__embed { height: 60vh; } }
 
 /* Letters: print */

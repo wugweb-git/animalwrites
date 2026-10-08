@@ -27,6 +27,10 @@ function aw_item_image( $post_id, $size = 'large' ) {
 	if ( 'aw_legal' === $type && $fid ) {
 		return (string) wp_get_attachment_image_url( $fid, $size );
 	}
+	$preview = (int) get_post_meta( $post_id, 'aw_doc_preview', true );
+	if ( 'aw_legal' === $type && $preview ) {
+		return (string) wp_get_attachment_image_url( $preview, 'full' );
+	}
 	$map    = (array) get_option( 'aw_topic_images', array() );
 	$topics = wp_get_object_terms( $post_id, 'aw_topic', array( 'fields' => 'slugs' ) );
 	$topics = is_wp_error( $topics ) ? array() : $topics;
@@ -109,7 +113,7 @@ add_filter(
 		$fid     = (int) get_post_meta( $post_id, 'aw_file_id', true );
 		$pdf     = $fid ? wp_get_attachment_url( $fid ) : '';
 		if ( ! $pdf ) {
-			return $content;
+			return $content . aw_doc_preview_html( $post_id );
 		}
 		$title  = get_the_title( $post_id );
 		$source = (string) get_post_meta( $post_id, 'aw_source_url', true );
@@ -129,6 +133,44 @@ add_filter(
 );
 
 /**
+ * A document we may not host (no permission yet): a blurred preview of its first page, the reason, and the
+ * link to the original.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function aw_doc_preview_html( $post_id ) {
+	$preview = (int) get_post_meta( $post_id, 'aw_doc_preview', true );
+	$source  = (string) get_post_meta( $post_id, 'aw_source_url', true );
+	if ( ! $preview || ! $source ) {
+		return '';
+	}
+	$host   = preg_replace( '/^www\./', '', (string) wp_parse_url( $source, PHP_URL_HOST ) );
+	$issuer = function_exists( 'aw_first_term' ) ? aw_first_term( $post_id, 'aw_source_type' ) : null;
+	$who    = $issuer ? strtoupper( $issuer->slug ) : $host;
+	return '<div class="aw-doc-preview"><a href="' . esc_url( $source ) . '" rel="noopener">'
+		. wp_get_attachment_image( $preview, 'full', false, array( 'alt' => '', 'loading' => 'lazy' ) ) . '</a>'
+		. '<div class="aw-doc-preview-text"><p>' . esc_html( sprintf( 'We don\'t have permission from the %s to host this document yet, so it isn\'t shown here.', $who ) ) . '</p>'
+		. '<p><a class="wp-element-button" href="' . esc_url( $source ) . '" rel="noopener">' . esc_html( 'Read it on ' . $host ) . '</a></p></div></div>';
+}
+
+/**
+ * Documents we may host: Acts, Rules and other Gazette matter, and court judgments and orders
+ * (s.52(1)(q) of the Copyright Act, 1957). Other government PDFs (circulars, notices) are linked, not copied.
+ *
+ * @param int    $post_id Post ID.
+ * @param string $url     Source URL.
+ * @return bool
+ */
+function aw_doc_hostable( $post_id, $url ) {
+	if ( has_term( array( 'act', 'rule', 'judgment', 'order' ), 'aw_legal_kind', $post_id ) ) {
+		return true;
+	}
+	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+	return (bool) preg_match( '/(^|\.)(sci\.gov\.in|egazette\.gov\.in|egazette\.nic\.in|indiacode\.nic\.in|ecourts\.gov\.in)$/i', $host );
+}
+
+/**
  * Letter templates: a print button and a clean printed page.
  */
 add_filter(
@@ -145,7 +187,7 @@ add_filter(
 );
 
 /**
- * Keep a copy of a government PDF (gov.in / nic.in) so it can be read inside the page.
+ * Keep a copy of a government PDF (gov.in / nic.in) we may host (aw_doc_hostable) so it can be read inside the page.
  *
  * @param int    $post_id Post ID.
  * @param string $url     Source URL.
@@ -153,7 +195,7 @@ add_filter(
  */
 function aw_mirror_gov_pdf( $post_id, $url ) {
 	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
-	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$/i', $host ) || get_post_meta( $post_id, 'aw_file_id', true ) ) {
+	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$/i', $host ) || get_post_meta( $post_id, 'aw_file_id', true ) || ! aw_doc_hostable( $post_id, $url ) ) {
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/media.php';
