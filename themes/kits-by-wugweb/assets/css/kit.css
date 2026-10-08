@@ -1044,3 +1044,11 @@ body { background: var(--kit-surface-page); }
 .kit-error-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .kit-error-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-pill); text-decoration: none; color: var(--kit-color-ink); }
 .kit-error-links a:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+
+/* Phone footer, second pass (one screen, ≤ 812px): less top space, empty error lines take no room until an error shows. */
+@media (max-width: 767px) {
+	.kit-site-footer.kit-footer { padding-block: var(--kit-space-4) var(--kit-space-3) !important; }
+	.kit-site-footer .kit-footer-grid { padding-top: 0; padding-bottom: var(--kit-space-3); }
+	.kit-footer-newsletter .kit-field-error:empty { display: none; }
+	.kit-site-footer .kit-footer-bar { padding-bottom: var(--kit-space-2); }
+}

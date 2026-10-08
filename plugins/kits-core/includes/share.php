@@ -41,7 +41,7 @@ add_filter(
 	function ( $content, $block ) {
 		static $done = false;
 		$types = (array) apply_filters( 'kits_share_post_types', array( 'post' ) );
-		if ( $done || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) {
+		if ( $done || ! $types || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) { // no types: off (is_singular( [] ) would match every page)
 			return $content;
 		}
 		$pos = strrpos( $content, '</main>' );
