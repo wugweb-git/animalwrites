@@ -122,6 +122,9 @@ add_filter(
 add_filter(
 	'render_block_core/post-terms',
 	function ( $html, $block, $instance ) {
+		if ( isset( $_GET['awdbg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$html = '<!-- awdbg singular=' . (int) is_singular() . ' ctx=' . esc_html( implode( ',', array_keys( (array) $instance->context ) ) ) . ' -->' . $html;
+		}
 		if ( ! is_singular() || isset( $instance->context['queryId'] ) ) { // the page's own chips, not those in lists
 			return $html;
 		}
