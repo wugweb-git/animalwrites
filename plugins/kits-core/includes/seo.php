@@ -97,3 +97,51 @@ add_action(
 	},
 	2
 );
+
+/* ---------- Settings → SEO: search engine verification (Bing Webmaster Tools, Yandex Webmaster) ---------- */
+
+add_action(
+	'admin_menu',
+	function () {
+		add_options_page(
+			'SEO',
+			'SEO',
+			'manage_options',
+			'kits-seo',
+			function () {
+				if ( isset( $_POST['kits_seo_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['kits_seo_nonce'] ) ), 'kits_seo' ) && current_user_can( 'manage_options' ) ) {
+					foreach ( array( 'kits_verify_bing', 'kits_verify_yandex' ) as $k ) {
+						update_option( $k, preg_replace( '/[^A-Za-z0-9_\-]/', '', kits_verify_code( wp_unslash( $_POST[ $k ] ?? '' ) ) ), true ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+					}
+					echo '<div class="notice notice-success"><p>Saved.</p></div>';
+				}
+				echo '<div class="wrap"><h1>SEO</h1><form method="post">' . wp_nonce_field( 'kits_seo', 'kits_seo_nonce', true, false ) . '<table class="form-table">';
+				foreach ( array( 'kits_verify_bing' => array( 'Bing Webmaster Tools', 'msvalidate.01' ), 'kits_verify_yandex' => array( 'Yandex Webmaster', 'yandex-verification' ) ) as $k => $f ) {
+					echo '<tr><th><label for="' . esc_attr( $k ) . '">' . esc_html( $f[0] ) . '</label></th><td><input class="regular-text code" id="' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( (string) get_option( $k ) ) . '"><p class="description">Paste the code, or the whole &lt;meta name="' . esc_html( $f[1] ) . '"&gt; tag.</p></td></tr>';
+				}
+				echo '</table>';
+				submit_button();
+				echo '</form></div>';
+			}
+		);
+	}
+);
+
+/** The code from a pasted value: a bare code, or the content of a pasted <meta> tag. */
+function kits_verify_code( $raw ) {
+	$raw = trim( (string) $raw );
+	return preg_match( '/content\s*=\s*["\']([^"\']+)["\']/i', $raw, $m ) ? $m[1] : $raw;
+}
+
+add_action(
+	'wp_head',
+	function () {
+		foreach ( array( 'kits_verify_bing' => 'msvalidate.01', 'kits_verify_yandex' => 'yandex-verification' ) as $k => $name ) {
+			$code = (string) get_option( $k );
+			if ( '' !== $code && ( is_front_page() ) ) {
+				echo '<meta name="' . esc_attr( $name ) . '" content="' . esc_attr( $code ) . '">' . "\n";
+			}
+		}
+	},
+	2
+);

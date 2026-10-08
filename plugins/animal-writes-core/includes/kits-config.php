@@ -105,3 +105,45 @@ add_filter(
 add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? $t : 'aw_topic', 10, 2 );
 add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
 
+
+/** Analytics page context (kits-core analytics.php): what this page is, for GTM and the events in kit.js. */
+add_filter(
+	'kits_page_context',
+	function ( $c ) {
+		$hub_types = array( 'aw_news' => 'news', 'aw_legal' => 'library', 'aw_guide' => 'resources', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_listing' => 'directory', 'aw_press' => 'media' );
+		$hub       = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
+		if ( is_page( 'search' ) ) {
+			$c['page_type'] = 'search';
+		} elseif ( $hub ) {
+			$c['page_type'] = get_query_var( 'aw_place' ) ? 'directory_place' : 'hub';
+			$c['section']   = $hub_types[ $hub ] ?? $hub;
+		} elseif ( is_tax( 'aw_topic' ) ) {
+			$c['page_type'] = 'category';
+			$c['category']  = single_term_title( '', false );
+		} elseif ( is_singular() ) {
+			$id             = get_queried_object_id();
+			$type           = get_post_type( $id );
+			$c['page_type'] = $hub_types[ $type ] ?? $type;
+			$c['section']   = $hub_types[ $type ] ?? '';
+			$topics         = wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'names' ) );
+			$c['category']  = $topics && ! is_wp_error( $topics ) ? $topics[0] : '';
+			if ( function_exists( 'aw_item_place_names' ) ) {
+				list( $c['state'], $c['district'] ) = aw_item_place_names( $id );
+			}
+			$lt                = wp_get_object_terms( $id, 'aw_listing_type', array( 'fields' => 'names' ) );
+			$c['listing_type'] = $lt && ! is_wp_error( $lt ) ? $lt[0] : '';
+			$iss               = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+			$c['issuer']       = $iss ? $iss->name : '';
+			$pub               = function_exists( 'aw_publisher_of' ) ? aw_publisher_of( $id ) : array( '' );
+			$c['publisher']    = (string) ( $pub[0] ?? '' );
+		}
+		if ( get_query_var( 'aw_place' ) && function_exists( 'aw_dir_place' ) ) {
+			$p = aw_dir_place( (string) get_query_var( 'aw_place' ) );
+			if ( $p ) {
+				$c['state']    = 'district' === $p->kind ? aw_place_state( $p->state )->name : $p->name;
+				$c['district'] = 'district' === $p->kind ? $p->name : '';
+			}
+		}
+		return $c;
+	}
+);

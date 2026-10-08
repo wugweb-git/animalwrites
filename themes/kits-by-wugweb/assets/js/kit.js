@@ -186,6 +186,7 @@
 			again.addEventListener('click', function () { form.reset(); fields(form).forEach(function (el) { show(el, ''); el.classList.remove('is-valid'); }); box.replaceWith(form); var f = form.querySelector('input:not([type=hidden]), select, textarea'); if (f) f.focus(); });
 			box.appendChild(again);
 		}
+		form.dispatchEvent(new CustomEvent('kit:form-done', { bubbles: true })); // analytics (tracking module below)
 		form.replaceWith(box);
 		box.focus();
 	}
@@ -245,7 +246,7 @@
 			groups(form).forEach(function (g) { if (!groupOk(g, true)) bad.push(g.querySelector('input')); });
 			var custom = form.dispatchEvent(new CustomEvent('aw:validate', { cancelable: true, detail: { errors: bad } }));
 			summary(form, bad);
-			if (bad.length || !custom) { e.preventDefault(); if (bad[0]) bad[0].focus(); return; }
+			if (bad.length || !custom) { e.preventDefault(); form.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'browser', fields: bad.length } })); if (bad[0]) bad[0].focus(); return; }
 			var btn = form.querySelector('button[type=submit]');
 			if (btn && btn.classList.contains('is-loading')) { e.preventDefault(); return; }
 			// ALTCHA in automatic mode checks on send and then sends the form again: let it run first.
@@ -281,6 +282,7 @@
 						if (el) { show(el, data.errors[name]); list.push(el); }
 					});
 					summary(form, list);
+					form.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'server', fields: list.length } }));
 					if (data.notice) status(form, data.notice); else if (list[0]) list[0].focus();
 				})
 				.catch(function () { busy(btn, false); status(form, form.dataset.genericError || GENERIC); });
@@ -316,7 +318,7 @@
 		box.classList.add('is-stepped');
 		var bad = steps.findIndex(function (s) { return s.querySelector('[aria-invalid=true]'); });
 		var cur = bad > -1 ? bad : 0;
-		function go(i) { cur = i; steps.forEach(function (s, n) { s.hidden = n !== i; }); var lg = steps[i].querySelector('legend'); if (lg) { lg.tabIndex = -1; lg.focus(); } }
+		function go(i) { cur = i; box.dispatchEvent(new CustomEvent('kit:step', { bubbles: true, detail: { step: i + 1 } })); steps.forEach(function (s, n) { s.hidden = n !== i; }); var lg = steps[i].querySelector('legend'); if (lg) { lg.tabIndex = -1; lg.focus(); } }
 		steps.forEach(function (s, n) { s.hidden = n !== cur; });
 		box.addEventListener('click', function (e) {
 			var next = e.target.closest('[data-step-next]'), back = e.target.closest('[data-step-back]');
@@ -352,7 +354,7 @@
 		if (!area) return;
 		var data = { menu_area: area, link_text: (a.textContent || a.getAttribute('aria-label') || '').trim().slice(0, 100), link_url: a.getAttribute('href') };
 		(window.dataLayer = window.dataLayer || []).push(Object.assign({ event: 'menu_click' }, data)); // for GTM
-		if (typeof window.gtag === 'function') window.gtag('event', 'menu_click', data); // GA4 through Site Kit
+		if ((window.kitsPage || {}).gtag && typeof window.gtag === 'function') window.gtag('event', 'menu_click', data); // GA4 through Site Kit, until GA4 runs inside GTM
 	}, { capture: true });
 })();
 
@@ -523,6 +525,7 @@
 		var status = form.parentNode.querySelector('[data-kit-filter-status]');
 		if (status) status.textContent = 'Loading results';
 		var q = params.toString();
+		form.dispatchEvent(new CustomEvent('kit:filter', { bubbles: true, detail: { params: q } }));
 		window.location.href = form.getAttribute('action').split('?')[0] + (q ? '?' + q : '');
 	}
 	document.querySelectorAll('form[data-kit-filterbar]').forEach(function (form) {
@@ -580,4 +583,83 @@
 	}
 	window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
 	bar.addEventListener('focusin', function (e) { if (e.target.matches(':focus-visible')) bar.classList.remove('kit-header-hidden'); });
+})();
+
+/* Analytics events (owner, 9 Oct 2026). Every event goes to the dataLayer (GTM). While GA4 is still placed directly by
+   Site Kit (window.kitsPage.gtag), the same event also goes to gtag, so GA4 receives it once either way.
+   Events: form_submit_success, form_error, search, pin_search, filter_apply, sort_change, outbound_click, call_click,
+   whatsapp_click, email_click, pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth. */
+(function () {
+	var page = window.kitsPage || {};
+	function track(name, params) {
+		params = params || {};
+		params.page_type = page.page_type || '';
+		(window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, params));
+		if (page.gtag && typeof window.gtag === 'function') window.gtag('event', name, params);
+	}
+	window.kitsTrack = track;
+	function formName(form) {
+		var a = form && form.querySelector('input[name=action]');
+		var v = a ? a.value.replace(/^aw_/, '') : (form && form.id || '');
+		return { newsletter: 'newsletter', volunteer: 'volunteer', claim: 'claim', report: 'report', contact: 'contact', remove_data: 'remove_data' }[v] || v;
+	}
+	document.addEventListener('kit:form-done', function (e) { track('form_submit_success', { form: formName(e.target) }); });
+	document.addEventListener('kit:form-error', function (e) { track('form_error', { form: formName(e.target), where: e.detail.where, fields: e.detail.fields }); });
+	document.addEventListener('kit:step', function (e) { if (e.target.closest('.aw-claim-form, #claim')) track('claim_step', { step: e.detail.step }); });
+	document.addEventListener('kit:filter', function (e) { track('filter_apply', { filters: e.detail.params, hub: page.section || '' }); });
+
+	// Forms sent without JavaScript (and the claim form, which uploads a file) come back with ?aw_done=…
+	var qs = new URLSearchParams(location.search);
+	var doneMap = { contact: 'contact', volunteer: 'volunteer', report: 'report', claim: 'claim', nl_check: 'newsletter', rd_check: 'remove_data' };
+	if (doneMap[qs.get('aw_done')]) track('form_submit_success', { form: doneMap[qs.get('aw_done')] });
+
+	// Search results and the PIN code search
+	if (page.page_type === 'search' && qs.get('q')) {
+		var c = document.querySelector('.aw-search-count');
+		track('search', { term: qs.get('q').slice(0, 100), results: c ? parseInt(c.textContent.replace(/[^\d]/g, ''), 10) || 0 : 0 });
+	}
+	document.addEventListener('submit', function (e) {
+		var q = e.target.querySelector && e.target.querySelector('input[name=q]');
+		if (q && /^\s*[1-9]\d{5}\s*$/.test(q.value)) track('pin_search', { pin: q.value.trim() });
+		if (e.target.matches && e.target.matches('.aw-dir-search')) track('filter_apply', { filters: new URLSearchParams(new FormData(e.target)).toString().slice(0, 200), hub: 'directory' });
+	}, true);
+
+	// Clicks
+	document.addEventListener('click', function (e) {
+		var a = e.target.closest && e.target.closest('a[href]');
+		if (!a) return;
+		var href = a.getAttribute('href') || '';
+		if (a.closest('.kit-dd--sort, .kit-segment') || a.classList.contains('kit-dd-opt') && a.closest('[data-kit-sort], .kit-sort')) { track('sort_change', { value: a.textContent.trim().slice(0, 60) }); return; }
+		if (/^tel:/i.test(href)) { track('call_click', { number: href.slice(4) }); return; }
+		if (/wa\.me|api\.whatsapp\.com/i.test(href)) { track('whatsapp_click', {}); return; }
+		if (/^mailto:/i.test(href)) { track('email_click', {}); return; }
+		var share = a.closest('.scriptlesssocialsharing__buttons');
+		if (share) { track('share_click', { network: (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
+		if (/\.pdf(\?|#|$)/i.test(href) || a.hasAttribute('download')) { track('pdf_download', { item: document.title.split(' – ')[0].slice(0, 100), issuer: page.issuer || '' }); }
+		var li = a.closest('.wp-block-post-template > li');
+		if (li && !li.classList.contains('kit-ad-item')) {
+			var list = li.parentNode, pos = Array.prototype.indexOf.call(list.children, li) + 1;
+			track('card_click', { list: page.section || page.page_type || '', position: pos });
+		}
+		try {
+			var u = new URL(href, location.href);
+			if (/^https?:$/.test(u.protocol) && u.host !== location.host) track('outbound_click', { domain: u.host.replace(/^www\./, '') });
+		} catch (x) {}
+	}, true);
+
+	// 404
+	if (document.body.classList.contains('error404')) track('404_view', { path: location.pathname.slice(0, 200) });
+
+	// Scroll depth: 25, 50, 75, 90 % (once each)
+	var marks = [25, 50, 75, 90], hit = {}, tick = false;
+	window.addEventListener('scroll', function () {
+		if (tick) return; tick = true;
+		requestAnimationFrame(function () {
+			tick = false;
+			var h = document.documentElement.scrollHeight - window.innerHeight;
+			if (h < 200) return;
+			var pct = window.scrollY / h * 100;
+			marks.forEach(function (m) { if (pct >= m && !hit[m]) { hit[m] = 1; track('scroll_depth', { percent: m }); } });
+		});
+	}, { passive: true });
 })();

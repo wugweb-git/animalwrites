@@ -64,3 +64,33 @@ add_action(
 		echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( aw_gtm_id() ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
 	}
 );
+
+/**
+ * Page context for analytics (owner, 9 Oct 2026): window.kitsPage and a dataLayer "page_context" push before any tag,
+ * so GTM tags and the events in kit.js know the page type, section, category, place, listing type, issuer and
+ * publisher. A site fills the values with the kits_page_context filter. gtag = true while GA4 is placed directly by
+ * Site Kit (events then also go to gtag); false once GA4 runs only inside GTM.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
+		$ga  = (array) get_option( 'googlesitekit_analytics-4_settings', array() );
+		$ctx = array(
+			'page_type'    => is_front_page() ? 'home' : ( is_404() ? '404' : ( is_singular() ? get_post_type() : 'list' ) ),
+			'section'      => '',
+			'category'     => '',
+			'state'        => '',
+			'district'     => '',
+			'listing_type' => '',
+			'issuer'       => '',
+			'publisher'    => '',
+		);
+		$ctx         = array_map( 'strval', (array) apply_filters( 'kits_page_context', $ctx ) );
+		$ctx['gtag'] = ! empty( $ga['useSnippet'] ) && ! get_option( 'kits_ga4_via_gtm' );
+		echo '<script>window.kitsPage=' . wp_json_encode( $ctx ) . ';(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:"page_context"},window.kitsPage));</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	},
+	0
+);
