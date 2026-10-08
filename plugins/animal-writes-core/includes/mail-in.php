@@ -3,11 +3,11 @@
  * Incoming mail → Inbox (owner, 9 Oct 2026). Hostinger Mail calls POST /wp-json/aw/v1/mail-in for every new message
  * in support@animalwrites.in (vedanshu@, contact@ and the catch-all forward into it).
  *
- * - Only Hostinger may call it: the webhook's secret arrives as "Authorization: Bearer …" and must equal the
- *   AW_MAIL_WEBHOOK_SECRET constant in wp-config.php (never in the repo). Anything else gets 401.
- * - With AW_MAIL_API_TOKEN (API token scoped to the mailbox) and AW_MAIL_MAILBOX_ID in wp-config, the full message is
- *   fetched from the Hostinger Mail API (subject, from, to, date, text, attachments, headers); otherwise the
- *   webhook's own fields are used.
+ * - Only Hostinger may call it: the webhook's secret arrives as "Authorization: Bearer …" and must equal the secret
+ *   saved in Settings → Incoming mail (or the AW_MAIL_WEBHOOK_SECRET constant in wp-config.php). Anything else gets 401.
+ * - With an API token scoped to the mailbox and the mailbox ID (same settings page, or AW_MAIL_API_TOKEN /
+ *   AW_MAIL_MAILBOX_ID), the full message is fetched from the Hostinger Mail API (subject, from, to, date, text,
+ *   attachments, headers); otherwise the webhook's own fields are used.
  * - Each message becomes an Inbox item (Contact messages, tag "Email", unread) with the original To address
  *   (vedanshu@ / contact@ / support@ / other), deduplicated on Message-ID. Spam is skipped. Attachments: names only.
  * - Nothing is ever sent from WordPress (no auto-reply); replies stay in webmail.
@@ -19,12 +19,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Hostinger Mail API GET (with the token from wp-config), or null. */
+/** A mail setting: the wp-config constant if defined, else the value saved in Settings → Incoming mail. */
+function aw_mail_setting( $key ) {
+	$const = strtoupper( 'aw_mail_' . $key );
+	return defined( $const ) && constant( $const ) ? (string) constant( $const ) : (string) get_option( 'aw_mail_' . $key, '' );
+}
+
+/** Hostinger Mail API GET (with the saved API token), or null. */
 function aw_mail_api( $path ) {
-	if ( ! defined( 'AW_MAIL_API_TOKEN' ) || ! AW_MAIL_API_TOKEN ) {
+	$token = aw_mail_setting( 'api_token' );
+	if ( '' === $token ) {
 		return null;
 	}
-	$r = wp_remote_get( 'https://api.mail.hostinger.com' . $path, array( 'timeout' => 15, 'headers' => array( 'Authorization' => 'Bearer ' . AW_MAIL_API_TOKEN, 'Accept' => 'application/json' ) ) );
+	$r = wp_remote_get( 'https://api.mail.hostinger.com' . $path, array( 'timeout' => 15, 'headers' => array( 'Authorization' => 'Bearer ' . $token, 'Accept' => 'application/json' ) ) );
 	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
 		return null;
 	}
@@ -75,7 +82,7 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => function ( WP_REST_Request $req ) {
-					$secret = defined( 'AW_MAIL_WEBHOOK_SECRET' ) ? (string) AW_MAIL_WEBHOOK_SECRET : '';
+					$secret = aw_mail_setting( 'webhook_secret' );
 					$auth   = (string) $req->get_header( 'authorization' );
 					$given  = preg_match( '/^Bearer\s+(.+)$/i', $auth, $m ) ? trim( $m[1] ) : '';
 					return '' !== $secret && '' !== $given && hash_equals( $secret, $given );
@@ -94,7 +101,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 	if ( $evt && false === stripos( $evt, 'received' ) && false === stripos( $evt, 'test' ) ) {
 		return new WP_REST_Response( array( 'status' => 'ignored' ), 200 );
 	}
-	$box    = (string) ( aw_mail_pick( $data, array( 'mailboxResourceId', 'mailbox.resourceId', 'mailbox_id', 'resourceId' ) ) ?? ( defined( 'AW_MAIL_MAILBOX_ID' ) ? AW_MAIL_MAILBOX_ID : '' ) );
+	$box    = (string) ( aw_mail_pick( $data, array( 'mailboxResourceId', 'mailbox.resourceId', 'mailbox_id', 'resourceId' ) ) ?? aw_mail_setting( 'mailbox_id' ) );
 	$folder = (string) ( aw_mail_pick( $data, array( 'folder', 'path', 'message.folder', 'message.path' ) ) ?? 'INBOX' );
 	$uid    = (string) aw_mail_pick( $data, array( 'uid', 'message.uid', 'messageUid' ) );
 	$msg    = is_array( $data['message'] ?? null ) ? $data['message'] : $data;
@@ -182,8 +189,52 @@ function aw_mail_in( WP_REST_Request $req ) {
 		update_post_meta( $id, $k, sanitize_text_field( (string) $v ) );
 	}
 	update_post_meta( $id, 'aw_review', 'held: email — to review' );
+	update_option( 'aw_mail_last', array( 'at' => current_time( 'mysql' ), 'to' => $orig, 'subject' => $subject ), false );
 	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
 }
 
 // Inbox list: show who an email was sent to.
 add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array_slice( $c, 0, 3, true ) + array( 'aw_m_to' => 'Sent to' ) + array_slice( $c, 3, null, true ), 20 );
+
+/* ---------- Settings → Incoming mail ---------- */
+
+add_action(
+	'admin_menu',
+	function () {
+		add_options_page( 'Incoming mail', 'Incoming mail', 'manage_options', 'aw-mail-in', 'aw_mail_in_screen' );
+	}
+);
+
+function aw_mail_in_screen() {
+	if ( isset( $_POST['aw_mail_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_mail_nonce'] ) ), 'aw_mail_in' ) && current_user_can( 'manage_options' ) ) {
+		foreach ( array( 'webhook_secret', 'api_token', 'mailbox_id' ) as $k ) {
+			$v = trim( sanitize_text_field( wp_unslash( $_POST[ 'aw_mail_' . $k ] ?? '' ) ) );
+			if ( '' !== $v || 'mailbox_id' === $k ) { // an empty secret or token field keeps the saved one
+				update_option( 'aw_mail_' . $k, $v, false );
+			}
+		}
+		echo '<div class="notice notice-success"><p>Saved.</p></div>';
+	}
+	$last = get_option( 'aw_mail_last' );
+	echo '<div class="wrap"><h1>Incoming mail</h1>';
+	echo '<p>Hostinger Mail sends each new message in support@animalwrites.in to this address. It arrives in Inbox → Contact messages, tagged Email. Nothing is ever sent from WordPress.</p>';
+	echo '<p><strong>Webhook URL (paste in hPanel → Agentic mail → Webhooks, event "message.received"):</strong><br><code>' . esc_html( rest_url( 'aw/v1/mail-in' ) ) . '</code></p>';
+	echo '<p>Last message received: <strong>' . esc_html( is_array( $last ) ? $last['at'] . ' — to ' . $last['to'] . ' — ' . $last['subject'] : 'none yet' ) . '</strong></p>';
+	echo '<form method="post">' . wp_nonce_field( 'aw_mail_in', 'aw_mail_nonce', true, false ) . '<table class="form-table">';
+	$rows = array(
+		'webhook_secret' => array( 'Webhook secret', 'The secret Hostinger shows once when the webhook is created.', true ),
+		'api_token'      => array( 'Mail API token (optional)', 'From Agentic mail → API. Lets WordPress fetch the full message, its headers and attachment names.', true ),
+		'mailbox_id'     => array( 'Mailbox ID (optional)', 'The mailbox resource ID of support@animalwrites.in.', false ),
+	);
+	foreach ( $rows as $k => $r ) {
+		$saved = '' !== aw_mail_setting( $k );
+		echo '<tr><th><label for="aw_mail_' . esc_attr( $k ) . '">' . esc_html( $r[0] ) . '</label></th><td>'
+			. ( $r[2]
+				? '<input class="regular-text code" type="password" autocomplete="off" id="aw_mail_' . esc_attr( $k ) . '" name="aw_mail_' . esc_attr( $k ) . '" value=""' . ( $saved ? ' placeholder="Saved. Leave empty to keep it."' : '' ) . '>'
+				: '<input class="regular-text code" id="aw_mail_' . esc_attr( $k ) . '" name="aw_mail_' . esc_attr( $k ) . '" value="' . esc_attr( aw_mail_setting( $k ) ) . '">' )
+			. '<p class="description">' . esc_html( $r[1] ) . '</p></td></tr>';
+	}
+	echo '</table>';
+	submit_button();
+	echo '</form></div>';
+}
