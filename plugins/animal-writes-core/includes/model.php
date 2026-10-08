@@ -6,8 +6,8 @@
  * Additive only: no existing item is changed. Front-end display comes in later phases.
  *
  * - Legal sub-type: taxonomy aw_legal_kind (Act, Rule, Order, Judgment, Circular, Notification) on Legal Watch and Research.
- * - Issuer: taxonomy aw_source_type, a label on Library items. Courts (Supreme Court, High Courts, NGT) are issuers;
- *   the separate Court list (aw_court) was merged into it on 8 Oct 2026 (old value kept in the meta aw_court_legacy).
+ * - Issuer: a label on Library items (meta aw_issuer, issuers.php). Courts (Supreme Court, High Courts, NGT) are
+ *   issuers; the Court list and the issuer list were merged into the label on 8 Oct 2026 (court kept in aw_court_legacy).
  * - Topic: meta aw_primary_topic (term ID) plus up to 2 more topics (secondary) per item.
  * - Topic → listing types: term meta aw_help_types on each topic (Topics screen).
  * - Relations: one post-meta row per linked ID, so the reverse side is a plain meta query.
@@ -82,42 +82,6 @@ add_action(
 );
 
 /**
- * Court → Issuer, once (8 Oct 2026): each Library item with a court gets the issuer of the same name, and keeps the
- * court in the meta aw_court_legacy. The Court list is no longer registered.
- */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_court_to_issuer_done' ) ) {
-			return;
-		}
-		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug, t.name, p.post_type FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_court' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = tr.object_id" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$n    = 0;
-		foreach ( $rows as $r ) {
-			if ( ! in_array( $r->slug, (array) get_post_meta( (int) $r->id, 'aw_court_legacy' ), true ) ) {
-				add_post_meta( (int) $r->id, 'aw_court_legacy', $r->slug );
-			}
-			if ( 'aw_legal' !== $r->post_type ) {
-				continue; // news items lost the court earlier (meta only)
-			}
-			$issuer = get_term_by( 'slug', $r->slug, 'aw_source_type' );
-			if ( ! $issuer ) {
-				$made   = wp_insert_term( $r->name, 'aw_source_type', array( 'slug' => $r->slug ) );
-				$issuer = is_wp_error( $made ) ? null : get_term( $made['term_id'], 'aw_source_type' );
-			}
-			if ( $issuer ) {
-				wp_set_object_terms( (int) $r->id, array( (int) $issuer->term_id ), 'aw_source_type', true );
-				$n++;
-			}
-		}
-		update_option( 'aw_court_to_issuer_report', array( 'links' => count( $rows ), 'library_items' => $n ), false );
-		update_option( 'aw_court_to_issuer_done', '1', false );
-	},
-	30
-);
-
-/**
  * Templates live in the Library (8 Oct 2026): the two letter-writing items in Resources become Library items of type
  * Template, each with one 301 from its /resources/ URL. Resource types are Guide, How-to, FAQ, Research: Library items
  * still tagged with a template resource type keep the value in the meta aw_resource_type_legacy, and the three
@@ -173,17 +137,42 @@ add_action(
 	40
 );
 
-/** [aw_issuer_label] "Issued by …" on a Library item (a label, not a link). */
-add_shortcode(
-	'aw_issuer_label',
+/**
+ * News reports filed in the Library move to News (S1.3, 8 Oct 2026): LiveLaw and Bar and Bench reports are reporting,
+ * not documents. Each keeps its status and slug; a published one gets one 301 from its Library URL. Once.
+ */
+add_action(
+	'init',
 	function () {
-		$t = get_the_terms( get_the_ID(), 'aw_source_type' );
-		if ( ! $t || is_wp_error( $t ) ) {
-			return '';
+		if ( '1' === get_option( 'aw_reports_to_news_done' ) || ! function_exists( 'aw_redirect_add' ) ) {
+			return;
 		}
-		$names = implode( ', ', wp_list_pluck( $t, 'name' ) );
-		return '<p class="kit-tags aw-issuer">' . ( function_exists( 'kits_tag' ) ? kits_tag( 'Issued by ' . $names ) : esc_html( 'Issued by ' . $names ) ) . '</p>';
-	}
+		$moved = array();
+		foreach ( array( 8879, 7486, 7487, 203 ) as $id ) {
+			$p = get_post( $id );
+			if ( ! $p || 'aw_legal' !== $p->post_type ) {
+				continue;
+			}
+			$old = wp_parse_url( get_permalink( $p ), PHP_URL_PATH );
+			$iss = (string) get_post_meta( $id, 'aw_issuer', true );
+			if ( '' !== $iss ) {
+				update_post_meta( $id, 'aw_issuer_legacy', $iss ); // News items have a publisher, not an issuer
+				delete_post_meta( $id, 'aw_issuer' );
+			}
+			wp_update_post( array( 'ID' => $id, 'post_type' => 'aw_news', 'post_name' => wp_unique_post_slug( $p->post_name, $id, $p->post_status, 'aw_news', 0 ) ) );
+			$key = function_exists( 'aw_publisher_key' ) ? aw_publisher_key( $id ) : '';
+			if ( '' !== $key ) {
+				update_post_meta( $id, 'aw_publisher', $key );
+			}
+			if ( 'publish' === $p->post_status ) {
+				aw_redirect_add( $old, $id );
+			}
+			$moved[] = array( $id, $p->post_status, $old, wp_parse_url( get_permalink( $id ), PHP_URL_PATH ) );
+		}
+		update_option( 'aw_reports_to_news_report', $moved, false );
+		update_option( 'aw_reports_to_news_done', '1', false );
+	},
+	40
 );
 
 /* ---------- Internal organisation ---------- */

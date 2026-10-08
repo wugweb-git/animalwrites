@@ -61,7 +61,6 @@ add_filter(
 	function ( $args, $tax ) {
 		$names = array(
 			'aw_legal_kind'  => array( 'Library types', 'Library type' ),
-			'aw_source_type' => array( 'Issuers', 'Issuer' ),
 		);
 		if ( isset( $names[ $tax ] ) ) {
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => $names[ $tax ][0], 'singular_name' => $names[ $tax ][1], 'menu_name' => $names[ $tax ][0] ) );

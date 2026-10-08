@@ -150,7 +150,7 @@ function aw_doc_preview_html( $post_id ) {
 		return '';
 	}
 	$host   = preg_replace( '/^www\./', '', (string) wp_parse_url( $source, PHP_URL_HOST ) );
-	$issuer = function_exists( 'aw_first_term' ) ? aw_first_term( $post_id, 'aw_source_type' ) : null;
+	$issuer = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $post_id ) : null;
 	$who    = $issuer ? strtoupper( $issuer->slug ) : $host;
 	return '<div class="aw-doc-preview"><a href="' . esc_url( $source ) . '" rel="noopener">'
 		. wp_get_attachment_image( $preview, 'full', false, array( 'alt' => '', 'loading' => 'lazy' ) ) . '</a>'

@@ -264,7 +264,7 @@ add_shortcode(
 		} else {
 			$src  = (string) get_post_meta( $id, 'aw_source_url', true );
 			$name = (string) get_post_meta( $id, 'aw_source_name', true );
-			$iss  = aw_first_term( $id, 'aw_source_type' );
+			$iss  = aw_item_issuer( $id );
 			if ( $iss ) {
 				$rows[] = array( 'legal', 'Issued by ' . $iss->name );
 			}

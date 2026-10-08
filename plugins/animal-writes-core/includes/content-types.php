@@ -89,19 +89,7 @@ function aw_register_content_types() {
 		)
 	);
 
-	register_taxonomy(
-		'aw_source_type',
-		array( 'aw_legal' ),
-		array(
-			'labels'             => array( 'name' => 'Issuers', 'singular_name' => 'Issuer' ),
-			'hierarchical'       => true, // e.g. Supreme Court, High Court, AWBI, Gazette. Courts are issuers too.
-			'public'             => true,
-			'publicly_queryable' => false, // a label on Library items ("Issued by …"), not a filter or a page
-			'rewrite'            => false,
-			'show_in_rest'       => true,
-			'show_admin_column'  => true,
-		)
-	);
+	// Issuer is a label on Library items (meta aw_issuer, issuers.php), not a list.
 
 	register_taxonomy(
 		'aw_opportunity_type',

@@ -42,6 +42,7 @@ function aw_hub_blocks() {
 		'browse-states' => array( 'Browse by state', 'aw_block_browse_states', array() ),
 		'press-media'   => array( 'Press thumbnail', 'aw_block_press_media', array() ),
 		'press-meta'    => array( 'Press date and format', 'aw_block_press_meta', array() ),
+		'posted-by'     => array( 'Posted by', 'aw_block_posted_by', array() ),
 	);
 }
 
@@ -166,7 +167,7 @@ function aw_block_issuer( $a, $id ) {
 	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
 		return kits_tag( 'Template', 'accent' );
 	}
-	$iss = aw_first_term( $id, 'aw_source_type' );
+	$iss = aw_item_issuer( $id );
 	return $iss ? kits_tag( 'Issued by ' . $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '';
 }
 
@@ -217,6 +218,17 @@ function aw_block_deadline( $a, $id ) {
 function aw_block_opp_actions( $a, $id ) {
 	$apply = (string) get_post_meta( $id, 'aw_apply_url', true );
 	return '<div class="aw-opp-actions">' . ( $apply ? '<a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener">Apply or sign up</a>' : '' ) . '<a class="kit-btn kit-btn--sm kit-btn--secondary" href="' . esc_url( get_permalink( $id ) ) . '">Details</a></div>';
+}
+
+/** Single opportunity: "Posted by {organisation}", linked to its Directory profile when there is one. */
+function aw_block_posted_by( $a, $id ) {
+	$name    = (string) get_post_meta( $id, 'aw_org_name', true );
+	$listing = (int) get_post_meta( $id, 'aw_organisation', true );
+	if ( $listing && 'publish' === get_post_status( $listing ) ) {
+		$name = $name ? $name : get_the_title( $listing );
+		return '<p class="aw-posted-by">Posted by <a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( $name ) . '</a></p>';
+	}
+	return $name ? '<p class="aw-posted-by">Posted by ' . esc_html( $name ) . '</p>' : '';
 }
 
 /* ---------- Directory ---------- */

@@ -163,7 +163,9 @@ function aw_ingest( WP_REST_Request $req ) {
 		aw_assign_existing_terms( $post_id, $topics, 'aw_topic', $ignored );
 	}
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
-		aw_assign_existing_terms( $post_id, array( $req->get_param( 'source_type' ) ), 'aw_source_type', $ignored );
+		if ( ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php)
+			$ignored[] = 'issuer: ' . sanitize_text_field( (string) $req->get_param( 'source_type' ) );
+		}
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
@@ -172,7 +174,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		}
 		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
 		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) ) {
-			aw_assign_existing_terms( $post_id, array( $req->get_param( 'court' ) ), 'aw_source_type', $ignored );
+			aw_set_issuer( $post_id, (string) $req->get_param( 'court' ) );
 		}
 	}
 	// Place: names are matched to the LGD file (places.php); an unknown name is ignored, never added.

@@ -148,7 +148,7 @@ function aw_article_schema( $id ) {
 		if ( $kind ) {
 			$data['legislationType'] = $kind->name;
 		}
-		$iss = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_source_type' ) : null;
+		$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 		if ( $iss ) {
 			$data['legislationPassedBy'] = array( '@type' => 'Organization', 'name' => $iss->name );
 		}
