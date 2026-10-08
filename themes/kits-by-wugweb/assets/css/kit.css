@@ -784,5 +784,5 @@ main.is-layout-constrained > .wp-block-post-content.is-layout-constrained > :whe
 	.kit-section-band > .kit-section-inner { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
 	.kit-section-band .kit-section-head, .kit-section-band .kit-section-head:has(.kit-section-visual) { flex: 1 1 auto; height: auto !important; min-height: 0; align-items: stretch; }
 	.kit-section-band .kit-section-head > :first-child { justify-content: flex-start; }
-	.kit-section-band .aw-section-filters, .kit-section-band .kit-section-filters { flex: none; }
+	.kit-section-band .kit-section-filters { flex: none; }
 }
