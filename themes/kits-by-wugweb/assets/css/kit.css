@@ -1064,3 +1064,8 @@ body { background: var(--kit-surface-page); }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next) { width: var(--kit-size-target); height: var(--kit-size-target); padding: 0 !important; justify-content: center; gap: 0 !important; font-size: 0 !important; border-radius: var(--kit-radius-control) !important; aspect-ratio: 1; }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::before,
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::after { width: 20px !important; height: 20px !important; }
+/* Phone socket: the visits line (shown to visitors) still fits one screen: compact legal links and "Powered by". */
+@media (max-width: 767px) {
+	.kit-site-footer .kit-footer-bar { row-gap: 2px; }
+	.kit-site-footer .kit-footer-bar .kit-legal-links a, .kit-site-footer .kit-powered { min-height: 24px; }
+}
