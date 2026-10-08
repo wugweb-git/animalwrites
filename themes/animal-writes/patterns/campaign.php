@@ -19,22 +19,8 @@
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button -->
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#letters">Write your letter</a></div>
-<!-- /wp:button -->
-
-<!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="#count-my-letter">I posted mine</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"align":"full","className":"aw-camp-counts aw-dark","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"900px"}} -->
-<div class="wp-block-group alignfull aw-camp-counts aw-dark has-background-color has-secondary-background-color has-text-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:shortcode -->
-<div class="aw-counts">[aw_count campaign="my-campaign" what="letters"] [aw_count campaign="my-campaign" what="people"] [aw_count campaign="my-campaign" what="cities"]</div>
-<!-- /wp:shortcode -->
-
-<!-- wp:paragraph {"fontSize":"small"} -->
-<p class="has-small-font-size">Counted from photos people upload below. Updated every few minutes.</p>
-<!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
 <!-- wp:heading -->
@@ -66,14 +52,6 @@
 <!-- wp:post-excerpt {"excerptLength":20} /-->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
-
-<!-- wp:heading {"anchor":"count-my-letter"} -->
-<h2 class="wp-block-heading" id="count-my-letter">I posted my letter</h2>
-<!-- /wp:heading -->
-
-<!-- wp:shortcode -->
-[aw_receipt_form campaign="my-campaign"]
-<!-- /wp:shortcode -->
 
 <!-- wp:heading {"anchor":"volunteer"} -->
 <h2 class="wp-block-heading" id="volunteer">Lead it in your city</h2>

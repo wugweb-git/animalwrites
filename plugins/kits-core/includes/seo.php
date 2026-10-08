@@ -25,7 +25,10 @@ function aw_seo_plugin_active() {
  * @return string
  */
 function aw_seo_description() {
-	$desc = '';
+	$desc = function_exists( 'kits_seo_override' ) ? kits_seo_override( 'kits_seo_desc' ) : '';
+	if ( '' !== $desc ) {
+		return $desc; // written by hand: used as is
+	}
 	if ( is_singular() ) {
 		$post = get_queried_object();
 		$desc = has_excerpt( $post ) ? $post->post_excerpt : wp_strip_all_tags( strip_shortcodes( $post->post_content ) );
@@ -58,6 +61,10 @@ add_action(
 		if ( ! $image && is_singular() ) {
 			$image = (string) apply_filters( 'kits_seo_fallback_image', '', get_queried_object_id() );
 		}
+		$og_id = function_exists( 'kits_seo_override' ) ? (int) kits_seo_override( 'kits_og_image' ) : 0;
+		if ( $og_id && wp_get_attachment_image_url( $og_id, 'full' ) ) {
+			$image = (string) wp_get_attachment_image_url( $og_id, 'full' );
+		}
 		$large = (bool) $image;
 		if ( ! $image ) {
 			$default = (int) get_option( 'aw_default_share_image' );
@@ -72,8 +79,8 @@ add_action(
 			'<meta name="description" content="%s">'         => $desc,
 			'<meta property="og:site_name" content="%s">'    => get_bloginfo( 'name' ),
 			'<meta property="og:type" content="%s">'         => $type,
-			'<meta property="og:title" content="%s">'        => $title,
-			'<meta property="og:description" content="%s">'  => $desc,
+			'<meta property="og:title" content="%s">'        => ( function_exists( 'kits_seo_override' ) && kits_seo_override( 'kits_og_title' ) ) ? kits_seo_override( 'kits_og_title' ) : $title,
+			'<meta property="og:description" content="%s">'  => ( function_exists( 'kits_seo_override' ) && kits_seo_override( 'kits_og_desc' ) ) ? kits_seo_override( 'kits_og_desc' ) : $desc,
 			'<meta property="og:url" content="%s">'          => $url,
 			'<meta property="og:image" content="%s">'        => $image,
 			'<meta property="og:locale" content="%s">'       => (string) apply_filters( 'kits_seo_locale', str_replace( '-', '_', get_bloginfo( 'language' ) ) ),

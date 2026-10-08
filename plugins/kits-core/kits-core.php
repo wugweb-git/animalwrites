@@ -23,6 +23,7 @@ require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/mail.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
+require_once KITS_CORE_DIR . 'includes/seo-fields.php';
 require_once KITS_CORE_DIR . 'includes/seo.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/ads.php';
