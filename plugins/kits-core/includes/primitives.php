@@ -158,7 +158,8 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 add_action(
 	'init',
 	function () {
-		wp_register_script_module( 'kits-dropdown', plugins_url( 'assets/js/dropdown.js', KITS_CORE_DIR . 'kits-core.php' ), array( '@wordpress/interactivity' ), (string) filemtime( KITS_CORE_DIR . 'assets/js/dropdown.js' ) );
+		$f = get_template_directory() . '/assets/js/dropdown.js'; // served by the Kits theme (kits-core has no public URL of its own)
+		wp_register_script_module( 'kits-dropdown', get_template_directory_uri() . '/assets/js/dropdown.js', array( '@wordpress/interactivity' ), file_exists( $f ) ? (string) filemtime( $f ) : '1' );
 	}
 );
 
