@@ -1,6 +1,7 @@
 <?php
 /**
- * Section header for archives: [aw_section_head]. Title, one-line description and live count, on a full-width band.
+ * Section header for archives: [aw_section_head]. Title, one-line description, live count and a
+ * three-image visual built from real content in that section.
  *
  * @package animal-writes-core
  */
@@ -58,7 +59,37 @@ add_shortcode(
 		$count = (int) $wp_query->found_posts;
 		$noun  = array( 'aw_listing' => 'organisations', 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
 
-		$visual = ''; // the three-picture strip was removed (owner, 8 Oct 2026)
+		// Visual: campaign photos for campaigns; otherwise the first three items in this view.
+		$tiles = '';
+		if ( 'aw_campaign' === $type ) {
+			foreach ( array( 'aw1-im8-768x1024.jpeg', 'aw1-im10-461x1024.jpeg', 'aw1-im12-768x1024.jpeg' ) as $f ) {
+				$tiles .= '<img src="/wp-content/uploads/2026/10/' . esc_attr( $f ) . '" alt="" loading="lazy">';
+			}
+		} else {
+			// Prefer items with a real image; fall back to placards only to fill the three tiles.
+			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => is_tax() ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
+			// Three tiles, each a different picture: one item per distinct image, then placards to fill.
+			$seen  = array();
+			$with  = array();
+			foreach ( $pool as $p ) {
+				$key = aw_item_image( $p->ID ) ?: ( get_post_meta( $p->ID, 'aw_file_id', true ) ? 'doc' . $p->ID : ( has_post_thumbnail( $p ) ? get_the_post_thumbnail_url( $p ) : '' ) );
+				if ( $key && ! isset( $seen[ $key ] ) ) {
+					$seen[ $key ] = true;
+					$with[]       = $p;
+				}
+			}
+			$rest  = array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
+			$posts = array_slice( array_merge( $with, $rest ), 0, 3 );
+			foreach ( $posts as $p ) {
+				$tiles .= aw_section_tile( $p );
+			}
+		}
+		// A category page leads with its own photo (set on the category screen in WP Admin).
+		$cat_img = ( is_tax() && function_exists( 'aw_topic_image_id' ) ) ? aw_topic_image_id( get_queried_object() ) : 0;
+		if ( $cat_img ) {
+			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="aw-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
+		}
+		$visual = $tiles ? '<div class="aw-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
 		if ( 'aw_listing' === $type && is_post_type_archive( 'aw_listing' ) && ! get_query_var( 'aw_city' ) && ! get_query_var( 'aw_listing_type' ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			// Directory home: the states with the most organisations, set as type. Real counts, no map.
 			$items = '';
