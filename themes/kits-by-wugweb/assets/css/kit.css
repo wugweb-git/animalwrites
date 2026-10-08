@@ -113,8 +113,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 :is(.wp-element-button, button)[disabled], :is(.wp-element-button, button)[aria-disabled=true] ,:is(.wp-element-button, button)[disabled], :is(.wp-element-button, button)[aria-disabled=true] {
 	opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
 }
-:is(.wp-element-button, button).is-loading ,:is(.wp-element-button, button).is-loading { position: relative; color: transparent !important; pointer-events: none; }
-:is(.wp-element-button, button).is-loading::after ,:is(.wp-element-button, button).is-loading::after {
+:is(.wp-element-button, button):not(.kit-btn).is-loading ,:is(.wp-element-button, button):not(.kit-btn).is-loading { position: relative; color: transparent !important; pointer-events: none; }
+:is(.wp-element-button, button):not(.kit-btn).is-loading::after ,:is(.wp-element-button, button):not(.kit-btn).is-loading::after {
 	content: ""; position: absolute; width: 1.1em; height: 1.1em; border-radius: 50%;
 	border: 2px solid var(--kit-color-on-accent); border-right-color: transparent;
 	animation: kit-spin 700ms linear infinite;

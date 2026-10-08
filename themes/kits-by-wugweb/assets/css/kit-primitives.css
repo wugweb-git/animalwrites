@@ -58,7 +58,8 @@
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
 }
 .kit-filter-pill::before { content: none; }
-.kit-filter-pill[aria-pressed=true], .kit-filter-pill[aria-checked=true], .kit-filter-pill[aria-current] {
+.kit-filter-pill:visited { color: var(--kit-color-ink); }
+.kit-filter-pill[aria-pressed=true], .kit-filter-pill[aria-checked=true], .kit-filter-pill[aria-current], .kit-filter-pill[aria-current]:visited {
 	background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-bold);
 }
 .kit-filter-pill:is([aria-pressed=true], [aria-checked=true], [aria-current])::before { /* selected is not colour only: a check mark */
