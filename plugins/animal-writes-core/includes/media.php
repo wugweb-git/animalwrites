@@ -187,6 +187,27 @@ add_filter(
 );
 
 /**
+ * egazette.gov.in sends its certificate without Let's Encrypt's YR2 intermediate and Root YR, so a plain download fails
+ * verification. Add those two public certificates to WordPress's CA bundle for that host only (verification stays on).
+ */
+add_filter(
+	'http_request_args',
+	function ( $args, $url ) {
+		if ( 'egazette.gov.in' !== wp_parse_url( $url, PHP_URL_HOST ) ) {
+			return $args;
+		}
+		$bundle = trailingslashit( get_temp_dir() ) . 'aw-ca-bundle-egazette.pem';
+		if ( ! file_exists( $bundle ) ) {
+			file_put_contents( $bundle, file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ) . "\n" . file_get_contents( AW_CORE_DIR . 'assets/certs/lets-encrypt-yr2-root-yr.pem' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
+		$args['sslcertificates'] = $bundle;
+		return $args;
+	},
+	10,
+	2
+);
+
+/**
  * Keep a copy of a government PDF (gov.in / nic.in, or the open judgment datasets) we may host (aw_doc_hostable) so it can be read inside the page.
  *
  * @param int    $post_id Post ID.

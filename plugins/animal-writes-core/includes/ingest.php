@@ -101,6 +101,9 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	$title      = sanitize_text_field( (string) $req->get_param( 'title' ) );
 	$summary    = sanitize_textarea_field( (string) $req->get_param( 'summary' ) );
+	// The workers mark legal summaries "[Needs legal review]": an internal flag, never part of the published text.
+	$legal_flag = false !== strpos( $summary, '[Needs legal review]' );
+	$summary    = trim( str_replace( '[Needs legal review]', '', $summary ) );
 	$source_url = esc_url_raw( (string) $req->get_param( 'source_url' ) );
 
 	if ( '' === $title ) {
@@ -140,6 +143,9 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	update_post_meta( $post_id, 'aw_source_url', $source_url );
+	if ( $legal_flag ) {
+		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
+	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
 	$image = esc_url_raw( (string) $req->get_param( 'image_url' ) );
