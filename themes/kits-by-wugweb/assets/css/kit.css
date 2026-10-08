@@ -277,7 +277,7 @@ body.single-aw_research .aw-lead-media ,body.single-aw_research .kit-lead-media 
 /* Phones: the band runs edge to edge and drops the picture strip */
 @media (max-width: 599px) {
 	.aw-section-band ,.kit-section-band { width: auto; max-width: none !important; margin-inline: calc(50% - 50vw) !important; }
-	.aw-section-visual ,.kit-section-visual { display: none; }
+	.aw-section-band .aw-section-visual ,.kit-section-band .kit-section-visual { display: none; }
 }
 html { overflow-x: clip; }
 .aw-section-head ,.kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
