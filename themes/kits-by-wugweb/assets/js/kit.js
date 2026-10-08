@@ -561,3 +561,23 @@
 	});
 })();
 
+
+/* Header hides while you scroll down and comes back as soon as you scroll up (owner, 9 Oct 2026). It stays while the
+   menu or the search is open, near the top of the page, or when focus is inside it. */
+(function () {
+	var bar = document.querySelector('header.wp-block-template-part');
+	if (!bar || !bar.querySelector('.kit-site-header')) return;
+	var last = window.scrollY, ticking = false;
+	function busy() {
+		return document.documentElement.classList.contains('has-modal-open') || bar.querySelector('.is-searching, .is-menu-open') || bar.contains(document.activeElement) && document.activeElement.matches(':focus-visible'); // keyboard users keep it
+	}
+	function update() {
+		var y = window.scrollY, h = bar.offsetHeight;
+		if (y <= h || busy()) bar.classList.remove('kit-header-hidden');
+		else if (y > last + 4) bar.classList.add('kit-header-hidden');
+		else if (y < last - 4) bar.classList.remove('kit-header-hidden');
+		last = y; ticking = false;
+	}
+	window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+	bar.addEventListener('focusin', function (e) { if (e.target.matches(':focus-visible')) bar.classList.remove('kit-header-hidden'); });
+})();
