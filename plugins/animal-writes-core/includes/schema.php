@@ -2,7 +2,7 @@
 /**
  * Structured data (JSON-LD).
  *
- * - Listing pages: Organization (NGO) with name, URL, logo, locality/region (no street address), contact details
+ * - Listing pages: NGO / VeterinaryCare / AnimalShelter / GovernmentOrganization (by listing type, several allowed) with name, URL, logo, locality/region (no street address), contact details
  *   when present, the official website as sameAs, and the AWBI recognition code as an identifier.
  * - Directory pages (all, state, district, type): ItemList of the organisations on the page, in order.
  * - Every page: the publisher (Organization) and the site (WebSite with site search), and the breadcrumb trail.
@@ -44,10 +44,29 @@ function aw_listing_place( $id ) {
 function aw_listing_schema( $id ) {
 	list( $state, $district ) = aw_listing_place( $id );
 	$m    = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
-	$vet  = has_term( array( 'veterinary-hospital', 'veterinary-dispensary', 'mobile-veterinary-unit', 'veterinary-office' ), 'aw_listing_type', $id );
-	$site = $m( 'aw_website' );
-	$org  = array(
-		'@type'       => $vet ? 'VeterinaryCare' : 'NGO',
+	// schema.org type by listing type; a listing with several types gets several (@type as a list).
+	$map   = array(
+		'VeterinaryCare'         => array( 'veterinary-hospital', 'veterinary-clinic', 'veterinary-dispensary', 'bird-hospital', 'mobile-veterinary-unit' ),
+		'AnimalShelter'          => array( 'animal-shelter', 'gaushala', 'sanctuary' ),
+		'GovernmentOrganization' => array( 'veterinary-office', 'mobile-veterinary-unit' ),
+	);
+	$stype = array();
+	foreach ( $map as $t => $slugs ) {
+		if ( has_term( $slugs, 'aw_listing_type', $id ) ) {
+			$stype[] = $t;
+		}
+	}
+	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOrganization', $stype, true ) && in_array( 'gov', wp_list_pluck( aw_listing_sources( $id ), 0 ), true ) ) {
+		$stype[] = 'GovernmentOrganization'; // a government vet (from a government list)
+	}
+	if ( ! $stype || has_term( array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'legal-aid', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' ), 'aw_listing_type', $id ) ) {
+		array_unshift( $stype, 'NGO' );
+	}
+	$stype = array_values( array_unique( $stype ) );
+	$vet   = (bool) array_intersect( array( 'VeterinaryCare', 'AnimalShelter' ), $stype ); // places (LocalBusiness): free-text hours allowed
+	$site  = $m( 'aw_website' );
+	$org   = array(
+		'@type'       => 1 === count( $stype ) ? $stype[0] : $stype,
 		'@id'         => get_permalink( $id ) . '#organization',
 		'name'        => wp_strip_all_tags( (string) get_post_field( 'post_title', $id ) ), // no "Private:" prefix
 		'url'         => $site ? $site : get_permalink( $id ),                 // the organisation's own site when known
@@ -111,8 +130,14 @@ function aw_listing_schema( $id ) {
 	if ( $code ) {
 		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
 	}
-	if ( $m( 'aw_registration' ) ) { // Trust/Society number, 12A, 80G, NGO Darpan ID, as the organisation states them
-		$org['identifier'] = array_values( array_filter( array( $org['identifier'] ?? null, array( '@type' => 'PropertyValue', 'propertyID' => 'Registration', 'value' => $m( 'aw_registration' ) ) ) ) );
+	$ids = isset( $org['identifier'] ) ? array( $org['identifier'] ) : array();
+	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
+		if ( $m( $k ) ) { // as the organisation states them
+			$ids[] = array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'value' => $m( $k ) );
+		}
+	}
+	if ( $ids ) {
+		$org['identifier'] = 1 === count( $ids ) ? $ids[0] : $ids;
 	}
 	return array_filter( $org );
 }

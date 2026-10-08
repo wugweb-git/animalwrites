@@ -31,6 +31,9 @@ function aw_meta_schema() {
 		// Directory.
 		'aw_verified'        => array( 'boolean', array( 'aw_listing' ), 'Verified by Animal Writes' ),
 		'aw_verified_on'     => array( 'string', array( 'aw_listing' ), 'Last verified date (Y-m-d)' ),
+		'aw_awbi_recognised' => array( 'string', array( 'aw_listing' ), 'AWBI recognised on (Y-m-d)' ),
+		'aw_awbi_renewed'    => array( 'string', array( 'aw_listing' ), 'AWBI renewed on (Y-m-d)' ),
+		'aw_awbi_valid'      => array( 'string', array( 'aw_listing' ), 'AWBI recognition valid until (Y-m-d)' ),
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
 		'aw_featured'        => array( 'integer', array( 'aw_listing' ), 'Featured (1) or not (0)' ),
 		'aw_featured_until'  => array( 'string', array( 'aw_listing' ), 'Featured until (Y-m-d)' ),
@@ -58,7 +61,10 @@ function aw_meta_schema() {
 		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 4 media IDs, comma separated' ),
 		'aw_founded'         => array( 'string', array( 'aw_listing' ), 'Year established' ),
 		'aw_head'            => array( 'string', array( 'aw_listing' ), 'Head of the organisation (name and role, as the organisation publishes it)' ),
-		'aw_registration'    => array( 'string', array( 'aw_listing' ), 'Registration (Trust/Society number, 12A, 80G, NGO Darpan ID)' ),
+		'aw_registration'    => array( 'string', array( 'aw_listing' ), 'Registration (Trust/Society number)' ),
+		'aw_reg_12a'         => array( 'string', array( 'aw_listing' ), '12A registration number' ),
+		'aw_reg_80g'         => array( 'string', array( 'aw_listing' ), '80G registration number' ),
+		'aw_darpan_id'       => array( 'string', array( 'aw_listing' ), 'NGO Darpan ID' ),
 		'aw_animals'         => array( 'string', array( 'aw_listing' ), 'Animals helped (comma separated)' ),
 		'aw_hours'           => array( 'string', array( 'aw_listing' ), 'Opening hours' ),
 		'aw_languages'       => array( 'string', array( 'aw_listing' ), 'Languages spoken (comma separated)' ),
@@ -88,7 +94,7 @@ function aw_meta_schema() {
  */
 function aw_sanitize_meta( $value, $key ) {
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until' );
+	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );

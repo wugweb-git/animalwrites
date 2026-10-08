@@ -25,46 +25,84 @@ function kits_section_id( $base ) {
 	return $n;
 }
 
+/**
+ * The text of the heading the processor stands on, and its id (one is added from the text when it has none).
+ * Attributes are read and written with WordPress's HTML API (WP_HTML_Tag_Processor), never with regular expressions.
+ *
+ * @param WP_HTML_Tag_Processor $p    Processor on a heading opener.
+ * @param string                $base Id base when the heading has no id ('' = its text).
+ * @return array{0: string, 1: string} text, id.
+ */
+function kits_section_heading( $p, $base = '' ) {
+	$tag = $p->get_tag();
+	$p->set_bookmark( 'kits-h' );
+	$hid  = $p->get_attribute( 'id' );
+	$text = '';
+	while ( $p->next_token() ) {
+		if ( '#tag' === $p->get_token_type() && $tag === $p->get_tag() && $p->is_tag_closer() ) {
+			break;
+		}
+		if ( '#text' === $p->get_token_type() ) {
+			$text .= $p->get_modifiable_text();
+		}
+	}
+	$text = trim( wp_strip_all_tags( $text ) );
+	if ( ! is_string( $hid ) || '' === $hid ) {
+		$p->seek( 'kits-h' );
+		$hid = kits_section_id( ( $base ? $base : $text ) . '-title' );
+		$p->set_attribute( 'id', $hid );
+	}
+	$p->release_bookmark( 'kits-h' );
+	return array( $text, $hid );
+}
+
 add_filter(
 	'render_block_core/group',
 	function ( $html, $block ) {
 		$align = $block['attrs']['align'] ?? '';
-		if ( is_admin() || ! in_array( $align, array( 'full', 'wide' ), true ) || ! preg_match( '/^\s*<(div|header)\b([^>]*)>/', $html, $open ) ) {
+		if ( is_admin() || ! in_array( $align, array( 'full', 'wide' ), true ) ) {
 			return $html;
 		}
-		if ( 'header' === $open[1] || false !== strpos( $open[2], 'kit-site-' ) || false !== strpos( $open[2], 'aria-label' ) ) {
-			return $html; // page header bands keep <header>; site header and footer are landmarks already
+		$p = new WP_HTML_Tag_Processor( $html );
+		if ( ! $p->next_tag() || 'DIV' !== $p->get_tag() ) {
+			return $html; // page header bands keep <header>
 		}
-		$labels = (array) apply_filters( 'kits_section_labels', array() );
-		$id     = '';
-		$label  = '';
-		foreach ( $labels as $class => $def ) {
-			if ( preg_match( '/class="[^"]*\b' . preg_quote( $class, '/' ) . '\b/', $open[2] ) ) {
+		if ( false !== strpos( (string) $p->get_attribute( 'class' ), 'kit-site-' ) || null !== $p->get_attribute( 'aria-label' ) ) {
+			return $html; // site header and footer are landmarks already
+		}
+		$p->set_bookmark( 'kits-open' );
+		$id    = '';
+		$label = '';
+		foreach ( (array) apply_filters( 'kits_section_labels', array() ) as $class => $def ) {
+			if ( $p->has_class( $class ) ) {
 				list( $id, $label ) = $def;
 				break;
 			}
 		}
-		// The first h1/h2 that comes before any list in this section names it.
-		$before = (string) strstr( $html, '<li', true );
-		$before = '' === $before ? $html : $before;
-		$attrs  = '';
-		if ( preg_match( '/<(h[12])\b([^>]*)>(.*?)<\/\1>/s', $before, $h ) ) {
-			$text = trim( wp_strip_all_tags( $h[3] ) );
-			if ( preg_match( '/\bid="([^"]+)"/', $h[2], $hid ) ) {
-				$hid = $hid[1];
-			} else {
-				$hid  = kits_section_id( ( $id ? $id : $text ) . '-title' );
-				$html = preg_replace( '/<' . $h[1] . '\b' . preg_quote( $h[2], '/' ) . '>/', '<' . $h[1] . ' id="' . esc_attr( $hid ) . '"' . $h[2] . '>', $html, 1 );
+		// The first h1/h2 that comes before any list item in this section names it.
+		$hid = '';
+		while ( $p->next_tag() ) {
+			if ( 'LI' === $p->get_tag() ) {
+				break;
 			}
-			$id    = $id ? $id : $text;
-			$attrs = ' aria-labelledby="' . esc_attr( $hid ) . '"';
-		} elseif ( $label ) {
-			$attrs = ' aria-label="' . esc_attr( $label ) . '"';
-		} else {
+			if ( in_array( $p->get_tag(), array( 'H1', 'H2' ), true ) ) {
+				list( $text, $hid ) = kits_section_heading( $p, $id );
+				$id                 = $id ? $id : $text;
+				break;
+			}
+		}
+		if ( ! $hid && ! $label ) {
 			return $html; // nothing to name it by: leave as a plain group
 		}
-		$sid  = false !== strpos( $open[2], ' id="' ) ? '' : ' id="' . esc_attr( kits_section_id( $id ) ) . '"';
-		$html = preg_replace( '/^(\s*)<div\b/', '$1<section' . $sid . $attrs, $html, 1 );
+		$p->seek( 'kits-open' );
+		$hid ? $p->set_attribute( 'aria-labelledby', $hid ) : $p->set_attribute( 'aria-label', $label );
+		if ( null === $p->get_attribute( 'id' ) ) {
+			$p->set_attribute( 'id', kits_section_id( $id ) );
+		}
+		$p->release_bookmark( 'kits-open' );
+		$html = $p->get_updated_html();
+		// The HTML API cannot rename a tag: the group's own outer <div> … </div> becomes <section> … </section>.
+		$html = (string) preg_replace( '/^(\s*)<div\b/', '$1<section', $html, 1 );
 		return (string) preg_replace( '/<\/div>(\s*)$/', '</section>$1', $html, 1 );
 	},
 	20,
@@ -81,40 +119,47 @@ add_filter(
 		if ( is_admin() || false === strpos( $html, '<section' ) ) {
 			return $html;
 		}
-		return (string) preg_replace_callback(
-			'/<section\b([^>]*)>(.*?)(?=<section\b|<\/section>)/s',
-			function ( $m ) {
-				$attrs = $m[1];
-				$body  = $m[2];
-				if ( preg_match( '/\bid="/', $attrs ) && preg_match( '/aria-label(ledby)?="/', $attrs ) ) {
-					return $m[0];
-				}
-				$name = '';
-				if ( preg_match( '/aria-labelledby="([^"]+)"/', $attrs, $l ) ) {
-					$name = preg_replace( '/-(title|h|heading)$/', '', $l[1] );
-				} elseif ( preg_match( '/aria-label="([^"]+)"/', $attrs, $l ) ) {
-					$name = $l[1];
-				} elseif ( preg_match( '/<(h[2-4])\b([^>]*)>(.*?)<\/\1>/s', $body, $h ) ) {
-					$text = trim( wp_strip_all_tags( $h[3] ) );
-					$name = $text;
-					if ( preg_match( '/\bid="([^"]+)"/', $h[2], $hid ) ) {
-						$hid = $hid[1];
-					} else {
-						$hid  = kits_section_id( $text . '-title' );
-						$body = preg_replace( '/<' . $h[1] . '\b' . preg_quote( $h[2], '/' ) . '>/', '<' . $h[1] . ' id="' . esc_attr( $hid ) . '"' . $h[2] . '>', $body, 1 );
+		$p = new WP_HTML_Tag_Processor( $html );
+		$n = 0;
+		while ( $p->next_tag( array( 'tag_name' => 'SECTION' ) ) ) {
+			$id = $p->get_attribute( 'id' );
+			$lb = $p->get_attribute( 'aria-labelledby' );
+			$al = $p->get_attribute( 'aria-label' );
+			if ( is_string( $id ) && $id && ( $lb || $al ) ) {
+				continue;
+			}
+			$mark = 'kits-s' . ( ++$n );
+			$p->set_bookmark( $mark );
+			$name = '';
+			$hid  = '';
+			if ( is_string( $lb ) && $lb ) {
+				$name = preg_replace( '/-(title|h|heading)$/', '', $lb );
+			} elseif ( is_string( $al ) && $al ) {
+				$name = $al;
+			} else {
+				// Its first h2–h4, up to the next section (opening or closing).
+				while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+					if ( 'SECTION' === $p->get_tag() ) {
+						break;
 					}
-					$attrs .= ' aria-labelledby="' . esc_attr( $hid ) . '"';
+					if ( ! $p->is_tag_closer() && in_array( $p->get_tag(), array( 'H2', 'H3', 'H4' ), true ) ) {
+						list( $name, $hid ) = kits_section_heading( $p );
+						break;
+					}
 				}
-				if ( '' === $name ) {
-					return $m[0];
+			}
+			$p->seek( $mark );
+			if ( '' !== $name ) {
+				if ( $hid ) {
+					$p->set_attribute( 'aria-labelledby', $hid );
 				}
-				if ( ! preg_match( '/\bid="/', $attrs ) ) {
-					$attrs = ' id="' . esc_attr( kits_section_id( $name ) ) . '"' . $attrs;
+				if ( ! is_string( $id ) || '' === $id ) {
+					$p->set_attribute( 'id', kits_section_id( $name ) );
 				}
-				return '<section' . $attrs . '>' . $body;
-			},
-			$html
-		);
+			}
+			$p->release_bookmark( $mark );
+		}
+		return $p->get_updated_html();
 	},
 	99
 );

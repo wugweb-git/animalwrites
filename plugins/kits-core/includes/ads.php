@@ -30,7 +30,7 @@ function aw_ad( $slot ) {
 	}
 	// One line inside a block element, so wpautop in list shortcodes adds no <p>/<br> around the network code.
 	$code = (string) preg_replace( '/\s*[\r\n]+\s*/', ' ', $code );
-	return '<aside class="kit-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="kit-ad-label"><span class="kit-badge kit-badge--ad">Advertisement</span></p><div class="aw-ad-unit">' . $code . '</div></aside>';
+	return '<aside class="kit-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement"><p class="kit-ad-label"><span class="kit-badge kit-badge--ad">Advertisement</span></p><div class="kit-ad-unit aw-ad-unit">' . $code . '</div></aside>';
 }
 
 /** Is this a list page (archives, the blog, or a theme's own list Pages)? */

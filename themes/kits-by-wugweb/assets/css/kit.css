@@ -482,10 +482,11 @@ html { overflow-x: clip; }
 .kit-ad { margin: var(--kit-space-7) auto; max-width: var(--kit-width-content); text-align: center; border-block: 1px solid var(--kit-color-line); padding: var(--kit-space-3) 0; }
 .kit-ad-label { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin: 0 0 var(--kit-space-2); max-width: none; }
 .kit-ad-item { grid-column: 1 / -1; }
-/* An ad box takes no space until the network actually fills it (unapproved site, no ad to show). */
-:is(.kit-ad, .kit-ad):has(ins.adsbygoogle:not([data-ad-status="filled"])) { margin: 0 auto; padding: 0; border-block: 0; }
-:is(.kit-ad, .kit-ad):has(ins.adsbygoogle:not([data-ad-status="filled"])) :is(.kit-ad-label, .kit-ad-label) { display: none; }
-:is(.kit-ad, .kit-ad) ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; overflow: hidden; }
+/* Fixed space per ad size, kept from the first paint so nothing below jumps (phone 320×100, from 768px 728×90).
+   Ads are never clipped (no max-height). The box gives its space back only when the network says no ad will come. */
+.kit-ad-unit { min-height: 100px; display: flex; align-items: center; justify-content: center; }
+@media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
+.kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
 
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--kit-color-line); }

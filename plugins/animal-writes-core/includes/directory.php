@@ -306,10 +306,24 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 add_action(
 	'template_redirect',
 	function () {
-		if ( ! aw_is_directory_view() || ! isset( $_GET['aw_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! aw_is_directory_view() ) {
 			return;
 		}
-		$g     = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+		$g = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+		// A 6-digit PIN code in the search box opens that PIN's district (or state) list.
+		$pin = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
+		if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
+			$r = aw_pin_lookup( $pin );
+			if ( is_array( $r ) ) {
+				$g['state']    = $r['state_slug'];
+				$g['district'] = $r['district_slug'];
+				$g['q']        = '';
+				$g['aw_filter'] = 1;
+			}
+		}
+		if ( ! isset( $g['aw_filter'] ) ) {
+			return;
+		}
 		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
 		$type  = sanitize_title( $g['type'] ?? '' );
 		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'type', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
@@ -391,7 +405,7 @@ function aw_directory_filter() {
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
-		. $field( 'aw-dir-q', 'Name', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
+		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
 		. '<details class="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="kit-btn kit-btn--secondary kit-btn--sm">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )

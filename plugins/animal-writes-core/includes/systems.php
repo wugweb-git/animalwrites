@@ -289,7 +289,11 @@ add_shortcode(
 				? array( 'check', 'Verified by Animal Writes' . ( $on ? ' on ' . wp_date( 'j M Y', strtotime( $on ) ) : '' ) )
 				: array( 'alert', 'Not yet confirmed by the organisation. Check details before you travel.' );
 			if ( $code ) {
-				$rows[] = array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . $code . ' (list as on 31 May 2026)' );
+				$since  = (string) get_post_meta( $id, 'aw_awbi_recognised', true );
+				$until  = (string) get_post_meta( $id, 'aw_awbi_valid', true );
+				$rows[] = aw_awbi_lapsed( $id )
+					? array( 'alert', 'AWBI recognition (code ' . $code . ') was valid until ' . wp_date( 'j M Y', strtotime( $until ) ) . '. Needs re-check.' )
+					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . $code . ( $since ? ', since ' . wp_date( 'j M Y', strtotime( $since ) ) : '' ) . ( $until ? ', valid until ' . wp_date( 'j M Y', strtotime( $until ) ) : '' ) . ' (list as on 31 May 2026)' );
 			}
 			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
 			if ( $abc ) {

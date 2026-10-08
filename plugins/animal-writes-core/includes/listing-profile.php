@@ -42,7 +42,10 @@ function aw_listing_fields() {
 		'About'   => array(
 			'aw_founded'      => array( 'Year established', 'text', 'e.g. 2014' ),
 			'aw_head'         => array( 'Head of the organisation', 'text', 'Name and role, as the organisation publishes it' ),
-			'aw_registration' => array( 'Registration', 'text', 'Trust/Society number, 12A, 80G, NGO Darpan ID' ),
+			'aw_registration' => array( 'Registration', 'text', 'Trust/Society registration number' ),
+			'aw_reg_12a'      => array( '12A', 'text', '12A registration number' ),
+			'aw_reg_80g'      => array( '80G', 'text', '80G registration number' ),
+			'aw_darpan_id'    => array( 'NGO Darpan ID', 'text', 'e.g. KL/2017/0123456' ),
 			'aw_animals'      => array( 'Animals helped', 'text', 'Comma separated, e.g. dogs, cats, cattle, birds' ),
 			'aw_services'     => array( 'Services', 'text', 'Comma separated, as the organisation states them' ),
 			'aw_languages'    => array( 'Languages', 'text', 'Comma separated' ),
@@ -126,8 +129,8 @@ function aw_block_org_details( $a, $id ) {
 		$photos .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	$facts = '';
-	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
-	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
+	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( $m( $k ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when

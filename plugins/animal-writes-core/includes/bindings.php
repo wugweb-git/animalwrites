@@ -95,6 +95,9 @@ function aw_binding_value( $key, $post_id ) {
 			if ( ! get_post_meta( $post_id, 'aw_verified', true ) ) {
 				return '';
 			}
+			if ( get_post_meta( $post_id, 'aw_needs_reverify', true ) ) {
+				return __( 'Needs re-check', 'animal-writes-core' );
+			}
 			$on = aw_format_date( $m( 'aw_verified_on' ) );
 			/* translators: %s: date. */
 			return $on ? sprintf( __( 'Verified · %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );

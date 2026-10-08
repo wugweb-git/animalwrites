@@ -378,7 +378,16 @@ add_filter(
 			return $html;
 		}
 		$url = (string) get_post_meta( $id, 'aw_press_url', true );
-		return preg_replace( '#<a href="[^"]*"[^>]*>(.*?)</a>#s', '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">$1 ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a>', $html, 1 );
+		$p = new WP_HTML_Tag_Processor( $html );
+		if ( ! $url || ! $p->next_tag( 'A' ) ) {
+			return $html;
+		}
+		$p->set_attribute( 'href', esc_url( $url ) );
+		$p->set_attribute( 'target', '_blank' );
+		$p->set_attribute( 'rel', 'noopener noreferrer' );
+		$html = $p->get_updated_html();
+		$end  = strpos( $html, '</a>' );
+		return false === $end ? $html : substr_replace( $html, ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span>', $end, 0 );
 	},
 	10,
 	3

@@ -1705,5 +1705,15 @@
   "local-nav": "live",
   "footer-nav": "live",
   "pagination": "live"
+ },
+ "menus": {
+  "primary": "Primary menu (header): parts/header.html, core Navigation block, List View name 'Primary menu (header; on phones the hamburger menu)'",
+  "secondary": "Secondary menu (utility: search, contact): parts/header.html, data-menu=secondary",
+  "mobile": "Hamburger / mobile menu: the Primary menu's overlay below 1200px, plus its phone-only items (Contact us, Privacy, Terms, Disclaimer)",
+  "footer": "Footer menu: parts/footer.html, data-menu=footer (helplines, Explore, Animal Writes) and the Categories menu",
+  "socket": "Socket menu (copyright, legal links, visits): parts/footer.html, data-menu=socket",
+  "mega": "not used",
+  "sidebar-vertical": "not used",
+  "drop-down-multi-level": "not used (the Primary menu opens sub-menus on click if any are added)"
  }
 }

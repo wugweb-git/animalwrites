@@ -65,5 +65,27 @@ function aw_daily() {
 	foreach ( $stale as $id ) {
 		update_post_meta( $id, 'aw_needs_reverify', true );
 	}
+
+	// AWBI recognition past its "valid until": the listing needs re-checking (badge and trust line say so).
+	$lapsed = get_posts(
+		array(
+			'post_type'      => 'aw_listing',
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'meta_query'     => array(
+				array( 'key' => 'aw_awbi_valid', 'value' => $today, 'compare' => '<', 'type' => 'DATE' ),
+			),
+		)
+	);
+	foreach ( $lapsed as $id ) {
+		update_post_meta( $id, 'aw_needs_reverify', true );
+	}
+}
+
+/** True when the listing's AWBI recognition has a "valid until" date that has passed. */
+function aw_awbi_lapsed( $id ) {
+	$v = (string) get_post_meta( $id, 'aw_awbi_valid', true );
+	return '' !== $v && $v < current_time( 'Y-m-d' );
 }
 add_action( 'aw_daily', 'aw_daily' );

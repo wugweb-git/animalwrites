@@ -33,7 +33,13 @@ add_filter(
 			return $html;
 		}
 		$done = true;
-		return (string) preg_replace( '/^(\s*<main\b)(?![^>]*\bid=)/', '$1 id="main" tabindex="-1" aria-label="' . esc_attr( kits_page_label() ) . '"', $html, 1 );
+		$p    = new WP_HTML_Tag_Processor( $html );
+		if ( $p->next_tag() && 'MAIN' === $p->get_tag() && null === $p->get_attribute( 'id' ) ) {
+			$p->set_attribute( 'id', 'main' );
+			$p->set_attribute( 'tabindex', '-1' );
+			$p->set_attribute( 'aria-label', kits_page_label() );
+		}
+		return $p->get_updated_html();
 	},
 	10,
 	2
@@ -45,7 +51,12 @@ add_filter(
 		if ( 'footer' !== ( $block['attrs']['slug'] ?? '' ) ) {
 			return $html;
 		}
-		return (string) preg_replace( '/^(\s*<footer\b)(?![^>]*\bid=)/', '$1 id="site-footer" aria-label="Site footer"', $html, 1 );
+		$p = new WP_HTML_Tag_Processor( $html );
+		if ( $p->next_tag() && 'FOOTER' === $p->get_tag() && null === $p->get_attribute( 'id' ) ) {
+			$p->set_attribute( 'id', 'site-footer' );
+			$p->set_attribute( 'aria-label', 'Site footer' );
+		}
+		return $p->get_updated_html();
 	},
 	10,
 	2
