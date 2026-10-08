@@ -188,9 +188,36 @@ function aw_article_schema( $id ) {
 	return array_filter( $data );
 }
 
+/** A campaign: a CreativeWork by its organiser (or Animal Writes), with its topic. */
+function aw_campaign_schema( $id ) {
+	$org   = (int) get_post_meta( $id, 'aw_organiser', true );
+	$topic = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_topic' ) : null;
+	$image = (string) get_the_post_thumbnail_url( $id, 'large' );
+	return array_filter(
+		array(
+			'@type'         => 'CreativeWork',
+			'@id'           => get_permalink( $id ) . '#campaign',
+			'url'           => get_permalink( $id ),
+			'name'          => wp_strip_all_tags( get_the_title( $id ) ),
+			'description'   => function_exists( 'aw_text' ) ? aw_text( $id, 40 ) : '',
+			'datePublished' => get_the_date( 'c', $id ),
+			'dateModified'  => get_the_modified_date( 'c', $id ),
+			'inLanguage'    => 'en-IN',
+			'image'         => $image ? array( $image ) : null,
+			'about'         => $topic ? array( '@type' => 'Thing', 'name' => $topic->name ) : null,
+			'creator'       => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => get_the_title( $org ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) ),
+			'publisher'     => array( '@id' => home_url( '/#organization' ) ),
+		)
+	);
+}
+
 /** BreadcrumbList for the current page, from the same trail people see (breadcrumbs.php). */
 function aw_breadcrumb_schema() {
 	$trail = function_exists( 'aw_breadcrumbs' ) ? aw_breadcrumbs() : array();
+	if ( ! $trail && is_post_type_archive( array_keys( aw_post_types() ) ) ) { // section hubs: Home › Section (search engines only)
+		$obj   = get_queried_object();
+		$trail = array( array( 'Home', home_url( '/' ) ), array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );
+	}
 	if ( ! $trail ) {
 		return array();
 	}
@@ -288,6 +315,22 @@ add_action(
 			}
 		} elseif ( is_singular( 'aw_opportunity' ) ) {
 			$graph[] = aw_job_schema( get_queried_object_id() );
+		} elseif ( is_singular( 'aw_campaign' ) ) {
+			$graph[] = aw_campaign_schema( get_queried_object_id() );
+		} elseif ( is_tax( 'aw_topic' ) ) {
+			$term    = get_queried_object();
+			$graph[] = array_filter(
+				array(
+					'@type'       => 'CollectionPage',
+					'@id'         => get_term_link( $term ) . '#page',
+					'url'         => get_term_link( $term ),
+					'name'        => $term->name,
+					'description' => wp_strip_all_tags( term_description( $term ) ),
+					'inLanguage'  => 'en-IN',
+					'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+					'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+				)
+			);
 		}
 		$graph[] = aw_breadcrumb_schema();
 		aw_jsonld( array( '@context' => 'https://schema.org', '@graph' => array_values( array_filter( $graph ) ) ) );

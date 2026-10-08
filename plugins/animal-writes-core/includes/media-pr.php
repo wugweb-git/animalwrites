@@ -192,8 +192,6 @@ function aw_banners_screen() {
 				'mobile'  => absint( $b['mobile'] ?? 0 ),
 				'alt'     => sanitize_text_field( $b['alt'] ?? '' ),
 				'text'    => wp_kses_post( $b['text'] ?? '' ),
-				'credit'     => sanitize_text_field( $b['credit'] ?? '' ),
-				'credit_url' => esc_url_raw( $b['credit_url'] ?? '' ),
 			);
 			if ( ( $row['desktop'] || $row['mobile'] ) && '' === $row['alt'] ) {
 				$notes[] = $key;
@@ -205,16 +203,14 @@ function aw_banners_screen() {
 	}
 	echo '<div class="wrap"><h1>Banners</h1><p>Optional banner at the top of each place. It shows only when it has a wide image (16:5, e.g. 1600×500), a phone image (4:3, e.g. 800×600) and alt text. Use WebP or AVIF. Images: media library IDs.</p><form method="post">';
 	wp_nonce_field( 'aw_banners' );
-	echo '<table class="widefat striped"><thead><tr><th>Place</th><th>Wide image ID</th><th>Phone image ID</th><th>Alt text</th><th>Text on the banner (optional)</th><th>Photographer</th><th>Photo page</th></tr></thead><tbody>';
+	echo '<table class="widefat striped"><thead><tr><th>Place</th><th>Wide image ID</th><th>Phone image ID</th><th>Alt text</th><th>Text on the banner (optional)</th></tr></thead><tbody>';
 	foreach ( aw_banner_locations() as $key => $label ) {
 		$b = $all[ $key ] ?? array();
 		echo '<tr><td>' . esc_html( $label ) . '</td>'
 			. '<td><input type="number" min="0" name="aw_banners[' . esc_attr( $key ) . '][desktop]" value="' . esc_attr( (string) ( $b['desktop'] ?? '' ) ) . '" style="width:7em"></td>'
 			. '<td><input type="number" min="0" name="aw_banners[' . esc_attr( $key ) . '][mobile]" value="' . esc_attr( (string) ( $b['mobile'] ?? '' ) ) . '" style="width:7em"></td>'
 			. '<td><input type="text" name="aw_banners[' . esc_attr( $key ) . '][alt]" value="' . esc_attr( (string) ( $b['alt'] ?? '' ) ) . '"></td>'
-			. '<td><input type="text" class="regular-text" name="aw_banners[' . esc_attr( $key ) . '][text]" value="' . esc_attr( (string) ( $b['text'] ?? '' ) ) . '"></td>'
-			. '<td><input type="text" name="aw_banners[' . esc_attr( $key ) . '][credit]" value="' . esc_attr( (string) ( $b['credit'] ?? '' ) ) . '"></td>'
-			. '<td><input type="url" name="aw_banners[' . esc_attr( $key ) . '][credit_url]" value="' . esc_attr( (string) ( $b['credit_url'] ?? '' ) ) . '"></td></tr>';
+			. '<td><input type="text" class="regular-text" name="aw_banners[' . esc_attr( $key ) . '][text]" value="' . esc_attr( (string) ( $b['text'] ?? '' ) ) . '"></td></tr>';
 	}
 	echo '</tbody></table>';
 	submit_button();
