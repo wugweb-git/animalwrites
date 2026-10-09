@@ -37,6 +37,10 @@ jobs:
           php-version: '8.3'
           extensions: mysqli, gd, intl, zip
           tools: wp-cli
+      - name: WP-CLI (installed from its release if setup-php could not)
+        run: |
+          command -v wp || { sudo curl -sSL -o /usr/local/bin/wp https://github.com/wp-cli/wp-cli/releases/download/v2.11.0/wp-cli-2.11.0.phar && sudo chmod +x /usr/local/bin/wp; }
+          wp --version --allow-root
       - name: PHP lint (all files)
         run: |
           find plugins themes tools -name '*.php' -print0 | xargs -0 -n1 -P4 php -l | grep -v '^No syntax errors' && exit 1 || true
