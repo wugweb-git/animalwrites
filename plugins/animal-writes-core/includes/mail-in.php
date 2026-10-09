@@ -215,7 +215,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 		'aw_m_message_id'  => $mid,
 		'aw_m_date'        => $date,
 		'aw_m_attachments' => implode( "\n", $files ),
-		'aw_m_source'      => 'email: ' . $orig,
+		'aw_m_source'      => '', // Sent from = a page on the site; emails have none
 		'aw_m_contact'     => 'Not subscribed', // never added to the newsletter without their own consent
 	) as $k => $v ) {
 		update_post_meta( $id, $k, sanitize_text_field( (string) $v ) );
@@ -225,8 +225,6 @@ function aw_mail_in( WP_REST_Request $req ) {
 	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
 }
 
-// Inbox list: show who an email was sent to.
-add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array_slice( $c, 0, 3, true ) + array( 'aw_m_to' => 'Sent to' ) + array_slice( $c, 3, null, true ), 20 );
 
 /* ---------- Settings → Incoming mail ---------- */
 

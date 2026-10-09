@@ -208,7 +208,7 @@ add_action( 'admin_post_aw_claim', 'aw_claim_submit' );
 
 /* ---------- Admin review ---------- */
 
-add_filter( 'manage_aw_claim_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Listing: claimant', 'aw_status' => 'Status', 'aw_changes' => 'Changes', 'date' => 'Received' ) );
+add_filter( 'manage_aw_claim_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Listing and claimant', 'aw_status' => 'Status', 'aw_changes' => 'Changes', 'date' => 'Received' ) );
 add_action(
 	'manage_aw_claim_posts_custom_column',
 	function ( $col, $id ) {

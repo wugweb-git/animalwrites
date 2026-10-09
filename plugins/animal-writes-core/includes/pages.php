@@ -171,11 +171,35 @@ function aw_contact_submit() {
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
 
-add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'About: sender', 'aw_m_tag' => 'Tag', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_source' => 'Sent from', 'date' => 'Received' ) );
+// Contact messages list (owner, 9 Oct 2026): Name · Email · Organisation · Tag · Sent to · Sent from · Received.
+add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Name', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_tag' => 'Tag', 'aw_m_to' => 'Sent to', 'aw_m_source' => 'Sent from', 'date' => 'Received' ), 30 );
 add_action(
 	'manage_aw_message_posts_custom_column',
 	function ( $col, $id ) {
-		echo esc_html( (string) get_post_meta( $id, $col, true ) );
+		$v = (string) get_post_meta( $id, $col, true );
+		if ( 'aw_m_tag' === $col && '' === $v ) { // contact form messages: the reason they chose
+			$v = AW_CONTACT_ABOUT[ (string) get_post_meta( $id, 'aw_m_about', true ) ] ?? '';
+		}
+		if ( 'aw_m_source' === $col && 0 === strpos( $v, 'email:' ) ) {
+			$v = ''; // emails come from the mailbox, not a page
+		}
+		if ( 'aw_m_to' === $col && '' === $v && 'Email' !== get_post_meta( $id, 'aw_m_tag', true ) ) {
+			$v = 'Contact form';
+		}
+		echo esc_html( '' !== $v ? $v : '—' );
+	},
+	10,
+	2
+);
+// The Name column shows the sender's name (the stored title — "Reason: name" or "Email: subject" — is unchanged).
+add_filter(
+	'the_title',
+	function ( $title, $id = 0 ) {
+		if ( ! is_admin() || ! $id || 'aw_message' !== get_post_type( $id ) || ! function_exists( 'get_current_screen' ) || ! get_current_screen() || 'edit-aw_message' !== get_current_screen()->id ) {
+			return $title;
+		}
+		$name = trim( (string) get_post_meta( $id, 'aw_m_name', true ) );
+		return '' !== $name ? $name : $title;
 	},
 	10,
 	2
