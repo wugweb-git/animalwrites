@@ -93,7 +93,7 @@
   --kit-grid-gap: 16px;
   --kit-grid-columns: 4;
   --kit-width-nav: 1280px;
-  --kit-header-height: 64px;
+  --kit-header-height: 56px;
   --kit-layer-nav: 10;
   --kit-duration-spring: 400ms;
   --kit-ease-spring: linear(0, 0.0544, 0.1785, 0.3258, 0.4733, 0.6066, 0.7181, 0.8053, 0.8689, 0.9123, 0.9403, 0.9576, 0.9681, 0.975, 0.9806, 0.9864, 0.9929, 1.0001, 1.0072, 1.0128, 1.015, 1.0146, 1.0119, 1.0085, 1.0052, 1.0026, 1.0008, 1);
@@ -114,7 +114,7 @@
     --kit-carousel-item: auto;
     --kit-grid-gap: 24px;
     --kit-grid-columns: 8;
-    --kit-header-height: 100px;
+    --kit-header-height: 72px;
   }
 }
 @media (min-width: 1200px) {
