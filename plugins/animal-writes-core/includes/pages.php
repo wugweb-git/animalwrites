@@ -426,3 +426,21 @@ add_action(
 		}
 	}
 );
+
+// Inbox → Contact messages: "Reply" opens your own mail app with the sender and subject filled in (WordPress sends nothing).
+add_filter(
+	'post_row_actions',
+	function ( $actions, $post ) {
+		if ( 'aw_message' !== $post->post_type ) {
+			return $actions;
+		}
+		$email = (string) get_post_meta( $post->ID, 'aw_m_email', true );
+		if ( is_email( $email ) ) {
+			$subject = preg_replace( '/^Email:\s*/', '', (string) get_post_field( 'post_title', $post->ID ) );
+			$actions = array( 'aw_reply' => '<a href="' . esc_url( 'mailto:' . rawurlencode( $email ) . '?subject=' . rawurlencode( 'Re: ' . $subject ) ) . '">Reply</a>' ) + $actions;
+		}
+		return $actions;
+	},
+	10,
+	2
+);
