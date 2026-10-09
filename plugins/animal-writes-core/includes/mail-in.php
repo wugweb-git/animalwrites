@@ -90,6 +90,8 @@ add_action(
 				'callback'            => 'aw_mail_in',
 			)
 		);
+		// A browser or hPanel opening the URL (GET) gets a plain "ready" instead of "no route".
+		register_rest_route( 'aw/v1', '/mail-in', array( 'methods' => 'GET', 'permission_callback' => '__return_true', 'callback' => fn() => new WP_REST_Response( array( 'status' => 'ready', 'method' => 'POST' ), 200 ) ) );
 	}
 );
 

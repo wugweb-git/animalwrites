@@ -76,7 +76,13 @@ function aw_review_apply( $ids, $action ) {
 			continue;
 		}
 		if ( 'publish' === $action ) {
-			wp_publish_post( $id );
+			$src = (string) get_post_meta( $id, 'aw_source_date', true );
+			if ( get_post_meta( $id, 'aw_backfill', true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $src ) && $src <= current_time( 'Y-m-d' ) ) {
+				// Backfilled items keep their original date (not the day they were approved).
+				wp_update_post( array( 'ID' => $id, 'post_status' => 'publish', 'post_date' => $src . ' 12:00:00', 'post_date_gmt' => get_gmt_from_date( $src . ' 12:00:00' ), 'edit_date' => true ) );
+			} else {
+				wp_publish_post( $id );
+			}
 			update_post_meta( $id, 'aw_review', 'approved by ' . $who . ' ' . $when );
 		} else {
 			wp_update_post( array( 'ID' => $id, 'post_status' => 'draft' ) );
@@ -93,8 +99,13 @@ add_action(
 		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_review' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$action = in_array( $_REQUEST['do'] ?? '', array( 'publish', 'reject' ), true ) ? sanitize_key( $_REQUEST['do'] ) : '';
+		// Two action menus (above and below the list): whichever one was set wins.
+		$do     = '' !== (string) ( $_REQUEST['do'] ?? '' ) ? $_REQUEST['do'] : ( $_REQUEST['do2'] ?? '' ); // phpcs:ignore WordPress.Security
+		$action = in_array( $do, array( 'publish', 'reject' ), true ) ? sanitize_key( $do ) : '';
 		$ids    = array_map( 'intval', (array) ( $_REQUEST['ids'] ?? array() ) );
+		if ( ! empty( $_REQUEST['all'] ) ) { // "Publish all N": every item in this view, not only the ticked ones
+			$ids = wp_list_pluck( aw_review_items( sanitize_key( $_REQUEST['type'] ?? '' ) ), 'ID' );
+		}
 		$n      = $action ? aw_review_apply( $ids, $action ) : 0;
 		$back   = admin_url( 'admin.php?page=aw-review' . ( ! empty( $_REQUEST['type'] ) ? '&type=' . sanitize_key( $_REQUEST['type'] ) : '' ) );
 		wp_safe_redirect( add_query_arg( array( 'done' => $action, 'n' => $n ), $back ) );
@@ -128,8 +139,10 @@ function aw_review_page() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="clear:both">';
 	wp_nonce_field( 'aw_review' );
 	echo '<input type="hidden" name="action" value="aw_review"><input type="hidden" name="type" value="' . esc_attr( $type ) . '">';
-	$bulk = '<div class="tablenav"><div class="alignleft actions bulkactions"><label class="screen-reader-text" for="aw-review-do">Action for the ticked items</label><select name="do" id="aw-review-do"><option value="">With the ticked items…</option><option value="publish">Publish</option><option value="reject">Reject (move to Drafts)</option></select> <button class="button action">Apply</button></div></div>';
-	echo $bulk; // phpcs:ignore WordPress.Security.EscapeOutput
+	$all  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review&do=publish&all=1&type=' . $type ), 'aw_review' );
+	$bulk = fn( $n ) => '<div class="tablenav"><div class="alignleft actions bulkactions"><label class="screen-reader-text" for="aw-review-' . $n . '">Action for the ticked items</label><select name="' . $n . '" id="aw-review-' . $n . '"><option value="">With the ticked items…</option><option value="publish">Publish</option><option value="reject">Reject (move to Drafts)</option></select> <button class="button action">Apply</button></div>'
+		. '<div class="alignleft actions"><a class="button" href="' . esc_url( $all ) . '" onclick="return confirm(' . esc_attr( wp_json_encode( sprintf( 'Publish all %d items in this view?', count( $items ) ) ) ) . ')">' . esc_html( sprintf( 'Publish all %d', count( $items ) ) ) . '</a></div></div>';
+	echo $bulk( 'do' ); // phpcs:ignore WordPress.Security.EscapeOutput
 	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><td class="manage-column column-cb check-column"><input type="checkbox" aria-label="Tick all"></td><th style="width:9%">Type</th><th>Item</th><th style="width:16%">Source</th><th style="width:22%">Why it is waiting</th><th style="width:10%">Received</th><th style="width:15%">Decide</th></tr></thead><tbody>';
 	foreach ( $items as $p ) {
 		$url    = (string) get_post_meta( $p->ID, 'aw_source_url', true );
@@ -147,5 +160,63 @@ function aw_review_page() {
 			. '<td>' . esc_html( get_the_date( 'j M Y', $p ) ) . '</td>'
 			. '<td>' . $act( 'publish', 'Publish', 'button-primary' ) . ' ' . $act( 'reject', 'Reject', '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
-	echo '</tbody></table>' . $bulk . '</form></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
+	echo '</tbody><tfoot><tr><td class="manage-column column-cb check-column"><input type="checkbox" aria-label="Tick all"></td><th colspan="6"></th></tr></tfoot></table>' . $bulk( 'do2' ) . '</form></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
 }
+
+/* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
+
+foreach ( array_keys( AW_REVIEW_TYPES ) as $aw_rt ) {
+	add_filter( 'bulk_actions-edit-' . $aw_rt, fn( $a ) => array( 'aw_publish' => 'Publish (approve)' ) + $a );
+	add_filter(
+		'handle_bulk_actions-edit-' . $aw_rt,
+		function ( $back, $action, $ids ) {
+			if ( 'aw_publish' !== $action ) {
+				return $back;
+			}
+			return add_query_arg( 'aw_published', aw_review_apply( (array) $ids, 'publish' ), $back );
+		},
+		10,
+		3
+	);
+}
+
+// "Publish all N in this view" on the Pending and Draft views (every page, not only the one on screen).
+add_action(
+	'restrict_manage_posts',
+	function ( $type, $which ) {
+		$status = sanitize_key( $_GET['post_status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'top' !== $which || ! isset( AW_REVIEW_TYPES[ $type ] ) || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+			return;
+		}
+		$n = (int) ( wp_count_posts( $type )->$status ?? 0 );
+		if ( $n ) {
+			$url = wp_nonce_url( admin_url( 'admin-post.php?action=aw_publish_all&post_type=' . $type . '&status=' . $status ), 'aw_publish_all' );
+			echo '<a class="button" href="' . esc_url( $url ) . '" onclick="return confirm(' . esc_attr( wp_json_encode( sprintf( 'Publish all %d items in this view?', $n ) ) ) . ')">' . esc_html( sprintf( 'Publish all %d', $n ) ) . '</a>';
+		}
+	},
+	10,
+	2
+);
+add_action(
+	'admin_post_aw_publish_all',
+	function () {
+		$type   = sanitize_key( $_GET['post_type'] ?? '' );
+		$status = sanitize_key( $_GET['status'] ?? '' );
+		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$ids = get_posts( array( 'post_type' => $type, 'post_status' => $status, 'fields' => 'ids', 'numberposts' => -1 ) );
+		$n   = aw_review_apply( $ids, 'publish' );
+		wp_safe_redirect( add_query_arg( array( 'post_type' => $type, 'post_status' => $status, 'aw_published' => $n ), admin_url( 'edit.php' ) ) );
+		exit;
+	}
+);
+add_action(
+	'admin_notices',
+	function () {
+		if ( isset( $_GET['aw_published'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$n = (int) $_GET['aw_published']; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( _n( '%d item published.', '%d items published.', $n ), $n ) ) . '</p></div>';
+		}
+	}
+);
