@@ -186,6 +186,10 @@ add_action(
 		if ( 'aw_m_to' === $col && '' === $v && 'Email' !== get_post_meta( $id, 'aw_m_tag', true ) ) {
 			$v = 'Contact form';
 		}
+		$box = (string) get_post_meta( $id, 'aw_m_mailbox', true );
+		if ( 'aw_m_to' === $col && $box && $v && $box !== $v ) {
+			$v .= ' (in ' . $box . ')'; // the mailbox it arrived in, when that differs from the address it was sent to
+		}
 		echo esc_html( '' !== $v ? $v : '—' );
 	},
 	10,
