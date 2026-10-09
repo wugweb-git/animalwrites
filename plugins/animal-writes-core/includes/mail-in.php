@@ -128,7 +128,6 @@ add_action(
 						$secret = aw_mail_setting( 'secret_' . $key );
 						if ( '' !== $secret && '' !== $given && hash_equals( $secret, $given ) ) {
 							$req->set_param( '_aw_mailbox', $key );
-				$req->set_param( '_aw_import', '1' );
 							return true;
 						}
 					}
