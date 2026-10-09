@@ -147,3 +147,7 @@ add_filter(
 		return $c;
 	}
 );
+
+// Mail (owner, 9 Oct 2026): sent as "Animal Writes <noreply@animalwrites.in>", replies to contact@ (vedanshu@'s alias).
+add_filter( 'kits_mail_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
+add_filter( 'kits_mail_reply_to', fn() => 'contact@animalwrites.in' );

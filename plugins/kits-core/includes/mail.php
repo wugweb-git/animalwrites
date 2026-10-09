@@ -24,13 +24,30 @@ function kits_mail_settings() {
 			'pass' => '',
 		)
 	);
-	return array_merge( $defaults, array_filter( (array) get_option( 'kits_mail', array() ), fn( $v ) => '' !== $v ) );
+	$s = array_merge( $defaults, array_filter( (array) get_option( 'kits_mail', array() ), fn( $v ) => '' !== $v ) );
+	// The mailbox password can live in the server environment (KITS_MAIL_PASSWORD) or wp-config instead of the database.
+	$env = getenv( 'KITS_MAIL_PASSWORD' );
+	if ( $env ) {
+		$s['pass'] = (string) $env;
+	} elseif ( defined( 'KITS_MAIL_PASSWORD' ) && KITS_MAIL_PASSWORD ) {
+		$s['pass'] = (string) KITS_MAIL_PASSWORD;
+	}
+	return $s;
 }
+
+// Every message leaves as the site's mailbox (never wordpress@), with the site's name.
+add_filter( 'wp_mail_from', fn() => kits_mail_settings()['user'] );
+add_filter( 'wp_mail_from_name', fn() => kits_mail_settings()['name'] );
 
 add_action(
 	'phpmailer_init',
 	function ( $mailer ) {
 		$s = kits_mail_settings();
+		// Replies go to the site's contact address unless the message sets its own Reply-To (the contact form does).
+		$reply = (string) apply_filters( 'kits_mail_reply_to', '' );
+		if ( $reply && ! $mailer->getReplyToAddresses() ) {
+			$mailer->addReplyTo( $reply, $s['name'] );
+		}
 		if ( '' === $s['pass'] ) {
 			return;
 		}
