@@ -128,6 +128,7 @@ add_action(
 						$secret = aw_mail_setting( 'secret_' . $key );
 						if ( '' !== $secret && '' !== $given && hash_equals( $secret, $given ) ) {
 							$req->set_param( '_aw_mailbox', $key );
+				$req->set_param( '_aw_import', '1' );
 							return true;
 						}
 					}
@@ -146,6 +147,15 @@ function aw_mail_in( WP_REST_Request $req ) {
 	$boxkey = isset( AW_MAIL_BOXES[ (string) $req->get_param( '_aw_mailbox' ) ] ) ? (string) $req->get_param( '_aw_mailbox' ) : 'vedanshu';
 	$boxadr = AW_MAIL_BOXES[ $boxkey ];
 	$p      = (array) $req->get_json_params();
+	if ( '' === (string) $req->get_param( '_aw_import' ) ) { // what Hostinger's webhook sends (field names only, for mapping)
+		$keys = array_keys( $p );
+		foreach ( array( 'data', 'message' ) as $k ) {
+			if ( isset( $p[ $k ] ) && is_array( $p[ $k ] ) ) {
+				$keys[] = $k . ': ' . implode( ', ', array_keys( $p[ $k ] ) );
+			}
+		}
+		update_option( 'aw_mail_webhook_fields', $keys, false );
+	}
 	$data = isset( $p['data'] ) && is_array( $p['data'] ) ? $p['data'] : $p;
 	$evt  = (string) aw_mail_pick( $p, array( 'event', 'type', 'data.event' ) );
 	if ( $evt && false === stripos( $evt, 'received' ) && false === stripos( $evt, 'test' ) ) {
@@ -183,7 +193,14 @@ function aw_mail_in( WP_REST_Request $req ) {
 
 	$mid = trim( (string) ( aw_mail_pick( $msg, array( 'messageId', 'message_id', 'headers.message-id' ) ) ?? aw_mail_header( $source, 'Message-ID' ) ), '<> ' );
 	$mid = '' !== $mid ? $mid : 'uid:' . $box . ':' . $folder . ':' . $uid . ':' . md5( wp_json_encode( $msg ) );
-	if ( get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'fields' => 'ids', 'numberposts' => 1, 'meta_key' => 'aw_m_message_id', 'meta_value' => $mid ) ) ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+	$dup = get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'fields' => 'ids', 'numberposts' => 1, 'meta_key' => 'aw_m_message_id', 'meta_value' => $mid ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( $dup ) {
+		// Already in the Inbox: only fill in what an earlier, thinner delivery left empty (its text).
+		$t = (string) ( aw_mail_pick( $msg, array( 'text', 'plain', 'body' ) ) ?? '' );
+		if ( '' !== trim( $t ) && '' === trim( (string) get_post_field( 'post_content', $dup[0] ) ) ) {
+			wp_update_post( array( 'ID' => $dup[0], 'post_content' => sanitize_textarea_field( $t ) ) );
+			return new WP_REST_Response( array( 'status' => 'filled' ), 200 );
+		}
 		return new WP_REST_Response( array( 'status' => 'duplicate' ), 200 );
 	}
 
