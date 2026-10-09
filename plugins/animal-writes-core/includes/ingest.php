@@ -240,6 +240,10 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	if ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) { // keeps its own publication date, never the day it was fetched
+			wp_update_post( array( 'ID' => $post_id, 'post_date' => $day . ' 09:00:00', 'post_date_gmt' => get_gmt_from_date( $day . ' 09:00:00' ), 'edit_date' => true ) );
+		}
 		update_post_meta( $post_id, 'aw_review', 'held: backfill (published ' . substr( (string) $req->get_param( 'source_date' ), 0, 10 ) . ') — owner review' );
 		$review = '';
 	} else {
