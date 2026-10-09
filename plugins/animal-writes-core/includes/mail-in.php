@@ -173,6 +173,10 @@ function aw_mail_in( WP_REST_Request $req ) {
 		if ( is_array( $full ) ) {
 			$msg  = $full + $msg;
 			$text = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
+			if ( ! $text || ( is_array( $text ) && '' === trim( (string) ( $text['text'] ?? '' ) . (string) ( $text['html'] ?? '' ) ) ) ) {
+				sleep( 2 ); // just arrived: one quick retry
+				$text = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
+			}
 			if ( $text ) {
 				$msg['text'] = is_array( $text ) ? (string) ( $text['text'] ?? '' ) : (string) $text;
 				if ( '' === trim( $msg['text'] ) && is_array( $text ) && ! empty( $text['html'] ) ) {
@@ -261,6 +265,10 @@ function aw_mail_in( WP_REST_Request $req ) {
 		update_post_meta( $id, $k, sanitize_text_field( (string) $v ) );
 	}
 	update_post_meta( $id, 'aw_review', 'held: email — to review' );
+	if ( '' === trim( $text ) && $box && $uid ) {
+		// The webhook arrives as the mail lands; the text may not be ready yet. Fetch it again in a minute.
+		wp_schedule_single_event( time() + 60, 'aw_mail_refill', array( $id, $box, $folder, $uid ) );
+	}
 	update_option( 'aw_mail_last', array( 'at' => current_time( 'mysql' ), 'to' => $orig, 'mailbox' => $boxadr, 'subject' => $subject ), false );
 	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
 }
@@ -370,4 +378,21 @@ add_action(
 		wp_safe_redirect( admin_url( 'options-general.php?page=aw-mail-in&imported=1' ) );
 		exit;
 	}
+);
+
+/** Fill in an item's text a minute after it arrived (see the webhook handler). */
+add_action(
+	'aw_mail_refill',
+	function ( $id, $box, $folder, $uid ) {
+		if ( '' !== trim( (string) get_post_field( 'post_content', $id ) ) ) {
+			return;
+		}
+		$t = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
+		$t = is_array( $t ) ? ( '' !== trim( (string) ( $t['text'] ?? '' ) ) ? (string) $t['text'] : wp_strip_all_tags( (string) ( $t['html'] ?? '' ) ) ) : (string) $t;
+		if ( '' !== trim( $t ) ) {
+			wp_update_post( array( 'ID' => $id, 'post_content' => sanitize_textarea_field( $t ) ) );
+		}
+	},
+	10,
+	4
 );
