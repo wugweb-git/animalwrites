@@ -199,7 +199,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 	$dup = get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'fields' => 'ids', 'numberposts' => 1, 'meta_key' => 'aw_m_message_id', 'meta_value' => $mid ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	if ( $dup ) {
 		// Already in the Inbox: only fill in what an earlier, thinner delivery left empty (its text).
-		$t = (string) ( aw_mail_pick( $msg, array( 'text', 'plain', 'body' ) ) ?? '' );
+		$t = (string) ( aw_mail_pick( $msg, array( 'text', 'plainBody', 'plain', 'body' ) ) ?? '' );
 		if ( '' !== trim( $t ) && '' === trim( (string) get_post_field( 'post_content', $dup[0] ) ) ) {
 			wp_update_post( array( 'ID' => $dup[0], 'post_content' => sanitize_textarea_field( $t ) ) );
 			return new WP_REST_Response( array( 'status' => 'filled' ), 200 );
@@ -225,8 +225,11 @@ function aw_mail_in( WP_REST_Request $req ) {
 		$own  = array_values( array_filter( $to, fn( $x ) => str_ends_with( $x, '@animalwrites.in' ) ) );
 		$orig = $own ? $own[0] : ( $to ? $to[0] : $boxadr );
 	}
-	$text  = (string) ( aw_mail_pick( $msg, array( 'text', 'plain', 'body', 'preview', 'snippet', 'truncatedMessage', 'message' ) ) ?? '' );
+	$text  = aw_mail_pick( $msg, array( 'text', 'plainBody', 'plain', 'body', 'preview', 'snippet', 'truncatedMessage', 'message' ) ) ?? '';
 	$text  = is_string( $text ) ? $text : wp_json_encode( $text );
+	if ( '' === trim( $text ) && ! empty( $msg['htmlBody'] ) ) { // the webhook carries the body as plainBody / htmlBody
+		$text = wp_strip_all_tags( (string) $msg['htmlBody'] );
+	}
 	$files = array();
 	foreach ( (array) ( $msg['attachments'] ?? array() ) as $att ) {
 		$files[] = is_array( $att ) ? trim( (string) ( $att['filename'] ?? $att['name'] ?? 'attachment' ) . ( isset( $att['size'] ) ? ' (' . size_format( (int) $att['size'] ) . ')' : '' ) ) : (string) $att;
