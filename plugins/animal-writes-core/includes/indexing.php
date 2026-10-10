@@ -75,7 +75,7 @@ function aw_is_filtered_list() {
  * filtered list (e.g. /directory/?type=gaushala) is its own indexed page (owner, 10 Oct 2026). Sort order is left out.
  */
 function aw_list_canonical() {
-	if ( is_singular() || is_search() || is_404() ) {
+	if ( is_search() || is_404() || ( is_singular() && ! aw_is_filtered_list() ) ) { // hub pages are Pages: filtered ones still count
 		return '';
 	}
 	$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
