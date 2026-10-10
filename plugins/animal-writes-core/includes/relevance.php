@@ -10,8 +10,11 @@
  * - POST aw/v1/relevance-verdicts  {verdicts: [{id, relevant, category, india, issuer, reason, model, at}]} → meta
  *                                  aw_relevance (JSON). Never changes an item's status.
  * - POST aw/v1/relevance-rejected  {title, source_url, reason, type, feed, model} → the Rejected log: option
- *                                  aw_relevance_rejected, newest first, last 500, one entry per URL. Shown collapsed
- *                                  in Inbox → To review, to administrators only.
+ *                                  aw_relevance_rejected, newest first, last 500, one entry per URL. Shown under
+ *                                  Settings → Sourcing → Rejected, to administrators only; never in To review.
+ *
+ * Inbox → To review shows only items the check passed (or has not checked): an item whose stored verdict is "not
+ * relevant" is left out of the list and its counts.
  *
  * @package animal-writes-core
  */
@@ -230,15 +233,36 @@ add_action(
 	}
 );
 
-/** Inbox → To review: the Rejected log, collapsed, administrators only. */
-function aw_relevance_rejected_box() {
+/** Stored verdict says "not relevant". */
+function aw_relevance_failed( $post_id ) {
+	$v = (string) get_post_meta( $post_id, 'aw_relevance', true );
+	if ( '' === $v ) {
+		return false;
+	}
+	$v = json_decode( $v, true );
+	return is_array( $v ) && array_key_exists( 'relevant', $v ) && ! $v['relevant'];
+}
+
+// Settings → Sourcing → Rejected: the log of items the relevance check refused (never created). Administrators only.
+add_filter(
+	'kits_sourcing_tabs',
+	function ( $tabs ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			$tabs['rejected'] = array( 'Rejected', 'aw_relevance_rejected_tab' );
+		}
+		return $tabs;
+	},
+	20
+);
+
+/** The Rejected tab. */
+function aw_relevance_rejected_tab() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 	$log = (array) get_option( AW_RELEVANCE_LOG, array() );
-	echo '<details style="clear:both;margin:1em 0"><summary><strong>' . esc_html( sprintf( 'Rejected by the relevance check (%d)', count( $log ) ) ) . '</strong></summary>';
+	echo '<p>' . esc_html( sprintf( 'Rejected: %d', count( $log ) ) ) . '</p>';
 	if ( ! $log ) {
-		echo '<p>None yet.</p></details>';
 		return;
 	}
 	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><th>Item</th><th style="width:9%">Type</th><th style="width:34%">Reason</th><th style="width:12%">Date</th></tr></thead><tbody>';
@@ -247,5 +271,5 @@ function aw_relevance_rejected_box() {
 		echo '<tr><td><a href="' . esc_url( (string) ( $e['url'] ?? '' ) ) . '" target="_blank" rel="noopener">' . esc_html( (string) ( $e['title'] ?? '' ) ?: $host ) . '</a><br><span style="color:#50575e">' . esc_html( $host ) . '</span></td>'
 			. '<td>' . esc_html( (string) ( $e['type'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['reason'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['at'] ?? '' ) ) . '</td></tr>';
 	}
-	echo '</tbody></table></details>';
+	echo '</tbody></table>';
 }

@@ -37,6 +37,10 @@ function aw_review_items( $type = '' ) {
 		)
 	);
 	$all = array_merge( $pending, $held );
+	// Only items the relevance check passed (or has not checked): "not relevant" never reaches a person (owner, 10 Oct 2026).
+	if ( function_exists( 'aw_relevance_failed' ) ) {
+		$all = array_values( array_filter( $all, fn( $p ) => ! aw_relevance_failed( $p->ID ) ) );
+	}
 	usort( $all, fn( $a, $b ) => strcmp( $b->post_date, $a->post_date ) );
 	return $all;
 }
@@ -119,9 +123,6 @@ function aw_review_page() {
 	$base  = admin_url( 'admin.php?page=aw-review' );
 	echo '<div class="wrap"><h1 class="wp-heading-inline">To review</h1><hr class="wp-header-end">';
 	echo '<p>Items that came in automatically and need a person: why each was held is shown beside it. Publish puts it live; Reject moves it to Drafts (nothing is deleted).</p>';
-	if ( function_exists( 'aw_relevance_rejected_box' ) ) {
-		aw_relevance_rejected_box(); // items the relevance check refused (never created), administrators only
-	}
 	if ( isset( $_GET['done'], $_GET['n'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$n = (int) $_GET['n']; // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
