@@ -403,6 +403,9 @@ function aw_press_ingest( WP_REST_Request $req ) {
 		return new WP_REST_Response( array( 'status' => 'error', 'message' => 'source_url is required' ), 400 );
 	}
 	$dupe = get_posts( array( 'post_type' => 'aw_press', 'post_status' => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ), 'meta_key' => 'aw_press_url', 'meta_value' => $url, 'fields' => 'ids', 'numberposts' => 1 ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( ! $dupe && function_exists( 'aw_find_by_title' ) ) { // same normalised title within a day either side
+		$dupe = aw_find_by_title( array( 'aw_press' ), (string) $req->get_param( 'title' ), (string) $req->get_param( 'source_date' ), 'aw_press_date' );
+	}
 	if ( $dupe || ( function_exists( 'aw_find_by_source' ) && aw_find_by_source( 'aw_news', $url ) ) ) {
 		return new WP_REST_Response( array( 'status' => 'duplicate' ), 200 );
 	}
@@ -425,6 +428,9 @@ function aw_press_ingest( WP_REST_Request $req ) {
 		if ( '' !== $v ) {
 			update_post_meta( $id, $k, $v );
 		}
+	}
+	if ( function_exists( 'aw_relevance_store' ) ) {
+		aw_relevance_store( $id, $req->get_param( 'relevance' ) );
 	}
 	aw_press_fetch( $id ); // fill what the page itself says (thumbnail downloaded, never hotlinked)
 	if ( ! has_post_thumbnail( $id ) && $meta['aw_press_thumb_src'] ) {

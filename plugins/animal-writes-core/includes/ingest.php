@@ -120,6 +120,13 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $existing ) {
 		return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
 	}
+	// Same story: the same normalised title dated within a day either side, drafts included (relevance.php).
+	if ( 'aw_listing' !== $type && function_exists( 'aw_find_by_title' ) ) {
+		$existing = aw_find_by_title( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), $title, (string) $req->get_param( 'source_date' ) );
+		if ( $existing ) {
+			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
+		}
+	}
 
 	// Sourcing policy (News → Sourcing): blocked publishers and, when switched on, the keyword filter.
 	if ( function_exists( 'aw_sourcing_gate' ) && function_exists( 'kits_sourced_types' ) && in_array( $type, kits_sourced_types(), true ) ) {
@@ -156,6 +163,9 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	update_post_meta( $post_id, 'aw_source_url', $source_url );
+	if ( function_exists( 'aw_relevance_store' ) ) {
+		aw_relevance_store( $post_id, $req->get_param( 'relevance' ) ); // the workers' relevance verdict
+	}
 	if ( $legal_flag ) {
 		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
 	}
