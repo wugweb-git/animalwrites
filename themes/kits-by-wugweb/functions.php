@@ -168,3 +168,61 @@ add_filter(
 	10,
 	2
 );
+
+/**
+ * One stylesheet instead of five: the Kits files (kits-v42, kit-tokens, kits, kit, kit-primitives) are joined, in the
+ * same order, into uploads/kits-cache/kits-{hash}.css; the hash changes with any file, so a changed file makes a new
+ * bundle. The five handles stay registered (child themes depend on them) but print nothing. If the bundle cannot be
+ * written, the five files load as before. Turn off with add_filter( 'kits_bundle_css', '__return_false' ).
+ */
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		$styles  = wp_styles();
+		$handles = array( 'kits-v42', 'kit-tokens', 'kits', 'kit-components', 'kit-primitives' );
+		if ( is_admin() || ! apply_filters( 'kits_bundle_css', true ) ) {
+			return;
+		}
+		$dir   = get_template_directory();
+		$uri   = get_template_directory_uri();
+		$files = array();
+		foreach ( $handles as $h ) {
+			$src = isset( $styles->registered[ $h ] ) ? (string) $styles->registered[ $h ]->src : '';
+			if ( ! wp_style_is( $h, 'enqueued' ) && ! wp_style_is( $h, 'registered' ) || 0 !== strpos( $src, $uri ) || ! empty( $styles->registered[ $h ]->extra['after'] ) || ! empty( $styles->registered[ $h ]->extra['before'] ) ) {
+				return; // not ours, or carries inline CSS: leave the files as they are
+			}
+			$files[ $h ] = $dir . substr( strtok( $src, '?' ), strlen( $uri ) );
+		}
+		$sig  = substr( md5( implode( ',', array_map( fn( $f ) => $f . ':' . ( file_exists( $f ) ? filemtime( $f ) . ':' . filesize( $f ) : 0 ), $files ) ) ), 0, 12 );
+		$up   = wp_upload_dir();
+		$path = trailingslashit( $up['basedir'] ) . 'kits-cache/kits-' . $sig . '.css';
+		if ( ! file_exists( $path ) ) {
+			$css = '';
+			foreach ( $files as $h => $f ) {
+				$part = file_exists( $f ) ? (string) file_get_contents( $f ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
+				if ( '' === $part ) {
+					return;
+				}
+				$css .= "/* {$h} */\n" . $part . "\n";
+			}
+			wp_mkdir_p( dirname( $path ) );
+			$tmp = $path . '.' . wp_generate_password( 6, false ) . '.tmp';
+			if ( false === file_put_contents( $tmp, $css ) || ! rename( $tmp, $path ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+				@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				return;
+			}
+			foreach ( (array) glob( dirname( $path ) . '/kits-*.css' ) as $old ) {
+				if ( $old !== $path && filemtime( $old ) < time() - DAY_IN_SECONDS ) {
+					@unlink( $old ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				}
+			}
+		}
+		$first = $styles->registered[ $handles[0] ];
+		wp_register_style( 'kits-bundle', trailingslashit( $up['baseurl'] ) . 'kits-cache/kits-' . $sig . '.css', $first->deps, null );
+		foreach ( $handles as $h ) {
+			$styles->registered[ $h ]->src  = false; // an alias: prints nothing, keeps its place for dependants
+			$styles->registered[ $h ]->deps = array( 'kits-bundle' );
+		}
+	},
+	1000
+);
