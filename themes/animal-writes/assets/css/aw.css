@@ -996,3 +996,6 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-act-copy .aw-ed-col-title { margin-bottom: var(--kit-space-2); }
 }
 @media (max-width: 767px) { .aw-ed-steps a { padding-block: var(--kit-space-2) var(--kit-space-3); } }
+/* Footer column titles are paragraphs (not headings, SEO audit 10 Oct 2026): they keep the look they had as h2. */
+.kit-footer :is(p.kit-footer-head, p.kit-footer-nl-head) { max-width: none; text-wrap: balance; }
+.kit-footer p.kit-footer-nl-head { letter-spacing: var(--kit-tracking-heading); }

@@ -423,9 +423,10 @@ add_filter(
 		$p->set_attribute( 'href', esc_url( $url ) );
 		$p->set_attribute( 'target', '_blank' );
 		$p->set_attribute( 'rel', 'noopener noreferrer' );
+		$p->set_attribute( 'aria-label', aw_seo_plain( get_the_title( $id ) ) . ' (opens in a new tab)' ); // the note is not part of the heading text
 		$html = $p->get_updated_html();
 		$end  = strpos( $html, '</a>' );
-		return false === $end ? $html : substr_replace( $html, ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span>', $end, 0 );
+		return false === $end ? $html : substr_replace( $html, ' ' . aw_i( 'arrow-up-right' ), $end, 0 );
 	},
 	10,
 	3

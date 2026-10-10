@@ -38,3 +38,17 @@ add_action(
 		register_block_pattern_category( 'animal-writes', array( 'label' => __( 'Animal Writes', 'animal-writes' ) ) );
 	}
 );
+
+// Home page: the hero photograph (patterns/hero.php) is the largest thing on screen; the browser starts on it at once.
+add_action(
+	'wp_head',
+	function () {
+		if ( ! is_front_page() ) {
+			return;
+		}
+		$base = '/wp-content/uploads/2026/10/aw1-im5-';
+		$set  = implode( ', ', array_map( fn( $s ) => esc_url( home_url( $base . $s[0] . '.jpeg' ) ) . ' ' . $s[1] . 'w', array( array( '768x433', 768 ), array( '1024x578', 1024 ), array( '1536x866', 1536 ), array( '2048x1155', 2048 ) ) ) );
+		echo '<link rel="preload" as="image" href="' . esc_url( home_url( $base . '1536x866.jpeg' ) ) . '" imagesrcset="' . esc_attr( $set ) . '" imagesizes="100vw" fetchpriority="high">' . "\n";
+	},
+	1
+);

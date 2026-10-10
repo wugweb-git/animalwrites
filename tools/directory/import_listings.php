@@ -15,6 +15,7 @@ $made = $updated = $attached = 0;
 foreach ( $rows as $r ) {
 	if ( ! empty( $r['post_id'] ) ) {
 		$id = (int) $r['post_id'];
+		$id = (int) get_post_meta( $id, 'aw_merged_into', true ) ? (int) get_post_meta( $id, 'aw_merged_into', true ) : $id; // merged: extend the listing it went into
 		if ( 'aw_listing' !== get_post_type( $id ) ) {
 			continue;
 		}
@@ -26,12 +27,15 @@ foreach ( $rows as $r ) {
 		$attached++;
 		continue;
 	}
-	$have = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'any', 'meta_key' => 'aw_import_key', 'meta_value' => $r['key'], 'fields' => 'ids', 'posts_per_page' => 1 ) );
+	$have = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => array( 'publish', 'draft', 'pending', 'private', 'future', 'trash' ), 'meta_key' => 'aw_import_key', 'meta_value' => $r['key'], 'fields' => 'ids', 'posts_per_page' => 1 ) );
 	$post = array(
 		'post_type'    => 'aw_listing',
 		'post_title'   => $r['name'],
 		'post_content' => '<!-- wp:paragraph --><p>' . esc_html( $r['content'] ) . '</p><!-- /wp:paragraph -->',
 	);
+	if ( $have && get_post_meta( $have[0], 'aw_merged_into', true ) ) {
+		continue; // merged into another listing (a draft with a 301): never updated or made again
+	}
 	if ( $have ) {
 		$id         = $have[0];
 		$post['ID'] = $id;

@@ -344,7 +344,8 @@ add_shortcode(
 					$rows[] = array( 'link', 'Also reported by <a href="' . esc_url( $also['url'] ) . '" rel="noopener">' . esc_html( $also['name'] ?? wp_parse_url( $also['url'], PHP_URL_HOST ) ) . '</a>', true );
 				}
 			}
-			$rows[] = array( 'calendar', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . aw_src_date( $id ) . ' · added ' : 'Added ' ) . get_the_date( 'j M Y', $id ) );
+			$t      = fn( $iso, $text ) => '<time datetime="' . esc_attr( $iso ) . '">' . esc_html( $text ) . '</time>'; // the same words, as dates machines can read
+			$rows[] = array( 'calendar', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . $t( aw_src_date( $id, 'Y-m-d' ), aw_src_date( $id ) ) . ' · added ' : 'Added ' ) . $t( get_the_date( 'Y-m-d', $id ), get_the_date( 'j M Y', $id ) ), true );
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
 				$rows[] = array( 'research', 'Official document attached below' );
 			} elseif ( get_post_meta( $id, 'aw_doc_preview', true ) ) {
@@ -360,7 +361,7 @@ add_shortcode(
 		}
 		$out = '<aside class="kit-trust ' . $cls . '" aria-label="About this information"><ul>';
 		foreach ( $rows as $r ) {
-			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ) ) ) ) . '</span></li>';
+			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ) ) ) ) . '</span></li>';
 		}
 		return $out . '</ul></aside>';
 	}

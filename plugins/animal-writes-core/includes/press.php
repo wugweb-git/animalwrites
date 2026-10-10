@@ -333,7 +333,7 @@ function aw_press_schema() {
 				array(
 					'@type'         => 'video' === get_post_meta( $p->ID, 'aw_press_format', true ) ? 'VideoObject' : 'NewsArticle',
 					'headline'      => get_the_title( $p ),
-					'name'          => get_the_title( $p ),
+					'name'          => aw_seo_plain( get_the_title( $p ) ),
 					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
 					'datePublished' => function_exists( 'aw_schema_date' ) ? aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ) : (string) get_post_meta( $p->ID, 'aw_press_date', true ),
 					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
@@ -346,7 +346,7 @@ function aw_press_schema() {
 		'@type'      => 'CollectionPage',
 		'@id'        => get_permalink() . '#page',
 		'url'        => get_permalink(),
-		'name'       => get_the_title(),
+		'name'       => aw_seo_plain( get_the_title() ),
 		'inLanguage' => 'en-IN',
 		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 		'mainEntity' => array( '@type' => 'ItemList', 'itemListElement' => $list ),

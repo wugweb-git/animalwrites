@@ -21,23 +21,46 @@ function aw_seo_plugin_active() {
 }
 
 /**
- * Cut text at a word boundary to at most $max characters, adding "…" when cut.
+ * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
  *
  * @param string $text Plain text.
  * @param int    $max  Maximum length.
+ * @param string $more Added when the text was cut ('' for none).
  * @return string
  */
-function kits_seo_cut( $text, $max ) {
+function kits_seo_cut( $text, $max, $more = '…' ) {
 	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	if ( mb_strlen( $text ) <= $max ) {
 		return $text;
 	}
-	$cut = mb_substr( $text, 0, $max - 1 );
-	$sp  = mb_strrpos( $cut, ' ' );
-	if ( ' ' !== mb_substr( $text, $max - 1, 1 ) && false !== $sp && $sp > $max * 0.6 ) { // never end inside a word
+	$room = $max - mb_strlen( $more );
+	$cut  = mb_substr( $text, 0, $room );
+	$sp   = mb_strrpos( $cut, ' ' );
+	if ( ' ' !== mb_substr( $text, $room, 1 ) && false !== $sp && $sp > $max * 0.6 ) { // never end inside a word
 		$cut = mb_substr( $cut, 0, $sp );
 	}
-	return preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $cut ) . '…';
+	$cut = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $cut );
+	if ( '' === $more && substr_count( $cut, '(' ) > substr_count( $cut, ')' ) ) {
+		$cut = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', mb_substr( $cut, 0, mb_strrpos( $cut, '(' ) ) ); // no half bracket
+	}
+	return $cut . $more;
+}
+
+/** Page number of a list view (archive, hub Page, topic): 1 on the first page. */
+function kits_seo_page_number() {
+	return max( 1, (int) get_query_var( 'paged' ), is_singular() ? 1 : (int) get_query_var( 'page' ) );
+}
+
+/** " – Page N" for the second and later pages of a list, '' otherwise. */
+function kits_seo_page_suffix() {
+	$n = kits_seo_page_number();
+	return $n > 1 ? ' – Page ' . $n : '';
+}
+
+/** $text with the page suffix, unless it already names the page. */
+function kits_seo_with_page( $text ) {
+	$suffix = kits_seo_page_suffix();
+	return ( '' === $suffix || false !== stripos( $text, 'Page ' . kits_seo_page_number() ) ) ? $text : $text . $suffix;
 }
 
 /**
@@ -92,8 +115,37 @@ function aw_seo_description() {
 	if ( '' === trim( $desc ) ) {
 		$desc = get_bloginfo( 'description' );
 	}
-	return kits_seo_cut( html_entity_decode( wp_strip_all_tags( $desc ), ENT_QUOTES, 'UTF-8' ), 155 );
+	$desc  = preg_replace( '/\s+,/u', ',', html_entity_decode( wp_strip_all_tags( $desc ), ENT_QUOTES, 'UTF-8' ) ); // "Jaipur , Rajasthan"
+	$pages = kits_seo_page_suffix();
+	return kits_seo_with_page( kits_seo_cut( $desc, 155 - mb_strlen( $pages ) ) );
 }
+
+/**
+ * The full <title> a site sets for the current view (kits_seo_title filter), '' to leave it to WordPress.
+ * A title typed for the item (SEO box, or Rank Math) always wins; list pages get " – Page N".
+ *
+ * @return string
+ */
+function kits_seo_site_title() {
+	$t = trim( (string) apply_filters( 'kits_seo_title', '' ) );
+	return '' === $t ? '' : kits_seo_with_page( $t );
+}
+
+add_filter(
+	'pre_get_document_title',
+	function ( $title ) {
+		if ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) {
+			if ( ! kits_rank_math_building_title() ) {
+				return $title; // Rank Math prints the title; it asks for ours through its filter (seo-rankmath.php)
+			}
+		} elseif ( function_exists( 'kits_seo_override' ) && '' !== kits_seo_override( 'kits_seo_title' ) ) {
+			return $title; // typed in the SEO box
+		}
+		$ours = kits_seo_site_title();
+		return '' !== $ours ? $ours : $title;
+	},
+	25
+);
 
 /**
  * Canonical URL of the current view; og:url uses it, so the two always match.
@@ -336,3 +388,31 @@ add_action(
 	},
 	2
 );
+
+/* ---------- One address per page: upper-case paths go to the lower-case one ---------- */
+
+// /NEWS/ and /News/ answer with the same page as /news/; one 301 sends them to it (the query string is kept).
+// Files (a dot in the last part), the admin, REST and login are left alone. A site can turn it off (kits_lowercase_urls).
+add_action(
+	'parse_request',
+	function () {
+		if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) || ! apply_filters( 'kits_lowercase_urls', true ) ) {
+			return;
+		}
+		$uri  = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$path = (string) wp_parse_url( $uri, PHP_URL_PATH );
+		$bare = preg_replace( '/%[0-9A-Fa-f]{2}/', '', $path ); // percent-encoded letters (Hindi slugs) are not upper case
+		if ( ! preg_match( '/[A-Z]/', $bare ) || preg_match( '#^/(wp-|xmlrpc)#i', $path ) || false !== strpos( basename( $path ), '.' ) ) {
+			return;
+		}
+		$lower = preg_replace_callback( '/(%[0-9A-Fa-f]{2})|([^%]+)/', fn( $m ) => '' !== $m[1] ? $m[1] : strtolower( $m[2] ), $path );
+		$query = (string) wp_parse_url( $uri, PHP_URL_QUERY );
+		wp_safe_redirect( home_url( $lower ) . ( '' !== $query ? '?' . $query : '' ), 301, 'Kits' );
+		exit;
+	},
+	0
+);
+
+// A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug (an unpublished or merged
+// item would otherwise send people and search engines to an unrelated page). Merges add their own 301s.
+add_filter( 'do_redirect_guess_404_permalink', '__return_false' );

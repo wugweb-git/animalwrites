@@ -20,7 +20,7 @@
 <!-- /wp:html -->
 <!-- wp:query {"queryId":47,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} -->
 <div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template -->
-<!-- wp:post-title {"level":4,"isLink":true} /-->
+<!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-terms {"term":"aw_opportunity_type"} /-->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->

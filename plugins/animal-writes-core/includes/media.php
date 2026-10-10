@@ -94,8 +94,14 @@ add_filter(
 			$doc = $fid ? (string) wp_get_attachment_image_url( $fid, 'large' ) : ''; // First page of the official PDF.
 			$url = $doc;
 		}
+		$dims   = '';
+		$att    = $url && ! $doc ? aw_item_image_id( $post_id ) : (int) get_post_meta( $post_id, 'aw_file_id', true );
+		$src    = $att ? wp_get_attachment_image_src( $att, 'large' ) : false;
+		if ( $src && ! empty( $src[1] ) && ! empty( $src[2] ) && $src[0] === $url ) {
+			$dims = ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"'; // the box is known before the image arrives
+		}
 		$inner  = $url
-			? '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">'
+			? '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( aw_seo_plain( get_the_title( $post_id ) ) ) . '"' . $dims . ' loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">'
 			: aw_placard_html( $post_id );
 		if ( $url ) {
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.

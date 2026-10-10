@@ -232,9 +232,19 @@ add_filter(
 );
 
 // Links to a listing type go straight to the filtered Directory (/directory/?type=…), not through the old type page.
+// On a listing's own page they go to that type in its district (/directory/{state}/{district}/{type}/).
 add_filter(
 	'term_link',
-	fn( $url, $term, $tax ) => ( 'aw_listing_type' === $tax && function_exists( 'aw_hub_url' ) ) ? add_query_arg( 'type', $term->slug, aw_hub_url( 'aw_listing' ) ) : $url,
+	function ( $url, $term, $tax ) {
+		if ( 'aw_listing_type' !== $tax || ! function_exists( 'aw_hub_url' ) ) {
+			return $url;
+		}
+		$place = is_singular( 'aw_listing' ) && function_exists( 'aw_item_place' ) ? aw_item_place( get_queried_object_id() ) : null;
+		if ( $place && 'district' === $place->kind ) {
+			return aw_directory_url( $place->slug, $term->slug );
+		}
+		return add_query_arg( 'type', $term->slug, aw_hub_url( 'aw_listing' ) );
+	},
 	10,
 	3
 );

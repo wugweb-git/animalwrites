@@ -62,8 +62,11 @@ add_filter( 'pre_get_document_title', fn( $t ) => kits_rank_math_building_title(
 add_filter(
 	'rank_math/frontend/title',
 	function ( $title ) {
-		if ( kits_rank_math_building_title() || '' !== kits_rank_math_typed( 'title' ) ) {
-			return $title; // typed in Rank Math: used as is
+		if ( kits_rank_math_building_title() ) {
+			return $title;
+		}
+		if ( '' !== kits_rank_math_typed( 'title' ) ) {
+			return function_exists( 'kits_seo_with_page' ) ? kits_seo_with_page( $title ) : $title; // typed in Rank Math: used as is (" – Page N" on later pages)
 		}
 		kits_rank_math_building_title( true );
 		$ours = wp_get_document_title();
@@ -79,8 +82,11 @@ add_filter(
 add_filter(
 	'rank_math/frontend/description',
 	function ( $desc ) {
-		if ( is_404() || '' !== kits_rank_math_typed( 'description' ) || ! function_exists( 'aw_seo_description' ) ) {
+		if ( is_404() || ! function_exists( 'aw_seo_description' ) ) {
 			return $desc;
+		}
+		if ( '' !== kits_rank_math_typed( 'description' ) ) {
+			return kits_seo_with_page( $desc ); // typed in Rank Math: used as is (" – Page N" on later pages)
 		}
 		$ours = aw_seo_description();
 		return '' !== $ours ? $ours : $desc;

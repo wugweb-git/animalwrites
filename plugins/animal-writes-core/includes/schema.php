@@ -68,10 +68,10 @@ function aw_listing_schema( $id ) {
 	$org   = array(
 		'@type'       => 1 === count( $stype ) ? $stype[0] : $stype,
 		'@id'         => get_permalink( $id ) . '#organization',
-		'name'        => wp_strip_all_tags( (string) get_post_field( 'post_title', $id ) ), // no "Private:" prefix
+		'name'        => aw_seo_plain( get_post_field( 'post_title', $id ) ), // no "Private:" prefix
 		'url'         => $site ? $site : get_permalink( $id ),                 // the organisation's own site when known
 		'mainEntityOfPage' => get_permalink( $id ),                           // this profile
-		'description' => wp_strip_all_tags( (string) get_the_excerpt( $id ) ),
+		'description' => aw_seo_plain( get_the_excerpt( $id ) ),
 	);
 	$logo = get_the_post_thumbnail_url( $id, 'medium' );
 	if ( $logo ) {
@@ -79,7 +79,12 @@ function aw_listing_schema( $id ) {
 		$org['image'] = $logo;
 	}
 	if ( $state || $district ) {
-		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $m( 'aw_area' ), 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
+		$street = $m( 'aw_area' );
+		$rest   = str_ireplace( array_filter( array( $district, $state, 'India' ) ), '', $street );
+		if ( '' === trim( preg_replace( '/[\s,.\-–]+/u', '', $rest ) ) ) {
+			$street = ''; // only repeats the district and state
+		}
+		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
 		$org['areaServed'] = array_values( array_filter( array( $district ? array( '@type' => 'AdministrativeArea', 'name' => $district ) : null, $state ? array( '@type' => 'State', 'name' => $state ) : null ) ) );
 	}
 	if ( $m( 'aw_phone' ) ) {
@@ -135,8 +140,8 @@ function aw_listing_schema( $id ) {
 	}
 	$ids = isset( $org['identifier'] ) ? array( $org['identifier'] ) : array();
 	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
-		if ( $m( $k ) ) { // as the organisation states them
-			$ids[] = array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'value' => $m( $k ) );
+		if ( $m( $k ) ) { // as the organisation states them; words without a number are a note, not an identifier
+			$ids[] = preg_match( '/\d/', $m( $k ) ) ? array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'value' => $m( $k ) ) : array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'description' => $m( $k ) );
 		}
 	}
 	if ( $ids ) {
@@ -150,15 +155,36 @@ function aw_listing_schema( $id ) {
 
 /** The publisher (Animal Writes) as schema.org Organization. */
 function aw_publisher_schema() {
-	$logo = get_site_icon_url( 512 );
+	$logo  = get_site_icon_url( 512 );
+	$front = (int) get_option( 'page_on_front' );
+	$desc  = $front ? (string) get_post_meta( $front, 'rank_math_description', true ) : ''; // the home page's meta description
+	$desc  = '' !== trim( $desc ) ? $desc : ( $front ? (string) get_post_field( 'post_excerpt', $front ) : '' );
+	$desc  = '' !== trim( $desc ) ? $desc : get_bloginfo( 'description' );
+	$about = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'fields' => 'names' ) );
+	$pages = array();
+	foreach ( array( 'publishingPrinciples' => 'editorial-policy', 'correctionsPolicy' => 'corrections' ) as $k => $slug ) {
+		$page = get_page_by_path( $slug );
+		if ( $page && 'publish' === $page->post_status ) {
+			$pages[ $k ] = get_permalink( $page );
+		}
+	}
 	return array_filter(
-		array(
-			'@type'  => 'Organization',
-			'@id'    => home_url( '/#organization' ),
-			'name'   => get_bloginfo( 'name' ),
-			'url'    => home_url( '/' ),
-			'logo'   => $logo ? array( '@type' => 'ImageObject', 'url' => $logo ) : null,
-			'sameAs' => array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/AnimalWrites' ),
+		array_merge(
+			array(
+				'@type'         => 'Organization',
+				'@id'           => home_url( '/#organization' ),
+				'name'          => get_bloginfo( 'name' ),
+				'alternateName' => array( 'Animal Writes India', 'AnimalWrites.in' ),
+				'url'           => home_url( '/' ),
+				'description'   => aw_seo_plain( $desc ),
+				'logo'          => $logo ? array( '@type' => 'ImageObject', 'url' => $logo ) : null,
+				'email'         => 'contact@animalwrites.in', // as on the Contact page
+				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in', 'url' => home_url( '/contact/' ) ),
+				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
+				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'aw_seo_plain', $about ) ) : null,
+				'sameAs'        => array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/AnimalWrites' ),
+			),
+			$pages
 		)
 	);
 }
@@ -201,7 +227,7 @@ function aw_schema_image( $id ) {
  */
 function aw_article_schema( $id ) {
 	$type  = get_post_type( $id );
-	$title = wp_strip_all_tags( get_the_title( $id ) );
+	$title = aw_seo_plain( get_the_title( $id ) );
 	$at    = 'Article';
 	if ( 'aw_legal' === $type && has_term( array( 'act', 'rule', 'notification', 'circular' ), 'aw_legal_kind', $id ) ) {
 		$at = 'Legislation';
@@ -218,10 +244,10 @@ function aw_article_schema( $id ) {
 	$src_name = (string) get_post_meta( $id, 'aw_source_name', true );
 	$data     = array(
 		'@type'            => $at,
-		'@id'              => get_permalink( $id ) . '#article',
+		'@id'              => get_permalink( $id ) . ( 'Legislation' === $at ? '#legislation' : '#article' ),
 		'mainEntityOfPage' => get_permalink( $id ),
 		'url'              => get_permalink( $id ),
-		'description'      => function_exists( 'aw_text' ) ? aw_text( $id, 40 ) : '',
+		'description'      => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
 		'datePublished'    => get_the_date( 'c', $id ),
 		'dateModified'     => $reviewed ? aw_schema_date( $reviewed ) : get_the_modified_date( 'c', $id ),
 		'inLanguage'       => 'en-IN',
@@ -231,24 +257,66 @@ function aw_article_schema( $id ) {
 	if ( $image ) {
 		$data['image'] = $image;
 	}
+	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	if ( 'Legislation' !== $at ) {
 		$data['author'] = array( '@id' => home_url( '/#organization' ) ); // the summary or guide is ours
+		if ( 'aw_legal' === $type && $iss && in_array( $iss->slug, AW_COURT_ISSUERS, true ) ) { // a court ruling
+			$data['genre'] = 'Court judgment';
+			$data['about'] = array( '@type' => 'GovernmentOrganization', 'name' => $iss->name );
+			$order         = aw_court_document_url( $id );
+			if ( $order ) {
+				$data['citation'] = $order;
+			}
+		}
 	} else {
 		$data['legislationJurisdiction'] = 'IN';
 		$kind = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
 		if ( $kind ) {
 			$data['legislationType'] = $kind->name;
 		}
-		$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
-		if ( $iss ) {
-			$data['legislationPassedBy'] = array( '@type' => 'Organization', 'name' => $iss->name );
+		if ( $iss && 'gazette' !== $iss->slug ) { // the Gazette publishes; it does not pass the law
+			$data['legislationPassedBy'] = array( '@type' => 'GovernmentOrganization', 'name' => $iss->name );
+		}
+		$on = (string) get_post_meta( $id, 'aw_source_date', true );
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $on ) ) {
+			$data['legislationDate'] = $on;
 		}
 	}
 	if ( $src_url ) {
 		// The original item we summarise or host.
-		$data['isBasedOn'] = array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $src_name ? array( '@type' => 'Organization', 'name' => $src_name ) : null ) );
+		$pub = $src_name ? aw_seo_plain( $src_name ) : '';
+		if ( 'Legislation' === $at && $iss && 'gazette' === $iss->slug ) {
+			$pub = $iss->name;
+		}
+		$data['isBasedOn'] = array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $pub ? array( '@type' => 'Organization', 'name' => $pub ) : null ) );
+		$doi = preg_match( '#^https?://(?:dx\.)?doi\.org/(10\..+)$#i', $src_url, $mm ) ? rawurldecode( $mm[1] ) : '';
+		if ( 'post' === $type && $doi ) { // a research paper: its DOI and journal
+			$data['isBasedOn'] = array_filter(
+				array(
+					'@type'      => 'ScholarlyArticle',
+					'url'        => $src_url,
+					'sameAs'     => 'https://doi.org/' . $doi,
+					'identifier' => array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ),
+					'isPartOf'   => $pub ? array( '@type' => 'Periodical', 'name' => $pub ) : null,
+				)
+			);
+		}
 	}
 	return array_filter( $data );
+}
+
+/** Issuers that are courts: their Library items are rulings. */
+const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
+
+/** The court's own copy of a ruling, when stored: the hosted file's official source or a court website / PDF. */
+function aw_court_document_url( $id ) {
+	foreach ( array( (string) get_post_meta( $id, 'aw_source_url', true ), (string) get_post_meta( $id, 'aw_file_url', true ) ) as $url ) {
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		if ( $host && ( preg_match( '/(^|\.)(gov\.in|nic\.in)$/', $host ) || false !== strpos( $host, 'supreme-court-judgments' ) || preg_match( '/\.pdf$/i', (string) wp_parse_url( $url, PHP_URL_PATH ) ) ) ) {
+			return $url;
+		}
+	}
+	return '';
 }
 
 /** A campaign: a CreativeWork by its organiser (or Animal Writes), with its topic. */
@@ -261,14 +329,14 @@ function aw_campaign_schema( $id ) {
 			'@type'         => 'CreativeWork',
 			'@id'           => get_permalink( $id ) . '#campaign',
 			'url'           => get_permalink( $id ),
-			'name'          => wp_strip_all_tags( get_the_title( $id ) ),
-			'description'   => function_exists( 'aw_text' ) ? aw_text( $id, 40 ) : '',
+			'name'          => aw_seo_plain( get_the_title( $id ) ),
+			'description'   => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
 			'datePublished' => get_the_date( 'c', $id ),
 			'dateModified'  => get_the_modified_date( 'c', $id ),
 			'inLanguage'    => 'en-IN',
 			'image'         => $image ? array( $image ) : null,
 			'about'         => $topic ? array( '@type' => 'Thing', 'name' => $topic->name ) : null,
-			'creator'       => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => get_the_title( $org ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) ),
+			'creator'       => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) ),
 			'publisher'     => array( '@id' => home_url( '/#organization' ) ),
 		)
 	);
@@ -282,7 +350,7 @@ function aw_breadcrumb_schema() {
 	}
 	$list = array();
 	foreach ( $trail as $i => $it ) {
-		$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => wp_strip_all_tags( $it[0] ), 'item' => $it[1] );
+		$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => aw_seo_plain( $it[0] ), 'item' => $it[1] );
 	}
 	return array( '@type' => 'BreadcrumbList', 'itemListElement' => $list );
 }
@@ -317,7 +385,7 @@ function aw_faq_schema( $id ) {
 	foreach ( $m as $row ) {
 		$answer = trim( wp_strip_all_tags( $row[2] ) );
 		if ( '' !== $answer ) {
-			$qs[] = array( '@type' => 'Question', 'name' => wp_strip_all_tags( $row[1] ), 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $answer ) );
+			$qs[] = array( '@type' => 'Question', 'name' => aw_seo_plain( $row[1] ), 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => aw_seo_plain( $answer ) ) );
 		}
 	}
 	return count( $qs ) >= 2 ? array( '@type' => 'FAQPage', '@id' => get_permalink( $id ) . '#faq', 'mainEntity' => $qs ) : array();
@@ -339,7 +407,10 @@ function aw_job_schema( $id ) {
 		$org_site = (string) get_post_meta( $org_id, 'aw_website', true );
 	}
 	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
-	$desc     = trim( (string) get_post_field( 'post_content', $id ) );
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) {
+		return array(); // closed: no JobPosting after its validThrough date
+	}
+	$desc     = trim( preg_replace( '/<!--.*?-->/s', '', (string) get_post_field( 'post_content', $id ) ) ); // no block comments
 	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : '' );
 	$desc     = $desc ? $desc : (string) get_post_field( 'post_excerpt', $id );
 	$desc     = $desc ? $desc : get_the_title( $id );
@@ -353,12 +424,12 @@ function aw_job_schema( $id ) {
 	$data = array(
 		'@type'              => 'JobPosting',
 		'@id'                => get_permalink( $id ) . '#job',
-		'title'              => wp_strip_all_tags( get_the_title( $id ) ),
-		'description'        => wp_kses_post( $desc ),
+		'title'              => aw_seo_plain( get_the_title( $id ) ),
+		'description'        => trim( preg_replace( '/\n{3,}/', "\n\n", wp_kses_post( $desc ) ) ),
 		'datePosted'         => get_the_date( 'c', $id ),
 		'url'                => get_permalink( $id ),
 		'employmentType'     => $emp ? ( 1 === count( $emp ) ? $emp[0] : $emp ) : null,
-		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => $org, 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null ) ) : null,
+		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null ) ) : null,
 		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
 	if ( $remote ) {
@@ -371,6 +442,29 @@ function aw_job_schema( $id ) {
 		);
 	}
 	return array_filter( $data );
+}
+
+/** The Topics page: CollectionPage + ItemList of every topic. */
+function aw_topics_schema() {
+	$url   = get_permalink();
+	$items = array();
+	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'orderby' => 'name' ) ) as $i => $t ) {
+		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => get_term_link( $t ), 'name' => aw_seo_plain( $t->name ) );
+	}
+	return array(
+		array(
+			'@type'       => 'CollectionPage',
+			'@id'         => $url . '#page',
+			'url'         => $url,
+			'name'        => aw_seo_plain( get_the_title() ),
+			'description' => function_exists( 'aw_seo_description' ) ? aw_seo_description() : '',
+			'inLanguage'  => 'en-IN',
+			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+			'mainEntity'  => array( '@id' => $url . '#list' ),
+		),
+		array( '@type' => 'ItemList', '@id' => $url . '#list', 'numberOfItems' => count( $items ), 'itemListElement' => $items ),
+	);
 }
 
 /**
@@ -401,7 +495,7 @@ function aw_schema_nodes() {
 			'@type'      => 'ContactPage',
 			'@id'        => get_permalink() . '#page',
 			'url'        => get_permalink(),
-			'name'       => get_the_title(),
+			'name'       => aw_seo_plain( get_the_title() ),
 			'inLanguage' => 'en-IN',
 			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 			'mainEntity' => array(
@@ -411,6 +505,10 @@ function aw_schema_nodes() {
 				'contactPoint' => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in' ),
 			),
 		);
+	} elseif ( is_page( 'about' ) ) {
+		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
+	} elseif ( is_page( 'topics' ) ) {
+		$nodes = array_merge( $nodes, aw_topics_schema() );
 	} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
@@ -469,6 +567,10 @@ add_filter(
 			}
 		}
 		foreach ( $nodes as $i => $node ) {
+			if ( 'AboutPage' === ( $node['@type'] ?? '' ) && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
+				$data['WebPage'] = array_merge( $data['WebPage'], array( '@type' => 'AboutPage', 'mainEntity' => $node['mainEntity'] ) ); // Rank Math's page, as an About page
+				continue;
+			}
 			$data[ 'aw_node_' . $i ] = $node;
 		}
 		if ( isset( $data['kits_faq'] ) ) {

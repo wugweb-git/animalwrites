@@ -19,7 +19,7 @@
 <!-- /wp:html -->
 <!-- wp:query {"queryId":43,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list aw-ed-law-list"} -->
 <div class="wp-block-query aw-hub-list aw-ed-law-list"><!-- wp:post-template -->
-<?php echo function_exists( 'aw_hub_item' ) ? aw_hub_item( 'aw_legal' ) : ''; // the same card as the Library list ?>
+<?php echo function_exists( 'aw_hub_item' ) ? str_replace( '"level":2', '"level":3', aw_hub_item( 'aw_legal' ) ) : ''; // the same card as the Library list, one level below this section's H2 ?>
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 </div>

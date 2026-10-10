@@ -34,7 +34,7 @@ add_filter(
 		$tax = array_filter( AW_NOINDEX_TAXONOMIES, fn( $t ) => is_tax( $t ) );
 		// A directory place page is also a listing-type query; only the bare type archive (/directory-type/…) is excluded.
 		$type_archive = $tax && ! get_query_var( 'aw_place' );
-		if ( $type_archive || is_search() || aw_is_thin_directory_page() ) {
+		if ( $type_archive || is_search() || aw_is_thin_directory_page() || aw_is_filtered_list() ) {
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 			unset( $robots['max-image-preview'] );
@@ -43,6 +43,22 @@ add_filter(
 	},
 	20
 );
+
+/** Query parameters that filter a list: such a URL is not indexed (its canonical stays the list itself). */
+const AW_FILTER_PARAMS = array( 'type', 'state', 'district', 'q', 'topic', 'kind', 'service', 'verified', 'sort', 'publisher', 'court', 'issuer' );
+
+/** Whether the current URL is a filtered or sorted list (?type=, ?state=, ?q=, ?topic=, ?kind= …). */
+function aw_is_filtered_list() {
+	if ( is_singular() && ! ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) ) {
+		return false;
+	}
+	foreach ( AW_FILTER_PARAMS as $k ) {
+		if ( isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return true;
+		}
+	}
+	return false;
+}
 
 /** Canonical URL of the current list page: its path (with /page/N/), without filters. */
 function aw_list_canonical() {

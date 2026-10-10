@@ -2,8 +2,8 @@
 /**
  * Sitemap (WordPress core /wp-sitemap.xml), tuned for Animal Writes:
  * - no users list and no categories (Resource types have no pages); Posts are Resources and are listed;
- * - a "directory" sitemap lists the place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings,
- *   and district × listing-type pages with at least 3 listings (indexing.php). Places come from the LGD file (places.php).
+ * - a "directory" sitemap lists the place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings;
+ *   district × listing-type pages are left out (10 Oct 2026). Places come from the LGD file (places.php).
  * Retention rules (news age, closed opportunities) live in retention.php.
  *
  * @package animal-writes-core
@@ -36,26 +36,7 @@ add_filter(
 	}
 );
 
-/** District × listing-type pairs with enough listings to be indexed (no state × type pages exist). Stored counts, places.php. */
-function aw_sitemap_directory_pairs() {
-	$pairs = get_transient( 'aw_sitemap_dir_pairs' );
-	if ( false !== $pairs ) {
-		return $pairs;
-	}
-	$min   = defined( 'AW_THIN_DISTRICT_TYPE' ) ? AW_THIN_DISTRICT_TYPE : 3;
-	$pairs = array();
-	foreach ( aw_place_counts()['pairs'] as $p ) {
-		$d = aw_place_district( $p[0] );
-		if ( $d && $p[3] >= $min ) {
-			$pairs[] = array( 'city' => $d->slug, 'type' => $p[1], 'modified' => $p[2], 'n' => $p[3] );
-		}
-	}
-	usort( $pairs, fn( $x, $y ) => strcmp( $x['city'] . '/' . $x['type'], $y['city'] . '/' . $y['type'] ) );
-	set_transient( 'aw_sitemap_dir_pairs', $pairs, 12 * HOUR_IN_SECONDS );
-	return $pairs;
-}
-
-/** Directory place pages (states and districts with listings), then district × type pages. */
+/** Directory place pages: states and districts with listings. */
 function aw_sitemap_directory_urls() {
 	$urls = array();
 	foreach ( aw_place_states() as $st ) {
@@ -68,9 +49,7 @@ function aw_sitemap_directory_urls() {
 			}
 		}
 	}
-	foreach ( aw_sitemap_directory_pairs() as $r ) {
-		$urls[] = array( 'loc' => aw_directory_url( $r['city'], $r['type'] ), 'lastmod' => gmdate( 'c', strtotime( $r['modified'] . ' UTC' ) ) );
-	}
+	// District × type pages (/directory/{state}/{district}/{type}/) are not listed (SEO audit, 10 Oct 2026).
 	return $urls;
 }
 

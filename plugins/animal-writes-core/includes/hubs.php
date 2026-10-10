@@ -321,6 +321,11 @@ add_action(
 	1
 );
 
+/** An item hidden from search engines (SEO box or Rank Math's robots field). */
+function aw_is_noindex_item( $id ) {
+	return '1' === (string) get_post_meta( $id, 'kits_noindex', true ) || in_array( 'noindex', (array) get_post_meta( $id, 'rank_math_robots', true ), true );
+}
+
 /**
  * CollectionPage + ItemList of a hub's current page (schema.php puts them in the page's one graph). Empty off a hub.
  *
@@ -339,7 +344,10 @@ function aw_hub_schema_nodes() {
 	$items = array();
 	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
 	foreach ( aw_hub_posts( $type ) as $i => $p ) {
-		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => wp_strip_all_tags( get_the_title( $p ) ) );
+		if ( aw_is_noindex_item( $p->ID ) ) {
+			continue; // not indexed, so not listed
+		}
+		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
 	}
 	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
 	$nodes = array(
@@ -347,7 +355,7 @@ function aw_hub_schema_nodes() {
 			'@type'       => 'CollectionPage',
 			'@id'         => $url . '#page',
 			'url'         => $url,
-			'name'        => wp_strip_all_tags( $name ),
+			'name'        => aw_seo_plain( $name ),
 			'description' => function_exists( 'aw_seo_description' ) ? aw_seo_description() : '',
 			'inLanguage'  => 'en-IN',
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
