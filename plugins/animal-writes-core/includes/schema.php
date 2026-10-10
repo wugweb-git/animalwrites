@@ -305,9 +305,6 @@ function aw_article_schema( $id ) {
 	return array_filter( $data );
 }
 
-/** Issuers that are courts: their Library items are rulings. */
-const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
-
 /** The court's own copy of a ruling, when stored: the hosted file's official source or a court website / PDF. */
 function aw_court_document_url( $id ) {
 	foreach ( array( (string) get_post_meta( $id, 'aw_source_url', true ), (string) get_post_meta( $id, 'aw_file_url', true ) ) as $url ) {

@@ -173,11 +173,15 @@ function aw_seo_awbi_description( $id, $desc ) {
 		return '';
 	}
 	$types = get_the_terms( $id, 'aw_listing_type' );
+	if ( $types && ! is_wp_error( $types ) && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
+		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
+	}
 	$type  = ( $types && ! is_wp_error( $types ) ) ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) ? $w : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
 	list( $state, $district ) = aw_item_place_names( $id );
 	$where = implode( ', ', array_filter( array( $district, $state ) ) );
 	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
-	return sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s). Address, contact and how to help.', $name, $type, $where ? ' in ' . $where : '', $code );
+	$line = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );
+	return mb_strlen( $line ) <= 120 ? $line . ' Address, contact and how to help.' : $line; // whole sentences only
 }
 
 add_filter(
@@ -208,7 +212,7 @@ add_filter(
 				return ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : AW_HUB_DESCRIPTIONS['aw_listing']; // phpcs:ignore WordPress.Security.NonceVerification
 			}
 			$state = aw_place_parent_state( $place );
-			if ( $place->parent && '' !== $slug ) {
+			if ( $place->parent && '' !== $slug && '0' !== $n ) {
 				return sprintf( '%1$s %2$s in %3$s, %4$s: addresses, contact details and services.', $n, aw_seo_type_plural( $slug ), $place->name, $state->name );
 			}
 			if ( aw_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification

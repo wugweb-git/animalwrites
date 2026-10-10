@@ -72,7 +72,8 @@ function aw_list_canonical() {
 add_action(
 	'wp_head',
 	function () {
-		$url = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? '' : aw_list_canonical(); // Rank Math prints it otherwise
+		// Rank Math prints it, except on a noindex page; a filtered list keeps its canonical (the list itself).
+		$url = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? ( aw_is_filtered_list() && function_exists( 'kits_seo_canonical' ) ? kits_seo_canonical() : '' ) : aw_list_canonical();
 		if ( $url ) {
 			echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
 		}
