@@ -165,7 +165,12 @@ function aw_block_publisher( $a, $id ) {
 		$plat = (string) get_post_meta( $id, 'aw_press_platform', true );
 		$icon = in_array( $plat, array( 'instagram', 'facebook', 'x' ), true ) ? aw_i( $plat ) : '';
 		$name = $pub ? $pub : ( 'web' !== $plat && $plat ? ( AW_PRESS_PLATFORMS[ $plat ] ?? '' ) : '' );
-		return $name ? '<p class="aw-src">' . ( $icon ? $icon : ( $logo ? '<img class="aw-src-icon" src="' . esc_url( $logo ) . '" alt="" width="16" height="16" loading="lazy">' : '' ) ) . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
+		// Same row as News: the publisher's small logo (News favicon for that site, else its own logo), else a letter tile.
+		$host = function_exists( 'aw_host' ) ? aw_host( (string) get_post_meta( $id, 'aw_press_url', true ) ) : '';
+		$fav  = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
+		$fav  = $fav ? $fav : $logo;
+		$mark = $icon ? $icon : ( $fav ? '<img class="aw-src-icon" src="' . esc_url( $fav ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : ( $name ? '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>' : '' ) );
+		return $name ? '<p class="aw-src">' . $mark . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
 	}
 	return aw_news_meta_row( $id );
 }

@@ -235,7 +235,7 @@ function aw_press_fetch( $id ) {
 			$found[] = 'thumbnail';
 		}
 	}
-	if ( ! has_post_thumbnail( $id ) && ! get_post_meta( $id, 'aw_press_logo', true ) ) {
+	if ( ! get_post_meta( $id, 'aw_press_logo', true ) ) { // the small publisher logo on every card, as on News (owner, 10 Oct 2026)
 		$logo = aw_press_site_logo( $url );
 		if ( $logo ) {
 			update_post_meta( $id, 'aw_press_logo', $logo );
