@@ -33,10 +33,10 @@ function kits_seo_cut( $text, $max ) {
 	}
 	$cut = mb_substr( $text, 0, $max - 1 );
 	$sp  = mb_strrpos( $cut, ' ' );
-	if ( false !== $sp && $sp > $max * 0.6 ) {
+	if ( ' ' !== mb_substr( $text, $max - 1, 1 ) && false !== $sp && $sp > $max * 0.6 ) { // never end inside a word
 		$cut = mb_substr( $cut, 0, $sp );
 	}
-	return rtrim( $cut, " \t,;:–—-" ) . '…';
+	return preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $cut ) . '…';
 }
 
 /**
@@ -116,11 +116,12 @@ function kits_seo_canonical() {
 /**
  * [url, width, height] of an attachment at share size, or null.
  *
- * @param int $att Attachment ID.
+ * @param int    $att  Attachment ID.
+ * @param string $size Image size.
  * @return array|null
  */
-function kits_seo_attachment( $att ) {
-	$src = $att ? wp_get_attachment_image_src( (int) $att, 'large' ) : false;
+function kits_seo_attachment( $att, $size = 'large' ) {
+	$src = $att ? wp_get_attachment_image_src( (int) $att, $size ) : false;
 	if ( ! $src || empty( $src[0] ) ) {
 		return null;
 	}
@@ -134,7 +135,7 @@ function kits_seo_attachment( $att ) {
 
 /** The site's default share image (Settings), as kits_seo_attachment(). */
 function kits_seo_default_image() {
-	return kits_seo_attachment( (int) get_option( 'aw_default_share_image' ) );
+	return kits_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // made at share size (1200×630)
 }
 
 /**
@@ -195,7 +196,7 @@ add_filter(
 		$t = trim( html_entity_decode( wp_strip_all_tags( $parts['title'] ), ENT_QUOTES, 'UTF-8' ) );
 		if ( mb_strlen( $t ) > 55 ) {
 			unset( $parts['site'], $parts['tagline'] ); // the headline alone
-			$parts['title'] = kits_seo_cut( $t, 64 );
+			$parts['title'] = kits_seo_cut( $t, 65 );
 		}
 		return $parts;
 	},
