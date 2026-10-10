@@ -29,7 +29,7 @@ function aw_site_check_urls() {
 		'Search'              => '/search/?q=dog',
 		'Sitemap'             => '/wp-sitemap.xml',
 	);
-	foreach ( array( 'aw_news' => 'A news item', 'aw_legal' => 'A Library item', 'aw_guide' => 'A guide', 'aw_opportunity' => 'An opportunity', 'aw_campaign' => 'A campaign', 'aw_listing' => 'An organisation' ) as $type => $label ) {
+	foreach ( array( 'aw_news' => 'A news item', 'aw_legal' => 'A Library item', 'post' => 'A guide', 'aw_opportunity' => 'An opportunity', 'aw_campaign' => 'A campaign', 'aw_listing' => 'An organisation' ) as $type => $label ) {
 		$p = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids' ) );
 		if ( $p ) {
 			$urls[ $label ] = wp_parse_url( get_permalink( $p[0] ), PHP_URL_PATH );

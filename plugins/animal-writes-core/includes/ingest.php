@@ -38,7 +38,7 @@ function aw_find_by_source( $post_type, $url ) {
 	$ids = get_posts(
 		array(
 			// Every section, not just $post_type: an item moved from Legal Watch to News must not come back as a new Legal item.
-			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_opportunity' ),
+			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ),
 			'post_status'    => 'any',
 			'meta_key'       => 'aw_source_url',
 			'meta_value'     => $url,
@@ -93,7 +93,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	$map = array(
 		'news'     => 'aw_news',
 		'legal'    => 'aw_legal',
-		'research' => 'aw_guide', // Resources; tagged Research below
+		'research' => 'post', // Resources; tagged Research below
 		'listing'  => 'aw_listing',
 		'opportunity' => 'aw_opportunity',
 	);
@@ -236,7 +236,7 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).
 	if ( 'research' === $req->get_param( 'type' ) ) {
-		wp_set_object_terms( $post_id, 'research', 'aw_resource_type', false );
+		wp_set_object_terms( $post_id, 'research', 'category', false );
 	}
 	if ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SECTION_DESC = array(
 	'aw_news'        => 'Animal-welfare news from across India, summarised, with a link to every source.',
 	'aw_legal'       => 'Court orders, notifications and rules that affect animals, explained in plain words.',
-	'aw_guide'       => 'Practical guides for the moments that matter: an injured animal, a cruelty case, a community dog.',
+	'post'           => 'Practical guides for the moments that matter: an injured animal, a cruelty case, a community dog.',
 	'aw_campaign'    => 'Citizen campaigns for animals, starting with the letters of Animal Writes 1.0.',
 	'aw_opportunity' => 'Volunteer, foster or intern with people doing the work.',
 	'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.', // OWNER to approve (Phase 11 E1)
@@ -57,7 +57,7 @@ add_shortcode(
 			$desc = aw_directory_intro();
 		}
 		$count = (int) $wp_query->found_posts;
-		$noun  = array( 'aw_listing' => 'organisations', 'aw_guide' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
+		$noun  = array( 'aw_listing' => 'organisations', 'post' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
 
 		// Visual: campaign photos for campaigns; otherwise the first three items in this view.
 		$tiles = '';
@@ -125,7 +125,7 @@ add_shortcode(
 				array( (int) wp_count_posts( 'aw_listing' )->publish, 'organisations listed', '/directory/' ),
 				array( count( $states ), 'states and UTs covered', '/directory/' ),
 				array( (int) wp_count_posts( 'aw_legal' )->publish, 'official documents and templates', '/library/' ),
-				array( (int) wp_count_posts( 'aw_guide' )->publish, 'guides and resources', '/resources/' ),
+				array( (int) wp_count_posts( 'post' )->publish, 'guides and resources', '/resources/' ),
 			);
 			set_transient( 'aw_stats', $stats, HOUR_IN_SECONDS );
 		}

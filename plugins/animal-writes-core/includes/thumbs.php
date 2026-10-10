@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_THUMB_TYPES = array( 'aw_news', 'aw_legal', 'aw_guide' );
+const AW_THUMB_TYPES = array( 'aw_news', 'aw_legal', 'post' );
 
 /** Content hash of an attachment's file (cached on the attachment). */
 function aw_thumb_hash( $att ) {

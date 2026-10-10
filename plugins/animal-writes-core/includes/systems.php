@@ -68,7 +68,7 @@ function aw_text( $id, $words = 28 ) {
 const AW_LIST_FILTERS = array(
 	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'State' ) ),
 	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
-	'aw_guide'       => array( array( 'kind', 'aw_resource_type', 'Resource type' ), array( 'topic', 'aw_topic', 'Category' ) ),
+	'post'           => array( array( 'kind', 'resource-kind', 'Resource type' ), array( 'topic', 'aw_topic', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
 	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Category' ) ),
 	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ), // Articles · Videos · Social posts
@@ -79,12 +79,12 @@ const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-t
 const AW_LIST_SORTS = array(
 	'aw_news'        => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
 	'aw_legal'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z' ),
-	'aw_guide'       => array( 'new' => 'Newest first', 'az' => 'A–Z' ),
+	'post'           => array( 'new' => 'Newest first', 'az' => 'A–Z' ),
 	'aw_opportunity' => array( 'closing' => 'Closing soon', 'new' => 'Newest first' ),
 	'aw_campaign'    => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
 	'aw_press'       => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
 );
-const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'aw_guide' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
+const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'post' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
 /** Active filters on this request: param => list of value slugs (topic=a,b or topic[]=a&topic[]=b). */
 function aw_active_filters( $type ) {
@@ -117,10 +117,11 @@ function aw_publisher_key( $id ) {
 	return sanitize_title( $host );
 }
 
-/** Query clauses for active filters: [tax_query, meta_query]. */
+/** Query clauses for active filters: [tax_query, meta_query, post__in or null]. */
 function aw_filter_clauses( $type, $active ) {
 	$tq = array( 'relation' => 'AND' );
 	$mq = array();
+	$in = null;
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
 		$v = (array) ( $active[ $f[0] ] ?? array() ); // several values of one filter: any of them
 		if ( ! $v ) {
@@ -137,11 +138,24 @@ function aw_filter_clauses( $type, $active ) {
 			$mq[] = array( 'key' => 'aw_publisher', 'value' => $v, 'compare' => 'IN' );
 		} elseif ( 'press-format' === $f[1] ) {
 			$mq[] = array( 'key' => 'aw_press_group', 'value' => $v, 'compare' => 'IN' );
+		} elseif ( 'resource-kind' === $f[1] ) { // Resource types, or Sponsored (a label, not a type): any of them
+			$cats    = array_values( array_diff( $v, array( 'sponsored' ) ) );
+			$sponsor = array( 'key' => 'aw_sponsored', 'value' => '1' );
+			$by_type = array( 'taxonomy' => 'category', 'field' => 'slug', 'terms' => $cats, 'include_children' => true );
+			if ( count( $cats ) === count( $v ) ) {
+				$tq[] = $by_type;
+			} elseif ( ! $cats ) {
+				$mq[] = $sponsor;
+			} else {
+				$q  = array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' );
+				$in = array_values( array_unique( array_merge( get_posts( $q + array( 'tax_query' => array( $by_type ) ) ), get_posts( $q + array( 'meta_query' => array( $sponsor ) ) ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+				$in = $in ? $in : array( 0 );
+			}
 		} else {
 			$tq[] = array( 'taxonomy' => $f[1], 'field' => 'slug', 'terms' => $v, 'include_children' => true );
 		}
 	}
-	return array( count( $tq ) > 1 ? $tq : array(), $mq );
+	return array( count( $tq ) > 1 ? $tq : array(), $mq, $in );
 }
 
 /**
@@ -186,6 +200,16 @@ function aw_filter_values( $ids, $source ) {
 			}
 		}
 	} else {
+		if ( 'resource-kind' === $source ) { // "Sponsored" only when an item is sponsored
+			update_meta_cache( 'post', $ids );
+			foreach ( $ids as $id ) {
+				if ( get_post_meta( $id, 'aw_sponsored', true ) ) {
+					$seen['sponsored'][ $id ] = 1;
+					$name['sponsored']        = 'Sponsored';
+				}
+			}
+			$source = 'category';
+		}
 		foreach ( wp_get_object_terms( $ids, $source, array( 'fields' => 'all_with_object_id' ) ) as $t ) {
 			$seen[ $t->slug ][ $t->object_id ] = 1;
 			$name[ $t->slug ]                  = $t->name;
@@ -221,8 +245,8 @@ function aw_list_filters( $type ) {
 		$mine   = $active[ $param ] ?? array();
 		$others = array_diff_key( $active, array( $param => '' ) );
 		// Items matching the other filters: the counts for this filter.
-		list( $tq, $mq ) = aw_filter_clauses( $type, $others );
-		$ids     = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		list( $tq, $mq, $in ) = aw_filter_clauses( $type, $others );
+		$ids     = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) + ( null === $in ? array() : array( 'post__in' => $in ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$options = array();
 		foreach ( aw_filter_values( $ids, $source ) as $slug => $v ) {
 			$on        = in_array( (string) $slug, $mine, true );

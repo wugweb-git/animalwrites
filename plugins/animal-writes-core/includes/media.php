@@ -35,7 +35,7 @@ function aw_item_image( $post_id, $size = 'large' ) {
  */
 function aw_item_image_id( $post_id ) {
 	$type = get_post_type( $post_id );
-	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'aw_guide' ), true ) ) { // guides: their category's photo
+	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) ) { // guides: their category's photo
 		return 0;
 	}
 	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
@@ -78,7 +78,7 @@ add_filter(
 			return ''; // lists that show a picture only when the item has one (Resources, Opportunities)
 		}
 		$post_id = $instance->context['postId'] ?? get_the_ID();
-		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_guide' ), true ) ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'post' ), true ) ) {
 			return $content;
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );

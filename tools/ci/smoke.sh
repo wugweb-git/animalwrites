@@ -27,7 +27,7 @@ N=$(wp post create --post_type=aw_news --post_title="CI news item" --post_status
 wp post meta add "$N" aw_source_url "https://www.thehindu.com/ci-item/" --quiet
 wp post meta add "$N" aw_source_name "The Hindu" --quiet
 wp post create --post_type=aw_legal --post_title="CI library item 2023" --post_status=publish --quiet
-wp post create --post_type=aw_guide --post_title="CI guide" --post_status=publish --quiet
+wp post create --post_type=post --post_title="CI guide" --post_status=publish --quiet
 wp post create --post_type=aw_opportunity --post_title="CI opportunity" --post_status=publish --quiet
 wp post create --post_type=aw_campaign --post_title="CI campaign" --post_status=publish --quiet
 L=$(wp post create --post_type=aw_listing --post_title="CI listing Ernakulam" --post_status=publish --porcelain)
@@ -41,7 +41,7 @@ curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
 URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
   /directory/kerala/ /directory/kerala/ernakulam/
-  "$(single aw_news)" "$(single aw_legal)" "$(single aw_guide)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
+  "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
 for u in "${URLS[@]}"; do
   code=$(curl -s -o /tmp/page.html -w '%{http_code}' "http://127.0.0.1:8080$u")

@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_HUBS = array(
 	'aw_news'        => array( 'news', 101, 13, 'News list' ),
-	'aw_guide'       => array( 'resources', 102, 40, 'Resources list' ),
+	'post'           => array( 'resources', 102, 40, 'Resources list' ),
 	'aw_legal'       => array( 'library', 103, 20, 'Library list' ),
 	'aw_opportunity' => array( 'opportunities', 104, 24, 'Opportunities list' ),
 	'aw_campaign'    => array( 'campaigns', 105, 20, 'Campaigns list' ),
@@ -165,12 +165,15 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 		'ignore_sticky_posts' => true,
 	);
 	if ( function_exists( 'aw_filter_clauses' ) ) {
-		list( $tq, $mq ) = aw_filter_clauses( $type, aw_active_filters( $type ) );
+		list( $tq, $mq, $in ) = aw_filter_clauses( $type, aw_active_filters( $type ) );
 		if ( $tq ) {
 			$v['tax_query'] = $tq;
 		}
 		if ( $mq ) {
 			$v['meta_query'] = $mq;
+		}
+		if ( null !== $in ) {
+			$v['post__in'] = $in;
 		}
 	}
 	$sort = function_exists( 'aw_active_sort' ) ? aw_active_sort( $type ) : '';
@@ -436,7 +439,7 @@ function aw_hub_item( $type ) {
 <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span>
 <!-- /wp:html --></article>
 <!-- /wp:group -->';
-		case 'aw_guide':
+		case 'post':
 			return '<!-- wp:group {"tagName":"article","className":"kit-card kit-task","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
 
@@ -519,7 +522,7 @@ function aw_hub_empty( $type ) {
 	$t = array(
 		'aw_news'        => '<p>No stories on this topic yet.</p>',
 		'aw_legal'       => '<p>No updates match this filter yet.</p>',
-		'aw_guide'       => '<p>No guides match this filter yet.</p>',
+		'post'           => '<p>No guides match this filter yet.</p>',
 		'aw_opportunity' => '<p>No open opportunities of this kind right now.</p>',
 		'aw_campaign'    => '',
 		'aw_listing'     => '<p>No organisations match. Try another district, or clear the filters.</p><p><a class="kit-btn kit-btn--secondary" href="/directory/">Clear filters</a></p>',
@@ -535,7 +538,7 @@ function aw_hub_empty( $type ) {
 /** The list section (saved as a synced pattern). */
 function aw_hub_list( $type ) {
 	$h     = AW_HUBS[ $type ];
-	$lists = array( 'aw_news' => 'aw-news-list', 'aw_legal' => 'aw-cases', 'aw_guide' => 'aw-tasks', 'aw_opportunity' => 'aw-opps', 'aw_campaign' => 'aw-news-grid', 'aw_listing' => 'aw-orgs', 'aw_press' => 'aw-news-grid' );
+	$lists = array( 'aw_news' => 'aw-news-list', 'aw_legal' => 'aw-cases', 'post' => 'aw-tasks', 'aw_opportunity' => 'aw-opps', 'aw_campaign' => 'aw-news-grid', 'aw_listing' => 'aw-orgs', 'aw_press' => 'aw-news-grid' );
 	$cls   = 'aw-hub-list aw-hub-' . $h[0] . ( 'aw_campaign' === $type ? ' aw-camp-more aw-hide-empty' : '' );
 	$head  = 'aw_campaign' === $type ? '<!-- wp:heading -->
 <h2 class="wp-block-heading">More campaigns</h2>
@@ -564,7 +567,7 @@ function aw_hub_list( $type ) {
 
 /** Body after the list (static content the owner can edit). */
 function aw_hub_after( $type ) {
-	if ( 'aw_guide' === $type ) {
+	if ( 'post' === $type ) {
 		return '<!-- wp:html -->
 <div class="aw-also"><h2>Also useful</h2><ul class="kit-tiles"><li><a class="kit-tile" href="#helplines"><span class="kit-ico kit-ico--helpline" aria-hidden="true"></span><strong>Helplines</strong><span class="kit-tile-desc">National helplines: 112, 1962 and AWBI.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/directory/"><span class="kit-ico kit-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span class="kit-tile-desc">Shelters, vets and rescuers near you.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/library/?kind=act"><span class="kit-ico kit-ico--research" aria-hidden="true"></span><strong>The law in full</strong><span class="kit-tile-desc">Acts, Rules and judgments, from the official source.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
 <!-- /wp:html -->';
@@ -605,7 +608,7 @@ add_action(
 		if ( AW_HUBS_VERSION === get_option( 'aw_hubs_version' ) || ! did_action( 'init' ) ) {
 			return;
 		}
-		$titles = array( 'aw_news' => 'News', 'aw_guide' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'aw_press' => 'Media & PR' );
+		$titles = array( 'aw_news' => 'News', 'post' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'aw_press' => 'Media & PR' );
 		$made   = (array) get_option( 'aw_hub_pages', array() );
 		$hashes = (array) get_option( 'aw_hub_hashes', array() );
 		foreach ( AW_HUBS as $type => $h ) {

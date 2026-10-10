@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign', 'aw_opportunity', 'aw_listing' );
+const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' );
 
 // Tags: Site Kit only (Analytics GT-TXZHFR39 -> G-4P5YMJ04RL, AdSense, Tag Manager GTM-TB3FCFQB). Kits Core prints
 // no GTM of its own, so nothing loads twice. Do not put a GA4 tag inside GTM-TB3FCFQB while Site Kit Analytics is on.
@@ -21,7 +21,8 @@ add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) );
 /*
  * Ads (owner, 9 Oct 2026). Articles: News, Library, Resources (in-content, end). Lists: News, Library, Resources (after
  * items 6 and 18), Directory state and district pages (after item 5). Profiles: above "Is this your organisation?".
- * None at all on forms, search, 404, crisis guides, government vets and MVUs, or Cruelty and Prosecution items.
+ * None at all on forms, search, 404, crisis guides, sponsored Resources, government vets and MVUs, or Cruelty and
+ * Prosecution items.
  */
 const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ); // help-now guides + the crisis guides
 add_filter(
@@ -33,21 +34,24 @@ add_filter(
 		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'aw_listing_type', get_queried_object_id() ) ) {
 			return true;
 		}
-		if ( is_singular( 'aw_guide' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
+		if ( is_singular( 'post' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
 			return true;
+		}
+		if ( is_singular( 'post' ) && function_exists( 'aw_is_sponsored' ) && aw_is_sponsored( get_queried_object_id() ) ) {
+			return true; // sponsored Resources carry no ads
 		}
 		return is_singular() && has_term( 'cruelty-prosecution', 'aw_topic', get_queried_object_id() );
 	}
 );
-add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide' ) );
-add_filter( 'kits_ads_end_after_content_types', fn() => array( 'aw_guide' ) ); // guides have no end bar: the end ad follows the text
+add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post' ) );
+add_filter( 'kits_ads_end_after_content_types', fn() => array( 'post' ) ); // guides have no end bar: the end ad follows the text
 add_filter(
 	'kits_ads_list_positions',
 	function ( $at, $slot ) {
 		if ( 'directory' === $slot ) {
 			return get_query_var( 'aw_place' ) ? array( 5 ) : array(); // state and district pages only
 		}
-		return in_array( function_exists( 'aw_hub_type' ) ? aw_hub_type() : '', array( 'aw_news', 'aw_legal', 'aw_guide' ), true ) ? $at : array();
+		return in_array( function_exists( 'aw_hub_type' ) ? aw_hub_type() : '', array( 'aw_news', 'aw_legal', 'post' ), true ) ? $at : array();
 	},
 	10,
 	2
@@ -64,7 +68,7 @@ add_filter(
 	}
 );
 
-add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign' ) );
+add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) );
 add_filter( 'kits_seo_twitter_site', fn() => '@AnimalWrites' );
 add_filter( 'kits_seo_locale', fn() => 'en_IN' );
 add_filter(
@@ -72,7 +76,7 @@ add_filter(
 	fn() => array(
 		'aw_news'        => 'Animal-welfare news from across India, summarised with a link to every source.',
 		'aw_legal'       => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
-		'aw_guide'       => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
+		'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
 		'aw_campaign'    => 'Citizen campaigns for animals in India, starting with Animal Writes 1.0.',
 		'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
 		'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.',
@@ -129,14 +133,14 @@ add_filter(
 
 // End bar on items: categories bottom left, share bottom right.
 add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? $t : 'aw_topic', 10, 2 );
-add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
+add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
 
 
 /** Analytics page context (kits-core analytics.php): what this page is, for GTM and the events in kit.js. */
 add_filter(
 	'kits_page_context',
 	function ( $c ) {
-		$hub_types = array( 'aw_news' => 'news', 'aw_legal' => 'library', 'aw_guide' => 'resources', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_listing' => 'directory', 'aw_press' => 'media' );
+		$hub_types = array( 'aw_news' => 'news', 'aw_legal' => 'library', 'post' => 'resources', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_listing' => 'directory', 'aw_press' => 'media' );
 		$hub       = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
 		if ( is_page( 'search' ) ) {
 			$c['page_type'] = 'search';

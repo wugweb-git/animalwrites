@@ -56,7 +56,7 @@ function aw_set_issuer( $id, $value ) {
 add_action(
 	'add_meta_boxes',
 	function () {
-		foreach ( array( 'aw_legal', 'aw_guide' ) as $type ) {
+		foreach ( array( 'aw_legal', 'post' ) as $type ) {
 			add_meta_box( 'aw-issuer', 'Issued by', 'aw_issuer_box', $type, 'side', 'default' );
 		}
 	}
@@ -75,7 +75,7 @@ function aw_issuer_box( $post ) {
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( ! in_array( $post->post_type, array( 'aw_legal', 'aw_guide' ), true ) || ! isset( $_POST['aw_issuer_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_issuer_nonce'] ), 'aw_issuer_save' ) || ! current_user_can( 'edit_post', $id ) ) {
+		if ( ! in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) || ! isset( $_POST['aw_issuer_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_issuer_nonce'] ), 'aw_issuer_save' ) || ! current_user_can( 'edit_post', $id ) ) {
 			return;
 		}
 		$new = sanitize_text_field( wp_unslash( $_POST['aw_issuer_new'] ?? '' ) );

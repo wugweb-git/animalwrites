@@ -391,10 +391,10 @@ add_action(
 			return;
 		}
 		$graph = array( aw_publisher_schema(), aw_website_schema() );
-		if ( is_singular( array( 'aw_news', 'aw_legal', 'aw_guide' ) ) ) {
+		if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
 			$id      = get_queried_object_id();
 			$graph[] = aw_article_schema( $id );
-			if ( 'aw_guide' === get_post_type( $id ) ) {
+			if ( 'post' === get_post_type( $id ) ) {
 				$graph[] = aw_faq_schema( $id );
 			}
 		} elseif ( is_singular( 'aw_opportunity' ) ) {

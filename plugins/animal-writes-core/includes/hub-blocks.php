@@ -98,7 +98,7 @@ function aw_block_hub_count( $a ) {
 
 /** "23 stories": the number of items in a hub list with the current filters. */
 function aw_hub_count_label( $type ) {
-	$noun = array( 'aw_guide' => array( 'guide', 'guides' ), 'aw_opportunity' => array( 'opportunity', 'opportunities' ), 'aw_campaign' => array( 'campaign', 'campaigns' ), 'aw_legal' => array( 'document', 'documents' ), 'aw_news' => array( 'story', 'stories' ), 'aw_listing' => array( 'organisation', 'organisations' ), 'aw_press' => array( 'item', 'items' ) );
+	$noun = array( 'post' => array( 'guide', 'guides' ), 'aw_opportunity' => array( 'opportunity', 'opportunities' ), 'aw_campaign' => array( 'campaign', 'campaigns' ), 'aw_legal' => array( 'document', 'documents' ), 'aw_news' => array( 'story', 'stories' ), 'aw_listing' => array( 'organisation', 'organisations' ), 'aw_press' => array( 'item', 'items' ) );
 	if ( ! isset( $noun[ $type ] ) ) {
 		return '';
 	}
@@ -206,15 +206,16 @@ function aw_block_doc_date( $a, $id ) {
 /** "{Type} · {Date}" above a card title: a Resource's type and when it was last updated, or a Library item's kind and date. */
 function aw_block_type_date( $a, $id ) {
 	$type = get_post_type( $id );
-	$tax  = 'aw_guide' === $type ? 'aw_resource_type' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
+	$tax  = 'post' === $type ? 'category' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
 	$name = '';
 	if ( $tax ) {
 		$t    = wp_get_object_terms( $id, $tax, array( 'fields' => 'names' ) );
 		$name = is_wp_error( $t ) || ! $t ? '' : $t[0];
 	}
-	$date = 'aw_guide' === $type ? get_the_modified_date( 'j M Y', $id ) : ( function_exists( 'aw_src_date' ) ? aw_src_date( $id, 'j M Y' ) : get_the_date( 'j M Y', $id ) );
-	$text = implode( ' · ', array_filter( array( $name, $date ) ) );
-	return $text ? '<p class="aw-case-meta">' . esc_html( $text ) . '</p>' : '';
+	$date = 'post' === $type ? get_the_modified_date( 'j M Y', $id ) : ( function_exists( 'aw_src_date' ) ? aw_src_date( $id, 'j M Y' ) : get_the_date( 'j M Y', $id ) );
+	$text  = implode( ' · ', array_filter( array( $name, $date ) ) );
+	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
+	return $text || $badge ? '<p class="aw-case-meta">' . $badge . ( $badge && $text ? ' ' : '' ) . esc_html( $text ) . '</p>' : '';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
@@ -266,7 +267,8 @@ function aw_block_task_icon( $a, $id ) {
 
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
-	return '<p class="aw-task-meta"><span>' . aw_i( 'calendar' ) . 'Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
+	return '<p class="aw-task-meta">' . $badge . '<span>' . aw_i( 'calendar' ) . 'Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */

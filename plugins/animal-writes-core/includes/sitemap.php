@@ -1,7 +1,7 @@
 <?php
 /**
  * Sitemap (WordPress core /wp-sitemap.xml), tuned for Animal Writes:
- * - no users list and no default blog posts or categories (unused);
+ * - no users list and no categories (Resource types have no pages); Posts are Resources and are listed;
  * - a "directory" sitemap lists the place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings,
  *   and district × listing-type pages with at least 3 listings (indexing.php). Places come from the LGD file (places.php).
  * Retention rules (news age, closed opportunities) live in retention.php.
@@ -15,12 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'wp_sitemaps_add_provider', fn( $provider, $name ) => 'users' === $name ? false : $provider, 10, 2 );
 
-add_filter(
-	'wp_sitemaps_post_types',
-	function ( $types ) {
-		unset( $types['post'] );
-		return $types;
-	}
+// Posts are Resources (content-types.php): their sitemap is wp-sitemap-posts-post-N.xml; the old Resources sitemap
+// address points there.
+add_action(
+	'template_redirect',
+	function () {
+		if ( 'posts' === get_query_var( 'sitemap' ) && 'aw_guide' === get_query_var( 'sitemap-subtype' ) ) {
+			wp_safe_redirect( home_url( '/wp-sitemap-posts-post-' . max( 1, (int) get_query_var( 'paged' ) ) . '.xml' ), 301, 'Animal Writes' );
+			exit;
+		}
+	},
+	0
 );
 
 add_filter(

@@ -2,7 +2,7 @@
 /**
  * WP Admin information architecture (Phase 11 J). Nothing is deleted: menus move, labels match the site.
  *
- * - Posts (Categories, Tags) and Comments hidden; comments off sitewide. Testimonials (1.0 leftover) hidden.
+ * - Posts are Resources (content-types.php); Comments hidden and off sitewide. Testimonials (1.0 leftover) hidden.
  * - Topics and Locations are shared by several sections: shown once, under "Classification".
  * - "Inbox": Messages and Listing claims, with unread counts. "Audience": Newsletter and Volunteers.
  * - Menu order follows the site: Directory · News · Resources · Library · Opportunities · Campaigns · Pages · Media …
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SHARED_TAXONOMIES = array( 'aw_topic' ); // places are not a list any more (LGD file, places.php)
 
-/* ---------- Comments off, Posts hidden ---------- */
+/* ---------- Comments off ---------- */
 
 add_filter( 'comments_open', '__return_false', 20 );
 add_filter( 'pings_open', '__return_false', 20 );
@@ -49,7 +49,6 @@ add_action(
 	function () {
 		global $wp_admin_bar;
 		$wp_admin_bar->remove_node( 'comments' );
-		$wp_admin_bar->remove_node( 'new-post' );
 	}
 );
 
@@ -159,8 +158,7 @@ add_action(
 	'admin_menu',
 	function () {
 		global $submenu, $menu;
-		// Hidden: Posts, Comments.
-		remove_menu_page( 'edit.php' );
+		// Hidden: Comments.
 		remove_menu_page( 'edit-comments.php' );
 		// Volunteer sign-ups go under Inbox; Newsletter stays its own item with its Subscribers list (pages keep their URLs).
 		foreach ( $menu as $i => $item ) {
@@ -237,7 +235,7 @@ add_filter(
 			'index.php',
 			'edit.php?post_type=aw_listing',
 			'edit.php?post_type=aw_news',
-			'edit.php?post_type=aw_guide',
+			'edit.php',
 			'edit.php?post_type=aw_legal',
 			'edit.php?post_type=aw_opportunity',
 			'edit.php?post_type=aw_campaign',
@@ -271,7 +269,7 @@ add_action(
 		update_option( 'default_comment_status', 'closed' );
 		update_option( 'default_ping_status', 'closed' );
 		// The default "Hello world!" post → draft.
-		foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+		foreach ( get_posts( array( 'post_type' => 'post', 'name' => 'hello-world', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) { // only that one: Posts are Resources now
 			wp_update_post( array( 'ID' => $id, 'post_status' => 'draft' ) );
 		}
 		// News items with a court: keep the value as meta before the taxonomy leaves news.

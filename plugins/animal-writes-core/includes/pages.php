@@ -248,7 +248,7 @@ add_filter(
 
 /* ---------- Site search at /search/?q= (noindex; see wp_robots above) ---------- */
 
-const AW_SEARCH_TYPES = array( 'aw_news', 'aw_legal', 'aw_guide', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'page' );
+const AW_SEARCH_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'page' );
 
 // WordPress's own search (?s=) goes to the search page, so there is one search address.
 add_action(
@@ -281,7 +281,7 @@ add_shortcode(
 			return $html;
 		}
 		$words  = array_values( array_filter( preg_split( '/\s+/u', $q ), fn( $w ) => mb_strlen( $w ) >= 3 ) );
-		$groups = array( 'aw_news' => 'News', 'aw_guide' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'page' => 'Pages' );
+		$groups = array( 'aw_news' => 'News', 'post' => 'Resources', 'aw_legal' => 'Library', 'aw_opportunity' => 'Opportunities', 'aw_campaign' => 'Campaigns', 'aw_listing' => 'Directory', 'page' => 'Pages' );
 		$total  = 0;
 		$out    = '';
 		$shown  = 0;
@@ -321,7 +321,7 @@ add_shortcode(
 		if ( ! $term || empty( $term->taxonomy ) || 'aw_topic' !== $term->taxonomy ) {
 			return '';
 		}
-		$groups = array( 'aw_guide' => 'Resources', 'aw_news' => 'News', 'aw_legal' => 'Library', 'aw_campaign' => 'Campaigns' );
+		$groups = array( 'post' => 'Resources', 'aw_news' => 'News', 'aw_legal' => 'Library', 'aw_campaign' => 'Campaigns' );
 		$html   = '';
 		foreach ( $groups as $type => $label ) {
 			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'tax_query' => array( array( 'taxonomy' => 'aw_topic', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
@@ -355,7 +355,7 @@ add_shortcode(
 add_filter(
 	'render_block_core/post-title',
 	function ( $html, $block ) {
-		if ( ! is_singular( 'aw_guide' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() ) {
+		if ( ! is_singular( 'post' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() ) {
 			return $html;
 		}
 		$id = get_queried_object_id();
@@ -363,6 +363,99 @@ add_filter(
 	},
 	20,
 	2
+);
+
+/* ---------- Resources: the Resource type is a list filter, not a link on the page ---------- */
+
+// The master single template shows the Category chips above the title; Resource types have no pages of their own.
+add_filter(
+	'render_block_core/post-terms',
+	function ( $html, $block, $instance ) {
+		if ( 'category' !== ( $block['attrs']['term'] ?? '' ) || ! is_singular( 'post' ) || isset( $instance->context['queryId'] ) ) {
+			return $html;
+		}
+		return '';
+	},
+	5,
+	3
+);
+
+/* ---------- Resources: Sponsored (a label, not a Resource type) ---------- */
+
+/** Whether a Resource is sponsored. */
+function aw_is_sponsored( $id ) {
+	return 'post' === get_post_type( $id ) && (bool) get_post_meta( $id, 'aw_sponsored', true );
+}
+
+/** The "Sponsored" badge on a Resource card ('' when not sponsored). */
+function aw_sponsored_badge( $id ) {
+	return aw_is_sponsored( $id ) && function_exists( 'kits_badge' ) ? kits_badge( 'Sponsored', 'sponsored' ) : '';
+}
+
+// Item page: "Sponsored by {name}" above the title (the same label News and Library items use).
+add_filter(
+	'render_block_core/post-title',
+	function ( $html, $block ) {
+		if ( ! is_singular( 'post' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() || ! aw_is_sponsored( get_the_ID() ) ) {
+			return $html;
+		}
+		$label = function_exists( 'aw_binding_value' ) ? (string) aw_binding_value( 'sponsored_label', get_the_ID() ) : 'Sponsored';
+		return '<p class="is-style-kits-label">' . esc_html( $label ) . '</p>' . $html;
+	},
+	5,
+	2
+);
+
+// Every outbound link in a sponsored Resource: rel="sponsored noopener".
+add_filter(
+	'the_content',
+	function ( $content ) {
+		if ( ! is_singular( 'post' ) || ! in_the_loop() || ! aw_is_sponsored( get_the_ID() ) || false === stripos( $content, '<a ' ) ) {
+			return $content;
+		}
+		$home = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$tags = new WP_HTML_Tag_Processor( $content );
+		while ( $tags->next_tag( 'a' ) ) {
+			$host = strtolower( (string) wp_parse_url( (string) $tags->get_attribute( 'href' ), PHP_URL_HOST ) );
+			if ( '' === $host || preg_replace( '/^www\./', '', $host ) === preg_replace( '/^www\./', '', $home ) ) {
+				continue; // same site
+			}
+			$rel = preg_split( '/\s+/', strtolower( trim( (string) $tags->get_attribute( 'rel' ) ) ), -1, PREG_SPLIT_NO_EMPTY );
+			$tags->set_attribute( 'rel', implode( ' ', array_unique( array_merge( array( 'sponsored', 'noopener' ), $rel ) ) ) );
+		}
+		return $tags->get_updated_html();
+	},
+	20
+);
+
+// Editing: a Sponsored box beside the editor.
+add_action(
+	'add_meta_boxes_post',
+	function () {
+		add_meta_box( 'aw-sponsored', 'Sponsored', 'aw_sponsored_box', 'post', 'side', 'default' );
+	}
+);
+
+function aw_sponsored_box( $post ) {
+	wp_nonce_field( 'aw_sponsored_save', 'aw_sponsored_nonce' );
+	echo '<p><label><input type="checkbox" name="aw_sponsored" value="1"' . checked( (bool) get_post_meta( $post->ID, 'aw_sponsored', true ), true, false ) . '> Sponsored</label></p>';
+	echo '<p><label for="aw-sponsor-name">Sponsor name</label><br><input type="text" id="aw-sponsor-name" name="aw_sponsor_name" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_sponsor_name', true ) ) . '" style="width:100%"></p>';
+}
+
+add_action(
+	'save_post_post',
+	function ( $id ) {
+		if ( wp_is_post_revision( $id ) || ! isset( $_POST['aw_sponsored_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_sponsored_nonce'] ), 'aw_sponsored_save' ) || ! current_user_can( 'edit_post', $id ) ) {
+			return;
+		}
+		if ( empty( $_POST['aw_sponsored'] ) ) {
+			delete_post_meta( $id, 'aw_sponsored' );
+		} else {
+			update_post_meta( $id, 'aw_sponsored', '1' );
+		}
+		$name = sanitize_text_field( wp_unslash( $_POST['aw_sponsor_name'] ?? '' ) );
+		'' === $name ? delete_post_meta( $id, 'aw_sponsor_name' ) : update_post_meta( $id, 'aw_sponsor_name', $name );
+	}
 );
 
 /* ---------- Contact: "Elsewhere" links (Phase 11 H5) ---------- */

@@ -37,7 +37,7 @@ function aw_relations() {
 		'aw_organiser'    => array( array( 'aw_campaign' ), 'aw_listing', 'Organiser', 'Campaigns organised', 1 ),
 		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0 ),
 		'aw_organisation' => array( array( 'aw_opportunity' ), 'aw_listing', 'Organisation', 'Opportunities', 1 ),
-		'aw_rel_resource' => array( array( 'aw_guide' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
+		'aw_rel_resource' => array( array( 'post' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
 	);
 }
 
@@ -56,7 +56,6 @@ add_action(
 			'show_admin_column'  => true,
 		);
 		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
-		register_taxonomy( 'aw_resource_type', array( 'aw_guide' ), $args( 'Resource types', 'Resource type' ) );
 		register_taxonomy( 'aw_service', array( 'aw_listing' ), $args( 'Services', 'Service' ) );
 		// Language is no longer used on the Library (Phase 12 B4); each item keeps its old value in the meta aw_language_legacy.
 		// Places (State filter) come from the LGD codes on each item (places.php).
@@ -241,7 +240,7 @@ add_action(
 			add_meta_box( 'aw_primary_topic', 'Primary topic', 'aw_primary_topic_box', $post_type, 'side', 'high' );
 		}
 		$rel = array_filter( aw_relations(), fn( $r ) => in_array( $post_type, $r[0], true ) );
-		if ( $rel || 'aw_guide' === $post_type ) {
+		if ( $rel || 'post' === $post_type ) {
 			add_meta_box( 'aw_related', 'Related', 'aw_related_box', $post_type, 'normal', 'default' );
 		}
 		$back = array_filter( aw_relations(), fn( $r ) => $r[1] === $post_type );
@@ -291,7 +290,7 @@ function aw_related_box( $post ) {
 		}
 		echo '</ul><input type="search" class="regular-text aw-rel-q" placeholder="Search to add"><ul class="aw-rel-hits"></ul></div></td></tr>';
 	}
-	if ( 'aw_guide' === $post->post_type ) {
+	if ( 'post' === $post->post_type ) {
 		$cur = array_map( 'intval', (array) get_post_meta( $post->ID, 'aw_rel_listing_type', false ) );
 		echo '<tr><th>Listing types</th><td>';
 		foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
@@ -350,7 +349,7 @@ add_action(
 				add_post_meta( $post_id, $key, $id );
 			}
 		}
-		if ( 'aw_guide' === $post->post_type ) {
+		if ( 'post' === $post->post_type ) {
 			delete_post_meta( $post_id, 'aw_rel_listing_type' );
 			foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_rel_listing_type'] ?? array() ) ) as $tid ) {
 				if ( term_exists( $tid, 'aw_listing_type' ) ) {
@@ -434,7 +433,7 @@ function aw_topic_help_types( $term_id ) {
 add_action(
 	'aw_listing_type_edit_form_fields',
 	function ( $term ) {
-		$ids = get_posts( array( 'post_type' => 'aw_guide', 'post_status' => 'any', 'numberposts' => 50, 'fields' => 'ids', 'meta_key' => 'aw_rel_listing_type', 'meta_value' => (string) $term->term_id ) ); // phpcs:ignore
+		$ids = get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'numberposts' => 50, 'fields' => 'ids', 'meta_key' => 'aw_rel_listing_type', 'meta_value' => (string) $term->term_id ) ); // phpcs:ignore
 		echo '<tr class="form-field"><th scope="row">Guides linking here</th><td>';
 		echo $ids ? implode( ', ', array_map( fn( $id ) => '<a href="' . esc_url( get_edit_post_link( $id ) ) . '">' . esc_html( get_post_field( 'post_title', $id ) ) . '</a>', $ids ) ) : '<span class="description">None yet.</span>'; // phpcs:ignore
 		echo '</td></tr>';
