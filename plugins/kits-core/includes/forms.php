@@ -66,17 +66,81 @@ function aw_form_is_fetch() {
 /**
  * Success: JSON for fetch() (the form is replaced by the message in place), otherwise the usual redirect.
  *
- * @param string $url   Where a normal POST goes (with ?aw_done=...).
+ * @param string $url   Where a normal POST goes: the thank-you page (kits_thanks_url()) or a URL with ?aw_done=....
  * @param string $title Heading of the success message.
  * @param string $text  Line under it.
  * @param array  $more  Extra fields for the page script (e.g. a "Send another" label).
  */
 function aw_form_success( $url, $title, $text = '', $more = array() ) {
 	if ( aw_form_is_fetch() ) {
-		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more ) );
+		// A thank-you page URL: kit.js goes there; otherwise the form is replaced by the message in place.
+		$go = kits_is_thanks_url( $url ) ? array( 'redirect' => $url ) : array();
+		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more, $go ) );
 	}
 	wp_safe_redirect( $url );
 	exit;
+}
+
+/* ---------- Thank-you page (one page for every form's success) ---------- */
+
+/** Path of the site's thank-you page (filter kits_thanks_path). */
+function kits_thanks_path() {
+	return '/' . trim( (string) apply_filters( 'kits_thanks_path', '/thank-you/' ), '/' ) . '/';
+}
+
+/** Is $url the thank-you page? */
+function kits_is_thanks_url( $url ) {
+	return trailingslashit( (string) wp_parse_url( (string) $url, PHP_URL_PATH ) ) === trailingslashit( (string) wp_parse_url( home_url( kits_thanks_path() ), PHP_URL_PATH ) );
+}
+
+/**
+ * Where a form goes when it is sent: the thank-you page, ?form=<name>, plus $args (e.g. listing), the page the person
+ * came from (?from=, a path on this site) and, when a message is given, a short-lived token for it (?t=), so personal
+ * details such as an email address are never in the URL.
+ *
+ * @param string $form  Form name, e.g. "contact".
+ * @param array  $args  Extra query args.
+ * @param string $title Message heading (the form's success message).
+ * @param string $text  Line under it.
+ * @return string
+ */
+function kits_thanks_url( $form, $args = array(), $title = '', $text = '' ) {
+	$q = array( 'form' => sanitize_key( $form ) );
+	if ( ! isset( $args['from'] ) ) {
+		$ref  = wp_get_referer();
+		$path = $ref ? (string) wp_parse_url( $ref, PHP_URL_PATH ) : '';
+		if ( $path && ! kits_is_thanks_url( $path ) ) {
+			$q['from'] = $path;
+		}
+	}
+	if ( '' !== $title || '' !== $text ) {
+		$token = wp_generate_password( 16, false );
+		set_transient( 'kits_thanks_' . $token, array( 'form' => $q['form'], 'title' => $title, 'text' => $text ), 30 * MINUTE_IN_SECONDS );
+		$q['t'] = $token;
+	}
+	return add_query_arg( array_merge( $q, $args ), home_url( kits_thanks_path() ) );
+}
+
+/** The form name on the thank-you page (?form=). */
+function kits_thanks_form() {
+	return sanitize_key( wp_unslash( $_GET['form'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+}
+
+/** The message saved for this thank-you page (?t=): array{title: string, text: string}, or null. */
+function kits_thanks_message() {
+	$token = preg_replace( '/[^A-Za-z0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$msg   = $token ? get_transient( 'kits_thanks_' . $token ) : false;
+	return is_array( $msg ) && ( $msg['form'] ?? '' ) === kits_thanks_form() ? $msg : null;
+}
+
+/** The page the person came from (?from=), as a URL on this site, or ''. */
+function kits_thanks_from() {
+	$path = (string) wp_unslash( $_GET['from'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( '' === $path || '/' !== $path[0] || str_starts_with( $path, '//' ) ) {
+		return '';
+	}
+	$url = home_url( $path );
+	return wp_validate_redirect( $url, '' ) === $url ? $url : '';
 }
 
 /** Email cleaned as the server checks it: trimmed, domain in lower case. */

@@ -88,7 +88,7 @@ add_shortcode( 'aw_volunteer_form', fn() => aw_volunteer_form() );
 function aw_volunteer_submit() {
 	$form = 'aw_volunteer';
 	$back = aw_form_back( '/volunteer/' );
-	$done = add_query_arg( 'aw_done', 'volunteer', $back ) . '#volunteer';
+	$done = kits_thanks_url( 'volunteer' );
 	$rl   = aw_form_guard( $form, $back, 'volunteer', $done );
 	$v    = array(
 		'name'     => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
@@ -140,7 +140,9 @@ function aw_volunteer_submit() {
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		aw_nl_optin( $v['email'], $v['name'], 'volunteer' );
 	}
-	aw_form_success( $done, __( 'Thank you for signing up.', 'animal-writes-core' ), __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) );
+	$title = __( 'Thank you for signing up.', 'animal-writes-core' );
+	$text  = __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
+	aw_form_success( kits_thanks_url( 'volunteer', array(), $title, $text ), $title, $text );
 }
 add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
 add_action( 'admin_post_aw_volunteer', 'aw_volunteer_submit' );

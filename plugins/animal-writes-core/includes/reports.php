@@ -47,25 +47,23 @@ add_action(
 /** The report form (S7.3): what is wrong, and an optional note. */
 function aw_report_form( $listing ) {
 	$form = 'aw_report';
-	if ( isset( $_GET['aw_done'] ) && 'report' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Thanks — we\'ll check it.</p></div>';
-	}
-	return aw_form_open( $form, array( 'class' => 'kit-form aw-report-form', 'id' => 'aw-form-aw_report' ) )
+	return aw_form_open( $form, array( 'class' => 'kit-form aw-report-form', 'id' => 'aw-form-aw_report', 'data-key' => (string) $listing->ID, 'data-source' => trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' ) ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
 		. aw_field( $form, array( 'name' => 'reason', 'label' => 'What is wrong?', 'type' => 'select', 'required' => true, 'options' => array( '' => 'Choose one' ) + aw_report_reasons(), 'messages' => array( 'required' => 'Choose what is wrong' ) ) )
 		. aw_field( $form, array( 'name' => 'details', 'label' => 'Details', 'type' => 'textarea', 'hint' => 'Tell us the correct details if you know them.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 4 ) ) )
 		. '<div class="kit-form-actions"><button type="submit" class="kit-btn">Send report</button></div></form>';
 }
 
-/** Back-compat: [aw_report_box] prints the listing card's report form. */
+/** Back-compat: [aw_report_box] prints the report form of the current listing. */
 add_shortcode( 'aw_report_box', fn() => get_post() ? aw_report_form( get_post() ) : '' );
 
 /** Handle a report. */
 function aw_report_submit() {
 	$form    = 'aw_report';
 	$listing = get_post( (int) ( $_POST['listing'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$back    = $listing && 'aw_listing' === $listing->post_type ? get_permalink( $listing ) : aw_form_back( '/directory/' );
-	$done    = add_query_arg( 'aw_done', 'report', $back ) . '#report';
+	$lid     = $listing ? (int) $listing->ID : 0;
+	$back    = aw_report_url( $lid ); // errors: back to /report/?listing=<ID>, details kept
+	$done    = kits_thanks_url( 'report', array( 'listing' => $lid, 'from' => false ) );
 	$rl      = aw_form_guard( $form, $back, 'report', $done, 10 );
 	if ( ! $listing || 'aw_listing' !== $listing->post_type || 'publish' !== $listing->post_status ) {
 		aw_form_fail( $form, array(), array(), $back, 'report', 'This listing could not be found.' );
@@ -91,7 +89,7 @@ function aw_report_submit() {
 	update_post_meta( $id, 'aw_r_status', 'new' );
 	update_post_meta( $id, 'aw_r_source', kits_submitted_source() ); // the page it came from (S5.8)
 	aw_form_count( $rl );
-	aw_form_success( $done, 'Thanks — we\'ll check it.' );
+	aw_form_success( kits_thanks_url( 'report', array( 'listing' => $lid, 'from' => false ), 'Thanks — we\'ll check it.' ), 'Thanks — we\'ll check it.' );
 }
 add_action( 'admin_post_nopriv_aw_report', 'aw_report_submit' );
 add_action( 'admin_post_aw_report', 'aw_report_submit' );

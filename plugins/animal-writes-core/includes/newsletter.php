@@ -122,7 +122,7 @@ add_shortcode( 'aw_newsletter', 'aw_newsletter_form' );
 function aw_newsletter_submit() {
 	$form = 'aw_newsletter';
 	$back = aw_form_back( '/' );
-	$done = add_query_arg( 'aw_done', 'nl_check', $back ) . '#newsletter';
+	$done = kits_thanks_url( 'newsletter' );
 	$rl   = aw_form_guard( $form, $back, 'newsletter', $done );
 	$v    = array(
 		'email'   => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
@@ -141,7 +141,8 @@ function aw_newsletter_submit() {
 	$before = aw_nl_get( 'email', strtolower( $v['email'] ) );
 	if ( $before && 'active' === ( $before['status'] ?? '' ) ) {
 		aw_form_count( $rl );
-		aw_form_success( add_query_arg( array( 'aw_done' => 'nl_already', 'to' => $v['email'] ), $back ) . '#newsletter', 'You\'re already subscribed', sprintf( 'Updates go to %s.', $v['email'] ) );
+		$text = sprintf( 'Updates go to %s.', $v['email'] );
+		aw_form_success( kits_thanks_url( 'newsletter', array(), 'You\'re already subscribed', $text ), 'You\'re already subscribed', $text );
 	}
 	$row = aw_nl_add( $v['email'], $v['name'], 'site:' . kits_submitted_source(), 'pending' ); // where they signed up (S5.8)
 	if ( ! $row ) {
@@ -155,7 +156,8 @@ function aw_newsletter_submit() {
 		);
 	}
 	aw_form_count( $rl );
-	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Check your inbox', sprintf( 'We\'ve sent a link to %s. Open it to confirm your subscription.', $v['email'] ) );
+	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm your subscription.', $v['email'] );
+	aw_form_success( kits_thanks_url( 'newsletter', array(), 'Check your inbox', $text ), 'Check your inbox', $text );
 }
 add_action( 'admin_post_nopriv_aw_newsletter', 'aw_newsletter_submit' );
 add_action( 'admin_post_aw_newsletter', 'aw_newsletter_submit' );

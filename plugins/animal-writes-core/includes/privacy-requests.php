@@ -34,7 +34,7 @@ add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
 function aw_remove_data_submit() {
 	$form = 'aw_remove_data';
 	$back = aw_form_back( '/remove-my-data/' );
-	$rl   = aw_form_guard( $form, $back, 'remove-data', add_query_arg( 'aw_done', 'rd_check', $back ), 3 );
+	$rl   = aw_form_guard( $form, $back, 'remove-data', kits_thanks_url( 'remove-data' ), 3 );
 	$v    = array( 'email' => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ) );
 	$errors = aw_form_validate( array( 'email' => array( 'required', 'email' ) ), $v, array( 'email' => 'Email' ) );
 	if ( $errors ) {
@@ -46,7 +46,8 @@ function aw_remove_data_submit() {
 	}
 	// The same answer whether or not a request was already open, so the form says nothing about who is on file.
 	aw_form_count( $rl );
-	aw_form_success( add_query_arg( array( 'aw_done' => 'rd_check', 'to' => $v['email'] ), $back ), 'Check your inbox', sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $v['email'] ) );
+	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $v['email'] );
+	aw_form_success( kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'Check your inbox', $text );
 }
 add_action( 'admin_post_nopriv_aw_remove_data', 'aw_remove_data_submit' );
 add_action( 'admin_post_aw_remove_data', 'aw_remove_data_submit' );

@@ -208,7 +208,7 @@
 			if (g && submitted) groupOk(g, true);
 		});
 		// Keep what was typed in this tab until the form is sent (a reload or an expired page does not lose it).
-		var KEY = 'kit-form:' + location.pathname + ':' + (form.id || form.getAttribute('action'));
+		var KEY = 'kit-form:' + location.pathname + ':' + (form.id || form.getAttribute('action')) + (form.dataset.key ? ':' + form.dataset.key : ''); // data-key: one form page for many items
 		function save() {
 			try {
 				var o = {};
@@ -275,6 +275,7 @@
 							.then(function (r) { return r.json(); })
 							.then(function (k) { var n = form.querySelector('input[name=_aw_nonce]'); if (n && k.nonce) { n.value = k.nonce; form.requestSubmit(); } else status(form, data.notice); });
 					}
+					if (data.ok && data.redirect) { try { sessionStorage.removeItem(KEY); } catch (x) {} busy(btn, true); location.assign(data.redirect); return; } // the thank-you page
 					if (data.ok) { try { sessionStorage.removeItem(KEY); } catch (x) {} done(form, data); return; }
 					var list = [];
 					Object.keys(data.errors || {}).forEach(function (name) {
@@ -608,10 +609,19 @@
 	document.addEventListener('kit:step', function (e) { if (e.target.closest('.aw-claim-form, #claim')) track('claim_step', { step: e.detail.step }); });
 	document.addEventListener('kit:filter', function (e) { track('filter_apply', { filters: e.detail.params, hub: page.section || '' }); });
 
-	// Forms sent without JavaScript (and the claim form, which uploads a file) come back with ?aw_done=…
+	// The thank-you page ([data-kit-thanks="<form>"]): every form that goes there, with or without JavaScript, counts here
+	// (once per visit to that URL; kit:form-done above counts only forms that show their message in place).
 	var qs = new URLSearchParams(location.search);
-	var doneMap = { contact: 'contact', volunteer: 'volunteer', report: 'report', claim: 'claim', nl_check: 'newsletter', rd_check: 'remove_data' };
-	if (doneMap[qs.get('aw_done')]) track('form_submit_success', { form: doneMap[qs.get('aw_done')] });
+	var thanks = document.querySelector('[data-kit-thanks]');
+	if (thanks && thanks.dataset.kitThanks) {
+		var seen = false;
+		try {
+			seen = sessionStorage.getItem('kit-thanks:' + location.search) === '1';
+			sessionStorage.setItem('kit-thanks:' + location.search, '1');
+			Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf('kit-form:') === 0) sessionStorage.removeItem(k); }); // sent: forget what was typed
+		} catch (x) {}
+		if (!seen) track('form_submit_success', { form: thanks.dataset.kitThanks });
+	}
 
 	// Search results and the PIN code search
 	if (page.page_type === 'search' && qs.get('q')) {

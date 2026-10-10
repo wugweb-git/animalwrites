@@ -125,7 +125,7 @@ add_shortcode( 'aw_contact_form', 'aw_contact_form' );
 function aw_contact_submit() {
 	$form = 'aw_contact';
 	$back = aw_form_back( '/contact/' );
-	$done = add_query_arg( 'aw_done', 'contact', $back ) . '#write';
+	$done = kits_thanks_url( 'contact' );
 	$rl   = aw_form_guard( $form, $back, 'write', $done );
 	$v    = array(
 		'about'   => sanitize_key( wp_unslash( $_POST['about'] ?? '' ) ),
@@ -166,7 +166,8 @@ function aw_contact_submit() {
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		aw_nl_optin( $v['email'], $v['name'], 'contact' );
 	}
-	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Message sent.', sprintf( 'We\'ll reply to %s.', $v['email'] ), array( 'again' => 'Send another' ) );
+	$text = sprintf( 'We\'ll reply to %s.', $v['email'] );
+	aw_form_success( kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'Message sent.', $text, array( 'again' => 'Send another' ) );
 }
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );

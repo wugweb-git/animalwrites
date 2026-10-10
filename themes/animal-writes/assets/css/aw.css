@@ -704,6 +704,11 @@ body { background: var(--kit-color-canvas); }
 .aw-listing-help > h2 { font-size: var(--kit-type-h3); margin: 0 0 var(--s-2); }
 .aw-listing-help > p { margin: 0 0 var(--s-4); color: var(--kit-color-muted); }
 .aw-listing-help-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+/* Claim, Report and Thank-you pages (owner, 10 Oct 2026): the listing they are about, and the links back */
+.aw-form-for { display: flex; flex-direction: column; gap: var(--s-1); margin: 0 0 var(--s-6); padding: var(--s-4) var(--s-5); border: 1px solid var(--kit-color-line); border-radius: var(--r-4); }
+.aw-form-for a { font-weight: var(--kit-weight-strong); }
+.aw-form-for span { color: var(--kit-color-muted); }
+.aw-thanks-links { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
 .aw-listing-help-actions > .kit-disclosure { order: 1; }
 .aw-listing-help-actions > .kit-disclosure[open] { order: 2; flex-basis: 100%; } /* buttons stay in one row; the open form below */
 .aw-listing-help-actions > .kit-disclosure[open] > summary { order: -1; }
@@ -797,10 +802,10 @@ body { background: var(--kit-color-canvas); }
 /* Animal Writes buttons: icon by function */
 .aw-newsletter-form [type=submit] { --kit-btn-ico: var(--kit-ico-mail); }
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
-#claim > summary, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
-#report > summary, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
+#claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
+#report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
 #volunteer > summary, .aw-volunteer-form [type=submit] { --kit-btn-ico: var(--kit-ico-person); }
-#claim > summary::before, #report > summary::before, #volunteer > summary::before { content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico) center / contain no-repeat; mask: var(--kit-btn-ico) center / contain no-repeat; }
+#claim > summary::before, #report > summary::before, #volunteer > summary::before, .aw-claim-link::before, .aw-report-link::before { content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico) center / contain no-repeat; mask: var(--kit-btn-ico) center / contain no-repeat; }
 
 /* Animal Writes parts of the Kits components (tags by noun, logo tiles, meta icons) */
 .aw-profile-badge, .taxonomy-aw_place a {

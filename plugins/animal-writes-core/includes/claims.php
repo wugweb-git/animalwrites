@@ -77,10 +77,6 @@ function aw_claim_services_field( $form, $listing ) {
 
 function aw_claim_form( $listing ) {
 	$form = 'aw_claim';
-	if ( isset( $_GET['aw_done'] ) && 'claim' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request sent.</p>' . ( $to ? '<p>' . esc_html( sprintf( 'We\'ll check it and email you at %s.', $to ) ) . '</p>' : '' ) . '</div>';
-	}
 	$about  = kits_dict_field( $form, 'name', array( 'required' => true ) )
 		. kits_dict_field( $form, 'role', array( 'options' => AW_CLAIM_ROLES ) )
 		. kits_dict_field( $form, 'email', array( 'hint' => 'We use this only to check this request. It is not shown on the page.' ) )
@@ -98,13 +94,13 @@ function aw_claim_form( $listing ) {
 		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
 		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) )
 		. ( function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : '' );
-	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim' ) )
+	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim', 'data-key' => (string) $listing->ID, 'data-source' => trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' ) ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
 		. kits_form_steps( array( array( 'About you', $about ), array( 'What should change', $change ) ), 'Send for review' )
 		. '</form>';
 }
 
-/** Back-compat: [aw_claim_box] prints the listing card's claim form. */
+/** Back-compat: [aw_claim_box] prints the claim form of the current listing. */
 add_shortcode( 'aw_claim_box', fn() => get_post() ? aw_claim_form( get_post() ) : '' );
 
 /**
@@ -113,8 +109,9 @@ add_shortcode( 'aw_claim_box', fn() => get_post() ? aw_claim_form( get_post() ) 
 function aw_claim_submit() {
 	$form    = 'aw_claim';
 	$listing = get_post( (int) ( $_POST['listing'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$back    = $listing && 'aw_listing' === $listing->post_type ? get_permalink( $listing ) : aw_form_back( '/directory/' );
-	$done    = add_query_arg( 'aw_done', 'claim', $back ) . '#claim';
+	$lid     = $listing ? (int) $listing->ID : 0;
+	$back    = aw_claim_url( $lid ); // errors: back to /claim/?listing=<ID>, details kept
+	$done    = kits_thanks_url( 'claim', array( 'listing' => $lid, 'from' => false ) );
 	$rl      = aw_form_guard( $form, $back, 'claim', $done );
 	if ( ! $listing || 'aw_listing' !== $listing->post_type || 'publish' !== $listing->post_status ) {
 		aw_form_fail( $form, array(), array(), $back, 'claim', 'This listing could not be found.' );
@@ -201,7 +198,8 @@ function aw_claim_submit() {
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		aw_nl_optin( $v['email'], $v['name'], 'claim' );
 	}
-	aw_form_success( add_query_arg( 'to', $v['email'], $done ), 'Request sent.', sprintf( 'We\'ll check it and email you at %s.', $v['email'] ) );
+	$text = sprintf( 'We\'ll check it and email you at %s.', $v['email'] );
+	aw_form_success( kits_thanks_url( 'claim', array( 'listing' => $lid, 'from' => false ), 'Request sent.', $text ), 'Request sent.', $text );
 }
 add_action( 'admin_post_nopriv_aw_claim', 'aw_claim_submit' );
 add_action( 'admin_post_aw_claim', 'aw_claim_submit' );

@@ -27,7 +27,7 @@ const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 90
 add_filter(
 	'kits_ads_skip',
 	function ( $skip ) {
-		if ( $skip || is_search() || is_page( array( 'helplines', 'corrections', 'contact', 'volunteer', 'remove-my-data', 'search' ) ) ) {
+		if ( $skip || is_search() || is_page( array( 'helplines', 'corrections', 'contact', 'volunteer', 'remove-my-data', 'search', 'claim', 'report', 'thank-you' ) ) ) {
 			return true;
 		}
 		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'aw_listing_type', get_queried_object_id() ) ) {
