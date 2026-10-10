@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_THIN_DISTRICT_TYPE = 3; // a district × type page needs this many listings to be indexed
+const AW_THIN_DISTRICT_TYPE = 1; // owner, 10 Oct 2026: every district × type page with a listing is indexed
 const AW_NOINDEX_TAXONOMIES = array( 'aw_listing_type', 'aw_opportunity_type', 'aw_legal_kind', 'category', 'aw_service' );
 
 /** District × type page with too few listings to be worth indexing. */
@@ -24,8 +24,17 @@ function aw_is_thin_directory_page() {
 		return false;
 	}
 	$place = aw_current_place();
-	global $wp_query;
-	return $place && $place->parent && (int) $wp_query->found_posts < AW_THIN_DISTRICT_TYPE;
+	if ( ! $place || ! $place->parent ) {
+		return false;
+	}
+	// Stored counts (places.php), the same numbers the sitemap uses — the page query's found_posts is not reliable here.
+	$type = (string) get_query_var( 'aw_dir_type' );
+	foreach ( aw_place_counts()['pairs'] as $p ) {
+		if ( (string) $p[0] === (string) $place->code && $p[1] === $type ) {
+			return (int) $p[3] < AW_THIN_DISTRICT_TYPE;
+		}
+	}
+	return true; // no listings of this type here
 }
 
 add_filter(
@@ -34,7 +43,7 @@ add_filter(
 		$tax = array_filter( AW_NOINDEX_TAXONOMIES, fn( $t ) => is_tax( $t ) );
 		// A directory place page is also a listing-type query; only the bare type archive (/directory-type/…) is excluded.
 		$type_archive = $tax && ! get_query_var( 'aw_place' );
-		if ( $type_archive || is_search() || aw_is_thin_directory_page() || aw_is_filtered_list() ) {
+		if ( $type_archive || is_search() || aw_is_thin_directory_page() ) { // filtered lists are indexed (owner, 10 Oct 2026)
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 			unset( $robots['max-image-preview'] );
@@ -60,20 +69,33 @@ function aw_is_filtered_list() {
 	return false;
 }
 
-/** Canonical URL of the current list page: its path (with /page/N/), without filters. */
+/**
+ * Canonical URL of the current list page: its path (with /page/N/) plus its filters, in a fixed order, so each
+ * filtered list (e.g. /directory/?type=gaushala) is its own indexed page (owner, 10 Oct 2026). Sort order is left out.
+ */
 function aw_list_canonical() {
 	if ( is_singular() || is_search() || is_404() ) {
 		return '';
 	}
 	$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	return home_url( user_trailingslashit( $path ) );
+	$url  = home_url( user_trailingslashit( $path ) );
+	$args = array();
+	foreach ( AW_FILTER_PARAMS as $k ) {
+		if ( 'sort' !== $k && isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] && is_string( $_GET[ $k ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$args[ $k ] = sanitize_text_field( wp_unslash( $_GET[ $k ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		}
+	}
+	return $args ? add_query_arg( array_map( 'rawurlencode', $args ), $url ) : $url;
 }
+
+// The same canonical for Rank Math: a filtered list points to itself, not to the unfiltered list.
+add_filter( 'kits_seo_canonical', fn( $url ) => aw_is_filtered_list() ? aw_list_canonical() : $url, 20 ); // after the hub canonical (kits-config.php)
 
 add_action(
 	'wp_head',
 	function () {
-		// Rank Math prints it, except on a noindex page; a filtered list keeps its canonical (the list itself).
-		$url = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? ( aw_is_filtered_list() && function_exists( 'kits_seo_canonical' ) ? kits_seo_canonical() : '' ) : aw_list_canonical();
+		// Rank Math prints it when active (filtered lists included, through kits_seo_canonical below).
+		$url = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? '' : aw_list_canonical();
 		if ( $url ) {
 			echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
 		}

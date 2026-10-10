@@ -163,7 +163,7 @@ add_shortcode(
 add_filter(
 	'wp_robots',
 	function ( $robots ) {
-		if ( is_page( array( 'claim', 'report', 'thank-you' ) ) ) {
+		if ( is_page( array( 'report', 'thank-you' ) ) ) { // /claim/ is indexed (owner, 10 Oct 2026)
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 		}
@@ -179,6 +179,21 @@ add_action(
 			do_action( 'litespeed_control_set_nocache', 'form page with a personal message' );
 		}
 	}
+);
+
+// /claim/?listing=ID is one indexed page per listing: its own canonical and title (owner, 10 Oct 2026).
+function aw_claim_listing() {
+	$id = is_page( 'claim' ) ? absint( $_GET['listing'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+	return ( $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) ? $id : 0;
+}
+add_filter( 'kits_seo_canonical', fn( $url ) => '' === $url && aw_claim_listing() ? add_query_arg( 'listing', aw_claim_listing(), get_permalink() ) : $url );
+add_filter(
+	'rank_math/frontend/title',
+	function ( $title ) {
+		$id = aw_claim_listing();
+		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – Animal Writes' : $title;
+	},
+	30
 );
 
 /** Make /claim/, /report/ and /thank-you/ once. */
@@ -199,7 +214,7 @@ add_action(
 					'post_content' => '<!-- wp:shortcode -->[' . $p[1] . ']<!-- /wp:shortcode -->',
 				)
 			);
-			if ( $id && ! is_wp_error( $id ) ) {
+			if ( $id && ! is_wp_error( $id ) && 'claim' !== $slug ) {
 				update_post_meta( $id, 'kits_noindex', '1' );
 			}
 		}
