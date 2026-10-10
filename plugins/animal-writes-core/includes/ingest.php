@@ -242,7 +242,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
 		// Owner, 9 Oct 2026: backfilled items go live at once, with their own publication date (never the day fetched).
-		$when = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day . ' 09:00:00' : current_time( 'mysql' );
+		$when = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? min( $day . ' 09:00:00', current_time( 'mysql' ) ) : current_time( 'mysql' ); // never in the future (would schedule, not publish)
 		wp_update_post( array( 'ID' => $post_id, 'post_status' => 'publish', 'post_date' => $when, 'post_date_gmt' => get_gmt_from_date( $when ), 'edit_date' => true ) );
 		delete_post_meta( $post_id, 'aw_review' );
 		$review = '';
