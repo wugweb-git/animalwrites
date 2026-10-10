@@ -119,3 +119,64 @@ add_filter(
 	10,
 	2
 );
+
+/* ---------- Rank Math sitemap (/sitemap_index.xml): the same URLs ---------- */
+
+// The directory place pages and district × type pages, as Rank Math's "directory" sitemap (directory-sitemap.xml).
+add_filter(
+	'rank_math/sitemap/providers',
+	function ( $providers ) {
+		if ( ! interface_exists( '\RankMath\Sitemap\Providers\Provider' ) || ! class_exists( '\RankMath\Sitemap\Router' ) ) {
+			return $providers;
+		}
+		if ( ! class_exists( 'AW_Rank_Math_Sitemap_Directory' ) ) {
+			/** Directory place pages and district × type pages. */
+			class AW_Rank_Math_Sitemap_Directory implements \RankMath\Sitemap\Providers\Provider {
+				public function handles_type( $type ) {
+					return 'directory' === $type;
+				}
+				public function get_index_links( $max_entries ) {
+					$urls  = aw_sitemap_directory_urls();
+					$pages = (int) ceil( count( $urls ) / max( 1, $max_entries ) );
+					$links = array();
+					for ( $i = 1; $i <= $pages; $i++ ) {
+						$chunk = array_slice( $urls, ( $i - 1 ) * $max_entries, $max_entries );
+						$mods  = array_filter( wp_list_pluck( $chunk, 'lastmod' ) );
+						$links[] = array_filter(
+							array(
+								'loc'     => \RankMath\Sitemap\Router::get_base_url( 'directory-sitemap' . ( $pages > 1 ? $i : '' ) . '.xml' ),
+								'lastmod' => $mods ? max( $mods ) : '',
+							)
+						);
+					}
+					return $links;
+				}
+				public function get_sitemap_links( $type, $max_entries, $current_page ) {
+					$chunk = array_slice( aw_sitemap_directory_urls(), ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
+					return array_map( fn( $u ) => array_filter( array( 'loc' => $u['loc'], 'mod' => $u['lastmod'] ?? '' ) ), $chunk );
+				}
+			}
+		}
+		$providers[] = new AW_Rank_Math_Sitemap_Directory();
+		return $providers;
+	}
+);
+
+// Sections are Pages (the hubs, in the page sitemap); content types have no archive of their own to list.
+add_filter( 'rank_math/sitemap/post_type_archive_link', '__return_false' );
+
+// Not indexed, so not listed: the search, claim, report and thank-you pages, the kit demo, and closed opportunities.
+add_filter(
+	'kits_sitemap_skip',
+	function ( $skip, $post ) {
+		if ( 'page' === $post->post_type && in_array( $post->post_name, array( 'search', 'claim', 'report', 'thank-you', 'kits-demo' ), true ) ) {
+			return true;
+		}
+		if ( 'aw_opportunity' === $post->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $post ) ) {
+			return true;
+		}
+		return $skip;
+	},
+	10,
+	2
+);

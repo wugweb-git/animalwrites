@@ -2,8 +2,9 @@
 /**
  * Permanent redirects for items that moved section or were merged (restructure Phase 3).
  *
- * Option aw_redirects maps an old path (no slashes at the ends) to the post that now holds it. A request that would
- * 404 at an old path gets one 301 to that post's current URL, so a move never costs a redirect chain.
+ * The one list is Rank Math → Redirections (owner, 10 Oct 2026). aw_redirect_add() adds to it, so forms, merges and
+ * migrations keep writing to that one list. The old option aw_redirects (old path => post ID or URL) was imported into
+ * it on 10 Oct 2026 and is kept unchanged as a record; it is only read when Rank Math is not active (a fresh install).
  *
  * @package animal-writes-core
  */
@@ -12,10 +13,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/#volunteer'). */
+/** Whether Rank Math's Redirections module holds the redirects. */
+function aw_redirects_in_rank_math() {
+	return function_exists( 'kits_rank_math_module' ) && kits_rank_math_module( 'redirections' ) && class_exists( '\RankMath\Redirections\Redirection' );
+}
+
+/**
+ * Add one 301 to Rank Math's list: $pattern (a path, or a regex when $comparison is 'regex') to $to (a URL).
+ * An exact path already in the list is left alone. Returns the redirection ID, or 0.
+ *
+ * @param string $pattern    Path without slashes at the ends, or a regex.
+ * @param string $to         Destination URL (absolute, or a path on this site).
+ * @param string $comparison exact | regex.
+ * @return int
+ */
+function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
+	if ( ! aw_redirects_in_rank_math() || '' === $pattern || '' === $to ) {
+		return 0;
+	}
+	if ( 'exact' === $comparison && class_exists( '\RankMath\Redirections\DB' ) ) {
+		$have = \RankMath\Redirections\DB::match_redirections_source( $pattern );
+		foreach ( (array) $have as $row ) {
+			foreach ( (array) maybe_unserialize( $row['sources'] ?? '' ) as $src ) {
+				if ( 'exact' === ( $src['comparison'] ?? '' ) && trim( (string) $src['pattern'], '/' ) === $pattern ) {
+					return (int) $row['id'];
+				}
+			}
+		}
+	}
+	$r = \RankMath\Redirections\Redirection::from(
+		array(
+			'sources'     => array( array( 'pattern' => $pattern, 'comparison' => $comparison ) ),
+			'url_to'      => $to,
+			'header_code' => 301,
+			'status'      => 'active',
+		)
+	);
+	return (int) $r->save();
+}
+
+/** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/volunteer/'). */
 function aw_redirect_add( $old_url, $target ) {
 	$path = trim( (string) wp_parse_url( $old_url, PHP_URL_PATH ), '/' );
 	if ( '' === $path ) {
+		return;
+	}
+	if ( aw_redirects_in_rank_math() ) {
+		$to = is_numeric( $target ) ? (string) get_permalink( (int) $target ) : home_url( (string) $target );
+		if ( $to ) {
+			aw_rank_math_redirect( rawurldecode( $path ), $to );
+		}
 		return;
 	}
 	$map          = (array) get_option( 'aw_redirects', array() );
@@ -23,14 +70,14 @@ function aw_redirect_add( $old_url, $target ) {
 	update_option( 'aw_redirects', $map, false );
 }
 
-/** Whole sections that moved (7 Oct 2026): old prefix => new prefix. Items keep their slug. */
+/** Whole sections that moved (7 Oct 2026): old prefix => new prefix. Items keep their slug. In Rank Math as regex rules. */
 const AW_MOVED_SECTIONS = array( 'knowledge' => 'resources', 'legal-watch' => 'library', 'research' => 'resources' );
 
 add_action(
 	'template_redirect',
 	function () {
-		if ( ! is_404() ) {
-			return;
+		if ( ! is_404() || aw_redirects_in_rank_math() ) {
+			return; // Rank Math answers these (its list has the items and the moved sections)
 		}
 		$path = trim( (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$map  = (array) get_option( 'aw_redirects', array() );

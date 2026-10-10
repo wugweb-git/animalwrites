@@ -56,7 +56,7 @@ function aw_list_canonical() {
 add_action(
 	'wp_head',
 	function () {
-		$url = aw_list_canonical();
+		$url = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? '' : aw_list_canonical(); // Rank Math prints it otherwise
 		if ( $url ) {
 			echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
 		}

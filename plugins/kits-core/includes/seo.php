@@ -1,7 +1,8 @@
 <?php
 /**
  * Meta description, Open Graph and Twitter card tags.
- * Skipped automatically if a dedicated SEO plugin (Yoast, Rank Math, SEOPress, AIOSEO) is active.
+ * Skipped automatically if a dedicated SEO plugin (Yoast, Rank Math, SEOPress, AIOSEO) is active; with Rank Math the
+ * functions below feed its filters instead (seo-rankmath.php).
  *
  * @package kits-core
  */
@@ -282,10 +283,14 @@ add_action(
 );
 
 /* ---------- Settings → SEO: search engine verification (Bing Webmaster Tools, Yandex Webmaster) ---------- */
+// With Rank Math active the codes live in Rank Math → General → Webmaster Tools; this page and its output stay off.
 
 add_action(
 	'admin_menu',
 	function () {
+		if ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) {
+			return;
+		}
 		add_options_page(
 			'SEO',
 			'SEO',
@@ -319,6 +324,9 @@ function kits_verify_code( $raw ) {
 add_action(
 	'wp_head',
 	function () {
+		if ( aw_seo_plugin_active() ) {
+			return;
+		}
 		foreach ( array( 'kits_verify_bing' => 'msvalidate.01', 'kits_verify_yandex' => 'yandex-verification' ) as $k => $name ) {
 			$code = (string) get_option( $k );
 			if ( '' !== $code && ( is_front_page() ) ) {

@@ -310,58 +310,59 @@ add_action(
 		}
 	}
 );
+// Without Rank Math (with it, Rank Math prints the canonical from kits_seo_canonical, kits-config.php).
 add_action(
 	'wp_head',
 	function () {
-		if ( aw_hub_type() && ! is_404() ) {
+		if ( aw_hub_type() && ! is_404() && ! ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ) {
 			echo '<link rel="canonical" href="' . esc_url( aw_hub_canonical() ) . '">' . "\n";
 		}
 	},
 	1
 );
 
-/** CollectionPage + ItemList of a hub's current page. */
-add_action(
-	'wp_head',
-	function () {
-		$type = aw_hub_type();
-		if ( ! $type || is_404() || 'aw_press' === $type ) {
-			return; // Media & PR has its own (press.php)
-		}
-		$url   = strtok( aw_hub_base_url(), '?' );
-		$items = array();
-		$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
-		foreach ( aw_hub_posts( $type ) as $i => $p ) {
-			$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => wp_strip_all_tags( get_the_title( $p ) ) );
-		}
-		$name = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
-		aw_jsonld(
-			array(
-				'@context' => 'https://schema.org',
-				'@graph'   => array(
-					array(
-						'@type'       => 'CollectionPage',
-						'@id'         => $url . '#page',
-						'url'         => $url,
-						'name'        => wp_strip_all_tags( $name ),
-						'description' => function_exists( 'aw_seo_description' ) ? aw_seo_description() : '',
-						'inLanguage'  => 'en-IN',
-						'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
-						'publisher'   => array( '@id' => home_url( '/#organization' ) ),
-						'mainEntity'  => array( '@id' => $url . '#list' ),
-					),
-					array(
-						'@type'           => 'ItemList',
-						'@id'             => $url . '#list',
-						'numberOfItems'   => aw_hub_total( $type ),
-						'itemListElement' => $items,
-					),
-				),
-			)
-		);
-	},
-	30
-);
+/**
+ * CollectionPage + ItemList of a hub's current page (schema.php puts them in the page's one graph). Empty off a hub.
+ *
+ * @return array
+ */
+function aw_hub_schema_nodes() {
+	static $nodes = null;
+	if ( null !== $nodes ) {
+		return $nodes;
+	}
+	$type = aw_hub_type();
+	if ( ! $type || is_404() || 'aw_press' === $type ) {
+		return $nodes = array(); // Media & PR has its own (press.php)
+	}
+	$url   = strtok( aw_hub_base_url(), '?' );
+	$items = array();
+	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
+	foreach ( aw_hub_posts( $type ) as $i => $p ) {
+		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => wp_strip_all_tags( get_the_title( $p ) ) );
+	}
+	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
+	$nodes = array(
+		array(
+			'@type'       => 'CollectionPage',
+			'@id'         => $url . '#page',
+			'url'         => $url,
+			'name'        => wp_strip_all_tags( $name ),
+			'description' => function_exists( 'aw_seo_description' ) ? aw_seo_description() : '',
+			'inLanguage'  => 'en-IN',
+			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+			'mainEntity'  => array( '@id' => $url . '#list' ),
+		),
+		array(
+			'@type'           => 'ItemList',
+			'@id'             => $url . '#list',
+			'numberOfItems'   => aw_hub_total( $type ),
+			'itemListElement' => $items,
+		),
+	);
+	return $nodes;
+}
 
 /* ---------- The Pages and their list patterns (created once; the owner edits them after) ---------- */
 

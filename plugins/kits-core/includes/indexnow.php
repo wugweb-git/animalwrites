@@ -3,6 +3,7 @@
  * IndexNow: when a public item is published or updated, Bing, Yandex and the other IndexNow engines are told at once.
  * The key is made once and served at /{key}.txt (the protocol's proof of ownership). Pings are sent in the background
  * (a one-off scheduled event), batched, at most once per URL per 10 minutes; failures are logged, never shown.
+ * When Rank Math's Instant Indexing module is on, Rank Math sends them with this same key and this file only serves it.
  *
  * @package kits-core
  */
@@ -39,8 +40,8 @@ add_action(
 add_action(
 	'transition_post_status',
 	function ( $new, $old, $post ) {
-		if ( 'publish' !== $new || wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) ) {
-			return;
+		if ( 'publish' !== $new || wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) || ( function_exists( 'kits_rank_math_module' ) && kits_rank_math_module( 'instant-indexing' ) ) ) {
+			return; // with Rank Math's Instant Indexing on, Rank Math sends the pings (same key)
 		}
 		$type = get_post_type_object( $post->post_type );
 		if ( ! $type || ! $type->public || 0 === strpos( (string) wp_parse_url( home_url(), PHP_URL_HOST ), 'staging.' ) || ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) || 'production' !== wp_get_environment_type() && ! apply_filters( 'kits_indexnow_any_env', false ) ) {

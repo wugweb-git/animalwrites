@@ -34,6 +34,18 @@ const KITS_SEO_POST_FIELDS = array(
 	'kits_last_reviewed'    => 'Last reviewed (date)',
 );
 
+/** Fields that Rank Math holds when it is active (seo-rankmath.php); the box then leaves them out. */
+const KITS_SEO_RANK_MATH_FIELDS = array( 'kits_seo_title', 'kits_seo_desc', 'kits_og_title', 'kits_og_desc', 'kits_og_image', 'kits_noindex', 'kits_canonical', 'kits_focus_kw', 'kits_secondary_kw' );
+
+/** The fields of the SEO box: all of them, or without Rank Math's when it is active. */
+function kits_seo_post_fields() {
+	$fields = KITS_SEO_POST_FIELDS;
+	if ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) {
+		$fields = array_diff_key( $fields, array_flip( KITS_SEO_RANK_MATH_FIELDS ) );
+	}
+	return $fields;
+}
+
 /** Field kinds for the box: key => checkbox | url | textarea | date | select options. */
 function kits_seo_field_kinds() {
 	return array(
@@ -64,7 +76,7 @@ function kits_seo_override( $key ) {
 add_filter(
 	'pre_get_document_title',
 	function ( $title ) {
-		$t = kits_seo_override( 'kits_seo_title' );
+		$t = ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? '' : kits_seo_override( 'kits_seo_title' ); // Rank Math holds the SEO title
 		if ( '' === $t || is_front_page() ) {
 			return $title;
 		}
@@ -79,6 +91,9 @@ add_filter(
 add_action(
 	'admin_init',
 	function () {
+		if ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) {
+			return; // Rank Math has the term SEO title and description
+		}
 		foreach ( get_taxonomies( array( 'public' => true ) ) as $tax ) {
 			add_action(
 				"{$tax}_edit_form_fields",
@@ -113,7 +128,7 @@ add_action(
 	function ( $type ) {
 		$obj = get_post_type_object( $type );
 		if ( $obj && $obj->public ) {
-			add_meta_box( 'kits_seo', 'SEO', 'kits_seo_box', $type, 'normal', 'low' );
+			add_meta_box( 'kits_seo', ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? 'AI answers, FAQs and schema' : 'SEO', 'kits_seo_box', $type, 'normal', 'low' );
 		}
 	}
 );
@@ -122,7 +137,7 @@ function kits_seo_box( $post ) {
 	wp_nonce_field( 'kits_seo_' . $post->ID, '_kits_seo' );
 	echo '<table class="form-table">';
 	$kinds = kits_seo_field_kinds();
-	foreach ( KITS_SEO_POST_FIELDS as $k => $label ) {
+	foreach ( kits_seo_post_fields() as $k => $label ) {
 		$v    = (string) get_post_meta( $post->ID, $k, true );
 		$kind = $kinds[ $k ] ?? 'text';
 		if ( is_array( $kind ) ) {
@@ -140,7 +155,7 @@ function kits_seo_box( $post ) {
 		}
 		echo '<tr><th><label for="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td>' . $ctl . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
-	echo '</table><p class="description">Empty fields use the page title, excerpt and featured image.</p>';
+	echo '</table>' . ( ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ? '' : '<p class="description">Empty fields use the page title, excerpt and featured image.</p>' );
 }
 
 add_action(
@@ -149,7 +164,7 @@ add_action(
 		if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['_kits_seo'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_kits_seo'] ) ), 'kits_seo_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		foreach ( array_keys( KITS_SEO_POST_FIELDS ) as $k ) {
+		foreach ( array_keys( kits_seo_post_fields() ) as $k ) {
 			$v = wp_unslash( $_POST[ $k ] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$kind = kits_seo_field_kinds()[ $k ] ?? 'text';
 			if ( 'kits_og_image' === $k ) {
@@ -273,8 +288,8 @@ add_filter(
 add_action(
 	'wp_head',
 	function () {
-		if ( ! is_singular() || ! apply_filters( 'kits_seo_print_faq_schema', true ) ) {
-			return;
+		if ( ! is_singular() || ! apply_filters( 'kits_seo_print_faq_schema', true ) || ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ) {
+			return; // with Rank Math the FAQPage joins its graph (seo-rankmath.php)
 		}
 		$faqs = kits_seo_faqs( get_queried_object_id() );
 		if ( ! $faqs ) {

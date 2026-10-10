@@ -145,16 +145,6 @@ function aw_listing_schema( $id ) {
 	return array_filter( $org );
 }
 
-add_action(
-	'wp_head',
-	function () {
-		if ( is_singular( 'aw_listing' ) ) {
-			aw_jsonld( array( '@context' => 'https://schema.org' ) + aw_listing_schema( get_queried_object_id() ) );
-			return;
-		}
-	},
-	30
-);
 
 /* ---------- Site and content pages ---------- */
 
@@ -383,60 +373,123 @@ function aw_job_schema( $id ) {
 	return array_filter( $data );
 }
 
-// One graph per page: the publisher and the site on every page, plus the page's own item and its breadcrumb trail.
+/**
+ * The schema.org nodes of the current page's own content (not the publisher, the site or the breadcrumb trail):
+ * the article, legislation, job, campaign, listing organisation, contact page, hub list or topic collection.
+ *
+ * @return array List of nodes.
+ */
+function aw_schema_nodes() {
+	$nodes = array();
+	if ( is_404() ) {
+		return $nodes;
+	}
+	if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
+		$id      = get_queried_object_id();
+		$nodes[] = aw_article_schema( $id );
+		if ( 'post' === get_post_type( $id ) ) {
+			$nodes[] = aw_faq_schema( $id );
+		}
+	} elseif ( is_singular( 'aw_listing' ) ) {
+		$nodes[] = aw_listing_schema( get_queried_object_id() );
+	} elseif ( is_singular( 'aw_opportunity' ) ) {
+		$nodes[] = aw_job_schema( get_queried_object_id() );
+	} elseif ( is_singular( 'aw_campaign' ) ) {
+		$nodes[] = aw_campaign_schema( get_queried_object_id() );
+	} elseif ( is_page( 'contact' ) ) {
+		$nodes[] = array(
+			'@type'      => 'ContactPage',
+			'@id'        => get_permalink() . '#page',
+			'url'        => get_permalink(),
+			'name'       => get_the_title(),
+			'inLanguage' => 'en-IN',
+			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+			'mainEntity' => array(
+				'@type'        => 'Organization',
+				'@id'          => home_url( '/#organization' ),
+				'email'        => 'contact@animalwrites.in',
+				'contactPoint' => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in' ),
+			),
+		);
+	} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
+		$nodes[] = aw_press_schema();
+	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
+		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
+	} elseif ( is_tax( 'aw_topic' ) ) {
+		$term    = get_queried_object();
+		$nodes[] = array_filter(
+			array(
+				'@type'       => 'CollectionPage',
+				'@id'         => get_term_link( $term ) . '#page',
+				'url'         => get_term_link( $term ),
+				'name'        => $term->name,
+				'description' => wp_strip_all_tags( term_description( $term ) ),
+				'inLanguage'  => 'en-IN',
+				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+				'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+			)
+		);
+	}
+	return array_values( array_filter( $nodes ) );
+}
+
+// Without Rank Math: one graph per page, the publisher and the site, the page's own nodes and its breadcrumb trail.
 add_action(
 	'wp_head',
 	function () {
-		if ( is_404() ) {
+		if ( is_404() || ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ) {
 			return;
 		}
-		$graph = array( aw_publisher_schema(), aw_website_schema() );
-		if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
-			$id      = get_queried_object_id();
-			$graph[] = aw_article_schema( $id );
-			if ( 'post' === get_post_type( $id ) ) {
-				$graph[] = aw_faq_schema( $id );
-			}
-		} elseif ( is_singular( 'aw_opportunity' ) ) {
-			$graph[] = aw_job_schema( get_queried_object_id() );
-		} elseif ( is_singular( 'aw_campaign' ) ) {
-			$graph[] = aw_campaign_schema( get_queried_object_id() );
-		} elseif ( is_page( 'contact' ) ) {
-			$graph[] = array(
-				'@type'      => 'ContactPage',
-				'@id'        => get_permalink() . '#page',
-				'url'        => get_permalink(),
-				'name'       => get_the_title(),
-				'inLanguage' => 'en-IN',
-				'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
-				'mainEntity' => array(
-					'@type'        => 'Organization',
-					'@id'          => home_url( '/#organization' ),
-					'email'        => 'contact@animalwrites.in',
-					'contactPoint' => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in' ),
-				),
-			);
-		} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
-			$graph[] = aw_press_schema();
-		} elseif ( is_tax( 'aw_topic' ) ) {
-			$term    = get_queried_object();
-			$graph[] = array_filter(
-				array(
-					'@type'       => 'CollectionPage',
-					'@id'         => get_term_link( $term ) . '#page',
-					'url'         => get_term_link( $term ),
-					'name'        => $term->name,
-					'description' => wp_strip_all_tags( term_description( $term ) ),
-					'inLanguage'  => 'en-IN',
-					'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
-					'publisher'   => array( '@id' => home_url( '/#organization' ) ),
-				)
-			);
-		}
-		$graph[] = aw_breadcrumb_schema();
+		$graph = array_merge( array( aw_publisher_schema(), aw_website_schema() ), aw_schema_nodes(), array( aw_breadcrumb_schema() ) );
 		aw_jsonld( array( '@context' => 'https://schema.org', '@graph' => array_values( array_filter( $graph ) ) ) );
 	},
 	31
+);
+
+// With Rank Math: its one graph carries ours. Our publisher and site replace its defaults (same @id); our item nodes
+// replace its automatic article; our breadcrumb trail is the one people see; a page that is itself a collection or a
+// contact page replaces Rank Math's plain WebPage. Schemas an editor adds in Rank Math are kept.
+add_filter(
+	'rank_math/json_ld',
+	function ( $data ) {
+		if ( is_404() ) {
+			return $data;
+		}
+		$data              = (array) $data;
+		$data['publisher'] = aw_publisher_schema();
+		$data['WebSite']   = aw_website_schema();
+		unset( $data['ProfilePage'] ); // authors are not shown on this site
+		$nodes = aw_schema_nodes();
+		if ( $nodes ) {
+			unset( $data['richSnippet'] );
+		}
+		foreach ( $nodes as $node ) {
+			if ( in_array( $node['@type'] ?? '', array( 'CollectionPage', 'ContactPage' ), true ) ) {
+				unset( $data['WebPage'], $data['primaryImage'] );
+			}
+		}
+		foreach ( $nodes as $i => $node ) {
+			$data[ 'aw_node_' . $i ] = $node;
+		}
+		if ( isset( $data['kits_faq'] ) ) {
+			foreach ( $nodes as $node ) {
+				if ( 'FAQPage' === ( $node['@type'] ?? '' ) ) {
+					unset( $data['kits_faq'] );
+				}
+			}
+		}
+		$crumbs = aw_breadcrumb_schema();
+		unset( $data['BreadcrumbList'] );
+		if ( $crumbs ) {
+			$crumbs['@id']          = ( function_exists( 'kits_seo_canonical' ) ? kits_seo_canonical() : get_permalink() ) . '#breadcrumb';
+			$data['BreadcrumbList'] = $crumbs;
+			if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
+				$data['WebPage']['breadcrumb'] = array( '@id' => $crumbs['@id'] );
+			}
+		}
+		return $data;
+	},
+	999
 );
 
 /**
