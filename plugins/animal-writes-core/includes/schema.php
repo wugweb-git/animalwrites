@@ -174,6 +174,36 @@ function aw_publisher_schema() {
 }
 
 /**
+ * A date as full ISO 8601 with offset; a bare date (Y-m-d) becomes 09:00 India time.
+ *
+ * @param string $date Date.
+ * @return string
+ */
+function aw_schema_date( $date ) {
+	$date = trim( (string) $date );
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) ) {
+		return $date . 'T09:00:00+05:30';
+	}
+	$ts = $date ? strtotime( $date ) : false;
+	return $ts ? wp_date( 'c', $ts ) : '';
+}
+
+/**
+ * ImageObject for an item: the same stored image its og:image uses (kits-core seo.php), with its size. Never the
+ * publisher's image. Null when the site has no image to give.
+ *
+ * @param int $id Post ID.
+ * @return array|null
+ */
+function aw_schema_image( $id ) {
+	if ( ! function_exists( 'kits_seo_image' ) ) {
+		return null;
+	}
+	$img = ( is_singular() && get_queried_object_id() === (int) $id ) ? kits_seo_image() : ( kits_seo_item_image( $id ) ? kits_seo_item_image( $id ) : kits_seo_default_image() );
+	return $img ? array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) ) : null;
+}
+
+/**
  * Article-type data for a content post (news, legal, research, guide).
  *
  * @param int $id Post ID.
@@ -192,9 +222,8 @@ function aw_article_schema( $id ) {
 	}
 	$over     = trim( (string) get_post_meta( $id, 'kits_schema_type', true ) ); // editor's choice (SEO box)
 	$at       = $over ? $over : $at;
-	$src_date = (string) get_post_meta( $id, 'aw_source_date', true );
-	$image    = function_exists( 'aw_item_image' ) ? aw_item_image( $id ) : '';
-	$image    = $image ? $image : (string) get_the_post_thumbnail_url( $id, 'large' );
+	$image    = aw_schema_image( $id );
+	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true );
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = (string) get_post_meta( $id, 'aw_source_name', true );
 	$data     = array(
@@ -203,14 +232,14 @@ function aw_article_schema( $id ) {
 		'mainEntityOfPage' => get_permalink( $id ),
 		'url'              => get_permalink( $id ),
 		'description'      => function_exists( 'aw_text' ) ? aw_text( $id, 40 ) : '',
-		'datePublished'    => $src_date ? $src_date : get_the_date( 'c', $id ),
-		'dateModified'     => get_post_meta( $id, 'kits_last_reviewed', true ) ? (string) get_post_meta( $id, 'kits_last_reviewed', true ) : get_the_modified_date( 'c', $id ),
+		'datePublished'    => get_the_date( 'c', $id ),
+		'dateModified'     => $reviewed ? aw_schema_date( $reviewed ) : get_the_modified_date( 'c', $id ),
 		'inLanguage'       => 'en-IN',
 		'publisher'        => array( '@id' => home_url( '/#organization' ) ),
 	);
 	$data[ 'Legislation' === $at ? 'name' : 'headline' ] = $title;
 	if ( $image ) {
-		$data['image'] = array( $image );
+		$data['image'] = $image;
 	}
 	if ( 'Legislation' !== $at ) {
 		$data['author'] = array( '@id' => home_url( '/#organization' ) ); // the summary or guide is ours
@@ -304,41 +333,53 @@ function aw_faq_schema( $id ) {
 	return count( $qs ) >= 2 ? array( '@type' => 'FAQPage', '@id' => get_permalink( $id ) . '#faq', 'mainEntity' => $qs ) : array();
 }
 
-/** JobPosting for jobs, internships and fellowships that have a place. */
+/** JobPosting for every opportunity: remote ones as TELECOMMUTE, others at their place (else India). */
 function aw_job_schema( $id ) {
-	if ( ! has_term( array( 'job', 'internship', 'fellowship' ), 'aw_opportunity_type', $id ) ) {
-		return array();
-	}
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
-	$area = (string) get_post_meta( $id, 'aw_area', true );
-	$org_listing = (int) get_post_meta( $id, 'aw_organisation', true );
-	if ( ! $state && ! $district && ! $area && $org_listing ) {
-		list( $state, $district ) = aw_listing_place( $org_listing ); // the organisation's own location
-	}
-	if ( ! $state && ! $district && ! $area ) {
-		return array(); // a job posting needs a place
+	$area   = trim( (string) get_post_meta( $id, 'aw_area', true ) . ' ' . (string) get_post_meta( $id, 'aw_place_city', true ) );
+	$org_id = (int) get_post_meta( $id, 'aw_organisation', true );
+	$remote = (bool) preg_match( '/\b(remote|online|anywhere|work from home|wfh|virtual)\b/i', $area . ' ' . $state . ' ' . $district );
+	if ( ! $remote && ! $state && ! $district && ! $area && $org_id ) {
+		list( $state, $district ) = aw_listing_place( $org_id ); // the organisation's own location
 	}
 	$org      = (string) get_post_meta( $id, 'aw_org_name', true );
-	$org_id   = (int) get_post_meta( $id, 'aw_organisation', true );
-	$org      = $org ? $org : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
-	$deadline = function_exists( 'aw_opportunity_closes' ) ? aw_opportunity_closes( $id ) : (string) get_post_meta( $id, 'aw_deadline', true );
+	$org      = $org ? $org : ( $org_id && 'publish' === get_post_status( $org_id ) ? get_post_field( 'post_title', $org_id ) : '' );
+	$org_site = (string) get_post_meta( $id, 'aw_website', true );
+	if ( ! $org_site && $org_id ) {
+		$org_site = (string) get_post_meta( $org_id, 'aw_website', true );
+	}
+	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
 	$desc     = trim( (string) get_post_field( 'post_content', $id ) );
-	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : get_the_title( $id ) );
-	$data     = array(
+	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : '' );
+	$desc     = $desc ? $desc : (string) get_post_field( 'post_excerpt', $id );
+	$desc     = $desc ? $desc : get_the_title( $id );
+	$emp      = array();
+	if ( has_term( 'internship', 'aw_opportunity_type', $id ) ) {
+		$emp[] = 'INTERN';
+	}
+	if ( has_term( 'volunteer', 'aw_opportunity_type', $id ) ) {
+		$emp[] = 'VOLUNTEER';
+	}
+	$data = array(
 		'@type'              => 'JobPosting',
 		'@id'                => get_permalink( $id ) . '#job',
 		'title'              => wp_strip_all_tags( get_the_title( $id ) ),
 		'description'        => wp_kses_post( $desc ),
 		'datePosted'         => get_the_date( 'c', $id ),
 		'url'                => get_permalink( $id ),
-		'employmentType'     => has_term( 'internship', 'aw_opportunity_type', $id ) ? 'INTERN' : null,
-		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => $org, 'sameAs' => (string) get_post_meta( $id, 'aw_website', true ) ) ) : null,
-		'jobLocation'        => array(
-			'@type'   => 'Place',
-			'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district ? $district : $area, 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
-		),
-		'validThrough'       => $deadline ? $deadline . 'T23:59:59+05:30' : null,
+		'employmentType'     => $emp ? ( 1 === count( $emp ) ? $emp[0] : $emp ) : null,
+		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => $org, 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null ) ) : null,
+		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
+	if ( $remote ) {
+		$data['jobLocationType']                 = 'TELECOMMUTE';
+		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => 'India' );
+	} else {
+		$data['jobLocation'] = array(
+			'@type'   => 'Place',
+			'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district ? $district : ( $area ? $area : null ), 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
+		);
+	}
 	return array_filter( $data );
 }
 

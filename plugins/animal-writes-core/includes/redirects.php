@@ -68,3 +68,17 @@ add_action(
 	},
 	1
 );
+
+// Author archives (/author/{name}/, ?author=N) are not used: one 301 to the About page (owner, 10 Oct 2026).
+// Category, tag and date archives are left alone: Posts and categories are kept for later use.
+add_action(
+	'template_redirect',
+	function () {
+		$path = trim( (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ), '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( is_author() || 0 === strpos( $path . '/', 'author/' ) || isset( $_GET['author'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( home_url( '/about/' ), 301, 'Animal Writes' );
+			exit;
+		}
+	},
+	0
+);

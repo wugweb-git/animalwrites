@@ -231,6 +231,14 @@ add_filter(
 	}
 );
 
+// Links to a listing type go straight to the filtered Directory (/directory/?type=…), not through the old type page.
+add_filter(
+	'term_link',
+	fn( $url, $term, $tax ) => ( 'aw_listing_type' === $tax && function_exists( 'aw_hub_url' ) ) ? add_query_arg( 'type', $term->slug, aw_hub_url( 'aw_listing' ) ) : $url,
+	10,
+	3
+);
+
 // Old type pages (/directory-type/{type}/) are the Directory filtered by type.
 add_action(
 	'template_redirect',

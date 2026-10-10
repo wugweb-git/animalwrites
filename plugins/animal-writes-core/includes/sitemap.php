@@ -93,3 +93,24 @@ add_action(
 	}
 );
 
+
+// Pages that are not indexed stay out of the page sitemap: site search, and the claim, report and thank-you forms.
+add_filter(
+	'wp_sitemaps_posts_query_args',
+	function ( $args, $post_type ) {
+		if ( 'page' !== $post_type ) {
+			return $args;
+		}
+		$ids = array();
+		foreach ( array( 'search', 'claim', 'report', 'thank-you' ) as $slug ) {
+			$p = get_page_by_path( $slug );
+			if ( $p ) {
+				$ids[] = $p->ID;
+			}
+		}
+		$args['post__not_in'] = array_merge( (array) ( $args['post__not_in'] ?? array() ), $ids );
+		return $args;
+	},
+	10,
+	2
+);

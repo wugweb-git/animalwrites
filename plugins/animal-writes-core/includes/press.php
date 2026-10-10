@@ -312,6 +312,17 @@ function aw_press_list() {
 // The Media & PR list is the hub Query Loop on the Media & PR Page (hubs.php, hub-blocks.php).
 
 /** Media & PR page schema: CollectionPage + ItemList. */
+/** ImageObject of a press item: its stored thumbnail, else the stored publisher logo (null when neither exists). */
+function aw_press_image_schema( $id ) {
+	foreach ( array( (int) get_post_thumbnail_id( $id ), (int) get_post_meta( $id, 'aw_press_logo', true ) ) as $att ) {
+		$img = $att && function_exists( 'kits_seo_attachment' ) ? kits_seo_attachment( $att ) : null;
+		if ( $img ) {
+			return array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) );
+		}
+	}
+	return null;
+}
+
 function aw_press_schema() {
 	$list = array();
 	foreach ( aw_press_list() as $i => $p ) {
@@ -324,9 +335,9 @@ function aw_press_schema() {
 					'headline'      => get_the_title( $p ),
 					'name'          => get_the_title( $p ),
 					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
-					'datePublished' => (string) get_post_meta( $p->ID, 'aw_press_date', true ),
+					'datePublished' => function_exists( 'aw_schema_date' ) ? aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ) : (string) get_post_meta( $p->ID, 'aw_press_date', true ),
 					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
-					'image'         => (string) get_the_post_thumbnail_url( $p, 'large' ),
+					'image'         => aw_press_image_schema( $p->ID ),
 				)
 			),
 		);

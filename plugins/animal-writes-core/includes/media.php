@@ -19,21 +19,35 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string URL, or '' when there is none (callers then show the placard).
  */
 function aw_item_image( $post_id, $size = 'large' ) {
+	$att = aw_item_image_id( $post_id );
+	if ( ! $att ) {
+		return '';
+	}
+	$is_doc = 'aw_legal' === get_post_type( $post_id ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && (int) get_post_meta( $post_id, 'aw_doc_preview', true ) === $att;
+	return (string) wp_get_attachment_image_url( $att, $is_doc ? 'full' : $size );
+}
+
+/**
+ * The attachment behind aw_item_image(): the hosted PDF, its preview, or the item's topic photo. 0 when there is none.
+ *
+ * @param int $post_id Post ID.
+ * @return int
+ */
+function aw_item_image_id( $post_id ) {
 	$type = get_post_type( $post_id );
 	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'aw_guide' ), true ) ) { // guides: their category's photo
-		return '';
+		return 0;
 	}
 	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
 	if ( 'aw_legal' === $type && $fid ) {
-		return (string) wp_get_attachment_image_url( $fid, $size );
+		return $fid;
 	}
 	$preview = (int) get_post_meta( $post_id, 'aw_doc_preview', true );
 	if ( 'aw_legal' === $type && $preview ) {
-		return (string) wp_get_attachment_image_url( $preview, 'full' );
+		return $preview;
 	}
 	// A category photo belongs to one item at a time across the whole site (thumbs.php); everyone else gets the placard.
-	$att = function_exists( 'aw_thumb_for' ) ? aw_thumb_for( $post_id ) : 0;
-	return $att ? (string) wp_get_attachment_image_url( $att, $size ) : '';
+	return function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
 }
 
 /**

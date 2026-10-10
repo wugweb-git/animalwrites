@@ -294,6 +294,11 @@ add_filter(
 
 /* ---------- Canonical and schema ---------- */
 
+/** Canonical URL of a hub page: its path without filters, with /page/N/ (og:url uses it too, kits-config.php). */
+function aw_hub_canonical() {
+	return strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' );
+}
+
 add_action(
 	'wp',
 	function () {
@@ -306,7 +311,7 @@ add_action(
 	'wp_head',
 	function () {
 		if ( aw_hub_type() && ! is_404() ) {
-			echo '<link rel="canonical" href="' . esc_url( strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' ) ) . '">' . "\n";
+			echo '<link rel="canonical" href="' . esc_url( aw_hub_canonical() ) . '">' . "\n";
 		}
 	},
 	1
