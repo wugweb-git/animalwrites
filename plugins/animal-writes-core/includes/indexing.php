@@ -53,12 +53,13 @@ add_filter(
 	20
 );
 
-/** Query parameters that filter a list: such a URL is not indexed (its canonical stays the list itself). */
+/** Query parameters that filter a list: such a URL is indexed with its own canonical (owner, 10 Oct 2026). */
 const AW_FILTER_PARAMS = array( 'type', 'state', 'district', 'q', 'topic', 'kind', 'service', 'verified', 'sort', 'publisher', 'court', 'issuer' );
 
 /** Whether the current URL is a filtered or sorted list (?type=, ?state=, ?q=, ?topic=, ?kind= …). */
 function aw_is_filtered_list() {
-	if ( is_singular() && ! ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) ) {
+	$is_list = ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) || ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) || is_page( 'directory' );
+	if ( is_singular() && ! $is_list ) {
 		return false;
 	}
 	foreach ( AW_FILTER_PARAMS as $k ) {
