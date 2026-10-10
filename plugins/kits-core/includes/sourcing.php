@@ -162,8 +162,8 @@ function aw_has_term( $hay, $term ) {
 	if ( '' === $t ) {
 		return false;
 	}
-	if ( preg_match( '/^[a-z0-9 \-]{1,5}$/', $t ) ) {
-		return (bool) preg_match( '/\b' . preg_quote( $t, '/' ) . '\b/u', $hay );
+	if ( preg_match( "/^[a-z0-9 \\-'’]+$/u", $t ) ) { // Latin terms: whole words only, plural allowed ("hen" no longer matches "when")
+		return (bool) preg_match( '/(?<![a-z0-9])' . preg_quote( $t, '/' ) . '(?:s|es)?(?![a-z0-9])/u', $hay );
 	}
 	return false !== mb_strpos( $hay, $t );
 }
