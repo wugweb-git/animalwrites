@@ -185,8 +185,17 @@ add_filter(
 	2
 );
 
-// Resources have no tags.
-add_action( 'init', fn() => unregister_taxonomy_for_object_type( 'post_tag', 'post' ), 20 );
+// Resources have no tags, author box or post formats (core registers Posts with them before this plugin loads).
+add_action(
+	'init',
+	function () {
+		unregister_taxonomy_for_object_type( 'post_tag', 'post' );
+		foreach ( array( 'author', 'trackbacks', 'post-formats' ) as $feature ) {
+			remove_post_type_support( 'post', $feature );
+		}
+	},
+	20
+);
 
 // Rewrite rules follow the Resources permalink once (and again whenever it changes).
 add_action(

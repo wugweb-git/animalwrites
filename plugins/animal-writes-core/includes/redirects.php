@@ -70,7 +70,7 @@ add_action(
 );
 
 // Author archives (/author/{name}/, ?author=N) are not used: one 301 to the About page (owner, 10 Oct 2026).
-// Category, tag and date archives are left alone: Posts and categories are kept for later use.
+// Tag and date archives are left alone; categories are Resource types, with no pages (content-types.php).
 add_action(
 	'template_redirect',
 	function () {
