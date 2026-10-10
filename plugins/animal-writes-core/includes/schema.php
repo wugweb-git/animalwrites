@@ -453,7 +453,7 @@ add_filter(
 	'rank_math/json_ld',
 	function ( $data ) {
 		if ( is_404() ) {
-			return $data;
+			return array(); // a missing page has no structured data (as before)
 		}
 		$data              = (array) $data;
 		$data['publisher'] = aw_publisher_schema();

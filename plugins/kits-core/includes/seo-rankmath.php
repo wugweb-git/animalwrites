@@ -144,7 +144,7 @@ foreach ( array( 'facebook', 'twitter' ) as $kits_net ) {
 	add_action(
 		"rank_math/opengraph/{$kits_net}/add_images",
 		function ( $image ) {
-			if ( ! function_exists( 'kits_seo_image' ) || ! is_object( $image ) || ! method_exists( $image, 'add_image' ) ) {
+			if ( is_404() || ! function_exists( 'kits_seo_image' ) || ! is_object( $image ) || ! method_exists( $image, 'add_image' ) ) {
 				return;
 			}
 			if ( kits_rank_math_typed( 'facebook_image_id' ) || kits_rank_math_typed( 'facebook_image' ) || kits_rank_math_typed( 'twitter_image_id' ) ) {
@@ -158,6 +158,9 @@ foreach ( array( 'facebook', 'twitter' ) as $kits_net ) {
 	);
 }
 unset( $kits_net );
+
+// A missing page shares no image (as before).
+add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( (array) apply_filters( 'kits_seo_article_types', array( 'post' ) ) ) ? 'article' : 'website' );
 add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => (string) apply_filters( 'kits_seo_locale', $l ) );
@@ -190,7 +193,8 @@ add_filter(
 add_filter(
 	'rank_math/sitemap/entry',
 	function ( $url, $type, $obj ) {
-		if ( 'post' !== $type || ! $obj instanceof WP_Post ) {
+		$obj = ( 'post' === $type && is_object( $obj ) && ! empty( $obj->ID ) ) ? get_post( (int) $obj->ID ) : null; // Rank Math passes a database row
+		if ( ! $obj instanceof WP_Post ) {
 			return $url;
 		}
 		if ( '' === (string) $obj->post_name || '1' === (string) get_post_meta( $obj->ID, 'kits_noindex', true ) || apply_filters( 'kits_sitemap_skip', false, $obj ) ) {
