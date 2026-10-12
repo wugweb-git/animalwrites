@@ -1091,3 +1091,12 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card > .kit-ico--arrow-right { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
 .kit-card:hover > .kit-ico--arrow-right { transform: translateX(4px); }
 @media (prefers-reduced-motion: reduce) { .kit-card > .kit-ico--arrow-right { transition: none; transform: none !important; } }
+
+/* Step progress header for multi-step forms (kit.js adds it to .kit-steps; 12 Oct 2026). */
+.kit-steps-progress { list-style: none; margin: 0 0 var(--s-6); padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2); counter-reset: none; }
+.kit-steps-progress li { display: flex; align-items: center; gap: var(--s-2); padding-top: var(--s-3); border-top: 3px solid var(--kit-color-line); color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
+.kit-steps-progress .kit-steps-num { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--kit-color-line); font-weight: var(--kit-weight-strong); flex: none; }
+.kit-steps-progress li.is-current { border-top-color: var(--kit-color-ink); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); }
+.kit-steps-progress li.is-current .kit-steps-num { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-steps-progress li.is-done { border-top-color: var(--kit-color-ink); }
+.kit-steps.is-stepped .kit-step-count { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

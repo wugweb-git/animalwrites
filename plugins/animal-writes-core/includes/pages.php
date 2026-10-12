@@ -358,11 +358,25 @@ add_filter(
 		if ( ! is_singular( 'post' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() ) {
 			return $html;
 		}
-		$id = get_queried_object_id();
-		return $html . '<p class="aw-byline">By Animal Writes · Last updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></p>';
+		$id  = get_queried_object_id();
+		$pub = '<time datetime="' . esc_attr( get_the_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_date( 'j M Y', $id ) ) . '</time>';
+		$upd = get_the_modified_date( 'Y-m-d', $id ) > get_the_date( 'Y-m-d', $id ) // edited on a later day: say so
+			? ' · Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time>' : '';
+		return $html . '<p class="aw-byline">By Animal Writes · ' . $pub . $upd . '</p>';
 	},
 	20,
 	2
+);
+
+// One date line on a Resource: the byline above carries it, so the template's own date block is not repeated (12 Oct 2026).
+add_filter(
+	'render_block_core/post-date',
+	function ( $html, $block, $instance ) {
+		$id = (int) ( $instance->context['postId'] ?? 0 );
+		return ( is_singular( 'post' ) && $id === get_queried_object_id() ) ? '' : $html;
+	},
+	30,
+	3
 );
 
 /* ---------- Resources: the Resource type is a list filter, not a link on the page ---------- */

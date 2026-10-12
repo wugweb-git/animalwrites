@@ -1045,3 +1045,14 @@ body { background: var(--kit-color-canvas); }
 	.aw-vol-role.kit-checkbox { transition: none; }
 	.aw-vol-role.kit-checkbox:has(input:checked) { transform: none; }
 }
+
+/* Claim page (12 Oct 2026): the listing as a card, services as tap rows like the Volunteer page. */
+#claim .aw-form-for { background: var(--kit-color-surface); border-color: transparent; font-size: var(--kit-type-lead); }
+.aw-claim-services { border: 0; padding: 0; display: grid; gap: var(--s-2); }
+.aw-claim-services > legend { font-weight: var(--kit-weight-strong); margin-bottom: var(--s-3); }
+.aw-claim-services .kit-checkbox { display: flex; align-items: center; gap: var(--s-3); margin: 0; min-height: 48px; padding: var(--s-2) var(--s-3); border: 1px solid var(--kit-color-line); border-radius: var(--r-3, 12px); background: var(--kit-color-bg); cursor: pointer; transition: border-color var(--kit-motion-fast, 150ms) ease, box-shadow var(--kit-motion-fast, 150ms) ease; }
+.aw-claim-services .kit-checkbox input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--kit-color-ink); }
+.aw-claim-services .kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: 4px 4px 0 var(--kit-color-accent); }
+.aw-claim-services .kit-checkbox:has(input:focus-visible) { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
+@media (min-width: 640px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }

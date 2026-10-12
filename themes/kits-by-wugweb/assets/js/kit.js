@@ -319,8 +319,22 @@
 		box.classList.add('is-stepped');
 		var bad = steps.findIndex(function (s) { return s.querySelector('[aria-invalid=true]'); });
 		var cur = bad > -1 ? bad : 0;
-		function go(i) { cur = i; box.dispatchEvent(new CustomEvent('kit:step', { bubbles: true, detail: { step: i + 1 } })); steps.forEach(function (s, n) { s.hidden = n !== i; }); var lg = steps[i].querySelector('legend'); if (lg) { lg.tabIndex = -1; lg.focus(); } }
+		// A progress header naming every step, the current one marked (visual; each step's legend still says "Step n of m").
+		var bar = document.createElement('ol');
+		bar.className = 'kit-steps-progress';
+		bar.setAttribute('aria-hidden', 'true');
+		steps.forEach(function (s, n) {
+			var lg = s.querySelector('legend'), li = document.createElement('li');
+			var name = lg ? (lg.querySelector('.kit-step-title') || lg).textContent.replace(/^\s*Step \d+ of \d+\s*/i, '').trim() : 'Step ' + (n + 1);
+			li.innerHTML = '<span class="kit-steps-num">' + (n + 1) + '</span><span class="kit-steps-name"></span>';
+			li.lastChild.textContent = name;
+			bar.appendChild(li);
+		});
+		box.insertBefore(bar, steps[0]);
+		function mark() { Array.prototype.forEach.call(bar.children, function (li, n) { li.classList.toggle('is-current', n === cur); li.classList.toggle('is-done', n < cur); }); }
+		function go(i) { cur = i; mark(); box.dispatchEvent(new CustomEvent('kit:step', { bubbles: true, detail: { step: i + 1 } })); steps.forEach(function (s, n) { s.hidden = n !== i; }); var lg = steps[i].querySelector('legend'); if (lg) { lg.tabIndex = -1; lg.focus(); } }
 		steps.forEach(function (s, n) { s.hidden = n !== cur; });
+		mark();
 		box.addEventListener('click', function (e) {
 			var next = e.target.closest('[data-step-next]'), back = e.target.closest('[data-step-back]');
 			if (back) { go(cur - 1); return; }
