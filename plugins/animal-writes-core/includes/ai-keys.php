@@ -94,7 +94,8 @@ function aw_ai_call( string $provider, string $key, string $model = '', bool $ch
 	if ( is_wp_error( $r ) ) {
 		return array( 0, '' );
 	}
-	$headers = array_change_key_case( (array) wp_remote_retrieve_headers( $r )->getAll(), CASE_LOWER );
+	$hd      = wp_remote_retrieve_headers( $r );
+	$headers = array_change_key_case( is_object( $hd ) && method_exists( $hd, 'getAll' ) ? $hd->getAll() : (array) $hd, CASE_LOWER );
 	return array( (int) wp_remote_retrieve_response_code( $r ), strtolower( substr( wp_remote_retrieve_body( $r ), 0, 3000 ) ), $headers );
 }
 
