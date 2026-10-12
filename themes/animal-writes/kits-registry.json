@@ -602,7 +602,8 @@
    "status": "live",
    "classes": [
     "aw-datasrc",
-    "aw-datasrcs"
+    "aw-datasrcs",
+    "aw-datasrc-img"
    ],
    "states": [
     "default"

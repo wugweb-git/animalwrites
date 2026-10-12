@@ -309,18 +309,13 @@ function aw_block_org_mark( $a, $id ) {
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';
 }
 
-/** Verified, Featured and Sponsored badges, where the details came from, and up to two types. */
+/** The Verified badge, where the details came from, and up to two types. */
 function aw_block_badges( $a, $id ) {
 	$out = '';
 	if ( get_post_meta( $id, 'aw_verified', true ) ) {
 		$out .= kits_badge( 'Verified', 'verified' );
 	}
-	if ( (int) get_post_meta( $id, 'aw_featured', true ) ) {
-		$out .= kits_badge( 'Featured', 'featured' );
-	}
-	if ( get_post_meta( $id, 'aw_sponsored', true ) ) {
-		$out .= kits_badge( 'Sponsored', 'sponsored' );
-	}
+	// Featured and Sponsored are not shown on listings (owner, 12 Oct 2026).
 	$out  .= function_exists( 'aw_source_labels' ) ? aw_source_labels( $id ) : '';
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {

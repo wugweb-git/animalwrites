@@ -1064,3 +1064,6 @@ body { background: var(--kit-color-canvas); }
 	.aw-dir-search { align-items: start; }
 	.aw-dir-submit { margin-top: 30px; } /* the height of a field label (22px) plus its gap (8px) */
 }
+/* Source marks as icons: Google Maps pin, organisation building (12 Oct 2026). */
+.aw-datasrc-img { display: block; width: 16px; height: 16px; }
+.aw-datasrc .aw-datasrc-mark:has(.aw-datasrc-img) { display: inline-flex; align-items: center; }

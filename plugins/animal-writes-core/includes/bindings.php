@@ -102,7 +102,7 @@ function aw_binding_value( $key, $post_id ) {
 			/* translators: %s: date. */
 			return $on ? sprintf( __( 'Verified · %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );
 		case 'featured_label':
-			return (int) get_post_meta( $post_id, 'aw_featured', true ) ? __( 'Featured', 'animal-writes-core' ) : '';
+			return ''; // the Featured label is not shown (owner, 12 Oct 2026)
 		case 'area':
 			return $m( 'aw_area' );
 		case 'services':
