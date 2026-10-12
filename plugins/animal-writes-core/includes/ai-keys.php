@@ -1,9 +1,9 @@
 <?php
 /**
- * Settings → AI models (owner, 10 + 12 Oct 2026): the AI services the news workers use, one row per key.
- * Each row = provider + model + key (+ API address for any other OpenAI-compatible service). Rows are tried
- * top to bottom; any number of rows per provider, each kept separately. Option aw_ai_models (not autoloaded).
- * The workers read the rows (GET /aw/v1/ai-keys) and use them before their GitHub Actions secrets.
+ * Settings → AI models (owner, 10 + 12 Oct 2026): paste a key; the site works out the provider and a model that
+ * answers, and shows whether the key works. One row per key, tried top to bottom, each kept separately.
+ * Option aw_ai_models = list of {key, provider, model, url, status, checked} (not autoloaded).
+ * The workers read the usable rows (GET /aw/v1/ai-keys) and try them before their GitHub Actions secrets.
  * Administrators and the ingest user only.
  *
  * @package animal-writes-core
@@ -13,18 +13,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Known providers: label, default model, chat-completions address ('' = the workers' own client). */
+/**
+ * Known providers: label, key prefixes, API base ('' = own client), models to try in order.
+ * A key whose prefix matches is tried against those providers first, then every other one.
+ */
 const AW_AI_PROVIDERS = array(
-	'gemini'     => array( 'Google Gemini', 'gemini-flash-latest', '' ),
-	'groq'       => array( 'Groq', 'openai/gpt-oss-120b', 'https://api.groq.com/openai/v1/chat/completions' ),
-	'openrouter' => array( 'OpenRouter', 'openai/gpt-4o-mini', 'https://openrouter.ai/api/v1/chat/completions' ),
-	'deepseek'   => array( 'DeepSeek', 'deepseek-chat', 'https://api.deepseek.com/chat/completions' ),
-	'openai'     => array( 'OpenAI', 'gpt-4o-mini', 'https://api.openai.com/v1/chat/completions' ),
-	'xai'        => array( 'xAI', 'grok-3-mini', 'https://api.x.ai/v1/chat/completions' ),
-	'moonshot'   => array( 'Moonshot', 'moonshot-v1-8k', 'https://api.moonshot.ai/v1/chat/completions' ),
-	'minimax'    => array( 'MiniMax', 'MiniMax-M2', 'https://api.minimax.io/v1/chat/completions' ),
-	'anthropic'  => array( 'Anthropic (Claude)', 'claude-haiku-4-5', '' ),
-	'other'      => array( 'Other (OpenAI-compatible)', '', '' ),
+	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
+	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ),
+	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
+	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
+	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
+	'openai'     => array( 'OpenAI', array( 'sk-proj-', 'sk-svcacct-', 'sk-' ), 'https://api.openai.com/v1', array( 'gpt-4o-mini', 'gpt-4.1-mini' ) ),
+	'deepseek'   => array( 'DeepSeek', array( 'sk-' ), 'https://api.deepseek.com', array( 'deepseek-chat' ) ),
+	'moonshot'   => array( 'Moonshot', array( 'sk-' ), 'https://api.moonshot.ai/v1', array( 'moonshot-v1-8k', 'kimi-k2-turbo-preview' ) ),
+	'minimax'    => array( 'MiniMax', array( 'sk-api-', 'eyJ' ), 'https://api.minimax.io/v1', array( 'MiniMax-M2' ) ),
+	'mistral'    => array( 'Mistral', array(), 'https://api.mistral.ai/v1', array( 'mistral-small-latest' ) ),
+	'together'   => array( 'Together', array( 'tgp_' ), 'https://api.together.xyz/v1', array( 'meta-llama/Llama-3.3-70B-Instruct-Turbo' ) ),
+	'cerebras'   => array( 'Cerebras', array( 'csk-' ), 'https://api.cerebras.ai/v1', array( 'gpt-oss-120b', 'llama-3.3-70b' ) ),
+);
+
+const AW_AI_STATUS = array(
+	'works'      => 'Works',
+	'no-credit'  => 'No credit',
+	'limited'    => 'Rate-limited for now',
+	'invalid'    => 'Key refused',
+	'unknown'    => 'Provider not recognised',
+	'unchecked'  => 'Not checked yet',
+	'no-model'   => 'No model answered',
 );
 
 add_action(
@@ -34,32 +49,105 @@ add_action(
 	}
 );
 
-/** Saved rows: list of {provider, name, model, url, key, on}. First read converts the older per-provider keys. */
+/** Saved rows. First read converts the older per-provider keys (aw_ai_keys) into unchecked rows. */
 function aw_ai_rows(): array {
 	$rows = get_option( 'aw_ai_models', null );
 	if ( is_array( $rows ) ) {
-		return $rows;
+		$rows = array_values( array_filter( $rows, fn( $r ) => is_array( $r ) && ! empty( $r['key'] ) ) );
+		return array_map( fn( $r ) => isset( $r['status'] ) ? $r : aw_ai_blank_row( $r['key'] ), $rows );
 	}
 	$rows = array();
-	foreach ( (array) get_option( 'aw_ai_keys', array() ) as $p => $v ) {
+	foreach ( (array) get_option( 'aw_ai_keys', array() ) as $v ) {
 		foreach ( (array) ( is_array( $v ) ? $v : preg_split( '/[\s,]+/', (string) $v ) ) as $k ) {
-			$k = trim( (string) $k );
-			if ( '' === $k ) {
-				continue;
+			if ( '' !== trim( (string) $k ) ) {
+				$rows[] = aw_ai_blank_row( trim( (string) $k ) );
 			}
-			$known  = isset( AW_AI_PROVIDERS[ $p ] ) && 'other' !== $p;
-			$rows[] = array(
-				'provider' => $known ? $p : 'other',
-				'name'     => $known ? '' : ucfirst( (string) $p ),
-				'model'    => '',
-				'url'      => '',
-				'key'      => $k,
-				'on'       => true,
-			);
 		}
 	}
 	update_option( 'aw_ai_models', $rows, false );
 	return $rows;
+}
+
+function aw_ai_blank_row( string $key ): array {
+	return array( 'key' => $key, 'provider' => '', 'model' => '', 'url' => '', 'status' => 'unchecked', 'checked' => 0 );
+}
+
+/** HTTP status of a short test request ($chat = false: list models only). */
+function aw_ai_call( string $provider, string $key, string $model = '', bool $chat = true ): array {
+	$p   = AW_AI_PROVIDERS[ $provider ];
+	$arg = array( 'timeout' => 12 );
+	if ( 'anthropic' === $provider ) {
+		$arg['headers'] = array( 'x-api-key' => $key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json' );
+		$url            = 'https://api.anthropic.com/v1/' . ( $chat ? 'messages' : 'models' );
+		$body           = array( 'model' => $model, 'max_tokens' => 5, 'messages' => array( array( 'role' => 'user', 'content' => 'Say ok' ) ) );
+	} elseif ( 'gemini' === $provider ) {
+		$arg['headers'] = array( 'x-goog-api-key' => $key, 'content-type' => 'application/json' );
+		$url            = 'https://generativelanguage.googleapis.com/v1beta/models' . ( $chat ? '/' . $model . ':generateContent' : '' );
+		$body           = array( 'contents' => array( array( 'parts' => array( array( 'text' => 'Say ok' ) ) ) ) );
+	} else {
+		$arg['headers'] = array( 'Authorization' => 'Bearer ' . $key, 'content-type' => 'application/json' );
+		$url            = $p[2] . ( $chat ? '/chat/completions' : '/models' );
+		$body           = array( 'model' => $model, 'max_tokens' => 5, 'messages' => array( array( 'role' => 'user', 'content' => 'Say ok' ) ) );
+	}
+	$r = $chat ? wp_remote_post( $url, $arg + array( 'body' => wp_json_encode( $body ) ) ) : wp_remote_get( $url, $arg );
+	if ( is_wp_error( $r ) ) {
+		return array( 0, '' );
+	}
+	return array( (int) wp_remote_retrieve_response_code( $r ), strtolower( substr( wp_remote_retrieve_body( $r ), 0, 400 ) ) );
+}
+
+/** Work out a key's provider (prefix first, then every provider) and the first model that answers. */
+function aw_ai_check( array $row ): array {
+	$key   = $row['key'];
+	$order = array();
+	if ( ! empty( $row['provider'] ) && isset( AW_AI_PROVIDERS[ $row['provider'] ] ) ) {
+		$order[] = $row['provider']; // Already known: just re-test it.
+	} else {
+		foreach ( AW_AI_PROVIDERS as $id => $p ) {
+			foreach ( $p[1] as $prefix ) {
+				if ( str_starts_with( $key, $prefix ) ) {
+					$order[] = $id;
+					break;
+				}
+			}
+		}
+		$order = array_unique( array_merge( $order, array_keys( AW_AI_PROVIDERS ) ) );
+	}
+	$row['checked'] = time();
+	foreach ( $order as $id ) {
+		list( $code ) = aw_ai_call( $id, $key, '', false );
+		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) ) {
+			continue; // Not this provider's key (or not reachable).
+		}
+		$row['provider'] = $id;
+		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
+		$row['status']   = 'no-model';
+		foreach ( AW_AI_PROVIDERS[ $id ][3] as $model ) {
+			list( $code, $body ) = aw_ai_call( $id, $key, $model );
+			$row['model'] = $model;
+			if ( $code >= 200 && $code < 300 ) {
+				$row['status'] = 'works';
+				return $row;
+			}
+			if ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
+				$row['status'] = 'no-credit';
+				return $row;
+			}
+			if ( 429 === $code ) {
+				$row['status'] = 'limited';
+				return $row;
+			}
+			if ( 401 === $code || 403 === $code ) {
+				$row['status'] = 'invalid';
+				return $row;
+			}
+		}
+		return $row;
+	}
+	$row['provider'] = '';
+	$row['model']    = '';
+	$row['status']   = 'unknown';
+	return $row;
 }
 
 add_action(
@@ -74,17 +162,10 @@ add_action(
 				'callback'            => function () {
 					$out = array();
 					foreach ( aw_ai_rows() as $r ) {
-						$p = AW_AI_PROVIDERS[ $r['provider'] ] ?? null;
-						if ( ! $p || empty( $r['on'] ) || '' === $r['key'] ) {
+						if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited', 'no-credit' ), true ) ) {
 							continue;
 						}
-						$out[] = array(
-							'provider' => $r['provider'],
-							'name'     => '' !== $r['name'] ? $r['name'] : $r['provider'],
-							'model'    => '' !== $r['model'] ? $r['model'] : $p[1],
-							'url'      => '' !== $r['url'] ? $r['url'] : $p[2],
-							'key'      => $r['key'],
-						);
+						$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
 					}
 					return new WP_REST_Response( array( 'rows' => $out ) );
 				},
@@ -99,99 +180,69 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_ai_keys' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$in   = (array) wp_unslash( $_POST['aw_ai'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$rows = array();
-		foreach ( (array) ( $in['key'] ?? array() ) as $i => $key ) {
-			$key = sanitize_text_field( (string) $key );
-			if ( '' === $key ) {
-				continue; // An empty key removes the row.
+		@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- several test calls per key.
+		$saved = aw_ai_rows();
+		$rows  = array();
+		foreach ( (array) ( $_POST['aw_ai_order'] ?? array() ) as $i ) { // Kept rows, in the order shown.
+			if ( isset( $saved[ (int) $i ] ) ) {
+				$rows[] = $saved[ (int) $i ];
 			}
-			$p      = sanitize_key( (string) ( $in['provider'][ $i ] ?? '' ) );
-			$rows[] = array(
-				'provider' => isset( AW_AI_PROVIDERS[ $p ] ) ? $p : 'other',
-				'name'     => sanitize_text_field( (string) ( $in['name'][ $i ] ?? '' ) ),
-				'model'    => sanitize_text_field( (string) ( $in['model'][ $i ] ?? '' ) ),
-				'url'      => esc_url_raw( (string) ( $in['url'][ $i ] ?? '' ) ),
-				'key'      => $key,
-				'on'       => ! empty( $in['on'][ $i ] ),
-			);
 		}
+		$have = wp_list_pluck( $rows, 'key' );
+		foreach ( preg_split( '/[\s,]+/', sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new'] ?? '' ) ) ) as $k ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			if ( '' !== $k && ! in_array( $k, $have, true ) ) {
+				$rows[] = aw_ai_blank_row( $k );
+				$have[] = $k;
+			}
+		}
+		foreach ( $rows as &$r ) { // New keys, and any key not working, are (re)checked; working ones are left alone.
+			if ( 'works' !== $r['status'] || ! empty( $_POST['aw_ai_recheck'] ) ) {
+				$r = aw_ai_check( $r );
+			}
+		}
+		unset( $r );
 		update_option( 'aw_ai_models', $rows, false );
 		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&saved=1' ) );
 		exit;
 	}
 );
 
-/** One editable row; $i is its position (checkbox values carry it so unticked rows stay aligned). */
-function aw_ai_row_html( array $r, $i ): string {
-	$opts = '';
-	foreach ( AW_AI_PROVIDERS as $id => $p ) {
-		$opts .= '<option value="' . esc_attr( $id ) . '" data-model="' . esc_attr( $p[1] ) . '" data-url="' . esc_attr( $p[2] ) . '"' . selected( $r['provider'], $id, false ) . '>' . esc_html( $p[0] ) . '</option>';
-	}
-	$def = AW_AI_PROVIDERS[ $r['provider'] ] ?? AW_AI_PROVIDERS['other'];
-	return '<tr data-aw-row>'
-		. '<td><select name="aw_ai[provider][]" aria-label="Provider" data-aw-provider>' . $opts . '</select>'
-		. '<input type="text" name="aw_ai[name][]" value="' . esc_attr( $r['name'] ) . '" placeholder="Name" aria-label="Name" class="regular-text"' . ( 'other' === $r['provider'] ? '' : ' hidden' ) . ' data-aw-name></td>'
-		. '<td><input type="text" name="aw_ai[model][]" value="' . esc_attr( $r['model'] ) . '" placeholder="' . esc_attr( $def[1] ? $def[1] : 'Model name' ) . '" aria-label="Model" class="regular-text code"></td>'
-		. '<td><input type="text" name="aw_ai[key][]" value="' . esc_attr( $r['key'] ) . '" placeholder="Key" aria-label="Key" class="regular-text code" autocomplete="off" spellcheck="false">'
-		. '<input type="url" name="aw_ai[url][]" value="' . esc_attr( $r['url'] ) . '" placeholder="' . esc_attr( $def[2] ? $def[2] : 'API address (…/chat/completions)' ) . '" aria-label="API address" class="regular-text code"' . ( '' === $def[2] && 'other' !== $r['provider'] ? ' hidden' : '' ) . ' data-aw-url></td>'
-		. '<td><input type="checkbox" name="aw_ai[on][' . esc_attr( (string) $i ) . ']" value="1" aria-label="Use"' . checked( ! empty( $r['on'] ), true, false ) . '></td>'
-		. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="button" class="button-link" data-aw-remove>Remove</button></td>'
-		. '</tr>';
-}
-
 function aw_ai_keys_screen() {
-	$rows  = aw_ai_rows();
-	$blank = array( 'provider' => 'gemini', 'name' => '', 'model' => '', 'url' => '', 'key' => '', 'on' => true );
+	$rows = aw_ai_rows();
 	echo '<div class="wrap"><h1>AI models</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success"><p>Saved.</p></div>';
+		echo '<div class="notice notice-success"><p>Saved and checked.</p></div>';
 	}
-	echo '<p>One row per key. The news workers try the rows from the top down, then the keys in their GitHub secrets. Leave Model empty for the default shown. For a service not listed, choose "Other" and give its API address.</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
 	wp_nonce_field( 'aw_ai_keys' );
-	echo '<table class="widefat striped"><thead><tr><th>Provider</th><th>Model</th><th>Key</th><th>Use</th><th></th></tr></thead><tbody data-aw-rows>';
+	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
+	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
+	echo '<p>The news workers try these keys from the top down, then the keys in their GitHub secrets.</p>';
+	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
+	if ( ! $rows ) {
+		echo '<tr><td colspan="6">No keys yet.</td></tr>';
+	}
 	foreach ( $rows as $i => $r ) {
-		echo aw_ai_row_html( $r, $i ); // phpcs:ignore WordPress.Security.EscapeOutput
+		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] : '—';
+		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
+			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
+			. '<td>' . esc_html( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ) . '</td>'
+			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
+			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="button" class="button-link" data-aw-remove>Remove</button></td></tr>';
 	}
 	echo '</tbody></table>';
-	echo '<template data-aw-blank>' . aw_ai_row_html( $blank, '__i__' ) . '</template>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	echo '<p><button type="button" class="button" data-aw-add>Add a model</button></p>';
-	submit_button( 'Save' );
+	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check the working keys again too</label></p>';
+	submit_button( 'Save and check' );
 	echo '</form></div>';
 	?>
 	<script>
-	(function () {
-		var body = document.querySelector('[data-aw-rows]');
-		function renumber() { // Keep each "Use" checkbox tied to its row's position.
-			body.querySelectorAll('[data-aw-row]').forEach(function (tr, i) {
-				tr.querySelector('input[type=checkbox]').name = 'aw_ai[on][' + i + ']';
-			});
-		}
-		document.querySelector('[data-aw-add]').addEventListener('click', function () {
-			var t = document.querySelector('[data-aw-blank]').content.firstElementChild.cloneNode(true);
-			body.appendChild(t);
-			renumber();
-			t.querySelector('select').focus();
-		});
-		body.addEventListener('click', function (e) {
-			var tr = e.target.closest('[data-aw-row]');
-			if (!tr) return;
-			if (e.target.matches('[data-aw-remove]')) tr.remove();
-			if (e.target.matches('[data-aw-up]') && tr.previousElementSibling) body.insertBefore(tr, tr.previousElementSibling);
-			if (e.target.matches('[data-aw-down]') && tr.nextElementSibling) body.insertBefore(tr.nextElementSibling, tr);
-			renumber();
-		});
-		body.addEventListener('change', function (e) {
-			if (!e.target.matches('[data-aw-provider]')) return;
-			var tr = e.target.closest('[data-aw-row]'), o = e.target.selectedOptions[0], other = e.target.value === 'other';
-			tr.querySelector('[data-aw-name]').hidden = !other;
-			tr.querySelector('input[name="aw_ai[model][]"]').placeholder = o.dataset.model || 'Model name';
-			var url = tr.querySelector('[data-aw-url]');
-			url.hidden = !other && !o.dataset.url;
-			url.placeholder = o.dataset.url || 'API address (…/chat/completions)';
-		});
-	})();
+	document.querySelector('[data-aw-rows]').addEventListener('click', function (e) {
+		var tr = e.target.closest('[data-aw-row]'), body = this;
+		if (!tr) return;
+		if (e.target.matches('[data-aw-remove]')) tr.remove();
+		if (e.target.matches('[data-aw-up]') && tr.previousElementSibling) body.insertBefore(tr, tr.previousElementSibling);
+		if (e.target.matches('[data-aw-down]') && tr.nextElementSibling) body.insertBefore(tr.nextElementSibling, tr);
+	});
 	</script>
 	<?php
 }
