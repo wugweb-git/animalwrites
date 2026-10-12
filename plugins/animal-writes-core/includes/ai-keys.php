@@ -99,7 +99,8 @@ function aw_ai_call( string $provider, string $key, string $model = '', bool $ch
 /** Work out a key's provider (prefix first, then every provider) and the first model that answers. */
 function aw_ai_check( array $row ): array {
 	$key   = $row['key'];
-	$order = array();
+	$order  = array();
+	$strong = array(); // Providers whose own distinctive prefix the key carries: theirs even if the model list refuses.
 	if ( ! empty( $row['provider'] ) && isset( AW_AI_PROVIDERS[ $row['provider'] ] ) ) {
 		$order[] = $row['provider']; // Already known: just re-test it.
 	} else {
@@ -107,6 +108,9 @@ function aw_ai_check( array $row ): array {
 			foreach ( $p[1] as $prefix ) {
 				if ( str_starts_with( $key, $prefix ) ) {
 					$order[] = $id;
+					if ( 'sk-' !== $prefix ) {
+						$strong[] = $id;
+					}
 					break;
 				}
 			}
@@ -116,7 +120,7 @@ function aw_ai_check( array $row ): array {
 	$row['checked'] = time();
 	foreach ( $order as $id ) {
 		list( $code ) = aw_ai_call( $id, $key, '', false );
-		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) ) {
+		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) && ! in_array( $id, $strong, true ) ) {
 			continue; // Not this provider's key (or not reachable).
 		}
 		$row['provider'] = $id;
