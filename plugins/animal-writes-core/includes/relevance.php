@@ -321,3 +321,55 @@ add_action(
 		echo '<div class="notice notice-error"><p><strong>Relevance check could not run.</strong> ' . esc_html( (int) $a['held'] . ' new item(s) held since ' . $a['since'] . ': no AI service answered, so nothing was created for them. They are tried again every 6 hours. Adding credit to an AI key clears it.' ) . ( ! empty( $a['run'] ) ? ' <a href="' . esc_url( $a['run'] ) . '" target="_blank" rel="noopener">Run details</a>' : '' ) . '</p></div>';
 	}
 );
+
+/*
+ * Ingestion heartbeat (owner, 12 Oct 2026): every worker run reports how many items it created. When nothing new has
+ * arrived for 12 hours the owner gets an email (once per 12 hours) and a dashboard notice; the next run that creates
+ * something clears it.
+ */
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/ingest-heartbeat',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$now = time();
+					$new = max( 0, (int) $req->get_param( 'new' ) );
+					$hb  = (array) get_option( 'aw_ingest_heartbeat', array() );
+					$hb['last_run']  = $now;
+					$hb['last_link'] = esc_url_raw( (string) $req->get_param( 'link' ) );
+					if ( $new > 0 || empty( $hb['last_new'] ) ) {
+						$hb['last_new'] = $now;
+					}
+					$quiet = $now - (int) $hb['last_new'];
+					if ( $quiet >= 12 * HOUR_IN_SECONDS && ! get_transient( 'aw_ingest_quiet_mailed' ) ) {
+						$hours = (int) floor( $quiet / HOUR_IN_SECONDS );
+						if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: no new items for ' . $hours . ' hours', "The workers have run, but nothing new has been published for {$hours} hours.\n\nLast run: " . $hb['last_link'] . "\n\nCheck the sources in Settings > Sourcing, or ask Claude Code to look at the workers." ) ) {
+							set_transient( 'aw_ingest_quiet_mailed', 1, 12 * HOUR_IN_SECONDS );
+						}
+					}
+					update_option( 'aw_ingest_heartbeat', $hb, false );
+					return new WP_REST_Response( array( 'quiet_hours' => (int) floor( $quiet / HOUR_IN_SECONDS ) ) );
+				},
+			)
+		);
+	}
+);
+add_action(
+	'admin_notices',
+	function () {
+		$hb = get_option( 'aw_ingest_heartbeat' );
+		if ( ! is_array( $hb ) || empty( $hb['last_new'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$quiet = time() - (int) $hb['last_new'];
+		if ( $quiet < 12 * HOUR_IN_SECONDS ) {
+			return;
+		}
+		echo '<div class="notice notice-error"><p><strong>No new items for ' . (int) floor( $quiet / HOUR_IN_SECONDS ) . ' hours.</strong> The workers are running but nothing new has been published.' . ( ! empty( $hb['last_link'] ) ? ' <a href="' . esc_url( $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run</a>' : '' ) . '</p></div>';
+	}
+);
