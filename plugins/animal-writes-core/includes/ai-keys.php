@@ -40,6 +40,7 @@ const AW_AI_STATUS = array(
 	'unknown'    => 'Provider not recognised',
 	'unchecked'  => 'Not checked yet',
 	'no-model'   => 'No model answered',
+	'workspace'  => 'Key not tied to a workspace: create the key inside a workspace',
 );
 
 add_action(
@@ -131,6 +132,10 @@ function aw_ai_check( array $row ): array {
 			$row['model'] = $model;
 			if ( $code >= 200 && $code < 300 ) {
 				$row['status'] = 'works';
+				return $row;
+			}
+			if ( str_contains( $body, 'not scoped to a workspace' ) ) {
+				$row['status'] = 'workspace';
 				return $row;
 			}
 			if ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
