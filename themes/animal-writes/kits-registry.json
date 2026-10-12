@@ -474,7 +474,9 @@
     "aw-newsletter-form",
     "aw-volunteer-form",
     "aw-report-form",
-    "aw-claim-services"
+    "aw-claim-services",
+    "aw-claim-find",
+    "aw-claim-results"
    ],
    "states": [
     "default",

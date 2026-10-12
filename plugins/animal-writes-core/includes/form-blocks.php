@@ -100,11 +100,36 @@ function aw_form_page_missing() {
 	return '<p>This listing could not be found.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/directory/' ) ) . '">Directory</a></p>';
 }
 
+/**
+ * /claim/ opened on its own (owner, 12 Oct 2026: a page to register a claim): find your organisation by name, then claim it.
+ * Results link to /claim/?listing=ID, which shows the claim form. Not listed yet → add it through the Contact form.
+ */
+function aw_claim_finder() {
+	$q    = sanitize_text_field( wp_unslash( $_GET['org'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$html = '<form class="kit-form aw-claim-find" method="get" action="' . esc_url( home_url( '/claim/' ) ) . '" role="search">'
+		. '<p class="kit-field"><label for="aw-claim-org">Organisation name</label><input id="aw-claim-org" type="search" name="org" value="' . esc_attr( $q ) . '" required minlength="3" autocomplete="organization"></p>'
+		. '<p><button class="kit-btn kit-btn--primary" type="submit">Find your organisation</button></p></form>';
+	if ( mb_strlen( $q ) >= 3 ) {
+		$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'numberposts' => 20, 'fields' => 'ids', 'orderby' => 'relevance' ) );
+		if ( $ids ) {
+			$html .= '<ul class="aw-claim-results">';
+			foreach ( $ids as $id ) {
+				$place = function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $id ) ) ) ) : '';
+				$html .= '<li><a href="' . esc_url( add_query_arg( 'listing', $id, home_url( '/claim/' ) ) ) . '"><strong>' . esc_html( get_the_title( $id ) ) . '</strong>' . ( $place ? ' <span>' . esc_html( $place ) . '</span>' : '' ) . '</a></li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p role="status">No listing matches “' . esc_html( $q ) . '”.</p>';
+		}
+	}
+	return $html . '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Not listed yet? Add your organisation</a></p>';
+}
+
 add_shortcode(
 	'aw_claim_page',
 	function () {
 		$listing = aw_form_page_listing();
-		return $listing ? '<div class="aw-form-page" id="claim">' . aw_form_page_for( $listing ) . aw_claim_form( $listing ) . '</div>' : aw_form_page_missing();
+		return $listing ? '<div class="aw-form-page" id="claim">' . aw_form_page_for( $listing ) . aw_claim_form( $listing ) . '</div>' : '<div class="aw-form-page" id="claim">' . aw_claim_finder() . '</div>';
 	}
 );
 add_shortcode(

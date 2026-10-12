@@ -999,3 +999,8 @@ body { background: var(--kit-color-canvas); }
 /* Footer column titles are paragraphs (not headings, SEO audit 10 Oct 2026): they keep the look they had as h2. */
 .kit-footer :is(p.kit-footer-head, p.kit-footer-nl-head) { max-width: none; text-wrap: balance; }
 .kit-footer p.kit-footer-nl-head { letter-spacing: var(--kit-tracking-heading); }
+/* /claim/ without a listing: find your organisation (12 Oct 2026). */
+.aw-claim-find { max-width: 36rem; }
+.aw-claim-results { list-style: none; margin: var(--s-4) 0 var(--s-6); padding: 0; display: grid; gap: var(--s-2); }
+.aw-claim-results a { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-3) var(--s-4); border: 1px solid var(--kit-color-line); border-radius: var(--r-4); text-decoration: none; }
+.aw-claim-results span { color: var(--kit-color-muted); }
