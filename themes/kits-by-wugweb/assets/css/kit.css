@@ -484,7 +484,8 @@ html { overflow-x: clip; }
    Ads are never clipped (no max-height). The box gives its space back only when the network says no ad will come. */
 .kit-ad-unit { min-height: 100px; display: flex; align-items: center; justify-content: center; }
 @media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
-.kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
+/* Every ad slot shows as one light tone, filled or not, so its place is visible (owner, 12 Oct 2026). */
+.kit-ad-unit { background: var(--kit-color-surface-soft, var(--kit-color-surface)); border-radius: var(--kit-radius-card, 12px); }
 
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--kit-color-line); }

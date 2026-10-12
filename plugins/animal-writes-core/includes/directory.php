@@ -140,6 +140,7 @@ add_filter(
  */
 function aw_directory_query_vars( $v ) {
 	$mq = (array) ( $v['meta_query'] ?? array() );
+	$v['aw_digits_last'] = 1; // A–Z means letters first: names that start with a number (e.g. "1962 …") come after Z
 	// Every listing carries aw_featured; aw_verified may be missing.
 	$mq['feat'] = array( 'key' => 'aw_featured', 'type' => 'NUMERIC' );
 	$order      = array( 'feat' => 'DESC', 'title' => 'ASC' );
@@ -530,3 +531,17 @@ function aw_directory_intro() {
 	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );
 }
 add_filter( 'kits_seo_description', fn( $d ) => ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['type'] ) && empty( $_GET['q'] ) ) ? aw_directory_intro() : $d ); // phpcs:ignore WordPress.Security.NonceVerification
+
+// A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).
+add_filter(
+	'posts_orderby',
+	function ( $orderby, $q ) {
+		global $wpdb;
+		if ( ! $q->get( 'aw_digits_last' ) || false === strpos( $orderby, "{$wpdb->posts}.post_title" ) ) {
+			return $orderby;
+		}
+		return preg_replace( '/(' . preg_quote( "{$wpdb->posts}.post_title", '/' ) . ' (ASC|DESC))/', "({$wpdb->posts}.post_title REGEXP '^[0-9]') ASC, $1", $orderby, 1 );
+	},
+	10,
+	2
+);
