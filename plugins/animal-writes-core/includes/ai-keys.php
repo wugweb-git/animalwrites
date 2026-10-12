@@ -92,7 +92,7 @@ function aw_ai_call( string $provider, string $key, string $model = '', bool $ch
 	}
 	$r = $chat ? wp_remote_post( $url, $arg + array( 'body' => wp_json_encode( $body ) ) ) : wp_remote_get( $url, $arg );
 	if ( is_wp_error( $r ) ) {
-		return array( 0, '' );
+		return array( 0, '', array() );
 	}
 	$hd      = wp_remote_retrieve_headers( $r );
 	$headers = array_change_key_case( is_object( $hd ) && method_exists( $hd, 'getAll' ) ? $hd->getAll() : (array) $hd, CASE_LOWER );
