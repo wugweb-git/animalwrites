@@ -130,6 +130,36 @@ function aw_listing_schema( $id ) {
 	} elseif ( $m( 'aw_services' ) ) {
 		$org['knowsAbout'] = array_values( array_filter( array_map( 'trim', preg_split( '/[,;\n]+/', wp_strip_all_tags( $m( 'aw_services' ) ) ) ) ) );
 	}
+	// Everything else the listing states (owner, 12 Oct 2026): services as a catalogue, the head of the organisation,
+	// and the donate / volunteer links as actions.
+	if ( ! empty( $org['knowsAbout'] ) ) {
+		$org['hasOfferCatalog'] = array(
+			'@type'           => 'OfferCatalog',
+			'name'            => 'Services',
+			'itemListElement' => array_map( fn( $s ) => array( '@type' => 'Offer', 'itemOffered' => array( '@type' => 'Service', 'name' => $s ) ), $org['knowsAbout'] ),
+		);
+	}
+	if ( $m( 'aw_head' ) ) { // "Name, Role" as the organisation states it
+		$head            = array_map( 'trim', explode( ',', wp_strip_all_tags( $m( 'aw_head' ) ), 2 ) );
+		$org['founder']  = null; // only when the stated role says so
+		$person          = array_filter( array( '@type' => 'Person', 'name' => $head[0], 'jobTitle' => $head[1] ?? '' ) );
+		if ( isset( $head[1] ) && preg_match( '/found/i', $head[1] ) ) {
+			$org['founder'] = $person;
+		} else {
+			$org['employee'] = $person;
+		}
+		$org = array_filter( $org, fn( $v ) => null !== $v );
+	}
+	$acts = array();
+	if ( $m( 'aw_donate_url' ) ) {
+		$acts[] = array( '@type' => 'DonateAction', 'target' => esc_url_raw( $m( 'aw_donate_url' ) ), 'recipient' => array( '@id' => $org['@id'] ?? '' ) );
+	}
+	if ( $m( 'aw_volunteer_url' ) ) {
+		$acts[] = array( '@type' => 'JoinAction', 'name' => 'Volunteer', 'target' => esc_url_raw( $m( 'aw_volunteer_url' ) ) );
+	}
+	if ( $acts ) {
+		$org['potentialAction'] = 1 === count( $acts ) ? $acts[0] : $acts;
+	}
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	if ( $types && ! is_wp_error( $types ) ) {
 		$org['keywords'] = implode( ', ', array_filter( array_merge( wp_list_pluck( $types, 'name' ), array( $m( 'aw_g_category' ) ) ) ) ); // additionalType must be a URL; the type names (and Google's category) go here
