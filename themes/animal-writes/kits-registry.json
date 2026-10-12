@@ -603,7 +603,8 @@
    "classes": [
     "aw-datasrc",
     "aw-datasrcs",
-    "aw-datasrc-img"
+    "aw-datasrc-img",
+    "aw-verified-mark"
    ],
    "states": [
     "default"

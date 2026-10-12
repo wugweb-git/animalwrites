@@ -1067,3 +1067,5 @@ body { background: var(--kit-color-canvas); }
 /* Source marks as icons: Google Maps pin, organisation building (12 Oct 2026). */
 .aw-datasrc-img { display: block; width: 16px; height: 16px; }
 .aw-datasrc .aw-datasrc-mark:has(.aw-datasrc-img) { display: inline-flex; align-items: center; }
+.aw-verified-mark { display: inline-flex; align-items: center; padding-inline: var(--s-2); }
+.aw-verified-mark .kit-ico { width: 16px; height: 16px; }

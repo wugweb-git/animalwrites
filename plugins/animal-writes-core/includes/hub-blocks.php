@@ -312,8 +312,8 @@ function aw_block_org_mark( $a, $id ) {
 /** The Verified badge, where the details came from, and up to two types. */
 function aw_block_badges( $a, $id ) {
 	$out = '';
-	if ( get_post_meta( $id, 'aw_verified', true ) ) {
-		$out .= kits_badge( 'Verified', 'verified' );
+	if ( get_post_meta( $id, 'aw_verified', true ) ) { // an icon on listings (owner, 12 Oct 2026); the word stays for screen readers
+		$out .= '<span class="kit-tag kit-tag--success aw-verified-mark" title="Verified by Animal Writes">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified</span></span>';
 	}
 	// Featured and Sponsored are not shown on listings (owner, 12 Oct 2026).
 	$out  .= function_exists( 'aw_source_labels' ) ? aw_source_labels( $id ) : '';
@@ -329,10 +329,10 @@ function aw_block_contact( $a, $id ) {
 	$phone = (string) get_post_meta( $id, 'aw_phone', true );
 	$email = (string) get_post_meta( $id, 'aw_email', true );
 	$site  = (string) get_post_meta( $id, 'aw_website', true );
-	if ( ! $phone && ! $email && ! $site ) {
+	if ( ! $phone && ! $email ) { // the website arrow is not shown on cards (owner, 12 Oct 2026)
 		return '';
 	}
-	return '<p class="aw-org-contact">' . ( $phone ? aw_i( 'phone' ) . '<span class="screen-reader-text">Phone</span>' : '' ) . ( $email ? aw_i( 'mail' ) . '<span class="screen-reader-text">Email</span>' : '' ) . ( $site ? aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text">Website</span>' : '' ) . '</p>';
+	return '<p class="aw-org-contact">' . ( $phone ? aw_i( 'phone' ) . '<span class="screen-reader-text">Phone</span>' : '' ) . ( $email ? aw_i( 'mail' ) . '<span class="screen-reader-text">Email</span>' : '' ) . '' . '</p>';
 }
 
 function aw_block_org_actions( $a, $id ) {
