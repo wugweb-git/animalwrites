@@ -103,7 +103,8 @@ function aw_ai_check( array $row ): array {
 	$order  = array();
 	$strong = array(); // Providers whose own distinctive prefix the key carries: theirs even if the model list refuses.
 	if ( ! empty( $row['provider'] ) && isset( AW_AI_PROVIDERS[ $row['provider'] ] ) ) {
-		$order[] = $row['provider']; // Already known: just re-test it.
+		$order[]  = $row['provider']; // Already known: just re-test it.
+		$strong[] = $row['provider'];
 	} else {
 		foreach ( AW_AI_PROVIDERS as $id => $p ) {
 			foreach ( $p[1] as $prefix ) {
@@ -159,6 +160,26 @@ function aw_ai_check( array $row ): array {
 	return $row;
 }
 
+/** Test every saved key (owner, 12 Oct 2026): twice a day by WP-Cron, so the list and the workers only use keys that answer. */
+function aw_ai_check_all(): void {
+	@set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	$rows = aw_ai_rows();
+	foreach ( $rows as &$r ) {
+		$r = aw_ai_check( $r );
+	}
+	unset( $r );
+	update_option( 'aw_ai_models', $rows, false );
+}
+add_action( 'aw_ai_check_all', 'aw_ai_check_all' );
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_ai_check_all' ) ) {
+			wp_schedule_event( time() + 300, 'twicedaily', 'aw_ai_check_all' );
+		}
+	}
+);
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -171,7 +192,7 @@ add_action(
 				'callback'            => function () {
 					$out = array();
 					foreach ( aw_ai_rows() as $r ) {
-						if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited', 'no-credit' ), true ) ) {
+						if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
 							continue;
 						}
 						$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
@@ -226,7 +247,7 @@ function aw_ai_keys_screen() {
 	wp_nonce_field( 'aw_ai_keys' );
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
 	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
-	echo '<p>The news workers try these keys from the top down, then the keys in their GitHub secrets.</p>';
+	echo '<p>The news workers try the working keys from the top down, then the keys in their GitHub secrets. Every key is tested again twice a day.</p>';
 	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
 	if ( ! $rows ) {
 		echo '<tr><td colspan="6">No keys yet.</td></tr>';
