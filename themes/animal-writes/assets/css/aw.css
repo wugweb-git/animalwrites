@@ -1007,7 +1007,7 @@ body { background: var(--kit-color-canvas); }
 
 /* ---------- Volunteer page (redesign, 12 Oct 2026) ----------
  * One job: a sign-up on a phone. The five ways to help come first and read as choices; a chosen one lifts with the
- * brand's yellow offset (the only yellow besides the button). Desktop: the photo stays in view while the form scrolls. */
+ * brand's yellow offset (the only yellow besides the button). The photo runs across the top, the form below. */
 .aw-vol-page { background: none; border-radius: 0; overflow: visible; margin-block: var(--s-6) var(--s-12); gap: var(--s-6); }
 .aw-vol-page .aw-vol-banner-photo img { height: 180px; border-radius: var(--r-4); }
 .aw-vol-page .aw-vol-banner-body { padding: 0; max-width: 40rem; }
@@ -1037,9 +1037,9 @@ body { background: var(--kit-color-canvas); }
 	.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: auto; }
 }
 @media (min-width: 1024px) {
-	.aw-vol-page { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s-12); align-items: start; }
-	.aw-vol-page .aw-vol-banner-photo { position: sticky; top: calc(var(--kit-header-height, 72px) + var(--s-6)); }
-	.aw-vol-page .aw-vol-banner-photo img { height: calc(100vh - var(--kit-header-height, 72px) - var(--s-12)); max-height: 760px; min-height: 420px; }
+	/* Photo across the top on desktop too (owner, 12 Oct 2026); the form below it. */
+	.aw-vol-page { grid-template-columns: 1fr; }
+	.aw-vol-page .aw-vol-banner-photo img { height: 360px; }
 }
 @media (prefers-reduced-motion: reduce) {
 	.aw-vol-role.kit-checkbox { transition: none; }
