@@ -4,7 +4,8 @@
  * India, fits a Category (aw_topic) and, for documents, was issued by a known body, before anything is created.
  *
  * Endpoints (the ingest application-password user, edit_posts):
- * - GET  aw/v1/relevance-config    Categories (slug => name) and Directory organisation names (known issuers).
+ * - GET  aw/v1/relevance-config    Categories (slug => name), Directory organisation names (known issuers) and the
+ *                                  titles of News from the last 4 days (recent), for the same-story check.
  * - GET  aw/v1/relevance-items     Existing News, Library, Resources, Opportunities and Press items, any status but
  *                                  trash; paginated (page, per_page ≤ 200, missing=1 for items without a verdict).
  * - POST aw/v1/relevance-verdicts  {verdicts: [{id, relevant, category, india, issuer, reason, model, at}]} → meta
@@ -144,6 +145,21 @@ function aw_relevance_row( WP_Post $p ) {
 	);
 }
 
+/** Titles of News published or waiting from the last 4 days: the workers ask the AI whether a new item is one of these stories. */
+function aw_relevance_recent_titles(): array {
+	$ids = get_posts(
+		array(
+			'post_type'      => 'aw_news',
+			'post_status'    => array( 'publish', 'pending', 'draft', 'future' ),
+			'date_query'     => array( array( 'after' => '4 days ago' ) ),
+			'posts_per_page' => 400,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+	return array_values( array_map( fn( $id ) => html_entity_decode( get_the_title( $id ), ENT_QUOTES ), $ids ) );
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -154,7 +170,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $can,
-				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'directory' => aw_relevance_directory() ) ),
+				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles() ) ),
 			)
 		);
 		register_rest_route(
