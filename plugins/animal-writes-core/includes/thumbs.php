@@ -1,9 +1,9 @@
 <?php
 /**
- * Thumbnails never repeat (owner, 9 Oct 2026). No picture appears twice anywhere on the site as a card or featured
- * image — not on one page, not across items.
+ * Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. Ingested items (News, Library, research) show
+ * the publisher's own image, linked (media.php), and may share their topic photo when they have none (owner, 12 Oct 2026).
  *
- * Cards use our own openly licensed category photos (never the publisher's photo). Each photo belongs to ONE item at a
+ * Our own openly licensed category photos: each photo belongs to ONE item at a
  * time: the newest published item in that category that has no photo yet. Every other item shows its text placard.
  * Files are compared by content (md5), so the same picture uploaded twice still counts once. The assignment is stored
  * (option aw_thumb_map: post ID => attachment ID) and rebuilt when an item is published, changed or removed, and daily.

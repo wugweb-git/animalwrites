@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Our own image for an item: news and Legal Watch use the photo chosen for their topic (stored in the media library,
- * openly licensed), never the publisher's photo. Legal items with a hosted government PDF keep its first page.
+ * The image for an item: ingested items (News, Library, research) use the story's own image, linked from the publisher;
+ * without one, their topic's photo (stored, openly licensed). Library items with a hosted government PDF keep its first page.
  * Topic photos are set in the option aw_topic_images = array( topic-slug => attachment ID, 'default' => ID ).
  *
  * @param int    $post_id Post ID.
@@ -19,6 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string URL, or '' when there is none (callers then show the placard).
  */
 function aw_item_image( $post_id, $size = 'large' ) {
+	// Ingested items (News, Library, research): the story's own image, linked from the publisher, not copied (owner,
+	// 12 Oct 2026: the no-repeat rule is for content we create, not for ingested items). A hosted PDF page comes first.
+	if ( aw_is_ingested( $post_id ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && ! get_post_meta( $post_id, 'aw_doc_preview', true ) ) {
+		$remote = (string) get_post_meta( $post_id, 'aw_source_image', true );
+		if ( '' !== $remote && preg_match( '#^https://#i', $remote ) ) {
+			return $remote;
+		}
+	}
 	$att = aw_item_image_id( $post_id );
 	if ( ! $att ) {
 		return '';
@@ -46,8 +54,26 @@ function aw_item_image_id( $post_id ) {
 	if ( 'aw_legal' === $type && $preview ) {
 		return $preview;
 	}
-	// A category photo belongs to one item at a time across the whole site (thumbs.php); everyone else gets the placard.
-	return function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
+	// A category photo belongs to one item at a time across the whole site (thumbs.php). Ingested items without their own
+	// image may share their topic's photo (the no-repeat rule is for our own content, owner 12 Oct 2026).
+	$own = function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
+	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_topic_image_id' ) ) {
+		return $own;
+	}
+	$topics = wp_get_object_terms( $post_id, 'aw_topic' );
+	foreach ( is_wp_error( $topics ) ? array() : $topics as $t ) {
+		$att = (int) aw_topic_image_id( $t );
+		if ( $att ) {
+			return $att;
+		}
+	}
+	return 0;
+}
+
+/** Brought in by the workers (News, Library, research papers), as opposed to written by us. */
+function aw_is_ingested( $post_id ) {
+	$type = get_post_type( $post_id );
+	return in_array( $type, array( 'aw_news', 'aw_legal' ), true ) || ( 'post' === $type && '' !== (string) get_post_meta( $post_id, 'aw_source_url', true ) );
 }
 
 /**
