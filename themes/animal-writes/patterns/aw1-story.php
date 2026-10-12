@@ -31,7 +31,11 @@
 <li><time datetime="2025-11-29">29 Nov 2025</time><span>National day of action at post offices</span></li>
 <li><time datetime="2025-12-02">2 Dec 2025</time><span>Letters delivered to the Supreme Court</span></li>
 </ol>
-<a class="kit-btn" href="/campaigns/animal-writes-1-0/">Read the full story</a>
 <!-- /wp:html -->
-</div>
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-primary"} -->
+<div class="wp-block-button is-style-kits-primary"><a class="wp-block-button__link wp-element-button" href="/campaigns/animal-writes-1-0/">Read the full story</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->

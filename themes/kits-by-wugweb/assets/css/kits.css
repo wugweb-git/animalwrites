@@ -1,11 +1,6 @@
 /* Kits by Wugweb — styles theme.json cannot express. Use presets only; no raw values. */
 
-.is-style-kits-card {
-	background: var(--wp--preset--color--surface);
-	border: 1px solid var(--wp--preset--color--border);
-	border-radius: var(--wp--custom--radius--md);
-	padding: var(--wp--preset--spacing--40);
-}
+/* Group "Card" and "Surface", button "Primary/Secondary/Ghost/Small", separator "Hairline": theme.json styles.blocks variations. */
 
 .is-style-kits-label { /* = kit-eyebrow: small, sentence case, carries information */
 	display: block;
@@ -35,6 +30,6 @@
 	align-items: center;
 	justify-content: center;
 	border: 1px dashed var(--wp--preset--color--border);
-	border-radius: var(--wp--custom--radius--sm);
+	border-radius: var(--wp--preset--border-radius--control);
 	color: var(--wp--preset--color--text-muted);
 }

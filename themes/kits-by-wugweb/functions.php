@@ -108,23 +108,39 @@ function kits_pattern_categories() {
 add_action( 'init', 'kits_pattern_categories' );
 
 /**
- * Block styles.
+ * Block styles (Appearance > Editor > Styles > Blocks lists them under each block). Their colours, borders, padding and
+ * sizes are in theme.json (styles.blocks.*.variations), so they are edited there; kit.css adds height and hover.
  */
 function kits_block_styles() {
-	register_block_style(
-		'core/group',
-		array(
-			'name'  => 'kits-card',
-			'label' => __( 'Card', 'kits-by-wugweb' ),
-		)
+	$styles = array(
+		'core/button'    => array(
+			'kits-primary'   => __( 'Primary', 'kits-by-wugweb' ),
+			'kits-secondary' => __( 'Secondary', 'kits-by-wugweb' ),
+			'kits-ghost'     => __( 'Ghost', 'kits-by-wugweb' ),
+			'kits-small'     => __( 'Small', 'kits-by-wugweb' ),
+		),
+		'core/group'     => array(
+			'kits-card'    => __( 'Card', 'kits-by-wugweb' ),
+			'kits-surface' => __( 'Surface', 'kits-by-wugweb' ),
+		),
+		'core/separator' => array(
+			'kits-hairline' => __( 'Hairline', 'kits-by-wugweb' ),
+		),
+		'core/paragraph' => array(
+			'kits-label' => __( 'Label', 'kits-by-wugweb' ),
+		),
 	);
-	register_block_style(
-		'core/paragraph',
-		array(
-			'name'  => 'kits-label',
-			'label' => __( 'Label', 'kits-by-wugweb' ),
-		)
-	);
+	foreach ( $styles as $block => $list ) {
+		foreach ( $list as $name => $label ) {
+			register_block_style(
+				$block,
+				array(
+					'name'  => $name,
+					'label' => $label,
+				)
+			);
+		}
+	}
 }
 add_action( 'init', 'kits_block_styles' );
 

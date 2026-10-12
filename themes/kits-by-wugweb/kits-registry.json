@@ -1581,6 +1581,55 @@
     "alt": "n/a",
     "schema": "preview-only items are left out of ItemList, sitemaps and search"
    }
+  },
+  {
+   "name": "Core block styles (Site Editor > Styles > Blocks)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [],
+   "blockStyles": {
+    "core/button": [
+     "kits-primary",
+     "kits-secondary",
+     "kits-ghost",
+     "kits-small"
+    ],
+    "core/group": [
+     "kits-card",
+     "kits-surface"
+    ],
+    "core/separator": [
+     "kits-hairline"
+    ],
+    "core/paragraph": [
+     "kits-label"
+    ]
+   },
+   "states": [
+    "default",
+    "hover (kit.css)",
+    "focus (3px ring)",
+    "on dark surfaces: Primary stays yellow, Secondary and Ghost keep their outline"
+   ],
+   "tokens": [
+    "theme.json presets: color primary/secondary/border/surface/on-ink, spacing 40/50, font-size small, border-radius card/pill"
+   ],
+   "a11y": {
+    "element": "core blocks (<a class=wp-block-button__link>, <div>, <hr>)",
+    "aria": "none",
+    "keyboard": "Tab; Enter (buttons)",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "48px (Small: 44px)",
+    "motion": "colour change only",
+    "sr": "visible label"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what happens",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "source": "kits_block_styles() in functions.php registers them; theme.json styles.blocks.<block>.variations holds their values"
   }
  ],
  "nav": [

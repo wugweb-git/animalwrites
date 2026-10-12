@@ -6,12 +6,12 @@
 			"palette": [
 				{
 					"slug": "primary",
-					"name": "Wugweb yellow",
-					"color": "#ffbe1a"
+					"name": "Accent",
+					"color": "#FFBE1A"
 				},
 				{
 					"slug": "primary-dark",
-					"name": "Link blue",
+					"name": "Accent ink",
 					"color": "#0062b8"
 				},
 				{
@@ -20,60 +20,61 @@
 					"color": "#141414"
 				},
 				{
-					"slug": "background",
-					"name": "Paper",
-					"color": "#ffffff"
-				},
-				{
-					"slug": "surface",
-					"name": "Kraft",
-					"color": "#efe4cf"
-				},
-				{
 					"slug": "foreground",
-					"name": "Foreground",
+					"name": "Text",
 					"color": "#1e1e1e"
 				},
 				{
 					"slug": "text-muted",
-					"name": "Text muted",
-					"color": "#6e6e6e"
+					"name": "Muted",
+					"color": "#5f5f5f"
 				},
 				{
 					"slug": "border",
-					"name": "Border",
-					"color": "#e6e6e6"
+					"name": "Line",
+					"color": "#e4ddd0"
+				},
+				{
+					"slug": "canvas",
+					"name": "Page",
+					"color": "#F4F4F4"
+				},
+				{
+					"slug": "surface",
+					"name": "Surface",
+					"color": "#efe4cf"
+				},
+				{
+					"slug": "background",
+					"name": "Raised",
+					"color": "#FFFFFF"
+				},
+				{
+					"slug": "on-ink",
+					"name": "On ink",
+					"color": "#FFFFFF"
+				},
+				{
+					"slug": "focus",
+					"name": "Focus",
+					"color": "#0062b8"
+				},
+				{
+					"slug": "error",
+					"name": "Danger",
+					"color": "#c8102e"
 				},
 				{
 					"slug": "success",
 					"name": "Success",
-					"color": "#16a249"
+					"color": "#137a3b"
 				},
 				{
 					"slug": "warning",
 					"name": "Warning",
-					"color": "#c88a04"
-				},
-				{
-					"slug": "error",
-					"name": "Error",
-					"color": "#dc2626"
-				},
-				{
-					"slug": "marker-red",
-					"name": "Marker red",
-					"color": "#c8102e"
+					"color": "#8a5a00"
 				}
 			]
-		},
-		"custom": {
-			"radius": {
-				"control": "var(--kit-radius-control)",
-				"card": "var(--kit-radius-card)",
-				"media": "var(--kit-radius-media)",
-				"hero": "var(--kit-radius-hero)",
-				"pill": "var(--kit-radius-pill)"
-			}
 		},
 		"typography": {
 			"fontFamilies": [
@@ -110,37 +111,6 @@
 					]
 				}
 			]
-		}
-	},
-	"styles": {
-		"elements": {
-			"button": {
-				"border": {
-					"radius": "var(--kit-radius-control)"
-				},
-				"color": {
-					"background": "var(--wp--preset--color--primary)",
-					"text": "var(--wp--preset--color--secondary)"
-				},
-				"typography": {
-					"fontWeight": "600"
-				}
-			},
-			"link": {
-				":hover": {
-					"color": {
-						"text": "var(--wp--preset--color--primary-dark)"
-					}
-				}
-			},
-			"heading": {
-				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--display)",
-					"fontWeight": "400",
-					"lineHeight": "1.08",
-					"letterSpacing": "-0.01em"
-				}
-			}
 		}
 	},
 	"customTemplates": [

@@ -255,6 +255,7 @@ body { background: var(--kit-color-canvas); }
 .kit-ed-story { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-ed-story h2 { color: var(--kit-color-on-ink) !important; padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-accent); }
 .kit-ed-story-head p { font-size: var(--kit-type-lead); color: color-mix(in srgb, var(--neutral-0) 85%, transparent); max-width: 58ch; margin: var(--kit-space-4) 0 var(--kit-space-7); }
+.kit-ed-story > .wp-block-buttons { padding-top: var(--kit-space-5); } /* the button block's top margin merges with the timeline's; keep the gap it had as a link */
 .aw-ed-mosaic { display: grid; gap: var(--kit-space-2); grid-template-columns: repeat(2, 1fr); grid-auto-rows: 9rem; margin-bottom: var(--kit-space-7); }
 .aw-ed-mosaic img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--kit-radius-media); }
 .aw-ed-mosaic .m1 { grid-column: 1 / -1; grid-row: span 2; }

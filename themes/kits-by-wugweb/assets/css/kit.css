@@ -9,21 +9,16 @@
 /* 1. Base ------------------------------------------------------------------ */
 html { scroll-behavior: smooth; }
 html, body { overflow-x: clip; }
-body {
-	background: var(--kit-color-bg);
-	color: var(--kit-color-text);
-	font-family: var(--kit-font-body);
-	font-size: var(--kit-type-base);
-	line-height: var(--kit-leading-body);
-	-webkit-font-smoothing: antialiased;
-}
+/* Page colours, body type, links, headings, buttons and captions come from theme.json (Appearance > Editor > Styles);
+   the rules here add only what theme.json cannot express, so a change made in Styles is never overridden. */
+body { -webkit-font-smoothing: antialiased; }
 ::selection { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
 	outline: 3px solid var(--kit-color-focus);
 	outline-offset: 2px;
 	border-radius: 4px;
 }
-a { color: inherit; text-underline-offset: 0.18em; text-decoration-thickness: 1px; transition: color var(--kit-motion-fast) var(--kit-motion-ease); }
+a { text-underline-offset: 0.18em; text-decoration-thickness: 1px; transition: color var(--kit-motion-fast) var(--kit-motion-ease); }
 a:hover { color: var(--kit-color-link); text-decoration-thickness: 2px; }
 /* Links inside running text are blue (yellow is for fills only) */
 :is(.wp-block-post-content, .entry-content, .kit-ed-help-note, .kit-more, .kit-field-hint) :is(p, li, td, figcaption) > a:not([class]) { color: var(--kit-color-link); }
@@ -42,25 +37,15 @@ a:hover { color: var(--kit-color-link); text-decoration-thickness: 2px; }
    body     p, li                type-base / regular
    small    .has-small-font-size, meta, captions   type-sm
    caption  .kit-caption, dates, counts             type-xs / medium */
-body { font-family: var(--kit-font-body); letter-spacing: var(--kit-tracking-body); font-feature-settings: "cv11", "ss01"; }
-h1, h2, h3, h4, h5, h6, .wp-block-heading, .wp-block-post-title, .wp-block-query-title {
-	font-family: var(--kit-font-display);
-	font-weight: var(--kit-weight-bold);
-	line-height: var(--kit-leading-heading);
-	letter-spacing: var(--kit-tracking-heading);
-	color: var(--kit-color-ink);
-	text-wrap: balance;
-}
+body { font-feature-settings: "cv11", "ss01"; }
+/* Heading family, weight, size, leading, tracking and colour: theme.json styles.elements (h1-h6) */
+h1, h2, h3, h4, h5, h6, .wp-block-heading, .wp-block-post-title, .wp-block-query-title { text-wrap: balance; }
 .kit-display ,.kit-hero-title { font-size: var(--kit-type-display) !important; line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); font-weight: var(--kit-weight-bold); }
-h1, .wp-block-post-title:where(h1), .wp-block-query-title { font-size: var(--kit-type-h1); line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); }
-h2 { font-size: var(--kit-type-h2); }
-h3 { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-strong); }
-h4, h5, h6 { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); letter-spacing: -0.01em; }
 p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 .has-text-align-center { margin-inline: auto; }
 .has-large-font-size ,.kit-lead { font-size: var(--kit-type-lead) !important; line-height: 1.5; color: var(--kit-color-muted); }
 .has-small-font-size { font-size: var(--kit-type-sm) !important; }
-.kit-caption ,.kit-note ,.wp-element-caption ,.wp-block-post-date { color: var(--kit-color-muted); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); }
+.kit-caption ,.kit-note { color: var(--kit-color-muted); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); }
 
 /* 3. Layout ----------------------------------------------------------------- */
 .wp-block-post-template.is-layout-grid ,.kit-cards .wp-block-post-template {
@@ -75,8 +60,18 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 
 /* 4. Shared components ------------------------------------------------------- */
 
-/* 4.1 Button — variants: primary (default), outline, ink; states: hover, active, focus, disabled, loading */
-.wp-element-button ,.wp-block-button__link ,.kit-form button[type=submit] ,.kit-finder button ,.kit-print button {
+/* 4.1 Button — variants: primary (default), outline, ink; states: hover, active, focus, disabled, loading.
+   Core buttons (.wp-element-button) take colour, border, radius, padding and type from theme.json styles.elements.button
+   and the block style variations (Primary, Secondary, Ghost, Small); the form buttons below repeat the same tokens. */
+.wp-element-button ,.wp-block-button__link {
+	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2);
+	min-height: var(--kit-size-control);
+	cursor: pointer;
+	font-variant: inherit; font-stretch: inherit; font-kerning: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-feature-settings: inherit; font-variation-settings: inherit; word-spacing: inherit;
+	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
+		transform var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
+}
+.kit-form button[type=submit] ,.kit-finder button ,.kit-print button {
 	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2);
 	min-height: var(--kit-size-control);
 	padding: 0 var(--kit-space-5);
@@ -100,6 +95,13 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 .is-style-outline > .wp-block-button__link:hover {
 	background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink);
 }
+/* Block styles (theme.json holds their colours, border, padding and size; here: height and hover) */
+.wp-block-button.is-style-kits-primary .wp-block-button__link:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) .wp-block-buttons > .wp-block-button.is-style-kits-primary > .wp-block-button__link.wp-element-button:hover { /* outranks the dark-surface fill below */ background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.is-style-kits-secondary .wp-block-button__link:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.is-style-kits-ghost .wp-block-button__link:hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+.is-style-kits-small .wp-block-button__link { min-height: var(--kit-size-target); }
+.is-style-kits-hairline { border-width: 1px 0 0 !important; height: 0; opacity: 1; }
 .kit-finder button { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-finder button:hover { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 :is(.wp-element-button, button)[disabled] ,:is(.wp-element-button, button)[aria-disabled=true] {
@@ -195,7 +197,6 @@ body.single-aw_research .kit-lead-media { display: none; }
 }
 .kit-logo img { width: 100%; height: 100%; object-fit: contain; padding: var(--kit-space-2); }
 .kit-logo-lg { max-width: 10rem; }
-.wp-block-image img { border-radius: var(--kit-radius-media); }
 
 /* 4.4 Field — shared by volunteer, receipt and claim forms.
    States: default, hover, focus, invalid (aria-invalid), valid, disabled; error text; summary. */
@@ -778,7 +779,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 :where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
 
 /* Buttons: ink is the main button; yellow only on dark surfaces (header, hero, help band, footer), where ink would vanish. */
-:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(.is-style-outline *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(:is(.is-style-outline, .is-style-kits-secondary, .is-style-kits-ghost) *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .kit-form button[type=submit]):hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 
 /* Phones: every hub head the same height (no pictures on phones; intro clamped to two lines) */

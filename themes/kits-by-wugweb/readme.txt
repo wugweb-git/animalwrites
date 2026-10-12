@@ -13,6 +13,10 @@ Block theme built on the Kits by Wugweb design system.
 
 Kits by Wugweb is a full-site-editing block theme. Design tokens (colour, type, spacing) come from the Kits design system and live in theme.json. Brands ship as child themes or style variations; site features belong in plugins.
 
+= One source for design values =
+
+tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme, the site's tools/build-tokens.py) writes the presets listed under "$wp" into theme.json (colour palette, font sizes, spacing, border radius, shadows) and makes the CSS variables point at them (--kit-color-ink: var(--wp--preset--color--secondary)). Core blocks are styled in theme.json (styles.elements, styles.blocks and the block style variations Primary, Secondary, Ghost, Small, Card, Surface, Hairline); kit.css only adds what theme.json cannot express (heights, hover, motion, layout). So a change in Appearance > Editor > Styles reaches core blocks and Kits components alike. Font families are written by hand in theme.json, as they carry font files. Do not edit kit-tokens.css or the generated presets by hand; edit tokens.json and rebuild.
+
 == Changelog ==
 
 = 2.0.0 =
