@@ -1067,8 +1067,8 @@ body { background: var(--kit-color-canvas); }
 /* Source marks as icons: Google Maps pin, organisation building (12 Oct 2026). */
 .aw-datasrc-img { display: block; width: 16px; height: 16px; }
 .aw-datasrc .aw-datasrc-mark:has(.aw-datasrc-img) { display: inline-flex; align-items: center; }
-.aw-verified-mark { display: inline-flex; align-items: center; padding-inline: var(--s-2); }
-.aw-verified-mark .kit-ico { width: 16px; height: 16px; }
+.aw-verified-mark { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-left: .2em; border-radius: 50%; background: var(--kit-color-success); color: var(--kit-color-on-ink, #fff); vertical-align: -0.12em; }
+.aw-verified-mark .kit-ico { width: .7em; height: .7em; }
 
 /* Sponsored blocks (sponsored-blocks.php): a card or a banner, always labelled "Sponsored". Phone: one column; from
    768px the banner puts its picture beside the text. */

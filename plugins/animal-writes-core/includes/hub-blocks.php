@@ -309,14 +309,10 @@ function aw_block_org_mark( $a, $id ) {
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';
 }
 
-/** The Verified badge, where the details came from, and up to two types. */
+/** Up to two listing types (the card's labels). */
 function aw_block_badges( $a, $id ) {
 	$out = '';
-	if ( get_post_meta( $id, 'aw_verified', true ) ) { // an icon on listings (owner, 12 Oct 2026); the word stays for screen readers
-		$out .= '<span class="kit-tag kit-tag--success aw-verified-mark" title="Verified by Animal Writes">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified</span></span>';
-	}
-	// Featured and Sponsored are not shown on listings (owner, 12 Oct 2026).
-	$out  .= function_exists( 'aw_source_labels' ) ? aw_source_labels( $id ) : '';
+	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
 		$out .= kits_tag( $t->name );
@@ -438,5 +434,24 @@ add_filter(
 		return $classes;
 	},
 	10,
+	3
+);
+
+/** The Verified mark on a listing's name, on cards and on the profile (owner, 12 Oct 2026). */
+function aw_verified_mark() {
+	return ' <span class="aw-verified-mark" title="Verified by Animal Writes">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified</span></span>';
+}
+add_filter(
+	'render_block_core/post-title',
+	function ( $html, $block, $instance ) {
+		$id = (int) ( $instance->context['postId'] ?? get_the_ID() );
+		if ( ! $id || 'aw_listing' !== get_post_type( $id ) || ! get_post_meta( $id, 'aw_verified', true ) ) {
+			return $html;
+		}
+		$end = strrpos( $html, '</a>' );
+		$end = false !== $end ? $end : strrpos( $html, '</h' );
+		return false === $end ? $html : substr_replace( $html, aw_verified_mark(), $end, 0 );
+	},
+	25,
 	3
 );
