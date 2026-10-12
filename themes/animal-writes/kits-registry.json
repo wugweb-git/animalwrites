@@ -604,7 +604,8 @@
     "aw-datasrc",
     "aw-datasrcs",
     "aw-datasrc-img",
-    "aw-verified-mark"
+    "aw-verified-mark",
+    "aw-type-ico"
    ],
    "states": [
     "default"

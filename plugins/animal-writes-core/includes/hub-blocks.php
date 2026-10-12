@@ -315,7 +315,7 @@ function aw_block_badges( $a, $id ) {
 	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
-		$out .= kits_tag( $t->name );
+		$out .= '<span class="kit-tag"><span class="aw-type-ico aw-type-ico--' . esc_attr( $t->slug ) . '" aria-hidden="true"></span>' . esc_html( $t->name ) . '</span>'; // the type's icon, then its name
 	}
 	return $out ? '<p class="aw-org-tags kit-tags">' . $out . '</p>' : '';
 }
