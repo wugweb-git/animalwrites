@@ -353,3 +353,11 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-step-nav { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-2); }
 .kit-steps:not(.is-stepped) .kit-step-nav [data-step-next], .kit-steps:not(.is-stepped) .kit-step-nav [data-step-back] { display: none; }
 .kit-counter { margin-top: var(--s-1); }
+
+/* The dropdown arrow on every single select (fix 12 Oct 2026): the field rule above sets the whole `background` with a
+ * stronger selector, which removed the arrow. */
+.kit-field select:not([multiple]):not([size]), :where(select:not([multiple]):not([size])) {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+	background-repeat: no-repeat !important; background-position: right var(--s-3) center !important; background-size: 1rem !important;
+	padding-right: calc(var(--s-3) + 1.25rem) !important;
+}
