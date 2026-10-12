@@ -218,9 +218,12 @@ add_action(
 					$n    = max( 0, (int) $req->get_param( 'held' ) );
 					$run  = sanitize_text_field( (string) $req->get_param( 'run' ) );
 					$link = esc_url_raw( (string) $req->get_param( 'link' ) );
-					if ( ! $n ) {
-						return new WP_REST_Response( array( 'status' => 'nothing to report' ) );
+					if ( ! $n ) { // a run where the check worked clears the dashboard notice
+						delete_option( 'aw_relevance_alert_notice' );
+						return new WP_REST_Response( array( 'status' => 'clear' ) );
 					}
+					$prev = (array) get_option( 'aw_relevance_alert_notice', array() );
+					update_option( 'aw_relevance_alert_notice', array( 'held' => $n + (int) ( $prev['held'] ?? 0 ), 'since' => $prev['since'] ?? current_time( 'j M Y, g:i a' ), 'run' => $link ), false );
 					$total = $n + (int) get_option( 'aw_relevance_alert_pending', 0 );
 					if ( get_transient( 'aw_relevance_alert_sent' ) ) {
 						update_option( 'aw_relevance_alert_pending', $total, false );
@@ -306,3 +309,15 @@ function aw_relevance_rejected_tab() {
 	}
 	echo '</tbody></table>';
 }
+
+// Dashboard: the same alert while items are held (owner, 12 Oct 2026); it clears after a run where the check works.
+add_action(
+	'admin_notices',
+	function () {
+		$a = get_option( 'aw_relevance_alert_notice' );
+		if ( ! is_array( $a ) || empty( $a['held'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		echo '<div class="notice notice-error"><p><strong>Relevance check could not run.</strong> ' . esc_html( (int) $a['held'] . ' new item(s) held since ' . $a['since'] . ': no AI service answered, so nothing was created for them. They are tried again every 6 hours. Adding credit to an AI key clears it.' ) . ( ! empty( $a['run'] ) ? ' <a href="' . esc_url( $a['run'] ) . '" target="_blank" rel="noopener">Run details</a>' : '' ) . '</p></div>';
+	}
+);
