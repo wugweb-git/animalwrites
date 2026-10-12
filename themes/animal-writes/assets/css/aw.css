@@ -1056,3 +1056,11 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-services .kit-checkbox:has(input:focus-visible) { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
 @media (min-width: 640px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
 @media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }
+
+/* Directory search, wide screens (fix 12 Oct 2026): the name field, the three selects and Search sit on one line,
+ * top-aligned; "Verified only" goes on its own line under the selects instead of pushing the row out of line. */
+@media (min-width: 768px) { .aw-dir-more-body .aw-dir-check { grid-column: 1 / -1; } }
+@media (min-width: 1200px) {
+	.aw-dir-search { align-items: start; }
+	.aw-dir-submit { margin-top: 30px; } /* the height of a field label (22px) plus its gap (8px) */
+}
