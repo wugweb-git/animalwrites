@@ -86,14 +86,14 @@ function aw_ai_keys_screen() {
 	wp_nonce_field( 'aw_ai_keys' );
 	echo '<table class="form-table">';
 	foreach ( AW_AI_PROVIDERS as $p => $label ) {
-		echo '<tr><th>' . esc_html( $label ) . '</th><td class="aw-ai-keys" data-provider="' . esc_attr( $p ) . '">';
+		echo '<tr><th>' . esc_html( $label ) . '</th><td data-provider="' . esc_attr( $p ) . '">';
 		foreach ( array_merge( $keys[ $p ] ?? array(), array( '' ) ) as $i => $k ) {
 			echo '<p><input type="text" name="aw_ai_keys[' . esc_attr( $p ) . '][]" value="' . esc_attr( $k ) . '" class="large-text code" autocomplete="off" spellcheck="false" aria-label="' . esc_attr( $label . ' key ' . ( $i + 1 ) ) . '"' . ( '' === $k ? ' placeholder="Add a key"' : '' ) . '></p>';
 		}
-		echo '<p><button type="button" class="button aw-ai-add">Add another key</button></p></td></tr>';
+		echo '<p><button type="button" class="button" data-aw-add>Add another key</button></p></td></tr>';
 	}
 	echo '</table>';
 	submit_button( 'Save keys' );
 	echo '</form></div>';
-	echo "<script>document.querySelectorAll('.aw-ai-add').forEach(function(b){b.addEventListener('click',function(){var p=b.parentNode,c=p.previousElementSibling.cloneNode(true),f=c.querySelector('input');f.value='';f.placeholder='Add a key';p.parentNode.insertBefore(c,p);f.focus();});});</script>";
+	echo "<script>document.querySelectorAll('[data-aw-add]').forEach(function(b){b.addEventListener('click',function(){var p=b.parentNode,c=p.previousElementSibling.cloneNode(true),f=c.querySelector('input');f.value='';f.placeholder='Add a key';p.parentNode.insertBefore(c,p);f.focus();});});</script>";
 }
