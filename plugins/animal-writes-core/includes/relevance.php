@@ -206,6 +206,39 @@ add_action(
 				},
 			)
 		);
+		// The workers' check could not run (no AI service answered): items were held back, so the owner gets an email
+		// (owner, 12 Oct 2026). At most one email per 6 hours; the count adds up in between.
+		register_rest_route(
+			'aw/v1',
+			'/relevance-alert',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => $can,
+				'callback'            => function ( WP_REST_Request $req ) {
+					$n    = max( 0, (int) $req->get_param( 'held' ) );
+					$run  = sanitize_text_field( (string) $req->get_param( 'run' ) );
+					$link = esc_url_raw( (string) $req->get_param( 'link' ) );
+					if ( ! $n ) {
+						return new WP_REST_Response( array( 'status' => 'nothing to report' ) );
+					}
+					$total = $n + (int) get_option( 'aw_relevance_alert_pending', 0 );
+					if ( get_transient( 'aw_relevance_alert_sent' ) ) {
+						update_option( 'aw_relevance_alert_pending', $total, false );
+						return new WP_REST_Response( array( 'status' => 'queued', 'held' => $total ) );
+					}
+					$sent = wp_mail(
+						get_option( 'admin_email' ),
+						'Animal Writes: ' . $total . ' item(s) held — the relevance check could not run',
+						"The workers found {$total} new item(s) but no AI service answered the relevance check, so nothing was created for them. They are tried again on the next run (every 6 hours).\n\nRun: {$run}\n" . ( $link ? "Details: {$link}\n" : '' ) . "\nUsually this means the free daily limit of the AI keys is used up. Adding credit to a key (OpenRouter, OpenAI, DeepSeek …) clears it."
+					);
+					if ( $sent ) {
+						set_transient( 'aw_relevance_alert_sent', 1, 6 * HOUR_IN_SECONDS );
+						delete_option( 'aw_relevance_alert_pending' );
+					}
+					return new WP_REST_Response( array( 'status' => $sent ? 'sent' : 'mail failed', 'held' => $total ) );
+				},
+			)
+		);
 		register_rest_route(
 			'aw/v1',
 			'/relevance-rejected',
