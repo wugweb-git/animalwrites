@@ -86,7 +86,7 @@ function aw_find_by_title( array $types, $title, $day, $date_key = 'aw_source_da
 	$ids  = get_posts(
 		array(
 			'post_type'      => $types,
-			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future' ),
+			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ), // trash: never re-created
 			'fields'         => 'ids',
 			'posts_per_page' => 500,
 			'no_found_rows'  => true,
@@ -323,10 +323,75 @@ add_action(
 );
 
 /*
- * Ingestion heartbeat (owner, 12 Oct 2026): every worker run reports how many items it created. When nothing new has
- * arrived for 12 hours the owner gets an email (once per 12 hours) and a dashboard notice; the next run that creates
- * something clears it.
+ * Ingestion heartbeat and watchdog (owner, 12 Oct 2026; no new News 10-12 Oct went unnoticed).
+ * - Every worker run reports what it did: items created and published, sources tried and failed (POST ingest-heartbeat).
+ * - An hourly check on the site itself (event aw_ingest_watchdog, and after every heartbeat) emails the owner and shows
+ *   a dashboard notice when: no News has been published for 12 hours; no worker run has reported for 8 hours (Actions
+ *   stopped, a run crashed or timed out, login refused); or half the sources failed in the last run.
+ * One email per 12 hours for the same problems; a new kind of problem is emailed at once.
  */
+
+/** Unix time of the newest published News item, or 0. */
+function aw_newest_published_news() {
+	$ids = get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'publish', 'numberposts' => 1, 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids', 'suppress_filters' => true ) );
+	return $ids ? (int) get_post_time( 'U', true, $ids[0] ) : 0;
+}
+
+/**
+ * What is wrong with ingestion right now, as key => sentence (empty when all is well).
+ *
+ * @param int|null $now Unix time (tests).
+ * @return array<string,string>
+ */
+function aw_ingest_problems( $now = null ) {
+	$now  = $now ? $now : time();
+	$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
+	$out  = array();
+	$news = aw_newest_published_news();
+	if ( $news && $now - $news >= 12 * HOUR_IN_SECONDS ) {
+		$out['quiet'] = sprintf( 'No News has been published for %d hours (last: %s).', floor( ( $now - $news ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $news ) );
+	}
+	$last = (int) ( $hb['last_run'] ?? 0 );
+	if ( ! $last || $now - $last >= 8 * HOUR_IN_SECONDS ) {
+		$out['no_run'] = $last ? sprintf( 'No worker run has reported for %d hours (last: %s). The GitHub Actions schedule may have stopped, or runs are failing before the end.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $last ) ) : 'No worker run has reported yet.';
+	}
+	$n    = (int) ( $hb['sources'] ?? 0 );
+	$fail = (int) ( $hb['sources_failed'] ?? 0 );
+	if ( $n && $fail * 2 >= $n ) {
+		$out['sources'] = sprintf( '%d of %d sources could not be fetched in the last run%s', $fail, $n, empty( $hb['errors'] ) ? '.' : ': ' . implode( '; ', array_slice( (array) $hb['errors'], 0, 3 ) ) );
+	}
+	return $out;
+}
+
+/** Email the owner about ingestion problems (hourly event, and after every heartbeat). */
+function aw_ingest_watchdog() {
+	$problems = aw_ingest_problems();
+	update_option( 'aw_ingest_watchdog_last', array( 'at' => time(), 'problems' => $problems ), false );
+	if ( ! $problems ) {
+		delete_transient( 'aw_ingest_alert_mailed' );
+		return;
+	}
+	$kinds = implode( ',', array_keys( $problems ) );
+	$sent  = (string) get_transient( 'aw_ingest_alert_mailed' );
+	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
+		return; // the same problems were emailed in the last 12 hours
+	}
+	$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
+	$body = "Animal Writes ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/animal-writes-workers/actions\n";
+	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: ingestion problem — ' . reset( $problems ), $body ) ) {
+		set_transient( 'aw_ingest_alert_mailed', $kinds, 12 * HOUR_IN_SECONDS );
+	}
+}
+add_action( 'aw_ingest_watchdog', 'aw_ingest_watchdog' );
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_ingest_watchdog' ) ) {
+			wp_schedule_event( time() + 600, 'hourly', 'aw_ingest_watchdog' );
+		}
+	}
+);
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -337,23 +402,23 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
 				'callback'            => function ( WP_REST_Request $req ) {
-					$now = time();
-					$new = max( 0, (int) $req->get_param( 'new' ) );
-					$hb  = (array) get_option( 'aw_ingest_heartbeat', array() );
-					$hb['last_run']  = $now;
-					$hb['last_link'] = esc_url_raw( (string) $req->get_param( 'link' ) );
-					if ( $new > 0 || empty( $hb['last_new'] ) ) {
+					$now       = time();
+					$new       = max( 0, (int) $req->get_param( 'new' ) );
+					$published = null === $req->get_param( 'published' ) ? $new : max( 0, (int) $req->get_param( 'published' ) );
+					$hb        = (array) get_option( 'aw_ingest_heartbeat', array() );
+					$hb['last_run']       = $now;
+					$hb['last_link']      = esc_url_raw( (string) $req->get_param( 'link' ) );
+					$hb['new']            = $new;
+					$hb['published']      = $published;
+					$hb['sources']        = max( 0, (int) $req->get_param( 'sources' ) );
+					$hb['sources_failed'] = max( 0, (int) $req->get_param( 'sources_failed' ) );
+					$hb['errors']         = array_map( 'sanitize_text_field', array_slice( array_filter( (array) $req->get_param( 'errors' ), 'is_scalar' ), 0, 10 ) );
+					if ( $published > 0 || empty( $hb['last_new'] ) ) {
 						$hb['last_new'] = $now;
 					}
-					$quiet = $now - (int) $hb['last_new'];
-					if ( $quiet >= 12 * HOUR_IN_SECONDS && ! get_transient( 'aw_ingest_quiet_mailed' ) ) {
-						$hours = (int) floor( $quiet / HOUR_IN_SECONDS );
-						if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: no new items for ' . $hours . ' hours', "The workers have run, but nothing new has been published for {$hours} hours.\n\nLast run: " . $hb['last_link'] . "\n\nCheck the sources in Settings > Sourcing, or ask Claude Code to look at the workers." ) ) {
-							set_transient( 'aw_ingest_quiet_mailed', 1, 12 * HOUR_IN_SECONDS );
-						}
-					}
 					update_option( 'aw_ingest_heartbeat', $hb, false );
-					return new WP_REST_Response( array( 'quiet_hours' => (int) floor( $quiet / HOUR_IN_SECONDS ) ) );
+					aw_ingest_watchdog();
+					return new WP_REST_Response( array( 'problems' => array_keys( aw_ingest_problems( $now ) ) ) );
 				},
 			)
 		);
@@ -362,14 +427,14 @@ add_action(
 add_action(
 	'admin_notices',
 	function () {
-		$hb = get_option( 'aw_ingest_heartbeat' );
-		if ( ! is_array( $hb ) || empty( $hb['last_new'] ) || ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$quiet = time() - (int) $hb['last_new'];
-		if ( $quiet < 12 * HOUR_IN_SECONDS ) {
+		$problems = aw_ingest_problems();
+		if ( ! $problems ) {
 			return;
 		}
-		echo '<div class="notice notice-error"><p><strong>No new items for ' . (int) floor( $quiet / HOUR_IN_SECONDS ) . ' hours.</strong> The workers are running but nothing new has been published.' . ( ! empty( $hb['last_link'] ) ? ' <a href="' . esc_url( $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run</a>' : '' ) . '</p></div>';
+		$hb = (array) get_option( 'aw_ingest_heartbeat', array() );
+		echo '<div class="notice notice-error"><p><strong>Ingestion needs attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ( ! empty( $hb['last_link'] ) ? ' <a href="' . esc_url( $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run</a>' : '' ) . '</p></div>';
 	}
 );

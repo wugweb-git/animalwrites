@@ -39,7 +39,8 @@ function aw_find_by_source( $post_type, $url ) {
 		array(
 			// Every section, not just $post_type: an item moved from Legal Watch to News must not come back as a new Legal item.
 			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ),
-			'post_status'    => 'any',
+			// Trash included (12 Oct 2026): a trashed item must not come back as new if the workers' memory is lost.
+			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
 			'meta_key'       => 'aw_source_url',
 			'meta_value'     => $url,
 			'fields'         => 'ids',
@@ -264,6 +265,8 @@ function aw_ingest( WP_REST_Request $req ) {
 		array(
 			'status'        => 'created',
 			'id'            => $post_id,
+			// 'published', 'merged', or why it waits; the workers count published items for the heartbeat.
+			'review'        => 'publish' === get_post_status( $post_id ) ? 'published' : (string) $review,
 			'ignored_terms' => (object) $ignored,
 		),
 		201

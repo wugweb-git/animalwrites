@@ -31,6 +31,17 @@ function aw_title_words( $title ) {
 }
 
 /**
+ * The workers' relevance check (stored on the item as aw_relevance) said: about animal welfare, and about India.
+ *
+ * @param int $id Post ID.
+ * @return array|null The verdict when it passed, else null.
+ */
+function aw_ai_passed( $id ) {
+	$v = json_decode( (string) get_post_meta( $id, 'aw_relevance', true ), true );
+	return is_array( $v ) && ! empty( $v['relevant'] ) && ! empty( $v['india'] ) ? $v : null;
+}
+
+/**
  * Why an item must wait for a person, or '' when it can go live.
  *
  * @param int $id Post ID.
@@ -43,16 +54,26 @@ function aw_review_reason( $id ) {
 	$host  = function_exists( 'aw_host' ) ? aw_host( $url ) : (string) wp_parse_url( $url, PHP_URL_HOST );
 	$words = str_word_count( wp_strip_all_tags( $post->post_excerpt ) );
 
-	// 0. A publisher on the allow list (News > Sourcing); new publishers wait for a person.
+	// The owner can be offline for more than a day (12 Oct 2026): an item the AI check passed (animal welfare, India)
+	// goes live from a neutral publisher too, without the keyword test. Blocked publishers never do.
+	$ai = aw_ai_passed( $id );
+	// 0. A publisher on the allow list (News > Sourcing); other publishers wait for a person unless the AI check passed.
 	if ( function_exists( 'aw_publishers' ) ) {
-		$rec = aw_publishers()[ $host ] ?? array();
-		if ( 'allow' !== ( $rec['status'] ?? '' ) ) {
+		$status = aw_publishers()[ $host ]['status'] ?? 'neutral';
+		if ( 'block' === $status ) {
+			return 'publisher blocked (' . $host . ')';
+		}
+		if ( 'allow' !== $status && ! $ai ) {
 			return 'publisher not on the allow list (' . $host . ')';
 		}
 	}
-	// 0b. At least one topic.
+	// 0b. At least one topic: the AI check's category when the workers sent none.
 	if ( ! wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'ids' ) ) ) {
-		return 'no topic';
+		$term = $ai && ! empty( $ai['category'] ) ? get_term_by( 'slug', sanitize_title( $ai['category'] ), 'aw_topic' ) : null;
+		if ( ! $term ) {
+			return 'no topic';
+		}
+		wp_set_object_terms( $id, array( (int) $term->term_id ), 'aw_topic' );
 	}
 	// 1. Summary looks like a summary.
 	if ( $words < 15 || $words > 90 ) {
@@ -65,8 +86,8 @@ function aw_review_reason( $id ) {
 	if ( preg_match( '#/(web-?stories|videos?|video-news|short-videos?|photos?|photogallery|gallery|slideshow)/#i', $url ) ) {
 		return 'thin format (web story / video / gallery)';
 	}
-	// 3. Relevance (owner's keyword lists in News → Sourcing).
-	if ( function_exists( 'aw_relevance_verdict' ) ) {
+	// 3. Relevance (owner's keyword lists in News → Sourcing), unless the AI check already passed it.
+	if ( ! $ai && function_exists( 'aw_relevance_verdict' ) ) {
 		list( $ok, $why ) = aw_relevance_verdict( $post->post_title . ' ' . $post->post_excerpt );
 		if ( ! $ok ) {
 			return 'not clearly about animal welfare (' . $why . ')';
@@ -98,7 +119,7 @@ function aw_review_reason( $id ) {
 			$other  = aw_title_words( $r->post_title );
 			$shared = count( array_intersect( $mine, $other ) );
 			$union  = count( array_unique( array_merge( $mine, $other ) ) );
-			if ( $union && $shared / $union >= 0.45 ) {
+			if ( $union && $shared / $union >= 0.6 ) { // 0.45 merged different stories ("stray dog attack in X / in Y")
 				return 'same story as #' . $r->ID . ' (' . wp_trim_words( $r->post_title, 8 ) . ')';
 			}
 		}
@@ -146,7 +167,11 @@ function aw_auto_review( $id ) {
 		return 'merged';
 	}
 	if ( '' === $reason ) {
-		wp_update_post( array( 'ID' => $id, 'post_status' => 'publish' ) );
+		// The story's own date (owner, 12 Oct 2026), never later than now: an older story is not shown as today's.
+		$day  = substr( (string) get_post_meta( $id, 'aw_source_date', true ), 0, 10 );
+		$now  = current_time( 'mysql' );
+		$when = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? min( $day . ' ' . substr( $now, 11 ), $now ) : $now;
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'publish', 'post_date' => $when, 'post_date_gmt' => get_gmt_from_date( $when ), 'edit_date' => true ) );
 		update_post_meta( $id, 'aw_review', 'auto-published ' . wp_date( 'Y-m-d H:i' ) );
 		return 'published';
 	}
