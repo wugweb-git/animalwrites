@@ -436,7 +436,7 @@ function aw_cc0_score( $x, $word, $injury ) {
 	if ( preg_match( '/\b(person|people|persons|man|woman|men|women|girls?|boys?|child|children|kids|lady|ladies|portrait|selfie|wedding|bride|groom|crowd|tourists?|farmers?|owner|hands?|legs|feet|fingers|holding|family portrait|festival|nepalphotofestival\d*)\b/i', $text ) ) {
 		return -1;
 	}
-	if ( preg_match( '/\b(clip ?art|png|illustrations?|drawings?|vectors?|sketch|icons?|logos?|cartoons?|paintings?|posters?|sculptures?|statues?|toys?|figurines?|stamps?|coins?|maps?|diagrams?|signs?|text|prints?|patterns?|vintage|engravings?|lithographs?|book|page|plate|museum|skeletons?|fossils?|mural|graffiti|plush|costume|mask|emoji|art|bag|dispenser|fabric|textile|machine|stuffed|manhole|cover|rod|landscape|scenery|ornament|decoration|carving|bronze|ceramic)\b/i', $text ) ) {
+	if ( preg_match( '/\b(clip ?art|png|illustrations?|drawings?|vectors?|sketch|icons?|logos?|cartoons?|paintings?|posters?|sculptures?|statues?|toys?|figurines?|stamps?|coins?|maps?|diagrams?|signs?|text|prints?|patterns?|vintage|engravings?|lithographs?|book|page|plate|museum|skeletons?|fossils?|mural|graffiti|plush|costume|mask|emoji|art|bag|dispenser|fabric|textile|machine|stuffed|manhole|cover|rod|landscape|scenery|ornament|decoration|carving|bronze|ceramic|cutout|silhouette|coop|shed|barn|hut|kennel sign|enclosure sign)\b/i', $text ) ) {
 		return -1;
 	}
 	if ( preg_match( '/\b(dead|death|died|blood|bloody|carcass(es)?|slaughter\w*|meat|butcher\w*|hunt\w*|kill\w*|skulls?|bones?|taxiderm\w*|roadkill|corpse|attack\w*|fight\w*|eating a|prey|hide|leather|fur coat|food|dish|cooked|curry|market)\b/i', $text ) ) {
