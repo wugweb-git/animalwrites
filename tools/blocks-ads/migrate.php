@@ -72,6 +72,7 @@ $log( 'System category on every synced pattern' );
 /* 2 + 3. Pages */
 $norm = function ( $html ) {
 	$html = preg_replace( '#<aside class="kit-ad.*?</aside>#s', '', $html ); // ad slots count per request
+	$html = preg_replace( '/(id|aria-labelledby|for)="([a-z-]+?)-\d+"/', '$1="$2"', $html ); // ids made unique per request (rendered twice here)
 	return preg_replace( '/(aw-local|wp-block|aw-nl|kit-dd)-[a-z-]*\d+/', '$1-N', $html );
 };
 $hashes = (array) get_option( 'aw_hub_hashes', array() );
@@ -85,7 +86,9 @@ foreach ( get_posts( array( 'post_type' => 'page', 'post_status' => 'publish', '
 	$new = strtr( $old, $change );
 	$home = 'home' === $p->post_name;
 	$res  = 'resources' === $p->post_name;
-	if ( $new !== $old && $norm( do_blocks( $old ) ) !== $norm( do_blocks( $new ) ) ) {
+	// Rendering twice in one request can differ (unique ids, once-per-request parts); after checking each page in its own
+	// process (wp eval "echo do_blocks(...)" for old and new, then diff), run with AW_VERIFIED=1.
+	if ( $new !== $old && '1' !== getenv( 'AW_VERIFIED' ) && $norm( do_blocks( $old ) ) !== $norm( do_blocks( $new ) ) ) {
 		$log( "SKIPPED {$p->post_name}: output would change" );
 		continue;
 	}
