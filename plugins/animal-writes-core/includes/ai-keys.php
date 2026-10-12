@@ -94,7 +94,34 @@ function aw_ai_call( string $provider, string $key, string $model = '', bool $ch
 	if ( is_wp_error( $r ) ) {
 		return array( 0, '' );
 	}
-	return array( (int) wp_remote_retrieve_response_code( $r ), strtolower( substr( wp_remote_retrieve_body( $r ), 0, 400 ) ) );
+	$headers = array_change_key_case( (array) wp_remote_retrieve_headers( $r )->getAll(), CASE_LOWER );
+	return array( (int) wp_remote_retrieve_response_code( $r ), strtolower( substr( wp_remote_retrieve_body( $r ), 0, 3000 ) ), $headers );
+}
+
+/** Limits a provider reports on a test call (OpenAI-style and Anthropic headers, Retry-After, Gemini's retryDelay). */
+function aw_ai_limits( array $h, string $body, int $code ): array {
+	$get   = fn( $k ) => isset( $h[ $k ] ) ? ( is_array( $h[ $k ] ) ? reset( $h[ $k ] ) : $h[ $k ] ) : null;
+	$parts = array();
+	foreach ( array( 'requests', 'tokens' ) as $what ) {
+		$left  = $get( "x-ratelimit-remaining-$what" ) ?? $get( "anthropic-ratelimit-$what-remaining" );
+		$limit = $get( "x-ratelimit-limit-$what" ) ?? $get( "anthropic-ratelimit-$what-limit" );
+		$reset = $get( "x-ratelimit-reset-$what" ) ?? $get( "anthropic-ratelimit-$what-reset" );
+		if ( null !== $left && null !== $limit ) {
+			$parts[] = ucfirst( $what ) . ': ' . number_format_i18n( (float) $left ) . ' of ' . number_format_i18n( (float) $limit ) . ' left' . ( $reset ? ' (resets ' . ( is_numeric( $reset ) ? $reset . 's' : ( strtotime( $reset ) ? wp_date( 'H:i', strtotime( $reset ) ) : $reset ) ) . ')' : '' );
+		}
+	}
+	$wait = null;
+	if ( 429 === $code ) {
+		$ra = $get( 'retry-after' );
+		if ( is_numeric( $ra ) ) {
+			$wait = (int) $ra;
+		} elseif ( preg_match( '/"retrydelay":\s*"(\d+)s"/', $body, $m ) ) {
+			$wait = (int) $m[1];
+		} elseif ( preg_match( '/try again in (?:(\d+)m)?([\d.]+)s/', $body, $m ) ) {
+			$wait = (int) $m[1] * 60 + (int) ceil( (float) $m[2] );
+		}
+	}
+	return array( 'limits' => implode( ' · ', $parts ), 'cooldown' => null !== $wait ? time() + $wait : 0 );
 }
 
 /** Work out a key's provider (prefix first, then every provider) and the first model that answers. */
@@ -129,10 +156,12 @@ function aw_ai_check( array $row ): array {
 		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
 		$row['status']   = 'no-model';
 		foreach ( AW_AI_PROVIDERS[ $id ][3] as $model ) {
-			list( $code, $body ) = aw_ai_call( $id, $key, $model );
+			list( $code, $body, $headers ) = aw_ai_call( $id, $key, $model );
 			$row['model'] = $model;
+			$row          = array_merge( $row, aw_ai_limits( $headers, $body, $code ) );
 			if ( $code >= 200 && $code < 300 ) {
-				$row['status'] = 'works';
+				$row['status']  = 'works';
+				$row['last_ok'] = time();
 				return $row;
 			}
 			if ( str_contains( $body, 'not scoped to a workspace' ) ) {
@@ -248,15 +277,17 @@ function aw_ai_keys_screen() {
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
 	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
 	echo '<p>The news workers try the working keys from the top down, then the keys in their GitHub secrets. Every key is tested again twice a day.</p>';
-	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
+	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
 	if ( ! $rows ) {
-		echo '<tr><td colspan="6">No keys yet.</td></tr>';
+		echo '<tr><td colspan="8">No keys yet.</td></tr>';
 	}
 	foreach ( $rows as $i => $r ) {
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
 			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . esc_html( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ) . '</td>'
+			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
+			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
 			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
 			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="button" class="button-link" data-aw-remove>Remove</button></td></tr>';
 	}
