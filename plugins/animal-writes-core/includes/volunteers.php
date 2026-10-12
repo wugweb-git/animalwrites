@@ -137,7 +137,7 @@ function aw_volunteer_submit() {
 	);
 	aw_form_count( $rl );
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
-	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
+	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		aw_nl_optin( $v['email'], $v['name'], 'volunteer' );
 	}
