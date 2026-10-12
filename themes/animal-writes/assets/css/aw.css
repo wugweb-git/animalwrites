@@ -1088,3 +1088,5 @@ body { background: var(--kit-color-canvas); }
 	.aw-sponsored-banner:has(.aw-sponsored-banner-media) { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: center; }
 	.aw-sponsored-banner-media img { height: 100%; min-height: 220px; }
 }
+/* Directory results: at most 720px wide (owner, 12 Oct 2026). */
+.aw-orgs { max-width: 720px; }

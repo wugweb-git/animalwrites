@@ -334,7 +334,7 @@ function aw_block_contact( $a, $id ) {
 
 function aw_block_org_actions( $a, $id ) {
 	$phone = (string) get_post_meta( $id, 'aw_phone', true );
-	return '<div class="aw-org-actions">' . ( $phone ? '<a class="kit-btn kit-btn--sm kit-btn--secondary" href="' . esc_attr( aw_tel_url( $phone ) ) . '">' . aw_i( 'phone' ) . 'Call</a>' : '' )
+	return '<div class="aw-org-actions">' // no Call button on cards (owner, 12 Oct 2026)
 		. '<a class="aw-org-go" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'View ' . get_the_title( $id ) ) . '">' . aw_i( 'arrow-right' ) . '</a></div>';
 }
 

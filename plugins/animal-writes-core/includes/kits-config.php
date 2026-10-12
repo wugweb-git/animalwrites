@@ -79,7 +79,13 @@ add_filter(
 	function ( $slots ) {
 		$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
 		if ( 'aw_listing' === $hub ) {
-			return get_query_var( 'aw_place' ) ? array( 5 => 'directory-feed' ) : array();
+			// Directory (all of India, states, districts): after result 5, then after 11 and every 6 more as people scroll
+			// (owner, 12 Oct 2026). Each ad has listings on both sides, so two ads never touch.
+			$pos = array( 5 => 'directory-feed' );
+			for ( $n = 11; $n <= 200; $n += 6 ) {
+				$pos[ $n ] = 'directory-feed';
+			}
+			return $pos;
 		}
 		if ( 'aw_press' === $hub ) {
 			return array( 6 => 'media-feed' );
@@ -100,7 +106,14 @@ add_filter(
 			return $html;
 		}
 		$d = aw_dir_place( (string) get_query_var( 'aw_place' ) );
-		return $d && 'district' === $d->kind ? $html . aw_ad( 'directory-district-end' ) : $html;
+		if ( ! $d || 'district' !== $d->kind ) {
+			return $html;
+		}
+		// No end ad when the list's last card is already an ad or the last in-list ad is close to the end (never two together).
+		$tail = substr( $html, -4000 );
+		$last_ad = strrpos( $tail, 'kit-ad-item' );
+		$last_li = strrpos( $tail, 'wp-block-post ' );
+		return ( false !== $last_ad && ( false === $last_li || $last_ad > $last_li ) ) ? $html : $html . aw_ad( 'directory-district-end' );
 	},
 	20,
 	2
@@ -221,3 +234,6 @@ add_filter(
 // Mail (owner, 9 Oct 2026): sent as "Animal Writes <noreply@animalwrites.in>", replies to contact@ (vedanshu@'s alias).
 add_filter( 'kits_mail_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
 add_filter( 'kits_mail_reply_to', fn() => 'contact@animalwrites.in' );
+
+// The Directory carries as many in-list ads as its length allows (one every 6 results); other pages keep the Kits caps.
+add_filter( 'kits_ads_max', fn( $max ) => ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) ? 40 : $max );
