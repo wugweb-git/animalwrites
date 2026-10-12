@@ -2,7 +2,7 @@
 /**
  * Title: Volunteer banner
  * Slug: animal-writes/volunteer-banner
- * Categories: animal-writes
+ * Categories: animal-writes, system
  * Description: "Help animals near you": photo, one line and a button to the Volunteer page (the form lives there, 12 Oct 2026). Use once per page (Home, About, Campaigns, Opportunities, Contact).
  * Keywords: volunteer, banner, sign up
  * Inserter: yes

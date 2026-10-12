@@ -486,6 +486,12 @@ html { overflow-x: clip; }
 @media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
 /* Every ad slot shows as one light tone, filled or not, so its place is visible (owner, 12 Oct 2026). */
 .kit-ad-unit { background: color-mix(in srgb, var(--kit-color-ink) 9%, var(--kit-color-bg)); border-radius: var(--kit-radius-card, 12px); }
+/* Preview only (kits-core preview.php): an empty slot, an AdSense unit reporting "unfilled", and preview-only items take
+   no space unless the page previews (html.kits-preview from the preview script, body.kits-preview for administrators).
+   The page HTML is the same for everyone, so the public cache never varies by visitor. */
+html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad--empty, .kit-ad-item--empty, .kits-preview-only) { display: none !important; }
+html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad, .kit-ad-item):has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
+.kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--kit-color-line); }

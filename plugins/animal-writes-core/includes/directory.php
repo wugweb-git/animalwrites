@@ -366,11 +366,18 @@ add_action(
 	}
 );
 
+/** Published listings shown to visitors (preview-only ones, such as the sample listing, left out). */
+function aw_listing_public_count() {
+	$hidden = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
+	$less   = $hidden ? count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'post__in' => $hidden, 'fields' => 'ids', 'numberposts' => -1 ) ) ) : 0;
+	return max( 0, (int) wp_count_posts( 'aw_listing' )->publish - $less );
+}
+
 /** Number of verified listings (cached). "Verified only" appears once there is at least one. */
 function aw_verified_count() {
 	$n = get_transient( 'aw_verified_count' );
 	if ( false === $n ) {
-		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1' ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array() ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		set_transient( 'aw_verified_count', $n, HOUR_IN_SECONDS );
 	}
 	return (int) $n;

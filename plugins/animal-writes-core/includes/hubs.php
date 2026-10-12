@@ -216,7 +216,29 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 
 /** Number of items in a hub list with the current filters (cached per request). */
 function aw_hub_total( $type ) {
-	return (int) aw_hub_query( $type )->found_posts;
+	return max( 0, (int) aw_hub_query( $type )->found_posts - aw_hub_preview_only_count( $type ) );
+}
+
+/**
+ * How many preview-only items (kits_preview_only_ids, e.g. the sample listing) the current list holds: their cards stay
+ * in the HTML but are hidden for visitors, so counts leave them out. Administrators count them.
+ */
+function aw_hub_preview_only_count( $type ) {
+	static $n = array();
+	$ids = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
+	if ( ! $ids || current_user_can( 'manage_options' ) ) {
+		return 0;
+	}
+	if ( ! isset( $n[ $type ] ) ) {
+		$v = aw_hub_query_vars( $type, 1 );
+		$v['post__in']       = isset( $v['post__in'] ) ? array_values( array_intersect( array_map( 'intval', (array) $v['post__in'] ), $ids ) ) : $ids;
+		$v['fields']         = 'ids';
+		$v['posts_per_page'] = -1;
+		$v['paged']          = 1;
+		$v['no_found_rows']  = true;
+		$n[ $type ]          = $v['post__in'] ? count( get_posts( $v + array( 'suppress_filters' => false ) ) ) : 0;
+	}
+	return $n[ $type ];
 }
 
 /** The items on the current page of a hub list (for schema). */
@@ -344,8 +366,8 @@ function aw_hub_schema_nodes() {
 	$items = array();
 	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
 	foreach ( aw_hub_posts( $type ) as $i => $p ) {
-		if ( aw_is_noindex_item( $p->ID ) ) {
-			continue; // not indexed, so not listed
+		if ( aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
+			continue; // not indexed (or preview only), so not listed
 		}
 		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
 	}
@@ -656,7 +678,6 @@ add_action(
 /* ---------- Ads on list Pages (the hubs and search are Pages, not archives) ---------- */
 
 add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_page( 'search' ) );
-add_filter( 'kits_ads_list_slot', fn( $slot ) => 'aw_listing' === aw_hub_type() ? 'directory' : $slot );
 
 // The list's count, centred above its pagination ("23 stories").
 add_filter(

@@ -270,14 +270,15 @@ function aw_place_counts() {
 		return $c;
 	}
 	global $wpdb;
-	$c = array( 'state' => array(), 'district' => array(), 'pairs' => array(), 'at' => time() );
+	$c    = array( 'state' => array(), 'district' => array(), 'pairs' => array(), 'at' => time() );
+	$skip = function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ? ' AND p.ID NOT IN (' . implode( ',', kits_preview_only_ids() ) . ')' : ''; // preview-only items (integers)
 	foreach ( array( 'state' => 'aw_state_code', 'district' => 'aw_district_code' ) as $k => $meta ) {
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT pm.meta_value code, COUNT(DISTINCT p.ID) n FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish' WHERE pm.meta_key = %s GROUP BY pm.meta_value", $meta ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT pm.meta_value code, COUNT(DISTINCT p.ID) n FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} WHERE pm.meta_key = %s GROUP BY pm.meta_value", $meta ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( $rows as $r ) {
 			$c[ $k ][ (int) $r->code ] = (int) $r->n;
 		}
 	}
-	$rows = $wpdb->get_results( "SELECT pm.meta_value code, t.slug type, MAX(p.post_modified_gmt) modified, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = 'aw_district_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' GROUP BY pm.meta_value, t.slug", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = $wpdb->get_results( "SELECT pm.meta_value code, t.slug type, MAX(p.post_modified_gmt) modified, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = 'aw_district_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY pm.meta_value, t.slug", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( $rows as $r ) {
 		$c['pairs'][] = array( (int) $r['code'], $r['type'], $r['modified'], (int) $r['n'] );
 	}

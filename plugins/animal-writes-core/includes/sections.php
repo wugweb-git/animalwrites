@@ -122,7 +122,7 @@ add_shortcode(
 		if ( false === $stats ) {
 			$states = array_filter( aw_place_states(), 'aw_place_count' );
 			$stats  = array(
-				array( (int) wp_count_posts( 'aw_listing' )->publish, 'organisations listed', '/directory/' ),
+				array( aw_listing_public_count(), 'organisations listed', '/directory/' ),
 				array( count( $states ), 'states and UTs covered', '/directory/' ),
 				array( (int) wp_count_posts( 'aw_legal' )->publish, 'official documents and templates', '/library/' ),
 				array( (int) wp_count_posts( 'post' )->publish, 'guides and resources', '/resources/' ),
@@ -145,7 +145,7 @@ add_shortcode(
 	'aw_find_help',
 	function () {
 		$states = aw_place_states();
-		$total  = (int) wp_count_posts( 'aw_listing' )->publish;
+		$total  = aw_listing_public_count();
 		$opts   = '<option value="">All states and UTs</option>';
 		$with   = 0;
 		foreach ( (array) $states as $st ) {

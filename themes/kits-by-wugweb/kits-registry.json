@@ -1117,12 +1117,14 @@
     "kit-ad"
    ],
    "states": [
-    "empty (prints nothing)",
-    "filled"
+    "filled (labelled \"Ad\")",
+    "empty (placeholder, preview only: html/body.kits-preview)",
+    "AdSense unfilled (no space unless preview)",
+    "in a list (kit-ad-item card)"
    ],
    "tokens": [],
    "a11y": {
-    "element": "<aside aria-label=\"Advertisement\">",
+    "element": "<aside aria-label=\"Advertisement\">; empty placeholder aria-hidden",
     "aria": "none",
     "keyboard": "not interactive",
     "focus": "n/a",
@@ -1135,7 +1137,8 @@
     "link": "n/a",
     "alt": "n/a",
     "schema": "none"
-   }
+   },
+   "block": "kits/ad-slot"
   },
   {
    "name": "Claim panel",
@@ -1548,6 +1551,35 @@
    "seo": {
     "heading": "card title",
     "schema": "none"
+   }
+  },
+  {
+   "name": "Preview only",
+   "type": "utility",
+   "status": "live",
+   "classes": [
+    "kits-preview",
+    "kits-preview-only"
+   ],
+   "states": [
+    "hidden (visitors)",
+    "shown (html.kits-preview from GET /wp-json/kits/v1/preview, or body.kits-preview for administrators)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on a list card or ad placeholder",
+    "aria": "none",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "hidden content is display:none"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "preview-only items are left out of ItemList, sitemaps and search"
    }
   }
  ],

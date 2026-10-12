@@ -40,33 +40,73 @@ add_filter(
 		if ( is_singular( 'post' ) && function_exists( 'aw_is_sponsored' ) && aw_is_sponsored( get_queried_object_id() ) ) {
 			return true; // sponsored Resources carry no ads
 		}
+		if ( is_singular() && function_exists( 'aw_has_sponsored_block' ) && aw_has_sponsored_block( get_queried_object_id() ) ) {
+			return true; // nor does a page with a sponsored block
+		}
 		return is_singular() && has_term( 'cruelty-prosecution', 'aw_topic', get_queried_object_id() );
 	}
 );
 add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post' ) );
 add_filter( 'kits_ads_end_after_content_types', fn() => array( 'post' ) ); // guides have no end bar: the end ad follows the text
+/*
+ * Animal Writes slots (owner, 12 Oct 2026), on top of the Kits Core ones (home-top/mid/bottom, article-incontent-1/2,
+ * article-end, list-feed-1/2, sidebar, footer-above, head). Blocks: opportunity-end (opportunity template),
+ * resources-hub (Resources page). Counted: directory-feed (state and district pages, after result 5),
+ * directory-district-end (district pages, after the list), profile (Directory profiles), media-feed (Media & PR, after
+ * item 6). "directory" is an older name: the fallback of directory-feed.
+ */
 add_filter(
-	'kits_ads_list_positions',
-	function ( $at, $slot ) {
-		if ( 'directory' === $slot ) {
-			return get_query_var( 'aw_place' ) ? array( 5 ) : array(); // state and district pages only
+	'kits_ad_slots',
+	function ( $slots ) {
+		return array_merge(
+			$slots,
+			array(
+				'directory-feed'         => array( 'Directory – in results', 'Directory state and district pages: a card after result 5', 'directory', 'auto' ),
+				'directory-district-end' => array( 'Directory – end of district page', 'Directory district pages, after the list', '', 'auto' ),
+				'profile'                => array( 'Directory profile', 'Directory profiles, above "Is this your organisation?"', 'article-end', 'auto' ),
+				'opportunity-end'        => array( 'Opportunity – end', 'Opportunity pages, after the Apply button (block)', '', 'block' ),
+				'resources-hub'          => array( 'Resources page', 'The Resources page, after the list (block)', '', 'block' ),
+				'media-feed'             => array( 'Media & PR – in list', 'Media & PR: a card after item 6', '', 'auto' ),
+				'directory'              => array( 'Directory lists (older slot)', 'Used by "Directory – in results" while its own box is empty', 'archive', 'legacy' ),
+			)
+		);
+	}
+);
+// Counted list positions: News, Library, Resources (Kits default, after items 6 and 18); Directory state and district
+// pages (after item 5); Media & PR (after item 6). No list ads elsewhere.
+add_filter(
+	'kits_ads_list_slots',
+	function ( $slots ) {
+		$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
+		if ( 'aw_listing' === $hub ) {
+			return get_query_var( 'aw_place' ) ? array( 5 => 'directory-feed' ) : array();
 		}
-		return in_array( function_exists( 'aw_hub_type' ) ? aw_hub_type() : '', array( 'aw_news', 'aw_legal', 'post' ), true ) ? $at : array();
-	},
-	10,
-	2
+		if ( 'aw_press' === $hub ) {
+			return array( 6 => 'media-feed' );
+		}
+		return in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ? $slots : array();
+	}
 );
 // Directory profiles: the ad sits above "Is this your organisation?".
 add_filter(
 	'render_block_animal-writes/listing-help',
-	function ( $html ) {
-		if ( ! is_singular( 'aw_listing' ) || ! function_exists( 'aw_ad' ) ) {
+	fn( $html ) => is_singular( 'aw_listing' ) && function_exists( 'aw_ad' ) ? aw_ad( 'profile' ) . $html : $html
+);
+// Directory district pages: after the list (and after the "Few listings" card).
+add_filter(
+	'render_block_core/query',
+	function ( $html, $block ) {
+		if ( 'aw_listing' !== ( $block['attrs']['query']['postType'] ?? '' ) || ! function_exists( 'aw_dir_place' ) || ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() ) {
 			return $html;
 		}
-		$ad = aw_ad( 'profile' );
-		return ( '' !== $ad ? $ad : aw_ad( 'article' ) ) . $html;
-	}
+		$d = aw_dir_place( (string) get_query_var( 'aw_place' ) );
+		return $d && 'district' === $d->kind ? $html . aw_ad( 'directory-district-end' ) : $html;
+	},
+	20,
+	2
 );
+// The Wugweb sample listing: only the owner sees it (preview), everyone else gets a 404 and no trace in lists.
+add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ) ) );
 
 add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) );
 add_filter( 'kits_seo_twitter_site', fn() => '@AnimalWrites' );

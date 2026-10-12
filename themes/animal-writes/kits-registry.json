@@ -1751,6 +1751,69 @@
     "link": "state Directory page",
     "schema": "none"
    }
+  },
+  {
+   "name": "Sponsored Resource",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-sponsored-item",
+    "aw-sponsored-label"
+   ],
+   "states": [
+    "Resource with Sponsored ticked",
+    "with sponsor name",
+    "with or without picture",
+    "nothing (Resource not sponsored or not published)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<aside aria-label=\"Sponsored\">; title is the link",
+    "aria": "picture link aria-hidden (title says it)",
+    "keyboard": "Tab to the title",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "\"Sponsored\" in text"
+   },
+   "seo": {
+    "heading": "H3",
+    "link": "rel=\"sponsored noopener\"",
+    "alt": "empty (title says it)",
+    "schema": "none"
+   },
+   "block": "animal-writes/sponsored-item"
+  },
+  {
+   "name": "Sponsored banner",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-sponsored-banner",
+    "aw-sponsored-label"
+   ],
+   "states": [
+    "picture + heading + text + button",
+    "heading as the link (no button text)",
+    "no picture"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<aside aria-label=\"Sponsored\">",
+    "aria": "none",
+    "keyboard": "Tab to the link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "\"Sponsored\" in text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "rel=\"sponsored noopener\"",
+    "alt": "set by the editor",
+    "schema": "none"
+   },
+   "block": "animal-writes/sponsored-banner"
   }
  ],
  "nav_status": {

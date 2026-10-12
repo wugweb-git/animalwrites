@@ -2,7 +2,7 @@
 /**
  * Title: Need help now
  * Slug: animal-writes/help-now
- * Categories: animal-writes
+ * Categories: animal-writes, system
  * Description: Three large emergency actions: injured animal, report cruelty, find an organisation.
  * Inserter: yes
  *

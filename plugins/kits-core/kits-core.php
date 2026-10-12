@@ -35,6 +35,7 @@ require_once KITS_CORE_DIR . 'includes/seo.php';
 require_once KITS_CORE_DIR . 'includes/seo-rankmath.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/ads.php';
+require_once KITS_CORE_DIR . 'includes/preview.php';
 require_once KITS_CORE_DIR . 'includes/visits.php';
 require_once KITS_CORE_DIR . 'includes/sourcing.php';
 require_once KITS_CORE_DIR . 'includes/attribution.php';
