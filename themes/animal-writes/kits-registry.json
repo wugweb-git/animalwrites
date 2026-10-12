@@ -476,7 +476,11 @@
     "aw-report-form",
     "aw-claim-services",
     "aw-claim-find",
-    "aw-claim-results"
+    "aw-claim-results",
+    "aw-vol-roles",
+    "aw-vol-role",
+    "aw-vol-details",
+    "aw-vol-page"
    ],
    "states": [
     "default",

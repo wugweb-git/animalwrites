@@ -1004,3 +1004,44 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-results { list-style: none; margin: var(--s-4) 0 var(--s-6); padding: 0; display: grid; gap: var(--s-2); }
 .aw-claim-results a { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-3) var(--s-4); border: 1px solid var(--kit-color-line); border-radius: var(--r-4); text-decoration: none; }
 .aw-claim-results span { color: var(--kit-color-muted); }
+
+/* ---------- Volunteer page (redesign, 12 Oct 2026) ----------
+ * One job: a sign-up on a phone. The five ways to help come first and read as choices; a chosen one lifts with the
+ * brand's yellow offset (the only yellow besides the button). Desktop: the photo stays in view while the form scrolls. */
+.aw-vol-page { background: none; border-radius: 0; overflow: visible; margin-block: var(--s-6) var(--s-12); gap: var(--s-6); }
+.aw-vol-page .aw-vol-banner-photo img { height: 180px; border-radius: var(--r-4); }
+.aw-vol-page .aw-vol-banner-body { padding: 0; max-width: 40rem; }
+.aw-vol-page .aw-vol-banner-title { font-size: var(--kit-type-h3); }
+.aw-vol-page .aw-vol-banner-body > p { color: var(--kit-color-muted); max-width: 34rem; }
+
+.aw-vol-roles { border: 0; padding: 0; margin: var(--s-6) 0 var(--s-8); display: grid; gap: var(--s-3); }
+.aw-vol-roles > legend { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); margin-bottom: var(--s-4); padding: 0; }
+.aw-vol-role.kit-checkbox {
+	display: flex; align-items: center; gap: var(--s-4); margin: 0; cursor: pointer;
+	min-height: 64px; padding: var(--s-3) var(--s-4);
+	border: 1px solid var(--kit-color-line); border-radius: var(--r-3, 10px); background: var(--kit-color-bg);
+	font-size: var(--kit-type-lead); font-weight: var(--kit-weight-strong); line-height: 1.3;
+	transition: transform var(--kit-motion-fast, 150ms) var(--kit-ease-spring, ease), box-shadow var(--kit-motion-fast, 150ms) var(--kit-ease-spring, ease), border-color var(--kit-motion-fast, 150ms) ease;
+}
+.aw-vol-role.kit-checkbox input { width: 22px; height: 22px; flex: none; margin: 0; accent-color: var(--kit-color-ink); }
+.aw-vol-role.kit-checkbox:hover { border-color: var(--kit-color-ink); }
+.aw-vol-role.kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: 6px 6px 0 var(--kit-color-accent); transform: translate(-2px, -2px); }
+.aw-vol-role.kit-checkbox:has(input:focus-visible) { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
+.aw-vol-roles.is-invalid .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
+
+.aw-vol-details { margin-bottom: var(--s-6); }
+.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: 100%; justify-content: center; min-height: 52px; }
+
+@media (min-width: 640px) {
+	.aw-vol-page .aw-vol-banner-photo img { height: 240px; }
+	.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: auto; }
+}
+@media (min-width: 1024px) {
+	.aw-vol-page { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s-12); align-items: start; }
+	.aw-vol-page .aw-vol-banner-photo { position: sticky; top: calc(var(--kit-header-height, 72px) + var(--s-6)); }
+	.aw-vol-page .aw-vol-banner-photo img { height: calc(100vh - var(--kit-header-height, 72px) - var(--s-12)); max-height: 760px; min-height: 420px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aw-vol-role.kit-checkbox { transition: none; }
+	.aw-vol-role.kit-checkbox:has(input:checked) { transform: none; }
+}

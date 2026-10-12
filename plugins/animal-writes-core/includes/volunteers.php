@@ -63,18 +63,18 @@ function aw_volunteer_form( $source = '' ) {
 	$picked = (array) ( $state['values']['roles'] ?? array() );
 	$err    = $state['errors']['roles'] ?? '';
 	$html   = aw_form_open( $form, array_filter( array( 'class' => 'kit-form aw-volunteer-form', 'data-source' => $source ) ) );
-	$html  .= '<div class="kit-form-grid">';
+	$html  .= '<fieldset class="kit-field kit-check-group aw-vol-roles' . ( $err ? ' is-invalid' : '' ) . '" data-min="1" data-msg-required="Choose how you\'d like to help" aria-describedby="aw-volunteer-roles-error"><legend>How would you like to help?</legend>';
+	foreach ( AW_VOL_ROLES as $k => $label ) {
+		$html .= '<label class="kit-checkbox aw-vol-role"><input type="checkbox" name="roles[]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $picked, true ), true, false ) . '> <span>' . esc_html( $label ) . '</span></label>';
+	}
+	$html .= '<span class="kit-field-message kit-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
+	$html  .= '<div class="kit-form-grid aw-vol-details">';
 	$html  .= kits_dict_field( $form, 'name', array( 'required' => true ) );
 	$html  .= kits_dict_field( $form, 'email' );
 	$html  .= kits_dict_field( $form, 'phone' );
 	$html  .= kits_dict_field( $form, 'pincode' );
 	$html  .= aw_place_fields( $form );
 	$html  .= '</div>';
-	$html  .= '<fieldset class="kit-field kit-check-group' . ( $err ? ' is-invalid' : '' ) . '" data-min="1" data-msg-required="Choose how you\'d like to help" aria-describedby="aw-volunteer-roles-error"><legend>How would you like to help?</legend>';
-	foreach ( AW_VOL_ROLES as $k => $label ) {
-		$html .= '<label class="kit-checkbox"><input type="checkbox" name="roles[]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $picked, true ), true, false ) . '> <span>' . esc_html( $label ) . '</span></label>';
-	}
-	$html .= '<span class="kit-field-message kit-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.' ) );
 	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : ''; // newsletter: a separate, unticked choice
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
