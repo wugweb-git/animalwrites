@@ -104,7 +104,18 @@ function aw_binding_value( $key, $post_id ) {
 		case 'featured_label':
 			return ''; // the Featured label is not shown (owner, 12 Oct 2026)
 		case 'area':
-			return $m( 'aw_area' );
+			// Cards show the town, district and state only, never the street address (owner, 12 Oct 2026); the full
+			// address is on the profile.
+			$parts = function_exists( 'aw_listing_place' ) ? array_reverse( (array) aw_listing_place( $post_id ) ) : array();
+			array_unshift( $parts, $m( 'aw_place_city' ) );
+			$seen = array();
+			foreach ( $parts as $p ) {
+				$p = trim( (string) $p );
+				if ( '' !== $p && ! in_array( mb_strtolower( $p ), array_map( 'mb_strtolower', $seen ), true ) ) {
+					$seen[] = $p;
+				}
+			}
+			return implode( ', ', $seen );
 		case 'services':
 			// Services are the organisation's own description (claim) or a named list's; never ours. Shown with who said it.
 			if ( '' === $m( 'aw_services' ) ) {
