@@ -326,6 +326,7 @@ function aw_block_badges( $a, $id ) {
 
 /** Ways to reach the organisation, shown only when they exist. */
 function aw_block_contact( $a, $id ) {
+	return ''; // not on the Directory index (owner, 12 Oct 2026): the card's Call button and the profile carry the contact details
 	$phone = (string) get_post_meta( $id, 'aw_phone', true );
 	$email = (string) get_post_meta( $id, 'aw_email', true );
 	$site  = (string) get_post_meta( $id, 'aw_website', true );
