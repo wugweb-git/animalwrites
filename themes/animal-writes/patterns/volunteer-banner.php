@@ -3,7 +3,7 @@
  * Title: Volunteer banner
  * Slug: animal-writes/volunteer-banner
  * Categories: animal-writes
- * Description: "Help animals near you": photo, one line and the volunteer form that opens in place. Use once per page (Home, About, Campaigns, Opportunities, Contact).
+ * Description: "Help animals near you": photo, one line and a button to the Volunteer page (the form lives there, 12 Oct 2026). Use once per page (Home, About, Campaigns, Opportunities, Contact).
  * Keywords: volunteer, banner, sign up
  * Inserter: yes
  *
@@ -24,6 +24,10 @@
 <p>Join volunteers across India who rescue, feed and speak up for animals. Pick what you can do; we'll connect you.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:animal-writes/volunteer /--></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/volunteer/">Register as a volunteer</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->

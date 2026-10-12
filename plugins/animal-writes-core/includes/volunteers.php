@@ -119,7 +119,7 @@ function aw_volunteer_submit() {
 		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
 	}
 	// Stored in the volunteers table (one row per email; signing up again updates it).
-	aw_vol_upsert(
+	$saved = aw_vol_upsert(
 		array(
 			'name'                 => $v['name'],
 			'email'                => $v['email'],
@@ -136,12 +136,13 @@ function aw_volunteer_submit() {
 		)
 	);
 	aw_form_count( $rl );
-	wp_mail( 'contact@animalwrites.in', 'New volunteer: ' . $term->name, "A new volunteer signed up.\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
+	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
+	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		aw_nl_optin( $v['email'], $v['name'], 'volunteer' );
 	}
-	$title = __( 'Thank you for signing up.', 'animal-writes-core' );
-	$text  = __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
+	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
+	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
 	aw_form_success( kits_thanks_url( 'volunteer', array(), $title, $text ), $title, $text );
 }
 add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
