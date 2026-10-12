@@ -1,7 +1,9 @@
 <?php
 /**
  * Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. Ingested items (News, Library, research) show
- * the publisher's own image, linked (media.php), and may share their topic photo when they have none (owner, 12 Oct 2026).
+ * the publisher's own image, linked (media.php); without a usable one, their own CC0 photo from Openverse (featured
+ * image, used once site-wide, cc0-images.php); only failing that may they share their topic photo (owner, 12 Oct 2026).
+ * Featured images (_thumbnail_id) of every published item, CC0 photos included, are counted by aw_thumb_duplicates().
  *
  * Our own openly licensed category photos: each photo belongs to ONE item at a
  * time: the newest published item in that category that has no photo yet. Every other item shows its text placard.
@@ -43,8 +45,11 @@ function aw_thumb_rebuild() {
 	}
 	$map = array();
 	foreach ( $ids as $id ) {
-		if ( get_post_meta( $id, 'aw_file_id', true ) || get_post_meta( $id, 'aw_doc_preview', true ) ) {
-			continue; // its own document page
+		if ( get_post_meta( $id, 'aw_file_id', true ) || get_post_meta( $id, 'aw_doc_preview', true ) || get_post_thumbnail_id( $id ) ) {
+			continue; // its own document page, or its own featured image (e.g. a CC0 photo, cc0-images.php)
+		}
+		if ( function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && function_exists( 'aw_publisher_image' ) && aw_publisher_image( $id ) ) {
+			continue; // shows the publisher's image
 		}
 		$topics = wp_get_object_terms( $id, 'aw_topic' );
 		foreach ( is_wp_error( $topics ) ? array() : $topics as $t ) {

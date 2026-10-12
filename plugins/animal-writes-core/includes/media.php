@@ -10,8 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The image for an item: ingested items (News, Library, research) use the story's own image, linked from the publisher;
- * without one, their topic's photo (stored, openly licensed). Library items with a hosted government PDF keep its first page.
+ * The image for an item. Ingested items (News, Library, research), in order: the publisher's image, linked (unless the
+ * check in cc0-images.php found it missing, broken or a site logo); their own CC0 photo from Openverse (featured
+ * image); then, as for everything else, the hosted PDF page, the topic photo, and finally the placard (callers).
+ * Library items with a hosted government PDF keep its first page first.
  * Topic photos are set in the option aw_topic_images = array( topic-slug => attachment ID, 'default' => ID ).
  *
  * @param int    $post_id Post ID.
@@ -19,12 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string URL, or '' when there is none (callers then show the placard).
  */
 function aw_item_image( $post_id, $size = 'large' ) {
-	// Ingested items (News, Library, research): the story's own image, linked from the publisher, not copied (owner,
-	// 12 Oct 2026: the no-repeat rule is for content we create, not for ingested items). A hosted PDF page comes first.
 	if ( aw_is_ingested( $post_id ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && ! get_post_meta( $post_id, 'aw_doc_preview', true ) ) {
-		$remote = (string) get_post_meta( $post_id, 'aw_source_image', true );
-		if ( '' !== $remote && preg_match( '#^https://#i', $remote ) ) {
+		$remote = function_exists( 'aw_publisher_image' ) ? aw_publisher_image( $post_id ) : '';
+		if ( '' !== $remote ) {
 			return $remote;
+		}
+		$own = (int) get_post_thumbnail_id( $post_id );
+		if ( $own ) {
+			return (string) wp_get_attachment_image_url( $own, $size );
 		}
 	}
 	$att = aw_item_image_id( $post_id );
@@ -54,8 +58,13 @@ function aw_item_image_id( $post_id ) {
 	if ( 'aw_legal' === $type && $preview ) {
 		return $preview;
 	}
+	// An ingested item's own CC0 photo (cc0-images.php).
+	$feat = aw_is_ingested( $post_id ) ? (int) get_post_thumbnail_id( $post_id ) : 0;
+	if ( $feat ) {
+		return $feat;
+	}
 	// A category photo belongs to one item at a time across the whole site (thumbs.php). Ingested items without their own
-	// image may share their topic's photo (the no-repeat rule is for our own content, owner 12 Oct 2026).
+	// image may share their topic's photo as a last fallback before the placard (owner 12 Oct 2026).
 	$own = function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
 	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_topic_image_id' ) ) {
 		return $own;
@@ -96,14 +105,16 @@ function aw_placard_html( $post_id ) {
 add_filter(
 	'render_block_core/post-featured-image',
 	function ( $content, $block, $instance ) {
-		if ( '' !== trim( $content ) ) {
-			return $content; // A real featured image exists.
+		$post_id = $instance->context['postId'] ?? get_the_ID();
+		// A real featured image exists. Ingested items go through aw_item_image() even then: the publisher's image comes
+		// before their CC0 photo, and the card markup stays the same.
+		if ( '' !== trim( $content ) && ! ( $post_id && aw_is_ingested( $post_id ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && ! get_post_meta( $post_id, 'aw_doc_preview', true ) ) ) {
+			return $content;
 		}
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
-		if ( false !== strpos( $cls, 'aw-no-fallback' ) ) {
+		if ( false !== strpos( $cls, 'aw-no-fallback' ) && '' === trim( $content ) ) {
 			return ''; // lists that show a picture only when the item has one (Resources, Opportunities)
 		}
-		$post_id = $instance->context['postId'] ?? get_the_ID();
 		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'post' ), true ) ) {
 			return $content;
 		}
@@ -121,7 +132,7 @@ add_filter(
 			$url = $doc;
 		}
 		$dims   = '';
-		$att    = $url && ! $doc ? aw_item_image_id( $post_id ) : (int) get_post_meta( $post_id, 'aw_file_id', true );
+		$att    = $url && ! $doc ? aw_item_image_id( $post_id ) : (int) get_post_meta( $post_id, 'aw_file_id', true ); // own CC0 photo first for ingested items
 		$src    = $att ? wp_get_attachment_image_src( $att, 'large' ) : false;
 		if ( $src && ! empty( $src[1] ) && ! empty( $src[2] ) && $src[0] === $url ) {
 			$dims = ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"'; // the box is known before the image arrives
