@@ -1815,6 +1815,26 @@
     "schema": "none"
    },
    "block": "animal-writes/sponsored-banner"
+  },
+  {
+   "name": "Date with calendar icon",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-date"
+   ],
+   "states": [
+    "card meta",
+    "byline",
+    "press date"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> around the date; icon aria-hidden",
+    "aria": "none",
+    "keyboard": "none",
+    "focus": "none"
+   }
   }
  ],
  "nav_status": {

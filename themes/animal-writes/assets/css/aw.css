@@ -1131,3 +1131,6 @@ body { background: var(--kit-color-canvas); }
 	.aw-hub-list .kit-case, .aw-hub-list .kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "media" "when" "body"; grid-template-rows: auto; }
 	.aw-hub-list .kit-case .aw-case-cover { aspect-ratio: 16 / 9; width: 100% !important; margin-bottom: var(--kit-space-1); }
 }
+.aw-date { display: inline-flex; align-items: center; gap: 6px; }
+.aw-date > .kit-ico { --kit-ico-size: 1em; flex: none; }
+.aw-case-src .aw-src { margin: 0; }

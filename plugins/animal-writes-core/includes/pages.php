@@ -362,7 +362,7 @@ add_filter(
 		$pub = '<time datetime="' . esc_attr( get_the_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_date( 'j M Y', $id ) ) . '</time>';
 		$upd = get_the_modified_date( 'Y-m-d', $id ) > get_the_date( 'Y-m-d', $id ) // edited on a later day: say so
 			? ' · Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time>' : '';
-		return $html . '<p class="aw-byline">By Animal Writes · ' . $pub . $upd . '</p>';
+		return $html . '<p class="aw-byline">By Animal Writes · <span class="aw-date">' . aw_i( 'calendar' ) . $pub . $upd . '</span></p>';
 	},
 	20,
 	2

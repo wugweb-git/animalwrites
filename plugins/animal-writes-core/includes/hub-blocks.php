@@ -217,9 +217,9 @@ function aw_block_type_date( $a, $id ) {
 		$name = is_wp_error( $t ) || ! $t ? '' : $t[0];
 	}
 	$date = 'post' === $type ? get_the_modified_date( 'j M Y', $id ) : ( function_exists( 'aw_src_date' ) ? aw_src_date( $id, 'j M Y' ) : get_the_date( 'j M Y', $id ) );
-	$text  = implode( ' · ', array_filter( array( $name, $date ) ) );
+	$text  = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : '' ); // every date with the calendar icon (owner)
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return $text || $badge ? '<p class="aw-case-meta">' . $badge . ( $badge && $text ? ' ' : '' ) . esc_html( $text ) . '</p>' : '';
+	return $text || $badge ? '<p class="aw-case-meta">' . $badge . ( $badge && $text ? ' ' : '' ) . $text . '</p>' : '';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
@@ -251,7 +251,8 @@ function aw_block_doc_link( $a, $id ) {
 	$src  = (string) get_post_meta( $id, 'aw_source_name', true );
 	$fid  = (int) get_post_meta( $id, 'aw_file_id', true );
 	$pdf  = $fid ? (string) wp_get_attachment_url( $fid ) : '';
-	$html = ( $src ? 'Source: ' . esc_html( $src ) : '' ) . ( $pdf ? ' <a class="aw-doc" href="' . esc_url( $pdf ) . '">' . aw_i( 'research' ) . ' Official document (PDF)</a>' : '' );
+	$row  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : ''; // publisher logo + name, as on News
+	$html = ( $row ? $row : ( $src ? 'Source: ' . esc_html( $src ) : '' ) ) . ( $pdf ? ' <a class="aw-doc" href="' . esc_url( $pdf ) . '">' . aw_i( 'research' ) . ' Official document (PDF)</a>' : '' );
 	return '' !== trim( $html ) ? '<p class="aw-case-src">' . $html . '</p>' : '';
 }
 
@@ -387,7 +388,7 @@ function aw_block_press_meta( $a, $id ) {
 	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
 	$handle = (string) get_post_meta( $id, 'aw_press_account', true );
 	$video  = $fmt && 'videos' === aw_press_group( $fmt );
-	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time>' : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
+	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time></span>' : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
 }
 
 // Hub Pages in the editor: the H1 in the band is the title (no second title field above it).
