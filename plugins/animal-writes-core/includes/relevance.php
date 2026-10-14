@@ -149,7 +149,7 @@ function aw_relevance_row( WP_Post $p ) {
 function aw_relevance_recent_titles(): array {
 	$ids = get_posts(
 		array(
-			'post_type'      => 'aw_news',
+			'post_type'      => array( 'aw_news', 'aw_legal' ), // court reports in the Library repeat each other too (owner, 14 Oct 2026)
 			'post_status'    => array( 'publish', 'pending', 'draft', 'future' ),
 			'date_query'     => array( array( 'after' => '4 days ago' ) ),
 			'posts_per_page' => 400,
