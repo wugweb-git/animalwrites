@@ -1821,12 +1821,14 @@
    "type": "component",
    "status": "live",
    "classes": [
-    "aw-date"
+    "aw-date",
+    "aw-kind-date"
    ],
    "states": [
     "card meta",
     "byline",
-    "press date"
+    "press date",
+    "type · date (icon before the date only)"
    ],
    "tokens": [],
    "a11y": {

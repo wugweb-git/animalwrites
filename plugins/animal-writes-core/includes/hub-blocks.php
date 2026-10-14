@@ -204,8 +204,8 @@ function aw_block_doc_date( $a, $id ) {
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
-	$text  = implode( ' · ', array_filter( array( $kind, $date ) ) ); // e.g. Act · 1960
-	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $text ) . '</span>' : '' ) . '</span>';
+	$text  = ( $kind ? esc_html( $kind ) . ( $date ? ' · ' : '' ) : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : '' ); // e.g. Act · [calendar] 1960: the icon belongs to the date only
+	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-kind-date">' . $text . '</span>' : '' ) . '</span>';
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
 
