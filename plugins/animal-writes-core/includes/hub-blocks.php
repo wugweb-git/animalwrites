@@ -204,7 +204,7 @@ function aw_block_doc_date( $a, $id ) {
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
-	$text  = ( $kind ? esc_html( $kind ) . ( $date ? ' · ' : '' ) : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : '' ); // e.g. Act · [calendar] 1960: the icon belongs to the date only
+	$text  = $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : ''; // publisher, then the date; the type is a label with the others (owner, 14 Oct 2026)
 	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-kind-date">' . $text . '</span>' : '' ) . '</span>';
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
@@ -241,8 +241,10 @@ function aw_block_issuer( $a, $id ) {
 	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
 		return kits_tag( 'Template', 'accent' );
 	}
-	$iss = aw_item_issuer( $id );
-	return $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : ''; // just the court / body (owner, 14 Oct 2026)
+	$iss  = aw_item_issuer( $id );
+	$kind = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
+	$kind = is_wp_error( $kind ) || ! $kind ? '' : kits_tag( $kind[0] ); // the Library type (Official release, Circular, Judgment ...) as a label
+	return $kind . ( $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '' ); // just the court / body (owner, 14 Oct 2026)
 }
 
 /** Source line and the official document (PDF) on Library items. */
