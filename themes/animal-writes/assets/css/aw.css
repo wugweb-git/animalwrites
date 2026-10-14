@@ -1117,10 +1117,11 @@ body { background: var(--kit-color-canvas); }
 
 /* Library list (owner, 14 Oct 2026): a grid of cards like Resources (1 / 2 / 3 columns): the publisher's image on top,
    then publisher logo + name and the date with the calendar icon, title, summary, labels. */
-.aw-hub-library .aw-cases { display: grid; gap: var(--kit-space-grid); grid-template-columns: 1fr; margin-bottom: var(--kit-space-8); }
+.aw-hub-library .aw-cases { display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); margin-bottom: var(--kit-space-8); }
 @media (min-width: 768px) { .aw-hub-library .aw-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-hub-library .aw-cases { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.aw-hub-library .aw-cases > li { margin: 0 !important; }
+.aw-hub-library .aw-cases > li { margin: 0 !important; min-width: 0; }
+.aw-hub-library .kit-case { min-width: 0; max-width: 100%; }
 .aw-hub-library .kit-case { display: flex !important; flex-direction: column; gap: var(--kit-space-2); height: 100%; padding: 0 0 var(--kit-space-5) !important; overflow: hidden; background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); }
 .aw-hub-library .kit-case:hover { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-2); }
 .aw-hub-library .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
