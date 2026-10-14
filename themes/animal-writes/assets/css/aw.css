@@ -1188,3 +1188,6 @@ body { background: var(--kit-color-canvas); }
 .kit-case:has(> .aw-case-icon) { grid-template-columns: 3rem minmax(0, 1fr) auto; grid-template-areas: "media body arrow"; }
 .aw-ed-law-list .aw-case-cover { display: none !important; }
 .aw-kind-date { display: inline-flex; align-items: center; gap: 0.25em; line-height: 1; }
+/* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
+:not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
+:not(.wp-block-post-date) > time.aw-rel-time::before { content: ""; flex: none; width: 1em; height: 1em; margin-right: 6px; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }
