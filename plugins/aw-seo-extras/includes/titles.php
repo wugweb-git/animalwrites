@@ -191,7 +191,7 @@ function aw_seo_list_title() {
 			return ''; // type pages and filtered lists keep their own titles
 		}
 		if ( ! $place ) {
-			return AW_HUB_TITLES['aw_listing'];
+			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
