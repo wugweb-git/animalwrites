@@ -136,7 +136,7 @@ function aw_block_org_details( $a, $id ) {
 		if ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
-				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . esc_html( wp_date( 'j M Y', strtotime( $m( 'aw_services_on' ) ) ) ) : '' ) . '</span>';
+				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . aw_date( $m( 'aw_services_on' ) ) : '' ) . '</span>';
 			}
 			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );

@@ -25,6 +25,22 @@ function aw_i( $name ) {
 }
 
 /**
+ * The one date component (owner, 14 Oct 2026): the calendar icon directly before the date, nothing between them.
+ * Every visible date on the site goes through here (core post-date blocks get the same icon from CSS).
+ *
+ * @param string     $when Any date strtotime() reads (Y-m-d, a full timestamp string) or a Unix time.
+ * @param string     $fmt  Display format.
+ * @return string
+ */
+function aw_date( $when, $fmt = 'j M Y' ) {
+	$ts = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
+	if ( ! $ts ) {
+		return '';
+	}
+	return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
+}
+
+/**
  * Date of the original publication when known, else the post date.
  *
  * @param int    $id     Post ID.
@@ -307,18 +323,18 @@ add_shortcode(
 			$on       = (string) get_post_meta( $id, 'aw_verified_on', true );
 			$code     = (string) get_post_meta( $id, 'aw_awbi_code', true );
 			$rows[]   = $verified
-				? array( 'check', 'Verified by Animal Writes' . ( $on ? ' on ' . wp_date( 'j M Y', strtotime( $on ) ) : '' ) )
+				? array( 'check', 'Verified by Animal Writes' . ( $on ? ' on ' . aw_date( $on ) : '' ), true )
 				: array( 'alert', 'Not yet confirmed by the organisation. Check details before you travel.' );
 			if ( $code ) {
 				$since  = (string) get_post_meta( $id, 'aw_awbi_recognised', true );
 				$until  = (string) get_post_meta( $id, 'aw_awbi_valid', true );
 				$rows[] = aw_awbi_lapsed( $id )
-					? array( 'alert', 'AWBI recognition (code ' . $code . ') was valid until ' . wp_date( 'j M Y', strtotime( $until ) ) . '. Needs re-check.' )
-					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . $code . ( $since ? ', since ' . wp_date( 'j M Y', strtotime( $since ) ) : '' ) . ( $until ? ', valid until ' . wp_date( 'j M Y', strtotime( $until ) ) : '' ) . ' (list as on 31 May 2026)' );
+					? array( 'alert', 'AWBI recognition (code ' . esc_html( $code ) . ') was valid until ' . aw_date( $until ) . '. Needs re-check.', true )
+					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . esc_html( $code ) . ( $since ? ', since ' . aw_date( $since ) : '' ) . ( $until ? ', valid until ' . aw_date( $until ) : '' ) . ' (list as on ' . aw_date( '2026-05-31' ) . ')', true );
 			}
 			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
 			if ( $abc ) {
-				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . wp_date( 'j M Y', strtotime( $abc ) ) );
+				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . aw_date( $abc ), true );
 			}
 			$labels = aw_source_labels( $id, true );
 			if ( $labels ) {
@@ -341,8 +357,8 @@ add_shortcode(
 					$rows[] = array( 'link', 'Also reported by <a href="' . esc_url( $also['url'] ) . '" rel="noopener">' . esc_html( $also['name'] ?? wp_parse_url( $also['url'], PHP_URL_HOST ) ) . '</a>', true );
 				}
 			}
-			$t      = fn( $iso, $text ) => '<time datetime="' . esc_attr( $iso ) . '">' . esc_html( $text ) . '</time>'; // the same words, as dates machines can read
-			$rows[] = array( 'calendar', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . $t( aw_src_date( $id, 'Y-m-d' ), aw_src_date( $id ) ) . ' · added ' : 'Added ' ) . $t( get_the_date( 'Y-m-d', $id ), get_the_date( 'j M Y', $id ) ), true );
+			$t      = fn( $iso, $text ) => aw_date( $iso ); // the one date component
+			$rows[] = array( '', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . $t( aw_src_date( $id, 'Y-m-d' ), aw_src_date( $id ) ) . ' · added ' : 'Added ' ) . $t( get_the_date( 'Y-m-d', $id ), get_the_date( 'j M Y', $id ) ), true );
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
 				$rows[] = array( 'research', 'Official document attached below' );
 			} elseif ( get_post_meta( $id, 'aw_doc_preview', true ) ) {
@@ -358,7 +374,7 @@ add_shortcode(
 		}
 		$out = '<aside class="kit-trust ' . $cls . '" aria-label="About this information"><ul>';
 		foreach ( $rows as $r ) {
-			$out .= '<li>' . aw_i( $r[0] ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ) ) ) ) . '</span></li>';
+			$out .= '<li>' . ( $r[0] ? aw_i( $r[0] ) : '' ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ) ) ) ) . '</span></li>';
 		}
 		return $out . '</ul></aside>';
 	}

@@ -204,7 +204,7 @@ function aw_block_doc_date( $a, $id ) {
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
-	$text  = $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : ''; // publisher, then the date; the type is a label with the others (owner, 14 Oct 2026)
+	$text  = $year ? aw_date( $year . '-01-01', 'Y' ) : aw_date( aw_src_date( $id, 'Y-m-d' ) ); // publisher, then the date; the type is a label with the others (owner, 14 Oct 2026)
 	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-kind-date">' . $text . '</span>' : '' ) . '</span>';
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
@@ -218,8 +218,8 @@ function aw_block_type_date( $a, $id ) {
 		$t    = wp_get_object_terms( $id, $tax, array( 'fields' => 'names' ) );
 		$name = is_wp_error( $t ) || ! $t ? '' : $t[0];
 	}
-	$date = 'post' === $type ? get_the_modified_date( 'j M Y', $id ) : ( function_exists( 'aw_src_date' ) ? aw_src_date( $id, 'j M Y' ) : get_the_date( 'j M Y', $id ) );
-	$text  = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $date ) . '</span>' : '' ); // every date with the calendar icon (owner)
+	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
+	$text = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . $date;
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
 	return $text || $badge ? '<p class="aw-case-meta">' . $badge . ( $badge && $text ? ' ' : '' ) . $text . '</p>' : '';
 }
@@ -231,9 +231,9 @@ function aw_block_law_date( $a, $id ) {
 	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
 	if ( $d ) {
-		return '<time class="aw-law-date" datetime="' . esc_attr( $d ) . '">' . esc_html( wp_date( 'jS F, Y', strtotime( $d . ' 12:00:00' ) ) ) . '</time>';
+		return aw_date( $d . ' 12:00:00' );
 	}
-	return preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? '<time class="aw-law-date" datetime="' . esc_attr( $ym[0] ) . '">' . esc_html( $ym[0] ) . '</time>' : '';
+	return preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? aw_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '';
 }
 
 /** "Issued by …" (a label, not a filter); "Template" for templates. */
@@ -275,7 +275,7 @@ function aw_block_task_icon( $a, $id ) {
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return '<p class="aw-task-meta">' . $badge . '<span>Updated <span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	return '<p class="aw-task-meta">' . $badge . '<span>Updated ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */
@@ -288,7 +288,7 @@ function aw_block_place( $a, $id ) {
 /** "Checked by Animal Writes on …" and "Apply by …" (validThrough). */
 function aw_block_deadline( $a, $id ) {
 	$dl = (string) get_post_meta( $id, 'aw_deadline', true );
-	return '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . ( $dl ? ' · Apply by <time datetime="' . esc_attr( $dl ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $dl ) ) ) . '</time>' : '' ) . '</p>';
+	return '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . ( $dl ? ' · Apply by ' . aw_date( $dl ) . '' : '' ) . '</p>';
 }
 
 function aw_block_opp_actions( $a, $id ) {
@@ -390,7 +390,7 @@ function aw_block_press_meta( $a, $id ) {
 	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
 	$handle = (string) get_post_meta( $id, 'aw_press_account', true );
 	$video  = $fmt && 'videos' === aw_press_group( $fmt );
-	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? '<span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( $date ) . '">' . esc_html( wp_date( 'j M Y', strtotime( $date ) ) ) . '</time></span>' : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
+	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? aw_date( $date ) : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
 }
 
 // Hub Pages in the editor: the H1 in the band is the title (no second title field above it).
