@@ -1160,3 +1160,21 @@ body { background: var(--kit-color-canvas); }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { grid-template-columns: 200px minmax(0, 1fr); gap: var(--kit-space-5); }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 10; }
 }
+/* News first page by breakpoint (owner, 14 Oct 2026): nothing runs the full page width except on phones.
+   Tablet: lead across (picture left, text right), stories 2-4 as normal cards in the 2-column grid.
+   Desktop (12-column grid): lead in 8 columns with its picture on top; stories 2-4 stacked in the 4 columns beside it. */
+@media (min-width: 768px) and (max-width: 1199px) {
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: auto; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { display: block; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-3); }
+}
+@media (min-width: 1200px) {
+	.is-first-page .aw-news-list > li:first-child { grid-column: 1 / span 8; grid-row: span 3; border-bottom: 0 !important; padding-bottom: 0 !important; }
+	.is-first-page .aw-news-list > li:first-child > .aw-story { display: block; }
+	.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-4); }
+	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-h2) !important; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 9 / -1; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { grid-template-columns: 96px minmax(0, 1fr); gap: var(--kit-space-3); align-items: start; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 1; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story-title { font-size: var(--kit-type-base) !important; }
+}
