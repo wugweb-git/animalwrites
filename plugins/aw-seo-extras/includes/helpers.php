@@ -143,10 +143,16 @@ function aw_seo_cut_title( $text, $max = 60 ) {
 	if ( substr_count( $cut, '(' ) > substr_count( $cut, ')' ) ) {
 		$cut = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', mb_substr( $cut, 0, mb_strrpos( $cut, '(' ) ) );
 	}
-	if ( substr_count( $cut, '“' ) > substr_count( $cut, '”' ) || 1 === substr_count( $cut, '"' ) % 2 ) { // no half quote
-		$q   = substr_count( $cut, '“' ) > substr_count( $cut, '”' ) ? '“' : '"';
-		$at  = mb_strrpos( $cut, $q );
-		$cut = trim( mb_substr( $cut, 0, $at ) . mb_substr( $cut, $at + 1 ) );
+	foreach ( array( '“' => '”', '‘' => '’' ) as $open => $close ) { // no half quote: an opening mark after the last closing one
+		$o = mb_strrpos( $cut, $open );
+		$c = mb_strrpos( $cut, $close );
+		if ( false !== $o && ( false === $c || $o > $c ) ) {
+			$cut = trim( mb_substr( $cut, 0, $o ) . mb_substr( $cut, $o + 1 ) );
+		}
+	}
+	if ( 1 === substr_count( $cut, '"' ) % 2 ) {
+		$o   = mb_strrpos( $cut, '"' );
+		$cut = trim( mb_substr( $cut, 0, $o ) . mb_substr( $cut, $o + 1 ) );
 	}
 	return $cut;
 }
