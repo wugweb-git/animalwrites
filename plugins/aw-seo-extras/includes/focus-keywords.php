@@ -24,8 +24,7 @@ function aw_seo_api_allowed() {
 }
 
 /**
- * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable: empty, longer than six
- * words, the site's own name, or sharing no word with the item's title.
+ * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable: not 2 to 4 words, the site's own name, or sharing no word with the item's title.
  *
  * @param string $kw    Proposed keyword.
  * @param string $title Item title.
@@ -34,7 +33,8 @@ function aw_seo_api_allowed() {
 function aw_seo_clean_keyword( $kw, $title ) {
 	$kw = mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) );
 	$kw = trim( preg_replace( array( '/["“”‘’`]+/u', '/\s+/u' ), array( '', ' ' ), $kw ), " \t\n.,;:'-" );
-	if ( '' === $kw || mb_strlen( $kw ) > 70 || count( explode( ' ', $kw ) ) > 6 || false !== strpos( $kw, 'animal writes' ) ) {
+	$n = count( explode( ' ', $kw ) );
+	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 || false !== strpos( $kw, 'animal writes' ) ) {
 		return '';
 	}
 	$words = fn( $s ) => array_filter( preg_split( '/[^\p{L}\p{N}]+/u', mb_strtolower( $s ) ), fn( $w ) => mb_strlen( $w ) >= 3 );
