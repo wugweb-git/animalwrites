@@ -1191,3 +1191,10 @@ body { background: var(--kit-color-canvas); }
 /* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
 :not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
 :not(.wp-block-post-date) > time.aw-rel-time::before { content: ""; flex: none; width: 1em; height: 1em; margin-right: 6px; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }
+/* Card pictures keep their own shape at any size (owner, 14 Oct 2026): never cropped or forced into a frame.
+   Width comes from the layout, height from the picture. A card with no picture, or one whose picture fails to load,
+   keeps the placard box. */
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media):has(img):not(.kit-img-failed) { aspect-ratio: auto !important; height: auto !important; }
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img,
+.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; aspect-ratio: auto !important; object-fit: contain !important; }
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media) a { height: auto; }
