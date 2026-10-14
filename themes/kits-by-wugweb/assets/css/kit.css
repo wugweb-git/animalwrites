@@ -1108,3 +1108,6 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-steps-progress li.is-current .kit-steps-num { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-steps-progress li.is-done { border-top-color: var(--kit-color-ink); }
 .kit-steps.is-stepped .kit-step-count { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* The page band holds the filter dropdowns: keep it above the list below so an open panel is never covered by cards. */
+.kit-section-band { position: relative; z-index: 3; }
