@@ -28,7 +28,7 @@ function aw_analytics_hosts() {
  * @return bool
  */
 function aw_gtm_enabled() {
-	if ( ! aw_gtm_id() || is_admin() || wp_doing_ajax() ) {
+	if ( ! aw_gtm_id() || is_admin() || wp_doing_ajax() || aw_analytics_skip_user() ) {
 		return false;
 	}
 	$host  = wp_parse_url( home_url(), PHP_URL_HOST );
@@ -94,3 +94,13 @@ add_action(
 	},
 	0
 );
+
+/**
+ * Logged-in staff (anyone who can edit content) are never counted (owner, 14 Oct 2026): no GTM container for them,
+ * whether Site Kit places it or this file does. Visitors are unaffected.
+ */
+function aw_analytics_skip_user() {
+	return is_user_logged_in() && current_user_can( 'edit_posts' );
+}
+add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() );
+add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() );
