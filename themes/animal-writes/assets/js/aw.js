@@ -51,3 +51,21 @@
 		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || ''; });
 	});
 })();
+
+/* Card pictures: fill the 16:9 frame only when the picture's own shape is within about 15% of it; otherwise it is shown
+   whole (CSS default: contain). Decided from each picture's real size once it has loaded (owner, 14 Oct 2026). */
+( function () {
+	var FRAME = 16 / 9, SEL = ':is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img, img.aw-case-cover';
+	function fit( img ) {
+		if ( ! img.naturalWidth || ! img.naturalHeight ) { return; }
+		var r = img.naturalWidth / img.naturalHeight;
+		img.classList.toggle( 'is-fill', Math.abs( r - FRAME ) / FRAME <= 0.15 );
+	}
+	function scan( root ) {
+		( root || document ).querySelectorAll( SEL ).forEach( function ( img ) {
+			if ( img.complete ) { fit( img ); } else { img.addEventListener( 'load', function () { fit( img ); }, { once: true } ); }
+		} );
+	}
+	if ( document.readyState === 'loading' ) { document.addEventListener( 'DOMContentLoaded', function () { scan(); } ); } else { scan(); }
+	new MutationObserver( function ( list ) { list.forEach( function ( m ) { m.addedNodes.forEach( function ( n ) { if ( n.nodeType === 1 ) { scan( n ); } } ); } ); } ).observe( document.documentElement, { childList: true, subtree: true } );
+} )();

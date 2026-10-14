@@ -1191,10 +1191,13 @@ body { background: var(--kit-color-canvas); }
 /* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
 :not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
 :not(.wp-block-post-date) > time.aw-rel-time::before { content: ""; flex: none; width: 1em; height: 1em; margin-right: 6px; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }
-/* Card pictures keep their own shape at any size (owner, 14 Oct 2026): never cropped or forced into a frame.
-   Width comes from the layout, height from the picture. A card with no picture, or one whose picture fails to load,
-   keeps the placard box. */
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media):has(img):not(.kit-img-failed) { aspect-ratio: auto !important; height: auto !important; }
+/* Card pictures (owner, 14 Oct 2026): one 16:9 frame per card so grids line up (the design-system token). A picture
+   within about 15% of that shape fills the frame (.is-fill, set by aw.js from its real size); anything further off
+   (an A4 document page, a portrait photo, a logo) is shown whole inside the frame on a plain background. Nothing is cut. */
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) { aspect-ratio: var(--kit-card-media-ratio, 16/9) !important; height: auto !important; background: var(--kit-color-surface); }
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) a { height: 100%; }
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img,
-.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; object-fit: contain !important; } /* the shape comes from the picture's own width/height attributes; no fixed ratio */
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media) a { height: auto; }
+.aw-case-cover { width: 100% !important; height: 100% !important; object-fit: contain !important; object-position: center !important; }
+.aw-case-cover { height: auto !important; aspect-ratio: var(--kit-card-media-ratio, 16/9) !important; background: var(--kit-color-surface); }
+:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img.is-fill,
+.aw-case-cover.is-fill { object-fit: cover !important; }
