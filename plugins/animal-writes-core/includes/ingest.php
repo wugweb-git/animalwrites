@@ -190,12 +190,14 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
-		// No kind from the worker: a government press release (PIB) or a report about a case (LiveLaw, Bar & Bench).
-		$kind = $req->get_param( 'kind' ) ? $req->get_param( 'kind' ) : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : 'legal-news' );
-		if ( ! term_exists( $kind, 'aw_legal_kind' ) && isset( AW_LEGAL_KINDS[ $kind ] ) ) {
+		// No kind from the worker: a government press release (PIB) is an Official release.
+		$kind = $req->get_param( 'kind' ) ? $req->get_param( 'kind' ) : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' );
+		if ( $kind && ! term_exists( $kind, 'aw_legal_kind' ) && isset( AW_LEGAL_KINDS[ $kind ] ) ) {
 			wp_insert_term( AW_LEGAL_KINDS[ $kind ], 'aw_legal_kind', array( 'slug' => $kind ) );
 		}
-		aw_assign_existing_terms( $post_id, array( $kind ), 'aw_legal_kind', $ignored );
+		if ( $kind ) {
+			aw_assign_existing_terms( $post_id, array( $kind ), 'aw_legal_kind', $ignored );
+		}
 		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
 		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) ) {
 			aw_set_issuer( $post_id, (string) $req->get_param( 'court' ) );

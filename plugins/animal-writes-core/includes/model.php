@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template', 'legal-news' => 'Legal news', 'official-release' => 'Official release' ); // last two: reports about cases (LiveLaw, Bar & Bench) and government press releases (PIB) (owner, 14 Oct 2026)
+const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template', 'official-release' => 'Official release' ); // government press releases (PIB); reports about cases (LiveLaw, Bar & Bench) are News (owner, 14 Oct 2026)
 const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
 const AW_SECONDARY_TOPICS = 2;
 /** Services a listing offers: a fixed list (owner, 9 Oct 2026). Shown as tags; a Directory filter once 3+ listings use one. */
