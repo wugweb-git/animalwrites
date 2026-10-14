@@ -1115,22 +1115,23 @@ body { background: var(--kit-color-canvas); }
 /* The logo lines up with the top of the name (owner, 12 Oct 2026). */
 .aw-org-mark { align-self: start; }
 
-/* Library list card (owner, 14 Oct 2026): the publisher's image gets its own column (full width on phones), the date sits
-   above the title with the calendar icon like every other date. The date block's image and date become grid items. */
-.aw-hub-list .kit-case { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; row-gap: var(--kit-space-2); column-gap: var(--kit-space-5); }
-.aw-hub-list .kit-case:has(.aw-case-cover) { grid-template-columns: 13.75rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; }
-.aw-hub-list .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
-.aw-hub-list .kit-case .aw-case-cover { grid-area: media; width: 100% !important; height: auto; aspect-ratio: 4 / 3; object-fit: cover; object-position: top; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
-.aw-hub-list .kit-case .aw-case-cover--photo { object-position: center; }
-.aw-hub-list .kit-case .aw-case-date .d { grid-area: when; align-self: end; display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); }
-.aw-case-date .d .aw-src { margin: 0; }
-.aw-hub-list .kit-case > .aw-case-icon { grid-area: media; }
-.aw-hub-list .kit-case > .aw-case-body { grid-area: body; }
-.aw-hub-list .kit-case > .kit-ico--arrow-right { grid-area: arrow; }
-@media (max-width: 767px) {
-	.aw-hub-list .kit-case, .aw-hub-list .kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "media" "when" "body"; grid-template-rows: auto; }
-	.aw-hub-list .kit-case .aw-case-cover { aspect-ratio: 16 / 9; width: 100% !important; margin-bottom: var(--kit-space-1); }
-}
+/* Library list (owner, 14 Oct 2026): a grid of cards like Resources (1 / 2 / 3 columns): the publisher's image on top,
+   then publisher logo + name and the date with the calendar icon, title, summary, labels. */
+.aw-hub-library .aw-cases { display: grid; gap: var(--kit-space-grid); grid-template-columns: 1fr; margin-bottom: var(--kit-space-8); }
+@media (min-width: 768px) { .aw-hub-library .aw-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-hub-library .aw-cases { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-hub-library .aw-cases > li { margin: 0 !important; }
+.aw-hub-library .kit-case { display: flex !important; flex-direction: column; gap: var(--kit-space-2); height: 100%; padding: 0 0 var(--kit-space-5) !important; overflow: hidden; background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); }
+.aw-hub-library .kit-case:hover { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-2); }
+.aw-hub-library .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
+.aw-hub-library .kit-case .aw-case-cover { order: -1; width: 100% !important; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border: 0; border-radius: 0; background: var(--kit-color-line); }
+.aw-hub-library .kit-case .aw-case-cover--photo { object-position: center; }
+.aw-hub-library .kit-case .aw-case-date .d, .aw-hub-library .kit-case > .aw-case-body { padding-inline: var(--kit-space-5); }
+.aw-hub-library .kit-case .aw-case-date .d { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin-top: var(--kit-space-3); }
+.aw-hub-library .kit-case:not(:has(.aw-case-cover)) .aw-case-date .d { margin-top: var(--kit-space-5); }
+.aw-hub-library .kit-case > .aw-case-icon { padding: var(--kit-space-5) var(--kit-space-5) 0; justify-content: flex-start; }
+.aw-hub-library .kit-case > .kit-ico--arrow-right { display: none; }
+.aw-hub-library .aw-case-title { font-size: var(--kit-type-h4, 1.25rem) !important; }
 .aw-date { display: inline-flex; align-items: center; gap: 6px; }
 .aw-date > .kit-ico { --kit-ico-size: 1em; flex: none; }
 .aw-case-src .aw-src { margin: 0; }
