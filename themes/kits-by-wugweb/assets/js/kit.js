@@ -247,6 +247,7 @@
 			var custom = form.dispatchEvent(new CustomEvent('aw:validate', { cancelable: true, detail: { errors: bad } }));
 			summary(form, bad);
 			if (bad.length || !custom) { e.preventDefault(); form.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'browser', fields: bad.length } })); if (bad[0]) bad[0].focus(); return; }
+			try { sessionStorage.setItem('kit-sent', '1'); } catch (x) {} // analytics: the thank-you page counts a send only after this
 			var btn = form.querySelector('button[type=submit]');
 			if (btn && btn.classList.contains('is-loading')) { e.preventDefault(); return; }
 			// ALTCHA in automatic mode checks on send and then sends the form again: let it run first.
@@ -636,14 +637,15 @@
 	}
 	document.addEventListener('kit:filter', function (e) { filters(new URLSearchParams(e.detail.params), page.section || ''); });
 
-	// The thank-you page ([data-kit-thanks="<form>"]): every form that goes there, with or without JavaScript, counts here
+	// The thank-you page ([data-kit-thanks="<form>"]): every form sent from this site that goes there counts here
 	// (once per visit to that URL; kit:form-done above counts only forms that show their message in place).
 	var qs = new URLSearchParams(location.search);
 	var thanks = document.querySelector('[data-kit-thanks]');
 	if (thanks && thanks.dataset.kitThanks) {
-		var seen = false;
+		var seen = true; // a thank-you URL opened without sending a form here (bookmark, shared link, crawler) is not a send
 		try {
-			seen = sessionStorage.getItem('kit-thanks:' + location.search) === '1';
+			seen = sessionStorage.getItem('kit-sent') !== '1' || sessionStorage.getItem('kit-thanks:' + location.search) === '1';
+			sessionStorage.removeItem('kit-sent');
 			sessionStorage.setItem('kit-thanks:' + location.search, '1');
 			Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf('kit-form:') === 0) sessionStorage.removeItem(k); }); // sent: forget what was typed
 		} catch (x) {}

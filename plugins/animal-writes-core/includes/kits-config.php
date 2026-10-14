@@ -155,7 +155,7 @@ add_filter(
 			$id             = get_queried_object_id();
 			$type           = get_post_type( $id );
 			$c['page_type'] = $hub_types[ $type ] ?? $type;
-			$c['section']   = $hub_types[ $type ] ?? '';
+			$c['section']   = $hub_types[ $type ] ?? ( 'page' === $type ? (string) get_post_field( 'post_name', $id ) : '' ); // Pages: their slug (claim, contact, volunteer…)
 			$topics         = wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'names' ) );
 			$c['category']  = $topics && ! is_wp_error( $topics ) ? $topics[0] : '';
 			if ( function_exists( 'aw_item_place_names' ) ) {
