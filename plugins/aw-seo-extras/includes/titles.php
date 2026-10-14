@@ -201,7 +201,8 @@ function aw_seo_list_title() {
 					'Animal Welfare NGOs, Shelters & Vets in ' . $where,
 					'Animal Welfare NGOs in ' . $where,
 					'Animal Welfare NGOs in ' . $place->name,
-				)
+				),
+				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
 		return aw_seo_fit(
@@ -210,8 +211,13 @@ function aw_seo_list_title() {
 				'Animal Welfare NGOs & Animal Shelters in ' . $place->name,
 				'Animal Welfare NGOs & Shelters in ' . $place->name,
 				'Animal Welfare NGOs in ' . $place->name,
-			)
+			),
+			60 - mb_strlen( aw_seo_page_suffix() )
 		);
+	}
+	if ( is_tax( 'aw_opportunity_type' ) ) {
+		$what = 'Animal Welfare ' . single_term_title( '', false ) . ' Opportunities in India';
+		return aw_seo_fit( array( aw_seo_branded( $what ), $what ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
 }
@@ -251,7 +257,11 @@ add_filter(
 		aw_seo_building_title( true );
 		$ours = wp_get_document_title();
 		aw_seo_building_title( false );
-		$ours = trim( html_entity_decode( wp_strip_all_tags( $ours ), ENT_QUOTES, 'UTF-8' ) );
+		$ours  = trim( html_entity_decode( wp_strip_all_tags( $ours ), ENT_QUOTES, 'UTF-8' ) );
+		$brand = ' – ' . get_bloginfo( 'name' );
+		if ( mb_strlen( $ours ) > 60 && aw_seo_page_number() > 1 && false !== mb_strpos( $ours, $brand ) ) {
+			$ours = str_replace( $brand, '', $ours ); // later pages: the page number before the site name
+		}
 		return '' !== $ours ? $ours : $title;
 	},
 	20
@@ -266,6 +276,11 @@ function aw_seo_list_description() {
 		$desc = has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post );
 	} elseif ( is_post_type_archive() ) {
 		$desc = AW_ARCHIVE_DESCRIPTIONS[ get_query_var( 'post_type' ) ] ?? '';
+	} elseif ( is_tax( 'aw_opportunity_type' ) && '' === trim( (string) term_description() ) ) {
+		$term = get_queried_object();
+		$n    = (int) $term->count;
+		$what = mb_strtolower( $term->name ) . ' ' . ( 1 === $n ? 'opportunity' : 'opportunities' );
+		$desc = sprintf( '%1$s %2$s with animal welfare organisations across India, from Animal Writes. %3$s its role, location and how to apply.', 1 === $n ? 'One' : number_format_i18n( $n ), $what, 1 === $n ? 'It lists' : 'Each one lists' );
 	} elseif ( is_tax() || is_category() || is_tag() ) {
 		$desc = term_description() ?: single_term_title( '', false ) . ' on ' . get_bloginfo( 'name' ) . '.';
 	}
@@ -283,7 +298,7 @@ function aw_seo_list_description() {
 			$what = '1' === $n ? 'One ' . mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
 			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
-			$desc = mb_strlen( $desc . $more ) <= 155 ? $desc . $more : $desc;
+			$desc = mb_strlen( $desc . $more ) <= 155 ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= 155 ? $desc . ' From the Animal Writes Directory.' : $desc );
 		} elseif ( aw_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
