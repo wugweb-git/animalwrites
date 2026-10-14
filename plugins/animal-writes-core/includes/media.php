@@ -112,8 +112,8 @@ add_filter(
 			return $content;
 		}
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
-		if ( false !== strpos( $cls, 'aw-no-fallback' ) && '' === trim( $content ) ) {
-			return ''; // lists that show a picture only when the item has one (Resources, Opportunities)
+		if ( false !== strpos( $cls, 'aw-no-fallback' ) && '' === trim( $content ) && ! ( $post_id && aw_is_ingested( $post_id ) ) ) {
+			return ''; // lists that show a picture only when the item has one (Resources, Opportunities); ingested items (Library) always get theirs
 		}
 		if ( ! $post_id || ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'aw_opportunity', 'post' ), true ) ) {
 			return $content;
