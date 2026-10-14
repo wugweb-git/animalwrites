@@ -1,6 +1,6 @@
 {
  "exportFormatVersion": 2,
- "exportTime": "2026-10-09 03:31:35",
+ "exportTime": "2026-10-14 05:30:00",
  "containerVersion": {
   "path": "accounts/0/containers/0/versions/0",
   "accountId": "0",
@@ -458,6 +458,36 @@
       "type": "LIST",
       "key": "eventSettingsTable",
       "list": [
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "filter"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{DLV - filter}}"
+         }
+        ]
+       },
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "value"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{DLV - value}}"
+         }
+        ]
+       },
        {
         "type": "MAP",
         "map": [
@@ -2514,6 +2544,30 @@
       "type": "TEMPLATE",
       "key": "name",
       "value": "area"
+     }
+    ]
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "variableId": "132",
+    "name": "DLV - filter",
+    "type": "v",
+    "parameter": [
+     {
+      "type": "INTEGER",
+      "key": "dataLayerVersion",
+      "value": "2"
+     },
+     {
+      "type": "BOOLEAN",
+      "key": "setDefaultValue",
+      "value": "false"
+     },
+     {
+      "type": "TEMPLATE",
+      "key": "name",
+      "value": "filter"
      }
     ]
    }

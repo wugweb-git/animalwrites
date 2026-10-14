@@ -621,7 +621,17 @@
 	document.addEventListener('kit:form-done', function (e) { track('form_submit_success', { form: formName(e.target) }); });
 	document.addEventListener('kit:form-error', function (e) { track('form_error', { form: formName(e.target), where: e.detail.where, fields: e.detail.fields }); });
 	document.addEventListener('kit:step', function (e) { if (e.target.closest('.aw-claim-form, #claim')) track('claim_step', { step: e.detail.step }); });
-	document.addEventListener('kit:filter', function (e) { track('filter_apply', { filters: e.detail.params, hub: page.section || '' }); });
+	// filter_apply: one event per filter in use (filter, value), plus the whole query (filters) and the hub
+	function filters(params, hub) {
+		var all = params.toString().slice(0, 200), n = 0;
+		params.forEach(function (v, k) {
+			if (!v || /^(aw_filter|sort|paged|action|_wpnonce)$/.test(k)) return;
+			n++;
+			track('filter_apply', { filter: k === 'q' ? 'search' : k, value: v.slice(0, 100), filters: all, hub: hub });
+		});
+		if (!n) track('filter_apply', { filter: '(none)', value: '', filters: all, hub: hub });
+	}
+	document.addEventListener('kit:filter', function (e) { filters(new URLSearchParams(e.detail.params), page.section || ''); });
 
 	// The thank-you page ([data-kit-thanks="<form>"]): every form that goes there, with or without JavaScript, counts here
 	// (once per visit to that URL; kit:form-done above counts only forms that show their message in place).
@@ -645,7 +655,7 @@
 	document.addEventListener('submit', function (e) {
 		var q = e.target.querySelector && e.target.querySelector('input[name=q]');
 		if (q && /^\s*[1-9]\d{5}\s*$/.test(q.value)) track('pin_search', { pin: q.value.trim() });
-		if (e.target.matches && e.target.matches('.aw-dir-search')) track('filter_apply', { filters: new URLSearchParams(new FormData(e.target)).toString().slice(0, 200), hub: 'directory' });
+		if (e.target.matches && e.target.matches('.aw-dir-search')) filters(new URLSearchParams(new FormData(e.target)), 'directory');
 	}, true);
 
 	// Every button (and link styled as a button): button_click with its label (GTM, owner 9 Oct 2026)

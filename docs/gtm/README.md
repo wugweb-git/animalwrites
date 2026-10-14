@@ -1,6 +1,13 @@
 # GTM container import (Animal Writes)
 
-File: `animalwrites-gtm-container.json` — for container GTM-TB3FCFQB.
+File: `animalwrites-container.json` — for container GTM-TB3FCFQB.
+
+Status (14 Oct 2026): published in GTM; Site Kit's own GA4 tag is off and `kits_ga4_via_gtm` = 1, so GA4 counts
+only through GTM (no double counting). To update a published container with a newer copy of this file, import with
+**Merge → Overwrite conflicting tags, triggers and variables** (renaming would duplicate every tag), then publish.
+14 Oct 2026 update: filter_apply also carries `filter` and `value` (one event per filter in use); new variable DLV - filter.
+
+First import:
 
 1. GTM → Admin → Import container → choose the file → workspace "Default" → **Merge** → "Rename conflicting tags".
 2. Preview on animalwrites.in, click around (search, a phone link, a PDF), check the events arrive in GA4 DebugView.
