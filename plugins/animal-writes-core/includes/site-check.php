@@ -27,7 +27,7 @@ function aw_site_check_urls() {
 		'Contact'             => '/contact/',
 		'Volunteer'           => '/volunteer/',
 		'Search'              => '/search/?q=dog',
-		'Sitemap'             => ( function_exists( 'kits_rank_math_module' ) && kits_rank_math_module( 'sitemap' ) ) ? '/sitemap_index.xml' : '/wp-sitemap.xml',
+		'Sitemap'             => ( class_exists( '\RankMath\Helper' ) && \RankMath\Helper::is_module_active( 'sitemap' ) ) ? '/sitemap_index.xml' : '/wp-sitemap.xml',
 	);
 	foreach ( array( 'aw_news' => 'A news item', 'aw_legal' => 'A Library item', 'post' => 'A guide', 'aw_opportunity' => 'An opportunity', 'aw_campaign' => 'A campaign', 'aw_listing' => 'An organisation' ) as $type => $label ) {
 		$p = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids' ) );

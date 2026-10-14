@@ -121,58 +121,6 @@ add_filter(
 // The Wugweb sample listing: only the owner sees it (preview), everyone else gets a 404 and no trace in lists.
 add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ) ) );
 
-add_filter( 'kits_seo_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) );
-add_filter( 'kits_seo_twitter_site', fn() => '@AnimalWrites' );
-add_filter( 'kits_seo_locale', fn() => 'en_IN' );
-add_filter(
-	'kits_seo_archive_descriptions',
-	fn() => array(
-		'aw_news'        => 'Animal-welfare news from across India, summarised with a link to every source.',
-		'aw_legal'       => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
-		'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
-		'aw_campaign'    => 'Citizen campaigns for animals in India, starting with Animal Writes 1.0.',
-		'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
-		'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.',
-	)
-);
-// Share image (og:image, article schema): the item's own stored image (topic photo, hosted PDF), never the publisher's.
-add_filter(
-	'kits_seo_image_id',
-	fn( $att, $id ) => $att ? $att : ( function_exists( 'aw_item_image_id' ) ? aw_item_image_id( $id ) : 0 ),
-	10,
-	2
-);
-// Long headlines: the <title> is the headline alone, cut at a word (kits-core seo.php).
-add_filter( 'kits_seo_short_title_types', fn() => array( 'aw_news', 'aw_legal' ) );
-// og:url = canonical: list pages (hubs, directory places) use the hub canonical with /page/N/.
-add_filter( 'kits_seo_canonical', fn( $url ) => ( function_exists( 'aw_hub_canonical' ) && aw_hub_type() && ! is_404() ) ? aw_hub_canonical() : $url );
-// A listing with no description of its own: one from its facts (type, place, services).
-add_filter(
-	'kits_seo_description',
-	function ( $desc ) {
-		if ( '' !== trim( wp_strip_all_tags( (string) $desc ) ) || ! is_singular( 'aw_listing' ) ) {
-			return $desc;
-		}
-		return aw_listing_fact_description( get_queried_object_id() );
-	},
-	5
-);
-
-/** "{Listing type} in {District}, {State}. {Services}. Contact details, location and how to help." ('' without type or place). */
-function aw_listing_fact_description( $id ) {
-	$types = get_the_terms( $id, 'aw_listing_type' );
-	$type  = ( $types && ! is_wp_error( $types ) ) ? $types[0]->name : '';
-	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
-	$where = implode( ', ', array_filter( array( $district, $state ) ) );
-	if ( '' === $type && '' === $where ) {
-		return '';
-	}
-	$lead = $type ? $type . ( $where ? ' in ' . $where : '' ) : 'In ' . $where;
-	$svc  = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) );
-	$svc  = ( $svc && ! is_wp_error( $svc ) ) ? implode( ', ', array_slice( $svc, 0, 4 ) ) : '';
-	return $lead . '. ' . ( $svc ? ucfirst( $svc ) . '. ' : '' ) . 'Contact details, location and how to help.';
-}
-
 // Section names for sections without a visible heading (shell spec: every section labelled).
 add_filter(
 	'kits_section_labels',

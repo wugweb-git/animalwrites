@@ -1,38 +1,24 @@
 <?php
 /**
- * Structured data (JSON-LD).
+ * The site's own JSON-LD nodes, put into Rank Math's one graph (Rank Math's schema templates cannot build these from
+ * the site's fields):
  *
- * - Listing pages: NGO / VeterinaryCare / AnimalShelter / GovernmentOrganization (by listing type, several allowed) with name, URL, logo, locality/region (no street address), contact details
- *   when present, the official website as sameAs, and the AWBI recognition code as an identifier.
- * - Directory pages (all, state, district, type): ItemList of the organisations on the page, in order.
- * - Every page: the publisher (Organization) and the site (WebSite with site search), and the breadcrumb trail.
- * - News: NewsArticle. Legal Watch: Legislation for Acts, Rules, Notifications and Circulars, else NewsArticle.
- *   Guides: Article, plus FAQPage when the guide is written as questions. Jobs, internships, fellowships: JobPosting.
+ * - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOrganization (by listing type, several allowed) with
+ *   name, URL, logo, locality/region, contact details when present, the official website as sameAs, identifiers
+ *   (AWBI code, registration, 12A, 80G, Darpan), services, opening hours, donate and volunteer actions.
+ * - News: NewsArticle. Library: Legislation for Acts, Rules, Notifications and Circulars, else NewsArticle (court
+ *   rulings with their court and order). Resources: Article, plus FAQPage when the guide is written as questions.
+ *   Opportunities: JobPosting (none once closed). Campaigns: CreativeWork.
+ * - Section hubs and Directory places: CollectionPage + ItemList of the page's items. Topics page and topic archives:
+ *   CollectionPage. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
+ * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
+ *   site's own search address), replacing Rank Math's defaults (same @id), and the breadcrumb trail people see.
  *
- * @package animal-writes-core
+ * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-/**
- * Print one JSON-LD block.
- *
- * @param array $data Schema.org data.
- */
-function aw_jsonld( $data ) {
-	echo "\n" . '<script type="application/ld+json">' . wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
-}
-
-/**
- * State and district names of a listing.
- *
- * @param int $id Post ID.
- * @return array{0: string, 1: string} state, district.
- */
-function aw_listing_place( $id ) {
-	return aw_item_place_names( $id ); // LGD places (places.php)
 }
 
 /**
@@ -180,7 +166,6 @@ function aw_listing_schema( $id ) {
 	return array_filter( $org );
 }
 
-
 /* ---------- Site and content pages ---------- */
 
 /** The publisher (Animal Writes) as schema.org Organization. */
@@ -235,17 +220,14 @@ function aw_schema_date( $date ) {
 }
 
 /**
- * ImageObject for an item: the same stored image its og:image uses (kits-core seo.php), with its size. Never the
+ * ImageObject for an item: the same stored image its og:image uses (helpers.php), with its size. Never the
  * publisher's image. Null when the site has no image to give.
  *
  * @param int $id Post ID.
  * @return array|null
  */
 function aw_schema_image( $id ) {
-	if ( ! function_exists( 'kits_seo_image' ) ) {
-		return null;
-	}
-	$img = ( is_singular() && get_queried_object_id() === (int) $id ) ? kits_seo_image() : ( kits_seo_item_image( $id ) ? kits_seo_item_image( $id ) : kits_seo_default_image() );
+	$img = ( is_singular() && get_queried_object_id() === (int) $id ) ? aw_seo_image() : ( aw_seo_item_image( $id ) ? aw_seo_item_image( $id ) : aw_seo_default_image() );
 	return $img ? array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) ) : null;
 }
 
@@ -266,10 +248,8 @@ function aw_article_schema( $id ) {
 	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
 		$at = 'NewsArticle';
 	}
-	$over     = trim( (string) get_post_meta( $id, 'kits_schema_type', true ) ); // editor's choice (SEO box)
-	$at       = $over ? $over : $at;
 	$image    = aw_schema_image( $id );
-	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true );
+	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = (string) get_post_meta( $id, 'aw_source_name', true );
 	$data     = array(
@@ -401,9 +381,6 @@ function aw_website_schema() {
 
 /** FAQPage for a guide whose headings are questions, each followed by its answer. */
 function aw_faq_schema( $id ) {
-	if ( function_exists( 'kits_seo_faqs' ) && kits_seo_faqs( $id ) ) {
-		return array(); // the FAQ field's own FAQPage schema (kits-core) is printed instead
-	}
 	$html = (string) apply_filters( 'the_content', get_post_field( 'post_content', $id ) );
 	if ( ! preg_match_all( '#<h[23][^>]*>(.*?\?)\s*</h[23]>(.*?)(?=<h[23]|$)#si', $html, $m, PREG_SET_ORDER ) || count( $m ) < 2 ) {
 		return array();
@@ -484,7 +461,7 @@ function aw_topics_schema() {
 			'@id'         => $url . '#page',
 			'url'         => $url,
 			'name'        => aw_seo_plain( get_the_title() ),
-			'description' => function_exists( 'aw_seo_description' ) ? aw_seo_description() : '',
+			'description' => aw_seo_description(),
 			'inLanguage'  => 'en-IN',
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
@@ -558,18 +535,93 @@ function aw_schema_nodes() {
 	return array_values( array_filter( $nodes ) );
 }
 
-// Without Rank Math: one graph per page, the publisher and the site, the page's own nodes and its breadcrumb trail.
-add_action(
-	'wp_head',
-	function () {
-		if ( is_404() || ( function_exists( 'kits_rank_math' ) && kits_rank_math() ) ) {
-			return;
+/**
+ * CollectionPage + ItemList of a hub's current page (put in the page's one graph below). Empty off a hub.
+ *
+ * @return array
+ */
+function aw_hub_schema_nodes() {
+	static $nodes = null;
+	if ( null !== $nodes ) {
+		return $nodes;
+	}
+	$type = aw_hub_type();
+	if ( ! $type || is_404() || 'aw_press' === $type ) {
+		return $nodes = array(); // Media & PR has its own (aw_press_schema)
+	}
+	$url   = strtok( aw_hub_base_url(), '?' );
+	$items = array();
+	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
+	foreach ( aw_hub_posts( $type ) as $i => $p ) {
+		if ( aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
+			continue; // not indexed (or preview only), so not listed
 		}
-		$graph = array_merge( array( aw_publisher_schema(), aw_website_schema() ), aw_schema_nodes(), array( aw_breadcrumb_schema() ) );
-		aw_jsonld( array( '@context' => 'https://schema.org', '@graph' => array_values( array_filter( $graph ) ) ) );
-	},
-	31
-);
+		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
+	}
+	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
+	$nodes = array(
+		array(
+			'@type'       => 'CollectionPage',
+			'@id'         => $url . '#page',
+			'url'         => $url,
+			'name'        => aw_seo_plain( $name ),
+			'description' => aw_seo_description(),
+			'inLanguage'  => 'en-IN',
+			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+			'mainEntity'  => array( '@id' => $url . '#list' ),
+		),
+		array(
+			'@type'           => 'ItemList',
+			'@id'             => $url . '#list',
+			'numberOfItems'   => aw_hub_total( $type ),
+			'itemListElement' => $items,
+		),
+	);
+	return $nodes;
+}
+
+/** ImageObject of a press item: its stored thumbnail, else the stored publisher logo (null when neither exists). */
+function aw_press_image_schema( $id ) {
+	foreach ( array( (int) get_post_thumbnail_id( $id ), (int) get_post_meta( $id, 'aw_press_logo', true ) ) as $att ) {
+		$img = $att ? aw_seo_attachment( $att ) : null;
+		if ( $img ) {
+			return array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) );
+		}
+	}
+	return null;
+}
+
+/** Media & PR page schema: CollectionPage + ItemList. */
+function aw_press_schema() {
+	$list = array();
+	foreach ( aw_press_list() as $i => $p ) {
+		$list[] = array(
+			'@type'    => 'ListItem',
+			'position' => $i + 1,
+			'item'     => array_filter(
+				array(
+					'@type'         => 'video' === get_post_meta( $p->ID, 'aw_press_format', true ) ? 'VideoObject' : 'NewsArticle',
+					'headline'      => get_the_title( $p ),
+					'name'          => aw_seo_plain( get_the_title( $p ) ),
+					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
+					'datePublished' => aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ),
+					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
+					'image'         => aw_press_image_schema( $p->ID ),
+				)
+			),
+		);
+	}
+	return array(
+		'@type'      => 'CollectionPage',
+		'@id'        => get_permalink() . '#page',
+		'url'        => get_permalink(),
+		'name'       => aw_seo_plain( get_the_title() ),
+		'inLanguage' => 'en-IN',
+		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+		'mainEntity' => array( '@type' => 'ItemList', 'itemListElement' => $list ),
+	);
+}
 
 // With Rank Math: its one graph carries ours. Our publisher and site replace its defaults (same @id); our item nodes
 // replace its automatic article; our breadcrumb trail is the one people see; a page that is itself a collection or a
@@ -600,17 +652,10 @@ add_filter(
 			}
 			$data[ 'aw_node_' . $i ] = $node;
 		}
-		if ( isset( $data['kits_faq'] ) ) {
-			foreach ( $nodes as $node ) {
-				if ( 'FAQPage' === ( $node['@type'] ?? '' ) ) {
-					unset( $data['kits_faq'] );
-				}
-			}
-		}
 		$crumbs = aw_breadcrumb_schema();
 		unset( $data['BreadcrumbList'] );
 		if ( $crumbs ) {
-			$crumbs['@id']          = ( function_exists( 'kits_seo_canonical' ) ? kits_seo_canonical() : get_permalink() ) . '#breadcrumb';
+			$crumbs['@id']          = aw_seo_canonical() . '#breadcrumb';
 			$data['BreadcrumbList'] = $crumbs;
 			if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 				$data['WebPage']['breadcrumb'] = array( '@id' => $crumbs['@id'] );
@@ -620,35 +665,3 @@ add_filter(
 	},
 	999
 );
-
-/**
- * Exact opening hours ("Mon-Fri 09:00-18:00", one range per line) as schema.org OpeningHoursSpecification.
- *
- * @param string $text Lines.
- * @return array
- */
-function aw_hours_spec( $text ) {
-	$days = array( 'mon' => 'Monday', 'tue' => 'Tuesday', 'wed' => 'Wednesday', 'thu' => 'Thursday', 'fri' => 'Friday', 'sat' => 'Saturday', 'sun' => 'Sunday' );
-	$keys = array_keys( $days );
-	$out  = array();
-	foreach ( preg_split( '/[\r\n]+/', (string) $text ) as $line ) {
-		if ( ! preg_match( '/^\s*([a-z]{3})[a-z]*(?:\s*[-–]\s*([a-z]{3})[a-z]*)?\s+(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/i', $line, $mm ) ) {
-			continue;
-		}
-		$from = array_search( strtolower( $mm[1] ), $keys, true );
-		$to   = isset( $mm[2] ) && '' !== $mm[2] ? array_search( strtolower( $mm[2] ), $keys, true ) : $from;
-		if ( false === $from || false === $to ) {
-			continue;
-		}
-		$list = array();
-		for ( $i = $from; ; $i = ( $i + 1 ) % 7 ) {
-			$list[] = $days[ $keys[ $i ] ];
-			if ( $i === $to ) {
-				break;
-			}
-		}
-		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => $list, 'opens' => $mm[3], 'closes' => $mm[4] );
-	}
-	return $out;
-}
-

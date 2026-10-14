@@ -3,7 +3,8 @@
  * Retention: nothing is ever deleted. Old items are archived instead, and stay reachable at their URL.
  *
  * - News: permanent, listed and indexed at any age (owner's decision: old news stays in search).
- * - Opportunities past their deadline: closed — noindex, left out of the opportunities list and the sitemap.
+ * - Opportunities past their deadline: closed — left out of the opportunities list; noindex and out of the sitemap
+ *   (aw-seo-extras).
  * - Library, guides, resources, campaigns, directory: permanent, unchanged.
  *
  * @package animal-writes-core
@@ -30,19 +31,6 @@ function aw_retention_state( $post ) {
 	}
 	return '';
 }
-
-// Closed opportunities ask search engines not to index them; links are still followed.
-add_filter(
-	'wp_robots',
-	function ( $robots ) {
-		if ( is_singular( 'aw_opportunity' ) && aw_retention_state( get_queried_object() ) ) {
-			$robots['noindex'] = true;
-			$robots['follow']  = true;
-			unset( $robots['max-image-preview'] );
-		}
-		return $robots;
-	}
-);
 
 // Lists leave out closed opportunities.
 /** Days an opportunity without a deadline stays open before it needs renewing. */
@@ -127,15 +115,3 @@ function aw_open_opportunities_meta_query() {
 	);
 }
 
-// The sitemap lists only indexable items.
-add_filter(
-	'wp_sitemaps_posts_query_args',
-	function ( $args, $post_type ) {
-		if ( 'aw_opportunity' === $post_type ) {
-			$args['meta_query'] = aw_open_opportunities_meta_query();
-		}
-		return $args;
-	},
-	10,
-	2
-);

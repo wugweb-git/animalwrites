@@ -537,7 +537,6 @@ function aw_directory_intro() {
 	}
 	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );
 }
-add_filter( 'kits_seo_description', fn( $d ) => ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['type'] ) && empty( $_GET['q'] ) ) ? aw_directory_intro() : $d ); // phpcs:ignore WordPress.Security.NonceVerification
 
 // A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).
 add_filter(

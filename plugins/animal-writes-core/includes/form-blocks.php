@@ -183,19 +183,9 @@ add_shortcode(
 	}
 );
 
-// The three pages are not indexed and not in the sitemap (kits_noindex, set when they are made); never cached when they
+// /report/ and /thank-you/ are not indexed and not in the sitemap (Rank Math's robots field, set when they are made);
+// /claim/?listing=ID is one indexed page per listing (aw-seo-extras). Never cached when they
 // carry a person's message or errors; no ads.
-add_filter(
-	'wp_robots',
-	function ( $robots ) {
-		if ( is_page( array( 'report', 'thank-you' ) ) ) { // /claim/ is indexed (owner, 10 Oct 2026)
-			$robots['noindex'] = true;
-			$robots['follow']  = true;
-		}
-		return $robots;
-	},
-	20
-);
 add_action(
 	'template_redirect',
 	function () {
@@ -204,21 +194,6 @@ add_action(
 			do_action( 'litespeed_control_set_nocache', 'form page with a personal message' );
 		}
 	}
-);
-
-// /claim/?listing=ID is one indexed page per listing: its own canonical and title (owner, 10 Oct 2026).
-function aw_claim_listing() {
-	$id = is_page( 'claim' ) ? absint( $_GET['listing'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
-	return ( $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) ? $id : 0;
-}
-add_filter( 'kits_seo_canonical', fn( $url ) => '' === $url && aw_claim_listing() ? add_query_arg( 'listing', aw_claim_listing(), get_permalink() ) : $url );
-add_filter(
-	'rank_math/frontend/title',
-	function ( $title ) {
-		$id = aw_claim_listing();
-		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – Animal Writes' : $title;
-	},
-	30
 );
 
 /** Make /claim/, /report/ and /thank-you/ once. */
@@ -240,7 +215,7 @@ add_action(
 				)
 			);
 			if ( $id && ! is_wp_error( $id ) && 'claim' !== $slug ) {
-				update_post_meta( $id, 'kits_noindex', '1' );
+				update_post_meta( $id, 'rank_math_robots', array( 'noindex' ) );
 			}
 		}
 		update_option( 'aw_form_pages_done', '1', false );

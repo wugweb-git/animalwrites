@@ -18,6 +18,9 @@ for t in "$REPO"/themes/*/; do ln -s "$t" "wp-content/themes/$(basename "$t")"; 
 wp rewrite structure '/%postname%/' --quiet
 wp theme activate animal-writes --quiet
 wp plugin activate animal-writes-core --quiet
+# Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
+wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
+wp plugin activate aw-seo-extras --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
@@ -40,7 +43,7 @@ sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
 URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
-  /directory/kerala/ /directory/kerala/ernakulam/
+  /directory/kerala/ /directory/kerala/ernakulam/ /sitemap_index.xml
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
 for u in "${URLS[@]}"; do

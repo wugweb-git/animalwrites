@@ -311,48 +311,6 @@ function aw_press_list() {
 
 // The Media & PR list is the hub Query Loop on the Media & PR Page (hubs.php, hub-blocks.php).
 
-/** Media & PR page schema: CollectionPage + ItemList. */
-/** ImageObject of a press item: its stored thumbnail, else the stored publisher logo (null when neither exists). */
-function aw_press_image_schema( $id ) {
-	foreach ( array( (int) get_post_thumbnail_id( $id ), (int) get_post_meta( $id, 'aw_press_logo', true ) ) as $att ) {
-		$img = $att && function_exists( 'kits_seo_attachment' ) ? kits_seo_attachment( $att ) : null;
-		if ( $img ) {
-			return array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) );
-		}
-	}
-	return null;
-}
-
-function aw_press_schema() {
-	$list = array();
-	foreach ( aw_press_list() as $i => $p ) {
-		$list[] = array(
-			'@type'    => 'ListItem',
-			'position' => $i + 1,
-			'item'     => array_filter(
-				array(
-					'@type'         => 'video' === get_post_meta( $p->ID, 'aw_press_format', true ) ? 'VideoObject' : 'NewsArticle',
-					'headline'      => get_the_title( $p ),
-					'name'          => aw_seo_plain( get_the_title( $p ) ),
-					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
-					'datePublished' => function_exists( 'aw_schema_date' ) ? aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ) : (string) get_post_meta( $p->ID, 'aw_press_date', true ),
-					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
-					'image'         => aw_press_image_schema( $p->ID ),
-				)
-			),
-		);
-	}
-	return array(
-		'@type'      => 'CollectionPage',
-		'@id'        => get_permalink() . '#page',
-		'url'        => get_permalink(),
-		'name'       => aw_seo_plain( get_the_title() ),
-		'inLanguage' => 'en-IN',
-		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
-		'mainEntity' => array( '@type' => 'ItemList', 'itemListElement' => $list ),
-	);
-}
-
 /** One-time move of the old Settings list (option aw_press) into press items; the option is kept as an archive. */
 add_action(
 	'admin_init',

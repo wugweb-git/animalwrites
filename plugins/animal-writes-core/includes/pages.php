@@ -210,20 +210,6 @@ add_filter(
 	2
 );
 
-/* ---------- Search page ---------- */
-
-add_filter(
-	'wp_robots',
-	function ( $robots ) {
-		if ( is_page( 'search' ) ) {
-			$robots['noindex'] = true;
-			$robots['follow']  = true;
-		}
-		return $robots;
-	},
-	20
-);
-
 /* ---------- Footer topics list ---------- */
 
 add_shortcode(
@@ -246,7 +232,7 @@ add_filter(
 	fn( $html ) => false !== strpos( $html, '[aw_' ) ? do_shortcode( $html ) : $html
 );
 
-/* ---------- Site search at /search/?q= (noindex; see wp_robots above) ---------- */
+/* ---------- Site search at /search/?q= (noindex: Rank Math's robots field on the page) ---------- */
 
 const AW_SEARCH_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'page' );
 

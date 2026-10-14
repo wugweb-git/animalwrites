@@ -961,14 +961,6 @@ body { background: var(--kit-surface-page); }
 .scriptlesssocialsharing__buttons svg, .scriptlesssocialsharing__icon { width: 1.125em !important; height: 1.125em !important; fill: currentColor; }
 .scriptlesssocialsharing__buttons a.button::after { content: none !important; }
 
-/* AI-answer summary, key takeaways and FAQs (SEO box fields) */
-.kit-ai-summary { max-width: 72ch; margin: var(--kit-space-3) 0 var(--kit-space-4); font-size: var(--kit-type-lead); color: var(--kit-color-text); }
-.kit-takeaways { max-width: 72ch; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-surface-card); }
-.kit-takeaways-title { font-size: var(--kit-type-h4) !important; margin: 0 0 var(--kit-space-2) !important; }
-.kit-takeaways ul { margin: 0; padding-left: 1.2em; }
-.kit-faqs { max-width: 72ch; margin-top: var(--kit-space-6); }
-.kit-faq { border-top: 1px solid var(--kit-color-line); padding: var(--kit-space-3) 0; }
-.kit-faq summary { cursor: pointer; font-weight: var(--kit-weight-medium); min-height: var(--kit-size-target); display: flex; align-items: center; }
 /* Mobile menu: the list fills the screen so contact and legal sit at the bottom */
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { display: flex !important; flex-direction: column; min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }

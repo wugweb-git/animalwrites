@@ -196,3 +196,8 @@ add_filter(
 	},
 	20
 );
+
+/** Plain text of a title or name: tags removed, entities decoded, spaces collapsed. */
+function aw_seo_plain( $text ) {
+	return trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( (string) $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+}

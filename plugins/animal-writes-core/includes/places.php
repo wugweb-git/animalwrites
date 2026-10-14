@@ -521,3 +521,13 @@ function aw_places_migrate() {
 	delete_transient( 'aw_places_migrating' );
 }
 add_action( 'init', 'aw_places_migrate', 0 );
+
+/**
+ * State and district names of a listing.
+ *
+ * @param int $id Post ID.
+ * @return array{0: string, 1: string} state, district.
+ */
+function aw_listing_place( $id ) {
+	return aw_item_place_names( $id ); // LGD places (places.php)
+}
