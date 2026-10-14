@@ -335,6 +335,7 @@
 		function go(i) { cur = i; mark(); box.dispatchEvent(new CustomEvent('kit:step', { bubbles: true, detail: { step: i + 1 } })); steps.forEach(function (s, n) { s.hidden = n !== i; }); var lg = steps[i].querySelector('legend'); if (lg) { lg.tabIndex = -1; lg.focus(); } }
 		steps.forEach(function (s, n) { s.hidden = n !== cur; });
 		mark();
+		setTimeout(function () { box.dispatchEvent(new CustomEvent('kit:step', { bubbles: true, detail: { step: cur + 1 } })); }, 0); // analytics: the first step shown
 		box.addEventListener('click', function (e) {
 			var next = e.target.closest('[data-step-next]'), back = e.target.closest('[data-step-back]');
 			if (back) { go(cur - 1); return; }
@@ -350,6 +351,7 @@
 					if (m) m.textContent = el.validity.valueMissing ? (el.dataset.msgRequired || 'Enter this') : (el.dataset.msgEmail || el.dataset.msgPattern || el.validationMessage);
 				});
 				wrong[0].focus();
+				box.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'step ' + (cur + 1), fields: wrong.length } })); // analytics
 				return;
 			}
 			go(cur + 1);
@@ -614,6 +616,7 @@
 	}
 	window.kitsTrack = track;
 	function formName(form) {
+		form = form && form.closest && form.closest('form') || form;
 		var a = form && form.querySelector('input[name=action]');
 		var v = a ? a.value.replace(/^aw_/, '') : (form && form.id || '');
 		return { newsletter: 'newsletter', volunteer: 'volunteer', claim: 'claim', report: 'report', contact: 'contact', remove_data: 'remove_data' }[v] || v;
