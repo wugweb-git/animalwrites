@@ -1136,7 +1136,6 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-library .aw-case-sum .wp-block-post-excerpt__excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
 .aw-hub-library .aw-case-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-2) 0 0 !important; }
 .aw-hub-library .aw-case-tags .wp-block-post-terms { display: contents; }
-.aw-hub-library .aw-case-tags .kit-tag--ink, .aw-hub-library .aw-case-tags .aw-issuer { display: none; }
 @media (max-width: 767px) {
 	.aw-hub-library .kit-case { grid-template-columns: 4rem minmax(0, 1fr); grid-template-areas: "media when" "body body"; }
 	.aw-hub-library .kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "when" "body"; }

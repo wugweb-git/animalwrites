@@ -242,7 +242,7 @@ function aw_block_issuer( $a, $id ) {
 		return kits_tag( 'Template', 'accent' );
 	}
 	$iss = aw_item_issuer( $id );
-	return $iss ? kits_tag( 'Issued by ' . $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '';
+	return $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : ''; // just the court / body (owner, 14 Oct 2026)
 }
 
 /** Source line and the official document (PDF) on Library items. */
