@@ -1142,3 +1142,14 @@ body { background: var(--kit-color-canvas); }
 	.aw-hub-library .kit-case > .kit-ico--arrow-right { display: none; }
 	.aw-hub-library .kit-case .aw-case-date .d { align-self: center; }
 }
+/* News lead story by breakpoint (owner, 14 Oct 2026): phone = picture full width (16:9) above the text; tablet and up =
+   picture left (about 60%), text right, so the picture never fills the screen. */
+@media (min-width: 768px) {
+	.is-first-page .aw-news-list > li:first-child > .aw-story { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--kit-space-6); align-items: center; }
+	.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16 / 10; margin: 0; }
+	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-h2) !important; }
+	.is-first-page .aw-news-list > li:first-child .aw-story-sum { font-size: var(--kit-type-base); }
+}
+@media (min-width: 1200px) {
+	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-headline, var(--kit-type-h1)) !important; }
+}
