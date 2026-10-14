@@ -361,8 +361,8 @@ add_filter(
 		$id  = get_queried_object_id();
 		$pub = '<time datetime="' . esc_attr( get_the_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_date( 'j M Y', $id ) ) . '</time>';
 		$upd = get_the_modified_date( 'Y-m-d', $id ) > get_the_date( 'Y-m-d', $id ) // edited on a later day: say so
-			? ' · Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time>' : '';
-		return $html . '<p class="aw-byline">By Animal Writes · <span class="aw-date">' . aw_i( 'calendar' ) . $pub . $upd . '</span></p>';
+			? ' · Updated <span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span>' : '';
+		return $html . '<p class="aw-byline">By Animal Writes · <span class="aw-date">' . aw_i( 'calendar' ) . $pub . '</span>' . $upd . '</p>';
 	},
 	20,
 	2

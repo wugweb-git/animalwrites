@@ -275,7 +275,7 @@ function aw_block_task_icon( $a, $id ) {
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return '<p class="aw-task-meta">' . $badge . '<span>' . aw_i( 'calendar' ) . 'Updated <time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	return '<p class="aw-task-meta">' . $badge . '<span>Updated <span class="aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( get_the_modified_date( 'Y-m-d', $id ) ) . '">' . esc_html( get_the_modified_date( 'j M Y', $id ) ) . '</time></span></span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */
