@@ -1186,3 +1186,4 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-law-list .kit-case { display: block !important; }
 .aw-ed-law-list .kit-case .aw-case-date .d { margin-bottom: var(--kit-space-2); }
 .kit-case:has(> .aw-case-icon) { grid-template-columns: 3rem minmax(0, 1fr) auto; grid-template-areas: "media body arrow"; }
+.aw-ed-law-list .aw-case-cover { display: none !important; }
