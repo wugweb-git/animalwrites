@@ -198,7 +198,7 @@ function aw_block_doc_date( $a, $id ) {
 	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => '', 'loading' => 'lazy' ) ) : ''; // the document's first page
 	$pub   = function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && ! get_post_meta( $id, 'aw_file_id', true ) ? (string) aw_item_image( $id, 'medium' ) : '';
 	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
-		$cover = '<img class="aw-case-cover" src="' . esc_url( $pub ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
+		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
 	}
 	$kind  = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];

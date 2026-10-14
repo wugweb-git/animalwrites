@@ -1114,3 +1114,20 @@ body { background: var(--kit-color-canvas); }
 .aw-type-ico--legal-aid { --t: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' %3E %3Cpath d='m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z' /%3E %3Cpath d='m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z' /%3E %3Cpath d='M7 21h10' /%3E %3Cpath d='M12 3v18' /%3E %3Cpath d='M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2' /%3E %3C/svg%3E"); }
 /* The logo lines up with the top of the name (owner, 12 Oct 2026). */
 .aw-org-mark { align-self: start; }
+
+/* Library list card (owner, 14 Oct 2026): the publisher's image gets its own column (full width on phones), the date sits
+   above the title with the calendar icon like every other date. The date block's image and date become grid items. */
+.aw-hub-list .kit-case { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; row-gap: var(--kit-space-2); column-gap: var(--kit-space-5); }
+.aw-hub-list .kit-case:has(.aw-case-cover) { grid-template-columns: 13.75rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; }
+.aw-hub-list .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
+.aw-hub-list .kit-case .aw-case-cover { grid-area: media; width: 100% !important; height: auto; aspect-ratio: 4 / 3; object-fit: cover; object-position: top; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
+.aw-hub-list .kit-case .aw-case-cover--photo { object-position: center; }
+.aw-hub-list .kit-case .aw-case-date .d { grid-area: when; align-self: end; display: inline-flex; align-items: center; gap: 6px; }
+.aw-hub-list .kit-case .aw-case-date .d::before { content: ""; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }
+.aw-hub-list .kit-case > .aw-case-icon { grid-area: media; }
+.aw-hub-list .kit-case > .aw-case-body { grid-area: body; }
+.aw-hub-list .kit-case > .kit-ico--arrow-right { grid-area: arrow; }
+@media (max-width: 767px) {
+	.aw-hub-list .kit-case, .aw-hub-list .kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "media" "when" "body"; grid-template-rows: auto; }
+	.aw-hub-list .kit-case .aw-case-cover { aspect-ratio: 16 / 9; width: 100% !important; margin-bottom: var(--kit-space-1); }
+}
