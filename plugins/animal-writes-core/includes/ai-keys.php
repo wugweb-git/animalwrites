@@ -169,6 +169,10 @@ function aw_ai_check( array $row ): array {
 				$row['status'] = 'workspace';
 				return $row;
 			}
+			if ( 429 === $code && ! str_contains( $body, 'insufficient_quota' ) ) { // A free tier's daily/minute limit, not an empty account.
+				$row['status'] = 'limited';
+				return $row;
+			}
 			if ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
 				$row['status'] = 'no-credit';
 				return $row;
