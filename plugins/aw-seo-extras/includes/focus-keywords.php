@@ -64,20 +64,20 @@ add_action(
 					'missing'  => array( 'type' => 'boolean', 'default' => false ),
 				),
 				'callback'            => function ( WP_REST_Request $req ) {
+					do_action( 'litespeed_control_set_nocache', 'focus-keyword API' );
 					$args = array(
-						'post_type'      => $req['type'],
-						'post_status'    => 'publish',
-						'posts_per_page' => (int) $req['per_page'],
-						'paged'          => (int) $req['page'],
-						'orderby'        => 'ID',
-						'order'          => 'DESC',
+						'post_type'           => $req['type'],
+						'post_status'         => 'publish',
+						'posts_per_page'      => (int) $req['per_page'],
+						'paged'               => (int) $req['page'],
+						'orderby'             => 'ID',
+						'order'               => 'DESC',
+						'ignore_sticky_posts' => true,
 					);
-					if ( $req['missing'] ) {
-						$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery
-							'relation' => 'OR',
-							array( 'key' => 'rank_math_focus_keyword', 'compare' => 'NOT EXISTS' ),
-							array( 'key' => 'rank_math_focus_keyword', 'value' => '' ),
-						);
+					if ( $req['missing'] ) { // by SQL: the site's list rules (pre_get_posts) replace a meta_query
+						global $wpdb;
+						$ids              = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = %s AND p.post_status = 'publish' GROUP BY p.ID HAVING COALESCE( MAX( m.meta_value ), '' ) = ''", $req['type'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+						$args['post__in'] = $ids ? array_map( 'intval', $ids ) : array( 0 );
 					}
 					$q   = new WP_Query( $args );
 					$out = array();

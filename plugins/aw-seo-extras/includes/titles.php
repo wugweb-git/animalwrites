@@ -168,15 +168,9 @@ add_action(
 add_action(
 	'aw_seo_fill_daily',
 	function () {
-		$ids = get_posts(
-			array(
-				'post_type'      => AW_SEO_ITEM_TYPES,
-				'post_status'    => 'publish',
-				'posts_per_page' => 500,
-				'fields'         => 'ids',
-				'meta_query'     => array( array( 'key' => 'rank_math_title', 'compare' => 'NOT EXISTS' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
-			)
-		);
+		global $wpdb;
+		$types = implode( ',', array_map( fn( $t ) => "'" . esc_sql( $t ) . "'", AW_SEO_ITEM_TYPES ) );
+		$ids   = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_title' WHERE p.post_type IN ({$types}) AND p.post_status = 'publish' AND m.meta_id IS NULL LIMIT 500" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
 		foreach ( $ids as $id ) {
 			aw_seo_fill_post( $id );
 		}
