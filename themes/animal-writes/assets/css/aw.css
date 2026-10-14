@@ -1196,5 +1196,5 @@ body { background: var(--kit-color-canvas); }
    keeps the placard box. */
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media):has(img):not(.kit-img-failed) { aspect-ratio: auto !important; height: auto !important; }
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img,
-.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; aspect-ratio: auto !important; object-fit: contain !important; }
+.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; aspect-ratio: auto !important; object-fit: contain !important; contain-intrinsic-size: none !important; } /* WordPress gives lazy images a 3000x1500 placeholder size */
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media) a { height: auto; }
