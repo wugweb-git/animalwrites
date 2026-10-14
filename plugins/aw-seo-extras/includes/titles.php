@@ -193,10 +193,25 @@ function aw_seo_list_title() {
 		if ( ! $place ) {
 			return AW_HUB_TITLES['aw_listing'];
 		}
-		if ( $place->parent ) {
-			return sprintf( 'Animal Welfare NGOs in %1$s, %2$s: Rescue, Shelters, Vets', $place->name, aw_place_parent_state( $place )->name );
+		if ( $place->parent ) { // within 60 characters: the longest of these that fits
+			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
+			return aw_seo_fit(
+				array(
+					'Animal Welfare NGOs in ' . $where . ': Rescue, Shelters, Vets',
+					'Animal Welfare NGOs, Shelters & Vets in ' . $where,
+					'Animal Welfare NGOs in ' . $where,
+					'Animal Welfare NGOs in ' . $place->name,
+				)
+			);
 		}
-		return sprintf( 'Animal Welfare NGOs & Animal Shelters in %s – Animal Writes', $place->name );
+		return aw_seo_fit(
+			array(
+				aw_seo_branded( 'Animal Welfare NGOs & Shelters in ' . $place->name ),
+				'Animal Welfare NGOs & Animal Shelters in ' . $place->name,
+				'Animal Welfare NGOs & Shelters in ' . $place->name,
+				'Animal Welfare NGOs in ' . $place->name,
+			)
+		);
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
 }
@@ -263,19 +278,24 @@ function aw_seo_list_description() {
 		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );
 		$state = $place ? aw_place_parent_state( $place ) : null;
 		if ( ! $place ) {
-			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : AW_HUB_DESCRIPTIONS['aw_listing']; // phpcs:ignore WordPress.Security.NonceVerification
+			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'], $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
-			$desc = sprintf( '%1$s %2$s in %3$s, %4$s: addresses, contact details and services.', $n, aw_seo_type_plural( $slug ), $place->name, $state->name );
+			$what = '1' === $n ? 'One ' . mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
+			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
+			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
+			$desc = mb_strlen( $desc . $more ) <= 155 ? $desc . $more : $desc;
 		} elseif ( aw_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
-			$desc = sprintf( '%1$s animal rescue groups, shelters, gaushalas and vets in %2$s, %3$s. Phone, address and services.', $n, $place->name, $state->name );
+			$desc = '1' === $n
+				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $place->name, $state->name )
+				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
 		} else {
 			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
 		}
 	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) ) {
 		$desc = AW_HUB_DESCRIPTIONS[ $hub ];
-	} elseif ( in_array( $hub, array( 'aw_news', 'aw_legal' ), true ) ) {
+	} elseif ( in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
 		$desc = aw_seo_hub_intro_description( $hub );
 	}
 	if ( '' === trim( (string) $desc ) ) {
@@ -316,6 +336,19 @@ add_filter(
 );
 
 /* ---------- /claim/?listing=ID: one indexed page per listing, with its own title (owner, 10 Oct 2026) ---------- */
+
+add_filter(
+	'rank_math/frontend/description',
+	function ( $desc ) {
+		$id = function_exists( 'aw_claim_listing' ) ? aw_claim_listing() : 0;
+		if ( ! $id ) {
+			return $desc;
+		}
+		$name = aw_seo_plain( get_the_title( $id ) );
+		return aw_seo_cut( 'Claim ' . $name . ' in the Animal Writes Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
+	},
+	30
+);
 
 add_filter(
 	'rank_math/frontend/title',

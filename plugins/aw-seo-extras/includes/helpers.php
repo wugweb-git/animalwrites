@@ -123,10 +123,49 @@ function aw_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
 }
 
-/** One rule for news, Library and Resources headlines: over 60 characters cut at a word, else " – Animal Writes". */
+/** Words a cut title must not end on ("… rescued in", "… rabies prevention &"). */
+const AW_SEO_DANGLING = '&|\+|and|or|but|nor|of|the|a|an|to|in|on|at|by|for|with|from|into|onto|over|under|after|before|amid|as|via|per|than|that|which|who|whose|its|their|his|her|is|are|was|were|be|has|have|had|will|can|against|between|near|about|across|during|without|within|vs|v|every|each|all|some|any|this|these|those|our|your|my|what|how|why|when|where|whether|if|not|also|so|very|more|most|such|both|says|said';
+
+/**
+ * A title cut to at most $max characters at a word boundary that leaves a whole phrase: no dangling connector
+ * ("and", "of", "to", "&" …), no trailing comma, colon or dash, no half bracket.
+ */
+function aw_seo_cut_title( $text, $max = 60 ) {
+	$cut  = aw_seo_cut( $text, $max, '' );
+	$full = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	if ( $cut === $full ) {
+		return $cut;
+	}
+	do {
+		$before = $cut;
+		$cut    = preg_replace( '/(?:\s+(?:' . AW_SEO_DANGLING . ')|[\s,;:|\/\x{2013}\x{2014}-]+)$/iu', '', $cut );
+	} while ( $cut !== $before && mb_strlen( $cut ) > $max * 0.5 );
+	if ( substr_count( $cut, '(' ) > substr_count( $cut, ')' ) ) {
+		$cut = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', mb_substr( $cut, 0, mb_strrpos( $cut, '(' ) ) );
+	}
+	return $cut;
+}
+
+/**
+ * One rule for news, Library and Resources headlines, kept within 60 characters: "{Headline} – Animal Writes" when
+ * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (aw_seo_cut_title).
+ */
 function aw_seo_headline_title( $title ) {
 	$t = aw_seo_plain( $title );
-	return mb_strlen( $t ) > 60 ? aw_seo_cut( $t, 60, '' ) : aw_seo_branded( $t );
+	if ( mb_strlen( aw_seo_branded( $t ) ) <= 60 ) {
+		return aw_seo_branded( $t );
+	}
+	return mb_strlen( $t ) <= 60 ? $t : aw_seo_cut_title( $t, 60 );
+}
+
+/** The first of $titles within $max characters (the last one, cut at a whole phrase, when none fits). */
+function aw_seo_fit( array $titles, $max = 60 ) {
+	foreach ( $titles as $t ) {
+		if ( mb_strlen( $t ) <= $max ) {
+			return $t;
+		}
+	}
+	return aw_seo_cut_title( (string) end( $titles ), $max );
 }
 
 /** "{Name}, {District}" or "{Name}, {State}" (no trailing comma; the place is not repeated when the name has it). */
@@ -142,16 +181,16 @@ const AW_HUB_TITLES = array(
 	'aw_news'        => 'Animal Welfare News from India – Animal Writes',
 	'aw_legal'       => 'Animal Law, Court Orders & Rules in India – Animal Writes',
 	'post'           => 'Animal Welfare Guides & Research in India – Animal Writes',
-	'aw_listing'     => 'Animal Welfare NGOs in India: Directory of 5,000+ Organisations',
+	'aw_listing'     => 'Animal Welfare NGOs in India: Directory of 5,000+ Groups',
 	'aw_opportunity' => 'Animal Welfare Volunteer, Internship & Jobs in India',
 	'aw_press'       => 'Animal Writes in the News',
 );
 
 /** Fixed descriptions of the section hubs that are not built from their intro. */
 const AW_HUB_DESCRIPTIONS = array(
-	'aw_opportunity' => 'Volunteer, foster or intern with animal welfare organisations across India. Roles, locations and how to apply.',
+	'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
 	'aw_press'       => 'Press coverage of Animal Writes and its citizen campaign for community animals across India.',
-	'aw_listing'     => 'Find animal welfare NGOs, shelters, rescuers, gaushalas and government vets in every state and district of India.',
+	'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, gaushalas and government vets in every state and district of India, with phone, address and services.',
 );
 
 /** Descriptions of the content types' own archives (post type => description). */
