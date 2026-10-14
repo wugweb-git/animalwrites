@@ -1142,3 +1142,12 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-library .kit-case .aw-case-date .d .aw-src-name { line-height: 1; }
 .aw-hub-library .aw-case-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); }
 .aw-hub-library .aw-case-tags .wp-block-post-terms { display: contents; }
+/* Library cards: compact, one type scale (owner, 14 Oct 2026) */
+.aw-hub-library .kit-case { gap: var(--kit-space-2); padding-bottom: var(--kit-space-4) !important; }
+.aw-hub-library .kit-case .aw-case-date .d, .aw-hub-library .kit-case > .aw-case-body { padding-inline: var(--kit-space-4); }
+.aw-hub-library .kit-case .aw-case-date .d { margin-top: var(--kit-space-3); font-size: var(--kit-type-xs) !important; }
+.aw-hub-library .aw-case-title { font-size: 1.125rem !important; line-height: 1.3 !important; margin: 0 0 var(--kit-space-1) !important; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.aw-hub-library .aw-case-sum, .aw-hub-library .aw-case-sum p { font-size: var(--kit-type-sm) !important; line-height: 1.5 !important; }
+.aw-hub-library .aw-case-sum .wp-block-post-excerpt__excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; }
+.aw-hub-library .aw-case-tags { margin: var(--kit-space-2) 0 0 !important; }
+.aw-hub-library .aw-case-tags .kit-tag--ink, .aw-hub-library .aw-case-tags .aw-issuer { display: none; }
