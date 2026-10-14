@@ -1136,3 +1136,9 @@ body { background: var(--kit-color-canvas); }
 .aw-date { display: inline-flex; align-items: center; gap: 6px; }
 .aw-date > .kit-ico { --kit-ico-size: 1em; flex: none; }
 .aw-case-src .aw-src { margin: 0; }
+.aw-hub-library .aw-cases { border: 0 !important; }
+.aw-hub-library .kit-case .aw-case-date .d { align-items: center; line-height: 1; }
+.aw-hub-library .kit-case .aw-case-date .d :is(.aw-src, .aw-date) { display: inline-flex; align-items: center; line-height: 1; margin: 0; }
+.aw-hub-library .kit-case .aw-case-date .d .aw-src-name { line-height: 1; }
+.aw-hub-library .aw-case-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); }
+.aw-hub-library .aw-case-tags .wp-block-post-terms { display: contents; }
