@@ -203,7 +203,9 @@ function aw_block_doc_date( $a, $id ) {
 	$kind  = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
-	$when  = '<span class="d">' . esc_html( implode( ' · ', array_filter( array( $kind, $date ) ) ) ) . '</span>'; // e.g. Act · 1960
+	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
+	$text  = implode( ' · ', array_filter( array( $kind, $date ) ) ); // e.g. Act · 1960
+	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-date">' . aw_i( 'calendar' ) . esc_html( $text ) . '</span>' : '' ) . '</span>';
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
 
@@ -248,11 +250,9 @@ function aw_block_doc_link( $a, $id ) {
 	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
 		return '';
 	}
-	$src  = (string) get_post_meta( $id, 'aw_source_name', true );
 	$fid  = (int) get_post_meta( $id, 'aw_file_id', true );
 	$pdf  = $fid ? (string) wp_get_attachment_url( $fid ) : '';
-	$row  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : ''; // publisher logo + name, as on News
-	$html = ( $row ? $row : ( $src ? 'Source: ' . esc_html( $src ) : '' ) ) . ( $pdf ? ' <a class="aw-doc" href="' . esc_url( $pdf ) . '">' . aw_i( 'research' ) . ' Official document (PDF)</a>' : '' );
+	$html = ( $pdf ? ' <a class="aw-doc" href="' . esc_url( $pdf ) . '">' . aw_i( 'research' ) . ' Official document (PDF)</a>' : '' );
 	return '' !== trim( $html ) ? '<p class="aw-case-src">' . $html . '</p>' : '';
 }
 
