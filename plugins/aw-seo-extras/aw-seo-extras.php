@@ -39,7 +39,7 @@ add_action(
 			);
 			return;
 		}
-		foreach ( array( 'helpers', 'titles', 'canonical', 'robots', 'schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords' ) as $file ) {
+		foreach ( array( 'helpers', 'titles', 'canonical', 'robots', 'schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health' ) as $file ) {
 			require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 		}
 	},
