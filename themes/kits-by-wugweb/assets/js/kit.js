@@ -672,11 +672,12 @@
 		if (!a) return;
 		var href = a.getAttribute('href') || '';
 		if (a.closest('.kit-dd--sort, .kit-segment') || a.classList.contains('kit-dd-opt') && a.closest('[data-kit-sort], .kit-sort')) { track('sort_change', { value: a.textContent.trim().slice(0, 60) }); return; }
-		if (/^tel:/i.test(href)) { track('call_click', { number: href.slice(4) }); return; }
-		if (/wa\.me|api\.whatsapp\.com/i.test(href)) { track('whatsapp_click', {}); return; }
-		if (/^mailto:/i.test(href)) { track('email_click', {}); return; }
+		// share buttons first: their WhatsApp and email buttons are shares, not contact clicks
 		var share = a.closest('.scriptlesssocialsharing__buttons');
 		if (share) { track('share_click', { network: (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
+		if (/^tel:/i.test(href)) { track('call_click', { number: href.slice(4) }); return; }
+		if (/(^|\/\/|\.)(wa\.me|whatsapp\.com)\b/i.test(href)) { track('whatsapp_click', {}); return; }
+		if (/^mailto:/i.test(href)) { track('email_click', {}); return; }
 		if (/\.pdf(\?|#|$)/i.test(href) || a.hasAttribute('download')) { track('pdf_download', { item: document.title.split(' – ')[0].slice(0, 100), issuer: page.issuer || '' }); }
 		var li = a.closest('.wp-block-post-template > li');
 		if (li && !li.classList.contains('kit-ad-item')) {
