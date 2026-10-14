@@ -6,7 +6,7 @@
  *
  * Every 15 minutes (WP-Cron, aw_cc0_run), newest items first:
  *  1. Check publisher images (aw_source_image): GET → 200, an image content type, at least 200×200 when the size is
- *     readable; a site logo / default image (or one URL shared by 6+ items) counts as missing. Stored as
+ *     readable. A publisher's logo or stock picture is still the publisher's image and is used (owner, 14 Oct 2026). Stored as
  *     aw_source_image_ok = 1/0 and aw_source_image_checked = date; failures are re-checked weekly.
  *  2. Items with no usable publisher image and no featured image: search Openverse (cc0, pdm; WordPress Photo
  *     Directory first, then Flickr / rawpixel / Wikimedia) for the animal named in the title, else the topic's animal.
@@ -145,14 +145,6 @@ function aw_cc0_check_source( $post_id ) {
 	$url = (string) get_post_meta( $post_id, 'aw_source_image', true );
 	if ( ! preg_match( '#^https://[^/]+\.[^/]+/#i', $url ) ) {
 		return 'bad address';
-	}
-	if ( preg_match( '#(logo|default[_-]?image|placeholder|emblem|no[_-]?image)#i', (string) wp_parse_url( $url, PHP_URL_PATH ) ) ) {
-		return 'site logo or default image';
-	}
-	global $wpdb;
-	$shared = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'aw_source_image' AND meta_value = %s", $url ) ); // phpcs:ignore WordPress.DB
-	if ( $shared >= 6 ) {
-		return 'same image on ' . $shared . ' items (site default)';
 	}
 	$r = wp_remote_get(
 		$url,
@@ -614,7 +606,7 @@ add_action(
 				'Items (published, without a document page)'          => $c['total'] ?? 0,
 				'Publisher image checked and loading'                 => $c['pub_ok'] ?? 0,
 				'Publisher image not checked yet'                     => $c['pub_unchecked'] ?? 0,
-				'Publisher image failed (missing, broken, logo)'      => $c['pub_failed'] ?? 0,
+				'Publisher image failed (broken or not an image)'     => $c['pub_failed'] ?? 0,
 				'No publisher image'                                  => $c['pub_none'] ?? 0,
 				'CC0 photo assigned (Openverse)'                      => $c['cc0'] ?? 0,
 				'Still no photo of its own (topic photo or placard)'  => $c['placard'] ?? 0,
