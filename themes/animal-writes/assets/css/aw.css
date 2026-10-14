@@ -302,7 +302,7 @@ body { background: var(--kit-color-canvas); }
 .kit-case { position: relative; display: grid; grid-template-columns: 5rem 1fr auto; gap: var(--kit-space-5); align-items: start; padding: var(--kit-space-6) 0; border-bottom: 1px solid var(--kit-color-line); }
 .kit-case:hover { background: linear-gradient(90deg, transparent, var(--kit-color-raised) 20%, var(--kit-color-raised) 80%, transparent); }
 .aw-case-date { display: flex; flex-direction: column; gap: var(--kit-space-2); line-height: 1; }
-.aw-case-cover { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: top; border-radius: var(--radius-xs); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
+.aw-case-cover { display: block; width: 100%; height: auto; object-fit: cover; object-position: top; border-radius: var(--radius-xs); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
 .aw-case-date .d { font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
 .aw-case-date .m { margin-top: var(--kit-space-1); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); color: var(--kit-color-muted); }
 .aw-case-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); align-items: center; margin-bottom: var(--kit-space-2); }
@@ -794,7 +794,7 @@ body { background: var(--kit-color-canvas); }
 @media (max-width: 767px) {
 	.kit-case, .kit-case:has(.aw-case-date.has-cover) { grid-template-columns: minmax(0, 1fr); }
 	.aw-case-date, .aw-case-date.has-cover { flex-direction: row; align-items: center; gap: var(--kit-space-2); }
-	.aw-case-date.has-cover .aw-case-cover { width: 2rem; aspect-ratio: 16 / 9; }
+	.aw-case-date.has-cover .aw-case-cover { width: 2rem; }
 	.aw-case-tags .kit-tag { white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 1.75rem; }
 }
 /* Home hero: the section owns the gutter — the copy box (max 1200, centred) only pads where the window is narrower than 1200 + 2 gutters */
@@ -1123,8 +1123,8 @@ body { background: var(--kit-color-canvas); }
 .kit-case { grid-template-columns: 9rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; column-gap: var(--kit-space-4); row-gap: var(--kit-space-2); padding: var(--kit-space-5) 0 !important; }
 .kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; }
 .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
-.kit-case .aw-case-cover { grid-area: media; width: 100% !important; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
-.kit-case .aw-case-cover--photo { aspect-ratio: 16 / 9; object-position: center; }
+.kit-case .aw-case-cover { grid-area: media; width: 100% !important; height: auto; object-fit: cover; object-position: top; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
+.kit-case .aw-case-cover--photo { object-position: center; }
 .kit-case > .aw-case-icon { grid-area: media; }
 .kit-case > .aw-case-body { grid-area: body; min-width: 0; }
 .kit-case > .kit-ico--arrow-right { grid-area: arrow; align-self: center; }
@@ -1196,5 +1196,5 @@ body { background: var(--kit-color-canvas); }
    keeps the placard box. */
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media):has(img):not(.kit-img-failed) { aspect-ratio: auto !important; height: auto !important; }
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img,
-.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; aspect-ratio: auto !important; object-fit: contain !important; contain-intrinsic-size: none !important; } /* WordPress gives lazy images a 3000x1500 placeholder size */
+.kit-case .aw-case-cover, .aw-case-cover { height: auto !important; object-fit: contain !important; } /* the shape comes from the picture's own width/height attributes; no fixed ratio */
 :is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media) a { height: auto; }
