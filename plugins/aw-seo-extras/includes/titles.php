@@ -6,8 +6,9 @@
  * stored in Rank Math's own fields (rank_math_title, rank_math_description), so the Rank Math box shows what is printed.
  * They are written when an item is published or saved, and only where the field is empty or still holds the value
  * written automatically last time (_aw_seo_auto); a value typed in Rank Math is never replaced.
- *   - News, Library and Resources: over 60 characters the headline is cut at a word (no "…", no site name); shorter
- *     ones get " – Animal Writes".
+ *   - News: over 60 characters the headline is cut at a word (no "…", no site name); shorter ones get
+ *     " – Animal Writes".
+ *   - Library and Resources: aw_seo_resource_title() (Title Case, the kind added to short ones, never cut inside).
  *   - Listings: "{Name}, {District} – Animal Writes" ("{Name}, {State}" without a district); over 60 characters
  *     without " – Animal Writes", and the name itself is never cut.
  *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
@@ -59,7 +60,10 @@ function aw_seo_item_title( $post ) {
 	if ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
 		return 'Animal Writes – Animal welfare news, law and help in India';
 	}
-	if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
+	if ( in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) ) {
+		return aw_seo_resource_title( $post ); // Library and Resources (helpers.php)
+	}
+	if ( 'aw_news' === $post->post_type ) {
 		return aw_seo_headline_title( $post->post_title );
 	}
 	if ( 'aw_listing' === $post->post_type ) {
@@ -241,9 +245,9 @@ function aw_seo_list_title() {
 		$try[] = 'Animal Welfare in ' . preg_replace( '/^The /', '', $place->name ); // a long name ("The Dadra and Nagar Haveli and Daman and Diu"): never cut inside it
 		return aw_seo_fit( array_unique( $try ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
-	if ( is_tag() && function_exists( 'aw_seo_tag_title' ) ) { // a tag page: "{Tag plural} in India – Animal Writes"
-		$what = aw_seo_tag_title( get_queried_object() );
-		return aw_seo_fit( array( aw_seo_branded( $what ), $what ), 60 - mb_strlen( aw_seo_page_suffix() ) );
+	if ( ( is_tag() || aw_seo_is_category_page() ) && function_exists( 'aw_seo_term_title' ) ) { // a tag or category page: its written title (programmatic.php)
+		$what = aw_seo_term_title( get_queried_object() );
+		return aw_seo_page_number() > 1 ? aw_seo_fit( array( $what, preg_replace( '/ – ' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/u', '', $what ) ), 60 - mb_strlen( aw_seo_page_suffix() ) ) : $what;
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
 }

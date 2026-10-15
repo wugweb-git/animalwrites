@@ -651,6 +651,7 @@ function aw_seo_sync_categories() {
 		$att   = function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $term ) : 0;
 		$url   = $att ? (string) wp_get_attachment_url( $att ) : '';
 		$want  = array(
+			'title'                => aw_seo_term_title( $term ),
 			'description'          => $term->count ? aw_seo_category_description( $term ) : '',
 			'facebook_image_id'    => $url ? (string) $att : '',
 			'facebook_image'       => $url,
@@ -663,7 +664,7 @@ function aw_seo_sync_categories() {
 				update_term_meta( $term->term_id, 'rank_math_' . $k, wp_slash( $value ) );
 				$auto[ $k ] = $value;
 				$dirty      = true;
-			} elseif ( '' !== $value && $have === $value && ! isset( $auto[ $k ] ) && 'description' !== $k ) {
+			} elseif ( '' !== $value && $have === $value && ! isset( $auto[ $k ] ) && ! in_array( $k, array( 'description', 'title' ), true ) ) {
 				$auto[ $k ] = $value; // already equal: mark it automatic so a later photo change follows
 				$dirty      = true;
 			}
@@ -678,6 +679,115 @@ function aw_seo_sync_categories() {
 add_action( 'edited_category', fn() => aw_seo_sync_categories(), 30 ); // after the photo is saved (category-images.php)
 add_action( 'created_category', fn() => aw_seo_sync_categories(), 30 );
 add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
+
+/* ---------- Category and tag titles (owner, 15 Oct 2026) ---------- */
+
+/**
+ * Search titles of the categories and tags, written to fit 55–58 characters with " – Animal Writes" (keyword first,
+ * plain text, the site name only as the suffix). A term not listed gets aw_seo_term_title_rule().
+ */
+const AW_SEO_TERM_TITLES = array(
+	'category:adoption' => 'Animal Adoption in India: Dogs and Cats',
+	'category:animal-birth-control' => 'Animal Birth Control in India: ABC Rules',
+	'category:transport-slaughter' => 'Animal Transport & Slaughter Laws in India',
+	'category:birds' => 'Bird Welfare in India: Rescue, Laws, News',
+	'category:campaigns-civic-action' => 'Animal Welfare Campaigns & Civic Action',
+	'category:cattle-gaushalas' => 'Cattle & Gaushalas in India: News and Laws',
+	'category:community-dogs' => 'Community Dogs in India: News and the Law',
+	'category:courts-judgments' => 'Animal Welfare Courts & Judgments in India',
+	'category:cruelty-prosecution' => 'Animal Cruelty & Prosecution in India: Law',
+	'category:disaster-rescue' => 'Animal Disaster & Emergency Rescue, India',
+	'category:feeders-caregivers' => 'Feeders & Animal Caregivers in India: Law',
+	'category:laws-rules' => 'Animal Welfare Laws & Rules in India: Acts',
+	'category:performing-captive-animals' => 'Performing & Captive Animals in India: Law',
+	'category:pets-breeding' => 'Pets, Breeding & Pet Shops in India: Rules',
+	'category:policy-government' => 'Animal Welfare Policy & Government, India',
+	'category:rabies-public-health' => 'Rabies & Public Health in India: Research',
+	'category:veterinary-care' => 'Veterinary Care & Animal Health in India',
+	'category:wildlife' => 'Wildlife Welfare & Rescue in India: News',
+	'post_tag:abc-centre' => 'ABC Centres in India: Dog Sterilisation',
+	'post_tag:animal-welfare-organisation' => 'Animal Welfare Organisations (NGOs), India',
+	'post_tag:gaushala' => 'Gaushalas in India: Addresses and Phones',
+	'post_tag:veterinary-office' => 'Government Veterinary Offices, India: List',
+	'post_tag:mobile-veterinary-unit' => 'Mobile Veterinary Units (1962) in India',
+	'post_tag:veterinary-dispensary' => 'Veterinary Dispensaries in India: Contacts',
+	'post_tag:veterinary-hospital' => 'Veterinary Hospitals in India: Contacts',
+	'post_tag:wildlife-rescue' => 'Wildlife Rescue Groups in India: Contacts',
+	'post_tag:veterinary-clinic' => 'Veterinary Clinics in India: Phone Numbers',
+	'post_tag:bird-hospital' => 'Bird Hospitals in India: Addresses, Phones',
+	'post_tag:animal-shelter' => 'Animal Shelters in India: Phone Numbers',
+	'post_tag:animal-ambulance' => 'Animal Ambulances in India: Phone Numbers',
+	'post_tag:adoption-network' => 'Adoption Networks in India: Phone Numbers',
+	'post_tag:boarding-and-foster' => 'Boarding & Foster Homes in India: Contacts',
+	'post_tag:emergency-rescue' => 'Emergency Rescue Groups in India: Contacts',
+	'post_tag:feeder-network' => 'Feeder Networks in India: Phone Numbers',
+	'post_tag:legal-aid' => 'Legal Aid Groups in India: Phone Numbers',
+	'post_tag:rescue-group' => 'Rescue Groups in India: Addresses, Phones',
+	'post_tag:sanctuary' => 'Animal Sanctuaries in India: Phone Numbers',
+	'post_tag:adoption' => 'NGOs Offering Animal Adoption: Contacts',
+	'post_tag:ambulance' => 'NGOs With Animal Ambulances in India: List',
+	'post_tag:boarding-foster' => 'NGOs Offering Boarding and Foster, India',
+	'post_tag:cattle-care' => 'NGOs Offering Cattle Care in India: List',
+	'post_tag:feeding' => 'NGOs Feeding Stray Animals in India: List',
+	'post_tag:legal-help' => 'NGOs Offering Animal Legal Help in India',
+	'post_tag:rescue' => 'NGOs Offering Animal Rescue in India: List',
+	'post_tag:shelter' => 'NGOs Offering Animal Shelter: Contact List',
+	'post_tag:sterilisation' => 'NGOs Offering Sterilisation (ABC) in India',
+	'post_tag:treatment' => 'NGOs Offering Treatment and Vet Care: List',
+	'post_tag:vaccination' => 'NGOs Offering Animal Vaccination in India',
+	'post_tag:act' => 'Animal Welfare Acts in India: Summaries',
+	'post_tag:advisory' => 'Animal Welfare Advisories in India: AWBI',
+	'post_tag:circular' => 'Animal Welfare Circulars in India: AWBI',
+	'post_tag:judgment' => 'Animal Welfare Court Judgments in India',
+	'post_tag:notification' => 'Animal Welfare Notifications, India: AWBI',
+	'post_tag:official-release' => 'Animal Welfare Official Releases, India',
+	'post_tag:order' => 'Animal Welfare Court Orders in India: Text',
+	'post_tag:rule' => 'Animal Welfare Rules in India: Summaries',
+	'post_tag:template' => 'Animal Complaint Letter Templates, India',
+	'post_tag:event' => 'Animal Welfare Events in India: Join One',
+	'post_tag:fellowship' => 'Animal Welfare Fellowships in India: Apply',
+	'post_tag:foster' => 'Animal Foster Opportunities, India: Roles',
+	'post_tag:grant' => 'Animal Welfare Grants in India: Applying',
+	'post_tag:internship' => 'Animal Welfare Internships in India: Apply',
+	'post_tag:job' => 'Animal Welfare Jobs in India: NGO Job List',
+	'post_tag:volunteer' => 'Animal Welfare Volunteer Roles in India',
+	'post_tag:faq' => 'Animal Welfare FAQs: Questions on the Law',
+	'post_tag:guide' => 'Animal Welfare Guides for India: How-Tos',
+	'post_tag:how-to' => 'Animal Welfare How-to Guides, India: Help',
+	'post_tag:research' => 'Animal Welfare Research in India: Studies',
+);
+
+/** A category's or tag's search title, with " – Animal Writes". */
+function aw_seo_term_title( $term ) {
+	$key = $term->taxonomy . ':' . $term->slug;
+	if ( isset( AW_SEO_TERM_TITLES[ $key ] ) ) {
+		return aw_seo_branded( AW_SEO_TERM_TITLES[ $key ] );
+	}
+	return aw_seo_term_title_rule( $term );
+}
+
+/**
+ * The title of a category or tag that has no written one: the longest of a few shapes within 58 characters
+ * (55–58 when one fits), else the shortest.
+ */
+function aw_seo_term_title_rule( $term ) {
+	$what  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : aw_seo_plain( $term->name ) . ' in India';
+	$tries = 'post_tag' === $term->taxonomy
+		? array( $what . ': Addresses and Phone Numbers', $what . ': Summaries and Sources', $what . ': How to Apply', $what . ', Listed', $what )
+		: array( $what . ': News, Laws and Guides', $what . ': News and Laws', $what . ': News', $what );
+	foreach ( $tries as $t ) {
+		$n = mb_strlen( aw_seo_branded( $t ) );
+		if ( $n >= 55 && $n <= 58 ) {
+			return aw_seo_branded( $t );
+		}
+	}
+	foreach ( $tries as $t ) {
+		if ( mb_strlen( aw_seo_branded( $t ) ) <= 58 ) {
+			return aw_seo_branded( $t );
+		}
+	}
+	return mb_strlen( $what ) <= 60 ? $what : aw_seo_cut_title( $what, 60 );
+}
 
 /* ---------- Resources hub: guides and research summaries counted apart ---------- */
 
@@ -870,7 +980,7 @@ function aw_seo_sync_tags() {
 	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$want  = array(
-			'title'         => aw_seo_tag_title( $term ) . ' %sep% %sitename%',
+			'title'         => aw_seo_term_title( $term ), // plain text, 55–58 characters
 			'description'   => aw_seo_tag_description( $term ),
 			'focus_keyword' => aw_seo_tag_keyword( $term ),
 		);

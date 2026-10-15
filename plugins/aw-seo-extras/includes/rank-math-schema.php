@@ -1,6 +1,7 @@
 <?php
 /**
- * Rank Math's own schema entries for Pages, so its screens show the schema the page really has.
+ * Rank Math's own schema entries for Pages, Library items, Resources and campaigns, so its screens show the schema the
+ * page really has.
  *
  * Rank Math (free) offers no CollectionPage, AboutPage or ContactPage type, so its Pages list said "Schema: Off" and its
  * Schema tab was empty although the live graph (schema.php) carries the right node. Each published Page now holds one
@@ -18,7 +19,11 @@
  * the entry Rank Math would print as a separate node is removed (one graph, no duplicates). When an editor changes
  * the entry in Rank Math's Schema tab, the changed properties are put on the page's node (the editor wins); an entry
  * the editor deleted is not added back. Entries are written when a Page is saved and in bulk with
- * `wp aw-seo rank-math-schema [--dry-run]`.
+ * `wp aw-seo rank-math-schema [--dry-run] [--type=page,aw_legal,post,aw_campaign]`.
+ *
+ * Library and Resources items carry the type of their own node (aw_article_nodes in schema.php): Legislation for
+ * Acts, Rules and Notifications, DigitalDocument for templates, Article for the rest (a guide's HowTo stays a part of
+ * it). A campaign carries Event (CreativeWork when no day is stored), as aw_campaign_schema() builds it.
  *
  * @package aw-seo-extras
  */
@@ -54,6 +59,30 @@ function aw_rm_page_schema_type( $id ) {
 		'remove-my-data' => 'ContactPage',
 	);
 	return $map[ $slug ] ?? 'WebPage';
+}
+
+/** Post types whose items get a Rank Math schema entry. */
+const AW_RM_SCHEMA_TYPES = array( 'page', 'aw_legal', 'post', 'aw_campaign' );
+
+/**
+ * The schema.org type of a Page, Library item, Resource or campaign: the type of its own live node; '' for none.
+ *
+ * @param int $id Post ID.
+ * @return string
+ */
+function aw_rm_schema_type( $id ) {
+	$type = get_post_type( $id );
+	if ( 'page' === $type ) {
+		return aw_rm_page_schema_type( $id );
+	}
+	if ( in_array( $type, array( 'aw_legal', 'post' ), true ) && function_exists( 'aw_article_nodes' ) ) {
+		$nodes = aw_article_nodes( $id );
+		return (string) ( $nodes[0]['@type'] ?? '' );
+	}
+	if ( 'aw_campaign' === $type && function_exists( 'aw_campaign_schema' ) ) {
+		return (string) ( aw_campaign_schema( $id )['@type'] ?? '' );
+	}
+	return '';
 }
 
 /**
@@ -147,10 +176,10 @@ function aw_rm_schema_edited( $entry ) {
  * @return string What was done.
  */
 function aw_rm_schema_sync( $id, $dry = false ) {
-	if ( 'page' !== get_post_type( $id ) || 'publish' !== get_post_status( $id ) ) {
+	if ( ! in_array( get_post_type( $id ), AW_RM_SCHEMA_TYPES, true ) || 'publish' !== get_post_status( $id ) ) {
 		return 'skipped';
 	}
-	$type = aw_rm_page_schema_type( $id );
+	$type = aw_rm_schema_type( $id );
 	$own  = aw_rm_schema_own( $id );
 	if ( ! $own && get_post_meta( $id, AW_RM_SCHEMA_MID, true ) ) {
 		return 'kept: removed by an editor';
@@ -184,13 +213,14 @@ function aw_rm_schema_sync( $id, $dry = false ) {
 }
 
 add_action(
-	'save_post_page',
-	function ( $id ) {
-		if ( ! wp_is_post_revision( $id ) && ! wp_is_post_autosave( $id ) ) {
-			aw_rm_schema_sync( $id );
+	'wp_after_insert_post',
+	function ( $id, $post ) {
+		if ( in_array( $post->post_type, AW_RM_SCHEMA_TYPES, true ) && ! wp_is_post_revision( $id ) && ! wp_is_post_autosave( $id ) ) {
+			aw_rm_schema_sync( $id ); // after terms and meta are saved: the type depends on them
 		}
 	},
-	20
+	100,
+	2
 );
 
 // On the page: Rank Math's copy of our entry is not printed (the page's node is built in schema.php); an editor's
@@ -198,12 +228,12 @@ add_action(
 add_filter(
 	'rank_math/json_ld',
 	function ( $data ) {
-		if ( ! is_page() || ! is_array( $data ) || ! $data ) {
+		if ( ! is_singular( AW_RM_SCHEMA_TYPES ) || ! is_array( $data ) || ! $data ) {
 			return $data;
 		}
 		$id   = get_queried_object_id();
 		$own  = aw_rm_schema_own( $id );
-		$type = aw_rm_page_schema_type( $id );
+		$type = aw_rm_schema_type( $id );
 		if ( $own ) {
 			$rm   = 'schema-' . $own[0];
 			$node = isset( $data[ $rm ] ) && is_array( $data[ $rm ] ) ? $data[ $rm ] : array();
@@ -218,7 +248,7 @@ add_filter(
 				}
 			}
 		}
-		$extra = aw_rm_page_schema_extra( $id );
+		$extra = is_page() ? aw_rm_page_schema_extra( $id ) : array();
 		if ( $extra && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 			$data['WebPage'] = array_merge( $data['WebPage'], array_diff_key( $extra, $data['WebPage'] ) );
 		}
@@ -250,19 +280,23 @@ function aw_rm_absolute_urls( $node ) {
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * Write Rank Math schema entries for every published Page.
+	 * Write Rank Math schema entries for every published Page, Library item, Resource and campaign.
 	 *
 	 * ## OPTIONS
 	 *
 	 * [--dry-run]
 	 * : Report only.
+	 *
+	 * [--type=<types>]
+	 * : Comma-separated post types (default: all four).
 	 */
 	WP_CLI::add_command(
 		'aw-seo rank-math-schema',
 		function ( $args, $assoc ) {
-			$dry = ! empty( $assoc['dry-run'] );
-			foreach ( get_posts( array( 'post_type' => 'page', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) ) as $p ) {
-				WP_CLI::log( sprintf( '%d %s: %s', $p->ID, $p->post_name, aw_rm_schema_sync( $p->ID, $dry ) ) );
+			$dry   = ! empty( $assoc['dry-run'] );
+			$types = array_intersect( isset( $assoc['type'] ) ? explode( ',', $assoc['type'] ) : AW_RM_SCHEMA_TYPES, AW_RM_SCHEMA_TYPES );
+			foreach ( get_posts( array( 'post_type' => array_values( $types ), 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) ) as $p ) {
+				WP_CLI::log( sprintf( '%d %s %s: %s', $p->ID, $p->post_type, $p->post_name, aw_rm_schema_sync( $p->ID, $dry ) ) );
 			}
 		}
 	);

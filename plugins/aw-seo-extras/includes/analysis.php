@@ -9,6 +9,13 @@
  * - in Rank Math → Status & Tools → Database Tools → "Update SEO Scores", through `rank_math/recalculate_score/data`.
  * Pages written as plain text (Privacy Policy, Terms, About…) are analysed on their own text, as before.
  *
+ * Library items, Resources and campaigns are always analysed on their rendered <main>: their pages are built from the
+ * summary, the source link, the facts and the categories, which post_content alone does not hold. For them the tests
+ * that do not fit a summary are removed (600+ words, keyword density, keyword in a subheading, table of contents),
+ * through Rank Math's `rank_math/researches/tests`. Rank Math's own "Update SEO Scores" tool reads that filter once
+ * per batch, for the batch's first post, so stored scores for these types are worked out item by item instead
+ * (the same analyzer, the filter applied per item).
+ *
  * The rendered copy is cached for 12 hours and dropped when the Page is saved.
  *
  * @package aw-seo-extras
@@ -59,13 +66,44 @@ function aw_seo_rendered_main( $id, $fresh = false ) {
 	return $html;
 }
 
-/** The content Rank Math should analyse for a Page: its rendered <main> when built at run time, else ''. */
+/** Post types analysed on their rendered <main> whatever their content (Library, Resources, campaigns). */
+const AW_SEO_RENDERED_TYPES = array( 'aw_legal', 'post', 'aw_campaign' );
+
+/** Rank Math tests that do not fit a summary page (Library, Resources, campaigns). */
+const AW_SEO_SUMMARY_SKIP_TESTS = array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' );
+
+/** The content Rank Math should analyse: the rendered <main> of a built Page or a Library, Resources or campaign item, else ''. */
 function aw_seo_analysis_content( $post ) {
 	$post = get_post( $post );
-	return $post && aw_seo_page_is_built( $post ) ? aw_seo_rendered_main( $post->ID ) : '';
+	if ( ! $post ) {
+		return '';
+	}
+	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || aw_seo_page_is_built( $post ) ) ? aw_seo_rendered_main( $post->ID ) : '';
 }
 
-add_action( 'save_post_page', fn( $id ) => delete_transient( 'aw_seo_rendered_' . (int) $id ) );
+add_action(
+	'save_post',
+	function ( $id, $post ) {
+		if ( 'page' === $post->post_type || in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) ) {
+			delete_transient( 'aw_seo_rendered_' . (int) $id );
+		}
+	},
+	10,
+	2
+);
+
+// Tests that do not fit a summary page are not run on Library, Resources and campaign items.
+add_filter(
+	'rank_math/researches/tests',
+	function ( $tests, $type ) {
+		if ( 'post' === $type && in_array( get_post_type(), AW_SEO_RENDERED_TYPES, true ) ) {
+			$tests = array_diff_key( $tests, array_flip( AW_SEO_SUMMARY_SKIP_TESTS ) );
+		}
+		return $tests;
+	},
+	20,
+	2
+);
 
 // Rank Math's "Update SEO Scores" tool.
 add_filter(

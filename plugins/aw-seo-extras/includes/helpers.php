@@ -178,6 +178,91 @@ function aw_seo_headline_title( $title ) {
 	return mb_strlen( $t ) <= 60 ? $t : aw_seo_cut_title( $t, 60 );
 }
 
+/** Words a headline in Title Case keeps lower case (not first). */
+const AW_SEO_SMALL_WORDS = array( 'a', 'an', 'the', 'and', 'or', 'nor', 'but', 'of', 'in', 'on', 'at', 'to', 'for', 'by', 'with', 'from', 'as', 'vs', 'via', 'per', 'into', 'onto' );
+
+/**
+ * A headline in Title Case: each word capitalised except short connectors; acronyms, numbers and words with capitals
+ * inside (NHAI, CBI-DRI, iPhone) stay as written. A headline written all in capitals is lowered first.
+ */
+function aw_seo_headline_case( $text ) {
+	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	if ( ! preg_match( '/\p{Ll}/u', $text ) ) {
+		$text = mb_strtolower( $text );
+	}
+	$words = explode( ' ', $text );
+	foreach ( $words as $i => $w ) {
+		$bare = mb_strtolower( trim( $w, '‘’“”"\'(),:;' ) );
+		if ( $i > 0 && in_array( $bare, AW_SEO_SMALL_WORDS, true ) && ! preg_match( '/[:;–—-]$/u', $words[ $i - 1 ] ) ) {
+			$words[ $i ] = preg_match( '/^[‘“"(]?\p{Lu}\p{Ll}*[,:;)]?$/u', $w ) ? mb_strtolower( $w ) : $w; // "Of" → "of"; "OR", "of" as written
+			continue;
+		}
+		$words[ $i ] = preg_replace_callback( '/^([‘“"(]?)(\p{Ll})/u', fn( $m ) => $m[1] . mb_strtoupper( $m[2] ), $w );
+	}
+	return implode( ' ', $words );
+}
+
+/**
+ * The search title of a Library item or a Resource, built from its own title (owner, 15 Oct 2026): Title Case, a
+ * trailing "dated …" date dropped (the date is on the page), " – Animal Writes" when the whole fits within 60.
+ * - Under 50 characters with the site name: the item's kind is added when that still fits ("…: Circular",
+ *   "…: Research Summary").
+ * - Over 60: the headline alone; then its first part (before ":", " – " or ";") when that part has at least 30
+ *   characters; else the whole headline, never cut inside.
+ *
+ * @param WP_Post $post Library item or Resource.
+ * @return string
+ */
+function aw_seo_resource_title( $post ) {
+	$t = aw_seo_plain( $post->post_title );
+	$t = preg_replace( '/[\s,(–—-]*(?:dated\b)?[\s:–—-]*\d{1,2}\.\d{1,2}\.\d{4}\)?\.?$/u', '', $t ); // "… dated - 11.08.2026"
+	$t = preg_replace( '/[\s,;:.–—-]*\bdated$/u', '', $t );
+	$t = trim( preg_replace( '/^[“"]\s*(.*?)\s*[”"]$/u', '$1', trim( $t ) ), " \t.,;:" );
+	$t = aw_seo_headline_case( $t );
+	$max = 60;
+	if ( mb_strlen( aw_seo_branded( $t ) ) <= $max ) {
+		$kind = aw_seo_resource_kind( $post );
+		if ( mb_strlen( aw_seo_branded( $t ) ) < 50 && '' !== $kind && false === mb_stripos( $t, $kind ) && mb_strlen( aw_seo_branded( $t . ': ' . $kind ) ) <= $max ) {
+			return aw_seo_branded( $t . ': ' . $kind );
+		}
+		return aw_seo_branded( $t );
+	}
+	if ( mb_strlen( $t ) <= $max ) {
+		return $t;
+	}
+	$parts = preg_split( '/\s*(?::|;|\s[–—-])\s+/u', $t );
+	$first = trim( (string) ( $parts[0] ?? '' ) );
+	if ( count( $parts ) > 1 && mb_strlen( $first ) >= 30 ) {
+		if ( mb_strlen( aw_seo_branded( $first ) ) <= $max ) {
+			return aw_seo_branded( $first );
+		}
+		if ( mb_strlen( $first ) <= $max ) {
+			return $first;
+		}
+	}
+	return $t; // longer than 60 and no whole first part that fits: the name is never cut
+}
+
+/** What a Library item or Resource is, for its title: the Library type ("Circular"), "Research Summary", "Guide", "FAQ". */
+function aw_seo_resource_kind( $post ) {
+	$tags = wp_get_post_terms( $post->ID, 'post_tag', array( 'fields' => 'all' ) );
+	$by   = is_wp_error( $tags ) ? array() : array_column( $tags, 'name', 'slug' );
+	if ( 'post' === $post->post_type ) {
+		foreach ( array( 'research' => 'Research Summary', 'faq' => 'FAQ', 'how-to' => 'How-to Guide', 'guide' => 'Guide' ) as $slug => $label ) {
+			if ( isset( $by[ $slug ] ) ) {
+				return $label;
+			}
+		}
+		return '';
+	}
+	foreach ( array( 'act', 'rule', 'notification', 'circular', 'advisory', 'judgment', 'order', 'official-release', 'template' ) as $slug ) {
+		if ( isset( $by[ $slug ] ) ) {
+			return aw_seo_headline_case( $by[ $slug ] );
+		}
+	}
+	return '';
+}
+
 /** The first of $titles within $max characters (the last one, cut at a whole phrase, when none fits). */
 function aw_seo_fit( array $titles, $max = 60 ) {
 	foreach ( $titles as $t ) {
