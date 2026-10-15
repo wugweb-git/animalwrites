@@ -8,7 +8,7 @@
  * - items that are not indexed by a rule of their state stay out: closed opportunities, items merged into another
  *   story, items without a slug, and what kits_sitemap_skip adds (preview-only items). Private, draft and noindex items
  *   and the empty Web Stories type are left out by Rank Math itself. Fixed exclusions are Rank Math settings (noindex items, Sitemap →
- *   Exclude posts: the claim and search pages).
+ *   Exclude posts: the search page; /claim/ is indexed and listed, owner 15 Oct 2026).
  *
  * @package aw-seo-extras
  */

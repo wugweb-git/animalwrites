@@ -247,6 +247,7 @@
 			var custom = form.dispatchEvent(new CustomEvent('aw:validate', { cancelable: true, detail: { errors: bad } }));
 			summary(form, bad);
 			if (bad.length || !custom) { e.preventDefault(); form.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'browser', fields: bad.length } })); if (bad[0]) bad[0].focus(); return; }
+			if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return; // a GET form (a search, like the Claim finder) opens its results page
 			try { sessionStorage.setItem('kit-sent', '1'); } catch (x) {} // analytics: the thank-you page counts a send only after this
 			var btn = form.querySelector('button[type=submit]');
 			if (btn && btn.classList.contains('is-loading')) { e.preventDefault(); return; }
