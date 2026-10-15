@@ -777,7 +777,8 @@
     "aw-motion",
     "aw-h",
     "aw-state-grid",
-    "aw-category-image"
+    "aw-category-image",
+    "aw-ai-status"
    ],
    "states": [
     "n/a"
