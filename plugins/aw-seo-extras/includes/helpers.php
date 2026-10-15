@@ -79,6 +79,7 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
 	$t = preg_replace( '/\s+[–—-]+\s+|(?<=\p{L})\s*[–—]\s*(?=\p{L})/u', ' ', $t ); // a range such as 2025–26 stays
 	$t = preg_replace( '/(?<=\S)\s*[:;]\s+/u', ' ', $t );
 	$t = preg_replace( '/[(\[]\s*([^()\[\]]*?)\s*[)\]]/u', '$1', $t );
+	$t = preg_replace( '/\s+&\s+/u', ' and ', $t ); // "and", never "&" (owner, 15 Oct 2026)
 	return trim( preg_replace( '/\s+/u', ' ', $t ), " \t-–—:;|," );
 }
 
