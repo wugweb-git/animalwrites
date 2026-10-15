@@ -161,6 +161,17 @@ add_filter(
 	3
 );
 
+// Directory listings in a tag page's list carry no date (the date they were added means nothing to a visitor).
+add_filter(
+	'render_block_core/post-date',
+	function ( $html, $block, $instance ) {
+		$id = (int) ( $instance->context['postId'] ?? 0 );
+		return ( $id && ! is_singular() && 'aw_listing' === get_post_type( $id ) ) ? '' : $html;
+	},
+	20,
+	3
+);
+
 /* ---------- Old addresses ---------- */
 
 add_action(

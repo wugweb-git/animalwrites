@@ -212,6 +212,18 @@ foreach ( $wpdb->get_results( "SELECT ID, post_content FROM {$wpdb->posts} WHERE
 	}
 }
 
+// Synced patterns (wp_block) that name an old list in a post-terms block or a query's taxQuery.
+foreach ( $wpdb->get_results( "SELECT ID, post_content FROM {$wpdb->posts} WHERE post_type = 'wp_block' AND post_content REGEXP '\"(term|taxonomy|aw_legal_kind|aw_resource_type|aw_opportunity_type|aw_listing_type|aw_service)\"'" ) as $p ) { // phpcs:ignore WordPress.DB
+	$new = preg_replace( array( '/"(term|taxonomy)":"aw_(opportunity_type|listing_type|legal_kind|resource_type|service)"/', '/"aw_(opportunity_type|listing_type|legal_kind|resource_type|service)":\[/' ), array( '"$1":"post_tag"', '"post_tag":[' ), $p->post_content );
+	if ( $new !== $p->post_content ) {
+		$log( "Synced pattern {$p->ID}: old list → post_tag" );
+		if ( ! $dry ) {
+			$wpdb->update( $wpdb->posts, array( 'post_content' => $new ), array( 'ID' => (int) $p->ID ) ); // phpcs:ignore WordPress.DB
+			clean_post_cache( (int) $p->ID );
+		}
+	}
+}
+
 /* ---------- Counts, caches, the tags' Rank Math fields ---------- */
 
 if ( ! $dry ) {

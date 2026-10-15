@@ -25,12 +25,6 @@ if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
 	define( 'DISALLOW_FILE_EDIT', true );
 }
 
-/**
- * The workers' old field names (kind, opportunity_type, listing.listing_type) are still accepted while the workers
- * switch to tags (15 Oct 2026). Off once they are deployed.
- */
-const AW_WORKER_OLD_NAMES = true;
-
 /** Days after which a verified listing is flagged for re-verification. */
 if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 	define( 'AW_REVERIFY_DAYS', 180 );

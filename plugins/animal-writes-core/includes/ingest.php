@@ -14,7 +14,7 @@
  *   "source_url": "...", "source_name": "...", "source_date": "YYYY-MM-DD",
  *   "categories": ["..."], "tags": ["judgment"], "source_type": "Supreme Court", "city": "delhi",
  *   "court": "supreme-court", "document_url": "https://...pdf"   (Library only; its type is a tag, e.g. "judgment"),
- *   "listing": { "listing_type": "animal-shelter", "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
+ *   "listing": { "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
  * }
  *
  * @package animal-writes-core
@@ -197,8 +197,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
 		// The Library type is a tag; with none from the worker, a government press release (PIB) is an Official release.
-		$kind = AW_WORKER_OLD_NAMES ? sanitize_title( (string) $req->get_param( 'kind' ) ) : ''; // the workers' old field, until they are deployed
-		$kind = '' !== $kind ? $kind : ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
+		$kind = ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
 		foreach ( array_merge( $kind ? array( $kind ) : array(), array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ) as $k ) {
 			if ( ! term_exists( $k, 'post_tag' ) ) {
 				wp_insert_term( AW_LEGAL_KINDS[ $k ] ?? $k, 'post_tag', array( 'slug' => $k ) );
@@ -230,9 +229,6 @@ function aw_ingest( WP_REST_Request $req ) {
 		if ( $deadline ) {
 			update_post_meta( $post_id, 'aw_deadline', $deadline );
 		}
-		if ( $req->get_param( 'opportunity_type' ) && AW_WORKER_OLD_NAMES ) { // the workers' old field, until they are deployed
-			$tags[] = (string) $req->get_param( 'opportunity_type' );
-		}
 		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): every part that names an LGD state or district.
 		$places = aw_places_from_text( (string) $req->get_param( 'place' ) );
 		if ( $places ) {
@@ -246,9 +242,6 @@ function aw_ingest( WP_REST_Request $req ) {
 			if ( isset( $l[ $f ] ) ) {
 				update_post_meta( $post_id, 'aw_' . $f, aw_sanitize_meta( $l[ $f ], 'aw_' . $f ) );
 			}
-		}
-		if ( ! empty( $l['listing_type'] ) && AW_WORKER_OLD_NAMES ) { // the workers' old field, until they are deployed
-			$tags[] = (string) $l['listing_type'];
 		}
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 		update_post_meta( $post_id, 'aw_featured', 0 );
