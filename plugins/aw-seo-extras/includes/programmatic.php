@@ -694,20 +694,20 @@ add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
  * plain text, the site name only as the suffix). A term not listed gets aw_seo_term_title_rule().
  */
 const AW_SEO_TERM_TITLES = array(
-	'category:adoption' => 'Animal Adoption in India: News and Guides',
-	'category:animal-birth-control' => 'Animal Birth Control (ABC) Rules and News',
+	'category:adoption' => 'Animal Adoption News and Guides for India',
+	'category:animal-birth-control' => 'ABC Animal Birth Control Rules and News',
 	'category:transport-slaughter' => 'Animal Transport and Slaughter in India',
 	'category:birds' => 'Bird Rescue and Welfare News from India',
 	'category:campaigns-civic-action' => 'Animal Welfare Campaigns and Civic Action',
 	'category:cattle-gaushalas' => 'Cattle Welfare and Gaushala News in India',
-	'category:community-dogs' => 'Street and Community Dogs: News and Laws',
+	'category:community-dogs' => 'Laws and News on Stray and Community Dogs',
 	'category:courts-judgments' => 'Animal Welfare Court Cases and Judgments',
 	'category:cruelty-prosecution' => 'Animal Cruelty Cases and Prosecution News',
 	'category:disaster-rescue' => 'Animal Rescue in Disasters and Emergencies',
-	'category:feeders-caregivers' => 'Feeding Street Animals: Rights of Feeders',
+	'category:feeders-caregivers' => 'Rights of People Feeding Street Animals',
 	'category:laws-rules' => 'Animal Protection Laws and Rules in India',
 	'category:performing-captive-animals' => 'Performing and Captive Animals in India',
-	'category:pets-breeding' => 'Pets, Breeding and Pet Shop Rules in India',
+	'category:pets-breeding' => 'Pet Shop and Dog Breeding Rules in India',
 	'category:policy-government' => 'Animal Welfare Policy and Government News',
 	'category:rabies-public-health' => 'Rabies Control and Public Health in India',
 	'category:veterinary-care' => 'Veterinary Care and Animal Health in India',
@@ -716,12 +716,12 @@ const AW_SEO_TERM_TITLES = array(
 	'post_tag:animal-welfare-organisation' => 'Animal Welfare NGOs in India by District',
 	'post_tag:gaushala' => 'Gaushalas in India by State and District',
 	'post_tag:veterinary-office' => 'Government Veterinary Offices by District',
-	'post_tag:mobile-veterinary-unit' => 'Mobile Veterinary Units (1962) in India',
-	'post_tag:veterinary-dispensary' => 'Government Veterinary Dispensaries, India',
+	'post_tag:mobile-veterinary-unit' => '1962 Mobile Veterinary Units across India',
+	'post_tag:veterinary-dispensary' => 'Government Vet Dispensaries by District',
 	'post_tag:veterinary-hospital' => 'Veterinary Hospitals in India by District',
 	'post_tag:wildlife-rescue' => 'Wildlife Rescue Groups in Indian States',
 	'post_tag:veterinary-clinic' => 'Veterinary Clinics in India by District',
-	'post_tag:bird-hospital' => 'Bird Hospitals in India by State, District',
+	'post_tag:bird-hospital' => 'Bird Hospitals across India by District',
 	'post_tag:animal-shelter' => 'Animal Shelters across India by District',
 	'post_tag:animal-ambulance' => 'Animal Ambulances across India by District',
 	'post_tag:adoption-network' => 'Pet Adoption Networks in India by District',
@@ -739,18 +739,18 @@ const AW_SEO_TERM_TITLES = array(
 	'post_tag:legal-help' => 'NGOs Offering Animal Legal Help in India',
 	'post_tag:rescue' => 'NGOs Offering Animal Rescue across India',
 	'post_tag:shelter' => 'NGOs Offering Animal Shelter across India',
-	'post_tag:sterilisation' => 'NGOs Offering Sterilisation (ABC) in India',
+	'post_tag:sterilisation' => 'NGOs Offering ABC Sterilisation in India',
 	'post_tag:treatment' => 'NGOs Treating Injured Animals across India',
 	'post_tag:vaccination' => 'NGOs Offering Animal Vaccination in India',
-	'post_tag:act' => 'Animal Welfare Acts of India, Summarised',
+	'post_tag:act' => 'Animal Welfare Acts of India Summarised',
 	'post_tag:advisory' => 'Animal Welfare Advisories Issued in India',
 	'post_tag:circular' => 'Animal Welfare Circulars Issued in India',
 	'post_tag:judgment' => 'Animal Welfare Court Judgments in India',
 	'post_tag:notification' => 'Government Notifications on Animal Welfare',
 	'post_tag:official-release' => 'Official Press Releases on Animal Welfare',
 	'post_tag:order' => 'Court Orders on Animal Welfare in India',
-	'post_tag:rule' => 'Animal Welfare Rules of India, Summarised',
-	'post_tag:template' => 'Animal Complaint Letter Templates, India',
+	'post_tag:rule' => 'Animal Welfare Rules of India Summarised',
+	'post_tag:template' => 'Letter Templates for Animal Welfare Cases',
 	'post_tag:event' => 'Animal Welfare Event Listings for India',
 	'post_tag:fellowship' => 'Animal Welfare Fellowship Opportunities',
 	'post_tag:foster' => 'Animal Fostering Opportunities in India',
@@ -758,9 +758,9 @@ const AW_SEO_TERM_TITLES = array(
 	'post_tag:internship' => 'Animal Welfare Internship Opportunities',
 	'post_tag:job' => 'Jobs in Animal Welfare NGOs across India',
 	'post_tag:volunteer' => 'Animal Welfare Volunteer Roles in India',
-	'post_tag:faq' => 'Animal Welfare FAQs: Questions on the Law',
+	'post_tag:faq' => 'Animal Welfare FAQs and Answers on the Law',
 	'post_tag:guide' => 'Practical Animal Welfare Guides for India',
-	'post_tag:how-to' => 'Animal Welfare How-to Guides for Citizens',
+	'post_tag:how-to' => 'Animal Welfare How to Guides for Citizens',
 	'post_tag:research' => 'Animal Welfare Research Studies from India',
 );
 
@@ -778,8 +778,8 @@ function aw_seo_term_title( $term ) {
  * (55–58 when one fits), else the shortest.
  */
 function aw_seo_term_title_rule( $term ) {
-	// Only tails that say what the page really lists (owner, 15 Oct 2026: no filler such as ": News" or ": Acts" added
-	// to reach a length, no promise of phone numbers). New terms should still get a written title in AW_SEO_TERM_TITLES.
+	// Only tails that say what the page really lists, and no separator but the " – " before the brand (owner, 15 Oct
+	// 2026: no filler such as ": News" added to reach a length, no colons or commas, no promise of phone numbers). New terms should still get a written title in AW_SEO_TERM_TITLES.
 	$what  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : aw_seo_plain( $term->name ) . ' in India';
 	$types = array();
 	foreach ( array( 'aw_listing', 'aw_legal', 'aw_news', 'post', 'aw_opportunity' ) as $pt ) {
@@ -789,12 +789,13 @@ function aw_seo_term_title_rule( $term ) {
 		}
 	}
 	$tries = array();
+	$name  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : aw_seo_plain( $term->name );
 	if ( in_array( 'aw_listing', $types, true ) ) {
-		$tries = array( $what . ' by State and District', $what . ' by District' );
+		$tries = array( $what . ' by State and District', $what . ' by District', str_replace( ' in India', ' across India', $what ) );
 	} elseif ( array( 'aw_legal' ) === $types ) {
-		$tries = array( $what . ', Summarised' );
+		$tries = array( $what . ' Summarised' );
 	} elseif ( in_array( 'aw_news', $types, true ) ) {
-		$tries = in_array( 'aw_legal', $types, true ) ? array( $what . ': News and Laws' ) : array( $what . ': Latest News' );
+		$tries = in_array( 'aw_legal', $types, true ) ? array( $name . ' News and Laws in India', $name . ' News and Laws' ) : array( $name . ' News from India', $name . ' News' );
 	}
 	$tries[] = $what;
 	foreach ( $tries as $t ) {
