@@ -483,7 +483,7 @@ function aw_seo_dir_facts() {
 	} else {
 		$parts = aw_seo_dir_breakdown( $place );
 		$link  = fn( $p ) => aw_seo_link( aw_directory_url( $place->slug, $p[0] ), number_format_i18n( $p[1] ) . ' ' . aw_seo_type_words( $p[0], $p[1] ) );
-		$inc   = $parts && ! ( 1 === count( $parts ) && $parts[0][1] === $n ) ? esc_html( ', including ' ) . aw_seo_join( array_map( $link, array_slice( $parts, 0, 4 ) ) ) : '';
+		$inc   = $parts && ! ( 1 === count( $parts ) && $parts[0][1] === $n ) ? esc_html( ', including ' ) . aw_seo_join( array_map( $link, $parts ) ) : ''; // every type, so the parts add up to the count (a 5th type was dropped before)
 		if ( 'state' === $v['kind'] ) {
 			$kids = aw_seo_dir_children( $place );
 			$out  = esc_html( sprintf( '%1$s has %2$s %3$s in %4$s %5$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings', number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) ) . $inc . '.';

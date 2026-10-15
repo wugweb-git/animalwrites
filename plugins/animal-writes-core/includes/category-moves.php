@@ -14,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Old topic slugs → the Category that holds them now. */
+const AW_OLD_TOPIC_SLUGS = array( 'stray-animals' => 'community-dogs' );
+
 /** The current request's path and query string. */
 function aw_moves_request() {
 	$uri = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -28,8 +31,11 @@ add_action(
 		}
 		list( $path, $query ) = aw_moves_request();
 		$to = '';
-		if ( preg_match( '#^/topic/(.+)$#', $path, $m ) ) {
-			$to = '/category/' . $m[1];
+		if ( preg_match( '#^/topic/([^/]+)(/.*)?$#', $path, $m ) ) {
+			// Old slugs that are not a Category any more go to the Category that replaced them; any other unknown one to
+			// the Categories index (never to a /category/ address that is a 404).
+			$slug = AW_OLD_TOPIC_SLUGS[ $m[1] ] ?? $m[1];
+			$to   = term_exists( $slug, 'category' ) ? '/category/' . $slug . ( $m[2] ?? '/' ) : '/categories/';
 		}
 		parse_str( $query, $args );
 		if ( isset( $args['topic'] ) ) {
