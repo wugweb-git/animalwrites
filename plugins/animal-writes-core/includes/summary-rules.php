@@ -125,7 +125,7 @@ function aw_summary_problem( $text, $section, $short_ok = false ) {
  * @return string
  */
 function aw_summary_description( $text, $max = 0 ) {
-	$max  = $max ? $max : (int) ( aw_summary_rules()['description_max_chars'] ?? 160 );
+	$max  = $max ? $max : (int) ( aw_summary_rules()['description_max_chars'] ?? 155 );
 	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	$out  = '';
 	foreach ( preg_split( '/(?<=[.!?])\s+(?=["“‘(]?[A-Z0-9])/u', $text ) as $s ) {

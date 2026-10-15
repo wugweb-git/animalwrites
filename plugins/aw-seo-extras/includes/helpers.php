@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Longest search description, in characters (160 since 15 Oct 2026: Google shows that much whole on desktop). */
-const AW_SEO_DESC_MAX = 160;
+/** Longest search description, in characters (155: Google's desktop snippet fits about 151 of ours, so more would be cut). */
+const AW_SEO_DESC_MAX = 155;
 
 /**
  * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
@@ -401,7 +401,7 @@ function aw_seo_top_categories( $type ) {
 
 /**
  * Hub description built from its own intro (the hub Page's excerpt, as shown under its H1) and the list's facts:
- * "{intro} {N stories} on {category}, {category} and {category}." up to AW_SEO_DESC_MAX (160) characters.
+ * "{intro} {N stories} on {category}, {category} and {category}." up to AW_SEO_DESC_MAX (155) characters.
  */
 function aw_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
