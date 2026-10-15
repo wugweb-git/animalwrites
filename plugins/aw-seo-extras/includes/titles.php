@@ -8,7 +8,8 @@
  * written automatically last time (_aw_seo_auto); a value typed in Rank Math is never replaced.
  *   - News, Library and Resources: over 60 characters the headline is cut at a word (no "…", no site name); shorter
  *     ones get " – Animal Writes".
- *   - Listings: "{Name}, {District} – Animal Writes" ("{Name}, {State}" without a district).
+ *   - Listings: "{Name}, {District} – Animal Writes" ("{Name}, {State}" without a district); over 60 characters
+ *     without " – Animal Writes", and the name itself is never cut.
  *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
  *   - Description: the excerpt, else the first real paragraph; listings without one get a line of their facts.
  *
@@ -62,7 +63,8 @@ function aw_seo_item_title( $post ) {
 		return aw_seo_headline_title( $post->post_title );
 	}
 	if ( 'aw_listing' === $post->post_type ) {
-		return aw_seo_branded( aw_seo_listing_name( $post->ID ) );
+		$name = aw_seo_listing_name( $post->ID );
+		return mb_strlen( aw_seo_branded( $name ) ) <= 60 ? aw_seo_branded( $name ) : $name; // over 60: no site name (Google shows it beside the result); the name is never cut (owner, 15 Oct 2026)
 	}
 	if ( 'page' === $post->post_type && 'about' === $post->post_name && ! $post->post_parent ) {
 		return 'About Animal Writes';
