@@ -239,12 +239,27 @@ function aw_block_law_date( $a, $id ) {
 /** "Issued by …" (a label, not a filter); "Template" for templates. */
 function aw_block_issuer( $a, $id ) {
 	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
-		return kits_tag( 'Template', 'accent' );
+		return aw_legal_kind_tag( $id );
 	}
 	$iss  = aw_item_issuer( $id );
-	$kind = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
-	$kind = is_wp_error( $kind ) || ! $kind ? '' : kits_tag( $kind[0] ); // the Library type (Official release, Circular, Judgment ...) as a label
+	$kind = aw_legal_kind_tag( $id ); // the Library type (Official release, Circular, Judgment ...) as a label
 	return $kind . ( $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '' ); // just the court / body (owner, 14 Oct 2026)
+}
+
+/**
+ * A Library item's type label: its icon, then its name (owner, 15 Oct 2026), the same everywhere the label appears.
+ * Templates keep their accent tint. Never a logo; never in a logo slot.
+ *
+ * @param int $id Library item.
+ * @return string '' when the item has no type.
+ */
+function aw_legal_kind_tag( $id ) {
+	$t = wp_get_object_terms( $id, 'aw_legal_kind' );
+	if ( is_wp_error( $t ) || ! $t ) {
+		return '';
+	}
+	$t = $t[0];
+	return '<span class="kit-tag' . ( 'template' === $t->slug ? ' kit-tag--accent' : '' ) . '">' . aw_type_icon( 'lib-' . $t->slug ) . esc_html( $t->name ) . '</span>';
 }
 
 /** Source line and the official document (PDF) on Library items. */

@@ -99,8 +99,9 @@ add_action(
 add_shortcode(
 	'aw_issuer_label',
 	function () {
-		$iss = aw_item_issuer( get_the_ID() );
-		return $iss ? '<p class="kit-tags aw-issuer">' . kits_tag( $iss->name, 'issuer' ) . '</p>' : ''; // the issuer's own tint (green), as on the Library cards
+		$iss  = aw_item_issuer( get_the_ID() );
+		$kind = function_exists( 'aw_legal_kind_tag' ) ? aw_legal_kind_tag( get_the_ID() ) : ''; // the Library type with its icon, first, as on the cards (owner, 15 Oct 2026)
+		return $kind || $iss ? '<p class="kit-tags aw-issuer">' . $kind . ( $iss ? kits_tag( $iss->name, 'issuer' ) : '' ) . '</p>' : ''; // the issuer's own tint (green), as on the Library cards
 	}
 );
 
