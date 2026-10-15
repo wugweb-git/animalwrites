@@ -138,6 +138,9 @@ function aw_same_story_get( WP_REST_Request $req ) {
 			'title'      => html_entity_decode( get_the_title( $id ), ENT_QUOTES ),
 			'summary'    => wp_strip_all_tags( $p->post_excerpt ),
 			'source_url' => (string) get_post_meta( $id, 'aw_source_url', true ),
+			// The report's publication date: a summary may not give it as the event date (owner, 15 Oct 2026).
+			'source_date' => (string) get_post_meta( $id, 'aw_source_date', true ),
+			'date'       => get_the_date( 'Y-m-d', $id ),
 			'publisher'  => (string) get_post_meta( $id, 'aw_source_name', true ),
 			'merged'     => (int) get_post_meta( $id, 'aw_merged_into', true ),
 			'also'       => array_values( wp_list_pluck( array_filter( (array) get_post_meta( $id, 'aw_also_reported', true ) ), 'url' ) ),
