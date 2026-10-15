@@ -208,7 +208,7 @@ const AW_HUB_TITLES = array(
 /** Fixed descriptions of the section hubs that are not built from their intro. */
 const AW_HUB_DESCRIPTIONS = array(
 	'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
-	'aw_press'       => 'Press coverage of Animal Writes and its citizen campaign for community animals across India.',
+	'aw_press'       => 'Press coverage of Animal Writes and its citizen letter campaign for community animals across India.',
 	'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, gaushalas and government vets in every state and district of India, with phone, address and services.',
 );
 
