@@ -260,9 +260,10 @@ add_shortcode(
 	'aw_search',
 	function () {
 		$q    = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$html = '<form class="aw-search-form" role="search" method="get" action="' . esc_url( home_url( '/search/' ) ) . '">'
-			. '<label for="aw-search-q">Search</label><input type="search" id="aw-search-q" name="q" value="' . esc_attr( $q ) . '" autocomplete="off"> '
-			. '<button type="submit" class="wp-element-button">Search</button></form>';
+		// The Kits search field (as on the 404 page): one rounded field and the search button.
+		$html = '<form class="kit-error-search aw-search-form" role="search" method="get" action="' . esc_url( home_url( '/search/' ) ) . '">'
+			. '<label class="screen-reader-text" for="aw-search-q">Search</label><input type="search" id="aw-search-q" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off">'
+			. '<button type="submit" class="kit-btn"><span class="kit-ico kit-ico--search" aria-hidden="true"></span>Search</button></form>';
 		if ( '' === $q ) {
 			return $html;
 		}
@@ -280,7 +281,7 @@ add_shortcode(
 			$total += $res->found_posts;
 			$out   .= '<section class="aw-search-group"><h2 class="kit-eyebrow aw-search-head">' . esc_html( $label ) . ' ' . kits_count( $res->found_posts ) . '</h2><ol class="aw-search-results">';
 			foreach ( $res->posts as $p ) {
-				$out .= '<li>' . ( 'aw_legal' === $p->post_type && function_exists( 'aw_legal_kind_tag' ) && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a>'
+				$out .= '<li>' . ( 'aw_legal' === $p->post_type && function_exists( 'aw_legal_kind_tag' ) && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<h3 class="aw-search-title"><a href="' . esc_url( get_permalink( $p ) ) . '">' . aw_search_mark( get_the_title( $p ), $words ) . '</a></h3>'
 					. ( 'aw_listing' !== $p->post_type && function_exists( 'aw_text' ) ? '<p>' . aw_search_mark( aw_text( $p->ID, 26 ), $words ) . '</p>' : '' ) . '</li>';
 			}
 			$out .= '</ol>';
@@ -522,4 +523,24 @@ add_filter(
 	},
 	10,
 	2
+);
+
+/*
+ * Contact page: the "For organisations" rows and "Report a mistake" lead to the contact form on the same page with that
+ * reason chosen (/contact/?about=listing#write; aw.js chooses it in place without a reload).
+ */
+add_filter(
+	'render_block_core/heading',
+	function ( $html ) {
+		if ( ! is_page( 'contact' ) || false !== strpos( $html, '<a ' ) ) {
+			return $html;
+		}
+		$text = trim( html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES ) );
+		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
+		if ( ! $key || ! in_array( $key, array( 'listing', 'featured', 'opportunity', 'partnership', 'correction' ), true ) ) {
+			return $html;
+		}
+		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';
+		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );
+	}
 );

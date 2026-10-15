@@ -43,6 +43,9 @@ add_filter(
 		if ( is_singular() && function_exists( 'aw_has_sponsored_block' ) && aw_has_sponsored_block( get_queried_object_id() ) ) {
 			return true; // nor does a page with a sponsored block
 		}
+		if ( is_singular( 'aw_opportunity' ) && has_term( 'volunteer', 'aw_opportunity_type', get_queried_object_id() ) ) {
+			return true; // no ads on volunteer roles (owner, 15 Oct 2026)
+		}
 		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
 	}
 );

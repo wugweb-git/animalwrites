@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_HUBS = array(
 	'aw_news'        => array( 'news', 101, 13, 'News list' ),
-	'post'           => array( 'resources', 102, 40, 'Resources list' ),
+	'post'           => array( 'resources', 102, 12, 'Resources list' ), // 12 a page: 40 large cards made a 22,000px phone page
 	'aw_legal'       => array( 'library', 103, 20, 'Library list' ),
 	'aw_opportunity' => array( 'opportunities', 104, 24, 'Opportunities list' ),
 	'aw_campaign'    => array( 'campaigns', 105, 20, 'Campaigns list' ),

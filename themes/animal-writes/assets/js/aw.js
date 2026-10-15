@@ -49,6 +49,17 @@
 		var sel = f.querySelector('[name=about]'), msg = f.querySelector('[name=message]');
 		if (!sel || !msg) return;
 		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || ''; });
+		// The rows on the page (List your organisation, Get featured …) choose their reason here and move to the form.
+		document.querySelectorAll('a.aw-contact-pick[data-about]').forEach(function (a) {
+			a.addEventListener('click', function (e) {
+				if (!sel.querySelector('option[value="' + a.dataset.about + '"]')) return;
+				e.preventDefault();
+				sel.value = a.dataset.about; sel.dispatchEvent(new Event('change', { bubbles: true }));
+				history.replaceState(null, '', a.href);
+				f.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+				sel.focus({ preventScroll: true });
+			});
+		});
 	});
 })();
 
