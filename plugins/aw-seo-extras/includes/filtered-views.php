@@ -149,6 +149,9 @@ function aw_seo_filtered_title() {
 	if ( ! aw_seo_filtered_named() ) {
 		return '';
 	}
+	if ( 'tag' === $v['key'] && function_exists( 'aw_seo_term_title' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
+		return aw_seo_title_with_page( aw_seo_term_title( $term ) ); // the tag page's own title (its canonical, or the same list)
+	}
 	$name = str_replace( ' & ', ' and ', $v['name'] );
 	$what = array();
 	$words = fn( $t ) => array_diff( preg_split( '/\W+/u', mb_strtolower( $t ), -1, PREG_SPLIT_NO_EMPTY ), array( 'and', 'in', 'on', 'of', 'the', 'from', 'india' ) );
@@ -175,6 +178,9 @@ function aw_seo_filtered_description() {
 	$v = aw_seo_filtered_view();
 	if ( ! aw_seo_filtered_named() ) {
 		return '';
+	}
+	if ( 'tag' === $v['key'] && function_exists( 'aw_seo_tag_description' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
+		return aw_seo_with_page( aw_seo_tag_description( $term ) ); // as the tag page
 	}
 	$count = function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $v['type'] ) : '';
 	$about = ' on ' . aw_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) );
