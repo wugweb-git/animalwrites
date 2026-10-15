@@ -101,7 +101,13 @@ add_shortcode(
 	function () {
 		$iss  = aw_item_issuer( get_the_ID() );
 		$kind = function_exists( 'aw_legal_kind_tag' ) ? aw_legal_kind_tag( get_the_ID() ) : ''; // the Library type with its icon, first, as on the cards (owner, 15 Oct 2026)
-		return $kind || $iss ? '<p class="kit-tags aw-issuer">' . $kind . ( $iss ? kits_tag( $iss->name, 'issuer' ) : '' ) . '</p>' : ''; // the issuer's own tint (green), as on the Library cards
+		if ( ! $kind && ! $iss ) {
+			return '';
+		}
+		// The labels sit above the title on Library items; template shortcodes run before blocks, so the trail is claimed
+		// here to keep it first (otherwise it lands between the labels and the title).
+		$trail = ( is_singular() && function_exists( 'aw_breadcrumbs_claim' ) ) ? aw_breadcrumbs_claim() : '';
+		return $trail . '<p class="kit-tags aw-issuer">' . $kind . ( $iss ? kits_tag( $iss->name, 'issuer' ) : '' ) . '</p>'; // the issuer's own tint (green), as on the Library cards
 	}
 );
 

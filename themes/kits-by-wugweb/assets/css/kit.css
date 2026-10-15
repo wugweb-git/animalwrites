@@ -280,10 +280,10 @@ html { overflow-x: clip; }
 }
 /* Hub head: the same fixed height on every hub at each width (md 12rem, lg 15rem), title at the top; title and intro at most two lines
    each; the pictures fill the head's height and never set it. With the filter row the band stays under 60svh. */
-.kit-section-head .wp-block-query-title ,.kit-section-desc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* Hub title and intro are shown in full (no line clamp). */
 @media (min-width: 768px) {
 	:root { --kit-hub-head-h: 12rem; }
-	.kit-section-band .kit-section-head:has(.kit-section-visual) { height: var(--kit-hub-head-h); align-items: stretch; } /* fixed only where there are pictures */
+	.kit-section-band .kit-section-head:has(.kit-section-visual) { align-items: stretch; } /* picture column stretches to the text; height follows content */
 	.kit-section-band .kit-section-head > :first-child { display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; overflow: hidden; } /* title at the same place on every hub */
 	.kit-section-band .kit-section-visual { height: 100%; align-items: start; }
 	.kit-section-band .kit-section-visual > * { height: calc(100% - var(--kit-space-5)); }
@@ -351,7 +351,7 @@ html { overflow-x: clip; }
 
 
 /* 4.10 Tile — icon + title + one line + arrow; elevated link card (section index, quick links). */
-.kit-tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-grid); grid-template-columns: 1fr; }
+.kit-tiles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .kit-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .kit-tiles li { max-width: none; display: flex; }
@@ -463,6 +463,7 @@ html { overflow-x: clip; }
 .kit-share-wrap { max-width: var(--kit-width-content); padding: 0 0 var(--kit-space-7); } /* on the page frame like the content above (see One page grid) */
 .kit-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); border-top: 1px solid var(--kit-color-line); padding-top: var(--kit-space-5); }
 .kit-share-label { font-weight: var(--kit-weight-regular); margin-right: var(--kit-space-2); }
+@media (max-width: 639px) { .kit-share-label { flex-basis: 100%; margin: 0 0 var(--kit-space-1); } }
 .kit-share a ,.kit-share button {
 	display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4);
 	border-radius: var(--kit-radius-pill); font: inherit; font-weight: var(--kit-weight-strong); text-decoration: none; cursor: pointer;
@@ -492,6 +493,12 @@ html { overflow-x: clip; }
    The page HTML is the same for everyone, so the public cache never varies by visitor. */
 html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad--empty, .kit-ad-item--empty, .kits-preview-only) { display: none !important; }
 html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad, .kit-ad-item):has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
+/* Until the network fills it (e.g. while the account awaits approval) a slot shows nothing: no grey box, "Ad" label or
+   rules. It stays in the layout at full width because the network measures that width before it serves. */
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { border: 0; padding: 0; margin-block: 0; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) :is(.kit-ad-label) { display: none; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) .kit-ad-unit { min-height: 0; background: none; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > .kit-ad { border: 0; padding: 0; background: none; }
 .kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Details (FAQ) */
@@ -590,7 +597,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 /* 02 Need help now: three enormous actions on ink */
 .kit-ed-help { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-ed-help-title { color: var(--kit-color-on-ink) !important; font-size: var(--kit-type-h2); margin: 0 0 var(--kit-space-6); }
-.kit-ed-acts { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
+.kit-ed-acts { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1200px) { .kit-ed-acts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .kit-ed-act { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--neutral-8) 60%, var(--neutral-9)); border: 1px solid color-mix(in srgb, var(--neutral-0) 12%, transparent); color: var(--kit-color-on-ink); text-decoration: none; transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease); }
 .kit-ed-act:first-child { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
@@ -783,14 +790,12 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(:is(.is-style-outline, .is-style-kits-secondary, .is-style-kits-ghost) *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .kit-form button[type=submit]):hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
 
-/* Phones: every hub head the same height (no pictures on phones; intro clamped to two lines) */
-@media (max-width: 767px) { .kit-section-band .kit-section-head { min-height: 8.5rem; align-content: start; } }
-/* Hub band (owner, 9 Oct 2026): from 768px the band is as tall as its content, capped so it ends at most 550px down
-   the page when it holds filters or a search, 450px when it doesn't (cap = end point minus the announcement bar and the
-   nav). It is never padded out to reach the cap. Content sits top left. */
+/* Hub head height follows its content (no min-height: it left an empty band under short intros). */
+@media (max-width: 767px) { .kit-section-band .kit-section-head { align-content: start; } }
+/* Hub band: from 768px the band is as tall as its content; no height cap (locked rule: no section height caps).
+   Content sits top left. */
 @media (min-width: 768px) {
-	.kit-section-band { box-sizing: border-box; max-height: calc(550px - var(--kit-header-height) - var(--kit-announce-h, 34px)); display: flex; flex-direction: column; }
-	.kit-section-band:not(:has(.kit-filterbar, .kit-section-search)) { max-height: calc(450px - var(--kit-header-height) - var(--kit-announce-h, 34px)); }
+	.kit-section-band { box-sizing: border-box; display: flex; flex-direction: column; }
 	.kit-section-band > .kit-section-inner { width: 100%; display: flex; flex-direction: column; justify-content: flex-start; }
 	.kit-section-band .kit-section-head > :first-child { justify-content: flex-start; }
 	.kit-section-band .kit-section-filters { flex: none; }
@@ -1069,13 +1074,16 @@ body { background: var(--kit-surface-page); }
 /* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
    to a Query Loop; from 768px the list lays out as the section decides. */
 @media (max-width: 767px) {
-	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scrollbar-width: none; overscroll-behavior-x: contain; }
+	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
 	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
 	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
 }
 
 /* Header hides on scroll down, returns on scroll up (kit.js adds .kit-header-hidden). */
-header.wp-block-template-part:has(.kit-site-header) { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); will-change: transform; }
+header.wp-block-template-part:has(.kit-site-header) { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
+/* No will-change/transform while the menu is open: either one makes the header the containing block of the fixed
+   menu overlay, which then shrinks to the header's height (phone menu cut off behind the logo). */
+header.wp-block-template-part:has(.is-menu-open) { transform: none !important; }
 header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-100% - var(--wp-admin--admin-bar--height, 0px))); }
 @media (prefers-reduced-motion: reduce) { header.wp-block-template-part:has(.kit-site-header) { transition: none; } }
 

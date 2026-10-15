@@ -332,7 +332,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 :is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; }
 .kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 /* Layout: one column under 768px, at most two; the button bottom-left */
-.kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: 1fr; }
+.kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .kit-form-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: flex-start; margin-top: var(--s-2); }
 /* On a dark band (newsletter) */
