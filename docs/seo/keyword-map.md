@@ -26,13 +26,13 @@
 
 | Page | Primary keyword | Secondary keywords | Intent | Search title, page 1 (built by aw-seo-extras; a copy is kept in Rank Math) | Demand (15 Oct 2026) |
 |---|---|---|---|---|---|
-| /news/ | animal welfare news | animal welfare news india, stray dogs news, animal cruelty news | I | Animal Welfare News from India – Animal Writes | T 5, rising +1,500% ("animal news" T 136); AC Y; GSC hub 30 impr |
-| /library/ | animal laws in india | animal welfare court orders, animal welfare rules, supreme court stray dogs judgment | I | Animal Law, Court Orders & Rules in India – Animal Writes | T 2 (AC Y, top "pdf"); "supreme court stray dogs" T 16; GSC hub 48 impr, pos 4.3; rules by name about 70 |
-| /resources/ | animal welfare guides | how to report animal cruelty, injured animal help, feeding community dogs law | I | Animal Welfare Guides & Research in India – Animal Writes | T 0, AC – (secondaries AC Y: "how to report animal cruelty in india" is top); GSC hub 20 impr |
-| /directory/ | animal welfare ngos in india | animal ngo near me, animal shelter, gaushala, government veterinary hospital | C/T | Animal Welfare NGOs in India: Directory of 5,000+ Groups | AC Y; "animal ngo" T 28 ("near me" leads); "gaushala" T 383; GSC hub 17, place pages 2,540 impr, pos about 8 |
-| /opportunities/ | animal welfare volunteer | animal welfare jobs india, animal welfare internship, foster animals | T | Animal Welfare Volunteer, Internship & Jobs in India | T 0, AC Y ("volunteering near me"); "ngo jobs" T 67; "animal welfare jobs india" AC Y; GSC hub 0 |
-| /campaigns/ | animal welfare campaigns | letter petition supreme court, community animals campaign | I/N | (WordPress title of the Page) | T 0, AC Y; GSC: "petition campaign" 113, "letter petition" 48, "stray dog petition india" 14 (all on Home); hub 18 |
-| /media/ | animal writes in the news | letter petition campaign coverage | N | Animal Writes in the News | AC –, T 0; brand-only (GSC "nodogsnovote" 605 on Home) |
+| /news/ | animal welfare news | animal welfare news india, stray dogs news, animal cruelty news | I | Animal Welfare News from India, Summarised – Animal Writes | T 5, rising +1,500% ("animal news" T 136); AC Y; GSC hub 30 impr |
+| /library/ | animal laws in india | animal welfare court orders, animal welfare rules, supreme court stray dogs judgment | I | Animal Laws in India: Court Orders, Rules – Animal Writes | T 2 (AC Y, top "pdf"); "supreme court stray dogs" T 16; GSC hub 48 impr, pos 4.3; rules by name about 70 |
+| /resources/ | animal welfare guides | how to report animal cruelty, injured animal help, feeding community dogs law | I | Animal Welfare Guides, FAQs and Research – Animal Writes | T 0, AC – (secondaries AC Y: "how to report animal cruelty in india" is top); GSC hub 20 impr |
+| /directory/ | animal welfare ngos in india | animal ngo near me, animal shelter, gaushala, government veterinary hospital | C/T | Animal Welfare NGOs in India by District – Animal Writes | AC Y; "animal ngo" T 28 ("near me" leads); "gaushala" T 383; GSC hub 17, place pages 2,540 impr, pos about 8 |
+| /opportunities/ | animal welfare volunteer | animal welfare jobs india, animal welfare internship, foster animals | T | Animal Welfare Volunteer Roles and Jobs – Animal Writes | T 0, AC Y ("volunteering near me"); "ngo jobs" T 67; "animal welfare jobs india" AC Y; GSC hub 0 |
+| /campaigns/ | stray dog petition | letter petition supreme court | I/N | Stray Dog Petition and Citizen Campaigns – Animal Writes | T 0, AC Y; GSC: "petition campaign" 113, "letter petition" 48, "stray dog petition india" 14 (all on Home); hub 18 |
+| /media/ | letter petition campaign | animal writes in the news | N | Letter Petition Campaign: Press Coverage – Animal Writes | AC –, T 0; brand-only (GSC "nodogsnovote" 605 on Home) |
 
 ## 2. Directory (programmatic; titles built live, never stored)
 
@@ -58,7 +58,7 @@ The thin-page rules from Phase 1 still apply: thin district × type pages stay o
 
 | Topic | Primary keyword | Secondary keywords | Intent | Demand (15 Oct 2026) |
 |---|---|---|---|---|
-| /topics/ | animal welfare topics | animal welfare issues in india | I | AC Y (school-essay intent); "issues in india" AC – |
+| /categories/ | animal welfare categories | types of animal welfare | I | Google India autocomplete suggests "animal welfare categories" itself, and "types of animal welfare" (15 Oct 2026); replaces the earlier keyword with the banned word |
 | Community Dogs | stray dogs in india | community dogs, street dogs law | I | "stray dogs" T 171 (part anime), "street dogs" T 96, "community dogs" T 11; AC Y; GSC topic 3 |
 | Animal Birth Control | animal birth control | abc programme, dog sterilisation | I | AC Y ("rules 2023" top); T about 0; GSC 41 impr pos 5 (guide) |
 | Courts and Judgments | animal welfare court judgments | supreme court stray dogs | I | AC –; "supreme court stray dogs" T 16, AC Y |
@@ -126,11 +126,11 @@ Rules for the focus-keyword job, the same on the site (`aw_seo_clean_keyword`) a
 
 | Page | Primary keyword | Intent | Note |
 |---|---|---|---|
-| Home | animal welfare in india (secondary: animal welfare news, animal welfare ngo directory; was "animal welfare home") | N/I | The owner's hero copy is not changed. Demand check 15 Oct 2026: kept. "animal welfare india" scores higher (T 14 against 4), but its related queries are the Animal Welfare Board of India, and Google treats the two phrasings as one. "animal welfare in india" is suggested by autocomplete and its results page is informational. "animal welfare ngo directory" has no autocomplete. |
-| About | about animal writes | N | The owner's wording |
+| Home | animal welfare in india (no secondaries since 15 Oct 2026: "animal welfare news" belongs to /news/ and "animal welfare ngo directory" to /directory/; was "animal welfare home") | N/I | The owner's hero copy is not changed. Demand check 15 Oct 2026: kept. "animal welfare india" scores higher (T 14 against 4), but its related queries are the Animal Welfare Board of India, and Google treats the two phrasings as one. "animal welfare in india" is suggested by autocomplete and its results page is informational. "animal welfare ngo directory" has no autocomplete. |
+| About | animal writes (secondary: citizen letter campaign) | N | The brand is only the title suffix, so the brand query is the keyword |
 | Contact | contact us | N/T | The owner's wording |
-| Volunteer | register as volunteer | T | The owner's wording |
-| Claim / Report | claim this listing / report a mistake | T | Report and thank-you are noindex |
+| Volunteer | register as a volunteer | T | The page's own heading |
+| Claim / Report | claim this listing / report a mistake | T | Claim, report and thank-you are noindex |
 | Corrections, policies | as set | N | The owner's wording |
 
 ## 7. Cannibalisation watch
