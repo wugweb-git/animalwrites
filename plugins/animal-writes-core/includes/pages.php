@@ -460,7 +460,7 @@ add_shortcode(
 		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
 		foreach ( $links as $l ) {
 			$host  = (string) wp_parse_url( $l['url'], PHP_URL_HOST );
-			$icon  = preg_match( '/instagram\.com$/', $host ) ? 'instagram' : ( preg_match( '/facebook\.com$/', $host ) ? 'facebook' : ( preg_match( '/(^|\.)(x|twitter)\.com$/', $host ) ? 'x' : '' ) );
+			$icon  = preg_match( '/instagram\.com$/', $host ) ? 'instagram' : ( preg_match( '/facebook\.com$/', $host ) ? 'facebook' : ( preg_match( '/(^|\.)(x|twitter)\.com$/', $host ) ? 'x-brand' : '' ) );
 			$html .= '<li><a href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? aw_i( $icon ) : '' ) . esc_html( $l['label'] ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
 		}
 		return $html . '</ul></section>';

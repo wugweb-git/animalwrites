@@ -163,7 +163,7 @@ function aw_block_publisher( $a, $id ) {
 		$logo = (int) get_post_meta( $id, 'aw_press_logo', true );
 		$logo = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
 		$plat = (string) get_post_meta( $id, 'aw_press_platform', true );
-		$icon = in_array( $plat, array( 'instagram', 'facebook', 'x' ), true ) ? aw_i( $plat ) : '';
+		$icon = in_array( $plat, array( 'instagram', 'facebook', 'x' ), true ) ? aw_i( 'x' === $plat ? 'x-brand' : $plat ) : '';
 		$name = $pub ? $pub : ( 'web' !== $plat && $plat ? ( AW_PRESS_PLATFORMS[ $plat ] ?? '' ) : '' );
 		// Same row as News: the publisher's small logo (News favicon for that site, else its own logo), else a letter tile.
 		$host = function_exists( 'aw_host' ) ? aw_host( (string) get_post_meta( $id, 'aw_press_url', true ) ) : '';
