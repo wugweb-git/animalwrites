@@ -191,8 +191,12 @@ function aw_seo_list_title() {
 	$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
 	if ( 'aw_listing' === $hub ) {
 		$place = aw_current_place();
+		$typed = aw_seo_dir_title(); // district × type pages and lists filtered by type (programmatic.php)
+		if ( '' !== $typed ) {
+			return $typed;
+		}
 		if ( aw_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return ''; // type pages and filtered lists keep their own titles
+			return ''; // name searches and other filtered lists keep their own titles
 		}
 		if ( ! $place ) {
 			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
@@ -355,13 +359,18 @@ function aw_seo_list_description() {
 		$n    = (int) $term->count;
 		$what = mb_strtolower( $term->name ) . ' ' . ( 1 === $n ? 'opportunity' : 'opportunities' );
 		$desc = sprintf( '%1$s %2$s with animal welfare organisations across India, from Animal Writes. %3$s its role, location and how to apply.', 1 === $n ? 'One' : number_format_i18n( $n ), $what, 1 === $n ? 'It lists' : 'Each one lists' );
+	} elseif ( is_tax( 'aw_topic' ) && '' !== aw_seo_topic_description( get_queried_object() ) ) {
+		$desc = aw_seo_topic_description( get_queried_object() ); // what the topic holds, counted (programmatic.php)
 	} elseif ( is_tax() || is_category() || is_tag() ) {
 		$desc = term_description() ?: single_term_title( '', false ) . ' on ' . get_bloginfo( 'name' ) . '.';
 	}
 	if ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['type'] ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$desc = aw_directory_intro();
 	}
-	if ( 'aw_listing' === $hub && ! is_404() ) {
+	$built = 'aw_listing' === $hub ? aw_seo_dir_description() : ''; // places, district × type pages, lists filtered by type (programmatic.php)
+	if ( '' !== $built ) {
+		$desc = $built;
+	} elseif ( 'aw_listing' === $hub && ! is_404() ) {
 		$place = aw_current_place();
 		$slug  = (string) get_query_var( 'aw_type_slug' );
 		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );

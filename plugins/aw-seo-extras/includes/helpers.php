@@ -103,7 +103,9 @@ function aw_seo_typed( $key ) {
 		return $typed;
 	}
 	if ( is_category() || is_tag() || is_tax() ) {
-		return trim( (string) get_term_meta( $id, 'rank_math_' . $key, true ) );
+		$typed = trim( (string) get_term_meta( $id, 'rank_math_' . $key, true ) );
+		$auto  = (array) json_decode( (string) get_term_meta( $id, '_aw_seo_auto', true ), true );
+		return ( '' !== $typed && ( $auto[ $key ] ?? null ) === $typed ) ? '' : $typed; // a topic's stored copy (programmatic.php): built live, not typed
 	}
 	return '';
 }
@@ -269,7 +271,8 @@ function aw_seo_top_topics( $type ) {
 function aw_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
 	$intro = aw_seo_plain( ( $page instanceof WP_Post && '' !== trim( $page->post_excerpt ) ) ? $page->post_excerpt : aw_hub_intro( $type ) );
-	$count = function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '';
+	$count = 'post' === $type ? aw_seo_resources_count_label() : ''; // guides and research summaries counted apart
+	$count = '' !== $count ? $count : ( function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '' );
 	if ( '' === $count ) {
 		return $intro;
 	}

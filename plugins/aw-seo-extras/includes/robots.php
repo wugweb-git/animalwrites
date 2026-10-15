@@ -7,6 +7,7 @@
  *
  * - Closed opportunities (past their deadline or review date): noindex, links followed.
  * - Directory district × type pages with fewer listings than AW_THIN_DISTRICT_TYPE: noindex.
+ * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
  *
@@ -42,6 +43,9 @@ function aw_is_thin_directory_page() {
 function aw_seo_noindex_rule() {
 	if ( is_singular( 'aw_opportunity' ) && function_exists( 'aw_retention_state' ) && aw_retention_state( get_queried_object() ) ) {
 		return true; // closed opportunity
+	}
+	if ( is_post_type_archive( 'web-story' ) && ! (int) ( wp_count_posts( 'web-story' )->publish ?? 0 ) ) {
+		return true; // the Web Stories archive while it has no published story (it is also out of the sitemap: Rank Math)
 	}
 	return aw_is_thin_directory_page();
 }

@@ -169,13 +169,45 @@ function aw_listing_schema( $id ) {
 
 /* ---------- Site and content pages ---------- */
 
-/** The publisher (Animal Writes) as schema.org Organization. */
+/**
+ * A Rank Math setting (Titles & Meta → Local SEO / Social Meta), '' when Rank Math does not hold it.
+ *
+ * @param string $key Setting under "titles.".
+ * @return mixed
+ */
+function aw_seo_rm_setting( $key ) {
+	return class_exists( '\RankMath\Helper' ) ? \RankMath\Helper::get_settings( 'titles.' . $key ) : '';
+}
+
+/**
+ * The publisher's profiles (sameAs): Rank Math's Facebook URL and additional profiles (Titles & Meta → Social Meta),
+ * else the profiles the site footer links to. One node for both: Rank Math's own publisher is replaced by this one.
+ *
+ * @return array
+ */
+function aw_publisher_profiles() {
+	$list = array_merge( array( (string) aw_seo_rm_setting( 'social_url_facebook' ) ), preg_split( '/\s+/', (string) aw_seo_rm_setting( 'social_additional_profiles' ) ) );
+	$list = array_values( array_unique( array_filter( array_map( 'trim', $list ), fn( $u ) => (bool) wp_http_validate_url( $u ) ) ) );
+	return $list ? $list : array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/AnimalWrites' );
+}
+
+/**
+ * The publisher (Animal Writes) as schema.org Organization: name, URL, logo, email, description and profiles from
+ * Rank Math's Knowledge Graph settings (Titles & Meta → Local SEO, Social Meta), so the settings and the graph agree;
+ * the alternate names, policies, topics and country served are added here (Rank Math has no fields for them).
+ */
 function aw_publisher_schema() {
-	$logo  = get_site_icon_url( 512 );
+	$logo  = (string) aw_seo_rm_setting( 'knowledgegraph_logo' );
+	$logo  = '' !== $logo ? $logo : get_site_icon_url( 512 );
+	$lmeta = wp_get_attachment_metadata( (int) aw_seo_rm_setting( 'knowledgegraph_logo_id' ) );
 	$front = (int) get_option( 'page_on_front' );
-	$desc  = $front ? (string) get_post_meta( $front, 'rank_math_description', true ) : ''; // the home page's meta description
+	$desc  = (string) aw_seo_rm_setting( 'organization_description' );
+	$desc  = '' !== trim( $desc ) ? $desc : ( $front ? (string) get_post_meta( $front, 'rank_math_description', true ) : '' ); // the home page's meta description
 	$desc  = '' !== trim( $desc ) ? $desc : ( $front ? (string) get_post_field( 'post_excerpt', $front ) : '' );
 	$desc  = '' !== trim( $desc ) ? $desc : get_bloginfo( 'description' );
+	$email = sanitize_email( (string) aw_seo_rm_setting( 'email' ) );
+	$email = '' !== $email ? $email : 'contact@animalwrites.in'; // as on the Contact page
+	$name  = trim( (string) aw_seo_rm_setting( 'knowledgegraph_name' ) );
 	$about = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'fields' => 'names' ) );
 	$pages = array();
 	foreach ( array( 'publishingPrinciples' => 'editorial-policy', 'correctionsPolicy' => 'corrections' ) as $k => $slug ) {
@@ -189,16 +221,16 @@ function aw_publisher_schema() {
 			array(
 				'@type'         => 'Organization',
 				'@id'           => home_url( '/#organization' ),
-				'name'          => get_bloginfo( 'name' ),
+				'name'          => '' !== $name ? $name : get_bloginfo( 'name' ),
 				'alternateName' => array( 'Animal Writes India', 'AnimalWrites.in' ),
 				'url'           => home_url( '/' ),
 				'description'   => aw_seo_plain( $desc ),
-				'logo'          => $logo ? array( '@type' => 'ImageObject', 'url' => $logo ) : null,
-				'email'         => 'contact@animalwrites.in', // as on the Contact page
-				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in', 'url' => home_url( '/contact/' ) ),
+				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
+				'email'         => $email,
+				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ) ),
 				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
 				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'aw_seo_plain', $about ) ) : null,
-				'sameAs'        => array( 'https://www.facebook.com/AnimalWritesIndia/', 'https://www.instagram.com/animalwrites_india/', 'https://x.com/AnimalWrites' ),
+				'sameAs'        => aw_publisher_profiles(),
 			),
 			$pages
 		)
@@ -484,12 +516,7 @@ function aw_schema_nodes() {
 			'name'       => aw_seo_plain( get_the_title() ),
 			'inLanguage' => 'en-IN',
 			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
-			'mainEntity' => array(
-				'@type'        => 'Organization',
-				'@id'          => home_url( '/#organization' ),
-				'email'        => 'contact@animalwrites.in',
-				'contactPoint' => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'contact@animalwrites.in' ),
-			),
+			'mainEntity' => array( '@id' => home_url( '/#organization' ) ), // the publisher node carries the email and contact point
 		);
 	} elseif ( is_page( 'about' ) ) {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
