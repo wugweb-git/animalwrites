@@ -75,6 +75,9 @@ function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $
 			// Straight to the row: wp_update_post would move post_modified (the date never changes).
 			$wpdb->update( $wpdb->posts, array( 'post_excerpt' => $summary ), array( 'ID' => (int) $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$out['rewritten'] = true;
+			if ( function_exists( 'aw_summary_store_entities' ) ) {
+				aw_summary_store_entities( $keep ); // the names the new summary uses, for internal linking
+			}
 		}
 		$adds  = array_values( array_filter( (array) get_post_meta( $keep, 'aw_merge_additions', true ) ) );
 		$entry = array(
@@ -134,6 +137,7 @@ function aw_same_story_get( WP_REST_Request $req ) {
 	return new WP_REST_Response(
 		array(
 			'id'         => $id,
+			'type'       => $p->post_type, // the summary rules of its section (summary-rules.php)
 			'status'     => $p->post_status,
 			'title'      => html_entity_decode( get_the_title( $id ), ENT_QUOTES ),
 			'summary'    => wp_strip_all_tags( $p->post_excerpt ),

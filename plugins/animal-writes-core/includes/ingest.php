@@ -265,7 +265,12 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( array_intersect( $tags, $allowed ) ) {
 		aw_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
 	}
-	if ( $backfill ) {
+	// A summary below its section's minimum whose source gave no more (the workers' short fallback): never published
+	// at once, it waits in Inbox → To review with the reason (summary-rules.php).
+	if ( $backfill && $req->get_param( 'summary_short' ) ) {
+		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+	} elseif ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
 		// Owner, 9 Oct 2026: backfilled items go live at once, with their own publication date (never the day fetched).

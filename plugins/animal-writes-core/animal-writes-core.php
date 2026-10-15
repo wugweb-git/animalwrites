@@ -46,6 +46,7 @@ require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/sourcing-lists.php';
+require_once AW_CORE_DIR . 'includes/summary-rules.php';
 require_once AW_CORE_DIR . 'includes/places-admin.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/data-sources.php';

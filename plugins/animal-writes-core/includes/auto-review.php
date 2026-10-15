@@ -76,8 +76,14 @@ function aw_review_reason( $id ) {
 		}
 		wp_set_object_terms( $id, array( (int) $term->term_id ), 'category' );
 	}
-	// 1. Summary looks like a summary.
-	if ( $words < 15 || $words > 90 ) {
+	// 1. Summary follows the summary rules of its section (Settings → Sourcing → Summary rules): length, plain text.
+	$section = function_exists( 'aw_summary_section' ) ? aw_summary_section( $post ) : '';
+	if ( '' !== $section ) {
+		$why = aw_summary_problem( $post->post_excerpt, $section );
+		if ( '' !== $why ) {
+			return $why;
+		}
+	} elseif ( $words < 15 || $words > 90 ) {
 		return "summary length ({$words} words)";
 	}
 	if ( preg_match( '/\b(I cannot|I can\'t|as an AI|unable to (access|summari[sz]e)|no information)\b/i', $post->post_excerpt ) ) {
