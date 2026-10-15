@@ -9,9 +9,10 @@
  * - in Rank Math → Status & Tools → Database Tools → "Update SEO Scores", through `rank_math/recalculate_score/data`.
  * Pages written as plain text (Privacy Policy, Terms, About…) are analysed on their own text, as before.
  *
- * Library items, Resources and campaigns are always analysed on their rendered <main>: their pages are built from the
- * summary, the source link, the facts and the categories, which post_content alone does not hold. For them the tests
- * that do not fit a summary are removed (600+ words, keyword density, keyword in a subheading, table of contents),
+ * Library items, Resources, campaigns, News, Opportunities and Directory listings are always analysed on their rendered
+ * <main>: their pages are built from the summary, the source link, the facts, the contact details and the categories,
+ * which post_content alone does not hold. They are short by nature, so for them the tests that do not fit a summary
+ * are removed (600+ words, keyword density, keyword in a subheading, table of contents),
  * through Rank Math's `rank_math/researches/tests`. Rank Math's own "Update SEO Scores" tool reads that filter once
  * per batch, for the batch's first post, so stored scores for these types are worked out item by item instead
  * (the same analyzer, the filter applied per item).
@@ -66,13 +67,13 @@ function aw_seo_rendered_main( $id, $fresh = false ) {
 	return $html;
 }
 
-/** Post types analysed on their rendered <main> whatever their content (Library, Resources, campaigns). */
-const AW_SEO_RENDERED_TYPES = array( 'aw_legal', 'post', 'aw_campaign' );
+/** Post types analysed on their rendered <main> whatever their content (Library, Resources, campaigns, News, Opportunities, Directory). */
+const AW_SEO_RENDERED_TYPES = array( 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' );
 
-/** Rank Math tests that do not fit a summary page (Library, Resources, campaigns). */
+/** Rank Math tests that do not fit a summary page or a profile (the AW_SEO_RENDERED_TYPES). */
 const AW_SEO_SUMMARY_SKIP_TESTS = array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' );
 
-/** The content Rank Math should analyse: the rendered <main> of a built Page or a Library, Resources or campaign item, else ''. */
+/** The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''. */
 function aw_seo_analysis_content( $post ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
@@ -92,7 +93,7 @@ add_action(
 	2
 );
 
-// Tests that do not fit a summary page are not run on Library, Resources and campaign items.
+// Tests that do not fit a summary page are not run on Library, Resources, campaign, News, Opportunity and Directory items.
 add_filter(
 	'rank_math/researches/tests',
 	function ( $tests, $type ) {
