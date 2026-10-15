@@ -76,14 +76,16 @@ function aw_review_reason( $id ) {
 		}
 		wp_set_object_terms( $id, array( (int) $term->term_id ), 'category' );
 	}
-	// 1. Summary follows the summary rules of its section (Settings → Sourcing → Summary rules): length, plain text.
+	// 1. Summary follows the summary rules of its section (Settings → Sourcing → Summary rules): maximum, plain text.
+	// Below the minimum is never a reason to hold (owner, 15 Oct 2026): the workers already re-read the source and other
+	// coverage of the same story; accurate and complete beats long.
 	$section = function_exists( 'aw_summary_section' ) ? aw_summary_section( $post ) : '';
 	if ( '' !== $section ) {
-		$why = aw_summary_problem( $post->post_excerpt, $section );
+		$why = aw_summary_problem( $post->post_excerpt, $section, true );
 		if ( '' !== $why ) {
 			return $why;
 		}
-	} elseif ( $words < 15 || $words > 90 ) {
+	} elseif ( $words < 5 || $words > 90 ) {
 		return "summary length ({$words} words)";
 	}
 	if ( preg_match( '/\b(I cannot|I can\'t|as an AI|unable to (access|summari[sz]e)|no information)\b/i', $post->post_excerpt ) ) {
