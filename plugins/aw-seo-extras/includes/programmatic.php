@@ -151,7 +151,7 @@ function aw_seo_dir_breakdown( $place ) {
 	$have = (array) ( $d[ 'state' === $place->kind ? 's' : 'd' ][ $place->code ] ?? array() );
 	$out  = array();
 	foreach ( $have as $k => $n ) {
-		if ( 0 === strpos( (string) $k, '=' ) ) {
+		if ( 0 === strpos( (string) $k, '=' ) && false === strpos( (string) $k, '#' ) ) {
 			$out[] = array( substr( $k, 1 ), (int) $n ); // veterinary types are counted once, as "veterinary"
 		}
 	}
