@@ -1,6 +1,6 @@
 <?php
 /**
- * Search demand, next to Sourcing (15 Oct 2026): what people search and how Animal Writes shows up for it.
+ * Tools → Search demand (15 Oct 2026): what people search and how Animal Writes shows up for it.
  *
  * - One table (owner, 15 Oct 2026): every Search Console query of the latest 3 months merged with the keyword map's
  *   target phrases, ranked by Importance; Gaps sit collapsed under it. No filters, no CSV.
@@ -320,26 +320,18 @@ function aw_sd_cap(): string {
 	return defined( 'AW_SRC_CAP' ) ? AW_SRC_CAP : 'manage_options';
 }
 
-/* Search demand sits directly after Sourcing, under whatever parent Sourcing has (found at run time, late). */
+/*
+ * Tools → Search demand (owner, 15 Oct 2026: Settings holds configuration, Tools holds reports and jobs). It was under
+ * Settings next to Sourcing; the old address redirects here.
+ */
 add_action(
 	'admin_menu',
 	function () {
-		global $submenu;
-		$parent = 'options-general.php';
-		$pos    = null;
-		foreach ( (array) $submenu as $p => $items ) {
-			foreach ( array_values( (array) $items ) as $n => $item ) {
-				if ( 'aw-sourcing' === ( $item[2] ?? '' ) ) {
-					$parent = $p;
-					$pos    = $n + 1;
-					break 2;
-				}
-			}
-		}
-		add_submenu_page( $parent, 'Search demand', 'Search demand', aw_sd_cap(), 'aw-search-demand', 'aw_sd_screen', $pos );
+		add_management_page( 'Search demand', 'Search demand', aw_sd_cap(), 'aw-search-demand', 'aw_sd_screen' );
 	},
 	99
 );
+add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-search-demand' => 'tools.php' ) ); // Old Settings address → Tools (admin-ia.php).
 
 add_action(
 	'admin_post_aw_search_demand_refresh',
@@ -348,7 +340,7 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$problem = aw_sd_refresh();
-		$back    = wp_get_referer() ? remove_query_arg( array( 'refreshed', 'refresh_failed' ), wp_get_referer() ) : admin_url( 'admin.php?page=aw-search-demand' );
+		$back    = wp_get_referer() ? remove_query_arg( array( 'refreshed', 'refresh_failed' ), wp_get_referer() ) : admin_url( 'tools.php?page=aw-search-demand' );
 		wp_safe_redirect( add_query_arg( $problem ? 'refresh_failed' : 'refreshed', 1, $back ) );
 		exit;
 	}

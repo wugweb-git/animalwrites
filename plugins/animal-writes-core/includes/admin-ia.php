@@ -193,6 +193,27 @@ add_action(
 	999
 );
 
+/**
+ * Screens moved between Settings and Tools (owner, 15 Oct 2026: Settings = configuration, Tools = reports and jobs).
+ * Old bookmarks (options-general.php?page=…, admin.php?page=…) are sent to the new parent with a 301. Each screen adds
+ * itself with the aw_admin_moved_pages filter: slug => new parent file.
+ */
+function aw_admin_moved_redirect() {
+	global $pagenow;
+	$page  = sanitize_key( $_GET['page'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$moved = (array) apply_filters( 'aw_admin_moved_pages', array() );
+	if ( '' === $page || ! isset( $moved[ $page ] ) || $moved[ $page ] === $pagenow ) {
+		return;
+	}
+	if ( ! in_array( $pagenow, array( 'options-general.php', 'admin.php', 'tools.php' ), true ) ) {
+		return;
+	}
+	wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', wp_unslash( $_GET ) ), admin_url( $moved[ $page ] ) ), 301 ); // phpcs:ignore WordPress.Security.NonceVerification
+	exit;
+}
+add_action( 'admin_page_access_denied', 'aw_admin_moved_redirect' ); // WordPress refuses a page under the wrong parent before admin_init.
+add_action( 'admin_init', 'aw_admin_moved_redirect' );
+
 // Keep the right top-level item open on the moved screens.
 add_filter(
 	'parent_file',

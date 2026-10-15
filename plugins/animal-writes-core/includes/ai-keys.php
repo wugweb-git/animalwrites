@@ -69,6 +69,17 @@ function aw_ai_rows(): array {
 	return $rows;
 }
 
+/** The saved rows as they are in the database now (skips this request's cached copy: a check or save may have run meanwhile). */
+function aw_ai_rows_fresh(): array {
+	wp_cache_delete( 'aw_ai_models', 'options' );
+	return aw_ai_rows();
+}
+
+/** A short id for a key, used by the Remove button so the key itself never goes into the page. */
+function aw_ai_key_id( string $key ): string {
+	return substr( hash( 'sha256', $key ), 0, 16 );
+}
+
 function aw_ai_blank_row( string $key ): array {
 	return array( 'key' => $key, 'provider' => '', 'model' => '', 'url' => '', 'status' => 'unchecked', 'checked' => 0 );
 }
@@ -197,9 +208,16 @@ function aw_ai_check( array $row ): array {
 /** Test every saved key (owner, 12 Oct 2026): twice a day by WP-Cron, so the list and the workers only use keys that answer. */
 function aw_ai_check_all(): void {
 	@set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-	$rows = aw_ai_rows();
+	$checked = array();
+	foreach ( aw_ai_rows() as $r ) {
+		$checked[ $r['key'] ] = aw_ai_check( $r );
+	}
+	// The checks take a while: write the results into the list as it is now, so a key removed meanwhile stays removed.
+	$rows = aw_ai_rows_fresh();
 	foreach ( $rows as &$r ) {
-		$r = aw_ai_check( $r );
+		if ( isset( $checked[ $r['key'] ] ) ) {
+			$r = $checked[ $r['key'] ];
+		}
 	}
 	unset( $r );
 	update_option( 'aw_ai_models', $rows, false );
@@ -265,8 +283,39 @@ add_action(
 			}
 		}
 		unset( $r );
+		// Keys removed while this save was checking stay removed.
+		$now  = wp_list_pluck( aw_ai_rows_fresh(), 'key' );
+		$was  = wp_list_pluck( $saved, 'key' );
+		$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
 		update_option( 'aw_ai_models', $rows, false );
 		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&saved=1' ) );
+		exit;
+	}
+);
+
+// Remove one key straight away (owner, 15 Oct 2026): no Save, no re-checking of the other keys.
+add_action(
+	'admin_post_aw_ai_key_remove',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_ai_key_remove' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$id      = sanitize_key( wp_unslash( $_POST['aw_ai_remove'] ?? '' ) );
+		$rows    = aw_ai_rows_fresh();
+		$removed = '';
+		foreach ( $rows as $i => $r ) {
+			if ( '' !== $id && aw_ai_key_id( $r['key'] ) === $id ) {
+				$removed = substr( $r['key'], -4 );
+				$label   = $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider';
+				unset( $rows[ $i ] );
+				update_option( 'aw_ai_models', array_values( $rows ), false );
+				if ( function_exists( 'kits_sourcing_log' ) ) {
+					kits_sourcing_log( 'AI models', 'removed key …' . $removed . ' (' . $label . ')' );
+				}
+				break;
+			}
+		}
+		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&' . ( $removed ? 'removed=' . rawurlencode( $removed ) : 'notfound=1' ) ) );
 		exit;
 	}
 );
@@ -276,6 +325,12 @@ function aw_ai_keys_screen() {
 	echo '<div class="wrap"><h1>AI models</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success"><p>Saved and checked.</p></div>';
+	}
+	if ( isset( $_GET['removed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		echo '<div class="notice notice-success is-dismissible"><p>Key …' . esc_html( substr( sanitize_text_field( wp_unslash( $_GET['removed'] ) ), 0, 4 ) ) . ' removed. The news workers stop using it from their next run. It is noted in Settings → Sourcing → Change log.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	if ( isset( $_GET['notfound'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		echo '<div class="notice notice-warning"><p>That key was already gone; nothing changed.</p></div>';
 	}
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
 	wp_nonce_field( 'aw_ai_keys' );
@@ -294,18 +349,21 @@ function aw_ai_keys_screen() {
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
 			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
-			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="button" class="button-link" data-aw-remove>Remove</button></td></tr>';
+			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="submit" form="aw-ai-remove" name="aw_ai_remove" value="' . esc_attr( aw_ai_key_id( $r['key'] ) ) . '" class="button-link button-link-delete" data-aw-remove="…' . esc_attr( substr( $r['key'], -4 ) ) . '">Remove</button></td></tr>';
 	}
 	echo '</tbody></table>';
 	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check the working keys again too</label></p>';
 	submit_button( 'Save and check' );
+	echo '</form>';
+	echo '<form id="aw-ai-remove" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_key_remove">';
+	wp_nonce_field( 'aw_ai_key_remove' );
 	echo '</form></div>';
 	?>
 	<script>
 	document.querySelector('[data-aw-rows]').addEventListener('click', function (e) {
 		var tr = e.target.closest('[data-aw-row]'), body = this;
 		if (!tr) return;
-		if (e.target.matches('[data-aw-remove]')) tr.remove();
+		if (e.target.matches('[data-aw-remove]') && !confirm('Remove key ' + e.target.getAttribute('data-aw-remove') + '? This takes effect straight away.')) e.preventDefault();
 		if (e.target.matches('[data-aw-up]') && tr.previousElementSibling) body.insertBefore(tr, tr.previousElementSibling);
 		if (e.target.matches('[data-aw-down]') && tr.nextElementSibling) body.insertBefore(tr.nextElementSibling, tr);
 	});
