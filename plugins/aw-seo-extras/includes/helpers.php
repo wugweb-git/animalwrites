@@ -219,11 +219,8 @@ function aw_seo_cut_title( $text, $max = 60 ) {
  * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (aw_seo_cut_title).
  */
 function aw_seo_headline_title( $title ) {
-	$t = aw_seo_plain( $title );
-	if ( mb_strlen( aw_seo_branded( $t ) ) <= 60 ) {
-		return aw_seo_branded( $t );
-	}
-	return mb_strlen( $t ) <= 60 ? $t : aw_seo_cut_title( $t, 60 );
+	$t = aw_seo_headline_case( aw_seo_plain( $title ) ); // Title Case like every other title on the site
+	return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; a headline is never cut (owner, 15 Oct 2026)
 }
 
 /** Words a headline in Title Case keeps lower case (not first). */
