@@ -435,6 +435,9 @@ function aw_seo_default_image() {
 	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // made at share size (1200×630)
 }
 
+/** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
+const AW_SEO_LISTING_SHARE_IMAGE = 8814;
+
 /** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
 const AW_SEO_SOURCE_IMAGE_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' );
 
@@ -492,7 +495,8 @@ function aw_seo_term_image() {
 
 /**
  * The share image of the current view (og:image and article schema): the item's own image when it is landscape (or of
- * unknown shape), a category page's category photo, else the site share image, else the site icon. Tags keep the site
+ * unknown shape), a category page's category photo, for a listing the Directory band picture, else the site share image,
+ * else the site icon. Tags keep the site
  * share image (they have no picture of their own).
  *
  * @return array|null
@@ -505,6 +509,9 @@ function aw_seo_image() {
 	$img = is_singular() ? aw_seo_item_image( get_queried_object_id() ) : aw_seo_term_image();
 	if ( $img && $img['height'] > $img['width'] && ! ( is_singular() && get_post_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true ) ) ) {
 		$img = null; // portrait: share cards are landscape, so the site image is shared instead (the page keeps its photo)
+	}
+	if ( ! $img && is_singular( 'aw_listing' ) ) {
+		$img = aw_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
 	}
 	if ( ! $img ) {
 		$img = aw_seo_default_image();
