@@ -4,7 +4,7 @@
  * Styles: themes/kits-by-wugweb/assets/css/kit-primitives.css. Behaviour (sheet, show more): kit.js.
  *
  *  kits_tag()            static metadata (type, language, "Template")          span.kit-tag
- *  kits_chip()           a tag that navigates (topics)                          a.kit-chip
+ *  kits_chip()           a tag that navigates (categories)                      a.kit-chip
  *  kits_badge()          state: verified, unconfirmed, featured, sponsored, ad, closed, new
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
@@ -73,7 +73,7 @@ function kits_filter_group( $legend, $options, $show = 8 ) {
  * counts. Values with no items are not listed; a filter with one value and nothing chosen is not shown.
  *
  * @param string $legend  Visible label ("Category").
- * @param string $param   URL parameter ("topic"). Several choices are sent as topic=a,b (topic[]=a&topic[]=b without JavaScript).
+ * @param string $param   URL parameter ("category"). Several choices are sent as category=a,b (category[]=a&category[]=b without JavaScript).
  * @param array  $options List of [label, value, selected (bool), count (int)].
  * @return string
  */

@@ -7,7 +7,7 @@
  * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
  * - ?lang=, ?issuer= and ?court= on the Library → the same list without them.
  * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
- * - Resource-type archives (/?cat=N, or the Resource type taxonomy) and opportunity-type archives (/opportunity-type/{type}/) → the hub filtered by that
+ * - Resource-type archives (aw_resource_type; old /?cat=N addresses: animal-writes-core category-moves.php) and opportunity-type archives (/opportunity-type/{type}/) → the hub filtered by that
  *   type (/resources/?kind=…, /opportunities/?type=…): the same list, indexed once at its filtered address (a 301
  *   rather than a noindex page whose canonical points elsewhere). An empty type goes to the hub itself.
  *

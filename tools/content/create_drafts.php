@@ -1,6 +1,6 @@
 <?php
 /**
- * Create content DRAFTS from JSON (type, slug, title, excerpt, topics[], content). Never publishes, never overwrites
+ * Create content DRAFTS from JSON (type, slug, title, excerpt, categories[], content). Never publishes, never overwrites
  * a published post; an existing draft with the same slug is updated.
  * Usage: wp eval-file create_drafts.php drafts.json
  */
@@ -27,6 +27,6 @@ foreach ( $rows as $r ) {
 		echo 'error: ' . $r['slug'] . ' ' . $id->get_error_message() . "\n";
 		continue;
 	}
-	wp_set_object_terms( $id, $r['topics'], 'aw_topic' );
+	wp_set_object_terms( $id, $r['categories'], 'category' );
 	echo ( $have ? 'updated draft ' : 'created draft ' ) . $id . ': ' . $r['title'] . "\n";
 }

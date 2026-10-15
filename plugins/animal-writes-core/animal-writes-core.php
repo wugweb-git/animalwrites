@@ -25,6 +25,12 @@ if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
 	define( 'DISALLOW_FILE_EDIT', true );
 }
 
+/**
+ * The workers' old field names (topics; categories = Resource types) are still accepted and sent while the workers
+ * switch to the new ones (15 Oct 2026). Off once they are deployed.
+ */
+const AW_WORKER_OLD_NAMES = true;
+
 /** Days after which a verified listing is flagged for re-verification. */
 if ( ! defined( 'AW_REVERIFY_DAYS' ) ) {
 	define( 'AW_REVERIFY_DAYS', 180 );
@@ -40,6 +46,7 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 }
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/content-types.php';
+require_once AW_CORE_DIR . 'includes/category-moves.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
@@ -53,7 +60,7 @@ require_once AW_CORE_DIR . 'includes/ingest.php';
 require_once AW_CORE_DIR . 'includes/opportunities-site.php';
 require_once AW_CORE_DIR . 'includes/auto-review.php';
 require_once AW_CORE_DIR . 'includes/same-story.php';
-require_once AW_CORE_DIR . 'includes/topic-images.php';
+require_once AW_CORE_DIR . 'includes/category-images.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/media.php';

@@ -1,10 +1,10 @@
 <?php
 /**
  * Pages built from live data (SEO Phase 4, 15 Oct 2026): the Directory's state, district, district × type and filtered
- * lists (?type=, ?state=), and the 18 topic pages.
+ * lists (?type=, ?state=), and the 18 category pages.
  *
  * - Search titles and descriptions from the page's own counts and place names (titles.php asks these functions).
- * - One visible line of facts on page 1: under the result count in the Directory, above the lists on a topic page. It
+ * - One visible line of facts on page 1: under the result count in the Directory, above the lists on a category page. It
  *   says what is listed there, how many of each and where most of them are, so no two pages say the same thing.
  *
  * Every number and name comes from the published listings and items; nothing is written by hand. The owner's intro
@@ -509,22 +509,22 @@ add_filter(
 	}
 );
 
-/* ---------- Topics ---------- */
+/* ---------- Categories ---------- */
 
 /**
- * Published items per topic: news, Library documents, guides, research summaries, opportunities and campaigns
+ * Published items per category: news, Library documents, guides, research summaries, opportunities and campaigns
  * (cached for 12 hours).
  *
  * @return array term_id => [aw_news, aw_legal, guide, research, aw_opportunity, aw_campaign] counts.
  */
-function aw_seo_topic_counts() {
-	$out = get_transient( 'aw_seo_topic_counts' );
+function aw_seo_category_counts() {
+	$out = get_transient( 'aw_seo_category_counts' );
 	if ( is_array( $out ) ) {
 		return $out;
 	}
 	global $wpdb;
-	$research = get_term_by( 'slug', 'research', 'category' );
-	$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT tt.term_id term, p.post_type type, SUM(EXISTS(SELECT 1 FROM {$wpdb->term_relationships} rc WHERE rc.object_id = p.ID AND rc.term_taxonomy_id = %d)) research, COUNT(DISTINCT p.ID) n FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_status = 'publish' WHERE tt.taxonomy = 'aw_topic' GROUP BY tt.term_id, p.post_type", $research ? (int) $research->term_taxonomy_id : 0 ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$research = get_term_by( 'slug', 'research', 'aw_resource_type' );
+	$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT tt.term_id term, p.post_type type, SUM(EXISTS(SELECT 1 FROM {$wpdb->term_relationships} rc WHERE rc.object_id = p.ID AND rc.term_taxonomy_id = %d)) research, COUNT(DISTINCT p.ID) n FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_status = 'publish' WHERE tt.taxonomy = %s GROUP BY tt.term_id, p.post_type", $research ? (int) $research->term_taxonomy_id : 0, aw_seo_category_tax() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out      = array();
 	foreach ( $rows as $r ) {
 		$t = (int) $r['term'];
@@ -535,21 +535,21 @@ function aw_seo_topic_counts() {
 			$out[ $t ][ $r['type'] ] = (int) $r['n'];
 		}
 	}
-	set_transient( 'aw_seo_topic_counts', $out, 12 * HOUR_IN_SECONDS );
+	set_transient( 'aw_seo_category_counts', $out, 12 * HOUR_IN_SECONDS );
 	return $out;
 }
-add_action( 'save_post', fn() => delete_transient( 'aw_seo_topic_counts' ) );
+add_action( 'save_post', fn() => delete_transient( 'aw_seo_category_counts' ) );
 
 /**
- * What a topic holds, as [text, url] parts: "285 news stories", "5 court orders and official documents", "8 guides",
+ * What a category holds, as [text, url] parts: "285 news stories", "5 court orders and official documents", "8 guides",
  * "1 research summary", "2 opportunities", and the Directory listing types its "Find help" shows.
  *
- * @param WP_Term $term Topic.
+ * @param WP_Term $term Category.
  * @param bool    $help With the Directory types.
  * @return array
  */
-function aw_seo_topic_parts( $term, $help = true ) {
-	$c     = aw_seo_topic_counts()[ $term->term_id ] ?? array();
+function aw_seo_category_parts( $term, $help = true ) {
+	$c     = aw_seo_category_counts()[ $term->term_id ] ?? array();
 	$words = array(
 		'aw_news'        => array( 'news story', 'news stories', 'aw_news' ),
 		'aw_legal'       => array( 'court order or official document', 'court orders and official documents', 'aw_legal' ),
@@ -562,11 +562,11 @@ function aw_seo_topic_parts( $term, $help = true ) {
 	foreach ( $words as $k => $w ) {
 		$n = (int) ( $c[ $k ] ?? 0 );
 		if ( $n ) {
-			$parts[] = array( number_format_i18n( $n ) . ' ' . $w[ 1 === $n ? 0 : 1 ], add_query_arg( 'topic', $term->slug, aw_hub_url( $w[2] ) ) );
+			$parts[] = array( number_format_i18n( $n ) . ' ' . $w[ 1 === $n ? 0 : 1 ], add_query_arg( 'category', $term->slug, aw_hub_url( $w[2] ) ) );
 		}
 	}
-	if ( $help && function_exists( 'aw_topic_help_types' ) ) {
-		foreach ( aw_topic_help_types( $term->term_id ) as $tid ) {
+	if ( $help && function_exists( 'aw_category_help_types' ) ) {
+		foreach ( aw_category_help_types( $term->term_id ) as $tid ) {
 			$t = get_term( $tid, 'aw_listing_type' );
 			$n = ( $t && ! is_wp_error( $t ) ) ? aw_seo_dir_count( null, $t->slug ) : 0;
 			if ( $n ) {
@@ -578,13 +578,13 @@ function aw_seo_topic_parts( $term, $help = true ) {
 }
 
 /**
- * A topic's parts as text: [what it holds, its Directory types].
+ * A category's parts as text: [what it holds, its Directory types].
  *
- * @param array $parts aw_seo_topic_parts().
+ * @param array $parts aw_seo_category_parts().
  * @param bool  $links As links.
  * @return array
  */
-function aw_seo_topic_split( array $parts, $links = false ) {
+function aw_seo_category_split( array $parts, $links = false ) {
 	$out = array( array(), array() );
 	foreach ( $parts as $p ) {
 		$out[ empty( $p[2] ) ? 0 : 1 ][] = $links ? aw_seo_link( $p[1], $p[0] ) : $p[0];
@@ -592,13 +592,13 @@ function aw_seo_topic_split( array $parts, $links = false ) {
 	return $out;
 }
 
-/** Meta description of a topic page from what it holds; '' when it holds nothing. */
-function aw_seo_topic_description( $term ) {
-	$parts = aw_seo_topic_parts( $term );
+/** Meta description of a category page from what it holds; '' when it holds nothing. */
+function aw_seo_category_description( $term ) {
+	$parts = aw_seo_category_parts( $term );
 	if ( ! $parts ) {
 		return '';
 	}
-	list( $items, $dir ) = aw_seo_topic_split( $parts );
+	list( $items, $dir ) = aw_seo_category_split( $parts );
 	$lead  = aw_seo_plain( $term->name ) . ' in India on Animal Writes: ';
 	$room  = 155 - mb_strlen( aw_seo_page_suffix() );
 	$cands = array();
@@ -617,18 +617,18 @@ function aw_seo_topic_description( $term ) {
 	return aw_seo_cut( (string) end( $cands ), $room );
 }
 
-// A topic page: the line of facts above its lists, page 1.
+// A category page: the line of facts above its lists, page 1.
 add_filter(
 	'do_shortcode_tag',
 	function ( $html, $tag ) {
-		if ( 'aw_topic_hub' !== $tag || ! is_tax( 'aw_topic' ) || aw_seo_page_number() > 1 ) {
+		if ( 'aw_category_hub' !== $tag || ! aw_seo_is_category_page() || aw_seo_page_number() > 1 ) {
 			return $html;
 		}
-		$parts = aw_seo_topic_parts( get_queried_object() );
+		$parts = aw_seo_category_parts( get_queried_object() );
 		if ( ! $parts ) {
 			return $html;
 		}
-		list( $items, $dir ) = aw_seo_topic_split( $parts, true );
+		list( $items, $dir ) = aw_seo_category_split( $parts, true );
 		$line = trim( ( $items ? 'In this category: ' . aw_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . aw_seo_join( $dir ) . '.' : '' ) );
 		return '<p class="kit-note">' . $line . '</p>' . $html;
 	},
@@ -637,16 +637,16 @@ add_filter(
 );
 
 /**
- * Keep each topic's stored Rank Math description equal to the one built here, so the Rank Math box shows what is
+ * Keep each category's stored Rank Math description equal to the one built here, so the Rank Math box shows what is
  * printed: only where the field is empty or still holds the automatic copy (_aw_seo_auto); a typed one is never
- * replaced. Daily, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_topics() );'`.
+ * replaced. Daily, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_categories() );'`.
  *
  * @return array slug => description.
  */
-function aw_seo_sync_topics() {
+function aw_seo_sync_categories() {
 	$out = array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true ) ) as $term ) {
-		$value = aw_seo_topic_description( $term );
+	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true ) ) as $term ) {
+		$value = aw_seo_category_description( $term );
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$have  = trim( (string) get_term_meta( $term->term_id, 'rank_math_description', true ) );
 		if ( '' !== $value && $have !== $value && ( '' === $have || $have === ( $auto['description'] ?? null ) ) ) {
@@ -658,7 +658,7 @@ function aw_seo_sync_topics() {
 	}
 	return $out;
 }
-add_action( 'aw_seo_fill_daily', 'aw_seo_sync_topics', 30 );
+add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
 
 /* ---------- Resources hub: guides and research summaries counted apart ---------- */
 
@@ -668,7 +668,7 @@ function aw_seo_resources_count_label() {
 		return '';
 	}
 	$total    = (int) aw_hub_total( 'post' );
-	$term     = get_term_by( 'slug', 'research', 'category' );
+	$term     = get_term_by( 'slug', 'research', 'aw_resource_type' );
 	$research = $term ? (int) $term->count : 0;
 	$guides   = $total - $research;
 	if ( ! $research || $guides < 1 ) {

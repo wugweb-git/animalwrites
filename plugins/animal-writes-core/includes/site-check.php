@@ -35,7 +35,7 @@ function aw_site_check_urls() {
 			$urls[ $label ] = wp_parse_url( get_permalink( $p[0] ), PHP_URL_PATH );
 		}
 	}
-	$t = get_terms( array( 'taxonomy' => 'aw_topic', 'number' => 1, 'hide_empty' => true ) );
+	$t = get_terms( array( 'taxonomy' => 'category', 'number' => 1, 'hide_empty' => true ) );
 	if ( $t && ! is_wp_error( $t ) ) {
 		$urls['A category'] = wp_parse_url( get_term_link( $t[0] ), PHP_URL_PATH );
 	}

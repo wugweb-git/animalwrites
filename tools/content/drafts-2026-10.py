@@ -53,7 +53,7 @@ POSTS = [
         "type": "aw_guide", "slug": "animal-welfare-laws-in-india-explained",
         "title": "Animal welfare laws in India, in plain words",
         "excerpt": "What the main animal welfare laws say, who enforces them, and where to read the originals.",
-        "topics": ["laws-rules", "cruelty-prosecution"],
+        "categories": ["laws-rules", "cruelty-prosecution"],
         "content": p("A short map of the laws that protect animals in India. Each heading links to the full text in our Research Library.")
         + h("The Constitution")
         + ul(["Article 51A(g) makes it a fundamental duty of every citizen to have compassion for living creatures."])
@@ -80,7 +80,7 @@ POSTS = [
         "type": "aw_guide", "slug": "adopting-a-dog-or-cat",
         "title": "Adopting a dog or cat: a practical guide",
         "excerpt": "How to adopt responsibly: where to find animals, preparing your home, first vet visit and the first weeks.",
-        "topics": ["adoption", "pets-breeding"],
+        "categories": ["adoption", "pets-breeding"],
         "content": p("Adopting gives a rescued animal a home and frees space for another in need. Plan for a commitment of 10 to 15 years.")
         + h("Before you adopt")
         + ul(["Check that everyone at home agrees, and that your housing allows pets.",
@@ -102,7 +102,7 @@ POSTS = [
         "type": "aw_guide", "slug": "feeding-community-animals-good-practice",
         "title": "Feeding community animals: good practice",
         "excerpt": "Where, when and what to feed community dogs, cats, cattle and birds, and how to avoid conflicts.",
-        "topics": ["feeders-caregivers", "community-dogs"],
+        "categories": ["feeders-caregivers", "community-dogs"],
         "content": p("Regular, clean feeding keeps community animals healthy and calm, and makes sterilisation and vaccination easier.")
         + h("Where and when")
         + ul([f"Use a fixed spot and time, away from entrances, children's play areas and busy roads. The {a('abc', 'Animal Birth Control Rules, 2023')} ask resident welfare associations to arrange designated feeding spots.",
@@ -122,7 +122,7 @@ POSTS = [
         "type": "aw_guide", "slug": "living-alongside-animals",
         "title": "Living alongside animals: avoiding and solving conflicts",
         "excerpt": "Practical ways to prevent conflicts with community dogs, monkeys, snakes and birds, and what to do after a bite.",
-        "topics": ["community-dogs", "wildlife", "rabies-public-health"],
+        "categories": ["community-dogs", "wildlife", "rabies-public-health"],
         "content": p("Most conflicts with animals come from fear, food or crowding, and can be prevented.")
         + h("Community dogs")
         + ul(["Walk calmly, don't run, and avoid staring or startling a dog that is eating or sleeping.",
@@ -140,7 +140,7 @@ POSTS = [
         "type": "aw_guide", "slug": "animal-welfare-faqs",
         "title": "Animal welfare: frequently asked questions",
         "excerpt": "Short answers to common questions about community dogs, cruelty, pets and wildlife, with links to the law.",
-        "topics": ["community-dogs", "laws-rules"],
+        "categories": ["community-dogs", "laws-rules"],
         "content": h("Can community dogs be removed from my area?")
         + p(f"No. Under the {a('abc', 'Animal Birth Control Rules, 2023')}, dogs are sterilised, vaccinated and returned to the same area.")
         + h("Is it legal to feed community dogs?")
@@ -159,7 +159,7 @@ POSTS = [
         "type": "aw_resource", "slug": "animal-cruelty-police-complaint-template",
         "title": "Police complaint for animal cruelty (template)",
         "excerpt": "A fill-in template for reporting animal cruelty to the police under the BNS and the PCA Act.",
-        "topics": ["cruelty-prosecution", "laws-rules"],
+        "categories": ["cruelty-prosecution", "laws-rules"],
         "content": p("Copy this, fill in the details in square brackets, sign it, and submit it at the police station that covers the place of the incident. Keep a copy with the receiving stamp, or ask for the FIR number.")
         + pre("""To,
 The Station House Officer,
@@ -189,7 +189,7 @@ Yours faithfully,
         "type": "aw_resource", "slug": "rti-template-abc-programme",
         "title": "RTI application: your city's ABC programme (template)",
         "excerpt": "An RTI template asking your municipal body for data on its Animal Birth Control and anti-rabies programme.",
-        "topics": ["animal-birth-control", "campaigns-civic-action"],
+        "categories": ["animal-birth-control", "campaigns-civic-action"],
         "content": p("Use this Right to Information (RTI) application to ask your municipal corporation or council how its Animal Birth Control (ABC) programme is run. Send it by post with the fee, or file it online if your state has an RTI portal.")
         + pre("""To,
 The Public Information Officer,

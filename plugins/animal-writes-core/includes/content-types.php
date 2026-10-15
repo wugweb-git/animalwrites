@@ -14,8 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Thin cards (news, legal, research) store a summary + source link, never the source content.
  * Owned content (guides, campaigns, resources, opportunities, listings) is authored on site.
- * Resources are WordPress's own Posts (owner, 10 Oct 2026): relabelled, at /resources/{slug}/, with the Category list
- * as "Resource types" (Guide, How-to, FAQ, Research). See aw_resources_post_args() below.
+ * Resources are WordPress's own Posts (owner, 10 Oct 2026): relabelled, at /resources/{slug}/, with their own list of
+ * Resource types (aw_resource_type: Guide, How-to, FAQ, Research). See aw_resources_post_args() below.
+ * Categories are WordPress's own category (owner, 15 Oct 2026), shared by every section, at /category/{slug}/.
  *
  * @return array slug => [ singular, plural, rewrite slug, supports ]
  */
@@ -68,15 +69,37 @@ function aw_register_content_types() {
 
 	$all = array_keys( aw_post_types() );
 
+	// Categories are WordPress's own (owner, 15 Oct 2026): the core category, on every section, at /category/{slug}/.
+	foreach ( $all as $type ) {
+		register_taxonomy_for_object_type( 'category', $type );
+	}
+
+	// Resource types (Guide, How-to, FAQ, Research): labels and list filters on Resources only, no pages of their own.
 	register_taxonomy(
-		'aw_topic',
-		$all,
+		'aw_resource_type',
+		array( 'post' ),
 		array(
-			'labels'            => array( 'name' => 'Categories', 'singular_name' => 'Category' ), // shared by every section; URLs stay /topic/{slug}/
-			'hierarchical'      => true,
-			'show_in_rest'      => true,
-			'show_admin_column' => true,
-			'rewrite'           => array( 'slug' => 'topic', 'with_front' => false ),
+			'labels'             => array(
+				'name'          => 'Resource types',
+				'singular_name' => 'Resource type',
+				'menu_name'     => 'Resource types',
+				'all_items'     => 'All resource types',
+				'edit_item'     => 'Edit resource type',
+				'view_item'     => 'View resource type',
+				'update_item'   => 'Update resource type',
+				'add_new_item'  => 'Add New Resource type',
+				'new_item_name' => 'New resource type name',
+				'search_items'  => 'Search resource types',
+				'not_found'     => 'No resource types found.',
+				'back_to_items' => '&larr; Go to Resource types',
+			),
+			'hierarchical'       => true,
+			'public'             => true,
+			'publicly_queryable' => false,
+			'query_var'          => false,
+			'rewrite'            => false,
+			'show_in_rest'       => true,
+			'show_admin_column'  => true,
 		)
 	);
 
@@ -155,35 +178,37 @@ function aw_resources_post_args( $args, $type ) {
 }
 add_filter( 'register_post_type_args', 'aw_resources_post_args', 10, 2 );
 
-/** The Category list is "Resource types": labels and list filters only, no archive pages (as before). */
+/**
+ * Categories: WordPress's own list, labelled as on the site, at /category/{slug}/ (not under /resources/, the Posts
+ * permalink's front). Listed once, under Classification in WP Admin (admin-ia.php).
+ */
 add_filter(
 	'register_taxonomy_args',
 	function ( $args, $tax ) {
 		if ( 'category' !== $tax ) {
 			return $args;
 		}
-		$args['labels']             = array(
-			'name'          => 'Resource types',
-			'singular_name' => 'Resource type',
-			'menu_name'     => 'Resource types',
-			'all_items'     => 'All resource types',
-			'edit_item'     => 'Edit resource type',
-			'view_item'     => 'View resource type',
-			'update_item'   => 'Update resource type',
-			'add_new_item'  => 'Add New Resource type',
-			'new_item_name' => 'New resource type name',
-			'search_items'  => 'Search resource types',
-			'not_found'     => 'No resource types found.',
-			'back_to_items' => '&larr; Go to Resource types',
-		);
-		$args['publicly_queryable'] = false;
-		$args['rewrite']            = false;
-		$args['show_admin_column']  = true;
+		$args['labels']            = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Categories', 'singular_name' => 'Category', 'menu_name' => 'Categories', 'all_items' => 'All categories', 'edit_item' => 'Edit category', 'add_new_item' => 'Add category', 'search_items' => 'Search categories' ) );
+		$args['rewrite']           = array( 'slug' => 'category', 'with_front' => false, 'hierarchical' => true, 'ep_mask' => EP_CATEGORIES );
+		$args['show_admin_column'] = true;
 		return $args;
 	},
 	10,
 	2
 );
+
+/** The sections a category page lists (WordPress lists only Posts on a category page unless told). */
+add_action(
+	'pre_get_posts',
+	function ( $q ) {
+		if ( ! is_admin() && $q->is_main_query() && $q->is_category() && ! $q->get( 'post_type' ) ) {
+			$q->set( 'post_type', array_keys( aw_post_types() ) );
+		}
+	}
+);
+
+/** No item is filed under a default category: WordPress's "Uncategorized" is not used (owner, 15 Oct 2026). */
+add_filter( 'pre_option_default_category', fn() => 0 );
 
 // Resources have no tags, author box or post formats (core registers Posts with them before this plugin loads).
 add_action(
@@ -201,9 +226,10 @@ add_action(
 add_action(
 	'init',
 	function () {
-		if ( AW_RESOURCES_PERMALINK !== get_option( 'aw_resources_rewrite' ) ) {
+		$want = AW_RESOURCES_PERMALINK . ' categories-2026-10-15'; // and once more when Categories moved to /category/
+		if ( $want !== get_option( 'aw_resources_rewrite' ) ) {
 			flush_rewrite_rules( false );
-			update_option( 'aw_resources_rewrite', AW_RESOURCES_PERMALINK, true );
+			update_option( 'aw_resources_rewrite', $want, true );
 		}
 	},
 	99

@@ -221,7 +221,7 @@ function aw_schema_x_profiles( $node ) {
 /**
  * The publisher (Animal Writes) as schema.org Organization: name, URL, logo, email, description and profiles from
  * Rank Math's Knowledge Graph settings (Titles & Meta → Local SEO, Social Meta), so the settings and the graph agree;
- * the alternate names, policies, topics and country served are added here (Rank Math has no fields for them).
+ * the alternate names, policies, categories and country served are added here (Rank Math has no fields for them).
  */
 function aw_publisher_schema() {
 	$logo  = (string) aw_seo_rm_setting( 'knowledgegraph_logo' );
@@ -689,7 +689,7 @@ function aw_categories_schema() {
 
 /**
  * The schema.org nodes of the current page's own content (not the publisher, the site or the breadcrumb trail):
- * the article, legislation, job, campaign, listing organisation, contact page, hub list or topic collection.
+ * the article, legislation, job, campaign, listing organisation, contact page, hub list or category collection.
  *
  * @return array List of nodes.
  */
@@ -718,7 +718,7 @@ function aw_schema_nodes() {
 		);
 	} elseif ( is_page( 'about' ) ) {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
-	} elseif ( is_page( array( 'topics', 'categories' ) ) ) {
+	} elseif ( is_page( 'categories' ) ) {
 		$nodes = array_merge( $nodes, aw_categories_schema() );
 	} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
 		$nodes[] = aw_press_schema();

@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The image for an item. Ingested items (News, Library, research), in order: the publisher's image, linked (unless the
  * check in cc0-images.php found it missing, broken or a site logo); their own CC0 photo from Openverse (featured
- * image); then, as for everything else, the hosted PDF page, the topic photo, and finally the placard (callers).
+ * image); then, as for everything else, the hosted PDF page, the category photo, and finally the placard (callers).
  * Library items with a hosted government PDF keep its first page first.
- * Topic photos are set in the option aw_topic_images = array( topic-slug => attachment ID, 'default' => ID ).
+ * Category photos are term meta aw_category_image; the option aw_category_images = array( 'default' => IDs ) holds the general ones.
  *
  * @param int    $post_id Post ID.
  * @param string $size    Image size.
@@ -40,7 +40,7 @@ function aw_item_image( $post_id, $size = 'large' ) {
 }
 
 /**
- * The attachment behind aw_item_image(): the hosted PDF, its preview, or the item's topic photo. 0 when there is none.
+ * The attachment behind aw_item_image(): the hosted PDF, its preview, or the item's category photo. 0 when there is none.
  *
  * @param int $post_id Post ID.
  * @return int
@@ -64,14 +64,14 @@ function aw_item_image_id( $post_id ) {
 		return $feat;
 	}
 	// A category photo belongs to one item at a time across the whole site (thumbs.php). Ingested items without their own
-	// image may share their topic's photo as a last fallback before the placard (owner 12 Oct 2026).
+	// image may share their category's photo as a last fallback before the placard (owner 12 Oct 2026).
 	$own = function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
-	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_topic_image_id' ) ) {
+	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_category_image_id' ) ) {
 		return $own;
 	}
-	$topics = wp_get_object_terms( $post_id, 'aw_topic' );
-	foreach ( is_wp_error( $topics ) ? array() : $topics as $t ) {
-		$att = (int) aw_topic_image_id( $t );
+	$cats = wp_get_object_terms( $post_id, 'category' );
+	foreach ( is_wp_error( $cats ) ? array() : $cats as $t ) {
+		$att = (int) aw_category_image_id( $t );
 		if ( $att ) {
 			return $att;
 		}

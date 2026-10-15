@@ -25,10 +25,11 @@ wp plugin activate aw-seo-extras --quiet
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
 wp post create --post_type=page --post_title="Search" --post_name=search --post_status=publish --post_content="[aw_search]" --quiet
-wp term create aw_topic "Community Dogs" --slug=community-dogs --quiet || true
+wp term create category "Community Dogs" --slug=community-dogs --quiet || true
 N=$(wp post create --post_type=aw_news --post_title="CI news item" --post_status=publish --porcelain)
 wp post meta add "$N" aw_source_url "https://www.thehindu.com/ci-item/" --quiet
 wp post meta add "$N" aw_source_name "The Hindu" --quiet
+wp post term add "$N" category community-dogs --quiet
 wp post create --post_type=aw_legal --post_title="CI library item 2023" --post_status=publish --quiet
 wp post create --post_type=post --post_title="CI guide" --post_status=publish --quiet
 wp post create --post_type=aw_opportunity --post_title="CI opportunity" --post_status=publish --quiet
@@ -43,7 +44,7 @@ sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
 URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
-  /directory/kerala/ /directory/kerala/ernakulam/
+  /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
 for u in "${URLS[@]}"; do

@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Category hub — category list
- * Slug: kits-by-wugweb/topic-hub
+ * Slug: kits-by-wugweb/category-hub
  * Categories: kits-lists
  */
 ?>

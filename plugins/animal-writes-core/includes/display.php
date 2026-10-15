@@ -174,14 +174,14 @@ add_filter(
 	2
 );
 
-// Research papers (Resources in the Research category) keep their summary in the excerpt and their journal and DOI in
+// Research papers (Resources of the Research type) keep their summary in the excerpt and their journal and DOI in
 // the source fields, with no body text: the page shows that stored summary and "Source: {journal}, {DOI link}" where
 // the body goes (SEO audit, 10 Oct 2026). A paper with body text of its own is left as written.
 add_filter(
 	'the_content',
 	function ( $content ) {
 		$id = (int) get_the_ID();
-		if ( '' !== trim( (string) $content ) || ! $id || ! is_singular( 'post' ) || get_queried_object_id() !== $id || ! has_category( 'research', $id ) ) {
+		if ( '' !== trim( (string) $content ) || ! $id || ! is_singular( 'post' ) || get_queried_object_id() !== $id || ! has_term( 'research', 'aw_resource_type', $id ) ) {
 			return $content;
 		}
 		$summary = trim( (string) get_post_field( 'post_excerpt', $id ) );

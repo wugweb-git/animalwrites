@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The order of Pages in llms.txt, by slug ("" = the home page). Pages not named here follow, as Rank Math lists them. */
-const AW_LLMS_PAGE_ORDER = array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'media', 'topics', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' );
+const AW_LLMS_PAGE_ORDER = array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'media', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' );
 
-/** Resource categories that are guides (listed before research). */
-const AW_LLMS_GUIDE_CATS = array( 'guide', 'faq', 'how-to' );
+/** Resource types that are guides (listed before research). */
+const AW_LLMS_GUIDE_TYPES = array( 'guide', 'faq', 'how-to' );
 
 add_filter( 'rank_math/llms_txt/remove_credit', '__return_true' );
 
@@ -59,7 +59,7 @@ add_filter(
 					'post_status'    => 'publish',
 					'posts_per_page' => $limit,
 					'has_password'   => false,
-					'tax_query'      => array( array( 'taxonomy' => 'category', 'field' => 'slug', 'terms' => AW_LLMS_GUIDE_CATS ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+					'tax_query'      => array( array( 'taxonomy' => 'aw_resource_type', 'field' => 'slug', 'terms' => AW_LLMS_GUIDE_TYPES ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 				)
 			);
 			$seen   = array_flip( wp_list_pluck( $guides, 'ID' ) );

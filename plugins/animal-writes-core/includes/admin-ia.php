@@ -3,7 +3,7 @@
  * WP Admin information architecture (Phase 11 J). Nothing is deleted: menus move, labels match the site.
  *
  * - Posts are Resources (content-types.php); Comments hidden and off sitewide. Testimonials (1.0 leftover) hidden.
- * - Topics and Locations are shared by several sections: shown once, under "Classification".
+ * - Categories are shared by every section: shown once, under "Classification".
  * - "Inbox": Messages and Listing claims, with unread counts. "Audience": Newsletter and Volunteers.
  * - Menu order follows the site: Directory · News · Resources · Library · Opportunities · Campaigns · Pages · Media …
  * - Labels: Library types → Kind, Source types → Issuers, Campaign Hub → Campaigns (slugs and URLs unchanged).
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SHARED_TAXONOMIES = array( 'aw_topic' ); // places are not a list any more (LGD file, places.php)
+const AW_SHARED_TAXONOMIES = array( 'category' ); // WordPress's own Categories, on every section // places are not a list any more (LGD file, places.php)
 
 /* ---------- Comments off ---------- */
 
@@ -78,9 +78,6 @@ add_filter(
 		}
 		if ( in_array( $tax, AW_SHARED_TAXONOMIES, true ) ) {
 			$args['show_in_menu'] = false; // listed once, under Classification
-		}
-		if ( 'aw_topic' === $tax && is_admin() ) { // Categories, in WP Admin and on the site
-			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Categories', 'singular_name' => 'Category', 'menu_name' => 'Categories', 'all_items' => 'All categories', 'edit_item' => 'Edit category', 'add_new_item' => 'Add category', 'search_items' => 'Search categories' ) );
 		}
 		return $args;
 	},

@@ -3,7 +3,7 @@
  * Open Graph / Twitter details Rank Math's settings cannot express. Rank Math prints the tags; a share image or text
  * chosen in Rank Math always wins.
  *
- * - One share image: the item's own stored image when landscape (featured image, topic photo, hosted PDF cover), else
+ * - One share image: the item's own stored image when landscape (featured image, category photo, hosted PDF cover), else
  *   the site share image, with its size (helpers.php). Never the publisher's remote image.
  * - og:type "article" only for news, Library, Resources and campaigns; "website" elsewhere.
  * - og:locale en_IN.

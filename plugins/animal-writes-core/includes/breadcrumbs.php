@@ -86,7 +86,7 @@ add_filter(
 	10,
 	2
 );
-// On item pages the topic chips sit above the title: the trail goes before them, so it is always first.
+// On item pages the category chips sit above the title: the trail goes before them, so it is always first.
 add_filter(
 	'render_block_core/post-terms',
 	function ( $html, $block, $instance ) {
@@ -98,5 +98,5 @@ add_filter(
 	10,
 	3
 );
-// Shortcodes in a template run before its blocks, so the trail is placed by blocks (topic chips or the title) or by the
+// Shortcodes in a template run before its blocks, so the trail is placed by blocks (category chips or the title) or by the
 // section band itself, never by a shortcode such as the publisher row.

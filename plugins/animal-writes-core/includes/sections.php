@@ -44,15 +44,16 @@ add_shortcode(
 	'aw_section_head',
 	function () {
 		global $wp_query;
-		$type  = (string) get_query_var( 'post_type' );
-		$type  = $type ? $type : ( is_tax() ? (string) ( get_taxonomy( get_queried_object()->taxonomy )->object_type[0] ?? '' ) : '' );
-		$title = is_tax() ? single_term_title( '', false ) : post_type_archive_title( '', false );
+		$term_page = is_tax() || is_category();
+		$type      = is_category() ? 'aw_news' : (string) get_query_var( 'post_type' ); // a category page leads with its news
+		$type      = $type ? $type : ( $term_page ? (string) ( get_taxonomy( get_queried_object()->taxonomy )->object_type[0] ?? '' ) : '' );
+		$title     = $term_page ? single_term_title( '', false ) : post_type_archive_title( '', false );
 		if ( 'aw_listing' === $type && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_listing_type' ) ) ) {
 			$city  = aw_current_place();
 			$tname = function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '';
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
-		$desc = is_tax() && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
+		$desc = $term_page && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
 		if ( 'aw_listing' === $type && function_exists( 'aw_directory_intro' ) ) {
 			$desc = aw_directory_intro();
 		}
@@ -67,7 +68,7 @@ add_shortcode(
 			}
 		} else {
 			// Prefer items with a real image; fall back to placards only to fill the three tiles.
-			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => is_tax() ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
+			$pool  = get_posts( array( 'post_type' => $type ? $type : 'any', 'post_status' => 'publish', 'numberposts' => 12, 'tax_query' => $term_page ? array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) ) : array() ) );
 			// Three tiles, each a different picture: one item per distinct image, then placards to fill.
 			$seen  = array();
 			$with  = array();
@@ -85,7 +86,7 @@ add_shortcode(
 			}
 		}
 		// A category page leads with its own photo (set on the category screen in WP Admin).
-		$cat_img = ( is_tax() && function_exists( 'aw_topic_image_id' ) ) ? aw_topic_image_id( get_queried_object() ) : 0;
+		$cat_img = ( $term_page && function_exists( 'aw_category_image_id' ) ) ? aw_category_image_id( get_queried_object() ) : 0;
 		if ( $cat_img ) {
 			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="kit-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
 		}

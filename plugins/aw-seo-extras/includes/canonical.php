@@ -2,7 +2,7 @@
 /**
  * Canonical URLs Rank Math cannot work out (og:url follows the canonical):
  * - section hub Pages and Directory places: the Page path with /page/N/, without filters;
- * - filtered or sorted lists (?type=, ?state=, ?topic=, ?kind= …): the list with its filters in a fixed order, so each
+ * - filtered or sorted lists (?type=, ?state=, ?category=, ?kind= …): the list with its filters in a fixed order, so each
  *   filtered list is its own indexed page (owner, 10 Oct 2026); the sort order is left out;
  * - /claim/?listing=ID: one indexed page per listing.
  * A canonical typed in Rank Math always wins. Items keep Rank Math's own canonical.
@@ -15,14 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Query parameters that filter a list: such a URL is indexed with its own canonical (owner, 10 Oct 2026). */
-const AW_FILTER_PARAMS = array( 'type', 'state', 'district', 'q', 'topic', 'kind', 'service', 'verified', 'sort', 'publisher', 'court', 'issuer' );
+const AW_FILTER_PARAMS = array( 'type', 'state', 'district', 'q', 'category', 'kind', 'service', 'verified', 'sort', 'publisher', 'court', 'issuer' );
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function aw_hub_canonical() {
 	return strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' );
 }
 
-/** Whether the current URL is a filtered or sorted list (?type=, ?state=, ?q=, ?topic=, ?kind= …). */
+/** Whether the current URL is a filtered or sorted list (?type=, ?state=, ?q=, ?category=, ?kind= …). */
 function aw_is_filtered_list() {
 	$is_list = ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) || ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) || is_page( 'directory' );
 	if ( is_singular() && ! $is_list ) {

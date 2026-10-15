@@ -396,8 +396,8 @@ function aw_seo_list_description() {
 		$n    = (int) $term->count;
 		$what = mb_strtolower( $term->name ) . ' ' . ( 1 === $n ? 'opportunity' : 'opportunities' );
 		$desc = sprintf( '%1$s %2$s with animal welfare organisations across India, from Animal Writes. %3$s its role, location and how to apply.', 1 === $n ? 'One' : number_format_i18n( $n ), $what, 1 === $n ? 'It lists' : 'Each one lists' );
-	} elseif ( is_tax( 'aw_topic' ) && '' !== aw_seo_topic_description( get_queried_object() ) ) {
-		$desc = aw_seo_topic_description( get_queried_object() ); // what the topic holds, counted (programmatic.php)
+	} elseif ( aw_seo_is_category_page() && '' !== aw_seo_category_description( get_queried_object() ) ) {
+		$desc = aw_seo_category_description( get_queried_object() ); // what the category holds, counted (programmatic.php)
 	} elseif ( is_tax() || is_category() || is_tag() ) {
 		$desc = term_description() ?: single_term_title( '', false ) . ' on ' . get_bloginfo( 'name' ) . '.';
 	}

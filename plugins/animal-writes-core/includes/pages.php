@@ -4,7 +4,7 @@
  * writes their text (tools/restructure/phase6.php creates them).
  *
  * - [aw_copy_needed what="…"]: a marker for text still to be written, shown to editors only.
- * - [aw_topics_index]: every topic with its photo and item count (/topics/).
+ * - [aw_categories_index]: every category with its photo and item count (/categories/).
  * - [aw_contact_form]: the contact form; /contact/?about=featured (listing, opportunity, partner, correction …)
  *   preselects the subject. Messages are private posts (WP Admin > Messages) and are emailed to the team.
  * - /search/ is not indexed.
@@ -31,22 +31,22 @@ add_shortcode(
 	}
 );
 
-/* ---------- Topics index ---------- */
+/* ---------- Categories index ---------- */
 
 add_shortcode(
-	'aw_topics_index',
+	'aw_categories_index',
 	function () {
-		$terms = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => false, 'orderby' => 'name' ) );
+		$terms = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false, 'orderby' => 'name' ) );
 		if ( ! $terms || is_wp_error( $terms ) ) {
 			return '';
 		}
-		$html = '<ul class="aw-topics-index">';
+		$html = '<ul class="aw-categories-index">';
 		foreach ( $terms as $t ) {
-			$img  = function_exists( 'aw_topic_image_id' ) ? aw_topic_image_id( $t ) : 0;
+			$img  = function_exists( 'aw_category_image_id' ) ? aw_category_image_id( $t ) : 0;
 			$html .= '<li><a href="' . esc_url( get_term_link( $t ) ) . '">'
 				. ( $img ? wp_get_attachment_image( $img, 'medium', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '' )
-				. '<span class="aw-topics-name">' . esc_html( $t->name ) . '</span>'
-				. '<span class="aw-topics-n">' . (int) $t->count . '</span></a></li>';
+				. '<span class="aw-categories-name">' . esc_html( $t->name ) . '</span>'
+				. '<span class="aw-categories-n">' . (int) $t->count . '</span></a></li>';
 		}
 		return $html . '</ul>';
 	}
@@ -210,12 +210,12 @@ add_filter(
 	2
 );
 
-/* ---------- Footer topics list ---------- */
+/* ---------- Footer categories list ---------- */
 
 add_shortcode(
-	'aw_topics_list',
+	'aw_categories_list',
 	function ( $a ) {
-		$terms = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'orderby' => 'name' ) );
+		$terms = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'orderby' => 'name' ) );
 		if ( ! $terms || is_wp_error( $terms ) ) {
 			return '';
 		}
@@ -298,30 +298,30 @@ add_shortcode(
 	}
 );
 
-/* ---------- Topic hub (/topic/{slug}/) ---------- */
+/* ---------- Category page (/category/{slug}/) ---------- */
 
 add_shortcode(
-	'aw_topic_hub',
+	'aw_category_hub',
 	function () {
 		$term = get_queried_object();
-		if ( ! $term || empty( $term->taxonomy ) || 'aw_topic' !== $term->taxonomy ) {
+		if ( ! $term || empty( $term->taxonomy ) || 'category' !== $term->taxonomy ) {
 			return '';
 		}
 		$groups = array( 'post' => 'Resources', 'aw_news' => 'News', 'aw_legal' => 'Library', 'aw_campaign' => 'Campaigns' );
 		$html   = '';
 		foreach ( $groups as $type => $label ) {
-			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'tax_query' => array( array( 'taxonomy' => 'aw_topic', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
+			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'tax_query' => array( array( 'taxonomy' => 'category', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
 			if ( ! $posts ) {
 				continue;
 			}
-			$all   = add_query_arg( 'topic', $term->slug, aw_hub_url( $type ) );
+			$all   = add_query_arg( 'category', $term->slug, aw_hub_url( $type ) );
 			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul>';
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . ( 'aw_legal' === $type && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
 			}
 			$html .= '</ul><p><a href="' . esc_url( $all ) . '">All ' . esc_html( strtolower( $label ) ) . ' in this category</a></p></section>';
 		}
-		$types = function_exists( 'aw_topic_help_types' ) ? aw_topic_help_types( $term->term_id ) : array();
+		$types = function_exists( 'aw_category_help_types' ) ? aw_category_help_types( $term->term_id ) : array();
 		$links = '';
 		foreach ( $types as $tid ) {
 			$t = get_term( $tid, 'aw_listing_type' );
@@ -362,21 +362,6 @@ add_filter(
 		return ( is_singular( 'post' ) && $id === get_queried_object_id() ) ? '' : $html;
 	},
 	30,
-	3
-);
-
-/* ---------- Resources: the Resource type is a list filter, not a link on the page ---------- */
-
-// The master single template shows the Category chips above the title; Resource types have no pages of their own.
-add_filter(
-	'render_block_core/post-terms',
-	function ( $html, $block, $instance ) {
-		if ( 'category' !== ( $block['attrs']['term'] ?? '' ) || ! is_singular( 'post' ) || isset( $instance->context['queryId'] ) ) {
-			return $html;
-		}
-		return '';
-	},
-	5,
 	3
 );
 

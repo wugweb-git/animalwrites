@@ -578,8 +578,7 @@
    "type": "component",
    "status": "live",
    "classes": [
-    "aw-topic",
-    "aw-topics"
+    "aw-categories"
    ],
    "states": [
     "default"
@@ -778,7 +777,7 @@
     "aw-motion",
     "aw-h",
     "aw-state-grid",
-    "aw-topic-image"
+    "aw-category-image"
    ],
    "states": [
     "n/a"

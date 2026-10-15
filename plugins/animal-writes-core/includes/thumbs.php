@@ -2,7 +2,7 @@
 /**
  * Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. Ingested items (News, Library, research) show
  * the publisher's own image, linked (media.php); without a usable one, their own CC0 photo from Openverse (featured
- * image, used once site-wide, cc0-images.php); only failing that may they share their topic photo (owner, 12 Oct 2026).
+ * image, used once site-wide, cc0-images.php); only failing that may they share their category photo (owner, 12 Oct 2026).
  * Featured images (_thumbnail_id) of every published item, CC0 photos included, are counted by aw_thumb_duplicates().
  *
  * Our own openly licensed category photos: each photo belongs to ONE item at a
@@ -51,9 +51,9 @@ function aw_thumb_rebuild() {
 		if ( function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && function_exists( 'aw_publisher_image' ) && aw_publisher_image( $id ) ) {
 			continue; // shows the publisher's image
 		}
-		$topics = wp_get_object_terms( $id, 'aw_topic' );
-		foreach ( is_wp_error( $topics ) ? array() : $topics as $t ) {
-			$att = function_exists( 'aw_topic_image_id' ) ? (int) aw_topic_image_id( $t ) : 0;
+		$cats = wp_get_object_terms( $id, 'category' );
+		foreach ( is_wp_error( $cats ) ? array() : $cats as $t ) {
+			$att = function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $t ) : 0;
 			if ( $att && ! isset( $used[ aw_thumb_hash( $att ) ] ) ) {
 				$used[ aw_thumb_hash( $att ) ] = $id;
 				$map[ $id ]                    = $att;
@@ -92,7 +92,7 @@ add_action(
 	10,
 	3
 );
-add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'aw_topic' === $tax && in_array( get_post_type( $id ), AW_THUMB_TYPES, true ) ? aw_thumb_schedule() : null, 10, 4 );
+add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'category' === $tax && in_array( get_post_type( $id ), AW_THUMB_TYPES, true ) ? aw_thumb_schedule() : null, 10, 4 );
 
 /** Number of pictures used by more than one published item (cards and featured images). */
 function aw_thumb_duplicates() {

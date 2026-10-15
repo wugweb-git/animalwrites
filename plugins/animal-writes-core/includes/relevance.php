@@ -1,7 +1,7 @@
 <?php
 /**
  * Relevance gate (owner, 10 Oct 2026): the workers ask a cheap model whether each item is about animal welfare in
- * India, fits a Category (aw_topic) and, for documents, was issued by a known body, before anything is created.
+ * India, fits a Category (WordPress's category) and, for documents, was issued by a known body, before anything is created.
  *
  * Endpoints (the ingest application-password user, edit_posts):
  * - GET  aw/v1/relevance-config    Categories (slug => name), Directory organisation names (known issuers) and the
@@ -102,10 +102,10 @@ function aw_find_by_title( array $types, $title, $day, $date_key = 'aw_source_da
 	return 0;
 }
 
-/** Categories: aw_topic slug => name. */
+/** Categories: slug => name. */
 function aw_relevance_categories() {
 	$out = array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => false ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false ) ) as $t ) {
 		$out[ $t->slug ] = html_entity_decode( $t->name );
 	}
 	return $out;
@@ -130,7 +130,8 @@ function aw_relevance_row( WP_Post $p ) {
 	$text    = $p->post_excerpt ? $p->post_excerpt : wp_trim_words( wp_strip_all_tags( strip_shortcodes( $p->post_content ) ), 150 );
 	$issuer  = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	$verdict = (string) get_post_meta( $id, 'aw_relevance', true );
-	return array(
+	$rtypes  = 'post' === $p->post_type ? wp_get_post_terms( $id, 'aw_resource_type', array( 'fields' => 'slugs' ) ) : array();
+	$row     = array(
 		'id'          => $id,
 		'type'        => $p->post_type,
 		'status'      => $p->post_status,
@@ -139,10 +140,16 @@ function aw_relevance_row( WP_Post $p ) {
 		'source_url'  => (string) get_post_meta( $id, $press ? 'aw_press_url' : 'aw_source_url', true ),
 		'source_name' => (string) get_post_meta( $id, $press ? 'aw_press_publisher' : 'aw_source_name', true ),
 		'issuer'      => $issuer ? $issuer->name : '',
-		'categories'  => 'post' === $p->post_type ? wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ) : array(),
-		'topics'      => 'aw_press' === $p->post_type ? array() : wp_get_post_terms( $id, 'aw_topic', array( 'fields' => 'slugs' ) ),
+		'resource_types' => $rtypes,
+		'categories'     => 'aw_press' === $p->post_type ? array() : wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ),
 		'verdict'     => $verdict ? json_decode( $verdict, true ) : null,
 	);
+	// Until the workers read the new names (15 Oct 2026): the old ones too ("categories" then meant Resource types).
+	if ( AW_WORKER_OLD_NAMES ) {
+		$row['topics']     = $row['categories'];
+		$row['categories'] = $rtypes;
+	}
+	return $row;
 }
 
 /** Titles of News published or waiting from the last 4 days: the workers ask the AI whether a new item is one of these stories. */

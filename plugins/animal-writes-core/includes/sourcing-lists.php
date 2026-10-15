@@ -2,10 +2,10 @@
 /**
  * Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
  * Publishers (whose articles are accepted), Keywords (the one word list) and the Change log; this adds News feeds (RSS and Google News queries), Library sources
- * (AWBI, PIB, Gazette, courts), Opportunity sources, Press-discovery queries and Topics (keyword → topic).
+ * (AWBI, PIB, Gazette, courts), Opportunity sources, Press-discovery queries and Categories (keyword → category).
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
- * sources, topics, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
+ * sources, categories, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
  * run from the private, authenticated policy endpoint (aw/v1/sourcing-policy) once "Workers use these lists" is on;
  * until then, and whenever the site cannot be reached, they use sources.yaml. API keys stay in GitHub secrets.
  *
@@ -24,6 +24,7 @@ function aw_sources_config() {
 		$c['live'] = false; // the owner switches the workers over after checking
 		update_option( 'aw_sources', $c, false );
 	}
+	$c['categories'] = (array) ( $c['categories'] ?? array() );
 	return $c;
 }
 
@@ -72,7 +73,7 @@ add_filter(
 			$tabs[ $slug ] = array( $t[0], fn() => aw_sources_tab( $slug ) );
 		}
 		$tabs['press']  = array( 'Press queries', 'aw_sources_press_tab' );
-		$tabs['topics'] = array( 'Categories', 'aw_sources_topics_tab' );
+		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab' );
 		return $tabs;
 	}
 );
@@ -217,35 +218,35 @@ add_action(
 	}
 );
 
-/** Topics: words that tag an item with a topic. */
-function aw_sources_topics_tab() {
+/** Categories: words that file an item under a category. */
+function aw_sources_categories_tab() {
 	$c = aw_sources_config();
 	echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
 	$lines = array();
-	foreach ( (array) $c['topics'] as $slug => $words ) {
+	foreach ( (array) $c['categories'] as $slug => $words ) {
 		$lines[] = $slug . ': ' . implode( ', ', (array) $words );
 	}
-	echo '<textarea name="topics" class="large-text code" rows="22">' . esc_textarea( implode( "\n", $lines ) ) . '</textarea>';
+	echo '<textarea name="categories" class="large-text code" rows="22">' . esc_textarea( implode( "\n", $lines ) ) . '</textarea>';
 	submit_button( 'Save' );
 }
 add_action(
-	'kits_sourcing_save_topics',
+	'kits_sourcing_save_categories',
 	function () {
 		$c      = aw_sources_config();
-		$old    = $c['topics'];
-		$topics = array();
-		foreach ( explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['topics'] ?? '' ) ) ) as $line ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$old  = $c['categories'];
+		$cats = array();
+		foreach ( explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['categories'] ?? '' ) ) ) as $line ) { // phpcs:ignore WordPress.Security.NonceVerification
 			if ( preg_match( '/^\s*([a-z0-9-]+)\s*:\s*(.+)$/u', $line, $m ) ) {
-				$topics[ $m[1] ] = array_values( array_filter( array_map( 'trim', explode( ',', $m[2] ) ) ) );
+				$cats[ $m[1] ] = array_values( array_filter( array_map( 'trim', explode( ',', $m[2] ) ) ) );
 			}
 		}
 		$what = array();
-		foreach ( array_unique( array_merge( array_keys( $old ), array_keys( $topics ) ) ) as $slug ) {
-			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $topics[ $slug ] ?? array() );
+		foreach ( array_unique( array_merge( array_keys( $old ), array_keys( $cats ) ) ) as $slug ) {
+			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $cats[ $slug ] ?? array() );
 		}
-		$c['topics'] = $topics;
+		$c['categories'] = $cats;
 		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'topics', implode( ' · ', array_filter( $what ) ) );
+		kits_sourcing_log( 'categories', implode( ' · ', array_filter( $what ) ) );
 	}
 );
 
@@ -273,7 +274,10 @@ add_filter(
 			unset( $s['on'], $s['filter'] );
 			$sources[] = $s;
 		}
-		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'topics' => $c['topics'], 'press' => $c['press'] );
+		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'press' => $c['press'] );
+		if ( AW_WORKER_OLD_NAMES ) {
+			$data['config']['topics'] = $c['categories']; // the workers' old name, until they are deployed
+		}
 		return $data;
 	}
 );

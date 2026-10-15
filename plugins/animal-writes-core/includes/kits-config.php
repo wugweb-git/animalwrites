@@ -43,7 +43,7 @@ add_filter(
 		if ( is_singular() && function_exists( 'aw_has_sponsored_block' ) && aw_has_sponsored_block( get_queried_object_id() ) ) {
 			return true; // nor does a page with a sponsored block
 		}
-		return is_singular() && has_term( 'cruelty-prosecution', 'aw_topic', get_queried_object_id() );
+		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
 	}
 );
 add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post' ) );
@@ -133,7 +133,7 @@ add_filter(
 );
 
 // End bar on items: categories bottom left, share bottom right.
-add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? $t : 'aw_topic', 10, 2 );
+add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? '' : 'category', 10, 2 ); // listings: none
 add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
 
 
@@ -148,7 +148,7 @@ add_filter(
 		} elseif ( $hub ) {
 			$c['page_type'] = get_query_var( 'aw_place' ) ? 'directory_place' : 'hub';
 			$c['section']   = $hub_types[ $hub ] ?? $hub;
-		} elseif ( is_tax( 'aw_topic' ) ) {
+		} elseif ( is_category() ) {
 			$c['page_type'] = 'category';
 			$c['category']  = single_term_title( '', false );
 		} elseif ( is_singular() ) {
@@ -156,8 +156,8 @@ add_filter(
 			$type           = get_post_type( $id );
 			$c['page_type'] = $hub_types[ $type ] ?? $type;
 			$c['section']   = $hub_types[ $type ] ?? ( 'page' === $type ? (string) get_post_field( 'post_name', $id ) : '' ); // Pages: their slug (claim, contact, volunteer…)
-			$topics         = wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'names' ) );
-			$c['category']  = $topics && ! is_wp_error( $topics ) ? $topics[0] : '';
+			$cats           = wp_get_object_terms( $id, 'category', array( 'fields' => 'names' ) );
+			$c['category']  = $cats && ! is_wp_error( $cats ) ? $cats[0] : '';
 			if ( function_exists( 'aw_item_place_names' ) ) {
 				list( $c['state'], $c['district'] ) = aw_item_place_names( $id );
 			}

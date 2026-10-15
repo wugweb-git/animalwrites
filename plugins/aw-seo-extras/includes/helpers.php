@@ -35,7 +35,7 @@ function aw_seo_cut( $text, $max, $more = '…' ) {
 	return $cut . $more;
 }
 
-/** Page number of a list view (hub Page, Directory place, topic): 1 on the first page. */
+/** Page number of a list view (hub Page, Directory place, category): 1 on the first page. */
 function aw_seo_page_number() {
 	return max( 1, (int) get_query_var( 'paged' ), is_singular() ? 1 : (int) get_query_var( 'page' ) );
 }
@@ -105,7 +105,7 @@ function aw_seo_typed( $key ) {
 	if ( is_category() || is_tag() || is_tax() ) {
 		$typed = trim( (string) get_term_meta( $id, 'rank_math_' . $key, true ) );
 		$auto  = (array) json_decode( (string) get_term_meta( $id, '_aw_seo_auto', true ), true );
-		return ( '' !== $typed && ( $auto[ $key ] ?? null ) === $typed ) ? '' : $typed; // a topic's stored copy (programmatic.php): built live, not typed
+		return ( '' !== $typed && ( $auto[ $key ] ?? null ) === $typed ) ? '' : $typed; // a category's stored copy (programmatic.php): built live, not typed
 	}
 	return '';
 }
@@ -251,13 +251,13 @@ function aw_seo_type_plural( $slug ) {
 	return trim( implode( ' ', $words ) . ' ' . $last );
 }
 
-/** The topics with the most published items of a type, as lower-case names (cached for 12 hours). */
-function aw_seo_top_topics( $type ) {
-	$key = 'aw_seo_topics_' . $type;
+/** The categories with the most published items of a type, as lower-case names (cached for 12 hours). */
+function aw_seo_top_categories( $type ) {
+	$key = 'aw_seo_categories_' . $type;
 	$out = get_transient( $key );
 	if ( false === $out ) {
 		global $wpdb;
-		$names = $wpdb->get_col( $wpdb->prepare( "SELECT t.name FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = 'aw_topic' JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = %s AND p.post_status = 'publish' GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT 4", $type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$names = $wpdb->get_col( $wpdb->prepare( "SELECT t.name FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = %s JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = %s AND p.post_status = 'publish' GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT 4", aw_seo_category_tax(), $type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$out   = array_map( fn( $n ) => implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', html_entity_decode( $n, ENT_QUOTES, 'UTF-8' ) ) ) ), (array) $names );
 		set_transient( $key, $out, 12 * HOUR_IN_SECONDS );
 	}
@@ -266,7 +266,7 @@ function aw_seo_top_topics( $type ) {
 
 /**
  * Hub description built from its own intro (the hub Page's excerpt, as shown under its H1) and the list's facts:
- * "{intro} {N stories} on {topic}, {topic} and {topic}." up to 155 characters.
+ * "{intro} {N stories} on {category}, {category} and {category}." up to 155 characters.
  */
 function aw_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
@@ -276,10 +276,10 @@ function aw_seo_hub_intro_description( $type ) {
 	if ( '' === $count ) {
 		return $intro;
 	}
-	$topics = array_values( array_filter( aw_seo_top_topics( $type ), fn( $t ) => false === strpos( $t, ' and ' ) ) ); // "laws and rules" would blur the list
+	$cats = array_values( array_filter( aw_seo_top_categories( $type ), fn( $t ) => false === strpos( $t, ' and ' ) ) ); // "laws and rules" would blur the list
 	$best   = $intro . ' ' . $count . '.';
-	for ( $n = 1; $n <= count( $topics ); $n++ ) {
-		$list = array_slice( $topics, 0, $n );
+	for ( $n = 1; $n <= count( $cats ); $n++ ) {
+		$list = array_slice( $cats, 0, $n );
 		$last = array_pop( $list );
 		$line = $intro . ' ' . $count . ' on ' . ( $list ? implode( ', ', $list ) . ' and ' : '' ) . $last . '.';
 		if ( mb_strlen( $line ) > 155 ) {
@@ -352,7 +352,7 @@ function aw_seo_default_image() {
 
 /**
  * The image of an item, from the site's own media library only: the share image chosen in Rank Math, the featured
- * image, then the item's own stored image (topic photo, hosted PDF). Never a remote URL.
+ * image, then the item's own stored image (category photo, hosted PDF). Never a remote URL.
  *
  * @param int $id Post ID.
  * @return array|null
@@ -398,12 +398,12 @@ function aw_seo_image() {
 
 if ( ! function_exists( 'aw_seo_category_tax' ) ) {
 	/**
-	 * The taxonomy that holds the site's categories (one place to switch when they move to WordPress's own category).
+	 * The taxonomy that holds the site's categories: WordPress's own category (since 15 Oct 2026).
 	 *
 	 * @return string
 	 */
 	function aw_seo_category_tax() {
-		return 'aw_topic';
+		return 'category';
 	}
 }
 
@@ -413,9 +413,9 @@ function aw_seo_is_category_page() {
 	return 'category' === $tax ? is_category() : is_tax( $tax );
 }
 
-/** The page that lists every category (/categories/, else the older /topics/), or ''. */
+/** The page that lists every category (/categories/), or ''. */
 function aw_seo_categories_url() {
-	foreach ( array( 'categories', 'topics' ) as $slug ) {
+	foreach ( array( 'categories' ) as $slug ) {
 		$page = get_page_by_path( $slug );
 		if ( $page && 'publish' === $page->post_status ) {
 			return get_permalink( $page );

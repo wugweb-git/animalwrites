@@ -1,7 +1,7 @@
 <?php
 /**
  * Ingested items (News, Library, research) whose publisher image is missing or won't load get a free CC0 / public
- * domain photo from Openverse that matches their topic (owner, 12 Oct 2026). No credit is shown; the source and
+ * domain photo from Openverse that matches their category (owner, 12 Oct 2026). No credit is shown; the source and
  * licence are stored on the attachment (aw_cc0_source, aw_cc0_license) for our records.
  *
  * Every 15 minutes (WP-Cron, aw_cc0_run), newest items first:
@@ -9,7 +9,7 @@
  *     readable. A publisher's logo or stock picture is still the publisher's image and is used (owner, 14 Oct 2026). Stored as
  *     aw_source_image_ok = 1/0 and aw_source_image_checked = date; failures are re-checked weekly.
  *  2. Items with no usable publisher image and no featured image: search Openverse (cc0, pdm; WordPress Photo
- *     Directory first, then Flickr / rawpixel / Wikimedia) for the animal named in the title, else the topic's animal.
+ *     Directory first, then Flickr / rawpixel / Wikimedia) for the animal named in the title, else the category's animal.
  *     Each Openverse image is used once on the whole site (aw_openverse_id and the file's md5 are checked).
  *     The photo is resized to 1600 px wide, added to the Media Library and set as the item's featured image.
  *     No match: tried again after 7 days, at most 3 times (aw_cc0_status, aw_cc0_attempts).
@@ -312,8 +312,8 @@ function aw_cc0_nouns() {
 	);
 }
 
-/** Topic => query, when the title names no animal. */
-function aw_cc0_topic_query( $slug ) {
+/** Category => query, when the title names no animal. */
+function aw_cc0_category_query( $slug ) {
 	$m = array(
 		'community-dogs'             => 'dog',
 		'animal-birth-control'       => 'dog',
@@ -349,8 +349,8 @@ function aw_cc0_queries( $post_id ) {
 			$best = $noun;
 		}
 	}
-	$topics = wp_get_object_terms( $post_id, 'aw_topic', array( 'fields' => 'slugs' ) );
-	$topics = is_wp_error( $topics ) ? array() : $topics;
+	$cats = wp_get_object_terms( $post_id, 'category', array( 'fields' => 'slugs' ) );
+	$cats = is_wp_error( $cats ) ? array() : $cats;
 	if ( ! $best ) { // words that point to one animal
 		foreach ( array( '/\b(rabi[ed]s|anti-rabies|dog[- ]bites?|animal bites?|bite cases?|sterili[sz]ation|abc programme)\b/i' => 'dog', '/\b(meat|dairy|milk|beef|bovine|jallikattu|kambala|slaughter\w*)\b/i' => 'cow', '/\b(poach\w*|wildlife|forest|tiger reserve|national park|sanctuary|zoo)\b/i' => 'wildlife' ) as $re => $n ) {
 			if ( preg_match( $re, $title ) ) {
@@ -360,8 +360,8 @@ function aw_cc0_queries( $post_id ) {
 		}
 	}
 	if ( ! $best ) {
-		foreach ( $topics as $s ) {
-			$best = aw_cc0_topic_query( $s );
+		foreach ( $cats as $s ) {
+			$best = aw_cc0_category_query( $s );
 			if ( $best ) {
 				break;
 			}
@@ -373,7 +373,7 @@ function aw_cc0_queries( $post_id ) {
 		$best = array( 'elephant', 'tiger', 'leopard', 'deer', 'peacock', 'monkey' )[ $post_id % 6 ];
 	}
 	if ( in_array( $best, array( 'dog', 'puppy' ), true ) ) {
-		$stray = (bool) preg_match( '/\b(stray|street|community|abc|sterili[sz]|feed(?:er|ing)|rabies|bite)/i', $title ) || array_intersect( $topics, array( 'community-dogs', 'animal-birth-control', 'feeders-caregivers', 'rabies-public-health' ) );
+		$stray = (bool) preg_match( '/\b(stray|street|community|abc|sterili[sz]|feed(?:er|ing)|rabies|bite)/i', $title ) || array_intersect( $cats, array( 'community-dogs', 'animal-birth-control', 'feeders-caregivers', 'rabies-public-health' ) );
 	}
 	$word = array(
 		'dog'        => 'dogs?|pupp(?:y|ies)|canine',
@@ -463,7 +463,7 @@ function aw_cc0_used() {
  */
 function aw_cc0_assign( $post_id ) {
 	$used   = aw_cc0_used();
-	$injury = has_term( 'veterinary-care', 'aw_topic', $post_id );
+	$injury = has_term( 'veterinary-care', 'category', $post_id );
 	$tried  = array();
 	foreach ( aw_cc0_queries( $post_id ) as $qq ) {
 		list( $q, $source, $word ) = $qq;

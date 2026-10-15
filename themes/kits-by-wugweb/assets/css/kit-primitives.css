@@ -30,7 +30,7 @@
 .kit-tag--info { background: var(--kit-color-info-soft); color: var(--kit-color-info); }
 .kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
 
-/* ---------- 2. Link chip: a tag that navigates (also topic links from the core post-terms block) ---------- */
+/* ---------- 2. Link chip: a tag that navigates (also category links from the core post-terms block) ---------- */
 .kit-chip, .wp-block-post-terms a {
 	position: relative;
 	display: inline-flex; align-items: center;

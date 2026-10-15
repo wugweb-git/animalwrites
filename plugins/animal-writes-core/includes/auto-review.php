@@ -4,7 +4,7 @@
  * the checks go live; only doubtful ones wait for a person).
  *
  * An item is published when every check passes; otherwise it stays Pending with the reason in `aw_review`
- * (shown in the admin list). Checks: publisher on the allow list, a topic, a real summary, not a thin format, relevant,
+ * (shown in the admin list). Checks: publisher on the allow list, a category, a real summary, not a thin format, relevant,
  * legal items from a legal source. The same event as a story published in the last 7 days is not published again:
  * its publisher is added to that story as "also reported by" (the workers add the facts it adds: same-story.php) and the
  * item is kept private. Nothing is deleted.
@@ -68,13 +68,13 @@ function aw_review_reason( $id ) {
 			return 'publisher not on the allow list (' . $host . ')';
 		}
 	}
-	// 0b. At least one topic: the AI check's category when the workers sent none.
-	if ( ! wp_get_object_terms( $id, 'aw_topic', array( 'fields' => 'ids' ) ) ) {
-		$term = $ai && ! empty( $ai['category'] ) ? get_term_by( 'slug', sanitize_title( $ai['category'] ), 'aw_topic' ) : null;
+	// 0b. At least one category: the AI check's category when the workers sent none.
+	if ( ! wp_get_object_terms( $id, 'category', array( 'fields' => 'ids' ) ) ) {
+		$term = $ai && ! empty( $ai['category'] ) ? get_term_by( 'slug', sanitize_title( $ai['category'] ), 'category' ) : null;
 		if ( ! $term ) {
-			return 'no topic';
+			return 'no category';
 		}
-		wp_set_object_terms( $id, array( (int) $term->term_id ), 'aw_topic' );
+		wp_set_object_terms( $id, array( (int) $term->term_id ), 'category' );
 	}
 	// 1. Summary looks like a summary.
 	if ( $words < 15 || $words > 90 ) {

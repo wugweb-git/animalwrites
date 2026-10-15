@@ -4,7 +4,7 @@
  *
  * POST /wp-json/aw/v1/ingest  (Application Password auth, user needs edit_posts)
  * Everything lands as "pending" (Pending Review). Nothing is ever auto-published.
- * Terms (topics, source_type, city, listing_type) are only assigned if they already exist;
+ * Terms (categories, source_type, city, listing_type) are only assigned if they already exist;
  * unknown ones are skipped and returned in "ignored_terms".
  *
  * Body (JSON):
@@ -12,7 +12,7 @@
  *   "type": "news|legal|research|listing",
  *   "title": "...", "summary": "2–3 lines in our own words",
  *   "source_url": "...", "source_name": "...", "source_date": "YYYY-MM-DD",
- *   "topics": ["..."], "source_type": "Supreme Court", "city": "delhi",
+ *   "categories": ["..."], "source_type": "Supreme Court", "city": "delhi",
  *   "kind": "judgment", "court": "supreme-court", "document_url": "https://...pdf"   (Library only),
  *   "listing": { "listing_type": "animal-shelter", "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
  * }
@@ -179,9 +179,12 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	$ignored = array();
 
-	$topics = array_filter( (array) $req->get_param( 'topics' ), 'is_scalar' );
-	if ( $topics ) {
-		aw_assign_existing_terms( $post_id, $topics, 'aw_topic', $ignored );
+	$cats = array_filter( (array) $req->get_param( 'categories' ), 'is_scalar' );
+	if ( ! $cats && AW_WORKER_OLD_NAMES ) {
+		$cats = array_filter( (array) $req->get_param( 'topics' ), 'is_scalar' ); // the workers' old name, until they are deployed
+	}
+	if ( $cats ) {
+		aw_assign_existing_terms( $post_id, $cats, 'category', $ignored );
 	}
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
 		if ( ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php)
@@ -252,7 +255,7 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).
 	if ( 'research' === $req->get_param( 'type' ) ) {
-		wp_set_object_terms( $post_id, 'research', 'category', false );
+		wp_set_object_terms( $post_id, 'research', 'aw_resource_type', false );
 	}
 	if ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );

@@ -78,15 +78,15 @@ function aw_text( $id, $words = 28 ) {
 /**
  * List filters: post type => list of [query parameter, source, label]. The source is a taxonomy, "place" (the state,
  * from the LGD codes; places.php) or "publisher" (the news publisher's site). One type per section is the main filter;
- * Topic is the shared one; issuer, publisher name on cards and organisation are labels, not filters (8 Oct 2026).
+ * Category is the shared one; issuer, publisher name on cards and organisation are labels, not filters (8 Oct 2026).
  * Several filters can apply at once; every filtered list is canonical to the plain list (indexing.php).
  */
 const AW_LIST_FILTERS = array(
-	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'State' ) ),
-	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
-	'post'           => array( array( 'kind', 'resource-kind', 'Resource type' ), array( 'topic', 'aw_topic', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
-	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'topic', 'aw_topic', 'Category' ), array( 'state', 'place', 'Location' ) ),
-	'aw_campaign'    => array( array( 'topic', 'aw_topic', 'Category' ) ),
+	'aw_legal'       => array( array( 'kind', 'aw_legal_kind', 'Library type' ), array( 'category', 'category', 'Category' ), array( 'state', 'place', 'State' ) ),
+	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'category', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
+	'post'           => array( array( 'kind', 'resource-kind', 'Resource type' ), array( 'category', 'category', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
+	'aw_opportunity' => array( array( 'type', 'aw_opportunity_type', 'Opportunity type' ), array( 'category', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
+	'aw_campaign'    => array( array( 'category', 'category', 'Category' ) ),
 	'aw_press'       => array( array( 'format', 'press-format', 'Format' ) ), // Articles · Videos · Social posts
 );
 /** Issuer values that are courts (shown darker on Library cards). */
@@ -102,7 +102,7 @@ const AW_LIST_SORTS = array(
 );
 const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'post' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
-/** Active filters on this request: param => list of value slugs (topic=a,b or topic[]=a&topic[]=b). */
+/** Active filters on this request: param => list of value slugs (category=a,b or category[]=a&category[]=b). */
 function aw_active_filters( $type ) {
 	$out = array();
 	foreach ( AW_LIST_FILTERS[ $type ] ?? array() as $f ) {
@@ -157,7 +157,7 @@ function aw_filter_clauses( $type, $active ) {
 		} elseif ( 'resource-kind' === $f[1] ) { // Resource types, or Sponsored (a label, not a type): any of them
 			$cats    = array_values( array_diff( $v, array( 'sponsored' ) ) );
 			$sponsor = array( 'key' => 'aw_sponsored', 'value' => '1' );
-			$by_type = array( 'taxonomy' => 'category', 'field' => 'slug', 'terms' => $cats, 'include_children' => true );
+			$by_type = array( 'taxonomy' => 'aw_resource_type', 'field' => 'slug', 'terms' => $cats, 'include_children' => true );
 			if ( count( $cats ) === count( $v ) ) {
 				$tq[] = $by_type;
 			} elseif ( ! $cats ) {
@@ -224,7 +224,7 @@ function aw_filter_values( $ids, $source ) {
 					$name['sponsored']        = 'Sponsored';
 				}
 			}
-			$source = 'category';
+			$source = 'aw_resource_type';
 		}
 		foreach ( wp_get_object_terms( $ids, $source, array( 'fields' => 'all_with_object_id' ) ) as $t ) {
 			$seen[ $t->slug ][ $t->object_id ] = 1;

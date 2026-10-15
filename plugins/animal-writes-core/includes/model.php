@@ -1,6 +1,6 @@
 <?php
 /**
- * Content model, restructure Phase 2: legal sub-type, court, primary topic, topic → listing types for "Find help",
+ * Content model, restructure Phase 2: legal sub-type, court, category → listing types for "Find help",
  * and relations between items (each one shown on both sides in WP Admin).
  *
  * Additive only: no existing item is changed. Front-end display comes in later phases.
@@ -8,8 +8,8 @@
  * - Legal sub-type: taxonomy aw_legal_kind (Act, Rule, Order, Judgment, Circular, Notification) on Legal Watch and Research.
  * - Issuer: a label on Library items (meta aw_issuer, issuers.php). Courts (Supreme Court, High Courts, NGT) are
  *   issuers; the Court list and the issuer list were merged into the label on 8 Oct 2026 (court kept in aw_court_legacy).
- * - Topic: meta aw_primary_topic (term ID) plus up to 2 more topics (secondary) per item.
- * - Topic → listing types: term meta aw_help_types on each topic (Topics screen).
+ * - Category: WordPress's own; the primary one is Rank Math's (its Primary Category field, meta rank_math_primary_category).
+ * - Category → listing types: term meta aw_help_types on each category (Categories screen).
  * - Relations: one post-meta row per linked ID, so the reverse side is a plain meta query.
  * - "Animal Writes" internal organisation: a private listing (meta aw_internal), so it can organise campaigns while
  *   staying out of the directory, search, the sitemap and every count.
@@ -23,7 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template', 'advisory' => 'Advisory', 'official-release' => 'Official release' ); // government press releases (PIB); reports about cases (LiveLaw, Bar & Bench) are News (owner, 14 Oct 2026)
 const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
-const AW_SECONDARY_TOPICS = 2;
 /** Services a listing offers: a fixed list (owner, 9 Oct 2026). Shown as tags; a Directory filter once 3+ listings use one. */
 const AW_SERVICES = array( 'rescue' => 'Rescue', 'treatment' => 'Treatment / vet care', 'shelter' => 'Shelter', 'adoption' => 'Adoption', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance', 'boarding-foster' => 'Boarding / foster', 'wildlife-rescue' => 'Wildlife rescue', 'legal-help' => 'Legal help', 'cattle-care' => 'Cattle care' );
 
@@ -227,18 +226,11 @@ add_action(
 	}
 );
 
-/* ---------- Admin: primary topic ---------- */
-
-function aw_model_types() {
-	return array_keys( aw_post_types() );
-}
+/* ---------- Admin: relations boxes ---------- */
 
 add_action(
 	'add_meta_boxes',
 	function ( $post_type ) {
-		if ( in_array( $post_type, aw_model_types(), true ) && 'aw_listing' !== $post_type ) {
-			add_meta_box( 'aw_primary_topic', 'Primary category', 'aw_primary_topic_box', $post_type, 'side', 'high' );
-		}
 		$rel = array_filter( aw_relations(), fn( $r ) => in_array( $post_type, $r[0], true ) );
 		if ( $rel || 'post' === $post_type ) {
 			add_meta_box( 'aw_related', 'Related', 'aw_related_box', $post_type, 'normal', 'default' );
@@ -249,20 +241,6 @@ add_action(
 		}
 	}
 );
-
-function aw_primary_topic_box( $post ) {
-	wp_nonce_field( 'aw_model_' . $post->ID, '_aw_model' );
-	$cur = (int) get_post_meta( $post->ID, 'aw_primary_topic', true );
-	echo '<select name="aw_primary_topic" style="width:100%"><option value="0">None</option>';
-	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
-		echo '<option value="' . (int) $t->term_id . '"' . selected( $cur, $t->term_id, false ) . '>' . esc_html( $t->name ) . '</option>';
-	}
-	echo '</select><p class="description">Plus up to ' . (int) AW_SECONDARY_TOPICS . ' more categories in the Categories box (secondary).</p>';
-	$n = count( wp_get_object_terms( $post->ID, 'aw_topic', array( 'fields' => 'ids' ) ) );
-	if ( $n > 1 + AW_SECONDARY_TOPICS ) {
-		echo '<p style="color:#b32d2e">This item has ' . (int) $n . ' categories. Keep 1 primary and up to ' . (int) AW_SECONDARY_TOPICS . ' others.</p>';
-	}
-}
 
 /* ---------- Admin: relations ---------- */
 
@@ -326,15 +304,6 @@ add_action(
 		if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['_aw_model'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_aw_model'] ) ), 'aw_model_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		if ( isset( $_POST['aw_primary_topic'] ) ) {
-			$t = absint( $_POST['aw_primary_topic'] );
-			if ( $t && term_exists( $t, 'aw_topic' ) ) {
-				update_post_meta( $post_id, 'aw_primary_topic', $t );
-				wp_add_object_terms( $post_id, $t, 'aw_topic' ); // the primary topic is always one of the item's topics
-			} else {
-				delete_post_meta( $post_id, 'aw_primary_topic' );
-			}
-		}
 		foreach ( aw_relations() as $key => $r ) {
 			if ( ! in_array( $post->post_type, $r[0], true ) || ! isset( $_POST[ $key ] ) ) {
 				continue;
@@ -385,9 +354,9 @@ JS;
 	}
 );
 
-/* ---------- Admin: topic → listing types ("Find help" on topic pages) ---------- */
+/* ---------- Admin: category → listing types ("Find help" on category pages) ---------- */
 
-function aw_topic_help_field( $term ) {
+function aw_category_help_field( $term ) {
 	$cur = $term ? array_map( 'intval', (array) get_term_meta( $term->term_id, 'aw_help_types', true ) ) : array();
 	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
 		echo '<label style="display:inline-block;min-width:16em"><input type="checkbox" name="aw_help_types[]" value="' . (int) $t->term_id . '"' . checked( in_array( $t->term_id, $cur, true ), true, false ) . '> ' . esc_html( $t->name ) . '</label> ';
@@ -396,22 +365,22 @@ function aw_topic_help_field( $term ) {
 }
 
 add_action(
-	'aw_topic_edit_form_fields',
+	'category_edit_form_fields',
 	function ( $term ) {
 		echo '<tr class="form-field"><th scope="row">Find help: listing types</th><td>';
-		aw_topic_help_field( $term );
+		aw_category_help_field( $term );
 		echo '</td></tr>';
 	}
 );
 add_action(
-	'aw_topic_add_form_fields',
+	'category_add_form_fields',
 	function () {
 		echo '<div class="form-field"><label>Find help: listing types</label>';
-		aw_topic_help_field( null );
+		aw_category_help_field( null );
 		echo '</div>';
 	}
 );
-foreach ( array( 'created_aw_topic', 'edited_aw_topic' ) as $aw_hook ) {
+foreach ( array( 'created_category', 'edited_category' ) as $aw_hook ) {
 	add_action(
 		$aw_hook,
 		function ( $term_id ) {
@@ -424,8 +393,8 @@ foreach ( array( 'created_aw_topic', 'edited_aw_topic' ) as $aw_hook ) {
 	);
 }
 
-/** Listing types a topic's "Find help" should show. */
-function aw_topic_help_types( $term_id ) {
+/** Listing types a category's "Find help" should show. */
+function aw_category_help_types( $term_id ) {
 	return array_map( 'intval', (array) get_term_meta( $term_id, 'aw_help_types', true ) );
 }
 

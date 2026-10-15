@@ -116,8 +116,8 @@ function aw_block_hub_visual( $a ) {
 	$tiles = '';
 	if ( 'aw_listing' === $type ) { // Directory: the photos of three categories it serves
 		foreach ( array( 'veterinary-care', 'community-dogs', 'cattle-gaushalas' ) as $slug ) {
-			$t   = get_term_by( 'slug', $slug, 'aw_topic' );
-			$tid = $t && function_exists( 'aw_topic_image_id' ) ? (int) aw_topic_image_id( $t ) : 0;
+			$t   = get_term_by( 'slug', $slug, 'category' );
+			$tid = $t && function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $t ) : 0;
 			$tiles .= $tid ? (string) wp_get_attachment_image( $tid, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '';
 		}
 	} elseif ( 'aw_press' === $type ) { // Media & PR: the latest coverage pictures
@@ -176,7 +176,7 @@ function aw_block_publisher( $a, $id ) {
 }
 
 /**
- * The news card's meta, one row on every news card (News, home, topic pages): publisher (logo tile + name) on the
+ * The news card's meta, one row on every news card (News, home, category pages): publisher (logo tile + name) on the
  * left, when it was published (calendar icon, relative time) after it.
  *
  * @param int $id Post ID.
@@ -212,7 +212,7 @@ function aw_block_doc_date( $a, $id ) {
 /** "{Type} · {Date}" above a card title: a Resource's type and when it was last updated, or a Library item's kind and date. */
 function aw_block_type_date( $a, $id ) {
 	$type = get_post_type( $id );
-	$tax  = 'post' === $type ? 'category' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
+	$tax  = 'post' === $type ? 'aw_resource_type' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
 	$name = '';
 	if ( $tax ) {
 		$t    = wp_get_object_terms( $id, $tax, array( 'fields' => 'names' ) );

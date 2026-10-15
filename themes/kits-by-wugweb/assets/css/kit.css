@@ -241,7 +241,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 	animation: kit-rise var(--kit-motion-slow) var(--kit-motion-ease) both;
 }
 
-/* 4.5 Topic links (core post-terms) look like kit-chip (kit-primitives.css); cards show at most two, smaller. */
+/* 4.5 Category links (core post-terms) look like kit-chip (kit-primitives.css); cards show at most two, smaller. */
 .wp-block-post-terms__separator { display: none; }
 .wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--s-1); }
 .wp-block-post-template .wp-block-post-terms a:nth-of-type(n+3) { display: none; } /* two chips per card at most */
@@ -424,7 +424,7 @@ html { overflow-x: clip; }
 /* Secondary menu item ("For organisations"): set apart from the primary items */
 .kit-menu-secondary > .wp-block-navigation-item__content { opacity: .8; }
 @media (min-width: 768px) { .kit-menu-secondary { margin-inline-start: var(--kit-space-3); padding-inline-start: var(--kit-space-4); border-inline-start: 1px solid color-mix(in srgb, var(--neutral-0) 25%, transparent); } }
-/* Footer topics: two compact columns */
+/* Footer categories: two compact columns */
 
 /* Carousel (card rows on small screens) — controls added by aw.js */
 @media (max-width: 767px) {
@@ -655,7 +655,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-hsearch input { min-height: var(--kit-size-target); width: min(16rem, 50vw); padding: 0 var(--kit-space-3); border-radius: var(--kit-radius-control); border: 1px solid color-mix(in srgb, var(--neutral-0) 35%, transparent); background: var(--kit-color-surface); color: var(--kit-color-ink); }
 .kit-header-utility { position: relative; }
 
-/* Footer topics: one row of small tags under the columns */
+/* Footer categories: one row of small tags under the columns */
 
 /* ---------- Phones: header, menu, filters (8 Oct 2026) ---------- */
 @media (max-width: 767px) {

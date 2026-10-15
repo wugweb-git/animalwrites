@@ -525,7 +525,7 @@
 })();
 
 /* Filter bar: ticking a filter applies it at once, except in the phone sheet, where "Apply" sends them together.
-   Several values of one filter go as topic=a,b. (Opening and closing the dropdowns: kits/dropdown, Interactivity API.) */
+   Several values of one filter go as category=a,b. (Opening and closing the dropdowns: kits/dropdown, Interactivity API.) */
 (function () {
 	function go(form) {
 		var params = new URLSearchParams(), lists = {};

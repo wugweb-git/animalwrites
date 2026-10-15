@@ -492,14 +492,14 @@ body { background: var(--kit-color-canvas); }
 .aw-org-name a, .aw-doc-title a { display: inline-block; padding-block: 2px; }
 
 
-/* Topics index (/topics/). */
-.aw-topics-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--kit-space-4, 1rem); list-style: none; padding: 0; margin: 0; }
-.aw-topics-index a { display: grid; gap: var(--kit-space-2, .5rem); padding: var(--kit-space-3, .75rem); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-ink); text-decoration: none; min-height: var(--kit-size-target, 44px); }
-.aw-topics-index a:hover { border-color: var(--kit-color-ink); }
-.aw-topics-index a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-.aw-topics-index img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--kit-radius-control); }
-.aw-topics-name { font-weight: var(--kit-weight-strong); }
-.aw-topics-n { color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
+/* Categories index (/categories/). */
+.aw-categories-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--kit-space-4, 1rem); list-style: none; padding: 0; margin: 0; }
+.aw-categories-index a { display: grid; gap: var(--kit-space-2, .5rem); padding: var(--kit-space-3, .75rem); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-ink); text-decoration: none; min-height: var(--kit-size-target, 44px); }
+.aw-categories-index a:hover { border-color: var(--kit-color-ink); }
+.aw-categories-index a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
+.aw-categories-index img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--kit-radius-control); }
+.aw-categories-name { font-weight: var(--kit-weight-strong); }
+.aw-categories-n { color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
 
 /* Organisation profile: what links to this organisation, and the claim link. */
 .aw-org-links { display: grid; gap: var(--kit-space-5, 1.25rem); margin-block: var(--kit-space-6, 1.5rem); }
@@ -509,7 +509,7 @@ body { background: var(--kit-color-canvas); }
 .aw-org-claim { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-org-claim a { display: inline-flex; align-items: center; min-height: var(--kit-size-target, 44px); }
 
-/* Topic hub and site search */
+/* Category page and site search */
 .aw-hub { display: grid; gap: var(--kit-space-6, 1.5rem); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); margin-block: var(--kit-space-6, 1.5rem); }
 .aw-hub-group h2 { font-size: var(--kit-type-h, 1.25rem); margin: 0 0 var(--kit-space-2, .5rem); }
 .aw-hub-group ul { margin: 0 0 var(--kit-space-2, .5rem); padding-inline-start: 1.1em; }
@@ -826,7 +826,7 @@ body { background: var(--kit-color-canvas); }
 	display: inline-flex; align-items: center; gap: var(--s-1); min-height: 1.75rem; padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm);
 	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
 }
-.taxonomy-aw_topic a { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
+.taxonomy-category a { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
 .taxonomy-aw_listing_type a, .taxonomy-aw_legal_kind a, .taxonomy-aw_resource_type a, .taxonomy-aw_opportunity_type a, .aw-org-tags > .kit-tag:not([class*="--"]) { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
 .kit-tag--info.aw-issuer, .aw-case-tags > .kit-tag--info, .aw-case-tags > .kit-tag--ink { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
 .taxonomy-aw_place a { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
