@@ -58,7 +58,7 @@ add_action(
  * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
  * declares 400 to 700 as separate static files without swap, and as the later rules they won: three extra 118 KB files
  * per page, with text hidden while they load. Those overlapping faces are left out; the library's other weights and its
- * italics stay. The theme's file is preloaded.
+ * italics stay. The file is not preloaded: on a slow phone a preload would compete with the page's main picture.
  */
 add_action(
 	'init',
@@ -88,12 +88,4 @@ add_action(
 			50
 		);
 	}
-);
-
-add_action(
-	'wp_head',
-	function () {
-		echo '<link rel="preload" href="' . esc_url( get_stylesheet_directory_uri() . '/assets/fonts/inter/inter-latin.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-	},
-	2
 );
