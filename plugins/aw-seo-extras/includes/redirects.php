@@ -99,6 +99,37 @@ add_action(
 
 add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
 
+// A redirect never leads to the trash (owner, 15 Oct 2026): trashing an item switches off the redirects that point to
+// it, and restoring it switches them back on.
+add_action(
+	'wp_trash_post',
+	function ( $post_id ) {
+		global $wpdb;
+		$url = (string) get_permalink( $post_id );
+		if ( '' === $url ) {
+			return;
+		}
+		$table = $wpdb->prefix . 'rank_math_redirections';
+		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE status = 'active' AND url_to IN ( %s, %s )", $url, untrailingslashit( $url ) ) ); // phpcs:ignore WordPress.DB
+		foreach ( $ids as $id ) {
+			$wpdb->update( $table, array( 'status' => 'inactive' ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB
+		}
+		if ( $ids ) {
+			update_post_meta( $post_id, '_aw_redirects_paused', array_map( 'intval', $ids ) );
+		}
+	}
+);
+add_action(
+	'untrashed_post',
+	function ( $post_id ) {
+		global $wpdb;
+		foreach ( (array) get_post_meta( $post_id, '_aw_redirects_paused', true ) as $id ) {
+			$wpdb->update( $wpdb->prefix . 'rank_math_redirections', array( 'status' => 'active' ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB
+		}
+		delete_post_meta( $post_id, '_aw_redirects_paused' );
+	}
+);
+
 // Taxonomy archives that duplicate a hub's filtered list go to that list (see the header).
 add_action(
 	'template_redirect',
