@@ -80,6 +80,10 @@ function aw_review_apply( $ids, $action ) {
 			continue;
 		}
 		if ( 'publish' === $action ) {
+			// A duplicate merged into another story stays unpublished (owner, 15 Oct 2026).
+			if ( get_post_meta( $id, 'aw_merged_into', true ) ) {
+				continue;
+			}
 			$src = (string) get_post_meta( $id, 'aw_source_date', true );
 			if ( get_post_meta( $id, 'aw_backfill', true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $src ) && $src <= current_time( 'Y-m-d' ) ) {
 				// Backfilled items keep their original date (not the day they were approved).

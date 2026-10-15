@@ -15,7 +15,7 @@ const AW_SECTION_DESC = array(
 	'aw_legal'       => 'Court orders, notifications and rules that affect animals, explained in plain words.',
 	'post'           => 'Practical guides for the moments that matter: an injured animal, a cruelty case, a community dog.',
 	'aw_campaign'    => 'Citizen campaigns for animals, starting with the letters of Animal Writes 1.0.',
-	'aw_opportunity' => 'Volunteer, foster or intern with people doing the work.',
+	'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India.',
 	'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.', // OWNER to approve (Phase 11 E1)
 );
 

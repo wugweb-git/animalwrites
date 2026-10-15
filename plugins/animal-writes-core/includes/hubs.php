@@ -322,7 +322,7 @@ add_filter(
 /** Intro of each hub (moved verbatim from the old section header). */
 function aw_hub_intro( $type ) {
 	if ( 'aw_press' === $type ) {
-		return 'See how our movement is making headlines across the nation';
+		return 'Press coverage of Animal Writes and its citizen letter campaign for community animals across India.';
 	}
 	return AW_SECTION_DESC[ $type ] ?? '';
 }
