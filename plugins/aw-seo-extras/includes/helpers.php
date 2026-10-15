@@ -46,6 +46,42 @@ function aw_seo_page_suffix() {
 	return $n > 1 ? ' – Page ' . $n : '';
 }
 
+/**
+ * A title with its page number on later pages: " Page N" before " – Animal Writes" (the only separator a title has),
+ * else at the end; unchanged when it already names the page.
+ */
+function aw_seo_title_with_page( $text ) {
+	$n = aw_seo_page_number();
+	if ( $n < 2 || false !== stripos( $text, 'Page ' . $n ) ) {
+		return $text;
+	}
+	$brand = ' – ' . get_bloginfo( 'name' );
+	return mb_substr( $text, -mb_strlen( $brand ) ) === $brand ? mb_substr( $text, 0, -mb_strlen( $brand ) ) . ' Page ' . $n . $brand : $text . ' Page ' . $n;
+}
+
+/**
+ * A title without separators of its own (owner, 15 Oct 2026: the only separator in a search title is the " – " before
+ * "Animal Writes"): a publisher's name appended to a headline is dropped; " | ", spaced dashes, a colon or semicolon
+ * joining two parts become a space; brackets are opened ("Representative (AWBI)" → "Representative AWBI"). Hyphens
+ * inside words, times (10:30) and commas inside a headline or a number (Rs 5,000) are kept.
+ *
+ * @param string $text      Title.
+ * @param string $publisher Publisher name to drop when it is appended.
+ * @return string
+ */
+function aw_seo_unseparate( $text, $publisher = '' ) {
+	$t = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	$publisher = trim( (string) $publisher );
+	if ( '' !== $publisher ) {
+		$t = preg_replace( '/\s*(?:\||:|;|\s[–—-]|[–—])\s*' . preg_quote( $publisher, '/' ) . '\.?$/iu', '', $t );
+	}
+	$t = preg_replace( '/\s*\|\s*/u', ' ', $t );
+	$t = preg_replace( '/\s+[–—-]+\s+|(?<=\p{L})\s*[–—]\s*(?=\p{L})/u', ' ', $t ); // a range such as 2025–26 stays
+	$t = preg_replace( '/(?<=\S)\s*[:;]\s+/u', ' ', $t );
+	$t = preg_replace( '/[(\[]\s*([^()\[\]]*?)\s*[)\]]/u', '$1', $t );
+	return trim( preg_replace( '/\s+/u', ' ', $t ), " \t-–—:;|," );
+}
+
 /** $text with the page suffix, unless it already names the page. */
 function aw_seo_with_page( $text ) {
 	$suffix = aw_seo_page_suffix();
@@ -205,10 +241,11 @@ function aw_seo_headline_case( $text ) {
 /**
  * The search title of a Library item or a Resource, built from its own title (owner, 15 Oct 2026): Title Case, a
  * trailing "dated …" date dropped (the date is on the page), " – Animal Writes" when the whole fits within 60.
- * - Under 50 characters with the site name: the item's kind is added when that still fits ("…: Circular",
- *   "…: Research Summary").
+ * - Under 50 characters with the site name: the item's kind is added when that still fits ("… Circular",
+ *   "… Research Summary"), without a separator.
  * - Over 60: the headline alone; then its first part (before ":", " – " or ";") when that part has at least 30
  *   characters; else the whole headline, never cut inside.
+ * - No separator but the " – " before the site name (aw_seo_unseparate).
  *
  * @param WP_Post $post Library item or Resource.
  * @return string
@@ -222,16 +259,17 @@ function aw_seo_resource_title( $post ) {
 	$max = 60;
 	if ( mb_strlen( aw_seo_branded( $t ) ) <= $max ) {
 		$kind = aw_seo_resource_kind( $post );
-		if ( mb_strlen( aw_seo_branded( $t ) ) < 50 && '' !== $kind && false === mb_stripos( $t, $kind ) && mb_strlen( aw_seo_branded( $t . ': ' . $kind ) ) <= $max ) {
-			return aw_seo_branded( $t . ': ' . $kind );
+		$t = aw_seo_unseparate( $t );
+		if ( mb_strlen( aw_seo_branded( $t ) ) < 50 && '' !== $kind && false === mb_stripos( $t, $kind ) && mb_strlen( aw_seo_branded( $t . ' ' . $kind ) ) <= $max ) {
+			return aw_seo_branded( $t . ' ' . $kind );
 		}
 		return aw_seo_branded( $t );
 	}
-	if ( mb_strlen( $t ) <= $max ) {
-		return $t;
+	if ( mb_strlen( aw_seo_unseparate( $t ) ) <= $max ) {
+		return aw_seo_unseparate( $t );
 	}
 	$parts = preg_split( '/\s*(?::|;|\s[–—-])\s+/u', $t );
-	$first = trim( (string) ( $parts[0] ?? '' ) );
+	$first = aw_seo_unseparate( trim( (string) ( $parts[0] ?? '' ) ) );
 	if ( count( $parts ) > 1 && mb_strlen( $first ) >= 30 ) {
 		if ( mb_strlen( aw_seo_branded( $first ) ) <= $max ) {
 			return aw_seo_branded( $first );
@@ -240,7 +278,7 @@ function aw_seo_resource_title( $post ) {
 			return $first;
 		}
 	}
-	return $t; // longer than 60 and no whole first part that fits: the name is never cut
+	return aw_seo_unseparate( $t ); // longer than 60 and no whole first part that fits: the name is never cut
 }
 
 /** What a Library item or Resource is, for its title: the Library type ("Circular"), "Research Summary", "Guide", "FAQ". */
@@ -273,21 +311,21 @@ function aw_seo_fit( array $titles, $max = 60 ) {
 	return aw_seo_cut_title( (string) end( $titles ), $max );
 }
 
-/** "{Name}, {District}" or "{Name}, {State}" (no trailing comma; the place is not repeated when the name has it). */
+/** "{Name} in {District}" or "{Name} in {State}" (no comma as a separator; the place is not repeated when the name has it). */
 function aw_seo_listing_name( $id ) {
 	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = $district ? $district : $state;
-	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ', ' . $where : $name;
+	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ' in ' . $where : $name;
 }
 
 /** Fixed titles of the section hubs (post type => title). */
 const AW_HUB_TITLES = array(
 	'aw_news'        => 'Animal Welfare News from India – Animal Writes',
-	'aw_legal'       => 'Animal Law, Court Orders & Rules in India – Animal Writes',
+	'aw_legal'       => 'Animal Laws and Court Orders in India – Animal Writes',
 	'post'           => 'Animal Welfare Guides & Research in India – Animal Writes',
-	'aw_listing'     => 'Animal Welfare NGOs in India: Directory of 5,000+ Groups',
-	'aw_opportunity' => 'Animal Welfare Volunteer, Internship & Jobs in India',
+	'aw_listing'     => 'Directory of 5,000+ Animal Welfare NGOs in India',
+	'aw_opportunity' => 'Animal Welfare Volunteering and Jobs in India',
 	'aw_press'       => 'Animal Writes in the News',
 	'aw_campaign'    => 'Animal Welfare Campaigns in India – Animal Writes',
 );

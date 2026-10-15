@@ -7,9 +7,12 @@
  * They are written when an item is published or saved, and only where the field is empty or still holds the value
  * written automatically last time (_aw_seo_auto); a value typed in Rank Math is never replaced.
  *   - News: over 60 characters the headline is cut at a word (no "…", no site name); shorter ones get
- *     " – Animal Writes".
+ *     " – Animal Writes". A publisher's name appended to the headline and separators joining its parts are dropped.
+ *   - The only separator in any title is the " – " before "Animal Writes" (owner, 15 Oct 2026): no colons, pipes,
+ *     other dashes, or commas and brackets used as separators (aw_seo_unseparate); later list pages add " Page N"
+ *     before the site name.
  *   - Library and Resources: aw_seo_resource_title() (Title Case, the kind added to short ones, never cut inside).
- *   - Listings: "{Name}, {District} – Animal Writes" ("{Name}, {State}" without a district); over 60 characters
+ *   - Listings: "{Name} in {District} – Animal Writes" ("{Name} in {State}" without a district); over 60 characters
  *     without " – Animal Writes", and the name itself is never cut.
  *   - Opportunities: "{Title} – Animal Writes"; over 60 characters the title alone (the role and organisation are
  *     never cut).
@@ -66,14 +69,14 @@ function aw_seo_item_title( $post ) {
 		return aw_seo_resource_title( $post ); // Library and Resources (helpers.php)
 	}
 	if ( 'aw_news' === $post->post_type ) {
-		return aw_seo_headline_title( $post->post_title );
+		return aw_seo_headline_title( aw_seo_unseparate( aw_seo_plain( $post->post_title ), aw_seo_plain( (string) get_post_meta( $post->ID, 'aw_source_name', true ) ) ) );
 	}
 	if ( 'aw_listing' === $post->post_type ) {
 		$name = aw_seo_listing_name( $post->ID );
 		return mb_strlen( aw_seo_branded( $name ) ) <= 60 ? aw_seo_branded( $name ) : $name; // over 60: no site name (Google shows it beside the result); the name is never cut (owner, 15 Oct 2026)
 	}
 	if ( 'aw_opportunity' === $post->post_type ) {
-		$t = aw_seo_plain( wptexturize( $post->post_title ) );
+		$t = aw_seo_unseparate( aw_seo_plain( wptexturize( $post->post_title ) ) );
 		return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; the role and organisation are never cut (owner, 15 Oct 2026)
 	}
 	if ( 'page' === $post->post_type && 'about' === $post->post_name && ! $post->post_parent ) {
@@ -218,14 +221,14 @@ function aw_seo_list_title() {
 			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
-			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
+			$where = $place->name . ' ' . aw_place_parent_state( $place )->name;
 			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue & NGO Contact Numbers in ' . $where, 'Animal Rescue & NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
 				array_merge(
 					$phone,
 					array(
-						'Animal Welfare NGOs in ' . $where . ': Rescue, Shelters, Vets',
-						'Animal Welfare NGOs, Shelters & Vets in ' . $where,
+						'Animal Welfare NGOs Shelters & Vets in ' . $where,
+						'Animal Welfare NGOs & Vets in ' . $where,
 						'Animal Welfare NGOs in ' . $where,
 						'Animal Welfare NGOs in ' . $place->name,
 					)
@@ -233,15 +236,15 @@ function aw_seo_list_title() {
 				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
-		// A state: its two biggest listing types, each listing counted once by its most specific type (owner, 15 Oct 2026). "Animal Welfare {Type1}, {Type2} & More in {State}";
-		// "& More" only when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
+		// A state: its two biggest listing types, each listing counted once by its most specific type (owner, 15 Oct 2026). "Animal Welfare {Type1} & {Type2} in {State}"
+		// (no comma: one separator only); "{Type1} & More" when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
 		$types = array_map( fn( $b ) => aw_seo_state_type_title( $place, $b[0] ), aw_seo_dir_breakdown( $place ) );
 		$first = $types[0] ?? 'NGOs';
 		$in    = ' in ' . $place->name;
 		$more  = count( $types ) > 2 ? ' & More' : '';
 		$try   = array();
 		if ( count( $types ) > 1 ) {
-			$try[] = 'Animal Welfare ' . $first . ( $more ? ', ' : ' & ' ) . $types[1] . $more . $in;
+			$try[] = 'Animal Welfare ' . $first . ' & ' . $types[1] . $in;
 		}
 		if ( $more ) {
 			$try[] = 'Animal Welfare ' . $first . $more . $in;
@@ -367,7 +370,7 @@ add_filter(
 			return $title;
 		}
 		$ours = aw_seo_list_title();
-		return '' !== $ours ? aw_seo_with_page( $ours ) : $title;
+		return '' !== $ours ? aw_seo_title_with_page( $ours ) : $title;
 	},
 	25
 );
@@ -379,7 +382,7 @@ add_filter(
 			return $title; // items: Rank Math's own field
 		}
 		if ( '' !== aw_seo_typed( 'title' ) ) {
-			return aw_seo_with_page( $title ); // typed in Rank Math: used as is (" – Page N" on later pages)
+			return aw_seo_title_with_page( $title ); // typed in Rank Math: used as is (" Page N" on later pages)
 		}
 		aw_seo_building_title( true );
 		$ours = wp_get_document_title();
