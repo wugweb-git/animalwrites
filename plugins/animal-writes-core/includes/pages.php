@@ -544,3 +544,25 @@ add_filter(
 		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );
 	}
 );
+
+/*
+ * Every date carries the calendar icon (owner): a "Last updated: October 2026" line written in a page's text gets the
+ * site's date component (icon + <time>) when shown. The stored text is not changed.
+ */
+add_filter(
+	'render_block_core/paragraph',
+	function ( $html ) {
+		if ( false === strpos( $html, 'Last updated' ) || false !== strpos( $html, 'aw-date' ) ) {
+			return $html;
+		}
+		return preg_replace_callback(
+			'/(Last updated:?\s*)((?:\d{1,2}\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/',
+			function ( $m ) {
+				$ts  = strtotime( ( preg_match( '/^\d/', $m[2] ) ? '' : '1 ' ) . $m[2] );
+				$iso = $ts ? wp_date( preg_match( '/^\d/', $m[2] ) ? 'Y-m-d' : 'Y-m', $ts ) : '';
+				return $m[1] . '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $m[2] ) . '</time></span>';
+			},
+			$html
+		);
+	}
+);
