@@ -463,11 +463,18 @@ function aw_seo_dir_facts() {
 			$m    = aw_seo_dir_count( $state, $type );
 			$kids = aw_seo_dir_children( $state, $type );
 			if ( count( $kids ) > 1 ) {
-				$others = array_values( array_filter( $kids, fn( $r ) => $r[0]->code !== $place->code ) );
-				$lead   = aw_seo_leaders( $others );
+				// The leaders among all the state's districts, this one included (Nagaur, 130, was left out under Jodhpur, 118);
+				// this district is named without a link to itself.
+				$lead   = aw_seo_leaders( $kids );
+				$named  = aw_seo_join(
+					array_map(
+						fn( $r ) => ( $r[0]->code === $place->code ? esc_html( $r[0]->name ) : aw_seo_link( aw_directory_url( $r[0]->slug, $type ), $r[0]->name ) ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')',
+						$lead
+					)
+				);
 				$out   .= ' ' . esc_html( $state->name . ' has ' ) . aw_seo_link( aw_directory_url( $state->slug, $type ), number_format_i18n( $m ) . ' ' . aw_seo_type_words( $type, $m ) )
 					. esc_html( ' in ' . number_format_i18n( count( $kids ) ) . ' districts' )
-					. ( $lead ? esc_html( '; the most in ' ) . aw_seo_places_links( $lead, fn( $p ) => aw_directory_url( $p->slug, $type ) ) : '' ) . '.';
+					. ( $lead ? esc_html( '; the most in ' ) . $named : '' ) . '.';
 			} else {
 				$out .= ' ' . esc_html( sprintf( 'It is the only district in %1$s with %2$s listed.', $state->name, aw_seo_type_words( $type, 2 ) ) );
 			}
