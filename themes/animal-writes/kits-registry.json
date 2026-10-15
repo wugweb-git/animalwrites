@@ -545,7 +545,8 @@
     "aw-also",
     "aw-elsewhere",
     "aw-byline",
-    "aw-item"
+    "aw-item",
+    "aw-reported"
    ],
    "states": [
     "default",

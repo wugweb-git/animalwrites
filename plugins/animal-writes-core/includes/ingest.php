@@ -272,6 +272,7 @@ function aw_ingest( WP_REST_Request $req ) {
 			'id'            => $post_id,
 			// 'published', 'merged', or why it waits; the workers count published items for the heartbeat.
 			'review'        => 'publish' === get_post_status( $post_id ) ? 'published' : (string) $review,
+			'merged_into'   => (int) get_post_meta( $post_id, 'aw_merged_into', true ), // same event: the workers add its facts there
 			'ignored_terms' => (object) $ignored,
 		),
 		201

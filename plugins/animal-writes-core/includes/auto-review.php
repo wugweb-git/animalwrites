@@ -6,7 +6,8 @@
  * An item is published when every check passes; otherwise it stays Pending with the reason in `aw_review`
  * (shown in the admin list). Checks: publisher on the allow list, a topic, a real summary, not a thin format, relevant,
  * legal items from a legal source. The same event as a story published in the last 7 days is not published again:
- * its publisher is added to that story as "also reported by" and the item is kept private. Nothing is deleted.
+ * its publisher is added to that story as "also reported by" (the workers add the facts it adds: same-story.php) and the
+ * item is kept private. Nothing is deleted.
  *
  * @package animal-writes-core
  */
@@ -154,13 +155,9 @@ function aw_auto_review( $id ) {
 	$reason = aw_review_reason( $id );
 	// Same event as a published story: credit this publisher on that story instead of publishing a second copy.
 	if ( preg_match( '/^same story as #(\d+)/', $reason, $m ) ) {
+		// The facts it adds are written by the workers, which have the report's own text (same-story.php).
 		$keep = (int) $m[1];
-		$also = (array) get_post_meta( $keep, 'aw_also_reported', true );
-		$url  = (string) get_post_meta( $id, 'aw_source_url', true );
-		if ( $url && ! in_array( $url, wp_list_pluck( $also, 'url' ), true ) && $url !== (string) get_post_meta( $keep, 'aw_source_url', true ) ) {
-			$also[] = array( 'name' => (string) get_post_meta( $id, 'aw_source_name', true ), 'url' => $url );
-			update_post_meta( $keep, 'aw_also_reported', array_values( array_filter( $also ) ) );
-		}
+		aw_same_story_fold( $keep, (string) get_post_meta( $id, 'aw_source_url', true ), (string) get_post_meta( $id, 'aw_source_name', true ) );
 		wp_update_post( array( 'ID' => $id, 'post_status' => 'private' ) );
 		update_post_meta( $id, 'aw_merged_into', $keep );
 		update_post_meta( $id, 'aw_review', 'merged into #' . $keep . ' as "also reported by" ' . wp_date( 'Y-m-d H:i' ) );

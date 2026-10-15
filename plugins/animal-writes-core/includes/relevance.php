@@ -160,6 +160,21 @@ function aw_relevance_recent_titles(): array {
 	return array_values( array_map( fn( $id ) => html_entity_decode( get_the_title( $id ), ENT_QUOTES ), $ids ) );
 }
 
+/** The same stories with their IDs, so the workers can add a later report's facts to the first one (same-story.php). */
+function aw_relevance_recent_items(): array {
+	$ids = get_posts(
+		array(
+			'post_type'      => array( 'aw_news', 'aw_legal' ),
+			'post_status'    => array( 'publish', 'pending', 'draft', 'future' ),
+			'date_query'     => array( array( 'after' => '4 days ago' ) ),
+			'posts_per_page' => 400,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+	return array_values( array_map( fn( $id ) => array( 'id' => (int) $id, 'title' => html_entity_decode( get_the_title( $id ), ENT_QUOTES ) ), $ids ) );
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -170,7 +185,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $can,
-				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles() ) ),
+				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles(), 'recent_items' => aw_relevance_recent_items() ) ),
 			)
 		);
 		register_rest_route(

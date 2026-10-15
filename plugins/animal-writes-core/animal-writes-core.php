@@ -52,6 +52,7 @@ require_once AW_CORE_DIR . 'includes/relevance.php';
 require_once AW_CORE_DIR . 'includes/ingest.php';
 require_once AW_CORE_DIR . 'includes/opportunities-site.php';
 require_once AW_CORE_DIR . 'includes/auto-review.php';
+require_once AW_CORE_DIR . 'includes/same-story.php';
 require_once AW_CORE_DIR . 'includes/topic-images.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';

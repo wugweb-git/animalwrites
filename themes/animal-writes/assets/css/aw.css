@@ -388,6 +388,10 @@ body { background: var(--kit-color-canvas); }
 @media (prefers-reduced-motion: reduce) { .kit-task:hover .aw-task-cta .kit-ico { transform: none; } }
 .aw-task-meta { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1) var(--kit-space-4); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
 .aw-also h2 { font-size: var(--kit-type-h3); padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-line); margin-bottom: var(--kit-space-5); }
+/* Same event, one story (15 Oct 2026): the facts later reports add, under the summary, each credited. */
+.aw-reported { margin-block: var(--kit-space-5); padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-line); }
+.aw-reported h2 { font-size: var(--kit-type-h3); margin: 0 0 var(--kit-space-3); }
+.aw-reported p { margin: 0 0 var(--kit-space-3); }
 
 /* HELP — Resources */
 .aw-res { display: grid; gap: var(--kit-space-grid); grid-template-columns: 1fr; }
