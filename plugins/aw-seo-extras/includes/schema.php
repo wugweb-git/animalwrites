@@ -412,7 +412,8 @@ function aw_campaign_schema( $id ) {
 
 /**
  * Every inLanguage in the graph as en-IN: Rank Math writes the WordPress locale (en-US) on its WebPage nodes, while the
- * site, its pages and its items are Indian English.
+ * site, its pages and its items are Indian English. Plain-text values lose their HTML entities (&#039;, &#8217; from
+ * WordPress titles), so the graph carries the characters themselves.
  *
  * @param mixed $node Graph or node.
  * @return mixed
@@ -424,6 +425,8 @@ function aw_schema_language( $node ) {
 	foreach ( $node as $k => $v ) {
 		if ( 'inLanguage' === $k && is_string( $v ) && 0 === stripos( $v, 'en' ) ) {
 			$node[ $k ] = 'en-IN';
+		} elseif ( is_string( $v ) && false === strpos( $v, '<' ) && false !== strpos( $v, '&' ) ) {
+			$node[ $k ] = html_entity_decode( $v, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		} elseif ( is_array( $v ) ) {
 			$node[ $k ] = aw_schema_language( $v );
 		}
@@ -703,7 +706,7 @@ function aw_press_schema() {
 			'item'     => array_filter(
 				array(
 					'@type'         => 'video' === get_post_meta( $p->ID, 'aw_press_format', true ) ? 'VideoObject' : 'NewsArticle',
-					'headline'      => get_the_title( $p ),
+					'headline'      => aw_seo_plain( get_the_title( $p ) ),
 					'name'          => aw_seo_plain( get_the_title( $p ) ),
 					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
 					'datePublished' => aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ),
