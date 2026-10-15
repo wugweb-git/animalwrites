@@ -230,7 +230,7 @@ function aw_doc_preview_html( $post_id ) {
  * @return bool
  */
 function aw_doc_hostable( $post_id, $url ) {
-	if ( has_term( array( 'act', 'rule', 'judgment', 'order' ), 'aw_legal_kind', $post_id ) ) {
+	if ( has_term( array( 'act', 'rule', 'judgment', 'order' ), 'post_tag', $post_id ) ) {
 		return true;
 	}
 	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
@@ -243,7 +243,7 @@ function aw_doc_hostable( $post_id, $url ) {
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
-		if ( ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'aw_legal_kind', get_queried_object_id() ) ) ) {
+		if ( ! ( is_singular( 'aw_legal' ) && has_term( 'template', 'post_tag', get_queried_object_id() ) ) ) {
 			return $content;
 		}
 		$button = '<p class="kit-print"><button type="button" class="wp-element-button" onclick="window.print()">'

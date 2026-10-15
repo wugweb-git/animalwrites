@@ -26,8 +26,8 @@ if ( ! defined( 'DISALLOW_FILE_EDIT' ) ) {
 }
 
 /**
- * The workers' old field names (topics; categories = Resource types) are still accepted and sent while the workers
- * switch to the new ones (15 Oct 2026). Off once they are deployed.
+ * The workers' old field names (kind, opportunity_type, listing.listing_type) are still accepted while the workers
+ * switch to tags (15 Oct 2026). Off once they are deployed.
  */
 const AW_WORKER_OLD_NAMES = true;
 
@@ -47,6 +47,7 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/category-moves.php';
+require_once AW_CORE_DIR . 'includes/tags.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';

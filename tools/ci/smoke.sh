@@ -30,6 +30,7 @@ N=$(wp post create --post_type=aw_news --post_title="CI news item" --post_status
 wp post meta add "$N" aw_source_url "https://www.thehindu.com/ci-item/" --quiet
 wp post meta add "$N" aw_source_name "The Hindu" --quiet
 wp post term add "$N" category community-dogs --quiet
+wp post term add "$N" post_tag ci-tag --quiet
 wp post create --post_type=aw_legal --post_title="CI library item 2023" --post_status=publish --quiet
 wp post create --post_type=post --post_title="CI guide" --post_status=publish --quiet
 wp post create --post_type=aw_opportunity --post_title="CI opportunity" --post_status=publish --quiet
@@ -44,7 +45,7 @@ sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
 URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
-  /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/
+  /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/ /tag/ci-tag/ "/news/?category_name=community-dogs"
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
 for u in "${URLS[@]}"; do

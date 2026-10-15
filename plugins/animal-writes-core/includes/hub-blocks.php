@@ -190,17 +190,17 @@ function aw_news_meta_row( $id ) {
 
 /** Library: the law's year (Acts, Rules), the source date, or the template icon. */
 function aw_block_doc_date( $a, $id ) {
-	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+	if ( has_term( 'template', 'post_tag', $id ) ) {
 		return '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>';
 	}
-	$year  = has_term( array( 'act', 'rule' ), 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
+	$year  = has_term( array( 'act', 'rule' ), 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
 	$thumb = (int) get_post_thumbnail_id( $id );
 	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => '', 'loading' => 'lazy' ) ) : ''; // the document's first page
 	$pub   = function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && ! get_post_meta( $id, 'aw_file_id', true ) ? (string) aw_item_image( $id, 'medium' ) : '';
 	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
 		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
 	}
-	$kind  = wp_get_object_terms( $id, 'aw_legal_kind', array( 'fields' => 'names' ) );
+	$kind  = wp_list_pluck( aw_item_tags( $id ), 'name' );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
@@ -212,11 +212,10 @@ function aw_block_doc_date( $a, $id ) {
 /** "{Type} · {Date}" above a card title: a Resource's type and when it was last updated, or a Library item's kind and date. */
 function aw_block_type_date( $a, $id ) {
 	$type = get_post_type( $id );
-	$tax  = 'post' === $type ? 'aw_resource_type' : ( 'aw_legal' === $type ? 'aw_legal_kind' : '' );
 	$name = '';
-	if ( $tax ) {
-		$t    = wp_get_object_terms( $id, $tax, array( 'fields' => 'names' ) );
-		$name = is_wp_error( $t ) || ! $t ? '' : $t[0];
+	if ( in_array( $type, array( 'post', 'aw_legal' ), true ) ) { // the Resource or Library type: the item's tag from its section's list
+		$t    = aw_item_tags( $id );
+		$name = $t ? $t[0]->name : '';
 	}
 	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
 	$text = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . $date;
@@ -226,7 +225,7 @@ function aw_block_type_date( $a, $id ) {
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
 function aw_block_law_date( $a, $id ) {
-	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+	if ( has_term( 'template', 'post_tag', $id ) ) {
 		return '';
 	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
@@ -238,7 +237,7 @@ function aw_block_law_date( $a, $id ) {
 
 /** "Issued by …" (a label, not a filter); "Template" for templates. */
 function aw_block_issuer( $a, $id ) {
-	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+	if ( has_term( 'template', 'post_tag', $id ) ) {
 		return aw_legal_kind_tag( $id );
 	}
 	$iss  = aw_item_issuer( $id );
@@ -254,8 +253,8 @@ function aw_block_issuer( $a, $id ) {
  * @return string '' when the item has no type.
  */
 function aw_legal_kind_tag( $id ) {
-	$t = wp_get_object_terms( $id, 'aw_legal_kind' );
-	if ( is_wp_error( $t ) || ! $t ) {
+	$t = aw_item_tags( $id, aw_section_tags( 'aw_legal' ) );
+	if ( ! $t ) {
 		return '';
 	}
 	$t = $t[0];
@@ -264,7 +263,7 @@ function aw_legal_kind_tag( $id ) {
 
 /** Source line and the official document (PDF) on Library items. */
 function aw_block_doc_link( $a, $id ) {
-	if ( has_term( 'template', 'aw_legal_kind', $id ) ) {
+	if ( has_term( 'template', 'post_tag', $id ) ) {
 		return '';
 	}
 	$fid  = (int) get_post_meta( $id, 'aw_file_id', true );
@@ -335,8 +334,7 @@ function aw_block_org_mark( $a, $id ) {
 function aw_block_badges( $a, $id ) {
 	$out = '';
 	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
-	$types = get_the_terms( $id, 'aw_listing_type' );
-	foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
+	foreach ( array_slice( aw_listing_types( $id ), 0, 2 ) as $t ) {
 		$out .= '<span class="kit-tag">' . aw_type_icon( $t->slug ) . esc_html( $t->name ) . '</span>'; // the type's icon, then its name
 	}
 	return $out ? '<p class="aw-org-tags kit-tags">' . $out . '</p>' : '';
@@ -353,26 +351,7 @@ function aw_type_icon( $slug ) {
 	return '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" aria-hidden="true"></span>';
 }
 
-// Organisation page: the listing type label carries the same icon as on the Directory cards.
-add_filter(
-	'render_block_core/post-terms',
-	function ( $html, $block, $instance ) {
-		if ( 'aw_listing_type' !== ( $block['attrs']['term'] ?? '' ) || '' === $html ) {
-			return $html;
-		}
-		$id    = (int) ( $instance->context['postId'] ?? get_the_ID() );
-		$terms = get_the_terms( $id, 'aw_listing_type' );
-		if ( ! $terms || is_wp_error( $terms ) ) {
-			return $html;
-		}
-		foreach ( $terms as $t ) {
-			$html = preg_replace( '#(<a\b[^>]*>)(' . preg_quote( esc_html( $t->name ), '#' ) . '</a>)#u', '$1' . aw_type_icon( $t->slug ) . '$2', $html, 1 );
-		}
-		return $html;
-	},
-	5, // before the breadcrumb trail is put in front (breadcrumbs.php)
-	3
-);
+// Tag labels carry their icon wherever WordPress prints them (tags.php, term_links-post_tag).
 
 /** Ways to reach the organisation, shown only when they exist. */
 function aw_block_contact( $a, $id ) {

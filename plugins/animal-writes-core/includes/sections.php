@@ -44,17 +44,17 @@ add_shortcode(
 	'aw_section_head',
 	function () {
 		global $wp_query;
-		$term_page = is_tax() || is_category();
-		$type      = is_category() ? 'aw_news' : (string) get_query_var( 'post_type' ); // a category page leads with its news
+		$term_page = is_tax() || is_category() || is_tag();
+		$type      = is_category() ? 'aw_news' : ( is_tag() ? ( aw_tag_section( (string) get_queried_object()->slug ) ?: 'aw_news' ) : (string) get_query_var( 'post_type' ) ); // a category page leads with its news; a tag page is its section's
 		$type      = $type ? $type : ( $term_page ? (string) ( get_taxonomy( get_queried_object()->taxonomy )->object_type[0] ?? '' ) : '' );
 		$title     = $term_page ? single_term_title( '', false ) : post_type_archive_title( '', false );
-		if ( 'aw_listing' === $type && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_listing_type' ) ) ) {
+		if ( ( 'aw_listing' === $type && ! $term_page ) && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) ) ) {
 			$city  = aw_current_place();
 			$tname = function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '';
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
 		$desc = $term_page && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
-		if ( 'aw_listing' === $type && function_exists( 'aw_directory_intro' ) ) {
+		if ( ( 'aw_listing' === $type && ! $term_page ) && function_exists( 'aw_directory_intro' ) ) {
 			$desc = aw_directory_intro();
 		}
 		$count = (int) $wp_query->found_posts;
@@ -91,7 +91,7 @@ add_shortcode(
 			$tiles = '<img src="' . esc_url( (string) wp_get_attachment_image_url( $cat_img, 'medium_large' ) ) . '" alt="" loading="lazy">' . implode( '', array_slice( preg_split( '/(?=<img|<div class="kit-placard)/', $tiles, -1, PREG_SPLIT_NO_EMPTY ), 0, 2 ) );
 		}
 		$visual = $tiles ? '<div class="kit-section-visual" aria-hidden="true">' . $tiles . '</div>' : '';
-		if ( 'aw_listing' === $type ) {
+		if ( ( 'aw_listing' === $type && ! $term_page ) ) {
 			// Directory: the search bar is the main element and the count sits with the results (Phase 11 E1, E3).
 			$visual = '';
 			$count  = 0;
@@ -99,12 +99,12 @@ add_shortcode(
 		// The band holds the breadcrumb, the heading and the page's search or filters (Directory search bar; list filters).
 		$crumbs  = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
 		$filters = '';
-		if ( 'aw_listing' === $type && function_exists( 'aw_directory_filter' ) ) {
+		if ( ( 'aw_listing' === $type && ! $term_page ) && function_exists( 'aw_directory_filter' ) ) {
 			$filters = aw_directory_filter();
 		} elseif ( is_post_type_archive() && function_exists( 'aw_list_filters' ) ) {
 			$filters = aw_list_filters( $type );
 		}
-		return '<header class="kit-section-band alignfull' . ( 'aw_listing' === $type ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $crumbs . '<div class="kit-section-head"><div>'
+		return '<header class="kit-section-band alignfull' . ( ( 'aw_listing' === $type && ! $term_page ) ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $crumbs . '<div class="kit-section-head"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="kit-section-desc">' . esc_html( $desc ) . '</p>' : '' )
 			. ( $count ? '<p class="kit-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )

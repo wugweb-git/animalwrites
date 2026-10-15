@@ -4,7 +4,7 @@
  *
  * POST /wp-json/aw/v1/ingest  (Application Password auth, user needs edit_posts)
  * Everything lands as "pending" (Pending Review). Nothing is ever auto-published.
- * Terms (categories, source_type, city, listing_type) are only assigned if they already exist;
+ * Terms (categories and tags from the section's lists, source_type, city) are only assigned if they already exist;
  * unknown ones are skipped and returned in "ignored_terms".
  *
  * Body (JSON):
@@ -12,8 +12,8 @@
  *   "type": "news|legal|research|listing",
  *   "title": "...", "summary": "2–3 lines in our own words",
  *   "source_url": "...", "source_name": "...", "source_date": "YYYY-MM-DD",
- *   "categories": ["..."], "source_type": "Supreme Court", "city": "delhi",
- *   "kind": "judgment", "court": "supreme-court", "document_url": "https://...pdf"   (Library only),
+ *   "categories": ["..."], "tags": ["judgment"], "source_type": "Supreme Court", "city": "delhi",
+ *   "court": "supreme-court", "document_url": "https://...pdf"   (Library only; its type is a tag, e.g. "judgment"),
  *   "listing": { "listing_type": "animal-shelter", "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
  * }
  *
@@ -179,13 +179,16 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	$ignored = array();
 
-	$cats = array_filter( (array) $req->get_param( 'categories' ), 'is_scalar' );
-	if ( ! $cats && AW_WORKER_OLD_NAMES ) {
-		$cats = array_filter( (array) $req->get_param( 'topics' ), 'is_scalar' ); // the workers' old name, until they are deployed
+	// Categories: only those the item's section uses (Settings → Sourcing → Sections).
+	$cats    = array_values( array_unique( array_map( 'sanitize_title', array_filter( (array) $req->get_param( 'categories' ), 'is_scalar' ) ) ) );
+	$allowed = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : $cats;
+	foreach ( array_diff( $cats, $allowed ) as $bad ) {
+		$ignored[] = 'category: ' . $bad;
 	}
-	if ( $cats ) {
-		aw_assign_existing_terms( $post_id, $cats, 'category', $ignored );
+	if ( array_intersect( $cats, $allowed ) ) {
+		aw_assign_existing_terms( $post_id, array_values( array_intersect( $cats, $allowed ) ), 'category', $ignored );
 	}
+	$tags = array_filter( (array) $req->get_param( 'tags' ), 'is_scalar' );
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
 		if ( ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php)
 			$ignored[] = 'issuer: ' . sanitize_text_field( (string) $req->get_param( 'source_type' ) );
@@ -193,13 +196,16 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
 	if ( 'aw_legal' === $type ) {
-		// No kind from the worker: a government press release (PIB) is an Official release.
-		$kind = $req->get_param( 'kind' ) ? $req->get_param( 'kind' ) : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' );
-		if ( $kind && ! term_exists( $kind, 'aw_legal_kind' ) && isset( AW_LEGAL_KINDS[ $kind ] ) ) {
-			wp_insert_term( AW_LEGAL_KINDS[ $kind ], 'aw_legal_kind', array( 'slug' => $kind ) );
+		// The Library type is a tag; with none from the worker, a government press release (PIB) is an Official release.
+		$kind = AW_WORKER_OLD_NAMES ? sanitize_title( (string) $req->get_param( 'kind' ) ) : ''; // the workers' old field, until they are deployed
+		$kind = '' !== $kind ? $kind : ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
+		foreach ( array_merge( $kind ? array( $kind ) : array(), array_intersect( array_map( 'sanitize_title', $tags ), array_keys( AW_LEGAL_KINDS ) ) ) as $k ) {
+			if ( ! term_exists( $k, 'post_tag' ) ) {
+				wp_insert_term( AW_LEGAL_KINDS[ $k ] ?? $k, 'post_tag', array( 'slug' => $k ) );
+			}
 		}
 		if ( $kind ) {
-			aw_assign_existing_terms( $post_id, array( $kind ), 'aw_legal_kind', $ignored );
+			$tags[] = $kind;
 		}
 		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
 		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) ) {
@@ -224,8 +230,8 @@ function aw_ingest( WP_REST_Request $req ) {
 		if ( $deadline ) {
 			update_post_meta( $post_id, 'aw_deadline', $deadline );
 		}
-		if ( $req->get_param( 'opportunity_type' ) ) {
-			aw_assign_existing_terms( $post_id, array( $req->get_param( 'opportunity_type' ) ), 'aw_opportunity_type', $ignored );
+		if ( $req->get_param( 'opportunity_type' ) && AW_WORKER_OLD_NAMES ) { // the workers' old field, until they are deployed
+			$tags[] = (string) $req->get_param( 'opportunity_type' );
 		}
 		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): every part that names an LGD state or district.
 		$places = aw_places_from_text( (string) $req->get_param( 'place' ) );
@@ -241,8 +247,8 @@ function aw_ingest( WP_REST_Request $req ) {
 				update_post_meta( $post_id, 'aw_' . $f, aw_sanitize_meta( $l[ $f ], 'aw_' . $f ) );
 			}
 		}
-		if ( ! empty( $l['listing_type'] ) ) {
-			aw_assign_existing_terms( $post_id, array( $l['listing_type'] ), 'aw_listing_type', $ignored );
+		if ( ! empty( $l['listing_type'] ) && AW_WORKER_OLD_NAMES ) { // the workers' old field, until they are deployed
+			$tags[] = (string) $l['listing_type'];
 		}
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 		update_post_meta( $post_id, 'aw_featured', 0 );
@@ -255,7 +261,16 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	// Routine items go live when every check passes; the rest wait with the reason (auto-review.php).
 	if ( 'research' === $req->get_param( 'type' ) ) {
-		wp_set_object_terms( $post_id, 'research', 'aw_resource_type', false );
+		$tags[] = 'research';
+	}
+	// Tags: only those the item's section uses (Settings → Sourcing → Sections); unknown ones are ignored.
+	$allowed = function_exists( 'aw_section_tags' ) ? aw_section_tags( $type ) : array();
+	$tags    = array_values( array_unique( array_map( 'sanitize_title', array_filter( $tags, 'is_scalar' ) ) ) );
+	foreach ( array_diff( $tags, $allowed ) as $bad ) {
+		$ignored[] = 'tag: ' . $bad;
+	}
+	if ( array_intersect( $tags, $allowed ) ) {
+		aw_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
 	}
 	if ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );

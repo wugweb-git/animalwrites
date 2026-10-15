@@ -237,8 +237,8 @@ function aw_seo_list_title() {
 		$try[] = 'Animal Welfare in ' . preg_replace( '/^The /', '', $place->name ); // a long name ("The Dadra and Nagar Haveli and Daman and Diu"): never cut inside it
 		return aw_seo_fit( array_unique( $try ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
-	if ( is_tax( 'aw_opportunity_type' ) ) {
-		$what = 'Animal Welfare ' . single_term_title( '', false ) . ' Opportunities in India';
+	if ( is_tag() && function_exists( 'aw_seo_tag_title' ) ) { // a tag page: "{Tag plural} in India – Animal Writes"
+		$what = aw_seo_tag_title( get_queried_object() );
 		return aw_seo_fit( array( aw_seo_branded( $what ), $what ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
@@ -391,17 +391,14 @@ function aw_seo_list_description() {
 		$desc = has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post );
 	} elseif ( is_post_type_archive() ) {
 		$desc = AW_ARCHIVE_DESCRIPTIONS[ get_query_var( 'post_type' ) ] ?? '';
-	} elseif ( is_tax( 'aw_opportunity_type' ) && '' === trim( (string) term_description() ) ) {
-		$term = get_queried_object();
-		$n    = (int) $term->count;
-		$what = mb_strtolower( $term->name ) . ' ' . ( 1 === $n ? 'opportunity' : 'opportunities' );
-		$desc = sprintf( '%1$s %2$s with animal welfare organisations across India, from Animal Writes. %3$s its role, location and how to apply.', 1 === $n ? 'One' : number_format_i18n( $n ), $what, 1 === $n ? 'It lists' : 'Each one lists' );
+	} elseif ( is_tag() && '' === trim( (string) term_description() ) && function_exists( 'aw_seo_tag_description' ) ) {
+		$desc = aw_seo_tag_description( get_queried_object() ); // what the tag holds, counted (programmatic.php)
 	} elseif ( aw_seo_is_category_page() && '' !== aw_seo_category_description( get_queried_object() ) ) {
 		$desc = aw_seo_category_description( get_queried_object() ); // what the category holds, counted (programmatic.php)
 	} elseif ( is_tax() || is_category() || is_tag() ) {
 		$desc = term_description() ?: single_term_title( '', false ) . ' on ' . get_bloginfo( 'name' ) . '.';
 	}
-	if ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['type'] ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['tag'] ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$desc = aw_directory_intro();
 	}
 	$built = 'aw_listing' === $hub ? aw_seo_dir_description() : ''; // places, district × type pages, lists filtered by type (programmatic.php)

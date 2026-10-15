@@ -5,7 +5,7 @@
  *
  * Additive only: no existing item is changed. Front-end display comes in later phases.
  *
- * - Legal sub-type: taxonomy aw_legal_kind (Act, Rule, Order, Judgment, Circular, Notification) on Legal Watch and Research.
+ * - Library type: a Tag (Act, Rule, Order, Judgment, Circular, Notification, Template, Advisory, Official release).
  * - Issuer: a label on Library items (meta aw_issuer, issuers.php). Courts (Supreme Court, High Courts, NGT) are
  *   issuers; the Court list and the issuer list were merged into the label on 8 Oct 2026 (court kept in aw_court_legacy).
  * - Category: WordPress's own; the primary one is Rank Math's (its Primary Category field, meta rank_math_primary_category).
@@ -40,27 +40,7 @@ function aw_relations() {
 	);
 }
 
-/* ---------- Taxonomies ---------- */
-
-add_action(
-	'init',
-	function () {
-		$args = fn( $name, $one ) => array(
-			'labels'             => array( 'name' => $name, 'singular_name' => $one ),
-			'hierarchical'       => true,
-			'public'             => true,
-			'publicly_queryable' => false, // no archive pages; used as labels and list filters
-			'rewrite'            => false,
-			'show_in_rest'       => true,
-			'show_admin_column'  => true,
-		);
-		register_taxonomy( 'aw_legal_kind', array( 'aw_legal' ), $args( 'Library types', 'Library type' ) );
-		register_taxonomy( 'aw_service', array( 'aw_listing' ), $args( 'Services', 'Service' ) );
-		// Language is no longer used on the Library (Phase 12 B4); each item keeps its old value in the meta aw_language_legacy.
-		// Places (State filter) come from the LGD codes on each item (places.php).
-	},
-	11
-);
+/* ---------- Labels: WordPress's own Tags (tags.php) ---------- */
 
 /** The fixed services list (added once; names follow AW_SERVICES). */
 add_action(
@@ -70,8 +50,8 @@ add_action(
 			return;
 		}
 		foreach ( AW_SERVICES as $slug => $name ) {
-			if ( ! term_exists( $slug, 'aw_service' ) ) {
-				wp_insert_term( $name, 'aw_service', array( 'slug' => $slug ) );
+			if ( ! term_exists( $slug, 'post_tag' ) ) {
+				wp_insert_term( $name, 'post_tag', array( 'slug' => $slug ) );
 			}
 		}
 		update_option( 'aw_services_seeded', '1', false );
@@ -86,7 +66,7 @@ add_action(
 		if ( '1' === get_option( 'aw_model_seeded' ) ) {
 			return;
 		}
-		foreach ( array( 'aw_legal_kind' => AW_LEGAL_KINDS ) as $tax => $terms ) {
+		foreach ( array( 'post_tag' => AW_LEGAL_KINDS ) as $tax => $terms ) {
 			foreach ( $terms as $slug => $name ) {
 				if ( ! term_exists( $slug, $tax ) ) {
 					wp_insert_term( $name, $tax, array( 'slug' => $slug ) );
@@ -97,62 +77,6 @@ add_action(
 		update_option( 'aw_model_seeded', '1', false );
 	},
 	20
-);
-
-/**
- * Templates live in the Library (8 Oct 2026): the two letter-writing items in Resources become Library items of type
- * Template, each with one 301 from its /resources/ URL. Resource types are Guide, How-to, FAQ, Research: Library items
- * still tagged with a template resource type keep the value in the meta aw_resource_type_legacy, and the three
- * template resource types (empty after this) are removed. Once.
- */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_templates_to_library_done' ) || ! function_exists( 'aw_redirect_add' ) ) {
-			return;
-		}
-		$report = array( 'moved' => array(), 'cleaned' => 0, 'types_removed' => array() );
-		foreach ( array( 'handwritten-letter-format', 'key-points-to-include-in-your-letter' ) as $slug ) {
-			$p = get_page_by_path( $slug, OBJECT, 'aw_guide' );
-			if ( ! $p ) {
-				continue;
-			}
-			$old = wp_parse_url( get_permalink( $p ), PHP_URL_PATH );
-			foreach ( (array) get_the_terms( $p->ID, 'aw_resource_type' ) as $t ) {
-				if ( $t && ! is_wp_error( $t ) ) {
-					add_post_meta( $p->ID, 'aw_resource_type_legacy', $t->slug );
-				}
-			}
-			wp_delete_object_term_relationships( $p->ID, 'aw_resource_type' );
-			$name = wp_unique_post_slug( $p->post_name, $p->ID, $p->post_status, 'aw_legal', 0 );
-			wp_update_post( array( 'ID' => $p->ID, 'post_type' => 'aw_legal', 'post_name' => $name ) );
-			wp_set_object_terms( $p->ID, array( 'template' ), 'aw_legal_kind' );
-			aw_redirect_add( $old, $p->ID );
-			$report['moved'][] = array( $p->ID, $old, wp_parse_url( get_permalink( $p->ID ), PHP_URL_PATH ) );
-		}
-		// Library items still linked to a resource type (the list is not theirs): keep the value as meta, drop the link.
-		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_resource_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type <> 'aw_guide'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		foreach ( $rows as $r ) {
-			add_post_meta( (int) $r->id, 'aw_resource_type_legacy', $r->slug );
-			wp_delete_object_term_relationships( (int) $r->id, 'aw_resource_type' );
-			$report['cleaned']++;
-		}
-		foreach ( array( 'complaint-template', 'letter-template', 'rti-template' ) as $slug ) {
-			$t = get_term_by( 'slug', $slug, 'aw_resource_type' );
-			if ( $t ) {
-				wp_update_term_count_now( array( $t->term_taxonomy_id ), 'aw_resource_type' );
-				$t = get_term( $t->term_id, 'aw_resource_type' );
-				if ( 0 === (int) $t->count ) {
-					wp_delete_term( $t->term_id, 'aw_resource_type' );
-					$report['types_removed'][] = $slug;
-				}
-			}
-		}
-		update_option( 'aw_templates_to_library_report', $report, false );
-		update_option( 'aw_templates_to_library_done', '1', false );
-	},
-	40
 );
 
 /**
@@ -271,7 +195,7 @@ function aw_related_box( $post ) {
 	if ( 'post' === $post->post_type ) {
 		$cur = array_map( 'intval', (array) get_post_meta( $post->ID, 'aw_rel_listing_type', false ) );
 		echo '<tr><th>Listing types</th><td>';
-		foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
+		foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
 			echo '<label style="display:inline-block;min-width:16em"><input type="checkbox" name="aw_rel_listing_type[]" value="' . (int) $t->term_id . '"' . checked( in_array( $t->term_id, $cur, true ), true, false ) . '> ' . esc_html( $t->name ) . '</label> ';
 		}
 		echo '</td></tr>';
@@ -321,7 +245,7 @@ add_action(
 		if ( 'post' === $post->post_type ) {
 			delete_post_meta( $post_id, 'aw_rel_listing_type' );
 			foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_rel_listing_type'] ?? array() ) ) as $tid ) {
-				if ( term_exists( $tid, 'aw_listing_type' ) ) {
+				if ( term_exists( $tid, 'post_tag' ) ) {
 					add_post_meta( $post_id, 'aw_rel_listing_type', $tid );
 				}
 			}
@@ -358,7 +282,7 @@ JS;
 
 function aw_category_help_field( $term ) {
 	$cur = $term ? array_map( 'intval', (array) get_term_meta( $term->term_id, 'aw_help_types', true ) ) : array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
 		echo '<label style="display:inline-block;min-width:16em"><input type="checkbox" name="aw_help_types[]" value="' . (int) $t->term_id . '"' . checked( in_array( $t->term_id, $cur, true ), true, false ) . '> ' . esc_html( $t->name ) . '</label> ';
 	}
 	echo '<p class="description">Directory listing types shown under "Find help" on this category\'s page.</p>';
@@ -387,7 +311,7 @@ foreach ( array( 'created_category', 'edited_category' ) as $aw_hook ) {
 			if ( ! current_user_can( 'manage_categories' ) || ! isset( $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 				return;
 			}
-			$ids = array_values( array_filter( array_map( 'absint', (array) wp_unslash( $_POST['aw_help_types'] ?? array() ) ), fn( $t ) => term_exists( $t, 'aw_listing_type' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$ids = array_values( array_filter( array_map( 'absint', (array) wp_unslash( $_POST['aw_help_types'] ?? array() ) ), fn( $t ) => term_exists( $t, 'post_tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			update_term_meta( $term_id, 'aw_help_types', $ids );
 		}
 	);
@@ -400,8 +324,11 @@ function aw_category_help_types( $term_id ) {
 
 // Listing-type screen: guides that link to this type (the other side of Guide → listing types).
 add_action(
-	'aw_listing_type_edit_form_fields',
+	'post_tag_edit_form_fields',
 	function ( $term ) {
+		if ( ! in_array( $term->slug, aw_listing_type_slugs(), true ) ) {
+			return;
+		}
 		$ids = get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'numberposts' => 50, 'fields' => 'ids', 'meta_key' => 'aw_rel_listing_type', 'meta_value' => (string) $term->term_id ) ); // phpcs:ignore
 		echo '<tr class="form-field"><th scope="row">Guides linking here</th><td>';
 		echo $ids ? implode( ', ', array_map( fn( $id ) => '<a href="' . esc_url( get_edit_post_link( $id ) ) . '">' . esc_html( get_post_field( 'post_title', $id ) ) . '</a>', $ids ) ) : '<span class="description">None yet.</span>'; // phpcs:ignore

@@ -31,7 +31,7 @@ add_filter(
 		if ( $skip || is_search() || is_page( array( 'helplines', 'corrections', 'contact', 'volunteer', 'remove-my-data', 'search', 'claim', 'report', 'thank-you' ) ) ) {
 			return true;
 		}
-		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'aw_listing_type', get_queried_object_id() ) ) {
+		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'post_tag', get_queried_object_id() ) ) {
 			return true;
 		}
 		if ( is_singular( 'post' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
@@ -43,7 +43,7 @@ add_filter(
 		if ( is_singular() && function_exists( 'aw_has_sponsored_block' ) && aw_has_sponsored_block( get_queried_object_id() ) ) {
 			return true; // nor does a page with a sponsored block
 		}
-		if ( is_singular( 'aw_opportunity' ) && has_term( 'volunteer', 'aw_opportunity_type', get_queried_object_id() ) ) {
+		if ( is_singular( 'aw_opportunity' ) && has_term( 'volunteer', 'post_tag', get_queried_object_id() ) ) {
 			return true; // no ads on volunteer roles (owner, 15 Oct 2026)
 		}
 		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
@@ -136,7 +136,7 @@ add_filter(
 );
 
 // End bar on items: categories bottom left, share bottom right.
-add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? '' : 'category', 10, 2 ); // listings: none
+add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? '' : 'category', 10, 2 ); // listings: none (their tags sit under the name)
 add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
 
 
@@ -164,8 +164,8 @@ add_filter(
 			if ( function_exists( 'aw_item_place_names' ) ) {
 				list( $c['state'], $c['district'] ) = aw_item_place_names( $id );
 			}
-			$lt                = wp_get_object_terms( $id, 'aw_listing_type', array( 'fields' => 'names' ) );
-			$c['listing_type'] = $lt && ! is_wp_error( $lt ) ? $lt[0] : '';
+			$lt                = 'aw_listing' === $type ? aw_listing_types( $id ) : array();
+			$c['listing_type'] = $lt ? $lt[0]->name : '';
 			$iss               = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 			$c['issuer']       = $iss ? $iss->name : '';
 			$pub               = function_exists( 'aw_publisher_of' ) ? aw_publisher_of( $id ) : array( '' );

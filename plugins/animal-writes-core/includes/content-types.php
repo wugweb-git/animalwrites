@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Thin cards (news, legal, research) store a summary + source link, never the source content.
  * Owned content (guides, campaigns, resources, opportunities, listings) is authored on site.
- * Resources are WordPress's own Posts (owner, 10 Oct 2026): relabelled, at /resources/{slug}/, with their own list of
- * Resource types (aw_resource_type: Guide, How-to, FAQ, Research). See aw_resources_post_args() below.
+ * Resources are WordPress's own Posts (owner, 10 Oct 2026): relabelled, at /resources/{slug}/; their Resource types
+ * (Guide, How-to, FAQ, Research) are Tags (tags.php). See aw_resources_post_args() below.
  * Categories are WordPress's own category (owner, 15 Oct 2026), shared by every section, at /category/{slug}/.
  *
  * @return array slug => [ singular, plural, rewrite slug, supports ]
@@ -74,62 +74,9 @@ function aw_register_content_types() {
 		register_taxonomy_for_object_type( 'category', $type );
 	}
 
-	// Resource types (Guide, How-to, FAQ, Research): labels and list filters on Resources only, no pages of their own.
-	register_taxonomy(
-		'aw_resource_type',
-		array( 'post' ),
-		array(
-			'labels'             => array(
-				'name'          => 'Resource types',
-				'singular_name' => 'Resource type',
-				'menu_name'     => 'Resource types',
-				'all_items'     => 'All resource types',
-				'edit_item'     => 'Edit resource type',
-				'view_item'     => 'View resource type',
-				'update_item'   => 'Update resource type',
-				'add_new_item'  => 'Add New Resource type',
-				'new_item_name' => 'New resource type name',
-				'search_items'  => 'Search resource types',
-				'not_found'     => 'No resource types found.',
-				'back_to_items' => '&larr; Go to Resource types',
-			),
-			'hierarchical'       => true,
-			'public'             => true,
-			'publicly_queryable' => false,
-			'query_var'          => false,
-			'rewrite'            => false,
-			'show_in_rest'       => true,
-			'show_admin_column'  => true,
-		)
-	);
-
+	// Labels (Library, Resource, Opportunity and Listing types, Services) are WordPress's own Tags (tags.php).
 	// Places are not a WordPress list: states and districts come from the LGD file (places.php).
-
-	register_taxonomy(
-		'aw_listing_type',
-		array( 'aw_listing' ),
-		array(
-			'labels'            => array( 'name' => 'Listing types', 'singular_name' => 'Listing type' ),
-			'hierarchical'      => true,
-			'show_in_rest'      => true,
-			'show_admin_column' => true,
-			'rewrite'           => array( 'slug' => 'directory-type', 'with_front' => false ),
-		)
-	);
-
 	// Issuer is a label on Library items (meta aw_issuer, issuers.php), not a list.
-
-	register_taxonomy(
-		'aw_opportunity_type',
-		array( 'aw_opportunity' ),
-		array(
-			'labels'            => array( 'name' => 'Opportunity types', 'singular_name' => 'Opportunity type' ),
-			'hierarchical'      => true,
-			'show_in_rest'      => true,
-			'show_admin_column' => true,
-			'rewrite'           => array( 'slug' => 'opportunity-type', 'with_front' => false ),
-		)
-	);
 }
 add_action( 'init', 'aw_register_content_types' );
 
@@ -210,11 +157,10 @@ add_action(
 /** No item is filed under a default category: WordPress's "Uncategorized" is not used (owner, 15 Oct 2026). */
 add_filter( 'pre_option_default_category', fn() => 0 );
 
-// Resources have no tags, author box or post formats (core registers Posts with them before this plugin loads).
+// Resources have no author box or post formats (core registers Posts with them before this plugin loads).
 add_action(
 	'init',
 	function () {
-		unregister_taxonomy_for_object_type( 'post_tag', 'post' );
 		foreach ( array( 'author', 'trackbacks', 'post-formats' ) as $feature ) {
 			remove_post_type_support( 'post', $feature );
 		}
@@ -226,7 +172,7 @@ add_action(
 add_action(
 	'init',
 	function () {
-		$want = AW_RESOURCES_PERMALINK . ' categories-2026-10-15'; // and once more when Categories moved to /category/
+		$want = AW_RESOURCES_PERMALINK . ' tags-2026-10-15'; // and once more when Categories moved to /category/
 		if ( $want !== get_option( 'aw_resources_rewrite' ) ) {
 			flush_rewrite_rules( false );
 			update_option( 'aw_resources_rewrite', $want, true );

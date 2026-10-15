@@ -413,7 +413,7 @@ function aw_hub_item( $type ) {
 
 <!-- wp:group {"className":"aw-opp-body","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-opp-body"><!-- wp:group {"className":"aw-opp-tags kit-tags","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-opp-tags kit-tags"><!-- wp:post-terms {"term":"aw_opportunity_type"} /-->
+<div class="wp-block-group aw-opp-tags kit-tags"><!-- wp:post-terms {"term":"post_tag"} /-->
 
 <!-- wp:animal-writes/place /--></div>
 <!-- /wp:group -->
@@ -523,7 +523,7 @@ function aw_hub_list( $type ) {
 function aw_hub_after( $type ) {
 	if ( 'post' === $type ) {
 		return '<!-- wp:html -->
-<div class="aw-also"><h2>Also useful</h2><ul class="kit-tiles"><li><a class="kit-tile" href="#helplines"><span class="kit-ico kit-ico--helpline" aria-hidden="true"></span><strong>Helplines</strong><span class="kit-tile-desc">National helplines: 112, 1962 and AWBI.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/directory/"><span class="kit-ico kit-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span class="kit-tile-desc">Shelters, vets and rescuers near you.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/library/?kind=act"><span class="kit-ico kit-ico--research" aria-hidden="true"></span><strong>The law in full</strong><span class="kit-tile-desc">Acts, Rules and judgments, from the official source.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
+<div class="aw-also"><h2>Also useful</h2><ul class="kit-tiles"><li><a class="kit-tile" href="#helplines"><span class="kit-ico kit-ico--helpline" aria-hidden="true"></span><strong>Helplines</strong><span class="kit-tile-desc">National helplines: 112, 1962 and AWBI.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/directory/"><span class="kit-ico kit-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span class="kit-tile-desc">Shelters, vets and rescuers near you.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a class="kit-tile" href="/library/?tag=act"><span class="kit-ico kit-ico--research" aria-hidden="true"></span><strong>The law in full</strong><span class="kit-tile-desc">Acts, Rules and judgments, from the official source.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
 <!-- /wp:html -->';
 	}
 	if ( 'aw_campaign' === $type ) {

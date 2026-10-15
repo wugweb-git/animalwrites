@@ -4,7 +4,8 @@
  * India, fits a Category (WordPress's category) and, for documents, was issued by a known body, before anything is created.
  *
  * Endpoints (the ingest application-password user, edit_posts):
- * - GET  aw/v1/relevance-config    Categories (slug => name), Directory organisation names (known issuers) and the
+ * - GET  aw/v1/relevance-config    Categories (slug => name), each section's allowed categories and tags (sections:
+ *                                  type => {categories: {slug: name}, tags: {slug: name}}), Directory organisation names (known issuers) and the
  *                                  titles of News from the last 4 days (recent), for the same-story check.
  * - GET  aw/v1/relevance-items     Existing News, Library, Resources, Opportunities and Press items, any status but
  *                                  trash; paginated (page, per_page ≤ 200, missing=1 for items without a verdict).
@@ -111,13 +112,29 @@ function aw_relevance_categories() {
 	return $out;
 }
 
+/** Each section's allowed categories and tags (Settings → Sourcing → Sections): type => {categories, tags} as slug => name. */
+function aw_relevance_sections() {
+	$out   = array();
+	$names = function ( $tax, $slugs ) {
+		$o = array();
+		foreach ( $slugs ? get_terms( array( 'taxonomy' => $tax, 'slug' => $slugs, 'hide_empty' => false ) ) : array() as $t ) {
+			$o[ $t->slug ] = html_entity_decode( $t->name );
+		}
+		return (object) $o;
+	};
+	foreach ( array_keys( aw_post_types() ) as $type ) {
+		$out[ $type ] = array( 'categories' => $names( 'category', aw_section_categories( $type ) ), 'tags' => $names( 'post_tag', aw_section_tags( $type ) ) );
+	}
+	return $out;
+}
+
 /** Directory organisations (animal-welfare organisations, ABC centres, wildlife rescue): published names. */
 function aw_relevance_directory() {
 	global $wpdb;
 	return $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		"SELECT DISTINCT p.post_title FROM {$wpdb->posts} p
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
-		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type'
+		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('animal-welfare-organisation','abc-centre','wildlife-rescue')
 		 WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'"
 	);
@@ -130,7 +147,7 @@ function aw_relevance_row( WP_Post $p ) {
 	$text    = $p->post_excerpt ? $p->post_excerpt : wp_trim_words( wp_strip_all_tags( strip_shortcodes( $p->post_content ) ), 150 );
 	$issuer  = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	$verdict = (string) get_post_meta( $id, 'aw_relevance', true );
-	$rtypes  = 'post' === $p->post_type ? wp_get_post_terms( $id, 'aw_resource_type', array( 'fields' => 'slugs' ) ) : array();
+	$rtypes  = 'post' === $p->post_type ? wp_list_pluck( aw_item_tags( $id, aw_section_tags( 'post' ) ), 'slug' ) : array();
 	$row     = array(
 		'id'          => $id,
 		'type'        => $p->post_type,
@@ -140,15 +157,11 @@ function aw_relevance_row( WP_Post $p ) {
 		'source_url'  => (string) get_post_meta( $id, $press ? 'aw_press_url' : 'aw_source_url', true ),
 		'source_name' => (string) get_post_meta( $id, $press ? 'aw_press_publisher' : 'aw_source_name', true ),
 		'issuer'      => $issuer ? $issuer->name : '',
-		'resource_types' => $rtypes,
+		'resource_types' => $rtypes, // the Resource type tags (research, guide ...)
+		'tags'           => 'aw_press' === $p->post_type ? array() : wp_list_pluck( aw_item_tags( $id ), 'slug' ),
 		'categories'     => 'aw_press' === $p->post_type ? array() : wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ),
 		'verdict'     => $verdict ? json_decode( $verdict, true ) : null,
 	);
-	// Until the workers read the new names (15 Oct 2026): the old ones too ("categories" then meant Resource types).
-	if ( AW_WORKER_OLD_NAMES ) {
-		$row['topics']     = $row['categories'];
-		$row['categories'] = $rtypes;
-	}
 	return $row;
 }
 
@@ -192,7 +205,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $can,
-				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles(), 'recent_items' => aw_relevance_recent_items() ) ),
+				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'sections' => aw_relevance_sections(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles(), 'recent_items' => aw_relevance_recent_items() ) ),
 			)
 		);
 		register_rest_route(

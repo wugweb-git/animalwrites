@@ -59,7 +59,7 @@ add_filter(
 					'post_status'    => 'publish',
 					'posts_per_page' => $limit,
 					'has_password'   => false,
-					'tax_query'      => array( array( 'taxonomy' => 'aw_resource_type', 'field' => 'slug', 'terms' => AW_LLMS_GUIDE_TYPES ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+					'tax_query'      => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => AW_LLMS_GUIDE_TYPES ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 				)
 			);
 			$seen   = array_flip( wp_list_pluck( $guides, 'ID' ) );

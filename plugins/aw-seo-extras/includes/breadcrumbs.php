@@ -10,6 +10,7 @@
  * Other items:       Home › Section › Item
  * Section hub:       Home › Section
  * Category:          Home › Categories › Category
+ * Tag:               Home › Section › Tag
  * Page:              Home › (parent) › Page
  *
  * An item's label is the "Breadcrumb Title" typed in Rank Math (Advanced tab), when there is one.
@@ -79,6 +80,11 @@ function aw_seo_breadcrumb_trail() {
 	} elseif ( aw_seo_is_category_page() ) {
 		$all   = aw_seo_categories_url();
 		$trail = array_merge( $all ? array( array( 'Categories', $all ) ) : array(), array( array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) ) );
+	} elseif ( is_tag() ) { // Home › the tag's section › Tag
+		$term = get_queried_object();
+		$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
+		$obj  = $sec ? get_post_type_object( $sec ) : null;
+		$trail = array_merge( $obj ? array( array( $obj->labels->name, aw_hub_url( $sec ) ) ) : array(), array( array( single_term_title( '', false ), get_term_link( $term ) ) ) );
 	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
 		$obj   = get_queried_object();
 		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );

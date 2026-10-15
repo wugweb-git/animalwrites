@@ -138,7 +138,7 @@ function aw_doc_sort_sync( $id ) {
 		return;
 	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
-	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && ! has_term( 'template', 'aw_legal_kind', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ) {
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && ! has_term( 'template', 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ) {
 		$d = $ym[0] . '-01-01';
 	}
 	// Every item gets a value (undated ones and templates sort last): rows without the key would sort unpredictably.
@@ -181,7 +181,7 @@ add_filter(
 	'the_content',
 	function ( $content ) {
 		$id = (int) get_the_ID();
-		if ( '' !== trim( (string) $content ) || ! $id || ! is_singular( 'post' ) || get_queried_object_id() !== $id || ! has_term( 'research', 'aw_resource_type', $id ) ) {
+		if ( '' !== trim( (string) $content ) || ! $id || ! is_singular( 'post' ) || get_queried_object_id() !== $id || ! has_term( 'research', 'post_tag', $id ) ) {
 			return $content;
 		}
 		$summary = trim( (string) get_post_field( 'post_excerpt', $id ) );

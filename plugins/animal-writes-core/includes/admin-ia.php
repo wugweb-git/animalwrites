@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SHARED_TAXONOMIES = array( 'category' ); // WordPress's own Categories, on every section // places are not a list any more (LGD file, places.php)
+const AW_SHARED_TAXONOMIES = array( 'category', 'post_tag' ); // WordPress's own Categories and Tags, on every section // places are not a list any more (LGD file, places.php)
 
 /* ---------- Comments off ---------- */
 
@@ -70,9 +70,7 @@ add_action(
 add_filter(
 	'register_taxonomy_args',
 	function ( $args, $tax ) {
-		$names = array(
-			'aw_legal_kind'  => array( 'Library types', 'Library type' ),
-		);
+		$names = array();
 		if ( isset( $names[ $tax ] ) ) {
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => $names[ $tax ][0], 'singular_name' => $names[ $tax ][1], 'menu_name' => $names[ $tax ][0] ) );
 		}

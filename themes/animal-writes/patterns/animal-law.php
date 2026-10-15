@@ -15,7 +15,7 @@
 <!-- /wp:html -->
 <!-- wp:group {"className":"aw-ed-law-grid","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-law-grid"><!-- wp:html -->
-<div class="aw-ed-law-side"><p>Court decisions, government notices and the rules behind them, summarised in plain words and linked to the original documents.</p><ul class="aw-ed-links"><li><a href="/library/">Browse the Library <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/library/?kind=act">Read the Acts and Rules <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/resources/animal-birth-control-abc-explained/">Animal Birth Control, explained <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
+<div class="aw-ed-law-side"><p>Court decisions, government notices and the rules behind them, summarised in plain words and linked to the original documents.</p><ul class="aw-ed-links"><li><a href="/library/">Browse the Library <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/library/?tag=act">Read the Acts and Rules <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/resources/animal-birth-control-abc-explained/">Animal Birth Control, explained <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul></div>
 <!-- /wp:html -->
 <!-- wp:query {"queryId":43,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list aw-ed-law-list"} -->
 <div class="wp-block-query aw-hub-list aw-ed-law-list"><!-- wp:post-template -->

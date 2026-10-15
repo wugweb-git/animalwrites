@@ -132,8 +132,7 @@ function aw_block_org_details( $a, $id ) {
 		$photos .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
 	}
 	$facts = '';
-	$svc   = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) ); // the fixed services list, as tags
-	$svc   = is_wp_error( $svc ) ? array() : $svc;
+	$svc   = aw_listing_service_names( $id ); // the fixed services list, as tags
 	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
 	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );

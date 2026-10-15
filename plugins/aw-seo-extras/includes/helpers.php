@@ -296,11 +296,11 @@ function aw_seo_awbi_description( $id, $desc ) {
 	if ( '' === $code || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
 		return '';
 	}
-	$types = get_the_terms( $id, 'aw_listing_type' );
-	if ( $types && ! is_wp_error( $types ) && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
+	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	if ( $types && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
 		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
 	}
-	$type  = ( $types && ! is_wp_error( $types ) ) ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
+	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
 	list( $state, $district ) = aw_item_place_names( $id );
 	$where = implode( ', ', array_filter( array( $district, $state ) ) );
 	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
@@ -310,16 +310,16 @@ function aw_seo_awbi_description( $id, $desc ) {
 
 /** "{Listing type} in {District}, {State}. {Services}. Contact details, location and how to help." ('' without type or place). */
 function aw_listing_fact_description( $id ) {
-	$types = get_the_terms( $id, 'aw_listing_type' );
-	$type  = ( $types && ! is_wp_error( $types ) ) ? $types[0]->name : '';
+	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	$type  = $types ? $types[0]->name : '';
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = implode( ', ', array_filter( array( $district, $state ) ) );
 	if ( '' === $type && '' === $where ) {
 		return '';
 	}
 	$lead = $type ? $type . ( $where ? ' in ' . $where : '' ) : 'In ' . $where;
-	$svc  = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) );
-	$svc  = ( $svc && ! is_wp_error( $svc ) ) ? implode( ', ', array_slice( $svc, 0, 4 ) ) : '';
+	$svc  = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
+	$svc  = $svc ? implode( ', ', array_slice( $svc, 0, 4 ) ) : '';
 	return $lead . '. ' . ( $svc ? ucfirst( $svc ) . '. ' : '' ) . 'Contact details, location and how to help.';
 }
 

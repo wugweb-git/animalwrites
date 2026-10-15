@@ -31,18 +31,18 @@ add_filter(
 		};
 		$blocks = array(
 			'Document date (animal-writes/doc-date)' => array(
-				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'aw_legal_kind', 'field' => 'slug', 'terms' => array( 'act', 'rule' ) ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
-				array( 'Dated document: day and month', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date', 'tax_query' => array( array( 'taxonomy' => 'aw_legal_kind', 'field' => 'slug', 'terms' => array( 'act', 'rule', 'template' ), 'operator' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
-				array( 'Template: icon', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'aw_legal_kind', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
+				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule' ) ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
+				array( 'Dated document: day and month', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule', 'template' ), 'operator' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
+				array( 'Template: icon', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
 			),
 			'Law date, one line (animal-writes/law-date)' => array(
 				array( 'Own date', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date' ) ), fn( $id ) => aw_block_law_date( array(), $id ) ),
-				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'aw_legal_kind', 'field' => 'slug', 'terms' => 'act' ) ) ) ), fn( $id ) => aw_block_law_date( array(), $id ) ),
+				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'act' ) ) ) ), fn( $id ) => aw_block_law_date( array(), $id ) ),
 			),
 			'Issued by (animal-writes/issuer)' => array(
 				array( 'A court (dark)', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_issuer', 'value' => AW_COURT_ISSUERS, 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
 				array( 'A board or ministry', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_issuer', 'value' => AW_COURT_ISSUERS, 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
-				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'aw_legal_kind', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
+				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
 			),
 			'Checked and deadline (animal-writes/deadline)' => array(
 				array( 'With a deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_deadline', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_deadline( array(), $id ) ),

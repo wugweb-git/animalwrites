@@ -66,7 +66,7 @@ add_action(
 /** Services as tick boxes from the fixed list; the listing's current services start ticked. */
 function aw_claim_services_field( $form, $listing ) {
 	$state = aw_form_state( $form );
-	$kept  = isset( $state['values']['aw_services'] ) ? explode( ',', (string) $state['values']['aw_services'] ) : wp_get_object_terms( $listing->ID, 'aw_service', array( 'fields' => 'slugs' ) );
+	$kept  = isset( $state['values']['aw_services'] ) ? explode( ',', (string) $state['values']['aw_services'] ) : wp_list_pluck( aw_item_tags( $listing->ID, aw_service_slugs() ), 'slug' );
 	$kept  = is_wp_error( $kept ) ? array() : $kept;
 	$boxes = '';
 	foreach ( AW_SERVICES as $slug => $name ) {
@@ -308,7 +308,7 @@ add_action(
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {
-						wp_set_object_terms( $lid, array_intersect( explode( ',', (string) $val ), array_keys( AW_SERVICES ) ), 'aw_service' );
+						aw_set_item_tags( $lid, explode( ',', (string) $val ), aw_service_slugs() ); // the services only; the listing's types stay
 					} else {
 						update_post_meta( $lid, $key, $val );
 					}

@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Directory place URLs: /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/.
- * There are no state × type pages: /directory/{state}/?type= is a filtered state list (canonical: the state page).
+ * There are no state × type pages: /directory/{state}/?tag= is a filtered state list (canonical: the state page).
  * Older patterns (/directory/{district}/, /directory/{place}/{type}/) get one 301 to the new URL.
  */
 function aw_directory_rewrites() {
@@ -32,9 +32,30 @@ function aw_dir_place( $slug ) {
 /** "Veterinary" is one filter for people; the listings keep their separate veterinary types. */
 const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office', 'bird-hospital' );
 
-/** A listing-type slug from a URL or filter: a real type, or "veterinary". */
+/** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or "veterinary". */
 function aw_listing_type_ok( $slug ) {
-	return 'veterinary' === $slug || (bool) get_term_by( 'slug', $slug, 'aw_listing_type' );
+	return 'veterinary' === $slug || in_array( $slug, aw_listing_type_slugs(), true );
+}
+
+/** The ?tag= values on this request (tag=a,b or tag[]=a&tag[]=b). */
+function aw_request_tags() {
+	$raw = wp_unslash( $_GET['tag'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	return array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
+}
+
+/** The listing type chosen by ?tag= (the first one that is a type, or "veterinary"), or ''. */
+function aw_request_type() {
+	foreach ( aw_request_tags() as $t ) {
+		if ( aw_listing_type_ok( $t ) ) {
+			return $t;
+		}
+	}
+	return '';
+}
+
+/** The services chosen by ?tag=. */
+function aw_request_services() {
+	return array_values( array_intersect( aw_request_tags(), aw_service_slugs() ) );
 }
 
 /** What to query for a type slug: the type itself, or every veterinary type. */
@@ -47,7 +68,7 @@ function aw_listing_type_name( $slug ) {
 	if ( 'veterinary' === $slug ) {
 		return 'Veterinary';
 	}
-	$t = get_term_by( 'slug', $slug, 'aw_listing_type' );
+	$t = get_term_by( 'slug', $slug, 'post_tag' );
 	return $t ? $t->name : '';
 }
 
@@ -55,7 +76,7 @@ function aw_listing_type_name( $slug ) {
 function aw_current_type_name() {
 	$slug = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : get_query_var( 'aw_dir_type' ) );
 	if ( '' === $slug ) {
-		$slug = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$slug = aw_request_type();
 	}
 	return false !== strpos( $slug, ',' ) ? 'Veterinary' : ( $slug ? aw_listing_type_name( $slug ) : '' );
 }
@@ -79,7 +100,7 @@ add_filter(
 			if ( $paged > 1 ) {
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
 			}
-			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'service' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
@@ -92,8 +113,8 @@ add_filter(
 				$go( aw_directory_url( $a->slug ) ); // old /directory/{district}/
 			}
 			$out['aw_place'] = $a->slug;
-			$type           = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			if ( $type && $type_ok( $type ) ) {
+			$type           = aw_request_type();
+			if ( $type ) {
 				$out['aw_dir_type'] = aw_listing_type_query( $type ); // filtered state list
 			}
 		} elseif ( 2 === count( $seg ) && $a ) {
@@ -167,16 +188,15 @@ function aw_directory_query_vars( $v ) {
 	}
 	$type = (string) get_query_var( 'aw_dir_type' );
 	if ( '' === $type ) {
-		$g    = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$type = ( $g && aw_listing_type_ok( $g ) ) ? aw_listing_type_query( $g ) : ''; // a filtered list; canonical stays the unfiltered page
+		$g    = aw_request_type();
+		$type = $g ? aw_listing_type_query( $g ) : ''; // a filtered list (?tag=); canonical stays the unfiltered page
 	}
 	$tq = array();
 	if ( '' !== $type ) {
-		$tq[] = array( 'taxonomy' => 'aw_listing_type', 'field' => 'slug', 'terms' => explode( ',', $type ) );
+		$tq[] = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => explode( ',', $type ) );
 	}
-	$service = sanitize_title( wp_unslash( $_GET['service'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( '' !== $service && term_exists( $service, 'aw_service' ) ) {
-		$tq[] = array( 'taxonomy' => 'aw_service', 'field' => 'slug', 'terms' => array( $service ) );
+	foreach ( aw_request_services() as $service ) { // each chosen service
+		$tq[] = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( $service ) );
 	}
 	if ( $tq ) {
 		$v['tax_query'] = $tq;
@@ -232,34 +252,19 @@ add_filter(
 	}
 );
 
-// Links to a listing type go straight to the filtered Directory (/directory/?type=…), not through the old type page.
-// On a listing's own page they go to that type in its district (/directory/{state}/{district}/{type}/).
+// On a listing's own page its type links to that type in its district (/directory/{state}/{district}/{type}/); every
+// other tag link is the tag's own page (/tag/{slug}/).
 add_filter(
 	'term_link',
 	function ( $url, $term, $tax ) {
-		if ( 'aw_listing_type' !== $tax || ! function_exists( 'aw_hub_url' ) ) {
+		if ( 'post_tag' !== $tax || ! is_singular( 'aw_listing' ) || ! in_array( $term->slug, aw_listing_type_slugs(), true ) || ! function_exists( 'aw_item_place' ) ) {
 			return $url;
 		}
-		$place = is_singular( 'aw_listing' ) && function_exists( 'aw_item_place' ) ? aw_item_place( get_queried_object_id() ) : null;
-		if ( $place && 'district' === $place->kind ) {
-			return aw_directory_url( $place->slug, $term->slug );
-		}
-		return add_query_arg( 'type', $term->slug, aw_hub_url( 'aw_listing' ) );
+		$place = aw_item_place( get_queried_object_id() );
+		return ( $place && 'district' === $place->kind ) ? aw_directory_url( $place->slug, $term->slug ) : $url;
 	},
 	10,
 	3
-);
-
-// Old type pages (/directory-type/{type}/) are the Directory filtered by type.
-add_action(
-	'template_redirect',
-	function () {
-		if ( is_tax( 'aw_listing_type' ) ) {
-			wp_safe_redirect( add_query_arg( 'type', get_queried_object()->slug, aw_hub_url( 'aw_listing' ) ), 301, 'Animal Writes' );
-			exit;
-		}
-	},
-	1
 );
 
 /**
@@ -308,7 +313,7 @@ add_filter( 'document_title_parts', 'aw_directory_document_title' );
  * Directory URL helper for themes/menus.
  *
  * @param string $city_slug State or district slug.
- * @param string $type_slug Optional listing type slug (district pages only; a state gets ?type=).
+ * @param string $type_slug Optional listing type slug (district pages only; a state gets ?tag=).
  * @return string
  */
 function aw_directory_url( $city_slug, $type_slug = '' ) {
@@ -319,7 +324,7 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 	}
 	if ( ! $place->parent ) {
 		$url = home_url( 'directory/' . $place->slug . '/' );
-		return $type ? add_query_arg( 'type', $type, $url ) : $url; // no state × type pages
+		return $type ? add_query_arg( 'tag', $type, $url ) : $url; // no state × type pages
 	}
 	$state = aw_place_by_id( $place->parent );
 	return home_url( 'directory/' . $state->slug . '/' . $place->slug . '/' . ( $type ? $type . '/' : '' ) );
@@ -352,13 +357,19 @@ add_action(
 			return;
 		}
 		$city  = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
-		$type  = sanitize_title( $g['type'] ?? '' );
-		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'type', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
+		$tags  = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
+		$type  = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ?: array( '' ) );
+		$more  = array_values( array_diff( $tags, array( $type ) ) ); // services
+		$base  = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, aw_hub_url( 'aw_listing' ) ) : aw_hub_url( 'aw_listing' ) );
+		if ( $more ) {
+			$have = (string) wp_parse_url( $base, PHP_URL_QUERY );
+			parse_str( $have, $hq );
+			$base = add_query_arg( 'tag', implode( ',', array_filter( array_merge( array( (string) ( $hq['tag'] ?? '' ) ), $more ) ) ), $base );
+		}
 		$extra = array_filter(
 			array(
 				'q'        => sanitize_text_field( $g['q'] ?? '' ),
 				'verified' => empty( $g['verified'] ) ? '' : '1',
-				'service'  => sanitize_title( $g['service'] ?? '' ),
 			)
 		);
 		wp_safe_redirect( add_query_arg( $extra, $base ) );
@@ -392,21 +403,21 @@ function aw_verified_count() {
  */
 /** Services choice: only services that at least 3 listings offer (the rest would lead to near-empty lists). */
 function aw_directory_service_field( $field ) {
-	$cur  = sanitize_title( wp_unslash( $_GET['service'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$cur  = (string) current( aw_request_services() ?: array( '' ) );
 	$opts = '';
-	foreach ( get_terms( array( 'taxonomy' => 'aw_service', 'hide_empty' => true ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_service_slugs(), 'hide_empty' => true ) ) as $t ) {
 		if ( (int) $t->count >= 3 ) {
 			$opts .= '<option value="' . esc_attr( $t->slug ) . '"' . selected( $cur, $t->slug, false ) . '>' . esc_html( $t->name . ' (' . number_format_i18n( $t->count ) . ')' ) . '</option>';
 		}
 	}
-	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="service"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
+	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="tag[]"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
 }
 
 function aw_directory_filter() {
 	$cur_city = aw_current_place();
 	$cur_type = (string) get_query_var( 'aw_dir_type' );
 	if ( '' === $cur_type ) {
-		$cur_type = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$cur_type = aw_request_type();
 	}
 	$state    = $cur_city ? aw_place_parent_state( $cur_city ) : null;
 	$district = $cur_city && $cur_city->parent ? $cur_city : null;
@@ -439,7 +450,7 @@ function aw_directory_filter() {
 	}
 	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice.
 	$opts = array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => aw_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
 		$key            = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
 		$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
 		$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
@@ -456,7 +467,7 @@ function aw_directory_filter() {
 		. '<details class="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="kit-btn kit-btn--secondary kit-btn--sm">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
-		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="type">' . $t_opts . '</select>', 'type' )
+		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. aw_directory_service_field( $field )
 		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label>' : '' )
 		. '</div></details>'
@@ -502,7 +513,7 @@ add_action(
  * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
  */
 function aw_browse_states() {
-	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['type'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
 	$items = '';

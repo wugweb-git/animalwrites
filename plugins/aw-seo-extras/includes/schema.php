@@ -43,14 +43,14 @@ function aw_listing_schema( $id ) {
 	);
 	$stype = array();
 	foreach ( $map as $t => $slugs ) {
-		if ( has_term( $slugs, 'aw_listing_type', $id ) ) {
+		if ( has_term( $slugs, 'post_tag', $id ) ) {
 			$stype[] = $t;
 		}
 	}
 	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOffice', $stype, true ) && in_array( 'gov', wp_list_pluck( aw_listing_sources( $id ), 0 ), true ) ) {
 		$stype[] = 'GovernmentOffice'; // a government vet (from a government list)
 	}
-	if ( ! $stype || has_term( array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'legal-aid', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' ), 'aw_listing_type', $id ) ) {
+	if ( ! $stype || has_term( array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'legal-aid', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' ), 'post_tag', $id ) ) {
 		array_unshift( $stype, 'NGO' );
 	}
 	$stype = array_values( array_unique( $stype ) );
@@ -115,8 +115,8 @@ function aw_listing_schema( $id ) {
 		$org['openingHours'] = $m( 'aw_hours' ); // free-text hours: places (LocalBusiness) only, not on an NGO alone
 	}
 
-	$svc = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) );
-	if ( $svc && ! is_wp_error( $svc ) ) {
+	$svc = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
+	if ( $svc ) {
 		$org['knowsAbout'] = array_values( $svc ); // the fixed services list
 	} elseif ( $m( 'aw_services' ) ) {
 		$org['knowsAbout'] = array_values( array_filter( array_map( 'trim', preg_split( '/[,;\n]+/', wp_strip_all_tags( $m( 'aw_services' ) ) ) ) ) );
@@ -151,8 +151,8 @@ function aw_listing_schema( $id ) {
 	if ( $acts ) {
 		$org['potentialAction'] = 1 === count( $acts ) ? $acts[0] : $acts;
 	}
-	$types = get_the_terms( $id, 'aw_listing_type' );
-	if ( $types && ! is_wp_error( $types ) ) {
+	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
+	if ( $types ) {
 		$org['keywords'] = implode( ', ', array_filter( array_merge( wp_list_pluck( $types, 'name' ), array( $m( 'aw_g_category' ) ) ) ) ); // additionalType must be a URL; the type names (and Google's category) go here
 	}
 	$code = $m( 'aw_awbi_code' );
@@ -386,7 +386,7 @@ function aw_article_nodes( $id ) {
 	$type     = get_post_type( $id );
 	$url      = get_permalink( $id );
 	$title    = aw_seo_plain( get_the_title( $id ) );
-	$kind     = 'aw_legal' === $type && function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
+	$kind     = 'aw_legal' === $type && function_exists( 'aw_item_tags' ) ? ( aw_item_tags( $id, aw_section_tags( 'aw_legal' ) )[0] ?? null ) : null; // the Library type tag
 	$ks       = $kind ? $kind->slug : '';
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = aw_seo_plain( (string) get_post_meta( $id, 'aw_source_name', true ) );
@@ -488,8 +488,7 @@ function aw_article_nodes( $id ) {
 		$article['isBasedOn'] = array_filter( $doc );
 		$nodes[]              = $article;
 	} else { // Resources
-		$kinds    = taxonomy_exists( 'aw_resource_type' ) ? 'aw_resource_type' : ( 'category' !== aw_seo_category_tax() ? 'category' : '' ); // the Resource type
-		$research = $kinds && has_term( 'research', $kinds, $id );
+		$research = has_term( 'research', 'post_tag', $id ); // the Resource type tag
 		if ( $src_url ) {
 			$doi                  = preg_match( '#^https?://(?:dx\.)?doi\.org/(10\..+)$#i', $src_url, $mm ) ? rawurldecode( $mm[1] ) : '';
 			$article['isBasedOn'] = array_filter(
@@ -624,7 +623,7 @@ function aw_job_schema( $id ) {
 	if ( ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) || ( function_exists( 'aw_retention_state' ) && aw_retention_state( $id ) ) ) {
 		return array(); // closed (past its deadline or review date): no JobPosting
 	}
-	$kinds = wp_get_object_terms( $id, 'aw_opportunity_type', array( 'fields' => 'slugs' ) );
+	$kinds = wp_get_object_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
 	$kinds = is_wp_error( $kinds ) ? array() : $kinds;
 	if ( $kinds && ! array_intersect( array( 'job', 'internship', 'fellowship', 'volunteer' ), $kinds ) ) {
 		return array(); // an event, fostering or a grant is not a job
@@ -634,10 +633,10 @@ function aw_job_schema( $id ) {
 	$desc     = $desc ? $desc : (string) get_post_field( 'post_excerpt', $id );
 	$desc     = $desc ? $desc : get_the_title( $id );
 	$emp      = array();
-	if ( has_term( 'internship', 'aw_opportunity_type', $id ) ) {
+	if ( has_term( 'internship', 'post_tag', $id ) ) {
 		$emp[] = 'INTERN';
 	}
-	if ( has_term( 'volunteer', 'aw_opportunity_type', $id ) ) {
+	if ( has_term( 'volunteer', 'post_tag', $id ) ) {
 		$emp[] = 'VOLUNTEER';
 	}
 	$data = array(
@@ -724,11 +723,14 @@ function aw_schema_nodes() {
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
-	} elseif ( aw_seo_is_category_page() ) {
+	} elseif ( aw_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
 	}
 	return array_values( array_filter( $nodes ) );
 }
+
+/** The schema.org type of an item in a category or tag page's list. */
+const AW_LIST_ITEM_TYPES = array( 'aw_news' => 'NewsArticle', 'aw_legal' => 'Article', 'post' => 'Article', 'aw_listing' => 'Organization', 'aw_opportunity' => 'CreativeWork', 'aw_campaign' => 'CreativeWork' );
 
 /**
  * A category page: CollectionPage + ItemList of the items on the current page (indexed items only).
@@ -746,7 +748,11 @@ function aw_category_schema_nodes() {
 		if ( ! $p instanceof WP_Post || aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
 			continue;
 		}
-		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $start + $i + 1,
+			'item'     => array( '@type' => AW_LIST_ITEM_TYPES[ $p->post_type ] ?? 'CreativeWork', '@id' => get_permalink( $p ), 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) ), // each item as what it is
+		);
 	}
 	$desc  = aw_seo_plain( aw_seo_description() );
 	$nodes = array(

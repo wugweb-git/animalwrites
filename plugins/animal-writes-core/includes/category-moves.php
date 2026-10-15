@@ -3,9 +3,8 @@
  * Categories moved to WordPress's own category (owner, 15 Oct 2026). The old addresses keep working with one 301:
  *
  * - /topic/{slug}/ (and its /page/N/ and /feed/) → /category/{slug}/…
- * - ?topic= on a list → ?category= (the same list, same values).
- * - /?cat=N for a Resource type (Guide, Research, FAQ, How-to were WordPress categories until then) → the Resources
- *   list filtered by that type (/resources/?kind={slug}).
+ * - ?topic= on a list → ?category_name= (WordPress's own query var; the same list, same values).
+ * - /?cat=N of an old Resource type: tags.php.
  * - /topics/ → /categories/ is in Rank Math → Redirections (tools/categories/migrate.php adds it).
  *
  * @package animal-writes-core
@@ -34,19 +33,11 @@ add_action(
 		}
 		parse_str( $query, $args );
 		if ( isset( $args['topic'] ) ) {
-			if ( ! isset( $args['category'] ) ) {
-				$args['category'] = $args['topic'];
+			if ( ! isset( $args['category_name'] ) ) {
+				$args['category_name'] = $args['topic'];
 			}
 			unset( $args['topic'] );
 			$to = '' !== $to ? $to : $path;
-		}
-		if ( isset( $args['cat'] ) && is_numeric( $args['cat'] ) ) {
-			$t = get_term( (int) $args['cat'] );
-			if ( $t instanceof WP_Term && 'aw_resource_type' === $t->taxonomy ) {
-				unset( $args['cat'] );
-				$to   = '/resources/';
-				$args = array( 'kind' => $t->slug ) + $args;
-			}
 		}
 		if ( '' === $to ) {
 			return;

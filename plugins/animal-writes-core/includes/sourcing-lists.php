@@ -25,6 +25,7 @@ function aw_sources_config() {
 		update_option( 'aw_sources', $c, false );
 	}
 	$c['categories'] = (array) ( $c['categories'] ?? array() );
+	$c['sections']   = (array) ( $c['sections'] ?? array() );
 	return $c;
 }
 
@@ -74,6 +75,7 @@ add_filter(
 		}
 		$tabs['press']  = array( 'Press queries', 'aw_sources_press_tab' );
 		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab' );
+		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab' );
 		return $tabs;
 	}
 );
@@ -250,6 +252,42 @@ add_action(
 	}
 );
 
+/** Sections: the categories and tags each section may use (the workers classify only within these; hub filters show only these). */
+function aw_sources_sections_tab() {
+	$c = aw_sources_config();
+	echo '<p>Which categories and tags each section uses. One slug per line. The workers pick only from these lists, and each list\'s filters show only these. An empty Categories list means every category.</p>';
+	echo '<table class="form-table">';
+	foreach ( aw_post_types() as $type => $def ) {
+		$l = (array) ( $c['sections'][ $type ] ?? array() );
+		echo '<tr><th scope="row">' . esc_html( $def[1] ) . '</th><td style="display:flex;gap:1em;flex-wrap:wrap">';
+		foreach ( array( 'categories' => 'Allowed categories', 'tags' => 'Allowed tags' ) as $k => $label ) {
+			echo '<label style="flex:1;min-width:16em">' . esc_html( $label ) . '<textarea name="sections[' . esc_attr( $type ) . '][' . esc_attr( $k ) . ']" class="large-text code" rows="8">' . esc_textarea( implode( "\n", (array) ( $l[ $k ] ?? array() ) ) ) . '</textarea></label>';
+		}
+		echo '</td></tr>';
+	}
+	echo '</table>';
+	submit_button( 'Save' );
+}
+add_action(
+	'kits_sourcing_save_sections',
+	function () {
+		$c    = aw_sources_config();
+		$old  = $c['sections'];
+		$in   = (array) wp_unslash( $_POST['sections'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification
+		$new  = array();
+		$what = array();
+		foreach ( array_keys( aw_post_types() ) as $type ) {
+			foreach ( array( 'categories', 'tags' ) as $k ) {
+				$new[ $type ][ $k ] = array_values( array_unique( array_filter( array_map( 'sanitize_title', preg_split( '/[\s,]+/', (string) ( $in[ $type ][ $k ] ?? '' ) ) ) ) ) );
+				$what[]             = kits_sourcing_diff( $type . ' ' . $k, (array) ( $old[ $type ][ $k ] ?? array() ), $new[ $type ][ $k ] );
+			}
+		}
+		$c['sections'] = $new;
+		update_option( 'aw_sources', $c, false );
+		kits_sourcing_log( 'sections', implode( ' · ', array_filter( $what ) ) );
+	}
+);
+
 /**
  * The workers' copy of the lists (same shape as sources.yaml), when "Workers use these lists" is on. Sources that are
  * off are left out; a source with "Keyword check" gets the feed keywords.
@@ -274,10 +312,7 @@ add_filter(
 			unset( $s['on'], $s['filter'] );
 			$sources[] = $s;
 		}
-		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'press' => $c['press'] );
-		if ( AW_WORKER_OLD_NAMES ) {
-			$data['config']['topics'] = $c['categories']; // the workers' old name, until they are deployed
-		}
+		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'] );
 		return $data;
 	}
 );

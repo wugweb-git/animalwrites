@@ -1,6 +1,6 @@
 <?php
 /**
- * Category photos, set in WP Admin on each list's screen (Categories, Listing types, Opportunity types): add or edit
+ * Category and tag photos, set in WP Admin on the Categories and Tags screens: add or edit
  * a category's name, slug, write-up (Description) and photo (pick or upload from the media library).
  * Category photos are also used on news and Library items in that category.
  * News and Library items show their category's photo (see aw_item_image() in media.php). Stored as term meta
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Category screens that get the photo field. */
-const AW_PHOTO_TAXONOMIES = array( 'category', 'aw_listing_type', 'aw_opportunity_type' );
+const AW_PHOTO_TAXONOMIES = array( 'category', 'post_tag' );
 
 /** Attachment ID of a category's photo (term meta; for Categories, the older option mapping as fallback). */
 function aw_category_image_id( $term ) {

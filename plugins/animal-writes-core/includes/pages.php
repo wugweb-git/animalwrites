@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/* ---------- Acts & Rules: now the Library's "Act" filter (/library/?kind=act); the old address redirects there ---------- */
+/* ---------- Acts & Rules: now the Library's "Act" filter (/library/?tag=act); the old address redirects there ---------- */
 
 /* ---------- Placeholders for copy ---------- */
 
@@ -315,7 +315,7 @@ add_shortcode(
 			if ( ! $posts ) {
 				continue;
 			}
-			$all   = add_query_arg( 'category', $term->slug, aw_hub_url( $type ) );
+			$all   = add_query_arg( 'category_name', $term->slug, aw_hub_url( $type ) );
 			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul' . ( 'aw_news' === $type ? ' class="aw-hub-news"' : '' ) . '>';
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . ( 'aw_legal' === $type && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
@@ -325,9 +325,9 @@ add_shortcode(
 		$types = function_exists( 'aw_category_help_types' ) ? aw_category_help_types( $term->term_id ) : array();
 		$links = '';
 		foreach ( $types as $tid ) {
-			$t = get_term( $tid, 'aw_listing_type' );
+			$t = get_term( $tid, 'post_tag' );
 			if ( $t && ! is_wp_error( $t ) && $t->count ) {
-				$links .= '<li><a href="' . esc_url( add_query_arg( 'type', $t->slug, home_url( '/directory/' ) ) ) . '">' . esc_html( $t->name ) . '</a></li>';
+				$links .= '<li><a href="' . esc_url( add_query_arg( 'tag', $t->slug, home_url( '/directory/' ) ) ) . '">' . esc_html( $t->name ) . '</a></li>';
 			}
 		}
 		if ( $links ) {

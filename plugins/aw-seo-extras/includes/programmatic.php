@@ -1,7 +1,7 @@
 <?php
 /**
  * Pages built from live data (SEO Phase 4, 15 Oct 2026): the Directory's state, district, district × type and filtered
- * lists (?type=, ?state=), and the 18 category pages.
+ * lists (?tag=, ?state=), the 18 category pages and the tag pages.
  *
  * - Search titles and descriptions from the page's own counts and place names (titles.php asks these functions).
  * - One visible line of facts on page 1: under the result count in the Directory, above the lists on a category page. It
@@ -46,7 +46,7 @@ function aw_seo_dir_data() {
 	$ids  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
 	$skip = $ids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : ''; // preview-only items (integers)
 	$rows = $wpdb->get_results( "SELECT p.ID id, MAX(CASE WHEN pm.meta_key = 'aw_state_code' THEN pm.meta_value END) st, MAX(CASE WHEN pm.meta_key = 'aw_district_code' THEN pm.meta_value END) dt, MAX(CASE WHEN pm.meta_key IN ('aw_phone', 'aw_whatsapp') AND TRIM(pm.meta_value) <> '' THEN 1 ELSE 0 END) ph, MAX(CASE WHEN pm.meta_key = 'aw_source_name' AND TRIM(pm.meta_value) <> '' AND pm.meta_value NOT LIKE '%google%' AND pm.meta_value <> 'AWBI ABC list' THEN 1 ELSE 0 END) gov FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key IN ('aw_state_code', 'aw_district_code', 'aw_phone', 'aw_whatsapp', 'aw_source_name') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY p.ID", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
-	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', aw_listing_type_slugs() ) ) . "') JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$types = array();
 	foreach ( $tax as $t ) {
 		$types[ (int) $t['id'] ][] = $t['slug'];
@@ -233,13 +233,13 @@ function aw_seo_dir_view() {
 	$place = aw_current_place();
 	$type  = (string) get_query_var( 'aw_type_slug' );
 	if ( '' === $type ) {
-		$type = sanitize_title( wp_unslash( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$type = ( '' !== $type && aw_listing_type_ok( $type ) ) ? $type : '';
+		$type = function_exists( 'aw_request_type' ) ? aw_request_type() : ''; // ?tag= (a listing type)
 	}
 	$other = false;
-	foreach ( array( 'q', 'service', 'verified' ) as $k ) {
+	foreach ( array( 'q', 'verified' ) as $k ) {
 		$other = $other || ( isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
+	$other = $other || ( function_exists( 'aw_request_services' ) && aw_request_services() ); // a service chosen too
 	$v = array(
 		'kind'  => $place ? $place->kind : 'india',
 		'place' => $place,
@@ -523,7 +523,7 @@ function aw_seo_category_counts() {
 		return $out;
 	}
 	global $wpdb;
-	$research = get_term_by( 'slug', 'research', 'aw_resource_type' );
+	$research = get_term_by( 'slug', 'research', 'post_tag' );
 	$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT tt.term_id term, p.post_type type, SUM(EXISTS(SELECT 1 FROM {$wpdb->term_relationships} rc WHERE rc.object_id = p.ID AND rc.term_taxonomy_id = %d)) research, COUNT(DISTINCT p.ID) n FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_status = 'publish' WHERE tt.taxonomy = %s GROUP BY tt.term_id, p.post_type", $research ? (int) $research->term_taxonomy_id : 0, aw_seo_category_tax() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out      = array();
 	foreach ( $rows as $r ) {
@@ -562,15 +562,15 @@ function aw_seo_category_parts( $term, $help = true ) {
 	foreach ( $words as $k => $w ) {
 		$n = (int) ( $c[ $k ] ?? 0 );
 		if ( $n ) {
-			$parts[] = array( number_format_i18n( $n ) . ' ' . $w[ 1 === $n ? 0 : 1 ], add_query_arg( 'category', $term->slug, aw_hub_url( $w[2] ) ) );
+			$parts[] = array( number_format_i18n( $n ) . ' ' . $w[ 1 === $n ? 0 : 1 ], add_query_arg( 'category_name', $term->slug, aw_hub_url( $w[2] ) ) );
 		}
 	}
 	if ( $help && function_exists( 'aw_category_help_types' ) ) {
 		foreach ( aw_category_help_types( $term->term_id ) as $tid ) {
-			$t = get_term( $tid, 'aw_listing_type' );
+			$t = get_term( $tid, 'post_tag' );
 			$n = ( $t && ! is_wp_error( $t ) ) ? aw_seo_dir_count( null, $t->slug ) : 0;
 			if ( $n ) {
-				$parts[] = array( number_format_i18n( $n ) . ' ' . aw_seo_type_words( $t->slug, $n ), add_query_arg( 'type', $t->slug, aw_hub_url( 'aw_listing' ) ), 'dir' );
+				$parts[] = array( number_format_i18n( $n ) . ' ' . aw_seo_type_words( $t->slug, $n ), add_query_arg( 'tag', $t->slug, aw_hub_url( 'aw_listing' ) ), 'dir' );
 			}
 		}
 	}
@@ -668,7 +668,7 @@ function aw_seo_resources_count_label() {
 		return '';
 	}
 	$total    = (int) aw_hub_total( 'post' );
-	$term     = get_term_by( 'slug', 'research', 'aw_resource_type' );
+	$term     = get_term_by( 'slug', 'research', 'post_tag' );
 	$research = $term ? (int) $term->count : 0;
 	$guides   = $total - $research;
 	if ( ! $research || $guides < 1 ) {
@@ -676,3 +676,111 @@ function aw_seo_resources_count_label() {
 	}
 	return sprintf( '%1$s %2$s and %3$s %4$s', number_format_i18n( $guides ), 1 === $guides ? 'guide' : 'guides', number_format_i18n( $research ), 1 === $research ? 'research summary' : 'research summaries' );
 }
+
+/* ---------- Tags: Library, Resource, Opportunity and Listing types, and Services ---------- */
+
+/** A tag's plural for a title: "Gaushalas", "Judgments", "Official Releases", "Jobs", "Mobile Veterinary Units (1962)". */
+function aw_seo_tag_plural( $term ) {
+	$fixed = array(
+		'research'           => 'Research Summaries',
+		'faq'                => 'FAQs',
+		'how-to'             => 'How-to Guides',
+		'advisory'           => 'Advisories',
+		'volunteer'          => 'Volunteer Opportunities',
+		'foster'             => 'Foster Opportunities',
+		'animal-welfare-organisation' => 'Animal Welfare Organisations',
+		'mobile-veterinary-unit'      => 'Mobile Veterinary Units (1962)',
+		'veterinary-office'           => 'Government Veterinary Offices',
+	);
+	if ( isset( $fixed[ $term->slug ] ) ) {
+		return $fixed[ $term->slug ];
+	}
+	if ( function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true ) ) {
+		return 'Animal Welfare Organisations Offering ' . aw_seo_title_case( mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) );
+	}
+	if ( function_exists( 'aw_listing_type_slugs' ) && in_array( $term->slug, aw_listing_type_slugs(), true ) ) {
+		return aw_seo_title_case( aw_seo_type_plural( $term->slug ) );
+	}
+	$words = explode( ' ', trim( $term->name ) );
+	$last  = (string) array_pop( $words );
+	$last  = preg_match( '/[^aeiou]y$/', $last ) ? substr( $last, 0, -1 ) . 'ies' : ( preg_match( '/(s|x|ch|sh)$/', $last ) ? $last . 'es' : $last . 's' );
+	return aw_seo_title_case( trim( implode( ' ', $words ) . ' ' . $last ) );
+}
+
+/** A tag page's title without the site name: "{Tag plural} in India". */
+function aw_seo_tag_title( $term ) {
+	return aw_seo_tag_plural( $term ) . ' in India';
+}
+
+/** A tag page's description from what it holds (live counts). */
+function aw_seo_tag_description( $term ) {
+	$n    = (int) $term->count;
+	$num  = 1 === $n ? 'One' : number_format_i18n( $n );
+	$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
+	$what = mb_strtolower( aw_seo_tag_plural( $term ) );
+	$what = preg_replace( array( '/\bgaushalas\b/u', '/\bfaqs\b/u', '/\(1962\)/u' ), array( 'Gaushalas', 'FAQs', '(1962)' ), $what );
+	switch ( $sec ) {
+		case 'aw_listing':
+			$text = sprintf( '%1$s %2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
+			break;
+		case 'aw_legal':
+			$text = sprintf( '%1$s %2$s on animals in India, each summarised in plain words with a link to the official document, in the Animal Writes Library.', $num, $what );
+			break;
+		case 'aw_opportunity':
+			$text = sprintf( '%1$s animal welfare %2$s in India with organisations across the country: the role, location and how to apply.', $num, $what );
+			break;
+		case 'post':
+			$text = sprintf( '%1$s %2$s on animal welfare in India from Animal Writes, in plain words.', $num, $what );
+			break;
+		default:
+			$text = sprintf( '%1$s %2$s on Animal Writes, animal welfare in India.', $num, $what );
+	}
+	return aw_seo_cut( $text, 155 );
+}
+
+// A tag page is indexed once it holds 3 or more items.
+add_filter(
+	'rank_math/frontend/robots',
+	function ( $robots ) {
+		if ( is_tag() && (int) get_queried_object()->count < 3 ) {
+			$robots['index'] = 'noindex';
+		}
+		return $robots;
+	},
+	25
+);
+
+/**
+ * Keep each tag's Rank Math title, description and robots equal to the ones built here (marked automatic in
+ * _aw_seo_auto), so the Rank Math box shows what is printed and the sitemap leaves out tags with fewer than 3 items. A
+ * typed title or description is never replaced. Daily, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_tags() );'`.
+ *
+ * @return array slug => [title, description, robots].
+ */
+function aw_seo_sync_tags() {
+	$out = array();
+	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) ) as $term ) {
+		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
+		$want  = array(
+			'title'       => aw_seo_tag_title( $term ) . ' %sep% %sitename%',
+			'description' => aw_seo_tag_description( $term ),
+		);
+		foreach ( $want as $k => $value ) {
+			$have = trim( (string) get_term_meta( $term->term_id, 'rank_math_' . $k, true ) );
+			if ( $have !== $value && ( '' === $have || $have === ( $auto[ $k ] ?? null ) ) ) {
+				update_term_meta( $term->term_id, 'rank_math_' . $k, wp_slash( $value ) );
+				$auto[ $k ] = $value;
+			}
+		}
+		$robots = (int) $term->count >= 3 ? array( 'index' ) : array( 'noindex' );
+		$have   = (array) get_term_meta( $term->term_id, 'rank_math_robots', true );
+		if ( $have !== $robots && ( ! array_filter( $have ) || $have === ( $auto['robots'] ?? null ) ) ) {
+			update_term_meta( $term->term_id, 'rank_math_robots', $robots );
+			$auto['robots'] = $robots;
+		}
+		update_term_meta( $term->term_id, '_aw_seo_auto', wp_slash( wp_json_encode( $auto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
+		$out[ $term->slug ] = array( get_term_meta( $term->term_id, 'rank_math_title', true ), get_term_meta( $term->term_id, 'rank_math_description', true ), implode( ',', (array) get_term_meta( $term->term_id, 'rank_math_robots', true ) ) );
+	}
+	return $out;
+}
+add_action( 'aw_seo_fill_daily', 'aw_seo_sync_tags', 31 );

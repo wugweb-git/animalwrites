@@ -278,7 +278,8 @@ function aw_place_counts() {
 			$c[ $k ][ (int) $r->code ] = (int) $r->n;
 		}
 	}
-	$rows = $wpdb->get_results( "SELECT pm.meta_value code, t.slug type, MAX(p.post_modified_gmt) modified, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = 'aw_district_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY pm.meta_value, t.slug", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$types = "'" . implode( "','", array_map( 'esc_sql', aw_listing_type_slugs() ) ) . "'"; // the listing types (not the services)
+	$rows = $wpdb->get_results( "SELECT pm.meta_value code, t.slug type, MAX(p.post_modified_gmt) modified, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = 'aw_district_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ({$types}) WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY pm.meta_value, t.slug", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( $rows as $r ) {
 		$c['pairs'][] = array( (int) $r['code'], $r['type'], $r['modified'], (int) $r['n'] );
 	}
@@ -306,7 +307,7 @@ add_action(
 	2
 );
 add_action( 'deleted_post', 'aw_place_counts_reset' );
-add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'aw_listing_type' === $tax && aw_place_counts_reset(), 10, 4 );
+add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'post_tag' === $tax && 'aw_listing' === get_post_type( $id ) && aw_place_counts_reset(), 10, 4 );
 
 /* ---------- Directory and list queries ---------- */
 
