@@ -987,7 +987,7 @@ body { background: var(--kit-color-canvas); }
 	.aw-ed-mosaic img { flex: 0 0 auto; width: auto !important; height: 100% !important; aspect-ratio: auto; }
 	.aw-ed-mosaic .m1 { aspect-ratio: 16 / 9; }
 	.aw-ed-mosaic :is(.m2, .m3, .m4, .m5) { aspect-ratio: 3 / 4; }
-	.aw-ed-timeline { display: flex !important; overflow-x: auto; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) 0; scrollbar-width: none; }
+	.aw-ed-timeline { display: flex !important; overflow-x: auto; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) 0; scrollbar-width: none; }
 	.aw-ed-timeline::-webkit-scrollbar { display: none; }
 	.aw-ed-timeline li { flex: 0 0 min(70%, 16rem); }
 	.aw-ed-numbers { gap: var(--kit-space-4); margin-bottom: var(--kit-space-6); }
@@ -1175,6 +1175,10 @@ body { background: var(--kit-color-canvas); }
 	.kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "when" "body"; }
 	.kit-case > .kit-ico--arrow-right { display: none; }
 	.kit-case .aw-case-date .d { align-self: center; }
+	/* Phones: one stacked state for every Library card. Meta row, then the picture full width in its own shape (nothing
+	   cut), then title, summary and tags. Never the picture beside the meta. */
+	.kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "when" "media" "body" !important; }
+	.kit-case .aw-case-cover { box-sizing: border-box; width: 100% !important; height: auto !important; object-fit: contain; }
 }
 /* News lead story by breakpoint (owner, 14 Oct 2026): phone = picture full width (16:9) above the text; tablet and up =
    picture left (about 60%), text right, so the picture never fills the screen. */
