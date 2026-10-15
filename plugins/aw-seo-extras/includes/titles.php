@@ -219,27 +219,55 @@ function aw_seo_list_title() {
 				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
-		$has   = fn( $k ) => aw_seo_dir_count( $place, $k ) > 0;
-		$kinds = array_merge( array( 'NGOs' ), $has( 'gaushala' ) ? array( 'Gaushalas' ) : array(), $has( 'veterinary' ) ? array( 'Vets' ) : array() ); // "gaushala" is the field's biggest search (Trends 383)
-		$named = count( $kinds ) > 1 ? 'Animal Welfare ' . implode( ', ', array_slice( $kinds, 0, -1 ) ) . ' & ' . end( $kinds ) . ' in ' . $place->name : '';
-		return aw_seo_fit(
-			array_merge(
-				$named ? array( aw_seo_branded( $named ), $named ) : array(),
-				array(
-					aw_seo_branded( 'Animal Welfare NGOs & Shelters in ' . $place->name ),
-					'Animal Welfare NGOs & Animal Shelters in ' . $place->name,
-					'Animal Welfare NGOs & Shelters in ' . $place->name,
-					'Animal Welfare NGOs in ' . $place->name,
-				)
-			),
-			60 - mb_strlen( aw_seo_page_suffix() )
-		);
+		// A state: its two biggest listing types (owner, 15 Oct 2026). "Animal Welfare {Type1}, {Type2} & More in {State}";
+		// "& More" only when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
+		$types = array_map( fn( $b ) => aw_seo_state_type_title( $place, $b[0] ), aw_seo_dir_breakdown( $place ) );
+		$first = $types[0] ?? 'NGOs';
+		$in    = ' in ' . $place->name;
+		$more  = count( $types ) > 2 ? ' & More' : '';
+		$try   = array();
+		if ( count( $types ) > 1 ) {
+			$try[] = 'Animal Welfare ' . $first . ( $more ? ', ' : ' & ' ) . $types[1] . $more . $in;
+		}
+		if ( $more ) {
+			$try[] = 'Animal Welfare ' . $first . $more . $in;
+		}
+		$try[] = 'Animal Welfare ' . $first . $in;
+		$try[] = 'Animal Welfare NGOs' . $in;
+		$try[] = 'Animal Welfare in ' . preg_replace( '/^The /', '', $place->name ); // a long name ("The Dadra and Nagar Haveli and Daman and Diu"): never cut inside it
+		return aw_seo_fit( array_unique( $try ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
 	if ( is_tax( 'aw_opportunity_type' ) ) {
 		$what = 'Animal Welfare ' . single_term_title( '', false ) . ' Opportunities in India';
 		return aw_seo_fit( array( aw_seo_branded( $what ), $what ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
+}
+
+/**
+ * A listing type as a state page's title names it, plural and short: "NGOs", "Gaushalas", "ABC Centres". The
+ * veterinary types are counted together: "Vet Hospitals" when most of them are hospitals, dispensaries or clinics,
+ * else "Vets" (government offices, 1962 units).
+ *
+ * @param object $place State.
+ * @param string $key   Type slug or "veterinary".
+ * @return string
+ */
+function aw_seo_state_type_title( $place, $key ) {
+	$words = array(
+		'animal-welfare-organisation' => 'NGOs',
+		'gaushala'                    => 'Gaushalas',
+		'abc-centre'                  => 'ABC Centres',
+		'wildlife-rescue'             => 'Wildlife Rescuers',
+	);
+	if ( isset( $words[ $key ] ) ) {
+		return $words[ $key ];
+	}
+	if ( 'veterinary' === $key ) {
+		$care = aw_seo_dir_count( $place, 'veterinary-hospital' ) + aw_seo_dir_count( $place, 'veterinary-dispensary' ) + aw_seo_dir_count( $place, 'veterinary-clinic' );
+		return $care * 2 > aw_seo_dir_count( $place, 'veterinary' ) ? 'Vet Hospitals' : 'Vets';
+	}
+	return aw_seo_title_case( aw_seo_type_words( $key, 2, true ) );
 }
 
 /** True while the WordPress document title of a list is being built (Rank Math's title filter then steps aside). */
