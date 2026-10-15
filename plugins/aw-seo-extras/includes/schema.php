@@ -3,17 +3,20 @@
  * The site's own JSON-LD nodes, put into Rank Math's one graph (Rank Math's schema templates cannot build these from
  * the site's fields):
  *
- * - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOrganization (by listing type, several allowed) with
+ * - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOffice (by listing type, several allowed) with
  *   name, URL, logo, locality/region, contact details when present, the official website as sameAs, identifiers
  *   (AWBI code, registration, 12A, 80G, Darpan), services, opening hours, donate and volunteer actions.
- * - News: NewsArticle. Library: Legislation for Acts, Rules, Notifications and Circulars, else NewsArticle (court
- *   rulings with their court and order). Resources: Article. A guide's questions and answers come from its Rank Math
+ * - News: NewsArticle. Library: Legislation for Acts, Rules, Notifications and Circulars, else Article with the Library
+ *   type as its genre (court rulings with their court and order; official releases based on the issuer's release),
+ *   never NewsArticle. Resources: Article. A guide's questions and answers come from its Rank Math
  *   FAQ block (Rank Math prints that FAQPage in the same graph; there is no second one here).
- *   Opportunities: JobPosting (none once closed). Campaigns: CreativeWork.
- * - Section hubs and Directory places: CollectionPage + ItemList of the page's items. Topics page and topic archives:
- *   CollectionPage. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
+ *   Opportunities: JobPosting for jobs, internships, fellowships and volunteering (none once closed, none for events
+ *   or fostering). Campaigns: CreativeWork.
+ * - Section hubs, Directory places and category pages: CollectionPage + ItemList of the page's items. Categories
+ *   page: CollectionPage + ItemList of the categories. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
  * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
  *   site's own search address), replacing Rank Math's defaults (same @id), and the breadcrumb trail people see.
+ *   Every node's inLanguage is en-IN (Rank Math writes the WordPress locale, en-US, on its WebPage).
  *
  * @package aw-seo-extras
  */
@@ -35,7 +38,7 @@ function aw_listing_schema( $id ) {
 	$map   = array(
 		'VeterinaryCare'         => array( 'veterinary-hospital', 'veterinary-clinic', 'veterinary-dispensary', 'bird-hospital', 'mobile-veterinary-unit' ),
 		'AnimalShelter'          => array( 'animal-shelter', 'gaushala', 'sanctuary' ),
-		'GovernmentOrganization' => array( 'veterinary-office', 'mobile-veterinary-unit' ),
+		'GovernmentOffice'       => array( 'veterinary-office', 'mobile-veterinary-unit' ), // a government office the public visits
 	);
 	$stype = array();
 	foreach ( $map as $t => $slugs ) {
@@ -43,14 +46,14 @@ function aw_listing_schema( $id ) {
 			$stype[] = $t;
 		}
 	}
-	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOrganization', $stype, true ) && in_array( 'gov', wp_list_pluck( aw_listing_sources( $id ), 0 ), true ) ) {
-		$stype[] = 'GovernmentOrganization'; // a government vet (from a government list)
+	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOffice', $stype, true ) && in_array( 'gov', wp_list_pluck( aw_listing_sources( $id ), 0 ), true ) ) {
+		$stype[] = 'GovernmentOffice'; // a government vet (from a government list)
 	}
 	if ( ! $stype || has_term( array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'legal-aid', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' ), 'aw_listing_type', $id ) ) {
 		array_unshift( $stype, 'NGO' );
 	}
 	$stype = array_values( array_unique( $stype ) );
-	$vet   = (bool) array_intersect( array( 'VeterinaryCare', 'AnimalShelter' ), $stype ); // places (LocalBusiness): free-text hours allowed
+	$vet   = (bool) array_intersect( array( 'VeterinaryCare', 'AnimalShelter', 'GovernmentOffice' ), $stype ); // places (LocalBusiness): free-text hours allowed
 	$site  = $m( 'aw_website' );
 	$org   = array(
 		'@type'       => 1 === count( $stype ) ? $stype[0] : $stype,
@@ -108,7 +111,7 @@ function aw_listing_schema( $id ) {
 	if ( $spec ) {
 		$org['openingHoursSpecification'] = $spec; // exact hours, e.g. from the Google profile
 	} elseif ( $m( 'aw_hours' ) && $vet ) {
-		$org['openingHours'] = $m( 'aw_hours' ); // free-text hours: places (LocalBusiness) only, so only on VeterinaryCare
+		$org['openingHours'] = $m( 'aw_hours' ); // free-text hours: places (LocalBusiness) only, not on an NGO alone
 	}
 
 	$svc = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) );
@@ -299,10 +302,8 @@ function aw_article_schema( $id ) {
 	$at    = 'Article';
 	if ( 'aw_legal' === $type && has_term( array( 'act', 'rule', 'notification', 'circular' ), 'aw_legal_kind', $id ) ) {
 		$at = 'Legislation';
-	} elseif ( 'aw_legal' === $type && has_term( 'template', 'aw_legal_kind', $id ) ) {
-		$at = 'Article';
-	} elseif ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
-		$at = 'NewsArticle';
+	} elseif ( 'aw_news' === $type ) {
+		$at = 'NewsArticle'; // judgments, official releases, templates and other Library items stay Article (our summary of a document)
 	}
 	$image    = aw_schema_image( $id );
 	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
@@ -326,6 +327,10 @@ function aw_article_schema( $id ) {
 	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	if ( 'Legislation' !== $at ) {
 		$data['author'] = array( '@id' => home_url( '/#organization' ) ); // the summary or guide is ours
+		$kind           = 'aw_legal' === $type && function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
+		if ( $kind ) {
+			$data['genre'] = aw_seo_plain( $kind->name ); // the Library type people see: Judgment, Official release, Template …
+		}
 		if ( 'aw_legal' === $type && $iss && in_array( $iss->slug, AW_COURT_ISSUERS, true ) ) { // a court ruling
 			$data['genre'] = 'Court judgment';
 			$data['about'] = array( '@type' => 'GovernmentOrganization', 'name' => $iss->name );
@@ -405,6 +410,27 @@ function aw_campaign_schema( $id ) {
 	);
 }
 
+/**
+ * Every inLanguage in the graph as en-IN: Rank Math writes the WordPress locale (en-US) on its WebPage nodes, while the
+ * site, its pages and its items are Indian English.
+ *
+ * @param mixed $node Graph or node.
+ * @return mixed
+ */
+function aw_schema_language( $node ) {
+	if ( ! is_array( $node ) ) {
+		return $node;
+	}
+	foreach ( $node as $k => $v ) {
+		if ( 'inLanguage' === $k && is_string( $v ) && 0 === stripos( $v, 'en' ) ) {
+			$node[ $k ] = 'en-IN';
+		} elseif ( is_array( $v ) ) {
+			$node[ $k ] = aw_schema_language( $v );
+		}
+	}
+	return $node;
+}
+
 /** BreadcrumbList for the current page, from the same trail people see (breadcrumbs.php). */
 function aw_breadcrumb_schema() {
 	$trail = function_exists( 'aw_breadcrumbs' ) ? aw_breadcrumbs() : array();
@@ -435,15 +461,12 @@ function aw_website_schema() {
 	);
 }
 
-/** JobPosting for every opportunity: remote ones as TELECOMMUTE, others at their place (else India). */
+/** JobPosting for an open job, internship, fellowship or volunteer role: remote ones as TELECOMMUTE, others at their place (else India). */
 function aw_job_schema( $id ) {
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
 	$area   = trim( (string) get_post_meta( $id, 'aw_area', true ) . ' ' . (string) get_post_meta( $id, 'aw_place_city', true ) );
 	$org_id = (int) get_post_meta( $id, 'aw_organisation', true );
 	$remote = (bool) preg_match( '/\b(remote|online|anywhere|work from home|wfh|virtual)\b/i', $area . ' ' . $state . ' ' . $district );
-	if ( ! $remote && ! $state && ! $district && ! $area && $org_id ) {
-		list( $state, $district ) = aw_listing_place( $org_id ); // the organisation's own location
-	}
 	$org      = (string) get_post_meta( $id, 'aw_org_name', true );
 	$org      = $org ? $org : ( $org_id && 'publish' === get_post_status( $org_id ) ? get_post_field( 'post_title', $org_id ) : '' );
 	$org_site = (string) get_post_meta( $id, 'aw_website', true );
@@ -451,8 +474,13 @@ function aw_job_schema( $id ) {
 		$org_site = (string) get_post_meta( $org_id, 'aw_website', true );
 	}
 	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
-	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) {
-		return array(); // closed: no JobPosting after its validThrough date
+	if ( ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) && $deadline < wp_date( 'Y-m-d' ) ) || ( function_exists( 'aw_retention_state' ) && aw_retention_state( $id ) ) ) {
+		return array(); // closed (past its deadline or review date): no JobPosting
+	}
+	$kinds = wp_get_object_terms( $id, 'aw_opportunity_type', array( 'fields' => 'slugs' ) );
+	$kinds = is_wp_error( $kinds ) ? array() : $kinds;
+	if ( $kinds && ! array_intersect( array( 'job', 'internship', 'fellowship', 'volunteer' ), $kinds ) ) {
+		return array(); // an event, fostering or a grant is not a job
 	}
 	$desc     = trim( preg_replace( '/<!--.*?-->/s', '', (string) get_post_field( 'post_content', $id ) ) ); // no block comments
 	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : '' );
@@ -480,6 +508,7 @@ function aw_job_schema( $id ) {
 		$data['jobLocationType']                 = 'TELECOMMUTE';
 		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => 'India' );
 	} else {
+		// The opportunity's own place; without one, only the country (never the organisation's office, which may be elsewhere).
 		$data['jobLocation'] = array(
 			'@type'   => 'Place',
 			'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district ? $district : ( $area ? $area : null ), 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
@@ -550,21 +579,49 @@ function aw_schema_nodes() {
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
 	} elseif ( is_tax( 'aw_topic' ) ) {
-		$term    = get_queried_object();
-		$nodes[] = array_filter(
+		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
+	}
+	return array_values( array_filter( $nodes ) );
+}
+
+/**
+ * A category page (/topic/{slug}/): CollectionPage + ItemList of the items on the current page (indexed items only).
+ *
+ * @return array
+ */
+function aw_category_schema_nodes() {
+	global $wp_query;
+	$term  = get_queried_object();
+	$url   = get_term_link( $term );
+	$per   = max( 1, (int) get_query_var( 'posts_per_page' ) );
+	$start = ( max( 1, (int) get_query_var( 'paged' ) ) - 1 ) * $per;
+	$items = array();
+	foreach ( (array) $wp_query->posts as $i => $p ) {
+		if ( ! $p instanceof WP_Post || aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
+			continue;
+		}
+		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
+	}
+	$desc  = aw_seo_plain( aw_seo_description() );
+	$nodes = array(
+		array_filter(
 			array(
 				'@type'       => 'CollectionPage',
-				'@id'         => get_term_link( $term ) . '#page',
-				'url'         => get_term_link( $term ),
-				'name'        => $term->name,
-				'description' => wp_strip_all_tags( term_description( $term ) ),
+				'@id'         => $url . '#page',
+				'url'         => $url,
+				'name'        => aw_seo_plain( $term->name ),
+				'description' => '' !== $desc ? $desc : wp_strip_all_tags( term_description( $term ) ),
 				'inLanguage'  => 'en-IN',
 				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 				'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+				'mainEntity'  => $items ? array( '@id' => $url . '#list' ) : null,
 			)
-		);
+		),
+	);
+	if ( $items ) {
+		$nodes[] = array( '@type' => 'ItemList', '@id' => $url . '#list', 'numberOfItems' => (int) $wp_query->found_posts, 'itemListElement' => $items );
 	}
-	return array_values( array_filter( $nodes ) );
+	return $nodes;
 }
 
 /**
@@ -584,13 +641,25 @@ function aw_hub_schema_nodes() {
 	$url   = strtok( aw_hub_base_url(), '?' );
 	$items = array();
 	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
-	foreach ( aw_hub_posts( $type ) as $i => $p ) {
+	$posts = aw_hub_posts( $type );
+	$extra = 0;
+	if ( 'aw_campaign' === $type && 1 === aw_hub_page() ) {
+		$lead = get_page_by_path( 'animal-writes-1-0', OBJECT, 'aw_campaign' ); // shown above the list as its own story (hubs.php)
+		if ( $lead && 'publish' === $lead->post_status ) {
+			array_unshift( $posts, $lead );
+			$extra = 1;
+		}
+	}
+	foreach ( $posts as $i => $p ) {
 		if ( aw_is_noindex_item( $p->ID ) || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $p->ID, kits_preview_only_ids(), true ) ) ) {
 			continue; // not indexed (or preview only), so not listed
 		}
 		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
 	}
 	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
+	if ( ! $items ) { // an empty list: the collection page alone
+		return $nodes = array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => aw_seo_plain( $name ), 'description' => aw_seo_description(), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
+	}
 	$nodes = array(
 		array(
 			'@type'       => 'CollectionPage',
@@ -606,7 +675,7 @@ function aw_hub_schema_nodes() {
 		array(
 			'@type'           => 'ItemList',
 			'@id'             => $url . '#list',
-			'numberOfItems'   => aw_hub_total( $type ),
+			'numberOfItems'   => (int) aw_hub_total( $type ) + $extra,
 			'itemListElement' => $items,
 		),
 	);
@@ -700,7 +769,7 @@ add_filter(
 				$data['WebPage']['description'] = $desc;
 			}
 		}
-		return aw_schema_x_profiles( $data );
+		return aw_schema_language( aw_schema_x_profiles( $data ) );
 	},
 	999
 );

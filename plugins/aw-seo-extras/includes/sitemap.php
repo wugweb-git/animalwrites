@@ -5,8 +5,9 @@
  *   /directory/{state}/{district}/) that have listings, and district × listing-type pages with listings. Places come
  *   from the LGD file (places.php); Rank Math knows nothing of these virtual pages.
  * - no post-type archive links (the sections are Pages, listed in the page sitemap).
- * - items that are not indexed by a rule of their state stay out: closed opportunities, items without a slug, and what
- *   kits_sitemap_skip adds (preview-only items). Fixed exclusions are Rank Math settings (noindex items, Sitemap →
+ * - items that are not indexed by a rule of their state stay out: closed opportunities, items merged into another
+ *   story, items without a slug, and what kits_sitemap_skip adds (preview-only items). Private, draft and noindex items
+ *   and the empty Web Stories type are left out by Rank Math itself. Fixed exclusions are Rank Math settings (noindex items, Sitemap →
  *   Exclude posts: the claim and search pages).
  *
  * @package aw-seo-extras
@@ -102,7 +103,8 @@ add_filter(
 			return $url;
 		}
 		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
-		if ( '' === (string) $obj->post_name || $closed || apply_filters( 'kits_sitemap_skip', false, $obj ) ) {
+		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
+		if ( '' === (string) $obj->post_name || $closed || $merged || apply_filters( 'kits_sitemap_skip', false, $obj ) ) {
 			return false;
 		}
 		return $url;

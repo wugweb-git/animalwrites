@@ -7,6 +7,9 @@
  * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
  * - ?lang=, ?issuer= and ?court= on the Library → the same list without them.
  * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
+ * - Resource-type archives (/?cat=N) and opportunity-type archives (/opportunity-type/{type}/) → the hub filtered by that
+ *   type (/resources/?kind=…, /opportunities/?type=…): the same list, indexed once at its filtered address (a 301
+ *   rather than a noindex page whose canonical points elsewhere). An empty type goes to the hub itself.
  *
  * @package aw-seo-extras
  */
@@ -95,3 +98,25 @@ add_action(
 );
 
 add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
+
+// Taxonomy archives that duplicate a hub's filtered list go to that list (see the header).
+add_action(
+	'template_redirect',
+	function () {
+		$map = array(
+			'category'            => array( 'post', 'kind' ),
+			'aw_opportunity_type' => array( 'aw_opportunity', 'type' ),
+		);
+		foreach ( $map as $tax => $to ) {
+			if ( ( 'category' === $tax ? is_category() : is_tax( $tax ) ) && function_exists( 'aw_hub_url' ) ) {
+				$term = get_queried_object();
+				$hub  = aw_hub_url( $to[0] );
+				if ( $hub ) {
+					wp_safe_redirect( ( $term instanceof WP_Term && $term->count > 0 ) ? add_query_arg( $to[1], $term->slug, $hub ) : $hub, 301, 'Animal Writes' );
+					exit;
+				}
+			}
+		}
+	},
+	1
+);
