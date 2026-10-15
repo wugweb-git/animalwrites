@@ -222,10 +222,31 @@ add_filter(
 		if ( $extra && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 			$data['WebPage'] = array_merge( $data['WebPage'], array_diff_key( $extra, $data['WebPage'] ) );
 		}
-		return $data;
+		return aw_rm_absolute_urls( $data );
 	},
 	1000
 );
+
+/**
+ * Rank Math takes a page's first content image as its primary image as written in the content, which can be a
+ * site-relative address (/wp-content/...); schema addresses must be absolute.
+ *
+ * @param mixed $node Graph or node.
+ * @return mixed
+ */
+function aw_rm_absolute_urls( $node ) {
+	if ( ! is_array( $node ) ) {
+		return $node;
+	}
+	foreach ( $node as $k => $v ) {
+		if ( is_string( $v ) && in_array( $k, array( '@id', 'url', 'contentUrl' ), true ) && 0 === strpos( $v, '/' ) && 0 !== strpos( $v, '//' ) ) {
+			$node[ $k ] = home_url( $v );
+		} elseif ( is_array( $v ) ) {
+			$node[ $k ] = aw_rm_absolute_urls( $v );
+		}
+	}
+	return $node;
+}
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
