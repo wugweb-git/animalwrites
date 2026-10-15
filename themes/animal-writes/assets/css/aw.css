@@ -466,6 +466,14 @@ body { background: var(--kit-color-canvas); }
 .aw-src--link a:hover .aw-src-name { text-decoration: underline; text-underline-offset: 3px; }
 .aw-src--link a::after { content: none !important; }
 .aw-src--link { font-size: var(--kit-type-sm); margin-bottom: 0; }
+/* "Also reported by" logos in the source row, after the main publisher (15 Oct 2026); wraps on narrow screens. */
+.aw-src--also { flex-wrap: wrap; row-gap: var(--kit-space-1); }
+.aw-src-also { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1); margin: 0; padding: 0 0 0 var(--kit-space-2); list-style: none; border-left: 1px solid var(--kit-color-line); }
+.kit-trust .aw-src-also { margin-left: var(--kit-space-2); vertical-align: middle; }
+.aw-src-also li { margin: 0; padding: 0; }
+.aw-src-also .aw-src-also-link { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; min-height: max(24px, var(--kit-size-target, 24px)); text-decoration: none; }
+.aw-src-also .aw-src-also-link::after { content: none !important; }
+.aw-src-also .aw-src-also-link:focus-visible { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 .aw-rel-time { font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
 .aw-item-time { margin: 0 0 var(--kit-space-4); }
 .aw-card-time { margin-top: auto; padding-right: 48px; min-height: 36px; display: flex; align-items: center; }

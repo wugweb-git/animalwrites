@@ -350,13 +350,11 @@ add_shortcode(
 			}
 			if ( $src ) {
 				$host   = $name ? $name : wp_parse_url( $src, PHP_URL_HOST );
-				$rows[] = array( 'link', 'Source: <a href="' . esc_url( $src ) . '" rel="noopener">' . esc_html( $host ) . '</a>', true );
+				// Library pages have no source row above the title: the "also reported by" logos follow the publisher here.
+				$also   = 'aw_legal' === $type && function_exists( 'aw_also_logos_html' ) ? aw_also_logos_html( $id ) : '';
+				$rows[] = array( 'link', 'Source: <a href="' . esc_url( $src ) . '" rel="noopener">' . esc_html( $host ) . '</a>' . $also, true );
 			}
-			foreach ( (array) get_post_meta( $id, 'aw_also_reported', true ) as $also ) {
-				if ( ! empty( $also['url'] ) ) {
-					$rows[] = array( 'link', 'Also reported by <a href="' . esc_url( $also['url'] ) . '" rel="noopener">' . esc_html( $also['name'] ?? wp_parse_url( $also['url'], PHP_URL_HOST ) ) . '</a>', true );
-				}
-			}
+			// "Also reported by" is shown as publisher logos in the source row (same-story.php), not as text lines here.
 			$t      = fn( $iso, $text ) => aw_date( $iso ); // the one date component
 			$rows[] = array( '', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . $t( aw_src_date( $id, 'Y-m-d' ), aw_src_date( $id ) ) . ' · added ' : 'Added ' ) . $t( get_the_date( 'Y-m-d', $id ), get_the_date( 'j M Y', $id ) ), true );
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
@@ -374,7 +372,7 @@ add_shortcode(
 		}
 		$out = '<aside class="kit-trust ' . $cls . '" aria-label="About this information"><ul>';
 		foreach ( $rows as $r ) {
-			$out .= '<li>' . ( $r[0] ? aw_i( $r[0] ) : '' ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ) ) ) ) . '</span></li>';
+			$out .= '<li>' . ( $r[0] ? aw_i( $r[0] ) : '' ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true, 'class' => true, 'title' => true, 'aria-label' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ), 'ul' => array( 'class' => true, 'aria-label' => true ), 'li' => array(), 'img' => array( 'class' => true, 'src' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true, 'decoding' => true ) ) ) ) . '</span></li>';
 		}
 		return $out . '</ul></aside>';
 	}
