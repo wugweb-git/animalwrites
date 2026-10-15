@@ -220,7 +220,7 @@ add_action(
 /** Topics: words that tag an item with a topic. */
 function aw_sources_topics_tab() {
 	$c = aw_sources_config();
-	echo '<p>An item gets every topic whose words appear in its title or summary. One topic per line: <code>topic-slug: word, word, word</code>. Hindi works.</p>';
+	echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
 	$lines = array();
 	foreach ( (array) $c['topics'] as $slug => $words ) {
 		$lines[] = $slug . ': ' . implode( ', ', (array) $words );

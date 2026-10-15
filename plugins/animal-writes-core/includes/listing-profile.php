@@ -3,7 +3,8 @@
  * Organisation profile (directory listings): the details box in wp-admin and the block that shows them.
  *
  * Admin: "Organisation details" on every listing, grouped as Contact, Online, About, Photos and Support. Every field is
- * optional; empty fields print nothing. The short bio is the listing's excerpt (WordPress's own field).
+ * optional; empty fields print nothing, except phone, email, website, address, opening hours and services, which say
+ * they are not available yet (with a link to suggest an update), and Directions, which shows greyed out. The short bio is the listing's excerpt (WordPress's own field).
  * Front end: block animal-writes/org-details — links (map, social, donate, volunteer), up to four photos, and the facts.
  *
  * @package animal-writes-core
@@ -120,6 +121,8 @@ function aw_block_org_details( $a, $id ) {
 		if ( $m( $k ) ) {
 			$rel    = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
 			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
+		} elseif ( 'aw_maps_url' === $k ) { // no map link yet: Directions stays, greyed out and not a link (owner, 15 Oct 2026)
+			$links .= '<span class="kit-btn kit-btn--secondary kit-btn--sm" role="link" aria-disabled="true">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</span>';
 		}
 	}
 	$photos = '';
@@ -131,6 +134,21 @@ function aw_block_org_details( $a, $id ) {
 	$facts = '';
 	$svc   = wp_get_object_terms( $id, 'aw_service', array( 'fields' => 'names' ) ); // the fixed services list, as tags
 	$svc   = is_wp_error( $svc ) ? array() : $svc;
+	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
+	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
+	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
+	$contact = array(
+		'aw_phone'   => array( 'phone', 'Phone', $m( 'aw_phone' ) && aw_tel_url( $m( 'aw_phone' ) ) ? '<a href="' . esc_url( aw_tel_url( $m( 'aw_phone' ) ) ) . '">' . esc_html( $m( 'aw_phone' ) ) . '</a>' : '' ),
+		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
+		'aw_website' => array( 'link', 'Website', $m( 'aw_website' ) ? '<a href="' . esc_url( $m( 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '">' . esc_html( preg_replace( '#^https?://(www\.)?|/$#', '', $m( 'aw_website' ) ) ) . '</a>' : '' ),
+	);
+	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
+	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">Suggest an update</a>' : '';
+	$missing = fn( $k ) => '<span class="aw-org-fact-na">' . esc_html( $na[ $k ] ) . '</span>' . $suggest;
+	$facts   = '';
+	foreach ( $contact as $k => $c ) {
+		$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $c[0] ) . '</span><dt>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
+	}
 	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
 	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
@@ -141,6 +159,8 @@ function aw_block_org_details( $a, $id ) {
 			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );
 			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
+		} elseif ( isset( $na[ $k ] ) ) {
+			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $missing( $k ) . '</dd></div>';
 		}
 	}
 	if ( '' === $links . $photos . $facts ) {

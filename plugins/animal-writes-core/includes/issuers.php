@@ -100,7 +100,7 @@ add_shortcode(
 	'aw_issuer_label',
 	function () {
 		$iss = aw_item_issuer( get_the_ID() );
-		return $iss ? '<p class="kit-tags aw-issuer">' . kits_tag( $iss->name ) . '</p>' : '';
+		return $iss ? '<p class="kit-tags aw-issuer">' . kits_tag( $iss->name, 'issuer' ) . '</p>' : ''; // the issuer's own tint (green), as on the Library cards
 	}
 );
 

@@ -609,7 +609,7 @@ add_action(
 				'Publisher image failed (broken or not an image)'     => $c['pub_failed'] ?? 0,
 				'No publisher image'                                  => $c['pub_none'] ?? 0,
 				'CC0 photo assigned (Openverse)'                      => $c['cc0'] ?? 0,
-				'Still no photo of its own (topic photo or placard)'  => $c['placard'] ?? 0,
+				'Still no photo of its own (category photo or placard)'  => $c['placard'] ?? 0,
 				'No suitable CC0 photo after ' . AW_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
 			) as $k => $v
 		) {

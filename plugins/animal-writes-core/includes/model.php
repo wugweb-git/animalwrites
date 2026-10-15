@@ -237,7 +237,7 @@ add_action(
 	'add_meta_boxes',
 	function ( $post_type ) {
 		if ( in_array( $post_type, aw_model_types(), true ) && 'aw_listing' !== $post_type ) {
-			add_meta_box( 'aw_primary_topic', 'Primary topic', 'aw_primary_topic_box', $post_type, 'side', 'high' );
+			add_meta_box( 'aw_primary_topic', 'Primary category', 'aw_primary_topic_box', $post_type, 'side', 'high' );
 		}
 		$rel = array_filter( aw_relations(), fn( $r ) => in_array( $post_type, $r[0], true ) );
 		if ( $rel || 'post' === $post_type ) {
@@ -257,10 +257,10 @@ function aw_primary_topic_box( $post ) {
 	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
 		echo '<option value="' . (int) $t->term_id . '"' . selected( $cur, $t->term_id, false ) . '>' . esc_html( $t->name ) . '</option>';
 	}
-	echo '</select><p class="description">Plus up to ' . (int) AW_SECONDARY_TOPICS . ' more topics in the Topics box (secondary).</p>';
+	echo '</select><p class="description">Plus up to ' . (int) AW_SECONDARY_TOPICS . ' more categories in the Categories box (secondary).</p>';
 	$n = count( wp_get_object_terms( $post->ID, 'aw_topic', array( 'fields' => 'ids' ) ) );
 	if ( $n > 1 + AW_SECONDARY_TOPICS ) {
-		echo '<p style="color:#b32d2e">This item has ' . (int) $n . ' topics. Keep 1 primary and up to ' . (int) AW_SECONDARY_TOPICS . ' others.</p>';
+		echo '<p style="color:#b32d2e">This item has ' . (int) $n . ' categories. Keep 1 primary and up to ' . (int) AW_SECONDARY_TOPICS . ' others.</p>';
 	}
 }
 
@@ -392,7 +392,7 @@ function aw_topic_help_field( $term ) {
 	foreach ( get_terms( array( 'taxonomy' => 'aw_listing_type', 'hide_empty' => false, 'orderby' => 'name' ) ) as $t ) {
 		echo '<label style="display:inline-block;min-width:16em"><input type="checkbox" name="aw_help_types[]" value="' . (int) $t->term_id . '"' . checked( in_array( $t->term_id, $cur, true ), true, false ) . '> ' . esc_html( $t->name ) . '</label> ';
 	}
-	echo '<p class="description">Directory listing types shown under "Find help" on this topic\'s page.</p>';
+	echo '<p class="description">Directory listing types shown under "Find help" on this category\'s page.</p>';
 }
 
 add_action(

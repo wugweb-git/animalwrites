@@ -38,7 +38,7 @@ function aw_topic_image_field( $id ) {
 	echo '<p><img src="' . esc_url( (string) $src ) . '" alt="" style="max-width:300px;height:auto;' . ( $src ? '' : 'display:none' ) . '"></p>';
 	echo '<p><button type="button" class="button aw-topic-image-pick">Choose photo</button> ';
 	echo '<button type="button" class="button-link-delete aw-topic-image-clear"' . ( $src ? '' : ' style="display:none"' ) . '>Remove</button></p>';
-	echo '<p class="description">Shown at the top of this category\'s page (and, for topics, on news and Legal Watch items in it). Use a photo you have the rights to (your own, or openly licensed). Landscape, at least 1200 px wide.</p>';
+	echo '<p class="description">Shown at the top of this category\'s page (and, for categories, on news and Legal Watch items in it). Use a photo you have the rights to (your own, or openly licensed). Landscape, at least 1200 px wide.</p>';
 	echo '</div>';
 }
 
@@ -125,7 +125,7 @@ add_action(
 	function ( $term ) {
 		$id = (int) get_term_meta( $term->term_id, 'aw_banner_image', true );
 		echo '<tr class="form-field"><th scope="row"><label for="aw_banner_image">Banner image</label></th><td><input type="number" min="0" id="aw_banner_image" name="aw_banner_image" value="' . esc_attr( $id ? (string) $id : '' ) . '" style="width:8em">'
-			. '<p class="description">Optional. Media ID of a wide image (16:5, up to 5 MB, WebP or AVIF) shown at the top of this topic\'s page. Leave empty for no banner.</p></td></tr>';
+			. '<p class="description">Optional. Media ID of a wide image (16:5, up to 5 MB, WebP or AVIF) shown at the top of this category\'s page. Leave empty for no banner.</p></td></tr>';
 	},
 	20
 );

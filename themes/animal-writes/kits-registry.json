@@ -182,11 +182,11 @@
    "states": [
     "logo or initials",
     "verified or not",
-    "with or without each contact way"
+    "with or without each contact way: a missing one shows greyed out (aria-disabled, not a link)"
    ],
    "tokens": [],
    "a11y": {
-    "element": "<h1> name; type and place as links; contact buttons are <a> (tel:, mailto:, WhatsApp, website)",
+    "element": "<h1> name; type and place as links; contact buttons are <a> (tel:, mailto:, WhatsApp, website), or a <span role=link aria-disabled=true> when the detail is missing",
     "aria": "icons aria-hidden; button text names the action",
     "keyboard": "Tab; Enter",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
@@ -209,6 +209,7 @@
     "aw-org-details",
     "aw-org-gallery",
     "aw-org-facts",
+    "aw-org-fact-na",
     "aw-org-services"
    ],
    "states": [
@@ -216,7 +217,8 @@
     "photos",
     "facts",
     "all",
-    "nothing filled (prints nothing)"
+    "missing phone, email, website, address, hours or services: \"… not available yet\" and a Suggest an update link (the Report form)",
+    "no map link: Directions greyed out (aria-disabled, not a link)"
    ],
    "tokens": [],
    "a11y": {

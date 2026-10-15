@@ -474,7 +474,7 @@ function aw_hub_item( $type ) {
 /** Empty state of each hub list (existing wording). */
 function aw_hub_empty( $type ) {
 	$t = array(
-		'aw_news'        => '<p>No stories on this topic yet.</p>',
+		'aw_news'        => '<p>No stories in this category yet.</p>',
 		'aw_legal'       => '<p>No updates match this filter yet.</p>',
 		'post'           => '<p>No guides match this filter yet.</p>',
 		'aw_opportunity' => '<p>No open opportunities of this kind right now.</p>',

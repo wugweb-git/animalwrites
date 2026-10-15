@@ -1,13 +1,13 @@
 <?php
 /**
- * Title: Topic hub — category list
+ * Title: Category hub — category list
  * Slug: kits-by-wugweb/topic-hub
  * Categories: kits-lists
  */
 ?>
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide"><!-- wp:heading -->
-<h2 class="wp-block-heading">Topics</h2>
+<h2 class="wp-block-heading">Categories</h2>
 <!-- /wp:heading -->
 
 <!-- wp:categories {"showPostCounts":true} /--></div>

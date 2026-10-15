@@ -5,7 +5,8 @@
  * Usage in a template:
  * <!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"verified_label"}}}}} -->
  *
- * Blocks bound to an empty value are removed from the output.
+ * Blocks bound to an empty value are removed from the output, except the contact buttons on organisation pages, which
+ * show greyed out (aria-disabled, not a link).
  *
  * @package animal-writes-core
  */
@@ -187,7 +188,13 @@ function aw_hide_empty_bound_blocks( $content, $block, $instance = null ) {
 	}
 	$post_id = ( $instance && isset( $instance->context['postId'] ) ) ? (int) $instance->context['postId'] : (int) get_the_ID();
 	foreach ( $bindings as $binding ) {
-		if ( ( $binding['source'] ?? '' ) === 'animal-writes/field' && '' === aw_binding_value( $binding['args']['key'] ?? '', $post_id ) ) {
+		$key = $binding['args']['key'] ?? '';
+		if ( ( $binding['source'] ?? '' ) === 'animal-writes/field' && '' === aw_binding_value( $key, $post_id ) ) {
+			// Organisation contact buttons stay in place, greyed out and not a link, so every profile has the same row (owner, 15 Oct 2026).
+			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $key ] ?? '';
+			if ( $act && 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
+				return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" data-act="' . $act . '">', '</span>' ), $content, 1 );
+			}
 			return '';
 		}
 	}

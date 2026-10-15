@@ -319,7 +319,7 @@ add_shortcode(
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
 			}
-			$html .= '</ul><p><a href="' . esc_url( $all ) . '">All ' . esc_html( strtolower( $label ) ) . ' on this topic</a></p></section>';
+			$html .= '</ul><p><a href="' . esc_url( $all ) . '">All ' . esc_html( strtolower( $label ) ) . ' in this category</a></p></section>';
 		}
 		$types = function_exists( 'aw_topic_help_types' ) ? aw_topic_help_types( $term->term_id ) : array();
 		$links = '';
