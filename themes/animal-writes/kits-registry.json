@@ -574,6 +574,47 @@
    }
   },
   {
+   "name": "Related items (item pages)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-related"
+   ],
+   "states": [
+    "News: Related news, From the Library",
+    "Library: Related in the Library, News about this, Resources",
+    "Resources: Related resources, From the Library",
+    "Opportunity: More opportunities (open only)",
+    "Listing: More organisations in {District}, News from {District}",
+    "empty group (not printed)"
+   ],
+   "tokens": [
+    "--kit-space-5",
+    "--kit-space-6",
+    "--kit-space-7",
+    "--kit-space-8",
+    "--kit-space-grid",
+    "--kit-type-h3",
+    "--kit-color-line"
+   ],
+   "a11y": {
+    "element": "<section> per group, named by its h2 (aria-labelledby); the hub cards inside (core Query Loop, .aw-hub-list)",
+    "aria": "aria-labelledby on each section",
+    "keyboard": "Tab to each card title",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 group, H3 card titles",
+    "link": "item titles (internal links by shared category, tag and place)",
+    "alt": "as the hub cards",
+    "schema": "none"
+   },
+   "source": "plugins/animal-writes-core/includes/related.php ([aw_related] in the single templates)"
+  },
+  {
    "name": "Category index",
    "type": "component",
    "status": "live",

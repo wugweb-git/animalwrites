@@ -1,7 +1,8 @@
 <?php
 /**
  * Local cards (owner copy, 9 Oct 2026):
- * - [aw_news_local] on a News item that has a place: "Organisations in {State}", linked to that state's Directory page.
+ * - [aw_news_local] on a News item that has a place: "Organisations in {State}", linked to that state's Directory page
+ *   (a district with listings instead, plus its state, 15 Oct 2026).
  * - Directory district pages with fewer than 3 listings: "Few listings in {District} yet", with the state and
  *   "Add an organisation" (Contact, reason "List your organisation").
  *
@@ -30,10 +31,13 @@ add_shortcode(
 		if ( ! $state ) {
 			return '';
 		}
+		// A story about a district with listings: that district's Directory page first, then the state's (Phase 7).
+		$near = $p && 'district' === $p->kind && aw_place_count( $p ) > 0 ? $p : $state;
+		$more = $near !== $state ? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>' : '';
 		return aw_local_card(
-			sprintf( 'Organisations in %s', $state->name ),
-			sprintf( 'Rescue groups, shelters and government vets you can contact in %s.', $state->name ),
-			'<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>'
+			sprintf( 'Organisations in %s', $near->name ),
+			sprintf( 'Rescue groups, shelters and government vets you can contact in %s.', $near->name ),
+			'<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_directory_url( $near->slug ) ) . '">' . esc_html( sprintf( 'See all in %s', $near->name ) ) . '</a>' . $more
 		);
 	}
 );

@@ -9,6 +9,7 @@
  * District × type:   Home › Directory › State › District › Type
  * Other items:       Home › Section › Item
  * Section hub:       Home › Section
+ * Filtered hub:      Home › Section › Category or tag (one ?category_name= or ?tag=; filtered-views.php)
  * Category:          Home › Categories › Category
  * Tag:               Home › Section › Tag
  * Page:              Home › (parent) › Page
@@ -94,6 +95,10 @@ function aw_seo_breadcrumb_trail() {
 			$trail[] = array( get_the_title( $a ), get_permalink( $a ) );
 		}
 		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+		$view    = function_exists( 'aw_seo_filtered_named' ) && aw_seo_filtered_named() ? aw_seo_filtered_view() : null;
+		if ( $view ) { // a hub filtered by one category or tag: Home › Section › Category
+			$trail[] = array( $view['name'], add_query_arg( $view['key'], rawurlencode( $view['slug'] ), aw_hub_canonical() ) );
+		}
 	}
 	$trail = $trail ? array_merge( array( array( 'Home', home_url( '/' ) ) ), $trail ) : array();
 	if ( count( $trail ) < 2 ) {

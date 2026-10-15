@@ -510,6 +510,14 @@ body { background: var(--kit-color-canvas); }
 .aw-org-claim { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-org-claim a { display: inline-flex; align-items: center; min-height: var(--kit-size-target, 44px); }
 
+/* Related items at the end of an item page (SEO Phase 7, related.php): each group is an h2 over the hubs' own cards
+   (.aw-hub-list), so pictures sit in the same 16:9 frame (fill or contain) and dates carry the calendar icon. */
+.aw-related { margin: var(--kit-space-8) 0 0; padding-top: var(--kit-space-6); border-top: 1px solid var(--kit-color-line); }
+.aw-related + .aw-related { margin-top: var(--kit-space-7); }
+.aw-related-head { font-size: var(--kit-type-h3); line-height: 1.25; margin: 0 0 var(--kit-space-5); }
+.aw-related-list .aw-orgs { max-width: none; }
+@media (min-width: 768px) { .aw-related-list .aw-orgs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-grid); } }
+
 /* Category page and site search */
 .aw-hub { display: grid; gap: var(--kit-space-6, 1.5rem); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); margin-block: var(--kit-space-6, 1.5rem); }
 .aw-hub-group h2 { font-size: var(--kit-type-h, 1.25rem); margin: 0 0 var(--kit-space-2, .5rem); }

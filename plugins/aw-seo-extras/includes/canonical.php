@@ -3,7 +3,8 @@
  * Canonical URLs Rank Math cannot work out (og:url follows the canonical):
  * - section hub Pages and Directory places: the Page path with /page/N/, without filters;
  * - filtered or sorted lists (?tag=, ?state=, ?category_name= …): the list with its filters in a fixed order, so each
- *   filtered list is its own indexed page (owner, 10 Oct 2026); the sort order is left out;
+ *   filtered list is its own indexed page (owner, 10 Oct 2026); the sort order is left out. A hub's ?category_name= and
+ *   ?tag= views follow filtered-views.php (15 Oct 2026: ?tag= points at the tag page);
  * - /claim/?listing=ID: one indexed page per listing.
  * A canonical typed in Rank Math always wins. Items keep Rank Math's own canonical.
  *
@@ -73,7 +74,8 @@ function aw_seo_canonical() {
 		$url = add_query_arg( 'listing', aw_claim_listing(), get_permalink() );
 	}
 	if ( aw_is_filtered_list() ) {
-		$url = aw_list_canonical();
+		$view = function_exists( 'aw_seo_filtered_view' ) ? aw_seo_filtered_view() : null;
+		$url  = ( $view && '' !== $view['canonical'] ) ? $view['canonical'] : aw_list_canonical(); // ?category_name= / ?tag= views: filtered-views.php
 	}
 	if ( '' !== $url ) {
 		return $url;

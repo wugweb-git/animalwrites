@@ -802,6 +802,10 @@ function aw_hub_schema_nodes() {
 		return $nodes = array(); // Media & PR has its own (aw_press_schema)
 	}
 	$url   = strtok( aw_hub_base_url(), '?' );
+	$view  = function_exists( 'aw_seo_filtered_named' ) && aw_seo_filtered_named() ? aw_seo_filtered_view() : null;
+	if ( $view ) { // a hub filtered by one category or tag is its own collection (filtered-views.php)
+		$url = add_query_arg( $view['key'], rawurlencode( $view['slug'] ), strtok( aw_hub_base_url(), '?' ) );
+	}
 	$items = array();
 	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
 	$posts = aw_hub_posts( $type );
@@ -820,6 +824,7 @@ function aw_hub_schema_nodes() {
 		$items[] = array( '@type' => 'ListItem', 'position' => $start + $i + 1, 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) );
 	}
 	$name  = 'aw_listing' === $type && function_exists( 'aw_directory_h1' ) ? aw_directory_h1() : get_the_title( get_queried_object_id() );
+	$name  = $view && 'aw_listing' !== $type ? $view['name'] . ' – ' . get_the_title( get_queried_object_id() ) : $name; // "Wildlife – News"
 	if ( ! $items ) { // an empty list: the collection page alone
 		return $nodes = array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => aw_seo_plain( $name ), 'description' => aw_seo_description(), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
 	}
