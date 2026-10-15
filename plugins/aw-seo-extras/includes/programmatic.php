@@ -356,7 +356,7 @@ function aw_seo_dir_description() {
 			$one     = $parts ? aw_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $one, $where );
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services.', $one, $where );
-		} elseif ( 'district' === $v['kind'] && aw_seo_dir_view_phones( $v ) ) {
+		} elseif ( 'district' === $v['kind'] && aw_seo_dir_view_phones( $v ) >= 2 ) { // "numbers": at least two
 			// Searched as "animal helpline number {district}" and "animal rescue {district} contact number" (SC, 15 Oct 2026).
 			$ph   = aw_seo_dir_view_phones( $v );
 			$lead = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations, %3$s', $where, number_format_i18n( $n ), $ph >= $n ? 'all with a phone number' : number_format_i18n( $ph ) . ' with a phone number' );
@@ -404,7 +404,7 @@ function aw_seo_phone_note( $n, $phones ) {
 	if ( 1 === $n ) {
 		return esc_html( ' It has a phone number.' );
 	}
-	return esc_html( $phones >= $n ? ' All have a phone number.' : sprintf( ' %s of them have a phone number.', number_format_i18n( $phones ) ) );
+	return esc_html( $phones >= $n ? ' All have a phone number.' : sprintf( 1 === $phones ? ' %s of them has a phone number.' : ' %s of them have a phone number.', number_format_i18n( $phones ) ) );
 }
 
 /** The facts line of the current Directory view (HTML), '' where there is nothing to add. */
@@ -435,8 +435,8 @@ function aw_seo_dir_facts() {
 		} else {
 			$kids = aw_seo_dir_children( $place, $type );
 			$out  = 'state' === $v['kind']
-				? esc_html( sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), aw_seo_type_words( $type, $n ), $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) )
-				: esc_html( sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), aw_seo_type_words( $type, $n ), number_format_i18n( count( $kids ) ) ) );
+				? esc_html( sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) )
+				: esc_html( sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), number_format_i18n( count( $kids ) ) ) );
 			if ( aw_seo_leaders( $kids ) ) {
 				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug, $type ) ) . '.'; // districts × type, or states filtered by type
 			}
