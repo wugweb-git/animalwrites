@@ -153,14 +153,14 @@ add_filter(
 );
 
 /*
- * The first picture in the page's main lists or lead (not on Home, whose hero photograph is preloaded) is usually the
+ * The first picture in a list page (a hub, category, tag or search; not Home, whose hero photograph is preloaded) is usually the
  * largest thing on screen on a phone: it loads at once, with high priority, instead of lazily. Every later one stays lazy.
  */
 add_filter(
 	'render_block_core/post-featured-image',
 	function ( $content ) {
 		static $done = false;
-		if ( $done || is_front_page() || is_admin() || false === strpos( $content, '<img' ) ) {
+		if ( $done || is_front_page() || ( is_singular() && ! aw_hub_type() ) || is_admin() || false === strpos( $content, '<img' ) ) { // an item's own page: WordPress already gives its lead picture priority
 			return $content;
 		}
 		$done = true;
