@@ -205,7 +205,7 @@ function aw_seo_list_title() {
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
-			$phone = aw_seo_dir_count( $place, '*#ph' ) >= 2 ? array( 'Animal Rescue & NGO Contact Numbers in ' . $where, 'Animal Rescue & NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
+			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue & NGO Contact Numbers in ' . $where, 'Animal Rescue & NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
 				array_merge(
 					$phone,

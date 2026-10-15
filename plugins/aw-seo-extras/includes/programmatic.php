@@ -221,6 +221,15 @@ function aw_seo_dir_view() {
 	return $v;
 }
 
+/**
+ * Whether a district's page may speak of "contact numbers": at least two of its listings, and at least a quarter of them,
+ * have a phone or WhatsApp number.
+ */
+function aw_seo_has_numbers( $place ) {
+	$ph = aw_seo_dir_count( $place, '*#ph' );
+	return $ph >= 2 && $ph * 4 >= aw_seo_dir_count( $place );
+}
+
 /** Listings in the current Directory view with a phone or WhatsApp number (its place and type). */
 function aw_seo_dir_view_phones( $v ) {
 	return aw_seo_dir_count( $v['place'], ( '' !== $v['type'] ? $v['type'] : '*' ) . '#ph' );
@@ -356,7 +365,7 @@ function aw_seo_dir_description() {
 			$one     = $parts ? aw_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $one, $where );
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services.', $one, $where );
-		} elseif ( 'district' === $v['kind'] && aw_seo_dir_view_phones( $v ) >= 2 ) { // "numbers": at least two
+		} elseif ( 'district' === $v['kind'] && aw_seo_has_numbers( $place ) ) {
 			// Searched as "animal helpline number {district}" and "animal rescue {district} contact number" (SC, 15 Oct 2026).
 			$ph   = aw_seo_dir_view_phones( $v );
 			$lead = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations, %3$s', $where, number_format_i18n( $n ), $ph >= $n ? 'all with a phone number' : number_format_i18n( $ph ) . ' with a phone number' );
