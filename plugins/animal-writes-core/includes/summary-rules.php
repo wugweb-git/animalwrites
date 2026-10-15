@@ -67,7 +67,7 @@ function aw_summary_section( $post ) {
 	if ( 'aw_legal' === $post->post_type ) {
 		return 'library';
 	}
-	if ( 'post' === $post->post_type && has_term( 'research', 'aw_resource_type', $post ) ) {
+	if ( 'post' === $post->post_type && ( has_term( 'research', 'post_tag', $post ) || ( taxonomy_exists( 'aw_resource_type' ) && has_term( 'research', 'aw_resource_type', $post ) ) ) ) { // research is a tag since 15 Oct 2026
 		return 'research';
 	}
 	return '';
@@ -159,7 +159,7 @@ function aw_summary_names( $text, $phrase ) {
 /** A published page titled with an entity's name (Library first, then the Directory): [post type, ID] or null. */
 function aw_summary_entity_page( $name ) {
 	global $wpdb;
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_legal','aw_listing') AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = 'aw_legal' DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_legal','aw_listing') AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = 'aw_legal' DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', 'The ' . $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return $row ? array( $row->post_type, (int) $row->ID ) : null;
 }
 
@@ -215,7 +215,7 @@ function aw_summary_entities( $text ) {
 
 /** Store the entities an item's summary names (meta aw_entities, JSON). */
 function aw_summary_store_entities( $post_id ) {
-	if ( '' === aw_summary_section( $post_id ) ) {
+	if ( ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
 		return;
 	}
 	$found = aw_summary_entities( wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $post_id, 'raw' ) ) );
@@ -284,7 +284,7 @@ function aw_summary_below_counts() {
 	$sets  = array(
 		'news'     => array( 'post_type' => 'aw_news' ),
 		'library'  => array( 'post_type' => 'aw_legal' ),
-		'research' => array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'aw_resource_type', 'field' => 'slug', 'terms' => 'research' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+		'research' => array( 'post_type' => 'post', 'tag' => 'research' ),
 	);
 	foreach ( $sets as $name => $args ) {
 		$ids  = get_posts( $args + array( 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
