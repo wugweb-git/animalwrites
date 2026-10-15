@@ -16,6 +16,10 @@
  * page number, which Rank Math's templates cannot express: they are built here at run time, through Rank Math's
  * title and description filters. A title or description typed in Rank Math for a hub Page still wins.
  *
+ * The seven section hub Pages also keep a copy of their page-1 title and description in Rank Math's fields, so the
+ * Rank Math box shows what is printed (owner, 14 Oct 2026). The copy is refreshed whenever page 1 is built with a
+ * different value (counts change) and is marked as automatic (_aw_seo_auto), so it is never mistaken for a typed one.
+ *
  * @package aw-seo-extras
  */
 
@@ -231,6 +235,33 @@ function aw_seo_building_title( $set = null ) {
 	return $busy;
 }
 
+/**
+ * Keep a hub Page's stored Rank Math title or description equal to what its first page prints (see the header).
+ * Only on the hub's own address without query or page number, and only where the field is empty or still holds the
+ * automatic copy.
+ *
+ * @param string $field title|description.
+ * @param string $value What page 1 prints.
+ */
+function aw_seo_mirror_hub( $field, $value ) {
+	$post = get_queried_object();
+	if ( '' === $value || ! is_singular() || ! ( $post instanceof WP_Post ) || ! aw_seo_is_hub_page( $post ) || aw_seo_page_number() > 1 || ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		return;
+	}
+	$path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	if ( untrailingslashit( $path ) !== untrailingslashit( (string) wp_parse_url( get_permalink( $post ), PHP_URL_PATH ) ) ) {
+		return; // a Directory place or type page shown through the hub Page
+	}
+	$auto = (array) json_decode( (string) get_post_meta( $post->ID, '_aw_seo_auto', true ), true );
+	$have = trim( (string) get_post_meta( $post->ID, 'rank_math_' . $field, true ) );
+	if ( $have === $value || ( '' !== $have && $have !== ( $auto[ $field ] ?? null ) ) ) {
+		return; // up to date, or typed by an editor
+	}
+	update_post_meta( $post->ID, 'rank_math_' . $field, wp_slash( $value ) );
+	$auto[ $field ] = $value;
+	update_post_meta( $post->ID, '_aw_seo_auto', wp_slash( wp_json_encode( $auto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
+}
+
 // While building, the document title comes from WordPress's own parts (the Directory type pages set theirs).
 add_filter( 'pre_get_document_title', fn( $t ) => aw_seo_building_title() ? '' : $t, 16 );
 add_filter(
@@ -262,7 +293,9 @@ add_filter(
 		if ( mb_strlen( $ours ) > 60 && aw_seo_page_number() > 1 && false !== mb_strpos( $ours, $brand ) ) {
 			$ours = str_replace( $brand, '', $ours ); // later pages: the page number before the site name
 		}
-		return '' !== $ours ? $ours : $title;
+		$ours = '' !== $ours ? $ours : $title;
+		aw_seo_mirror_hub( 'title', $ours );
+		return $ours;
 	},
 	20
 );
@@ -345,7 +378,9 @@ add_filter(
 			return aw_seo_with_page( $desc ); // typed in Rank Math: used as is (" – Page N" on later pages)
 		}
 		$ours = aw_seo_list_description();
-		return '' !== $ours ? $ours : $desc;
+		$ours = '' !== $ours ? $ours : $desc;
+		aw_seo_mirror_hub( 'description', $ours );
+		return $ours;
 	},
 	20
 );

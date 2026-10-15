@@ -7,7 +7,8 @@
  *   name, URL, logo, locality/region, contact details when present, the official website as sameAs, identifiers
  *   (AWBI code, registration, 12A, 80G, Darpan), services, opening hours, donate and volunteer actions.
  * - News: NewsArticle. Library: Legislation for Acts, Rules, Notifications and Circulars, else NewsArticle (court
- *   rulings with their court and order). Resources: Article, plus FAQPage when the guide is written as questions.
+ *   rulings with their court and order). Resources: Article. A guide's questions and answers come from its Rank Math
+ *   FAQ block (Rank Math prints that FAQPage in the same graph; there is no second one here).
  *   Opportunities: JobPosting (none once closed). Campaigns: CreativeWork.
  * - Section hubs and Directory places: CollectionPage + ItemList of the page's items. Topics page and topic archives:
  *   CollectionPage. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
@@ -379,22 +380,6 @@ function aw_website_schema() {
 	);
 }
 
-/** FAQPage for a guide whose headings are questions, each followed by its answer. */
-function aw_faq_schema( $id ) {
-	$html = (string) apply_filters( 'the_content', get_post_field( 'post_content', $id ) );
-	if ( ! preg_match_all( '#<h[23][^>]*>(.*?\?)\s*</h[23]>(.*?)(?=<h[23]|$)#si', $html, $m, PREG_SET_ORDER ) || count( $m ) < 2 ) {
-		return array();
-	}
-	$qs = array();
-	foreach ( $m as $row ) {
-		$answer = trim( wp_strip_all_tags( $row[2] ) );
-		if ( '' !== $answer ) {
-			$qs[] = array( '@type' => 'Question', 'name' => aw_seo_plain( $row[1] ), 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => aw_seo_plain( $answer ) ) );
-		}
-	}
-	return count( $qs ) >= 2 ? array( '@type' => 'FAQPage', '@id' => get_permalink( $id ) . '#faq', 'mainEntity' => $qs ) : array();
-}
-
 /** JobPosting for every opportunity: remote ones as TELECOMMUTE, others at their place (else India). */
 function aw_job_schema( $id ) {
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
@@ -485,9 +470,6 @@ function aw_schema_nodes() {
 	if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
 		$id      = get_queried_object_id();
 		$nodes[] = aw_article_schema( $id );
-		if ( 'post' === get_post_type( $id ) ) {
-			$nodes[] = aw_faq_schema( $id );
-		}
 	} elseif ( is_singular( 'aw_listing' ) ) {
 		$nodes[] = aw_listing_schema( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_opportunity' ) ) {

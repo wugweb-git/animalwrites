@@ -93,7 +93,14 @@ function aw_seo_typed( $key ) {
 		return '';
 	}
 	if ( is_singular() ) {
-		return trim( (string) get_post_meta( $id, 'rank_math_' . $key, true ) );
+		$typed = trim( (string) get_post_meta( $id, 'rank_math_' . $key, true ) );
+		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && aw_seo_is_hub_page( $id ) ) {
+			$auto = (array) json_decode( (string) get_post_meta( $id, '_aw_seo_auto', true ), true );
+			if ( ( $auto[ $key ] ?? null ) === $typed ) {
+				return ''; // a hub's stored copy of its own page-1 title (titles.php): built live, not typed
+			}
+		}
+		return $typed;
 	}
 	if ( is_category() || is_tag() || is_tax() ) {
 		return trim( (string) get_term_meta( $id, 'rank_math_' . $key, true ) );

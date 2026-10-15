@@ -7,7 +7,7 @@
  * GET  /wp-json/aw/v1/seo-items?type=aw_news&page=1&per_page=100&missing=1
  *      → {items: [{id, title, excerpt, has_focus}], total, pages}
  * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}]}
- *      → writes the keyword only where the field is empty; {written, skipped: [{id, why}]}
+ *      → writes the keyword only where the field is empty and it passes aw_seo_clean_keyword(); {written, skipped: [{id, why}]}
  *
  * Allowed for administrators and the ingest user (the same rule as /aw/v1/ai-keys).
  *
@@ -23,29 +23,56 @@ function aw_seo_api_allowed() {
 	return current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login;
 }
 
+/** Words that alone make no search phrase ("save animals", "animal welfare india"). */
+const AW_SEO_GENERIC_WORDS = array( 'animal', 'animals', 'welfare', 'india', 'indian', 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' );
+
 /**
- * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable: not 2 to 4 words, the site's own name, or sharing no word with the item's title.
+ * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable:
+ * - not 2 to 4 words, or over 60 characters;
+ * - the site's own name, unless the item's title names the site itself (a campaign or press item about Animal Writes);
+ * - ending on a connector ("india writes for", "rescued in");
+ * - only generic words ("save animals", "animal welfare");
+ * - sharing no word with the item's title or its own text (excerpt or first paragraph).
+ *
+ * The workers' focus-keyword job applies the same rules before it sends a phrase (aw_workers/focus_keywords.py).
  *
  * @param string $kw    Proposed keyword.
  * @param string $title Item title.
+ * @param string $text  The item's own text (excerpt or intro), optional.
  * @return string
  */
-function aw_seo_clean_keyword( $kw, $title ) {
+function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	$kw = mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) );
-	$kw = trim( preg_replace( array( '/["“”‘’`]+/u', '/\s+/u' ), array( '', ' ' ), $kw ), " \t\n.,;:'-" );
-	$n = count( explode( ' ', $kw ) );
-	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 || false !== strpos( $kw, 'animal writes' ) ) {
+	$kw = trim( preg_replace( array( '/["“”‘’`#]+/u', '/\s+/u' ), array( '', ' ' ), $kw ), " \t\n.,;:'-" );
+	$parts = explode( ' ', $kw );
+	$n     = count( $parts );
+	$title = aw_seo_plain( $title );
+	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 ) {
+		return '';
+	}
+	if ( false !== strpos( $kw, 'animal writes' ) && false === mb_stripos( $title, 'animal writes' ) && false === mb_stripos( $title, 'animalwrites' ) ) {
+		return '';
+	}
+	if ( preg_match( '/^(?:' . AW_SEO_DANGLING . ')$/iu', (string) end( $parts ) ) ) {
+		return '';
+	}
+	if ( ! array_diff( $parts, AW_SEO_GENERIC_WORDS ) ) {
 		return '';
 	}
 	$words = fn( $s ) => array_filter( preg_split( '/[^\p{L}\p{N}]+/u', mb_strtolower( $s ) ), fn( $w ) => mb_strlen( $w ) >= 3 );
 	$stem  = fn( $w ) => mb_substr( $w, 0, 5 ); // "dogs" / "dog", "cruelty" / "cruel"
-	$t     = array_map( $stem, $words( aw_seo_plain( $title ) ) );
+	$own   = array_map( $stem, $words( $title . ' ' . aw_seo_plain( $text ) ) );
 	foreach ( $words( $kw ) as $w ) {
-		if ( in_array( $stem( $w ), $t, true ) ) {
+		if ( in_array( $stem( $w ), $own, true ) ) {
 			return $kw;
 		}
 	}
 	return '';
+}
+
+/** The item's own text the keyword may draw on: its excerpt, else its first paragraph. */
+function aw_seo_keyword_text( $post ) {
+	return aw_seo_plain( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
 }
 
 add_action(
@@ -88,7 +115,7 @@ add_action(
 						$out[] = array(
 							'id'        => $p->ID,
 							'title'     => aw_seo_plain( $p->post_title ),
-							'excerpt'   => aw_seo_cut( aw_seo_plain( has_excerpt( $p ) ? $p->post_excerpt : aw_seo_intro( $p ) ), 400 ),
+							'excerpt'   => aw_seo_cut( aw_seo_keyword_text( $p ), 400 ),
 							'has_focus' => '' !== trim( (string) get_post_meta( $p->ID, 'rank_math_focus_keyword', true ) ),
 						);
 					}
@@ -116,7 +143,7 @@ add_action(
 							$skipped[] = array( 'id' => $id, 'why' => 'already set' );
 							continue;
 						}
-						$kw = aw_seo_clean_keyword( (string) ( $it['keyword'] ?? '' ), $post->post_title );
+						$kw = aw_seo_clean_keyword( (string) ( $it['keyword'] ?? '' ), $post->post_title, aw_seo_keyword_text( $post ) );
 						if ( '' === $kw ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'unusable keyword' );
 							continue;
