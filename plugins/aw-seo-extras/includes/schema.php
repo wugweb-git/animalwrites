@@ -6,16 +6,17 @@
  * - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOffice (by listing type, several allowed) with
  *   name, URL, logo, locality/region, contact details when present, the official website as sameAs, identifiers
  *   (AWBI code, registration, 12A, 80G, Darpan), services, opening hours, donate and volunteer actions.
- * - News: NewsArticle. Library: Legislation for Acts, Rules, Notifications and Circulars, else Article with the Library
- *   type as its genre (court rulings with their court and order; official releases based on the issuer's release),
- *   never NewsArticle. Resources: Article. A guide's questions and answers come from its Rank Math
- *   FAQ block (Rank Math prints that FAQPage in the same graph; there is no second one here).
- *   Opportunities: JobPosting for jobs, internships, fellowships and volunteering (none once closed, none for events
- *   or fostering). Campaigns: CreativeWork.
+ * - News, Library and Resources: one purpose-made node per type and sub-type (aw_article_nodes: NewsArticle,
+ *   Legislation, Article on a court ruling / press release / government document, DigitalDocument, Article + HowTo,
+ *   Article on a ScholarlyArticle). A guide's FAQPage is Rank Math's own (its FAQ block). Opportunities: JobPosting for
+ *   open jobs, internships, fellowships and volunteering (none once closed, none for events or fostering). Campaigns:
+ *   Event when the day is stored, else CreativeWork. Rank Math's Titles & Meta hold each type's schema type; these
+ *   nodes replace its default, which cannot carry these properties.
  * - Section hubs, Directory places and category pages: CollectionPage + ItemList of the page's items. Categories
  *   page: CollectionPage + ItemList of the categories. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
  * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
- *   site's own search address), replacing Rank Math's defaults (same @id), and the breadcrumb trail people see.
+ *   site's own search address), replacing Rank Math's defaults (same @id). The BreadcrumbList is Rank Math's own
+ *   (breadcrumbs.php gives it the trail people see).
  *   Every node's inLanguage is en-IN (Rank Math writes the WordPress locale, en-US, on its WebPage).
  *
  * @package aw-seo-extras
@@ -234,7 +235,7 @@ function aw_publisher_schema() {
 	$email = sanitize_email( (string) aw_seo_rm_setting( 'email' ) );
 	$email = '' !== $email ? $email : 'contact@animalwrites.in'; // as on the Contact page
 	$name  = trim( (string) aw_seo_rm_setting( 'knowledgegraph_name' ) );
-	$about = get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'fields' => 'names' ) );
+	$about = get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true, 'fields' => 'names' ) );
 	$pages = array();
 	foreach ( array( 'publishingPrinciples' => 'editorial-policy', 'correctionsPolicy' => 'corrections' ) as $k => $slug ) {
 		$page = get_page_by_path( $slug );
@@ -291,89 +292,226 @@ function aw_schema_image( $id ) {
 }
 
 /**
- * Article-type data for a content post (news, legal, research, guide).
+ * The site's categories on an item, as schema.org Things (about).
  *
  * @param int $id Post ID.
- * @return array
+ * @return array|null
  */
-function aw_article_schema( $id ) {
-	$type  = get_post_type( $id );
-	$title = aw_seo_plain( get_the_title( $id ) );
-	$at    = 'Article';
-	if ( 'aw_legal' === $type && has_term( array( 'act', 'rule', 'notification', 'circular' ), 'aw_legal_kind', $id ) ) {
-		$at = 'Legislation';
-	} elseif ( 'aw_news' === $type ) {
-		$at = 'NewsArticle'; // judgments, official releases, templates and other Library items stay Article (our summary of a document)
+function aw_schema_categories( $id ) {
+	$names = wp_get_object_terms( $id, aw_seo_category_tax(), array( 'fields' => 'names' ) );
+	if ( ! $names || is_wp_error( $names ) ) {
+		return null;
 	}
-	$image    = aw_schema_image( $id );
-	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
+	return array_map( fn( $n ) => array( '@type' => 'Thing', 'name' => aw_seo_plain( $n ) ), array_values( $names ) );
+}
+
+/** The item's place (district and state, when stored) as a Place, or null. */
+function aw_schema_place( $id ) {
+	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+	if ( ! $state && ! $district ) {
+		return null;
+	}
+	return array(
+		'@type'   => 'Place',
+		'name'    => implode( ', ', array_filter( array( $district, $state ) ) ),
+		'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district, 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
+	);
+}
+
+/**
+ * The document's PDF as a MediaObject: the file hosted here (aw_file_id), else the source address when it is a PDF.
+ *
+ * @param int $id Post ID.
+ * @return array|null
+ */
+function aw_schema_pdf( $id ) {
+	$att = (int) get_post_meta( $id, 'aw_file_id', true );
+	$url = $att && 'application/pdf' === get_post_mime_type( $att ) ? (string) wp_get_attachment_url( $att ) : '';
+	if ( '' === $url ) {
+		$src = (string) get_post_meta( $id, 'aw_source_url', true );
+		$url = preg_match( '/\.pdf$/i', (string) wp_parse_url( $src, PHP_URL_PATH ) ) ? $src : '';
+	}
+	return $url ? array( '@type' => 'MediaObject', 'contentUrl' => $url, 'encodingFormat' => 'application/pdf' ) : null;
+}
+
+/** The issuing body of a Library item (court, ministry, board) as a GovernmentOrganization, or null. */
+function aw_schema_issuer( $id ) {
+	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	return $iss ? array( '@type' => 'GovernmentOrganization', 'name' => aw_seo_plain( $iss->name ) ) : null;
+}
+
+/**
+ * HowTo of a guide whose text is a numbered list of steps (its first numbered list with three or more steps), or null.
+ * The steps are the guide's own words.
+ *
+ * @param int $id Post ID.
+ * @return array|null
+ */
+function aw_schema_howto( $id ) {
+	if ( ! preg_match( '#<ol[^>]*>(.*?)</ol>#is', (string) get_post_field( 'post_content', $id ), $ol ) ) {
+		return null;
+	}
+	preg_match_all( '#<li[^>]*>(.*?)</li>#is', $ol[1], $li );
+	$steps = array_values( array_filter( array_map( 'aw_seo_plain', $li[1] ) ) );
+	if ( count( $steps ) < 3 || count( $steps ) !== count( $li[1] ) ) {
+		return null;
+	}
+	$url = get_permalink( $id );
+	return array(
+		'@type'    => 'HowTo',
+		'@id'      => $url . '#howto',
+		'name'     => aw_seo_plain( get_the_title( $id ) ),
+		'url'      => $url,
+		'isPartOf' => array( '@id' => $url . '#article' ),
+		'step'     => array_map( fn( $t, $i ) => array( '@type' => 'HowToStep', 'position' => $i + 1, 'text' => $t ), $steps, array_keys( $steps ) ),
+	);
+}
+
+/**
+ * The item's own schema node, purpose-made by type and sub-type (see the file header). Only stored values are used.
+ *
+ * - News: NewsArticle; the source article (isBasedOn), its publisher (sourceOrganization), the other reports of the
+ *   same event (citation), categories (about), place (contentLocation).
+ * - Library: Acts, Rules and Notifications as Legislation (type, date, jurisdiction, the PDF as encoding, the issuing
+ *   body as sourceOrganization); judgments and orders as our Article on the court's ruling (a CreativeWork by the
+ *   court); official releases as our Article on the issuer's press release; circulars, advisories and other documents
+ *   as our Article on the issuer's DigitalDocument; templates as a DigitalDocument.
+ * - Resources: guides as Article (plus HowTo when the guide is numbered steps; FAQPage comes from Rank Math's FAQ
+ *   block); research summaries as Article based on the ScholarlyArticle (DOI, journal).
+ *
+ * @param int $id Post ID.
+ * @return array List of nodes (the main one first).
+ */
+function aw_article_nodes( $id ) {
+	$type     = get_post_type( $id );
+	$url      = get_permalink( $id );
+	$title    = aw_seo_plain( get_the_title( $id ) );
+	$kind     = 'aw_legal' === $type && function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
+	$ks       = $kind ? $kind->slug : '';
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
-	$src_name = (string) get_post_meta( $id, 'aw_source_name', true );
-	$data     = array(
-		'@type'            => $at,
-		'@id'              => get_permalink( $id ) . ( 'Legislation' === $at ? '#legislation' : '#article' ),
-		'mainEntityOfPage' => get_permalink( $id ),
-		'url'              => get_permalink( $id ),
+	$src_name = aw_seo_plain( (string) get_post_meta( $id, 'aw_source_name', true ) );
+	$src_date = aw_schema_date( (string) get_post_meta( $id, 'aw_source_date', true ) );
+	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
+	$issuer   = 'aw_legal' === $type ? aw_schema_issuer( $id ) : null;
+	$pdf      = 'aw_legal' === $type ? aw_schema_pdf( $id ) : null;
+	$us       = array( '@id' => home_url( '/#organization' ) );
+	$base     = array(
+		'mainEntityOfPage' => $url,
+		'url'              => $url,
 		'description'      => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
 		'datePublished'    => get_the_date( 'c', $id ),
 		'dateModified'     => $reviewed ? aw_schema_date( $reviewed ) : get_the_modified_date( 'c', $id ),
 		'inLanguage'       => 'en-IN',
-		'publisher'        => array( '@id' => home_url( '/#organization' ) ),
+		'image'            => aw_schema_image( $id ),
+		'about'            => aw_schema_categories( $id ),
 	);
-	$data[ 'Legislation' === $at ? 'name' : 'headline' ] = $title;
-	if ( $image ) {
-		$data['image'] = $image;
-	}
-	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
-	if ( 'Legislation' !== $at ) {
-		$data['author'] = array( '@id' => home_url( '/#organization' ) ); // the summary or guide is ours
-		$kind           = 'aw_legal' === $type && function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
-		if ( $kind ) {
-			$data['genre'] = aw_seo_plain( $kind->name ); // the Library type people see: Judgment, Official release, Template …
+	$article = array_merge( array( '@type' => 'Article', '@id' => $url . '#article', 'headline' => $title ), $base, array( 'author' => $us, 'publisher' => $us ) );
+	$nodes   = array();
+
+	if ( 'aw_news' === $type ) {
+		$node = array_merge( $article, array( '@type' => 'NewsArticle' ) );
+		if ( $src_date ) {
+			$node['datePublished'] = $src_date; // the day the story was reported
 		}
-		if ( 'aw_legal' === $type && $iss && in_array( $iss->slug, AW_COURT_ISSUERS, true ) ) { // a court ruling
-			$data['genre'] = 'Court judgment';
-			$data['about'] = array( '@type' => 'GovernmentOrganization', 'name' => $iss->name );
-			$order         = aw_court_document_url( $id );
-			if ( $order ) {
-				$data['citation'] = $order;
+		$outlet = $src_name ? array( '@type' => 'NewsMediaOrganization', 'name' => $src_name ) : null;
+		if ( $outlet ) {
+			$node['sourceOrganization'] = $outlet;
+		}
+		if ( $src_url ) {
+			$node['isBasedOn'] = array_filter( array( '@type' => 'NewsArticle', 'url' => $src_url, 'publisher' => $outlet, 'datePublished' => $src_date ) );
+		}
+		$also = array();
+		foreach ( (array) get_post_meta( $id, 'aw_also_reported', true ) as $r ) {
+			if ( is_array( $r ) && ! empty( $r['url'] ) ) { // later reports of the same event
+				$also[] = array_filter( array( '@type' => 'NewsArticle', 'url' => (string) $r['url'], 'publisher' => empty( $r['name'] ) ? null : array( '@type' => 'NewsMediaOrganization', 'name' => aw_seo_plain( $r['name'] ) ) ) );
 			}
 		}
-	} else {
-		$data['legislationJurisdiction'] = 'IN';
-		$kind = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_legal_kind' ) : null;
-		if ( $kind ) {
-			$data['legislationType'] = $kind->name;
+		if ( $also ) {
+			$node['citation'] = $also;
 		}
-		if ( $iss && 'gazette' !== $iss->slug ) { // the Gazette publishes; it does not pass the law
-			$data['legislationPassedBy'] = array( '@type' => 'GovernmentOrganization', 'name' => $iss->name );
+		$node['contentLocation'] = aw_schema_place( $id );
+		$nodes[]                 = $node;
+	} elseif ( in_array( $ks, array( 'act', 'rule', 'notification' ), true ) ) {
+		$node = array_merge(
+			array(
+				'@type'                   => 'Legislation',
+				'@id'                     => $url . '#legislation',
+				'name'                    => $title,
+				'legislationType'         => aw_seo_plain( $kind->name ),
+				'legislationJurisdiction' => 'IN',
+			),
+			$base
+		);
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) get_post_meta( $id, 'aw_source_date', true ) ) ) {
+			$node['legislationDate'] = (string) get_post_meta( $id, 'aw_source_date', true ); // the date of the text, as stored
 		}
-		$on = (string) get_post_meta( $id, 'aw_source_date', true );
-		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $on ) ) {
-			$data['legislationDate'] = $on;
+		$node['encoding']           = $pdf;
+		$node['sourceOrganization'] = $issuer; // the body whose copy this is (it may not be the law-maker)
+		$node['isBasedOn']          = $src_url ? array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $issuer ) ) : null;
+		$nodes[]                    = $node;
+	} elseif ( 'aw_legal' === $type && 'template' === $ks ) {
+		$nodes[] = array_merge(
+			array( '@type' => 'DigitalDocument', '@id' => $url . '#document', 'name' => $title, 'genre' => aw_seo_plain( $kind->name ), 'encodingFormat' => 'text/html' ),
+			$base,
+			array( 'author' => $us, 'publisher' => $us )
+		);
+	} elseif ( 'aw_legal' === $type ) {
+		$court = $issuer && function_exists( 'aw_item_issuer' ) && in_array( aw_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
+		$doc   = array_filter(
+			array(
+				'@type'         => 'CreativeWork',
+				'name'          => $title,
+				'url'           => $src_url ? $src_url : null,
+				'author'        => $issuer,
+				'datePublished' => $src_date,
+				'encoding'      => $pdf,
+			)
+		);
+		if ( $court || in_array( $ks, array( 'judgment', 'order' ), true ) ) {
+			$doc['genre']     = 'order' === $ks ? 'Court order' : 'Court judgment';
+			$article['genre'] = $doc['genre'];
+			if ( $issuer ) {
+				$article['about'] = array_merge( array( $issuer ), (array) $article['about'] );
+			}
+			$order = aw_court_document_url( $id );
+			if ( $order ) {
+				$article['citation'] = $order; // the court's own copy
+			}
+		} elseif ( 'official-release' === $ks ) {
+			$doc['genre']     = 'Press release';
+			$article['genre'] = 'Press release';
+		} else {
+			$doc['@type']     = 'DigitalDocument'; // a circular, advisory or other government document
+			$doc['genre']     = $kind ? aw_seo_plain( $kind->name ) : null;
+			$article['genre'] = $doc['genre'];
 		}
-	}
-	if ( $src_url ) {
-		// The original item we summarise or host.
-		$pub = $src_name ? aw_seo_plain( $src_name ) : '';
-		if ( 'Legislation' === $at && $iss && 'gazette' === $iss->slug ) {
-			$pub = $iss->name;
-		}
-		$data['isBasedOn'] = array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $pub ? array( '@type' => 'Organization', 'name' => $pub ) : null ) );
-		$doi = preg_match( '#^https?://(?:dx\.)?doi\.org/(10\..+)$#i', $src_url, $mm ) ? rawurldecode( $mm[1] ) : '';
-		if ( 'post' === $type && $doi ) { // a research paper: its DOI and journal
-			$data['isBasedOn'] = array_filter(
+		$article['isBasedOn'] = array_filter( $doc );
+		$nodes[]              = $article;
+	} else { // Resources
+		$kinds    = taxonomy_exists( 'aw_resource_type' ) ? 'aw_resource_type' : ( 'category' !== aw_seo_category_tax() ? 'category' : '' ); // the Resource type
+		$research = $kinds && has_term( 'research', $kinds, $id );
+		if ( $src_url ) {
+			$doi                  = preg_match( '#^https?://(?:dx\.)?doi\.org/(10\..+)$#i', $src_url, $mm ) ? rawurldecode( $mm[1] ) : '';
+			$article['isBasedOn'] = array_filter(
 				array(
-					'@type'      => 'ScholarlyArticle',
+					'@type'      => $research || $doi ? 'ScholarlyArticle' : 'CreativeWork',
 					'url'        => $src_url,
-					'sameAs'     => 'https://doi.org/' . $doi,
-					'identifier' => array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ),
-					'isPartOf'   => $pub ? array( '@type' => 'Periodical', 'name' => $pub ) : null,
+					'sameAs'     => $doi ? 'https://doi.org/' . $doi : null,
+					'identifier' => $doi ? array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ) : null,
+					'isPartOf'   => $doi && $src_name ? array( '@type' => 'Periodical', 'name' => $src_name ) : null,
+					'publisher'  => ! $doi && $src_name ? array( '@type' => 'Organization', 'name' => $src_name ) : null,
+					'datePublished' => $src_date,
 				)
 			);
 		}
+		$nodes[] = $article;
+		$howto   = $research ? null : aw_schema_howto( $id );
+		if ( $howto ) {
+			$nodes[0]['hasPart'] = array( '@id' => $howto['@id'] );
+			$nodes[]             = $howto;
+		}
 	}
-	return array_filter( $data );
+	return array_map( fn( $n ) => array_filter( $n, fn( $v ) => null !== $v && '' !== $v && array() !== $v ), $nodes );
 }
 
 /** The court's own copy of a ruling, when stored: the hosted file's official source or a court website / PDF. */
@@ -387,25 +525,44 @@ function aw_court_document_url( $id ) {
 	return '';
 }
 
-/** A campaign: a CreativeWork by its organiser (or Animal Writes), with its topic. */
+/**
+ * A campaign: an Event when its day is stored (aw_event_date, Y-m-d; place in aw_event_place), organised by its
+ * organiser or Animal Writes; otherwise a CreativeWork by the organiser.
+ *
+ * @param int $id Post ID.
+ * @return array
+ */
 function aw_campaign_schema( $id ) {
-	$org   = (int) get_post_meta( $id, 'aw_organiser', true );
-	$topic = function_exists( 'aw_first_term' ) ? aw_first_term( $id, 'aw_topic' ) : null;
-	$image = (string) get_the_post_thumbnail_url( $id, 'large' );
+	$org     = (int) get_post_meta( $id, 'aw_organiser', true );
+	$image   = (string) get_the_post_thumbnail_url( $id, 'large' );
+	$by      = $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) );
+	$day     = (string) get_post_meta( $id, 'aw_event_date', true );
+	$place   = aw_seo_plain( (string) get_post_meta( $id, 'aw_event_place', true ) );
+	$common  = array(
+		'url'         => get_permalink( $id ),
+		'name'        => aw_seo_plain( get_the_title( $id ) ),
+		'description' => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
+		'inLanguage'  => 'en-IN',
+		'image'       => $image ? array( $image ) : null,
+		'about'       => aw_schema_categories( $id ),
+	);
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
+		return array_filter(
+			array_merge(
+				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
+				$common,
+				array(
+					'location'  => $place ? array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ) : null,
+					'organizer' => $by,
+				)
+			)
+		);
+	}
 	return array_filter(
-		array(
-			'@type'         => 'CreativeWork',
-			'@id'           => get_permalink( $id ) . '#campaign',
-			'url'           => get_permalink( $id ),
-			'name'          => aw_seo_plain( get_the_title( $id ) ),
-			'description'   => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
-			'datePublished' => get_the_date( 'c', $id ),
-			'dateModified'  => get_the_modified_date( 'c', $id ),
-			'inLanguage'    => 'en-IN',
-			'image'         => $image ? array( $image ) : null,
-			'about'         => $topic ? array( '@type' => 'Thing', 'name' => $topic->name ) : null,
-			'creator'       => $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) ),
-			'publisher'     => array( '@id' => home_url( '/#organization' ) ),
+		array_merge(
+			array( '@type' => 'CreativeWork', '@id' => get_permalink( $id ) . '#campaign', 'datePublished' => get_the_date( 'c', $id ), 'dateModified' => get_the_modified_date( 'c', $id ) ),
+			$common,
+			array( 'creator' => $by, 'publisher' => array( '@id' => home_url( '/#organization' ) ) )
 		)
 	);
 }
@@ -432,19 +589,6 @@ function aw_schema_language( $node ) {
 		}
 	}
 	return $node;
-}
-
-/** BreadcrumbList for the current page, from the same trail people see (breadcrumbs.php). */
-function aw_breadcrumb_schema() {
-	$trail = function_exists( 'aw_breadcrumbs' ) ? aw_breadcrumbs() : array();
-	if ( ! $trail ) {
-		return array();
-	}
-	$list = array();
-	foreach ( $trail as $i => $it ) {
-		$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => aw_seo_plain( $it[0] ), 'item' => $it[1] );
-	}
-	return array( '@type' => 'BreadcrumbList', 'itemListElement' => $list );
 }
 
 /** The site itself, with site search (shown on every page). */
@@ -520,11 +664,11 @@ function aw_job_schema( $id ) {
 	return array_filter( $data );
 }
 
-/** The Topics page: CollectionPage + ItemList of every topic. */
-function aw_topics_schema() {
+/** The Categories page: CollectionPage + ItemList of every category. */
+function aw_categories_schema() {
 	$url   = get_permalink();
 	$items = array();
-	foreach ( get_terms( array( 'taxonomy' => 'aw_topic', 'hide_empty' => true, 'orderby' => 'name' ) ) as $i => $t ) {
+	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $i => $t ) {
 		$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => get_term_link( $t ), 'name' => aw_seo_plain( $t->name ) );
 	}
 	return array(
@@ -555,8 +699,7 @@ function aw_schema_nodes() {
 		return $nodes;
 	}
 	if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
-		$id      = get_queried_object_id();
-		$nodes[] = aw_article_schema( $id );
+		$nodes = aw_article_nodes( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_listing' ) ) {
 		$nodes[] = aw_listing_schema( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_opportunity' ) ) {
@@ -575,20 +718,20 @@ function aw_schema_nodes() {
 		);
 	} elseif ( is_page( 'about' ) ) {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
-	} elseif ( is_page( 'topics' ) ) {
-		$nodes = array_merge( $nodes, aw_topics_schema() );
+	} elseif ( is_page( array( 'topics', 'categories' ) ) ) {
+		$nodes = array_merge( $nodes, aw_categories_schema() );
 	} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
-	} elseif ( is_tax( 'aw_topic' ) ) {
+	} elseif ( aw_seo_is_category_page() ) {
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
 	}
 	return array_values( array_filter( $nodes ) );
 }
 
 /**
- * A category page (/topic/{slug}/): CollectionPage + ItemList of the items on the current page (indexed items only).
+ * A category page: CollectionPage + ItemList of the items on the current page (indexed items only).
  *
  * @return array
  */
@@ -705,8 +848,9 @@ function aw_press_schema() {
 			'position' => $i + 1,
 			'item'     => array_filter(
 				array(
-					'@type'         => 'video' === get_post_meta( $p->ID, 'aw_press_format', true ) ? 'VideoObject' : 'NewsArticle',
+					'@type'         => 'Article', // coverage of Animal Writes, at the outlet's address
 					'headline'      => aw_seo_plain( get_the_title( $p ) ),
+					'about'         => array( '@id' => home_url( '/#organization' ) ),
 					'name'          => aw_seo_plain( get_the_title( $p ) ),
 					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
 					'datePublished' => aw_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ),
@@ -742,8 +886,8 @@ add_filter(
 		$data['WebSite']   = aw_website_schema();
 		unset( $data['ProfilePage'] ); // authors are not shown on this site
 		$nodes = aw_schema_nodes();
-		if ( $nodes ) {
-			unset( $data['richSnippet'] );
+		if ( $nodes || is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_listing', 'aw_opportunity', 'aw_campaign' ) ) ) {
+			unset( $data['richSnippet'] ); // Rank Math's type default (Titles & Meta) is filled here; a closed opportunity has none
 		}
 		foreach ( $nodes as $node ) {
 			if ( in_array( $node['@type'] ?? '', array( 'CollectionPage', 'ContactPage' ), true ) ) {
@@ -757,13 +901,11 @@ add_filter(
 			}
 			$data[ 'aw_node_' . $i ] = $node;
 		}
-		$crumbs = aw_breadcrumb_schema();
-		unset( $data['BreadcrumbList'] );
-		if ( $crumbs ) {
-			$crumbs['@id']          = aw_seo_canonical() . '#breadcrumb';
-			$data['BreadcrumbList'] = $crumbs;
-			if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
-				$data['WebPage']['breadcrumb'] = array( '@id' => $crumbs['@id'] );
+		if ( ! empty( $data['BreadcrumbList']['@id'] ) ) { // Rank Math's own trail (breadcrumbs.php gives it the places and sections)
+			foreach ( $data as $k => $node ) {
+				if ( is_array( $node ) && in_array( $node['@type'] ?? '', array( 'WebPage', 'CollectionPage', 'ContactPage', 'AboutPage' ), true ) ) {
+					$data[ $k ]['breadcrumb'] = array( '@id' => $data['BreadcrumbList']['@id'] );
+				}
 			}
 		}
 		if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) && empty( $data['WebPage']['description'] ) ) {

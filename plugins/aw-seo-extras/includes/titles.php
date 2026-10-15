@@ -495,3 +495,12 @@ add_filter(
 	},
 	30
 );
+
+/*
+ * The title separator as a character: Rank Math writes %sep% as an HTML entity (htmlentities of "–" is "&ndash;"),
+ * and its <title> and share titles print that entity as is. Titles are plain text, so entities are decoded last; the
+ * output is still escaped by Rank Math.
+ */
+add_filter( 'rank_math/frontend/title', fn( $t ) => html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), 9999 );
+add_filter( 'rank_math/opengraph/facebook/og_title', fn( $t ) => html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), 9999 );
+add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), 9999 );

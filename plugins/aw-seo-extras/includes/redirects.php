@@ -7,7 +7,7 @@
  * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
  * - ?lang=, ?issuer= and ?court= on the Library → the same list without them.
  * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
- * - Resource-type archives (/?cat=N) and opportunity-type archives (/opportunity-type/{type}/) → the hub filtered by that
+ * - Resource-type archives (/?cat=N, or the Resource type taxonomy) and opportunity-type archives (/opportunity-type/{type}/) → the hub filtered by that
  *   type (/resources/?kind=…, /opportunities/?type=…): the same list, indexed once at its filtered address (a 301
  *   rather than a noindex page whose canonical points elsewhere). An empty type goes to the hub itself.
  *
@@ -135,9 +135,12 @@ add_action(
 	'template_redirect',
 	function () {
 		$map = array(
-			'category'            => array( 'post', 'kind' ),
+			'aw_resource_type'    => array( 'post', 'kind' ), // Resource types, once they are their own taxonomy
 			'aw_opportunity_type' => array( 'aw_opportunity', 'type' ),
 		);
+		if ( 'category' !== aw_seo_category_tax() ) {
+			$map['category'] = array( 'post', 'kind' ); // until then WordPress's category holds the Resource types
+		}
 		foreach ( $map as $tax => $to ) {
 			if ( ( 'category' === $tax ? is_category() : is_tax( $tax ) ) && function_exists( 'aw_hub_url' ) ) {
 				$term = get_queried_object();

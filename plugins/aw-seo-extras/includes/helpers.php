@@ -395,3 +395,31 @@ function aw_seo_image() {
 	}
 	return $img;
 }
+
+if ( ! function_exists( 'aw_seo_category_tax' ) ) {
+	/**
+	 * The taxonomy that holds the site's categories (one place to switch when they move to WordPress's own category).
+	 *
+	 * @return string
+	 */
+	function aw_seo_category_tax() {
+		return 'aw_topic';
+	}
+}
+
+/** Whether the current view is a category page. */
+function aw_seo_is_category_page() {
+	$tax = aw_seo_category_tax();
+	return 'category' === $tax ? is_category() : is_tax( $tax );
+}
+
+/** The page that lists every category (/categories/, else the older /topics/), or ''. */
+function aw_seo_categories_url() {
+	foreach ( array( 'categories', 'topics' ) as $slug ) {
+		$page = get_page_by_path( $slug );
+		if ( $page && 'publish' === $page->post_status ) {
+			return get_permalink( $page );
+		}
+	}
+	return '';
+}
