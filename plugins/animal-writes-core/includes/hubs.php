@@ -96,12 +96,20 @@ add_action(
 	40
 );
 
-// /news/page/2/ is the Page's own pagination: WordPress must not "correct" it to /news/.
+// /news/page/2/ is the Page's own pagination: WordPress must not "correct" it to /news/. The one correction kept is the
+// trailing slash (/news to /news/, one 301), so a hub has a single address.
 add_filter(
 	'redirect_canonical',
-	function ( $redirect ) {
-		return aw_hub_type() ? false : $redirect;
-	}
+	function ( $redirect, $requested = '' ) {
+		if ( ! aw_hub_type() ) {
+			return $redirect;
+		}
+		$to   = (string) strtok( (string) $redirect, '?' );
+		$from = (string) strtok( (string) $requested, '?' );
+		return ( '' !== $to && $to !== $from && untrailingslashit( $to ) === untrailingslashit( $from ) ) ? $redirect : false;
+	},
+	10,
+	2
 );
 
 /** Page number of a hub Page (from /page/N/). */

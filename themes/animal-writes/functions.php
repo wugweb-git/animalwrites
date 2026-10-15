@@ -52,3 +52,48 @@ add_action(
 	},
 	1
 );
+
+/*
+ * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 400 to 700,
+ * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
+ * declares 400 to 700 as separate static files without swap, and as the later rules they won: three extra 118 KB files
+ * per page, with text hidden while they load. Those overlapping faces are left out; the library's other weights and its
+ * italics stay. The theme's file is preloaded.
+ */
+add_action(
+	'init',
+	function () {
+		if ( ! class_exists( 'WP_Font_Face_Resolver' ) || false === has_action( 'wp_head', 'wp_print_font_faces' ) ) {
+			return;
+		}
+		remove_action( 'wp_head', 'wp_print_font_faces', 50 );
+		add_action(
+			'wp_head',
+			function () {
+				$fonts = WP_Font_Face_Resolver::get_fonts_from_theme_json();
+				foreach ( $fonts as $family => $faces ) {
+					$fonts[ $family ] = array_values(
+						array_filter(
+							$faces,
+							function ( $f ) {
+								$src    = implode( ' ', (array) ( $f['src'] ?? array() ) );
+								$weight = (int) ( $f['font-weight'] ?? 0 );
+								return ! ( 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && false !== strpos( $src, '/uploads/fonts/' ) && 'normal' === ( $f['font-style'] ?? 'normal' ) && $weight >= 400 && $weight <= 700 );
+							}
+						)
+					);
+				}
+				wp_print_font_faces( array_filter( $fonts ) );
+			},
+			50
+		);
+	}
+);
+
+add_action(
+	'wp_head',
+	function () {
+		echo '<link rel="preload" href="' . esc_url( get_stylesheet_directory_uri() . '/assets/fonts/inter/inter-latin.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
+	},
+	2
+);

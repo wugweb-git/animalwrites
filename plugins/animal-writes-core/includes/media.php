@@ -136,6 +136,8 @@ add_filter(
 		$src    = $att ? wp_get_attachment_image_src( $att, 'large' ) : false;
 		if ( $src && ! empty( $src[1] ) && ! empty( $src[2] ) && $src[0] === $url ) {
 			$dims = ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"'; // the box is known before the image arrives
+		} elseif ( $url && ! $doc && (int) get_post_meta( $post_id, 'aw_source_image_w', true ) > 0 && (int) get_post_meta( $post_id, 'aw_source_image_h', true ) > 0 && (string) get_post_meta( $post_id, 'aw_source_image', true ) === $url ) {
+			$dims = ' width="' . (int) get_post_meta( $post_id, 'aw_source_image_w', true ) . '" height="' . (int) get_post_meta( $post_id, 'aw_source_image_h', true ) . '"'; // the publisher's image, measured at ingest
 		}
 		$inner  = $url
 			? '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( aw_seo_plain( get_the_title( $post_id ) ) ) . '"' . $dims . ' loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">'
@@ -148,6 +150,24 @@ add_filter(
 	},
 	10,
 	3
+);
+
+/*
+ * The first picture in the page's main lists or lead (not on Home, whose hero photograph is preloaded) is usually the
+ * largest thing on screen on a phone: it loads at once, with high priority, instead of lazily. Every later one stays lazy.
+ */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $content ) {
+		static $done = false;
+		if ( $done || is_front_page() || is_admin() || false === strpos( $content, '<img' ) ) {
+			return $content;
+		}
+		$done = true;
+		$content = preg_replace( '/<img(?![^>]*fetchpriority)/', '<img fetchpriority="high"', $content, 1 );
+		return preg_replace( '/(<img[^>]*?)\sloading="lazy"/', '$1 loading="eager"', $content, 1 );
+	},
+	40
 );
 
 /*

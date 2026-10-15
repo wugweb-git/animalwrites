@@ -486,6 +486,7 @@ html { overflow-x: clip; }
 /* Fixed space per ad size, kept from the first paint so nothing below jumps (phone 320×100, from 768px 728×90).
    Ads are never clipped (no max-height). The box gives its space back only when the network says no ad will come. */
 .kit-ad-unit { min-height: 100px; display: flex; align-items: center; justify-content: center; }
+.kit-ad-unit > ins { flex: 1 1 100%; min-width: 0; } /* a flex item would shrink to 0 wide, and AdSense then has no width to size the ad for */
 @media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
 /* Every ad slot shows as one light tone, filled or not, so its place is visible (owner, 12 Oct 2026). */
 .kit-ad-unit { background: color-mix(in srgb, var(--kit-color-ink) 9%, var(--kit-color-bg)); border-radius: var(--kit-radius-card, 12px); }
