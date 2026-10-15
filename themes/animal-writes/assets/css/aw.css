@@ -1216,7 +1216,7 @@ body { background: var(--kit-color-canvas); }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-3); }
 }
 @media (min-width: 1200px) {
-	.is-first-page .aw-news-list > li:first-child { grid-column: 1 / span 8; grid-row: span 3; border-bottom: 0 !important; padding-bottom: 0 !important; }
+	.is-first-page .aw-news-list > li:first-child { grid-column: 1 / span 8; grid-row: 1 / span 4; border-bottom: 0 !important; padding-bottom: 0 !important; } /* rows 1-4 like story 4, so no later story backfills under the lead and the order stays 5, 6, 7 */
 	.is-first-page .aw-news-list > li:first-child > .aw-story { display: block; }
 	.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-4); }
 	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-h2) !important; }
