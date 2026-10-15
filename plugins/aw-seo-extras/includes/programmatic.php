@@ -25,7 +25,8 @@ const AW_SEO_BREAKDOWN = array( 'animal-welfare-organisation', 'gaushala', 'vete
 /**
  * Published listings counted per state code, district code and for all of India, by listing type (its slug), by
  * "veterinary" (any veterinary type, as the Directory's Veterinary filter) and in all ("*"). A listing with two types
- * counts under each. Rebuilt when the Directory's stored counts are (places.php), else kept for 12 hours.
+ * counts under each. "{key}#ph" counts those with a phone or WhatsApp number, "{key}#gov" those from a government list
+ * (or a government veterinary office or 1962 unit). Rebuilt when the Directory's stored counts are (places.php), else kept for 12 hours.
  *
  * @return array{at:int, s:array, d:array, in:array}
  */
@@ -36,13 +37,13 @@ function aw_seo_dir_data() {
 	}
 	$at   = (int) ( aw_place_counts()['at'] ?? 0 );
 	$data = get_transient( 'aw_seo_dir_data' );
-	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at ) {
+	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at && isset( $data['in']['*#ph'] ) ) {
 		return $data;
 	}
 	global $wpdb;
 	$ids  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
 	$skip = $ids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : ''; // preview-only items (integers)
-	$rows = $wpdb->get_results( "SELECT p.ID id, MAX(CASE WHEN pm.meta_key = 'aw_state_code' THEN pm.meta_value END) st, MAX(CASE WHEN pm.meta_key = 'aw_district_code' THEN pm.meta_value END) dt FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key IN ('aw_state_code', 'aw_district_code') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY p.ID", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
+	$rows = $wpdb->get_results( "SELECT p.ID id, MAX(CASE WHEN pm.meta_key = 'aw_state_code' THEN pm.meta_value END) st, MAX(CASE WHEN pm.meta_key = 'aw_district_code' THEN pm.meta_value END) dt, MAX(CASE WHEN pm.meta_key IN ('aw_phone', 'aw_whatsapp') AND TRIM(pm.meta_value) <> '' THEN 1 ELSE 0 END) ph, MAX(CASE WHEN pm.meta_key = 'aw_source_name' AND TRIM(pm.meta_value) <> '' AND pm.meta_value NOT LIKE '%google%' AND pm.meta_value <> 'AWBI ABC list' THEN 1 ELSE 0 END) gov FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key IN ('aw_state_code', 'aw_district_code', 'aw_phone', 'aw_whatsapp', 'aw_source_name') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY p.ID", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
 	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'aw_listing_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$types = array();
 	foreach ( $tax as $t ) {
@@ -56,13 +57,16 @@ function aw_seo_dir_data() {
 			$keys[] = 'veterinary';
 		}
 		$keys[] = '*';
-		foreach ( array_unique( $keys ) as $k ) {
+		$gov    = $r['gov'] || array_intersect( $keys, array( 'veterinary-office', 'mobile-veterinary-unit' ) ); // from a government list
+		foreach ( array_unique( $keys ) as $k0 ) {
+			foreach ( array_filter( array( $k0, $r['ph'] ? $k0 . '#ph' : '', $gov ? $k0 . '#gov' : '' ) ) as $k ) {
 			$data['in'][ $k ] = ( $data['in'][ $k ] ?? 0 ) + 1;
 			if ( $r['st'] ) {
 				$data['s'][ (int) $r['st'] ][ $k ] = ( $data['s'][ (int) $r['st'] ][ $k ] ?? 0 ) + 1;
 			}
 			if ( $r['dt'] ) {
 				$data['d'][ (int) $r['dt'] ][ $k ] = ( $data['d'][ (int) $r['dt'] ][ $k ] ?? 0 ) + 1;
+			}
 			}
 		}
 	}
@@ -116,7 +120,7 @@ function aw_seo_dir_breakdown( $place ) {
 	$vet  = defined( 'AW_VET_TYPES' ) ? AW_VET_TYPES : array();
 	$out  = array();
 	foreach ( $have as $k => $n ) {
-		if ( '*' === $k || in_array( $k, $vet, true ) ) {
+		if ( '*' === $k || false !== strpos( $k, '#' ) || in_array( $k, $vet, true ) ) {
 			continue; // veterinary types are counted once, as "veterinary"
 		}
 		$out[] = array( $k, (int) $n );
@@ -217,6 +221,35 @@ function aw_seo_dir_view() {
 	return $v;
 }
 
+/** Listings in the current Directory view with a phone or WhatsApp number (its place and type). */
+function aw_seo_dir_view_phones( $v ) {
+	return aw_seo_dir_count( $v['place'], ( '' !== $v['type'] ? $v['type'] : '*' ) . '#ph' );
+}
+
+/**
+ * Words for the current view's type: "government veterinary hospitals" when every veterinary listing in the place comes
+ * from a government list, else as aw_seo_type_words().
+ */
+function aw_seo_view_type_words( $v, $n, $short = false ) {
+	$words = aw_seo_type_words( $v['type'], $n, $short );
+	$vet   = array( 'veterinary', 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic' );
+	if ( in_array( $v['type'], $vet, true ) && aw_seo_dir_count( $v['place'], $v['type'] ) && aw_seo_dir_count( $v['place'], $v['type'] . '#gov' ) === aw_seo_dir_count( $v['place'], $v['type'] ) ) {
+		$words = 'government ' . $words;
+	}
+	return $words;
+}
+
+/** "address, phone number and services" as far as the listings in view have them. */
+function aw_seo_view_info( $n, $phones ) {
+	if ( $phones >= $n ) {
+		return 1 === $n ? 'address, phone number and services' : 'addresses, phone numbers and services';
+	}
+	if ( ! $phones ) {
+		return 1 === $n ? 'address and services' : 'addresses and services';
+	}
+	return sprintf( 'addresses and services, %s with a phone number', number_format_i18n( $phones ) );
+}
+
 /* ---------- Directory: titles and descriptions ---------- */
 
 /**
@@ -228,7 +261,9 @@ function aw_seo_dir_title() {
 	if ( ! $v || '' === $v['type'] || $v['other'] ) {
 		return '';
 	}
-	$what = aw_seo_title_case( aw_seo_type_words( $v['type'], max( 1, $v['n'] ) ) );
+	$what = aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) );
+	$ph   = aw_seo_dir_view_phones( $v );
+	$num  = $ph ? ( 1 === $ph ? ': Contact Number' : ': Contact Numbers' ) : '';
 	if ( 'district' === $v['kind'] ) {
 		$full  = $v['place']->name . ', ' . $v['state']->name;
 		$short = $v['place']->name;
@@ -239,6 +274,7 @@ function aw_seo_dir_title() {
 	return aw_seo_fit(
 		array_unique(
 			array(
+				$num ? $what . ' in ' . $full . $num : aw_seo_branded( $what . ' in ' . $full ),
 				aw_seo_branded( $what . ' in ' . $full ),
 				$what . ' in ' . $full,
 				aw_seo_branded( $what . ' in ' . $short ),
@@ -288,8 +324,8 @@ function aw_seo_dir_description() {
 	$tail  = array( ' From the Animal Writes Directory of animal welfare organisations in India.', ' From the Animal Writes Directory.', '' );
 	$cands = array();
 	if ( '' !== $v['type'] ) {
-		$what = aw_seo_type_words( $v['type'], $n );
-		$info = 1 === $n ? 'address, phone number and services' : 'addresses, phone numbers and services';
+		$what = aw_seo_view_type_words( $v, $n );
+		$info = aw_seo_view_info( $n, aw_seo_dir_view_phones( $v ) );
 		if ( 'district' === $v['kind'] ) {
 			$lead = sprintf( '%1$s %2$s in %3$s, %4$s: %5$s.', aw_seo_num( $n, true ), $what, $place->name, $state->name, $info );
 			$m    = aw_seo_dir_count( $state, $v['type'] );
@@ -320,6 +356,15 @@ function aw_seo_dir_description() {
 			$one     = $parts ? aw_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $one, $where );
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services.', $one, $where );
+		} elseif ( 'district' === $v['kind'] && aw_seo_dir_view_phones( $v ) ) {
+			// Searched as "animal helpline number {district}" and "animal rescue {district} contact number" (SC, 15 Oct 2026).
+			$ph   = aw_seo_dir_view_phones( $v );
+			$lead = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations, %3$s', $where, number_format_i18n( $n ), $ph >= $n ? 'all with a phone number' : number_format_i18n( $ph ) . ' with a phone number' );
+			for ( $max = min( 3, count( $parts ) ); $max >= 0; $max-- ) {
+				$list    = array_map( fn( $p ) => number_format_i18n( $p[1] ) . ' ' . aw_seo_type_words( $p[0], $p[1], true ), array_slice( $parts, 0, $max ) );
+				$cands[] = $lead . ( $list ? ', including ' . aw_seo_join( $list ) : '' ) . '.';
+			}
+			$cands[] = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations.', $where, number_format_i18n( $n ) );
 		} else {
 			$kids = 'state' === $v['kind'] ? aw_seo_dir_children( $place ) : array();
 			$lead = sprintf( '%1$s animal welfare organisations in %2$s', number_format_i18n( $n ), $where ) . ( $kids ? sprintf( ', across %1$s %2$s', number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) : '' );
@@ -351,6 +396,17 @@ function aw_seo_places_links( array $list, callable $url, $max = 3 ) {
 	return aw_seo_join( array_map( fn( $r ) => aw_seo_link( $url( $r[0] ), $r[0]->name ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')', array_slice( $list, 0, $max ) ) );
 }
 
+/** " All have a phone number." / " 30 have a phone number." ('' without one). */
+function aw_seo_phone_note( $n, $phones ) {
+	if ( ! $phones ) {
+		return '';
+	}
+	if ( 1 === $n ) {
+		return esc_html( ' It has a phone number.' );
+	}
+	return esc_html( $phones >= $n ? ' All have a phone number.' : sprintf( ' %s of them have a phone number.', number_format_i18n( $phones ) ) );
+}
+
 /** The facts line of the current Directory view (HTML), '' where there is nothing to add. */
 function aw_seo_dir_facts() {
 	$v = aw_seo_dir_view();
@@ -364,7 +420,7 @@ function aw_seo_dir_facts() {
 	$out   = '';
 	if ( '' !== $type ) {
 		if ( 'district' === $v['kind'] ) {
-			$out  = esc_html( sprintf( '%1$s %2$s listed in %3$s.', aw_seo_num( $n, true ), aw_seo_type_words( $type, $n ), $place->name ) );
+			$out  = esc_html( sprintf( '%1$s %2$s listed in %3$s.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), $place->name ) ) . aw_seo_phone_note( $n, aw_seo_dir_view_phones( $v ) );
 			$m    = aw_seo_dir_count( $state, $type );
 			$kids = aw_seo_dir_children( $state, $type );
 			if ( count( $kids ) > 1 ) {
@@ -396,7 +452,7 @@ function aw_seo_dir_facts() {
 				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug ) ) . '.';
 			}
 		} else {
-			$out = esc_html( sprintf( '%1$s has %2$s %3$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings' ) ) . $inc . '.';
+			$out = esc_html( sprintf( '%1$s has %2$s %3$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings' ) ) . $inc . '.' . aw_seo_phone_note( $n, aw_seo_dir_view_phones( $v ) );
 			$m   = aw_seo_dir_count( $state );
 			if ( $m > $n ) {
 				$out .= ' ' . aw_seo_link( aw_directory_url( $state->slug ), $state->name ) . esc_html( ' has ' . number_format_i18n( $m ) . ' in all.' );

@@ -203,22 +203,32 @@ function aw_seo_list_title() {
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
+			$phone = aw_seo_dir_count( $place, '*#ph' ) ? array( 'Animal Rescue & NGO Contact Numbers in ' . $where, 'Animal Rescue & NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
-				array(
-					'Animal Welfare NGOs in ' . $where . ': Rescue, Shelters, Vets',
-					'Animal Welfare NGOs, Shelters & Vets in ' . $where,
-					'Animal Welfare NGOs in ' . $where,
-					'Animal Welfare NGOs in ' . $place->name,
+				array_merge(
+					$phone,
+					array(
+						'Animal Welfare NGOs in ' . $where . ': Rescue, Shelters, Vets',
+						'Animal Welfare NGOs, Shelters & Vets in ' . $where,
+						'Animal Welfare NGOs in ' . $where,
+						'Animal Welfare NGOs in ' . $place->name,
+					)
 				),
 				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
+		$has   = fn( $k ) => aw_seo_dir_count( $place, $k ) > 0;
+		$kinds = array_merge( array( 'NGOs' ), $has( 'gaushala' ) ? array( 'Gaushalas' ) : array(), $has( 'veterinary' ) ? array( 'Vets' ) : array() ); // "gaushala" is the field's biggest search (Trends 383)
+		$named = count( $kinds ) > 1 ? 'Animal Welfare ' . implode( ', ', array_slice( $kinds, 0, -1 ) ) . ' & ' . end( $kinds ) . ' in ' . $place->name : '';
 		return aw_seo_fit(
-			array(
-				aw_seo_branded( 'Animal Welfare NGOs & Shelters in ' . $place->name ),
-				'Animal Welfare NGOs & Animal Shelters in ' . $place->name,
-				'Animal Welfare NGOs & Shelters in ' . $place->name,
-				'Animal Welfare NGOs in ' . $place->name,
+			array_merge(
+				$named ? array( aw_seo_branded( $named ), $named ) : array(),
+				array(
+					aw_seo_branded( 'Animal Welfare NGOs & Shelters in ' . $place->name ),
+					'Animal Welfare NGOs & Animal Shelters in ' . $place->name,
+					'Animal Welfare NGOs & Shelters in ' . $place->name,
+					'Animal Welfare NGOs in ' . $place->name,
+				)
 			),
 			60 - mb_strlen( aw_seo_page_suffix() )
 		);
