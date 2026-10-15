@@ -65,6 +65,28 @@ add_action(
 	}
 );
 
+/** Microsoft Clarity project ID for this site ('' = off). */
+function aw_clarity_id() {
+	return (string) apply_filters( 'kits_clarity_id', '' );
+}
+
+// Microsoft Clarity: same rules as GTM (production host only, never for logged-in staff).
+add_action(
+	'wp_head',
+	function () {
+		if ( ! aw_clarity_id() || is_admin() || wp_doing_ajax() || aw_analytics_skip_user() ) {
+			return;
+		}
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( ! in_array( $host, array_map( 'trim', explode( ',', aw_analytics_hosts() ) ), true ) ) {
+			return;
+		}
+		$id = esc_js( aw_clarity_id() );
+		echo "<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,\"clarity\",\"script\",\"{$id}\");</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	},
+	2
+);
+
 /**
  * Page context for analytics (owner, 9 Oct 2026): window.kitsPage and a dataLayer "page_context" push before any tag,
  * so GTM tags and the events in kit.js know the page type, section, category, place, listing type, issuer and

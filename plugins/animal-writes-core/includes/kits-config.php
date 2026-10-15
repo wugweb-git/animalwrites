@@ -15,6 +15,7 @@ const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'a
 // no GTM of its own, so nothing loads twice. Do not put a GA4 tag inside GTM-TB3FCFQB while Site Kit Analytics is on.
 add_filter( 'kits_gtm_id', fn() => '' );
 add_filter( 'kits_analytics_hosts', fn() => 'animalwrites.in,www.animalwrites.in' );
+add_filter( 'kits_clarity_id', fn() => 'yy09ekj2dp' ); // Microsoft Clarity (owner, 15 Oct 2026)
 
 add_filter( 'kits_share_post_types', fn() => array() ); // sharing: the Scriptless Social Sharing plugin (owner, 8 Oct 2026)
 add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) ); // first one holds the Sourcing menu
