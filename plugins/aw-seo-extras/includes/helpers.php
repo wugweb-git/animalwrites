@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** Longest search description, in characters (160 since 15 Oct 2026: Google shows that much whole on desktop). */
+const AW_SEO_DESC_MAX = 160;
+
 /**
  * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
  *
@@ -398,7 +401,7 @@ function aw_seo_top_categories( $type ) {
 
 /**
  * Hub description built from its own intro (the hub Page's excerpt, as shown under its H1) and the list's facts:
- * "{intro} {N stories} on {category}, {category} and {category}." up to 155 characters.
+ * "{intro} {N stories} on {category}, {category} and {category}." up to AW_SEO_DESC_MAX (160) characters.
  */
 function aw_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
@@ -414,7 +417,7 @@ function aw_seo_hub_intro_description( $type ) {
 		$list = array_slice( $cats, 0, $n );
 		$last = array_pop( $list );
 		$line = $intro . ' ' . $count . ' on ' . ( $list ? implode( ', ', $list ) . ' and ' : '' ) . $last . '.';
-		if ( mb_strlen( $line ) > 155 ) {
+		if ( mb_strlen( $line ) > AW_SEO_DESC_MAX ) {
 			break;
 		}
 		$best = $line;
@@ -596,3 +599,33 @@ function aw_seo_categories_url() {
 	}
 	return '';
 }
+
+/* ---------- Image alt and title: never the page title ---------- */
+
+/*
+ * Rank Math's Image SEO (General → Images, "add missing alt / title") fills every empty alt and title in the page
+ * with the page's title: card pictures read "Library" or "Media & PR", with titles "Media & PR 1", "Media & PR 2".
+ * Our empty alts are deliberate (a decorative picture beside its own linked title); pictures that carry information
+ * get their true alt in the markup, and every image in the media library has its own alt. So Rank Math's two
+ * attribute filters are taken off after it adds them (it hooks 'wp' at 9999); it never changed a non-empty alt.
+ */
+add_action(
+	'wp',
+	function () {
+		foreach ( array( 'the_content', 'post_thumbnail_html', 'woocommerce_single_product_image_thumbnail_html' ) as $hook ) {
+			global $wp_filter;
+			if ( empty( $wp_filter[ $hook ] ) ) {
+				continue;
+			}
+			foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $cb ) {
+					$fn = $cb['function'];
+					if ( is_array( $fn ) && is_object( $fn[0] ) && 'add_img_attributes' === $fn[1] && false !== stripos( get_class( $fn[0] ), 'RankMath' ) ) {
+						remove_filter( $hook, $fn, $priority );
+					}
+				}
+			}
+		}
+	},
+	10000
+);

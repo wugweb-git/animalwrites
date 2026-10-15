@@ -8,8 +8,9 @@
  *   searched words, the linkable entities.
  * - GET aw/v1/summary-rules serves them to the workers, which build their prompts and checks from them (summarise.py,
  *   merge.py, fold_existing.py) and use the same defaults when the site cannot be reached.
- * - The site applies them too: auto-review holds a summary outside its section's length, or not plain text
- *   (aw_summary_problem); the search description is the summary's lead (aw-seo-extras titles.php); an item's own page
+ * - The site applies them too: auto-review holds a summary over its section's maximum, or not plain text
+ *   (aw_summary_problem); a summary below the minimum is never held (owner, 15 Oct 2026: the workers re-read the source
+ *   and other coverage of the same story, and publish the best rule-following summary); the search description is the summary's lead (aw-seo-extras titles.php); an item's own page
  *   shows the whole summary; the entities a summary names are stored per item (aw_entities) for internal linking.
  *
  * @package animal-writes-core
@@ -86,11 +87,12 @@ function aw_summary_sentences( $text ) {
 /**
  * Why a summary breaks the length or plain-text rules of its section, or ''.
  *
- * @param string $text    The summary.
- * @param string $section news|library|research.
+ * @param string $text     The summary.
+ * @param string $section  news|library|research.
+ * @param bool   $short_ok Below the minimum words or sentences is not a problem (auto-review: never held for it).
  * @return string
  */
-function aw_summary_problem( $text, $section ) {
+function aw_summary_problem( $text, $section, $short_ok = false ) {
 	$rules = aw_summary_rules();
 	$sec   = $rules['sections'][ $section ] ?? null;
 	$text  = trim( str_replace( '[Needs legal review]', '', (string) $text ) );
@@ -101,14 +103,14 @@ function aw_summary_problem( $text, $section ) {
 		return 'summary is not plain text (link, HTML, markup or line break)';
 	}
 	$w = aw_summary_words( $text );
-	if ( $w < (int) $sec['min_words'] ) {
+	if ( $w < (int) $sec['min_words'] && ! $short_ok ) {
 		return sprintf( 'summary below the minimum (%d words; %s needs %d)', $w, $sec['label'], (int) $sec['min_words'] );
 	}
 	if ( $w > (int) $sec['max_words'] ) {
 		return sprintf( 'summary over the maximum (%d words; %s allows %d)', $w, $sec['label'], (int) $sec['max_words'] );
 	}
 	$s = aw_summary_sentences( $text );
-	if ( $s < (int) $sec['min_sentences'] || $s > (int) $sec['max_sentences'] ) {
+	if ( ( $s < (int) $sec['min_sentences'] && ! $short_ok ) || $s > (int) $sec['max_sentences'] ) {
 		return sprintf( 'summary has %d sentences (%s: %d to %d)', $s, $sec['label'], (int) $sec['min_sentences'], (int) $sec['max_sentences'] );
 	}
 	return '';
@@ -123,7 +125,7 @@ function aw_summary_problem( $text, $section ) {
  * @return string
  */
 function aw_summary_description( $text, $max = 0 ) {
-	$max  = $max ? $max : (int) ( aw_summary_rules()['description_max_chars'] ?? 155 );
+	$max  = $max ? $max : (int) ( aw_summary_rules()['description_max_chars'] ?? 160 );
 	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	$out  = '';
 	foreach ( preg_split( '/(?<=[.!?])\s+(?=["“‘(]?[A-Z0-9])/u', $text ) as $s ) {
@@ -311,7 +313,7 @@ function aw_summary_rules_textarea( $name, $label, $value, $rows = 4, $help = ''
 function aw_summary_rules_tab() {
 	$r     = aw_summary_rules();
 	$below = aw_summary_below_counts();
-	echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary breaks the length or plain-text rule in Inbox → To review. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) $r['description_max_chars'] . ' characters).</p>';
+	echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Inbox → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) $r['description_max_chars'] . ' characters).</p>';
 	echo '<h2>Length per section</h2><table class="widefat striped" style="max-width:900px"><thead><tr><th>Section</th><th>Minimum words</th><th>Maximum words</th><th>Minimum sentences</th><th>Maximum sentences</th><th>Published summaries below the minimum</th></tr></thead><tbody>';
 	foreach ( $r['sections'] as $name => $sec ) {
 		echo '<tr><td>' . esc_html( $sec['label'] ) . '</td>';

@@ -416,7 +416,7 @@ function aw_seo_dir_description() {
 		}
 	}
 	foreach ( $cands as $c ) {
-		if ( mb_strlen( $c ) <= 155 - mb_strlen( aw_seo_page_suffix() ) ) {
+		if ( mb_strlen( $c ) <= AW_SEO_DESC_MAX - mb_strlen( aw_seo_page_suffix() ) ) {
 			return $c;
 		}
 	}
@@ -607,7 +607,7 @@ function aw_seo_category_description( $term ) {
 	}
 	list( $items, $dir ) = aw_seo_category_split( $parts );
 	$lead  = aw_seo_plain( $term->name ) . ' in India on Animal Writes: ';
-	$room  = 155 - mb_strlen( aw_seo_page_suffix() );
+	$room  = AW_SEO_DESC_MAX - mb_strlen( aw_seo_page_suffix() );
 	$cands = array();
 	for ( $d = count( $dir ); $d >= 0; $d-- ) {
 		$tail = $d ? ' In the Directory: ' . aw_seo_join( array_slice( $dir, 0, $d ) ) . '.' : '';
@@ -889,7 +889,7 @@ function aw_seo_tag_description( $term ) {
 		default:
 			$text = sprintf( '%1$s%2$s on Animal Writes, animal welfare in India.', $num, $what );
 	}
-	return aw_seo_cut( ucfirst( $text ), 155 );
+	return aw_seo_cut( ucfirst( $text ), AW_SEO_DESC_MAX );
 }
 
 /**

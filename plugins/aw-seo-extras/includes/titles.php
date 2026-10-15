@@ -115,7 +115,7 @@ function aw_seo_item_description( $post ) {
 	if ( has_excerpt( $post ) && function_exists( 'aw_summary_section' ) && '' !== aw_summary_section( $post ) ) {
 		return aw_summary_description( trim( str_replace( '[Needs legal review]', '', $desc ) ) );
 	}
-	return aw_seo_cut( $desc, 155 );
+	return aw_seo_cut( $desc, AW_SEO_DESC_MAX );
 }
 
 /**
@@ -432,7 +432,7 @@ function aw_seo_list_description() {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
 			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
-			$desc = mb_strlen( $desc . $more ) <= 155 ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= 155 ? $desc . ' From the Animal Writes Directory.' : $desc );
+			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= AW_SEO_DESC_MAX ? $desc . ' From the Animal Writes Directory.' : $desc );
 		} elseif ( aw_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
@@ -452,7 +452,7 @@ function aw_seo_list_description() {
 	}
 	$desc  = preg_replace( '/\s+,/u', ',', html_entity_decode( wp_strip_all_tags( (string) $desc ), ENT_QUOTES, 'UTF-8' ) );
 	$pages = aw_seo_page_suffix();
-	return aw_seo_with_page( aw_seo_cut( $desc, 155 - mb_strlen( $pages ) ) );
+	return aw_seo_with_page( aw_seo_cut( $desc, AW_SEO_DESC_MAX - mb_strlen( $pages ) ) );
 }
 
 /**
