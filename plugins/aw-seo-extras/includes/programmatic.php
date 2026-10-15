@@ -249,6 +249,25 @@ function aw_seo_dir_title() {
 	);
 }
 
+/**
+ * The places worth naming as "most are in": up to $max with at least two listings and more than the next place down
+ * (no list of ties such as "A (1), B (1) and C (1)").
+ *
+ * @param array $list [place, count], most first.
+ * @param int   $max  At most this many.
+ * @return array
+ */
+function aw_seo_leaders( array $list, $max = 3 ) {
+	$out = array();
+	foreach ( array_slice( $list, 0, $max ) as $i => $r ) {
+		if ( $r[1] < 2 || ( isset( $list[ $max ] ) && $r[1] <= $list[ $max ][1] ) ) {
+			break;
+		}
+		$out[] = $r;
+	}
+	return count( $out ) === count( $list ) ? array() : $out; // naming every place is not "most"
+}
+
 /** "A (12), B (9) and C (4)" for the first $max places. */
 function aw_seo_places_line( array $list, $max = 3 ) {
 	return aw_seo_join( array_map( fn( $r ) => $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')', array_slice( $list, 0, $max ) ) );
@@ -286,8 +305,9 @@ function aw_seo_dir_description() {
 			$area = 'state' === $v['kind']
 				? sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), $what, $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' )
 				: sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), $what, number_format_i18n( count( $kids ) ) );
-			$most = count( $kids ) > 1 ? ' Most are in ' . aw_seo_places_line( $kids ) . '.' : '';
-			foreach ( array( $most, count( $kids ) > 2 ? ' Most are in ' . aw_seo_places_line( $kids, 2 ) . '.' : '', '' ) as $m ) {
+			$lead = aw_seo_leaders( $kids );
+			$most = $lead ? ' Most are in ' . aw_seo_places_line( $lead ) . '.' : '';
+			foreach ( array_unique( array( $most, count( $lead ) > 2 ? ' Most are in ' . aw_seo_places_line( $lead, 2 ) . '.' : '', '' ) ) as $m ) {
 				foreach ( array( ' ' . ucfirst( $info ) . ' of each.', '' ) as $t ) {
 					$cands[] = $area . $m . $t;
 				}
@@ -349,9 +369,10 @@ function aw_seo_dir_facts() {
 			$kids = aw_seo_dir_children( $state, $type );
 			if ( count( $kids ) > 1 ) {
 				$others = array_values( array_filter( $kids, fn( $r ) => $r[0]->code !== $place->code ) );
+				$lead   = aw_seo_leaders( $others );
 				$out   .= ' ' . esc_html( $state->name . ' has ' ) . aw_seo_link( aw_directory_url( $state->slug, $type ), number_format_i18n( $m ) . ' ' . aw_seo_type_words( $type, $m ) )
-					. esc_html( ' in ' . number_format_i18n( count( $kids ) ) . ' districts; also in ' )
-					. aw_seo_places_links( $others, fn( $p ) => aw_directory_url( $p->slug, $type ) ) . '.';
+					. esc_html( ' in ' . number_format_i18n( count( $kids ) ) . ' districts' )
+					. ( $lead ? esc_html( '; the most in ' ) . aw_seo_places_links( $lead, fn( $p ) => aw_directory_url( $p->slug, $type ) ) : '' ) . '.';
 			} else {
 				$out .= ' ' . esc_html( sprintf( 'It is the only district in %1$s with %2$s listed.', $state->name, aw_seo_type_words( $type, 2 ) ) );
 			}
@@ -360,8 +381,8 @@ function aw_seo_dir_facts() {
 			$out  = 'state' === $v['kind']
 				? esc_html( sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), aw_seo_type_words( $type, $n ), $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) )
 				: esc_html( sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), aw_seo_type_words( $type, $n ), number_format_i18n( count( $kids ) ) ) );
-			if ( count( $kids ) > 1 ) {
-				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( $kids, fn( $p ) => aw_directory_url( $p->slug, $type ) ) . '.'; // districts × type, or states filtered by type
+			if ( aw_seo_leaders( $kids ) ) {
+				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug, $type ) ) . '.'; // districts × type, or states filtered by type
 			}
 		}
 	} else {
@@ -371,8 +392,8 @@ function aw_seo_dir_facts() {
 		if ( 'state' === $v['kind'] ) {
 			$kids = aw_seo_dir_children( $place );
 			$out  = esc_html( sprintf( '%1$s has %2$s %3$s in %4$s %5$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings', number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) ) . $inc . '.';
-			if ( count( $kids ) > 1 ) {
-				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( $kids, fn( $p ) => aw_directory_url( $p->slug ) ) . '.';
+			if ( aw_seo_leaders( $kids ) ) {
+				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug ) ) . '.';
 			}
 		} else {
 			$out = esc_html( sprintf( '%1$s has %2$s %3$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings' ) ) . $inc . '.';
