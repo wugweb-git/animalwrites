@@ -150,6 +150,22 @@ add_filter(
 	3
 );
 
+/*
+ * In lists the card title is the card's one link (its ::after covers the card). A linked picture to the same page stays
+ * clickable but is out of the tab order and hidden from screen readers, as aw_item_image() cards already are.
+ */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $content, $block, $instance ) {
+		if ( empty( $block['attrs']['isLink'] ) || ! isset( $instance->context['queryId'] ) || false !== strpos( $content, 'tabindex="-1"' ) ) {
+			return $content;
+		}
+		return preg_replace( '/<a (?=[^>]*href=)/', '<a tabindex="-1" aria-hidden="true" ', $content, 1 );
+	},
+	30,
+	3
+);
+
 /**
  * Research and Legal Watch documents: show the mirrored PDF inline (Acts, Rules and judgments may be reproduced
  * under s.52(1)(q) of the Copyright Act, 1957), with download and official-source links.
