@@ -3,7 +3,10 @@
  * Publish items held in Inbox → To review only because their summary is short or the source thin (owner, 15 Oct 2026:
  * "just publish them for now"; the rewrite comes later, from short-2026-10-15/rewrite-later.json).
  *
- *   AW_IDS=1,2,3 [AW_APPLY=1] wp eval-file tools/summary-dates/publish-held.php
+ *   AW_IDS=1,2,3 [AW_THIN_OK=2,3] [AW_APPLY=1] wp eval-file tools/summary-dates/publish-held.php
+ *
+ * AW_THIN_OK: items whose only other check is "thin format" (a video page with a thin text) that a person read and
+ * found to be real Indian news: published too (the thin source is the summary's problem, not the item's).
  *
  * An item is published only when it is pending, its hold is about summary length or a thin source, and auto-review
  * finds no other reason (publisher, category, thin format, relevance, Library source, same story); otherwise it is left
@@ -15,6 +18,7 @@
 
 $ids   = array_filter( array_map( 'intval', explode( ',', (string) getenv( 'AW_IDS' ) ) ) );
 $apply = '1' === getenv( 'AW_APPLY' );
+$thin  = array_filter( array_map( 'intval', explode( ',', (string) getenv( 'AW_THIN_OK' ) ) ) );
 $out   = array(
 	'published' => array(),
 	'left'      => array(),
@@ -31,7 +35,7 @@ foreach ( $ids as $id ) {
 		continue;
 	}
 	$why = in_array( $p->post_type, array( 'aw_news', 'aw_legal' ), true ) && function_exists( 'aw_review_reason' ) ? aw_review_reason( $id ) : '';
-	if ( '' !== $why && ! preg_match( '/^summary below|^summary has \d+ sentences/', $why ) ) {
+	if ( '' !== $why && ! preg_match( '/^summary below|^summary has \d+ sentences/', $why ) && ! ( in_array( $id, $thin, true ) && str_starts_with( $why, 'thin format' ) ) ) {
 		$out['left'][ $id ] = 'other check: ' . $why;
 		continue;
 	}
