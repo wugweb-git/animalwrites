@@ -5,9 +5,14 @@
  * aw_workers/focus_keywords.py), which reads and writes through this API:
  *
  * GET  /wp-json/aw/v1/seo-items?type=aw_news&page=1&per_page=100&missing=1
- *      → {items: [{id, title, excerpt, has_focus}], total, pages}
- * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}]}
- *      → writes the keyword only where the field is empty and it passes aw_seo_clean_keyword(); {written, skipped: [{id, why}]}
+ *      → {items: [{id, title, seo_title, excerpt, focus, has_focus, in_title}], total, pages}
+ * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}], replace: false}
+ *      → writes the keyword where the field is empty and it passes aw_seo_clean_keyword() and is a phrase of the item's
+ *        SEO title (aw_seo_keyword_in_title); with replace, also over a keyword that is not in the SEO title.
+ *        {written, skipped: [{id, why}]}
+ *
+ * The SEO title is the source of truth (owner, 15 Oct 2026): the primary focus keyword is words that stand together in
+ * it, never a title changed to fit a keyword.
  *
  * Allowed for administrators and the ingest user (the same rule as /aw/v1/ai-keys).
  *
@@ -70,6 +75,45 @@ function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	return '';
 }
 
+/** The SEO title of an item as printed, without the site name: Rank Math's stored title, else the title rule. */
+function aw_seo_title_for_keyword( $post ) {
+	$post = get_post( $post );
+	if ( ! $post ) {
+		return '';
+	}
+	$t = trim( (string) get_post_meta( $post->ID, 'rank_math_title', true ) );
+	if ( '' !== $t && false !== strpos( $t, '%' ) && class_exists( '\RankMath\Helper' ) ) {
+		$t = \RankMath\Helper::replace_vars( $t, $post );
+	}
+	if ( '' === $t && function_exists( 'aw_seo_item_title' ) ) {
+		$t = aw_seo_item_title( $post );
+	}
+	$t = aw_seo_plain( '' !== $t ? $t : $post->post_title );
+	return trim( preg_replace( '/\s*[\x{2013}\x{2014}|-]\s*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/iu', '', $t ) );
+}
+
+/** Words of a text for phrase matching: lower case, apostrophes dropped ("India’s" → "indias"), letters and digits only. */
+function aw_seo_phrase_words( $text ) {
+	$text = str_replace( array( "'", '’', '‘', '`' ), '', mb_strtolower( (string) $text ) );
+	return array_values( array_filter( preg_split( '/[^\p{L}\p{N}]+/u', $text ), 'strlen' ) );
+}
+
+/** Whether the keyword's words stand together, in order, in the SEO title (the workers check the same). */
+function aw_seo_keyword_in_title( $kw, $seo_title ) {
+	$k = aw_seo_phrase_words( $kw );
+	$t = aw_seo_phrase_words( $seo_title );
+	$n = count( $k );
+	if ( ! $n ) {
+		return false;
+	}
+	for ( $i = 0; $i + $n <= count( $t ); $i++ ) {
+		if ( array_slice( $t, $i, $n ) === $k ) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /** The item's own text the keyword may draw on: its excerpt, else its first paragraph. */
 function aw_seo_keyword_text( $post ) {
 	return aw_seo_plain( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
@@ -112,11 +156,17 @@ add_action(
 						if ( aw_seo_is_hub_page( $p ) ) {
 							continue;
 						}
+						$focus = trim( (string) get_post_meta( $p->ID, 'rank_math_focus_keyword', true ) );
+						$first = trim( (string) strtok( $focus, ',' ) ); // Rank Math keeps extra keywords after commas; the first is the primary one
+						$seo   = aw_seo_title_for_keyword( $p );
 						$out[] = array(
 							'id'        => $p->ID,
 							'title'     => aw_seo_plain( $p->post_title ),
+							'seo_title' => $seo,
 							'excerpt'   => aw_seo_cut( aw_seo_keyword_text( $p ), 400 ),
-							'has_focus' => '' !== trim( (string) get_post_meta( $p->ID, 'rank_math_focus_keyword', true ) ),
+							'focus'     => $focus,
+							'has_focus' => '' !== $focus,
+							'in_title'  => '' !== $first && aw_seo_keyword_in_title( $first, $seo ),
 						);
 					}
 					return array( 'items' => $out, 'total' => (int) $q->found_posts, 'pages' => (int) $q->max_num_pages );
@@ -132,6 +182,7 @@ add_action(
 				'callback'            => function ( WP_REST_Request $req ) {
 					$written = 0;
 					$skipped = array();
+					$replace = (bool) $req->get_param( 'replace' );
 					foreach ( array_slice( (array) $req->get_param( 'items' ), 0, 200 ) as $it ) {
 						$id   = absint( $it['id'] ?? 0 );
 						$post = $id ? get_post( $id ) : null;
@@ -139,16 +190,32 @@ add_action(
 							$skipped[] = array( 'id' => $id, 'why' => 'not a published item' );
 							continue;
 						}
-						if ( '' !== trim( (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) ) ) {
-							$skipped[] = array( 'id' => $id, 'why' => 'already set' );
-							continue;
+						$have = trim( (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) );
+						$seo  = aw_seo_title_for_keyword( $post );
+						$rest = '';
+						if ( '' !== $have ) {
+							$parts = array_map( 'trim', explode( ',', $have ) );
+							if ( ! $replace || aw_seo_keyword_in_title( $parts[0], $seo ) ) {
+								$skipped[] = array( 'id' => $id, 'why' => 'already set' );
+								continue;
+							}
+							$rest = implode( ', ', array_slice( $parts, 1 ) ); // extra keywords stay after the new primary one
 						}
 						$kw = aw_seo_clean_keyword( (string) ( $it['keyword'] ?? '' ), $post->post_title, aw_seo_keyword_text( $post ) );
 						if ( '' === $kw ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'unusable keyword' );
 							continue;
 						}
-						update_post_meta( $id, 'rank_math_focus_keyword', wp_slash( $kw ) );
+						if ( ! aw_seo_keyword_in_title( $kw, $seo ) ) {
+							$skipped[] = array( 'id' => $id, 'why' => 'not a phrase of the SEO title' );
+							continue;
+						}
+						if ( '' !== $have ) {
+							$hist = (array) get_post_meta( $id, '_aw_focus_history', true );
+							$hist[] = array( 'keyword' => $have, 'replaced' => gmdate( 'c' ) );
+							update_post_meta( $id, '_aw_focus_history', $hist ); // the keyword it replaced
+						}
+						update_post_meta( $id, 'rank_math_focus_keyword', wp_slash( '' !== $rest ? $kw . ', ' . $rest : $kw ) );
 						++$written;
 					}
 					return array( 'written' => $written, 'skipped' => $skipped );
