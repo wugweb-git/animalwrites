@@ -712,30 +712,39 @@ function aw_seo_tag_title( $term ) {
 	return aw_seo_tag_plural( $term ) . ' in India';
 }
 
-/** A tag page's description from what it holds (live counts). */
+/** Words for a sentence: lower case, except acronyms (ABC, FAQs), "Gaushala" and brackets such as "(1962)". */
+function aw_seo_sentence_case( $text ) {
+	return implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}s?$|^\(|^Gaushala/u', $w ) ? $w : mb_strtolower( $w ), explode( ' ', trim( $text ) ) ) );
+}
+
+/** A tag page's description from what it holds (live counts): "2,047 Gaushalas in India in the Animal Writes Directory …". */
 function aw_seo_tag_description( $term ) {
 	$n    = (int) $term->count;
-	$num  = 1 === $n ? 'One' : number_format_i18n( $n );
 	$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
-	$what = mb_strtolower( aw_seo_tag_plural( $term ) );
-	$what = preg_replace( array( '/\bgaushalas\b/u', '/\bfaqs\b/u', '/\(1962\)/u' ), array( 'Gaushalas', 'FAQs', '(1962)' ), $what );
+	$svc  = function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true );
+	if ( 1 === $n ) {
+		$what = $svc ? 'animal welfare organisation offering ' . aw_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) : aw_seo_sentence_case( $term->name );
+	} else {
+		$what = aw_seo_sentence_case( aw_seo_tag_plural( $term ) );
+	}
+	$num  = 0 === $n ? '' : ( 1 === $n ? 'One ' : number_format_i18n( $n ) . ' ' );
 	switch ( $sec ) {
 		case 'aw_listing':
-			$text = sprintf( '%1$s %2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
+			$text = sprintf( '%1$s%2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
 			break;
 		case 'aw_legal':
-			$text = sprintf( '%1$s %2$s on animals in India, each summarised in plain words with a link to the official document, in the Animal Writes Library.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animals in India, summarised in plain words with a link to the official document, in the Animal Writes Library.', $num, $what );
 			break;
 		case 'aw_opportunity':
-			$text = sprintf( '%1$s animal welfare %2$s in India with organisations across the country: the role, location and how to apply.', $num, $what );
+			$text = sprintf( '%1$sanimal welfare %2$s in India with organisations across the country: the role, location and how to apply.', $num, $what );
 			break;
 		case 'post':
-			$text = sprintf( '%1$s %2$s on animal welfare in India from Animal Writes, in plain words.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animal welfare in India from Animal Writes, in plain words.', $num, $what );
 			break;
 		default:
-			$text = sprintf( '%1$s %2$s on Animal Writes, animal welfare in India.', $num, $what );
+			$text = sprintf( '%1$s%2$s on Animal Writes, animal welfare in India.', $num, $what );
 	}
-	return aw_seo_cut( $text, 155 );
+	return aw_seo_cut( ucfirst( $text ), 155 );
 }
 
 // A tag page is indexed once it holds 3 or more items.
