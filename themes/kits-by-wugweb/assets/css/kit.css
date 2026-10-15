@@ -243,14 +243,14 @@ body.single-aw_research .kit-lead-media { display: none; }
 
 /* 4.5 Category links (core post-terms) look like kit-chip (kit-primitives.css); cards show at most two, smaller. */
 .wp-block-post-terms__separator { display: none; }
-.wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.wp-block-post-terms { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
 .wp-block-post-template .wp-block-post-terms a:nth-of-type(n+3) { display: none; } /* two chips per card at most */
 .wp-block-post-template .wp-block-post-terms + .wp-block-post-terms { display: none; }
 
 /* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
 /* The band runs edge to edge at every width, flush under the header (no gap above or at the sides). It holds the
    breadcrumb, the heading and the page's search or filters, all on the same left edge as the content below. */
-.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--s-4) var(--kit-space-gutter) var(--kit-space-6); }
+.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--kit-space-4) var(--kit-space-gutter) var(--kit-space-6); }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
 .kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-6); }
@@ -907,7 +907,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 }
 /* Tags are nouns, each kind its own tint; one font, size, weight and height for all; links never underline */
 .kit-tag, .kit-chip, .wp-block-post-terms a {
-	display: inline-flex; align-items: center; gap: var(--s-1); min-height: 1.75rem; padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm);
+	display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 1.75rem; padding: 0 var(--kit-space-2); border: 0; border-radius: var(--radius-sm);
 	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
 }
 /* Doubled class: kit-primitives.css (loaded after this file) sets the base .kit-tag fill, which would otherwise win */
@@ -926,7 +926,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 
 
 /* Meta always with an icon: date, author / posted by, reading time, place */
-.wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--s-1); }
+.wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--kit-space-1); }
 .wp-block-post-date::before, .kit-meta::before {
 	content: "" !important; display: inline-block !important; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
 }
@@ -936,7 +936,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 /* Previous / Next: one pager everywhere — outlined pill buttons with arrows, numbers as 44px squares */
 .wp-block-query-pagination, .kit-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--kit-space-2); }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .wp-block-post-navigation-link a, .kit-pager .prev, .kit-pager .next) {
-	display: inline-flex !important; align-items: center; gap: var(--s-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important;
+	display: inline-flex !important; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important;
 	border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-pill) !important; background: transparent; color: var(--kit-color-ink); font-weight: var(--kit-weight-medium); text-decoration: none !important;
 }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .wp-block-post-navigation-link a, .kit-pager .prev, .kit-pager .next):hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink); }
@@ -957,7 +957,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 [href^="tel:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-phone); }
 [href^="mailto:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-mail); }
 [href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
-.kit-disclosure > summary { gap: var(--s-2); }
+.kit-disclosure > summary { gap: var(--kit-space-2); }
 .kit-disclosure[open] > summary::before { display: none; }
 
 /* Surfaces: white, grey and its shades — page grey, sections white or darker grey, cards white on grey */
@@ -996,7 +996,7 @@ body { background: var(--kit-surface-page); }
    (24px, no circles), each with a 44px tap area; phone nav bar 64px tall. */
 @media (max-width: 1199px) {
 	.kit-site-header .kit-header-right > .wp-block-navigation { order: 9; margin-left: 0; }
-	.kit-site-header .kit-header-right { gap: var(--s-1) !important; }
+	.kit-site-header .kit-header-right { gap: var(--kit-space-1) !important; }
 }
 .kit-site-header .wp-block-navigation__responsive-container-open, .kit-site-header .wp-block-navigation__responsive-container-close { width: 44px; height: 44px; align-items: center; justify-content: center; border: 0 !important; border-radius: 0 !important; background: transparent !important; padding: 0 !important; color: var(--kit-color-on-ink) !important; }
 .kit-site-header .wp-block-navigation__responsive-container-open svg, .kit-site-header .wp-block-navigation__responsive-container-close svg { display: none; }
@@ -1010,18 +1010,18 @@ body { background: var(--kit-surface-page); }
 }
 
 /* Filters menu (more than two filters): one button; inside, each filter type folds open; Apply sends */
-.kit-dd-panel--menu { min-width: 18rem; padding: var(--s-2) var(--s-2) 0; }
+.kit-dd-panel--menu { min-width: 18rem; padding: var(--kit-space-2) var(--kit-space-2) 0; }
 .kit-dd-section { border-bottom: 1px solid var(--kit-color-line); }
-.kit-dd-section > summary { display: flex; align-items: center; gap: var(--s-2); min-height: var(--kit-size-target); padding: 0 var(--s-3); list-style: none; cursor: pointer; font-weight: var(--kit-weight-medium); font-size: var(--fluid-body-sm); }
+.kit-dd-section > summary { display: flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); list-style: none; cursor: pointer; font-weight: var(--kit-weight-medium); font-size: var(--fluid-body-sm); }
 .kit-dd-section > summary::-webkit-details-marker { display: none; }
 .kit-dd-section > summary .kit-ico { margin-left: auto; --kit-ico-size: 1rem; transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
 .kit-dd-section[open] > summary .kit-ico { transform: rotate(180deg); }
-.kit-dd-section fieldset { border: 0; margin: 0; padding: 0 0 var(--s-2); max-height: 16rem; overflow: auto; }
-.kit-dd-menu-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; padding: var(--s-2); background: var(--kit-color-raised); }
+.kit-dd-section fieldset { border: 0; margin: 0; padding: 0 0 var(--kit-space-2); max-height: 16rem; overflow: auto; }
+.kit-dd-menu-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; padding: var(--kit-space-2); background: var(--kit-color-raised); }
 .kit-dd--menu .kit-dd-btn > .kit-ico--sliders { --kit-ico-size: 1rem; }
 /* End of an article: tags bottom left, share bottom right */
 .kit-endbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-line); }
-.kit-endbar-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.kit-endbar-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
 .kit-endbar-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-left: auto; }
 .kit-endbar-share > p:empty, .kit-endbar-share br { display: none; } /* autop leftovers */
 @media (max-width: 767px) { .kit-endbar-share { margin-left: 0; } .kit-endbar-label { flex-basis: 100%; } } /* label on its own line; buttons wrap from the left */
@@ -1116,8 +1116,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 @media (prefers-reduced-motion: reduce) { .kit-card > .kit-ico--arrow-right { transition: none; transform: none !important; } }
 
 /* Step progress header for multi-step forms (kit.js adds it to .kit-steps; 12 Oct 2026). */
-.kit-steps-progress { list-style: none; margin: 0 0 var(--s-6); padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2); counter-reset: none; }
-.kit-steps-progress li { display: flex; align-items: center; gap: var(--s-2); padding-top: var(--s-3); border-top: 3px solid var(--kit-color-line); color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
+.kit-steps-progress { list-style: none; margin: 0 0 var(--kit-space-5); padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--kit-space-2); counter-reset: none; }
+.kit-steps-progress li { display: flex; align-items: center; gap: var(--kit-space-2); padding-top: var(--kit-space-3); border-top: 3px solid var(--kit-color-line); color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
 .kit-steps-progress .kit-steps-num { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--kit-color-line); font-weight: var(--kit-weight-strong); flex: none; }
 .kit-steps-progress li.is-current { border-top-color: var(--kit-color-ink); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); }
 .kit-steps-progress li.is-current .kit-steps-num { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
