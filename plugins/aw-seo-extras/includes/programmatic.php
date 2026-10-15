@@ -475,11 +475,26 @@ function aw_seo_topic_parts( $term, $help = true ) {
 			$t = get_term( $tid, 'aw_listing_type' );
 			$n = ( $t && ! is_wp_error( $t ) ) ? aw_seo_dir_count( null, $t->slug ) : 0;
 			if ( $n ) {
-				$parts[] = array( number_format_i18n( $n ) . ' ' . aw_seo_type_words( $t->slug, $n ) . ' in the Directory', add_query_arg( 'type', $t->slug, aw_hub_url( 'aw_listing' ) ) );
+				$parts[] = array( number_format_i18n( $n ) . ' ' . aw_seo_type_words( $t->slug, $n ), add_query_arg( 'type', $t->slug, aw_hub_url( 'aw_listing' ) ), 'dir' );
 			}
 		}
 	}
 	return $parts;
+}
+
+/**
+ * A topic's parts as text: [what it holds, its Directory types].
+ *
+ * @param array $parts aw_seo_topic_parts().
+ * @param bool  $links As links.
+ * @return array
+ */
+function aw_seo_topic_split( array $parts, $links = false ) {
+	$out = array( array(), array() );
+	foreach ( $parts as $p ) {
+		$out[ empty( $p[2] ) ? 0 : 1 ][] = $links ? aw_seo_link( $p[1], $p[0] ) : $p[0];
+	}
+	return $out;
 }
 
 /** Meta description of a topic page from what it holds; '' when it holds nothing. */
@@ -488,14 +503,23 @@ function aw_seo_topic_description( $term ) {
 	if ( ! $parts ) {
 		return '';
 	}
-	$lead = aw_seo_plain( $term->name ) . ' in India on Animal Writes: ';
-	for ( $max = count( $parts ); $max >= 1; $max-- ) {
-		$line = $lead . aw_seo_join( array_column( array_slice( $parts, 0, $max ), 0 ) ) . '.';
-		if ( mb_strlen( $line ) <= 155 - mb_strlen( aw_seo_page_suffix() ) ) {
-			return $line;
+	list( $items, $dir ) = aw_seo_topic_split( $parts );
+	$lead  = aw_seo_plain( $term->name ) . ' in India on Animal Writes: ';
+	$room  = 155 - mb_strlen( aw_seo_page_suffix() );
+	$cands = array();
+	for ( $d = count( $dir ); $d >= 0; $d-- ) {
+		$tail = $d ? ' In the Directory: ' . aw_seo_join( array_slice( $dir, 0, $d ) ) . '.' : '';
+		$cands[] = ( $items ? $lead . aw_seo_join( $items ) . '.' : rtrim( $lead, ': ' ) . '.' ) . $tail;
+	}
+	for ( $max = count( $items ) - 1; $max >= 1; $max-- ) {
+		$cands[] = $lead . aw_seo_join( array_slice( $items, 0, $max ) ) . '.';
+	}
+	foreach ( $cands as $c ) {
+		if ( mb_strlen( $c ) <= $room ) {
+			return $c;
 		}
 	}
-	return aw_seo_cut( $line, 155 - mb_strlen( aw_seo_page_suffix() ) );
+	return aw_seo_cut( (string) end( $cands ), $room );
 }
 
 // A topic page: the line of facts above its lists, page 1.
@@ -509,7 +533,8 @@ add_filter(
 		if ( ! $parts ) {
 			return $html;
 		}
-		$line = 'On this topic: ' . aw_seo_join( array_map( fn( $p ) => aw_seo_link( $p[1], $p[0] ), $parts ) ) . '.';
+		list( $items, $dir ) = aw_seo_topic_split( $parts, true );
+		$line = trim( ( $items ? 'On this topic: ' . aw_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . aw_seo_join( $dir ) . '.' : '' ) );
 		return '<p class="kit-note">' . $line . '</p>' . $html;
 	},
 	10,
