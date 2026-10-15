@@ -607,7 +607,11 @@ function aw_website_schema() {
 	);
 }
 
-/** JobPosting for an open job, internship, fellowship or volunteer role: remote ones as TELECOMMUTE, others at their place (else India). */
+/**
+ * JobPosting for an open job, internship, fellowship or volunteer role: remote ones as TELECOMMUTE, others at their place
+ * (else India). validThrough only from a stored deadline (aw_deadline; a review date is not a deadline); employmentType
+ * from the opportunity's tags: internship INTERN, volunteer VOLUNTEER, fellowship OTHER, job none (hours are not stored).
+ */
 function aw_job_schema( $id ) {
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
 	$area   = trim( (string) get_post_meta( $id, 'aw_area', true ) . ' ' . (string) get_post_meta( $id, 'aw_place_city', true ) );
@@ -639,6 +643,13 @@ function aw_job_schema( $id ) {
 	if ( has_term( 'volunteer', 'post_tag', $id ) ) {
 		$emp[] = 'VOLUNTEER';
 	}
+	if ( has_term( 'fellowship', 'post_tag', $id ) ) {
+		$emp[] = 'OTHER'; // Google has no fellowship value; a job tag alone says nothing of hours, so it gets none (no FULL_TIME guessed)
+	}
+	if ( '' === $org ) {
+		return array(); // Google requires hiringOrganization: without the organisation's name there is no JobPosting
+	}
+	$logo = $org_id && 'publish' === get_post_status( $org_id ) ? (string) get_the_post_thumbnail_url( $org_id, 'medium' ) : ''; // the organisation's own logo, when its listing has one
 	$data = array(
 		'@type'              => 'JobPosting',
 		'@id'                => get_permalink( $id ) . '#job',
@@ -647,7 +658,7 @@ function aw_job_schema( $id ) {
 		'datePosted'         => get_the_date( 'c', $id ),
 		'url'                => get_permalink( $id ),
 		'employmentType'     => $emp ? ( 1 === count( $emp ) ? $emp[0] : $emp ) : null,
-		'hiringOrganization' => $org ? array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null ) ) : null,
+		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
 		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
 	if ( $remote ) {
