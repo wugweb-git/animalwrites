@@ -895,10 +895,11 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 	display: inline-flex; align-items: center; gap: var(--s-1); min-height: 1.75rem; padding: 0 var(--s-2); border: 0; border-radius: var(--radius-sm);
 	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
 }
-.kit-tag--category { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
-.kit-tag--type { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
-.kit-tag--issuer { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
-.kit-tag--place { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
+/* Doubled class: kit-primitives.css (loaded after this file) sets the base .kit-tag fill, which would otherwise win */
+.kit-tag.kit-tag--category { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
+.kit-tag.kit-tag--type { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
+.kit-tag.kit-tag--issuer { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
+.kit-tag.kit-tag--place { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
 
 .kit-tag .kit-ico, .kit-chip .kit-ico { --kit-ico-size: 1em; }
 
