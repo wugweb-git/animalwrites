@@ -219,7 +219,7 @@ function aw_seo_list_title() {
 				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
-		// A state: its two biggest listing types (owner, 15 Oct 2026). "Animal Welfare {Type1}, {Type2} & More in {State}";
+		// A state: its two biggest listing types, each listing counted once by its most specific type (owner, 15 Oct 2026). "Animal Welfare {Type1}, {Type2} & More in {State}";
 		// "& More" only when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
 		$types = array_map( fn( $b ) => aw_seo_state_type_title( $place, $b[0] ), aw_seo_dir_breakdown( $place ) );
 		$first = $types[0] ?? 'NGOs';
@@ -245,9 +245,9 @@ function aw_seo_list_title() {
 }
 
 /**
- * A listing type as a state page's title names it, plural and short: "NGOs", "Gaushalas", "ABC Centres". The
- * veterinary types are counted together: "Vet Hospitals" when most of them are hospitals, dispensaries or clinics,
- * else "Vets" (government offices, 1962 units).
+ * A listing type as a state page's title names it, plural and short: "NGOs", "Gaushalas", "ABC Centres". Every
+ * veterinary type (hospital, dispensary, clinic, government office, 1962 unit, bird hospital) is counted together and
+ * always named "Vets" (owner, 15 Oct 2026).
  *
  * @param object $place State.
  * @param string $key   Type slug or "veterinary".
@@ -259,13 +259,10 @@ function aw_seo_state_type_title( $place, $key ) {
 		'gaushala'                    => 'Gaushalas',
 		'abc-centre'                  => 'ABC Centres',
 		'wildlife-rescue'             => 'Wildlife Rescuers',
+		'veterinary'                  => 'Vets',
 	);
 	if ( isset( $words[ $key ] ) ) {
 		return $words[ $key ];
-	}
-	if ( 'veterinary' === $key ) {
-		$care = aw_seo_dir_count( $place, 'veterinary-hospital' ) + aw_seo_dir_count( $place, 'veterinary-dispensary' ) + aw_seo_dir_count( $place, 'veterinary-clinic' );
-		return $care * 2 > aw_seo_dir_count( $place, 'veterinary' ) ? 'Vet Hospitals' : 'Vets';
 	}
 	return aw_seo_title_case( aw_seo_type_words( $key, 2, true ) );
 }

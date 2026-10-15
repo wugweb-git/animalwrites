@@ -26,7 +26,9 @@ const AW_SEO_BREAKDOWN = array( 'animal-welfare-organisation', 'gaushala', 'vete
  * Published listings counted per state code, district code and for all of India, by listing type (its slug), by
  * "veterinary" (any veterinary type, as the Directory's Veterinary filter) and in all ("*"). A listing with two types
  * counts under each. "{key}#ph" counts those with a phone or WhatsApp number, "{key}#gov" those from a government list
- * (or a government veterinary office or 1962 unit). Rebuilt when the Directory's stored counts are (places.php), else kept for 12 hours.
+ * (or a government veterinary office or 1962 unit). "={key}" counts each listing once, by its most specific type
+ * (aw_seo_main_type(): a gaushala, vet or ABC centre is not also counted as an NGO), so a breakdown adds up to the whole
+ * (owner, 15 Oct 2026). Rebuilt when the Directory's stored counts are (places.php), else kept for 12 hours.
  *
  * @return array{at:int, s:array, d:array, in:array}
  */
@@ -37,7 +39,7 @@ function aw_seo_dir_data() {
 	}
 	$at   = (int) ( aw_place_counts()['at'] ?? 0 );
 	$data = get_transient( 'aw_seo_dir_data' );
-	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at && isset( $data['in']['*#ph'] ) ) {
+	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at && 2 === ( $data['v'] ?? 0 ) ) {
 		return $data;
 	}
 	global $wpdb;
@@ -50,13 +52,17 @@ function aw_seo_dir_data() {
 		$types[ (int) $t['id'] ][] = $t['slug'];
 	}
 	$vet  = defined( 'AW_VET_TYPES' ) ? AW_VET_TYPES : array();
-	$data = array( 'at' => $at, 's' => array(), 'd' => array(), 'in' => array() );
+	$data = array( 'v' => 2, 'at' => $at, 's' => array(), 'd' => array(), 'in' => array() );
 	foreach ( $rows as $r ) {
 		$keys = $types[ (int) $r['id'] ] ?? array();
+		$main = aw_seo_main_type( $keys );
 		if ( array_intersect( $keys, $vet ) ) {
 			$keys[] = 'veterinary';
 		}
 		$keys[] = '*';
+		if ( '' !== $main ) {
+			$keys[] = '=' . $main;
+		}
 		$gov    = $r['gov'] || array_intersect( $keys, array( 'veterinary-office', 'mobile-veterinary-unit' ) ); // from a government list
 		foreach ( array_unique( $keys ) as $k0 ) {
 			foreach ( array_filter( array( $k0, $r['ph'] ? $k0 . '#ph' : '', $gov ? $k0 . '#gov' : '' ) ) as $k ) {
@@ -72,6 +78,31 @@ function aw_seo_dir_data() {
 	}
 	set_transient( 'aw_seo_dir_data', $data, 12 * HOUR_IN_SECONDS );
 	return $data;
+}
+
+/**
+ * The one type a listing is counted under in a breakdown: its most specific. Any veterinary type ("veterinary"), then
+ * ABC centre, gaushala, wildlife rescue, any other type, and the generic Animal Welfare Organisation ("NGOs") last.
+ *
+ * @param string[] $slugs The listing's type slugs.
+ * @return string Type key, '' without a type.
+ */
+function aw_seo_main_type( array $slugs ) {
+	$vet = defined( 'AW_VET_TYPES' ) ? AW_VET_TYPES : array();
+	if ( array_intersect( $slugs, $vet ) ) {
+		return 'veterinary';
+	}
+	foreach ( array( 'abc-centre', 'gaushala', 'wildlife-rescue' ) as $k ) {
+		if ( in_array( $k, $slugs, true ) ) {
+			return $k;
+		}
+	}
+	$rest = array_values( array_diff( $slugs, array( 'animal-welfare-organisation' ) ) );
+	if ( $rest ) {
+		sort( $rest );
+		return $rest[0];
+	}
+	return in_array( 'animal-welfare-organisation', $slugs, true ) ? 'animal-welfare-organisation' : '';
 }
 
 /**
@@ -110,6 +141,7 @@ function aw_seo_dir_children( $place, $key = '*' ) {
 
 /**
  * What is listed in a place, by type, most first: the types in AW_SEO_BREAKDOWN, then any other type with listings.
+ * Each listing is counted once, under its most specific type (aw_seo_main_type()), so the parts add up to the whole.
  *
  * @param object $place State or district.
  * @return array List of [type key, count].
@@ -117,13 +149,11 @@ function aw_seo_dir_children( $place, $key = '*' ) {
 function aw_seo_dir_breakdown( $place ) {
 	$d    = aw_seo_dir_data();
 	$have = (array) ( $d[ 'state' === $place->kind ? 's' : 'd' ][ $place->code ] ?? array() );
-	$vet  = defined( 'AW_VET_TYPES' ) ? AW_VET_TYPES : array();
 	$out  = array();
 	foreach ( $have as $k => $n ) {
-		if ( '*' === $k || false !== strpos( $k, '#' ) || in_array( $k, $vet, true ) ) {
-			continue; // veterinary types are counted once, as "veterinary"
+		if ( 0 === strpos( (string) $k, '=' ) ) {
+			$out[] = array( substr( $k, 1 ), (int) $n ); // veterinary types are counted once, as "veterinary"
 		}
-		$out[] = array( $k, (int) $n );
 	}
 	$rank = array_flip( AW_SEO_BREAKDOWN );
 	usort( $out, fn( $a, $b ) => $b[1] <=> $a[1] ?: ( $rank[ $a[0] ] ?? 99 ) <=> ( $rank[ $b[0] ] ?? 99 ) );
@@ -142,7 +172,7 @@ function aw_seo_type_words( $key, $n = 2, $short = false ) {
 	$words = array( // singular, plural, short plural
 		'animal-welfare-organisation' => array( 'animal welfare organisation', 'animal welfare organisations', 'NGOs' ),
 		'gaushala'                    => array( 'gaushala', 'gaushalas', 'gaushalas' ),
-		'veterinary'                  => array( 'vet or veterinary hospital', 'vets and veterinary hospitals', 'vets' ),
+		'veterinary'                  => array( 'vet', 'vets', 'vets' ), // every veterinary type, always "vets" (owner, 15 Oct 2026)
 		'veterinary-hospital'         => array( 'veterinary hospital', 'veterinary hospitals', 'vet hospitals' ),
 		'veterinary-dispensary'       => array( 'veterinary dispensary', 'veterinary dispensaries', 'vet dispensaries' ),
 		'veterinary-clinic'           => array( 'veterinary clinic', 'veterinary clinics', 'vet clinics' ),
@@ -263,7 +293,7 @@ function aw_seo_view_info( $n, $phones ) {
 
 /**
  * Search title of a district × type page or a filtered list by type (state or all India); '' for other views.
- * "Gaushalas in Pune, Maharashtra – Animal Writes", "Vets & Veterinary Hospitals in Karnataka – Animal Writes".
+ * "Gaushalas in Pune, Maharashtra – Animal Writes", "Vets in Karnataka – Animal Writes".
  */
 function aw_seo_dir_title() {
 	$v = aw_seo_dir_view();
