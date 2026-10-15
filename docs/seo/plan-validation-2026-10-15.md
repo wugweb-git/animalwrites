@@ -1,0 +1,328 @@
+# SEO plan validation: 15 Oct 2026
+
+**Plan checked:** `~/.claude/plans/the-7-hub-pages-federated-shore.md` (10 phases, Ground rules, Verification).
+
+**Method:** this was a read-only check. Each row below comes from a live check made on 15 Oct 2026, between about 14:30 and 15:30 IST. Commit messages were not taken as proof. The sources were:
+- Rank Math options on the server, read with `wp eval-file`.
+- SQL counts on the live database.
+- Live HTML fetched with curl for 31 URLs, covering every page type.
+- A crawl of internal links: 230 seed pages, 1,128 unique internal links.
+- Event tests in a real browser (the built-in browser pane).
+- Rank Math 1.0.280's own source on the server.
+
+**Changes since the plan:**
+- `aw_topic` is now core `category`.
+- The label taxonomies are now `post_tag`.
+- Resources are the core `post` type, so `aw_guide` has 0 items.
+- Phase 7 was held on purpose, so it is marked Not started.
+
+**Another session was writing to the site during this check.** For example, News focus keywords went from 992 to 1,006 between two of my queries. Counts are as of the moment each one was read.
+
+## Summary
+
+| Status | Rows |
+|---|---|
+| Done | 17 |
+| Partly | 18 |
+| Not done | 4 |
+| Not started | 9 (Phase 7: 3, Phase 8: 2, Phase 9: 1, Phase 10: 3) |
+| Not checked | 2 (outside what this check could reach) |
+| **Total** | **50** |
+
+There is no evidence that Phases 8, 9 and 10 were ever run:
+- no commits for them;
+- no `~/backups/seo-phase7…10` dumps (phases 1 to 6 each have one);
+- no reports in `docs/seo/`;
+- no final report artifact.
+
+## 1. Plan bullets
+
+### Ground rules
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| G1 | Rank Math first; `aw-seo-extras` only for what Rank Math can't do; nothing SEO-related in themes, kits-core or animal-writes-core | Partly | The SEO output on the 31 sampled URLs comes from Rank Math plus aw-seo-extras. A grep of the core plugins found one leftover: `plugins/animal-writes-core/includes/directory.php:310` still adds a `document_title_parts` title filter for Directory views. kits-core still has `kits_sitemap_skip` (preview.php:186), which does nothing now. | Remove the Directory title filter from core, or move it to aw-seo-extras. Drop the unused `kits_sitemap_skip`. |
+| G2 | No invented facts | Partly | Generated text is built from counts, but one line is wrong. On `/directory/rajasthan/nagaur/gaushala/`, the facts line reads: "130 Gaushalas listed in Nagaur. Rajasthan has 873 Gaushalas in 31 districts; the most in Jodhpur (118)…". Nagaur itself has the most, so the sentence is false. Separately, the hub copy in llms.txt says "995 stories" while the live hub says 1,006. | Leave the current place out of the ranking, or name it first. Refresh the llms.txt hub copies. |
+| G3 | Design tokens; `aw_date()`; 16:9 card frame | Not checked | Outside an SEO check. | — |
+| G4 | mysqldump to `~/backups/` before bulk changes | Done | `~/backups/seo-phase1…phase6-*.sql.gz` dated 14–15 Oct, plus JSON copies of the options from before Phase 4 and before the web-story change. | No dumps for phases 7 to 10, because those phases never ran. |
+| G5 | No deleting; trash only | Not checked | The removed News items I found are in `trash` (IDs 13292 and 10789), not deleted. A full audit isn't possible from the database. | — |
+| G6 | Deploy with `aw-ship.sh`, explicit git paths, Wugweb trailer | Done | All 7 SEO commits I checked carry `Co-Authored-By: Wugweb`. The deploy route can't be checked after the fact. | — |
+| G7 | 28-page head snapshot after every phase | Partly | The only snapshot files I found are before/after pairs in a scratchpad `rmschema/` folder, which look like Phase 6. There are no snapshots in the repo or on the server for the other phases. | Keep each phase's snapshot diff, for example in `docs/seo/`. |
+
+### Phase 1: audit, noindex bug, events
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 1.1 | Full repo and live audit | Partly | Fixes landed (rows 1.2 to 1.5). No audit report exists in `docs/seo/`, `docs/` or the artifacts. | The audit write-up. |
+| 1.2 | Fix the global `noarchive` | Done | `robots_global = ["index"]`. Every indexable sample outputs `follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large`, with no `noarchive`. | — |
+| 1.3 | Re-check noindex rules: search, thin district×type pages, closed opportunities, claim/report/thank-you, 4 manual items | Partly | These are noindex as intended: search, report, thank-you, remove-my-data, the sample listing, closed opportunity 7616, an empty `/web-stories/`, and 34 thin tags. The thin district×type threshold is 1, so none are noindexed, which is the owner's 10 Oct decision. **`/claim/` is indexable**: it outputs `follow, index`, `rank_math_robots=["index"]`, yet it is excluded from the sitemap (`exclude_posts=12587`). | Set `/claim/` to noindex. |
+| 1.4 | Watchdog for sitemap_index.xml and llms.txt | Done | `aw_seo_endpoints_watchdog` is scheduled hourly (next run 15:33). Last run 14:35: no problems, no flush needed. The code in `aw-seo-extras/includes/health.php` flushes rewrite rules once, then emails and shows a dashboard notice. | — |
+| 1.5 | Event audit, mapping to the Phase-10 list, GTM import file | Done | All 12 mapped events are in `kit.js`. `docs/gtm/animalwrites-container.json` has 19 tags, 18 triggers and 33 variables. The **live** GTM-TB3FCFQB container includes every event name (form_submit_success, filter_apply, card_click, 404_view, scroll_depth and the rest) and GA4 G-4P5YMJ04RL. A `page_context` push with page type, section, category, state and district fires on every page. | Browser test coverage: see V3. |
+
+### Phase 2: broken links and on-page
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 2.1 | Crawl the whole site, including the Directory | Partly | No crawl output was kept. My sample crawl (230 seeds: News, Library, Resources, 40 listings, 50 Directory place pages, all categories and tags, opportunities, hubs) checked 1,128 internal links: 1,127 return 200 and **1 returns 404**. | A full crawl record. |
+| 2.2 | Repair broken internal links | Partly | The one broken link goes to `/directory/org/wugweb-sample-listing/`, which returns 404. It is linked from **/directory/** and **/tag/abc-centre/**. The post (ID 9003) is published and noindexed, but its page returns 404. | Remove it from the lists. Ask the owner before trashing or unpublishing it. |
+| 2.3 | Rank Math redirects for dead URLs in the 404 monitor | Partly | 265 active redirects, 148 of them created since 14 Oct, and no chains among them. These are still 404 today:<br>- `news/pramod-muthalik-…` (7 hits, last at 09:20)<br>- `news/vegan-foods-…-2027` (hit at 12:12); both are trashed duplicates<br>- `topic/stray-animals`, which **redirects to `/category/stray-animals/`, itself a 404**<br>- `directory/org/wugweb-sample-listing` (12 hits)<br>- `wp-content/plugins/home/u544169507/…/kits-core/assets/js/ad-slot.js` (15 hits, last at 14:45): a broken editor script URL in `kits-core/includes/ads.php:176` (`plugins_url` with a symlinked path) | Redirect the trashed duplicates to the copy that was kept. Point `topic/stray-animals` at a category that exists. Fix the `ad-slot.js` URL. |
+| 2.4 | Mark dead outbound links: listings `aw_link_dead`, News source URLs | Partly | 15 listings have `aw_link_dead`. **News has no dead-source marking.** There is no meta key for it; the only `aw_source_*` checks are on images. | Check and mark News source URLs. |
+| 2.5 | On-page fixes per type: H1, heading order, alt, title and description length | Partly | Exactly 1 H1 on all 28 pages checked, with no skipped heading levels. Title length (rendered Rank Math title) and description length are in the table below. **Alt text:** 361 of 941 images in the media library have none, and 23 of 502 featured images on published items have none. Card pictures on category pages use `alt=""` (decorative, title link next to them), which is acceptable. | Alt text for the 23 featured images and the media library. Decide on the 249 long listing titles. |
+
+**Title and description lengths per type:**
+
+| Type | Titles over 60 | Titles under 25 | Descriptions over 160 | Descriptions under 70 | Duplicate titles |
+|---|---|---|---|---|---|
+| News | 0 | 0 | 0 | 1 | 0 |
+| Library | 0 | 0 | 0 | 6 | 1 |
+| Resources | 0 | 0 | 0 | 0 | 0 |
+| Listings | **249** (names are never cut, by design) | 5 | 0 | 58 | **55** |
+| Opportunities | **6** | 0 | 0 | 1 | 0 |
+| Pages | 0 | 2 | 0 | 1 | 0 |
+
+### Phase 3: AEO/GEO, keywords, focus keyword job
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 3.1 | Focus keyword filled per type | Partly | Published items with a focus keyword: News 1,006/1,006, Library 84/84, Resources 159/159, Listings 5,139/5,139, Opportunities 18/18, Campaign 1/1, Pages 22/22, Categories 18/18. **Tags: 0/50** have one (they have a Rank Math title and description, 50/50). | Tag focus keywords. |
+| 3.2 | Secondary keywords where useful | Done | The 7 hubs, Home, About and Media carry 2 to 5 comma-separated keywords. | — |
+| 3.3 | Search intent and schema/article type per type | Done | Rank Math defaults by type: News `article`/`NewsArticle`, Library `Article`, Resources `article`, Opportunities `jobposting`, Campaigns `event`, Listings `off` (aw-seo-extras outputs NGO, VeterinaryCare and so on). The live JSON-LD matches these. | — |
+| 3.4 | Rank Math FAQ block on guides where the answers exist | Done | 16 of 16 non-research Resources guides contain `rank-math/faq-block`. The guides checked output `WebPage+FAQPage` with Question and Answer. No Page has an FAQ block; the plan said "key pages", so that is optional. | — |
+| 3.5 | Finish the 43 missing focus keywords; tighten `focus_keywords.py` | Done | 0 missing. Workers commits `ddaa79b` and `cb23c77` added: 2 to 4 words, no connector at the end, not only generic words, at least one word from the title or text. **Weak point:** sharing a single word is enough to pass, so the keyword is inside the SEO title for only 263 of 1,006 News items (26%), 27/84 Library and 37/159 Resources. That costs 36 of Rank Math's 100 points (see section 2). | Require the whole phrase to appear in the SEO title. |
+| 3.6 | Improve Rank Math title and description templates per type and taxonomy | Partly | Taxonomy templates were improved, for example category `%term% in India %sep% %sitename%` and the opportunity-type template. **The post-type templates are still Rank Math's defaults** (`%title% %sep% %sitename%` / `%excerpt%`) for every type. Every item stores its own values, so this is hidden, but a new item before the daily fill gets the default. There are also leftover options for the removed types (`pt_aw_guide_*`, `tax_aw_listing_type_sitemap=1`). | Templates per post type, and remove the stale options. |
+| 3.7 | Store the 7 hub titles and descriptions in Rank Math | Done | News, Library, Resources, Directory, Opportunities, Campaigns and Media each have `rank_math_title`, `rank_math_description` and `_aw_seo_auto`. The live titles match the stored ones. | — |
+
+### Phase 4: programmatic SEO, local, organisation
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 4.1 | Directory state, district and type pages and category pages: intro, title and description from live data; thin-page rules stay | Partly | Titles, descriptions and a facts line come from live counts, for example "Rajasthan has 1,035 listings in 32 districts…" and "In this category: 202 news stories…". The intro sentence above the facts line is the same template on every district. The Nagaur ranking error is in G2. | Fix the facts-line ranking. |
+| 4.2 | Rank Math Local SEO and Knowledge Graph | Done | Type `company`, name "Animal Writes", logo (ID 162), email, 3 `sameAs` links (Facebook, Instagram, x.com), About page 58, Contact page 61. No phone and no address; no address policy is written down. | Record the address policy. |
+| 4.3 | One publisher Organization; Rank Math carries the same values | Done | The same `#organization` node on Home and News: alternateName, publishingPrinciples, correctionsPolicy, knowsAbout (18 categories), the same `sameAs`. | — |
+
+### Phase 5: AI visibility
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 5.1 | llms.txt contents; robots for AI crawlers | Partly | llms.txt returns 200 with 282 lines in these sections: Pages, Resources, News (51), Library (51), Campaigns, Opportunities, Categories, Tags, Directory by state. The hub counts are stale (995 against 1,006). **robots.txt has no AI-crawler section**: all crawlers are allowed by default, and no decision is recorded. | Refresh the counts. Write down the AI-crawler decision. |
+| 5.2 | Citation-ready summaries on hubs and key pages | Partly | Hub and page summaries are in the JSON-LD graph and llms.txt (commit 3222a6b). Hubs have their intro text. I did not see a separate citation-ready block. | Confirm with the owner whether more is wanted. |
+| 5.3 | Entity consistency | Done | The same name, alternate names and `sameAs` on every page sampled; `twitter_author_names` is AnimalWrites; one Organization node. | — |
+
+### Phase 6: schema
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 6.1 | Validate every type with Rich Results / schema.org | Partly | All 31 URLs have one JSON-LD block that parses. My check of required and recommended fields found these gaps:<br>- **JobPosting has no `validThrough`** (both opportunities sampled), and one has no `employmentType`.<br>- The hiring Organization has no `logo`.<br>- The research `isBasedOn` ScholarlyArticle has no `name`/`headline`.<br>There is no record that the Google Rich Results test was run, and I could not run it from here. | Run the Rich Results test on one URL per type. Fill `validThrough` and `employmentType` **only where the data exists**. |
+| 6.2 | Fix and fill schema per type | Done | Live types found:<br>- News: NewsArticle with the source as a CreativeWork.<br>- Rules: Legislation with a MediaObject.<br>- Library documents: Article with DigitalDocument.<br>- Research: Article with `isBasedOn` ScholarlyArticle.<br>- Guides: Article with FAQPage.<br>- Listings: NGO, or VeterinaryCare+GovernmentOffice.<br>- Opportunities: JobPosting, with none on closed ones.<br>- Campaign: Event.<br>- Hubs, places and categories: CollectionPage with ItemList.<br>- BreadcrumbList everywhere except Home. | No AnimalShelter seen in the sample. HowTo appears only on numbered guides, by design. |
+| 6.3 | Rank Math schema per post type; robots, canonical and OG defaults | Done | Default rich-snippet type per type (Rank Math free has no schema templates). Primary taxonomy `category` for News, Library, Resources, Campaigns, Opportunities and Listings. Breadcrumbs on. Default OG image ID 174. Canonical present on every indexable page; filtered and noindex pages have none. | — |
+| 6.4 | Sitemap module | Done | The index lists 17 sitemaps:<br>- Resources 159, Pages 17, News 1,006, Library 84, Campaign 1.<br>- Opportunities 16 (the 2 closed ones left out), Listings 5,138 (the noindexed sample left out).<br>- Categories 18, Tags 16 (the 34 noindexed thin tags left out, which is consistent).<br>- Directory places 1,561.<br>Images are included. `/sitemap.xml` and `/wp-sitemap.xml` 301 to the index. | `/claim/` mismatch: see 1.3. |
+
+### Phase 7: internal linking (held until the taxonomy migration; now unblocked)
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 7.1 | Related items: News, Library, Resources and Directory by category and place | Not started | Held on purpose. Rank Math's link counter shows almost no links inside content: 65 rows in `rank_math_internal_links`, because News and Library `post_content` is empty. | All of it. |
+| 7.2 | Breadcrumbs everywhere; orphan check | Not started | Breadcrumbs do show on every sampled page except Home (done in Phase 6). No orphan check has been made. | Orphan check. |
+| 7.3 | Canonicals and breadcrumbs on filtered lists | Not started | — | All of it. |
+
+### Phase 8: content and strategy
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 8.1 | Fill missing SEO copy: meta, intros, alt text, FAQ answers | Not started | No Phase 8 commits or backups. The open gaps are listed in 2.5 and 3.1. | All of it. |
+| 8.2 | Content-strategy map, delivered as a report | Not started | None in `docs/seo/` or the artifacts. `keyword-map.md` and `keyword-demand-2026-10-15.md` exist but are not a gap map per category. | The report. |
+
+### Phase 9: site health
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 9.1 | Core Web Vitals, CLS, caching, mobile, HTTPS/www, robots.txt, 404 monitor, redirect chains | Not started | No Phase 9 work. What is true today:<br>- **`?author=1` still takes 2 hops** (to `/author/admin/`, then `/about/`); the plan named this one explicitly.<br>- `http://www.` takes 2 hops.<br>- `/news` without the trailing slash answers 200 (canonical points to `/news/`).<br>- LiteSpeed cache hits, HSTS is on, robots.txt returns 200.<br>- No horizontal scroll at 375px, and CLS was 0 in the browser pane on 4 pages.<br>- **The PageSpeed API refused every request (daily quota exceeded), and Lighthouse is not installed, so there are no CWV or Lighthouse scores.**<br>- 404 monitor gaps: see 2.3. | All of it. |
+
+### Phase 10: final champion pass
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| 10.1 | Check everything: sitemap entries Rank Math lacks, IndexNow, the save handler, and that removed pieces stay removed | Not started | Spot check done here:<br>- IndexNow module is on and has a key.<br>- No FAQPage, takeaways or summary output in our code.<br>- Only `kits_sitemap_skip` is left from the kits_* SEO filters.<br>- The breadcrumb filter now lives in aw-seo-extras, as intended.<br>- **The core Directory title filter is still there** (G1).<br>- The core term-screen fields are not SEO ("Find help" types and photos). | The full pass. |
+| 10.2 | Fix leftovers | Not started | — | — |
+| 10.3 | Final report with before and after | Not started | No SEO report artifact exists. The latest artifact is from 8 Oct. | The report. |
+
+### Verification section
+
+| # | Bullet | Status | Evidence | What's missing |
+|---|---|---|---|---|
+| V1 | Per phase: snapshot diff; sitemap, llms.txt and robots.txt return 200; Rich Results test per type | Partly | The 3 endpoints return 200 now. Snapshots exist for Phase 6 only. No Rich Results record. | — |
+| V2a | Broken-link crawl shows 0 internal 404s | Not done | The sample crawl found 1 internal 404 (2.2). | — |
+| V2b | Lighthouse SEO and performance on Home, News, a listing and a guide at 375 and 1200 | Not done | No earlier record. The PageSpeed API quota was exhausted today. | Run it with an API key or local Lighthouse. |
+| V3 | Every mapped event seen firing in a real browser | Partly | Seen today in the browser pane:<br>- `page_context` (with page type, section, state and district)<br>- `search`, `outbound_click`, `email_click`, `card_click`, `menu_click`<br>- `404_view`, and `scroll_depth` at 25, 50, 75 and 90<br>**Not seen:**<br>- `form_submit_success`, `form_error`, `filter_apply`, `sort_change`<br>- `call_click`, `whatsapp_click`, `pdf_download`, `share_click`, `claim_step`<br>These need a form submit or specific pages, which this read-only check avoided. | Test those events. |
+| V4a | Field counts per type | Done | See 3.1. Other counts:<br>- Rank Math title and description: 100% on every published post type.<br>- OG image meta: 1 Page only, so every other page falls back to the default image or the featured image.<br>- Featured images: News 233/1,006, Library 76/84, Resources 159/159, Listings 14/5,139.<br>- Categories: title, description and keyword 18/18. Tags: title and description 50/50, keyword 0/50. | — |
+| V4b | Rank Math scores on 10 items, before and after | Not done | **`rank_math_seo_score` is empty for every published item of every type** (0 rows). There is no before/after. | See section 2. |
+| V5 | Final report artifact for the owner | Not done | None exists. | — |
+
+## 2. Rank Math SEO score
+
+### How Rank Math (free, 1.0.280) works out the score
+
+- **It is calculated only in the browser.** The analyzer is `assets/admin/js/analyzer.js`. It builds a "Paper" from the SEO title, the SEO description, the focus keyword, the URL and the content, then runs the tests below.
+- **The score** is the points earned divided by the points possible across the tests that apply, × 100. Above 80 is "great" (green), 51 to 80 is "good", and 50 or below is "bad" (red).
+- **Where it is stored.** The editor saves the score into `rank_math_seo_score` when the post is saved. Nothing on the server calculates it:
+  - `rest/class-admin.php::update_seo_score` only stores numbers the browser sends.
+  - The `rank-math/get-seo-scores` ability only reads the stored value.
+  - The `rank-math/analyze-post-content` ability returns raw headings, images and links, not a score.
+- **Bulk option:** Rank Math → Status & Tools → Database Tools → **Update SEO Scores**. It needs a **logged-in admin browser**:
+  - The PHP side sends batches of `{title, description, keyword, content: wpautop(post_content), url, thumbnail alt}`.
+  - The browser runs the same analyzer on each batch.
+  - It POSTs the numbers to `/rankmath/v1/updateSeoScore`, using the REST nonce.
+  - It only covers items that have a focus keyword, which is all of ours.
+- **There is no server-only or wp-cli route.** Running `analyzer.js` headless under Node would mean rebuilding Rank Math. Not recommended.
+
+**Tests and their maximum points.** "Applies" says which of our types each test fits:
+
+| Test | Max | Applies |
+|---|---|---|
+| Keyword in SEO title | **36** | all |
+| Keyword density about 1% | 6 | all with text |
+| Content has images or video | 6 | all with text |
+| Keyword in URL | 5 | all |
+| Has an internal link | 5 | all with text |
+| Content length (0 under 600 words; 2 at 600+; up to 8 at 2,500+) | 8 | all with text |
+| URL at most 75 characters | 4 | all |
+| Has an external link | 4 | all with text |
+| Keyword in first 10% of the content | 3 | all with text |
+| Keyword in content | 3 | all with text |
+| Keyword in a subheading | 3 | all with text |
+| Title starts with the keyword (first half) | 3 | all |
+| No paragraph over 120 words | 3 | all with text |
+| Keyword in SEO description | 2 | all |
+| Keyword in image alt | 2 | all |
+| Not all links external | 2 | all with text |
+| Table of contents | 2 | all with text |
+| Number in title, sentiment, power words | 1 each | all |
+
+The static Home page skips a few tests.
+
+### What the owner sees today in Pages → SEO column
+
+- **For the 18 indexable pages:** a grey **"N/A"**, then "Keyword: …" showing the first focus keyword. `class-post-columns.php` prints N/A whenever `rank_math_seo_score` is missing, and it is missing on all 22 pages.
+- **For search, remove-my-data, report and thank-you:** "N/A" and **"No Index"**.
+- **Inside the editor:** the Rank Math sidebar calculates a live score from the block markup in `post_content`. For hubs and form pages that markup is shortcodes and pattern references, so the analyzer sees 0 to 22 words, no links and no images. My estimates:
+  - Directory about 47 (red).
+  - Categories about 7 (red), because its keyword "animal welfare topics" is not in its title "Animal Welfare Categories in India".
+  - About about 52.
+- Saving any page in the editor stores that red number, and the list column then turns red.
+
+### Why our types score badly: where the text actually lives
+
+| Type | Where its text is | What Rank Math sees |
+|---|---|---|
+| News | Summary in `post_excerpt` (average 198 characters); `post_content` is **empty on all 1,006** | 0 words |
+| Library | 78 of 84 have under 200 characters of content; the summary is in the excerpt | 0 words |
+| Resources (research) | 143 summaries, mostly in the excerpt | 0 words |
+| Resources (guides) | The guide text is in the content | 250 to 300 words |
+| Listings | Average 179 characters; the details shown on the page come from meta (`aw_area`, `aw_awbi_*`) and the template | 3 to 25 words |
+| Opportunities | 18 to 70 words | 18 to 70 words |
+| Pages (hubs and forms) | Lists rendered by blocks and shortcodes | 9 to 22 words of real text |
+
+### Failing tests: 3 real items per type, Rank Math's rules applied to stored data
+
+| Type | Items | Estimated score | Tests failed |
+|---|---|---|---|
+| News | 13748, 13752, 13707 | 3–9 | Every content test. Keyword in title failed on all 3 when checked; the keywords were filled during the check, and 74% of News keywords are not in the title. URL over 75 on 2 of 3. |
+| Library | 8881, 142, 9636 | 8–58 | Every content test (0 words). Keyword in title failed on 8881: its cut title "…Control and Supervision" drops "laboratory animals rules". URL over 75 on 3 of 3. |
+| Resources guide | 127, 9031 (12545 is research) | 61–70 | Length under 600; keyword not in a subheading; keyword not in the description (127); no internal or external link (9031); no image. |
+| Listing | 3152, 8449, 1583 | 50–54 | Every content test; length; no image. URL over 75 on 2 of 3. Title, URL and description tests pass. |
+| Opportunity | 7621, 169, 7626 | 9–57 | 169: keyword "volunteer orientation hyderabad" is not in the title ("…at Blue Cross of Hyderabad"). Density too high (11–14%) on 30-word bodies. Length, links, image. |
+| Page | 8945, 8759, 58 | 7–52 | Content tests, keyword in description (all 3), keyword in URL. 8759: keyword not in title. |
+| Category | community-dogs, wildlife, courts-judgments | about 7 | The keyword is not in the title on all 3 (for example "stray dogs in india" against "Community Dogs in India"). The term description is about 30 words. |
+
+The estimates come from a re-implementation of the weights above. Sentiment, power word, number and table of contents are counted as failed. Treat the numbers as rough; the list of failed tests is exact.
+
+How widely the keyword placement tests fail, across all published items:
+
+| Type | Keyword in title | Keyword in description | Keyword in slug | URL over 75 characters |
+|---|---|---|---|---|
+| News | 263/1,006 | 131 | 472 | **960** |
+| Library | 27/84 | 22 | 51 | 74 |
+| Resources | 37/159 | 31 | 102 | 145 |
+| Listings | 5,137/5,139 | 4,564 | 5,139 | 1,183 |
+| Opportunities | 13/18 | 12 | 13 | 8 |
+| Pages | 14/22 | 4 | 4 | 0 |
+
+### Feeding rendered content (`rank_math_content`): is it the right fix?
+
+**Yes, for News, Library, research, listings, opportunities and the hub and form Pages.** Their visible text is real, but it lives in the excerpt, in meta or in templates. Rank Math supports exactly this:
+- the JS filter `wp.hooks.addFilter('rank_math_content', …)` in the editor, used the same way by its ACF and custom-fields integrations;
+- the PHP filter `rank_math/recalculate_score/data` for the bulk tool, the same way its WooCommerce module uses it.
+
+Without this, every content test scores the empty `post_content` and every score is meaningless.
+
+How to build it, in aw-seo-extras (allowed, because Rank Math can't see rendered content):
+
+1. **One function returns the item's main body as HTML, and only that.** For News, the summary, source link and categories; for listings, the details block; for hubs, page 1 of the list. It must not include the header, navigation or footer, otherwise every page gets the same links and words and the scores become dishonest. Hubs can reuse the page-1 copy that `aw-seo-extras` already fetches.
+2. **Editor:** a small script on the edit screens appends that HTML through `rank_math_content`, then calls `rankMathEditor.refresh('content')`.
+3. **Bulk:** `add_filter('rank_math/recalculate_score/data', fn($v,$id) => […$v, 'content' => aw_seo_rendered_body($id)], 10, 2)`.
+4. Run **Update SEO Scores** in a logged-in browser. This needs the owner's login; it can't be done over SSH.
+
+The Rank Math setting "Custom fields to analyze" (`pt_*_analyze_fields`) covers meta-stored text in the editor only. It does not cover the excerpt, and the bulk tool ignores it, so the filter is still needed.
+
+### Fixes we can make without inventing content (a)
+
+1. **Keyword in the SEO title: 36 of 100 points.** Change `focus_keywords.py` so the phrase must appear word-for-word in the SEO title, and preferably early, which also wins the 3-point "title starts with keyword" test. Re-run it for News, Library and Resources, with a backup first.
+2. **Keyword in the description: 2 points.** Where the description, which is drawn from the item's text, can naturally contain the phrase, prefer that phrase.
+3. **Feed the rendered body** (above). The summary text, the source link (external), the category and related links (internal, Phase 7) and the picture (image test) then count. These are things the page already has.
+4. **Alt text:** 23 featured images without alt (take the alt from their own title), and 361 media-library images. News pictures are publisher links and can't carry our alt.
+5. **Slugs:** keep published URLs. New ingests get shorter slugs (75 characters or less, keyword included).
+6. **Categories and the Categories page:** their keywords don't match their own titles. **Proposed Categories page keyword: "animal welfare categories"**:
+   - Google autocomplete (India) suggests it as a query, returning "animal welfare categories" and "animal welfare topics".
+   - It is word-for-word in the live title "Animal Welfare Categories in India" and in the description "Explore animal welfare categories across India…", so the title, title-start and description tests pass.
+   - "animal welfare issues" also autocompletes, but mostly with other countries ("…in australia", "…in canada"), and "animal welfare issues in india" does not.
+   - Suggested secondary keyword: "types of animal welfare" (autocompletes).
+   - Row 61 of `docs/seo/keyword-map.md` also says "animal welfare topics" and needs the same change.
+   - For category terms, the owner chooses between the search term ("stray dogs in india") and the site's own word ("community dogs"). One of the title and the keyword has to give way.
+
+### Tests that don't fit the content type (b)
+
+| Test | Doesn't fit | What to do |
+|---|---|---|
+| 600+ words; density about 1%; keyword in subheading; table of contents | News and Library summaries (about 50 words), listings, opportunities, form pages, hubs | Don't pad the content. Remove these tests for those post types with the PHP filter `rank_math/researches/tests` (it gets `$tests`, `$type`; check `get_post_type()`). This changes the editor score. **Unverified:** whether the bulk tool's test list (`rankMath.assessor.researchesTests` on the Status page) also passes through this filter. Test on 1 item. |
+| Number, sentiment and power words in the title (3 points) | News titles are the publisher's headline; listing titles are names | Accept, or remove with the same filter. |
+| URL at most 75 characters | 960 existing News URLs, 1,183 listings | Leave published URLs alone (renaming them means redirects and lost links). Fix it at ingest for new items only. |
+| No paragraph over 120 words | Fine as it is | — |
+| Keyword in URL | Hubs (`/directory/`, `/news/`) | Accept; hub URLs are fixed. |
+
+Even after (a) and (b), a 50-word News summary will rarely reach "great". Use the score as a checklist, not a target.
+
+## 3. Prioritised fix list
+
+### P0: wrong or broken now (small changes)
+
+1. Set `/claim/` (12587) to noindex. It is out of the sitemap but indexable.
+2. Remove `wugweb-sample-listing` (9003) from the lists on `/directory/` and `/tag/abc-centre/`. It is linked but returns 404. Ask the owner before unpublishing it.
+3. Redirects:
+   - Point the 2 trashed duplicates (13292, 10789) at the copies that were kept.
+   - Point `topic/stray-animals` at a category that exists. Right now it redirects into a 404.
+4. Fix the `ad-slot.js` editor script URL in `kits-core/includes/ads.php:176`. It 404s on every editor load.
+5. Fix the facts line on Directory type pages. "The most in Jodhpur (118)" is printed on the Nagaur page, which has 130.
+6. Redirects that take 2 hops:
+   - `?author=N` should go to `/about/` in one hop.
+   - `http://www.` should go straight to `https://animalwrites.in/`. This is a host or CDN setting.
+
+### P1: Rank Math scores, and gaps in Phases 1 to 6
+
+7. Build the rendered-body feed (`rank_math_content` plus `rank_math/recalculate_score/data`). Remove the tests that don't fit each type. Then run **Update SEO Scores** in a logged-in browser. Record 10 items before and after; this is V4b.
+8. `focus_keywords.py`: the phrase must be inside the SEO title. Re-run for News, Library and Resources, with a backup first.
+9. Change the Categories page keyword to "animal welfare categories" (plus "types of animal welfare"). The owner decides the keyword versus title wording for category terms.
+10. JobPosting: add `validThrough` and `employmentType` where the opportunity has a stored deadline or type. Never guess them. Run the Rich Results test on one URL per type.
+11. Check and mark dead News source URLs.
+12. Alt text for the 23 featured images, then the media library.
+13. Focus keywords for tags (0/50).
+14. Rank Math templates per post type instead of the defaults. Remove the stale `pt_aw_guide_*` and `tax_aw_listing_type_sitemap` options.
+15. Refresh the llms.txt hub counts. Record the AI-crawler decision for robots.txt.
+16. Ground rule G1: move or remove the `document_title_parts` Directory filter in animal-writes-core, and the unused `kits_sitemap_skip`.
+
+### P2: phases not yet run
+
+17. Phase 7 internal linking (now unblocked): related items, orphan check, canonicals on filtered lists.
+18. Phase 8: missing copy, plus the content-strategy gap report.
+19. Phase 9: Lighthouse and CWV at 375 and 1200 (with a PageSpeed API key or local Lighthouse), caching, the 404 monitor, redirect chains.
+20. Test the events not yet seen firing: form_submit_success, form_error, filter_apply, sort_change, call_click, whatsapp_click, pdf_download, share_click, claim_step.
+21. Phase 10: final pass, then the report artifact for the owner, with before and after.
