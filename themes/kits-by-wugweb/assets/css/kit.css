@@ -487,6 +487,9 @@ html { overflow-x: clip; }
    Ads are never clipped (no max-height). The box gives its space back only when the network says no ad will come. */
 .kit-ad-unit { min-height: 100px; display: flex; align-items: center; justify-content: center; }
 .kit-ad-unit > ins { flex: 1 1 100%; min-width: 0; } /* a flex item would shrink to 0 wide, and AdSense then has no width to size the ad for */
+/* While the network decides, a slot is 0 tall (it keeps its width, which is all the network measures): no empty box
+   that later collapses and moves the page. It takes its height when filled. */
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-height: 0 !important; overflow: hidden; }
 @media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
 /* Every ad slot shows as one light tone, filled or not, so its place is visible (owner, 12 Oct 2026). */
 .kit-ad-unit { background: color-mix(in srgb, var(--kit-color-ink) 9%, var(--kit-color-bg)); border-radius: var(--kit-radius-card, 12px); }
@@ -505,6 +508,7 @@ html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle
    it moves to the end of the list at full width and no height, where the network can still measure it. Once filled
    it takes its own cell again. */
 html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { order: 99; grid-column: 1 / -1 !important; grid-row: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; min-height: 0; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-adsbygoogle-status="done"]:not([data-ad-status]) { max-height: 0 !important; overflow: hidden !important; } /* the request has gone with its size; until AdSense answers (filled or unfilled) the unit takes no height, so no blank box */
 .kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Details (FAQ) */
