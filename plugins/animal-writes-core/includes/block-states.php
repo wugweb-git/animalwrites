@@ -50,7 +50,7 @@ add_filter(
 			),
 			'Opportunity buttons (animal-writes/opp-actions)' => array(
 				array( 'With an apply link', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_apply_url', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_opp_actions( array(), $id ) ),
-				array( 'Details only', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_apply_url', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_apply_url', 'value' => '' ) ) ) ), fn( $id ) => aw_block_opp_actions( array(), $id ) ),
+				array( 'No apply link', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_apply_url', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_apply_url', 'value' => '' ) ) ) ), fn( $id ) => aw_block_opp_actions( array(), $id ) ),
 			),
 			'Posted by (animal-writes/posted-by)' => array(
 				array( 'Linked to a Directory profile', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_organisation', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_posted_by( array(), $id ) ),

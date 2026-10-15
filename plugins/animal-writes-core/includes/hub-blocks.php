@@ -306,8 +306,8 @@ function aw_block_deadline( $a, $id ) {
 }
 
 function aw_block_opp_actions( $a, $id ) {
-	$apply = (string) get_post_meta( $id, 'aw_apply_url', true );
-	return '<div class="aw-opp-actions">' . ( $apply ? '<a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener" aria-label="' . esc_attr( 'Apply or sign up: ' . get_the_title( $id ) ) . '">Apply or sign up</a>' : '' ) . '<a class="kit-btn kit-btn--sm kit-btn--secondary" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'Details: ' . get_the_title( $id ) ) . '">Details</a></div>';
+	$apply = (string) get_post_meta( $id, 'aw_apply_url', true ); // the card itself links to the item page (title ::after)
+	return $apply ? '<div class="aw-opp-actions"><a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener" aria-label="' . esc_attr( 'Apply or sign up: ' . get_the_title( $id ) ) . '">Apply or sign up</a></div>' : '';
 }
 
 /** Single opportunity: "Posted by {organisation}", linked to its Directory profile when there is one. */
