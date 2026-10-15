@@ -78,6 +78,7 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
 	if ( '' !== $publisher ) {
 		$t = preg_replace( '/\s*(?:\||:|;|\s[–—-]|[–—])\s*' . preg_quote( $publisher, '/' ) . '\.?$/iu', '', $t );
 	}
+	$t = preg_replace( '/\s*\|\s*[\p{L}\p{N}&\']+(?:\s[\p{L}\p{N}&\']+)?\s*$/u', '', $t ); // a section label after the last pipe ("… | Trending", "… | India News")
 	$t = preg_replace( '/\s*\|\s*/u', ' ', $t );
 	$t = preg_replace( '/\s+[–—-]+\s+|(?<=\p{L})\s*[–—]\s*(?=\p{L})/u', ' ', $t ); // a range such as 2025–26 stays
 	$t = preg_replace( '/(?<=\S)\s*[:;]\s+/u', ' ', $t );
