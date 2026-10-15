@@ -98,6 +98,35 @@ add_filter(
 		$out .= '<div><h3 class="kit-demo-h">Volunteer form (animal-writes/volunteer)</h3>'
 			. '<div class="aw-state-row"><p class="aw-state-name">Closed (behind the button)</p><div class="aw-state-out">' . kits_disclosure( 'aw-demo-vol', 'Register as a volunteer', '<p>The form.</p>' ) . '</div></div>'
 			. '<div class="aw-state-row"><p class="aw-state-name">Sent</p><div class="aw-state-out"><div class="kit-form-done" role="status"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>' . esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div></div></div></div>';
-		return $html . $out . '</div>';
+		$out .= '</div>';
+		// Cards at each width: layout and data states together. Media queries follow the viewport, so each list is its
+		// real page in a frame of that width (scaled to fit); scroll inside a frame for more items and states.
+		$cards = array(
+			'News: lead and rows'         => array( '/news/', '.wp-block-post-template' ),
+			'Library card'                => array( '/library/', '.wp-block-post-template' ),
+			'Resources card'              => array( '/resources/', '.wp-block-post-template' ),
+			'Opportunity card'            => array( '/opportunities/', '.wp-block-post-template' ),
+			'Directory card'              => array( '/directory/', '.wp-block-post-template' ),
+			'Media & PR card'             => array( '/media/', '.wp-block-post-template' ),
+			'Category page: News rows'    => array( '/category/community-dogs/', '.aw-hub-news' ),
+			'Search results'              => array( '/search/?q=dog', 'main h3' ),
+			'Home: News'                  => array( '/', '.aw-ed-news' ),
+			'Home: From the Library'      => array( '/', '.aw-ed-law' ),
+			'Home: Guides'                => array( '/', '.aw-ed-learn' ),
+			'Home: Animal Writes 1.0'     => array( '/', '.kit-ed-story' ),
+		);
+		$out .= '<h2>Cards at each width</h2><p>Each list in its real page at 375, 768 and 1440 pixels: the layout state and the data states of the items together. Scroll inside a frame for more items.</p>'
+			. '<style>.aw-bp-set{display:grid;gap:var(--s-4);grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr));margin-bottom:var(--s-6)}.aw-bp{margin:0}.aw-bp-frame{position:relative;overflow:hidden;height:32rem;border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-canvas)}.aw-bp-frame iframe{position:absolute;inset:0 auto auto 0;border:0;transform-origin:0 0}.aw-bp figcaption{font-size:var(--fluid-label);color:var(--kit-color-muted);margin-top:var(--s-2)}</style>';
+		foreach ( $cards as $name => $c ) {
+			$out .= '<h3 class="kit-demo-h">' . esc_html( $name ) . '</h3><div class="aw-bp-set">';
+			foreach ( array( 375, 768, 1440 ) as $w ) {
+				$out .= '<figure class="aw-bp"><div class="aw-bp-frame"><iframe loading="lazy" tabindex="-1" title="' . esc_attr( $name . ', ' . $w . ' pixels' ) . '" width="' . (int) $w . '" data-w="' . (int) $w . '" data-at="' . esc_attr( $c[1] ) . '" src="' . esc_url( home_url( $c[0] ) ) . '"></iframe></div><figcaption>' . esc_html( $w . ' px' ) . '</figcaption></figure>';
+			}
+			$out .= '</div>';
+		}
+		$out .= '<script>(function(){function fit(f){var b=f.parentNode,k=b.clientWidth/f.dataset.w;f.style.transform="scale("+k+")";f.style.height=(b.clientHeight/k)+"px";}'
+			. 'document.querySelectorAll(".aw-bp iframe").forEach(function(f){fit(f);f.addEventListener("load",function(){try{var t=f.contentDocument.querySelector(f.dataset.at);if(t)t.scrollIntoView();}catch(e){}});});'
+			. 'addEventListener("resize",function(){document.querySelectorAll(".aw-bp iframe").forEach(fit);});})();</script>';
+		return $html . $out;
 	}
 );
