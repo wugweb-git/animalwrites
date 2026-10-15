@@ -192,6 +192,29 @@ function aw_publisher_profiles() {
 }
 
 /**
+ * Profile links in the graph use x.com: Rank Math builds https://twitter.com/{Twitter username} from its Social Meta
+ * setting (kept for the twitter:site tag) next to the x.com address in the additional profiles. Each sameAs list is
+ * rewritten to x.com and de-duplicated, in any node.
+ *
+ * @param mixed $node Graph or node.
+ * @return mixed
+ */
+function aw_schema_x_profiles( $node ) {
+	if ( ! is_array( $node ) ) {
+		return $node;
+	}
+	foreach ( $node as $k => $v ) {
+		if ( 'sameAs' === $k && ( is_array( $v ) || is_string( $v ) ) ) {
+			$list = array_map( fn( $u ) => is_string( $u ) ? preg_replace( '#^https?://(www\.)?twitter\.com/#i', 'https://x.com/', $u ) : $u, (array) $v );
+			$node[ $k ] = is_string( $v ) ? $list[0] : array_values( array_unique( $list, SORT_REGULAR ) );
+		} elseif ( is_array( $v ) ) {
+			$node[ $k ] = aw_schema_x_profiles( $v );
+		}
+	}
+	return $node;
+}
+
+/**
  * The publisher (Animal Writes) as schema.org Organization: name, URL, logo, email, description and profiles from
  * Rank Math's Knowledge Graph settings (Titles & Meta → Local SEO, Social Meta), so the settings and the graph agree;
  * the alternate names, policies, topics and country served are added here (Rank Math has no fields for them).
@@ -621,15 +644,16 @@ function aw_press_schema() {
 			),
 		);
 	}
-	return array(
-		'@type'      => 'CollectionPage',
-		'@id'        => get_permalink() . '#page',
-		'url'        => get_permalink(),
-		'name'       => aw_seo_plain( get_the_title() ),
-		'inLanguage' => 'en-IN',
-		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
-		'mainEntity' => array( '@type' => 'ItemList', 'itemListElement' => $list ),
-	);
+	return array_filter( array(
+		'@type'       => 'CollectionPage',
+		'@id'         => get_permalink() . '#page',
+		'url'         => get_permalink(),
+		'name'        => aw_seo_plain( get_the_title() ),
+		'description' => aw_seo_plain( aw_seo_description() ),
+		'inLanguage'  => 'en-IN',
+		'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+		'mainEntity'  => array( '@type' => 'ItemList', 'itemListElement' => $list ),
+	) );
 }
 
 // With Rank Math: its one graph carries ours. Our publisher and site replace its defaults (same @id); our item nodes
@@ -670,7 +694,13 @@ add_filter(
 				$data['WebPage']['breadcrumb'] = array( '@id' => $crumbs['@id'] );
 			}
 		}
-		return $data;
+		if ( isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) && empty( $data['WebPage']['description'] ) ) {
+			$desc = aw_seo_plain( aw_seo_description() ); // the page's own search description, so a quote of the page has its summary
+			if ( '' !== $desc ) {
+				$data['WebPage']['description'] = $desc;
+			}
+		}
+		return aw_schema_x_profiles( $data );
 	},
 	999
 );

@@ -599,7 +599,7 @@ add_filter(
 			return $html;
 		}
 		list( $items, $dir ) = aw_seo_topic_split( $parts, true );
-		$line = trim( ( $items ? 'On this topic: ' . aw_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . aw_seo_join( $dir ) . '.' : '' ) );
+		$line = trim( ( $items ? 'In this category: ' . aw_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . aw_seo_join( $dir ) . '.' : '' ) );
 		return '<p class="kit-note">' . $line . '</p>' . $html;
 	},
 	10,

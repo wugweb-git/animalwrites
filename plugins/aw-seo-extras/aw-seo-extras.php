@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Animal Writes – SEO extras for Rank Math
  * Plugin URI:        https://animalwrites.in/
- * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects and the focus-keyword API. Rank Math holds everything else. Does nothing unless Rank Math is active.
+ * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API and llms.txt ordering and Directory section. Rank Math holds everything else. Does nothing unless Rank Math is active.
  * Version:           1.0.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
@@ -39,7 +39,7 @@ add_action(
 			);
 			return;
 		}
-		foreach ( array( 'helpers', 'programmatic', 'titles', 'canonical', 'robots', 'schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand' ) as $file ) {
+		foreach ( array( 'helpers', 'programmatic', 'titles', 'canonical', 'robots', 'schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand', 'llms' ) as $file ) {
 			require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 		}
 	},
