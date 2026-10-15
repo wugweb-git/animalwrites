@@ -103,7 +103,48 @@ function aw_hub_count_label( $type ) {
 		return '';
 	}
 	$n = 'aw_campaign' === $type ? (int) wp_count_posts( 'aw_campaign' )->publish : aw_hub_total( $type ); // all campaigns, the 1.0 story included
+	if ( 'post' === $type && $n ) { // Resources holds guides, FAQ pages and research summaries: say which
+		$label = aw_resources_kinds_label( aw_hub_query_vars( 'post', 1 ), $n );
+		if ( '' !== $label ) {
+			return $label;
+		}
+	}
 	return $n ? number_format_i18n( $n ) . ' ' . $noun[ $type ][ 1 === $n ? 0 : 1 ] : '';
+}
+
+/**
+ * What a Resources list holds, counted live by its type tags: "15 guides, 1 FAQ page and 143 research summaries".
+ * $vars are the list's query vars (its filters); $total is the list's count. Items without a type tag are "other resources".
+ */
+function aw_resources_kinds_label( $vars, $total ) {
+	static $cache = array();
+	$key = md5( wp_json_encode( array( $vars, $total ) ) );
+	if ( isset( $cache[ $key ] ) ) {
+		return $cache[ $key ];
+	}
+	$kinds = array(
+		'guide'    => array( 'guide', 'guides' ),
+		'faq'      => array( 'FAQ page', 'FAQ pages' ),
+		'research' => array( 'research summary', 'research summaries' ),
+	);
+	$parts = array();
+	$seen  = 0;
+	foreach ( $kinds as $slug => $noun ) {
+		$v = array_merge( $vars, array( 'fields' => 'ids', 'posts_per_page' => 1, 'paged' => 1, 'no_found_rows' => false ) );
+		$tag = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => $slug );
+		$v['tax_query'] = empty( $vars['tax_query'] ) ? array( $tag ) : array( 'relation' => 'AND', $vars['tax_query'], $tag );
+		$n = (int) ( new WP_Query( $v ) )->found_posts;
+		if ( $n ) {
+			$parts[] = number_format_i18n( $n ) . ' ' . $noun[ 1 === $n ? 0 : 1 ];
+			$seen   += $n;
+		}
+	}
+	$rest = (int) $total - $seen; // an item carries one type tag; anything untagged is named plainly
+	if ( $rest > 0 && $parts ) {
+		$parts[] = number_format_i18n( $rest ) . ' ' . ( 1 === $rest ? 'other resource' : 'other resources' );
+	}
+	$last = array_pop( $parts );
+	return $cache[ $key ] = $parts ? implode( ', ', $parts ) . ' and ' . $last : (string) $last;
 }
 
 /** Three pictures from the section (campaign photos for Campaigns). */
@@ -195,10 +236,11 @@ function aw_block_doc_date( $a, $id ) {
 	}
 	$year  = has_term( array( 'act', 'rule' ), 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
 	$thumb = (int) get_post_thumbnail_id( $id );
-	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => '', 'loading' => 'lazy' ) ) : ''; // the document's first page
+	$alt   = wp_strip_all_tags( get_the_title( $id ) ); // the picture is this item's: its first page or its publisher's image
+	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => $alt, 'loading' => 'lazy' ) ) : ''; // the document's first page
 	$pub   = function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && ! get_post_meta( $id, 'aw_file_id', true ) ? (string) aw_item_image( $id, 'medium' ) : '';
 	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
-		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
+		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
 	}
 	$kind  = wp_list_pluck( aw_item_tags( $id ), 'name' );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
@@ -403,9 +445,9 @@ function aw_block_press_media( $a, $id ) {
 	$logo     = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
 	$thumb    = (string) get_the_post_thumbnail_url( $id, 'medium_large' );
 	$video    = (string) get_post_meta( $id, 'aw_press_video', true );
-	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
+	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr( $pub ) . '" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
 	$media    = $thumb
-		? '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')"><span class="aw-story-fallback">' . $fallback . '</span>'
+		? '<img src="' . esc_url( $thumb ) . '" alt="' . esc_attr( wp_strip_all_tags( get_the_title( $id ) ) ) . '" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')"><span class="aw-story-fallback">' . $fallback . '</span>'
 		: '<span class="aw-story-fallback">' . $fallback . '</span>';
 	return '<div class="kit-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>';
 }

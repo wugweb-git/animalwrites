@@ -59,6 +59,14 @@ add_shortcode(
 		}
 		$count = (int) $wp_query->found_posts;
 		$noun  = array( 'aw_listing' => 'organisations', 'post' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_legal' => 'documents', 'aw_news' => 'stories' );
+		$count_label = number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) );
+		if ( 'post' === $type && $count && function_exists( 'aw_resources_kinds_label' ) ) { // Resources: guides, FAQ pages and research summaries counted apart
+			$scope       = array( 'post_type' => 'post', 'post_status' => 'publish' );
+			if ( $term_page ) {
+				$scope['tax_query'] = array( array( 'taxonomy' => get_queried_object()->taxonomy, 'terms' => get_queried_object_id() ) );
+			}
+			$count_label = aw_resources_kinds_label( $scope, $count ) ?: $count_label;
+		}
 
 		// Visual: campaign photos for campaigns; otherwise the first three items in this view.
 		$tiles = '';
@@ -107,7 +115,7 @@ add_shortcode(
 		return '<header class="kit-section-band alignfull' . ( ( 'aw_listing' === $type && ! $term_page ) ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $crumbs . '<div class="kit-section-head"><div>'
 			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
 			. ( $desc ? '<p class="kit-section-desc">' . esc_html( $desc ) . '</p>' : '' )
-			. ( $count ? '<p class="kit-section-count">' . esc_html( number_format_i18n( $count ) . ' ' . ( 1 === $count ? rtrim( preg_replace( '/ies$/', 'y', $noun[ $type ] ?? 'items' ), 's' ) : ( $noun[ $type ] ?? 'items' ) ) ) . '</p>' : '' )
+			. ( $count ? '<p class="kit-section-count">' . esc_html( $count_label ) . '</p>' : '' )
 			. '</div>' . $visual . '</div>' . ( $filters ? '<div class="kit-section-filters">' . $filters . '</div>' : '' ) . '</div></header>';
 	}
 );

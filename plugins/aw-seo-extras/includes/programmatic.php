@@ -814,19 +814,12 @@ function aw_seo_term_title_rule( $term ) {
 
 /* ---------- Resources hub: guides and research summaries counted apart ---------- */
 
-/** "16 guides and 143 research summaries" for the unfiltered Resources hub ('' when it does not apply). */
+/** "15 guides, 1 FAQ page and 143 research summaries" for the unfiltered Resources hub ('' when it does not apply). */
 function aw_seo_resources_count_label() {
-	if ( ( function_exists( 'aw_is_filtered_list' ) && aw_is_filtered_list() ) || ! function_exists( 'aw_hub_total' ) ) {
+	if ( ( function_exists( 'aw_is_filtered_list' ) && aw_is_filtered_list() ) || ! function_exists( 'aw_hub_count_label' ) ) {
 		return '';
 	}
-	$total    = (int) aw_hub_total( 'post' );
-	$term     = get_term_by( 'slug', 'research', 'post_tag' );
-	$research = $term ? (int) $term->count : 0;
-	$guides   = $total - $research;
-	if ( ! $research || $guides < 1 ) {
-		return '';
-	}
-	return sprintf( '%1$s %2$s and %3$s %4$s', number_format_i18n( $guides ), 1 === $guides ? 'guide' : 'guides', number_format_i18n( $research ), 1 === $research ? 'research summary' : 'research summaries' );
+	return aw_hub_count_label( 'post' ); // the same live split the hub shows above its pagination
 }
 
 /* ---------- Tags: Library, Resource, Opportunity and Listing types, and Services ---------- */
