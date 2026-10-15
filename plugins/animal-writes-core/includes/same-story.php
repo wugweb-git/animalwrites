@@ -3,13 +3,14 @@
  * Same event, one story (owner, 15 Oct 2026).
  *
  * The first story of an event stays the one story. When another publisher reports the same event, the workers read
- * the new report, write the facts it adds (only facts from its own text, in the house style of our summaries) and send
- * them here. They are kept on the first story as `aw_merge_additions` (source URL, publisher, the added text, time,
- * model: the audit) and shown under its summary as "Also reported by X, which adds: …". With nothing new, only the
- * credit is added ("Also reported by" in the box above the summary, `aw_also_reported`).
+ * the new report and, when it has facts our story lacks, rewrite the first story's summary with them woven in (only
+ * facts from the two reports; every number and name checked against them). Each fold is kept as an audit in
+ * `aw_merge_additions` (source URL, publisher, the facts it added, time, model, the summary before); every earlier
+ * summary is kept in `aw_summary_history` so it can be restored. The credit is the publisher's logo in the source row
+ * (`aw_also_reported`). Nothing on the page says how the summary was written.
  *
- * Nothing here touches the first story's post_date or post_modified: only post meta changes, so its date stays its
- * own and no "Updated" date can appear (owner: "no we dont do date updates on frontend").
+ * The first story's dates never change: the summary is written straight to the row (post_excerpt only), so neither
+ * post_date nor post_modified moves and no "Updated" date can appear (owner: "no we dont do date updates on frontend").
  *
  * A duplicate already on the site (dup_id) is set to private with `aw_merged_into` and its URL sent to the first story.
  *
@@ -23,20 +24,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SAME_STORY_TYPES = array( 'aw_news', 'aw_legal' );
 
 /**
- * Credit a publisher on the first story, and keep the facts its report adds.
+ * Credit a publisher on the first story; with new facts, put in the rewritten summary (the old one is kept).
  *
  * @param int    $keep      The first story.
  * @param string $url       The new report's URL.
  * @param string $publisher The new report's publisher.
  * @param string $text      The facts it adds ('' = credit only).
  * @param string $model     The model that wrote them.
- * @return array{credited:bool,added:bool}
+ * @param string $summary   The first story's summary with those facts woven in ('' = summary unchanged).
+ * @return array{credited:bool,added:bool,rewritten:bool}
  */
-function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '' ) {
+function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $summary = '' ) {
 	$url  = esc_url_raw( $url );
 	$out  = array(
 		'credited' => false,
 		'added'    => false,
+		'rewritten' => false,
 	);
 	$own  = (string) get_post_meta( $keep, 'aw_source_url', true );
 	if ( '' === $url || $url === $own ) {
@@ -55,23 +58,44 @@ function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '' ) 
 		update_post_meta( $keep, 'aw_also_reported', $also );
 		$out['credited'] = true;
 	}
-	$text = trim( preg_replace( '/\s+/', ' ', sanitize_textarea_field( $text ) ) );
+	$text    = trim( preg_replace( '/\s+/', ' ', sanitize_textarea_field( $text ) ) );
+	$summary = trim( preg_replace( '/\s+/', ' ', sanitize_textarea_field( $summary ) ) );
 	if ( '' !== $text ) {
-		$adds = array_values( array_filter( (array) get_post_meta( $keep, 'aw_merge_additions', true ) ) );
-		if ( ! in_array( $url, wp_list_pluck( $adds, 'url' ), true ) ) {
-			$adds[] = array(
-				'url'       => $url,
-				'publisher' => $publisher,
-				'text'      => $text,
-				'at'        => current_time( 'mysql' ), // IST, the site's time zone
-				'model'     => sanitize_text_field( $model ),
+		global $wpdb;
+		$before = (string) get_post_field( 'post_excerpt', $keep, 'raw' );
+		$now    = current_time( 'mysql' ); // IST, the site's time zone
+		if ( '' !== $summary && $summary !== $before ) {
+			$hist   = array_values( array_filter( (array) get_post_meta( $keep, 'aw_summary_history', true ) ) );
+			$hist[] = array(
+				'summary' => $before,
+				'at'      => $now,
+				'url'     => $url,
 			);
-			update_post_meta( $keep, 'aw_merge_additions', $adds );
-			$out['added'] = true;
+			update_post_meta( $keep, 'aw_summary_history', $hist );
+			// Straight to the row: wp_update_post would move post_modified (the date never changes).
+			$wpdb->update( $wpdb->posts, array( 'post_excerpt' => $summary ), array( 'ID' => (int) $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$out['rewritten'] = true;
 		}
+		$adds  = array_values( array_filter( (array) get_post_meta( $keep, 'aw_merge_additions', true ) ) );
+		$entry = array(
+			'url'            => $url,
+			'publisher'      => $publisher,
+			'text'           => $text,
+			'at'             => $now,
+			'model'          => sanitize_text_field( $model ),
+			'summary_before' => $out['rewritten'] ? $before : '',
+		);
+		$at = array_search( $url, wp_list_pluck( $adds, 'url' ), true );
+		if ( false === $at ) {
+			$adds[] = $entry;
+		} else {
+			$adds[ $at ] = $entry; // the same report folded again (a rewrite of an earlier fold)
+		}
+		update_post_meta( $keep, 'aw_merge_additions', $adds );
+		$out['added'] = true;
 	}
 	if ( $out['credited'] || $out['added'] ) {
-		clean_post_cache( $keep ); // meta only: post_date and post_modified stay as they are
+		clean_post_cache( $keep ); // post_date and post_modified stay as they are
 		do_action( 'litespeed_purge_post', $keep );
 	}
 	return $out;
@@ -133,7 +157,7 @@ function aw_same_story_post( WP_REST_Request $req ) {
 	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), AW_SAME_STORY_TYPES, true ) ) ) {
 		return new WP_Error( 'aw_bad_dup', 'Bad duplicate', array( 'status' => 400 ) );
 	}
-	$res = aw_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ) );
+	$res = aw_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ), (string) $req->get_param( 'summary' ) );
 	if ( $dup ) {
 		aw_same_story_retire( $dup, $keep );
 	}
@@ -161,39 +185,6 @@ add_action(
 			)
 		);
 	}
-);
-
-/**
- * The added facts, under the summary: "Also reported by X, which adds: …", each with its link.
- *
- * @param int $id Post ID.
- * @return string
- */
-function aw_same_story_html( $id ) {
-	$adds = array_filter( (array) get_post_meta( $id, 'aw_merge_additions', true ), fn( $a ) => ! empty( $a['text'] ) && ! empty( $a['url'] ) );
-	if ( ! $adds ) {
-		return '';
-	}
-	$out = '<section class="aw-reported" aria-labelledby="aw-reported-h"><h2 id="aw-reported-h">Also reported</h2>';
-	foreach ( $adds as $a ) {
-		$name = '' !== (string) ( $a['publisher'] ?? '' ) ? $a['publisher'] : preg_replace( '/^www\./', '', (string) wp_parse_url( $a['url'], PHP_URL_HOST ) );
-		$out .= '<p>Also reported by <a href="' . esc_url( $a['url'] ) . '" rel="noopener nofollow" target="_blank">' . esc_html( $name ) . '</a>, which adds: ' . esc_html( $a['text'] ) . '</p>';
-	}
-	return $out . '</section>';
-}
-
-// After the summary on a News or Library item's own page.
-add_filter(
-	'render_block_core/post-excerpt',
-	function ( $html, $block, $instance ) {
-		$id = (int) ( $instance->context['postId'] ?? 0 );
-		if ( ! $id || ! is_singular( AW_SAME_STORY_TYPES ) || get_queried_object_id() !== $id ) {
-			return $html;
-		}
-		return $html . aw_same_story_html( $id );
-	},
-	20,
-	3
 );
 
 /**
