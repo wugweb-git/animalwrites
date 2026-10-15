@@ -202,6 +202,7 @@ const AW_HUB_TITLES = array(
 	'aw_listing'     => 'Animal Welfare NGOs in India: Directory of 5,000+ Groups',
 	'aw_opportunity' => 'Animal Welfare Volunteer, Internship & Jobs in India',
 	'aw_press'       => 'Animal Writes in the News',
+	'aw_campaign'    => 'Animal Welfare Campaigns in India – Animal Writes',
 );
 
 /** Fixed descriptions of the section hubs that are not built from their intro. */
