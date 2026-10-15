@@ -1,7 +1,9 @@
 <?php
 /**
- * Settings → Search demand (15 Oct 2026): what people search and how Animal Writes shows up for it.
+ * Search demand, next to Sourcing (15 Oct 2026): what people search and how Animal Writes shows up for it.
  *
+ * - One table (owner, 15 Oct 2026): every Search Console query of the latest 3 months merged with the keyword map's
+ *   target phrases, ranked by Importance; Gaps sit collapsed under it. No filters, no CSV.
  * - Search Console (last 28 days and last 3 months) comes through Site Kit's own search-console module, the same
  *   call the 15 Oct research used. It refreshes weekly by WP-Cron and on "Refresh now". Site Kit keeps the Google
  *   connection; this file never reads its tokens.
@@ -19,7 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SD_OPTION         = 'aw_search_demand';
 const AW_SD_CRON           = 'aw_search_demand_refresh';
 const AW_SD_STATIC_VERSION = 1;
-const AW_SD_SHOW_ROWS      = 200;
 
 /** Brand searches: the site's own names and addresses (not the generic "animal rights"). */
 const AW_SD_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
@@ -313,106 +314,165 @@ add_action(
 	}
 );
 
+
+/** Capability of the Sourcing screen (Kits Core), so both screens open for the same people. */
+function aw_sd_cap(): string {
+	return defined( 'AW_SRC_CAP' ) ? AW_SRC_CAP : 'manage_options';
+}
+
+/* Search demand sits directly after Sourcing, under whatever parent Sourcing has (found at run time, late). */
 add_action(
 	'admin_menu',
 	function () {
-		add_options_page( 'Search demand', 'Search demand', 'manage_options', 'aw-search-demand', 'aw_sd_screen' );
-	}
+		global $submenu;
+		$parent = 'options-general.php';
+		$pos    = null;
+		foreach ( (array) $submenu as $p => $items ) {
+			foreach ( array_values( (array) $items ) as $n => $item ) {
+				if ( 'aw-sourcing' === ( $item[2] ?? '' ) ) {
+					$parent = $p;
+					$pos    = $n + 1;
+					break 2;
+				}
+			}
+		}
+		add_submenu_page( $parent, 'Search demand', 'Search demand', aw_sd_cap(), 'aw-search-demand', 'aw_sd_screen', $pos );
+	},
+	99
 );
 
 add_action(
 	'admin_post_aw_search_demand_refresh',
 	function () {
-		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_search_demand_refresh' ) ) {
+		if ( ! current_user_can( aw_sd_cap() ) || ! check_admin_referer( 'aw_search_demand_refresh' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$problem = aw_sd_refresh();
-		wp_safe_redirect( admin_url( 'options-general.php?page=aw-search-demand&' . ( $problem ? 'refresh_failed=1' : 'refreshed=1' ) ) );
+		$back    = wp_get_referer() ? remove_query_arg( array( 'refreshed', 'refresh_failed' ), wp_get_referer() ) : admin_url( 'admin.php?page=aw-search-demand' );
+		wp_safe_redirect( add_query_arg( $problem ? 'refresh_failed' : 'refreshed', 1, $back ) );
 		exit;
 	}
 );
 
-/** Current table filters from the request: period (28d, 3m) and view (nonbrand, opportunities, brand, all). */
-function aw_sd_filters(): array {
-	$period = sanitize_key( wp_unslash( $_GET['period'] ?? '28d' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$view   = sanitize_key( wp_unslash( $_GET['view'] ?? 'nonbrand' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	return array(
-		in_array( $period, array( '28d', '3m' ), true ) ? $period : '28d',
-		in_array( $view, array( 'nonbrand', 'opportunities', 'brand', 'all' ), true ) ? $view : 'nonbrand',
-	);
+/** Lowercase, single-spaced. */
+function aw_sd_norm( string $s ): string {
+	return trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( $s ) ) );
 }
 
-const AW_SD_PERIODS = array( '28d' => 'Last 28 days', '3m' => 'Last 3 months' );
-const AW_SD_VIEWS   = array(
-	'nonbrand'      => 'Non-brand',
-	'opportunities' => 'Opportunities (position 5–20, 0 clicks)',
-	'brand'         => 'Brand',
-	'all'           => 'All',
-);
-
-/** Query rows of a period, filtered by view. */
-function aw_sd_rows( array $data, string $period, string $view ): array {
-	$rows = $data['gsc']['periods'][ $period ]['queries'] ?? array();
-	return array_values(
-		array_filter(
-			$rows,
-			function ( $r ) use ( $view ) {
-				switch ( $view ) {
-					case 'brand':
-						return 1 === (int) $r[5];
-					case 'nonbrand':
-						return 0 === (int) $r[5];
-					case 'opportunities':
-						return 0 === (int) $r[5] && 0 === (int) $r[1] && $r[3] >= 5 && $r[3] <= 20;
-				}
-				return true;
+/**
+ * Keyword-map targets, one per phrase: phrase, pages ("Section: Page") and a regex for matching queries (null when the
+ * phrase is all placeholder, like "{organisation name}" or "{type} in {district}", which would match nearly anything).
+ * A plain phrase matches a query that contains it as whole words; a phrase with {placeholders} must match the whole query.
+ */
+function aw_sd_targets( array $map ): array {
+	$out = array();
+	foreach ( $map as $m ) {
+		$phrase = aw_sd_norm( (string) $m[2] );
+		$page   = $m[0] . ': ' . $m[1];
+		if ( isset( $out[ $phrase ] ) ) {
+			$out[ $phrase ]['pages'][] = $page;
+			continue;
+		}
+		$re = null;
+		if ( false === strpos( $phrase, '{' ) ) {
+			$re = '/(?:^|\s)' . preg_quote( $phrase, '/' ) . '(?:\s|$)/u';
+		} else {
+			$literal = preg_split( '/\s+/', trim( (string) preg_replace( '/\{[^}]*\}/', ' ', $phrase ) ) );
+			$words   = array_filter( (array) $literal, fn( $w ) => mb_strlen( $w ) >= 3 && ! in_array( $w, array( 'the', 'and', 'for' ), true ) );
+			if ( $words ) {
+				$parts = preg_split( '/\{[^}]*\}/', $phrase );
+				$re    = '/^' . implode( '.+', array_map( fn( $x ) => preg_quote( $x, '/' ), $parts ) ) . '$/u';
 			}
-		)
-	);
+		}
+		$out[ $phrase ] = array( 'phrase' => $phrase, 'pages' => array( $page ), 're' => $re );
+	}
+	return $out;
 }
 
-add_action(
-	'admin_post_aw_search_demand_csv',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_search_demand_csv' ) ) {
-			wp_die( 'Not allowed.', 403 );
+/**
+ * The one table: Search Console queries (latest 3 months) merged with the keyword-map targets.
+ *
+ * Importance (owner, 15 Oct 2026). Each non-brand query weighs its impressions over the latest 3 months, doubled
+ * when it sits at average position 5–20 with 0 clicks (Google shows us on page 1–2 and nobody clicks: an opportunity).
+ * Brand queries and target phrases with no Search Console data weigh 0. Importance % = weight ÷ sum of all weights
+ * × 100, rounded to 2 decimals by largest remainder so the column adds up to exactly 100.
+ *
+ * @return array<int, array{q:string, clicks:?int, impr:?int, pos:?float, page:string, brand:bool, targets:array, imp:float}>
+ */
+function aw_sd_table( array $data ): array {
+	$targets = aw_sd_targets( $data['static']['map'] ?? array() );
+	$rows    = array();
+	$seen    = array();
+	foreach ( (array) ( $data['gsc']['periods']['3m']['queries'] ?? array() ) as $r ) {
+		$q     = (string) $r[0];
+		$nq    = aw_sd_norm( $q );
+		$brand = (bool) preg_match( AW_SD_BRAND, $q );
+		$hits  = array();
+		foreach ( $targets as $t ) {
+			if ( $t['phrase'] === $nq || ( $t['re'] && preg_match( $t['re'], $nq ) ) ) {
+				$hits[] = $t;
+				if ( $t['phrase'] === $nq ) {
+					$seen[ $t['phrase'] ] = true;
+				}
+			}
 		}
-		list( $period, $view ) = aw_sd_filters();
-		$rows                  = aw_sd_rows( aw_sd_get(), $period, $view );
-		nocache_headers();
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="search-demand-' . $view . '-' . $period . '-' . wp_date( 'Y-m-d' ) . '.csv"' );
-		$fh   = fopen( 'php://output', 'w' );
-		$cell = fn( $v ) => is_string( $v ) && preg_match( '/^[=+\-@\t\r]/', $v ) ? "'" . $v : $v; // Spreadsheets must not run a query as a formula.
-		fputcsv( $fh, array( 'Query', 'Clicks', 'Impressions', 'CTR %', 'Position', 'Page Google shows', 'Brand' ) );
-		foreach ( $rows as $r ) {
-			fputcsv( $fh, array( $cell( $r[0] ), $r[1], $r[2], $r[2] ? round( 100 * $r[1] / $r[2], 1 ) : 0, $r[3], $cell( $r[4] ), $r[5] ? 'yes' : 'no' ) );
-		}
-		fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		exit;
+		usort( $hits, fn( $a, $b ) => ( $b['phrase'] === $nq ) <=> ( $a['phrase'] === $nq ) ); // The exact phrase first.
+		$opp    = 0 === (int) $r[1] && $r[3] >= 5 && $r[3] <= 20;
+		$rows[] = array(
+			'q'       => $q,
+			'clicks'  => (int) $r[1],
+			'impr'    => (int) $r[2],
+			'pos'     => (float) $r[3],
+			'page'    => (string) $r[4],
+			'brand'   => $brand,
+			'targets' => $hits,
+			'w'       => $brand ? 0 : (int) $r[2] * ( $opp ? 2 : 1 ),
+		);
 	}
-);
+	foreach ( $targets as $t ) {
+		if ( empty( $seen[ $t['phrase'] ] ) ) { // No query is exactly this phrase: it still gets its own row.
+			$rows[] = array( 'q' => $t['phrase'], 'clicks' => null, 'impr' => null, 'pos' => null, 'page' => '', 'brand' => false, 'targets' => array( $t ), 'w' => 0 );
+		}
+	}
+	// Largest remainder, in hundredths of a per cent.
+	$sum   = array_sum( array_column( $rows, 'w' ) );
+	$units = array();
+	$rest  = array();
+	foreach ( $rows as $i => $row ) {
+		$exact       = $sum ? $row['w'] * 10000 / $sum : 0;
+		$units[ $i ] = (int) floor( $exact );
+		$rest[ $i ]  = $exact - $units[ $i ];
+	}
+	arsort( $rest );
+	$left = $sum ? 10000 - array_sum( $units ) : 0;
+	foreach ( array_keys( $rest ) as $i ) {
+		if ( $left-- <= 0 ) {
+			break;
+		}
+		++$units[ $i ];
+	}
+	foreach ( $rows as $i => &$row ) {
+		$row['imp'] = $units[ $i ] / 100;
+	}
+	unset( $row );
+	usort( $rows, fn( $a, $b ) => $b['imp'] <=> $a['imp'] ?: (int) $b['impr'] <=> (int) $a['impr'] ?: strcmp( $a['q'], $b['q'] ) );
+	return $rows;
+}
 
 function aw_sd_num( $n ): string {
 	return esc_html( number_format_i18n( (float) $n ) );
 }
 
-function aw_sd_ctr( int $clicks, int $impr ): string {
-	return $impr ? esc_html( number_format_i18n( 100 * $clicks / $impr, 1 ) . '%' ) : '—';
-}
-
 function aw_sd_screen() {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( aw_sd_cap() ) ) {
 		return;
 	}
-	$data                  = aw_sd_get();
-	$static                = $data['static'];
-	list( $period, $view ) = aw_sd_filters();
-	list( , $problem )     = aw_sd_sitekit();
-	$base                  = admin_url( 'options-general.php?page=aw-search-demand' );
+	$data              = aw_sd_get();
+	$gsc               = $data['gsc'] ?? array();
+	list( , $problem ) = aw_sd_sitekit();
+	$rows              = aw_sd_table( $data );
 
 	echo '<div class="wrap"><h1>Search demand</h1>';
-	echo '<p>What people search for, and how Animal Writes shows up for it. Search Console figures come through Site Kit and refresh every Monday at 07:00 IST. The keyword map, gaps, Google Trends and autocomplete figures are the snapshot taken on 15 Oct 2026.</p>';
 	if ( isset( $_GET['refreshed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success"><p>Search Console figures refreshed.</p></div>';
 	}
@@ -423,104 +483,81 @@ function aw_sd_screen() {
 		echo '<div class="notice notice-warning"><p>' . esc_html( $problem ) . ' The figures below are the last ones fetched.</p></div>';
 	}
 
-	// (a) Search Console.
-	echo '<h2>Search Console</h2>';
-	$gsc = $data['gsc'] ?? array();
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_search_demand_refresh">';
 	wp_nonce_field( 'aw_search_demand_refresh' );
-	echo '<p>' . ( ! empty( $gsc['fetched'] ) ? 'Last fetched ' . aw_sd_date( $gsc['fetched'], 'j M Y, H:i' ) . ' IST' . ( $gsc['property'] ? ' from <code>' . esc_html( $gsc['property'] ) . '</code>' : '' ) . '. ' : 'Not fetched yet. ' );
-	$next = wp_next_scheduled( AW_SD_CRON );
-	echo $next ? 'Next weekly refresh ' . aw_sd_date( $next, 'j M Y, H:i' ) . ' IST. ' : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
+	echo '<p>Search Console data updated ' . ( ! empty( $gsc['fetched'] ) ? aw_sd_date( $gsc['fetched'] ) : 'never' ) . ' · next refresh Mon 07:00 IST '; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
 	submit_button( 'Refresh now', 'secondary', 'submit', false );
 	echo '</p></form>';
 
-	echo '<table class="widefat striped" style="max-width:60rem"><thead><tr><th>Period</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Avg. position</th><th>Brand clicks / impressions</th><th>Non-brand clicks / impressions</th></tr></thead><tbody>';
-	foreach ( AW_SD_PERIODS as $k => $label ) {
-		$p = $gsc['periods'][ $k ] ?? null;
-		if ( ! $p ) {
-			echo '<tr><td>' . esc_html( $label ) . '</td><td colspan="6">Not fetched yet.</td></tr>';
-			continue;
-		}
-		echo '<tr><td>' . esc_html( $label ) . '<br><small>' . esc_html( wp_date( 'j M', strtotime( $p['start'] ) ) . ' – ' . wp_date( 'j M Y', strtotime( $p['end'] ) ) ) . '</small></td>'
-			. '<td>' . aw_sd_num( $p['totals']['clicks'] ) . '</td><td>' . aw_sd_num( $p['totals']['impr'] ) . '</td>'
-			. '<td>' . aw_sd_ctr( $p['totals']['clicks'], $p['totals']['impr'] ) . '</td><td>' . esc_html( (string) $p['totals']['pos'] ) . '</td>'
-			. '<td>' . aw_sd_num( $p['brand']['clicks'] ) . ' / ' . aw_sd_num( $p['brand']['impr'] ) . '</td>'
-			. '<td>' . aw_sd_num( $p['nonbrand']['clicks'] ) . ' / ' . aw_sd_num( $p['nonbrand']['impr'] ) . '</td></tr>';
+	echo '<h2>Searches and targets <span class="count">(' . aw_sd_num( count( $rows ) ) . ')</span></h2>';
+	echo '<p class="description">Importance: each non-brand search\'s share of all non-brand impressions over the last 3 months, counted double when Google shows us at position 5–20 and nobody clicks; the column adds up to 100%.</p>';
+	$cols = array( 'Query', 'Importance (%)', 'Clicks', 'Impressions', 'Avg. position', 'Page Google shows', 'Our target?' );
+	echo '<table id="aw-sd-table" class="wp-list-table widefat striped"><thead><tr>';
+	foreach ( $cols as $n => $label ) {
+		$state = 1 === $n ? 'sorted desc' : 'sortable asc';
+		echo '<th scope="col" class="manage-column ' . esc_attr( $state ) . '"' . ( 1 === $n ? ' aria-sort="descending"' : '' ) . ' data-col="' . (int) $n . '"><a href="#"><span>' . esc_html( $label ) . '</span><span class="sorting-indicators"><span class="sorting-indicator asc" aria-hidden="true"></span><span class="sorting-indicator desc" aria-hidden="true"></span></span></a></th>';
 	}
-	$snap = $static['gsc_snapshot'];
-	echo '<tr><td>' . esc_html( $snap['label'] ) . '</td><td>' . aw_sd_num( $snap['clicks'] ) . '</td><td>' . aw_sd_num( $snap['impr'] ) . '</td><td>' . aw_sd_ctr( $snap['clicks'], $snap['impr'] ) . '</td><td>—</td>'
-		. '<td>' . aw_sd_num( $snap['brand'][0] ) . ' / ' . aw_sd_num( $snap['brand'][1] ) . '</td><td>' . aw_sd_num( $snap['nonbrand'][0] ) . ' / about ' . aw_sd_num( $snap['nonbrand'][1] ) . '</td></tr>';
-	echo '</tbody></table>';
-	echo '<p class="description">Totals include searches Google keeps private. The brand split counts only the searches Google names, so brand and non-brand add up to less than the total. Brand means searches for Animal Writes by name or address.</p>';
-
-	echo '<h3>Searches</h3>';
-	$links = array();
-	foreach ( AW_SD_PERIODS as $k => $label ) {
-		$links[] = '<li><a href="' . esc_url( add_query_arg( array( 'period' => $k, 'view' => $view ), $base ) ) . '"' . ( $k === $period ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a></li>';
-	}
-	echo '<ul class="subsubsub" style="float:none">' . implode( ' | ', $links ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	$links = array();
-	foreach ( AW_SD_VIEWS as $k => $label ) {
-		$links[] = '<li><a href="' . esc_url( add_query_arg( array( 'period' => $period, 'view' => $k ), $base ) ) . '"' . ( $k === $view ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . aw_sd_num( count( aw_sd_rows( $data, $period, $k ) ) ) . ')</span></a></li>';
-	}
-	echo '<ul class="subsubsub" style="float:none">' . implode( ' | ', $links ) . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	$rows = aw_sd_rows( $data, $period, $view );
-	$csv  = wp_nonce_url( add_query_arg( array( 'action' => 'aw_search_demand_csv', 'period' => $period, 'view' => $view ), admin_url( 'admin-post.php' ) ), 'aw_search_demand_csv' );
-	echo '<p><a class="button" href="' . esc_url( $csv ) . '">Download CSV</a> ';
-	echo count( $rows ) > AW_SD_SHOW_ROWS ? 'Showing the top ' . aw_sd_num( AW_SD_SHOW_ROWS ) . ' of ' . aw_sd_num( count( $rows ) ) . ' by impressions; the CSV has them all.' : '';
-	echo '</p>';
-	if ( 'opportunities' === $view ) {
-		echo '<p class="description">Searches where Google already shows a page on page 1 or 2 but nobody clicks: the words to work into that page\'s title, description or first paragraph.</p>';
-	}
-	echo '<table class="widefat striped"><thead><tr><th>Search</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th><th>Page Google shows</th></tr></thead><tbody>';
+	echo '</tr></thead><tbody>';
 	if ( ! $rows ) {
-		echo '<tr><td colspan="6">' . ( empty( $gsc ) ? 'Not fetched yet. Use Refresh now.' : 'No searches in this view.' ) . '</td></tr>';
+		echo '<tr><td colspan="7">Not fetched yet. Use Refresh now.</td></tr>';
 	}
-	foreach ( array_slice( $rows, 0, AW_SD_SHOW_ROWS ) as $r ) {
-		echo '<tr><td>' . esc_html( $r[0] ) . '</td><td>' . aw_sd_num( $r[1] ) . '</td><td>' . aw_sd_num( $r[2] ) . '</td><td>' . aw_sd_ctr( (int) $r[1], (int) $r[2] ) . '</td><td>' . esc_html( (string) $r[3] ) . '</td>'
-			. '<td>' . ( $r[4] ? '<a href="' . esc_url( home_url( $r[4] ) ) . '" target="_blank" rel="noopener">' . esc_html( $r[4] ) . '</a>' : '—' ) . '</td></tr>';
+	$dash = '—';
+	foreach ( $rows as $r ) {
+		$target = $dash;
+		$tsort  = '';
+		if ( $r['targets'] ) {
+			$t      = $r['targets'][0];
+			$tsort  = implode( ', ', $t['pages'] );
+			$target = 'Yes: ' . esc_html( $tsort ) . ( aw_sd_norm( $r['q'] ) !== $t['phrase'] ? '<br><span class="description">' . esc_html( '"' . $t['phrase'] . '"' ) . '</span>' : '' );
+		}
+		$none = null === $r['impr'];
+		echo '<tr>'
+			. '<td data-v="' . esc_attr( $r['q'] ) . '">' . esc_html( $r['q'] ) . ( $r['brand'] ? ' — <span class="post-state">Brand</span>' : '' ) . '</td>'
+			. '<td data-v="' . esc_attr( (string) $r['imp'] ) . '">' . esc_html( number_format_i18n( $r['imp'], 2 ) ) . '</td>'
+			. '<td data-v="' . ( $none ? -1 : (int) $r['clicks'] ) . '">' . ( $none ? $dash : aw_sd_num( $r['clicks'] ) ) . '</td>'
+			. '<td data-v="' . ( $none ? -1 : (int) $r['impr'] ) . '">' . ( $none ? $dash : aw_sd_num( $r['impr'] ) ) . '</td>'
+			. '<td data-v="' . ( $none ? 9999 : esc_attr( (string) $r['pos'] ) ) . '">' . ( $none ? $dash : esc_html( number_format_i18n( $r['pos'], 1 ) ) ) . '</td>'
+			. '<td data-v="' . esc_attr( $r['page'] ) . '">' . ( $r['page'] ? '<a href="' . esc_url( home_url( $r['page'] ) ) . '" target="_blank" rel="noopener">' . esc_html( $r['page'] ) . '</a>' : $dash ) . '</td>'
+			. '<td data-v="' . esc_attr( $tsort ) . '">' . $target . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput -- escaped above.
+			. '</tr>';
 	}
 	echo '</tbody></table>';
+	?>
+<script>
+( function () {
+	var table = document.getElementById( 'aw-sd-table' );
+	if ( ! table ) { return; }
+	var heads = table.tHead.rows[0].cells, body = table.tBodies[0];
+	Array.prototype.forEach.call( heads, function ( th ) {
+		th.querySelector( 'a' ).addEventListener( 'click', function ( e ) {
+			e.preventDefault();
+			var col = +th.getAttribute( 'data-col' ), text = col === 0 || col >= 5;
+			var desc = th.getAttribute( 'aria-sort' ) ? th.getAttribute( 'aria-sort' ) === 'ascending' : ! text;
+			var rows = Array.prototype.slice.call( body.rows );
+			rows.sort( function ( a, b ) {
+				var x = a.cells[ col ].getAttribute( 'data-v' ), y = b.cells[ col ].getAttribute( 'data-v' );
+				var c = text ? x.localeCompare( y ) : ( +x - +y );
+				return desc ? -c : c;
+			} );
+			rows.forEach( function ( r ) { body.appendChild( r ); } );
+			Array.prototype.forEach.call( heads, function ( h ) {
+				h.removeAttribute( 'aria-sort' );
+				h.className = 'manage-column sortable asc';
+			} );
+			th.className = 'manage-column sorted ' + ( desc ? 'desc' : 'asc' );
+			th.setAttribute( 'aria-sort', desc ? 'descending' : 'ascending' );
+		} );
+	} );
+}() );
+</script>
+	<?php
 
-	// (b) Keyword map.
-	echo '<h2>Keyword map</h2>';
-	echo '<p>The phrase each page targets, with the demand found for it on 15 Oct 2026. <strong>T</strong> is the Google Trends index for India over 12 months, with "animal welfare" = 100: relative interest, not a search count. <strong>Autocomplete</strong>: Y means Google suggests the exact phrase, ext only longer forms, – not at all. <strong>Search Console</strong> is impressions for 17 Nov 2025 – 14 Oct 2026.</p>';
-	echo '<table class="widefat striped"><thead><tr><th>Section</th><th>Page</th><th>Target phrase</th><th>Google Trends</th><th>Autocomplete</th><th>Search Console</th></tr></thead><tbody>';
-	foreach ( $static['map'] as $m ) {
-		echo '<tr><td>' . esc_html( $m[0] ) . '</td><td>' . esc_html( $m[1] ) . '</td><td><strong>' . esc_html( $m[2] ) . '</strong></td><td>' . esc_html( '' !== $m[3] ? $m[3] : '—' ) . '</td><td>' . esc_html( '' !== $m[4] ? $m[4] : '—' ) . '</td><td>' . esc_html( '' !== $m[5] ? $m[5] : '—' ) . '</td></tr>';
-	}
-	echo '</tbody></table>';
-
-	// (c) Gaps.
-	echo '<h2>Gaps</h2>';
-	echo '<p>Searches with demand that no page targets yet. Suggestions only; nothing on the site was changed.</p>';
-	echo '<table class="widefat striped"><thead><tr><th>#</th><th>Gap</th><th>Detail</th></tr></thead><tbody>';
-	foreach ( $static['gaps'] as $i => $g ) {
+	$gaps = $data['static']['gaps'] ?? array();
+	echo '<details style="margin-top:1.5em"><summary><strong>Gaps (' . aw_sd_num( count( $gaps ) ) . ')</strong>: searches with demand that no page targets yet. Suggestions only.</summary>';
+	echo '<table class="widefat striped" style="margin-top:.5em"><thead><tr><th>#</th><th>Gap</th><th>Detail</th></tr></thead><tbody>';
+	foreach ( $gaps as $i => $g ) {
 		echo '<tr><td>' . (int) ( $i + 1 ) . '</td><td><strong>' . esc_html( $g[0] ) . '</strong></td><td>' . esc_html( $g[1] ) . '</td></tr>';
 	}
-	echo '</tbody></table>';
-
-	echo '<h2>Other signals</h2>';
-	echo '<div style="display:flex;flex-wrap:wrap;gap:2rem">';
-	echo '<table class="widefat striped" style="width:auto"><caption style="text-align:left"><strong>Home phrase, Google Trends</strong></caption><thead><tr><th>Phrase</th><th>Index</th></tr></thead><tbody>';
-	foreach ( $static['trends'] as $t ) {
-		echo '<tr><td>' . esc_html( $t[0] ) . '</td><td>' . aw_sd_num( $t[1] ) . '</td></tr>';
-	}
-	echo '</tbody></table>';
-	echo '<table class="widefat striped" style="width:auto"><caption style="text-align:left"><strong>Wikipedia views a month</strong></caption><thead><tr><th>Article</th><th>Views</th></tr></thead><tbody>';
-	foreach ( $static['wikipedia'] as $w ) {
-		echo '<tr><td>' . esc_html( $w[0] ) . '</td><td>' . aw_sd_num( $w[1] ) . '</td></tr>';
-	}
-	echo '</tbody></table></div>';
-
-	// (d) Last updated.
-	echo '<h2>Last updated</h2>';
-	echo '<table class="widefat striped" style="max-width:60rem"><thead><tr><th>Source</th><th>Updated</th><th>How</th></tr></thead><tbody>';
-	$sc_status = $problem ? $problem : ( ! empty( $data['gsc_error'] ) ? 'Last refresh failed ' . wp_date( 'j M Y, H:i', $data['gsc_error']['time'] ) . ' IST: ' . $data['gsc_error']['message'] : 'Through Site Kit, weekly (Mondays, 07:00 IST) and on Refresh now.' );
-	echo '<tr><td>Search Console</td><td>' . ( ! empty( $gsc['fetched'] ) ? aw_sd_date( $gsc['fetched'], 'j M Y, H:i' ) . ' IST' : 'Never' ) . '</td><td>' . esc_html( $sc_status ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	foreach ( $static['sources'] as $s ) {
-		echo '<tr><td>' . esc_html( $s[0] ) . '</td><td>' . aw_sd_date( $s[1] ) . '</td><td>' . esc_html( $s[2] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	}
-	echo '</tbody></table>';
+	echo '</tbody></table></details>';
 	echo '</div>';
 }
