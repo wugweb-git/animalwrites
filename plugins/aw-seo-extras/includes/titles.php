@@ -262,6 +262,36 @@ function aw_seo_mirror_hub( $field, $value ) {
 	update_post_meta( $post->ID, '_aw_seo_auto', wp_slash( wp_json_encode( $auto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
 }
 
+/**
+ * Refresh the stored copies of all seven hub Pages without a visitor (daily, and from WP-CLI:
+ * `wp eval 'aw_seo_sync_hubs();'`): each hub's page 1 is set up as the main query and its title and description built
+ * through the same filters a visit uses. Cached pages are never built, so this keeps the copies current.
+ *
+ * @return array Hub slug => [title, description] as stored.
+ */
+function aw_seo_sync_hubs() {
+	global $wp_query, $wp_the_query, $post;
+	$keep = array( $wp_query, $wp_the_query, $post, $_SERVER['REQUEST_URI'] ?? '', $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+	$out  = array();
+	foreach ( AW_HUBS as $h ) {
+		$page = get_page_by_path( $h[0] );
+		if ( ! $page || 'publish' !== $page->post_status ) {
+			continue;
+		}
+		$_GET                   = array();
+		$_SERVER['REQUEST_URI'] = (string) wp_parse_url( get_permalink( $page ), PHP_URL_PATH );
+		$wp_query               = new WP_Query( array( 'page_id' => $page->ID ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		$wp_the_query           = $wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		$post                   = $page; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		apply_filters( 'rank_math/frontend/title', '' );
+		apply_filters( 'rank_math/frontend/description', '' );
+		$out[ $h[0] ] = array( get_post_meta( $page->ID, 'rank_math_title', true ), get_post_meta( $page->ID, 'rank_math_description', true ) );
+	}
+	list( $wp_query, $wp_the_query, $post, $_SERVER['REQUEST_URI'], $_GET ) = $keep; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+	return $out;
+}
+add_action( 'aw_seo_fill_daily', 'aw_seo_sync_hubs', 20 );
+
 // While building, the document title comes from WordPress's own parts (the Directory type pages set theirs).
 add_filter( 'pre_get_document_title', fn( $t ) => aw_seo_building_title() ? '' : $t, 16 );
 add_filter(

@@ -7,6 +7,7 @@
  *   the site share image, with its size (helpers.php). Never the publisher's remote image.
  * - og:type "article" only for news, Library, Resources and campaigns; "website" elsewhere.
  * - og:locale en_IN.
+ * - og:image:alt: the picture's own alt text, else the page's title (never the focus keyword, which Rank Math would use).
  * - A missing page shares no image.
  *
  * @package aw-seo-extras
@@ -31,7 +32,12 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 			}
 			$img = aw_seo_image();
 			if ( $img ) {
-				$image->add_image( array_filter( array( 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'], 'type' => (string) get_post_mime_type( (int) ( $img['id'] ?? 0 ) ) ) ) );
+				$alt = trim( (string) get_post_meta( (int) ( $img['id'] ?? 0 ), '_wp_attachment_image_alt', true ) ); // the picture's own alt text
+				if ( '' === $alt ) {
+					$obj = get_queried_object();
+					$alt = $obj instanceof WP_Post ? aw_seo_plain( $obj->post_title ) : ( $obj instanceof WP_Term ? aw_seo_plain( $obj->name ) : get_bloginfo( 'name' ) );
+				}
+				$image->add_image( array_filter( array( 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'], 'type' => (string) get_post_mime_type( (int) ( $img['id'] ?? 0 ) ), 'alt' => $alt ) ) );
 			}
 		}
 	);
