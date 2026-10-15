@@ -834,6 +834,8 @@ body { background: var(--kit-color-canvas); }
 .aw-src-icon, .aw-datasrc-logo img { width: 16px !important; height: 16px !important; object-fit: contain; border-radius: 3px; background: transparent; border: 0; padding: 0; }
 .aw-src-icon:not(.aw-src-icon--letter), .aw-datasrc-logo { box-sizing: content-box; padding: 3px !important; background: var(--kit-color-raised) !important; border: 1px solid var(--kit-color-line) !important; border-radius: var(--radius-sm) !important; }
 .aw-datasrc-logo { display: inline-flex; width: 16px !important; height: 16px !important; align-items: center; justify-content: center; }
+/* A publisher with no logo yet: its letter on an ink tile, never a blank square (owner, 15 Oct 2026). */
+.aw-src-icon.aw-src-icon--letter { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .aw-datasrcs.is-full { grid-template-columns: max-content minmax(0, 1fr); }
 .aw-law-date, .aw-posted-by, .aw-press-handle { display: inline-flex !important; align-items: center; gap: var(--s-1); }
 .aw-law-date::before, .aw-posted-by::before, .aw-press-handle::before {

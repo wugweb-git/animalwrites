@@ -322,10 +322,42 @@ function aw_block_badges( $a, $id ) {
 	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
 	$types = get_the_terms( $id, 'aw_listing_type' );
 	foreach ( ( $types && ! is_wp_error( $types ) ) ? array_slice( $types, 0, 2 ) : array() as $t ) {
-		$out .= '<span class="kit-tag"><span class="aw-type-ico aw-type-ico--' . esc_attr( $t->slug ) . '" aria-hidden="true"></span>' . esc_html( $t->name ) . '</span>'; // the type's icon, then its name
+		$out .= '<span class="kit-tag">' . aw_type_icon( $t->slug ) . esc_html( $t->name ) . '</span>'; // the type's icon, then its name
 	}
 	return $out ? '<p class="aw-org-tags kit-tags">' . $out . '</p>' : '';
 }
+
+/**
+ * A listing type's icon (aw-type-ico): it goes before the type's name wherever that label appears, and never stands in
+ * for a logo (owner, 15 Oct 2026: a logo slot shows the organisation's own logo or its initials only).
+ *
+ * @param string $slug Listing type slug.
+ * @return string
+ */
+function aw_type_icon( $slug ) {
+	return '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" aria-hidden="true"></span>';
+}
+
+// Organisation page: the listing type label carries the same icon as on the Directory cards.
+add_filter(
+	'render_block_core/post-terms',
+	function ( $html, $block, $instance ) {
+		if ( 'aw_listing_type' !== ( $block['attrs']['term'] ?? '' ) || '' === $html ) {
+			return $html;
+		}
+		$id    = (int) ( $instance->context['postId'] ?? get_the_ID() );
+		$terms = get_the_terms( $id, 'aw_listing_type' );
+		if ( ! $terms || is_wp_error( $terms ) ) {
+			return $html;
+		}
+		foreach ( $terms as $t ) {
+			$html = preg_replace( '#(<a\b[^>]*>)(' . preg_quote( esc_html( $t->name ), '#' ) . '</a>)#u', '$1' . aw_type_icon( $t->slug ) . '$2', $html, 1 );
+		}
+		return $html;
+	},
+	5, // before the breadcrumb trail is put in front (breadcrumbs.php)
+	3
+);
 
 /** Ways to reach the organisation, shown only when they exist. */
 function aw_block_contact( $a, $id ) {
