@@ -106,7 +106,7 @@
   --kit-color-canvas: var(--wp--preset--color--canvas, #F4F4F4);
   --kit-focus-width: 3px;
   --kit-focus-offset: 2px;
-  --kit-size-check: 1.25rem;
+  --kit-size-check: 1.5rem;
   --kit-color-warning: var(--wp--preset--color--warning, #8a5a00);
   --kit-color-warning-soft: #fff6e0;
   --kit-color-info: var(--color-blue);

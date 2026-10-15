@@ -286,3 +286,27 @@ function aw_mirror_gov_pdf( $post_id, $url ) {
 	update_post_meta( $post_id, 'aw_file_id', (int) $fid );
 	return (int) $fid;
 }
+
+/*
+ * No picture twice on an item's own page: when the lead picture is the same file the article body already shows (e.g. a
+ * Library item's document preview, both above the summary and in the text), the lead picture is left out. Lists and
+ * cards are not affected.
+ */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $content, $block, $instance ) {
+		$post_id = (int) ( $instance->context['postId'] ?? 0 );
+		if ( '' === trim( $content ) || ! $post_id || ! is_singular() || get_queried_object_id() !== $post_id || ! empty( $block['attrs']['isLink'] ) ) {
+			return $content;
+		}
+		if ( ! preg_match( '/<img[^>]+src="([^"]+)"/', $content, $m ) ) {
+			return $content;
+		}
+		$file = (string) wp_basename( (string) wp_parse_url( html_entity_decode( $m[1] ), PHP_URL_PATH ) );
+		$stem = preg_replace( '/(-\d+x\d+|-scaled)?\.[a-z0-9]+$/i', '', $file ); // "name-1024x576.jpg" -> "name"
+		$body = (string) get_post_field( 'post_content', $post_id );
+		return ( strlen( $stem ) > 3 && false !== strpos( $body, $stem ) ) ? '' : $content;
+	},
+	20,
+	3
+);
