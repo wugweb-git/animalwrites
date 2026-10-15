@@ -786,6 +786,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 
 /* Full-width bands follow each other with no gap (the page background showed through as a strip). */
 :where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
+html:not(.kits-preview) :where(.wp-block-post-content, main) > .alignfull + :is(.kit-ad--empty, .kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"])) + .alignfull { margin-block-start: 0 !important; } /* a hidden ad slot between two sections adds no gap */
 
 /* Buttons: ink is the main button; yellow only on dark surfaces (header, hero, help band, footer), where ink would vanish. */
 :is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(:is(.is-style-outline, .is-style-kits-secondary, .is-style-kits-ghost) *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
