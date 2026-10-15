@@ -83,7 +83,7 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
 	$t = preg_replace( '/(?<=\S)\s*[:;]\s+/u', ' ', $t );
 	$t = preg_replace( '/[(\[]\s*([^()\[\]]*?)\s*[)\]]/u', '$1', $t );
 	$t = preg_replace( '/\s+&\s+/u', ' and ', $t ); // "and", never "&" (owner, 15 Oct 2026)
-	return trim( preg_replace( '/\s+/u', ' ', $t ), " \t-–—:;|," );
+	return (string) preg_replace( '/^[\s\-–—:;|,]+|[\s\-–—:;|,]+$/u', '', preg_replace( '/\s+/u', ' ', $t ) ); // not trim(): its byte list would eat the opening quote of "‘Supreme Court’…" (owner, 15 Oct 2026)
 }
 
 /** $text with the page suffix, unless it already names the page. */
