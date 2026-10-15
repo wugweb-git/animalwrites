@@ -573,12 +573,20 @@
 		s.style.opacity = '0';
 		var io = new IntersectionObserver(function (entries) {
 			entries.forEach(function (e) {
-				if (!e.isIntersecting) return;
-				io.disconnect();
-				window.gsap.fromTo(s, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: ease, clearProps: 'transform,opacity' });
+				if (e.isIntersecting) {
+					io.disconnect();
+					window.gsap.fromTo(s, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: ease, clearProps: 'transform,opacity' });
+				} else if (e.boundingClientRect.bottom < 0) { // jumped past (anchor link, fast scroll): show it, no animation
+					io.disconnect();
+					s.style.opacity = '';
+				}
 			});
-		}, { rootMargin: '0px 0px -10% 0px' });
+		}, { rootMargin: '0px' });
 		io.observe(s);
+	});
+	// Print shows every section, whether or not it has scrolled into view.
+	window.addEventListener('beforeprint', function () {
+		sections.forEach(function (s) { window.gsap.killTweensOf(s); s.style.opacity = ''; s.style.transform = ''; });
 	});
 })();
 

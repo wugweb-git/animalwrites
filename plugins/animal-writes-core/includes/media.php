@@ -199,7 +199,7 @@ function aw_doc_preview_html( $post_id ) {
 	$host   = preg_replace( '/^www\./', '', (string) wp_parse_url( $source, PHP_URL_HOST ) );
 	$issuer = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $post_id ) : null;
 	$who    = $issuer ? strtoupper( $issuer->slug ) : $host;
-	return '<div class="aw-doc-preview"><a href="' . esc_url( $source ) . '" rel="noopener">'
+	return '<div class="aw-doc-preview"><a href="' . esc_url( $source ) . '" rel="noopener" tabindex="-1" aria-hidden="true">' // the button below is the one link
 		. wp_get_attachment_image( $preview, 'full', false, array( 'alt' => '', 'loading' => 'lazy' ) ) . '</a>'
 		. '<div class="aw-doc-preview-text"><p>' . esc_html( sprintf( 'We don\'t have permission from the %s to host this document yet, so it isn\'t shown here.', $who ) ) . '</p>'
 		. '<p><a class="wp-element-button" href="' . esc_url( $source ) . '" rel="noopener">' . esc_html( 'Read it on ' . $host ) . '</a></p></div></div>';
@@ -305,6 +305,9 @@ add_filter(
 		$file = (string) wp_basename( (string) wp_parse_url( html_entity_decode( $m[1] ), PHP_URL_PATH ) );
 		$stem = preg_replace( '/(-\d+x\d+|-scaled)?\.[a-z0-9]+$/i', '', $file ); // "name-1024x576.jpg" -> "name"
 		$body = (string) get_post_field( 'post_content', $post_id );
+		if ( is_singular( 'aw_legal' ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && '' !== aw_doc_preview_html( $post_id ) ) {
+			$body .= (string) get_attached_file( (int) get_post_meta( $post_id, 'aw_doc_preview', true ) ); // the document preview under the summary
+		}
 		return ( strlen( $stem ) > 3 && false !== strpos( $body, $stem ) ) ? '' : $content;
 	},
 	20,

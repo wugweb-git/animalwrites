@@ -276,6 +276,9 @@ function aw_list_filters( $type ) {
 		$groups .= kits_filter_dropdown( $label, $param, $options ); // every hub the same (owner, 14 Oct 2026): one button per filter, Sort beside them; a "Filters" sheet on phones
 	}
 	$sort_opts = array();
+	if ( (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ) {
+		$sorts = array(); // nothing to order with fewer than 2 items
+	}
 	foreach ( $sorts as $k => $l ) {
 		$sort_opts[] = array( $l, add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), $all ), $k === $sort );
 	}
