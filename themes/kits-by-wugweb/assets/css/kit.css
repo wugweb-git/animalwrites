@@ -566,6 +566,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-trust ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); }
 .kit-trust li { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: start; max-width: none; margin: 0; }
 .kit-trust li > .kit-ico { --kit-ico-size: 1.25rem; margin-top: 0.05em; color: var(--kit-color-muted); }
+.kit-trust li > span:only-child { grid-column: 2; } /* a row without an icon (e.g. the dates) stays in the text column */
 .kit-trust.is-verified li:first-child > .kit-ico { color: var(--kit-color-success); }
 .kit-trust.is-unverified li:first-child > .kit-ico { color: var(--kit-color-warning); }
 .kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-regular); }
