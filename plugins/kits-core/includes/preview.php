@@ -8,9 +8,9 @@
  * and CSS hides preview-only parts unless the page is marked html.kits-preview (set by a small script after asking the
  * uncached endpoint GET /wp-json/kits/v1/preview) or body.kits-preview (administrators, who bypass the cache).
  *
- * Preview-only items (kits_preview_only_ids): their list cards carry .kits-preview-only (hidden unless previewing), they
- * are left out of search for everyone but administrators and out of the sitemaps, and their own URL is never cached and
- * returns 404 unless the request previews (checked on the server; that URL is not cached).
+ * Preview-only items (kits_preview_only_ids): left out of every list and search for everyone but administrators (their
+ * cards also carry .kits-preview-only) and out of the sitemaps, and their own URL is never cached and returns 404 unless
+ * the request previews (checked on the server; that URL is not cached).
  *
  * @package kits-core
  */
@@ -171,11 +171,15 @@ add_filter(
 	3
 );
 
-// Search (any query with search words) leaves them out, except for administrators.
+// Every list and search on the site leaves them out, except for administrators (who bypass the page cache), so no
+// public page links to them (owner, 15 Oct 2026). Only the item's own address still finds it, for the preview check below.
 add_action(
 	'pre_get_posts',
 	function ( $q ) {
-		if ( is_admin() || '' === (string) $q->get( 's' ) || current_user_can( 'manage_options' ) || ! kits_preview_only_ids() ) {
+		if ( is_admin() || wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI ) || current_user_can( 'manage_options' ) || ! kits_preview_only_ids() ) {
+			return;
+		}
+		if ( $q->is_main_query() && $q->is_singular() ) {
 			return;
 		}
 		$q->set( 'post__not_in', array_merge( (array) $q->get( 'post__not_in' ), kits_preview_only_ids() ) );

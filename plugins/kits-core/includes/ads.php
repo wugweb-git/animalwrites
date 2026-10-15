@@ -173,7 +173,14 @@ add_filter(
 add_action(
 	'init',
 	function () {
-		wp_register_script( 'kits-ad-slot', plugins_url( 'assets/js/ad-slot.js', KITS_CORE_DIR . 'kits-core.php' ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ), (string) filemtime( KITS_CORE_DIR . 'assets/js/ad-slot.js' ), true );
+		// kits-core loaded from outside wp-content/plugins (bundled next to a site plugin) has no public URL, so its editor
+		// script is printed inline there; installed as a plugin, it is a normal file.
+		$file   = KITS_CORE_DIR . 'assets/js/ad-slot.js';
+		$public = 0 === strpos( wp_normalize_path( (string) realpath( KITS_CORE_DIR ) ), wp_normalize_path( (string) realpath( WP_PLUGIN_DIR ) ) . '/' );
+		wp_register_script( 'kits-ad-slot', $public ? plugins_url( 'assets/js/ad-slot.js', KITS_CORE_DIR . 'kits-core.php' ) : false, array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ), (string) filemtime( $file ), true );
+		if ( ! $public ) {
+			wp_add_inline_script( 'kits-ad-slot', (string) file_get_contents( $file ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
 		$opts = array();
 		foreach ( kits_ad_block_slots() as $name => $s ) {
 			$opts[] = array( 'value' => $name, 'label' => $s[0], 'where' => $s[1] );

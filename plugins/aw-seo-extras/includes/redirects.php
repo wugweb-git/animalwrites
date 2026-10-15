@@ -1,7 +1,8 @@
 <?php
 /**
  * Redirects. The one list is Rank Math → Redirections (owner, 10 Oct 2026): aw_redirect_add() adds to it, so forms,
- * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author).
+ * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author);
+ * /?author=N goes there in one hop (below).
  *
  * Rules Rank Math's list cannot hold (they rewrite the address rather than match it) stay here:
  * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
@@ -90,6 +91,18 @@ add_action(
 	function () {
 		if ( ( isset( $_GET['lang'] ) || isset( $_GET['issuer'] ) || isset( $_GET['court'] ) ) && is_post_type_archive( 'aw_legal' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			wp_safe_redirect( remove_query_arg( array( 'lang', 'issuer', 'court' ) ), 301 );
+			exit;
+		}
+	},
+	1
+);
+
+// /?author=N goes to About in one hop (WordPress would first send it to /author/{name}/, which the ^author rule sends on).
+add_action(
+	'template_redirect',
+	function () {
+		if ( isset( $_GET['author'] ) && is_author() ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( home_url( '/about/' ), 301, 'Animal Writes' );
 			exit;
 		}
 	},
