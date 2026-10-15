@@ -413,17 +413,17 @@ function aw_article_nodes( $id ) {
 		if ( $src_date ) {
 			$node['datePublished'] = $src_date; // the day the story was reported
 		}
-		$outlet = $src_name ? array( '@type' => 'NewsMediaOrganization', 'name' => $src_name ) : null;
+		$outlet = $src_name ? array( '@type' => 'NewsMediaOrganization', 'name' => $src_name ) : null; // references are CreativeWork, so search engines see one article
 		if ( $outlet ) {
 			$node['sourceOrganization'] = $outlet;
 		}
 		if ( $src_url ) {
-			$node['isBasedOn'] = array_filter( array( '@type' => 'NewsArticle', 'url' => $src_url, 'publisher' => $outlet, 'datePublished' => $src_date ) );
+			$node['isBasedOn'] = array_filter( array( '@type' => 'CreativeWork', 'genre' => 'News report', 'url' => $src_url, 'publisher' => $outlet, 'datePublished' => $src_date ) );
 		}
 		$also = array();
 		foreach ( (array) get_post_meta( $id, 'aw_also_reported', true ) as $r ) {
 			if ( is_array( $r ) && ! empty( $r['url'] ) ) { // later reports of the same event
-				$also[] = array_filter( array( '@type' => 'NewsArticle', 'url' => (string) $r['url'], 'publisher' => empty( $r['name'] ) ? null : array( '@type' => 'NewsMediaOrganization', 'name' => aw_seo_plain( $r['name'] ) ) ) );
+				$also[] = array_filter( array( '@type' => 'CreativeWork', 'genre' => 'News report', 'url' => (string) $r['url'], 'publisher' => empty( $r['name'] ) ? null : array( '@type' => 'NewsMediaOrganization', 'name' => aw_seo_plain( $r['name'] ) ) ) );
 			}
 		}
 		if ( $also ) {
