@@ -363,7 +363,14 @@ add_shortcode(
 			}
 			// "Also reported by" is shown as publisher logos in the source row (same-story.php), not as text lines here.
 			$t      = fn( $iso, $text ) => aw_date( $iso ); // the one date component
-			$rows[] = array( '', ( get_post_meta( $id, 'aw_source_date', true ) ? 'Published ' . $t( aw_src_date( $id, 'Y-m-d' ), aw_src_date( $id ) ) . ' · added ' : 'Added ' ) . $t( get_the_date( 'Y-m-d', $id ), get_the_date( 'j M Y', $id ) ), true );
+			$pub    = get_post_meta( $id, 'aw_source_date', true ) ? aw_src_date( $id, 'Y-m-d' ) : '';
+			$added  = get_the_date( 'Y-m-d', $id );
+			$rows[] = array(
+				'',
+				$pub === $added ? 'Published ' . $t( $pub, '' ) // same day: one date (owner, 15 Oct 2026)
+					: ( $pub ? 'Published ' . $t( $pub, '' ) . ' · added ' : 'Added ' ) . $t( $added, '' ),
+				true,
+			);
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
 				$rows[] = array( 'research', 'Official document attached below' );
 			} elseif ( get_post_meta( $id, 'aw_doc_preview', true ) ) {
