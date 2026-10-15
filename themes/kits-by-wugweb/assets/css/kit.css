@@ -876,7 +876,8 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 }
 
 /* Breadcrumbs: Home as an icon; long trails fold the middle into "…" */
-.kit-crumbs-home a { display: inline-flex; align-items: center; text-decoration: none !important; }
+.kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none !important;
+	min-width: var(--kit-size-check); min-height: var(--kit-size-check); margin: calc((1rem - var(--kit-size-check)) / 2); } /* 24px hit area around the 16px icon; the negative margin keeps the icon where it was */
 .kit-crumbs-home .kit-ico { --kit-ico-size: 1rem; }
 .kit-crumbs-more { color: var(--kit-color-muted); }
 /* Band head spans the content box (it is a flex child; auto margins would shrink and centre it) */
