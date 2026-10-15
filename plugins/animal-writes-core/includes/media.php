@@ -157,7 +157,9 @@ add_filter(
 add_filter(
 	'render_block_core/post-featured-image',
 	function ( $content, $block, $instance ) {
-		if ( empty( $block['attrs']['isLink'] ) || ! isset( $instance->context['queryId'] ) || false !== strpos( $content, 'tabindex="-1"' ) ) {
+		$post_id = (int) ( $instance->context['postId'] ?? 0 );
+		$own     = is_singular() && get_queried_object_id() === $post_id; // the item's own page, not a card
+		if ( empty( $block['attrs']['isLink'] ) || $own || false !== strpos( $content, 'tabindex="-1"' ) ) {
 			return $content;
 		}
 		return preg_replace( '/<a (?=[^>]*href=)/', '<a tabindex="-1" aria-hidden="true" ', $content, 1 );
