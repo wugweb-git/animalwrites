@@ -85,7 +85,7 @@ Topic titles are already stored per term in Rank Math ("{Topic} in India – Ani
 | Resources: guides (16) | set by hand from the guide | 1 to 2 (see below) | I (how-to) | Article → Article | Article; FAQPage from the guide's Rank Math FAQ block |
 | Opportunities | role title (the job) | none | T | None | JobPosting (none once closed) |
 | Campaign | animal writes campaign | none | N/I | None | CreativeWork |
-| Press | a phrase from the coverage title (the job) | none | N | None (the item redirects to the outlet or to Media) | (in the Media CollectionPage) |
+| Press | a phrase from the coverage title (the job) | none | N | None | (in the Media CollectionPage) |
 | Listings | organisation name (on publish, aw-seo-extras) | none | N/T | None | NGO / VeterinaryCare / AnimalShelter / GovernmentOrganization |
 
 Rules for the focus-keyword job, the same on the site (`aw_seo_clean_keyword`) and in the worker (`focus_keywords.why_refused`):
@@ -121,7 +121,7 @@ Rules for the focus-keyword job, the same on the site (`aw_seo_clean_keyword`) a
 
 | Page | Primary keyword | Intent | Note |
 |---|---|---|---|
-| Home | animal welfare in india (field currently "animal welfare home": proposed change, see the report) | N/I | The owner's hero copy is not changed |
+| Home | animal welfare in india (secondary: animal welfare news, animal welfare ngo directory; was "animal welfare home") | N/I | The owner's hero copy is not changed |
 | About | about animal writes | N | The owner's wording |
 | Contact | contact us | N/T | The owner's wording |
 | Volunteer | register as volunteer | T | The owner's wording |
