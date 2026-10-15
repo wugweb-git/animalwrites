@@ -1066,11 +1066,11 @@ body { background: var(--kit-color-canvas); }
 .aw-vol-details { margin-bottom: var(--s-6); }
 .aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: 100%; justify-content: center; min-height: 52px; }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
 	.aw-vol-page .aw-vol-banner-photo img { height: 240px; }
 	.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: auto; }
 }
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
 	/* Photo across the top on desktop too (owner, 12 Oct 2026); the form below it. */
 	.aw-vol-page { grid-template-columns: minmax(0, 1fr); }
 	.aw-vol-page .aw-vol-banner-photo img { height: 360px; }
@@ -1088,7 +1088,7 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-services .kit-checkbox input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--kit-color-ink); }
 .aw-claim-services .kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: 4px 4px 0 var(--kit-color-accent); }
 .aw-claim-services .kit-checkbox:has(input:focus-visible) { outline: 3px solid var(--kit-color-focus); outline-offset: 2px; }
-@media (min-width: 640px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
+@media (min-width: 768px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
 @media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }
 
 /* Directory search, wide screens (fix 12 Oct 2026): the name field, the three selects and Search sit on one line,
