@@ -3,8 +3,10 @@
  * Open Graph / Twitter details Rank Math's settings cannot express. Rank Math prints the tags; a share image or text
  * chosen in Rank Math always wins.
  *
- * - One share image: the item's own stored image when landscape (featured image, category photo, hosted PDF cover), else
- *   the site share image, with its size (helpers.php). Never the publisher's remote image.
+ * - One share image (helpers.php): the item's own image when landscape: for News, Library, research and Opportunities
+ *   the publisher's image, linked; else the featured image (a listing's logo), a Library item's hosted PDF cover, a
+ *   Page's own band photo. Category pages: the category photo, stored in Rank Math's own share-image fields
+ *   (programmatic.php), which Rank Math prints. Tags and everything else: the site share image.
  * - og:type "article" only for news, Library, Resources and campaigns; "website" elsewhere.
  * - og:locale en_IN.
  * - og:image:alt: the picture's own alt text, else the page's title (never the focus keyword, which Rank Math would use).
@@ -29,6 +31,9 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 			}
 			if ( aw_seo_typed( 'facebook_image_id' ) || aw_seo_typed( 'facebook_image' ) || aw_seo_typed( 'twitter_image_id' ) ) {
 				return;
+			}
+			if ( aw_seo_is_category_page() && get_term_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true ) ) {
+				return; // the category photo, stored in Rank Math's fields: Rank Math prints it
 			}
 			$img = aw_seo_image();
 			if ( $img ) {

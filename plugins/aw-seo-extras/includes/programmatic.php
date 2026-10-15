@@ -637,27 +637,46 @@ add_filter(
 );
 
 /**
- * Keep each category's stored Rank Math description equal to the one built here, so the Rank Math box shows what is
- * printed: only where the field is empty or still holds the automatic copy (_aw_seo_auto); a typed one is never
- * replaced. Daily, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_categories() );'`.
+ * Keep each category's stored Rank Math fields equal to the ones built here, so the Rank Math box shows what is printed:
+ * the description, and the share image (Facebook image = the category photo, Twitter uses the Facebook one). Only
+ * where the field is empty or still holds the automatic copy (_aw_seo_auto); a typed one is never replaced. Daily, when
+ * a category is saved, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_categories() );'`.
  *
  * @return array slug => description.
  */
 function aw_seo_sync_categories() {
 	$out = array();
-	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true ) ) as $term ) {
-		$value = aw_seo_category_description( $term );
+	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => false ) ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
-		$have  = trim( (string) get_term_meta( $term->term_id, 'rank_math_description', true ) );
-		if ( '' !== $value && $have !== $value && ( '' === $have || $have === ( $auto['description'] ?? null ) ) ) {
-			update_term_meta( $term->term_id, 'rank_math_description', wp_slash( $value ) );
-			$auto['description'] = $value;
+		$att   = function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $term ) : 0;
+		$url   = $att ? (string) wp_get_attachment_url( $att ) : '';
+		$want  = array(
+			'description'          => $term->count ? aw_seo_category_description( $term ) : '',
+			'facebook_image_id'    => $url ? (string) $att : '',
+			'facebook_image'       => $url,
+			'twitter_use_facebook' => $url ? 'on' : '',
+		);
+		$dirty = false;
+		foreach ( $want as $k => $value ) {
+			$have = trim( (string) get_term_meta( $term->term_id, 'rank_math_' . $k, true ) );
+			if ( '' !== $value && $have !== $value && ( '' === $have || $have === ( $auto[ $k ] ?? null ) ) ) {
+				update_term_meta( $term->term_id, 'rank_math_' . $k, wp_slash( $value ) );
+				$auto[ $k ] = $value;
+				$dirty      = true;
+			} elseif ( '' !== $value && $have === $value && ! isset( $auto[ $k ] ) && 'description' !== $k ) {
+				$auto[ $k ] = $value; // already equal: mark it automatic so a later photo change follows
+				$dirty      = true;
+			}
+		}
+		if ( $dirty ) {
 			update_term_meta( $term->term_id, '_aw_seo_auto', wp_slash( wp_json_encode( $auto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
 		}
 		$out[ $term->slug ] = trim( (string) get_term_meta( $term->term_id, 'rank_math_description', true ) );
 	}
 	return $out;
 }
+add_action( 'edited_category', fn() => aw_seo_sync_categories(), 30 ); // after the photo is saved (category-images.php)
+add_action( 'created_category', fn() => aw_seo_sync_categories(), 30 );
 add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
 
 /* ---------- Resources hub: guides and research summaries counted apart ---------- */
@@ -747,6 +766,85 @@ function aw_seo_tag_description( $term ) {
 	return aw_seo_cut( ucfirst( $text ), 155 );
 }
 
+/**
+ * A tag's Rank Math focus keyword: the primary search phrase first, then secondaries, comma-separated (as the
+ * categories are stored; docs/seo/keyword-map.md). Searched wording where it is known (keyword-demand-2026-10-15.md:
+ * "gaushala", "veterinary hospital", "1962", "ngo jobs"), else built from the tag's name and section.
+ *
+ * @param WP_Term $term Tag.
+ * @return string
+ */
+function aw_seo_tag_keyword( $term ) {
+	$known = array(
+		'abc-centre'                  => 'abc centre,dog sterilisation centre,animal birth control centre',
+		'act'                         => 'animal welfare acts india,pca act',
+		'adoption'                    => 'dog adoption,pet adoption ngo',
+		'adoption-network'            => 'dog adoption,adopt a dog',
+		'advisory'                    => 'animal welfare advisories,awbi advisory',
+		'ambulance'                   => 'animal ambulance,animal ambulance number',
+		'animal-ambulance'            => 'animal ambulance,animal ambulance number',
+		'animal-shelter'              => 'animal shelter,animal shelter near me',
+		'animal-welfare-organisation' => 'animal welfare ngos in india,animal ngo,animal ngo near me',
+		'bird-hospital'               => 'bird hospital,injured bird helpline',
+		'boarding-foster'             => 'pet boarding,dog foster home',
+		'boarding-and-foster'         => 'pet boarding,dog foster home',
+		'cattle-care'                 => 'cattle care,gaushala',
+		'circular'                    => 'animal welfare circulars,awbi circular',
+		'emergency-rescue'            => 'animal rescue,animal rescue contact number',
+		'event'                       => 'animal welfare events india',
+		'faq'                         => 'animal welfare faqs',
+		'feeder-network'              => 'stray dog feeders,stray animal feeders',
+		'feeding'                     => 'feeding stray dogs,stray dog feeding',
+		'fellowship'                  => 'animal welfare fellowship',
+		'foster'                      => 'foster animals,dog foster',
+		'gaushala'                    => 'gaushala,gaushalas in india,gaushala near me',
+		'grant'                       => 'animal welfare grants',
+		'guide'                       => 'animal welfare guides',
+		'how-to'                      => 'animal welfare how-to guides',
+		'internship'                  => 'animal welfare internship',
+		'job'                         => 'animal welfare jobs india,ngo jobs',
+		'judgment'                    => 'animal welfare court judgments,supreme court stray dogs',
+		'legal-aid'                   => 'animal legal aid',
+		'legal-help'                  => 'animal legal help',
+		'mobile-veterinary-unit'      => '1962 mobile veterinary unit,1962 animal ambulance,mobile veterinary unit',
+		'notification'                => 'animal welfare notifications,awbi notification',
+		'official-release'            => 'animal welfare official releases',
+		'order'                       => 'animal welfare orders',
+		'rescue'                      => 'animal rescue,animal rescue near me',
+		'rescue-group'                => 'animal rescue group',
+		'research'                    => 'animal welfare research india,stray dog research',
+		'rule'                        => 'animal welfare rules india,animal protection rules',
+		'sanctuary'                   => 'animal sanctuary india',
+		'shelter'                     => 'animal shelter,animal shelter near me',
+		'sterilisation'               => 'dog sterilisation,abc programme',
+		'template'                    => 'animal complaint letter template',
+		'treatment'                   => 'stray animal treatment,animal treatment ngo',
+		'vaccination'                 => 'dog vaccination,anti rabies vaccination',
+		'veterinary-clinic'           => 'veterinary clinic,vet near me',
+		'veterinary-dispensary'       => 'veterinary dispensary,government veterinary dispensary',
+		'veterinary-hospital'         => 'veterinary hospital,government veterinary hospital',
+		'veterinary-office'           => 'government veterinary office,animal husbandry office',
+		'volunteer'                   => 'animal welfare volunteer,animal volunteering near me',
+		'wildlife-rescue'             => 'wildlife rescue india,wildlife rescue',
+	);
+	if ( isset( $known[ $term->slug ] ) ) {
+		return $known[ $term->slug ];
+	}
+	$name   = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) ) ) );
+	$plural = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_tag_plural( $term ) ) ) ) ) );
+	$sec    = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
+	if ( function_exists( 'aw_service_slugs' ) && in_array( $term->slug, aw_service_slugs(), true ) ) {
+		return 0 === strpos( $name, 'animal' ) ? $name : 'animal ' . $name; // "animal rescue"
+	}
+	if ( 'aw_listing' === $sec ) {
+		return $plural . ' in india'; // "dog trainers in india"
+	}
+	if ( in_array( $sec, array( 'aw_legal', 'aw_opportunity', 'post' ), true ) ) {
+		return 0 === strpos( $plural, 'animal' ) ? $plural : 'animal welfare ' . $plural; // "animal welfare circulars"
+	}
+	return $name;
+}
+
 // A tag page is indexed once it holds 3 or more items.
 add_filter(
 	'rank_math/frontend/robots',
@@ -760,9 +858,10 @@ add_filter(
 );
 
 /**
- * Keep each tag's Rank Math title, description and robots equal to the ones built here (marked automatic in
- * _aw_seo_auto), so the Rank Math box shows what is printed and the sitemap leaves out tags with fewer than 3 items. A
- * typed title or description is never replaced. Daily, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_tags() );'`.
+ * Keep each tag's Rank Math title, description, focus keyword and robots equal to the ones built here (marked automatic
+ * in _aw_seo_auto), so the Rank Math box shows what is printed and the sitemap leaves out tags with fewer than 3 items.
+ * A typed title, description or keyword is never replaced. Daily, when a tag is added or saved, and from WP-CLI:
+ * `wp eval 'print_r( aw_seo_sync_tags() );'`.
  *
  * @return array slug => [title, description, robots].
  */
@@ -771,8 +870,9 @@ function aw_seo_sync_tags() {
 	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$want  = array(
-			'title'       => aw_seo_tag_title( $term ) . ' %sep% %sitename%',
-			'description' => aw_seo_tag_description( $term ),
+			'title'         => aw_seo_tag_title( $term ) . ' %sep% %sitename%',
+			'description'   => aw_seo_tag_description( $term ),
+			'focus_keyword' => aw_seo_tag_keyword( $term ),
 		);
 		foreach ( $want as $k => $value ) {
 			$have = trim( (string) get_term_meta( $term->term_id, 'rank_math_' . $k, true ) );
@@ -793,3 +893,5 @@ function aw_seo_sync_tags() {
 	return $out;
 }
 add_action( 'aw_seo_fill_daily', 'aw_seo_sync_tags', 31 );
+add_action( 'created_post_tag', fn() => aw_seo_sync_tags(), 30 );
+add_action( 'edited_post_tag', fn() => aw_seo_sync_tags(), 30 );

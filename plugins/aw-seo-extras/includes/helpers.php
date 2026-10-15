@@ -350,19 +350,43 @@ function aw_seo_default_image() {
 	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // made at share size (1200×630)
 }
 
+/** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
+const AW_SEO_SOURCE_IMAGE_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' );
+
 /**
- * The image of an item, from the site's own media library only: the share image chosen in Rank Math, the featured
- * image, then the item's own stored image (category photo, hosted PDF). Never a remote URL.
+ * The item's own image (owner, 15 Oct 2026: ingested items use the publisher's image, linked; never a category photo
+ * in place of the item's own):
+ *  1. the share image chosen in Rank Math;
+ *  2. News, Library, research and Opportunities: the publisher's image (aw_source_image, checked in cc0-images.php;
+ *     read from the source page's og:image when ingest stored none);
+ *  3. the featured image (a guide's photo, a listing's logo, an ingested item's own CC0 photo);
+ *  4. Library: the hosted PDF's first page;
+ *  5. Pages: the first picture in the page's own content (the Volunteer band photo, for example).
+ * Null when the item has none (the site share image is used then).
  *
  * @param int $id Post ID.
- * @return array|null
+ * @return array|null [id, url, width, height]; id 0 for a linked publisher image.
  */
 function aw_seo_item_image( $id ) {
-	$cands = array(
-		(int) get_post_meta( $id, 'rank_math_facebook_image_id', true ),
-		(int) get_post_thumbnail_id( $id ),
-		function_exists( 'aw_item_image_id' ) ? (int) aw_item_image_id( $id ) : 0,
-	);
+	$img = aw_seo_attachment( (int) get_post_meta( $id, 'rank_math_facebook_image_id', true ) );
+	if ( $img ) {
+		return $img;
+	}
+	$type = get_post_type( $id );
+	if ( in_array( $type, AW_SEO_SOURCE_IMAGE_TYPES, true ) && function_exists( 'aw_publisher_image' ) ) {
+		$url = aw_publisher_image( $id );
+		if ( '' !== $url ) {
+			return array( 'id' => 0, 'url' => $url, 'width' => (int) get_post_meta( $id, 'aw_source_image_w', true ), 'height' => (int) get_post_meta( $id, 'aw_source_image_h', true ) );
+		}
+	}
+	$cands = array( (int) get_post_thumbnail_id( $id ) );
+	if ( 'aw_legal' === $type ) {
+		$cands[] = (int) get_post_meta( $id, 'aw_file_id', true );
+		$cands[] = (int) get_post_meta( $id, 'aw_doc_preview', true );
+	}
+	if ( 'page' === $type && preg_match( '/<!-- wp:(?:image|cover|media-text) \{[^}]*?"(?:id|mediaId)":(\d+)/', (string) get_post_field( 'post_content', $id ), $m ) ) {
+		$cands[] = (int) $m[1];
+	}
 	foreach ( $cands as $att ) {
 		$img = aw_seo_attachment( $att );
 		if ( $img ) {
@@ -372,9 +396,19 @@ function aw_seo_item_image( $id ) {
 	return null;
 }
 
+/** The share image of a category page: its category photo (term meta aw_category_image), or null. */
+function aw_seo_term_image() {
+	if ( ! aw_seo_is_category_page() || ! function_exists( 'aw_category_image_id' ) ) {
+		return null;
+	}
+	$att = (int) get_term_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true );
+	return aw_seo_attachment( $att ? $att : (int) aw_category_image_id( get_queried_object() ) );
+}
+
 /**
- * The share image of the current view (og:image and article schema): the item's own stored image when it is landscape,
- * else the site share image, else the site icon. [url, width, height] or null.
+ * The share image of the current view (og:image and article schema): the item's own image when it is landscape (or of
+ * unknown shape), a category page's category photo, else the site share image, else the site icon. Tags keep the site
+ * share image (they have no picture of their own).
  *
  * @return array|null
  */
@@ -383,8 +417,8 @@ function aw_seo_image() {
 	if ( false !== $img ) {
 		return $img;
 	}
-	$img = is_singular() ? aw_seo_item_image( get_queried_object_id() ) : null;
-	if ( $img && $img['height'] > $img['width'] && ! get_post_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true ) ) {
+	$img = is_singular() ? aw_seo_item_image( get_queried_object_id() ) : aw_seo_term_image();
+	if ( $img && $img['height'] > $img['width'] && ! ( is_singular() && get_post_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true ) ) ) {
 		$img = null; // portrait: share cards are landscape, so the site image is shared instead (the page keeps its photo)
 	}
 	if ( ! $img ) {

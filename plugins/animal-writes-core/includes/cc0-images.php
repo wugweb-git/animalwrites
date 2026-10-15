@@ -5,6 +5,10 @@
  * licence are stored on the attachment (aw_cc0_source, aw_cc0_license) for our records.
  *
  * Every 15 minutes (WP-Cron, aw_cc0_run), newest items first:
+ *  0. Items (News, Library, research, Opportunities) whose ingest stored no publisher image, or whose image failed the
+ *     check: the source page's og:image (else twitter:image) is read once (aw_source_og_tried; one page a second,
+ *     descriptive User-Agent) and, when found, stored as aw_source_image and checked at once (owner, 15 Oct 2026:
+ *     ingested items use the publisher's own image; a category photo never stands in for it in shares).
  *  1. Check publisher images (aw_source_image): GET → 200, an image content type, at least 200×200 when the size is
  *     readable. A publisher's logo or stock picture is still the publisher's image and is used (owner, 14 Oct 2026). Stored as
  *     aw_source_image_ok = 1/0 and aw_source_image_checked = date; failures are re-checked weekly.
@@ -86,6 +90,9 @@ function aw_cc0_run() {
 	$start = time();
 	global $wpdb;
 
+	// 0. Publisher images read from the source page when ingest stored none (or a broken one).
+	$fetched = aw_source_og_run( 40 );
+
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
@@ -126,8 +133,8 @@ function aw_cc0_run() {
 			++$none;
 		}
 	}
-	if ( $checked || $done || $none ) {
-		aw_cc0_log( sprintf( 'run: %d publisher images checked, %d photos added, %d without a match (%ds)', $checked, $done, $none, time() - $start ) );
+	if ( $fetched || $checked || $done || $none ) {
+		aw_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d checked, %d photos added, %d without a match (%ds)', $fetched, $checked, $done, $none, time() - $start ) );
 	}
 	if ( $done && function_exists( 'aw_thumb_schedule' ) ) {
 		aw_thumb_schedule();
@@ -168,10 +175,113 @@ function aw_cc0_check_source( $post_id ) {
 		return 'not an image (' . ( $type ? $type : 'no type' ) . ')';
 	}
 	$size = @getimagesizefromstring( (string) wp_remote_retrieve_body( $r ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-	if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) && ( $size[0] < 200 || $size[1] < 200 ) ) {
-		return 'too small (' . $size[0] . '×' . $size[1] . ')';
+	if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
+		update_post_meta( $post_id, 'aw_source_image_w', (int) $size[0] ); // og:image:width / height (aw-seo-extras)
+		update_post_meta( $post_id, 'aw_source_image_h', (int) $size[1] );
+		if ( $size[0] < 200 || $size[1] < 200 ) {
+			return 'too small (' . $size[0] . '×' . $size[1] . ')';
+		}
 	}
 	return '';
+}
+
+/**
+ * The image a source page names for sharing (og:image, else twitter:image, else link rel=image_src): an absolute
+ * https URL, or ''.
+ *
+ * @param string $page Source page URL.
+ * @return string
+ */
+function aw_source_og_image( $page ) {
+	if ( ! preg_match( '#^https?://#i', $page ) ) {
+		return '';
+	}
+	$r = wp_remote_get(
+		$page,
+		array(
+			'timeout'             => 12,
+			'redirection'         => 5,
+			'user-agent'          => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)',
+			'limit_response_size' => 524288,
+			'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5' ),
+		)
+	);
+	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) || false === stripos( (string) wp_remote_retrieve_header( $r, 'content-type' ), 'html' ) ) {
+		return '';
+	}
+	$html = (string) wp_remote_retrieve_body( $r );
+	$head = substr( $html, 0, (int) ( stripos( $html, '</head>' ) ?: strlen( $html ) ) );
+	foreach ( array( 'og:image:secure_url', 'og:image:url', 'og:image', 'twitter:image', 'twitter:image:src' ) as $prop ) {
+		foreach ( array( '/<meta[^>]+(?:property|name)=["\']' . preg_quote( $prop, '/' ) . '["\'][^>]*content=["\']([^"\']+)["\']/i', '/<meta[^>]+content=["\']([^"\']+)["\'][^>]*(?:property|name)=["\']' . preg_quote( $prop, '/' ) . '["\']/i' ) as $re ) {
+			if ( preg_match( $re, $head, $m ) ) {
+				$url = html_entity_decode( trim( $m[1] ), ENT_QUOTES );
+				break 2;
+			}
+		}
+	}
+	if ( empty( $url ) && preg_match( '/<link[^>]+rel=["\']image_src["\'][^>]*href=["\']([^"\']+)["\']/i', $head, $m ) ) {
+		$url = html_entity_decode( trim( $m[1] ), ENT_QUOTES );
+	}
+	if ( empty( $url ) ) {
+		return '';
+	}
+	if ( 0 === strpos( $url, '//' ) ) {
+		$url = 'https:' . $url;
+	} elseif ( '/' === $url[0] ) {
+		$p   = wp_parse_url( $page );
+		$url = 'https://' . $p['host'] . $url;
+	}
+	$url = preg_replace( '#^http://#i', 'https://', $url );
+	return preg_match( '#^https://[^/]+\.[^/]+/#i', $url ) ? esc_url_raw( $url ) : '';
+}
+
+/**
+ * Step 0: read the publisher image from the source page for items without a usable one. Each item's page is read
+ * once (aw_source_og_tried = date, aw_source_og_result = what was found). A different image found for a broken one
+ * replaces it (the old address is kept in aw_source_image_prev). Returns how many images were stored.
+ *
+ * @param int $limit Pages to read in this run.
+ * @return int
+ */
+function aw_source_og_run( $limit = 40 ) {
+	global $wpdb;
+	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB
+		$wpdb->prepare(
+			"SELECT p.ID FROM {$wpdb->posts} p
+			JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE 'http%%'
+			LEFT JOIN {$wpdb->postmeta} si ON si.post_id = p.ID AND si.meta_key = 'aw_source_image'
+			LEFT JOIN {$wpdb->postmeta} ok ON ok.post_id = p.ID AND ok.meta_key = 'aw_source_image_ok'
+			WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post','aw_opportunity')
+			AND ( si.meta_value IS NULL OR si.meta_value = '' OR ok.meta_value = '0' )
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = 'aw_source_og_tried')
+			ORDER BY p.post_date DESC LIMIT %d",
+			$limit
+		)
+	);
+	$stored = 0;
+	$start  = time();
+	foreach ( $ids as $id ) {
+		if ( time() - $start > 90 ) {
+			break;
+		}
+		$found = aw_source_og_image( (string) get_post_meta( $id, 'aw_source_url', true ) );
+		$have  = (string) get_post_meta( $id, 'aw_source_image', true );
+		update_post_meta( $id, 'aw_source_og_tried', current_time( 'mysql', true ) );
+		update_post_meta( $id, 'aw_source_og_result', '' === $found ? 'none' : ( $found === $have ? 'same as the broken one' : $found ) );
+		if ( '' !== $found && $found !== $have ) {
+			if ( '' !== $have ) {
+				update_post_meta( $id, 'aw_source_image_prev', $have );
+			}
+			update_post_meta( $id, 'aw_source_image', $found );
+			$why = aw_cc0_check_source( (int) $id );
+			update_post_meta( $id, 'aw_source_image_ok', '' === $why ? 1 : 0 );
+			update_post_meta( $id, 'aw_source_image_checked', current_time( 'mysql', true ) );
+			update_post_meta( $id, 'aw_source_image_why', $why );
+			$stored += '' === $why ? 1 : 0;
+		}
+		sleep( 1 ); // one source page a second
+	}
+	return $stored;
 }
 
 /* ---------- Openverse ---------- */

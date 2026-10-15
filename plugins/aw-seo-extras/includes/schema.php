@@ -280,8 +280,8 @@ function aw_schema_date( $date ) {
 }
 
 /**
- * ImageObject for an item: the same stored image its og:image uses (helpers.php), with its size. Never the
- * publisher's image. Null when the site has no image to give.
+ * ImageObject for an item: the same image its og:image uses (helpers.php: for ingested items the publisher's own
+ * image, linked), with its size when known. Null when the site has no image to give.
  *
  * @param int $id Post ID.
  * @return array|null
