@@ -875,6 +875,8 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 .kit-crumbs-more { color: var(--kit-color-muted); }
 /* Band head spans the content box (it is a flex child; auto margins would shrink and centre it) */
 .kit-section-band .kit-section-head { width: 100%; margin-inline: 0; grid-template-columns: minmax(0, 1fr) !important; }
+/* …but a head with pictures keeps text beside them from md up; one column would give the title no height */
+@media (min-width: 768px) { .kit-section-band .kit-section-head:has(.kit-section-visual) { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) !important; } }
 
 /* ======================================================================================================
    Components (owner, 8 Oct 2026)
