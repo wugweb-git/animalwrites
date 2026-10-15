@@ -43,6 +43,29 @@ const AW_AI_STATUS = array(
 	'workspace'  => 'Key not tied to a workspace: create the key inside a workspace',
 );
 
+/**
+ * A key's status as a coloured icon and label (owner, 15 Oct 2026): green = works, amber = wait or check again,
+ * red = broken (safe to remove). Colours are WordPress admin's own success, warning and error colours.
+ */
+function aw_ai_status_badge( $status ) {
+	$tone = 'works' === $status ? 'ok' : ( in_array( $status, array( 'limited', 'unchecked' ), true ) ? 'wait' : 'bad' );
+	$icon = array( 'ok' => 'yes-alt', 'wait' => 'clock', 'bad' => 'dismiss' )[ $tone ];
+	return '<span class="aw-ai-status aw-ai-status--' . $tone . '"><span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span>'
+		. esc_html( AW_AI_STATUS[ $status ] ?? $status ) . '</span>';
+}
+
+add_action(
+	'admin_head',
+	function () {
+		if ( 'settings_page_aw-ai-keys' !== ( get_current_screen()->id ?? '' ) ) {
+			return;
+		}
+		echo '<style>.aw-ai-status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 4px;border-radius:999px;font-weight:600}'
+			. '.aw-ai-status .dashicons{font-size:18px;width:18px;height:18px}'
+			. '.aw-ai-status--ok{color:#007017;background:#edfaef}.aw-ai-status--wait{color:#996800;background:#fcf9e8}.aw-ai-status--bad{color:#b32d2e;background:#fcf0f1}</style>';
+	}
+);
+
 add_action(
 	'admin_menu',
 	function () {
@@ -345,7 +368,7 @@ function aw_ai_keys_screen() {
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
 			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
-			. '<td>' . esc_html( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ) . '</td>'
+			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
 			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
