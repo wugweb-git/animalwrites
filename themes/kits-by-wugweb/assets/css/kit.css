@@ -406,7 +406,7 @@ html { overflow-x: clip; }
 .kit-sh-primary { background: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
 .kit-sh-secondary { border: 1px solid color-mix(in srgb, var(--neutral-0) 60%, transparent); color: var(--kit-color-on-ink) !important; }
 @media (min-width: 768px) { .kit-sticky-help { display: none !important; } }
-@media (max-width: 767px) { body { padding-bottom: 64px; } }
+@media (max-width: 767px) { body:has(.kit-sticky-help) { padding-bottom: 64px; } } /* room for the sticky bar only when the page has one (else a blank strip under the footer) */
 
 /* Header: grouped navigation + Find help button */
 .kit-header-right { gap: var(--kit-space-5) !important; align-items: center; }
@@ -1014,7 +1014,9 @@ body { background: var(--kit-surface-page); }
 /* End of an article: tags bottom left, share bottom right */
 .kit-endbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: 1px solid var(--kit-color-line); }
 .kit-endbar-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); }
-.kit-endbar-share { display: flex; align-items: center; gap: var(--kit-space-2); margin-left: auto; }
+.kit-endbar-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-left: auto; }
+.kit-endbar-share > p:empty, .kit-endbar-share br { display: none; } /* autop leftovers */
+@media (max-width: 639px) { .kit-endbar-share { margin-left: 0; } .kit-endbar-label { flex-basis: 100%; } } /* label on its own line; buttons wrap from the left */
 .kit-endbar-label { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .kit-endbar .scriptlesssocialsharing { margin: 0; padding: 0; border: 0; }
 /* List count: centred above the pagination */
@@ -1115,3 +1117,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 
 /* The page band holds the filter dropdowns: keep it above the list below so an open panel is never covered by cards. */
 .kit-section-band { position: relative; z-index: 3; }
+
+/* Form fields are at least 16px on phones: iOS Safari zooms the whole page into any smaller field on focus. */
+@media (max-width: 767px) {
+	:is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select, textarea) { font-size: max(1rem, 16px) !important; }
+}

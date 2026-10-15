@@ -315,7 +315,7 @@ add_shortcode(
 				continue;
 			}
 			$all   = add_query_arg( 'category', $term->slug, aw_hub_url( $type ) );
-			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul>';
+			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul' . ( 'aw_news' === $type ? ' class="aw-hub-news"' : '' ) . '>';
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . ( 'aw_legal' === $type && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
 			}

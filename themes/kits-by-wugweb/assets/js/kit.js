@@ -601,6 +601,9 @@
 	}
 	window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
 	bar.addEventListener('focusin', function (e) { if (e.target.matches(':focus-visible')) bar.classList.remove('kit-header-hidden'); });
+	// Back/forward cache: a page restored after a menu tap keeps focus on the menu button and can show its focus ring
+	// with no keyboard use; drop that stale focus when the page is shown again.
+	window.addEventListener('pageshow', function (e) { var a = document.activeElement; if (e.persisted && a && bar.contains(a)) a.blur(); });
 })();
 
 /* Analytics events (owner, 9 Oct 2026). Also button_click on every button. Every event goes to the dataLayer (GTM). While GA4 is still placed directly by

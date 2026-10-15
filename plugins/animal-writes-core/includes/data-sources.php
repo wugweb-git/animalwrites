@@ -106,7 +106,7 @@ function aw_source_labels( $id, $full = false ) {
 			$tag  = $logo ? '<span class="aw-datasrc-logo" title="' . esc_attr( $title ) . '">' . $logo . '</span>' : $tag;
 			$shown = esc_html( $label ) . ( $on ? ', as on ' . aw_date( $on ) : '' ); // the one date component
 			$text  = $link ? '<a href="' . esc_url( $link ) . '" rel="noopener nofollow">' . $shown . '</a>' : $shown;
-			$tag  = '<span class="aw-datasrc-row">' . $tag . ' ' . $text . '</span>';
+			$tag  = '<span class="aw-datasrc-row">' . $tag . ' <span class="aw-datasrc-text">' . $text . '</span></span>'; // one text cell: the date stays beside its label
 		}
 		$html .= $tag;
 	}

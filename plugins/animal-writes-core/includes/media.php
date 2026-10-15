@@ -310,3 +310,30 @@ add_filter(
 	20,
 	3
 );
+
+/*
+ * One link to the original per item page: when the document preview already ends with "Read it on …" to the source, the
+ * template's "Read at <source>" button to the same address is left out (and its empty Buttons row with it).
+ */
+add_filter(
+	'render_block_core/button',
+	function ( $content ) {
+		if ( ! is_singular() || ! preg_match( '/href="([^"]+)"/', $content, $m ) ) {
+			return $content;
+		}
+		$id = get_queried_object_id();
+		if ( ! $id || ! get_post_meta( $id, 'aw_doc_preview', true ) ) {
+			return $content;
+		}
+		$src = (string) get_post_meta( $id, 'aw_source_url', true );
+		return ( $src && html_entity_decode( $m[1] ) === $src ) ? '' : $content;
+	},
+	20
+);
+add_filter(
+	'render_block_core/buttons',
+	function ( $content ) {
+		return ( is_singular() && false === strpos( $content, '<a' ) && false === strpos( $content, '<button' ) ) ? '' : $content;
+	},
+	20
+);
