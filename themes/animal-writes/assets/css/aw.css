@@ -62,6 +62,7 @@
 .aw-doc-preview { display: flex; flex-wrap: wrap; gap: var(--kit-space-6); align-items: center; margin-block: var(--kit-space-6); }
 .aw-doc-preview img { display: block; width: 240px; max-width: 100%; height: auto; border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
 .aw-doc-preview-text { flex: 1 1 240px; }
+@media (max-width: 767px) { .aw-doc-preview-text .wp-element-button { display: flex; width: 100%; box-sizing: border-box; justify-content: flex-start; text-align: start; } } /* a long source name reads as one full-width button */
 @media (max-width: 767px) { .aw-pdf .wp-block-file__embed { height: 60vh; } }
 
 /* Letters: print */
