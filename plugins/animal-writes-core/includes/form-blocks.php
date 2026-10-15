@@ -115,7 +115,7 @@ function aw_claim_finder() {
 			$html .= '<ul class="aw-claim-results">';
 			foreach ( $ids as $id ) {
 				$place = function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $id ) ) ) ) : '';
-				$html .= '<li><a href="' . esc_url( add_query_arg( 'listing', $id, home_url( '/claim/' ) ) ) . '"><strong>' . esc_html( get_the_title( $id ) ) . '</strong>' . ( $place ? ' <span>' . esc_html( $place ) . '</span>' : '' ) . '</a></li>';
+				$html .= '<li><a href="' . esc_url( add_query_arg( 'listing', $id, home_url( '/claim/' ) ) ) . '"><strong>' . esc_html( get_the_title( $id ) ) . '</strong>' . ( $place ? ' <span class="aw-place">' . aw_i( 'directory' ) . esc_html( $place ) . '</span>' : '' ) . '</a></li>';
 			}
 			$html .= '</ul>';
 		} else {

@@ -207,7 +207,7 @@ function aw_form_open( $form, $attrs = array() ) {
 		. str_replace( ' id="_aw_nonce"', '', wp_nonce_field( $form, '_aw_nonce', true, false ) ) // several forms on a page: no repeated id
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
-		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="aw_website" tabindex="-1" autocomplete="off"></label></p>'
+		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="kits_hp" tabindex="-1" autocomplete="off"></label></p>'
 		. kits_altcha_widget( $altcha );
 	return $html;
 }
@@ -313,7 +313,7 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 		}
 		aw_form_fail( $form, array(), aw_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}
-	if ( ! empty( $_POST['aw_website'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
+	if ( ! empty( $_POST['kits_hp'] ) || ( time() - (int) ( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
 		aw_form_success( $done, '' ); // bots see a success
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -332,7 +332,7 @@ function aw_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
  * @return array<string,mixed>
  */
 function aw_form_kept_values() {
-	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'aw_website', 'altcha', 'aw_source' );
+	$skip = array( 'action', '_aw_nonce', '_wp_http_referer', 'aw_t', 'altcha', 'aw_source', 'kits_hp' );
 	$out  = array();
 	foreach ( wp_unslash( $_POST ) as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! in_array( $k, $skip, true ) ) {
