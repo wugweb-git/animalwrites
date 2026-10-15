@@ -415,7 +415,7 @@ function aw_seo_list_description() {
 		if ( ! $place ) {
 			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'], $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
-			$what = '1' === $n ? 'One ' . mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
+			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
 			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
 			$desc = mb_strlen( $desc . $more ) <= 155 ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= 155 ? $desc . ' From the Animal Writes Directory.' : $desc );
@@ -424,9 +424,9 @@ function aw_seo_list_description() {
 		} elseif ( $place->parent ) {
 			$desc = '1' === $n
 				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $place->name, $state->name )
-				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
+				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, Gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
 		} else {
-			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
+			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
 		}
 	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) ) {
 		$desc = AW_HUB_DESCRIPTIONS[ $hub ];

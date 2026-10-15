@@ -171,7 +171,7 @@ function aw_seo_dir_breakdown( $place ) {
 function aw_seo_type_words( $key, $n = 2, $short = false ) {
 	$words = array( // singular, plural, short plural
 		'animal-welfare-organisation' => array( 'animal welfare organisation', 'animal welfare organisations', 'NGOs' ),
-		'gaushala'                    => array( 'gaushala', 'gaushalas', 'gaushalas' ),
+		'gaushala'                    => array( 'Gaushala', 'Gaushalas', 'Gaushalas' ), // always capitalised (owner, 15 Oct 2026)
 		'veterinary'                  => array( 'vet', 'vets', 'vets' ), // every veterinary type, always "vets" (owner, 15 Oct 2026)
 		'veterinary-hospital'         => array( 'veterinary hospital', 'veterinary hospitals', 'vet hospitals' ),
 		'veterinary-dispensary'       => array( 'veterinary dispensary', 'veterinary dispensaries', 'vet dispensaries' ),
@@ -186,7 +186,7 @@ function aw_seo_type_words( $key, $n = 2, $short = false ) {
 		return 1 === (int) $n ? $words[ $key ][0] : $words[ $key ][ $short ? 2 : 1 ];
 	}
 	$name = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $key ) ) );
-	$name = implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) ? $w : mb_strtolower( $w ), explode( ' ', $name ) ) );
+	$name = implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) ) );
 	return 1 === (int) $n ? $name : aw_seo_type_plural( $key );
 }
 

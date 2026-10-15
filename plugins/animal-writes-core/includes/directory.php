@@ -529,13 +529,13 @@ function aw_state_count( $state ) {
 function aw_directory_intro() {
 	$city = aw_current_place();
 	if ( ! $city ) {
-		return 'Animal welfare organisations, gaushalas and government vets across India.';
+		return 'Animal welfare organisations, Gaushalas and government vets across India.';
 	}
 	if ( $city->parent ) {
 		$state = aw_place_parent_state( $city );
-		return sprintf( 'Animal welfare organisations, gaushalas and government vets in %1$s, %2$s.', $city->name, $state->name );
+		return sprintf( 'Animal welfare organisations, Gaushalas and government vets in %1$s, %2$s.', $city->name, $state->name );
 	}
-	return sprintf( 'Animal welfare organisations, gaushalas and government vets in %s.', $city->name );
+	return sprintf( 'Animal welfare organisations, Gaushalas and government vets in %s.', $city->name );
 }
 
 // A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).

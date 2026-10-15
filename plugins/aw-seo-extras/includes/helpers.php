@@ -211,7 +211,7 @@ const AW_HUB_TITLES = array(
 const AW_HUB_DESCRIPTIONS = array(
 	'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
 	'aw_press'       => 'Press coverage of Animal Writes and its citizen letter campaign for community animals across India.',
-	'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, gaushalas and government vets in every state and district of India, with phone, address and services.',
+	'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in every state and district of India, with phone, address and services.',
 );
 
 /** Descriptions of the content types' own archives (post type => description). */
@@ -221,10 +221,10 @@ const AW_ARCHIVE_DESCRIPTIONS = array(
 	'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
 	'aw_campaign'    => 'Citizen campaigns for animals in India, starting with Animal Writes 1.0.',
 	'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
-	'aw_listing'     => 'Animal welfare organisations, gaushalas and government vets across India.',
+	'aw_listing'     => 'Animal welfare organisations, Gaushalas and government vets across India.',
 );
 
-/** Plural of a listing type for a sentence: "gaushalas", "ABC centres", "veterinary dispensaries". */
+/** Plural of a listing type for a sentence: "Gaushalas" (always capitalised, owner 15 Oct 2026), "ABC centres", "veterinary dispensaries". */
 function aw_seo_type_plural( $slug ) {
 	$fixed = array(
 		'veterinary'             => 'veterinary hospitals and dispensaries',
@@ -239,7 +239,7 @@ function aw_seo_type_plural( $slug ) {
 		return $fixed[ $slug ];
 	}
 	$name  = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_listing_type_name( $slug ) ) );
-	$words = array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) ? $w : mb_strtolower( $w ), explode( ' ', $name ) );
+	$words = array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) );
 	$last  = (string) array_pop( $words );
 	if ( preg_match( '/[^aeiou]y$/', $last ) ) {
 		$last = substr( $last, 0, -1 ) . 'ies';
@@ -258,7 +258,7 @@ function aw_seo_top_topics( $type ) {
 	if ( false === $out ) {
 		global $wpdb;
 		$names = $wpdb->get_col( $wpdb->prepare( "SELECT t.name FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = 'aw_topic' JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = %s AND p.post_status = 'publish' GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT 4", $type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$out   = array_map( fn( $n ) => implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) ? $w : mb_strtolower( $w ), explode( ' ', html_entity_decode( $n, ENT_QUOTES, 'UTF-8' ) ) ) ), (array) $names );
+		$out   = array_map( fn( $n ) => implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', html_entity_decode( $n, ENT_QUOTES, 'UTF-8' ) ) ) ), (array) $names );
 		set_transient( $key, $out, 12 * HOUR_IN_SECONDS );
 	}
 	return (array) $out;
@@ -300,7 +300,7 @@ function aw_seo_awbi_description( $id, $desc ) {
 	if ( $types && ! is_wp_error( $types ) && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
 		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
 	}
-	$type  = ( $types && ! is_wp_error( $types ) ) ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) ? $w : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
+	$type  = ( $types && ! is_wp_error( $types ) ) ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
 	list( $state, $district ) = aw_item_place_names( $id );
 	$where = implode( ', ', array_filter( array( $district, $state ) ) );
 	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
