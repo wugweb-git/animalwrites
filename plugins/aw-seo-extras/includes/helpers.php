@@ -123,6 +123,14 @@ function aw_seo_intro( $post ) {
  * @param string $key Field, e.g. title, description, canonical_url, facebook_image_id.
  * @return string
  */
+/** A hub's place, type, name-search or filtered view (Directory state/district/type pages, ?tag=, ?category_name=, ?q=). */
+function aw_seo_hub_subview() {
+	if ( ( function_exists( 'aw_current_place' ) && aw_current_place() ) || ( function_exists( 'aw_current_type_name' ) && aw_current_type_name() ) || get_query_var( 'aw_dir_type' ) ) {
+		return true;
+	}
+	return ! empty( $_GET['tag'] ) || ! empty( $_GET['category_name'] ) || ! empty( $_GET['q'] ); // phpcs:ignore WordPress.Security.NonceVerification
+}
+
 function aw_seo_typed( $key ) {
 	$id = get_queried_object_id();
 	if ( ! $id ) {
@@ -130,6 +138,9 @@ function aw_seo_typed( $key ) {
 	}
 	if ( is_singular() ) {
 		$typed = trim( (string) get_post_meta( $id, 'rank_math_' . $key, true ) );
+		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && aw_seo_is_hub_page( $id ) && aw_seo_hub_subview() ) {
+			return ''; // a hub's own title and description belong to its first view only, never to its place, type or filtered views
+		}
 		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && aw_seo_is_hub_page( $id ) ) {
 			$auto = (array) json_decode( (string) get_post_meta( $id, '_aw_seo_auto', true ), true );
 			if ( ( $auto[ $key ] ?? null ) === $typed ) {

@@ -222,13 +222,13 @@ function aw_seo_list_title() {
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ' ' . aw_place_parent_state( $place )->name;
-			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue & NGO Contact Numbers in ' . $where, 'Animal Rescue & NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
+			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue and NGO Contact Numbers in ' . $where, 'Animal Rescue and NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
 				array_merge(
 					$phone,
 					array(
-						'Animal Welfare NGOs Shelters & Vets in ' . $where,
-						'Animal Welfare NGOs & Vets in ' . $where,
+						'Animal Welfare NGOs Shelters and Vets in ' . $where,
+						'Animal Welfare NGOs and Vets in ' . $where,
 						'Animal Welfare NGOs in ' . $where,
 						'Animal Welfare NGOs in ' . $place->name,
 					)
@@ -236,15 +236,15 @@ function aw_seo_list_title() {
 				60 - mb_strlen( aw_seo_page_suffix() )
 			);
 		}
-		// A state: its two biggest listing types, each listing counted once by its most specific type (owner, 15 Oct 2026). "Animal Welfare {Type1} & {Type2} in {State}"
-		// (no comma: one separator only); "{Type1} & More" when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
+		// A state: its two biggest listing types, each listing counted once by its most specific type (owner, 15 Oct 2026). "Animal Welfare {Type1} and {Type2} in {State}"
+		// (no comma: one separator only); "{Type1} and More" when it has a third type; one type, then "NGOs", when the longer ones pass 60 characters.
 		$types = array_map( fn( $b ) => aw_seo_state_type_title( $place, $b[0] ), aw_seo_dir_breakdown( $place ) );
 		$first = $types[0] ?? 'NGOs';
 		$in    = ' in ' . $place->name;
-		$more  = count( $types ) > 2 ? ' & More' : '';
+		$more  = count( $types ) > 2 ? ' and More' : '';
 		$try   = array();
 		if ( count( $types ) > 1 ) {
-			$try[] = 'Animal Welfare ' . $first . ' & ' . $types[1] . $in;
+			$try[] = 'Animal Welfare ' . $first . ' and ' . $types[1] . $in;
 		}
 		if ( $more ) {
 			$try[] = 'Animal Welfare ' . $first . $more . $in;
