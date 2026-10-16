@@ -8,7 +8,7 @@
 <!-- wp:query {"queryId":10,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false},"align":"wide"} -->
 <div class="wp-block-query alignwide"><!-- wp:post-template {"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"18rem"}} -->
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9"} /-->
+<div class="wp-block-group is-style-kits-card"><!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->
 
 <!-- wp:post-title {"level":3,"isLink":true,"fontSize":"x-large"} /-->
 

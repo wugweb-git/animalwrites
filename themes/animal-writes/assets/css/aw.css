@@ -333,7 +333,7 @@ body { background: var(--kit-color-canvas); }
 .aw-news-top { display: grid; gap: var(--kit-space-6); padding-bottom: var(--kit-space-7); margin-bottom: var(--kit-space-7); border-bottom: 1px solid var(--kit-color-line); }
 @media (min-width: 1200px) { .aw-news-top { grid-template-columns: 1.7fr 1fr; gap: var(--kit-space-7); } }
 .aw-story { position: relative; }
-.kit-story-media { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); aspect-ratio: var(--kit-card-media-ratio, 16/9); }
+.kit-story-media { position: relative; overflow: hidden; border-radius: var(--kit-radius-media); background: var(--kit-color-surface); aspect-ratio: var(--kit-card-media-ratio, 4/3); }
 .kit-story-media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--kit-motion-slow) var(--kit-motion-ease); }
 .aw-story:hover .kit-story-media img { transform: scale(1.03); }
 .aw-story-ph { display: none; position: absolute; inset: 0; align-items: flex-end; padding: var(--kit-space-4); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-h4); background: var(--kit-color-surface); border-bottom: 6px solid var(--kit-color-accent); }
@@ -346,12 +346,11 @@ body { background: var(--kit-color-canvas); }
 .aw-story:hover .aw-story-title a { text-decoration: underline; text-underline-offset: 4px; }
 .aw-story-sum { color: var(--kit-color-muted); font-size: var(--kit-type-lead); margin: 0 0 var(--kit-space-3); }
 .aw-story-meta { font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); margin: 0; }
-.aw-story--lead .kit-story-media { aspect-ratio: 16/9; }
 .aw-story--lead .aw-story-title { font-size: var(--kit-type-headline, var(--kit-type-h1)) !important; line-height: 1.1 !important; letter-spacing: var(--kit-tracking-display) !important; }
 .aw-news-side { display: grid; align-content: start; }
 .aw-story--row { display: grid; grid-template-columns: 1fr 112px; gap: var(--kit-space-4); padding: var(--kit-space-4) 0; border-top: 1px solid var(--kit-color-line); }
 .aw-story--row:first-child { border-top: 0; padding-top: 0; }
-.aw-story--row .kit-story-media { order: 2; aspect-ratio: 1; }
+.aw-story--row .kit-story-media { order: 2; }
 .aw-story--row .aw-story-kicker { margin-top: 0; }
 .aw-news-grid { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .aw-news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -379,7 +378,7 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 1200px) { .aw-tasks { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .kit-task { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); color: var(--kit-color-ink); text-decoration: none; transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .kit-task:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
-.aw-task-media { display: block; aspect-ratio: 16/9; }
+.aw-task-media { display: block; }
 .aw-task-media img { width: 100%; height: 100%; object-fit: cover; }
 .aw-task-body { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-6); }
 .aw-task-body > .kit-ico:first-child { --kit-ico-size: 1.75rem; color: var(--kit-color-ink); padding: 0.5rem; box-sizing: content-box; border-radius: var(--kit-radius-control); background: var(--kit-color-accent); -webkit-mask: none; mask: none; position: relative; align-self: flex-start; }
@@ -401,7 +400,7 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 1200px) { .aw-res { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .kit-res-card { display: flex; flex-direction: column; overflow: hidden; background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); color: var(--kit-color-ink); text-decoration: none; transition: transform var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
 .kit-res-card:hover { transform: translateY(var(--kit-motion-lift)); box-shadow: var(--kit-elevation-2); }
-.aw-res-media { aspect-ratio: 16/9; display: block; }
+.aw-res-media { display: block; }
 .aw-res-media img { width: 100%; height: 100%; object-fit: cover; }
 .aw-res-body { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-5); flex: 1; }
 
@@ -437,8 +436,6 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 768px) { .aw-opps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .aw-opp { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
 @media (min-width: 1200px) { .aw-opp { grid-template-columns: 2fr 3fr; } }
-.aw-opp-media { aspect-ratio: 16/9; }
-@media (min-width: 1200px) { .aw-opp-media { aspect-ratio: auto; } }
 .aw-opp-media img { width: 100%; height: 100%; object-fit: cover; }
 .aw-opp-body { display: flex; flex-direction: column; gap: var(--kit-space-2); padding: var(--kit-space-5); }
 .aw-opp-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); align-items: center; margin: 0; font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
@@ -502,7 +499,7 @@ body { background: var(--kit-color-canvas); }
 .aw-categories-index a { display: grid; gap: var(--kit-space-2, .5rem); padding: var(--kit-space-3, .75rem); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-ink); text-decoration: none; min-height: var(--kit-size-target, 44px); }
 .aw-categories-index a:hover { border-color: var(--kit-color-ink); }
 .aw-categories-index a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-.aw-categories-index img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--kit-radius-control); }
+.aw-categories-index img { width: 100%; aspect-ratio: var(--kit-card-media-ratio); object-fit: cover; border-radius: var(--kit-radius-control); }
 .aw-categories-name { font-weight: var(--kit-weight-strong); }
 .aw-categories-n { color: var(--kit-color-muted); font-size: var(--kit-type-sm); }
 
@@ -515,7 +512,7 @@ body { background: var(--kit-color-canvas); }
 .aw-org-claim a { display: inline-flex; align-items: center; min-height: var(--kit-size-target, 44px); }
 
 /* Related items at the end of an item page (SEO Phase 7, related.php): each group is an h2 over the hubs' own cards
-   (.aw-hub-list), so pictures sit in the same 16:9 frame (fill or contain) and dates carry the calendar icon. */
+   (.aw-hub-list), so pictures sit in the same 4:3 card frame (masked, owner 16 Oct 2026) and dates carry the calendar icon. */
 .aw-related { margin: var(--kit-space-8) 0 0; padding-top: var(--kit-space-6); border-top: 1px solid var(--kit-color-line); }
 .aw-related + .aw-related { margin-top: var(--kit-space-7); }
 .aw-related-head { font-size: var(--kit-type-h3); line-height: 1.25; margin: 0 0 var(--kit-space-5); }
@@ -636,13 +633,12 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-list .wp-block-post-template .wp-block-post-date::before { display: none; }
 .aw-hub-list .aw-story-title { margin: 0 0 var(--kit-space-2); }
 .is-first-page .aw-news-list > li:first-child { grid-column: 1 / -1; padding-bottom: var(--kit-space-7) !important; border-bottom: 1px solid var(--kit-color-line) !important; }
-.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16/9; }
 .is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-headline, var(--kit-type-h1)) !important; line-height: 1.1 !important; letter-spacing: var(--kit-tracking-display) !important; }
 .is-first-page .aw-news-list > li:first-child .wp-block-post-excerpt__excerpt { display: block; -webkit-line-clamp: unset; font-size: inherit; line-height: inherit; }
 .is-first-page .aw-news-list > li:first-child .aw-story-sum { display: block; color: var(--kit-color-muted); font-size: var(--kit-type-lead); margin: 0 0 var(--kit-space-3); }
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 1 / -1; }
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { display: grid; grid-template-columns: 1fr 112px; gap: var(--kit-space-4); }
-.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { order: 2; aspect-ratio: 16 / 9; }
+.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { order: 2; }
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-src { margin-top: 0; }
 @media (max-width: 1199px) {
 	.is-first-page .aw-news-list > li:first-child { border-bottom: 0 !important; padding-bottom: 0 !important; }
@@ -991,14 +987,13 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-news-grid::-webkit-scrollbar { display: none; }
 	.kit-ed-news-grid > .wp-block-query, .kit-ed-news-grid .wp-block-post-template { display: contents !important; }
 	.kit-ed-news-grid .wp-block-post-template > li { display: block !important; flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.kit-ed-news-grid .wp-block-post-featured-image { aspect-ratio: 16 / 9 !important; margin: 0 0 var(--kit-space-3) !important; width: 100%; }
+	.kit-ed-news-grid .wp-block-post-featured-image { margin: 0 0 var(--kit-space-3) !important; width: 100%; }
 	.kit-ed-news-grid .wp-block-post-featured-image img { height: 100%; }
 	.kit-ed-news-grid .wp-block-post-excerpt { display: none; }
 	.kit-ed-news-grid .wp-block-post-title { font-size: var(--kit-type-h4) !important; margin: var(--kit-space-2) 0 0 !important; }
 }
 @media (min-width: 1200px) {
 	.kit-ed-list .wp-block-post-template > li:nth-child(n+4) { display: none !important; }
-	.kit-ed-lead .wp-block-post-featured-image { aspect-ratio: 16 / 9 !important; }
 }
 
 /* From the Library: phones and tablets = side text, then a sideways row of compact cards (Type · Date, title, issuer);
@@ -1152,7 +1147,7 @@ body { background: var(--kit-color-canvas); }
    768px the banner puts its picture beside the text. */
 .aw-sponsored-label { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 .aw-sponsored-item { border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); padding: var(--kit-space-4); margin-block: var(--kit-space-7); max-width: var(--kit-width-content); background: var(--kit-surface-card, var(--kit-color-raised)); }
-.aw-sponsored-item-media { display: block; aspect-ratio: 16/9; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-card, 12px); overflow: hidden; }
+.aw-sponsored-item-media { display: block; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-card, 12px); overflow: hidden; }
 .aw-sponsored-item-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .aw-sponsored-item-title { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h4, 1.125rem); }
 .aw-sponsored-item p:last-child { margin-bottom: 0; }
@@ -1210,7 +1205,7 @@ body { background: var(--kit-color-canvas); }
 .kit-case { grid-template-columns: 9rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; column-gap: var(--kit-space-4); row-gap: var(--kit-space-2); padding: var(--kit-space-5) 0 !important; }
 .kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; }
 .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
-.kit-case .aw-case-cover { grid-area: media; width: 100% !important; height: auto; object-fit: cover; object-position: top; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
+.kit-case .aw-case-cover { grid-area: media; width: 100% !important; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
 .kit-case .aw-case-cover--photo { object-position: center; }
 .kit-case > .aw-case-icon { grid-area: media; }
 .kit-case > .aw-case-body { grid-area: body; min-width: 0; }
@@ -1231,13 +1226,12 @@ body { background: var(--kit-color-canvas); }
 	/* Phones: one stacked state for every Library card. Meta row, then the picture full width in its own shape (nothing
 	   cut), then title, summary and tags. Never the picture beside the meta. */
 	.kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "when" "media" "body" !important; }
-	.kit-case .aw-case-cover { box-sizing: border-box; width: 100% !important; height: auto !important; object-fit: contain; }
 }
-/* News lead story by breakpoint (owner, 14 Oct 2026): phone = picture full width (16:9) above the text; tablet and up =
+/* News lead story by breakpoint (owner, 14 Oct 2026): phone = picture full width (4:3 card frame, 16 Oct) above the text; tablet and up =
    picture left (about 60%), text right, so the picture never fills the screen. */
 @media (min-width: 768px) {
 	.is-first-page .aw-news-list > li:first-child > .aw-story { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--kit-space-6); align-items: center; }
-	.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16 / 9; margin: 0; }
+	.is-first-page .aw-news-list > li:first-child .kit-story-media { margin: 0; }
 	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-h2) !important; }
 	.is-first-page .aw-news-list > li:first-child .aw-story-sum { font-size: var(--kit-type-base); }
 }
@@ -1249,7 +1243,7 @@ body { background: var(--kit-color-canvas); }
 .is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { order: 0; }
 @media (min-width: 768px) {
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { grid-template-columns: 200px minmax(0, 1fr); gap: var(--kit-space-5); }
-	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 9; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { }
 }
 /* News first page by breakpoint (owner, 14 Oct 2026): nothing runs the full page width except on phones.
    Tablet: lead across (picture left, text right), stories 2-4 as normal cards in the 2-column grid.
@@ -1257,20 +1251,19 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 768px) and (max-width: 1199px) {
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: auto; }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { display: block; }
-	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-3); }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { margin-bottom: var(--kit-space-3); }
 }
 @media (min-width: 1200px) {
 	.is-first-page .aw-news-list > li:first-child { grid-column: 1 / span 8; grid-row: 1 / span 4; border-bottom: 0 !important; padding-bottom: 0 !important; } /* rows 1-4 like story 4, so no later story backfills under the lead and the order stays 5, 6, 7 */
 	.is-first-page .aw-news-list > li:first-child > .aw-story { display: block; }
-	.is-first-page .aw-news-list > li:first-child .kit-story-media { aspect-ratio: 16 / 9; margin-bottom: var(--kit-space-4); }
+	.is-first-page .aw-news-list > li:first-child .kit-story-media { margin-bottom: var(--kit-space-4); }
 	.is-first-page .aw-news-list > li:first-child .aw-story-title { font-size: var(--kit-type-h2) !important; }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) { grid-column: 9 / -1; }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story { grid-template-columns: 128px minmax(0, 1fr); gap: var(--kit-space-3); align-items: start; }
-	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { aspect-ratio: 16 / 9; }
+	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .kit-story-media { }
 	.is-first-page .aw-news-list > li:nth-child(n+2):nth-child(-n+4) .aw-story-title { font-size: var(--kit-type-base) !important; }
 }
 
-/* One picture shape for every card: 16:9 (owner rule, 14 Oct 2026). Never square, 4:3, 3:4 or 16:10 on cards. */
 /* Calendar icon never touches the date. */
 .aw-date > .kit-ico, .aw-task-meta .kit-ico--calendar { margin-right: 6px; flex: none; }
 /* Home "Laws and rules" columns: compact (no cover), publisher and date on one line above the title. */
@@ -1282,16 +1275,16 @@ body { background: var(--kit-color-canvas); }
 /* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
 :not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
 :not(.wp-block-post-date) > time.aw-rel-time::before { content: ""; flex: none; width: 1em; height: 1em; margin-right: 6px; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }
-/* Card pictures (owner, 14 Oct 2026): one 16:9 frame per card so grids line up (the design-system token). A picture
-   within about 15% of that shape fills the frame (.is-fill, set by aw.js from its real size); anything further off
-   (an A4 document page, a portrait photo, a logo) is shown whole inside the frame on a plain background. Nothing is cut. */
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) { aspect-ratio: var(--kit-card-media-ratio, 16/9) !important; height: auto !important; background: var(--kit-color-surface); }
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) a { height: 100%; }
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img,
-.aw-case-cover { width: 100% !important; height: 100% !important; object-fit: contain !important; object-position: center !important; }
-.aw-case-cover { height: auto !important; aspect-ratio: var(--kit-card-media-ratio, 16/9) !important; background: var(--kit-color-surface); }
-:is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img.is-fill,
-.aw-case-cover.is-fill { object-fit: cover !important; }
+/* Card pictures (owner, 16 Oct 2026): every picture in a card or list item is 4:3 (--kit-card-media-ratio), masked
+   the way WordPress does it (object-fit: cover, centred); the full image is served, only the frame hides its edges.
+   Logos and icons stay whole. The Kits rule (kit.css 4.3) covers .kit-card-media, .wp-block-post-featured-image and
+   .kit-story-media; these are Animal Writes' own card media. Library document pages are masked from the top
+   (masthead). */
+:is(.aw-task-media, .aw-opp-media, .aw-res-media, .aw-sponsored-item-media) { aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; }
+:is(.aw-task-media, .aw-opp-media, .aw-res-media, .aw-sponsored-item-media) img, .aw-case-cover { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.kit-case .aw-case-cover { height: auto; aspect-ratio: var(--kit-card-media-ratio); }
+.kit-case .aw-case-cover:not(.aw-case-cover--photo) { object-position: top; } /* a document's first page: its masthead */
+.kit-section-visual img.aw-tile-logo { object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-3); } /* a listing logo in a head band's pictures stays whole */
 
 /* Sideways rows on phones snap to an item, and the first and last items rest at the gutter (1.0 photos and timeline). */
 @media (max-width: 1199px) { .aw-ed-mosaic, .aw-ed-timeline { scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); } .aw-ed-mosaic > *, .aw-ed-timeline > li { scroll-snap-align: start; } }

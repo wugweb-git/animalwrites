@@ -34,7 +34,7 @@ function aw_section_tile( $p ) {
 		$img = (string) get_the_post_thumbnail_url( $p, 'medium_large' );
 	}
 	if ( $img ) {
-		$fit = 'aw_listing' === $p->post_type ? ' style="object-fit:contain;background:#fff;padding:12px"' : '';
+		$fit = 'aw_listing' === $p->post_type ? ' class="aw-tile-logo"' : ''; // an organisation's logo stays whole (aw.css)
 		return '<img src="' . esc_url( $img ) . '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"' . $fit . '>';
 	}
 	return function_exists( 'aw_placard_html' ) ? aw_placard_html( $p->ID ) : '';

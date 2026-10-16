@@ -16,7 +16,7 @@
 <!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-ed-news-grid"><!-- wp:query {"queryId":41,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-lead"} -->
 <div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->
-<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"3/2"} /-->
+<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->
 <!-- wp:animal-writes/publisher /-->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-excerpt {"excerptLength":36} /-->

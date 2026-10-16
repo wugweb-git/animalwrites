@@ -63,24 +63,6 @@
 	});
 })();
 
-/* Card pictures: fill the 16:9 frame only when the picture's own shape is within about 15% of it; otherwise it is shown
-   whole (CSS default: contain). Decided from each picture's real size once it has loaded (owner, 14 Oct 2026). */
-( function () {
-	var FRAME = 16 / 9, SEL = ':is(.kit-card-media, .wp-block-post-featured-image, .kit-story-media, .aw-task-media, .aw-opp-media, .aw-res-media) img, img.aw-case-cover';
-	function fit( img ) {
-		if ( ! img.naturalWidth || ! img.naturalHeight ) { return; }
-		var r = img.naturalWidth / img.naturalHeight;
-		img.classList.toggle( 'is-fill', Math.abs( r - FRAME ) / FRAME <= 0.15 );
-	}
-	function scan( root ) {
-		( root || document ).querySelectorAll( SEL ).forEach( function ( img ) {
-			if ( img.complete ) { fit( img ); } else { img.addEventListener( 'load', function () { fit( img ); }, { once: true } ); }
-		} );
-	}
-	if ( document.readyState === 'loading' ) { document.addEventListener( 'DOMContentLoaded', function () { scan(); } ); } else { scan(); }
-	new MutationObserver( function ( list ) { list.forEach( function ( m ) { m.addedNodes.forEach( function ( n ) { if ( n.nodeType === 1 ) { scan( n ); } } ); } ); } ).observe( document.documentElement, { childList: true, subtree: true } );
-} )();
-
 /* Home "Opportunities near you" (owner, 16 Oct 2026). A state chosen in a Directory search ("Find help near you") is
    kept in this browser only; on the home page the list then shows opportunities in that state (newest fill the rest).
    No state chosen, nothing found, or no JavaScript: the server's newest ones stay. */

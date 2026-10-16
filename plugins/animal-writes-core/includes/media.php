@@ -146,7 +146,8 @@ add_filter(
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}
 		$inner = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $inner . '</a>' : $inner;
-		return '<figure class="wp-block-post-featured-image kit-card-media' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . ( $url ? ' has-remote' : '' ) . ( $doc ? ' kit-doc-cover' : '' ) . '">' . $inner . '</figure>';
+		$ratio = preg_match( '#^\d+(?:\.\d+)?/\d+(?:\.\d+)?$#', (string) ( $block['attrs']['aspectRatio'] ?? '' ) ) ? $block['attrs']['aspectRatio'] : ''; // the block's own shape, as core prints it (item leads keep 16:9); else the card token
+		return '<figure class="wp-block-post-featured-image kit-card-media' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . ( $url ? ' has-remote' : '' ) . ( $doc ? ' kit-doc-cover' : '' ) . '"' . ( $ratio ? ' style="aspect-ratio:' . esc_attr( $ratio ) . '"' : '' ) . '>' . $inner . '</figure>';
 	},
 	10,
 	3
