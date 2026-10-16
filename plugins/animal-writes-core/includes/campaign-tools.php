@@ -42,10 +42,10 @@ function aw_camp_is_open( $id ) {
 	return (bool) apply_filters( 'aw_camp_is_open', ! $ts || time() < $ts, $id );
 }
 
-/** Whole days left, counting today (5 Nov when it is 16 Oct: 21). */
+/** Days to go, counted as [aw_countdown] counts them (to the start of the last day), so both say the same number. */
 function aw_camp_days_left( $id ) {
 	$ts = aw_camp_close_ts( $id );
-	return $ts ? max( 0, (int) ceil( ( $ts - time() ) / DAY_IN_SECONDS ) ) : 0;
+	return $ts ? max( 0, (int) ceil( ( $ts - DAY_IN_SECONDS - time() ) / DAY_IN_SECONDS ) ) : 0;
 }
 
 /* ---------- Open / closed blocks ---------- */
@@ -275,7 +275,7 @@ add_shortcode(
 			return '';
 		}
 		$d = aw_camp_days_left( $id );
-		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a><span class="aw-sticky-cta-days">' . esc_html( sprintf( _n( '%d day left', '%d days left', $d, 'animal-writes-core' ), $d ) ) . '</span></div>';
+		return '<div class="aw-sticky-cta" data-target="' . esc_attr( $a['href'] ) . '"><a class="wp-element-button" href="' . esc_attr( $a['href'] ) . '">' . esc_html( $a['label'] ) . '</a><span class="aw-sticky-cta-days">' . esc_html( $d ? sprintf( _n( '%d day to go', '%d days to go', $d, 'animal-writes-core' ), $d ) : 'Last day today' ) . '</span></div>';
 	}
 );
 
