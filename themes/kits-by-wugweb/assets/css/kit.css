@@ -269,7 +269,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 }
 html { overflow-x: clip; }
 .kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
-.kit-section-head .wp-block-query-title { margin: 0; }
+.kit-section-head :is(.wp-block-query-title, .wp-block-post-title) { margin: 0; } /* the band's H1, archive or Page */
 .kit-section-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-3) 0 0; }
 .kit-section-count { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); font-size: var(--kit-type-sm); margin: var(--kit-space-2) 0 0; } /* ink: accent-ink on kraft is only 4.3:1 */
 .kit-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--kit-space-2); min-width: 0; }
