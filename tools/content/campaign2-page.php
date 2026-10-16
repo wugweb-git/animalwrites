@@ -263,8 +263,7 @@ $share_txt = rawurlencode( 'Object to India\'s draft lab animal rules before 5 N
 $loop      = c2sec(
 	'updates',
 	c2h( 'Get updates on these rules' )
-	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published.' )
-	. c2sc( '[aw_newsletter]' )
+	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.' ) // the footer has the form on every page
 	. c2p( 'Share: <a href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">WhatsApp</a> · <a href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">X</a> · <a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">LinkedIn</a>' )
 	. c2p( 'Colours from the explainer artwork by @p.s___withlove, used with her permission.', 'has-small-font-size' ),
 	'aw-camp-dark'
