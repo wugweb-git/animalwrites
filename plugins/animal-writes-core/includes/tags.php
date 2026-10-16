@@ -112,6 +112,11 @@ function aw_item_tags( $id, $slugs = null ) {
 	return array_values( array_filter( $terms, fn( $t ) => in_array( $t->slug, $slugs, true ) ) );
 }
 
+/** A Library item's type tags, from the fixed list (AW_LEGAL_KINDS). Other Library labels, such as a campaign tag, are not types. */
+function aw_legal_kinds( $id ) {
+	return aw_item_tags( $id, array_keys( AW_LEGAL_KINDS ) );
+}
+
 /** A listing's types (tags that are listing types). */
 function aw_listing_types( $id ) {
 	return aw_item_tags( $id, aw_listing_type_slugs() );

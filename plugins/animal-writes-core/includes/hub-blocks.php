@@ -244,7 +244,7 @@ function aw_block_doc_date( $a, $id ) {
 	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
 		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
 	}
-	$kind  = wp_list_pluck( aw_item_tags( $id ), 'name' );
+	$kind  = wp_list_pluck( 'aw_legal' === get_post_type( $id ) ? aw_legal_kinds( $id ) : aw_item_tags( $id ), 'name' );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
@@ -258,7 +258,7 @@ function aw_block_type_date( $a, $id ) {
 	$type = get_post_type( $id );
 	$name = '';
 	if ( in_array( $type, array( 'post', 'aw_legal' ), true ) ) { // the Resource or Library type: the item's tag from its section's list
-		$t    = aw_item_tags( $id );
+		$t    = 'aw_legal' === $type ? aw_legal_kinds( $id ) : aw_item_tags( $id ); // a Library label (campaign tag) is not its type
 		$name = $t ? $t[0]->name : '';
 	}
 	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
@@ -297,7 +297,7 @@ function aw_block_issuer( $a, $id ) {
  * @return string '' when the item has no type.
  */
 function aw_legal_kind_tag( $id ) {
-	$t = aw_item_tags( $id, aw_section_tags( 'aw_legal' ) );
+	$t = aw_legal_kinds( $id );
 	if ( ! $t ) {
 		return '';
 	}

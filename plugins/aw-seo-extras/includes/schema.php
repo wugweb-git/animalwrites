@@ -394,7 +394,7 @@ function aw_article_nodes( $id ) {
 	$type     = get_post_type( $id );
 	$url      = get_permalink( $id );
 	$title    = aw_seo_plain( get_the_title( $id ) );
-	$kind     = 'aw_legal' === $type && function_exists( 'aw_item_tags' ) ? ( aw_item_tags( $id, aw_section_tags( 'aw_legal' ) )[0] ?? null ) : null; // the Library type tag
+	$kind     = 'aw_legal' === $type && function_exists( 'aw_legal_kinds' ) ? ( aw_legal_kinds( $id )[0] ?? null ) : null; // the Library type tag (never a label such as a campaign tag)
 	$ks       = $kind ? $kind->slug : '';
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = aw_seo_plain( (string) get_post_meta( $id, 'aw_source_name', true ) );
