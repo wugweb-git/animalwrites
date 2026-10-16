@@ -194,11 +194,13 @@ add_filter(
  */
 add_filter(
 	'render_block_core/post-excerpt',
-	function ( $content ) {
-		if ( ! is_singular( 'aw_legal' ) ) {
+	function ( $content, $block = array(), $instance = null ) {
+		$post_id = get_queried_object_id();
+		// Only the item's own summary: not the excerpts of related-item or other cards on the same page, which
+		// otherwise each got this item's document preview or PDF viewer.
+		if ( ! is_singular( 'aw_legal' ) || ( $instance && ( isset( $instance->context['queryId'] ) || (int) ( $instance->context['postId'] ?? $post_id ) !== (int) $post_id ) ) ) {
 			return $content;
 		}
-		$post_id = get_queried_object_id();
 		$fid     = (int) get_post_meta( $post_id, 'aw_file_id', true );
 		$pdf     = $fid ? wp_get_attachment_url( $fid ) : '';
 		if ( ! $pdf ) {
@@ -218,7 +220,9 @@ add_filter(
 			esc_url( $source )
 		);
 		return $content . $viewer;
-	}
+	},
+	10,
+	3
 );
 
 /**
