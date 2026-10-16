@@ -128,6 +128,10 @@ function kits_block_styles() {
 		),
 		'core/paragraph' => array(
 			'kits-label' => __( 'Label', 'kits-by-wugweb' ),
+			'kits-note'  => __( 'Note', 'kits-by-wugweb' ),
+		),
+		'core/list'      => array(
+			'kits-sources' => __( 'Sources', 'kits-by-wugweb' ),
 		),
 	);
 	foreach ( $styles as $block => $list ) {

@@ -762,3 +762,25 @@
 	window.addEventListener('resize', check, { passive: true });
 	if (window.ResizeObserver) new ResizeObserver(check).observe(side);
 })();
+
+/* Rank Math FAQ: each question opens and closes its answer, like the Details FAQ. The question stays a heading (the
+   button sits inside it), the FAQ schema is untouched, and without JavaScript every answer is shown. */
+(function () {
+	document.querySelectorAll('.rank-math-list-item').forEach(function (item, i) {
+		var q = item.querySelector('.rank-math-question'), a = item.querySelector('.rank-math-answer');
+		if (!q || !a || q.querySelector('button')) return;
+		a.id = a.id || 'kit-faq-a-' + i;
+		var b = document.createElement('button');
+		b.type = 'button';
+		b.setAttribute('aria-expanded', 'false');
+		b.setAttribute('aria-controls', a.id);
+		while (q.firstChild) b.appendChild(q.firstChild);
+		q.appendChild(b);
+		a.hidden = true;
+		b.addEventListener('click', function () {
+			var open = b.getAttribute('aria-expanded') !== 'true';
+			b.setAttribute('aria-expanded', open ? 'true' : 'false');
+			a.hidden = !open;
+		});
+	});
+})();

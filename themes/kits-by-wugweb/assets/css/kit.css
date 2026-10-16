@@ -519,6 +519,40 @@ html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle
 html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-adsbygoogle-status="done"]:not([data-ad-status]) { max-height: 0 !important; overflow: hidden !important; } /* the request has gone with its size; until AdSense answers (filled or unfilled) the unit takes no height, so no blank box */
 .kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
+/* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
+   "Stripes" (core block style) shades every other row. Tokens only. */
+.wp-block-table { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-block: var(--kit-space-5); }
+.wp-block-table table { width: 100%; border-collapse: collapse; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); }
+@media (max-width: 767px) { .wp-block-table table { min-width: var(--kit-table-min); } }
+.wp-block-table table :is(th, td) { padding: var(--kit-space-3) var(--kit-space-4); border: 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); text-align: start; vertical-align: top; }
+.wp-block-table table thead { border-bottom: 0; }
+.wp-block-table table thead th { background: var(--kit-color-surface); color: var(--kit-color-ink); font-weight: var(--kit-weight-strong); border-bottom-color: var(--kit-color-ink); }
+.wp-block-table table tfoot { border-top: 0; }
+.wp-block-table.is-style-stripes { border-bottom: 0; }
+.wp-block-table.is-style-stripes tbody tr:nth-child(odd) { background: var(--kit-color-surface); }
+.wp-block-table figcaption, .wp-element-caption { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin-top: var(--kit-space-2); }
+
+/* Rank Math FAQ (keeps its FAQ schema): drawn like the Details FAQ below; kit.js makes each answer open and close. */
+.rank-math-block { margin-block: var(--kit-space-6); }
+.rank-math-list-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
+.rank-math-question { margin: 0 !important; font-size: var(--kit-type-body); line-height: var(--kit-leading-heading); }
+.rank-math-question > button { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
+.rank-math-question > button::after { content: "+"; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.rank-math-question > button[aria-expanded="true"]::after { transform: rotate(45deg); }
+.rank-math-question > button:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.rank-math-answer { padding-bottom: var(--kit-space-4); }
+.rank-math-answer > :first-child { margin-top: 0; }
+.rank-math-answer[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .rank-math-question > button::after { transition: none; } }
+
+/* Note (block style "Note" on core/paragraph): a small, muted line set apart above it, e.g. "general information, not advice". */
+.is-style-kits-note { margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+
+/* Sources list (block style "Sources" on core/list): small, muted, one source per line, links in ink. */
+.wp-block-list.is-style-kits-sources { font-size: var(--kit-type-sm); color: var(--kit-color-muted); padding-inline-start: var(--kit-space-5); }
+.wp-block-list.is-style-kits-sources li + li { margin-top: var(--kit-space-2); }
+.wp-block-list.is-style-kits-sources a { color: var(--kit-color-ink); }
+
 /* Details (FAQ) */
 .wp-block-details { border-bottom: 1px solid var(--kit-color-line); }
 .wp-block-details summary {

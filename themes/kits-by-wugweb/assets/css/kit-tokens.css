@@ -93,6 +93,8 @@
   --kit-z-overlay: 100;
   --kit-size-target: 44px;
   --kit-size-control: 48px;
+  --kit-border-width: 1px;
+  --kit-table-min: 34rem;
   --kit-border-control: 1px;
   --kit-card-columns: 1;
   --kit-card-media-ratio: 4/3;

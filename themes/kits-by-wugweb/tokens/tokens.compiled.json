@@ -365,6 +365,16 @@
       "md": "48px",
       "lg": "48px"
     },
+    "border-width": {
+      "sm": "1px",
+      "md": "1px",
+      "lg": "1px"
+    },
+    "table-min": {
+      "sm": "34rem",
+      "md": "34rem",
+      "lg": "34rem"
+    },
     "border-control": {
       "sm": "1px",
       "md": "1px",

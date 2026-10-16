@@ -1325,3 +1325,5 @@ body { background: var(--kit-color-canvas); }
 @media (max-width: 1199px) { .aw-ed-mosaic { scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); } .aw-ed-mosaic > * { scroll-snap-align: start; } }
 /* A date never breaks inside itself ("15 / Oct 2026"). */
 .aw-date { white-space: nowrap; }
+/* Guide disclaimer ("This guide is general information, not legal advice."): the Kits "Note" look. */
+.aw-guide-disclaimer { margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
