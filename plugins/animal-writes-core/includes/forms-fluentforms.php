@@ -325,6 +325,9 @@ foreach ( array( 'input_text', 'input_email', 'textarea', 'select', 'input_check
 			if ( ! $key ) {
 				return $html;
 			}
+			if ( ! is_array( $data ) ) { // Fluent Forms passes the markup in place of the field for tick boxes
+				$data = array( 'element' => false !== strpos( $html, 'ff-el-form-check' ) ? 'input_checkbox' : '', 'attributes' => array( 'name' => preg_match( '/name=[\'"]([a-z_]+)/', $html, $m ) ? $m[1] : '' ) );
+			}
 			$name = (string) ( $data['attributes']['name'] ?? '' );
 			$el   = $data['element'] ?? '';
 			if ( 'claim' === $key && 'feature' === rtrim( $name, '[]' ) && aw_ff_ctx( 'listing' ) && get_post_meta( aw_ff_ctx( 'listing' )->ID, 'aw_featured', true ) ) {

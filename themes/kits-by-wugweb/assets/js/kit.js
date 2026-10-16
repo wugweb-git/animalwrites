@@ -653,8 +653,14 @@
 	document.addEventListener('kit:form-done', function (e) { track('form_submit_success', { form: formName(e.target) }); });
 	document.addEventListener('kit:form-error', function (e) { track('form_error', { form: formName(e.target), where: e.detail.where, fields: e.detail.fields }); });
 	// Fluent Forms (AJAX): its own success and failure events, on document, with the form in detail.form
-	document.addEventListener('fluentform_submission_success', function (e) { track('form_submit_success', { form: formName(e.detail && e.detail.form) }); });
+	document.addEventListener('fluentform_submission_success', function (e) {
+		var res = e.detail && e.detail.response && e.detail.response.data && e.detail.response.data.result;
+		if (res && res.redirectUrl && res.redirectUrl.indexOf('/thank-you/') > -1) { try { sessionStorage.setItem('kit-sent', '1'); return; } catch (x) {} } // the thank-you page counts it, as for the site's own forms
+		track('form_submit_success', { form: formName(e.detail && e.detail.form) });
+	});
 	document.addEventListener('fluentform_submission_failed', function (e) { track('form_error', { form: formName(e.detail && e.detail.form), where: 'server', fields: '' }); });
+	// Fluent Forms' own check in the browser (a jQuery event): the fields it stopped on
+	if (window.jQuery) jQuery(document).on('fluentform_validation_failed', function (e, d) { var f = d && d.form && d.form[0]; track('form_error', { form: formName(f), where: 'browser', fields: d && d.response ? Object.keys(d.response).length : '' }); });
 	document.addEventListener('kit:step', function (e) { if (e.target.closest('.aw-claim-form, #claim')) track('claim_step', { step: e.detail.step }); });
 	// filter_apply: one event per filter in use (filter, value), plus the whole query (filters) and the hub
 	function filters(params, hub) {
