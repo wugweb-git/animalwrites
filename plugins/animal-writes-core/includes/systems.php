@@ -32,7 +32,16 @@ function aw_i( $name ) {
  * @param string     $fmt  Display format.
  * @return string
  */
-function aw_date( $when, $fmt = 'j M Y' ) {
+/*
+ * One date format sitewide, Indian day-month-year (owner, 16 Oct 2026): "8 Oct 2026". WordPress's own date format
+ * (core Post Date blocks, date_i18n( get_option( 'date_format' ) )) follows it too, whatever Settings → General says.
+ */
+if ( ! defined( 'AW_DATE_FORMAT' ) ) {
+	define( 'AW_DATE_FORMAT', 'j M Y' );
+}
+add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
+
+function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
 	$ts = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
 	if ( ! $ts ) {
 		return '';

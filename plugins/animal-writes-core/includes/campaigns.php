@@ -36,7 +36,7 @@ add_shortcode(
 		}
 		$ts   = strtotime( $date . ' 00:00:00 Asia/Kolkata' );
 		$days = (int) ceil( ( $ts - time() ) / DAY_IN_SECONDS );
-		$when = wp_date( 'j F Y', $ts, new DateTimeZone( 'Asia/Kolkata' ) );
+		$when = wp_date( AW_DATE_FORMAT, $ts, new DateTimeZone( 'Asia/Kolkata' ) );
 		$lbl  = $a['label'] ? esc_html( $a['label'] ) . ': ' : '';
 		if ( $days > 1 ) {
 			$text = sprintf( '<span class="aw-cd-num">%d</span> <span class="aw-cd-unit">days to go</span>', $days );

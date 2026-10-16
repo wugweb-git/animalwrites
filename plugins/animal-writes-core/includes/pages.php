@@ -548,7 +548,7 @@ add_filter(
 /*
  * Every date carries the calendar icon (owner, 15–16 Oct 2026), also inside sentences: a date written in a page's,
  * guide's or campaign's text ("29 November 2025", "8 Oct 2026", "November 29, 2025", "October 2026") gets the site's
- * date component (icon + <time datetime>) when shown. Only visible text in text blocks, classic content and card excerpts is touched (not headings), never
+ * date component (icon + <time datetime>) when shown, written in the one site format (AW_DATE_FORMAT: "29 Nov 2025"; a month alone "Oct 2026"). Only visible text in text blocks, classic content and card excerpts is touched (not headings), never
  * a date already inside <time>; the stored text is not changed.
  */
 function aw_inline_dates( $html ) {
@@ -579,7 +579,8 @@ function aw_inline_dates( $html ) {
 				$day = '' !== $m[1] ? $m[1] : ( $m[3] ?? '' );
 				$ts  = strtotime( ( '' !== $day ? $day : '1' ) . ' ' . $m[2] . ' ' . $m[4] );
 				$iso = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts ) : '';
-				return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . $m[0] . '</time></span>';
+				$txt = $ts ? wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0]; // one format sitewide: "2 Oct 2026", "Nov 2025"
+				return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
 			},
 			$part
 		);

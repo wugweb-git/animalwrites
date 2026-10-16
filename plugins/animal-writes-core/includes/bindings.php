@@ -26,7 +26,7 @@ function aw_format_date( $ymd ) {
 		return '';
 	}
 	$ts = strtotime( $ymd );
-	return $ts ? date_i18n( get_option( 'date_format' ), $ts ) : '';
+	return $ts ? date_i18n( AW_DATE_FORMAT, $ts ) : '';
 }
 
 /**
