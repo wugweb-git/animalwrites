@@ -21,46 +21,6 @@
             "selected": 0
         },
         {
-            "key": "field_aw_listing_phone",
-            "label": "Phone",
-            "name": "aw_phone",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "The number the site shows and calls (the Call button). Any format; Indian numbers get +91.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "0481 256 0000",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_aw_listing_whatsapp",
-            "label": "WhatsApp",
-            "name": "aw_whatsapp",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Kept as a fallback (copied into Phone numbers below on 16 Oct 2026). The site shows the Phone numbers list; this field is used only when the list is empty.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_aw_listing_email",
             "label": "Email",
             "name": "aw_email",
@@ -85,7 +45,7 @@
             "name": "aw_phones",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "What visitors and search engines see: each number with a Call link, and a WhatsApp link when WhatsApp is on. The Phone and WhatsApp fields above are kept as a fallback for an empty list.",
+            "instructions": "What visitors and search engines see: each number with a Call link, and a WhatsApp link when WhatsApp is on. The first number is the Call button.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -298,46 +258,6 @@
             "placement": "top",
             "endpoint": 0,
             "selected": 0
-        },
-        {
-            "key": "field_aw_listing_hours",
-            "label": "Opening hours",
-            "name": "aw_hours",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Kept as a fallback: shown only when Opening hours by day is empty, e.g. Mon–Sat 9 am – 6 pm; emergencies 24 hours.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_aw_listing_hours_spec",
-            "label": "Opening hours (exact)",
-            "name": "aw_hours_spec",
-            "aria-label": "",
-            "type": "textarea",
-            "instructions": "Kept as a fallback: used only when Opening hours by day is empty. One line per day range, e.g. Mon-Fri 09:00-18:00 and Sat 10:00-14:00.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "rows": 3,
-            "placeholder": "",
-            "new_lines": ""
         },
         {
             "key": "field_aw_listing_opening_hours",
@@ -1447,5 +1367,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1792137600
+    "modified": 1792141200
 }

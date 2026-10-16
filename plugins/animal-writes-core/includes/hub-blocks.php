@@ -431,7 +431,7 @@ function aw_type_icon( $slug ) {
 /** Ways to reach the organisation, shown only when they exist. */
 function aw_block_contact( $a, $id ) {
 	return ''; // not on the Directory index (owner, 12 Oct 2026): the card's Call button and the profile carry the contact details
-	$phone = (string) get_post_meta( $id, 'aw_phone', true );
+	$phone = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id ) : '';
 	$email = (string) get_post_meta( $id, 'aw_email', true );
 	$site  = (string) get_post_meta( $id, 'aw_website', true );
 	if ( ! $phone && ! $email ) { // the website arrow is not shown on cards (owner, 12 Oct 2026)
@@ -441,7 +441,7 @@ function aw_block_contact( $a, $id ) {
 }
 
 function aw_block_org_actions( $a, $id ) {
-	$phone = (string) get_post_meta( $id, 'aw_phone', true );
+	$phone = function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $id ) : '';
 	return '<div class="aw-org-actions">' // no Call button on cards (owner, 12 Oct 2026)
 		. '<a class="aw-org-go" href="' . esc_url( get_permalink( $id ) ) . '" aria-label="' . esc_attr( 'View ' . get_the_title( $id ) ) . '">' . aw_i( 'arrow-right' ) . '</a></div>';
 }

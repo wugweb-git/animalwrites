@@ -154,26 +154,6 @@
             "placeholder": "https://"
         },
         {
-            "key": "field_aw_opportunity_stipend",
-            "label": "Stipend or pay",
-            "name": "aw_stipend",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "As the organisation states it, e.g. Rs 10,000 a month, or Unpaid. Shown as \"Stipend\" under the deadline. In the job data only when it is a clear amount with currency and period.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_aw_opportunity_paid_listing",
             "label": "Paid listing",
             "name": "aw_paid_listing",
@@ -285,5 +265,5 @@
     "active": true,
     "description": "Opportunity details on the existing meta keys.",
     "show_in_rest": 0,
-    "modified": 1792137600
+    "modified": 1792141200
 }

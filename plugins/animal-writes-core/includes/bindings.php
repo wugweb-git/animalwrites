@@ -125,23 +125,13 @@ function aw_binding_value( $key, $post_id ) {
 			$src = $m( 'aw_services_source' );
 			$on  = $m( 'aw_services_on' ) ? aw_format_date( $m( 'aw_services_on' ) ) : '';
 			return 'Services: ' . $m( 'aw_services' ) . ( $src ? ' (as stated by ' . $src . ( $on ? ', ' . $on : '' ) . ')' : '' ); // escaped by the binding source
-		case 'phone': // the first number of the Phone numbers list (else the single Phone field)
+		case 'phone': // the first number of the Phone numbers list
+			return function_exists( 'aw_listing_first_phone' ) ? aw_listing_first_phone( $post_id ) : '';
 		case 'phone_url':
-			$p = function_exists( 'aw_listing_phones' ) && 'aw_listing' === get_post_type( $post_id ) ? aw_listing_phones( $post_id ) : array( array( 'number' => $m( 'aw_phone' ) ) );
-			$p = (string) ( $p[0]['number'] ?? '' );
-			return 'phone' === $key ? $p : aw_tel_url( $p );
-		case 'whatsapp_url': // the first number marked WhatsApp (else the single WhatsApp field)
-			$d = '';
-			foreach ( function_exists( 'aw_listing_phones' ) && 'aw_listing' === get_post_type( $post_id ) ? aw_listing_phones( $post_id ) : array( array( 'number' => $m( 'aw_whatsapp' ), 'whatsapp' => true ) ) as $p ) {
-				if ( ! empty( $p['whatsapp'] ) && aw_normalise_phone( $p['number'] ) ) {
-					$d = aw_normalise_phone( $p['number'] );
-					break;
-				}
-			}
-			return $d ? 'https://wa.me/' . $d : '';
-		case 'stipend': // as the organisation states it; empty removes the bound block
-			$s = $m( 'aw_stipend' );
-			return '' !== $s ? __( 'Stipend', 'animal-writes-core' ) . ': ' . $s : '';
+			return function_exists( 'aw_listing_first_phone' ) ? aw_tel_url( aw_listing_first_phone( $post_id ) ) : '';
+		case 'whatsapp_url': // the first number marked WhatsApp
+			$d = function_exists( 'aw_listing_first_phone' ) ? aw_normalise_phone( aw_listing_first_phone( $post_id, true ) ) : '';
+			return strlen( $d ) > 5 ? 'https://wa.me/' . $d : '';
 		case 'email_url':
 			$e = $m( 'aw_email' );
 			return $e ? 'mailto:' . $e : '';
@@ -211,7 +201,8 @@ function aw_hide_empty_bound_blocks( $content, $block, $instance = null ) {
 			// Organisation contact buttons stay in place, greyed out and not a link, so every profile has the same row (owner, 15 Oct 2026).
 			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $key ] ?? '';
 			if ( $act && 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
-				return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" data-act="' . $act . '">', '</span>' ), $content, 1 );
+				$name = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' )[ $act ];
+				return preg_replace( array( '#<a\b[^>]*>#', '#</a>#' ), array( '<span class="wp-block-button__link wp-element-button" role="link" aria-disabled="true" aria-label="' . esc_attr( $name . ': not available yet' ) . '" title="Not available yet" data-act="' . $act . '">', '</span>' ), $content, 1 );
 			}
 			return '';
 		}
@@ -219,3 +210,23 @@ function aw_hide_empty_bound_blocks( $content, $block, $instance = null ) {
 	return $content;
 }
 add_filter( 'render_block', 'aw_hide_empty_bound_blocks', 10, 3 );
+
+/**
+ * Organisation contact row (Call, WhatsApp, Email, Website): when any is missing, the greyed buttons are followed by a
+ * visible note naming them ("Not available yet: Call, Email") and the Suggest an update link (owner's rule, 15 Oct
+ * 2026: missing details show greyed, disabled buttons or a clear "not available" note).
+ *
+ * @param string $content Rendered core/buttons block.
+ * @return string
+ */
+function aw_profile_actions_note( $content ) {
+	if ( false === strpos( $content, 'aw-profile-actions' ) || ! is_singular( 'aw_listing' ) || ! preg_match_all( '#aria-disabled="true"[^>]*data-act="([a-z]+)"#', $content, $m ) ) {
+		return $content;
+	}
+	$names = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
+	$list  = implode( ', ', array_map( fn( $a ) => $names[ $a ] ?? $a, $m[1] ) );
+	$id    = (int) get_queried_object_id();
+	return $content . '<p class="aw-profile-actions-na"><span>' . esc_html( 'Not available yet: ' . $list ) . '</span>'
+		. ( function_exists( 'aw_report_url' ) ? ' <a href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">Suggest an update</a>' : '' ) . '</p>';
+}
+add_filter( 'render_block_core/buttons', 'aw_profile_actions_note', 15 );

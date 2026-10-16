@@ -764,6 +764,10 @@ body { background: var(--kit-color-canvas); }
 .aw-profile-actions :is(a[href^="http"]:not([href*="wa.me"]), [data-act="website"]) { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%22/%3E%3Cpath%20d%3D%22M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%22/%3E%3C/svg%3E"); }
 /* A contact way the organisation has not given yet: the button stays in its place, greyed out and not a link (owner, 15 Oct 2026) */
 :is(.aw-profile-actions, .aw-org-details-links) [aria-disabled="true"] { background: transparent; border-color: var(--kit-color-line); color: var(--kit-color-muted); opacity: 1; box-shadow: none; pointer-events: none; }
+/* Contact row with missing details: the greyed buttons, then "Not available yet: Call, Email" and Suggest an update */
+.aw-profile-actions:has(+ .aw-profile-actions-na) { margin-block-end: var(--kit-space-2); }
+.aw-profile-actions-na { margin: 0 0 var(--kit-space-5); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-profile-actions-na a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Directory search: on phones the name field and a "Filters" button (state, district, type fold away); wider, all in one row */
 .aw-dir-more > summary { list-style: none; cursor: pointer; }

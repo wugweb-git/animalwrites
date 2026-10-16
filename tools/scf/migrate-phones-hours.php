@@ -9,7 +9,7 @@
  * - aw_hours_spec, else aw_hours -> aw_opening_hours, only when every part of the text is clearly a day (or day range)
  *   with times, "closed", "24 hours" or "24x7". Anything else is reported and left as it is; no time is ever guessed
  *   (a range without days, times without am/pm or a colon, "noon", notes such as "emergencies" all count as unclear).
- * - The old keys are not touched. A listing that already has rows in a list keeps them (that list is skipped).
+ * - The old keys are not touched (the site no longer reads them). A listing that already has rows in a list keeps them (that list is skipped).
  * - Lists are written with update_field() on the field key: SCF's own repeater format.
  * - Report (CSV) to the path in $AW_REPORT, else ./migrate-phones-hours.csv.
  *
@@ -22,6 +22,24 @@ if ( ! defined( 'ABSPATH' ) || ! function_exists( 'update_field' ) ) {
 
 $apply  = in_array( 'apply', (array) ( $args ?? array() ), true );
 $report = getenv( 'AW_REPORT' ) ? getenv( 'AW_REPORT' ) : 'migrate-phones-hours.csv';
+
+/** aw_phone and aw_whatsapp as list rows: one row marked WhatsApp when they are the same number, else two. */
+function aw_mig_phone_rows( $phone, $whatsapp ) {
+	$phone    = trim( (string) $phone );
+	$whatsapp = trim( (string) $whatsapp );
+	$rows     = array();
+	if ( '' !== $phone ) {
+		$same   = '' !== $whatsapp && aw_normalise_phone( $phone ) === aw_normalise_phone( $whatsapp );
+		$rows[] = array( 'number' => $phone, 'label' => '', 'whatsapp' => $same );
+		if ( $same ) {
+			$whatsapp = '';
+		}
+	}
+	if ( '' !== $whatsapp ) {
+		$rows[] = array( 'number' => $whatsapp, 'label' => '', 'whatsapp' => true );
+	}
+	return $rows;
+}
 
 /** "9", "9:30", "09:00", "9 am", "9.30pm" -> "HH:MM" (24 h), or '' when unclear. */
 function aw_mig_time( $t ) {
@@ -173,7 +191,7 @@ foreach ( $ids as $id ) {
 			++$c['phones_skipped_existing'];
 			$note[] = 'phone list already had rows: kept';
 		} else {
-			$p_rows = aw_phones_from_single( $phone, $wa );
+			$p_rows = aw_mig_phone_rows( $phone, $wa );
 			++$c['phone_lists'];
 			$c['phone_rows'] += count( $p_rows );
 			if ( '' !== $wa ) {

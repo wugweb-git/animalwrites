@@ -60,7 +60,7 @@ foreach ( $rows as $r ) {
 		update_post_meta( $id, 'aw_' . $k, $r[ $k ] );
 	}
 	if ( ! empty( $r['phone'] ) ) {
-		update_post_meta( $id, 'aw_phone', $r['phone'] );
+		aw_listing_put_phone( $id, $r['phone'] ); // into the Phone numbers list
 	}
 	if ( ! empty( $r['email'] ) && is_email( $r['email'] ) ) {
 		update_post_meta( $id, 'aw_email', sanitize_email( $r['email'] ) ); // official office email only

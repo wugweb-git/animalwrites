@@ -18,12 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_listing_fields() {
 	return array(
 		'Contact' => array(
-			'aw_phone'    => array( 'Phone', 'tel', '' ),
-			'aw_whatsapp' => array( 'WhatsApp', 'tel', '' ),
 			'aw_email'    => array( 'Email', 'email', '' ),
 			'aw_area'     => array( 'Area or landmark', 'text', 'No full street address' ),
-			'aw_hours'    => array( 'Opening hours', 'text', 'e.g. Mon–Sat 9 am – 6 pm; emergencies 24 hours' ),
-			'aw_hours_spec' => array( 'Opening hours (exact)', 'textarea', 'One line per day range, e.g. Mon-Fri 09:00-18:00 and Sat 10:00-14:00' ),
 		),
 		'Online'  => array(
 			'aw_website'   => array( 'Website', 'url', '' ),
@@ -87,6 +83,13 @@ function aw_listing_details_box( $post ) {
 		}
 		echo '</tbody></table>';
 	}
+	// The two lists (SCF repeaters) as plain lines, for when SCF is off.
+	$ph = implode( "\n", array_map( fn( $r ) => $r['number'] . ' | ' . $r['label'] . ' | ' . ( $r['whatsapp'] ? 'whatsapp' : '' ), aw_listing_phones( $post->ID ) ) );
+	$hr = implode( "\n", array_map( fn( $r ) => $r['day'] . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '-' . $r['close'] ), aw_listing_hours( $post->ID ) ) );
+	echo '<h3 style="margin:1.25em 0 .5em">Phone numbers and opening hours</h3><table class="form-table" role="presentation"><tbody>'
+		. '<tr><th scope="row"><label for="aw_phones_lines">Phone numbers</label></th><td><textarea class="large-text" rows="3" id="aw_phones_lines" name="aw_phones_lines">' . esc_textarea( $ph ) . '</textarea><p class="description">One per line: number | label | whatsapp (the last two optional), e.g. 98765 43210 | Helpline | whatsapp</p></td></tr>'
+		. '<tr><th scope="row"><label for="aw_hours_lines">Opening hours by day</label></th><td><textarea class="large-text" rows="4" id="aw_hours_lines" name="aw_hours_lines">' . esc_textarea( $hr ) . '</textarea><p class="description">One day per line: Monday 09:00-18:00, or Sunday closed. Open all day: 00:00-23:59.</p></td></tr>'
+		. '</tbody></table>';
 	$ids = (string) get_post_meta( $post->ID, 'aw_gallery', true );
 	echo '<h3 style="margin:1.25em 0 .5em">Photos (up to 4)</h3><input type="hidden" id="aw_gallery" name="aw_gallery" value="' . esc_attr( $ids ) . '"><div id="aw-gallery-prev" style="display:flex;gap:8px;margin-bottom:8px">';
 	foreach ( array_filter( array_map( 'absint', explode( ',', $ids ) ) ) as $id ) {
@@ -113,6 +116,21 @@ add_action(
 			$v = aw_sanitize_meta( wp_unslash( $_POST[ $key ] ?? '' ), $key ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			'' === $v ? delete_post_meta( $id, $key ) : update_post_meta( $id, $key, $v );
 		}
+		$rows = array();
+		foreach ( preg_split( '/\R/', (string) wp_unslash( $_POST['aw_phones_lines'] ?? '' ) ) as $line ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			$p = array_map( 'trim', explode( '|', sanitize_text_field( $line ) ) );
+			if ( '' !== $p[0] ) {
+				$rows[] = array( 'number' => $p[0], 'label' => $p[1] ?? '', 'whatsapp' => 'whatsapp' === strtolower( $p[2] ?? '' ) );
+			}
+		}
+		aw_set_listing_list( $id, 'aw_phones', $rows );
+		$rows = array();
+		foreach ( preg_split( '/\R/', (string) wp_unslash( $_POST['aw_hours_lines'] ?? '' ) ) as $line ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			if ( preg_match( '/^\s*(' . implode( '|', AW_WEEKDAYS ) . ')\s+(?:(closed)|(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}))\s*$/i', sanitize_text_field( $line ), $x ) ) {
+				$rows[] = array( 'day' => ucfirst( strtolower( $x[1] ) ), 'open' => $x[3] ?? '', 'close' => $x[4] ?? '', 'closed' => ! empty( $x[2] ) );
+			}
+		}
+		aw_set_listing_list( $id, 'aw_opening_hours', $rows );
 	}
 );
 
@@ -141,8 +159,8 @@ function aw_block_org_details( $a, $id ) {
 	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
 	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
-	$phones  = aw_listing_phones( $id ); // the Phone numbers list, else the single Phone and WhatsApp fields
-	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // Opening hours by day, else the exact hours text
+	$phones  = aw_listing_phones( $id ); // the Phone numbers list
+	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // the Opening hours by day list
 	$contact = array(
 		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones ) ),
 		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
@@ -157,8 +175,8 @@ function aw_block_org_details( $a, $id ) {
 	}
 	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
 	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
-		if ( 'aw_hours' === $k && $hours ) { // the hours table; the free-text hours only when there is no list
-			$facts .= '<div class="aw-org-fact aw-org-fact--wide"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $hours . '</dd></div>';
+		if ( 'aw_hours' === $k ) { // the hours table, from the list only
+			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
 		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when

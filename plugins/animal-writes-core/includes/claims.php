@@ -22,7 +22,11 @@ const AW_CLAIM_ROLES = array(
 	'other'     => 'Other',
 );
 
-/** Listing fields a claim can change: meta key => label, validation rule. */
+/**
+ * Listing fields a claim can change: key => label, validation rule. aw_phone and aw_whatsapp are the claim's own keys for
+ * a phone and a WhatsApp number; on approval they go into the listing's Phone numbers list (aw_listing_put_phone), not
+ * into single fields.
+ */
 const AW_CLAIM_FIELDS = array(
 	'aw_phone'    => array( 'Phone', 'phone' ),
 	'aw_whatsapp' => array( 'WhatsApp', 'phone' ),
@@ -75,13 +79,21 @@ function aw_claim_services_field( $form, $listing ) {
 	return '<fieldset class="kit-field kit-check-group aw-claim-services"><legend>Services</legend>' . $boxes . '</fieldset>';
 }
 
+/** What a listing shows now for a claim field: phones from the Phone numbers list, the rest from its meta. */
+function aw_claim_current( $lid, $key ) {
+	if ( 'aw_phone' === $key || 'aw_whatsapp' === $key ) {
+		return aw_listing_first_phone( $lid, 'aw_whatsapp' === $key );
+	}
+	return (string) get_post_meta( $lid, $key, true );
+}
+
 function aw_claim_form( $listing ) {
 	$form = 'aw_claim';
 	$about  = kits_dict_field( $form, 'name', array( 'required' => true ) )
 		. kits_dict_field( $form, 'role', array( 'options' => AW_CLAIM_ROLES ) )
 		. kits_dict_field( $form, 'email', array( 'hint' => 'We use this only to check this request. It is not shown on the page.' ) )
 		. kits_dict_field( $form, 'phone' );
-	$cur    = fn( $k ) => (string) get_post_meta( $listing->ID, $k, true );
+	$cur    = fn( $k ) => aw_claim_current( $listing->ID, $k );
 	$keep   = fn( $k ) => array( 'placeholder' => '' !== $cur( $k ) ? $cur( $k ) : 'Not listed' );
 	$change = '<p class="kit-field-hint">Leave a field empty to keep what is shown now.</p>'
 		. kits_dict_field( $form, 'phone', array( 'name' => 'aw_phone', 'attrs' => $keep( 'aw_phone' ) ) )
@@ -252,7 +264,7 @@ function aw_claim_review_box( $post ) {
 	echo '<table class="widefat striped"><thead><tr><th>Field</th><th>Now</th><th>Proposed</th></tr></thead><tbody>';
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
-			echo '<tr><td>' . esc_html( $def[0] ) . '</td><td>' . esc_html( (string) get_post_meta( $lid, $key, true ) ) . '</td><td><strong>' . esc_html( $proposed[ $key ] ) . '</strong></td></tr>';
+			echo '<tr><td>' . esc_html( $def[0] ) . '</td><td>' . esc_html( aw_claim_current( $lid, $key ) ) . '</td><td><strong>' . esc_html( $proposed[ $key ] ) . '</strong></td></tr>';
 		}
 	}
 	if ( $logo ) {
@@ -309,6 +321,10 @@ add_action(
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {
 						aw_set_item_tags( $lid, explode( ',', (string) $val ), aw_service_slugs() ); // the services only; the listing's types stay
+					} elseif ( 'aw_phone' === $key ) {
+						aw_listing_put_phone( $lid, (string) $val, '' ); // into the Phone numbers list
+					} elseif ( 'aw_whatsapp' === $key ) {
+						aw_listing_put_phone( $lid, '', (string) $val );
 					} else {
 						update_post_meta( $lid, $key, $val );
 					}

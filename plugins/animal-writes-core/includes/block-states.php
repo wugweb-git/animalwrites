@@ -66,13 +66,13 @@ add_filter(
 				array( 'Not confirmed (types and source only)', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
 			),
 			'Contact icons (animal-writes/contact)' => array(
-				array( 'Phone, email and website', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_email', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_website', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
-				array( 'Phone only', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_email', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
-				array( 'No contact details', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_email', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
+				array( 'Phone, email and website', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phones', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ), array( 'key' => 'aw_email', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_website', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
+				array( 'Phone only', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phones', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ), array( 'key' => 'aw_email', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
+				array( 'No contact details', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'relation' => 'OR', array( 'key' => 'aw_phones', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_phones', 'value' => array( '', '0' ), 'compare' => 'IN' ) ), array( 'key' => 'aw_email', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_contact( array(), $id ) ),
 			),
 			'Organisation buttons (animal-writes/org-actions)' => array(
-				array( 'With a phone: Call', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_org_actions( array(), $id ) ),
-				array( 'No phone', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phone', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_org_actions( array(), $id ) ),
+				array( 'With a phone: Call', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_phones', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_org_actions( array(), $id ) ),
+				array( 'No phone', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'relation' => 'OR', array( 'key' => 'aw_phones', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_phones', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ) ), fn( $id ) => aw_block_org_actions( array(), $id ) ),
 			),
 			'Place (animal-writes/place)' => array(
 				array( 'District and state', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_district_code', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_place( array(), $id ) ),

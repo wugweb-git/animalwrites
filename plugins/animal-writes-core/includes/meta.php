@@ -38,8 +38,6 @@ function aw_meta_schema() {
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
 		'aw_featured'        => array( 'integer', array( 'aw_listing' ), 'Featured (1) or not (0)' ),
 		'aw_featured_until'  => array( 'string', array( 'aw_listing' ), 'Featured until (Y-m-d)' ),
-		'aw_phone'           => array( 'string', array( 'aw_listing' ), 'Phone' ),
-		'aw_whatsapp'        => array( 'string', array( 'aw_listing' ), 'WhatsApp' ),
 		'aw_email'           => array( 'string', array( 'aw_listing' ), 'Email' ),
 		'aw_website'         => array( 'string', array( 'aw_listing', 'aw_opportunity' ), 'Website' ),
 		'aw_area'            => array( 'string', array( 'aw_listing' ), 'Area / locality (no full address)' ),
@@ -54,7 +52,6 @@ function aw_meta_schema() {
 		'aw_g_reviews'       => array( 'string', array( 'aw_listing' ), 'Number of Google reviews' ),
 		'aw_g_category'      => array( 'string', array( 'aw_listing' ), 'Google category (e.g. Animal shelter)' ),
 		'aw_g_profile'       => array( 'string', array( 'aw_listing' ), 'Google Business Profile link' ),
-		'aw_hours_spec'      => array( 'string', array( 'aw_listing' ), 'Opening hours, one line per day range: "Mon-Fri 09:00-18:00"' ),
 		'aw_instagram'       => array( 'string', array( 'aw_listing' ), 'Instagram' ),
 		'aw_facebook'        => array( 'string', array( 'aw_listing' ), 'Facebook' ),
 		'aw_ngobase_url'     => array( 'string', array( 'aw_listing' ), 'ngobase.org profile' ),
@@ -68,7 +65,6 @@ function aw_meta_schema() {
 		'aw_reg_80g'         => array( 'string', array( 'aw_listing' ), '80G registration number' ),
 		'aw_darpan_id'       => array( 'string', array( 'aw_listing' ), 'NGO Darpan ID' ),
 		'aw_animals'         => array( 'string', array( 'aw_listing' ), 'Animals helped (comma separated)' ),
-		'aw_hours'           => array( 'string', array( 'aw_listing' ), 'Opening hours' ),
 		'aw_languages'       => array( 'string', array( 'aw_listing' ), 'Languages spoken (comma separated)' ),
 		'aw_donate_url'      => array( 'string', array( 'aw_listing' ), 'Donate link' ),
 		'aw_volunteer_url'   => array( 'string', array( 'aw_listing' ), 'Volunteer link' ),
@@ -80,7 +76,6 @@ function aw_meta_schema() {
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
 		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
-		'aw_stipend'         => array( 'string', array( 'aw_opportunity' ), 'Stipend or pay, as stated (shown as "Stipend" on the opportunity)' ),
 
 		// Campaigns (read by the Event schema in aw-seo-extras).
 		'aw_event_date'      => array( 'string', array( 'aw_campaign' ), 'Event date (Y-m-d)' ),
@@ -132,9 +127,6 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_rel_nofollow' === $key ) {
 		return $value ? '1' : '';
-	}
-	if ( 'aw_hours_spec' === $key ) { // keep line breaks
-		return sanitize_textarea_field( (string) $value );
 	}
 	if ( 'aw_email' === $key ) {
 		return sanitize_email( (string) $value );
@@ -221,50 +213,25 @@ add_action(
 	}
 );
 
-/**
- * Exact opening hours ("Mon-Fri 09:00-18:00", one range per line) as schema.org OpeningHoursSpecification.
- *
- * @param string $text Lines.
- * @return array
- */
-function aw_hours_spec( $text ) {
-	$days = array( 'mon' => 'Monday', 'tue' => 'Tuesday', 'wed' => 'Wednesday', 'thu' => 'Thursday', 'fri' => 'Friday', 'sat' => 'Saturday', 'sun' => 'Sunday' );
-	$keys = array_keys( $days );
-	$out  = array();
-	foreach ( preg_split( '/[\r\n]+/', (string) $text ) as $line ) {
-		if ( ! preg_match( '/^\s*([a-z]{3})[a-z]*(?:\s*[-–]\s*([a-z]{3})[a-z]*)?\s+(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/i', $line, $mm ) ) {
-			continue;
-		}
-		$from = array_search( strtolower( $mm[1] ), $keys, true );
-		$to   = isset( $mm[2] ) && '' !== $mm[2] ? array_search( strtolower( $mm[2] ), $keys, true ) : $from;
-		if ( false === $from || false === $to ) {
-			continue;
-		}
-		$list = array();
-		for ( $i = $from; ; $i = ( $i + 1 ) % 7 ) {
-			$list[] = $days[ $keys[ $i ] ];
-			if ( $i === $to ) {
-				break;
-			}
-		}
-		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => $list, 'opens' => $mm[3], 'closes' => $mm[4] );
-	}
-	return $out;
-}
-
 /*
- * Phone numbers and opening hours as lists (SCF repeaters aw_phones and aw_opening_hours, stored the way SCF stores a
- * repeater: the row count under the key, each sub-field under "{key}_{row}_{name}"). Read here straight from the meta,
- * so the page and the schema work with or without SCF. The former single fields (aw_phone, aw_whatsapp, aw_hours,
- * aw_hours_spec) are kept and used only when a list is empty.
+ * Phone numbers and opening hours: the only source is the two lists (SCF repeaters aw_phones and aw_opening_hours),
+ * stored the way SCF stores a repeater: the row count under the key, each sub-field under "{key}_{row}_{name}", and the
+ * field-key reference rows SCF writes. Read and written here straight from the meta, so the page, the schema, imports
+ * and claims work with or without SCF. (The former single fields aw_phone, aw_whatsapp, aw_hours and aw_hours_spec were
+ * copied into these lists on 16 Oct 2026; their stored values are left in the database and nothing reads them.)
  */
 
 /** The days in order, Monday first. */
 const AW_WEEKDAYS = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
 
+/** Sub-fields of the two lists: name => SCF field key. */
+const AW_LIST_FIELDS = array(
+	'aw_phones'        => array( 'number' => 'field_aw_listing_phones_number', 'label' => 'field_aw_listing_phones_label', 'whatsapp' => 'field_aw_listing_phones_whatsapp' ),
+	'aw_opening_hours' => array( 'day' => 'field_aw_listing_opening_hours_day', 'open' => 'field_aw_listing_opening_hours_open', 'close' => 'field_aw_listing_opening_hours_close', 'closed' => 'field_aw_listing_opening_hours_closed' ),
+);
+
 /**
- * A listing's phone numbers: [ [ number, label, whatsapp (bool) ], … ]. From aw_phones; when that is empty, from
- * aw_phone and aw_whatsapp (one row when they are the same number).
+ * A listing's phone numbers: [ [ number, label, whatsapp (bool) ], … ] from aw_phones.
  *
  * @param int $id Listing ID.
  * @return array
@@ -282,38 +249,12 @@ function aw_listing_phones( $id ) {
 			);
 		}
 	}
-	return $rows ? $rows : aw_phones_from_single( get_post_meta( $id, 'aw_phone', true ), get_post_meta( $id, 'aw_whatsapp', true ) );
-}
-
-/**
- * The single Phone and WhatsApp fields as list rows: the phone, flagged WhatsApp when the WhatsApp number is the same,
- * else the WhatsApp number as a second row.
- *
- * @param string $phone    aw_phone.
- * @param string $whatsapp aw_whatsapp.
- * @return array
- */
-function aw_phones_from_single( $phone, $whatsapp ) {
-	$phone    = trim( (string) $phone );
-	$whatsapp = trim( (string) $whatsapp );
-	$rows     = array();
-	if ( '' !== $phone ) {
-		$same   = '' !== $whatsapp && function_exists( 'aw_normalise_phone' ) && aw_normalise_phone( $phone ) === aw_normalise_phone( $whatsapp );
-		$rows[] = array( 'number' => $phone, 'label' => '', 'whatsapp' => $same );
-		if ( $same ) {
-			$whatsapp = '';
-		}
-	}
-	if ( '' !== $whatsapp ) {
-		$rows[] = array( 'number' => $whatsapp, 'label' => '', 'whatsapp' => true );
-	}
 	return $rows;
 }
 
 /**
- * A listing's opening hours by day: [ [ day, open (H:i), close (H:i), closed (bool) ], … ] in weekday order. From
- * aw_opening_hours; when that is empty, from the exact hours text (aw_hours_spec). The free-text aw_hours is not a list
- * and is shown as text only when this returns nothing.
+ * A listing's opening hours by day: [ [ day, open (H:i), close (H:i), closed (bool) ], … ] from aw_opening_hours, in
+ * weekday order.
  *
  * @param int $id Listing ID.
  * @return array
@@ -334,15 +275,100 @@ function aw_listing_hours( $id ) {
 			$rows[] = array( 'day' => $day, 'open' => $closed ? '' : $open, 'close' => $closed ? '' : $close, 'closed' => $closed );
 		}
 	}
-	if ( ! $rows ) {
-		foreach ( aw_hours_spec( get_post_meta( $id, 'aw_hours_spec', true ) ) as $s ) {
-			foreach ( $s['dayOfWeek'] as $day ) {
-				$rows[] = array( 'day' => $day, 'open' => sprintf( '%05s', $s['opens'] ), 'close' => sprintf( '%05s', $s['closes'] ), 'closed' => false );
-			}
-		}
-	}
 	usort( $rows, fn( $a, $b ) => array( array_search( $a['day'], AW_WEEKDAYS, true ), $a['open'] ) <=> array( array_search( $b['day'], AW_WEEKDAYS, true ), $b['open'] ) );
 	return $rows;
+}
+
+/**
+ * Write a whole list in SCF's repeater format (count, rows, reference rows); rows past the new count are removed, as SCF
+ * does when rows are taken out.
+ *
+ * @param int    $id   Listing ID.
+ * @param string $key  aw_phones or aw_opening_hours.
+ * @param array  $rows Rows keyed by sub-field name (number/label/whatsapp, or day/open/close/closed).
+ */
+function aw_set_listing_list( $id, $key, array $rows ) {
+	$subs = AW_LIST_FIELDS[ $key ];
+	$old  = (int) get_post_meta( $id, $key, true );
+	$rows = array_values( $rows );
+	foreach ( $rows as $i => $r ) {
+		foreach ( $subs as $name => $fkey ) {
+			$v = $r[ $name ] ?? '';
+			if ( in_array( $name, array( 'whatsapp', 'closed' ), true ) ) {
+				$v = $v ? 1 : 0;
+			} elseif ( in_array( $name, array( 'open', 'close' ), true ) ) {
+				$v = preg_match( '/^\d{2}:\d{2}$/', (string) $v ) ? $v . ':00' : (string) $v;
+			}
+			update_post_meta( $id, "{$key}_{$i}_{$name}", is_int( $v ) ? $v : sanitize_text_field( (string) $v ) );
+			update_post_meta( $id, "_{$key}_{$i}_{$name}", $fkey );
+		}
+	}
+	for ( $i = count( $rows ); $i < $old; $i++ ) {
+		foreach ( array_keys( $subs ) as $name ) {
+			delete_post_meta( $id, "{$key}_{$i}_{$name}" );
+			delete_post_meta( $id, "_{$key}_{$i}_{$name}" );
+		}
+	}
+	update_post_meta( $id, $key, count( $rows ) );
+	update_post_meta( $id, '_' . $key, 'aw_phones' === $key ? 'field_aw_listing_phones' : 'field_aw_listing_opening_hours' );
+}
+
+/**
+ * Put a phone and/or WhatsApp number into a listing's phone list (imports, the ingest endpoint, approved claims): the
+ * phone replaces the first number (keeping its label and WhatsApp mark) or is added; the WhatsApp number marks the row
+ * with the same number, else replaces the first number marked WhatsApp, else is added as a WhatsApp row. Other rows stay.
+ *
+ * @param int    $id       Listing ID.
+ * @param string $phone    Phone ('' to leave as is).
+ * @param string $whatsapp WhatsApp number ('' to leave as is).
+ */
+function aw_listing_put_phone( $id, $phone = '', $whatsapp = '' ) {
+	$phone    = trim( sanitize_text_field( (string) $phone ) );
+	$whatsapp = trim( sanitize_text_field( (string) $whatsapp ) );
+	if ( '' === $phone && '' === $whatsapp ) {
+		return;
+	}
+	$rows = aw_listing_phones( $id );
+	$norm = fn( $n ) => function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $n ) : preg_replace( '/\D+/', '', $n );
+	if ( '' !== $phone ) {
+		if ( $rows ) {
+			$rows[0]['number'] = $phone;
+		} else {
+			$rows[] = array( 'number' => $phone, 'label' => '', 'whatsapp' => false );
+		}
+	}
+	if ( '' !== $whatsapp ) {
+		$done = false;
+		foreach ( $rows as $i => $r ) {
+			if ( $norm( $r['number'] ) === $norm( $whatsapp ) ) {
+				$rows[ $i ]['whatsapp'] = $done = true;
+				break;
+			}
+		}
+		if ( ! $done ) {
+			foreach ( $rows as $i => $r ) {
+				if ( $r['whatsapp'] && ( 0 !== $i || '' === $phone ) ) {
+					$rows[ $i ]['number'] = $whatsapp;
+					$done                 = true;
+					break;
+				}
+			}
+		}
+		if ( ! $done ) {
+			$rows[] = array( 'number' => $whatsapp, 'label' => '', 'whatsapp' => true );
+		}
+	}
+	aw_set_listing_list( $id, 'aw_phones', $rows );
+}
+
+/** The first number of a listing (Call), or the first marked WhatsApp. */
+function aw_listing_first_phone( $id, $whatsapp = false ) {
+	foreach ( aw_listing_phones( $id ) as $p ) {
+		if ( ! $whatsapp || $p['whatsapp'] ) {
+			return $p['number'];
+		}
+	}
+	return '';
 }
 
 /**

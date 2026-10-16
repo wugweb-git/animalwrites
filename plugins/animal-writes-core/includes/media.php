@@ -378,6 +378,11 @@ add_filter(
 add_filter(
 	'render_block_core/buttons',
 	function ( $content ) {
+		// A row with no links is dropped, except an organisation's contact row of greyed buttons (aria-disabled), which
+		// stays on listings so a missing phone, email or website reads as not available (owner, 15 Oct 2026).
+		if ( is_singular( 'aw_listing' ) && false !== strpos( $content, 'aria-disabled="true"' ) ) {
+			return $content;
+		}
 		return ( is_singular() && false === strpos( $content, '<a' ) && false === strpos( $content, '<button' ) ) ? '' : $content;
 	},
 	20

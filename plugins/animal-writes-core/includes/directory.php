@@ -470,7 +470,7 @@ add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
 /** How many ways to reach a listing: phone, WhatsApp, email, website. */
 function aw_contact_score( $id ) {
 	$n      = 0;
-	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array(); // the list, else the single fields
+	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array(); // the Phone numbers list
 	$n     += $phones ? 1 : 0;
 	$n     += in_array( true, wp_list_pluck( $phones, 'whatsapp' ), true ) ? 1 : 0;
 	foreach ( array( 'aw_email', 'aw_website' ) as $k ) {
@@ -480,7 +480,7 @@ function aw_contact_score( $id ) {
 }
 /** Keep the score current when a contact field changes. */
 function aw_contact_score_sync( $mid, $id, $key ) {
-	if ( ( in_array( $key, array( 'aw_phone', 'aw_whatsapp', 'aw_email', 'aw_website', 'aw_phones' ), true ) || 0 === strpos( (string) $key, 'aw_phones_' ) ) && 'aw_listing' === get_post_type( $id ) ) {
+	if ( ( in_array( $key, array( 'aw_email', 'aw_website', 'aw_phones' ), true ) || 0 === strpos( (string) $key, 'aw_phones_' ) ) && 'aw_listing' === get_post_type( $id ) ) {
 		update_post_meta( $id, 'aw_contact_score', aw_contact_score( $id ) );
 	}
 }

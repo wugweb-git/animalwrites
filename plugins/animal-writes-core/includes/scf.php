@@ -163,7 +163,7 @@ add_filter(
 			array_unique(
 				array_merge(
 					(array) ( $config['names'] ?? array() ),
-					array( 'aw_lat', 'aw_lng', 'aw_place_id', 'aw_g_rating', 'aw_g_reviews', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_darpan_id', 'aw_awbi_code', 'aw_publisher', 'aw_source_url', 'aw_source_name', 'aw_maps_url', 'aw_g_profile', 'aw_ngobase_url', 'aw_founded', 'aw_legal_number', 'aw_services_source', 'aw_hours_spec' )
+					array( 'aw_lat', 'aw_lng', 'aw_place_id', 'aw_g_rating', 'aw_g_reviews', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_darpan_id', 'aw_awbi_code', 'aw_publisher', 'aw_source_url', 'aw_source_name', 'aw_maps_url', 'aw_g_profile', 'aw_ngobase_url', 'aw_founded', 'aw_legal_number', 'aw_services_source' )
 				)
 			)
 		);

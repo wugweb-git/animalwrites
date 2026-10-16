@@ -241,11 +241,13 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	if ( 'aw_listing' === $type ) {
 		$l = (array) $req->get_param( 'listing' );
-		foreach ( array( 'phone', 'whatsapp', 'email', 'website', 'area', 'services' ) as $f ) {
+		foreach ( array( 'email', 'website', 'area', 'services' ) as $f ) {
 			if ( isset( $l[ $f ] ) ) {
 				update_post_meta( $post_id, 'aw_' . $f, aw_sanitize_meta( $l[ $f ], 'aw_' . $f ) );
 			}
 		}
+		// Phone and WhatsApp go into the Phone numbers list (one row, marked WhatsApp, when they are the same number).
+		aw_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 		update_post_meta( $post_id, 'aw_featured', 0 );
 	}

@@ -177,12 +177,14 @@
    "type": "component",
    "status": "live",
    "classes": [
-    "aw-profile"
+    "aw-profile",
+    "aw-profile-actions-na"
    ],
    "states": [
     "logo or initials",
     "verified or not",
-    "with or without each contact way: a missing one shows greyed out (aria-disabled, not a link)"
+    "with or without each contact way: a missing one shows greyed out (aria-disabled, not a link)",
+    "contact row with missing details: each missing button greyed (aria-disabled, not a link, aria-label \"…: not available yet\"), then a visible \"Not available yet: Call, Email\" note and Suggest an update; the row stays when all four are missing"
    ],
    "tokens": [],
    "a11y": {
@@ -221,8 +223,8 @@
     "all",
     "missing phone, email, website, address, hours or services: \"… not available yet\" and a Suggest an update link (the Report form)",
     "no map link: Directions greyed out (aria-disabled, not a link)",
-    "phones: one or more numbers (Call link each, label, WhatsApp link when marked); from the Phone numbers list, else the single Phone and WhatsApp fields",
-    "opening hours: a day-by-day table (Closed, Open 24 hours, split days); from Opening hours by day, else the exact hours text, else the free-text hours (the hours fact spans both columns from md, aw-org-fact--wide)"
+    "phones: one or more numbers from the Phone numbers list (Call link each, label, WhatsApp link when marked)",
+    "opening hours: a day-by-day table from Opening hours by day (Closed, Open 24 hours, split days); the hours fact spans both columns from md (aw-org-fact--wide)"
    ],
    "tokens": [],
    "a11y": {
