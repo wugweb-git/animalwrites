@@ -186,8 +186,7 @@ add_action(
 	}
 );
 
-// Sitemaps: never listed.
-add_filter( 'kits_sitemap_skip', fn( $skip, $post ) => $skip || in_array( (int) $post->ID, kits_preview_only_ids(), true ), 10, 2 );
+// Sitemaps: an SEO plugin leaves them out (kits_preview_only_ids() is public for that).
 
 // Their own page: never cached; 404 unless the request previews.
 add_action(

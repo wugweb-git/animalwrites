@@ -200,6 +200,75 @@ add_action(
 	}
 );
 
+/* ---------- Rank Math Titles & Meta templates: the same rules (SEO Phase 10, 16 Oct 2026) ---------- */
+
+/*
+ * Every item type's Titles & Meta template is %aw_title% / %aw_description% (Rank Math → Titles & Meta → each post
+ * type), so an item that has no stored title or description yet, and the snippet preview in the editor and in the
+ * settings, show what the rules above write: one separator, " – Animal Writes" only at the end, never a bare
+ * %variable%. Stored values still win, as Rank Math always does.
+ */
+
+/** The post a Rank Math variable is being replaced for. */
+function aw_seo_var_post( $args = null ) {
+	if ( $args instanceof WP_Post ) {
+		return $args;
+	}
+	if ( is_object( $args ) && ! empty( $args->ID ) ) {
+		return get_post( (int) $args->ID );
+	}
+	if ( is_admin() && ! empty( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		return get_post( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	$post = get_post();
+	return $post ? $post : ( is_singular() ? get_queried_object() : null );
+}
+
+/** %aw_title%: the item's title by the rules above; a hub or an untitled draft: "{Title} – Animal Writes". */
+function aw_seo_var_title( $var_args = '', $args = null ) {
+	$post  = aw_seo_var_post( $args );
+	$title = $post ? aw_seo_item_title( $post ) : '';
+	if ( '' === $title ) {
+		$own   = $post ? trim( aw_seo_plain( wptexturize( $post->post_title ) ) ) : '';
+		$title = '' !== $own ? aw_seo_branded( $own ) : get_bloginfo( 'name' );
+	}
+	return $title;
+}
+
+/** %aw_description%: the item's description by the rules above (its summary condensed, else its intro). */
+function aw_seo_var_description( $var_args = '', $args = null ) {
+	$post = aw_seo_var_post( $args );
+	$desc = $post ? aw_seo_item_description( $post ) : '';
+	return '' !== $desc ? $desc : get_bloginfo( 'description' );
+}
+
+add_action(
+	'rank_math/vars/register_extra_replacements',
+	function () {
+		$post = is_admin() ? aw_seo_var_post() : null; // the example is only shown in admin previews
+		rank_math_register_var_replacement(
+			'aw_title',
+			array(
+				'name'        => 'Animal Writes title',
+				'description' => 'The title by the site\'s rules: one separator, " – Animal Writes" only at the end',
+				'variable'    => 'aw_title',
+				'example'     => $post ? aw_seo_var_title( '', $post ) : 'Supreme Court Order on Community Dogs – Animal Writes',
+			),
+			'aw_seo_var_title'
+		);
+		rank_math_register_var_replacement(
+			'aw_description',
+			array(
+				'name'        => 'Animal Writes description',
+				'description' => 'The description by the site\'s rules (the summary condensed, else the intro)',
+				'variable'    => 'aw_description',
+				'example'     => $post ? aw_seo_var_description( '', $post ) : get_bloginfo( 'description' ),
+			),
+			'aw_seo_var_description'
+		);
+	}
+);
+
 /* ---------- Lists: built at run time ---------- */
 
 /** The title rule for the current list view, '' to leave it to WordPress (type pages, filtered lists, archives). */
@@ -360,6 +429,22 @@ function aw_seo_sync_hubs() {
 	return $out;
 }
 add_action( 'aw_seo_fill_daily', 'aw_seo_sync_hubs', 20 );
+
+/**
+ * Directory views that no title rule above names (a name search in a place, "/directory/rajasthan/?q=cow"): the
+ * document title is the page's own heading, aw_directory_title() ("Animal welfare directory: Rajasthan"). Moved here
+ * from animal-writes-core (SEO ground rule G1, 16 Oct 2026); titles are unchanged.
+ *
+ * @param array $parts Title parts.
+ * @return array
+ */
+function aw_seo_directory_document_title( $parts ) {
+	if ( function_exists( 'aw_is_directory_view' ) && function_exists( 'aw_directory_title' ) && aw_is_directory_view() ) {
+		$parts['title'] = wp_strip_all_tags( aw_directory_title( $parts['title'] ?? '' ) );
+	}
+	return $parts;
+}
+add_filter( 'document_title_parts', 'aw_seo_directory_document_title' );
 
 // While building, the document title comes from WordPress's own parts (the Directory type pages set theirs).
 add_filter( 'pre_get_document_title', fn( $t ) => aw_seo_building_title() ? '' : $t, 16 );

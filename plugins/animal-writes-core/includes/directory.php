@@ -295,19 +295,7 @@ function aw_directory_title( $title ) {
 }
 add_filter( 'get_the_archive_title', 'aw_directory_title', 20 );
 
-/**
- * Same title in the document <title> for SEO.
- *
- * @param array $parts Title parts.
- * @return array
- */
-function aw_directory_document_title( $parts ) {
-	if ( aw_is_directory_view() ) {
-		$parts['title'] = wp_strip_all_tags( aw_directory_title( $parts['title'] ?? '' ) );
-	}
-	return $parts;
-}
-add_filter( 'document_title_parts', 'aw_directory_document_title' );
+// The document <title> of these views is set in aw-seo-extras (titles.php), from aw_directory_title().
 
 /**
  * Directory URL helper for themes/menus.
