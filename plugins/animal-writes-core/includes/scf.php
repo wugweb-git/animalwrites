@@ -162,3 +162,40 @@ add_filter(
 		return $config;
 	}
 );
+
+/**
+ * get_field() by name finds our field without a stored "_name" reference row: the reference comes from the field
+ * group of the item's post type. (Our saves write no reference rows; see aw_value_guard.)
+ */
+add_filter(
+	'acf/pre_load_reference',
+	function ( $reference, $field_name, $post_id ) {
+		if ( null !== $reference || ! is_numeric( $post_id ) || ( 0 !== strpos( (string) $field_name, 'aw_' ) && 'kits_last_reviewed' !== $field_name ) ) {
+			return $reference;
+		}
+		static $map = null;
+		if ( null === $map ) {
+			$map = array();
+			foreach ( AW_SCF_GROUPS as $gk ) {
+				$group = acf_get_field_group( $gk );
+				if ( ! $group ) {
+					continue;
+				}
+				foreach ( (array) $group['location'] as $rules ) {
+					foreach ( $rules as $r ) {
+						if ( 'post_type' === $r['param'] ) {
+							foreach ( (array) acf_get_fields( $gk ) as $f ) {
+								if ( '' !== $f['name'] ) {
+									$map[ $r['value'] ][ $f['name'] ] = $f['key'];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return $map[ get_post_type( (int) $post_id ) ][ $field_name ] ?? $reference;
+	},
+	10,
+	3
+);
