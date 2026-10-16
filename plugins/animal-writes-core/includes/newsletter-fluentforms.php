@@ -101,7 +101,7 @@ add_filter(
 			return $body;
 		}
 		$row = aw_nl_get( 'email', strtolower( trim( (string) ( $data['email'] ?? '' ) ) ) );
-		return $row ? str_replace( '%%aw_unsubscribe%%', esc_url( aw_nl_link( 'unsubscribe', $row['token'] ) ), $body ) : $body;
+		return $row ? str_replace( '%%aw_unsubscribe%%', '<a href="' . esc_url( aw_nl_link( 'unsubscribe', $row['token'] ) ) . '">' . esc_html( aw_nl_link( 'unsubscribe', $row['token'] ) ) . '</a>', $body ) : $body;
 	},
 	10,
 	4
@@ -119,11 +119,15 @@ add_filter(
 				$ids = array();
 				if ( defined( 'FLUENTFORM' ) ) {
 					$email = strtolower( trim( (string) $email ) );
-					$ids   = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT submission_id FROM {$wpdb->prefix}fluentform_entry_details WHERE LOWER(field_value) = %s", $email ) ) ); // phpcs:ignore
 					$like  = '%' . $wpdb->esc_like( '"' . $email . '"' ) . '%';
-					$ids   = array_unique( array_merge( $ids, array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE LOWER(response) LIKE %s", $like ) ) ) ) ); // phpcs:ignore
-					if ( $ids ) {
-						\FluentForm\App\Models\Submission::remove( $ids );
+					$rows  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, form_id FROM {$wpdb->prefix}fluentform_submissions WHERE LOWER(response) LIKE %s OR id IN (SELECT submission_id FROM {$wpdb->prefix}fluentform_entry_details WHERE LOWER(field_value) = %s)", $like, $email ) ); // phpcs:ignore
+					$by    = array();
+					foreach ( $rows as $r ) {
+						$by[ (int) $r->form_id ][] = (int) $r->id;
+						$ids[]                     = (int) $r->id;
+					}
+					foreach ( $by as $form_id => $sub_ids ) { // Fluent Forms removes entries one form at a time
+						\FluentForm\App\Models\Submission::remove( $sub_ids, $form_id );
 					}
 				}
 				return array( 'items_removed' => (bool) $ids, 'items_retained' => false, 'messages' => array(), 'done' => true );
