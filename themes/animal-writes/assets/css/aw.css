@@ -881,7 +881,7 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .ff-el-is-error .ff-el-form-control, .aw-form-ff .ff-el-form-control[aria-invalid=true] { border-color: var(--color-peach); }
 .aw-form-ff .ff-el-input--content .error, .aw-form-ff .kit-field-message:not(:empty) { display: block; min-height: 0; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); }
 .aw-form-ff .ff-el-form-check { margin: 0; }
-.aw-form-ff .ff-el-form-check-label.kit-checkbox { margin: 0; }
+.aw-form-ff .ff-el-form-check-label.kit-checkbox { display: flex; margin: 0; }
 .aw-form-ff .ff-el-form-check-label.kit-checkbox > span { flex: 1; }
 .aw-form-ff .kit-check-group.ff-el-group > legend { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-strong); }
 .aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
