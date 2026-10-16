@@ -1,0 +1,691 @@
+{
+ "https://animalwrites.in/thank-you/": {
+  "status": 200,
+  "title": "Thank You for Your Message or Submission \u2013 Animal Writes",
+  "desc": "Thank you. Your message, sign-up or request has reached Animal Writes. Go back to the page you were on, or to the home page to keep reading.",
+  "robots": "follow, noindex",
+  "canonical": "",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/thank-you/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/report/": {
+  "status": 200,
+  "title": "Report a Mistake in a Directory Listing \u2013 Animal Writes",
+  "desc": "Report a mistake in an Animal Writes Directory listing: a wrong phone, email, website or location, a closed organisation, or one listed more than once.",
+  "robots": "follow, noindex",
+  "canonical": "",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/report/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/claim/": {
+  "status": 200,
+  "title": "Claim This Listing and Update Its Details \u2013 Animal Writes",
+  "desc": "Claim this listing for your organisation in the Animal Writes Directory: find it by name, then send changes to its phone, email, website, area or logo.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/claim/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/claim/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/remove-my-data/": {
+  "status": 200,
+  "title": "Contact Us to List or Update Organisations \u2013 Animal Writes",
+  "desc": "Contact us to list your organisation, get featured in the Directory, post an opportunity, partner with Animal Writes or report a mistake on the site.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/contact/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ContactPage\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/contact/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/volunteer/": {
+  "status": 200,
+  "title": "Register as a Volunteer to Help Animals \u2013 Animal Writes",
+  "desc": "Register as a volunteer with Animal Writes: rescue, feed, foster or speak up for animals near you, or help with letters, design or legal work.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/volunteer/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/volunteer/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/directory/": {
+  "status": 200,
+  "title": "Animal Welfare NGOs in India by District \u2013 Animal Writes",
+  "desc": "Find animal welfare NGOs in India: shelters, rescuers, gaushalas and government vets in every state and district, with phone, address and services.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/directory/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/campaigns/": {
+  "status": 200,
+  "title": "Stray Dog Petition and Citizen Campaigns \u2013 Animal Writes",
+  "desc": "Citizen campaigns for animals, starting with Animal Writes 1.0: the stray dog petition of letters to the Supreme Court, posted on 29 November 2025.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/campaigns/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/campaigns/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/opportunities/": {
+  "status": 200,
+  "title": "Animal Welfare Volunteer Roles and Jobs \u2013 Animal Writes",
+  "desc": "Animal welfare volunteer roles, fostering, internships and jobs with groups across India. Each opportunity lists its role, location and how to apply.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/opportunities/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/opportunities/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/library/": {
+  "status": 200,
+  "title": "Animal Laws in India and Key Court Orders \u2013 Animal Writes",
+  "desc": "Animal laws in India explained in plain words: court orders, notifications and rules that affect animals, each linked to the official source document.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/library/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/library/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/resources/": {
+  "status": 200,
+  "title": "Animal Welfare Guides and Research Studies \u2013 Animal Writes",
+  "desc": "Animal welfare guides for the moments that matter: an injured animal, a cruelty case, a community dog. Plus research summaries, each linked to its source.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/resources/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/resources/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/news/": {
+  "status": 200,
+  "title": "Animal Welfare News from India in Brief \u2013 Animal Writes",
+  "desc": "Animal welfare news from across India, summarised in plain words, with a link to every source: community dogs, wildlife, cruelty cases and the courts.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/news/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/news/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/media/": {
+  "status": 200,
+  "title": "Letter Petition Campaign in the News Media \u2013 Animal Writes",
+  "desc": "Letter petition campaign coverage: press articles, videos and social posts about Animal Writes and its citizen letters for community animals across India.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/media/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/media/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/search/": {
+  "status": 200,
+  "title": "Search Animal Welfare News and Directory \u2013 Animal Writes",
+  "desc": "Search animal welfare news, guides, research, court orders, rules, opportunities, campaigns and the directory of organisations across India.",
+  "robots": "follow, noindex",
+  "canonical": "",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/search/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/corrections/": {
+  "status": 200,
+  "title": "Corrections and Updates to Our Reporting \u2013 Animal Writes",
+  "desc": "Corrections and updates: tell us if something we published is wrong or out of date. We check your note against the original source and fix it promptly.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/corrections/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/corrections/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/categories/": {
+  "status": 200,
+  "title": "Animal Welfare Categories of News and Laws \u2013 Animal Writes",
+  "desc": "Explore animal welfare categories across India, with trusted guides, news, laws, research, resources, campaigns and ways to find help.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/categories/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/categories/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/terms/": {
+  "status": 200,
+  "title": "Terms of Use for Visitors and Contributors \u2013 Animal Writes",
+  "desc": "Terms of use for visitors, users and contributors: the site's purpose, your responsibilities, how summaries and Directory listings work, and your rights.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/terms/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/terms/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/disclaimer/": {
+  "status": 200,
+  "title": "Legal Disclaimer on Information We Publish \u2013 Animal Writes",
+  "desc": "Legal disclaimer: Animal Writes is for general information only. Library summaries are not legal advice; read the original order and consult a lawyer.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/disclaimer/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/disclaimer/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/contact/": {
+  "status": 200,
+  "title": "Contact Us to List or Update Organisations \u2013 Animal Writes",
+  "desc": "Contact us to list your organisation, get featured in the Directory, post an opportunity, partner with Animal Writes or report a mistake on the site.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/contact/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ContactPage\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/contact/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/editorial-policy/": {
+  "status": 200,
+  "title": "Editorial Policy on Our Sources and AI Use \u2013 Animal Writes",
+  "desc": "Our editorial policy: every news and legal item links to its source, AI drafts short summaries, and a person reviews each item before it is published.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/editorial-policy/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/editorial-policy/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/about/": {
+  "status": 200,
+  "title": "About Us and Our Citizen Letter Campaign \u2013 Animal Writes",
+  "desc": "Animal Writes started as a citizen letter campaign and is now a public resource for animal welfare in India: news, court orders, rules and help near you.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/about/",
+  "types": [
+   "\"AboutPage\"",
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/about/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/": {
+  "status": 200,
+  "title": "Animal Welfare in India and Help Near You \u2013 Animal Writes",
+  "desc": "Animal welfare in India: news, court orders and government decisions explained in plain words, plus shelters, vets and rescuers near you.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/",
+  "types": [
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": []
+ },
+ "https://animalwrites.in/privacy-policy/": {
+  "status": 200,
+  "title": "Privacy Policy and How We Handle Your Data \u2013 Animal Writes",
+  "desc": "This privacy policy explains what personal data Animal Writes collects, why, and your rights under the Digital Personal Data Protection Act, 2023.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/privacy-policy/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/privacy-policy/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/directory/org/gosamrakshanam-sangham/": {
+  "status": 200,
+  "title": "Gosamrakshanam Sangham in Guntur \u2013 Animal Writes",
+  "desc": "Gosamrakshanam Sangham is an AWBI-recognised Gaushala in Guntur, Andhra Pradesh (AWBI code AP025/1999). Address, contact and how to help.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/directory/org/gosamrakshanam-sangham/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"Organization\"",
+   "\"WebSite\"",
+   "[\"NGO\", \"AnimalShelter\"]"
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/andhra-pradesh/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/andhra-pradesh/guntur/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/org/gosamrakshanam-sangham/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/news/bhupender-yadav-inaugurates-centre-of-excellence-on-human-wildlife-conflict-in-coimbatore-launches-national-portal/": {
+  "status": 200,
+  "title": "Bhupender Yadav Inaugurates Centre of Excellence on Human-Wildlife Conflict in Coimbatore, Launches National Portal",
+  "desc": "Union Environment, Forest and Climate Change Minister Bhupender Yadav inaugurated the Centre of Excellence on Human-Wildlife Conflict and launched the\u2026",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/news/bhupender-yadav-inaugurates-centre-of-excellence-on-human-wildlife-conflict-in-coimbatore-launches-national-portal/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"NewsArticle\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/news/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/news/bhupender-yadav-inaugurates-centre-of-excellence-on-human-wildlife-conflict-in-coimbatore-launches-national-portal/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/category/adoption/": {
+  "status": 200,
+  "title": "Animal Adoption News and Guides for India \u2013 Animal Writes",
+  "desc": "Adoption in India on Animal Writes: 21 news stories and 1 guide. In the Directory: 3,891 animal welfare organisations.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/category/adoption/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/categories/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/category/adoption/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/tag/animal-welfare-organisation/": {
+  "status": 200,
+  "title": "Animal Welfare NGOs in India by District \u2013 Animal Writes",
+  "desc": "3,892 animal welfare organisations in India in the Animal Writes Directory, by state and district, with address, phone number and services.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/tag/animal-welfare-organisation/",
+  "types": [
+   "\"BreadcrumbList\"",
+   "\"CollectionPage\"",
+   "\"ItemList\"",
+   "\"Organization\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/directory/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/tag/animal-welfare-organisation/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/library/integrated-conservation-framework-proposed-to-tackle-illegal-marine-wildlife-trade/": {
+  "status": 200,
+  "title": "Illegal Trade of Marine Wildlife Framework \u2013 Animal Writes",
+  "desc": "A new framework has been proposed to specifically address the illegal trade of marine wildlife.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/library/integrated-conservation-framework-proposed-to-tackle-illegal-marine-wildlife-trade/",
+  "types": [
+   "\"Article\"",
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebPage\"",
+   "\"WebSite\""
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/library/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/library/integrated-conservation-framework-proposed-to-tackle-illegal-marine-wildlife-trade/"
+   ]
+  ]
+ },
+ "https://animalwrites.in/resources/found-an-injured-animal-what-to-do/": {
+  "status": 200,
+  "title": "Injured or Sick Animal Help and First Steps \u2013 Animal Writes",
+  "desc": "Practical first steps when you find an injured or sick animal on the street.",
+  "robots": "follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large",
+  "canonical": "https://animalwrites.in/resources/found-an-injured-animal-what-to-do/",
+  "types": [
+   "\"Article\"",
+   "\"BreadcrumbList\"",
+   "\"ImageObject\"",
+   "\"Organization\"",
+   "\"WebSite\"",
+   "[\"WebPage\", \"FAQPage\"]"
+  ],
+  "crumbs": [
+   [
+    null,
+    "https://animalwrites.in/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/resources/"
+   ],
+   [
+    null,
+    "https://animalwrites.in/resources/found-an-injured-animal-what-to-do/"
+   ]
+  ]
+ }
+}
