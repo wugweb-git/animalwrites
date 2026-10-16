@@ -141,8 +141,10 @@ function aw_block_org_details( $a, $id ) {
 	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
 	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
+	$phones  = aw_listing_phones( $id ); // the Phone numbers list, else the single Phone and WhatsApp fields
+	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // Opening hours by day, else the exact hours text
 	$contact = array(
-		'aw_phone'   => array( 'phone', 'Phone', $m( 'aw_phone' ) && aw_tel_url( $m( 'aw_phone' ) ) ? '<a href="' . esc_url( aw_tel_url( $m( 'aw_phone' ) ) ) . '">' . esc_html( $m( 'aw_phone' ) ) . '</a>' : '' ),
+		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones ) ),
 		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
 		'aw_website' => array( 'link', 'Website', $m( 'aw_website' ) ? '<a href="' . esc_url( $m( 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '">' . esc_html( preg_replace( '#^https?://(www\.)?|/$#', '', $m( 'aw_website' ) ) ) . '</a>' : '' ),
 	);
@@ -155,7 +157,9 @@ function aw_block_org_details( $a, $id ) {
 	}
 	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
 	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
-		if ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
+		if ( 'aw_hours' === $k && $hours ) { // the hours table; the free-text hours only when there is no list
+			$facts .= '<div class="aw-org-fact aw-org-fact--wide"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $hours . '</dd></div>';
+		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . aw_date( $m( 'aw_services_on' ) ) : '' ) . '</span>';
@@ -175,6 +179,55 @@ function aw_block_org_details( $a, $id ) {
 		. ( $photos ? '<div class="aw-org-gallery">' . $photos . '</div>' : '' )
 		. ( $facts ? '<h2 class="aw-profile-h">Details</h2><dl class="aw-org-facts">' . $facts . '</dl>' : '' )
 		. '</section>';
+}
+
+/**
+ * The phone numbers: each a Call link (tel:), with its label, and a WhatsApp link when the row is flagged. The links are
+ * what the site's analytics count (call_click on tel:, whatsapp_click on wa.me; kit.js).
+ *
+ * @param array $phones aw_listing_phones().
+ * @return string HTML, or '' when there is no number that can be dialled.
+ */
+function aw_org_phones_html( $phones ) {
+	$items = '';
+	foreach ( $phones as $p ) {
+		$tel = aw_tel_url( $p['number'] );
+		if ( '' === $tel ) {
+			continue;
+		}
+		$wa     = $p['whatsapp'] ? aw_normalise_phone( $p['number'] ) : '';
+		$items .= '<li><a href="' . esc_url( $tel ) . '">' . esc_html( $p['number'] ) . '</a>'
+			. ( '' !== $p['label'] ? ' <span class="aw-org-phones-label">' . esc_html( $p['label'] ) . '</span>' : '' )
+			. ( $wa && strlen( $wa ) > 5 ? ' <a class="aw-org-phones-wa" href="' . esc_url( 'https://wa.me/' . $wa ) . '" rel="noopener" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . 'WhatsApp</a>' : '' )
+			. '</li>';
+	}
+	return $items ? '<ul class="aw-org-phones">' . $items . '</ul>' : '';
+}
+
+/**
+ * Opening hours by day as a small table: one row per day (Monday first), split days as two times, "Closed", or "Open 24
+ * hours" for 00:00 to 23:59. Days with no row are not stated, so they are not listed.
+ *
+ * @param array $rows aw_listing_hours().
+ * @return string
+ */
+function aw_org_hours_html( $rows ) {
+	if ( ! $rows ) {
+		return '';
+	}
+	$fmt  = fn( $t ) => wp_date( 'g:i a', strtotime( '2000-01-01 ' . $t . ':00 UTC' ), new DateTimeZone( 'UTC' ) );
+	$days = array();
+	foreach ( $rows as $r ) {
+		$days[ $r['day'] ][] = $r['closed'] ? 'Closed' : ( '00:00' === $r['open'] && '23:59' === $r['close'] ? 'Open 24 hours' : $fmt( $r['open'] ) . ' – ' . $fmt( $r['close'] ) );
+	}
+	$trs = '';
+	foreach ( AW_WEEKDAYS as $d ) {
+		if ( isset( $days[ $d ] ) ) {
+			$closed = array( 'Closed' ) === array_unique( $days[ $d ] );
+			$trs   .= '<tr' . ( $closed ? ' class="aw-org-hours-closed"' : '' ) . '><th scope="row">' . esc_html( $d ) . '</th><td>' . esc_html( implode( ', ', array_unique( $days[ $d ] ) ) ) . '</td></tr>';
+		}
+	}
+	return '<table class="aw-org-hours"><caption class="screen-reader-text">Opening hours by day</caption><tbody>' . $trs . '</tbody></table>';
 }
 
 // The description gets its heading ("About"), so the page reads: name, details, about.

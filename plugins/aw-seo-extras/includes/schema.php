@@ -78,14 +78,24 @@ function aw_listing_schema( $id ) {
 		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
 		$org['areaServed'] = array_values( array_filter( array( $district ? array( '@type' => 'AdministrativeArea', 'name' => $district ) : null, $state ? array( '@type' => 'State', 'name' => $state ) : null ) ) );
 	}
-	if ( $m( 'aw_phone' ) ) {
-		$org['telephone'] = $m( 'aw_phone' );
+	// Phone numbers from the list (else the single Phone and WhatsApp fields): every number as telephone (one, or a
+	// list), and each number marked WhatsApp as a WhatsApp contact point.
+	$phones = function_exists( 'aw_listing_phones' ) ? aw_listing_phones( $id ) : array();
+	$tels   = array_values( array_unique( wp_list_pluck( $phones, 'number' ) ) );
+	if ( $tels ) {
+		$org['telephone'] = 1 === count( $tels ) ? $tels[0] : $tels;
 	}
 	if ( $m( 'aw_email' ) ) {
 		$org['email'] = $m( 'aw_email' );
 	}
-	if ( $m( 'aw_whatsapp' ) ) {
-		$org['contactPoint'] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $m( 'aw_whatsapp' ), 'availableLanguage' => array( 'en', 'hi' ) );
+	$wa = array();
+	foreach ( $phones as $p ) {
+		if ( $p['whatsapp'] ) {
+			$wa[] = array( '@type' => 'ContactPoint', 'contactType' => 'WhatsApp', 'telephone' => $p['number'], 'availableLanguage' => array( 'en', 'hi' ) );
+		}
+	}
+	if ( $wa ) {
+		$org['contactPoint'] = 1 === count( $wa ) ? $wa[0] : $wa;
 	}
 	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ) ) ) );
 	if ( $same ) {
@@ -108,7 +118,8 @@ function aw_listing_schema( $id ) {
 	if ( $m( 'aw_languages' ) ) {
 		$org['knowsLanguage'] = array_values( array_filter( array_map( 'trim', explode( ',', $m( 'aw_languages' ) ) ) ) );
 	}
-	$spec = aw_hours_spec( $m( 'aw_hours_spec' ) );
+	// Opening hours by day (else the exact hours text, inside aw_listing_hours); the free text only without either.
+	$spec = function_exists( 'aw_listing_hours' ) ? aw_hours_rows_spec( aw_listing_hours( $id ) ) : aw_hours_spec( $m( 'aw_hours_spec' ) );
 	if ( $spec ) {
 		$org['openingHoursSpecification'] = $spec; // exact hours, e.g. from the Google profile
 	} elseif ( $m( 'aw_hours' ) && $vet ) {
@@ -674,6 +685,10 @@ function aw_job_schema( $id ) {
 		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
 		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
+	$salary = aw_stipend_salary( (string) get_post_meta( $id, 'aw_stipend', true ) );
+	if ( $salary ) {
+		$data['baseSalary'] = $salary; // only a clear amount with currency and period
+	}
 	if ( $remote ) {
 		$data['jobLocationType']                 = 'TELECOMMUTE';
 		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => 'India' );
@@ -685,6 +700,39 @@ function aw_job_schema( $id ) {
 		);
 	}
 	return array_filter( $data );
+}
+
+/**
+ * The stipend as schema.org baseSalary, only when the whole text is one clear amount (or range) with a currency and a
+ * period: "Rs 10,000 a month", "₹8,000 – ₹12,000 per month", "INR 2,40,000 per annum". Anything else (Unpaid, "as per
+ * norms", extra words) gives nothing: never a guess.
+ *
+ * @param string $text aw_stipend.
+ * @return array
+ */
+function aw_stipend_salary( $text ) {
+	$t = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	$cur  = '(₹|rs\.?|inr|\$|usd|€|eur)';
+	$num  = '(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)';
+	$per  = '(?:per|a|an|\/|every)\s*(month|year|annum|week|day|hour)|(monthly|annually|yearly|weekly|daily|hourly|p\.?\s?m\.?|p\.?\s?a\.?)';
+	if ( ! preg_match( '/^' . $cur . '\s?' . $num . '(?:\s*(?:-|–|—|to)\s*(?:' . $cur . '\s?)?' . $num . ')?\s*(?:\/-)?\s*(?:' . $per . ')$/iu', $t, $x ) ) {
+		return array();
+	}
+	$code = array( '₹' => 'INR', 'rs' => 'INR', 'rs.' => 'INR', 'inr' => 'INR', '$' => 'USD', 'usd' => 'USD', '€' => 'EUR', 'eur' => 'EUR' );
+	$c1   = $code[ strtolower( $x[1] ) ] ?? '';
+	$c2   = ! empty( $x[3] ) ? ( $code[ strtolower( $x[3] ) ] ?? '' ) : $c1;
+	if ( '' === $c1 || $c1 !== $c2 ) {
+		return array();
+	}
+	$p    = strtolower( str_replace( array( '.', ' ' ), '', ( $x[5] ?? '' ) . ( $x[6] ?? '' ) ) );
+	$unit = array( 'month' => 'MONTH', 'monthly' => 'MONTH', 'pm' => 'MONTH', 'year' => 'YEAR', 'annum' => 'YEAR', 'annually' => 'YEAR', 'yearly' => 'YEAR', 'pa' => 'YEAR', 'week' => 'WEEK', 'weekly' => 'WEEK', 'day' => 'DAY', 'daily' => 'DAY', 'hour' => 'HOUR', 'hourly' => 'HOUR' )[ $p ] ?? '';
+	$lo   = (float) str_replace( ',', '', $x[2] );
+	$hi   = ! empty( $x[4] ) ? (float) str_replace( ',', '', $x[4] ) : 0;
+	if ( '' === $unit || $lo <= 0 || ( $hi && $hi < $lo ) ) {
+		return array();
+	}
+	$value = $hi ? array( '@type' => 'QuantitativeValue', 'minValue' => $lo, 'maxValue' => $hi, 'unitText' => $unit ) : array( '@type' => 'QuantitativeValue', 'value' => $lo, 'unitText' => $unit );
+	return array( '@type' => 'MonetaryAmount', 'currency' => $c1, 'value' => $value );
 }
 
 /** The Categories page: CollectionPage + ItemList of every category. */

@@ -125,13 +125,23 @@ function aw_binding_value( $key, $post_id ) {
 			$src = $m( 'aw_services_source' );
 			$on  = $m( 'aw_services_on' ) ? aw_format_date( $m( 'aw_services_on' ) ) : '';
 			return 'Services: ' . $m( 'aw_services' ) . ( $src ? ' (as stated by ' . $src . ( $on ? ', ' . $on : '' ) . ')' : '' ); // escaped by the binding source
-		case 'phone':
-			return $m( 'aw_phone' );
+		case 'phone': // the first number of the Phone numbers list (else the single Phone field)
 		case 'phone_url':
-			return aw_tel_url( $m( 'aw_phone' ) );
-		case 'whatsapp_url':
-			$d = aw_normalise_phone( $m( 'aw_whatsapp' ) );
+			$p = function_exists( 'aw_listing_phones' ) && 'aw_listing' === get_post_type( $post_id ) ? aw_listing_phones( $post_id ) : array( array( 'number' => $m( 'aw_phone' ) ) );
+			$p = (string) ( $p[0]['number'] ?? '' );
+			return 'phone' === $key ? $p : aw_tel_url( $p );
+		case 'whatsapp_url': // the first number marked WhatsApp (else the single WhatsApp field)
+			$d = '';
+			foreach ( function_exists( 'aw_listing_phones' ) && 'aw_listing' === get_post_type( $post_id ) ? aw_listing_phones( $post_id ) : array( array( 'number' => $m( 'aw_whatsapp' ), 'whatsapp' => true ) ) as $p ) {
+				if ( ! empty( $p['whatsapp'] ) && aw_normalise_phone( $p['number'] ) ) {
+					$d = aw_normalise_phone( $p['number'] );
+					break;
+				}
+			}
 			return $d ? 'https://wa.me/' . $d : '';
+		case 'stipend': // as the organisation states it; empty removes the bound block
+			$s = $m( 'aw_stipend' );
+			return '' !== $s ? __( 'Stipend', 'animal-writes-core' ) . ': ' . $s : '';
 		case 'email_url':
 			$e = $m( 'aw_email' );
 			return $e ? 'mailto:' . $e : '';

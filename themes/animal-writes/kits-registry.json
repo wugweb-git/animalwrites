@@ -210,7 +210,9 @@
     "aw-org-gallery",
     "aw-org-facts",
     "aw-org-fact-na",
-    "aw-org-services"
+    "aw-org-services",
+    "aw-org-phones",
+    "aw-org-hours"
    ],
    "states": [
     "links only",
@@ -218,7 +220,9 @@
     "facts",
     "all",
     "missing phone, email, website, address, hours or services: \"… not available yet\" and a Suggest an update link (the Report form)",
-    "no map link: Directions greyed out (aria-disabled, not a link)"
+    "no map link: Directions greyed out (aria-disabled, not a link)",
+    "phones: one or more numbers (Call link each, label, WhatsApp link when marked); from the Phone numbers list, else the single Phone and WhatsApp fields",
+    "opening hours: a day-by-day table (Closed, Open 24 hours, split days); from Opening hours by day, else the exact hours text, else the free-text hours (the hours fact spans both columns from md, aw-org-fact--wide)"
    ],
    "tokens": [],
    "a11y": {
@@ -1963,6 +1967,33 @@
     "link": "descriptive",
     "alt": "n/a",
     "schema": "campaign CreativeWork about the Library Legislation; FAQ from the Rank Math FAQ block"
+   }
+  },
+  {
+   "name": "Map picker (listing edit screen)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-map-picker"
+   ],
+   "states": [
+    "no coordinates: India view, click to drop a pin",
+    "coordinates: pin at the point, zoom 16",
+    "typing latitude/longitude moves the pin"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div> map beside the Latitude and Longitude fields (wp-admin only)",
+    "aria": "role=application with an aria-label; the two text fields stay the accessible way to enter a point",
+    "keyboard": "Leaflet keyboard pan/zoom; the fields",
+    "focus": "browser default in wp-admin",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "the fields"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "none"
    }
   }
  ],

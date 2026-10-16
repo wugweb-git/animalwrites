@@ -80,7 +80,7 @@ function aw_meta_schema() {
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
 		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
-		'aw_stipend'         => array( 'string', array( 'aw_opportunity' ), 'Stipend or pay, as stated (Phase 2; not shown yet)' ),
+		'aw_stipend'         => array( 'string', array( 'aw_opportunity' ), 'Stipend or pay, as stated (shown as "Stipend" on the opportunity)' ),
 
 		// Campaigns (read by the Event schema in aw-seo-extras).
 		'aw_event_date'      => array( 'string', array( 'aw_campaign' ), 'Event date (Y-m-d)' ),
@@ -248,6 +248,120 @@ function aw_hours_spec( $text ) {
 			}
 		}
 		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => $list, 'opens' => $mm[3], 'closes' => $mm[4] );
+	}
+	return $out;
+}
+
+/*
+ * Phone numbers and opening hours as lists (SCF repeaters aw_phones and aw_opening_hours, stored the way SCF stores a
+ * repeater: the row count under the key, each sub-field under "{key}_{row}_{name}"). Read here straight from the meta,
+ * so the page and the schema work with or without SCF. The former single fields (aw_phone, aw_whatsapp, aw_hours,
+ * aw_hours_spec) are kept and used only when a list is empty.
+ */
+
+/** The days in order, Monday first. */
+const AW_WEEKDAYS = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
+
+/**
+ * A listing's phone numbers: [ [ number, label, whatsapp (bool) ], … ]. From aw_phones; when that is empty, from
+ * aw_phone and aw_whatsapp (one row when they are the same number).
+ *
+ * @param int $id Listing ID.
+ * @return array
+ */
+function aw_listing_phones( $id ) {
+	$rows = array();
+	$n    = (int) get_post_meta( $id, 'aw_phones', true );
+	for ( $i = 0; $i < $n; $i++ ) {
+		$num = trim( (string) get_post_meta( $id, "aw_phones_{$i}_number", true ) );
+		if ( '' !== $num ) {
+			$rows[] = array(
+				'number'   => $num,
+				'label'    => trim( (string) get_post_meta( $id, "aw_phones_{$i}_label", true ) ),
+				'whatsapp' => (bool) get_post_meta( $id, "aw_phones_{$i}_whatsapp", true ),
+			);
+		}
+	}
+	return $rows ? $rows : aw_phones_from_single( get_post_meta( $id, 'aw_phone', true ), get_post_meta( $id, 'aw_whatsapp', true ) );
+}
+
+/**
+ * The single Phone and WhatsApp fields as list rows: the phone, flagged WhatsApp when the WhatsApp number is the same,
+ * else the WhatsApp number as a second row.
+ *
+ * @param string $phone    aw_phone.
+ * @param string $whatsapp aw_whatsapp.
+ * @return array
+ */
+function aw_phones_from_single( $phone, $whatsapp ) {
+	$phone    = trim( (string) $phone );
+	$whatsapp = trim( (string) $whatsapp );
+	$rows     = array();
+	if ( '' !== $phone ) {
+		$same   = '' !== $whatsapp && function_exists( 'aw_normalise_phone' ) && aw_normalise_phone( $phone ) === aw_normalise_phone( $whatsapp );
+		$rows[] = array( 'number' => $phone, 'label' => '', 'whatsapp' => $same );
+		if ( $same ) {
+			$whatsapp = '';
+		}
+	}
+	if ( '' !== $whatsapp ) {
+		$rows[] = array( 'number' => $whatsapp, 'label' => '', 'whatsapp' => true );
+	}
+	return $rows;
+}
+
+/**
+ * A listing's opening hours by day: [ [ day, open (H:i), close (H:i), closed (bool) ], … ] in weekday order. From
+ * aw_opening_hours; when that is empty, from the exact hours text (aw_hours_spec). The free-text aw_hours is not a list
+ * and is shown as text only when this returns nothing.
+ *
+ * @param int $id Listing ID.
+ * @return array
+ */
+function aw_listing_hours( $id ) {
+	$rows = array();
+	$n    = (int) get_post_meta( $id, 'aw_opening_hours', true );
+	$hm   = fn( $t ) => preg_match( '/^(\d{1,2}):(\d{2})/', trim( (string) $t ), $x ) ? sprintf( '%02d:%s', $x[1], $x[2] ) : '';
+	for ( $i = 0; $i < $n; $i++ ) {
+		$day = (string) get_post_meta( $id, "aw_opening_hours_{$i}_day", true );
+		if ( ! in_array( $day, AW_WEEKDAYS, true ) ) {
+			continue;
+		}
+		$closed = (bool) get_post_meta( $id, "aw_opening_hours_{$i}_closed", true );
+		$open   = $hm( get_post_meta( $id, "aw_opening_hours_{$i}_open", true ) );
+		$close  = $hm( get_post_meta( $id, "aw_opening_hours_{$i}_close", true ) );
+		if ( $closed || ( $open && $close ) ) {
+			$rows[] = array( 'day' => $day, 'open' => $closed ? '' : $open, 'close' => $closed ? '' : $close, 'closed' => $closed );
+		}
+	}
+	if ( ! $rows ) {
+		foreach ( aw_hours_spec( get_post_meta( $id, 'aw_hours_spec', true ) ) as $s ) {
+			foreach ( $s['dayOfWeek'] as $day ) {
+				$rows[] = array( 'day' => $day, 'open' => sprintf( '%05s', $s['opens'] ), 'close' => sprintf( '%05s', $s['closes'] ), 'closed' => false );
+			}
+		}
+	}
+	usort( $rows, fn( $a, $b ) => array( array_search( $a['day'], AW_WEEKDAYS, true ), $a['open'] ) <=> array( array_search( $b['day'], AW_WEEKDAYS, true ), $b['open'] ) );
+	return $rows;
+}
+
+/**
+ * Opening hours by day as schema.org OpeningHoursSpecification: days with the same hours in one node; a closed day as
+ * opens and closes 00:00 (Google's form for "closed all day").
+ *
+ * @param array $rows aw_listing_hours().
+ * @return array
+ */
+function aw_hours_rows_spec( $rows ) {
+	$groups = array();
+	foreach ( $rows as $r ) {
+		$k = $r['closed'] ? '00:00-00:00' : $r['open'] . '-' . $r['close'];
+		$groups[ $k ][] = $r['day'];
+	}
+	$out = array();
+	foreach ( $groups as $k => $days ) {
+		list( $open, $close ) = explode( '-', $k );
+		$out[] = array( '@type' => 'OpeningHoursSpecification', 'dayOfWeek' => array_values( array_unique( $days ) ), 'opens' => $open, 'closes' => $close );
 	}
 	return $out;
 }

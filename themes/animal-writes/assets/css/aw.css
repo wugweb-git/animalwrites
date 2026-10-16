@@ -816,6 +816,21 @@ body { background: var(--kit-color-canvas); }
 .aw-org-fact-ico { grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-sm); background: var(--kit-color-info-soft); color: var(--kit-color-info); }
 .aw-org-fact-ico .kit-ico { --kit-ico-size: 1.125rem; }
 .aw-org-fact dt, .aw-org-fact dd { grid-column: 2; }
+/* Phone numbers (one per line: number, label, WhatsApp link) and the opening hours table, inside the facts card.
+   sm 0–767: one column; md 768+: the hours fact spans both columns of the facts grid. */
+.aw-org-phones { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-1); }
+.aw-org-phones li { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-2); row-gap: var(--kit-space-1); }
+.aw-org-phones-label { font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
+.aw-org-phones-wa { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 44px; font-size: var(--kit-type-sm); color: var(--kit-color-whatsapp); }
+.aw-org-phones-wa .kit-ico { --kit-ico-size: 1rem; }
+.aw-org-phones a[href^="tel:"] { display: inline-flex; align-items: center; min-height: 44px; }
+.aw-org-hours { width: 100%; max-width: 26rem; border-collapse: collapse; margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); }
+.aw-org-hours th, .aw-org-hours td { padding: var(--kit-space-1) 0; text-align: start; border-bottom: 1px solid var(--kit-color-line); vertical-align: top; }
+.aw-org-hours tr:last-child th, .aw-org-hours tr:last-child td { border-bottom: 0; }
+.aw-org-hours th { font-weight: var(--kit-weight-medium); color: var(--kit-color-ink); padding-inline-end: var(--kit-space-4); white-space: nowrap; }
+.aw-org-hours td { color: var(--kit-color-ink); }
+.aw-org-hours-closed td { color: var(--kit-color-muted); }
+@media (min-width: 768px) { .aw-org-fact--wide { grid-column: 1 / -1; } }
 /* "Is this your organisation?": a section heading, not a page title */
 .aw-listing-help h2 { font-size: var(--kit-type-h4) !important; font-weight: var(--kit-weight-strong); margin: 0 0 var(--kit-space-3); }
 /* Library rows on phones: date (and a small first-page thumbnail) on one line above the title, no side column;

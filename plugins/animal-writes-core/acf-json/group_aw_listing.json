@@ -46,7 +46,7 @@
             "name": "aw_whatsapp",
             "aria-label": "",
             "type": "text",
-            "instructions": "Number for the WhatsApp button.",
+            "instructions": "Kept as a fallback (copied into Phone numbers below on 16 Oct 2026). The site shows the Phone numbers list; this field is used only when the list is empty.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -81,11 +81,11 @@
         },
         {
             "key": "field_aw_listing_phones",
-            "label": "More phone numbers",
+            "label": "Phone numbers",
             "name": "aw_phones",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "Phase 2 (enrichment). Not shown on the site yet: the Phone and WhatsApp fields above stay what visitors see until the Phase 2 migration moves them here.",
+            "instructions": "What visitors and search engines see: each number with a Call link, and a WhatsApp link when WhatsApp is on. The Phone and WhatsApp fields above are kept as a fallback for an empty list.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -305,7 +305,7 @@
             "name": "aw_hours",
             "aria-label": "",
             "type": "text",
-            "instructions": "As shown to visitors, e.g. Mon–Sat 9 am – 6 pm; emergencies 24 hours.",
+            "instructions": "Kept as a fallback: shown only when Opening hours by day is empty, e.g. Mon–Sat 9 am – 6 pm; emergencies 24 hours.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -325,7 +325,7 @@
             "name": "aw_hours_spec",
             "aria-label": "",
             "type": "textarea",
-            "instructions": "One line per day range, e.g. Mon-Fri 09:00-18:00 and Sat 10:00-14:00. Used for the opening hours in search results.",
+            "instructions": "Kept as a fallback: used only when Opening hours by day is empty. One line per day range, e.g. Mon-Fri 09:00-18:00 and Sat 10:00-14:00.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -345,7 +345,7 @@
             "name": "aw_opening_hours",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "Phase 2 (enrichment). Not shown on the site yet: the two fields above stay what visitors and search engines see until the Phase 2 migration.",
+            "instructions": "What visitors and search engines see: one row per day (two rows for a split day). Open all day: 00:00 to 23:59. Days with no row are not stated.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -1447,5 +1447,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1792108800
+    "modified": 1792137600
 }
