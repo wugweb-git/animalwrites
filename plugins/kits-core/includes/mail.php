@@ -97,7 +97,9 @@ function kits_mail_screen() {
 		$ph = 'pass' === $k && '' !== $s['pass'] ? ' placeholder="Saved. Leave empty to keep it."' : '';
 		echo '<tr><th scope="row"><label for="kits-mail-' . esc_attr( $k ) . '">' . esc_html( $r[0] ) . '</label></th><td><input class="regular-text" id="kits-mail-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" type="' . esc_attr( $r[1] ) . '" value="' . esc_attr( (string) $r[2] ) . '"' . $ph . ' autocomplete="' . ( 'pass' === $k ? 'new-password' : 'off' ) . '"></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
-	echo '</table><p><button class="button button-primary" name="do" value="save">Save</button> <button class="button" name="do" value="test">Save and send a test email</button></p></form></div>';
+	echo '</table><p><button class="button button-primary" name="do" value="save">Save</button> <button class="button" name="do" value="test">Save and send a test email</button></p></form>';
+	do_action( 'kits_mail_screen_after' ); // the site can add its own sections (a sending limit, a queue)
+	echo '</div>';
 }
 
 add_action(

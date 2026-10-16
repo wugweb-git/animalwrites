@@ -2,9 +2,9 @@
 /**
  * Newsletter growth, consent only (owner, 9 Oct 2026; DPDP: consent per purpose).
  *
- * - Contact, Volunteer and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
+ * - Contact and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
  *   person goes onto the newsletter list as "active" with the form as source (16 Oct 2026). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
- * - Volunteers, claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
+ * - Volunteers join the newsletter on signing up (owner, 16 Oct 2026; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
  *   lists them (name, email, source, date) with a CSV export, for a one-time opt-in invite sent outside WordPress.
  *
  * @package animal-writes-core
@@ -21,13 +21,13 @@ function aw_nl_optin_box( $form ) {
 	return aw_field( $form, array( 'name' => 'nl_optin', 'label' => AW_NL_OPTIN_LABEL, 'type' => 'checkbox' ) );
 }
 
-/** After a form succeeds: only when the box was ticked, add to the subscriber list as active (owner, 16 Oct 2026: no
- *  double opt-in; the form's own email is the only one sent). */
+/** After a form succeeds: only when the box was ticked, add to the newsletter (site list active, FluentCRM subscribed;
+ *  owner, 16 Oct 2026: no double opt-in; the form's own email is the only one sent). */
 function aw_nl_optin( $email, $name, $source ) {
-	if ( empty( $_POST['nl_optin'] ) || ! is_email( $email ) || ! function_exists( 'aw_nl_activate' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( empty( $_POST['nl_optin'] ) || ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return;
 	}
-	aw_nl_activate( $email, $name, 'site:' . $source, AW_NL_CONSENT );
+	aw_newsletter_join( $email, $name, 'site:' . $source, AW_NL_CONSENT, array(), array( 'newsletter' ) ); // site list and FluentCRM
 }
 
 /** Everyone we hold an email for who is not on the newsletter (active or pending). */

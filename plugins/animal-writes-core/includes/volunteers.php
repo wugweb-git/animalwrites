@@ -76,7 +76,6 @@ function aw_volunteer_form( $source = '' ) {
 	$html  .= aw_place_fields( $form );
 	$html  .= '</div>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.' ) );
-	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : ''; // newsletter: a separate, unticked choice
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
 	return $html;
 }
@@ -138,8 +137,8 @@ function aw_volunteer_submit() {
 	aw_form_count( $rl );
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
 	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
-	if ( function_exists( 'aw_nl_optin' ) ) {
-		aw_nl_optin( $v['email'], $v['name'], 'volunteer' );
+	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers are newsletter subscribers (owner, 16 Oct 2026); no email from this
+		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', 'owner-2026-10-16-volunteers', aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
 	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
