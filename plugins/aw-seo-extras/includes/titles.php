@@ -252,6 +252,7 @@ add_action(
 				'name'        => 'Animal Writes title',
 				'description' => 'The title by the site\'s rules: one separator, " – Animal Writes" only at the end',
 				'variable'    => 'aw_title',
+				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
 				'example'     => $post ? aw_seo_var_title( '', $post ) : 'Supreme Court Order on Community Dogs – Animal Writes',
 			),
 			'aw_seo_var_title'
@@ -262,6 +263,7 @@ add_action(
 				'name'        => 'Animal Writes description',
 				'description' => 'The description by the site\'s rules (the summary condensed, else the intro)',
 				'variable'    => 'aw_description',
+				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
 				'example'     => $post ? aw_seo_var_description( '', $post ) : get_bloginfo( 'description' ),
 			),
 			'aw_seo_var_description'
