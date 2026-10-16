@@ -600,4 +600,30 @@ add_filter(
 	10,
 	2
 );
-add_filter( 'the_content', fn( $c ) => ( is_admin() || is_feed() ) ? $c : aw_inline_dates( $c ), 20 ); // content shown outside the block filters (guide sections)
+add_filter( 'the_content', fn( $c ) => ( is_admin() || is_feed() ) ? $c : aw_inline_dates( $c ), 20 );
+
+/*
+ * Headings in page text keep their wording and get no icon, but a date in them is shown in the one site format too
+ * (owner, 16 Oct 2026: one format sitewide): the 1.0 timeline "November 1, 2025 — Campaign Launch" -> "1 Nov 2025 — …".
+ * Text nodes only; the stored text is not changed. Post titles are not touched.
+ */
+function aw_heading_dates( $html ) {
+	static $re = '/(?<![\w-])(?:(\d{1,2})(?:st|nd|rd|th)?\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(\d{1,2})(?:st|nd|rd|th)?,)?\s+((?:19|20)\d{2})(?![\w-])/';
+	$parts = preg_split( '/(<[^>]+>)/', (string) $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+	foreach ( $parts as $k => $part ) {
+		if ( '' === $part || '<' === $part[0] ) {
+			continue;
+		}
+		$parts[ $k ] = preg_replace_callback(
+			$re,
+			function ( $m ) {
+				$day = '' !== $m[1] ? $m[1] : ( $m[3] ?? '' );
+				$ts  = strtotime( ( '' !== $day ? $day : '1' ) . ' ' . $m[2] . ' ' . $m[4] );
+				return $ts ? wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0];
+			},
+			$part
+		);
+	}
+	return implode( '', $parts );
+}
+add_filter( 'render_block_core/heading', fn( $html ) => is_admin() ? $html : aw_heading_dates( $html ), 20 ); // content shown outside the block filters (guide sections)
