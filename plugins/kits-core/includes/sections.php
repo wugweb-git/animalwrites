@@ -134,6 +134,7 @@ add_filter(
 			$hid  = '';
 			if ( is_string( $lb ) && $lb ) {
 				$name = preg_replace( '/-(title|h|heading)$/', '', $lb );
+				$name = $name === $lb ? $lb . '-section' : $name; // a heading id with no suffix: never give the section the heading's own id
 			} elseif ( is_string( $al ) && $al ) {
 				$name = $al;
 			} else {
