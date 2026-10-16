@@ -88,17 +88,22 @@
 	'use strict';
 	var KEY = 'aw_state';
 	function get() { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+	function set(v) { try { if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch (x) {} }
+	// Chosen in a Directory search (home "Find help near you", Directory hub) ...
 	document.addEventListener('change', function (e) {
-		var t = e.target;
-		if (!t.matches || !t.matches('form.aw-dir-search select[name=state]')) return;
-		try { if (t.value) localStorage.setItem(KEY, t.value); else localStorage.removeItem(KEY); } catch (x) {}
+		var t = e.target, f = t.form;
+		if (t.matches && t.matches('select[name=state]') && f && /\/directory\/?$/.test(f.getAttribute('action') || '')) set(t.value);
 	});
+	// ... or by opening a state's (or district's) Directory page: /directory/{state}/.
+	var m = location.pathname.match(/^\/directory\/([a-z0-9-]+)\//);
+	if (m && ['org', 'page', 'feed'].indexOf(m[1]) < 0) set(m[1]);
 	var list = document.querySelector('.aw-ed-opps .wp-block-post-template');
 	var state = get();
 	if (!list || !state || !window.fetch) return;
 	fetch('/wp-json/aw/v1/opps-near?state=' + encodeURIComponent(state), { credentials: 'omit' })
 		.then(function (r) { return r.ok ? r.json() : null; })
 		.then(function (d) {
+			if (d && !d.state) { set(''); return; } // not a state after all
 			if (!d || !d.local || !d.html) return;
 			var box = document.createElement('div');
 			box.innerHTML = d.html;
