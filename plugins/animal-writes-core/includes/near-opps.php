@@ -55,7 +55,7 @@ add_action(
 						$html                = '';
 						if ( $local && function_exists( 'aw_related_queries' ) ) {
 							aw_related_queries( AW_NEAR_OPPS_QUERY_ID, $ids ); // the Query Loop shows exactly these, in order
-							$out = do_blocks( '<!-- wp:query {"queryId":' . AW_NEAR_OPPS_QUERY_ID . ',"query":{"perPage":' . count( $ids ) . ',"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} --><div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template --><!-- wp:post-title {"level":3,"isLink":true} /--><!-- wp:post-terms {"term":"post_tag"} /--><!-- /wp:post-template --></div><!-- /wp:query -->' );
+							$out = do_blocks( '<!-- wp:query {"queryId":' . AW_NEAR_OPPS_QUERY_ID . ',"query":{"perPage":' . count( $ids ) . ',"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} --><div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template --><!-- wp:post-title {"level":3,"isLink":true} /--><!-- wp:post-terms {"term":"post_tag"} /--><!-- wp:animal-writes/opp-line /--><!-- /wp:post-template --></div><!-- /wp:query -->' );
 							$html = preg_match( '#<ul\b[^>]*wp-block-post-template.*</ul>#s', $out, $m ) ? $m[0] : '';
 						}
 						$data = array( 'local' => $local, 'state' => $state->name, 'html' => $html );

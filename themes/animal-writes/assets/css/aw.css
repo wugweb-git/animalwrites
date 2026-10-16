@@ -250,8 +250,10 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-steps .kit-ico { position: absolute; right: 0; top: 50%; translate: 0 -50%; --kit-ico-size: 1.5rem; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-ed-steps a:hover .kit-ico { transform: translateX(4px); }
 .aw-ed-steps a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
-.aw-ed-opps .wp-block-post-template > li { display: flex !important; flex-wrap: nowrap; align-items: flex-start; justify-content: space-between; gap: var(--kit-space-3); }
-.aw-ed-opps .wp-block-post-template > li > .wp-block-post-title { flex: 1 1 auto; min-width: 0; } /* a long title wraps in its own column */
+.aw-ed-opps .wp-block-post-template > li { display: flex !important; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--kit-space-1) var(--kit-space-3); }
+.aw-ed-opps .wp-block-post-template > li > .wp-block-post-title { flex: 1 1 0; min-width: 0; } /* a long title wraps in its own column */
+.aw-ed-opps .aw-opp-line { flex: 0 0 100%; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-1) var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); } /* organisation · place · apply by, under the title */
+.aw-ed-opps .aw-opp-line > * { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
 .aw-ed-opps .wp-block-post-template > li > .wp-block-post-terms { flex: none; } /* the label stays beside the title, top-aligned, at every width */
 
 /* 08 Animal Writes 1.0: documentary */

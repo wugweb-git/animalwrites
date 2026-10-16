@@ -22,6 +22,7 @@
 <div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-terms {"term":"post_tag"} /-->
+<!-- wp:animal-writes/opp-line /-->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 <!-- wp:html -->
