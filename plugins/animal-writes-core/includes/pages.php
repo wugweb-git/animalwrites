@@ -546,23 +546,45 @@ add_filter(
 );
 
 /*
- * Every date carries the calendar icon (owner): a "Last updated: October 2026" line written in a page's text gets the
- * site's date component (icon + <time>) when shown. The stored text is not changed.
+ * Every date carries the calendar icon (owner, 15–16 Oct 2026), also inside sentences: a date written in a page's,
+ * guide's or campaign's text ("29 November 2025", "8 Oct 2026", "November 29, 2025", "October 2026") gets the site's
+ * date component (icon + <time datetime>) when shown. Only visible text in paragraphs and list items is touched, never
+ * a date already inside <time>; the stored text is not changed.
  */
-add_filter(
-	'render_block_core/paragraph',
-	function ( $html ) {
-		if ( false === strpos( $html, 'Last updated' ) || false !== strpos( $html, 'aw-date' ) ) {
-			return $html;
+function aw_inline_dates( $html ) {
+	static $re = '/(?<![\w-])(?:(\d{1,2})(?:st|nd|rd|th)?\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(\d{1,2})(?:st|nd|rd|th)?,)?\s+((?:19|20)\d{2})(?![\w-])/';
+	if ( ! preg_match( $re, wp_strip_all_tags( $html ) ) ) {
+		return $html;
+	}
+	$parts = preg_split( '/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+	$skip  = 0; // inside <time>, <script> or <style>
+	foreach ( $parts as $k => $part ) {
+		if ( '' === $part ) {
+			continue;
 		}
-		return preg_replace_callback(
-			'/(Last updated:?\s*)((?:\d{1,2}\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/',
+		if ( '<' === $part[0] ) {
+			if ( preg_match( '#^<(time|script|style)\b#i', $part ) ) {
+				++$skip;
+			} elseif ( preg_match( '#^</(time|script|style)>#i', $part ) ) {
+				$skip = max( 0, $skip - 1 );
+			}
+			continue;
+		}
+		if ( $skip ) {
+			continue;
+		}
+		$parts[ $k ] = preg_replace_callback(
+			$re,
 			function ( $m ) {
-				$ts  = strtotime( ( preg_match( '/^\d/', $m[2] ) ? '' : '1 ' ) . $m[2] );
-				$iso = $ts ? wp_date( preg_match( '/^\d/', $m[2] ) ? 'Y-m-d' : 'Y-m', $ts ) : '';
-				return $m[1] . '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $m[2] ) . '</time></span>';
+				$day = '' !== $m[1] ? $m[1] : ( $m[3] ?? '' );
+				$ts  = strtotime( ( '' !== $day ? $day : '1' ) . ' ' . $m[2] . ' ' . $m[4] );
+				$iso = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts ) : '';
+				return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . $m[0] . '</time></span>';
 			},
-			$html
+			$part
 		);
 	}
-);
+	return implode( '', $parts );
+}
+add_filter( 'render_block_core/paragraph', 'aw_inline_dates' );
+add_filter( 'render_block_core/list-item', 'aw_inline_dates' );
