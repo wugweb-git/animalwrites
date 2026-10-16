@@ -260,11 +260,6 @@
       "md": "720px",
       "lg": "720px"
     },
-    "header-h": {
-      "sm": "72px",
-      "md": "72px",
-      "lg": "72px"
-    },
     "width-wide": {
       "sm": "1200px",
       "md": "1200px",
@@ -481,9 +476,14 @@
       "lg": "1280px"
     },
     "header-height": {
-      "sm": "56px",
-      "md": "72px",
-      "lg": "72px"
+      "sm": "74px",
+      "md": "74px",
+      "lg": "74px"
+    },
+    "announce-height": {
+      "sm": "25px",
+      "md": "25px",
+      "lg": "25px"
     },
     "layer-nav": {
       "sm": "10",
