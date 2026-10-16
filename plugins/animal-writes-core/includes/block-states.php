@@ -85,6 +85,40 @@ add_filter(
 			'Is this your organisation? (animal-writes/listing-help)' => array(
 				array( 'Not confirmed: note, Claim and Report', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_listing_help( array(), $id ) ),
 			),
+			'Publisher (animal-writes/publisher)' => array(
+				array( 'Media & PR: its own logo', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_logo', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
+				array( 'Media & PR: no logo (letter mark)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_press_logo', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_logo', 'value' => '' ) ) ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
+				array( 'News story', aw_state_item( array( 'post_type' => 'aw_news' ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
+				array( 'Library item', aw_state_item( array( 'post_type' => 'aw_legal' ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
+			),
+			'Type and date (animal-writes/type-date)' => array(
+				array( 'Act or Rule', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule' ) ) ) ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
+				array( 'Dated document', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date' ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
+				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
+			),
+			'Document link (animal-writes/doc-link)' => array(
+				array( 'Hosted PDF', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_file_id', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
+				array( 'Preview only (not hosted)', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_doc_preview', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ), array( 'key' => 'aw_file_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
+				array( 'Source link only', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_file_id', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_doc_preview', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_source_url', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
+			),
+			'Resource icon (animal-writes/task-icon)' => array(
+				array( 'Guide', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'guide' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
+				array( 'FAQ page', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'faq' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
+				array( 'Research summary', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'research' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
+			),
+			'Reading meta (animal-writes/read-meta)' => array(
+				array( 'Updated after publishing', (int) ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'orderby' => 'modified', 'order' => 'DESC' ) )[0] ?? 0 ), fn( $id ) => aw_block_read_meta( array(), $id ) ),
+				array( 'Not updated', (int) ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'orderby' => 'modified', 'order' => 'ASC' ) )[0] ?? 0 ), fn( $id ) => aw_block_read_meta( array(), $id ) ),
+			),
+			'Opportunity line (animal-writes/opp-line)' => array(
+				array( 'Organisation, place and deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_deadline', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_state_code', 'compare' => 'EXISTS' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
+				array( 'No deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_deadline', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_deadline', 'value' => '' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
+				array( 'No place', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_state_code', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
+			),
+			'Organisation details (animal-writes/org-details)' => array(
+				array( 'Verified', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_org_details( array(), $id ) ),
+				array( 'Not confirmed', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_org_details( array(), $id ) ),
+			),
 		);
 		$out = '<h2>Animal Writes blocks in their states</h2><p>Each block drawn from a real item in that state. Form fields, buttons and dropdowns in every state are in the panels above.</p><style>.aw-state-grid{display:grid;gap:var(--s-6);grid-template-columns:repeat(auto-fill,minmax(22rem,1fr))}.aw-state-row{padding:var(--s-3) 0;border-top:1px solid var(--kit-color-line)}.aw-state-name{margin:0 0 var(--s-2);font-size:var(--fluid-label);color:var(--kit-color-muted)}</style><div class="aw-state-grid">';
 		foreach ( $blocks as $name => $states ) {
@@ -98,6 +132,42 @@ add_filter(
 		$out .= '<div><h3 class="kit-demo-h">Volunteer form (animal-writes/volunteer)</h3>'
 			. '<div class="aw-state-row"><p class="aw-state-name">Closed (behind the button)</p><div class="aw-state-out">' . kits_disclosure( 'aw-demo-vol', 'Register as a volunteer', '<p>The form.</p>' ) . '</div></div>'
 			. '<div class="aw-state-row"><p class="aw-state-name">Sent</p><div class="aw-state-out"><div class="kit-form-done" role="status"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>' . esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div></div></div></div>';
+		$out .= '</div>';
+		// Page-level blocks: they draw from the page they are on (its query, filters, place), so the sheet shows where they render; browse-states works anywhere.
+		$page_blocks = array(
+			array( 'Breadcrumb (animal-writes/breadcrumb)', 'every page top', '/library/' ),
+			array( 'Head band (animal-writes/section-head)', 'Pages, archives, category and Directory place pages', '/about/' ),
+			array( 'Hub count (animal-writes/hub-count)', 'hub head bands (prints nothing: the count sits above the pagination, owner 9 Oct)', '/news/' ),
+			array( 'Hub pictures (animal-writes/hub-visual)', 'hub head bands (prints nothing: no pictures in page top bands, owner 8 Oct)', '/news/' ),
+			array( 'List filters (animal-writes/list-filters)', 'hub head bands: dropdowns, Sort; Directory search', '/opportunities/' ),
+			array( 'Result count and sort (animal-writes/result-head)', 'Directory results: one result, many, filtered', '/directory/telangana/' ),
+		);
+		$out .= '<h2>Page-level blocks</h2><p>These draw from the page they are on, so each is shown on its page (and in the frames below).</p><div class="aw-state-grid">';
+		foreach ( $page_blocks as $pb ) {
+			$out .= '<div><h3 class="kit-demo-h">' . esc_html( $pb[0] ) . '</h3><div class="aw-state-row"><p class="aw-state-name">' . esc_html( $pb[1] ) . '</p><div class="aw-state-out"><a href="' . esc_url( home_url( $pb[2] ) ) . '">' . esc_html( $pb[2] ) . '</a></div></div></div>';
+		}
+		$out .= '<div><h3 class="kit-demo-h">Browse by state (animal-writes/browse-states)</h3><div class="aw-state-row"><p class="aw-state-name">Every state with listings</p><div class="aw-state-out">' . ( function_exists( 'aw_block_browse_states' ) ? aw_block_browse_states() : '' ) . '</div></div></div></div>';
+		// Picture states (owner, 16 Oct 2026): each real image in a 4:3 card frame, masked (cover); logos stay whole.
+		$pick = array( 'Landscape photo' => 0, 'Portrait photo' => 0, 'Square photo' => 0 );
+		foreach ( get_posts( array( 'post_type' => array( 'aw_news', 'post', 'aw_opportunity' ), 'post_status' => 'publish', 'numberposts' => 120, 'fields' => 'ids', 'meta_key' => '_thumbnail_id' ) ) as $pid ) {
+			$m = wp_get_attachment_metadata( (int) get_post_thumbnail_id( $pid ) );
+			if ( empty( $m['width'] ) || empty( $m['height'] ) ) {
+				continue;
+			}
+			$r = $m['width'] / $m['height'];
+			$k = $r > 1.45 ? 'Landscape photo' : ( $r < 0.9 ? 'Portrait photo' : ( abs( $r - 1 ) < 0.06 ? 'Square photo' : '' ) );
+			if ( $k && ! $pick[ $k ] ) {
+				$pick[ $k ] = (int) get_post_thumbnail_id( $pid );
+			}
+		}
+		$doc  = (int) get_post_meta( aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_doc_preview' ) ), 'aw_doc_preview', true );
+		$logo = (int) get_post_meta( aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_logo', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), 'aw_press_logo', true );
+		$out .= '<h2>Pictures in a card</h2><p>Card pictures are 4:3, masked like WordPress (cover, centred): the whole file is served, the frame hides the edges. A document page is masked from the top. Logos stay whole.</p><div class="aw-state-grid">';
+		foreach ( $pick + array( 'Document page' => $doc, 'Logo (stays whole)' => $logo ) as $label => $att ) {
+			$img  = $att ? wp_get_attachment_image( $att, 'medium_large', false, array( 'alt' => '', 'loading' => 'lazy', 'class' => 'Logo (stays whole)' === $label ? 'aw-story-logo' : '' ) ) : '';
+			$fig  = 'Logo (stays whole)' === $label ? '<figure class="wp-block-post-featured-image kit-card-media kit-story-media"><div class="aw-story-fallback" style="display:flex">' . $img . '</div></figure>' : '<figure class="wp-block-post-featured-image kit-card-media' . ( 'Document page' === $label ? ' kit-doc-cover' : '' ) . '">' . $img . '</figure>';
+			$out .= '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $label ) . '</p><div class="aw-state-out">' . ( $img ? $fig : '<em>No item in this state yet.</em>' ) . '</div></div>';
+		}
 		$out .= '</div>';
 		// Cards at each width: layout and data states together. Media queries follow the viewport, so each list is its
 		// real page in a frame of that width (scaled to fit); scroll inside a frame for more items and states.
@@ -116,6 +186,7 @@ add_filter(
 			'Home: Guides'                => array( '/', '.aw-ed-learn' ),
 			'Home: Animal Writes 1.0'     => array( '/', '.kit-ed-story' ),
 			'Directory listing page'      => array( '/directory/org/wugweb-sample-listing/', 'main' ),
+			'Item page: text and sidebar (sidebar empty today)' => array( '/resources/reporting-illegal-pet-shops-and-breeders/', 'main' ),
 		);
 		$out .= '<h2>Cards at each width</h2><p>Each list in its real page at 375, 768, 1199 and 1200 pixels (the token breakpoints are 768 and 1200): the layout state and the data states of the items together. Scroll inside a frame for more items.</p>'
 			. '<style>.aw-bp-set{display:grid;gap:var(--s-4);grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr));margin-bottom:var(--s-6)}.aw-bp{margin:0}.aw-bp-frame{position:relative;overflow:hidden;height:32rem;border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-canvas)}.aw-bp-frame iframe{position:absolute;inset:0 auto auto 0;border:0;transform-origin:0 0}.aw-bp figcaption{font-size:var(--fluid-label);color:var(--kit-color-muted);margin-top:var(--s-2)}</style>';
