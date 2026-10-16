@@ -312,7 +312,7 @@ add_filter(
 			unset( $s['on'], $s['filter'] );
 			$sources[] = $s;
 		}
-		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'] );
+		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'], 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
 		return $data;
 	}
 );
