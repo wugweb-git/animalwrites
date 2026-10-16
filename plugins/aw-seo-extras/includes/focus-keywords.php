@@ -48,7 +48,7 @@ const AW_SEO_GENERIC_WORDS = array( 'animal', 'animals', 'welfare', 'india', 'in
  */
 function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	$kw = mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) );
-	$kw = trim( preg_replace( array( '/["“”‘’`#]+/u', '/\s+/u' ), array( '', ' ' ), $kw ), " \t\n.,;:'-" );
+	$kw = trim( preg_replace( array( '/["“”`#]+/u', "/['‘’](?![\\p{L}\\p{N}])|(?<![\\p{L}\\p{N}])['‘’]/u", '/\s+/u' ), array( '', '', ' ' ), $kw ), " \t\n.,;:'-" ); // an apostrophe inside a word stays ("taneja's")
 	$parts = explode( ' ', $kw );
 	$n     = count( $parts );
 	$title = aw_seo_plain( $title );
@@ -92,10 +92,15 @@ function aw_seo_title_for_keyword( $post ) {
 	return trim( preg_replace( '/\s*[\x{2013}\x{2014}|-]\s*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/iu', '', $t ) );
 }
 
-/** Words of a text for phrase matching: lower case, apostrophes dropped ("India’s" → "indias"), letters and digits only. */
+/**
+ * Words of a text for phrase matching, as Rank Math's analyzer reads them: lower case; a hyphen or apostrophe inside a
+ * word stays part of it ("animal-free", "taneja's"), since Rank Math finds "animal free" or "tanejas" nowhere in
+ * "Animal-free" or "Taneja’s" (checked with its analyzer, 16 Oct 2026). Curly apostrophes count as straight ones here; a stored keyword keeps the title's own character.
+ */
 function aw_seo_phrase_words( $text ) {
-	$text = str_replace( array( "'", '’', '‘', '`' ), '', mb_strtolower( (string) $text ) );
-	return array_values( array_filter( preg_split( '/[^\p{L}\p{N}]+/u', $text ), 'strlen' ) );
+	$text = str_replace( array( '’', '‘', '`' ), "'", mb_strtolower( (string) $text ) );
+	preg_match_all( "/[\\p{L}\\p{N}]+(?:['-][\\p{L}\\p{N}]+)*/u", $text, $m );
+	return $m[0];
 }
 
 /** Whether the keyword's words stand together, in order, in the SEO title (the workers check the same). */

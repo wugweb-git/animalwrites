@@ -9,7 +9,12 @@
  *   sitemap entry), so such a view points its canonical at the tag page instead of competing with it.
  * - Several filters at once (?category_name=a&state=b) or several values (?tag=a,b) are noindex: the combinations
  *   would multiply without end. A parameter the hub does not filter by is noindex too.
- * - Other single filters (?state=, ?publisher= …) keep the earlier rule (indexed, canonical with the filter).
+ * - ?state= and ?publisher= (one value) follow the ?category_name= rule (16 Oct 2026): from 3 items their own title
+ *   ("Animal Welfare News from Kerala", "Animal Welfare News from LiveLaw"), description, breadcrumb step and
+ *   self-canonical; fewer, noindex. They had the hub's own title before, so each one duplicated it.
+ * - ?q= (a name or word search inside a list, the Directory's included) is a site search result: noindex, links
+ *   followed (Google's guidance on internal search result pages).
+ * - Any other single filter keeps the earlier rule (indexed, canonical with the filter).
  *
  * @package aw-seo-extras
  */
@@ -35,6 +40,46 @@ const AW_FILTERED_TITLE_WORDS = array(
 	'aw_opportunity' => array( '%s Volunteer Roles and Jobs', '%s Opportunities' ),
 	'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
 );
+
+/** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
+const AW_FILTERED_PLACE_TITLE_WORDS = array(
+	'state'     => array(
+		'aw_news'        => array( 'Animal Welfare News from %s', '%s Animal Welfare News', '%s News' ),
+		'aw_legal'       => array( 'Animal Laws and Court Orders in %s', 'Animal Laws in %s', '%s Animal Laws' ),
+		'aw_opportunity' => array( 'Animal Welfare Volunteer Roles and Jobs in %s', 'Animal Welfare Opportunities in %s', '%s Opportunities' ),
+	),
+	'publisher' => array(
+		'aw_news' => array( 'Animal Welfare News from %s', '%s Animal Welfare News', '%s News' ),
+	),
+);
+
+/**
+ * Name and item count of a ?state= or ?publisher= view on a hub, counted with the hub's own filter clauses (open
+ * opportunities only; preview-only items left out). ['', 0] when the value names nothing.
+ */
+function aw_seo_filtered_place( $type, $key, $slug ) {
+	$name = '';
+	if ( 'state' === $key && function_exists( 'aw_place_by_slug' ) ) {
+		$p    = aw_place_by_slug( $slug );
+		$name = $p && empty( $p->parent ) ? (string) $p->name : '';
+	} elseif ( 'publisher' === $key && function_exists( 'aw_filter_values' ) ) {
+		$one  = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'meta_key' => 'aw_publisher', 'meta_value' => $slug ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$vals = $one ? aw_filter_values( $one, 'publisher' ) : array();
+		$name = (string) ( $vals[ $slug ][0] ?? '' );
+	}
+	if ( '' === $name || ! function_exists( 'aw_filter_clauses' ) ) {
+		return array( '', 0 );
+	}
+	list( $tq, $mq ) = aw_filter_clauses( $type, array( $key => array( $slug ) ) );
+	$v = array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => false, 'tax_query' => $tq, 'meta_query' => $mq ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( 'aw_opportunity' === $type && function_exists( 'aw_open_opportunities_meta_query' ) ) {
+		$v['meta_query'][] = aw_open_opportunities_meta_query();
+	}
+	if ( function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ) {
+		$v['post__not_in'] = kits_preview_only_ids();
+	}
+	return array( $name, (int) ( new WP_Query( $v ) )->found_posts );
+}
 
 /** Filter parameters present on this request (sort is an order, not a filter): param => raw string. */
 function aw_seo_filter_params() {
@@ -100,8 +145,24 @@ function aw_seo_filtered_view() {
 	if ( count( $params ) > 1 || ! in_array( $key, $own, true ) || preg_match( '/,|%2C|\[\]/i', $value ) ) {
 		return $view; // several filters, several values, or not a filter of this hub: noindex
 	}
+	if ( 'q' === $key ) {
+		return $view; // a search inside the list: noindex, follow
+	}
+	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $key ][ $type ] ) ) { // ?state=, ?publisher=: as a category view
+		$slug = sanitize_title( $value );
+		list( $name, $n ) = aw_seo_filtered_place( $type, $key, $slug );
+		if ( '' === $name ) {
+			return $view; // names nothing: noindex
+		}
+		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => aw_seo_plain( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
+		if ( $n >= AW_FILTERED_MIN_ITEMS ) {
+			$view['index']     = true;
+			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), aw_hub_canonical() );
+		}
+		return $view;
+	}
 	if ( ! in_array( $key, array( 'category_name', 'tag' ), true ) ) {
-		$view['index'] = true; // ?state=, ?publisher= …: as before (indexed, canonical with the filter)
+		$view['index'] = true; // any other single filter: as before (indexed, canonical with the filter)
 		$view['key']   = $key;
 		return $view;
 	}
@@ -153,6 +214,16 @@ function aw_seo_filtered_title() {
 		return aw_seo_title_with_page( aw_seo_term_title( $term ) ); // the tag page's own title (its canonical, or the same list)
 	}
 	$name = str_replace( ' & ', ' and ', $v['name'] );
+	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] ) ) { // a state or publisher
+		$tries = array();
+		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
+			$tries[] = aw_seo_branded( sprintf( $shape, $name ) );
+		}
+		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
+			$tries[] = sprintf( $shape, $name );
+		}
+		return aw_seo_title_with_page( aw_seo_fit( $tries, 60 - mb_strlen( aw_seo_page_suffix() ) ) );
+	}
 	$what = array();
 	$words = fn( $t ) => array_diff( preg_split( '/\W+/u', mb_strtolower( $t ), -1, PREG_SPLIT_NO_EMPTY ), array( 'and', 'in', 'on', 'of', 'the', 'from', 'india' ) );
 	$all   = AW_FILTERED_TITLE_WORDS[ $v['type'] ] ?? array( '%s' );
@@ -183,7 +254,7 @@ function aw_seo_filtered_description() {
 		return aw_seo_with_page( aw_seo_tag_description( $term ) ); // as the tag page
 	}
 	$count = function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $v['type'] ) : '';
-	$about = ' on ' . aw_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) );
+	$about = 'state' === $v['key'] ? ' in ' . $v['name'] : ( 'publisher' === $v['key'] ? ' from ' . $v['name'] : ' on ' . aw_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) ) );
 	$lead = '' !== $count ? $count . $about . '. ' : '';
 	$desc = $lead . ( AW_ARCHIVE_DESCRIPTIONS[ $v['type'] ] ?? '' );
 	return aw_seo_with_page( aw_seo_cut( $desc, 155 - mb_strlen( aw_seo_page_suffix() ) ) );
@@ -193,7 +264,8 @@ function aw_seo_filtered_description() {
 add_filter(
 	'rank_math/frontend/robots',
 	function ( $robots ) {
-		if ( aw_seo_filtered_noindex() ) {
+		$search = function_exists( 'aw_hub_type' ) && aw_hub_type() && isset( $_GET['q'] ) && '' !== $_GET['q']; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( aw_seo_filtered_noindex() || $search ) { // ?q= on a Directory place too
 			$robots['index'] = 'noindex';
 		}
 		return $robots;
