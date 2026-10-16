@@ -630,12 +630,17 @@
 	window.kitsTrack = track;
 	function formName(form) {
 		form = form && form.closest && form.closest('form') || form;
+		var named = form && form.closest && form.closest('[data-kit-form]'); // a form from a form plugin, named by its wrapper
+		if (named) return named.dataset.kitForm;
 		var a = form && form.querySelector('input[name=action]');
 		var v = a ? a.value.replace(/^aw_/, '') : (form && form.id || '');
 		return { newsletter: 'newsletter', volunteer: 'volunteer', claim: 'claim', report: 'report', contact: 'contact', remove_data: 'remove_data' }[v] || v;
 	}
 	document.addEventListener('kit:form-done', function (e) { track('form_submit_success', { form: formName(e.target) }); });
 	document.addEventListener('kit:form-error', function (e) { track('form_error', { form: formName(e.target), where: e.detail.where, fields: e.detail.fields }); });
+	// Fluent Forms (AJAX): its own success and failure events, on document, with the form in detail.form
+	document.addEventListener('fluentform_submission_success', function (e) { track('form_submit_success', { form: formName(e.detail && e.detail.form) }); });
+	document.addEventListener('fluentform_submission_failed', function (e) { track('form_error', { form: formName(e.detail && e.detail.form), where: 'server', fields: '' }); });
 	document.addEventListener('kit:step', function (e) { if (e.target.closest('.aw-claim-form, #claim')) track('claim_step', { step: e.detail.step }); });
 	// filter_apply: one event per filter in use (filter, value), plus the whole query (filters) and the hub
 	function filters(params, hub) {

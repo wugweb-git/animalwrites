@@ -846,6 +846,29 @@ body { background: var(--kit-color-canvas); }
 
 /* Animal Writes buttons: icon by function */
 .aw-newsletter-form [type=submit] { --kit-btn-ico: var(--kit-ico-mail); }
+/* Newsletter sign-up in Fluent Forms (16 Oct 2026): the footer box's look, in tokens. Order: email, name, Subscribe, consent line. */
+.aw-newsletter-form .frm-fluent-form fieldset { display: flex !important; flex-direction: column; gap: var(--kit-space-3); }
+.aw-newsletter-form .ff-el-group { margin: 0; }
+.aw-newsletter-form .ff_submit_btn_wrapper { order: 4; }
+.aw-newsletter-form .ff-custom_html { order: 5; }
+.aw-newsletter-form .ff-custom_html p { margin: 0; font-size: var(--kit-type-xs); line-height: 1.5; }
+.aw-newsletter-form .ff-el-input--label { margin: 0 0 var(--kit-space-2); }
+.aw-newsletter-form .ff-el-input--label label { display: block; margin: 0; font-weight: var(--kit-weight-regular); color: inherit; }
+.aw-newsletter-form .ff-el-input--label.ff-el-is-required label::after { content: none; }
+.aw-newsletter-form .ff-el-form-control {
+	width: 100%; box-sizing: border-box; min-height: var(--kit-size-control); padding: 0 var(--kit-space-3);
+	font: inherit; color: var(--kit-color-ink); background: var(--kit-color-raised);
+	border: var(--kit-border-control) solid var(--kit-color-ink); border-radius: var(--kit-radius-control);
+	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
+}
+.aw-newsletter-form .ff-el-form-control:hover { box-shadow: 0 0 0 3px var(--kit-color-surface); }
+.aw-newsletter-form .ff-el-form-control:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--kit-color-accent); }
+.aw-newsletter-form .ff-el-is-error .ff-el-form-control { border-color: var(--kit-color-danger); background: var(--kit-color-danger-soft); }
+.aw-newsletter-form .ff-el-is-error .text-danger { display: block; margin-top: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-accent); }
+.aw-newsletter-form .ff-btn-submit.kit-btn { width: 100%; min-height: var(--kit-size-target); }
+.aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-4) var(--kit-space-5); border: 0; border-left: 4px solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
+.aw-newsletter-form .ff-message-success p { margin: 0; }
+.aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
 #claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }

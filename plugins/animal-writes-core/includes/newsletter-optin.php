@@ -3,8 +3,7 @@
  * Newsletter growth, consent only (owner, 9 Oct 2026; DPDP: consent per purpose).
  *
  * - Contact, Volunteer and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
- *   person goes onto the newsletter list as "pending" with the form as source, and gets the usual confirmation email
- *   (double opt-in, as in the footer). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
+ *   person goes onto the newsletter list as "active" with the form as source (16 Oct 2026). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
  * - Volunteers, claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
  *   lists them (name, email, source, date) with a CSV export, for a one-time opt-in invite sent outside WordPress.
  *
@@ -22,19 +21,13 @@ function aw_nl_optin_box( $form ) {
 	return aw_field( $form, array( 'name' => 'nl_optin', 'label' => AW_NL_OPTIN_LABEL, 'type' => 'checkbox' ) );
 }
 
-/** After a form succeeds: only when the box was ticked, add as pending and send the confirmation email. */
+/** After a form succeeds: only when the box was ticked, add to the subscriber list as active (owner, 16 Oct 2026: no
+ *  double opt-in; the form's own email is the only one sent). */
 function aw_nl_optin( $email, $name, $source ) {
-	if ( empty( $_POST['nl_optin'] ) || ! is_email( $email ) || ! function_exists( 'aw_nl_add' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( empty( $_POST['nl_optin'] ) || ! is_email( $email ) || ! function_exists( 'aw_nl_activate' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return;
 	}
-	$row = aw_nl_add( $email, $name, 'site:' . $source, 'pending' );
-	if ( $row && 'pending' === $row['status'] ) {
-		wp_mail(
-			$row['email'],
-			'Confirm your subscription to ' . get_bloginfo( 'name' ),
-			"Click this link to confirm that you want Animal Writes updates:\n" . aw_nl_link( 'confirm', $row['token'] ) . "\n\nIf you did not ask for this, ignore this email and you will not hear from us."
-		);
-	}
+	aw_nl_activate( $email, $name, 'site:' . $source, AW_NL_CONSENT );
 }
 
 /** Everyone we hold an email for who is not on the newsletter (active or pending). */

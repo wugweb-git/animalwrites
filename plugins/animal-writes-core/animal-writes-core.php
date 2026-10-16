@@ -95,6 +95,7 @@ require_once AW_CORE_DIR . 'includes/thumbs.php';
 require_once AW_CORE_DIR . 'includes/cc0-images.php';
 require_once AW_CORE_DIR . 'includes/mail-in.php';
 require_once AW_CORE_DIR . 'includes/newsletter-optin.php';
+require_once AW_CORE_DIR . 'includes/newsletter-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/ai-keys.php';
 
