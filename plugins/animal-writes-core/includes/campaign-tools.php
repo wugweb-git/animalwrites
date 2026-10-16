@@ -69,6 +69,16 @@ add_filter(
 
 /* ---------- Rule chips ---------- */
 
+/** Collects chip dialogs (with $html) or returns them all (without). */
+function aw_camp_dialogs( $html = null ) {
+	static $all = array();
+	if ( null !== $html ) {
+		$all[] = $html;
+	}
+	return $all;
+}
+add_action( 'wp_footer', fn() => print( implode( '', aw_camp_dialogs() ) ) ); // phpcs:ignore -- built from escaped parts above
+
 /**
  * The clause with this anchor in a Library item, as HTML: the block itself, plus its lettered clauses (for a sub-rule)
  * or the rest of the rule up to the next heading (for a whole rule). Empty when not found.
@@ -123,8 +133,8 @@ add_shortcode(
 		++$n;
 		$dlg  = 'aw-rule-' . $n;
 		$link = 'publish' === get_post_status( $doc ) ? get_permalink( $doc ) . '#' . $anchor : (string) get_post_meta( $doc, 'aw_source_url', true );
-		$out  = '<button type="button" class="aw-rule-chip" aria-haspopup="dialog" aria-controls="' . esc_attr( $dlg ) . '" data-rule="' . esc_attr( $a['rule'] ) . '">' . esc_html( $label ) . '</button>';
-		$out .= '<dialog class="aw-rule-chip-dialog" id="' . esc_attr( $dlg ) . '" aria-labelledby="' . esc_attr( $dlg ) . '-t">';
+		$btn  = '<button type="button" class="aw-rule-chip" aria-haspopup="dialog" aria-controls="' . esc_attr( $dlg ) . '" data-rule="' . esc_attr( $a['rule'] ) . '">' . esc_html( $label ) . '</button>';
+		$out  = '<dialog class="aw-rule-chip-dialog" id="' . esc_attr( $dlg ) . '" aria-labelledby="' . esc_attr( $dlg ) . '-t">';
 		$out .= '<p class="aw-rule-chip-head" id="' . esc_attr( $dlg ) . '-t"><strong>' . esc_html( $label ) . ': what it says</strong></p>';
 		$out .= '<div class="aw-rule-chip-text">' . $clause . '</div>';
 		if ( '' !== $a['allows'] ) {
@@ -132,7 +142,8 @@ add_shortcode(
 		}
 		$out .= '<p class="aw-rule-chip-src">' . esc_html( get_the_title( $doc ) ) . ( $link ? ' · <a href="' . esc_url( $link ) . '">Read the full text</a>' : '' ) . '</p>';
 		$out .= '<button type="button" class="aw-rule-chip-close" data-close>Close</button></dialog>';
-		return $out;
+		aw_camp_dialogs( $out ); // printed at the end of the page: a dialog holds paragraphs, so it cannot sit inside one
+		return $btn;
 	}
 );
 
