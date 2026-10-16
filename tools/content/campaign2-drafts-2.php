@@ -48,10 +48,10 @@ $camp  = home_url( '/campaigns/lab-animals-rules-2026/' );
 $draft = home_url( '/library/draft-laboratory-animals-rules-2026/' );
 $r1998 = home_url( '/library/breeding-experiments-animals-rules-1998/' );
 $act   = get_permalink( 117 );
-$n1    = home_url( '/news/draft-lab-animal-rules-2026-rule-by-rule/' );
-$n2    = home_url( '/news/who-approves-animal-experiments-draft-rules/' );
-$n3    = home_url( '/news/lab-animal-rules-today-vs-draft-2026/' );
-$n4    = home_url( '/news/palamur-beagles-case-timeline/' );
+$n1    = home_url( '/resources/draft-lab-animal-rules-2026-rule-by-rule/' );
+$n2    = home_url( '/resources/who-approves-animal-experiments-draft-rules/' );
+$n3    = home_url( '/resources/lab-animal-rules-today-vs-draft-2026/' );
+$n4    = home_url( '/resources/palamur-beagles-case-timeline/' );
 $r1    = home_url( '/resources/how-to-object-to-a-draft-rule-india/' );
 $r2    = home_url( '/resources/animal-experiment-severity-mild-moderate-severe/' );
 $r3    = home_url( '/resources/iaec-full-form-members-approvals/' );
@@ -85,7 +85,7 @@ $docs = array();
 
 /* N4 */
 $docs[] = array(
-	'type'     => 'aw_news',
+	'type'     => 'post',
 	'slug'     => 'palamur-beagles-case-timeline',
 	'title'    => 'The Palamur beagles case: a timeline',
 	'rm_title' => 'Palamur Beagles Case: A Timeline of Events – Animal Writes',

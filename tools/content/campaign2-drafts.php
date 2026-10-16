@@ -56,7 +56,7 @@ $docs = array();
 
 /* N1 */
 $docs[] = array(
-	'type'     => 'aw_news',
+	'type'     => 'post',
 	'slug'     => 'draft-lab-animal-rules-2026-rule-by-rule',
 	'title'    => 'What India\'s draft lab animal rules say, rule by rule',
 	'rm_title' => 'Draft Lab Animal Rules 2026, Rule by Rule – Animal Writes',
@@ -87,7 +87,7 @@ $docs[] = array(
 
 /* N2 */
 $docs[] = array(
-	'type'     => 'aw_news',
+	'type'     => 'post',
 	'slug'     => 'who-approves-animal-experiments-draft-rules',
 	'title'    => 'Who approves an animal experiment? The draft rules\' answer',
 	'rm_title' => 'Who Approves Animal Experiments in India? – Animal Writes',
@@ -116,7 +116,7 @@ $docs[] = array(
 
 /* N3 */
 $docs[] = array(
-	'type'     => 'aw_news',
+	'type'     => 'post',
 	'slug'     => 'lab-animal-rules-today-vs-draft-2026',
 	'title'    => 'Lab animal rules today vs the 2026 draft, side by side',
 	'rm_title' => 'Lab Animal Rules Today vs the 2026 Draft – Animal Writes',
