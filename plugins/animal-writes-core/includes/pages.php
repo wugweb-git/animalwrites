@@ -584,7 +584,7 @@ add_filter(
  * a date already inside <time>; the stored text is not changed.
  */
 function aw_inline_dates( $html ) {
-	static $re = '/(?<![\w-])(?:(\d{1,2})(?:st|nd|rd|th)?\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(\d{1,2})(?:st|nd|rd|th)?,)?\s+((?:19|20)\d{2})(?![\w-])/';
+	static $re = '/(?<![\w-])(?:(?<from>\d{1,2})(?:st|nd|rd|th)?\s*[–—-]\s*(?=\d))?(?:(?<d1>\d{1,2})(?:st|nd|rd|th)?\s+)?(?<mon>January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(?<d2>\d{1,2})(?:st|nd|rd|th)?,)?\s+(?<yr>(?:19|20)\d{2})(?![\w-])/u'; // a range "20–27 Jan 2025" is one date
 	if ( ! preg_match( $re, (string) preg_replace( '/<[^>]+>/', ' ', $html ) ) ) { // a tag counts as a space ("2025<br>Animal")
 		return $html;
 	}
@@ -608,10 +608,12 @@ function aw_inline_dates( $html ) {
 		$parts[ $k ] = preg_replace_callback(
 			$re,
 			function ( $m ) {
-				$day = '' !== $m[1] ? $m[1] : ( $m[3] ?? '' );
-				$ts  = strtotime( ( '' !== $day ? $day : '1' ) . ' ' . $m[2] . ' ' . $m[4] );
-				$iso = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts ) : '';
-				$txt = $ts ? wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0]; // one format sitewide: "2 Oct 2026", "Nov 2025"
+				$day  = '' !== ( $m['d1'] ?? '' ) ? $m['d1'] : ( $m['d2'] ?? '' );
+				$from = (string) ( $m['from'] ?? '' );
+				$ts   = strtotime( ( '' !== $day ? $day : '1' ) . ' ' . $m['mon'] . ' ' . $m['yr'] );
+				$ts0  = '' !== $from && $ts ? strtotime( $from . ' ' . $m['mon'] . ' ' . $m['yr'] ) : 0;
+				$iso  = $ts ? wp_date( '' !== $day ? 'Y-m-d' : 'Y-m', $ts0 ? $ts0 : $ts ) : '';
+				$txt  = $ts ? ( $ts0 ? (int) $from . '–' : '' ) . wp_date( '' !== $day ? AW_DATE_FORMAT : 'M Y', $ts ) : $m[0]; // one format sitewide: "2 Oct 2026", "Nov 2025", a range "20–27 Jan 2025"
 				return '<span class="aw-date">' . aw_i( 'calendar' ) . '<time' . ( $iso ? ' datetime="' . esc_attr( $iso ) . '"' : '' ) . '>' . esc_html( $txt ) . '</time></span>';
 			},
 			$part
