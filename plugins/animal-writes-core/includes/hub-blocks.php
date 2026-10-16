@@ -348,6 +348,20 @@ function aw_block_deadline( $a, $id ) {
 	return '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . ( $dl ? ' · Apply by ' . aw_date( $dl ) . '' : '' ) . '</p>';
 }
 
+/** The place for the opportunity line: in a list for one state ("near you"), that state's district or the state; else the first place. */
+function aw_opp_line_place( $id ) {
+	$places = function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array();
+	$want   = (int) ( $GLOBALS['aw_near_state_code'] ?? 0 );
+	$p      = $places ? $places[0] : null;
+	foreach ( $want ? $places : array() as $q ) {
+		if ( ( 'district' === $q->kind && (int) $q->state === $want ) || ( 'state' === $q->kind && (int) $q->code === $want ) ) {
+			$p = $q;
+			break;
+		}
+	}
+	return $p ? '<span class="aw-place">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
+}
+
 /** Compact line for title lists (home "Opportunities near you"): organisation · place · Apply by {date}. Empty parts are left out. */
 function aw_block_opp_line( $a, $id ) {
 	$org = (string) get_post_meta( $id, 'aw_org_name', true );
@@ -359,7 +373,7 @@ function aw_block_opp_line( $a, $id ) {
 	$parts = array_filter(
 		array(
 			'' !== $org ? '<span class="aw-opp-line-org">' . esc_html( $org ) . '</span>' : '',
-			aw_block_place( $a, $id ),
+			aw_opp_line_place( $id ),
 			$dl ? '<span class="aw-opp-line-by">Apply by ' . aw_date( $dl ) . '</span>' : '',
 		)
 	);
