@@ -177,6 +177,9 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;
 	transition: transform var(--kit-motion-slow) var(--kit-motion-ease), opacity var(--kit-motion-slow) var(--kit-motion-ease);
 }
+/* A block's own aspectRatio (core prints it on the <img>): the frame follows the picture, so item leads keep 16:9. */
+.wp-block-post-featured-image:has(img[style*="aspect-ratio"]) { aspect-ratio: auto; }
+.wp-block-post-featured-image img[style*="aspect-ratio"] { height: auto; }
 .wp-block-post-template > li:hover :is(.kit-card-media, .wp-block-post-featured-image) img { transform: scale(1.04); }
 .kit-card-media a { display: block; height: 100%; color: inherit; text-decoration: none; }
 .kit-card-media.has-remote .kit-placard { display: none; }
