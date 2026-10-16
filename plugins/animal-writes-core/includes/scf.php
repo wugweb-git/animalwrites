@@ -115,6 +115,14 @@ function aw_value_guard( $check, $value, $post_id, $field ) {
 }
 add_filter( 'acf/pre_update_value', 'aw_value_guard', 5, 4 );
 
+// Photos are stored "1,2,3"; SCF's gallery reads a list.
+add_filter(
+	'acf/load_value/type=gallery',
+	fn( $value, $post_id, $field ) => aw_scf_ours( $field ) && is_string( $value ) ? array_values( array_filter( array_map( 'absint', explode( ',', $value ) ) ) ) : $value,
+	10,
+	3
+);
+
 // Dates inside our repeaters are stored Y-m-d too, like every other date on the site.
 add_filter(
 	'acf/update_value/type=date_picker',
