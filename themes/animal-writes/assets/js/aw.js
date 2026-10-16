@@ -80,3 +80,30 @@
 	if ( document.readyState === 'loading' ) { document.addEventListener( 'DOMContentLoaded', function () { scan(); } ); } else { scan(); }
 	new MutationObserver( function ( list ) { list.forEach( function ( m ) { m.addedNodes.forEach( function ( n ) { if ( n.nodeType === 1 ) { scan( n ); } } ); } ); } ).observe( document.documentElement, { childList: true, subtree: true } );
 } )();
+
+/* Home "Opportunities near you" (owner, 16 Oct 2026). A state chosen in a Directory search ("Find help near you") is
+   kept in this browser only; on the home page the list then shows opportunities in that state (newest fill the rest).
+   No state chosen, nothing found, or no JavaScript: the server's newest ones stay. */
+(function () {
+	'use strict';
+	var KEY = 'aw_state';
+	function get() { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+	document.addEventListener('change', function (e) {
+		var t = e.target;
+		if (!t.matches || !t.matches('form.aw-dir-search select[name=state]')) return;
+		try { if (t.value) localStorage.setItem(KEY, t.value); else localStorage.removeItem(KEY); } catch (x) {}
+	});
+	var list = document.querySelector('.aw-ed-opps .wp-block-post-template');
+	var state = get();
+	if (!list || !state || !window.fetch) return;
+	fetch('/wp-json/aw/v1/opps-near?state=' + encodeURIComponent(state), { credentials: 'omit' })
+		.then(function (r) { return r.ok ? r.json() : null; })
+		.then(function (d) {
+			if (!d || !d.local || !d.html) return;
+			var box = document.createElement('div');
+			box.innerHTML = d.html;
+			var ul = box.querySelector('.wp-block-post-template');
+			if (ul) list.replaceWith(ul);
+		})
+		.catch(function () {});
+})();
