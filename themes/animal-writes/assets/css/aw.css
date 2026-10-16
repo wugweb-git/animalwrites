@@ -250,7 +250,9 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-steps .kit-ico { position: absolute; right: 0; top: 50%; translate: 0 -50%; --kit-ico-size: 1.5rem; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-ed-steps a:hover .kit-ico { transform: translateX(4px); }
 .aw-ed-steps a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
-.aw-ed-opps .wp-block-post-template > li { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-2); }
+.aw-ed-opps .wp-block-post-template > li { display: flex !important; flex-wrap: nowrap; align-items: flex-start; justify-content: space-between; gap: var(--kit-space-3); }
+.aw-ed-opps .wp-block-post-template > li > .wp-block-post-title { flex: 1 1 auto; min-width: 0; } /* a long title wraps in its own column */
+.aw-ed-opps .wp-block-post-template > li > .wp-block-post-terms { flex: none; } /* the label stays beside the title, top-aligned, at every width */
 
 /* 08 Animal Writes 1.0: documentary */
 .kit-ed-story { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
@@ -983,7 +985,6 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 1200px) { .aw-ed-find .aw-browse-states ul { grid-template-columns: repeat(6, minmax(0, 1fr)); } .aw-ed-find .aw-browse-states { margin-top: var(--kit-space-7); } }
 
 /* Take action: two opportunities; the photo only on desktop, as tall as the text beside it */
-.aw-ed-opps .wp-block-post-template > li:nth-child(n+3) { display: none !important; }
 @media (max-width: 1199px) { .aw-ed-act-media { display: none; } }
 @media (min-width: 1200px) { .aw-ed-act-media img { min-height: 0; max-height: 100%; } .aw-ed-act-media { position: relative; } .aw-ed-act-media img { position: absolute; inset: 0; } }
 .aw-ed-steps { margin: var(--kit-space-5) 0; }
@@ -1026,7 +1027,6 @@ body { background: var(--kit-color-canvas); }
 	.kit-ed-story-head p { margin: var(--kit-space-3) 0 var(--kit-space-4); }
 	.kit-ed-story h2, .kit-ed-act-copy h2 { padding-top: var(--kit-space-3); }
 	.aw-ed-numbers { margin-bottom: var(--kit-space-5); }
-	.kit-ed-act-copy .aw-ed-templates { margin-bottom: var(--kit-space-3); }
 	.kit-ed-act-copy .aw-ed-col-title { margin-bottom: var(--kit-space-2); }
 }
 @media (max-width: 767px) { .aw-ed-steps a { padding-block: var(--kit-space-2) var(--kit-space-3); } }

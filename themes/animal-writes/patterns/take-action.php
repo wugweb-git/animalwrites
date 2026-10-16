@@ -18,7 +18,7 @@
 <div class="wp-block-group kit-ed-act-copy"><!-- wp:html -->
 <h2>Take action</h2><p class="kit-ed-desc">Animal Writes began with people writing to the Supreme Court. Here is how to take part now.</p><ul class="aw-ed-steps"><li><a href="/campaigns/"><strong>Join a campaign</strong><span>Letters, petitions and days of action, with everything you need to take part.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li><li><a href="/volunteer/"><strong>Volunteer with Animal Writes</strong><span>Coordinate in your city, write, design, or help with legal work.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul><a class="kit-ed-more aw-ed-templates" href="/library/?tag=template">Letters and templates <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a><h3 class="aw-ed-col-title">Opportunities near you</h3>
 <!-- /wp:html -->
-<!-- wp:query {"queryId":47,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} -->
+<!-- wp:query {"queryId":47,"query":{"perPage":2,"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} -->
 <div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template -->
 <!-- wp:post-title {"level":3,"isLink":true} /-->
 <!-- wp:post-terms {"term":"post_tag"} /-->
