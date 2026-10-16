@@ -56,13 +56,13 @@ Item counts are published items on 15 Oct 2026, by type (News, Library, Resource
 
 | # | Piece | Keyword | Intent | Priority | Status |
 |---|---|---|---|---|---|
-| 1 | World Animal Day: why 4 October, and how it began | world animal day | Informational, seasonal (October) | Quick win: about 1,060 impressions already land on a weaker page | **Draft 13797.** Publish before mid-September 2027 at the latest, so it is indexed before the October spike. |
-| 2 | Animal Welfare Board of India (AWBI): what it does | animal welfare board of india | Informational / navigational | Big bet: the Board's own site ranks first, so we aim for the "explained" and recognition queries | **Draft 13800** |
-| 3 | 1962 helpline: Mobile Veterinary Units explained | 1962 helpline | Informational | Quick win: questions already asked, no answering page | **Draft 13798.** If published, remove "1962 mobile veterinary unit" and "1962 helpline" from the secondaries of "Who to call for an animal emergency in India" and "Injured animal emergency: who to call first", and link those guides to it, so the three don't compete. |
+| 1 | World Animal Day: why 4 October, and how it began | world animal day | Informational, seasonal (October) | Quick win: about 1,060 impressions already land on a weaker page | **Published 15 Oct 2026** (owner approved): /resources/world-animal-day-4-october/, Rank Math score 91. |
+| 2 | Animal Welfare Board of India (AWBI): what it does | animal welfare board of india | Informational / navigational | Big bet: the Board's own site ranks first, so we aim for the "explained" and recognition queries | **Published 15 Oct 2026**: /resources/animal-welfare-board-of-india-awbi-explained/, score 84. |
+| 3 | 1962 helpline: Mobile Veterinary Units explained | 1962 helpline | Informational | Quick win: questions already asked, no answering page | **Published 15 Oct 2026**: /resources/1962-helpline-mobile-veterinary-units/, score 90. "1962 helpline" and "1962 mobile veterinary unit" removed from the two emergency guides' secondaries, and both now link to it (scores 80 and 81). |
 | 4 | Library rule descriptions mention "PDF" | {rule name} pdf | Navigational | Quick win, edit only | For the owner (live Library copy) |
 | 5 | Directory district pages answer "helpline/contact number" | animal helpline number {district} | Local | Big bet, data first | Phone enrichment worker (Phase 2) |
-| 6 | Supreme Court stray dogs case, the later orders in plain English | supreme court stray dogs order | Informational | P3: needs the full orders read | Not drafted |
-| 7 | Bird helplines by city | injured bird helpline | Local | P3 | Not drafted (needs sourced numbers) |
+| 6 | Supreme Court stray dogs case, the later orders in plain English | supreme court stray dogs order | Informational | P3 | **Draft 13842** for owner approval (orders of 22 Aug 2025, 7 Nov 2025 and 19 May 2026 read in full, 16 Oct 2026) |
+| 7 | Bird helplines by city | injured bird helpline | Local | P3 | **Draft 13843** for owner approval: Gujarat, Delhi, Mumbai and Thane, Bengaluru; only numbers checked on official or the group's own sites (16 Oct 2026) |
 
 ## 4. Calendar (next 12 weeks)
 
@@ -97,3 +97,9 @@ Item counts are published items on 15 Oct 2026, by type (News, Library, Resource
   - Library and Media & PR card pictures now carry the item's title, or the publisher's name for a logo.
   - Rank Math's automatic alt and title, which wrote the page title ("Library", "Media & PR 1") into every empty alt, is turned off in code.
 - **FAQ answers:** all 16 guides already have Rank Math FAQ blocks with answers taken from the guide text. None were missing.
+
+## 8. Follow-up (15 and 16 Oct 2026)
+
+- Drafts 13797, 13800 and 13798 were checked against their sources again and published on 15 Oct 2026 (`tools/content/publish-guides-2026-10-15.php`). Changes made in the final check: the World Animal Day 2026 theme was added from Naturewatch Foundation; the claim that the AWBI website lists State Animal Welfare Boards was removed, because the source didn't support it; the 1962 guide's claim that every state runs its units through a PPP was narrowed to Karnataka.
+- P3 items 6 and 7 are drafts 13842 and 13843 (`tools/content/owner-drafts-p3-2026-10-16.php`).
+- Plan for testing titles and descriptions: `docs/seo/content-experiments-2026-10-15.md`.
