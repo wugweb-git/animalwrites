@@ -82,6 +82,28 @@ function aw_assign_existing_terms( $post_id, array $values, $taxonomy, array &$i
 }
 
 /**
+ * A Library item already holding this notification number ("G.S.R. 864(E)", "GSR 864 (E)" ... compared without spaces
+ * and dots), in any state but the bin; 0 when none.
+ *
+ * @param string $number Notification number.
+ * @return int
+ */
+function aw_legal_by_number( $number ) {
+	global $wpdb;
+	$key = strtoupper( preg_replace( '/[^0-9A-Z]/i', '', (string) $number ) );
+	if ( ! preg_match( '/\d/', $key ) || ! preg_match( '/(\d+)/', $key, $d ) ) {
+		return 0;
+	}
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = 'aw_legal' AND p.post_status <> 'trash' WHERE m.meta_key = 'aw_legal_number' AND m.meta_value LIKE %s", '%' . $wpdb->esc_like( $d[1] ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) $rows as $r ) {
+		if ( strtoupper( preg_replace( '/[^0-9A-Z]/i', '', (string) $r->meta_value ) ) === $key ) {
+			return (int) $r->post_id;
+		}
+	}
+	return 0;
+}
+
+/**
  * Handle an ingest request.
  *
  * @param WP_REST_Request $req Request.
@@ -120,6 +142,15 @@ function aw_ingest( WP_REST_Request $req ) {
 	$existing = aw_find_by_source( $type, $source_url );
 	if ( $existing ) {
 		return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
+	}
+	// A Gazette notification we already hold under the same number (G.S.R. / S.O. ...(E)), whatever its title or source
+	// (owner, 16 Oct 2026: the draft lab animal rules came in twice, from the Gazette and from CCSEA).
+	$number = sanitize_text_field( (string) $req->get_param( 'legal_number' ) );
+	if ( 'aw_legal' === $type && '' !== $number ) {
+		$held = aw_legal_by_number( $number );
+		if ( $held ) {
+			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $held ), 200 );
+		}
 	}
 	// Same story: the same normalised title dated within a day either side, drafts included (relevance.php).
 	if ( 'aw_listing' !== $type && function_exists( 'aw_find_by_title' ) ) {
@@ -274,6 +305,17 @@ function aw_ingest( WP_REST_Request $req ) {
 	// published like any other (owner, 15 Oct 2026); it is marked so a later rewrite pass can find it.
 	if ( $req->get_param( 'summary_short' ) ) {
 		update_post_meta( $post_id, 'aw_summary_short', current_time( 'Y-m-d' ) );
+	}
+	if ( 'aw_legal' === $type && '' !== $number ) {
+		update_post_meta( $post_id, 'aw_legal_number', $number );
+	}
+	if ( 'aw_legal' === $type && $req->get_param( 'draft' ) ) { // a draft published for objections, not rules in force
+		$t = get_term_by( 'slug', 'draft', 'post_tag' );
+		$t = $t ? (int) $t->term_id : (int) ( wp_insert_term( 'Draft', 'post_tag', array( 'slug' => 'draft' ) )['term_id'] ?? 0 );
+		if ( $t ) {
+			wp_set_object_terms( $post_id, $t, 'post_tag', true );
+		}
+		update_post_meta( $post_id, 'aw_legal_force', 'NotInForce' );
 	}
 	if ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
