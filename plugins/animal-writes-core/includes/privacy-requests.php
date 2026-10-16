@@ -7,7 +7,7 @@
  * 3. Only when the link in that email is opened, every eraser runs (ours below, plus WordPress's comments and
  *    media), the request is marked completed and the person gets WordPress's "data erased" email.
  * The request record (email, dates, items removed) stays in Tools → Erase Personal Data as the log.
- * There is no CRM connected; if one is added, it registers its own eraser on wp_privacy_personal_data_erasers.
+ * Contact messages (Inbox › Messages) go too (owner, 16 Oct 2026); the log keeps only how many.
  *
  * @package animal-writes-core
  */
@@ -101,6 +101,25 @@ add_filter(
 				return array( 'items_removed' => (bool) $ids, 'items_retained' => false, 'messages' => array(), 'done' => true );
 			},
 		);
+		// Contact messages (owner, 16 Oct 2026): the site's form and incoming email both keep the sender in aw_m_email.
+		// Matched without regard to case; the message, anything attached to it, and its Fluent Forms copy (the
+		// aw-fluentforms eraser) go. Only the number removed is logged.
+		$erasers['aw-messages'] = array(
+			'eraser_friendly_name' => 'Contact messages (Inbox)',
+			'callback'             => function ( $email ) {
+				global $wpdb;
+				$ids = array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_m_email' WHERE p.post_type = 'aw_message' AND LOWER(TRIM(m.meta_value)) = %s", strtolower( trim( (string) $email ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$n   = 0;
+				foreach ( array_unique( $ids ) as $mid ) {
+					foreach ( get_children( array( 'post_parent' => $mid, 'post_type' => 'attachment', 'fields' => 'ids' ) ) as $att ) {
+						wp_delete_attachment( $att, true );
+					}
+					$n += wp_delete_post( $mid, true ) ? 1 : 0;
+				}
+				$GLOBALS['aw_erased_messages'] = (int) ( $GLOBALS['aw_erased_messages'] ?? 0 ) + $n;
+				return array( 'items_removed' => $n > 0, 'items_retained' => false, 'messages' => array(), 'done' => true );
+			},
+		);
 		return $erasers;
 	}
 );
@@ -115,6 +134,7 @@ add_action(
 		}
 		$removed = 0;
 		$kept    = 0;
+		$GLOBALS['aw_erased_messages'] = 0;
 		foreach ( (array) apply_filters( 'wp_privacy_personal_data_erasers', array() ) as $eraser ) {
 			for ( $page = 1; $page <= 50; $page++ ) {
 				$r        = call_user_func( $eraser['callback'], $request->email, $page );
@@ -125,7 +145,7 @@ add_action(
 				}
 			}
 		}
-		update_post_meta( $request_id, '_aw_erasure_log', array( 'at' => current_time( 'mysql' ), 'removed' => $removed, 'retained' => $kept ) );
+		update_post_meta( $request_id, '_aw_erasure_log', array( 'at' => current_time( 'mysql' ), 'removed' => $removed, 'retained' => $kept, 'messages' => (int) $GLOBALS['aw_erased_messages'] ) );
 		wp_update_post( array( 'ID' => $request_id, 'post_status' => 'request-completed' ) );
 		update_post_meta( $request_id, '_wp_user_request_completed_timestamp', time() );
 		do_action( 'wp_privacy_personal_data_erased', $request_id ); // WordPress emails the person that it is done
