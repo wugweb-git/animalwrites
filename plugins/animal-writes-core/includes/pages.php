@@ -553,19 +553,19 @@ add_filter(
  */
 function aw_inline_dates( $html ) {
 	static $re = '/(?<![\w-])(?:(\d{1,2})(?:st|nd|rd|th)?\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?(?:\s+(\d{1,2})(?:st|nd|rd|th)?,)?\s+((?:19|20)\d{2})(?![\w-])/';
-	if ( ! preg_match( $re, wp_strip_all_tags( $html ) ) ) {
+	if ( ! preg_match( $re, (string) preg_replace( '/<[^>]+>/', ' ', $html ) ) ) { // a tag counts as a space ("2025<br>Animal")
 		return $html;
 	}
 	$parts = preg_split( '/(<[^>]+>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
-	$skip  = 0; // inside <time>, <script> or <style>
+	$skip  = 0; // inside <time>, <script>, <style> or a heading
 	foreach ( $parts as $k => $part ) {
 		if ( '' === $part ) {
 			continue;
 		}
 		if ( '<' === $part[0] ) {
-			if ( preg_match( '#^<(time|script|style)\b#i', $part ) ) {
+			if ( preg_match( '#^<(time|script|style|h[1-6])\b#i', $part ) ) {
 				++$skip;
-			} elseif ( preg_match( '#^</(time|script|style)>#i', $part ) ) {
+			} elseif ( preg_match( '#^</(time|script|style|h[1-6])>#i', $part ) ) {
 				$skip = max( 0, $skip - 1 );
 			}
 			continue;
@@ -596,3 +596,4 @@ add_filter(
 	10,
 	2
 );
+add_filter( 'the_content', fn( $c ) => ( is_admin() || is_feed() ) ? $c : aw_inline_dates( $c ), 20 ); // content shown outside the block filters (guide sections)
