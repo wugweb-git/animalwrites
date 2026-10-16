@@ -445,6 +445,14 @@ function aw_article_nodes( $id ) {
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) get_post_meta( $id, 'aw_source_date', true ) ) ) {
 			$node['legislationDate'] = (string) get_post_meta( $id, 'aw_source_date', true ); // the date of the text, as stored
 		}
+		$number = trim( (string) get_post_meta( $id, 'aw_legal_number', true ) );
+		$force  = (string) get_post_meta( $id, 'aw_legal_force', true );
+		if ( '' !== $number ) {
+			$node['legislationIdentifier'] = aw_seo_plain( $number );
+		}
+		if ( in_array( $force, array( 'InForce', 'NotInForce', 'PartiallyInForce' ), true ) ) {
+			$node['legislationLegalForce'] = 'https://schema.org/' . $force;
+		}
 		$node['encoding']           = $pdf;
 		$node['sourceOrganization'] = $issuer; // the body whose copy this is (it may not be the law-maker)
 		$node['isBasedOn']          = $src_url ? array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $issuer ) ) : null;

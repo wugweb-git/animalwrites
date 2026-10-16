@@ -83,6 +83,8 @@ function aw_meta_schema() {
 		// Resources.
 		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
 		'aw_requires_email'  => array( 'boolean', array( 'aw_legal' ), 'Gate download behind newsletter signup' ),
+		'aw_legal_number'    => array( 'string', array( 'aw_legal' ), 'Official number of the text (e.g. G.S.R. 864(E))' ),
+		'aw_legal_force'     => array( 'string', array( 'aw_legal' ), 'In force: InForce, NotInForce or PartiallyInForce' ),
 	);
 }
 
