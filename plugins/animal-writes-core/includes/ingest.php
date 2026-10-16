@@ -170,6 +170,9 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $legal_flag ) {
 		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
 	}
+	if ( $req->get_param( 'hold' ) ) { // the workers' topic rule asks for a person (e.g. final rules of a campaign's draft)
+		update_post_meta( $post_id, 'aw_hold', sanitize_text_field( (string) $req->get_param( 'hold' ) ) );
+	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
 	$image = esc_url_raw( (string) $req->get_param( 'image_url' ) );

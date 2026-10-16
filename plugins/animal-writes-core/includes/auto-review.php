@@ -55,6 +55,12 @@ function aw_review_reason( $id ) {
 	$host  = function_exists( 'aw_host' ) ? aw_host( $url ) : (string) wp_parse_url( $url, PHP_URL_HOST );
 	$words = str_word_count( wp_strip_all_tags( $post->post_excerpt ) );
 
+	// A topic rule in the workers asked for a person (sources.yaml topic_tags "hold"): held whatever else passes.
+	$hold = (string) get_post_meta( $id, 'aw_hold', true );
+	if ( '' !== $hold ) {
+		return 'flagged: ' . $hold;
+	}
+
 	// The owner can be offline for more than a day (12 Oct 2026): an item the AI check passed (animal welfare, India)
 	// goes live from a neutral publisher too, without the keyword test. Blocked publishers never do.
 	$ai = aw_ai_passed( $id );
