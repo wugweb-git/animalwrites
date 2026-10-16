@@ -46,6 +46,10 @@ add_action(
 
 /** The report form (S7.3): what is wrong, and an optional note. */
 function aw_report_form( $listing ) {
+	$ff = apply_filters( 'aw_form_html', '', 'report', array( 'listing' => $listing ) ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
+	if ( '' !== $ff ) {
+		return $ff;
+	}
 	$form = 'aw_report';
 	return aw_form_open( $form, array( 'class' => 'kit-form aw-report-form', 'id' => 'aw-form-aw_report', 'data-key' => (string) $listing->ID, 'data-source' => trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' ) ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
@@ -56,6 +60,41 @@ function aw_report_form( $listing ) {
 
 /** Back-compat: [aw_report_box] prints the report form of the current listing. */
 add_shortcode( 'aw_report_box', fn() => get_post() ? aw_report_form( get_post() ) : '' );
+
+/** A report's values from submitted data (already unslashed). */
+function aw_report_values( $in ) {
+	return array(
+		'reason'  => sanitize_key( (string) ( $in['reason'] ?? '' ) ),
+		'details' => sanitize_textarea_field( (string) ( $in['details'] ?? '' ) ),
+	);
+}
+
+/** Server rules for a report: field => message. */
+function aw_report_errors( $v ) {
+	$errors = aw_form_validate( array( 'reason' => array( 'required' ), 'details' => array( 'max:1000' ) ), $v, array( 'reason' => 'What is wrong?', 'details' => 'Details' ), array( 'reason' => array( 'required' => 'Choose what is wrong' ) ) );
+	if ( $v['reason'] && ! isset( aw_report_reasons()[ $v['reason'] ] ) ) {
+		$errors['reason'] = 'Choose what is wrong';
+	}
+	return $errors;
+}
+
+/**
+ * Save a checked report (Inbox > Reports, status New).
+ *
+ * @return array|false array{url, title, text}, or false when it could not be saved.
+ */
+function aw_report_save( $v, $listing, $source ) {
+	$id = wp_insert_post( array( 'post_type' => 'aw_report', 'post_status' => 'private', 'post_title' => $listing->post_title ), true );
+	if ( is_wp_error( $id ) ) {
+		return false;
+	}
+	update_post_meta( $id, 'aw_r_listing', $listing->ID );
+	update_post_meta( $id, 'aw_r_reason', $v['reason'] );
+	update_post_meta( $id, 'aw_r_details', $v['details'] );
+	update_post_meta( $id, 'aw_r_status', 'new' );
+	update_post_meta( $id, 'aw_r_source', $source ); // the page it came from (S5.8)
+	return array( 'url' => kits_thanks_url( 'report', array( 'listing' => (int) $listing->ID, 'from' => false ), 'Thanks — we\'ll check it.' ), 'title' => 'Thanks — we\'ll check it.', 'text' => '' );
+}
 
 /** Handle a report. */
 function aw_report_submit() {
@@ -68,28 +107,17 @@ function aw_report_submit() {
 	if ( ! $listing || 'aw_listing' !== $listing->post_type || 'publish' !== $listing->post_status ) {
 		aw_form_fail( $form, array(), array(), $back, 'report', 'This listing could not be found.' );
 	}
-	$v = array(
-		'reason'  => sanitize_key( wp_unslash( $_POST['reason'] ?? '' ) ),
-		'details' => sanitize_textarea_field( wp_unslash( $_POST['details'] ?? '' ) ),
-	);
-	$errors = aw_form_validate( array( 'reason' => array( 'required' ), 'details' => array( 'max:1000' ) ), $v, array( 'reason' => 'What is wrong?', 'details' => 'Details' ), array( 'reason' => array( 'required' => 'Choose what is wrong' ) ) );
-	if ( $v['reason'] && ! isset( aw_report_reasons()[ $v['reason'] ] ) ) {
-		$errors['reason'] = 'Choose what is wrong';
-	}
+	$v      = aw_report_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
+	$errors = aw_report_errors( $v );
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'report' );
 	}
-	$id = wp_insert_post( array( 'post_type' => 'aw_report', 'post_status' => 'private', 'post_title' => $listing->post_title ), true );
-	if ( is_wp_error( $id ) ) {
+	$res = aw_report_save( $v, $listing, kits_submitted_source() );
+	if ( ! $res ) {
 		aw_form_fail( $form, array(), $v, $back, 'report', aw_form_generic_error( $form ) );
 	}
-	update_post_meta( $id, 'aw_r_listing', $listing->ID );
-	update_post_meta( $id, 'aw_r_reason', $v['reason'] );
-	update_post_meta( $id, 'aw_r_details', $v['details'] );
-	update_post_meta( $id, 'aw_r_status', 'new' );
-	update_post_meta( $id, 'aw_r_source', kits_submitted_source() ); // the page it came from (S5.8)
 	aw_form_count( $rl );
-	aw_form_success( kits_thanks_url( 'report', array( 'listing' => $lid, 'from' => false ), 'Thanks — we\'ll check it.' ), 'Thanks — we\'ll check it.' );
+	aw_form_success( $res['url'], $res['title'] );
 }
 add_action( 'admin_post_nopriv_aw_report', 'aw_report_submit' );
 add_action( 'admin_post_aw_report', 'aw_report_submit' );

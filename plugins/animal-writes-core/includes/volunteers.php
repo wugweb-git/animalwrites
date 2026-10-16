@@ -58,6 +58,10 @@ function aw_volunteer_form( $source = '' ) {
 		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>'
 			. esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div>';
 	}
+	$ff = apply_filters( 'aw_form_html', '', 'volunteer', array( 'source' => $source ) ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
+	if ( '' !== $ff ) {
+		return $ff;
+	}
 	$form   = 'aw_volunteer';
 	$state  = aw_form_state( $form );
 	$picked = (array) ( $state['values']['roles'] ?? array() );
@@ -75,30 +79,33 @@ function aw_volunteer_form( $source = '' ) {
 	$html  .= kits_dict_field( $form, 'pincode' );
 	$html  .= aw_place_fields( $form );
 	$html  .= '</div>';
-	$html .= kits_dict_field( $form, 'consent', array( 'label' => 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.' ) );
+	$html .= kits_dict_field( $form, 'consent', array( 'label' => AW_VOL_CONSENT_LABEL ) );
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
 	return $html;
 }
 add_shortcode( 'aw_volunteer_form', fn() => aw_volunteer_form() );
 
-/**
- * Handle a submission.
- */
-function aw_volunteer_submit() {
-	$form = 'aw_volunteer';
-	$back = aw_form_back( '/volunteer/' );
-	$done = kits_thanks_url( 'volunteer' );
-	$rl   = aw_form_guard( $form, $back, 'volunteer', $done );
-	$v    = array(
-		'name'     => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
-		'email'    => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
-		'phone'    => trim( sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ) ),
-		'pincode'  => preg_replace( '/\D/', '', (string) wp_unslash( $_POST['pincode'] ?? '' ) ),
-		'state'    => sanitize_title( wp_unslash( $_POST['state'] ?? '' ) ),
-		'district' => sanitize_title( wp_unslash( $_POST['district'] ?? '' ) ),
-		'consent'  => empty( $_POST['consent'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
-		'roles'    => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['roles'] ?? array() ) ) ) ),
+/** The consent line on the volunteer form (owner, 16 Oct 2026: it now covers updates too) and its version. */
+const AW_VOL_CONSENT_LABEL   = 'I agree that Animal Writes may keep these details and contact me about volunteering, and receive Animal Writes updates. I can ask for them to be deleted at any time.';
+const AW_VOL_CONSENT_VERSION = 'v2-form-consent-2';
+
+/** A sign-up's values from submitted data (already unslashed): the site's form and Fluent Forms use this. */
+function aw_volunteer_values( $in ) {
+	$roles = $in['roles'] ?? array();
+	return array(
+		'name'     => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
+		'email'    => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
+		'phone'    => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
+		'pincode'  => preg_replace( '/\D/', '', (string) ( $in['pincode'] ?? '' ) ),
+		'state'    => sanitize_title( (string) ( $in['state'] ?? '' ) ),
+		'district' => sanitize_title( (string) ( $in['district'] ?? '' ) ),
+		'consent'  => empty( $in['consent'] ) ? '' : '1',
+		'roles'    => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) $roles ) ) ),
 	);
+}
+
+/** Server rules for a sign-up: field => message. */
+function aw_volunteer_errors( $v ) {
 	list( $rules, $msgs ) = kits_dict_rules( array( 'name' => 'name', 'email' => 'email', 'phone' => 'phone', 'pincode' => 'pincode', 'state' => 'state', 'consent' => 'consent' ), array( 'name', 'email', 'state', 'consent' ) );
 	$msgs['consent']['required'] = 'Tick the box to agree';
 	$errors = aw_form_validate( $rules, $v, array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone', 'pincode' => 'PIN code', 'state' => 'State', 'consent' => 'Agreement' ), $msgs );
@@ -114,10 +121,18 @@ function aw_volunteer_submit() {
 	if ( ! $v['roles'] ) {
 		$errors['roles'] = 'Choose how you\'d like to help';
 	}
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
-	}
-	// Stored in the volunteers table (one row per email; signing up again updates it).
+	return $errors;
+}
+
+/**
+ * Save a checked sign-up to the volunteers table (one row per email; signing up again updates it), email the team and
+ * add the volunteer to the newsletter (no email from that).
+ *
+ * @return array array{url, title, text} for the thank-you page.
+ */
+function aw_volunteer_save( $v, $source ) {
+	$term  = aw_place_by_slug( $v['state'] );
+	$dist  = $v['district'] ? aw_place_by_slug( $v['district'] ) : null;
 	$saved = aw_vol_upsert(
 		array(
 			'name'                 => $v['name'],
@@ -127,22 +142,39 @@ function aw_volunteer_submit() {
 			'state_slug'           => $term->slug,
 			'district_slug'        => $dist ? $dist->slug : '',
 			'city_text'            => $dist ? $dist->name : '',
-			'page_source'          => kits_submitted_source(),
+			'page_source'          => $source,
 			'role'                 => implode( ', ', $v['roles'] ),
 			'source'               => 'v2_form',
 			'consent_scope'        => 'volunteering',
-			'consent_text_version' => 'v2-form-consent-1',
+			'consent_text_version' => AW_VOL_CONSENT_VERSION,
 		)
 	);
-	aw_form_count( $rl );
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
-	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . kits_submitted_source() . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
+	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
 	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers are newsletter subscribers (owner, 16 Oct 2026); no email from this
-		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', 'owner-2026-10-16-volunteers', aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
+		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
 	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
-	aw_form_success( kits_thanks_url( 'volunteer', array(), $title, $text ), $title, $text );
+	return array( 'url' => kits_thanks_url( 'volunteer', array(), $title, $text ), 'title' => $title, 'text' => $text );
+}
+
+/**
+ * Handle a submission.
+ */
+function aw_volunteer_submit() {
+	$form   = 'aw_volunteer';
+	$back   = aw_form_back( '/volunteer/' );
+	$done   = kits_thanks_url( 'volunteer' );
+	$rl     = aw_form_guard( $form, $back, 'volunteer', $done );
+	$v      = aw_volunteer_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
+	$errors = aw_volunteer_errors( $v );
+	if ( $errors ) {
+		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
+	}
+	$res = aw_volunteer_save( $v, kits_submitted_source() );
+	aw_form_count( $rl );
+	aw_form_success( $res['url'], $res['title'], $res['text'] );
 }
 add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
 add_action( 'admin_post_aw_volunteer', 'aw_volunteer_submit' );

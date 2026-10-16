@@ -349,14 +349,28 @@
 			if (wrong.length) {
 				wrong.forEach(function (el) {
 					el.setAttribute('aria-invalid', 'true');
+					var text = el.validity.valueMissing ? (el.dataset.msgRequired || 'Enter this') : (el.dataset.msgEmail || el.dataset.msgPattern || el.validationMessage);
 					var m = document.getElementById(el.id + '-error');
-					if (m) m.textContent = el.validity.valueMissing ? (el.dataset.msgRequired || 'Enter this') : (el.dataset.msgEmail || el.dataset.msgPattern || el.validationMessage);
+					var ff = !m && el.closest('.ff-el-input--content'); // a form plugin's field (Fluent Forms): its own error line
+					if (ff) {
+						m = ff.querySelector('div.error');
+						if (!m) { m = document.createElement('div'); m.className = 'error text-danger'; m.setAttribute('role', 'alert'); ff.appendChild(m); }
+						el.closest('.ff-el-group').classList.add('ff-el-is-error');
+					}
+					if (m) m.textContent = text;
 				});
 				wrong[0].focus();
 				box.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'step ' + (cur + 1), fields: wrong.length } })); // analytics
 				return;
 			}
 			go(cur + 1);
+		});
+		// A form plugin (Fluent Forms) that finds errors on send: show the first step that has one.
+		if (window.jQuery) jQuery(box.closest('form')).on('fluentform_validation_failed fluentform_submission_failed', function () {
+			setTimeout(function () {
+				var i = steps.findIndex(function (s) { return s.querySelector('.ff-el-is-error, [aria-invalid=true]'); });
+				if (i > -1 && i !== cur) go(i);
+			}, 0);
 		});
 	});
 })();

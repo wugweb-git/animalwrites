@@ -23,6 +23,10 @@ function aw_remove_data_form() {
 		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Check your inbox</p><p>' . esc_html( sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $to ) ) . '</p></div>';
 	}
+	$ff = apply_filters( 'aw_form_html', '', 'remove_data', array() ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
+	if ( '' !== $ff ) {
+		return $ff;
+	}
 	$form  = 'aw_remove_data';
 	$html  = aw_form_open( $form, array( 'class' => 'kit-form aw-remove-data-form' ) );
 	$html .= kits_dict_field( $form, 'email' );
@@ -30,6 +34,21 @@ function aw_remove_data_form() {
 	return $html;
 }
 add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
+
+/**
+ * Start a removal for an email: WordPress's own request and its confirmation email. The same answer whether or not a
+ * request was already open, so the form says nothing about who is on file.
+ *
+ * @return array array{url, title, text} for the thank-you page.
+ */
+function aw_remove_data_save( $email ) {
+	$id = wp_create_user_request( $email, 'remove_personal_data' );
+	if ( ! is_wp_error( $id ) ) {
+		wp_send_user_request( $id ); // WordPress's confirmation email
+	}
+	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $email );
+	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'title' => 'Check your inbox', 'text' => $text );
+}
 
 function aw_remove_data_submit() {
 	$form = 'aw_remove_data';
@@ -40,14 +59,9 @@ function aw_remove_data_submit() {
 	if ( $errors ) {
 		aw_form_fail( $form, $errors, $v, $back, 'remove-data' );
 	}
-	$id = wp_create_user_request( $v['email'], 'remove_personal_data' );
-	if ( ! is_wp_error( $id ) ) {
-		wp_send_user_request( $id ); // WordPress's confirmation email
-	}
-	// The same answer whether or not a request was already open, so the form says nothing about who is on file.
+	$res = aw_remove_data_save( $v['email'] );
 	aw_form_count( $rl );
-	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $v['email'] );
-	aw_form_success( kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'Check your inbox', $text );
+	aw_form_success( $res['url'], $res['title'], $res['text'] );
 }
 add_action( 'admin_post_nopriv_aw_remove_data', 'aw_remove_data_submit' );
 add_action( 'admin_post_aw_remove_data', 'aw_remove_data_submit' );

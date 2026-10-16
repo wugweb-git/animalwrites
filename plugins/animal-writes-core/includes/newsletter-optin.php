@@ -23,11 +23,12 @@ function aw_nl_optin_box( $form ) {
 
 /** After a form succeeds: only when the box was ticked, add to the newsletter (site list active, FluentCRM subscribed;
  *  owner, 16 Oct 2026: no double opt-in; the form's own email is the only one sent). */
-function aw_nl_optin( $email, $name, $source ) {
-	if ( empty( $_POST['nl_optin'] ) || ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+function aw_nl_optin( $email, $name, $source, $ticked = null, $consent = AW_NL_CONSENT ) {
+	$ticked = null === $ticked ? ! empty( $_POST['nl_optin'] ) : (bool) $ticked; // phpcs:ignore WordPress.Security.NonceVerification -- the site's own forms post it; Fluent Forms passes it
+	if ( ! $ticked || ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) {
 		return;
 	}
-	aw_newsletter_join( $email, $name, 'site:' . $source, AW_NL_CONSENT, array(), array( 'newsletter' ) ); // site list and FluentCRM
+	aw_newsletter_join( $email, $name, 'site:' . $source, $consent, array(), array( 'newsletter' ) ); // site list and FluentCRM
 }
 
 /** Everyone we hold an email for who is not on the newsletter (active or pending). */

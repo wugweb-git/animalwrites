@@ -3,7 +3,7 @@
 	'use strict';
 	/* Directory search: District stays off until a State is chosen, then lists that state's districts; it resets
 	   when the State changes. Without JavaScript the server-rendered list works as is. */
-	document.querySelectorAll('.aw-dir-search, form.kit-form').forEach(function (f) {
+	document.querySelectorAll('.aw-dir-search, form.kit-form, .aw-form-ff form').forEach(function (f) {
 		var st = f.querySelector('[name=state]'), di = f.querySelector('[name=district]');
 		if (!st || !di) return;
 		var first = di.options[0];
@@ -32,7 +32,8 @@
 			var v = pin.value.replace(/\D/g, '');
 			if (v.length !== 6 || v === last) return;
 			last = v;
-			fetch(f.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') + '?action=aw_pin&pin=' + v, { credentials: 'same-origin' })
+			var ajax = f.getAttribute('action') ? f.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') : '/wp-admin/admin-ajax.php'; // Fluent Forms forms have no action
+			fetch(ajax + '?action=aw_pin&pin=' + v, { credentials: 'same-origin' })
 				.then(function (r) { return r.json(); })
 				.then(function (r) {
 					if (!r.success) { if (msg) msg.textContent = r.data; return; }
@@ -44,11 +45,38 @@
 		});
 	});
 
+	/* Logo (claim, Fluent Forms): a picked file is checked, then sent at once to the private folder; the form carries
+	   its token. A wrong file shows the same message as the site's own form. */
+	document.querySelectorAll('input[type=file][data-aw-upload]').forEach(function (inp) {
+		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[name=logo_token]'), msg = document.getElementById(inp.id + '-error');
+		inp.addEventListener('change', function () {
+			var file = inp.files && inp.files[0];
+			if (tok) tok.value = '';
+			if (msg) msg.textContent = '';
+			if (!file) return;
+			if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > +(inp.dataset.maxBytes || Infinity)) { if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; return; }
+			var fd = new FormData(); fd.append('logo', file);
+			inp.setAttribute('aria-busy', 'true');
+			fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' })
+				.then(function (r) { return r.json(); })
+				.then(function (r) { inp.removeAttribute('aria-busy'); if (r.success) { tok.value = r.data.token; } else { if (msg) msg.textContent = r.data; inp.value = ''; } })
+				.catch(function () { inp.removeAttribute('aria-busy'); if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; });
+		});
+	});
+
+	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
+	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
+		var err = d && d.response && d.response.responseJSON && d.response.responseJSON.errors, f = d && d.form && d.form[0];
+		var w = f && f.querySelector('altcha-widget');
+		if (w && err && err.altcha && typeof w.reset === 'function') w.reset();
+	});
+
 	/* Contact: the message placeholder follows the chosen reason. */
 	document.querySelectorAll('.aw-contact-form').forEach(function (f) {
 		var sel = f.querySelector('[name=about]'), msg = f.querySelector('[name=message]');
 		if (!sel || !msg) return;
-		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || ''; });
+		var map = {}; try { map = JSON.parse(f.dataset.placeholders || '{}'); } catch (x) {} // the Fluent Forms version keeps them on its wrapper
+		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || map[sel.value] || ''; });
 		// The rows on the page (List your organisation, Get featured …) choose their reason here and move to the form.
 		document.querySelectorAll('a.aw-contact-pick[data-about]').forEach(function (a) {
 			a.addEventListener('click', function (e) {

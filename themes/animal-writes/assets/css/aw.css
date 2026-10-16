@@ -870,6 +870,40 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-4) var(--kit-space-5); border: 0; border-left: 4px solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
+/* Contact, Volunteer, Claim, Report and Remove my data in Fluent Forms (16 Oct 2026): the site's form look (kit-field),
+ * in tokens. Fluent Forms' markup: .ff-el-group > .ff-el-input--label + .ff-el-input--content; errors in div.error. */
+.aw-form-ff .frm-fluent-form fieldset:not(.kit-step):not(.kit-check-group) { border: 0; padding: 0; margin: 0; min-width: 0; }
+.aw-form-ff .ff-el-group { margin: 0 0 var(--s-4); }
+.aw-form-ff .ff-el-input--label { margin: 0 0 var(--s-2); }
+.aw-form-ff .ff-el-input--label label { display: block; margin: 0; font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
+.aw-form-ff .ff-el-input--label.ff-el-is-required label::after, .aw-form-ff .ff-el-input--label label::after { content: none; }
+.aw-form-ff .ff-el-help-message { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-caption); font-style: normal; color: var(--neutral-5); }
+.aw-form-ff .ff-el-is-error .ff-el-form-control, .aw-form-ff .ff-el-form-control[aria-invalid=true] { border-color: var(--color-peach); }
+.aw-form-ff .ff-el-input--content .error, .aw-form-ff .kit-field-message:not(:empty) { display: block; min-height: 0; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); }
+.aw-form-ff .ff-el-form-check { margin: 0; }
+.aw-form-ff .ff-el-form-check-label.kit-checkbox { margin: 0; }
+.aw-form-ff .ff-el-form-check-label.kit-checkbox > span { flex: 1; }
+.aw-form-ff .kit-check-group.ff-el-group > legend { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-strong); }
+.aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
+.aw-form-ff .ff_submit_btn_wrapper { margin: 0; }
+.aw-form-ff .kit-step-nav { align-items: center; }
+.aw-form-ff .kit-step-nav .ff-el-group { margin: 0; }
+.aw-form-ff .ff-errors-in-stack { margin-top: var(--s-3); color: var(--kit-color-danger); }
+.aw-form-ff .ff-errors-in-stack .error { margin: 0 0 var(--s-1); }
+.aw-form-ff input[type=file] { display: block; max-width: 100%; font: inherit; }
+.aw-form-ff input[type=file][aria-busy=true] { opacity: var(--opacity-disabled); }
+/* Volunteer: the ways to help as cards (as .aw-vol-roles), then the details in two columns from md */
+.aw-form-ff .aw-vol-roles .ff-el-input--label label { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: inherit; }
+.aw-form-ff .aw-vol-roles .ff-el-input--label { margin-bottom: var(--kit-space-1); }
+.aw-form-ff .aw-vol-roles .ff-el-input--content { display: grid; gap: var(--kit-space-3); }
+.aw-form-ff .aw-vol-roles.ff-el-is-error .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
+.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: 100%; justify-content: center; min-height: 52px; }
+@media (min-width: 768px) {
+	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); }
+	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > * { grid-column: 1 / -1; }
+	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-half { grid-column: auto; }
+	.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: auto; }
+}
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
 #claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }

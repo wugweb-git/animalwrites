@@ -97,6 +97,10 @@ function aw_contact_form() {
 			. ( $to ? '<p>' . esc_html( sprintf( 'We\'ll reply to %s.', $to ) ) . '</p>' : '' )
 			. '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink() ) . '#write">Send another</a></p></div>';
 	}
+	$ff = apply_filters( 'aw_form_html', '', 'contact', array() ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
+	if ( '' !== $ff ) {
+		return $ff;
+	}
 	$form  = 'aw_contact';
 	$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$about = 'partner' === $about ? 'partnership' : $about; // older links
@@ -122,35 +126,43 @@ function aw_contact_form() {
 }
 add_shortcode( 'aw_contact_form', 'aw_contact_form' );
 
-function aw_contact_submit() {
-	$form = 'aw_contact';
-	$back = aw_form_back( '/contact/' );
-	$done = kits_thanks_url( 'contact' );
-	$rl   = aw_form_guard( $form, $back, 'write', $done );
-	$v    = array(
-		'about'   => sanitize_key( wp_unslash( $_POST['about'] ?? '' ) ),
-		'name'    => trim( sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ) ),
-		'email'   => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ),
-		'org'     => trim( sanitize_text_field( wp_unslash( $_POST['org'] ?? '' ) ) ),
-		'message' => sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ),
+/** A contact message's values from submitted data (already unslashed): the site's form and Fluent Forms use this. */
+function aw_contact_values( $in ) {
+	return array(
+		'about'   => sanitize_key( (string) ( $in['about'] ?? '' ) ),
+		'name'    => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
+		'email'   => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
+		'org'     => trim( sanitize_text_field( (string) ( $in['org'] ?? '' ) ) ),
+		'message' => sanitize_textarea_field( (string) ( $in['message'] ?? '' ) ),
 	);
+}
+
+/** Server rules for a contact message: field => message. */
+function aw_contact_errors( $v ) {
 	list( $rules, $msgs ) = kits_dict_rules( array( 'about' => 'reason', 'name' => 'name', 'email' => 'email', 'org' => 'organisation', 'message' => 'message' ), array( 'about', 'name', 'email', 'message' ) );
 	$errors               = aw_form_validate( $rules, $v, array( 'about' => 'What\'s this about?', 'name' => 'Your name', 'email' => 'Email', 'org' => 'Organisation', 'message' => 'Message' ), $msgs );
 	if ( $v['about'] && ! isset( AW_CONTACT_ABOUT[ $v['about'] ] ) ) {
 		$errors['about'] = 'Choose what this is about';
 	}
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'write' );
-	}
+	return $errors;
+}
+
+/**
+ * Save a checked contact message (Inbox > Messages), start a data removal when asked, email the team, and add the
+ * sender to the newsletter when the box is ticked.
+ *
+ * @return array|false array{url, title, text} for the thank-you page, or false when it could not be saved.
+ */
+function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 	$label = AW_CONTACT_ABOUT[ $v['about'] ];
 	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'], 'post_content' => $v['message'] ) );
 	if ( is_wp_error( $id ) || ! $id ) {
-		aw_form_fail( $form, array(), $v, $back, 'write', aw_form_generic_error( $form ) );
+		return false;
 	}
 	foreach ( array( 'about', 'name', 'email', 'org' ) as $k ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
-	update_post_meta( $id, 'aw_m_source', kits_submitted_source() ); // the page it was sent from (S5.8)
+	update_post_meta( $id, 'aw_m_source', $source ); // the page it was sent from (S5.8)
 	if ( 'remove-data' === $v['about'] ) {
 		// DPDP: tagged for the Inbox, and WordPress's own confirmation email is sent. Nothing is deleted until the person
 		// opens that link (privacy-requests.php runs the erasers then, and the request record is the log).
@@ -161,13 +173,30 @@ function aw_contact_submit() {
 			update_post_meta( $id, 'aw_m_request', (int) $req );
 		}
 	}
-	aw_form_count( $rl );
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
-	if ( function_exists( 'aw_nl_optin' ) ) {
-		aw_nl_optin( $v['email'], $v['name'], 'contact' );
+	if ( function_exists( 'aw_nl_optin' ) && 'remove-data' !== $v['about'] ) { // a removal request never subscribes anyone
+		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'contact', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $nl_consent );
 	}
 	$text = sprintf( 'We\'ll reply to %s.', $v['email'] );
-	aw_form_success( kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'Message sent.', $text, array( 'again' => 'Send another' ) );
+	return array( 'url' => kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text );
+}
+
+function aw_contact_submit() {
+	$form = 'aw_contact';
+	$back = aw_form_back( '/contact/' );
+	$done = kits_thanks_url( 'contact' );
+	$rl   = aw_form_guard( $form, $back, 'write', $done );
+	$v    = aw_contact_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
+	$errors = aw_contact_errors( $v );
+	if ( $errors ) {
+		aw_form_fail( $form, $errors, $v, $back, 'write' );
+	}
+	$res = aw_contact_save( $v, kits_submitted_source(), ! empty( $_POST['nl_optin'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( ! $res ) {
+		aw_form_fail( $form, array(), $v, $back, 'write', aw_form_generic_error( $form ) );
+	}
+	aw_form_count( $rl );
+	aw_form_success( $res['url'], $res['title'], $res['text'], array( 'again' => 'Send another' ) );
 }
 add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
