@@ -2027,6 +2027,34 @@
     "schema": "none"
    },
    "block": "animal-writes/section-head"
+  },
+  {
+   "name": "Guide call to action (campaign)",
+   "type": "pattern",
+   "status": "live",
+   "classes": [
+    "aw-guide-cta"
+   ],
+   "states": [
+    "line and button to the campaign's send form"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "group (Kits Card) + button",
+    "aria": "none",
+    "keyboard": "button link",
+    "focus": "button",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "link text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "campaign",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "block": "animal-writes/guide-cta"
   }
  ],
  "nav_status": {
