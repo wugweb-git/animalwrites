@@ -63,6 +63,7 @@ require_once AW_CORE_DIR . 'includes/media.php';
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
 require_once AW_CORE_DIR . 'includes/campaigns.php';
+require_once AW_CORE_DIR . 'includes/campaign-tools.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';

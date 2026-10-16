@@ -127,6 +127,13 @@
 			"postTypes": [
 				"page"
 			]
+		},
+		{
+			"name": "campaign-page",
+			"title": "Campaign page (full width; the page's own H1)",
+			"postTypes": [
+				"aw_campaign"
+			]
 		}
 	]
 }

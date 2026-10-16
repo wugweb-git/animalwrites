@@ -1884,6 +1884,56 @@
     "keyboard": "none",
     "focus": "none"
    }
+  },
+  {
+   "name": "Campaign tools",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-rule-chip",
+    "aw-letter",
+    "aw-sticky-cta",
+    "aw-camp-band",
+    "aw-camp-count",
+    "aw-camp-hero",
+    "aw-camp-paper",
+    "aw-camp-dark",
+    "aw-camp-severe",
+    "aw-camp-open",
+    "aw-camp-closed",
+    "aw-letter-grounds",
+    "aw-clause",
+    "aw-doc-status"
+   ],
+   "states": [
+    "open",
+    "closed (after the last day)",
+    "letter: ready, error (no name or city), sent (asked to confirm), confirmed",
+    "chip: closed, dialog open"
+   ],
+   "tokens": [
+    "--aw-camp-brand",
+    "--aw-camp-brand-deep",
+    "--aw-camp-dark",
+    "--aw-camp-paper",
+    "--aw-camp-meta",
+    "--aw-camp-on-brand"
+   ],
+   "a11y": {
+    "element": "<button> chips opening <dialog>; <form> with labelled fields and a fieldset of checkboxes",
+    "aria": "aria-haspopup=dialog, aria-controls; preview aria-live=polite; error role=alert; copy status role=status",
+    "keyboard": "Tab, Enter/Space; Esc closes the dialog",
+    "focus": "3px ring in --kit-color-focus (:focus-visible)",
+    "target": "44px minimum on chips and buttons",
+    "motion": "countdown settles once; none with prefers-reduced-motion",
+    "sr": "visible text; letter preview read as it changes"
+   },
+   "seo": {
+    "heading": "page H1 + H2 sections; band H2",
+    "link": "descriptive",
+    "alt": "n/a",
+    "schema": "campaign CreativeWork about the Library Legislation; FAQ from the Rank Math FAQ block"
+   }
   }
  ],
  "nav_status": {

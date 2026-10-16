@@ -553,6 +553,11 @@ function aw_campaign_schema( $id ) {
 		'image'       => $image ? array( $image ) : null,
 		'about'       => aw_schema_categories( $id ),
 	);
+	// A campaign about a law (aw_campaign_doc, campaign-tools.php): it is about that Library item's Legislation node.
+	$doc = (int) get_post_meta( $id, 'aw_campaign_doc', true );
+	if ( $doc && 'publish' === get_post_status( $doc ) ) {
+		$common['about'] = array_merge( array( array( '@id' => get_permalink( $doc ) . '#legislation' ) ), (array) $common['about'] );
+	}
 	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
 		return array_filter(
 			array_merge(
