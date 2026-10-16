@@ -35,6 +35,7 @@ function aw_hub_blocks() {
 		'read-meta'     => array( 'Updated and reading time', 'aw_block_read_meta', array() ),
 		'place'         => array( 'Place', 'aw_block_place', array() ),
 		'deadline'      => array( 'Checked and deadline', 'aw_block_deadline', array() ),
+		'opp-line'      => array( 'Opportunity line (organisation, place, apply by)', 'aw_block_opp_line', array() ),
 		'opp-actions'   => array( 'Opportunity buttons', 'aw_block_opp_actions', array() ),
 		'org-mark'      => array( 'Organisation logo', 'aw_block_org_mark', array() ),
 		'badges'        => array( 'Badges and labels', 'aw_block_badges', array() ),
@@ -345,6 +346,24 @@ function aw_block_place( $a, $id ) {
 function aw_block_deadline( $a, $id ) {
 	$dl = (string) get_post_meta( $id, 'aw_deadline', true );
 	return '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . ( $dl ? ' · Apply by ' . aw_date( $dl ) . '' : '' ) . '</p>';
+}
+
+/** Compact line for title lists (home "Opportunities near you"): organisation · place · Apply by {date}. Empty parts are left out. */
+function aw_block_opp_line( $a, $id ) {
+	$org = (string) get_post_meta( $id, 'aw_org_name', true );
+	if ( '' === $org ) {
+		$l   = (int) get_post_meta( $id, 'aw_organisation', true );
+		$org = $l && 'publish' === get_post_status( $l ) ? get_the_title( $l ) : '';
+	}
+	$dl    = (string) get_post_meta( $id, 'aw_deadline', true );
+	$parts = array_filter(
+		array(
+			'' !== $org ? '<span class="aw-opp-line-org">' . esc_html( $org ) . '</span>' : '',
+			aw_block_place( $a, $id ),
+			$dl ? '<span class="aw-opp-line-by">Apply by ' . aw_date( $dl ) . '</span>' : '',
+		)
+	);
+	return $parts ? '<p class="aw-opp-line">' . implode( '', $parts ) . '</p>' : '';
 }
 
 function aw_block_opp_actions( $a, $id ) {
