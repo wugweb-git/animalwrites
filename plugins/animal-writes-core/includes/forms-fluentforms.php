@@ -725,10 +725,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::error( 'Use one of: ' . implode( ', ', array_keys( AW_FF_FORMS ) ) . ' (Fluent Forms must be active).' );
 			}
 			$ids  = (array) get_option( AW_FF_OPTION, array() );
-			$have = (int) ( $ids[ $key ] ?? 0 );
+			$off  = (array) get_option( AW_FF_OPTION . '_off', array() ); // switched off earlier: the same form comes back
+			$have = (int) ( $ids[ $key ] ?? ( $off[ $key ] ?? 0 ) );
+			unset( $off[ $key ] );
+			update_option( AW_FF_OPTION . '_off', $off, false );
 			$have = $have && $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_forms WHERE id = %d", $have ) ) ? $have : 0; // phpcs:ignore
 			if ( $have && empty( $assoc['remake'] ) ) {
-				WP_CLI::success( "Already set up: {$have}" );
+				$ids[ $key ] = $have;
+				update_option( AW_FF_OPTION, $ids, false );
+				WP_CLI::success( "Set up: {$have}" );
 				return;
 			}
 			$id = aw_ff_make( $key, $have );
@@ -744,9 +749,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw ff-off',
 		function ( $args ) {
+			$key = (string) ( $args[0] ?? '' );
 			$ids = (array) get_option( AW_FF_OPTION, array() );
-			unset( $ids[ (string) ( $args[0] ?? '' ) ] );
+			$off = (array) get_option( AW_FF_OPTION . '_off', array() );
+			if ( isset( $ids[ $key ] ) ) {
+				$off[ $key ] = (int) $ids[ $key ];
+				unset( $ids[ $key ] );
+			}
 			update_option( AW_FF_OPTION, $ids, false );
+			update_option( AW_FF_OPTION . '_off', $off, false );
 			WP_CLI::success( 'The site\'s own form shows again.' );
 		}
 	);
