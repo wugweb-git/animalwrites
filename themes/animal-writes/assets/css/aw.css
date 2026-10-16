@@ -279,6 +279,8 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-numbers strong { display: block; font-size: var(--kit-type-stat); font-weight: var(--kit-weight-bold); letter-spacing: -0.04em; line-height: 1; color: var(--kit-color-accent); }
 .aw-ed-numbers span { display: block; margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--neutral-0) 80%, transparent); }
 .aw-ed-timeline { list-style: none; margin: 0 0 var(--kit-space-7); padding: 0; display: grid; gap: var(--kit-space-4); }
+/* 1.0 timeline (owner, 16 Oct 2026): no sideways row, so no step is cut at the edge: a list on phones, 2 x 2 on tablets, one row of 4 at lg. */
+@media (min-width: 768px) and (max-width: 1199px) { .aw-ed-timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-6) var(--kit-space-5); } }
 @media (min-width: 1200px) { .aw-ed-timeline { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; } }
 .aw-ed-timeline li { position: relative; max-width: none; padding: var(--kit-space-5) var(--kit-space-4) 0 0; border-top: 1px solid color-mix(in srgb, var(--neutral-0) 25%, transparent); }
 .aw-ed-timeline li::before { content: ""; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--kit-color-accent); }
@@ -1072,9 +1074,6 @@ body { background: var(--kit-color-canvas); }
 	.aw-ed-mosaic img { flex: 0 0 auto; width: auto !important; height: 100% !important; aspect-ratio: auto; }
 	.aw-ed-mosaic .m1 { aspect-ratio: 16 / 9; }
 	.aw-ed-mosaic :is(.m2, .m3, .m4, .m5) { aspect-ratio: 3 / 4; }
-	.aw-ed-timeline { display: flex !important; overflow-x: auto; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) 0; scrollbar-width: none; }
-	.aw-ed-timeline::-webkit-scrollbar { display: none; }
-	.aw-ed-timeline li { flex: 0 0 min(70%, 16rem); }
 	.aw-ed-numbers { gap: var(--kit-space-4); margin-bottom: var(--kit-space-6); }
 	.kit-ed-story-head p { margin-bottom: var(--kit-space-5); }
 }
@@ -1323,6 +1322,6 @@ body { background: var(--kit-color-canvas); }
 .kit-section-visual img.aw-tile-logo { object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-3); } /* a listing logo in a head band's pictures stays whole */
 
 /* Sideways rows on phones snap to an item, and the first and last items rest at the gutter (1.0 photos and timeline). */
-@media (max-width: 1199px) { .aw-ed-mosaic, .aw-ed-timeline { scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); } .aw-ed-mosaic > *, .aw-ed-timeline > li { scroll-snap-align: start; } }
+@media (max-width: 1199px) { .aw-ed-mosaic { scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); } .aw-ed-mosaic > * { scroll-snap-align: start; } }
 /* A date never breaks inside itself ("15 / Oct 2026"). */
 .aw-date { white-space: nowrap; }
