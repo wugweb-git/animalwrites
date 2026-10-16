@@ -373,6 +373,7 @@ html { overflow-x: clip; }
 
 
 /* 5. Site chrome ------------------------------------------------------------- */
+.kit-announce { padding: calc(var(--kit-space-1) * 1.5) var(--kit-space-4); } /* 6px / 16px from the spacing tokens */
 .kit-announce a { color: inherit; font-weight: var(--kit-weight-strong); }
 .kit-site-header { position: relative; z-index: var(--kit-z-header); }
 .kit-wordmark { display: inline-flex; line-height: 0; border-radius: 4px; }
