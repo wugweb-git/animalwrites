@@ -638,13 +638,13 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 /* 03 What's happening: one lead + three secondary */
 .kit-ed-news-grid { display: grid; gap: var(--kit-space-6); }
 @media (min-width: 1200px) { .kit-ed-news-grid { grid-template-columns: 1.6fr 1fr; gap: var(--kit-space-7); } }
-.kit-ed-lead .wp-block-post-featured-image { border-radius: var(--kit-radius-media); margin: 0 0 var(--kit-space-4); aspect-ratio: 3/2; }
+.kit-ed-lead .wp-block-post-featured-image { border-radius: var(--kit-radius-media) !important; margin: 0 0 var(--kit-space-4) !important; aspect-ratio: 3/2; }
 .kit-ed-lead .wp-block-post-title { font-size: var(--kit-type-h3) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading) !important; margin: var(--kit-space-3) 0 !important; }
 .kit-ed-lead .wp-block-post-excerpt { font-size: var(--kit-type-lead) !important; }
 .kit-ed-lead .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 4 !important; }
 .kit-ed-list .wp-block-post-template > li { display: grid !important; grid-template-columns: 1fr 120px; grid-template-areas: "terms img" "title img" "date img"; column-gap: var(--kit-space-4); align-content: start; padding: var(--kit-space-4) 0 !important; border-top: 1px solid var(--kit-color-ink) !important; }
 .kit-ed-list .wp-block-post-template > li:first-child { border-top: 0 !important; padding-top: 0 !important; }
-.kit-ed-list .wp-block-post-featured-image { grid-area: img; margin: 0; border-radius: var(--kit-radius-media); aspect-ratio: 4/3; }
+.kit-ed-list .wp-block-post-featured-image { grid-area: img; margin: 0 !important; border-radius: var(--kit-radius-media) !important; aspect-ratio: 4/3; }
 .kit-ed-list .wp-block-post-terms { grid-area: terms; }
 .kit-ed-list .wp-block-post-title { grid-area: title; font-size: var(--kit-type-h4) !important; line-height: 1.3 !important; margin: var(--kit-space-2) 0 !important; }
 .kit-ed-list .wp-block-post-date { grid-area: date; padding-right: 0 !important; min-height: 0 !important; }

@@ -1241,7 +1241,7 @@ body { background: var(--kit-color-canvas); }
 .kit-case { grid-template-columns: 9rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; column-gap: var(--kit-space-4); row-gap: var(--kit-space-2); padding: var(--kit-space-5) 0 !important; }
 .kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; }
 .kit-case > .aw-case-date:not(.aw-case-icon) { display: contents; }
-.kit-case .aw-case-cover { grid-area: media; width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
+.kit-case .aw-case-cover { grid-area: media; width: 100% !important; border-radius: var(--radius-sm); border: 1px solid var(--kit-color-line); background: var(--kit-color-raised); }
 .kit-case .aw-case-cover--photo { object-position: center; }
 .kit-case > .aw-case-icon { grid-area: media; }
 .kit-case > .aw-case-body { grid-area: body; min-width: 0; }
