@@ -764,7 +764,7 @@ body { background: var(--kit-color-canvas); }
 /* Contact row with missing details: the greyed buttons, then "Not available yet: Call, Email" and Suggest an update */
 .aw-profile-actions:has(+ .aw-profile-actions-na) { margin-block-end: var(--kit-space-2); }
 .aw-profile-actions-na { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-2); margin: 0 0 var(--kit-space-5); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
-.aw-profile-actions-na a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
+.aw-profile-actions-na a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Directory search: on phones the name field and a "Filters" button (state, district, type fold away); wider, all in one row */
 .aw-dir-more > summary { list-style: none; cursor: pointer; }
@@ -822,9 +822,9 @@ body { background: var(--kit-color-canvas); }
 .aw-org-phones { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-1); }
 .aw-org-phones li { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-2); row-gap: var(--kit-space-1); }
 .aw-org-phones-label { font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
-.aw-org-phones-wa { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 44px; font-size: var(--kit-type-sm); color: var(--kit-color-whatsapp); }
+.aw-org-phones-wa { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); font-size: var(--kit-type-sm); color: var(--kit-color-whatsapp); }
 .aw-org-phones-wa .kit-ico { --kit-ico-size: 1rem; }
-.aw-org-phones a[href^="tel:"] { display: inline-flex; align-items: center; min-height: 44px; }
+.aw-org-phones a[href^="tel:"] { display: inline-flex; align-items: center; min-height: var(--kit-size-target); }
 .aw-org-hours { width: 100%; max-width: 26rem; border-collapse: collapse; margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); }
 .aw-org-hours th, .aw-org-hours td { padding: var(--kit-space-1) 0; text-align: start; border-bottom: 1px solid var(--kit-color-line); vertical-align: top; }
 .aw-org-hours tr:last-child th, .aw-org-hours tr:last-child td { border-bottom: 0; }
@@ -1198,7 +1198,7 @@ body { background: var(--kit-color-canvas); }
 	.aw-sponsored-banner-media img { height: 100%; min-height: 220px; }
 }
 /* Directory results: at most 720px wide (owner, 12 Oct 2026). */
-.aw-orgs { max-width: 720px; }
+.aw-orgs { max-width: var(--kit-width-content); }
 /* Listing type icons (owner, 12 Oct 2026). Lucide (ISC licence); cow from Phosphor Icons (MIT licence). */
 .aw-type-ico { display: inline-block; width: 1em; height: 1em; margin-right: .35em; vertical-align: -0.14em; background: currentColor; -webkit-mask: var(--t) center / contain no-repeat; mask: var(--t) center / contain no-repeat; flex: none; }
 .aw-type-ico--animal-welfare-organisation { --t: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' %3E %3Ccircle cx='11' cy='4' r='2' /%3E %3Ccircle cx='18' cy='8' r='2' /%3E %3Ccircle cx='20' cy='16' r='2' /%3E %3Cpath d='M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z' /%3E %3C/svg%3E"); }
@@ -1236,7 +1236,7 @@ body { background: var(--kit-color-canvas); }
 /* Library list (owner, 14 Oct 2026): a stacked list, max 720px wide. Each row: the document's cover (or the publisher's
    picture) small on the left; on the right the publisher logo + name and the date with the calendar icon, then the
    title, a 3-line summary and the category labels. Design-system tokens only. */
-.aw-hub-library .aw-cases { display: block; max-width: 720px; border: 0 !important; }
+.aw-hub-library .aw-cases { display: block; max-width: var(--kit-width-content); border: 0 !important; }
 .aw-hub-library .aw-cases > li { margin: 0 !important; min-width: 0; }
 .kit-case { grid-template-columns: 9rem minmax(0, 1fr) auto; grid-template-areas: "media when arrow" "media body arrow"; grid-template-rows: auto 1fr; column-gap: var(--kit-space-4); row-gap: var(--kit-space-2); padding: var(--kit-space-5) 0 !important; }
 .kit-case:not(:has(.aw-case-cover)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when arrow" "body arrow"; }
