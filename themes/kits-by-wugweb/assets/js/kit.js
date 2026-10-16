@@ -755,7 +755,7 @@
 	var side = document.querySelector('.kit-with-sidebar > .kit-sidebar');
 	if (!side) return;
 	function check() {
-		var top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--kit-header-height')) || 74;
+		var top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--kit-header-height')) || 75;
 		side.classList.toggle('is-sticky', side.offsetHeight > 0 && side.offsetHeight + top + 48 < window.innerHeight);
 	}
 	check();
