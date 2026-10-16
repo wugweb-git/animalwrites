@@ -2,7 +2,9 @@
 
 <!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
-<!-- wp:paragraph {"className":"is-style-kits-label","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"sponsored_label"}}}}} -->
+<!-- wp:group {"align":"wide","className":"kit-with-sidebar","layout":{"type":"default"}} -->
+<div class="wp-block-group alignwide kit-with-sidebar"><!-- wp:group {"className":"kit-main","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-main"><!-- wp:paragraph {"className":"is-style-kits-label","metadata":{"bindings":{"content":{"source":"animal-writes/field","args":{"key":"sponsored_label"}}}}} -->
 <p class="is-style-kits-label"></p>
 <!-- /wp:paragraph -->
 
@@ -38,7 +40,11 @@
 
 <!-- wp:shortcode {"metadata":{"name":"End of article: categories and share"}} -->
 [kits_endbar]
-<!-- /wp:shortcode -->
+<!-- /wp:shortcode --></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"sidebar","tagName":"aside","area":"sidebar","className":"kit-sidebar"} /--></div>
+<!-- /wp:group -->
 
 <!-- wp:shortcode {"metadata":{"name":"Related items"}} -->
 [aw_related]

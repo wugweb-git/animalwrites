@@ -742,3 +742,17 @@
 		});
 	}, { passive: true });
 })();
+
+/* Item page sidebar: sticky under the header at lg only when it is shorter than the screen (a taller one scrolls
+   with the page, so nothing in it is out of reach). */
+(function () {
+	var side = document.querySelector('.kit-with-sidebar > .kit-sidebar');
+	if (!side) return;
+	function check() {
+		var top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--kit-header-h')) || 72;
+		side.classList.toggle('is-sticky', side.offsetHeight > 0 && side.offsetHeight + top + 48 < window.innerHeight);
+	}
+	check();
+	window.addEventListener('resize', check, { passive: true });
+	if (window.ResizeObserver) new ResizeObserver(check).observe(side);
+})();

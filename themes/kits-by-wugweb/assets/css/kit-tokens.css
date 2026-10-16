@@ -72,6 +72,7 @@
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;
   --kit-width-content: 720px;
+  --kit-header-h: 72px;
   --kit-width-wide: 1200px;
   --kit-radius-control: var(--wp--preset--border-radius--control, 8px);
   --kit-radius-card: var(--wp--preset--border-radius--card, 12px);

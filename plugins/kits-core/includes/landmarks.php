@@ -61,3 +61,22 @@ add_filter(
 	10,
 	2
 );
+
+/*
+ * A "Sidebar" template-part area (item pages, owner 16 Oct 2026): the Site Editor lists the sidebar part under its own
+ * area, so blocks can be added to it without code. It starts with the 'sidebar' ad slot only.
+ */
+add_filter(
+	'default_wp_template_part_areas',
+	function ( $areas ) {
+		$areas[] = array(
+			'area'        => 'sidebar',
+			'label'       => __( 'Sidebar', 'kits-core' ),
+			'description' => __( 'The column beside an item page\'s text (below it on phones and tablets).', 'kits-core' ),
+			'icon'        => 'sidebar',
+			'area_tag'    => 'aside',
+		);
+		return $areas;
+	}
+);
+

@@ -1594,6 +1594,42 @@
     "schema": "none"
    },
    "source": "kits_block_styles() in functions.php registers them; theme.json styles.blocks.<block>.variations holds their values"
+  },
+  {
+   "name": "Item page with sidebar",
+   "type": "layout",
+   "status": "live",
+   "classes": [
+    "kit-with-sidebar",
+    "kit-main",
+    "kit-sidebar"
+   ],
+   "states": [
+    "sidebar empty or only an empty/waiting/unfilled ad: one column, text centred at the reading width",
+    "sidebar with blocks or a filled ad: below the text under lg; second column at lg",
+    "sticky at lg only when shorter than the screen (.is-sticky, kit.js)"
+   ],
+   "tokens": [
+    "--kit-width-content",
+    "--kit-space-7",
+    "--kit-space-5",
+    "--kit-header-h"
+   ],
+   "a11y": {
+    "element": "div > div.kit-main + aside.kit-sidebar (template part, area sidebar)",
+    "aria": "aside landmark",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "complementary landmark"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "none",
+    "alt": "n/a",
+    "schema": "none"
+   }
   }
  ],
  "nav": [

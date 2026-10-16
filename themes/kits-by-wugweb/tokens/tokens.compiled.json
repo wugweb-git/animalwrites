@@ -260,6 +260,11 @@
       "md": "720px",
       "lg": "720px"
     },
+    "header-h": {
+      "sm": "72px",
+      "md": "72px",
+      "lg": "72px"
+    },
     "width-wide": {
       "sm": "1200px",
       "md": "1200px",
