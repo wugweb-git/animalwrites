@@ -263,7 +263,7 @@ function aw_ff_render_services( $element, $form ) {
 	foreach ( AW_SERVICES as $slug => $name ) {
 		$boxes .= '<label class="kit-checkbox"><input type="checkbox" name="aw_services[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, $kept, true ), true, false ) . '> ' . esc_html( $name ) . '</label>';
 	}
-	return '<fieldset class="ff-el-group kit-field kit-check-group aw-claim-services"><legend>Services</legend>' . $boxes . '</fieldset>';
+	return '<fieldset class="kit-field kit-check-group aw-claim-services"><legend>Services</legend>' . $boxes . '</fieldset>';
 }
 
 /* ---------- Fluent Forms fields: the site's look and rules ---------- */

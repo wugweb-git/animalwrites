@@ -883,7 +883,7 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .ff-el-form-check { margin: 0; }
 .aw-form-ff .ff-el-form-check-label.kit-checkbox { display: flex; margin: 0; }
 .aw-form-ff .ff-el-form-check-label.kit-checkbox > span { flex: 1; }
-.aw-form-ff .kit-check-group.ff-el-group > legend { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-strong); }
+.aw-form-ff .aw-claim-services { margin: 0 0 var(--s-4); }
 .aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
 .aw-form-ff .ff_submit_btn_wrapper { margin: 0; }
 .aw-form-ff .kit-step-nav { align-items: center; }
@@ -896,6 +896,7 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-vol-roles .ff-el-input--label label { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: inherit; }
 .aw-form-ff .aw-vol-roles .ff-el-input--label { margin-bottom: var(--kit-space-1); }
 .aw-form-ff .aw-vol-roles .ff-el-input--content { display: grid; gap: var(--kit-space-3); }
+.aw-form-ff .aw-vol-roles::before, .aw-form-ff .aw-vol-roles::after { content: none; }
 .aw-form-ff .aw-vol-roles.ff-el-is-error .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
 .aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: 100%; justify-content: center; min-height: 52px; }
 @media (min-width: 768px) {
