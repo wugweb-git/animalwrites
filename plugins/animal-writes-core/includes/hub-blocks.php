@@ -22,6 +22,7 @@ function aw_hub_blocks() {
 	$type_attr = array( 'postType' => array( 'type' => 'string', 'default' => '' ) );
 	return array(
 		'breadcrumb'    => array( 'Breadcrumb', 'aw_block_breadcrumb', array() ),
+		'section-head'  => array( 'Head band', 'aw_block_section_head', $type_attr ),
 		'hub-count'     => array( 'Hub count', 'aw_block_hub_count', $type_attr ),
 		'hub-visual'    => array( 'Hub pictures', 'aw_block_hub_visual', $type_attr ),
 		'list-filters'  => array( 'List filters', 'aw_block_list_filters', $type_attr ),

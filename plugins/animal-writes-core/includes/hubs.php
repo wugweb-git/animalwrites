@@ -337,29 +337,7 @@ function aw_hub_intro( $type ) {
 
 /** The section band of a hub Page: breadcrumb, H1, intro, count and pictures, then the filters or search. */
 function aw_hub_band( $type ) {
-	$compact = 'aw_listing' === $type ? ' kit-section-band--compact' : '';
-	$plain   = in_array( $type, array( 'aw_listing', 'aw_press' ), true ); // no count or pictures in their band
-	return '<!-- wp:group {"tagName":"header","align":"full","className":"kit-section-band' . $compact . '","layout":{"type":"default"}} -->
-<header class="wp-block-group alignfull kit-section-band' . $compact . '"><!-- wp:group {"className":"kit-section-inner","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-section-inner"><!-- wp:animal-writes/breadcrumb /-->
-
-<!-- wp:group {"className":"kit-section-head","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-section-head"><!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:post-title {"level":1,"className":"wp-block-query-title"} /-->
-
-<!-- wp:paragraph {"className":"kit-section-desc"} -->
-<p class="kit-section-desc">' . esc_html( aw_hub_intro( $type ) ) . '</p>
-<!-- /wp:paragraph -->
-
-' . ( $plain ? '' : '<!-- wp:animal-writes/hub-count {"postType":"' . $type . '"} /-->' ) . '</div>
-<!-- /wp:group -->
-
-' . ( $plain ? '' : '<!-- wp:animal-writes/hub-visual {"postType":"' . $type . '"} /-->' ) . '</div>
-<!-- /wp:group -->
-
-<!-- wp:animal-writes/list-filters {"postType":"' . $type . '"} /--></div>
-<!-- /wp:group --></header>
-<!-- /wp:group -->
+	return '<!-- wp:animal-writes/section-head {"postType":"' . $type . '"} /-->
 
 <!-- wp:pattern {"slug":"kits-by-wugweb/banner"} /-->';
 }

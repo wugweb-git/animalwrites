@@ -1998,6 +1998,34 @@
     "heading": "none",
     "link": "none"
    }
+  },
+  {
+   "name": "Head band (breadcrumb, H1, intro, count, filters)",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "Page: breadcrumb and title",
+    "hub Page (postType): intro and filters, compact for the Directory",
+    "archive, category, tag or Directory place page: description, count, pictures, filters"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block (header)",
+    "aria": "none",
+    "keyboard": "filters inside are",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "h1, breadcrumb nav"
+   },
+   "seo": {
+    "heading": "h1",
+    "link": "breadcrumb",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "block": "animal-writes/section-head"
   }
  ],
  "nav_status": {

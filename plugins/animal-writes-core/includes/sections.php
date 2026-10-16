@@ -40,9 +40,24 @@ function aw_section_tile( $p ) {
 	return function_exists( 'aw_placard_html' ) ? aw_placard_html( $p->ID ) : '';
 }
 
-add_shortcode(
-	'aw_section_head',
-	function () {
+/**
+ * The head band: breadcrumb, H1, intro, count, pictures, then the page's filters or search. One renderer for every
+ * page top (archives and category pages, Pages, new hub Pages); the markup is what the section band CSS expects.
+ *
+ * @param array $a crumbs (HTML), title (text), title_class, desc (text), count (text), visual (HTML), filters (HTML), compact (bool).
+ * @return string
+ */
+function aw_head_band( $a ) {
+	$a = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'desc' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false ) );
+	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
+		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . esc_html( $a['title'] ) . '</h1>'
+		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . esc_html( $a['desc'] ) . '</p>' : '' )
+		. ( '' !== $a['count'] ? '<p class="kit-section-count">' . esc_html( $a['count'] ) . '</p>' : '' )
+		. '</div>' . $a['visual'] . '</div>' . ( '' !== $a['filters'] ? '<div class="kit-section-filters">' . $a['filters'] . '</div>' : '' ) . '</div></header>';
+}
+
+/** Head band of an archive, category, tag or Directory place page (was the [aw_section_head] shortcode's own markup). */
+function aw_section_head_archive() {
 		global $wp_query;
 		$term_page = is_tax() || is_category() || is_tag();
 		$type      = is_category() ? 'aw_news' : ( is_tag() ? ( aw_tag_section( (string) get_queried_object()->slug ) ?: 'aw_news' ) : (string) get_query_var( 'post_type' ) ); // a category page leads with its news; a tag page is its section's
@@ -112,13 +127,50 @@ add_shortcode(
 		} elseif ( is_post_type_archive() && function_exists( 'aw_list_filters' ) ) {
 			$filters = aw_list_filters( $type );
 		}
-		return '<header class="kit-section-band alignfull' . ( ( 'aw_listing' === $type && ! $term_page ) ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $crumbs . '<div class="kit-section-head"><div>'
-			. '<h1 class="wp-block-query-title">' . esc_html( $title ) . '</h1>'
-			. ( $desc ? '<p class="kit-section-desc">' . esc_html( $desc ) . '</p>' : '' )
-			. ( $count ? '<p class="kit-section-count">' . esc_html( $count_label ) . '</p>' : '' )
-			. '</div>' . $visual . '</div>' . ( $filters ? '<div class="kit-section-filters">' . $filters . '</div>' : '' ) . '</div></header>';
+		return aw_head_band(
+			array(
+				'crumbs'  => $crumbs,
+				'title'   => $title,
+				'desc'    => $desc ? $desc : '',
+				'count'   => $count ? $count_label : '',
+				'visual'  => $visual,
+				'filters' => $filters ? $filters : '',
+				'compact' => 'aw_listing' === $type && ! $term_page,
+			)
+		);
+}
+add_shortcode( 'aw_section_head', 'aw_section_head_archive' ); // saved content keeps working; templates use the animal-writes/section-head block
+
+/**
+ * animal-writes/section-head block: the head band of the page it is on. A Page gets its breadcrumb and title (the
+ * default Page template); with postType set (a hub Page made by aw_hub_band) also the hub's intro and filters;
+ * on an archive or category page it is the archive band.
+ *
+ * @param array $a Block attributes (postType).
+ * @return string
+ */
+function aw_block_section_head( $a ) {
+	if ( ! is_singular() ) {
+		return do_shortcode( '[aw_section_head]' ); // the archive band (it places the breadcrumb itself; a category's banner is added to it)
 	}
-);
+	$crumbs = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+	$type = (string) ( $a['postType'] ?? '' );
+	$hub  = '' !== $type;
+	$filt = '';
+	if ( $hub ) {
+		$filt = 'aw_listing' === $type ? ( function_exists( 'aw_directory_filter' ) ? aw_directory_filter() : '' ) : ( function_exists( 'aw_list_filters' ) && defined( 'AW_LIST_FILTERS' ) && isset( AW_LIST_FILTERS[ $type ] ) ? aw_list_filters( $type ) : '' );
+	}
+	return aw_head_band(
+		array(
+			'crumbs'      => $crumbs,
+			'title'       => wp_strip_all_tags( get_the_title() ),
+			'title_class' => $hub ? 'wp-block-query-title wp-block-post-title' : 'wp-block-post-title',
+			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '',
+			'filters'     => (string) $filt,
+			'compact'     => 'aw_listing' === $type,
+		)
+	);
+}
 
 /**
  * [aw_stats] Live counts for the homepage hero: organisations, states and UTs covered, legal updates, guides and documents.
