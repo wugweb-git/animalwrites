@@ -548,7 +548,7 @@ add_filter(
 /*
  * Every date carries the calendar icon (owner, 15–16 Oct 2026), also inside sentences: a date written in a page's,
  * guide's or campaign's text ("29 November 2025", "8 Oct 2026", "November 29, 2025", "October 2026") gets the site's
- * date component (icon + <time datetime>) when shown. Only visible text in paragraphs and list items is touched, never
+ * date component (icon + <time datetime>) when shown. Only visible text in text blocks, classic content and card excerpts is touched (not headings), never
  * a date already inside <time>; the stored text is not changed.
  */
 function aw_inline_dates( $html ) {
@@ -586,5 +586,13 @@ function aw_inline_dates( $html ) {
 	}
 	return implode( '', $parts );
 }
-add_filter( 'render_block_core/paragraph', 'aw_inline_dates' );
-add_filter( 'render_block_core/list-item', 'aw_inline_dates' );
+add_filter(
+	'render_block',
+	function ( $html, $block ) {
+		// Text blocks, classic content (no block name), HTML blocks and card excerpts; headings stay as written.
+		$text = array( 'core/paragraph', 'core/list-item', 'core/freeform', 'core/html', 'core/table', 'core/quote', 'core/pullquote', 'core/details', 'core/verse', 'core/post-excerpt' );
+		return ( null === $block['blockName'] || in_array( $block['blockName'], $text, true ) ) ? aw_inline_dates( $html ) : $html;
+	},
+	10,
+	2
+);
