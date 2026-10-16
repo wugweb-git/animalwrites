@@ -42,6 +42,20 @@ GA4 marks the whole event, not one `form` value. To count only volunteer/newslet
 events in Admin → Events → Create event (e.g. `volunteer_signup` when `event_name` = `form_submit_success` and
 `form` = `volunteer`; likewise `newsletter_signup`, `claim_sent`, `contact_sent`) and mark those as key events.
 
+## Campaign 2.0 events (16 Oct 2026)
+
+The container has GA4 event tags for the campaign tools (`plugins/animal-writes-core/assets/js/campaign.js`):
+`campaign_view`, `letter_open`, `ground_toggle` (ground, on), `objection_sent` (route: gmail, outlook, mailto, copy),
+`objection_confirmed`, `rule_card_open` (rule), `home_campaign_click` (link_text). Import the container again (Merge →
+Overwrite) to add them.
+
+- Key events: mark `objection_sent` and `objection_confirmed`.
+- Custom dimensions (scope Event): `route` (Letter route), `rule` (Rule chip), `ground` (Letter ground).
+- Funnel exploration: `campaign_view` → `letter_open` → `objection_sent` → `objection_confirmed`, broken down by
+  `route` and device category.
+- Search Console: page group for `/campaigns/lab-animals-rules-2026/` and the two Library items
+  (`/library/draft-laboratory-animals-rules-2026/`, `/library/breeding-experiments-animals-rules-1998/`).
+
 ## Custom dimensions (GA4 → Admin → Custom definitions → Create, scope Event)
 
 | Dimension name | Parameter | Sent with |
