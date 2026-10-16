@@ -1051,6 +1051,36 @@
    "block": "animal-writes/law-date"
   },
   {
+   "name": "Opportunity line (organisation, place, apply by)",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-opp-line"
+   ],
+   "states": [
+    "organisation, place and deadline",
+    "any of them missing (left out)",
+    "none (nothing printed)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block (p)",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "<time datetime>"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "none",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "block": "animal-writes/opp-line"
+  },
+  {
    "name": "Issued by",
    "type": "block",
    "status": "live",
