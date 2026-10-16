@@ -145,6 +145,11 @@ function aw_binding_value( $key, $post_id ) {
 			$d = aw_format_date( $m( 'aw_deadline' ) );
 			/* translators: %s: date. */
 			return $d ? sprintf( __( 'Apply by %s', 'animal-writes-core' ), $d ) : '';
+		case 'deadline':
+			// "Apply by" with the one date component (aw_date: calendar icon directly before the date). HTML, kept by
+			// the source's wp_kses_post. Empty without a deadline, so the bound block is removed.
+			$d = $m( 'aw_deadline' );
+			return $d && function_exists( 'aw_date' ) ? __( 'Apply by', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' ) : '';
 		case 'file_url':
 			return $m( 'aw_file_url' );
 	}
@@ -166,6 +171,9 @@ function aw_register_bindings() {
 			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'] ?? get_the_ID();
 				$value   = aw_binding_value( $args['key'] ?? '', (int) $post_id );
+				if ( in_array( $args['key'] ?? '', array( 'deadline' ), true ) ) {
+					return wp_kses_post( $value ); // markup keys: the date component
+				}
 				return in_array( $args['key'] ?? '', array( 'source_url', 'phone_url', 'whatsapp_url', 'email_url', 'website', 'apply_url', 'file_url' ), true ) ? esc_url( $value ) : esc_html( $value );
 			},
 		)

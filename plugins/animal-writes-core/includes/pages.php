@@ -414,10 +414,13 @@ add_filter(
 	20
 );
 
-// Editing: a Sponsored box beside the editor.
+// Editing: a Sponsored box beside the editor (fallback when SCF is off; with SCF, the Sponsored tab of "Resource details").
 add_action(
 	'add_meta_boxes_post',
 	function () {
+		if ( function_exists( 'aw_scf_active' ) && aw_scf_active() ) {
+			return;
+		}
 		add_meta_box( 'aw-sponsored', 'Sponsored', 'aw_sponsored_box', 'post', 'side', 'default' );
 	}
 );

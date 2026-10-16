@@ -1,0 +1,107 @@
+{
+    "key": "group_aw_campaign",
+    "title": "Campaign details",
+    "fields": [
+        {
+            "key": "field_aw_campaign_event_date",
+            "label": "Event date",
+            "name": "aw_event_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "The day it happens. Makes the page an Event in search results.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_campaign_event_place",
+            "label": "Event place",
+            "name": "aw_event_place",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. All GPOs and HPOs",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_campaign_campaign_close",
+            "label": "Closes on",
+            "name": "aw_campaign_close",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Last day to take part.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_campaign_campaign_doc",
+            "label": "Campaign document",
+            "name": "aw_campaign_doc",
+            "aria-label": "",
+            "type": "post_object",
+            "instructions": "The Library item with the campaign's document.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "aw_legal"
+            ],
+            "post_status": "",
+            "taxonomy": "",
+            "return_format": "id",
+            "multiple": 0,
+            "allow_null": 1,
+            "bidirectional": 0,
+            "ui": 1,
+            "bidirectional_target": []
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_campaign"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Campaign event details.",
+    "show_in_rest": 0,
+    "modified": 1792108800
+}

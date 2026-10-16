@@ -43,6 +43,7 @@ require_once AW_CORE_DIR . 'includes/content-types.php';
 require_once AW_CORE_DIR . 'includes/category-moves.php';
 require_once AW_CORE_DIR . 'includes/tags.php';
 require_once AW_CORE_DIR . 'includes/meta.php';
+require_once AW_CORE_DIR . 'includes/scf.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
 require_once AW_CORE_DIR . 'includes/sourcing-lists.php';

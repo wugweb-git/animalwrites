@@ -61,9 +61,14 @@ function aw_listing_fields() {
 	);
 }
 
+// With SCF active the "Organisation details" field group (acf-json/group_aw_listing.json) edits these same keys; this box
+// is the fallback when SCF is off.
 add_action(
 	'add_meta_boxes_aw_listing',
 	function () {
+		if ( function_exists( 'aw_scf_active' ) && aw_scf_active() ) {
+			return;
+		}
 		add_meta_box( 'aw-listing-details', 'Organisation details', 'aw_listing_details_box', 'aw_listing', 'normal', 'high' );
 	}
 );

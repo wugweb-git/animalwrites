@@ -34,6 +34,7 @@ function aw_meta_schema() {
 		'aw_awbi_recognised' => array( 'string', array( 'aw_listing' ), 'AWBI recognised on (Y-m-d)' ),
 		'aw_awbi_renewed'    => array( 'string', array( 'aw_listing' ), 'AWBI renewed on (Y-m-d)' ),
 		'aw_awbi_valid'      => array( 'string', array( 'aw_listing' ), 'AWBI recognition valid until (Y-m-d)' ),
+		'aw_awbi_code'       => array( 'string', array( 'aw_listing' ), 'AWBI recognition code (from the AWBI list; read only)' ),
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
 		'aw_featured'        => array( 'integer', array( 'aw_listing' ), 'Featured (1) or not (0)' ),
 		'aw_featured_until'  => array( 'string', array( 'aw_listing' ), 'Featured until (Y-m-d)' ),
@@ -79,9 +80,20 @@ function aw_meta_schema() {
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
 		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
+		'aw_stipend'         => array( 'string', array( 'aw_opportunity' ), 'Stipend or pay, as stated (Phase 2; not shown yet)' ),
+
+		// Campaigns (read by the Event schema in aw-seo-extras).
+		'aw_event_date'      => array( 'string', array( 'aw_campaign' ), 'Event date (Y-m-d)' ),
+		'aw_event_place'     => array( 'string', array( 'aw_campaign' ), 'Event place' ),
+		'aw_campaign_close'  => array( 'string', array( 'aw_campaign' ), 'Closes on (Y-m-d)' ),
+		'aw_campaign_doc'    => array( 'string', array( 'aw_campaign' ), 'Campaign document (Library item ID)' ),
+
+		// Resources: the date a guide was last checked (schema lastReviewed).
+		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
 
 		// Resources.
 		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
+		'aw_file_id'         => array( 'string', array( 'aw_legal' ), 'Document file (attachment ID)' ),
 		'aw_requires_email'  => array( 'boolean', array( 'aw_legal' ), 'Gate download behind newsletter signup' ),
 		'aw_legal_number'    => array( 'string', array( 'aw_legal' ), 'Official number of the text (e.g. G.S.R. 864(E))' ),
 		'aw_legal_force'     => array( 'string', array( 'aw_legal' ), 'In force: InForce, NotInForce or PartiallyInForce' ),
@@ -97,7 +109,7 @@ function aw_meta_schema() {
  */
 function aw_sanitize_meta( $value, $key ) {
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url', 'aw_ngobase_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid' );
+	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'kits_last_reviewed' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );

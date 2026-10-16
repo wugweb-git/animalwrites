@@ -1,0 +1,238 @@
+{
+    "key": "group_aw_legal",
+    "title": "Library details",
+    "fields": [
+        {
+            "key": "field_aw_legal_tab_source",
+            "label": "Source",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_legal_source_url",
+            "label": "Source URL",
+            "name": "aw_source_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_legal_source_name",
+            "label": "Source name",
+            "name": "aw_source_name",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_legal_source_date",
+            "label": "Source date",
+            "name": "aw_source_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "Filled by sourcing; change only to correct it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_legal_msg_issuer",
+            "label": "Issuer",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "The issuer is set in the <strong>Issued by</strong> box (side panel).",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_legal_tab_document",
+            "label": "Document",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_aw_legal_file_id",
+            "label": "Document file",
+            "name": "aw_file_id",
+            "aria-label": "",
+            "type": "file",
+            "instructions": "The PDF in the Media Library.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "library": "all",
+            "min_size": "",
+            "max_size": "",
+            "mime_types": "pdf,doc,docx"
+        },
+        {
+            "key": "field_aw_legal_file_url",
+            "label": "Document link",
+            "name": "aw_file_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "A link to the document elsewhere, when there is no file.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_legal_legal_number",
+            "label": "Official number",
+            "name": "aw_legal_number",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. G.S.R. 864(E)",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_legal_legal_force",
+            "label": "In force",
+            "name": "aw_legal_force",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "InForce": "In force",
+                "PartiallyInForce": "Partly in force",
+                "NotInForce": "Not in force"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_legal_requires_email",
+            "label": "Ask for an email before download",
+            "name": "aw_requires_email",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "ui": 1,
+            "ui_on_text": "Yes",
+            "ui_off_text": "No"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_legal"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Library item source and document, filled by sourcing.",
+    "show_in_rest": 0,
+    "modified": 1792108800
+}
