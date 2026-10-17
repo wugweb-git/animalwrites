@@ -207,6 +207,15 @@ function aw_hide_empty_bound_blocks( $content, $block, $instance = null ) {
 			return '';
 		}
 	}
+	// Filled contact buttons name their action too (data-act), for the Directory analytics (aw-analytics.js).
+	if ( 'core/button' === ( $block['blockName'] ?? '' ) && 'aw_listing' === get_post_type( $post_id ) ) {
+		foreach ( $bindings as $binding ) {
+			$act = array( 'phone_url' => 'phone', 'whatsapp_url' => 'whatsapp', 'email_url' => 'email', 'website' => 'website' )[ $binding['args']['key'] ?? '' ] ?? '';
+			if ( $act && ( $binding['source'] ?? '' ) === 'animal-writes/field' ) {
+				return preg_replace( '#<a\b#', '<a data-act="' . $act . '"', $content, 1 );
+			}
+		}
+	}
 	return $content;
 }
 add_filter( 'render_block', 'aw_hide_empty_bound_blocks', 10, 3 );

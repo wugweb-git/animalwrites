@@ -179,7 +179,51 @@ add_filter(
 				$c['district'] = 'district' === $p->kind ? $p->name : '';
 			}
 		}
+		if ( is_front_page() ) {
+			$c['page_type'] = 'home'; // the homepage is also a Page; keep it apart (kits-core default)
+		}
+		// Analytics audit, 17 Oct 2026. Directory type pages and ?tag= filters: the type shown.
+		if ( 'aw_listing' === ( function_exists( 'aw_hub_type' ) ? aw_hub_type() : '' ) && function_exists( 'aw_current_type_name' ) ) {
+			$c['listing_type'] = (string) aw_current_type_name();
+		}
+		// The listing a page is about: its profile, or the Claim, Report and thank-you pages opened for it (?listing=).
+		$listing = is_singular( 'aw_listing' ) ? get_queried_object() : ( is_page( array( 'claim', 'report', 'thank-you' ) ) && function_exists( 'aw_form_page_listing' ) ? aw_form_page_listing() : null );
+		if ( $listing instanceof WP_Post ) {
+			$c['listing_id']   = (string) $listing->ID;
+			$c['listing_name'] = html_entity_decode( get_the_title( $listing ), ENT_QUOTES, 'UTF-8' );
+			if ( ! is_singular( 'aw_listing' ) ) {
+				$lt                = aw_listing_types( $listing->ID );
+				$c['listing_type'] = $lt ? $lt[0]->name : '';
+				if ( function_exists( 'aw_item_place_names' ) ) {
+					list( $c['state'], $c['district'] ) = aw_item_place_names( $listing->ID );
+				}
+			}
+		}
+		// Campaign pages: the same two names on every campaign (campaign_slug, campaign_title), for the standard
+		// campaign_view / campaign_action events (aw-analytics.js, campaign.js).
+		if ( is_singular( 'aw_campaign' ) ) {
+			$id                   = get_queried_object_id();
+			$close                = function_exists( 'aw_camp_close_ts' ) ? (int) aw_camp_close_ts( $id ) : 0;
+			$c['campaign_slug']   = (string) get_post_field( 'post_name', $id );
+			$c['campaign_title']  = html_entity_decode( get_the_title( $id ), ENT_QUOTES, 'UTF-8' );
+			$c['campaign_status'] = $close ? ( $close > time() ? 'open' : 'closed' ) : ''; // by the close date; no date: ''
+		}
+		// A sponsored Resource or listing: the sponsor's name (sponsored_view).
+		if ( is_singular() && get_post_meta( get_queried_object_id(), 'aw_sponsored', true ) ) {
+			$sp           = trim( (string) get_post_meta( get_queried_object_id(), 'aw_sponsor_name', true ) );
+			$c['sponsor'] = '' !== $sp ? $sp : 'sponsored';
+		}
 		return $c;
+	}
+);
+
+// Analytics events for the Directory, campaigns, sponsored blocks, donate links and named-entity links (owner's audit,
+// 17 Oct 2026). Every page: the script is small and decides from window.kitsPage what applies.
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		$f = 'assets/js/aw-analytics.js';
+		wp_enqueue_script( 'aw-analytics', plugins_url( $f, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . $f ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	}
 );
 

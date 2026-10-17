@@ -45,7 +45,9 @@ function aw_block_sponsored_item( $a ) {
 	$url   = get_permalink( $id );
 	$thumb = get_the_post_thumbnail( $id, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
 	$text  = function_exists( 'aw_text' ) ? aw_text( $id, 26 ) : get_the_excerpt( $id );
-	return '<aside class="aw-sponsored-item" aria-label="Sponsored">' . aw_sponsored_label( get_post_meta( $id, 'aw_sponsor_name', true ) )
+	$sponsor = trim( (string) get_post_meta( $id, 'aw_sponsor_name', true ) );
+	// data-sponsored-*: sponsored_view / sponsored_click (aw-analytics.js).
+	return '<aside class="aw-sponsored-item" aria-label="Sponsored" data-sponsored-type="resource" data-sponsor="' . esc_attr( '' !== $sponsor ? $sponsor : 'sponsored' ) . '" data-sponsored-item="' . esc_attr( get_the_title( $id ) ) . '">' . aw_sponsored_label( $sponsor )
 		. ( $thumb ? '<a class="aw-sponsored-item-media" href="' . esc_url( $url ) . '" rel="sponsored noopener" tabindex="-1" aria-hidden="true">' . $thumb . '</a>' : '' )
 		. '<h3 class="aw-sponsored-item-title"><a href="' . esc_url( $url ) . '" rel="sponsored noopener">' . esc_html( get_the_title( $id ) ) . '</a></h3>'
 		. ( $text ? '<p>' . esc_html( $text ) . '</p>' : '' ) . '</aside>';
@@ -61,7 +63,8 @@ function aw_block_sponsored_banner( $a ) {
 		return '';
 	}
 	$h = '' !== $heading ? ( $url && '' === $link ? '<a href="' . $url . '" rel="sponsored noopener">' . esc_html( $heading ) . '</a>' : esc_html( $heading ) ) : '';
-	return '<aside class="aw-sponsored-banner" aria-label="Sponsored">'
+	$sponsor = trim( (string) ( $a['sponsor'] ?? '' ) );
+	return '<aside class="aw-sponsored-banner" aria-label="Sponsored" data-sponsored-type="banner" data-sponsor="' . esc_attr( '' !== $sponsor ? $sponsor : 'sponsored' ) . '" data-sponsored-item="' . esc_attr( '' !== $heading ? $heading : $text ) . '">'
 		. ( $img ? '<div class="aw-sponsored-banner-media">' . $img . '</div>' : '' )
 		. '<div class="aw-sponsored-banner-body">' . aw_sponsored_label( (string) ( $a['sponsor'] ?? '' ) )
 		. ( $h ? '<h2 class="aw-sponsored-banner-title">' . $h . '</h2>' : '' )

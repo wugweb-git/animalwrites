@@ -1,8 +1,19 @@
-/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (kit.js). */
+/* Campaign tools (campaign-tools.php): rule chips, letter tool, phone bar, home band. Events go through kitsTrack (kit.js).
+   Standard campaign events (owner, 17 Oct 2026): every action here is also campaign_action (action = the older event's
+   name, with campaign_slug and campaign_title), through awCampaignTrack (aw-analytics.js). The older events keep firing
+   (objection_sent and objection_confirmed are key events). campaign_view: aw-analytics.js, on every campaign page. */
 (function () {
+	var page = window.kitsPage || {};
 	function track(name, params) {
 		if (typeof window.kitsTrack === 'function') window.kitsTrack(name, params || {});
 		else (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, params || {}));
+		// the same action as campaign_action, on a campaign page (the home band: aw-analytics.js promo_click)
+		if (page.campaign_slug && name !== 'home_campaign_click' && typeof window.awCampaignTrack === 'function') {
+			var p = Object.assign({}, params || {});
+			if ('on' in p) p.on = String(p.on);
+			if ('ground' in p) p.ground = String(p.ground);
+			window.awCampaignTrack(name === 'share_click' ? 'share' : name, p);
+		}
 	}
 
 	/* Rule chips: the clause in a dialog. */
@@ -29,10 +40,10 @@
 	document.addEventListener('fluentform_submission_success', function (e) {
 		var f = e.detail && e.detail.form;
 		f = f && f.jquery ? f[0] : f;
-		if (f && f.querySelector && f.querySelector('input[type=email]')) track('newsletter_optin', { source: source });
+		if (page.campaign_slug && f && f.querySelector && f.querySelector('input[type=email]')) track('newsletter_optin', { source: source }); // campaign pages only (not the home band's page)
 	});
 	document.addEventListener('kit:form-done', function (e) {
-		if (e.target && e.target.querySelector && e.target.querySelector('input[type=email]') && !e.target.closest('.aw-letter')) track('newsletter_optin', { source: source });
+		if (page.campaign_slug && e.target && e.target.querySelector && e.target.querySelector('input[type=email]') && !e.target.closest('.aw-letter')) track('newsletter_optin', { source: source });
 	});
 
 	/* Home band. */
@@ -107,7 +118,6 @@
 	form.addEventListener('input', render);
 	form.addEventListener('submit', function (e) { e.preventDefault(); });
 	render();
-	track('campaign_view');
 
 	function copy(text) {
 		function fallback() {

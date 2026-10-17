@@ -632,14 +632,25 @@
 /* Analytics events (owner, 9 Oct 2026). Also button_click on every button. Every event goes to the dataLayer (GTM). While GA4 is still placed directly by
    Site Kit (window.kitsPage.gtag), the same event also goes to gtag, so GA4 receives it once either way.
    Events: form_submit_success, form_error, search, pin_search, filter_apply, sort_change, outbound_click, call_click,
-   whatsapp_click, email_click, pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth. */
+   whatsapp_click, email_click, pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth.
+   17 Oct 2026: share intent links count as share_click (never whatsapp_click); whatsapp_click only for a chat with a
+   number; call/whatsapp/email clicks on a page about one listing carry listing_id and listing_name; card_click counts
+   positions among cards only and carries card_id, card_name. Ad slots: the module after this one. */
 (function () {
 	var page = window.kitsPage || {};
+	// params.ecommerce (GA4 items events: view_item, view_item_list, select_item): the previous one is cleared first, as GA4
+	// in GTM reads the latest ecommerce object; gtag gets it flattened.
 	function track(name, params) {
 		params = params || {};
 		params.page_type = page.page_type || '';
-		(window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, params));
-		if (page.gtag && typeof window.gtag === 'function') window.gtag('event', name, params);
+		var dl = window.dataLayer = window.dataLayer || [];
+		if (params.ecommerce) dl.push({ ecommerce: null });
+		dl.push(Object.assign({ event: name }, params));
+		if (page.gtag && typeof window.gtag === 'function') {
+			var g = Object.assign({}, params);
+			if (g.ecommerce) { Object.assign(g, g.ecommerce); delete g.ecommerce; }
+			window.gtag('event', name, g);
+		}
 	}
 	window.kitsTrack = track;
 	function formName(form) {
@@ -697,7 +708,7 @@
 	document.addEventListener('submit', function (e) {
 		var q = e.target.querySelector && e.target.querySelector('input[name=q]');
 		if (q && /^\s*[1-9]\d{5}\s*$/.test(q.value)) track('pin_search', { pin: q.value.trim() });
-		if (e.target.matches && e.target.matches('.aw-dir-search')) filters(new URLSearchParams(new FormData(e.target)), 'directory');
+		if (e.target.matches && e.target.matches('.aw-dir-search, .aw-ed-search')) filters(new URLSearchParams(new FormData(e.target)), 'directory'); // the Directory search, also the homepage's
 	}, true);
 
 	// Every button (and link styled as a button): button_click with its label (GTM, owner 9 Oct 2026)
@@ -708,6 +719,18 @@
 		track('button_click', { label: label, href: (b.getAttribute('href') || '').slice(0, 200), area: b.closest('header') ? 'header' : b.closest('footer') ? 'footer' : b.closest('form') ? 'form' : 'page' });
 	}, true);
 
+	// The network of a share intent URL (WhatsApp/Telegram text share, X, Facebook, LinkedIn, Pinterest, Reddit), or ''.
+	function shareIntent(href) {
+		if (/(^|\/\/|\.)wa\.me\/\?text=/i.test(href) || /whatsapp\.com\/send\?(?!(.*&)?phone=\d)/i.test(href) || /^whatsapp:\/\/send/i.test(href)) return 'whatsapp';
+		if (/(twitter|x)\.com\/intent\//i.test(href)) return 'x';
+		if (/facebook\.com\/sharer/i.test(href)) return 'facebook';
+		if (/linkedin\.com\/(sharing|shareArticle)/i.test(href)) return 'linkedin';
+		if (/t\.me\/share/i.test(href)) return 'telegram';
+		if (/pinterest\.[a-z.]+\/pin\/create/i.test(href)) return 'pinterest';
+		if (/reddit\.com\/submit/i.test(href)) return 'reddit';
+		return '';
+	}
+
 	// Clicks
 	document.addEventListener('click', function (e) {
 		var a = e.target.closest && e.target.closest('a[href]');
@@ -717,14 +740,23 @@
 		// share buttons first: their WhatsApp and email buttons are shares, not contact clicks
 		var share = a.closest('.scriptlesssocialsharing__buttons, [data-kit-share]'); // a link marked data-kit-share="network" is a share too
 		if (share) { track('share_click', { network: a.dataset.kitShare || (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
-		if (/^tel:/i.test(href)) { track('call_click', { number: href.slice(4) }); return; }
-		if (/(^|\/\/|\.)(wa\.me|whatsapp\.com)\b/i.test(href)) { track('whatsapp_click', {}); return; }
-		if (/^mailto:/i.test(href)) { track('email_click', {}); return; }
+		// a share link outside a share row (a "share on WhatsApp/X/Facebook/LinkedIn" intent URL) is a share too, not a contact
+		var intent = shareIntent(href);
+		if (intent) { track('share_click', { network: intent }); return; }
+		// contact clicks on an item page about one organisation (a Directory profile) carry it: listing_id, listing_name
+		var who = page.listing_id && a.closest('main') && !a.closest('.wp-block-post-template') ? { listing_id: page.listing_id, listing_name: page.listing_name || '' } : {};
+		if (/^tel:/i.test(href)) { track('call_click', Object.assign({ number: href.slice(4) }, who)); return; }
+		// WhatsApp contact = a chat with a number (wa.me/<number>, api.whatsapp.com/send?phone=); a group invite
+		// (chat.whatsapp.com) or a channel is not a contact and counts as an outbound click below.
+		if (/(^|\/\/|\.)wa\.me\/\+?\d/i.test(href) || /whatsapp\.com\/send\?(.*&)?phone=\d/i.test(href)) { track('whatsapp_click', who); return; }
+		if (/^mailto:/i.test(href)) { track('email_click', who); return; }
 		if (/\.pdf(\?|#|$)/i.test(href) || a.hasAttribute('download')) { track('pdf_download', { item: document.title.split(' – ')[0].slice(0, 100), issuer: page.issuer || '' }); }
 		var li = a.closest('.wp-block-post-template > li');
 		if (li && !li.classList.contains('kit-ad-item')) {
-			var list = li.parentNode, pos = Array.prototype.indexOf.call(list.children, li) + 1;
-			track('card_click', { list: page.section || page.page_type || '', position: pos });
+			// position among the cards only (ad cards in the list are not counted); the card's post ID and title
+			var cards = Array.prototype.filter.call(li.parentNode.children, function (c) { return !c.classList.contains('kit-ad-item'); });
+			var title = li.querySelector('.wp-block-post-title, h2, h3');
+			track('card_click', { list: page.section || page.page_type || '', position: cards.indexOf(li) + 1, card_id: ((li.className.match(/\bpost-(\d+)\b/) || [])[1] || ''), card_name: title ? title.textContent.replace(/\s+/g, ' ').trim().slice(0, 100) : '' });
 		}
 		try {
 			var u = new URL(href, location.href);
@@ -747,6 +779,51 @@
 			marks.forEach(function (m) { if (pct >= m && !hit[m]) { hit[m] = 1; track('scroll_depth', { percent: m }); } });
 		});
 	}, { passive: true });
+})();
+
+/* Ad slots (.kit-ad, kits-core ads.php), owner's analytics audit 17 Oct 2026. Per slot with code, once per page view:
+   ad_slot_status (ad_slot, ad_status, position): filled / unfilled as AdSense reports it on its <ins data-ad-status>;
+   not_loaded when the AdSense script never ran (blocked) and no_response when it ran but gave no answer within 15 s;
+   code for another network's code (fill unknown). ad_slot_view: a filled slot at least half on screen for 1 second.
+   Clicks on an ad cannot be counted: the ad is a frame from Google's domain. Empty placeholders are skipped. */
+(function () {
+	var slots = document.querySelectorAll('aside.kit-ad:not(.kit-ad--empty)');
+	if (!slots.length) return;
+	function track(name, params) { if (typeof window.kitsTrack === 'function') window.kitsTrack(name, params); }
+	Array.prototype.forEach.call(slots, function (el, i) {
+		var name = (el.className.match(/\baw-ad-([a-z0-9-]+)/) || [])[1] || 'unknown';
+		var ins = el.querySelector('ins.adsbygoogle');
+		var status = '', seen = false, viewed = false;
+		function view() {
+			if (viewed || !seen || (status !== 'filled' && status !== 'code')) return;
+			viewed = true;
+			track('ad_slot_view', { ad_slot: name, ad_status: status, position: i + 1 });
+		}
+		function report(s) {
+			if (status) return;
+			status = s;
+			track('ad_slot_status', { ad_slot: name, ad_status: s, position: i + 1 });
+			view();
+		}
+		if (!ins) {
+			report('code');
+		} else {
+			var check = function () { var s = ins.getAttribute('data-ad-status'); if (s) report(s); };
+			if (window.MutationObserver) new MutationObserver(check).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+			check();
+			var wait = function () { setTimeout(function () { if (!status) report(window.adsbygoogle && window.adsbygoogle.loaded ? 'no_response' : 'not_loaded'); }, 15000); };
+			if (document.readyState === 'complete') wait(); else window.addEventListener('load', wait, { once: true });
+		}
+		if ('IntersectionObserver' in window) {
+			var timer;
+			var io = new IntersectionObserver(function (en) {
+				if (en[0].intersectionRatio >= 0.5) {
+					if (!timer) timer = setTimeout(function () { seen = true; io.disconnect(); view(); }, 1000);
+				} else { clearTimeout(timer); timer = null; }
+			}, { threshold: [0, 0.5] });
+			io.observe(el);
+		}
+	});
 })();
 
 /* Item page sidebar: sticky under the header at lg only when it is shorter than the screen (a taller one scrolls

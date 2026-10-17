@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_ENTITY_LINKS_MAX = 4;
 
 /**
- * The pages an item's stored entities point to: list of [canonical name, URL]. Entities without a published page are
+ * The pages an item's stored entities point to: list of [canonical name, URL, kind (law, organisation, place)]. Entities without a published page are
  * left out, and so is the item's own page.
  *
  * @param int $id Item.
@@ -38,14 +38,14 @@ function aw_entity_targets( $id ) {
 		foreach ( (array) ( $e[ $group ] ?? array() ) as $x ) {
 			$pid = (int) ( $x['id'] ?? 0 );
 			if ( $pid && $pid !== (int) $id && 'publish' === get_post_status( $pid ) && ! in_array( $pid, function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(), true ) ) {
-				$out[] = array( (string) ( $x['name'] ?? '' ), (string) get_permalink( $pid ) );
+				$out[] = array( (string) ( $x['name'] ?? '' ), (string) get_permalink( $pid ), 'laws' === $group ? 'law' : 'organisation' );
 			}
 		}
 	}
 	foreach ( (array) ( $e['places'] ?? array() ) as $x ) {
 		$p = ! empty( $x['district'] ) ? aw_place_district( (int) $x['district'] ) : aw_place_state( (int) ( $x['state'] ?? 0 ) );
 		if ( $p && aw_place_count( $p ) > 0 ) { // a Directory page with listings
-			$out[] = array( (string) ( $x['name'] ?? '' ), aw_directory_url( $p->slug ) );
+			$out[] = array( (string) ( $x['name'] ?? '' ), aw_directory_url( $p->slug ), 'place' );
 		}
 	}
 	return array_values( array_filter( $out, fn( $t ) => '' !== trim( $t[0] ) && untrailingslashit( $t[1] ) !== $self ) );
@@ -56,7 +56,7 @@ function aw_entity_targets( $id ) {
  * AW_ENTITY_LINKS_MAX. A longer name wins over a shorter one at the same place.
  *
  * @param string $text    Escaped text.
- * @param array  $targets [name, URL] pairs.
+ * @param array  $targets [name, URL, kind] (kind: law, organisation or place; data-entity, for analytics).
  * @return string
  */
 function aw_entity_link_text( $text, $targets ) {
@@ -64,7 +64,7 @@ function aw_entity_link_text( $text, $targets ) {
 	foreach ( $targets as $t ) {
 		$name = esc_html( $t[0] );
 		if ( preg_match( '/(?<![\p{L}\p{N}])' . preg_quote( $name, '/' ) . '(?![\p{L}\p{N}])/u', $text, $m, PREG_OFFSET_CAPTURE ) ) {
-			$hits[] = array( $m[0][1], strlen( $m[0][0] ), $t[1] );
+			$hits[] = array( $m[0][1], strlen( $m[0][0] ), $t[1], (string) ( $t[2] ?? '' ) );
 		}
 	}
 	usort( $hits, fn( $a, $b ) => ( $a[0] <=> $b[0] ) ?: ( $b[1] <=> $a[1] ) );
@@ -83,7 +83,7 @@ function aw_entity_link_text( $text, $targets ) {
 		}
 	}
 	foreach ( array_reverse( $keep ) as $h ) {
-		$text = substr( $text, 0, $h[0] ) . '<a href="' . esc_url( $h[2] ) . '">' . substr( $text, $h[0], $h[1] ) . '</a>' . substr( $text, $h[0] + $h[1] );
+		$text = substr( $text, 0, $h[0] ) . '<a href="' . esc_url( $h[2] ) . '"' . ( '' !== $h[3] ? ' data-entity="' . esc_attr( $h[3] ) . '"' : '' ) . '>' . substr( $text, $h[0], $h[1] ) . '</a>' . substr( $text, $h[0] + $h[1] );
 	}
 	return $text;
 }

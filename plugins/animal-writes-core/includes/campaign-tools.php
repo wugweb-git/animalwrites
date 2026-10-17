@@ -366,10 +366,11 @@ add_shortcode(
 		if ( ! $post || 'publish' !== $post->post_status ) {
 			return '';
 		}
-		$url = get_permalink( $post );
-		$day = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
+		$url  = get_permalink( $post );
+		$day  = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
+		$data = ' data-campaign-slug="' . esc_attr( $post->post_name ) . '" data-campaign-title="' . esc_attr( get_the_title( $post ) ) . '"'; // campaign_action promo_click (aw-analytics.js)
 		if ( ! aw_camp_is_open( $post->ID ) ) { // after closing: a quieter "Latest campaign" card in the same place
-			$out  = '<section class="aw-camp aw-camp-band aw-camp-band--closed' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t">';
+			$out  = '<section class="aw-camp aw-camp-band aw-camp-band--closed' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>';
 			$out .= '<p class="aw-camp-band-kicker">Latest campaign</p>';
 			$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 			$out .= '<p>' . ( $day ? 'Objections closed on ' . aw_date( $day ) . '. ' : '' ) . 'See what happens next and read the rules.</p>';
@@ -377,7 +378,7 @@ add_shortcode(
 			return $out . '</section>';
 		}
 		aw_camp_cache_until( $post->ID );
-		$out = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t">';
+		$out = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>';
 		$out .= do_shortcode( '[aw_countdown date="' . esc_attr( $day ) . '" label="Last day"]' );
 		$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 		$out .= $a['text'] ? '<p>' . esc_html( $a['text'] ) . '</p>' : '';

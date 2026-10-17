@@ -143,9 +143,9 @@ function aw_block_org_details( $a, $id ) {
 	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x-brand', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ) ) as $k => $l ) {
 		if ( $m( $k ) ) {
 			$rel    = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
-			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
+			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>'; // data-act: analytics (aw-analytics.js)
 		} elseif ( 'aw_maps_url' === $k ) { // no map link yet: Directions stays, greyed out and not a link (owner, 15 Oct 2026)
-			$links .= '<span class="kit-btn kit-btn--secondary kit-btn--sm" role="link" aria-disabled="true">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</span>';
+			$links .= '<span class="kit-btn kit-btn--secondary kit-btn--sm" role="link" aria-disabled="true" data-act="maps_url">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</span>';
 		}
 	}
 	$photos = '';
@@ -163,8 +163,8 @@ function aw_block_org_details( $a, $id ) {
 	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // the Opening hours by day list
 	$contact = array(
 		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones ) ),
-		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
-		'aw_website' => array( 'link', 'Website', $m( 'aw_website' ) ? '<a href="' . esc_url( $m( 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '">' . esc_html( preg_replace( '#^https?://(www\.)?|/$#', '', $m( 'aw_website' ) ) ) . '</a>' : '' ),
+		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '" data-act="email">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
+		'aw_website' => array( 'link', 'Website', $m( 'aw_website' ) ? '<a href="' . esc_url( $m( 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" data-act="website">' . esc_html( preg_replace( '#^https?://(www\.)?|/$#', '', $m( 'aw_website' ) ) ) . '</a>' : '' ),
 	);
 	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
 	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">Suggest an update</a>' : '';
@@ -214,9 +214,9 @@ function aw_org_phones_html( $phones ) {
 			continue;
 		}
 		$wa     = $p['whatsapp'] ? aw_normalise_phone( $p['number'] ) : '';
-		$items .= '<li><a href="' . esc_url( $tel ) . '">' . esc_html( $p['number'] ) . '</a>'
+		$items .= '<li><a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>'
 			. ( '' !== $p['label'] ? ' <span class="aw-org-phones-label">' . esc_html( $p['label'] ) . '</span>' : '' )
-			. ( $wa && strlen( $wa ) > 5 ? ' <a class="aw-org-phones-wa" href="' . esc_url( 'https://wa.me/' . $wa ) . '" rel="noopener" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . 'WhatsApp</a>' : '' )
+			. ( $wa && strlen( $wa ) > 5 ? ' <a class="aw-org-phones-wa" href="' . esc_url( 'https://wa.me/' . $wa ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . 'WhatsApp</a>' : '' )
 			. '</li>';
 	}
 	return $items ? '<ul class="aw-org-phones">' . $items . '</ul>' : '';
