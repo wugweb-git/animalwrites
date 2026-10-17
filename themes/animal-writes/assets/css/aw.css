@@ -354,7 +354,7 @@ body { background: var(--kit-color-canvas); }
 .aw-story--row:first-child { border-top: 0; padding-top: 0; }
 .aw-story--row .kit-story-media { order: 2; }
 .aw-story--row .aw-story-kicker { margin-top: 0; }
-.aw-news-grid { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
+.aw-news-grid { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-card-min)), 1fr)); } /* two cards from about 600px wide, before the 768 layout */
 @media (min-width: 768px) { .aw-news-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-news-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
@@ -434,7 +434,7 @@ body { background: var(--kit-color-canvas); }
 @media (max-width: 767px) { .aw-org { grid-template-columns: var(--kit-size-target) 1fr; } .aw-org-mark { width: var(--kit-size-target); height: var(--kit-size-target); } .aw-org-actions { grid-column: 2; } .aw-org-go { display: none; } }
 
 /* ACTION — Opportunities */
-.aw-opps { display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
+.aw-opps { display: grid; gap: var(--kit-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-card-min)), 1fr)); }
 @media (min-width: 768px) { .aw-opps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .aw-opp { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-1); }
 @media (min-width: 1200px) { .aw-opp { grid-template-columns: 2fr 3fr; } }
@@ -626,7 +626,7 @@ body { background: var(--kit-color-canvas); }
 .kit-pager > a { align-items: center; justify-content: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-3); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: var(--kit-color-raised); color: var(--kit-color-ink); text-decoration: none; font-weight: var(--kit-weight-medium); }
 
 /* News: on page 1 the first story leads, with three rows beside it; then the grid */
-.aw-news-list { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); }
+.aw-news-list { display: grid; gap: var(--kit-space-7) var(--kit-space-grid); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--kit-card-min)), 1fr)); }
 @media (min-width: 768px) { .aw-news-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-news-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-hub-list .kit-story-media { margin: 0; }

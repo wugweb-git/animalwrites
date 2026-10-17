@@ -179,12 +179,13 @@ add_filter(
 		// Cards at each width: layout and data states together. Media queries follow the viewport, so each list is its
 		// real page in a frame of that width (scaled to fit); scroll inside a frame for more items and states.
 		$cards = array(
-			'News: lead and rows'         => array( '/news/', '.wp-block-post-template' ),
+			'News: lead and rows'         => array( '/news/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
 			'Library card'                => array( '/library/', '.wp-block-post-template' ),
 			'Resources card'              => array( '/resources/', '.wp-block-post-template' ),
-			'Opportunity card'            => array( '/opportunities/', '.wp-block-post-template' ),
+			'Opportunity card'            => array( '/opportunities/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
 			'Directory card'              => array( '/directory/', '.wp-block-post-template' ),
-			'Media & PR card'             => array( '/media/', '.wp-block-post-template' ),
+			'Media & PR card'             => array( '/media/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
+			'Campaign: news grid'         => array( '/campaigns/lab-animals-rules-2026/', '.aw-news-grid', array( 375, 640, 768, 1024, 1200 ) ),
 			'Category page: News rows'    => array( '/category/community-dogs/', '.aw-hub-news' ),
 			'Search results'              => array( '/search/?q=dog', 'main h3' ),
 			'Home: Need help now'         => array( '/', '.kit-ed-help' ),
@@ -195,11 +196,11 @@ add_filter(
 			'Directory listing page'      => array( '/directory/org/wugweb-sample-listing/', 'main' ),
 			'Item page: text and sidebar (sidebar empty today)' => array( '/resources/reporting-illegal-pet-shops-and-breeders/', 'main' ),
 		);
-		$out .= '<h2>Cards at each width</h2><p>Each list in its real page at 375, 768, 1199 and 1200 pixels (the token breakpoints are 768 and 1200): the layout state and the data states of the items together. Scroll inside a frame for more items.</p>'
+		$out .= '<h2>Cards at each width</h2><p>Each list in its real page at 375, 768, 1199 and 1200 pixels (the token breakpoints are 768 and 1200): the layout state and the data states of the items together. Card grids that fit two cards from about 600px wide (auto-fill, no extra breakpoint) also show 640 and 1024. Scroll inside a frame for more items.</p>'
 			. '<style>.aw-bp-set{display:grid;gap:var(--s-4);grid-template-columns:repeat(auto-fill,minmax(min(100%,18rem),1fr));margin-bottom:var(--s-6)}.aw-bp{margin:0}.aw-bp-frame{position:relative;overflow:hidden;height:32rem;border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-canvas)}.aw-bp-frame iframe{position:absolute;inset:0 auto auto 0;border:0;transform-origin:0 0}.aw-bp figcaption{font-size:var(--fluid-label);color:var(--kit-color-muted);margin-top:var(--s-2)}</style>';
 		foreach ( $cards as $name => $c ) {
 			$out .= '<h3 class="kit-demo-h">' . esc_html( $name ) . '</h3><div class="aw-bp-set">';
-			foreach ( array( 375, 768, 1199, 1200 ) as $w ) {
+			foreach ( $c[2] ?? array( 375, 768, 1199, 1200 ) as $w ) {
 				$out .= '<figure class="aw-bp"><div class="aw-bp-frame"><iframe loading="lazy" tabindex="-1" title="' . esc_attr( $name . ', ' . $w . ' pixels' ) . '" width="' . (int) $w . '" data-w="' . (int) $w . '" data-at="' . esc_attr( $c[1] ) . '" src="' . esc_url( home_url( $c[0] ) ) . '"></iframe></div><figcaption>' . esc_html( $w . ' px' ) . '</figcaption></figure>';
 			}
 			$out .= '</div>';

@@ -470,6 +470,11 @@
       "md": "112px",
       "lg": "112px"
     },
+    "card-min": {
+      "sm": "17rem",
+      "md": "17rem",
+      "lg": "17rem"
+    },
     "size-target-min": {
       "sm": "24px",
       "md": "24px",

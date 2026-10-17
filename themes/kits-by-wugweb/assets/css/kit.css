@@ -50,7 +50,7 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 /* 3. Layout ----------------------------------------------------------------- */
 .wp-block-post-template.is-layout-grid ,.kit-cards .wp-block-post-template {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(min(var(--kit-card-min), 100%), 1fr));
 	gap: var(--kit-space-6) var(--kit-space-grid);
 	list-style: none;
 	padding: 0;
