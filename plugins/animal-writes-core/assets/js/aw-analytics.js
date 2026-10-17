@@ -27,7 +27,12 @@
 		if (params.ecommerce) dl.push({ ecommerce: null });
 		dl.push(Object.assign({ event: name, page_type: page.page_type || '' }, params));
 	}
-	function text(el) { return el ? el.textContent.replace(/\s+/g, ' ').trim().slice(0, 100) : ''; }
+	function text(el) { // visible text: without screen-reader notes such as " (external site)" (kit.js)
+		if (!el) return '';
+		var c = el.cloneNode(true);
+		Array.prototype.forEach.call(c.querySelectorAll('.screen-reader-text'), function (n) { n.remove(); });
+		return c.textContent.replace(/\s+/g, ' ').trim().slice(0, 100);
+	}
 	function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
 	function domain(href) { try { var u = new URL(href, location.href); return u.host === location.host ? '' : u.host.replace(/^www\./, ''); } catch (x) { return ''; } }
 
@@ -54,7 +59,7 @@
 			item_name: text(a),
 			item_category: text(li.querySelector('.aw-org-tags .kit-tag')),
 			item_category2: meta.length > 1 ? meta[meta.length - 1] : page.state || '',
-			item_category3: meta.length > 1 ? meta.slice(0, -1).join(', ') : page.district || '',
+			item_category3: meta.length > 1 ? meta[meta.length - 2] : page.district || '', // "Area, District, State": the district
 			index: index
 		};
 		if (list) { it.item_list_id = list.id; it.item_list_name = list.name; }
