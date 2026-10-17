@@ -80,13 +80,34 @@ function aw_gtm_enabled() {
 	return true;
 }
 
+/**
+ * Site Kit's Tag Manager container ID when Site Kit places the container ('' otherwise). Its snippet starts the
+ * container at once; it is held back (googlesitekit_tagmanager_tag_blocked) and the same container is placed by the
+ * snippet below, which starts it after the page has loaded. Same pages as Site Kit: the live (production) site only.
+ *
+ * @return string
+ */
+function kits_sitekit_gtm_id() {
+	$s = get_option( 'googlesitekit_tagmanager_settings' );
+	if ( is_admin() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
+		return '';
+	}
+	return (string) $s['containerID'];
+}
+add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $b ) => '' !== kits_sitekit_gtm_id() ? true : $b );
+
+/** The container to place on this request: the site's own (aw_gtm_enabled) or Site Kit's; '' for none. */
+function kits_gtm_container() {
+	return aw_gtm_enabled() ? aw_gtm_id() : kits_sitekit_gtm_id();
+}
+
 add_action(
 	'wp_head',
 	function () {
-		if ( ! aw_gtm_enabled() ) {
+		if ( '' === kits_gtm_container() ) {
 			return;
 		}
-		$id = esc_js( aw_gtm_id() );
+		$id = esc_js( kits_gtm_container() );
 		// Page speed: the container starts once the page has loaded, or at the visitor's first tap, key or scroll if that
 		// comes first, so it never holds back the first paint. gtm.start is stamped now; everything pushed to the dataLayer
 		// before the container starts (consent defaults, page_context, events) is kept and read by it.
@@ -98,10 +119,10 @@ add_action(
 add_action(
 	'wp_body_open',
 	function () {
-		if ( ! aw_gtm_enabled() ) {
+		if ( '' === kits_gtm_container() ) {
 			return;
 		}
-		echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( aw_gtm_id() ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
+		echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( kits_gtm_container() ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
 	}
 );
 
