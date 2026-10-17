@@ -18,9 +18,11 @@ const AW_BOTS = '/bot|crawl|spider|slurp|preview|monitor|curl|wget|python|headle
 function kits_visits_public() {
 	$base  = (int) get_option( 'aw_visits_baseline', 0 ); // visits before this counter started (GA or the 1.0 site)
 	$since = (string) get_option( 'aw_visits_baseline_since' );
+	$since = $base && $since ? $since : (string) get_option( 'aw_visits_since' );
 	return array(
-		'total' => $base + (int) get_option( 'aw_visits_total', 0 ),
-		'since' => $base && $since ? $since : (string) get_option( 'aw_visits_since' ),
+		'total'       => $base + (int) get_option( 'aw_visits_total', 0 ),
+		'since'       => $since,
+		'since_label' => $since ? wp_date( (string) get_option( 'date_format' ), strtotime( $since . ' 12:00:00' ) ) : '', // the site's date format, as every other date
 	);
 }
 
@@ -139,7 +141,7 @@ function count(){try{if(navigator.webdriver||sessionStorage.getItem('aw_v'))retu
 function show(){if(!d.querySelector('.kit-visits'))return;
   fetch(<?php echo wp_json_encode( $total ); ?>+'?t='+Math.floor(Date.now()/3e5)).then(function(r){if(!r.ok)throw 0;return r.json();})
   .catch(function(){return fetch(<?php echo wp_json_encode( $rest ); ?>).then(function(r){return r.json();});}).then(function(v){
-  if(!v||!v.total)return;var since=v.since?new Date(v.since+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+  if(!v||!v.total)return;var since=v.since_label||(v.since?new Date(v.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).replace('Sept','Sep'):'');
   d.querySelectorAll('.kit-visits').forEach(function(x){x.textContent=v.total.toLocaleString('en-IN')+' visits'+(since?' since '+since:'');});}).catch(function(){});}
 function go(){count();show();}
 if(d.prerendering){d.addEventListener('prerenderingchange',go,{once:true});}else{go();}

@@ -306,7 +306,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 
 /* ---------- 16. Form standard (S5.2): one look for every form, from tokens ---------- */
 .kit-field > label, .kit-field > .kit-field-label, .kit-check-group > legend { font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
-.kit-field .kit-optional { font-weight: 400; color: var(--neutral-5); }
+.kit-field .kit-optional { font-weight: 400; color: var(--kit-color-muted); } /* neutral-5 was 4.1:1 on white */
 .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
 	min-height: 44px; padding: 0 var(--s-3); border-radius: var(--r-2);
 	background-color: var(--neutral-0); border: 1px solid var(--neutral-3); color: var(--neutral-10);
