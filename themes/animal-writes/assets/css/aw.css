@@ -139,7 +139,7 @@
 }
 .aw-dir-search .kit-field { margin: 0; min-width: 0; }
 .aw-dir-search > p:empty, .aw-dir-search > br { display: none; } /* left by auto-paragraphs around the shortcode */
-.kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
+.kit-section-band--compact { padding-bottom: var(--kit-space-6); } /* Directory: height = content (E1) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
@@ -611,7 +611,7 @@ body { background: var(--kit-color-canvas); }
    The Post Template items carry the old card classes; the generic query-loop card (kit.css) is undone here.
    =========================================================================== */
 .aw-hub-page > .wp-block-post-content { margin-block: 0; }
-.wp-block-post-content > .kit-section-band:first-child { margin-top: 0 !important; }
+.wp-block-post-content > .kit-section-band:first-child { margin-top: 0; }
 .aw-hub-list .wp-block-post-template { list-style: none; margin: 0; padding: 0; }
 .aw-hub-list .wp-block-post-template > li { position: static; display: block; margin: 0; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0; box-shadow: none !important; overflow: visible; transform: none !important; }
 .aw-hub-list .wp-block-post-template > li::after { display: none; }
