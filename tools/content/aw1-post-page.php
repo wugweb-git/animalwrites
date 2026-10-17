@@ -330,13 +330,8 @@ $news = a1sec(
 	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n"
 );
 
-/* ---------- 13 support: lessons learned, hidden until the owner writes them ---------- */
-$support = a1sec(
-	'support',
-	a1h( 'Lessons learned' )
-	. "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Handwritten letters and a single day of action gave thousands of people one clear, simple thing to do, and drew national press coverage.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>City coordinators made it possible to reach people far beyond the big metros.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Letters alone did not change the Court’s order. Public pressure on a court works differently from a comment window on a draft law, where objections must be formally considered.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Counting letters ourselves left our figures unverified. Future campaigns should record participation in a way others can check.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n",
-	'aw-camp-needs-copy'
-);
+/* ---------- 13 support: none (owner, 17 Oct 2026: the Lessons learned module removed; nothing else in it, so the
+   section is not printed) ---------- */
 
 /* ---------- 14 updates ---------- */
 $updates = a1sec( 'updates', a1h( 'Stay connected' ) . $ser( $take( 102 ) ) . $ser( $take( 111 ) ), 'aw-camp-dark' );
@@ -355,8 +350,28 @@ $unused_group = '<!-- wp:group {"className":"aw-unused-review","layout":{"type":
 
 $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--community-dogs","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-group alignfull aw-camp aw-camp--community-dogs">'
-	. $hero . $goal . $why . $how . $context . $impact . $next . $partners . $press . $library . $news . $support . $updates
+	. $hero . $goal . $why . $how . $context . $impact . $next . $partners . $press . $library . $news . $updates
 	. "</div>\n<!-- /wp:group -->";
+
+/* Headings in sentence case, dates as j M Y (owner, 17 Oct 2026). On the final text, so the old blocks' checks
+   above still compare their original wording. */
+$content = preg_replace_callback(
+	'#(<h[1-6][^>]*>)([^<]*)(</h[1-6]>)#',
+	fn( $m ) => $m[1] . strtr(
+		$m[2],
+		array(
+			'Campaign Timeline'                              => 'Campaign timeline',
+			'Supported By'                                   => 'Supported by',
+			'Media Coverage'                                 => 'Media coverage',
+			'No Infrastructure'                              => 'No infrastructure',
+			'Inevitable Suffering'                           => 'Inevitable suffering',
+			'Humane Solutions Exist'                         => 'Humane solutions exist',
+			'Why Letters to the Supreme Court Work?'         => 'Why letters to the Supreme Court work?',
+			'Nationwide GPO Participation on November 29th' => 'Nationwide GPO participation on 29 Nov 2025',
+		)
+	) . $m[3],
+	$content
+);
 
 $post = get_post( $post_id );
 $id   = wp_insert_post(
