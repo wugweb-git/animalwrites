@@ -169,6 +169,7 @@ function aw_form_back( $fallback ) {
  * @return string
  */
 function aw_form_open( $form, $attrs = array() ) {
+	$GLOBALS['aw_form_copies'][ $form ] = ( $GLOBALS['aw_form_copies'][ $form ] ?? 0 ) + 1; // the same form twice on a page (a page's own and the footer's)
 	$state  = aw_form_state( $form );
 	$altcha = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
 	$attrs = array_merge(
@@ -176,7 +177,7 @@ function aw_form_open( $form, $attrs = array() ) {
 			'class'  => 'kit-form',
 			'method' => 'post',
 			'action' => admin_url( 'admin-post.php' ),
-			'id'     => 'aw-form-' . $form,
+			'id'     => 'aw-form-' . $form . aw_form_copy_suffix( $form ),
 			'data-generic-error' => aw_form_generic_error( $form ),
 		),
 		$attrs
@@ -213,14 +214,25 @@ function aw_form_open( $form, $attrs = array() ) {
 }
 
 /**
- * Stable id for a field.
+ * Id suffix for the second and later copies of a form on one page ("-2", "-3"), so no id repeats; '' for the first.
+ *
+ * @param string $form Form key.
+ * @return string
+ */
+function aw_form_copy_suffix( $form ) {
+	$n = (int) ( $GLOBALS['aw_form_copies'][ $form ] ?? 1 );
+	return $n > 1 ? '-' . $n : '';
+}
+
+/**
+ * Stable id for a field (in the form copy being built).
  *
  * @param string $form Form key.
  * @param string $name Field name.
  * @return string
  */
 function aw_field_id( $form, $name ) {
-	return sanitize_html_class( str_replace( '_', '-', $form ) . '-' . rtrim( $name, '[]' ) );
+	return sanitize_html_class( str_replace( '_', '-', $form ) . '-' . rtrim( $name, '[]' ) . aw_form_copy_suffix( $form ) );
 }
 
 /**

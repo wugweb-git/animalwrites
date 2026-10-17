@@ -263,6 +263,7 @@ function aw_publisher_schema() {
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
 				'email'         => $email,
 				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ) ),
+				'foundingDate'  => '2025-11', // the first campaign, India Writes for Its Community Dogs (November 2025)
 				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
 				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'aw_seo_plain', $about ) ) : null,
 				'sameAs'        => aw_publisher_profiles(),
