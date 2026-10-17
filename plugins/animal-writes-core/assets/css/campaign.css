@@ -275,7 +275,7 @@
 .aw-camp .aw-camp-band-ghost:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
 
-/* Press cards on a campaign page: the publisher's logo on the campaign surface */
+/* Press cards on a campaign page: an item without a photo shows the publisher's logo on the campaign surface */
 .aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface, var(--aw-camp-paper)); }
 .aw-camp .aw-camp-press .aw-story-fallback img.aw-story-logo { width: auto !important; height: auto !important; max-width: 45%; max-height: 45%; } /* a logo tile, whole, not a photo-sized logo */
 .aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface, var(--aw-camp-paper)); border-bottom-color: var(--camp-primary, var(--aw-camp-brand)); }

@@ -347,7 +347,7 @@ $press = c2sec(
 	. '<!-- wp:query {"queryId":85,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->' . "\n"
 	. '<!-- wp:group {"tagName":"article","className":"aw-story aw-story\\u002d\\u002dcard aw-story\\u002d\\u002dexternal","layout":{"type":"default"}} -->' . "\n"
-	. '<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media {"logo":true} /-->' . "\n\n"
+	. '<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media /-->' . "\n\n"
 	. '<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->' . "\n\n"
 	. '<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-story-title"} /-->' . "\n\n" . '<!-- wp:animal-writes/press-meta /--></div>' . "\n" . '<!-- /wp:group --></article>' . "\n" . '<!-- /wp:group -->' . "\n"
 	. '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
