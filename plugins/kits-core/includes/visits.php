@@ -142,7 +142,7 @@ function show(){if(!d.querySelector('.kit-visits'))return;
   fetch(<?php echo wp_json_encode( $total ); ?>+'?t='+Math.floor(Date.now()/3e5)).then(function(r){if(!r.ok)throw 0;return r.json();})
   .catch(function(){return fetch(<?php echo wp_json_encode( $rest ); ?>).then(function(r){return r.json();});}).then(function(v){
   if(!v||!v.total)return;var since=v.since_label||(v.since?new Date(v.since+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}).replace('Sept','Sep'):'');
-  d.querySelectorAll('.kit-visits').forEach(function(x){x.textContent=v.total.toLocaleString('en-IN')+' visits'+(since?' since '+since:'');});}).catch(function(){});}
+  d.querySelectorAll('.kit-visits').forEach(function(x){x.textContent=v.total.toLocaleString('en-IN')+' visits'+(since?' since ':'');if(since){var m=d.createElement('span'),t=d.createElement('time');m.className='kit-meta';t.dateTime=v.since;t.textContent=since;m.appendChild(t);x.appendChild(m);}});}).catch(function(){});}
 function go(){count();show();}
 if(d.prerendering){d.addEventListener('prerenderingchange',go,{once:true});}else{go();}
 })(document);

@@ -661,3 +661,24 @@ function aw_heading_dates( $html ) {
 	return implode( '', $parts );
 }
 add_filter( 'render_block_core/heading', fn( $html ) => is_admin() ? $html : aw_heading_dates( $html ), 20 ); // content shown outside the block filters (guide sections)
+
+/*
+ * Titles and summaries are stored in the one format too (owner, 17 Oct 2026: "we keep only one format in dates"), so
+ * a worker, an import or an editor writing "October 15, 2026" or "4th October, 2026" saves "15 Oct 2026" / "4 Oct 2026".
+ * The body of a Library document keeps the Gazette's own text (it is shown in the one format, above). Search titles and
+ * descriptions are printed in the one format.
+ */
+add_filter(
+	'wp_insert_post_data',
+	function ( $data ) {
+		foreach ( array( 'post_title', 'post_excerpt' ) as $f ) {
+			if ( isset( $data[ $f ] ) && '' !== $data[ $f ] ) {
+				$data[ $f ] = wp_slash( aw_heading_dates( wp_unslash( $data[ $f ] ) ) );
+			}
+		}
+		return $data;
+	},
+	20
+);
+add_filter( 'rank_math/frontend/title', 'aw_heading_dates', 20 );
+add_filter( 'rank_math/frontend/description', 'aw_heading_dates', 20 );

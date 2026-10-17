@@ -90,7 +90,7 @@ function aw_published_ts( $id ) {
 }
 
 /**
- * Relative time, Google News style: "3 hours ago", "2 days ago", then "5 Oct".
+ * Relative time, Google News style: "3 hours ago", "2 days ago", then the date in the site format ("5 Oct 2026").
  *
  * @param int $id Post ID.
  * @return string <time> element.
@@ -102,11 +102,11 @@ function aw_rel_time_html( $id ) {
 		/* translators: %s: human time difference, e.g. 3 hours. */
 		$label = $diff < MINUTE_IN_SECONDS * 2 ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) );
 	} else {
-		$label = wp_date( wp_date( 'Y' ) === wp_date( 'Y', $ts ) ? 'j M' : 'j M Y', $ts );
+		$label = wp_date( (string) get_option( 'date_format' ), $ts ); // the site's one date format, with the year
 	}
 	$src   = (string) get_post_meta( $id, 'aw_source_date', true );
 	$exact = ! $src || wp_date( 'Y-m-d', (int) get_post_time( 'U', true, $id ) ) === $src; // only the date is known otherwise
-	return '<time class="aw-rel-time" datetime="' . esc_attr( $exact ? gmdate( 'c', $ts ) : $src ) . '" title="' . esc_attr( wp_date( $exact ? 'j F Y, g:i a' : 'j F Y', $ts ) ) . '">' . esc_html( $label ) . '</time>';
+	return '<time class="aw-rel-time" datetime="' . esc_attr( $exact ? gmdate( 'c', $ts ) : $src ) . '" title="' . esc_attr( wp_date( $exact ? get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) : (string) get_option( 'date_format' ), $ts ) ) . '">' . esc_html( $label ) . '</time>';
 }
 
 add_shortcode( 'aw_rel_time', fn() => aw_rel_time_html( (int) get_the_ID() ) );
