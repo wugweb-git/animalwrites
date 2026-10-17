@@ -1360,7 +1360,7 @@ body { background: var(--kit-color-canvas); }
 .aw-about-what .is-style-kits-card > * { margin-block: 0; }
 .aw-about-what .is-style-kits-card > * + * { margin-block-start: var(--kit-space-2); }
 .aw-about-what .is-style-kits-card > .wp-block-buttons { margin-block-start: auto; padding-top: var(--kit-space-4); }
-.aw-about-what .is-style-kits-card .wp-block-button__link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
 .aw-about-what .is-style-kits-card:hover { border-color: var(--kit-color-ink); }
 .aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 /* How we work: a note with the brand's yellow rule */
@@ -1377,7 +1377,7 @@ body { background: var(--kit-color-canvas); }
 .aw-about-act > * { margin-block: 0; }
 .aw-about-act > * + * { margin-block-start: var(--kit-space-2); }
 .aw-about-act > p:last-child { margin-block-start: auto; padding-top: var(--kit-space-3); }
-.aw-about-act .kit-ed-more::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.aw-about-act .kit-ed-more::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 .aw-about-act:hover { border-color: var(--kit-color-ink); }
 .aw-about-act:hover .kit-ed-more .kit-ico { transform: translateX(3px); }
 .aw-about-act:has(.kit-ed-more:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
