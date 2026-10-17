@@ -48,6 +48,10 @@ jobs:
         run: python3 tools/ci/registry_check.py
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
         run: python3 tools/ci/footer_check.py
+      - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)
+        run: python3 tools/ci/breakpoint_check.py
+      - name: Colour contrast (text 4.5:1, non-text 3:1; every campaign palette)
+        run: python3 tools/ci/contrast_check.py
       - name: No picture used twice on the live site
         run: python3 tools/ci/thumb_check.py
       - name: Boot WordPress and load every page type

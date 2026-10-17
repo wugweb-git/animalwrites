@@ -185,7 +185,11 @@ Hierarchy: controls (inputs, buttons) are tightest, cards and media softer, the 
 | `--aw-carousel-item` | 82% | auto | auto |
 
 ### Breakpoints
-`sm` 0, `md` 768, `lg` 1200, declared once in `tokens.json` → `$breakpoints`. Component CSS uses the same two `min-width` queries; there are no device-named breakpoints.
+Breakpoints (Kits tokens.json): mobile designed and tested at 375px · md 768px · lg 1200px. Fluid type scales from 375 to 1200. No other breakpoints.
+
+A component that must change layout at another width uses a container query (or an auto-fill/minmax grid) inside the component, never a new global media query. QA widths: 375, then either side of each breakpoint: 767 / 768 / 769 and 1199 / 1200 / 1201; also check 640 and 1024 as extra widths.
+
+`sm` 0, `md` 768, `lg` 1200 are declared once in `tokens.json` → `$breakpoints`. Width media queries (CSS, inline PHP styles) and `matchMedia` in JS use only `min-width: 768px` / `max-width: 767px` and `min-width: 1200px` / `max-width: 1199px`; the deploy check `tools/ci/breakpoint_check.py` fails on any other width.
 
 ## States vocabulary
 
