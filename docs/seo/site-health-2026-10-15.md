@@ -119,3 +119,57 @@ The monitor module is on. It holds 225 logged URLs and 514 hits, the last on 15 
 - **The guide's mobile LCP (6.8 s median, was 2.0 s in the single before-run).** The main picture loads quickly but renders late. Check whether the newly filled ads, or the related-items block deployed by another session today, delay it.
 - **Accessibility:** `.kit-tag--info` contrast on related cards, and `dl.aw-org-facts` structure on listings.
 - **PageSpeed Insights (field data):** re-run when the API quota resets, for real-user CrUX numbers.
+
+## Performance Lab (16–17 October)
+
+Performance Lab 4.2.0 is the WordPress performance team's plugin. Its features are separate plugins, installed from Settings → Performance. A database backup was taken first: `~/backups/perf-lab-2026-10-16.sql.gz`.
+
+**What LiteSpeed already does here:** page cache (on) and browser cache (on). Its image features are all off: WebP, image optimisation, lazy-load, viewport images and placeholders. CSS/JS minify and combine are off too. So no Performance Lab feature does the same job as a LiteSpeed feature that is switched on.
+
+**The owner switched on 7 features in the dashboard on 16 Oct, 16:25.** This was during the test. They are kept as the owner set them:
+
+- Enhanced Responsive Images;
+- Modern Image Formats (AVIF, new uploads only; 16 images so far);
+- Speculative Loading (prerender, moderate);
+- Embed Optimizer;
+- Image Placeholders (dominant colour);
+- View Transitions;
+- No-cache BFCache.
+
+### Before and after (Lighthouse 13.5.0, simulated mobile, median of 5)
+
+| Page | Before (16 Oct, no features): perf / LCP / CLS / TBT | After (17 Oct, final set): perf / LCP / CLS / TBT |
+|---|---|---|
+| Home | 85 / 2.5 s / 0 / 328 ms | 79 / 3.3 s / 0 / 333 ms |
+| /news/ | 62 / 10.9 s / 0 / 289 ms | 77 / 3.4 s / 0.004 / 314 ms |
+| Listing (a-dogs-tale) | 78 / 2.6 s / 0 / 379 ms | 83 / 3.1 s / 0 / 382 ms |
+| Guide (how-to-report-animal-cruelty) | 94 / 2.2 s / 0 / 220 ms | 84 / 3.3 s / 0 / 268 ms |
+
+Desktop, median of 3, before → after:
+
+| Page | Perf | LCP | CLS |
+|---|---|---|---|
+| Home | 93 → 95 | 0.9 → 1.0 s | 0.009 → 0.009 |
+| /news/ | 88 → 91 | 1.4 → 1.0 s | 0 → 0 |
+| Listing | 99 → 99 | 0.6 → 0.7 s | 0 → 0 |
+| Guide | 99 → 99 | 0.8 → 0.9 s | 0 → 0 |
+
+- **The mobile numbers swing between two levels.** Each page has fast runs (LCP 2–3.5 s) and slow runs (7–15 s), even with the same settings. In 2 of 5 final runs, every page landed on the slow side.
+- **The images are not the cause.** In the slow runs the main picture downloads in under 0.4 s. It then waits 1.2–2 s to be drawn while the phone's processor runs the Google scripts: the tag manager (300 KB), AdSense (245 KB) and the ads. With the ads blocked, the guide and the listing still had slow runs.
+- **Before → after differences of this size are within that noise.** They do not show that any feature helped or hurt mobile LCP. CLS stayed at about 0 on every page.
+
+### Feature by feature
+
+| Feature | Result | Why |
+|---|---|---|
+| Image Prioritizer + Optimization Detective | **Tested, now off** | The main pictures on all four pages already load at once with `fetchpriority="high"`, so it had little to add. It needs visits to learn each page; 36 simulated visits at 375–1440 px filled its data for the four pages. Run back to back with the features on and off (5 rounds, 17 Oct), the median results were: Home 53 vs 54, /news/ 60 vs 77, listing 61 vs 77, guide 78 vs 60. That is no consistent gain. Both plugins are deactivated. The 5 page records it learned are kept in the database (type `od_url_metrics`). |
+| Enhanced Responsive Images | On (owner) | It only changes the `sizes` attribute on images that load lazily, so the main picture is unaffected. Image Prioritizer also edits `sizes`; that is one more reason to keep it off. |
+| Modern Image Formats | On (owner), AVIF | LiteSpeed's WebP is off, so there is no overlap. It only covers new uploads. The mobile LCP pictures do not benefit: the Home hero is fixed HTML in the page, not an attachment the plugin rewrites, and /news/ pictures come from the publishers' sites. |
+| Speculative Loading | On (owner), prerender / moderate | Core already prefetched links when they were clicked. This makes clicked links open faster, but it cannot change a first-visit Lighthouse score. |
+| Embed Optimizer | On (owner) | No published post has an embed or iframe, so it has nothing to do yet. |
+| Web Worker Offloading | Not installed | It is no longer listed in Performance Lab 4.2.0. AdSense and the Site Kit tag manager are added as inline snippets, which it cannot move. AdSense is not supported off the main thread. |
+| Image Placeholders, View Transitions, No-cache BFCache | On (owner) | Not part of this LCP test. CLS stayed at about 0 and the layout checked out at 375 and 1200 px. |
+
+**Layout check:** Home and the guide were checked in the browser at 375 px and 1200 px with the final set. Hero, cards, the dated blocks and the guide's main picture all look right.
+
+**What would move mobile LCP:** less Google script on phones before the first content. Two ways: no ad above the first content on phones, or load the tag manager later. Both change ad placement or the theme, so neither was done in this job. Point 6 under "For the owner" applies.
