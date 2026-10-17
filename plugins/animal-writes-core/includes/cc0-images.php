@@ -173,11 +173,12 @@ function aw_cc0_check_source( $post_id ) {
 	if ( 200 !== $code ) {
 		return 'HTTP ' . $code;
 	}
-	$type = strtolower( (string) wp_remote_retrieve_header( $r, 'content-type' ) );
-	if ( 0 !== strpos( $type, 'image/' ) ) {
+	$type = wp_remote_retrieve_header( $r, 'content-type' );
+	$type = strtolower( (string) ( is_array( $type ) ? end( $type ) : $type ) ); // a header sent twice comes back as a list
+	$size = @getimagesizefromstring( (string) wp_remote_retrieve_body( $r ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	if ( 0 !== strpos( $type, 'image/' ) && ! $size ) { // the file's own bytes decide when the server names the type wrongly (text/plain, binary/octet-stream, "png")
 		return 'not an image (' . ( $type ? $type : 'no type' ) . ')';
 	}
-	$size = @getimagesizefromstring( (string) wp_remote_retrieve_body( $r ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	if ( $size && ! empty( $size[0] ) && ! empty( $size[1] ) ) {
 		update_post_meta( $post_id, 'aw_source_image_w', (int) $size[0] ); // og:image:width / height (aw-seo-extras)
 		update_post_meta( $post_id, 'aw_source_image_h', (int) $size[1] );

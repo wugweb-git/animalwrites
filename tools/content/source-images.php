@@ -74,9 +74,9 @@ foreach ( $ids as $id ) {
 	}
 	$img  = aw_source_og_image( $src );
 	$have = (string) get_post_meta( $id, 'aw_source_image', true );
-	$ok   = '' !== $img && $img !== $have && ! isset( $shared[ $img ] );
+	$ok   = '' !== $img && ! isset( $shared[ $img ] ); // the same picture as before is checked again (the check now reads the file's bytes)
 	if ( $ok && $apply ) {
-		if ( '' !== $have ) {
+		if ( '' !== $have && $img !== $have ) {
 			update_post_meta( $id, 'aw_source_image_prev', $have );
 		}
 		update_post_meta( $id, 'aw_source_image', $img );
