@@ -296,6 +296,9 @@ function aw_schema_date( $date ) {
  */
 function aw_schema_image( $id ) {
 	$img = ( is_singular() && get_queried_object_id() === (int) $id ) ? aw_seo_image() : ( aw_seo_item_image( $id ) ? aw_seo_item_image( $id ) : aw_seo_default_image() );
+	if ( $img && false !== strpos( html_entity_decode( $img['url'] ), '&' ) ) { // printed through wp_kses (& as &amp;): the plain address, as og:image
+		$img = array( 'url' => strtok( html_entity_decode( $img['url'] ), '?' ), 'width' => 0, 'height' => 0 );
+	}
 	return $img ? array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) ) : null;
 }
 
@@ -1192,7 +1195,11 @@ add_filter(
 		if ( ! $img || empty( $img['url'] ) ) {
 			return $data;
 		}
-		$url   = html_entity_decode( (string) $img['url'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ); // a publisher's address arrives with &amp;
+		$url   = html_entity_decode( (string) $img['url'], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		if ( false !== strpos( $url, '&' ) ) { // Rank Math prints the graph through wp_kses, which turns & into &amp;: the
+			$url = strtok( $url, '?' );          // picture's plain address, as og:image prints it (its crop size unknown)
+			$img = array( 'url' => $url, 'width' => 0, 'height' => 0 );
+		}
 		$old   = isset( $data['primaryImage']['@id'] ) ? (string) $data['primaryImage']['@id'] : '';
 		$image = array_filter( array( '@type' => 'ImageObject', '@id' => $url, 'url' => $url, 'contentUrl' => $url, 'width' => (int) $img['width'], 'height' => (int) $img['height'] ) );
 		if ( '' !== $old && $old !== $url ) {
