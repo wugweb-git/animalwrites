@@ -179,7 +179,7 @@ add_filter(
 				return '';
 			}
 		}
-		if ( preg_match( '/\baw-camp-if-filled\b/', $cls ) && '' === trim( wp_strip_all_tags( $html ) ) && false === strpos( $html, '<img' ) ) {
+		if ( preg_match( '/\baw-camp-if-filled\b/', $cls ) && '' === trim( wp_strip_all_tags( do_shortcode( $html ) ) ) && false === strpos( $html, '<img' ) ) { // shortcodes run after blocks: test what they print
 			return '';
 		}
 		if ( ! preg_match( '/\baw-camp-(open|closed|pre)\b/', $cls, $m ) ) {

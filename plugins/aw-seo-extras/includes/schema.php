@@ -614,7 +614,7 @@ function aw_campaign_list_nodes( $id ) {
 		}
 	}
 	if ( $items ) {
-		$head    = preg_match( '#<h2[^>]*>(.*?)</h2>\s*<!-- /wp:heading -->\s*<!-- wp:group \{"className":"aw-camp-grid"#s', $html, $h ) ? $plain( $h[1] ) : 'What the draft does';
+		$head    = preg_match( '#<h2[^>]*>([^<]*)</h2>\s*<!-- /wp:heading -->\s*<!-- wp:group \{"className":"aw-camp-grid"#', $html, $h ) ? $plain( $h[1] ) : 'What the draft does';
 		$nodes[] = array( '@type' => 'ItemList', '@id' => $url . '#rule-changes', 'name' => $head, 'numberOfItems' => count( $items ), 'itemListElement' => $items, 'isPartOf' => array( '@id' => $url . '#campaign' ) );
 	}
 	$terms = array();

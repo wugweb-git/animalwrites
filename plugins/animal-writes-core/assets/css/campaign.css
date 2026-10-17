@@ -35,7 +35,9 @@
 /* Type: the artwork's heavy, tight headlines, in the site face (Inter) */
 .aw-camp :is(h1, h2, h3.aw-camp-mod-h) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
 .aw-camp h1 { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem); margin: 0 0 var(--kit-space-4); }
-.aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); } /* a module (H3) that has its own band reads like a section */
+.aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
+/* A module (H3) with its own band reads like a section: the site's H2 level (aw.css text levels are !important) */
+.aw-camp h3.aw-camp-mod-h { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; }
 .aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
 .aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
 .aw-camp-section > * { max-width: 1120px; }
@@ -106,6 +108,7 @@
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
+.aw-camp .aw-camp-tier h4 { font-size: var(--kit-type-h3) !important; } /* tiers keep the card-title size as H4 */
 .aw-camp-tier h4 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
 .aw-camp-tier { --fill: 100%; }
