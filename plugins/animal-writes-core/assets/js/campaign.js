@@ -59,6 +59,14 @@
 		});
 		source.hidden = true; // the list stays in the page for readers without JavaScript
 	}
+	var pickedEl = form.querySelector('.aw-letter-picked');
+	function picked() {
+		if (!pickedEl) return;
+		var n = grounds.filter(function (g) { return g.box.checked; }).length;
+		pickedEl.textContent = n + ' of ' + grounds.length + ' chosen';
+	}
+	picked();
+	grounds.forEach(function (g) { g.box.addEventListener('change', picked); });
 
 	function val(name) { return (form.elements[name].value || '').replace(/\s+/g, ' ').trim(); }
 

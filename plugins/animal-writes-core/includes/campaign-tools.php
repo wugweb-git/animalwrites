@@ -188,22 +188,26 @@ add_shortcode(
 <form class="aw-letter" data-letter="<?php echo esc_attr( wp_json_encode( $data ) ); ?>" novalidate>
 	<div class="aw-letter-inputs">
 		<fieldset class="aw-letter-grounds-pick">
-			<legend>Choose your grounds</legend>
+			<legend><span class="aw-letter-step">1</span>Choose your grounds <span class="aw-letter-picked" aria-live="polite"></span></legend>
 			<div class="aw-letter-ground-list"></div>
 		</fieldset>
+		<div class="aw-letter-sign">
+		<p class="aw-letter-head"><span class="aw-letter-step">2</span>Sign it</p>
 		<p class="aw-letter-field"><label for="aw-letter-name">Your name <span aria-hidden="true">*</span></label>
 			<input id="aw-letter-name" name="name" type="text" autocomplete="name" required maxlength="80"></p>
 		<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
 			<input id="aw-letter-city" name="city" type="text" autocomplete="address-level2" required maxlength="60"></p>
 		<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
 			<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
+		</div>
 	</div>
 	<div class="aw-letter-out">
-		<p class="aw-letter-meta"><strong>To:</strong> <?php echo esc_html( $to ); ?><br><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></p>
+		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
+		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<p class="aw-letter-error" role="alert" hidden>Add your name and city first.</p>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail">Send with Gmail</button>
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'send' ); ?>Send with Gmail</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="outlook">Outlook</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto">Email app</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy">Copy letter</button>

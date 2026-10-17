@@ -52,7 +52,7 @@ function c2sec( $anchor, $inner, $cls = '' ) {
 		'align'     => 'full',
 		'className' => $classes,
 		'style'     => array( 'spacing' => array( 'padding' => array( 'top' => 'var:preset|spacing|60', 'bottom' => 'var:preset|spacing|60', 'left' => 'var:preset|spacing|40', 'right' => 'var:preset|spacing|40' ) ) ),
-		'layout'    => array( 'type' => 'constrained', 'contentSize' => '900px' ),
+		'layout'    => array( 'type' => 'constrained', 'contentSize' => '1120px' ),
 	);
 	if ( $anchor ) {
 		$attrs['anchor'] = $anchor;
@@ -91,19 +91,42 @@ function c2faq( $qa ) {
 	}
 	return '<!-- wp:rank-math/faq-block ' . wp_json_encode( array( 'questions' => $qs ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . ' --><div class="wp-block-rank-math-faq-block">' . $html . "</div><!-- /wp:rank-math/faq-block -->\n\n";
 }
+function c2html( $h ) {
+	return "<!-- wp:html -->\n$h\n<!-- /wp:html -->\n\n";
+}
+/** Theme icon (aw.css 4.7), same markup as aw_i(). */
+function c2i( $n ) {
+	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
+}
 function chip( $rule, $label, $allows = '' ) {
 	return '[aw_rule_chip rule="' . $rule . '" label="' . $label . '"' . ( $allows ? ' allows="' . $allows . '"' : '' ) . ']';
 }
 
+/*
+ * Layout (17 Oct 2026 redesign): campaign branding from the explainer artwork (brick red, ink, paper; heavy tight
+ * headlines; stat strip with red top rules; red address box), built from core blocks and theme icons (aw_i names).
+ * Each section uses its own layout: split hero with a poster panel, date strip, icon grid, pain ladder, table,
+ * stepped letter tool, icon list, two-column FAQ, document links, step line, news grid, share band.
+ */
+
 /* 1. Hero (open and closed versions; one shows). */
+$poster = '<div class="aw-camp-poster">'
+	. '<p class="aw-camp-stamp">G.S.R. 864(E)</p>'
+	. '[aw_countdown date="2026-11-05" label="Objections close"]'
+	. '<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">Read the clauses</span> ' . chip( '11-3', 'Rule 11(3)' ) . ' ' . chip( '21-2', 'Rule 21(2)' ) . ' ' . chip( '5-3', 'Rule 5(3)' ) . ' ' . chip( '2-i', 'Rule 2(i)' ) . '</p>'
+	. '</div>';
 $hero = c2sec(
 	'top',
-	c2sc( '[aw_countdown date="2026-11-05" label="Objections close"]' )
+	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-hero-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-hero-cols">'
+	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
 	. c2h( 'Labs could soon approve their own animal experiments.', 1 )
-	. c2p( 'India has published draft rules that move most approvals for animal experiments from the national committee to each lab\'s own committee. Read what the rules say, then send your objection in two minutes.', 'aw-camp-hero-summary' )
-	. c2buttons( array( array( 'Send your objection', '#send' ) ) )
-	. c2p( '<a href="#rules">Read what the rules say</a>' )
-	. c2p( chip( '11-3', 'Rule 11(3)' ) . ' ' . chip( '21-2', 'Rule 21(2)' ) . ' ' . chip( '5-3', 'Rule 5(3)' ) . ' ' . chip( '2-i', 'Rule 2(i)' ) ),
+	. c2p( 'Draft rules would move most approvals for animal experiments from the national regulator to each lab\'s own committee.', 'aw-camp-hero-summary' )
+	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#send">Send your objection</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
+	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#rules">What the rules say</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n"
+	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
+	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
+	. c2html( $poster )
+	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
 	'aw-camp-hero aw-camp-open'
 );
 $hero_closed = c2sec(
@@ -113,37 +136,58 @@ $hero_closed = c2sec(
 	'aw-camp-hero aw-camp-closed'
 );
 
-/* 2. What's happening */
+/* 2. What's happening: the artwork's date strip. */
 $what = c2sec(
 	'what',
 	c2h( 'What\'s happening' )
-	. c2p( 'On 6 October 2026 the Gazette of India published draft rules (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals in India. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).' )
-	. c2list( array( '<strong>30 September 2026:</strong> notification signed', '<strong>6 October 2026:</strong> published in the Gazette', '<strong>5 November 2026:</strong> last day for objections' ), true )
-	. c2p( '<a href="' . $lib_draft . '">Read the full draft in our Library</a>' ),
+	. c2p( 'The Gazette of India has published draft rules (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' )
+	. c2html(
+		'<ol class="aw-camp-dates">'
+		. '<li><span class="aw-camp-dates-when">30 Sep 2026</span><span class="aw-camp-dates-what">Notification signed</span></li>'
+		. '<li><span class="aw-camp-dates-when">6 Oct 2026</span><span class="aw-camp-dates-what">Published in the Gazette</span></li>'
+		. '<li class="is-key"><span class="aw-camp-dates-when">5 Nov 2026</span><span class="aw-camp-dates-what">Last day for objections</span></li>'
+		. '</ol>'
+	)
+	. c2p( '<a class="aw-camp-more" href="' . $lib_draft . '">Read the full draft in our Library ' . c2i( 'arrow-right' ) . '</a>' ),
 	'aw-camp-paper'
 );
 
-/* 3. What the draft does */
+/* 3. What the draft does: icon grid, the main change leads. */
+$card = function ( $icon, $title, $text, $chips ) {
+	return c2p( c2i( $icon ), 'aw-camp-card-ico' ) . c2h( $title, 3 ) . c2p( $text ) . c2p( $chips, 'aw-camp-card-chips' );
+};
 $cards = array(
-	c2h( 'Labs approve most experiments themselves', 3 ) . c2p( 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.' ) . c2p( chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ) ),
-	c2h( 'Some animals could come from open markets', 3 ) . c2p( 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.' ) . c2p( chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ) ),
-	c2h( 'Strays: banned, with exemptions', 3 ) . c2p( 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.' ) . c2p( chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ) ),
-	c2h( 'Wildlife and monkeys: allowed under conditions', 3 ) . c2p( 'Protected species and primates can be used for listed purposes with justification and permission. The draft is unclear on primates.' ) . c2p( chip( '5-1-c', 'Rule 5(1)(c)' ) . ' ' . chip( '6-2', 'Rule 6(2)' ) ),
-	c2h( 'A lab doesn\'t need walls', 3 ) . c2p( 'Places that are not wholly enclosed, and mobile facilities, count as labs.' ) . c2p( chip( '2-i', 'Rule 2(i)' ) ),
-	c2h( 'Training is a reason to use animals', 3 ) . c2p( 'Higher education and professional training are listed purposes, and teaching approvals can last five years.' ) . c2p( chip( '4-6', 'Rule 4(6)' ) . ' ' . chip( '11-11', 'Rule 11(11)' ) ),
+	$card( 'building', 'Labs approve most experiments themselves', 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.', chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ) ),
+	$card( 'world', 'Some animals could come from open markets', 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.', chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ) ),
+	$card( 'alert', 'Strays: banned, with exemptions', 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.', chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ) ),
+	$card( 'heart', 'Wildlife and monkeys: allowed under conditions', 'Protected species and primates can be used for listed purposes with justification and permission. The draft is unclear on primates.', chip( '5-1-c', 'Rule 5(1)(c)' ) . ' ' . chip( '6-2', 'Rule 6(2)' ) ),
+	$card( 'home', 'A lab doesn\'t need walls', 'Places that are not wholly enclosed, and mobile facilities, count as labs.', chip( '2-i', 'Rule 2(i)' ) ),
+	$card( 'knowledge', 'Training is a reason to use animals', 'Higher education and professional training are listed purposes, and teaching approvals can last five years.', chip( '4-6', 'Rule 4(6)' ) . ' ' . chip( '11-11', 'Rule 11(11)' ) ),
 );
-$rules = c2sec( 'rules', c2h( 'What the draft does' ) . c2grid( $cards ) );
+$grid = '';
+foreach ( $cards as $c ) {
+	$grid .= "<!-- wp:group {\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
+}
+$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" );
 
-/* 4. Pain scale */
+/* 4. Pain scale: a four-step ladder; who approves sits on each step. */
+$tier = function ( $lvl, $name, $who, $ext, $text ) {
+	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
+		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
+};
 $pain = c2sec(
 	'pain-scale',
 	c2h( 'The pain scale decides who says yes' )
-	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.' )
-	. c2p( '<strong>Mild: approved by the lab\'s committee.</strong> Examples in the draft: keeping sociable rats or mice alone for a short time; withholding food from adult rats for under 24 hours.' )
-	. c2p( '<strong>Moderate: approved by the lab\'s committee.</strong> Examples: withholding food from adult rats for 48 hours; stimuli the animal cannot escape or avoid; inducing tumours.' )
-	. c2p( '<strong>Severe: CCSEA approval for animals larger than rodents and rabbits.</strong> Examples: toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.', 'aw-camp-severe' )
-	. c2p( '<strong>Non-recovery: CCSEA approval for animals larger than rodents and rabbits.</strong> Done fully under anaesthesia; the animal does not wake up.' )
-	. c2p( 'The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) ),
+	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.', 'aw-camp-lede' )
+	. c2html(
+		'<ol class="aw-camp-ladder">'
+		. $tier( 1, 'Mild', 'Lab\'s own committee', false, 'Keeping sociable rats or mice alone for a short time; withholding food from adult rats for under 24 hours.' )
+		. $tier( 2, 'Moderate', 'Lab\'s own committee', false, 'Withholding food from adult rats for 48 hours; stimuli the animal cannot escape or avoid; inducing tumours.' )
+		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.' )
+		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
+		. '</ol>'
+		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
+	),
 	'aw-camp-dark'
 );
 
@@ -161,9 +205,8 @@ $compare = c2sec(
 			array( 'How it\'s judged', 'Size of the animal', 'Expected pain' ),
 			array( 'Penalty in the Act', 'Up to ₹200', 'Up to ₹200 (Act unchanged); the draft adds suspension or revocation of registration' ),
 		)
-	)
-	. c2p( '<a href="' . $lib_1998 . '">Read the 1998 Rules and their amendments</a> · <a href="' . $lib_act . '">Read the Prevention of Cruelty to Animals Act, 1960</a>' ),
-	'aw-camp-paper'
+	),
+	'aw-camp-paper aw-camp-compare'
 );
 
 /* 6. Send your objection */
@@ -184,34 +227,46 @@ $grounds = array(
 	'<strong>Rule 5(3), strays in practice:</strong> In September 2022 CPCSEA told labs that stray dogs may be used for new vaccine trials and challenge studies, and withdrew that only "till further orders" in October 2023. Rule 5(3)\'s exemption would allow the same again, and should be deleted.',
 );
 $letter_sc = '[aw_letter_tool to="cpcsea-mef@gov.in" subject="Objection to the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E))" ticked="1,2,6"'
-	. ' address="The Member Secretary, Committee for Control and Supervision of Experiments on Animals (CCSEA), Shadipur, Delhi – 110008"'
+	. ' address="The Member Secretary, Committee for Control and Supervision of Experiments on Animals (CCSEA), Shadipur, Delhi 110008"'
 	. ' intro="I submit the following objections to the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026, G.S.R. 864(E) dated 30 September 2026, published in the Gazette of India on 6 October 2026:"'
 	. ' closing="I request that the draft be withdrawn and revised after wider consultation, and that CCSEA publish a clause-by-clause comparison with the 1998 Rules. Kindly acknowledge receipt of this objection."]';
 $send = c2sec(
 	'send',
 	c2h( 'Send your objection' )
-	. c2p( 'Choose your grounds, add your name and city, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.' )
+	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
 	. c2sc( '[aw_campaign_count min="100"]' )
-	. c2p( 'We store nothing from this form. Your letter goes from your own email account.', 'has-small-font-size' ),
+	. c2p( c2i( 'check' ) . 'We store nothing from this form. Your letter goes from your own email account.', 'aw-camp-note' ),
 	'aw-camp-paper aw-camp-open'
 );
 
-/* 7. Other ways to send */
+/* 7. Other ways to send: icon list. */
+$way = function ( $icon, $title, $text ) {
+	return '<li>' . c2i( $icon ) . '<div><h3>' . $title . '</h3><p>' . $text . '</p></div></li>';
+};
 $how = c2sec(
 	'how',
 	c2h( 'Other ways to send' )
-	. c2p( '<strong>Copy and paste.</strong> Copy the letter and the address, and paste them into any email app.' )
-	. c2p( '<strong>By post.</strong> Member Secretary (CCSEA), Office of CCSEA, Near State Bank of India, Delhi Milk Scheme Complex, Shadipur, Delhi – 110008. Post it by 30 October so it arrives in time.' )
-	. c2p( '<strong>Write your own.</strong> Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.' ),
+	. c2html(
+		'<ul class="aw-camp-ways">'
+		. $way( 'file', 'Copy and paste', 'Copy the letter and the address, and paste them into any email app.' )
+		. $way( 'mail', 'By post', 'Member Secretary (CCSEA), Office of CCSEA, Near State Bank of India, Delhi Milk Scheme Complex, Shadipur, Delhi 110008. Post it by 30 October so it arrives in time.' )
+		. $way( 'send', 'Write your own', 'Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.' )
+		. '</ul>'
+	),
 	'aw-camp-open'
 );
 
-/* 8. Questions */
+/* 8. Questions: heading column and answers column. */
 $faq = c2sec(
 	'faq',
-	c2h( 'Questions' )
+	'<!-- wp:columns {"className":"aw-camp-faq-cols"} -->' . "\n" . '<div class="wp-block-columns aw-camp-faq-cols">'
+	. '<!-- wp:column {"width":"34%"} -->' . "\n" . '<div class="wp-block-column" style="flex-basis:34%">'
+	. c2h( 'Questions' )
+	. c2p( 'Something else? <a href="/contact/">Ask us</a> and we\'ll add the answer here.' )
+	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
+	. '<!-- wp:column {"width":"66%"} -->' . "\n" . '<div class="wp-block-column" style="flex-basis:66%">'
 	. c2faq(
 		array(
 			array( 'Are these rules already in force?', 'No. They take effect only after CCSEA considers objections and publishes final rules in the Gazette.' ),
@@ -224,48 +279,69 @@ $faq = c2sec(
 			array( 'Is my data stored?', 'The letter is sent from your own email. We store nothing unless you choose to join our updates.' ),
 		)
 	)
+	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n"
 );
 
-/* 10. Read the law */
+/* 10. Read the law: document links. */
+$docl = function ( $url, $title, $meta ) {
+	return '<li><a href="' . $url . '">' . c2i( 'file' ) . '<span><strong>' . $title . '</strong><span class="aw-camp-docs-meta">' . $meta . '</span></span>' . c2i( 'arrow-right' ) . '</a></li>';
+};
 $read = c2sec(
 	'read',
 	c2h( 'Read the law' )
-	. c2list(
-		array(
-			'<a href="' . $lib_draft . '">Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E)), full text</a>',
-			'<a href="' . $lib_act . '">Prevention of Cruelty to Animals Act, 1960 (Chapter IV covers experiments)</a>',
-			'<a href="' . $lib_1998 . '">Breeding of and Experiments on Animals Rules, 1998, with the 2001 and 2006 amendments</a>',
-		)
+	. c2html(
+		'<ul class="aw-camp-docs">'
+		. $docl( $lib_draft, 'Draft Laboratory Animals Rules, 2026', 'G.S.R. 864(E), full text with rule anchors' )
+		. $docl( $lib_act, 'Prevention of Cruelty to Animals Act, 1960', 'Chapter IV covers experiments on animals' )
+		. $docl( $lib_1998, 'Breeding of and Experiments on Animals Rules, 1998', 'With the 2001 and 2006 amendments' )
+		. '</ul>'
 	),
 	'aw-camp-paper'
 );
 
-/* 11. What happens next */
+/* 11. What happens next: a real sequence, so numbered. */
 $next = c2sec(
 	'next',
 	c2h( 'What happens next' )
-	. c2list( array( 'Objections close on 5 November 2026.', 'CCSEA reviews the objections and suggestions.', 'Final rules, revised or not, are published in the Gazette.', 'We follow every step here and in our newsletter.' ), true )
+	. c2html(
+		'<ol class="aw-camp-steps">'
+		. '<li><strong>Objections close</strong><span>5 Nov 2026</span></li>'
+		. '<li><strong>CCSEA reviews</strong><span>Every objection and suggestion is considered</span></li>'
+		. '<li><strong>Final rules</strong><span>Published in the Gazette, revised or not</span></li>'
+		. '<li><strong>We report back</strong><span>Here and in our newsletter</span></li>'
+		. '</ol>'
+	)
 );
 
-/* Latest updates: the three newest News items with the campaign tag. */
+/* Latest updates: News with the campaign tag, in the home page's news grid (publisher images, linked). */
 $tag     = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
+$tq      = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $updates = c2sec(
 	'latest',
-	c2h( 'Latest updates' )
-	. '<!-- wp:query {"queryId":82,"query":{"perPage":3,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}},"className":"kit-cards aw-cards-3"} -->'
-	. "\n<div class=\"wp-block-query kit-cards aw-cards-3\"><!-- wp:post-template -->\n<!-- wp:post-title {\"level\":3,\"isLink\":true} /-->\n\n<!-- wp:post-date /-->\n<!-- /wp:post-template -->\n\n<!-- wp:query-no-results -->\n"
-	. c2p( 'Updates will appear here.' ) . "<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->\n\n"
+	c2html( '<header class="kit-ed-head"><div><h2>Latest updates</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
+	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
+	. '<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
+	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
+	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
 );
 
-/* 12. Stay in the loop */
+/* 12. Stay in the loop: share row with the theme's brand icons. */
 $share_url = rawurlencode( home_url( '/campaigns/lab-animals-rules-2026/' ) );
 $share_txt = rawurlencode( 'Object to India\'s draft lab animal rules before 5 November:' );
 $loop      = c2sec(
 	'updates',
 	c2h( 'Get updates on these rules' )
 	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.' ) // the footer has the form on every page
-	. c2p( 'Share: <a href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">WhatsApp</a> · <a href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">X</a> · <a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">LinkedIn</a>' )
-	. c2p( 'Colours from the explainer artwork by @p.s___withlove, used with her permission.', 'has-small-font-size' ),
+	. c2html(
+		'<p class="aw-camp-share"><span class="aw-camp-share-label">Share this page</span>'
+		. '<a href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">' . c2i( 'brand-whatsapp' ) . 'WhatsApp</a>'
+		. '<a href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">' . c2i( 'x-brand' ) . 'X</a>'
+		. '<a href="https://www.facebook.com/sharer/sharer.php?u=' . $share_url . '">' . c2i( 'facebook' ) . 'Facebook</a>'
+		. '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'arrow-up-right' ) . 'LinkedIn</a>'
+		. '</p>'
+	),
 	'aw-camp-dark'
 );
 
