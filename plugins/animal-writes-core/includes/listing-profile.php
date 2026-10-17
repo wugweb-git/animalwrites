@@ -171,12 +171,12 @@ function aw_block_org_details( $a, $id ) {
 	$missing = fn( $k ) => '<span class="aw-org-fact-na">' . esc_html( $na[ $k ] ) . '</span>' . $suggest;
 	$facts   = '';
 	foreach ( $contact as $k => $c ) {
-		$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $c[0] ) . '</span><dt>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
+		$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $c[0] ) . '</span>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
 	}
 	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
 	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( 'aw_hours' === $k ) { // the hours table, from the list only
-			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
+			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
 		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
 			$note = '';
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
@@ -184,9 +184,9 @@ function aw_block_org_details( $a, $id ) {
 			}
 			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );
-			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
+			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
 		} elseif ( isset( $na[ $k ] ) ) {
-			$facts .= '<div class="aw-org-fact"><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span><dt>' . esc_html( $label ) . '</dt><dd>' . $missing( $k ) . '</dd></div>';
+			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $missing( $k ) . '</dd></div>';
 		}
 	}
 	if ( '' === $links . $photos . $facts ) {

@@ -513,6 +513,8 @@ function aw_article_nodes( $id ) {
 			$article['isBasedOn'] = array_filter(
 				array(
 					'@type'      => $research || $doi ? 'ScholarlyArticle' : 'CreativeWork',
+					'name'       => $title, // the item's own title (owner, 17 Oct 2026)
+					'headline'   => $title,
 					'url'        => $src_url,
 					'sameAs'     => $doi ? 'https://doi.org/' . $doi : null,
 					'identifier' => $doi ? array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ) : null,

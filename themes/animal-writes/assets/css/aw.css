@@ -814,11 +814,10 @@ body { background: var(--kit-color-canvas); }
 .aw-datasrc-logo { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: var(--radius-sm); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-datasrc-logo img { width: 1.25rem; height: 1.25rem; object-fit: contain; border-radius: var(--kit-radius-mark); }
 
-/* Facts: an icon tile (tinted with the info colour) beside each label and value */
-.aw-org-fact { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: start; }
-.aw-org-fact-ico { grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-sm); background: var(--kit-color-info-soft); color: var(--kit-color-info); }
+/* Facts: an icon tile (tinted with the info colour) beside each label and value. The icon sits inside the <dt> (a <dl> group holds only <dt> and <dd>), in the gutter. */
+.aw-org-fact { --aw-fact-ico: 2.25rem; position: relative; min-height: var(--aw-fact-ico); padding-left: calc(var(--aw-fact-ico) + var(--kit-space-3)); }
+.aw-org-fact-ico { position: absolute; top: 0; left: 0; display: inline-flex; align-items: center; justify-content: center; width: var(--aw-fact-ico); height: var(--aw-fact-ico); border-radius: var(--radius-sm); background: var(--kit-color-info-soft); color: var(--kit-color-info); }
 .aw-org-fact-ico .kit-ico { --kit-ico-size: 1.125rem; }
-.aw-org-fact dt, .aw-org-fact dd { grid-column: 2; }
 /* Phone numbers (one per line: number, label, WhatsApp link) and the opening hours table, inside the facts card.
    sm 0–767: one column; md 768+: the hours fact spans both columns of the facts grid. */
 .aw-org-phones { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-1); }

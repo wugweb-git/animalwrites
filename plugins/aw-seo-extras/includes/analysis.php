@@ -138,3 +138,105 @@ add_action(
 		);
 	}
 );
+
+/*
+ * Stored scores for new items, every day (owner, 17 Oct 2026). Rank Math works its score out only in a browser, so the
+ * workers (animal-writes-workers, seo-scores workflow, after the daily focus keywords) do what its "Update SEO Scores"
+ * tool does, unattended: they read the analyzer values below (built by Rank Math's own Update_Score tool, so with the
+ * rendered <main> from the filter above, and each item's own test list), run Rank Math's bundled analyzer.js on them
+ * and send the numbers back. Only published items with a focus keyword and no stored score; Media & PR items have no
+ * page of their own (they 301 to /media/) and are not scored.
+ */
+
+/** Published items with a page and a focus keyword but no stored Rank Math score (newest first). */
+function aw_seo_unscored_ids( $limit ) {
+	global $wpdb;
+	$types = array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) );
+	$in    = implode( ', ', array_fill( 0, count( $types ), '%s' ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders
+	return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} k ON k.post_id = p.ID AND k.meta_key = 'rank_math_focus_keyword' AND k.meta_value <> '' LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'rank_math_seo_score' WHERE p.post_status = 'publish' AND p.post_type IN ($in) GROUP BY p.ID HAVING COALESCE( MAX( s.meta_value ), '' ) = '' ORDER BY p.ID DESC LIMIT %d", array_merge( $types, array( (int) $limit ) ) ) ) );
+}
+
+/**
+ * Rank Math's analyzer values for the given items, as its Update SEO Scores tool builds them, plus each item's own
+ * test list (rank_math/researches/tests) and the settings the analyzer reads.
+ *
+ * @param int[] $ids Item IDs.
+ * @return array{rankMath: array, posts: array}
+ */
+function aw_seo_score_values( $ids ) {
+	if ( ! $ids ) {
+		return array( 'rankMath' => new stdClass(), 'posts' => new stdClass() );
+	}
+	if ( ! class_exists( '\RankMath\Tools\Update_Score' ) ) {
+		require_once WP_PLUGIN_DIR . '/seo-by-rank-math/includes/modules/database-tools/class-update-score.php';
+	}
+	$GLOBALS['post'] = get_post( $ids[0] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+	$tool            = \RankMath\Tools\Update_Score::get();
+	$tool->screen->localize();
+	$ref = new ReflectionProperty( get_class( rank_math()->json ), 'data' );
+	$ref->setAccessible( true );
+	$json = (array) $ref->getValue( rank_math()->json );
+	$rm   = array_intersect_key( (array) ( $json['rankMath'] ?? array() ), array_flip( array( 'assessor', 'links', 'localeFull', 'noFollowDomains', 'noFollowExcludeDomains', 'noFollowExternalLinks', 'parentDomain', 'objectType', 'postType' ) ) );
+	$only = function ( $q ) use ( $ids ) {
+		$q->set( 'post_type', array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) ) );
+		$q->set( 'post__in', $ids );
+		$q->set( 'posts_per_page', count( $ids ) );
+		$q->set( 'offset', 0 );
+		$q->set( 'post_status', 'publish' );
+	};
+	add_action( 'pre_get_posts', $only );
+	$req = new WP_REST_Request();
+	$req->set_param( 'args', array( 'update_all_scores' => 1, 'offset' => 0 ) );
+	$data = ( new \RankMath\Tools\Update_Score() )->update_seo_score( '', $req );
+	remove_action( 'pre_get_posts', $only );
+	$base = (array) ( $rm['assessor']['researchesTests'] ?? array() );
+	$rows = array();
+	foreach ( is_array( $data ) ? $data : array() as $id => $v ) {
+		$GLOBALS['post'] = get_post( (int) $id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		setup_postdata( $GLOBALS['post'] );
+		$v['tests']        = array_values( array_keys( apply_filters( 'rank_math/researches/tests', array_fill_keys( array_unique( array_merge( $base, AW_SEO_SUMMARY_SKIP_TESTS ) ), true ), 'post' ) ) );
+		$rows[ (int) $id ] = $v;
+	}
+	wp_reset_postdata();
+	return array( 'rankMath' => $rm, 'posts' => $rows ? $rows : new stdClass() );
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/seo-score-items',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => 'aw_seo_api_allowed',
+				'args'                => array( 'limit' => array( 'type' => 'integer', 'default' => 20, 'minimum' => 1, 'maximum' => 50 ) ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					do_action( 'litespeed_control_set_nocache', 'seo score API' );
+					return aw_seo_score_values( aw_seo_unscored_ids( (int) $req['limit'] ) );
+				},
+			)
+		);
+		register_rest_route(
+			'aw/v1',
+			'/seo-scores',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => 'aw_seo_api_allowed',
+				'callback'            => function ( WP_REST_Request $req ) {
+					$written = array();
+					foreach ( array_slice( (array) $req->get_param( 'scores' ), 0, 100, true ) as $id => $score ) {
+						$id = absint( $id );
+						if ( ! $id || 'publish' !== get_post_status( $id ) || ! in_array( get_post_type( $id ), AW_SEO_ITEM_TYPES, true ) || ! is_numeric( $score ) || $score < 0 || $score > 100 ) {
+							continue;
+						}
+						update_post_meta( $id, 'rank_math_seo_score', (int) round( $score ) ); // as Rank Math's own updateSeoScore stores it
+						$written[] = $id;
+					}
+					return array( 'written' => $written );
+				},
+			)
+		);
+	}
+);

@@ -398,3 +398,27 @@ add_filter(
 	},
 	20
 );
+
+/**
+ * A featured image with no alt text gets the item's own title (as the press, CC0 and Library pictures already do), whatever
+ * path set it: the editor, the workers, media_sideload_image() (which stores no alt). An alt someone wrote is never replaced.
+ *
+ * @param int    $meta_id  Meta ID (unused).
+ * @param int    $post_id  Item ID.
+ * @param string $meta_key Meta key.
+ * @param mixed  $value    Attachment ID.
+ */
+function aw_featured_alt_from_title( $meta_id, $post_id, $meta_key, $value ) {
+	if ( '_thumbnail_id' !== $meta_key || ! (int) $value || 'attachment' !== get_post_type( (int) $value ) ) {
+		return;
+	}
+	if ( '' !== trim( (string) get_post_meta( (int) $value, '_wp_attachment_image_alt', true ) ) ) {
+		return;
+	}
+	$title = trim( wp_strip_all_tags( html_entity_decode( get_the_title( $post_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+	if ( '' !== $title ) {
+		update_post_meta( (int) $value, '_wp_attachment_image_alt', $title );
+	}
+}
+add_action( 'added_post_meta', 'aw_featured_alt_from_title', 10, 4 );
+add_action( 'updated_post_meta', 'aw_featured_alt_from_title', 10, 4 );
