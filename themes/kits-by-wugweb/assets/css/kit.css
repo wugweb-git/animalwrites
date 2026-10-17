@@ -43,8 +43,8 @@ h1, h2, h3, h4, h5, h6, .wp-block-heading, .wp-block-post-title, .wp-block-query
 .kit-display ,.kit-hero-title { font-size: var(--kit-type-display) !important; line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-display); font-weight: var(--kit-weight-bold); }
 p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 .has-text-align-center { margin-inline: auto; }
-.has-large-font-size ,.kit-lead { font-size: var(--kit-type-lead) !important; line-height: 1.5; color: var(--kit-color-muted); }
-.has-small-font-size { font-size: var(--kit-type-sm) !important; }
+.has-large-font-size ,.kit-lead { font-size: var(--kit-type-lead); line-height: 1.5; color: var(--kit-color-muted); }
+.has-small-font-size { font-size: var(--kit-type-sm); }
 .kit-caption ,.kit-note { color: var(--kit-color-muted); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-medium); }
 
 /* 3. Layout ----------------------------------------------------------------- */
@@ -418,7 +418,7 @@ html { overflow-x: clip; }
 @media (max-width: 767px) { body:has(.kit-sticky-help) { padding-bottom: 64px; } } /* room for the sticky bar only when the page has one (else a blank strip under the footer) */
 
 /* Header: grouped navigation + Find help button */
-.kit-header-right { gap: var(--kit-space-5) !important; align-items: center; }
+.kit-header-right { gap: var(--kit-space-5); align-items: center; }
 .kit-site-header .wp-block-navigation__submenu-container { background: var(--kit-color-raised) !important; color: var(--kit-color-ink) !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); padding: var(--kit-space-2) !important; min-width: 15rem !important; }
 .kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content { color: var(--kit-color-ink) !important; padding: var(--kit-space-2) var(--kit-space-3) !important; border-radius: var(--kit-radius-control); font-size: var(--kit-type-sm); }
 .kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover { background: var(--kit-color-canvas); }
@@ -648,7 +648,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 
 /* 02 Need help now: three enormous actions on ink */
 .kit-ed-help { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.kit-ed-help-title { color: var(--kit-color-on-ink) !important; font-size: var(--kit-type-h2); margin: 0 0 var(--kit-space-6); }
+.kit-ed-help-title { color: var(--kit-color-on-ink); font-size: var(--kit-type-h2); margin: 0 0 var(--kit-space-6); }
 .kit-ed-acts { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1200px) { .kit-ed-acts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .kit-ed-act { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--neutral-8) 60%, var(--neutral-9)); border: var(--kit-border-width) solid color-mix(in srgb, var(--neutral-0) 12%, transparent); color: var(--kit-color-on-ink); text-decoration: none; transition: background-color var(--kit-motion-base) var(--kit-motion-ease), transform var(--kit-motion-base) var(--kit-motion-ease); }
@@ -744,7 +744,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 		width: var(--kit-size-target); height: var(--kit-size-target); min-width: var(--kit-size-target); min-height: var(--kit-size-target); padding: 0 !important; display: inline-flex; align-items: center; justify-content: center;
 		border-radius: 999px; border: var(--kit-border-width) solid color-mix(in srgb, var(--neutral-0) 30%, transparent); background: transparent; color: var(--kit-color-on-ink) !important;
 	}
-	.kit-header-contact { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
+	.kit-header-contact { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
 	.kit-header-search .kit-ico ,.kit-header-contact .kit-ico { --kit-ico-size: var(--kit-icon-md); }
 	.kit-header-right { gap: var(--kit-space-2) !important; }
 	.kit-header-utility { gap: var(--kit-space-2); }
@@ -772,9 +772,9 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
    top rule so the sticky header reads as separate; the same grid line as the header logo (nav container and padding). */
 .kit-footer { --kit-footer-bg: color-mix(in srgb, var(--neutral-8) 45%, var(--neutral-9)); --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 72%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); font-size: var(--kit-type-sm); }
 .kit-site-footer.kit-footer { display: flex; flex-direction: column; background: var(--kit-footer-bg) !important; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); padding: var(--kit-space-7) var(--kit-space-4) var(--kit-space-4) !important; }
-@media (min-width: 768px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-6) !important; } }
-@media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: 20px !important; } }
-.kit-site-footer.kit-footer > * { width: 100%; max-width: var(--kit-width-nav) !important; margin-inline: auto !important; margin-block: 0 !important; }
+@media (min-width: 768px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-6); } }
+@media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: 20px; } }
+.kit-site-footer.kit-footer > * { width: 100%; max-width: var(--kit-width-nav); margin-inline: auto; margin-block: 0; }
 
 /* Row 1 */
 .kit-footer-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-6); padding: 0 0 var(--kit-space-6); }
@@ -787,7 +787,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-socials { display: flex; gap: var(--kit-space-2); }
 .kit-social { display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: var(--kit-radius-control); border: var(--kit-border-width) solid var(--kit-footer-rule); color: var(--kit-color-on-ink); transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease); }
 .kit-social:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-.kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4 !important; color: var(--kit-footer-muted) !important; }
+.kit-footer-head { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; color: var(--kit-footer-muted); }
 .kit-footer-list, .kit-legal-links, .kit-footer-inline, .kit-footer-helplines { list-style: none; padding: 0; margin: 0; }
 .kit-footer-list li { margin: 0; }
 .kit-footer-list a { display: flex; align-items: center; min-height: 2.25rem; color: var(--kit-color-on-ink); text-decoration: none; }
@@ -795,7 +795,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 
 /* Newsletter: one stacked column — title, email, name, Subscribe (full width), consent */
 .kit-footer-newsletter { display: block; min-width: 0; }
-.kit-footer-nl-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs) !important; font-weight: var(--kit-weight-strong); line-height: 1.4 !important; color: var(--kit-footer-muted) !important; }
+.kit-footer-nl-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); line-height: 1.4; color: var(--kit-footer-muted); }
 .kit-footer-newsletter .kit-form { display: flex !important; flex-direction: column; gap: var(--kit-space-3); max-width: none; margin: 0; }
 .kit-footer-newsletter .kit-captcha { order: 10; }
 .kit-footer-newsletter .kit-field { margin: 0; }
@@ -836,7 +836,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 
 
 /* Full-width bands follow each other with no gap (the page background showed through as a strip). */
-:where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
+:where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0; }
 html:not(.kits-preview) :where(.wp-block-post-content, main) > .alignfull + :is(.kit-ad--empty, .kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"])) + .alignfull { margin-block-start: 0 !important; } /* a hidden ad slot between two sections adds no gap */
 
 /* Buttons: ink is the main button; yellow only on dark surfaces (header, hero, help band, footer), where ink would vanish. */
@@ -880,8 +880,8 @@ header.wp-block-template-part:has(.kit-site-header) { position: sticky; top: cal
 .kit-site-header { min-height: var(--kit-header-height); display: flex; align-items: center; padding: var(--kit-space-4) !important; box-sizing: border-box; cursor: grab; }
 .kit-site-header :is(a, button, input, label) { cursor: pointer; }
 .kit-site-header input { cursor: text; }
-.kit-site-header > * { width: 100%; max-width: var(--kit-width-nav) !important; margin-inline: auto !important; }
-@media (min-width: 768px) { .kit-site-header { padding: var(--kit-space-3) var(--kit-space-6) !important; } }
+.kit-site-header > * { width: 100%; max-width: var(--kit-width-nav); margin-inline: auto; }
+@media (min-width: 768px) { .kit-site-header { padding: var(--kit-space-3) var(--kit-space-6); } }
 @media (min-width: 1200px) { .kit-site-header { padding: var(--kit-space-3) 20px !important; } }
 .kit-site-header :is(a, .wp-block-navigation-item__content) { transition: color var(--kit-duration-spring) var(--kit-ease-spring), background-color var(--kit-duration-spring) var(--kit-ease-spring); }
 
@@ -918,7 +918,7 @@ header.wp-block-template-part:has(.kit-site-header) { position: sticky; top: cal
 .wp-block-navigation__responsive-container-close { position: fixed; top: var(--kit-toggle-top, 28px); left: var(--kit-toggle-left, auto); right: auto; transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
 .wp-block-navigation__responsive-container-open svg, .wp-block-navigation__responsive-container-close svg { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
 .wp-block-navigation__responsive-container-close svg { transform: rotate(90deg); }
-@media (min-width: 768px) { .kit-menu-legal { display: none !important; } }
+@media (min-width: 768px) { .kit-menu-legal { display: none; } }
 @keyframes kit-menu-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @keyframes kit-menu-link-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidden; }
@@ -928,7 +928,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 }
 
 /* Breadcrumbs: Home as an icon; long trails fold the middle into "…" */
-.kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none !important;
+.kit-crumbs-home a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
 	min-width: var(--kit-size-check); min-height: var(--kit-size-check); margin: calc((1rem - var(--kit-size-check)) / 2); } /* 24px hit area around the 16px icon; the negative margin keeps the icon where it was */
 .kit-crumbs-home .kit-ico { --kit-ico-size: 1rem; }
 .kit-crumbs-more { color: var(--kit-color-muted); }
@@ -954,7 +954,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 /* Tags are nouns, each kind its own tint; one font, size, weight and height for all; links never underline */
 .kit-tag, .kit-chip, .wp-block-post-terms a {
 	display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 1.75rem; padding: 0 var(--kit-space-2); border: 0; border-radius: var(--radius-sm);
-	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
+	font-family: inherit; font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none;
 }
 /* Doubled class: kit-primitives.css (loaded after this file) sets the base .kit-tag fill, which would otherwise win */
 .kit-tag.kit-tag--category { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
@@ -1093,11 +1093,11 @@ body { background: var(--kit-surface-page); }
 .kit-site-header .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-close { display: inline-flex !important; }
 
 /* Pagination: every block 1:1 (44 × 44). Previous / Next are arrow-only squares; their words stay for screen readers. */
-.kit-pager .page-numbers, .wp-block-query-pagination-numbers .page-numbers { width: var(--kit-size-target); min-width: var(--kit-size-target); height: var(--kit-size-target); padding: 0 !important; aspect-ratio: 1; }
+.kit-pager .page-numbers, .wp-block-query-pagination-numbers .page-numbers { width: var(--kit-size-target); min-width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; aspect-ratio: 1; }
 .kit-pager .page-numbers.dots { border: 0; width: auto; aspect-ratio: auto; }
-:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next) { width: var(--kit-size-target); height: var(--kit-size-target); padding: 0 !important; justify-content: center; gap: 0 !important; font-size: 0 !important; border-radius: var(--kit-radius-control) !important; aspect-ratio: 1; }
+:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next) { width: var(--kit-size-target); height: var(--kit-size-target); padding: 0; justify-content: center; gap: 0; font-size: 0; border-radius: var(--kit-radius-control); aspect-ratio: 1; }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::before,
-:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::after { width: 20px !important; height: 20px !important; }
+:is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::after { width: 20px; height: 20px; }
 
 
 /* CTA buttons (owner, 9 Oct 2026): every button carries an icon by what it does, and it moves when you point at it.
@@ -1133,7 +1133,7 @@ body { background: var(--kit-surface-page); }
 @media (max-width: 767px) {
 	.kit-scroll-row .wp-block-post-template { display: flex !important; flex-direction: row !important; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin: 0 calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter); max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain; }
 	.kit-scroll-row .wp-block-post-template::-webkit-scrollbar { display: none; }
-	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; }
+	.kit-scroll-row .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0; }
 }
 
 /* Header hides on scroll down, returns on scroll up (kit.js adds .kit-header-hidden). */
