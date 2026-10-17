@@ -20,6 +20,9 @@
 }
 /* The hero: the bright orange behind ink; inside it the brand and on-brand pair is the same two colours. */
 .aw-camp--community-dogs .aw-camp-hero { --aw-camp-brand: var(--camp-primary); --aw-camp-on-brand: var(--camp-primary-ink); background: var(--camp-primary); color: var(--camp-primary-ink); }
+/* The hero photo (a portrait) keeps its shape but not the whole screen. */
+.aw-camp--community-dogs .aw-camp-hero .wp-block-image { max-width: min(100%, 20rem); margin-top: var(--kit-space-5); }
+.aw-camp--community-dogs .aw-camp-hero .wp-block-image img { border-radius: var(--kit-radius-card); }
 
 /* Metrics: value, label, then the source and "as of" */
 .aw-camp-metric { display: flex; flex-direction: column; gap: var(--kit-space-1); }
