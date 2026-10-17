@@ -14,8 +14,9 @@
  *   names only. A one-time import brings in the mail already in the mailbox, newest first (Settings → Incoming mail,
  *   or wp aw-mail import).
  * - Each message is also a note on the sender's FluentCRM contact (found, or made as "transactional"; tag "Emailed
- *   us"); see fluentcrm.php. No auto-reply is ever sent. Replies can be sent from webmail or from the contact's
- *   profile in FluentCRM (Reply-To = the address the person wrote to, so their answer comes back here).
+ *   us"); see fluentcrm.php. No auto-reply is ever sent. Each email can be answered from webmail or from its Reply
+ *   (Inbox row, its screen, or its note on the contact → Inbox → Reply, mail-reply.php): Reply-To = the address that
+ *   email was sent to, threaded on its Message-ID, so the answer comes back here.
  *
  * @package animal-writes-core
  */

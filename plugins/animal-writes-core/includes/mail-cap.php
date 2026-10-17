@@ -10,8 +10,8 @@
  *   true, so no sender ever sees a failure. WP-Cron (every 5 minutes) sends the queue as the budget frees: highest
  *   priority first, oldest first within a priority. A queued email that fails 5 times is kept as "failed" (shown on
  *   Settings → Mail), never dropped.
- * - Priorities: 0 replies typed by hand in FluentCRM (a contact's profile → Send Email; fluentcrm.php marks them with
- *   an X-AW-Priority header, removed before sending), 1 owner/admin notices (everything not listed here), 2 sign-up
+ * - Priorities: 0 replies typed by hand to an incoming email (Inbox → Reply, mail-reply.php, marks them with an
+ *   X-AW-Priority header, removed before sending), 1 owner/admin notices (everything not listed here), 2 sign-up
  *   confirmations (Fluent Forms), 3 FluentCRM campaign emails.
  * - Campaign emails may use the budget minus a reserve (default 10), so notices and confirmations always have room.
  * - FluentCRM: sending speed 1 per second (fluent_crm/global_email_limit_per_second); its sender does not start while
