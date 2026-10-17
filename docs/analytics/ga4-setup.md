@@ -156,7 +156,7 @@ gives the ad-blocker rate.
 | Filter | `filter` | filter_apply |
 | Filter value | `value` | filter_apply, sort_change |
 | Hub | `hub` | filter_apply |
-| Search term | `term` | search |
+| Search term | built-in (GA4 reads `search_term`) | search, no_results. The GTM tags send the dataLayer `term` as `search_term` (17 Oct): an event parameter named `term` is read as a traffic-source field. The old custom dimension on `term` is archived. |
 | Claim step | `step` | claim_step |
 | List | `list` | card_click |
 | Outbound domain | `domain` | outbound_click |
@@ -167,7 +167,7 @@ gives the ad-blocker rate.
 | Letter route | `route` | objection_sent, campaign_action |
 | Rule chip | `rule` | rule_card_open, campaign_action |
 | Letter ground | `ground` | ground_toggle, campaign_action |
-| Sign-up source | `source` | newsletter_optin, campaign_action (add if not yet registered) |
+| Sign-up source | `optin_source` | newsletter_optin, campaign_action. The GTM tags send the dataLayer `source` as `optin_source` (17 Oct): an event parameter named `source` is read as a traffic-source field. |
 | **Action** | `action` | listing_action, campaign_action (new 17 Oct) |
 | **Listing ID** | `listing_id` | view_item, listing_action, generate_lead, call/whatsapp/email_click, claim_sent, form_submit_success, donate_click (new) |
 | **Listing name** | `listing_name` | the same (new) |
@@ -181,7 +181,7 @@ gives the ad-blocker rate.
 
 Metrics (scope Event, unit Standard) if wanted: `results` (search, view_item_list), `position` (card_click, ad slots),
 `percent` (scroll_depth), `fields` (form_error), `contacts` (view_item). GA4 allows 50 event-scoped dimensions; with
-the ten new ones (bold) and `source` this uses 36.
+the ten new ones (bold) and `optin_source`, minus the archived `term`, this uses 35 of 50 (plus 3 created by Site Kit).
 
 Item-scoped data (item_id, item_name, item_category 1–3, item list name, index) needs no custom dimensions: GA4's own
 item dimensions show it.

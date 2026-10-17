@@ -400,7 +400,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "term"
+                    "value": "search_term"
                   },
                   {
                     "type": "TEMPLATE",
@@ -2278,7 +2278,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "source"
+                    "value": "optin_source"
                   },
                   {
                     "type": "TEMPLATE",
@@ -3027,7 +3027,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "term"
+                    "value": "search_term"
                   },
                   {
                     "type": "TEMPLATE",
@@ -3301,7 +3301,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
-                    "value": "source"
+                    "value": "optin_source"
                   },
                   {
                     "type": "TEMPLATE",
