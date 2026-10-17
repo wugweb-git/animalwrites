@@ -1192,7 +1192,7 @@ add_filter(
 		if ( ! $img || empty( $img['url'] ) ) {
 			return $data;
 		}
-		$url   = (string) $img['url'];
+		$url   = html_entity_decode( (string) $img['url'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ); // a publisher's address arrives with &amp;
 		$old   = isset( $data['primaryImage']['@id'] ) ? (string) $data['primaryImage']['@id'] : '';
 		$image = array_filter( array( '@type' => 'ImageObject', '@id' => $url, 'url' => $url, 'contentUrl' => $url, 'width' => (int) $img['width'], 'height' => (int) $img['height'] ) );
 		if ( '' !== $old && $old !== $url ) {
