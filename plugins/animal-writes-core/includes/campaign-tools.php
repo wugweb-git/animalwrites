@@ -101,7 +101,7 @@ add_filter(
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
 		if ( preg_match( '/(^|\s)aw-camp(\s|$)/', $cls ) && aw_camp_id() ) { // the page wrapper: is-closed lets CSS reorder sections
 			aw_camp_cache_until( aw_camp_id() );
-			return aw_camp_is_open( aw_camp_id() ) ? $html : preg_replace( '/class="([^"]*\baw-camp\b)/', 'class="$1 is-closed', $html, 1 );
+			return aw_camp_is_open( aw_camp_id() ) ? $html : preg_replace( '/^(\s*<[^>]*?class=")([^"]*)"/', '$1$2 is-closed"', $html, 1 ); // appended to the wrapper's own class list
 		}
 		if ( ! preg_match( '/\baw-camp-(open|closed)\b/', $cls, $m ) ) {
 			return $html;
