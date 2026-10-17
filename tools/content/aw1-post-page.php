@@ -97,11 +97,11 @@ function a1sec( $anchor, $inner, $cls = '' ) {
 	$attrs   = array(
 		'align'     => 'full',
 		'className' => $classes,
-		'style'     => array( 'spacing' => array( 'padding' => array( 'top' => 'var:preset|spacing|60', 'bottom' => 'var:preset|spacing|60', 'left' => 'var:preset|spacing|40', 'right' => 'var:preset|spacing|40' ) ) ),
+		'style'     => array( 'spacing' => array( 'padding' => array( 'top' => 'var:preset|spacing|60', 'bottom' => 'var:preset|spacing|60' ) ) ), // left/right: none, so has-global-padding gives the site gutter (16/32/48), as on every other page
 		'layout'    => array( 'type' => 'constrained', 'contentSize' => '1120px' ),
 		'anchor'    => $anchor,
 	);
-	return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n<div id=\"$anchor\" class=\"wp-block-group alignfull $classes\" style=\"padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--40)\">$inner</div>\n<!-- /wp:group -->\n\n";
+	return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n<div id=\"$anchor\" class=\"wp-block-group alignfull $classes\" style=\"padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)\">$inner</div>\n<!-- /wp:group -->\n\n";
 }
 function a1owner( $note ) {
 	return '<!-- wp:paragraph {"className":"aw-owner-copy"} -->' . "\n<p class=\"aw-owner-copy\">[OWNER COPY] $note</p>\n<!-- /wp:paragraph -->\n\n";
