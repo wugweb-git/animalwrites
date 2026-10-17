@@ -2097,6 +2097,43 @@
     "schema": "none"
    },
    "block": "animal-writes/guide-cta"
+  },
+  {
+   "name": "About page bands",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-about"
+   ],
+   "states": [
+    "band: canvas (Who we are), raised (What we do), ink (Why we do it), surface (How you can help)",
+    "card or tile hover and focus: border darkens"
+   ],
+   "tokens": [
+    "--kit-color-raised",
+    "--kit-color-surface",
+    "--kit-color-ink",
+    "--kit-color-accent",
+    "--kit-space-section",
+    "--kit-width-wide",
+    "--kit-radius-media",
+    "--kit-radius-card"
+   ],
+   "a11y": {
+    "element": "groups, headings, one link per card or tile",
+    "aria": "none",
+    "keyboard": "one link per card or tile (the whole card is its target)",
+    "focus": "outline on the card or tile",
+    "target": "whole card or tile",
+    "motion": "border colour and arrow nudge; none with reduced motion",
+    "sr": "link text"
+   },
+   "seo": {
+    "heading": "H2 per band, H3 per card",
+    "link": "site sections",
+    "alt": "photograph alt in the block",
+    "schema": "none"
+   }
   }
  ],
  "nav_status": {
