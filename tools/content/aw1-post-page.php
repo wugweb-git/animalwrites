@@ -218,7 +218,7 @@ $entries = array(
 $old = array( 37 => '2025-11-01', 39 => '2025-11-10', 41 => '2025-11-20', 43 => '2025-11-29', 45 => '2025-12-02' );
 foreach ( $old as $i => $day ) {
 	$t = preg_replace( '/^[A-Za-z]+ \d{1,2}, \d{4}\s*—\s*/u', '', $text( $take( $i ) ) ); // the heading's own words, without its date
-	$entries[] = array( $day, $t, esc_html( $text( $take( $i + 1 ) ) ) );
+	$entries[] = array( $day, $t, esc_html( str_replace( 'Historic achievement', 'Letters delivered to the Supreme Court', $text( $take( $i + 1 ) ) ) ) ); // owner, 17 Oct 2026
 	if ( '2025-11-01' === $day ) {
 		$entries[] = array( '2025-11-07', 'Removal order', $link( $o7, 'Read the order (2025 INSC 1357)' ) );
 	}
@@ -391,7 +391,7 @@ foreach ( array(
 	'aw_campaign_close'           => '2025-11-29',
 	'aw_campaign_outcome'         => 'not', // Not achieved (campaign-tools.php keys)
 	'aw_campaign_outcome_asof'    => '2026-10-17',
-	'aw_campaign_impact_state'    => 'verified', // owner, 17 Oct 2026 (brief 2): the 19 May 2026 judgment is the evidence
+	'aw_campaign_impact_state'    => 'no-change', // owner, 17 Oct 2026: No change (verified); the 19 May 2026 judgment upheld the order
 	'aw_campaign_impact_evidence' => $j19 ? (int) $j19->ID : 0,
 	'aw_campaign_metrics'         => wp_json_encode( $metrics, JSON_UNESCAPED_UNICODE ),
 ) as $k => $v ) {

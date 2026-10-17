@@ -10,7 +10,9 @@
  *                                (Y-m-d), threshold (number, 0 = none), count (number compared with the threshold),
  *                                stale_days (0 = never stale)}. For fixed figures such as a closed campaign's results;
  *                                the live letter count stays [aw_campaign_count].
- *   aw_campaign_impact_state     verified|pending|inconclusive|na   the Real-world impact module (D4.2)
+ *   aw_campaign_impact_state     verified|no-change|pending|inconclusive|na   the Real-world impact module (D4.2):
+ *                                verified = evidence shows the intended change happened; no-change = evidence shows
+ *                                it did not; pending = not yet known; inconclusive = evidence can't settle it; na = hidden
  *   aw_campaign_impact_evidence  int     the item (usually a Library record) that is the evidence
  *
  * Shortcodes:
@@ -32,7 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_CAMP_IMPACT = array(
-	'verified'     => 'Verified',
+	'verified'     => 'Verified change',
+	'no-change'    => 'No change (verified)', // owner, 17 Oct 2026 (standard D4): evidence shows the change did not happen
 	'pending'      => 'Pending verification',
 	'inconclusive' => 'Inconclusive',
 	'na'           => 'Not applicable',
@@ -214,7 +217,7 @@ function aw_camp_record_box( $post ) {
 	}
 	echo '</select></p>';
 	echo '<p><label for="aw-camp-evidence">Evidence (item ID)</label><br><input type="number" id="aw-camp-evidence" name="aw_campaign_impact_evidence" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_campaign_impact_evidence', true ) ) . '" style="width:100%"></p>';
-	echo '<p class="description">Verified only with evidence of a change in policy, a court decision, practice or conditions. Never results (letters, events, coverage). Metrics: aw_campaign_metrics (campaign-record.php).</p>';
+	echo '<p class="description">Verified change only with evidence that the intended change happened (policy, a court decision, practice or conditions); No change (verified) when the evidence shows it did not. Never results (letters, events, coverage). Metrics: aw_campaign_metrics (campaign-record.php).</p>';
 }
 
 add_action(
