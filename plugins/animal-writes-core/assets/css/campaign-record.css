@@ -4,22 +4,19 @@
 
 /* India Writes for Its Community Dogs (29 Nov 2025): the campaign's own orange, the 1.0 site's two oranges.
    #ffa500 is under 3:1 on light surfaces, so it is only the hero's fill, with ink text (9.4:1). Everywhere else the
-   brand colour is the darker 1.0 orange #9a5b00: white on it 5.4:1, it on the page 5.4:1 and on paper 5.0:1.
+   mark colour (--camp-mark) is the darker 1.0 orange #9a5b00: white on it 5.4:1, it on the page 5.4:1 and on paper 5.0:1.
    Checked by tools/ci/contrast_check.py, which reads this file too. */
 .aw-camp--community-dogs {
 	--camp-primary: #ffa500;
 	--camp-primary-ink: #16130e;
 	--camp-surface: #fff5e6;
 	--camp-accent: #9a5b00;
-	--aw-camp-brand: #9a5b00;
-	--aw-camp-brand-deep: #6b3f00;
-	--aw-camp-dark: #16130e;
-	--aw-camp-paper: #fff5e6;
-	--aw-camp-meta: #5c4a33;
-	--aw-camp-on-brand: #ffffff;
+	--camp-mark: var(--camp-accent);
+	--camp-on-mark: #ffffff;
+	--camp-deep: #6b3f00;
+	--camp-dark: #16130e;
+	--camp-meta: #5c4a33;
 }
-/* The hero: the bright orange behind ink; inside it the brand and on-brand pair is the same two colours. */
-.aw-camp--community-dogs .aw-camp-hero { --aw-camp-brand: var(--camp-primary); --aw-camp-on-brand: var(--camp-primary-ink); background: var(--camp-primary); color: var(--camp-primary-ink); }
 /* The hero photo (a portrait) keeps its shape but not the whole screen. */
 .aw-camp--community-dogs .aw-camp-hero .wp-block-image { max-width: min(100%, 20rem); margin-top: var(--kit-space-5); }
 .aw-camp--community-dogs .aw-camp-hero .wp-block-image img { border-radius: var(--kit-radius-card); }
@@ -28,8 +25,8 @@
 .aw-camp-metric { display: flex; flex-direction: column; gap: var(--kit-space-1); }
 .aw-camp-metric-value { font-size: clamp(2rem, 1.4rem + 2vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
 .aw-camp-metric-label { font-weight: var(--kit-weight-strong); }
-.aw-camp-metric-note { color: var(--aw-camp-meta, var(--kit-color-muted)); font-size: var(--kit-type-small); }
-.aw-camp-hero .aw-camp-metric-note { color: var(--aw-camp-on-brand); }
+.aw-camp-metric-note { color: var(--camp-meta, var(--kit-color-muted)); font-size: var(--kit-type-small); }
+.aw-camp-hero .aw-camp-metric-note { color: var(--camp-on-mark); }
 .aw-camp-metric.is-stale .aw-camp-metric-value { opacity: 0.8; }
 .aw-camp-results { display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-results { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -25,16 +25,18 @@ CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/campaign-reco
 TEXT, NON_TEXT = 4.5, 3.0
 # Campaign pairs, from how campaign.css uses the palette: (foreground, background, minimum, where).
 CAMPAIGN_PAIRS = [
-    ("aw-camp-on-brand", "aw-camp-brand", TEXT, "hero, band, first card, step numbers: text on the brand colour"),
-    ("kit-color-on-ink", "aw-camp-dark", TEXT, "dark sections, poster, table head: text on dark"),
-    ("aw-camp-dark", "aw-camp-paper", TEXT, "closed band: text on paper"),
-    ("aw-camp-brand", "aw-camp-paper", TEXT, "closed band kicker: brand text on paper"),
-    ("aw-camp-brand", "kit-color-bg", TEXT, "key date: brand text on the page"),
-    ("aw-camp-meta", "kit-color-bg", TEXT, "dates, steps, notes: meta text on the page"),
-    ("aw-camp-meta", "aw-camp-paper", TEXT, "meta text on paper"),
-    ("aw-camp-brand", "kit-color-bg", NON_TEXT, "icons, borders, rings on the page"),
-    ("aw-camp-brand", "aw-camp-paper", NON_TEXT, "card icon on paper"),
-    ("aw-camp-on-brand", "aw-camp-brand", NON_TEXT, "ghost button ring on the brand colour"),
+    ("camp-primary-ink", "camp-primary", TEXT, "hero: text on the primary colour"),
+    ("camp-on-mark", "camp-mark", TEXT, "band, first card, step numbers, table head: text on the mark colour"),
+    ("kit-color-on-ink", "camp-dark", TEXT, "dark sections, poster, table head: text on dark"),
+    ("camp-dark", "camp-surface", TEXT, "closed band: text on the surface"),
+    ("camp-mark", "camp-surface", TEXT, "closed band kicker: mark text on the surface"),
+    ("camp-mark", "kit-color-bg", TEXT, "key date: mark text on the page"),
+    ("camp-meta", "kit-color-bg", TEXT, "dates, steps, notes: meta text on the page"),
+    ("camp-meta", "camp-surface", TEXT, "meta text on the surface"),
+    ("camp-mark", "kit-color-bg", NON_TEXT, "icons, borders, rings on the page"),
+    ("camp-mark", "camp-surface", NON_TEXT, "card icon on the surface"),
+    ("camp-on-mark", "camp-mark", NON_TEXT, "ghost button ring on the mark colour"),
+    ("camp-primary-ink", "camp-primary", NON_TEXT, "hero chips and ghost ring on the primary colour"),
 ]
 # Not checked: the poster's brand rule and chip outline on dark. The rule is a separator and the chip has its own
 # text, so WCAG 1.4.11 asks no 3:1 of them (the default palette has brand = dark there).
@@ -116,8 +118,6 @@ def main():
         scope = {**vals, **base, **own}
         for fg, bg, need, where in CAMPAIGN_PAIRS:
             check(f"campaign {name} ({where})", fg, bg, need, scope)
-        if "camp-primary" in own and "camp-primary-ink" in own:  # a palette with the standard's --camp-* tokens
-            check(f"campaign {name} (hero fill: --camp-primary-ink on --camp-primary)", "camp-primary-ink", "camp-primary", TEXT, scope)
 
     if fails:
         print("Contrast below the minimum (text 4.5:1, non-text 3:1):")

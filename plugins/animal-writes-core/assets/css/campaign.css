@@ -2,34 +2,40 @@
    spacing, type and radii come from Kits. Breakpoints: 768, 1200. Buttons stay the Kits primary. */
 
 .aw-camp {
-	--aw-camp-brand: var(--kit-color-ink);
-	--aw-camp-brand-deep: var(--kit-color-ink);
-	--aw-camp-dark: var(--kit-color-ink);
-	--aw-camp-paper: var(--kit-color-surface-soft);
-	--aw-camp-meta: var(--kit-color-muted);
-	--aw-camp-on-brand: var(--kit-color-on-ink);
+	/* Campaign tokens (Campaign Content Standard F1). The four identity tokens, then the five roles the rules use:
+	   mark = brand colour for fills, icons, borders and key text on light surfaces; on-mark = text on a mark fill;
+	   deep = shadow tint; dark = the dark band; meta = secondary text. Each campaign sets all nine. */
+	--camp-primary: var(--kit-color-ink);
+	--camp-primary-ink: var(--kit-color-on-ink);
+	--camp-surface: var(--kit-color-surface-soft);
+	--camp-accent: var(--kit-color-ink);
+	--camp-mark: var(--kit-color-ink);
+	--camp-on-mark: var(--kit-color-on-ink);
+	--camp-deep: var(--kit-color-ink);
+	--camp-dark: var(--kit-color-ink);
+	--camp-meta: var(--kit-color-muted);
 }
-/* Campaign 2.0 (draft lab animal rules 2026): colours from the campaign artwork. The four --camp-* tokens are the
-   Campaign Content Standard's identity tokens (F1); the --aw-camp-* names the rules below use point at them. */
+/* Campaign 2.0 (draft lab animal rules 2026). */
 .aw-camp--lab-rules {
 	--camp-primary: #c83410;
 	--camp-primary-ink: #ffffff;
 	--camp-surface: #f3efe6;
 	--camp-accent: #70230e;
-	--aw-camp-brand: var(--camp-primary);
-	--aw-camp-brand-deep: var(--camp-accent);
-	--aw-camp-dark: #16130e;
-	--aw-camp-paper: var(--camp-surface);
-	--aw-camp-meta: #544b44;
-	--aw-camp-on-brand: var(--camp-primary-ink);
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: var(--camp-primary-ink);
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #16130e;
+	--camp-meta: #544b44;
 }
+/* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
+.aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
 /* Bands */
-.aw-camp-hero { background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); }
-.aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--aw-camp-on-brand); }
-.aw-camp-hero a:not(.wp-element-button) { color: var(--aw-camp-on-brand); text-decoration: underline; text-underline-offset: 0.2em; }
-.aw-camp-paper { background: var(--aw-camp-paper); }
-.aw-camp-dark { background: var(--aw-camp-dark); color: var(--kit-color-on-ink); }
+.aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
+.aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
+.aw-camp-paper { background: var(--camp-surface); }
+.aw-camp-dark { background: var(--camp-dark); color: var(--kit-color-on-ink); }
 .aw-camp-dark :is(h2, h3, h4, p, li, strong) { color: var(--kit-color-on-ink); }
 
 /* Type: the artwork's heavy, tight headlines, in the site face (Inter) */
@@ -45,11 +51,11 @@
 /* Status (hero): the action window, and after closing the outcome beside it as its own label */
 .aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
 .aw-camp-status > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
-.aw-camp-status-window { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
-.aw-camp-status-outcome, .aw-camp-status-asof { box-shadow: inset 0 0 0 1px var(--aw-camp-on-brand); }
+.aw-camp-status-window { background: var(--camp-on-mark); color: var(--camp-mark); }
+.aw-camp-status-outcome, .aw-camp-status-asof { box-shadow: inset 0 0 0 1px var(--camp-on-mark); }
 .aw-camp-hero .aw-camp-status .aw-date { color: inherit; }
 .aw-camp-hero .aw-camp-count { margin: var(--kit-space-4) 0 0; }
-.aw-camp-count-asof { color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
+.aw-camp-count-asof { color: var(--camp-meta); font-size: var(--kit-type-sm); }
 .aw-camp-hero .aw-camp-count-asof { color: inherit; opacity: 0.85; }
 
 /* Hero: text left, poster panel right */
@@ -57,34 +63,34 @@
 .aw-camp-hero-summary { max-width: 36ch; font-size: var(--kit-type-lead); margin-bottom: var(--kit-space-5); }
 .aw-camp-closed .aw-camp-hero-summary { max-width: 1120px; padding-right: max(0px, calc(min(100%, 1120px) - 40rem)); box-sizing: border-box; } /* constrained layout centres a narrow paragraph: keep it full width, text on the left */
 .aw-camp-hero .wp-block-buttons { gap: var(--kit-space-3); }
-.aw-camp-ghost .wp-block-button__link { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); border: 0; }
-.aw-camp-ghost .wp-block-button__link:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
+.aw-camp-ghost .wp-block-button__link { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); border: 0; }
+.aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
 .aw-camp-poster {
 	position: relative; padding: var(--kit-space-5); border-radius: var(--kit-radius-card);
-	background: var(--aw-camp-dark); color: var(--kit-color-on-ink);
-	box-shadow: 0 1.5rem 3rem -1.5rem var(--aw-camp-brand-deep);
+	background: var(--camp-dark); color: var(--kit-color-on-ink);
+	box-shadow: 0 1.5rem 3rem -1.5rem var(--camp-deep);
 }
 .aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--kit-color-on-ink); }
 .aw-camp-poster .aw-cd-num { font-size: clamp(5rem, 3rem + 7vw, 8.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; }
-.aw-camp-poster .aw-cd-when { padding-top: var(--kit-space-3); margin-top: var(--kit-space-3); border-top: 3px solid var(--aw-camp-brand); }
+.aw-camp-poster .aw-cd-when { padding-top: var(--kit-space-3); margin-top: var(--kit-space-3); border-top: 3px solid var(--camp-mark); }
 .aw-camp-stamp {
 	display: inline-block; margin: 0 0 var(--kit-space-4); padding: var(--kit-space-1) var(--kit-space-2);
-	border: 2px solid var(--aw-camp-brand); border-radius: var(--kit-radius-control);
+	border: 2px solid var(--camp-mark); border-radius: var(--kit-radius-control);
 	color: var(--kit-color-on-ink); font-weight: var(--kit-weight-bold); font-variant-numeric: tabular-nums; transform: rotate(-2deg);
 }
 .aw-camp-poster-chips { margin: var(--kit-space-4) 0 0; }
 .aw-camp-poster-label { display: block; margin-bottom: var(--kit-space-1); font-size: var(--kit-type-sm); opacity: 0.8; }
 .aw-camp-poster .aw-rule-chip { border-color: rgb(255 255 255 / 0.45); }
-.aw-camp-poster .aw-rule-chip:hover { border-color: var(--kit-color-on-ink); background: var(--aw-camp-brand); }
+.aw-camp-poster .aw-rule-chip:hover { border-color: var(--kit-color-on-ink); background: var(--camp-mark); }
 
 /* Date strip (artwork slide 2): big dates on red top rules */
 .aw-camp-dates { list-style: none; margin: var(--kit-space-5) 0 var(--kit-space-3); padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
-.aw-camp-dates li { padding-top: var(--kit-space-3); border-top: 3px solid var(--aw-camp-brand); }
+.aw-camp-dates li { padding-top: var(--kit-space-3); border-top: 3px solid var(--camp-mark); }
 .aw-camp-dates-when { display: block; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.03em; }
-.aw-camp-dates-when .kit-ico { --kit-ico-size: 0.7em; color: var(--aw-camp-brand); }
-.aw-camp-dates-what { color: var(--aw-camp-meta); }
+.aw-camp-dates-when .kit-ico { --kit-ico-size: 0.7em; color: var(--camp-mark); }
+.aw-camp-dates-what { color: var(--camp-meta); }
 .aw-camp-dates .is-key { border-top-width: 6px; }
-.aw-camp-dates .is-key .aw-camp-dates-when { color: var(--aw-camp-brand); }
+.aw-camp-dates .is-key .aw-camp-dates-when { color: var(--camp-mark); }
 .aw-camp-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-weight: var(--kit-weight-strong); }
 
 /* What the draft does: icon grid; the main change leads in red */
@@ -95,14 +101,14 @@
 .aw-camp-card > * { margin: 0 0 var(--kit-space-3); }
 .aw-camp-card h3 { font-size: var(--kit-type-h3); }
 .aw-camp-card-chips { margin: auto 0 0; padding-top: var(--kit-space-2); }
-.aw-camp-card-ico { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--aw-camp-paper); color: var(--aw-camp-brand); }
+.aw-camp-card-ico { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--camp-surface); color: var(--camp-mark); }
 .aw-camp-card-ico .kit-ico { --kit-ico-size: 1.5rem; }
-.aw-camp-grid > :first-child { background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); box-shadow: none; }
-.aw-camp-grid > :first-child :is(h3, p) { color: var(--aw-camp-on-brand); }
+.aw-camp-grid > :first-child { background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; }
+.aw-camp-grid > :first-child :is(h3, p) { color: var(--camp-on-mark); }
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
-.aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--aw-camp-on-brand); }
-.aw-camp-grid > :first-child .aw-rule-chip { border-color: var(--aw-camp-on-brand); }
+.aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
+.aw-camp-grid > :first-child .aw-rule-chip { border-color: var(--camp-on-mark); }
 
 /* Pain scale: four steps, the bar grows with the pain */
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
@@ -115,29 +121,29 @@
 .aw-camp-tier--1 { --fill: 25%; }
 .aw-camp-tier--2 { --fill: 50%; }
 .aw-camp-tier--3 { --fill: 75%; }
-.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--aw-camp-brand) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
+.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
 @media (min-width: 1200px) {
 	.aw-camp-ladder { align-items: start; }
-	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--aw-camp-brand) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
+	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--camp-mark) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
 }
 .aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
-.aw-camp-tier-who.is-ext { background: var(--aw-camp-brand); }
-.aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
-.aw-camp-gap > .kit-ico { --kit-ico-size: 1.5rem; flex: none; color: var(--aw-camp-brand); margin-top: 0.15em; }
+.aw-camp-tier-who.is-ext { background: var(--camp-mark); }
+.aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--camp-mark); }
+.aw-camp-gap > .kit-ico { --kit-ico-size: 1.5rem; flex: none; color: var(--camp-mark); margin-top: 0.15em; }
 .aw-camp-dark .aw-rule-chip { border-color: rgb(255 255 255 / 0.45); }
 
 /* Today vs the draft: the draft column carries the campaign colour */
 .aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }
 .aw-camp-compare :is(th, td) { padding: var(--kit-space-3); vertical-align: top; }
-.aw-camp .aw-camp-compare .wp-block-table thead :is(tr, th) { background: var(--aw-camp-dark); color: var(--kit-color-on-ink); border-color: var(--aw-camp-dark); }
-.aw-camp .aw-camp-compare .wp-block-table thead th:last-child { background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); }
+.aw-camp .aw-camp-compare .wp-block-table thead :is(tr, th) { background: var(--camp-dark); color: var(--kit-color-on-ink); border-color: var(--camp-dark); }
+.aw-camp .aw-camp-compare .wp-block-table thead th:last-child { background: var(--camp-mark); color: var(--camp-on-mark); }
 .aw-camp-compare tbody td:first-child { font-weight: var(--kit-weight-strong); }
-.aw-camp-compare tbody td:last-child { background: color-mix(in srgb, var(--aw-camp-brand) 7%, transparent); }
+.aw-camp-compare tbody td:last-child { background: color-mix(in srgb, var(--camp-mark) 7%, transparent); }
 
 /* Other ways to send: icon list */
 .aw-camp-ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
 .aw-camp-ways li { display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); }
-.aw-camp-ways li > .kit-ico { --kit-ico-size: 1.5rem; color: var(--aw-camp-brand); margin-top: 0.15em; }
+.aw-camp-ways li > .kit-ico { --kit-ico-size: 1.5rem; color: var(--camp-mark); margin-top: 0.15em; }
 .aw-camp-ways h4 { margin: 0 0 var(--kit-space-1); font-size: var(--kit-type-h4, 1.125rem); }
 .aw-camp-ways p { margin: 0; }
 
@@ -149,8 +155,8 @@
 .aw-camp-docs-q .wp-block-post-template { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
 .aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--aw-camp-brand); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
-.aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
+.aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 /* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
 .aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-base) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
 .aw-camp .aw-camp-docs-q .wp-block-post-title a { color: var(--kit-color-text); text-decoration: none; }
@@ -162,18 +168,18 @@
 .aw-camp-steps { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; counter-reset: aw-step; display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-steps { grid-template-columns: repeat(4, 1fr); } }
 .aw-camp-steps li { counter-increment: aw-step; position: relative; padding-top: 3.25rem; }
-.aw-camp-steps li::before { content: counter(aw-step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); font-weight: 800; }
-@media (min-width: 768px) { .aw-camp-steps li:not(:last-child)::after { content: ""; position: absolute; top: 1.2rem; left: 3rem; right: calc(-1 * var(--kit-space-4) + 0.5rem); height: 2px; background: var(--aw-camp-brand); opacity: 0.35; } }
+.aw-camp-steps li::before { content: counter(aw-step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); font-weight: 800; }
+@media (min-width: 768px) { .aw-camp-steps li:not(:last-child)::after { content: ""; position: absolute; top: 1.2rem; left: 3rem; right: calc(-1 * var(--kit-space-4) + 0.5rem); height: 2px; background: var(--camp-mark); opacity: 0.35; } }
 .aw-camp-steps strong { display: block; font-size: var(--kit-type-h4, 1.125rem); }
-.aw-camp-steps span { color: var(--aw-camp-meta); }
+.aw-camp-steps span { color: var(--camp-meta); }
 
 /* Share row */
 .aw-camp-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-4); }
 .aw-camp-share-label { flex-basis: 100%; font-weight: var(--kit-weight-strong); }
 .aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
-.aw-camp .aw-camp-share :is(a, button):hover { background: var(--aw-camp-brand); box-shadow: none; }
+.aw-camp .aw-camp-share :is(a, button):hover { background: var(--camp-mark); box-shadow: none; }
 .aw-camp-share :is(a, button):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
+.aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--camp-meta); font-size: var(--kit-type-sm); }
 
 /* Countdown: one settle on load */
 .aw-camp-hero .aw-cd-num { display: inline-block; animation: aw-camp-settle var(--kit-motion-slow, 400ms) var(--kit-motion-ease, ease-out) both; }
@@ -184,13 +190,13 @@
 .aw-rule-chip {
 	display: inline-flex; align-items: center; gap: var(--kit-space-1);
 	margin: var(--kit-space-1) var(--kit-space-1) 0 0; padding: var(--kit-space-1) var(--kit-space-2);
-	border: 1px solid var(--aw-camp-meta, var(--kit-color-line)); border-radius: var(--kit-radius-control);
+	border: 1px solid var(--camp-meta, var(--kit-color-line)); border-radius: var(--kit-radius-control);
 	background: transparent; color: inherit; font: inherit; font-size: var(--kit-type-small, 0.875rem); font-variant-numeric: tabular-nums;
 	cursor: pointer; min-height: 2.75rem;
 }
 .aw-rule-chip:hover { border-color: currentColor; }
 .aw-rule-chip:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-camp-hero .aw-rule-chip { border-color: var(--aw-camp-on-brand); }
+.aw-camp-hero .aw-rule-chip { border-color: var(--camp-on-mark); }
 .aw-rule-chip--plain { cursor: default; }
 .aw-rule-chip-dialog {
 	width: min(40rem, calc(100vw - 2 * var(--kit-space-4))); max-height: 80vh; overflow: auto;
@@ -198,7 +204,7 @@
 	box-shadow: var(--kit-elevation-2);
 }
 .aw-rule-chip-dialog::backdrop { background: var(--kit-overlay, rgba(0, 0, 0, 0.5)); }
-.aw-rule-chip-text { padding-left: var(--kit-space-3); border-left: var(--kit-space-1) solid var(--aw-camp-brand, var(--kit-color-accent)); }
+.aw-rule-chip-text { padding-left: var(--kit-space-3); border-left: var(--kit-space-1) solid var(--camp-mark, var(--kit-color-accent)); }
 .aw-rule-chip-text .aw-clause { margin-left: var(--kit-space-3); }
 .aw-rule-chip-src { color: var(--kit-color-muted); font-size: var(--kit-type-small, 0.875rem); }
 .aw-rule-chip-close { margin-top: var(--kit-space-3); min-height: 2.75rem; padding: var(--kit-space-2) var(--kit-space-4); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-control); background: transparent; font: inherit; cursor: pointer; }
@@ -213,7 +219,7 @@
 }
 .aw-letter fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
 .aw-letter legend, .aw-letter-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); font-size: var(--kit-type-h3); font-weight: 800; letter-spacing: -0.01em; }
-.aw-letter-step { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--aw-camp-brand, var(--kit-color-ink)); color: var(--aw-camp-on-brand, var(--kit-color-on-ink)); font-size: 1rem; }
+.aw-letter-step { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); font-size: 1rem; }
 .aw-letter-picked { font-size: var(--kit-type-sm); font-weight: var(--kit-weight-regular); color: var(--kit-color-muted); }
 .aw-letter-ground-list { display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-letter-ground-list { grid-template-columns: repeat(2, 1fr); } }
@@ -224,15 +230,15 @@
 }
 .aw-letter-ground label { cursor: pointer; }
 .aw-letter-ground label::after { content: ""; position: absolute; inset: 0; } /* the whole card toggles */
-.aw-letter-ground:hover { box-shadow: inset 0 0 0 1px var(--aw-camp-brand, var(--kit-color-ink)); }
-.aw-letter-ground:has(input:checked) { box-shadow: inset 0 0 0 2px var(--aw-camp-brand, var(--kit-color-ink)); }
+.aw-letter-ground:hover { box-shadow: inset 0 0 0 1px var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-ground:has(input:checked) { box-shadow: inset 0 0 0 2px var(--camp-mark, var(--kit-color-ink)); }
 .aw-letter-ground:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-letter-ground input { width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--aw-camp-brand, var(--kit-color-ink)); }
+.aw-letter-ground input { width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
 .aw-letter-ground strong { display: block; font-size: var(--kit-type-base); }
 .aw-letter-field { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); }
 .aw-letter-field input, .aw-letter-field textarea { box-sizing: border-box; width: 100%; padding: var(--kit-space-2) var(--kit-space-3); border: var(--kit-border-control, 1px solid var(--kit-color-line)); border-radius: var(--kit-radius-control); font: inherit; background: var(--kit-color-bg); }
 .aw-letter-hint { color: var(--kit-color-muted); }
-.aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--aw-camp-brand, var(--kit-color-ink)); color: var(--aw-camp-on-brand, var(--kit-color-on-ink)); }
+.aw-letter-meta { display: grid; gap: var(--kit-space-1); margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-mark, var(--kit-color-ink)); color: var(--camp-on-mark, var(--kit-color-on-ink)); }
 .aw-letter-meta strong { color: inherit; }
 .aw-letter-to { display: flex; align-items: center; gap: var(--kit-space-2); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .aw-letter-preview {
@@ -257,7 +263,7 @@
 		display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-3);
 		position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--kit-layer-nav, 50);
 		padding: var(--kit-space-2) var(--kit-space-4) calc(var(--kit-space-2) + env(safe-area-inset-bottom));
-		background: var(--aw-camp-dark, var(--kit-color-ink)); color: var(--kit-color-on-ink);
+		background: var(--camp-dark, var(--kit-color-ink)); color: var(--kit-color-on-ink);
 		transition: transform var(--kit-motion-base, 200ms) var(--kit-motion-ease, ease);
 	}
 	.aw-sticky-cta.is-hidden { transform: translateY(110%); }
@@ -267,25 +273,25 @@
 /* Home band */
 .aw-camp-band {
 	padding: var(--kit-space-6) var(--kit-space-gutter);
-	background: var(--aw-camp-brand); color: var(--aw-camp-on-brand);
+	background: var(--camp-mark); color: var(--camp-on-mark);
 }
-.aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--aw-camp-on-brand); }
+.aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
-.aw-camp .aw-camp-band-ghost { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); }
-.aw-camp .aw-camp-band-ghost:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
+.aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }
+.aw-camp .aw-camp-band-ghost:hover { background: var(--camp-on-mark); color: var(--camp-mark); }
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
 
 /* Press cards on a campaign page: an item without a photo shows the publisher's logo on the campaign surface */
-.aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface, var(--aw-camp-paper)); }
+.aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface); }
 .aw-camp .aw-camp-press .aw-story-fallback img.aw-story-logo { width: auto !important; height: auto !important; max-width: 45%; max-height: 45%; } /* a logo tile, whole, not a photo-sized logo */
-.aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface, var(--aw-camp-paper)); border-bottom-color: var(--camp-primary, var(--aw-camp-brand)); }
+.aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface); border-bottom-color: var(--camp-primary); }
 
 /* In the press: the Media & PR cards; partners (only when the campaign has some) */
 .aw-camp-press { margin-top: var(--kit-space-4); }
 .aw-camp-partners { margin-top: var(--kit-space-7); }
 .aw-camp-partners ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
 .aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-3); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
-.aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
+.aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
 
 /* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
@@ -293,6 +299,6 @@
 .aw-camp.is-closed #faq-078f9b7a10 { order: -1; } /* id from the question text (campaign2-page.php c2faq) */
 
 /* Home band after closing: "Latest campaign", on paper */
-.aw-camp-band--closed { background: var(--aw-camp-paper); color: var(--aw-camp-dark); }
-.aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--aw-camp-dark); }
-.aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--aw-camp-brand); font-weight: var(--kit-weight-strong); }
+.aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
+.aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }

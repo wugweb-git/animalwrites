@@ -1986,12 +1986,11 @@
     "--camp-primary-ink",
     "--camp-surface",
     "--camp-accent",
-    "--aw-camp-brand",
-    "--aw-camp-brand-deep",
-    "--aw-camp-dark",
-    "--aw-camp-paper",
-    "--aw-camp-meta",
-    "--aw-camp-on-brand"
+    "--camp-mark",
+    "--camp-on-mark",
+    "--camp-deep",
+    "--camp-dark",
+    "--camp-meta"
    ],
    "a11y": {
     "element": "<button> chips opening <dialog>; <form> with labelled fields and a fieldset of checkboxes",
