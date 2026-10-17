@@ -235,7 +235,7 @@ $content = <<<'HTML'
 <p>We are building this platform because animal welfare needs more than awareness alone. It also needs accessible information, informed participation, and practical ways for people to get involved.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"metadata":{"name":"Principles"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","minimumColumnWidth":"16rem"}} -->
+<!-- wp:group {"metadata":{"name":"Principles"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
 <div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Make information easier to find</h3>
