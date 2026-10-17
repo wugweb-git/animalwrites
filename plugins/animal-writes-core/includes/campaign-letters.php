@@ -196,7 +196,7 @@ function aw_cl_report_page() {
 	}
 	echo '</select> ' . get_submit_button( 'Show', 'secondary', '', false ) . ' <a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_cl_csv&campaign=' . $cid ), 'aw_cl_csv' ) ) . '">Export CSV</a></form>';
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d", $cid ) ); // phpcs:ignore
-	echo '<h2>' . esc_html( number_format_i18n( $total ) ) . ' letters sent</h2>';
+	echo '<h2>' . esc_html( sprintf( _n( '%s letter sent', '%s letters sent', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</h2>';
 	$table = function ( $title, $rows, $head ) {
 		echo '<h2>' . esc_html( $title ) . '</h2><table class="widefat striped" style="max-width:48rem"><thead><tr><th>' . esc_html( $head ) . '</th><th style="width:8rem">Letters</th></tr></thead><tbody>';
 		foreach ( $rows as $label => $n ) {
