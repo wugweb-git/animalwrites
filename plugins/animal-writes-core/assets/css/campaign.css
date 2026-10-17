@@ -17,16 +17,23 @@
 }
 /* Campaign 2.0 (draft lab animal rules 2026). */
 .aw-camp--lab-rules {
-	--camp-primary: #c83410;
+	--camp-primary: #a3122f; /* "Gazette crimson", palette A (owner, 17 Oct 2026) */
 	--camp-primary-ink: #ffffff;
-	--camp-surface: #f3efe6;
-	--camp-accent: #70230e;
+	--camp-surface: #fbeef0;
+	--camp-accent: #6b0f22;
 	--camp-mark: var(--camp-primary);
-	--camp-on-mark: var(--camp-primary-ink);
+	--camp-on-mark: #ffffff;
 	--camp-deep: var(--camp-accent);
-	--camp-dark: #16130e;
-	--camp-meta: #544b44;
+	--camp-dark: #1d1418;
+	--camp-meta: #5e4c51;
 }
+/* Crimson on the dark bands is under 3:1, so rules, outlines, bars and icons there are white */
+.aw-camp--lab-rules :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
+.aw-camp--lab-rules .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
+.aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
