@@ -110,6 +110,11 @@
   --kit-radius-mark: 3px;
   --kit-radius-xs: 4px;
   --kit-thumb-sm: 56px;
+  --kit-thumb-md: 72px;
+  --kit-size-target-min: 24px;
+  --kit-accent-bar: 6px;
+  --kit-focus-outline: 2px;
+  --kit-focus-ring-width: 4px;
   --kit-table-min: 34rem;
   --kit-border-control: 1px;
   --kit-card-columns: 1;

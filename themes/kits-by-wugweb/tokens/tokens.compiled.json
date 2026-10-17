@@ -450,6 +450,31 @@
       "md": "56px",
       "lg": "56px"
     },
+    "thumb-md": {
+      "sm": "72px",
+      "md": "72px",
+      "lg": "72px"
+    },
+    "size-target-min": {
+      "sm": "24px",
+      "md": "24px",
+      "lg": "24px"
+    },
+    "accent-bar": {
+      "sm": "6px",
+      "md": "6px",
+      "lg": "6px"
+    },
+    "focus-outline": {
+      "sm": "2px",
+      "md": "2px",
+      "lg": "2px"
+    },
+    "focus-ring-width": {
+      "sm": "4px",
+      "md": "4px",
+      "lg": "4px"
+    },
     "table-min": {
       "sm": "34rem",
       "md": "34rem",

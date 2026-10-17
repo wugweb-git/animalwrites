@@ -220,7 +220,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 }
 .kit-form textarea { padding-block: var(--kit-space-3); min-height: 7rem; }
 .kit-form :is(input, select, textarea):hover { box-shadow: 0 0 0 3px var(--kit-color-surface); }
-.kit-form :is(input, select, textarea):focus-visible { outline: none; box-shadow: 0 0 0 4px var(--kit-color-accent); }
+.kit-form :is(input, select, textarea):focus-visible { outline: none; box-shadow: 0 0 0 var(--kit-focus-ring-width) var(--kit-color-accent); }
 .kit-form :is(input, select, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); background: var(--kit-color-danger-soft); }
 .kit-form :is(input, select, textarea).is-valid { border-color: var(--kit-color-success); }
 .kit-field-error { display: block; color: var(--kit-color-danger); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); margin-top: var(--kit-space-1); }
@@ -692,7 +692,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-crumbs li + li::before { content: "›"; margin-right: .4em; color: var(--kit-color-muted); }
 .kit-crumbs a { color: inherit; text-decoration: underline; text-underline-offset: .15em; text-decoration-color: var(--kit-color-line); }
 .kit-crumbs a:hover { color: var(--kit-color-ink); text-decoration-color: currentColor; }
-.kit-crumbs a:focus-visible { outline: 2px solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-hair); }
+.kit-crumbs a:focus-visible { outline: var(--kit-focus-outline) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-hair); }
 .kit-crumbs [aria-current] { color: var(--kit-color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40ch; }
 /* Phones: wordmark, search, Emergency and the menu button all fit on one row */
 @media (max-width: 767px) {
