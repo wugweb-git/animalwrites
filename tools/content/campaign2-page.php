@@ -376,23 +376,12 @@ $loop      = c2sec(
 /* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
 $impact = c2sec( '', c2h( 'Objections sent' ) . c2sc( '[aw_campaign_count min="100"]' ), 'aw-camp-paper' );
 
-/* Support: the volunteer sign-up (the site's "Help animals near you" banner with its form opening in place). Being on
-   the page, it also stands in for the banner that is otherwise added under every campaign. */
-$support = c2sec(
-	'',
-	'<!-- wp:group {"align":"wide","className":"aw-vol-banner","layout":{"type":"default"}} -->' . "\n"
-	. '<div class="wp-block-group alignwide aw-vol-banner"><!-- wp:image {"id":8856,"width":"800px","height":"600px","sizeSlug":"full","linkDestination":"none","className":"aw-vol-banner-photo"} -->' . "\n"
-	. '<figure class="wp-block-image size-full is-resized aw-vol-banner-photo"><img src="/wp-content/uploads/2026/10/banner-category-cattle-gaushalas-phone.webp" alt="A woman feeding cows on a street in India" class="wp-image-8856" width="800" height="600" loading="lazy"/></figure>' . "\n"
-	. '<!-- /wp:image -->' . "\n\n"
-	. '<!-- wp:group {"className":"aw-vol-banner-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-vol-banner-body">'
-	. c2h( 'Help animals near you', 2, '', 'aw-vol-banner-title' )
-	. c2p( 'Join volunteers across India who rescue, feed and speak up for animals. Pick what you can do; we\'ll connect you.' )
-	. '<!-- wp:animal-writes/volunteer /--></div>' . "\n" . '<!-- /wp:group --></div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
-);
+/* Support (volunteers, local networks, help) has no content yet, so it is not printed. Volunteer registration is not
+   support: the site's "Help animals near you" banner stays where every campaign page has it, after the content. */
 
 /*
  * Sections in the Active order of the Campaign Content Standard (C2). campaign-goal is folded into the hero and context,
- * and opportunities is reserved, so neither is printed. aw-camp-open sections show until the close date, aw-camp-closed
+ * support has no content yet and opportunities is reserved, so none of them is printed. aw-camp-open sections show until the close date, aw-camp-closed
  * after it (campaign-tools.php); after closing, next-steps comes straight after the hero.
  */
 $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rules","layout":{"type":"default"}} -->' . "\n"
@@ -403,7 +392,6 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $how, 'aw-camp-open' )
 	. c2slot( 'impact', $impact, 'aw-camp-if-count' )
-	. c2slot( 'support', $support )
 	. c2slot( 'faq', $faq )
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
