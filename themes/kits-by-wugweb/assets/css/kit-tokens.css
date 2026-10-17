@@ -93,6 +93,7 @@
   --kit-z-overlay: 100;
   --kit-size-target: 44px;
   --kit-size-control: 48px;
+  --kit-size-control-lg: 52px;
   --kit-border-width: 1px;
   --kit-border-mark: 3px;
   --kit-border-accent: 4px;
@@ -106,15 +107,19 @@
   --kit-icon-md: 20px;
   --kit-icon-lg: 24px;
   --kit-icon-xl: 28px;
+  --kit-icon-gap: 6px;
   --kit-radius-hair: 2px;
   --kit-radius-mark: 3px;
   --kit-radius-xs: 4px;
   --kit-thumb-sm: 56px;
   --kit-thumb-md: 72px;
+  --kit-thumb-lg: 112px;
   --kit-size-target-min: 24px;
   --kit-accent-bar: 6px;
   --kit-focus-outline: 2px;
   --kit-focus-ring-width: 4px;
+  --kit-press-offset-sm: 4px;
+  --kit-press-offset: 6px;
   --kit-table-min: 34rem;
   --kit-border-control: 1px;
   --kit-card-columns: 1;
