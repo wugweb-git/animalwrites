@@ -78,6 +78,7 @@ add_action(
 				'show_ui'      => true,
 				'show_in_menu' => 'edit.php?post_type=page',
 				'supports'     => array( 'title', 'thumbnail' ),
+				'taxonomies'   => array( 'post_tag' ), // campaign tags (campaign-*): which campaign the coverage is about; the Media & PR Campaign filter
 			)
 		);
 	}
@@ -390,6 +391,7 @@ function aw_press_ingest( WP_REST_Request $req ) {
 	if ( function_exists( 'aw_relevance_store' ) ) {
 		aw_relevance_store( $id, $req->get_param( 'relevance' ) );
 	}
+	aw_press_campaign_tags( $id, (array) $req->get_param( 'tags' ) );
 	aw_press_fetch( $id ); // fill what the page itself says (thumbnail downloaded, never hotlinked)
 	if ( ! has_post_thumbnail( $id ) && $meta['aw_press_thumb_src'] ) {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
@@ -401,6 +403,24 @@ function aw_press_ingest( WP_REST_Request $req ) {
 		}
 	}
 	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
+}
+
+/**
+ * Campaign tags on a press item: only existing tags whose slug starts with "campaign-" (the workers send the topic tags
+ * they matched, e.g. campaign-lab-animals-2026); anything else is ignored. Added to the item's tags, never replacing them.
+ */
+function aw_press_campaign_tags( $id, $tags ) {
+	$ids = array();
+	foreach ( array_filter( $tags, 'is_scalar' ) as $t ) {
+		$slug = sanitize_title( (string) $t );
+		$term = 0 === strpos( $slug, 'campaign-' ) ? get_term_by( 'slug', $slug, 'post_tag' ) : false;
+		if ( $term ) {
+			$ids[] = (int) $term->term_id;
+		}
+	}
+	if ( $ids ) {
+		wp_set_object_terms( $id, $ids, 'post_tag', true );
+	}
 }
 
 // Inbox → "Press to review": the pending items, with a count. Publish = approve; Move to Trash = reject (never comes back).

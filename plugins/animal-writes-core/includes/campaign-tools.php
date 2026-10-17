@@ -269,6 +269,30 @@ add_shortcode(
 	}
 );
 
+/*
+ * ---------- Campaign partners ----------
+ * Campaigns can have partners (owner, 17 Oct 2026; the site itself has none). [aw_campaign_partners title="Partners"]
+ * prints the campaign's partners, Directory listings named in aw_campaign_partners (IDs, comma-separated), as cards
+ * linking to their profiles; with no partners it prints nothing, heading included.
+ */
+add_shortcode(
+	'aw_campaign_partners',
+	function ( $atts ) {
+		$a   = shortcode_atts( array( 'title' => 'Partners' ), $atts );
+		$id  = aw_camp_id();
+		$ids = $id ? array_filter( array_map( 'intval', explode( ',', (string) get_post_meta( $id, 'aw_campaign_partners', true ) ) ) ) : array();
+		$out = '';
+		foreach ( $ids as $pid ) {
+			if ( 'aw_listing' !== get_post_type( $pid ) || 'publish' !== get_post_status( $pid ) ) {
+				continue;
+			}
+			$logo = get_the_post_thumbnail( $pid, 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) );
+			$out .= '<li><a href="' . esc_url( get_permalink( $pid ) ) . '">' . ( $logo ? $logo : aw_i( 'directory' ) ) . '<span>' . esc_html( get_the_title( $pid ) ) . '</span></a></li>';
+		}
+		return $out ? '<div class="aw-camp-partners"><h2>' . esc_html( $a['title'] ) . '</h2><ul>' . $out . '</ul></div>' : '';
+	}
+);
+
 /* ---------- Phone bar ---------- */
 add_shortcode(
 	'aw_sticky_cta',

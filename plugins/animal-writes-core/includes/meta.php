@@ -82,6 +82,7 @@ function aw_meta_schema() {
 		'aw_event_place'     => array( 'string', array( 'aw_campaign' ), 'Event place' ),
 		'aw_campaign_close'  => array( 'string', array( 'aw_campaign' ), 'Closes on (Y-m-d)' ),
 		'aw_campaign_doc'    => array( 'string', array( 'aw_campaign' ), 'Campaign document (Library item ID)' ),
+		'aw_campaign_partners' => array( 'string', array( 'aw_campaign' ), 'Partners (Directory listing IDs, comma-separated; only the owner\'s list)' ),
 
 		// Resources: the date a guide was last checked (schema lastReviewed).
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),

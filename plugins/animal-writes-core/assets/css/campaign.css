@@ -255,3 +255,11 @@
 .aw-camp .aw-camp-band-ghost { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); }
 .aw-camp .aw-camp-band-ghost:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
+
+/* In the press: the Media & PR cards; partners (only when the campaign has some) */
+.aw-camp-press { margin-top: var(--kit-space-4); }
+.aw-camp-partners { margin-top: var(--kit-space-7); }
+.aw-camp-partners ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+.aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-3); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
+.aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
+.aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
