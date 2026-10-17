@@ -1977,7 +1977,9 @@
     "aw-camp-card-doc",
     "aw-camp-gap-doc",
     "aw-camp-doc-strip",
-    "aw-camp-doc-page"
+    "aw-camp-doc-page",
+    "aw-letter-optin",
+    "aw-letter-email"
    ],
    "states": [
     "pre (upcoming)",

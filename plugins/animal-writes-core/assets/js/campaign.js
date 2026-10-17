@@ -135,11 +135,42 @@
 		else fallback();
 	}
 
+	/* Opt-in at send (campaign-letters.php): ticked, the email is asked for and required. */
+	var optin = form.elements.optin;
+	var emailRow = form.querySelector('.aw-letter-email');
+	if (optin && emailRow) optin.addEventListener('change', function () { emailRow.hidden = !optin.checked; if (optin.checked) form.elements.email.focus(); });
+	function wantsUpdates() { return !!(optin && optin.checked); }
+	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
+
 	function ready() {
-		var ok = val('name') && val('city');
+		var named = val('name') && val('city');
+		var ok = named && (!wantsUpdates() || emailOk());
+		errorEl.textContent = named ? 'Add your email to get updates, or untick the box.' : 'Add your name and city first.';
 		errorEl.hidden = !!ok;
-		if (!ok) (val('name') ? form.elements.city : form.elements.name).focus();
+		if (!ok) (!val('name') ? form.elements.name : !val('city') ? form.elements.city : form.elements.email).focus();
 		return ok;
+	}
+
+	function post(url, data) {
+		if (!url || !window.fetch) return Promise.reject();
+		return fetch(url, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+			.then(function (r) { if (!r.ok) throw r; return r; });
+	}
+	function chosen() { return grounds.filter(function (g) { return g.box.checked; }).map(function (g) { return g.box.value; }).join(','); }
+	function device() { return window.matchMedia('(max-width: 767px)').matches ? 'phone' : (window.matchMedia('(max-width: 1199px)').matches ? 'tablet' : 'desktop'); }
+	var counted = false, joined = false;
+	/* One anonymous row per letter (city, grounds, route, device, date; no name, email or IP), and the sign-up if ticked. */
+	function recordSend(route) {
+		if (!counted) {
+			counted = true;
+			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device() }).catch(function () {});
+		}
+		if (wantsUpdates() && !joined) {
+			joined = true;
+			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: '1' })
+				.then(function () { track('newsletter_optin', { source: cfg.source || '' }); })
+				.catch(function () { joined = false; });
+		}
 	}
 
 	form.querySelectorAll('[data-route]').forEach(function (btn) {
@@ -173,6 +204,7 @@
 				else window.open(url, '_blank', 'noopener');
 			}
 			track('objection_sent', { route: route });
+			recordSend(route);
 			confirmBox.hidden = false;
 		});
 	});

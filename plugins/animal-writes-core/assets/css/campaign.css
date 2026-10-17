@@ -259,6 +259,9 @@
 }
 @media (max-width: 767px) { .aw-letter-preview { max-height: 14rem; } }
 .aw-letter-error { color: var(--kit-color-danger); }
+.aw-letter-optin { display: flex; align-items: flex-start; gap: var(--kit-space-2); margin: var(--kit-space-3) 0; font-size: var(--kit-type-sm); }
+.aw-letter-optin input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
+.aw-letter-optin label { cursor: pointer; }
 .aw-letter-routes, .aw-letter-confirm { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
 .aw-letter-routes .wp-element-button { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
 .aw-letter-confirm p { flex-basis: 100%; margin: 0; }

@@ -264,7 +264,7 @@ $grounds = array(
 	'<strong>Reuse:</strong> The draft allows an animal to be reused (Rule 15(1), Annexure I). An animal that has been through a moderate or severe experiment should not be used again.',
 	'<strong>Rule 5(3), strays in practice:</strong> In September 2022 CPCSEA told labs that stray dogs may be used for new vaccine trials and challenge studies, and withdrew that only "till further orders" in October 2023. Rule 5(3)\'s exemption would allow the same again, and should be deleted.',
 );
-$letter_sc = '[aw_letter_tool to="cpcsea-mef@gov.in" subject="Objection to the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E))" ticked="1,2,6"'
+$letter_sc = '[aw_letter_tool source="campaign2" to="cpcsea-mef@gov.in" subject="Objection to the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E))" ticked="1,2,6"'
 	. ' address="The Member Secretary, Committee for Control and Supervision of Experiments on Animals (CCSEA), Shadipur, Delhi 110008"'
 	. ' intro="I submit the following objections to the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026, G.S.R. 864(E) dated 30 September 2026, published in the Gazette of India on 6 October 2026:"'
 	. ' closing="I request that the draft be withdrawn and revised after wider consultation, and that CCSEA publish a clause-by-clause comparison with the 1998 Rules. Kindly acknowledge receipt of this objection."]';
@@ -274,7 +274,7 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2p( c2i( 'check' ) . 'We store nothing from this form. Your letter goes from your own email account.', 'aw-camp-note' ),
+	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account. We keep only anonymous statistics (city, grounds, how it was sent, device type, date), never your name or email unless you sign up for updates. <a href="/privacy-policy/">Privacy Policy</a>', 'aw-camp-note' ),
 	'aw-camp-paper aw-camp-open'
 );
 
@@ -313,7 +313,7 @@ $faq = c2sec( // the section's id (faq) is on its c2slot
 			array( 'Can community dogs be used?', 'The draft says strays should not be used, but allows exemptions by "competent authorities", a term it does not define (Rule 5(3)). In September 2022 the regulator told labs stray dogs may be used for new vaccine trials; it withdrew that in October 2023 "till further orders".' ),
 			array( 'Is Animal Writes against medical research?', 'We ask for the oversight that exists today to stay, for non-animal methods to come first, and for clear limits on where animals come from.' ),
 			array( 'What happens after 5 November?', 'CCSEA reviews objections and may revise the draft before final notification. We will publish updates here.' ),
-			array( 'Is my data stored?', 'The letter is sent from your own email. We store nothing unless you choose to join our updates.' ),
+			array( 'Is my data stored?', 'Your letter is sent from your own email, and we never receive it. For each letter we record anonymous statistics: the city you typed, the grounds you chose, how you sent it, your device type and the date, with no name, email or IP address. If you tick "Email me updates", we keep your name, city, email and grounds until you unsubscribe. See our <a href="/privacy-policy/">Privacy Policy</a>.' ),
 		)
 	)
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n"
