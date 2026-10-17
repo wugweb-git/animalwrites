@@ -38,7 +38,7 @@
 /* Hero: text left, poster panel right */
 .aw-camp-hero-cols { gap: var(--kit-space-6); }
 .aw-camp-hero-summary { max-width: 36ch; font-size: var(--kit-type-lead); margin-bottom: var(--kit-space-5); }
-.aw-camp-closed .aw-camp-hero-summary { max-width: 1120px; padding-right: max(0px, calc(100% - 40rem)); box-sizing: border-box; } /* constrained layout centres a narrow paragraph: keep it full width, text on the left */
+.aw-camp-closed .aw-camp-hero-summary { max-width: 1120px; padding-right: max(0px, calc(min(100%, 1120px) - 40rem)); box-sizing: border-box; } /* constrained layout centres a narrow paragraph: keep it full width, text on the left */
 .aw-camp-hero .wp-block-buttons { gap: var(--kit-space-3); }
 .aw-camp-ghost .wp-block-button__link { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); border: 0; }
 .aw-camp-ghost .wp-block-button__link:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
@@ -266,7 +266,7 @@
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
 
 /* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
-.aw-camp.is-closed .wp-block-rank-math-faq-block { display: flex; flex-direction: column; }
+.aw-camp.is-closed .wp-block-rank-math-faq-block .rank-math-list { display: flex; flex-direction: column; }
 .aw-camp.is-closed #faq-078f9b7a10 { order: -1; } /* id from the question text (campaign2-page.php c2faq) */
 
 /* Home band after closing: "Latest campaign", on paper */
