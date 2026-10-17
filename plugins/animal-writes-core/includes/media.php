@@ -172,6 +172,22 @@ add_filter(
 );
 
 /*
+ * Opportunity cards: on wide screens (1200px and up) the picture is at most 233px wide (four to a row), so the browser
+ * is told so and picks the 300px file instead of the 1024px original. Narrower screens keep WordPress's sizes.
+ */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $content, $block ) {
+		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-opp-media' ) || false === strpos( $content, ' sizes="' ) ) {
+			return $content;
+		}
+		return preg_replace( '/ sizes="(auto,\s*)?/', ' sizes="$1(min-width: 1200px) 240px, ', $content, 1 );
+	},
+	30,
+	2
+);
+
+/*
  * In lists the card title is the card's one link (its ::after covers the card). A linked picture to the same page stays
  * clickable but is out of the tab order and hidden from screen readers, as aw_item_image() cards already are.
  */

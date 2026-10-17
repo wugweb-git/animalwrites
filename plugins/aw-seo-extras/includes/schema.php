@@ -1337,3 +1337,38 @@ add_filter(
 	},
 	1001
 );
+
+/**
+ * Plain text in the printed graph. Rank Math prints the graph through wp_kses_post_deep(), which writes every "&" in a
+ * value as "&amp;"; JSON-LD is not HTML, so a title such as "Photo & Video Content" reached search engines as
+ * "Photo &amp; Video Content" (and query strings in URLs as "&amp;"). The script Rank Math prints is read back and
+ * every text value decoded to plain characters; values that are HTML (a JobPosting description) keep their markup.
+ *
+ * @param mixed $node Graph or value.
+ * @return mixed
+ */
+function aw_schema_plain_values( $node ) {
+	if ( is_array( $node ) ) {
+		return array_map( 'aw_schema_plain_values', $node );
+	}
+	if ( is_string( $node ) && false !== strpos( $node, '&' ) && false === strpos( $node, '<' ) ) {
+		return html_entity_decode( $node, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+	return $node;
+}
+add_action( 'rank_math/head', fn() => ob_start(), 89 ); // Rank Math prints the graph at 90
+add_action(
+	'rank_math/head',
+	function () {
+		$html = (string) ob_get_clean();
+		echo preg_replace_callback( // phpcs:ignore WordPress.Security.EscapeOutput -- Rank Math's own output; text values decoded, < and > written as < and >
+			'#(<script type="application/ld\+json"[^>]*>)(.*?)(</script>)#s',
+			function ( $m ) {
+				$data = json_decode( $m[2], true );
+				return is_array( $data ) ? $m[1] . wp_json_encode( aw_schema_plain_values( $data ), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG ) . $m[3] : $m[0];
+			},
+			$html
+		);
+	},
+	91
+);

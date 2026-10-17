@@ -87,7 +87,10 @@ add_action(
 			return;
 		}
 		$id = esc_js( aw_gtm_id() );
-		echo "<!-- Google Tag Manager -->\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{$id}');</script>\n<!-- End Google Tag Manager -->\n";
+		// Page speed: the container starts once the page has loaded, or at the visitor's first tap, key or scroll if that
+		// comes first, so it never holds back the first paint. gtm.start is stamped now; everything pushed to the dataLayer
+		// before the container starts (consent defaults, page_context, events) is kept and read by it.
+		echo "<!-- Google Tag Manager -->\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var done=false,ev=['pointerdown','keydown','scroll'];function go(){if(done)return;done=true;ev.forEach(function(e){w.removeEventListener(e,go,true);});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}ev.forEach(function(e){w.addEventListener(e,go,{capture:true,passive:true});});if(d.readyState==='complete'){go();}else{w.addEventListener('load',go,{once:true});}})(window,document,'script','dataLayer','{$id}');</script>\n<!-- End Google Tag Manager -->\n";
 	},
 	1
 );
@@ -110,7 +113,8 @@ function aw_clarity_id() {
 // Microsoft Clarity: same rules as GTM (production host only, never for logged-in staff). Outside the consent region it
 // loads at once; inside it (judged by the browser's time zone, kits_consent_timezones()) only once analytics storage is
 // granted, read from Google's consent mode (gtag consent update) or the CMP's TCF signal (purpose 1), and then it is
-// told so with clarity('consentv2').
+// told so with clarity('consentv2'). Page speed: its script is fetched after the page has loaded, when the browser is
+// idle; calls made before then (consentv2, events) queue in clarity.q and are read when it starts.
 add_action(
 	'wp_head',
 	function () {
@@ -123,7 +127,7 @@ add_action(
 		}
 		$id = esc_js( aw_clarity_id() );
 		$tz = wp_json_encode( kits_consent_timezones() );
-		echo "<script>(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		echo "<script>(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};function go(){t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}function idle(){(\"requestIdleCallback\" in c)?requestIdleCallback(go,{timeout:2000}):setTimeout(go,1000);}if(l.readyState===\"complete\"){idle();}else{c.addEventListener(\"load\",idle,{once:true});}})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 	},
 	2
 );

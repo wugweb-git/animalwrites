@@ -54,11 +54,28 @@ add_action(
 );
 
 /*
+ * Inter without the jump (Core Web Vitals, layout shift). Until Inter arrives, text shows in "Inter Fallback": the
+ * device's Arial resized to Inter's width and line height (measured from inter-latin.woff2: 107.48% wide, ascent 90.14%,
+ * descent 22.44%), only for the characters Inter has. A line no longer rewraps when Inter swaps in (the Opportunities
+ * intro moved the list 29px). Wide screens (1200px and up) also preload Inter so it is there for the first paint;
+ * phones do not, so it never competes with their main picture.
+ */
+add_action(
+	'wp_head',
+	function () {
+		$font = get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
+		echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(min-width: 1200px)">' . "\n";
+		echo '<style id="aw-inter-fallback">@font-face{font-family:"Inter Fallback";src:local("Arial"),local("ArialMT");size-adjust:107.48%;ascent-override:90.14%;descent-override:22.44%;line-gap-override:0%;unicode-range:U+0000,U+0020-007E,U+00A0-00AC,U+00AE-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+2002,U+2009,U+200B,U+2013-2014,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032-2033,U+2039-203A,U+2044,U+20AC,U+2122,U+2191,U+2193,U+2212,U+FEFF}</style>' . "\n";
+	},
+	2
+);
+
+/*
  * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 400 to 700,
  * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
  * declares 400 to 700 as separate static files without swap, and as the later rules they won: three extra 118 KB files
  * per page, with text hidden while they load. Those overlapping faces are left out; the library's other weights and its
- * italics stay. The file is not preloaded: on a slow phone a preload would compete with the page's main picture.
+ * italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
  */
 add_action(
 	'init',

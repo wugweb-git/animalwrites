@@ -20,9 +20,9 @@ function kits_page_label() {
 		return 'Search';
 	}
 	if ( is_singular() ) {
-		return wp_strip_all_tags( (string) get_the_title( get_queried_object_id() ) );
+		return html_entity_decode( wp_strip_all_tags( (string) get_the_title( get_queried_object_id() ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ); // plain text: set_attribute() escapes it once
 	}
-	return wp_strip_all_tags( (string) ( get_the_archive_title() ?: get_bloginfo( 'name' ) ) );
+	return html_entity_decode( wp_strip_all_tags( (string) ( get_the_archive_title() ?: get_bloginfo( 'name' ) ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 }
 
 add_filter(

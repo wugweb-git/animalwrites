@@ -81,7 +81,7 @@
 				{
 					"slug": "base",
 					"name": "Inter",
-					"fontFamily": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
 					"fontFace": [
 						{
 							"fontFamily": "Inter",
@@ -97,7 +97,7 @@
 				{
 					"slug": "display",
 					"name": "Inter (headings)",
-					"fontFamily": "\"Inter\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+					"fontFamily": "\"Inter\", \"Inter Fallback\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
 					"fontFace": [
 						{
 							"fontFamily": "Inter",
