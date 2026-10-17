@@ -368,8 +368,8 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"metadata":{"name":"Newsletter"},"className":"kit-dark aw-about-newsletter","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"},"margin":{"top":"var:preset|spacing|50"}}},"backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->
-<div class="wp-block-group kit-dark aw-about-newsletter has-background-color has-secondary-background-color has-text-color has-background" style="margin-top:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Newsletter</h3>
+<div class="wp-block-group kit-dark aw-about-newsletter has-background-color has-secondary-background-color has-text-color has-background" style="margin-top:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:heading {"level":3,"textColor":"background"} -->
+<h3 class="wp-block-heading has-background-color has-text-color">Newsletter</h3>
 <!-- /wp:heading -->
 
 <!-- wp:shortcode -->
