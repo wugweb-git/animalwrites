@@ -76,9 +76,11 @@ function aw_meta_schema() {
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
 		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
 		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
+		'aw_employment_type' => array( 'string', array( 'aw_opportunity' ), 'Employment type as the source states it: FULL_TIME, PART_TIME, CONTRACTOR, TEMPORARY, PER_DIEM, INTERN, VOLUNTEER or OTHER (empty when not stated)' ),
 
 		// Campaigns (read by the Event schema in aw-seo-extras).
-		'aw_event_date'      => array( 'string', array( 'aw_campaign' ), 'Event date (Y-m-d)' ),
+		'aw_event_date'      => array( 'string', array( 'aw_campaign', 'aw_opportunity' ), 'Event date (Y-m-d)' ),
+		'aw_event_schedule'  => array( 'string', array( 'aw_opportunity' ), 'Repeats, as the source states it: "second Saturday monthly 14:00-16:00" (read by the Event schema)' ),
 		'aw_event_place'     => array( 'string', array( 'aw_campaign' ), 'Event place' ),
 		'aw_campaign_close'  => array( 'string', array( 'aw_campaign' ), 'Closes on (Y-m-d)' ),
 		'aw_campaign_doc'    => array( 'string', array( 'aw_campaign' ), 'Campaign document (Library item ID)' ),
@@ -131,6 +133,12 @@ function aw_sanitize_meta( $value, $key ) {
 	}
 	if ( 'aw_email' === $key ) {
 		return sanitize_email( (string) $value );
+	}
+	if ( 'aw_employment_type' === $key ) { // Google's JobPosting values only
+		$value = strtoupper( str_replace( array( '-', ' ' ), '_', trim( (string) $value ) ) );
+		$value = preg_replace( '/^(FULL|PART)_?TIME$/', '$1_TIME', $value ); // "Fulltime", "Full time"
+		$value = array( 'CONTRACT' => 'CONTRACTOR', 'INTERNSHIP' => 'INTERN', 'TEMP' => 'TEMPORARY' )[ $value ] ?? $value;
+		return in_array( $value, array( 'FULL_TIME', 'PART_TIME', 'CONTRACTOR', 'TEMPORARY', 'PER_DIEM', 'INTERN', 'VOLUNTEER', 'OTHER' ), true ) ? $value : '';
 	}
 	return sanitize_text_field( (string) $value );
 }

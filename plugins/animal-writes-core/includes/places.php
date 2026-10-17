@@ -247,6 +247,13 @@ function aw_places_from_text( $text ) {
 	if ( ! $out && $state ) {
 		$out[] = array( $state->code, 0 );
 	}
+	// A state named beside districts of another state ("Delhi NCR, Agra/Mathura") is a place of its own.
+	foreach ( $parts as $part ) {
+		$s = aw_place_state_by_name( $part );
+		if ( $s && ! aw_place_district_by_name( $part ) && ! array_filter( $out, fn( $p ) => (int) $p[0] === (int) $s->code ) ) {
+			$out[ 's' . $s->code ] = array( $s->code, 0 );
+		}
+	}
 	return array_values( $out );
 }
 

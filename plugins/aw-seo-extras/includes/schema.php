@@ -629,17 +629,27 @@ function aw_website_schema() {
 }
 
 /**
- * JobPosting for an open job, internship, fellowship or volunteer role: remote ones as TELECOMMUTE, others at their place
- * (else India). validThrough only from a stored deadline (aw_deadline; a review date is not a deadline); employmentType
- * from the opportunity's tags: internship INTERN, volunteer VOLUNTEER, fellowship OTHER, job none (hours are not stored).
+ * JobPosting for an open job, internship, fellowship or volunteer role: remote ones as TELECOMMUTE (with India as the
+ * applicant country), others at each of their places (else India). Only from what the item holds, nothing guessed:
+ * - validThrough only from a stored deadline (aw_deadline; a review date is not a deadline). Past it, or past its
+ *   review date, the opportunity is closed and has no JobPosting at all.
+ * - employmentType from the type the source states (aw_employment_type, e.g. FULL_TIME for "Type: Fulltime") and the
+ *   Opportunity type: internship INTERN, volunteer VOLUNTEER, fellowship OTHER. A job that states no hours has none.
+ * - jobLocation: one Place per stored district or state. Street and PIN code only when the role is at the hiring
+ *   organisation's own place: the opportunity has one place, the same district as the organisation's Directory listing,
+ *   and the listing holds them (its area beyond the district and state, its PIN code). The opportunity's own PIN code
+ *   comes first. Never the organisation's office for a role elsewhere.
+ * - baseSalary: never; no opportunity stores pay, and none is guessed.
  */
 function aw_job_schema( $id ) {
-	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
+	$places = function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array();
 	$area   = trim( (string) get_post_meta( $id, 'aw_area', true ) . ' ' . (string) get_post_meta( $id, 'aw_place_city', true ) );
+	$names  = implode( ' ', array_map( fn( $p ) => $p->name, $places ) );
 	$org_id = (int) get_post_meta( $id, 'aw_organisation', true );
-	$remote = (bool) preg_match( '/\b(remote|online|anywhere|work from home|wfh|virtual)\b/i', $area . ' ' . $state . ' ' . $district );
+	$org_id = $org_id && 'publish' === get_post_status( $org_id ) ? $org_id : 0;
+	$remote = (bool) preg_match( '/\b(remote|online|anywhere|work from home|wfh|virtual)\b/i', $area . ' ' . $names );
 	$org      = (string) get_post_meta( $id, 'aw_org_name', true );
-	$org      = $org ? $org : ( $org_id && 'publish' === get_post_status( $org_id ) ? get_post_field( 'post_title', $org_id ) : '' );
+	$org      = $org ? $org : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
 	$org_site = (string) get_post_meta( $id, 'aw_website', true );
 	if ( ! $org_site && $org_id ) {
 		$org_site = (string) get_post_meta( $org_id, 'aw_website', true );
@@ -653,24 +663,21 @@ function aw_job_schema( $id ) {
 	if ( $kinds && ! array_intersect( array( 'job', 'internship', 'fellowship', 'volunteer' ), $kinds ) ) {
 		return array(); // an event, fostering or a grant is not a job
 	}
-	$desc     = trim( preg_replace( '/<!--.*?-->/s', '', (string) get_post_field( 'post_content', $id ) ) ); // no block comments
-	$desc     = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : '' );
-	$desc     = $desc ? $desc : (string) get_post_field( 'post_excerpt', $id );
-	$desc     = $desc ? $desc : get_the_title( $id );
-	$emp      = array();
-	if ( has_term( 'internship', 'post_tag', $id ) ) {
-		$emp[] = 'INTERN';
-	}
-	if ( has_term( 'volunteer', 'post_tag', $id ) ) {
-		$emp[] = 'VOLUNTEER';
-	}
-	if ( has_term( 'fellowship', 'post_tag', $id ) ) {
-		$emp[] = 'OTHER'; // Google has no fellowship value; a job tag alone says nothing of hours, so it gets none (no FULL_TIME guessed)
-	}
 	if ( '' === $org ) {
 		return array(); // Google requires hiringOrganization: without the organisation's name there is no JobPosting
 	}
-	$logo = $org_id && 'publish' === get_post_status( $org_id ) ? (string) get_the_post_thumbnail_url( $org_id, 'medium' ) : ''; // the organisation's own logo, when its listing has one
+	$desc = trim( preg_replace( '/<!--.*?-->/s', '', (string) get_post_field( 'post_content', $id ) ) ); // no block comments
+	$desc = $desc ? $desc : ( function_exists( 'aw_text' ) ? aw_text( $id, 60 ) : '' );
+	$desc = $desc ? $desc : (string) get_post_field( 'post_excerpt', $id );
+	$desc = $desc ? $desc : get_the_title( $id );
+	$emp  = array_filter( array( (string) get_post_meta( $id, 'aw_employment_type', true ) ) ); // as the source states it
+	foreach ( array( 'internship' => 'INTERN', 'volunteer' => 'VOLUNTEER', 'fellowship' => 'OTHER' ) as $tag => $value ) { // Google has no fellowship value
+		if ( in_array( $tag, $kinds, true ) ) {
+			$emp[] = $value;
+		}
+	}
+	$emp  = array_values( array_unique( $emp ) );
+	$logo = $org_id ? (string) get_the_post_thumbnail_url( $org_id, 'medium' ) : ''; // the organisation's own logo, when its listing has one
 	$data = array(
 		'@type'              => 'JobPosting',
 		'@id'                => get_permalink( $id ) . '#job',
@@ -679,20 +686,196 @@ function aw_job_schema( $id ) {
 		'datePosted'         => get_the_date( 'c', $id ),
 		'url'                => get_permalink( $id ),
 		'employmentType'     => $emp ? ( 1 === count( $emp ) ? $emp[0] : $emp ) : null,
-		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id && 'publish' === get_post_status( $org_id ) ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
+		'hiringOrganization' => array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $org ), 'sameAs' => $org_site, 'url' => $org_id ? get_permalink( $org_id ) : null, 'logo' => $logo ) ),
 		'validThrough'       => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline . 'T23:59:59+05:30' : null,
 	);
 	if ( $remote ) {
-		$data['jobLocationType']                 = 'TELECOMMUTE';
+		$data['jobLocationType']               = 'TELECOMMUTE';
 		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => 'India' );
-	} else {
-		// The opportunity's own place; without one, only the country (never the organisation's office, which may be elsewhere).
-		$data['jobLocation'] = array(
+		return array_filter( $data );
+	}
+	$street = '';
+	$pin    = (string) get_post_meta( $id, 'aw_pincode', true );
+	if ( 1 === count( $places ) && 'district' === $places[0]->kind && $org_id && function_exists( 'aw_item_codes' ) && in_array( (int) $places[0]->code, aw_item_codes( $org_id )[1], true ) ) {
+		$state  = aw_place_state( $places[0]->state );
+		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $places[0]->name, $state ? $state->name : '', 'India' ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
+		$pin    = $pin ? $pin : (string) get_post_meta( $org_id, 'aw_pincode', true ); // the role is at the organisation's own place
+	}
+	$locs = array();
+	foreach ( $places ? $places : array( null ) as $p ) {
+		$state  = $p ? ( 'district' === $p->kind ? aw_place_state( $p->state ) : $p ) : null;
+		$locs[] = array(
 			'@type'   => 'Place',
-			'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district ? $district : ( $area ? $area : null ), 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
+			'address' => array_filter(
+				array(
+					'@type'           => 'PostalAddress',
+					'streetAddress'   => $street,
+					'addressLocality' => $p && 'district' === $p->kind ? $p->name : ( $p ? null : trim( (string) get_post_meta( $id, 'aw_place_city', true ) ) ),
+					'addressRegion'   => $state ? $state->name : null,
+					'postalCode'      => 1 === count( $places ) ? $pin : '',
+					'addressCountry'  => 'IN', // without a stored place, only the country
+				)
+			),
 		);
 	}
+	$data['jobLocation'] = 1 === count( $locs ) ? $locs[0] : $locs;
 	return array_filter( $data );
+}
+
+/**
+ * The kind of an Opportunity, from its Opportunity type tags (an event first, then a role, then the rest):
+ * event | role | fellowship | grant | course | call | '' (anything else, e.g. fostering alone: the page itself).
+ * scholarship, course/training/workshop and award/competition/call-for-submissions have no tags yet (see the report
+ * of 17 Oct 2026); their slugs are read here so the right type follows once the owner adds them.
+ */
+function aw_opportunity_kind( $id ) {
+	$kinds = wp_get_object_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
+	$kinds = is_wp_error( $kinds ) ? array() : $kinds;
+	$has   = fn( $list ) => (bool) array_intersect( $list, $kinds );
+	if ( $has( array( 'event' ) ) ) {
+		return 'event';
+	}
+	if ( $has( array( 'job', 'internship', 'volunteer' ) ) ) {
+		return 'role';
+	}
+	if ( $has( array( 'fellowship' ) ) ) {
+		return 'fellowship';
+	}
+	if ( $has( array( 'grant', 'scholarship' ) ) ) {
+		return 'grant';
+	}
+	if ( $has( array( 'course', 'training', 'workshop' ) ) ) {
+		return 'course';
+	}
+	if ( $has( array( 'award', 'competition', 'call-for-submissions' ) ) ) {
+		return 'call';
+	}
+	return '';
+}
+
+/**
+ * The next day an event repeats on, from aw_event_schedule as the source states it ("second Saturday monthly
+ * 14:00-16:00", "last Sunday monthly 10:00-16:00"): [Y-m-d, start H:i, end H:i, week of month (1-4, -1 last), day].
+ * Null when the text is not in that form.
+ */
+function aw_opportunity_repeat( $id ) {
+	$text  = strtolower( (string) get_post_meta( $id, 'aw_event_schedule', true ) );
+	$weeks = array( 'first' => 1, 'second' => 2, 'third' => 3, 'fourth' => 4, 'last' => -1 );
+	if ( ! preg_match( '/\b(first|second|third|fourth|last)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b.*?\bmonthly\b.*?(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/', $text, $m ) ) {
+		return null;
+	}
+	$tz    = wp_timezone();
+	$today = new DateTimeImmutable( 'today', $tz );
+	for ( $i = 0; $i < 3; $i++ ) {
+		$month = $today->modify( 'first day of this month' )->modify( "+$i month" );
+		$day   = $month->modify( $m[1] . ' ' . $m[2] . ' of this month' );
+		if ( $day >= $today ) {
+			return array( $day->format( 'Y-m-d' ), $m[3], $m[4], $weeks[ $m[1] ], ucfirst( $m[2] ) );
+		}
+	}
+	return null;
+}
+
+/**
+ * The address of an item at the organisation's own place: district and state of its one place, with the street and PIN
+ * code of the organisation's Directory listing when the listing is in that district (never an office elsewhere).
+ */
+function aw_opportunity_org_address( $id, $org_id ) {
+	$places = function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array();
+	$p      = 1 === count( $places ) ? $places[0] : null;
+	$state  = $p ? ( 'district' === $p->kind ? aw_place_state( $p->state ) : $p ) : null;
+	$street = '';
+	$pin    = (string) get_post_meta( $id, 'aw_pincode', true );
+	if ( $p && 'district' === $p->kind && $org_id && in_array( (int) $p->code, aw_item_codes( $org_id )[1], true ) ) {
+		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $p->name, $state ? $state->name : '', 'India' ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
+		$pin    = $pin ? $pin : (string) get_post_meta( $org_id, 'aw_pincode', true );
+	}
+	return array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $p && 'district' === $p->kind ? $p->name : null, 'addressRegion' => $state ? $state->name : null, 'postalCode' => $pin, 'addressCountry' => 'IN' ) );
+}
+
+/**
+ * The schema.org node of an Opportunity, by what it is (owner, 17 Oct 2026: the correct type per item):
+ * - a role (job, internship, volunteer role): JobPosting (aw_job_schema);
+ * - an event with a stated day, or a stated monthly repeat: Event at the organisation's place, organised by it
+ *   (a repeat also as an eventSchedule; startDate is its next day). Without a day: no node;
+ * - a fellowship: EducationalOccupationalProgram offered by the organisation (applicationDeadline from aw_deadline);
+ * - a grant or scholarship: MonetaryGrant funded by the organisation (no amount: none is stored);
+ * - a course, training or workshop: Course by the organisation (with a CourseInstance when it has a day);
+ * - an award, competition or call: Event when it has a day, else CreativeWork;
+ * - anything else (fostering alone): no node; the page is Rank Math's WebPage.
+ * A closed opportunity (past its deadline or review date) has none.
+ */
+function aw_opportunity_schema( $id ) {
+	if ( function_exists( 'aw_retention_state' ) && aw_retention_state( $id ) ) {
+		return array();
+	}
+	$kind = aw_opportunity_kind( $id );
+	if ( 'role' === $kind ) {
+		return aw_job_schema( $id );
+	}
+	if ( '' === $kind ) {
+		return array();
+	}
+	$org_id = (int) get_post_meta( $id, 'aw_organisation', true );
+	$org_id = $org_id && 'publish' === get_post_status( $org_id ) ? $org_id : 0;
+	$name   = (string) get_post_meta( $id, 'aw_org_name', true );
+	$name   = $name ? $name : ( $org_id ? get_post_field( 'post_title', $org_id ) : '' );
+	$org    = $name ? array_filter( array( '@type' => 'Organization', 'name' => aw_seo_plain( $name ), 'url' => $org_id ? get_permalink( $org_id ) : (string) get_post_meta( $id, 'aw_website', true ) ) ) : null;
+	$desc   = function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 60 ) ) : '';
+	$common = array(
+		'@id'         => get_permalink( $id ) . '#' . $kind,
+		'name'        => aw_seo_plain( get_the_title( $id ) ),
+		'description' => '' !== $desc ? $desc : aw_seo_plain( (string) get_post_field( 'post_excerpt', $id ) ),
+		'url'         => get_permalink( $id ),
+		'inLanguage'  => 'en-IN',
+	);
+	$day      = (string) get_post_meta( $id, 'aw_event_date', true );
+	$day      = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : '';
+	$repeat   = $day ? null : aw_opportunity_repeat( $id );
+	$deadline = (string) get_post_meta( $id, 'aw_deadline', true );
+	$deadline = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $deadline ) ? $deadline : '';
+	$event    = function () use ( $id, $common, $org, $org_id, $day, $repeat ) {
+		if ( ! $day && ! $repeat ) {
+			return array();
+		}
+		$t     = wp_timezone();
+		$start = $repeat ? new DateTimeImmutable( $repeat[0] . ' ' . $repeat[1], $t ) : null;
+		$end   = $repeat ? new DateTimeImmutable( $repeat[0] . ' ' . $repeat[2], $t ) : null;
+		$addr  = aw_opportunity_org_address( $id, $org_id );
+		$image = aw_schema_image( $id );
+		return array_filter(
+			array_merge(
+				array( '@type' => 'Event' ),
+				$common,
+				array(
+					'@id'                 => get_permalink( $id ) . '#event',
+					'startDate'           => $start ? $start->format( 'c' ) : $day,
+					'endDate'             => $end ? $end->format( 'c' ) : $day, // a stated day is one day
+					'eventSchedule'       => $repeat ? array( '@type' => 'Schedule', 'repeatFrequency' => 'P1M', 'byDay' => 'https://schema.org/' . $repeat[4], 'byMonthWeek' => $repeat[3], 'startTime' => $repeat[1] . ':00', 'endTime' => $repeat[2] . ':00', 'scheduleTimezone' => 'Asia/Kolkata' ) : null,
+					'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+					'eventStatus'         => 'https://schema.org/EventScheduled',
+					'location'            => array_filter( array( '@type' => 'Place', 'name' => $org ? $org['name'] : null, 'address' => $addr ) ),
+					'organizer'           => $org,
+					'image'               => $image ? array( $image ) : null,
+				)
+			)
+		);
+	};
+	if ( 'event' === $kind ) {
+		return $event();
+	}
+	if ( 'fellowship' === $kind ) {
+		return array_filter( array_merge( array( '@type' => 'EducationalOccupationalProgram' ), $common, array( 'provider' => $org, 'applicationDeadline' => $deadline ) ) );
+	}
+	if ( 'grant' === $kind ) {
+		return array_filter( array_merge( array( '@type' => 'MonetaryGrant' ), $common, array( 'funder' => $org ) ) );
+	}
+	if ( 'course' === $kind ) {
+		$instance = $day ? array( '@type' => 'CourseInstance', 'courseMode' => 'onsite', 'startDate' => $day, 'endDate' => $day, 'location' => array( '@type' => 'Place', 'address' => aw_opportunity_org_address( $id, $org_id ) ) ) : null;
+		return array_filter( array_merge( array( '@type' => 'Course' ), $common, array( 'provider' => $org, 'hasCourseInstance' => $instance ) ) );
+	}
+	$ev = $event(); // an award, competition or call
+	return $ev ? $ev : array_filter( array_merge( array( '@type' => 'CreativeWork' ), $common, array( 'creator' => $org, 'datePublished' => get_the_date( 'c', $id ) ) ) );
 }
 
 /** The Categories page: CollectionPage + ItemList of every category. */
@@ -734,7 +917,7 @@ function aw_schema_nodes() {
 	} elseif ( is_singular( 'aw_listing' ) ) {
 		$nodes[] = aw_listing_schema( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_opportunity' ) ) {
-		$nodes[] = aw_job_schema( get_queried_object_id() );
+		$nodes[] = aw_opportunity_schema( get_queried_object_id() ); // JobPosting, Event, programme, grant or course
 	} elseif ( is_singular( 'aw_campaign' ) ) {
 		$nodes[] = aw_campaign_schema( get_queried_object_id() );
 	} elseif ( is_page( 'contact' ) ) {

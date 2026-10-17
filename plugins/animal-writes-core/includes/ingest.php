@@ -263,6 +263,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		if ( $deadline ) {
 			update_post_meta( $post_id, 'aw_deadline', $deadline );
 		}
+		// Employment type only as the source states it ("Type: Full time"); nothing is guessed (meta.php keeps Google's values).
+		$emp = aw_sanitize_meta( (string) $req->get_param( 'employment_type' ), 'aw_employment_type' );
+		if ( $emp ) {
+			update_post_meta( $post_id, 'aw_employment_type', $emp );
+		}
 		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): every part that names an LGD state or district.
 		$places = aw_places_from_text( (string) $req->get_param( 'place' ) );
 		if ( $places ) {

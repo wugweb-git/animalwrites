@@ -102,6 +102,44 @@
             "first_day": 1
         },
         {
+            "key": "field_aw_opportunity_event_date",
+            "label": "Event date",
+            "name": "aw_event_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "For an event on one day, as the source states it. Leave empty for a role or a call.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_opportunity_event_schedule",
+            "label": "Repeats",
+            "name": "aw_event_schedule",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For an event the source says repeats, in its words as: week of the month, day, monthly, start-end time. E.g. \"second Saturday monthly 14:00-16:00\" or \"last Sunday monthly 10:00-16:00\". Leave empty otherwise.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "last Sunday monthly 10:00-16:00",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_opportunity_tab_apply",
             "label": "Apply",
             "name": "",
@@ -152,6 +190,38 @@
             },
             "default_value": "",
             "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_opportunity_employment_type",
+            "label": "Employment type",
+            "name": "aw_employment_type",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Only as the source states it (e.g. \"Type: Full time\"). Leave empty when it does not say. Internship, volunteer and fellowship come from the Opportunity type.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "FULL_TIME": "Full time",
+                "PART_TIME": "Part time",
+                "CONTRACTOR": "Contract",
+                "TEMPORARY": "Temporary",
+                "PER_DIEM": "Per day",
+                "INTERN": "Internship",
+                "VOLUNTEER": "Volunteer",
+                "OTHER": "Other"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
         },
         {
             "key": "field_aw_opportunity_paid_listing",
@@ -265,5 +335,5 @@
     "active": true,
     "description": "Opportunity details on the existing meta keys.",
     "show_in_rest": 0,
-    "modified": 1792141200
+    "modified": 1792224000
 }

@@ -68,8 +68,8 @@ def main(states_csv, districts_csv):
         for line in f:
             if line.startswith(("ALIAS_STATE=", "ALIAS_DIST=")):
                 exec(line, {}, tables)
-    aliases = {"state": dict(tables["ALIAS_STATE"], **{"orissa": "odisha", "nct of delhi": "delhi", "delhi ncr": "delhi", "andaman and nicobar": "andaman and nicobar islands", "dadra and nagar haveli": "the dadra and nagar haveli and daman and diu", "daman and diu": "the dadra and nagar haveli and daman and diu", "chandigarh ut": "chandigarh"}),
-               "district": dict(tables["ALIAS_DIST"])}
+    aliases = {"state": dict(tables["ALIAS_STATE"], **{"orissa": "odisha", "nct of delhi": "delhi", "delhi ncr": "delhi", "andaman and nicobar": "andaman and nicobar islands", "dadra and nagar haveli": "the dadra and nagar haveli and daman and diu", "daman and diu": "the dadra and nagar haveli and daman and diu", "chandigarh ut": "chandigarh", "maharshtra": "maharashtra"}),
+               "district": dict(tables["ALIAS_DIST"], **{"bengaluru": "bengaluru urban"})}
     # India Post writes Delhi's districts as "Central Delhi", "South West Delhi"; LGD as "Central", "South West".
     for d in districts:
         if d["State Code"] == "7":

@@ -29,9 +29,10 @@
  * Acts, Rules and Notifications, DigitalDocument for templates, Article for the rest (a guide's HowTo stays a part of
  * it). A campaign carries Event (CreativeWork when no day is stored), as aw_campaign_schema() builds it.
  *
- * News carries NewsArticle (aw_article_nodes). An open Opportunity carries JobPosting (aw_job_schema); a closed one, an
- * event, fostering or a grant has no posting: no entry, and Rank Math's own "no schema" flag (rank_math_rich_snippet
- * "off", as its Schema tab writes when every entry is deleted) so its list does not show the type's default JobPosting.
+ * News carries NewsArticle (aw_article_nodes). An open Opportunity carries the type of what it is (aw_opportunity_schema):
+ * JobPosting for a role, Event for an event with a day, EducationalOccupationalProgram for a fellowship, MonetaryGrant
+ * for a grant, Course for a course. A closed one, or one with no node (fostering alone, an event without a day): no
+ * entry, and Rank Math's own "no schema" flag (rank_math_rich_snippet "off", as its Schema tab writes when every entry is deleted) so its list does not show the type's default JobPosting.
  * When an open Opportunity closes, the entry written here is taken back (an editor's edited entry stays). A Directory
  * listing carries the type aw_listing_schema() chose for that organisation: NGO, VeterinaryCare, AnimalShelter or
  * GovernmentOffice, several at once when the listing is several (one entry with @type as a list, as Rank Math allows).
@@ -97,8 +98,8 @@ function aw_rm_schema_type( $id ) {
 	if ( 'aw_campaign' === $type && function_exists( 'aw_campaign_schema' ) ) {
 		return (string) ( aw_campaign_schema( $id )['@type'] ?? '' );
 	}
-	if ( 'aw_opportunity' === $type && function_exists( 'aw_job_schema' ) ) {
-		return (string) ( aw_job_schema( $id )['@type'] ?? '' ); // '' once closed
+	if ( 'aw_opportunity' === $type && function_exists( 'aw_opportunity_schema' ) ) {
+		return (string) ( aw_opportunity_schema( $id )['@type'] ?? '' ); // '' once closed, or for a kind without a node
 	}
 	if ( 'aw_listing' === $type && function_exists( 'aw_listing_schema' ) ) {
 		$t = aw_listing_schema( $id )['@type'] ?? '';
