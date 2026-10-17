@@ -202,8 +202,9 @@ $cards = array(
 	$card( 'knowledge', 'Training is a reason to use animals', 'Higher education and professional training are listed purposes, and teaching approvals can last five years.', chip( '4-6', 'Rule 4(6)' ) . ' ' . chip( '11-11', 'Rule 11(11)' ) ),
 );
 $grid = '';
-foreach ( $cards as $c ) {
-	$grid .= "<!-- wp:group {\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
+foreach ( $cards as $i => $c ) { // each card has its own anchor (change-1 ...), so the ItemList's items link to distinct places
+	$n     = $i + 1;
+	$grid .= "<!-- wp:group {\"anchor\":\"change-$n\",\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"change-$n\" class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
 }
 $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" );
 

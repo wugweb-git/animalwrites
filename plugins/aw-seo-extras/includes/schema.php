@@ -606,13 +606,14 @@ function aw_campaign_list_nodes( $id ) {
 	$plain = fn( $h ) => aw_seo_plain( trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( preg_replace( '/\[[^\]]*\]/', '', $h ) ) ) ) );
 	$nodes = array();
 	$items = array();
-	if ( preg_match_all( '#<div class="wp-block-group aw-camp-card">(.*?)</div>\s*<!-- /wp:group -->#s', $html, $cards ) ) {
-		foreach ( $cards[1] as $c ) {
+	if ( preg_match_all( '#<div (?:id="([^"]+)" )?class="wp-block-group aw-camp-card">(.*?)</div>\s*<!-- /wp:group -->#s', $html, $cards, PREG_SET_ORDER ) ) {
+		foreach ( $cards as $card ) {
+			$c = $card[2];
 			if ( ! preg_match( '#<h[34][^>]*>(.*?)</h[34]>#s', $c, $t ) ) {
 				continue;
 			}
 			preg_match( '#<p>(.*?)</p>#s', $c, $d );
-			$items[] = array_filter( array( '@type' => 'ListItem', 'position' => count( $items ) + 1, 'name' => $plain( $t[1] ), 'description' => isset( $d[1] ) ? $plain( $d[1] ) : null, 'url' => $url . '#why-it-matters' ) );
+			$items[] = array_filter( array( '@type' => 'ListItem', 'position' => count( $items ) + 1, 'name' => $plain( $t[1] ), 'description' => isset( $d[1] ) ? $plain( $d[1] ) : null, 'url' => $url . '#' . ( $card[1] ? $card[1] : 'why-it-matters' ) ) );
 		}
 	}
 	if ( $items ) {
