@@ -252,5 +252,6 @@
 }
 .aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--aw-camp-on-brand); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
-.aw-camp-band a:not(.wp-element-button) { color: var(--aw-camp-on-brand); text-decoration: underline; }
+.aw-camp .aw-camp-band-ghost { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); }
+.aw-camp .aw-camp-band-ghost:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
