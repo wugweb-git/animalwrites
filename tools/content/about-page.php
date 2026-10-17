@@ -1,7 +1,7 @@
 <?php
 /**
  * About page (page 58), owner-approved brief (17 Oct 2026): four sections (Who we are, What we do, Why we do it,
- * How you can help), built from theme blocks and styles. Takes out the first campaign's story blocks (A National
+ * How you can help), built from theme blocks and styles, in four full-width bands (aw.css: About page). Takes out the first campaign's story blocks (A National
  * Movement of Compassion, the Campaign Timeline, the next-phase banner, "Historic achievement unlocked"), the
  * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). No newsletter here:
  * the footer form covers it (owner, 18 Oct 2026). Sets the Rank Math
@@ -17,8 +17,9 @@ if ( ! $p || 'about' !== $p->post_name ) {
 }
 
 $content = <<<'HTML'
-<!-- wp:group {"metadata":{"name":"Who we are"},"align":"wide","className":"aw-about-who","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide aw-about-who" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|60"}}}} -->
+<!-- wp:group {"metadata":{"name":"Who we are"},"align":"full","className":"aw-about-band aw-about-who","layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull aw-about-band aw-about-who"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-about-inner"><!-- wp:columns {"verticalAlignment":"center","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|60"}}}} -->
 <div class="wp-block-columns are-vertically-aligned-center"><!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">Our story</p>
@@ -42,15 +43,17 @@ $content = <<<'HTML'
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center"} -->
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":19,"sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="/wp-content/uploads/2026/10/aw1-im3-1024x399.jpeg" alt="People seated with handwritten placards at a gathering for community dogs." class="wp-image-19" width="1024" height="399"/></figure>
+<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":22,"aspectRatio":"4/3","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="/wp-content/uploads/2026/10/aw1-im6-1024x578.jpeg" alt="A large crowd seated with placards at the day of action." class="wp-image-22" style="aspect-ratio:4/3;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"What we do"},"align":"wide","className":"aw-about-what","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide aw-about-what" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
+<!-- wp:group {"metadata":{"name":"What we do"},"align":"full","className":"aw-about-band aw-about-what aw-about-band--raised","layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull aw-about-band aw-about-what aw-about-band--raised"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-about-inner"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">The platform</p>
 <!-- /wp:paragraph -->
 
@@ -66,8 +69,8 @@ $content = <<<'HTML'
 <p>Animal Writes brings these pathways together in one place, helping people discover information, understand the issues affecting animals in India, and identify useful next steps.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"metadata":{"name":"Modules"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
+<!-- wp:group {"metadata":{"name":"Modules"},"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
+<div class="wp-block-group"><!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
 <div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Directory</h3>
 <!-- /wp:heading -->
@@ -188,8 +191,8 @@ $content = <<<'HTML'
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"How we work"},"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"metadata":{"name":"How we work"},"className":"aw-about-how","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-how"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">How we work</h3>
 <!-- /wp:heading -->
 
@@ -201,10 +204,12 @@ $content = <<<'HTML'
 <!-- wp:paragraph {"fontSize":"large"} -->
 <p class="has-large-font-size">Whether you’re looking for help, trying to understand an issue, or deciding how to contribute, start with what you need.</p>
 <!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Why we do it"},"align":"wide","className":"aw-about-why","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide aw-about-why" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
+<!-- wp:group {"metadata":{"name":"Why we do it"},"align":"full","className":"aw-about-band aw-about-why kit-dark aw-about-band--ink","layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull aw-about-band aw-about-why kit-dark aw-about-band--ink"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-about-inner"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">Why this matters</p>
 <!-- /wp:paragraph -->
 
@@ -224,8 +229,8 @@ $content = <<<'HTML'
 <p>Too often, finding these pieces means navigating different websites, documents, organisations, and sources without a clear path between them.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p>Animal Writes exists to make that journey easier.</p>
+<!-- wp:paragraph {"className":"aw-about-pivot"} -->
+<p class="aw-about-pivot">Animal Writes exists to make that journey easier.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -236,9 +241,9 @@ $content = <<<'HTML'
 <p>We are building this platform because animal welfare needs more than awareness alone. It also needs accessible information, informed participation, and practical ways for people to get involved.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"metadata":{"name":"Principles"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"metadata":{"name":"Principles"},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group"><!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Make information easier to find</h3>
 <!-- /wp:heading -->
 
@@ -247,8 +252,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Make complex issues easier to understand</h3>
 <!-- /wp:heading -->
 
@@ -257,8 +262,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Help people find their next step</h3>
 <!-- /wp:heading -->
 
@@ -267,10 +272,12 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"How you can help"},"align":"wide","className":"aw-about-help","style":{"spacing":{"padding":{"top":"var:preset|spacing|60","bottom":"var:preset|spacing|60"}}},"layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide aw-about-help" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
+<!-- wp:group {"metadata":{"name":"How you can help"},"align":"full","className":"aw-about-band aw-about-help aw-about-band--surface","layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull aw-about-band aw-about-help aw-about-band--surface"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-about-inner"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">Take part</p>
 <!-- /wp:paragraph -->
 
@@ -282,9 +289,9 @@ $content = <<<'HTML'
 <p>There are different ways to help animals, depending on your time, experience, and circumstances. You can begin by finding an organisation, learning about an issue, sharing useful information, or participating in a campaign.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"metadata":{"name":"Actions"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}},"layout":{"type":"grid","minimumColumnWidth":"20rem"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--50)"><!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"metadata":{"name":"Actions"},"layout":{"type":"grid","minimumColumnWidth":"20rem"}} -->
+<div class="wp-block-group"><!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Find an organisation</h3>
 <!-- /wp:heading -->
 
@@ -297,8 +304,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Learn before you act</h3>
 <!-- /wp:heading -->
 
@@ -311,8 +318,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Take part in a campaign</h3>
 <!-- /wp:heading -->
 
@@ -325,8 +332,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Volunteer</h3>
 <!-- /wp:heading -->
 
@@ -339,8 +346,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Claim your listing</h3>
 <!-- /wp:heading -->
 
@@ -353,8 +360,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"className":"is-style-kits-note","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-note"><!-- wp:heading {"level":3} -->
+<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
+<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Help improve the information</h3>
 <!-- /wp:heading -->
 
@@ -368,9 +375,10 @@ $content = <<<'HTML'
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:paragraph {"fontSize":"large","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
-<p class="has-large-font-size" style="margin-top:var(--wp--preset--spacing--50)">Start with one useful step. It may be the information you find, the resource you share, or the action you take next.</p>
+<!-- wp:paragraph {"fontSize":"large"} -->
+<p class="has-large-font-size">Start with one useful step. It may be the information you find, the resource you share, or the action you take next.</p>
 <!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
 <!-- /wp:group -->
 HTML;
 
