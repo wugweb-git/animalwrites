@@ -602,3 +602,33 @@ add_filter(
 	3
 );
 
+
+/*
+ * Library hub (owner, 17 Oct 2026): the list has its own heading (for screen readers; nothing visible changes) and each
+ * card title is an H3 under it, so headings go H1 Library > H2 list > H3 items. Only the Library Page's list.
+ */
+function aw_is_library_hub() {
+	return ! is_admin() && is_page( 'library' );
+}
+add_filter(
+	'render_block_data',
+	function ( $parsed ) {
+		if ( 'core/post-title' === ( $parsed['blockName'] ?? '' ) && false !== strpos( (string) ( $parsed['attrs']['className'] ?? '' ), 'aw-case-title' ) && 2 === (int) ( $parsed['attrs']['level'] ?? 2 ) && aw_is_library_hub() ) {
+			$parsed['attrs']['level'] = 3;
+		}
+		return $parsed;
+	}
+);
+add_filter(
+	'render_block_core/query',
+	function ( $html, $block ) {
+		static $done = false;
+		if ( $done || ! aw_is_library_hub() || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-hub-list' ) ) {
+			return $html;
+		}
+		$done = true;
+		return '<h2 class="screen-reader-text">' . esc_html__( 'Library documents', 'animal-writes-core' ) . '</h2>' . $html;
+	},
+	10,
+	2
+);
