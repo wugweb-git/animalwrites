@@ -1,7 +1,9 @@
 <?php
 /**
  * Honest visitor counter: one count per browser session, bots excluded, nothing personal stored.
- * Counting runs in the browser (so cached pages still count). Shown in the footer.
+ * Counting runs in the browser (so cached pages still count), once the page is shown (not while the browser only
+ * prerenders it). The footer reads the total from a static file (uploads/kits-visits.json), so a page view starts no
+ * PHP; only the one count per session does, through the lightest endpoint the site offers (kits_visit_endpoint).
  *
  * @package kits-core
  */
@@ -12,6 +14,70 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_BOTS = '/bot|crawl|spider|slurp|preview|monitor|curl|wget|python|headless|lighthouse|facebookexternalhit|whatsapp|pingdom|uptime/i';
 
+/** The public total (baseline + counted) and its start date. */
+function kits_visits_public() {
+	$base  = (int) get_option( 'aw_visits_baseline', 0 ); // visits before this counter started (GA or the 1.0 site)
+	$since = (string) get_option( 'aw_visits_baseline_since' );
+	return array(
+		'total' => $base + (int) get_option( 'aw_visits_total', 0 ),
+		'since' => $base && $since ? $since : (string) get_option( 'aw_visits_since' ),
+	);
+}
+
+/** The static copy of the total, read by pages without PHP. */
+function kits_visits_file() {
+	return WP_CONTENT_DIR . '/uploads/kits-visits.json';
+}
+
+/**
+ * Rewrite the static total, at most once a minute unless forced.
+ *
+ * @param bool $force Write now.
+ */
+function kits_visits_write( $force = false ) {
+	$file = kits_visits_file();
+	if ( ! $force && file_exists( $file ) && filemtime( $file ) > time() - 60 ) {
+		return;
+	}
+	@file_put_contents( $file, (string) json_encode( kits_visits_public() ), LOCK_EX ); // phpcs:ignore -- a cache file; a failed write only delays the footer
+}
+
+/**
+ * Count one visit. Uses only what WordPress loads with SHORTINIT (options, transients, $wpdb), so the lightweight
+ * endpoint and the REST route share it. Not counted: empty or bot user agents, prefetch and prerender requests
+ * (Sec-Purpose / Purpose), more than 30 an hour from one connection (hashed, never stored raw).
+ *
+ * @param string $ua      User agent.
+ * @param string $purpose Sec-Purpose or Purpose header.
+ * @param string $ip      Client address.
+ * @return bool Counted.
+ */
+function kits_visit_count( $ua, $purpose, $ip ) {
+	if ( '' === $ua || preg_match( AW_BOTS, $ua ) || preg_match( '/prefetch|prerender/i', $purpose ) ) {
+		return false;
+	}
+	$key = 'aw_vis_' . md5( ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' ) . $ip );
+	$n   = (int) get_transient( $key );
+	if ( $n >= 30 ) {
+		return false;
+	}
+	set_transient( $key, $n + 1, HOUR_IN_SECONDS );
+	global $wpdb;
+	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", 'aw_visits_total' ) ); // phpcs:ignore
+	$day = 'aw_visits_' . gmdate( 'Ymd' );
+	if ( false === get_option( $day ) ) {
+		add_option( $day, 0, '', false );
+	}
+	$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $day ) ); // phpcs:ignore
+	wp_cache_delete( 'aw_visits_total', 'options' );
+	kits_visits_write();
+	return true;
+}
+
+if ( defined( 'SHORTINIT' ) && SHORTINIT ) {
+	return; // the lightweight endpoint needs only the functions above
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -19,39 +85,19 @@ add_action(
 			'aw/v1',
 			'/visit',
 			array(
-				array(
+				array( // the fallback, and pages cached before the lightweight endpoint
 					'methods'             => 'POST',
 					'permission_callback' => '__return_true',
 					'callback'            => function ( WP_REST_Request $req ) {
-						$ua = (string) $req->get_header( 'user_agent' );
-						if ( '' === $ua || preg_match( AW_BOTS, $ua ) ) {
-							return array( 'counted' => false );
-						}
-						// Throttle per connection: at most 30 counts per hour (hashed, never stored raw).
-						$key = 'aw_vis_' . md5( wp_salt() . ( $_SERVER['REMOTE_ADDR'] ?? '' ) );
-						$n   = (int) get_transient( $key );
-						if ( $n >= 30 ) {
-							return array( 'counted' => false );
-						}
-						set_transient( $key, $n + 1, HOUR_IN_SECONDS );
-						global $wpdb;
-						$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", 'aw_visits_total' ) ); // phpcs:ignore
-						$day = 'aw_visits_' . gmdate( 'Ymd' );
-						if ( false === get_option( $day ) ) {
-							add_option( $day, 0, '', false );
-						}
-						$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", $day ) ); // phpcs:ignore
-						wp_cache_delete( 'aw_visits_total', 'options' );
-						return array( 'counted' => true );
+						$purpose = (string) $req->get_header( 'sec_purpose' ) . ' ' . (string) $req->get_header( 'purpose' );
+						return array( 'counted' => kits_visit_count( (string) $req->get_header( 'user_agent' ), $purpose, (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ) ); // phpcs:ignore
 					},
 				),
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => '__return_true',
 					'callback'            => function () {
-						$base  = (int) get_option( 'aw_visits_baseline', 0 ); // visits before this counter started (GA or the 1.0 site)
-						$since = (string) get_option( 'aw_visits_baseline_since' );
-						$r     = new WP_REST_Response( array( 'total' => $base + (int) get_option( 'aw_visits_total', 0 ), 'since' => $base && $since ? $since : (string) get_option( 'aw_visits_since' ) ) );
+						$r = new WP_REST_Response( kits_visits_public() );
 						$r->header( 'Cache-Control', 'public, max-age=60' );
 						return $r;
 					},
@@ -71,25 +117,33 @@ add_action(
 	}
 );
 
+/** Where the browser posts a visit: the REST route, or a lighter endpoint a site plugin offers. */
+function kits_visit_endpoint() {
+	return (string) apply_filters( 'kits_visit_endpoint', rest_url( 'aw/v1/visit' ) );
+}
+
 add_action(
 	'wp_footer',
 	function () {
 		if ( is_admin() || is_user_logged_in() ) {
 			return; // Editors browsing the site are not visitors.
 		}
-		$api = esc_url_raw( rest_url( 'aw/v1/visit' ) );
+		$post  = esc_url_raw( kits_visit_endpoint() );
+		$total = esc_url_raw( content_url( 'uploads/kits-visits.json' ) );
+		$rest  = esc_url_raw( rest_url( 'aw/v1/visit' ) );
 		?>
 <script>
-(function(){try{
-  if(!sessionStorage.getItem('aw_v')){sessionStorage.setItem('aw_v','1');
-    fetch(<?php echo wp_json_encode( $api ); ?>,{method:'POST',credentials:'omit',keepalive:true});}
-}catch(e){}
-fetch(<?php echo wp_json_encode( $api ); ?>).then(function(r){return r.json()}).then(function(d){
-  var el=document.querySelectorAll('.kit-visits'); if(!d||!d.total) return;
-  var since=d.since?new Date(d.since+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
-  el.forEach(function(x){x.textContent=d.total.toLocaleString('en-IN')+' visits'+(since?' since '+since:'');});
-}).catch(function(){});
-})();
+(function(d){
+function count(){try{if(navigator.webdriver||sessionStorage.getItem('aw_v'))return;sessionStorage.setItem('aw_v','1');
+  fetch(<?php echo wp_json_encode( $post ); ?>,{method:'POST',credentials:'omit',keepalive:true});}catch(e){}}
+function show(){if(!d.querySelector('.kit-visits'))return;
+  fetch(<?php echo wp_json_encode( $total ); ?>+'?t='+Math.floor(Date.now()/3e5)).then(function(r){if(!r.ok)throw 0;return r.json();})
+  .catch(function(){return fetch(<?php echo wp_json_encode( $rest ); ?>).then(function(r){return r.json();});}).then(function(v){
+  if(!v||!v.total)return;var since=v.since?new Date(v.since+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'';
+  d.querySelectorAll('.kit-visits').forEach(function(x){x.textContent=v.total.toLocaleString('en-IN')+' visits'+(since?' since '+since:'');});}).catch(function(){});}
+function go(){count();show();}
+if(d.prerendering){d.addEventListener('prerenderingchange',go,{once:true});}else{go();}
+})(document);
 </script>
 		<?php
 	},
@@ -129,6 +183,7 @@ add_action(
 		update_option( 'aw_visits_baseline', absint( $_POST['base'] ?? 0 ) );
 		$s = sanitize_text_field( wp_unslash( $_POST['since'] ?? '' ) );
 		update_option( 'aw_visits_baseline_since', preg_match( '/^\d{4}-\d{2}-\d{2}$/', $s ) ? $s : '' );
+		kits_visits_write( true );
 		wp_safe_redirect( admin_url() );
 		exit;
 	}

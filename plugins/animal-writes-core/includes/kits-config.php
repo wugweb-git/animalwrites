@@ -233,3 +233,6 @@ add_filter( 'kits_mail_reply_to', fn() => 'contact@animalwrites.in' );
 
 // The Directory carries as many in-list ads as its length allows (one every 6 results); other pages keep the Kits caps.
 add_filter( 'kits_ads_max', fn( $max ) => ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) ? 40 : $max );
+
+// Visits are posted to the plugin's lightweight endpoint (visit.php: WordPress in SHORTINIT mode), not the REST route.
+add_filter( 'kits_visit_endpoint', fn() => plugins_url( 'visit.php', AW_CORE_DIR . 'animal-writes-core.php' ) );

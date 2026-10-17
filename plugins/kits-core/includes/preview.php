@@ -6,7 +6,9 @@
  * /64 network), and registered preview devices (a long-lived HttpOnly cookie holding a random token; only its hash is
  * stored). Pages are served from a public cache, so the page HTML never varies by IP or device: it carries everything,
  * and CSS hides preview-only parts unless the page is marked html.kits-preview (set by a small script after asking the
- * uncached endpoint GET /wp-json/kits/v1/preview) or body.kits-preview (administrators, who bypass the cache).
+ * uncached endpoint GET /wp-json/kits/v1/preview, asked only by browsers carrying the kits_pv marker; a preview IP
+ * address marks a browser by opening any page once with ?kits-preview=1) or body.kits-preview (administrators, who
+ * bypass the cache).
  *
  * Preview-only items (kits_preview_only_ids): left out of every list and search for everyone but administrators (their
  * cards also carry .kits-preview-only) and out of the sitemaps, and their own URL is never cached and returns 404 unless
@@ -20,6 +22,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const KITS_PREVIEW_COOKIE = 'kits_pd';
+
+/** A plain marker (no secret) telling the page script this browser may preview, so other visitors never ask the server. */
+const KITS_PREVIEW_MARK = 'kits_pv';
+
+/** Mark this browser as one that previews (readable by the page script; the device token stays HttpOnly). */
+function kits_preview_mark() {
+	if ( headers_sent() || '1' === ( $_COOKIE[ KITS_PREVIEW_MARK ] ?? '' ) ) {
+		return;
+	}
+	setcookie( KITS_PREVIEW_MARK, '1', array( 'expires' => time() + 400 * DAY_IN_SECONDS, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax' ) );
+}
+
+// Administrators: marked on any admin screen.
+add_action( 'admin_init', fn() => current_user_can( 'manage_options' ) ? kits_preview_mark() : null );
 
 /** Items only previewers see (post IDs). */
 function kits_preview_only_ids() {
@@ -97,6 +113,7 @@ function kits_preview_register_device( $label ) {
 		'seen'  => gmdate( 'Y-m-d' ),
 	);
 	update_option( 'kits_preview_devices', $all, false );
+	kits_preview_mark();
 	setcookie(
 		KITS_PREVIEW_COOKIE,
 		$token,
@@ -133,7 +150,11 @@ add_action(
 				'permission_callback' => '__return_true',
 				'callback'            => function () {
 					kits_preview_nocache();
-					$r = new WP_REST_Response( array( 'preview' => kits_preview_ip_allowed( kits_client_ip() ) || kits_preview_device_ok() || current_user_can( 'manage_options' ) ) );
+					$yes = kits_preview_ip_allowed( kits_client_ip() ) || kits_preview_device_ok() || current_user_can( 'manage_options' );
+					if ( $yes ) {
+						kits_preview_mark(); // later pages ask only from this browser
+					}
+					$r = new WP_REST_Response( array( 'preview' => $yes ) );
 					$r->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private' );
 					$r->header( 'X-LiteSpeed-Cache-Control', 'no-cache' );
 					return $r;
@@ -143,14 +164,16 @@ add_action(
 	}
 );
 
-// Asks the endpoint once per browser session, only on pages that have something preview-only.
+// Asks the endpoint once per browser session, only on pages that have something preview-only, and only from a browser
+// marked as previewing (kits_pv: administrators, registered devices, or any page opened once with ?kits-preview=1 from a
+// preview IP address). Other visitors never ask (17 Oct 2026: it was one uncached request per visitor session).
 add_action(
 	'wp_head',
 	function () {
 		$url = wp_json_encode( esc_url_raw( rest_url( 'kits/v1/preview' ) ) );
 		echo '<script>(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
 			. 'if(v==="1"){h.classList.add("kits-preview");return;}if(v==="0"){return;}'
-			. 'function go(){if(!d.querySelector(".kit-ad,.kits-preview-only")){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
+			. 'function go(){if(!d.querySelector(".kit-ad,.kits-preview-only")||(!/(^|; )kits_pv=1/.test(d.cookie)&&!/[?&]kits-preview=1/.test(location.search))){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
 			. 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",go);}else{go();}})(document);</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 	},
 	2

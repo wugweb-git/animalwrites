@@ -11,7 +11,8 @@
  *                                  trash; paginated (page, per_page ≤ 200, missing=1 for items without a verdict).
  * - POST aw/v1/relevance-verdicts  {verdicts: [{id, relevant, category, india, issuer, reason, model, at}]} → meta
  *                                  aw_relevance (JSON). Never changes an item's status.
- * - POST aw/v1/relevance-rejected  {title, source_url, reason, type, feed, model} → the Rejected log: option
+ * - POST aw/v1/relevance-rejected  {title, source_url, reason, type, feed, model}, or {entries: [...]} for a run's
+ *                                  rejections in one request → the Rejected log: option
  *                                  aw_relevance_rejected, newest first, last 500, one entry per URL. Shown under
  *                                  Settings → Sourcing → Rejected, to administrators only; never in To review.
  *
@@ -300,18 +301,24 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => $can,
 				'callback'            => function ( WP_REST_Request $req ) {
-					$url   = esc_url_raw( (string) $req->get_param( 'source_url' ) );
-					$entry = array(
-						'title'  => sanitize_text_field( (string) $req->get_param( 'title' ) ),
-						'url'    => $url,
-						'reason' => sanitize_text_field( (string) $req->get_param( 'reason' ) ),
-						'type'   => sanitize_key( (string) $req->get_param( 'type' ) ),
-						'feed'   => sanitize_text_field( (string) $req->get_param( 'feed' ) ),
-						'model'  => sanitize_text_field( (string) $req->get_param( 'model' ) ),
-						'at'     => current_time( 'Y-m-d H:i' ),
-					);
-					$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $e ) => is_array( $e ) && ( $e['url'] ?? '' ) !== $url ) );
-					array_unshift( $log, $entry );
+					$batch = $req->get_param( 'entries' ); // the workers send a run's rejections in one request
+					$batch = is_array( $batch ) ? array_slice( $batch, 0, AW_RELEVANCE_LOG_MAX ) : array( $req->get_params() );
+					$log   = (array) get_option( AW_RELEVANCE_LOG, array() );
+					foreach ( $batch as $e ) {
+						$e     = (array) $e;
+						$url   = esc_url_raw( (string) ( $e['source_url'] ?? '' ) );
+						$entry = array(
+							'title'  => sanitize_text_field( (string) ( $e['title'] ?? '' ) ),
+							'url'    => $url,
+							'reason' => sanitize_text_field( (string) ( $e['reason'] ?? '' ) ),
+							'type'   => sanitize_key( (string) ( $e['type'] ?? '' ) ),
+							'feed'   => sanitize_text_field( (string) ( $e['feed'] ?? '' ) ),
+							'model'  => sanitize_text_field( (string) ( $e['model'] ?? '' ) ),
+							'at'     => current_time( 'Y-m-d H:i' ),
+						);
+						$log = array_values( array_filter( $log, fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
+						array_unshift( $log, $entry );
+					}
 					update_option( AW_RELEVANCE_LOG, array_slice( $log, 0, AW_RELEVANCE_LOG_MAX ), false );
 					return new WP_REST_Response( array( 'status' => 'logged' ) );
 				},
