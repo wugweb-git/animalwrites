@@ -51,7 +51,7 @@ if ( 'tags' === $phase ) {
 
 	/* The campaign's items (owner's list, 17 Oct 2026). */
 	$items = array(
-		'news'      => array( 12176, 12152, 12116, 12090, 11910, 11096, 11100, 10653, 9738, 201 ),
+		'news'      => array( 12176, 12152, 12116, 12090, 11910, 11096, 11100, 10653, 9738, 201, 11028 ), // 11028: Madras High Court, added 17 Oct 2026
 		'resources' => array( 13842, 9032, 128, 13800, 9028, 9029, 129, 7600, 12634, 12577, 12527 ),
 		'library'   => array( 176, 11, 9, 13, 14, 9561, 118 ),
 		'campaign'  => array( 8 ),

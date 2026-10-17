@@ -266,7 +266,7 @@ foreach ( array( $j19, $o7, $sop ) as $p ) {
 $next = a1sec(
 	'next-steps',
 	a1h( 'What happened next' )
-	. a1p( 'On 19 May 2026, the Supreme Court delivered its final judgment in the case (2026 INSC 506). It dismissed all applications to modify its 7 November 2025 order, upheld the Animal Welfare Board of India’s standard operating procedure, and allowed the euthanasia of rabid or dangerously aggressive dogs within legal safeguards. It directed every High Court to open its own case to monitor compliance, and several, including Delhi, Madras and Kerala, have since done so. The full judgment and earlier orders are in the Library.' )
+	. a1p( 'On 19 May 2026, the Supreme Court delivered its final judgment in the case (2026 INSC 506). It dismissed all applications to modify its 7 November 2025 order, upheld the Animal Welfare Board of India’s standard operating procedure, and allowed the euthanasia of rabid or dangerously aggressive dogs within legal safeguards. It directed every High Court to open its own case to monitor compliance, and several, including Delhi, <a href="/news/madras-high-court-directs-tamil-nadu-puducherry-govts-to-report-steps-taken-to-remove-stray-dogs-from/">Madras</a> and Kerala, have since done so. The full judgment and earlier orders are in the Library.' )
 	. ( $nlinks ? "<!-- wp:list -->\n<ul class=\"wp-block-list\">$nlinks</ul>\n<!-- /wp:list -->\n\n" : '' ),
 	'aw-camp-paper'
 );
