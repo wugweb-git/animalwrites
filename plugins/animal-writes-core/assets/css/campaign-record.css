@@ -2,26 +2,24 @@
    "India Writes for Its Community Dogs". Status labels are campaign.css's. Loads after campaign.css.
    Breakpoints: 768, 1200. */
 
-/* India Writes for Its Community Dogs (29 Nov 2025): the campaign's own orange.
-   Contrast (WCAG AA): ink #16130e on #ffa500 9.4:1; #9a5b00 on #fff5e6 5.0:1; #5c4a33 on #fff5e6 7.8:1.
-   #ffa500 is under 3:1 on light surfaces, so it is used only as a fill behind ink; lines, icons and coloured text
-   on light surfaces use the accent. */
+/* India Writes for Its Community Dogs (29 Nov 2025): the campaign's own orange, the 1.0 site's two oranges.
+   #ffa500 is under 3:1 on light surfaces, so it is only the hero's fill, with ink text (9.4:1). Everywhere else the
+   brand colour is the darker 1.0 orange #9a5b00: white on it 5.4:1, it on the page 5.4:1 and on paper 5.0:1.
+   Checked by tools/ci/contrast_check.py, which reads this file too. */
 .aw-camp--community-dogs {
 	--camp-primary: #ffa500;
 	--camp-primary-ink: #16130e;
 	--camp-surface: #fff5e6;
 	--camp-accent: #9a5b00;
-	--aw-camp-brand: var(--camp-primary);
-	--aw-camp-brand-deep: var(--camp-accent);
+	--aw-camp-brand: #9a5b00;
+	--aw-camp-brand-deep: #6b3f00;
 	--aw-camp-dark: #16130e;
-	--aw-camp-paper: var(--camp-surface);
+	--aw-camp-paper: #fff5e6;
 	--aw-camp-meta: #5c4a33;
-	--aw-camp-on-brand: var(--camp-primary-ink);
+	--aw-camp-on-brand: #ffffff;
 }
-.aw-camp--community-dogs :is(.aw-camp-dates li) { border-top-color: var(--camp-accent); }
-.aw-camp--community-dogs :is(.aw-camp-dates-when .kit-ico, .aw-camp-dates .is-key .aw-camp-dates-when, .aw-camp-card-ico, .aw-camp-gap > .kit-ico, .aw-camp-ways li > .kit-ico, .aw-camp-band-kicker) { color: var(--camp-accent); }
-.aw-camp--community-dogs :is(.aw-camp-gap, .aw-camp-docs-q li:hover, .aw-camp-partners a:hover) { box-shadow: inset 0 0 0 2px var(--camp-accent); }
-.aw-camp--community-dogs .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-primary-ink); }
+/* The hero: the bright orange behind ink; inside it the brand and on-brand pair is the same two colours. */
+.aw-camp--community-dogs .aw-camp-hero { --aw-camp-brand: var(--camp-primary); --aw-camp-on-brand: var(--camp-primary-ink); background: var(--camp-primary); color: var(--camp-primary-ink); }
 
 /* Metrics: value, label, then the source and "as of" */
 .aw-camp-metric { display: flex; flex-direction: column; gap: var(--kit-space-1); }

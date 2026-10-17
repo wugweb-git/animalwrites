@@ -19,6 +19,8 @@ TOKEN_FILES = [
 ]
 REGISTRIES = sorted((ROOT / "themes").glob("*/kits-registry.json"))
 CAMPAIGN_CSS = ROOT / "plugins/animal-writes-core/assets/css/campaign.css"
+# Campaign palettes kept outside campaign.css (campaign-record.php's styles): read as if they were in it.
+CAMPAIGN_CSS_MORE = [ROOT / "plugins/animal-writes-core/assets/css/campaign-record.css"]
 
 TEXT, NON_TEXT = 4.5, 3.0
 # Campaign pairs, from how campaign.css uses the palette: (foreground, background, minimum, where).
@@ -103,7 +105,7 @@ def main():
             if pair:
                 check(f"{reg.parent.name} / {it.get('name')}", pair[0].lstrip("-"), pair[1].lstrip("-"), TEXT, vals)
 
-    css = strip(CAMPAIGN_CSS.read_text())
+    css = strip(CAMPAIGN_CSS.read_text() + "\n" + "\n".join(f.read_text() for f in CAMPAIGN_CSS_MORE if f.exists()))
     base = {}
     for m in re.finditer(r"(^|\})\s*\.aw-camp\s*\{([^}]*)\}", css):
         base.update(decls(m.group(2)))
@@ -114,6 +116,8 @@ def main():
         scope = {**vals, **base, **own}
         for fg, bg, need, where in CAMPAIGN_PAIRS:
             check(f"campaign {name} ({where})", fg, bg, need, scope)
+        if "camp-primary" in own and "camp-primary-ink" in own:  # a palette with the standard's --camp-* tokens
+            check(f"campaign {name} (hero fill: --camp-primary-ink on --camp-primary)", "camp-primary-ink", "camp-primary", TEXT, scope)
 
     if fails:
         print("Contrast below the minimum (text 4.5:1, non-text 3:1):")
