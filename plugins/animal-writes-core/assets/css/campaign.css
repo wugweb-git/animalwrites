@@ -271,5 +271,5 @@
 
 /* Home band after closing: "Latest campaign", on paper */
 .aw-camp-band--closed { background: var(--aw-camp-paper); color: var(--aw-camp-dark); }
-.aw-camp-band--closed :is(h2, p) { color: var(--aw-camp-dark); }
-.aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--aw-camp-brand); font-weight: var(--kit-weight-strong); }
+.aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--aw-camp-dark); }
+.aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--aw-camp-brand); font-weight: var(--kit-weight-strong); }
