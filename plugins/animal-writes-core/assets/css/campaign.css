@@ -281,6 +281,7 @@
 /* Card pictures on a campaign page: press cards show the publisher's logo on the campaign surface; items without a
    picture of their own show the campaign tile (its document number as a stamp) instead of a general category photo */
 .aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface, var(--aw-camp-paper)); }
+.aw-camp .aw-camp-press .aw-story-fallback img.aw-story-logo { width: auto !important; height: auto !important; max-width: 45%; max-height: 45%; } /* a logo tile, whole, not a photo-sized logo */
 .aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface, var(--aw-camp-paper)); border-bottom-color: var(--camp-primary, var(--aw-camp-brand)); }
 .aw-camp-thumb-tile { display: grid; place-items: center; width: 100%; height: 100%; background: var(--camp-surface, var(--aw-camp-paper)); box-shadow: inset 0 -6px 0 var(--camp-primary, var(--aw-camp-brand)); }
 .aw-camp-thumb-tile .aw-camp-stamp { margin: 0; color: var(--camp-accent, var(--aw-camp-brand-deep)); font-size: var(--kit-type-h4, 1.125rem); }
