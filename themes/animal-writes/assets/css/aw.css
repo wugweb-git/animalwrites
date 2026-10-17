@@ -1041,7 +1041,7 @@ body { background: var(--kit-color-canvas); }
 	.aw-ed-law-list .wp-block-post-template::-webkit-scrollbar { display: none; }
 	.aw-ed-law-list .wp-block-post-template > li { flex: 0 0 min(78%, 20rem); scroll-snap-align: start; margin: 0 !important; }
 	.aw-ed-law-list .kit-case { display: block; height: 100%; padding: var(--kit-space-4) !important; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); background: var(--kit-surface-card, var(--kit-color-raised)); }
-	.aw-ed-law-list :is(.aw-case-cover, .aw-case-sum, .aw-case-tags .wp-block-post-terms, .aw-case-src, .aw-doc, .kit-case > .kit-ico) { display: none !important; }
+	.aw-ed-law-list :is(.aw-case-cover, .aw-case-sum, .aw-case-tags .wp-block-post-terms, .aw-case-src, .aw-doc, .kit-case > .kit-ico) { display: none; }
 	.aw-ed-law-list .aw-case-date { margin-bottom: var(--kit-space-2); }
 	.aw-ed-law-side .aw-ed-links { margin-top: var(--kit-space-3); }
 	.aw-ed-law-title { margin-bottom: var(--kit-space-5) !important; }
@@ -1260,7 +1260,7 @@ body { background: var(--kit-color-canvas); }
 	.kit-case .aw-case-date .d { align-self: center; }
 	/* Phones: one stacked state for every Library card. Meta row, then the picture full width in its own shape (nothing
 	   cut), then title, summary and tags. Never the picture beside the meta. */
-	.kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "when" "media" "body" !important; }
+	.kit-case:has(.aw-case-cover) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "when" "media" "body"; }
 }
 /* News lead story by breakpoint (owner, 14 Oct 2026): phone = picture full width (4:3 card frame, 16 Oct) above the text; tablet and up =
    picture left (about 60%), text right, so the picture never fills the screen. */
@@ -1305,7 +1305,7 @@ body { background: var(--kit-color-canvas); }
 .aw-ed-law-list .kit-case { display: block !important; }
 .aw-ed-law-list .kit-case .aw-case-date .d { margin-bottom: var(--kit-space-2); }
 .kit-case:has(> .aw-case-icon) { grid-template-columns: 3rem minmax(0, 1fr) auto; grid-template-areas: "media body arrow"; }
-.aw-ed-law-list .aw-case-cover { display: none !important; }
+.aw-ed-law-list .aw-case-cover { display: none; }
 .aw-kind-date { display: inline-flex; align-items: center; gap: 0.25em; line-height: 1; }
 /* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
 :not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
