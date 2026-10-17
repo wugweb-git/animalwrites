@@ -355,7 +355,7 @@ const AW_ARCHIVE_DESCRIPTIONS = array(
 	'aw_news'        => 'Animal-welfare news from across India, summarised with a link to every source.',
 	'aw_legal'       => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
 	'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
-	'aw_campaign'    => 'Citizen campaigns for animals in India, starting with Animal Writes 1.0.',
+	'aw_campaign'    => 'Citizen campaigns for animals in India: what each one asks for, how to take part and what it achieved.',
 	'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
 	'aw_listing'     => 'Animal welfare organisations, Gaushalas and government vets across India.',
 );
