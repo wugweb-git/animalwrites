@@ -12,6 +12,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Consent mode v2 regions (owner, 17 Oct 2026): the EEA (EU 27 plus Iceland, Liechtenstein, Norway), the UK and
+ * Switzerland, as ISO 3166-1 alpha-2 codes. Filter kits_consent_regions to change the list.
+ *
+ * @return string[]
+ */
+function kits_consent_regions() {
+	$eea = array( 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO' );
+	return array_values( array_unique( array_map( 'strtoupper', (array) apply_filters( 'kits_consent_regions', array_merge( $eea, array( 'GB', 'CH' ) ) ) ) ) );
+}
+
+/** IANA time zones of the consent regions (what a browser reports), for scripts that cannot ask Google for the region. */
+function kits_consent_timezones() {
+	$zones = array( 'Europe/Mariehamn', 'Arctic/Longyearbyen', 'Europe/Nicosia', 'Europe/Belfast' ); // aliases browsers may report
+	foreach ( kits_consent_regions() as $cc ) {
+		$zones = array_merge( $zones, (array) DateTimeZone::listIdentifiers( DateTimeZone::PER_COUNTRY, $cc ) );
+	}
+	return array_values( array_unique( $zones ) );
+}
+
+/**
+ * Consent mode v2 (basic), before any Google tag (GTM, AdSense, page_context push): everything denied by default in the
+ * consent regions until Google's CMP (AdSense Privacy & messaging) sends an update, granted everywhere else; ad data
+ * redacted and URL passthrough on while denied. The CMP itself is Google's, loaded by AdSense; no banner here.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
+		$region = wp_json_encode( kits_consent_regions() );
+		echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500,region:{$region}});gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	},
+	-100
+);
+
 /** GTM container ID for this site ('' = off). */
 function aw_gtm_id() {
 	return (string) apply_filters( 'kits_gtm_id', defined( 'KITS_GTM_ID' ) ? KITS_GTM_ID : '' );
@@ -70,7 +107,10 @@ function aw_clarity_id() {
 	return (string) apply_filters( 'kits_clarity_id', '' );
 }
 
-// Microsoft Clarity: same rules as GTM (production host only, never for logged-in staff).
+// Microsoft Clarity: same rules as GTM (production host only, never for logged-in staff). Outside the consent region it
+// loads at once; inside it (judged by the browser's time zone, kits_consent_timezones()) only once analytics storage is
+// granted, read from Google's consent mode (gtag consent update) or the CMP's TCF signal (purpose 1), and then it is
+// told so with clarity('consentv2').
 add_action(
 	'wp_head',
 	function () {
@@ -82,7 +122,8 @@ add_action(
 			return;
 		}
 		$id = esc_js( aw_clarity_id() );
-		echo "<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,\"clarity\",\"script\",\"{$id}\");</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+		$tz = wp_json_encode( kits_consent_timezones() );
+		echo "<script>(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 	},
 	2
 );
