@@ -89,3 +89,18 @@ function aw_awbi_lapsed( $id ) {
 	return '' !== $v && $v < current_time( 'Y-m-d' );
 }
 add_action( 'aw_daily', 'aw_daily' );
+
+/**
+ * LiteSpeed cache warmer: only between 02:00 and 05:00 India time (owner, 17 Oct 2026).
+ * Outside that window its scheduled run does nothing; the full sitemap is still warmed each week.
+ */
+function aw_litespeed_crawler_night_only() {
+	if ( ! wp_doing_cron() ) {
+		return;
+	}
+	$hour = (int) ( new DateTime( 'now', new DateTimeZone( 'Asia/Kolkata' ) ) )->format( 'G' );
+	if ( $hour < 2 || $hour >= 5 ) {
+		remove_all_actions( 'litespeed_task_crawler' );
+	}
+}
+add_action( 'init', 'aw_litespeed_crawler_night_only', PHP_INT_MAX );
