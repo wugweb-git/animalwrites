@@ -60,7 +60,7 @@
 .aw-camp-poster .aw-rule-chip:hover { border-color: var(--kit-color-on-ink); background: var(--aw-camp-brand); }
 
 /* Date strip (artwork slide 2): big dates on red top rules */
-.aw-camp-dates { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.aw-camp-dates { list-style: none; margin: var(--kit-space-5) 0 var(--kit-space-3); padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
 .aw-camp-dates li { padding-top: var(--kit-space-3); border-top: 3px solid var(--aw-camp-brand); }
 .aw-camp-dates-when { display: block; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.03em; }
 .aw-camp-dates-when .kit-ico { --kit-ico-size: 0.7em; color: var(--aw-camp-brand); }
@@ -72,7 +72,7 @@
 /* What the draft does: icon grid; the main change leads in red */
 .aw-camp-grid { display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .aw-camp-grid { grid-template-columns: repeat(3, 1fr); } .aw-camp-grid > :first-child { grid-column: span 2; } }
+@media (min-width: 1200px) { .aw-camp-grid { grid-template-columns: repeat(3, 1fr); } .aw-camp-grid > :first-child { grid-column: span 2; } .aw-camp-grid > :last-child:nth-child(3n) { grid-column: 1 / -1; } }
 .aw-camp-card { display: flex; flex-direction: column; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp-card > * { margin: 0 0 var(--kit-space-3); }
 .aw-camp-card h3 { font-size: var(--kit-type-h3); }
@@ -81,28 +81,25 @@
 .aw-camp-card-ico .kit-ico { --kit-ico-size: 1.5rem; }
 .aw-camp-grid > :first-child { background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); box-shadow: none; }
 .aw-camp-grid > :first-child :is(h3, p) { color: var(--aw-camp-on-brand); }
-.aw-camp-grid > :first-child h3 { font-size: var(--kit-type-h2); font-weight: 800; letter-spacing: -0.02em; }
+.aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
+.aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--aw-camp-on-brand); }
 .aw-camp-grid > :first-child .aw-rule-chip { border-color: var(--aw-camp-on-brand); }
 
 /* Pain scale: four steps, the bar grows with the pain */
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); align-items: end; } }
+@media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
 .aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
-.aw-camp-tier-bar { display: block; height: 0.5rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: var(--aw-camp-brand); }
-.aw-camp-tier--1 .aw-camp-tier-bar { width: 25%; opacity: 0.45; }
-.aw-camp-tier--2 .aw-camp-tier-bar { width: 50%; opacity: 0.7; }
-.aw-camp-tier--3 .aw-camp-tier-bar { width: 75%; }
-.aw-camp-tier--4 .aw-camp-tier-bar { width: 100%; }
+.aw-camp-tier { --fill: 100%; }
+.aw-camp-tier--1 { --fill: 25%; }
+.aw-camp-tier--2 { --fill: 50%; }
+.aw-camp-tier--3 { --fill: 75%; }
+.aw-camp-tier-bar { display: block; height: 0.75rem; margin-bottom: var(--kit-space-3); border-radius: var(--kit-radius-pill); background: linear-gradient(to right, var(--aw-camp-brand) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
 @media (min-width: 1200px) {
-	.aw-camp-tier-bar { width: 100% !important; height: auto; }
-	.aw-camp-tier--1 .aw-camp-tier-bar { height: 1.5rem; }
-	.aw-camp-tier--2 .aw-camp-tier-bar { height: 3rem; }
-	.aw-camp-tier--3 .aw-camp-tier-bar { height: 4.5rem; }
-	.aw-camp-tier--4 .aw-camp-tier-bar { height: 6rem; }
-	.aw-camp-tier-bar { border-radius: var(--kit-radius-control); }
+	.aw-camp-ladder { align-items: start; }
+	.aw-camp-tier-bar { height: 6rem; border-radius: var(--kit-radius-control); background: linear-gradient(to top, var(--aw-camp-brand) var(--fill), rgb(255 255 255 / 0.08) var(--fill)); }
 }
 .aw-camp-tier-who { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-2); border-radius: var(--kit-radius-control); background: rgb(255 255 255 / 0.1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
 .aw-camp-tier-who.is-ext { background: var(--aw-camp-brand); }
@@ -113,8 +110,8 @@
 /* Today vs the draft: the draft column carries the campaign colour */
 .aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }
 .aw-camp-compare :is(th, td) { padding: var(--kit-space-3); vertical-align: top; }
-.aw-camp-compare thead th { background: var(--aw-camp-dark); color: var(--kit-color-on-ink); }
-.aw-camp-compare thead th:last-child { background: var(--aw-camp-brand); }
+.aw-camp .aw-camp-compare .wp-block-table thead :is(tr, th) { background: var(--aw-camp-dark); color: var(--kit-color-on-ink); border-color: var(--aw-camp-dark); }
+.aw-camp .aw-camp-compare .wp-block-table thead th:last-child { background: var(--aw-camp-brand); color: var(--aw-camp-on-brand); }
 .aw-camp-compare tbody td:first-child { font-weight: var(--kit-weight-strong); }
 .aw-camp-compare tbody td:last-child { background: color-mix(in srgb, var(--aw-camp-brand) 7%, transparent); }
 
@@ -130,12 +127,26 @@
 
 /* Read the law: document links */
 .aw-camp-docs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); }
-.aw-camp-docs a { display: grid; grid-template-columns: auto 1fr auto; gap: var(--kit-space-3); align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); text-decoration: none; transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp-docs { max-width: none; }
+.aw-camp .aw-camp-docs a { display: grid; grid-template-columns: auto 1fr auto; gap: var(--kit-space-3); align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); text-decoration: none; transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-camp-docs a:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
 .aw-camp-docs a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp-docs a > .kit-ico:first-child { --kit-ico-size: 1.75rem; color: var(--aw-camp-brand); }
-.aw-camp-docs strong { display: block; }
+.aw-camp-docs strong { display: block; color: var(--kit-color-text); }
 .aw-camp-docs-meta { color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
+
+/* Library documents with the campaign tag (query loop): file icon from the theme's --i on the wrapper */
+.aw-camp-docs-q { max-width: none; }
+.aw-camp-docs-q .wp-block-post-template { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
+@media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
+.aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--aw-camp-brand); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
+.aw-camp-docs-q h3 { margin: 0; font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.35; }
+.aw-camp-docs-q h3 a { color: var(--kit-color-text); text-decoration: none; }
+.aw-camp-docs-q h3 a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
+.aw-camp-docs-q h3 a:focus-visible { outline: none; }
+.aw-camp-docs-q li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
 /* What happens next: a step line */
 .aw-camp-steps { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; counter-reset: aw-step; display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
@@ -149,8 +160,8 @@
 /* Share row */
 .aw-camp-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-4); }
 .aw-camp-share-label { flex-basis: 100%; font-weight: var(--kit-weight-strong); }
-.aw-camp-share a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
-.aw-camp-share a:hover { background: var(--aw-camp-brand); box-shadow: none; }
+.aw-camp .aw-camp-share a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
+.aw-camp .aw-camp-share a:hover { background: var(--aw-camp-brand); box-shadow: none; }
 .aw-camp-share a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
 

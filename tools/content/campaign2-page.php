@@ -282,20 +282,15 @@ $faq = c2sec(
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n"
 );
 
-/* 10. Read the law: document links. */
-$docl = function ( $url, $title, $meta ) {
-	return '<li><a href="' . $url . '">' . c2i( 'file' ) . '<span><strong>' . $title . '</strong><span class="aw-camp-docs-meta">' . $meta . '</span></span>' . c2i( 'arrow-right' ) . '</a></li>';
-};
+/* 10. Read the law: every Library document with the campaign tag (the draft, the Act, the 1998 Rules, circulars, orders). */
+$tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
+$tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
-	c2h( 'Read the law' )
-	. c2html(
-		'<ul class="aw-camp-docs">'
-		. $docl( $lib_draft, 'Draft Laboratory Animals Rules, 2026', 'G.S.R. 864(E), full text with rule anchors' )
-		. $docl( $lib_act, 'Prevention of Cruelty to Animals Act, 1960', 'Chapter IV covers experiments on animals' )
-		. $docl( $lib_1998, 'Breeding of and Experiments on Animals Rules, 1998', 'With the 2001 and 2006 amendments' )
-		. '</ul>'
-	),
+	c2h( 'Read the law and the record' )
+	. c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' )
+	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
+	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
 	'aw-camp-paper'
 );
 
@@ -313,16 +308,14 @@ $next = c2sec(
 	)
 );
 
-/* Latest updates: News with the campaign tag, in the home page's news grid (publisher images, linked). */
-$tag     = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
-$tq      = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
+/* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec(
 	'latest',
-	c2html( '<header class="kit-ed-head"><div><h2>Latest updates</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
+	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/resources/">All guides ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
 	. '<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
 	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
+	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
 	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
 );
@@ -339,7 +332,7 @@ $loop      = c2sec(
 		. '<a href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">' . c2i( 'brand-whatsapp' ) . 'WhatsApp</a>'
 		. '<a href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">' . c2i( 'x-brand' ) . 'X</a>'
 		. '<a href="https://www.facebook.com/sharer/sharer.php?u=' . $share_url . '">' . c2i( 'facebook' ) . 'Facebook</a>'
-		. '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'arrow-up-right' ) . 'LinkedIn</a>'
+		. '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'link' ) . 'LinkedIn</a>'
 		. '</p>'
 	),
 	'aw-camp-dark'
