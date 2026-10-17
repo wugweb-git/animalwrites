@@ -136,6 +136,10 @@ add_filter(
 		$src    = $att ? wp_get_attachment_image_src( $att, 'large' ) : false;
 		if ( $src && ! empty( $src[1] ) && ! empty( $src[2] ) && $src[0] === $url ) {
 			$dims = ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"'; // the box is known before the image arrives
+			$set  = (string) wp_get_attachment_image_srcset( $att, 'large' );
+			if ( '' !== $set ) { // the smaller copies too: a lazy picture loads the one that fits its box ("auto"), not the large one
+				$dims .= ' srcset="' . esc_attr( $set ) . '" sizes="auto, ' . esc_attr( (string) wp_calculate_image_sizes( 'large', null, null, $att ) ) . '"';
+			}
 		} elseif ( $url && ! $doc && (int) get_post_meta( $post_id, 'aw_source_image_w', true ) > 0 && (int) get_post_meta( $post_id, 'aw_source_image_h', true ) > 0 && (string) get_post_meta( $post_id, 'aw_source_image', true ) === $url ) {
 			$dims = ' width="' . (int) get_post_meta( $post_id, 'aw_source_image_w', true ) . '" height="' . (int) get_post_meta( $post_id, 'aw_source_image_h', true ) . '"'; // the publisher's image, measured at ingest
 		}
