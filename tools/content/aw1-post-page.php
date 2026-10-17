@@ -146,7 +146,7 @@ $hero = a1sec(
 	$ser( $h1 )
 	. a1p( 'Nationwide letter petition to the Supreme Court against the 7 Nov 2025 removal order · 29 Nov 2025', 'aw-camp-lede' )
 	. a1sc( '[aw_camp_status]' )
-	. a1owner( 'Hero summary: 1–2 lines; what people did, when, why (7 Nov 2025 order); past tense; no outcome claim; no superlatives.' )
+	. a1p( 'In November 2025, people across India wrote by hand to the Supreme Court, asking it to reconsider its 7 November order to remove community dogs from public institutions. On 29 November they walked to their post offices to send the letters together.', 'aw-camp-hero-summary' ) // owner's copy, 17 Oct 2026
 	. $ser( $take( 2 ) ) // 29 November 2025 · All GPOs and HPOs
 	. a1sc( '[aw_campaign_metric key="letters"]' )
 	. '<!-- wp:image {"id":15,"sizeSlug":"large","linkDestination":"none"} -->' . "\n" . '<figure class="wp-block-image size-large"><img src="' . esc_url( (string) wp_get_attachment_image_url( 15, 'large' ) ) . '" alt="' . esc_attr( (string) get_post_meta( 15, '_wp_attachment_image_alt', true ) ) . '" class="wp-image-15"/></figure>' . "\n<!-- /wp:image -->\n\n",
@@ -198,8 +198,8 @@ $how = a1sec(
 	'how-to-help',
 	a1h( 'What we did' )
 	. $ser( $take( 92 ) ) . $ser( $take( 93 ) ) // Nationwide GPO Participation on November 29th
-	. a1owner( 'Receipt uploads and city coordinators: one line each, facts only.' )
-	. a1owner( 'LawChakra line: one sentence, "as reported by LawChakra"; Imphal, Vadodara, Chennai; receipts as proof; link to https://lawchakra.in/legal-updates/indian-supreme-court-letters-stray-dogs/' )
+	. a1p( 'Volunteer coordinators in more than 100 cities helped people find their nearest post office, use the letter templates and post on the same day. After posting, participants uploaded their postal receipts as proof that each letter had gone out.' )
+	. a1p( 'As reported by <a href="https://lawchakra.in/legal-updates/indian-supreme-court-letters-stray-dogs/">LawChakra</a>, letters were posted from cities as far apart as Imphal, Vadodara and Chennai, and many participants uploaded their postal receipts as proof.' )
 	. a1h( 'The letters', 3 )
 	. "<!-- wp:list -->\n<ul class=\"wp-block-list\">$tlist</ul>\n<!-- /wp:list -->\n\n"
 	. $ser( a1rehead( $take( 79 ), 'Moments', 3 ) )
@@ -266,7 +266,7 @@ foreach ( array( $j19, $o7, $sop ) as $p ) {
 $next = a1sec(
 	'next-steps',
 	a1h( 'What happened next' )
-	. a1owner( 'Neutral, dated: 19 May 2026 judgment (2026 INSC 506), 7 Nov order upheld, AWBI SOP upheld, euthanasia within safeguards, High Courts monitor compliance; link the Library records; no attribution to the campaign.' )
+	. a1p( 'On 19 May 2026, the Supreme Court delivered its final judgment in the case (2026 INSC 506). It dismissed all applications to modify its 7 November 2025 order, upheld the Animal Welfare Board of India’s standard operating procedure, and allowed the euthanasia of rabid or dangerously aggressive dogs within legal safeguards. It directed every High Court to open its own case to monitor compliance, and several, including Delhi, Madras and Kerala, have since done so. The full judgment and earlier orders are in the Library.' )
 	. ( $nlinks ? "<!-- wp:list -->\n<ul class=\"wp-block-list\">$nlinks</ul>\n<!-- /wp:list -->\n\n" : '' ),
 	'aw-camp-paper'
 );
@@ -334,14 +334,15 @@ $news = a1sec(
 $support = a1sec(
 	'support',
 	a1h( 'Lessons learned' )
-	. a1owner( 'Lessons learned: the owner\'s first-hand reflections. This section stays hidden until this note is replaced.' ),
+	. "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>Handwritten letters and a single day of action gave thousands of people one clear, simple thing to do, and drew national press coverage.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>City coordinators made it possible to reach people far beyond the big metros.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Letters alone did not change the Court’s order. Public pressure on a court works differently from a comment window on a draft law, where objections must be formally considered.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Counting letters ourselves left our figures unverified. Future campaigns should record participation in a way others can check.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n",
 	'aw-camp-needs-copy'
 );
 
 /* ---------- 14 updates ---------- */
 $updates = a1sec( 'updates', a1h( 'Stay connected' ) . $ser( $take( 102 ) ) . $ser( $take( 111 ) ), 'aw-camp-dark' );
 
-/* ---------- Unused (review): every block without a section, unchanged and in its old order ---------- */
+/* ---------- Unused (review): built for the record only. The owner had the group deleted on 17 Oct 2026 (archive:
+   Claude outputs/campaign2/aw1-unused-blocks-archive.html; WP revision 14283), so it is not put on the page. ---------- */
 $unused = '';
 foreach ( $blocks as $i => $b ) {
 	if ( empty( $used[ $i ] ) ) {
@@ -355,7 +356,6 @@ $unused_group = '<!-- wp:group {"className":"aw-unused-review","layout":{"type":
 $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--community-dogs","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-group alignfull aw-camp aw-camp--community-dogs">'
 	. $hero . $goal . $why . $how . $context . $impact . $next . $partners . $press . $library . $news . $support . $updates
-	. $unused_group
 	. "</div>\n<!-- /wp:group -->";
 
 $post = get_post( $post_id );
