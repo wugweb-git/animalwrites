@@ -1972,7 +1972,12 @@
     "aw-camp-count-asof",
     "aw-camp-if-count",
     "aw-camp-if-filled",
-    "aw-camp-pre"
+    "aw-camp-pre",
+    "aw-camp-poster-doc",
+    "aw-camp-card-doc",
+    "aw-camp-gap-doc",
+    "aw-camp-doc-strip",
+    "aw-camp-doc-page"
    ],
    "states": [
     "pre (upcoming)",

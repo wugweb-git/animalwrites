@@ -11,8 +11,8 @@
  */
 ?>
 <!-- wp:group {"align":"wide","className":"aw-vol-banner","layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide aw-vol-banner"><!-- wp:image {"id":8856,"width":"800px","height":"600px","sizeSlug":"full","linkDestination":"none","className":"aw-vol-banner-photo"} -->
-<figure class="wp-block-image size-full is-resized aw-vol-banner-photo"><img src="/wp-content/uploads/2026/10/banner-category-cattle-gaushalas-phone.webp" alt="A woman feeding cows on a street in India" class="wp-image-8856" width="800" height="600" loading="lazy"/></figure>
+<div class="wp-block-group alignwide aw-vol-banner"><!-- wp:image {"id":14273,"width":"800px","height":"600px","sizeSlug":"full","linkDestination":"none","className":"aw-vol-banner-photo"} -->
+<figure class="wp-block-image size-full is-resized aw-vol-banner-photo"><img src="/wp-content/uploads/2026/10/street-dog-road-kasaragod-unsplash.avif" alt="A street dog crossing a road in Kasaragod, Kerala" class="wp-image-14273" width="800" height="600" loading="lazy"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:group {"className":"aw-vol-banner-body","layout":{"type":"default"}} -->

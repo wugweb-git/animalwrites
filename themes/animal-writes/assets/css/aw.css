@@ -714,7 +714,7 @@ body { background: var(--kit-color-canvas); }
 /* Volunteer banner (S6.2): photo left (~45%) with text and the form on the right; on phones a 120px photo strip on top. */
 .aw-vol-banner { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border-radius: var(--r-4); background: var(--kit-color-surface); margin-block: var(--kit-space-7); }
 .aw-vol-banner-photo { margin: 0 !important; }
-.aw-vol-banner-photo img { display: block; width: 100%; height: 120px; object-fit: cover; }
+.aw-vol-banner-photo img { display: block; width: 100%; height: 120px; object-fit: cover; object-position: 72% 68%; } /* the dog sits right of centre, low in the frame (Unsplash earDqniB3tM) */
 .aw-vol-banner-body { padding: var(--kit-space-5); }
 .aw-vol-banner-body > * { margin-block: 0 var(--kit-space-4); }
 .aw-vol-banner-title { font-size: var(--kit-type-h2); margin-top: 0; }

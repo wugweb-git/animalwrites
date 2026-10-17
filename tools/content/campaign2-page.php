@@ -119,6 +119,19 @@ function chip( $rule, $label, $allows = '' ) {
 	return '[aw_rule_chip rule="' . $rule . '" label="' . $label . '"' . ( $allows ? ' allows="' . $allows . '"' : '' ) . ']';
 }
 
+/**
+ * A page of the Gazette (our Library copy of G.S.R. 864(E)) as the campaign's legal-document motif (owner, 17 Oct
+ * 2026): the page renders 14253-14257 and the clause crops (meta aw_campaign_motif_crop). '' when the image is missing.
+ */
+function c2gz( $id, $cls, $size = 'medium_large' ) {
+	if ( ! is_numeric( $id ) ) {
+		$found = get_posts( array( 'post_type' => 'attachment', 'meta_key' => 'aw_campaign_motif_crop', 'meta_value' => $id, 'numberposts' => 1, 'fields' => 'ids' ) );
+		$id    = $found ? $found[0] : 0;
+	}
+	$img = $id ? wp_get_attachment_image( (int) $id, $size, false, array( 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	return $img ? '<figure class="' . $cls . '">' . $img . '</figure>' : '';
+}
+
 /*
  * Layout (17 Oct 2026 redesign): campaign branding from the explainer artwork (brick red, ink, paper; heavy tight
  * headlines; stat strip with red top rules; red address box), built from core blocks and theme icons (aw_i names).
@@ -128,6 +141,7 @@ function chip( $rule, $label, $allows = '' ) {
 
 /* 1. Hero (open and closed versions; one shows). */
 $poster = '<div class="aw-camp-poster">'
+	. c2gz( 14253, 'aw-camp-poster-doc', 'large' ) // the Gazette cover, muted; a header strip on phones
 	. '<p class="aw-camp-stamp">G.S.R. 864(E)</p>'
 	. '[aw_countdown date="2026-11-05" label="Objections close"]'
 	. '<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">Read the clauses</span> ' . chip( '11-3', 'Rule 11(3)' ) . ' ' . chip( '21-2', 'Rule 21(2)' ) . ' ' . chip( '5-3', 'Rule 5(3)' ) . ' ' . chip( '2-i', 'Rule 2(i)' ) . '</p>'
@@ -148,13 +162,14 @@ $hero = c2sec(
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
 	'aw-camp-hero aw-camp-open'
 );
-$hero_closed = c2sec( // copy for the owner to edit (17 Oct 2026 brief: [OWNER COPY]); facts only until then
+$hero_closed = c2sec( // owner's copy, 17 Oct 2026
 	'',
 	c2sc( '[aw_camp_status]' )
-	. c2h( 'Objections to the draft lab animal rules have closed.', 1 )
-	. c2p( 'The public could send objections to CCSEA until 5 November 2026. CCSEA now reviews them before publishing final rules in the Gazette.', 'aw-camp-hero-summary' )
+	. c2h( 'Objections to the draft lab animal rules have closed', 1 )
+	. c2p( 'The public comment window on the Draft Laboratory Animals Rules, 2026 (G.S.R. 864(E)) ended on 5 November 2026. CCSEA now has to consider the objections before the rules are finalised. We\'ll update this page when the final rules are notified.', 'aw-camp-hero-summary' )
 	. c2sc( '[aw_campaign_count min="100"]' )
-	. c2buttons( array( array( 'Read the draft rules', $lib_draft ) ) ),
+	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#next-steps">Read what happens next</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
+	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#updates">Get updates on these rules</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n",
 	'aw-camp-hero aw-camp-closed'
 );
 
@@ -175,13 +190,13 @@ $what = c2sec(
 );
 
 /* 3. What the draft does: icon grid, the main change leads. */
-$card = function ( $icon, $title, $text, $chips ) {
-	return c2p( c2i( $icon ), 'aw-camp-card-ico' ) . c2h( $title, 3 ) . c2p( $text ) . c2p( $chips, 'aw-camp-card-chips' );
+$card = function ( $icon, $title, $text, $chips, $doc = '' ) { // $doc: the clause on its Gazette page, above the chips
+	return c2p( c2i( $icon ), 'aw-camp-card-ico' ) . c2h( $title, 3 ) . c2p( $text ) . ( $doc ? c2html( c2gz( $doc, 'aw-camp-card-doc' ) ) : '' ) . c2p( $chips, 'aw-camp-card-chips' );
 };
 $cards = array(
-	$card( 'building', 'Labs approve most experiments themselves', 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.', chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ) ),
-	$card( 'world', 'Some animals could come from open markets', 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.', chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ) ),
-	$card( 'alert', 'Strays: banned, with exemptions', 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.', chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ) ),
+	$card( 'building', 'Labs approve most experiments themselves', 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.', chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ), 'rule-11-3' ),
+	$card( 'world', 'Some animals could come from open markets', 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.', chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ), 'rule-21-2' ),
+	$card( 'alert', 'Strays: banned, with exemptions', 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.', chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ), 'rule-5-3' ),
 	$card( 'heart', 'Wildlife and monkeys: allowed under conditions', 'Protected species and primates can be used for listed purposes with justification and permission. The draft is unclear on primates.', chip( '5-1-c', 'Rule 5(1)(c)' ) . ' ' . chip( '6-2', 'Rule 6(2)' ) ),
 	$card( 'home', 'A lab doesn\'t need walls', 'Places that are not wholly enclosed, and mobile facilities, count as labs.', chip( '2-i', 'Rule 2(i)' ) ),
 	$card( 'knowledge', 'Training is a reason to use animals', 'Higher education and professional training are listed purposes, and teaching approvals can last five years.', chip( '4-6', 'Rule 4(6)' ) . ' ' . chip( '11-11', 'Rule 11(11)' ) ),
@@ -208,6 +223,7 @@ $pain = c2sec(
 		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.' )
 		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
 		. '</ol>'
+		. c2gz( 'annexure-1', 'aw-camp-card-doc aw-camp-gap-doc' ) // Annexure I (the scale itself), above its chip
 		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
 	),
 	'aw-camp-dark'
@@ -308,7 +324,8 @@ $tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
 $tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
-	c2h( 'Read the law and the record' )
+	c2html( '<div class="aw-camp-doc-strip">' . c2gz( 14254, 'aw-camp-doc-page' ) . c2gz( 14255, 'aw-camp-doc-page' ) . c2gz( 14256, 'aw-camp-doc-page' ) . c2gz( 14257, 'aw-camp-doc-page' ) . '</div>' ) // pages of the draft, on dark
+	. c2h( 'Read the law and the record' )
 	. c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' )
 	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
 	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
