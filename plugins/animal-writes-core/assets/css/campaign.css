@@ -266,10 +266,10 @@
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
 
 /* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
-.aw-camp.is-closed .wp-block-rank-math-faq-block .rank-math-list { display: flex; flex-direction: column; }
+.aw-camp.is-closed .rank-math-block .rank-math-list { display: flex; flex-direction: column; } /* Rank Math's FAQ markup */
 .aw-camp.is-closed #faq-078f9b7a10 { order: -1; } /* id from the question text (campaign2-page.php c2faq) */
 
 /* Home band after closing: "Latest campaign", on paper */
-.aw-camp-band--closed { background: var(--aw-camp-paper); color: var(--kit-color-text); }
-.aw-camp-band--closed :is(h2, p) { color: var(--kit-color-text); }
+.aw-camp-band--closed { background: var(--aw-camp-paper); color: var(--aw-camp-dark); }
+.aw-camp-band--closed :is(h2, p) { color: var(--aw-camp-dark); }
 .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--aw-camp-brand); font-weight: var(--kit-weight-strong); }
