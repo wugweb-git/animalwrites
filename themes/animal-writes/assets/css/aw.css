@@ -1383,3 +1383,6 @@ body { background: var(--kit-color-canvas); }
 .aw-about-act:has(.kit-ed-more:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } .aw-about-act:hover .kit-ed-more .kit-ico { transform: none; } }
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
+/* The three principles: one column on phones, three from 768 (never two plus one alone) */
+.aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: minmax(0, 1fr) !important; }
+@media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
