@@ -149,10 +149,10 @@ function aw_camp_block_has_class( $block, $cls ) {
 }
 
 add_filter(
-	'pre_render_block',
-	function ( $pre, $block ) {
+	'render_block', // runs for nested blocks too (pre_render_block only sees top-level ones)
+	function ( $html, $block ) {
 		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
-			return $pre;
+			return $html;
 		}
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
 		if ( preg_match( '/(^|\s)(aw-owner-copy|aw-unused-review)(\s|$)/', $cls ) ) {
@@ -161,7 +161,7 @@ add_filter(
 		if ( preg_match( '/(^|\s)aw-camp-needs-copy(\s|$)/', $cls ) && aw_camp_block_has_class( $block, 'aw-owner-copy' ) ) {
 			return ''; // the section waits for the owner's copy
 		}
-		return $pre;
+		return $html;
 	},
 	5,
 	2
