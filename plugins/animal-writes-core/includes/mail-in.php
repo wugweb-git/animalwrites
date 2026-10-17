@@ -409,3 +409,50 @@ add_action(
 	10,
 	4
 );
+
+/**
+ * Safety net for the webhook (17 Oct 2026: it stopped delivering after 9 Oct). Every 5 minutes, list the newest 20
+ * messages in each mailbox and pass on only those not seen before; aw_mail_in() still de-duplicates on Message-ID.
+ */
+function aw_mail_poll() {
+	$seen = (array) get_option( 'aw_mail_seen_uids', array() );
+	$n    = 0;
+	foreach ( array_keys( AW_MAIL_BOXES ) as $key ) {
+		$box = aw_mail_box_id( $key );
+		if ( '' === $box ) {
+			continue;
+		}
+		$list = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/INBOX/messages?perPage=20&sort=-date&page=1' );
+		if ( ! is_array( $list ) ) {
+			continue;
+		}
+		$known = (array) ( $seen[ $key ] ?? array() );
+		foreach ( $list as $m ) {
+			$uid = (string) ( $m['uid'] ?? '' );
+			if ( '' === $uid || in_array( $uid, $known, true ) ) {
+				continue;
+			}
+			$req = new WP_REST_Request( 'POST', '/aw/v1/mail-in' );
+			$req->set_header( 'content-type', 'application/json' );
+			$req->set_body( wp_json_encode( array( 'event' => 'message.received', 'data' => array( 'mailboxResourceId' => $box, 'folder' => 'INBOX', 'uid' => $uid ) ) ) );
+			$req->set_param( '_aw_mailbox', $key );
+			$st = (string) ( aw_mail_in( $req )->get_data()['status'] ?? 'error' );
+			if ( 'error' !== $st ) {
+				$known[] = $uid;
+				$n      += 'created' === $st ? 1 : 0;
+			}
+		}
+		$seen[ $key ] = array_slice( array_values( array_unique( $known ) ), -200 );
+	}
+	update_option( 'aw_mail_seen_uids', $seen, false );
+	return $n;
+}
+add_action( 'aw_mail_poll', 'aw_mail_poll' );
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_mail_poll' ) ) {
+			wp_schedule_event( time() + 120, 'aw_5min', 'aw_mail_poll' );
+		}
+	}
+);
