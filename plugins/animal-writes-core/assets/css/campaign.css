@@ -9,14 +9,19 @@
 	--aw-camp-meta: var(--kit-color-muted);
 	--aw-camp-on-brand: var(--kit-color-on-ink);
 }
-/* Campaign 2.0 (draft lab animal rules 2026): colours from the campaign artwork. */
+/* Campaign 2.0 (draft lab animal rules 2026): colours from the campaign artwork. The four --camp-* tokens are the
+   Campaign Content Standard's identity tokens (F1); the --aw-camp-* names the rules below use point at them. */
 .aw-camp--lab-rules {
-	--aw-camp-brand: #c83410;
-	--aw-camp-brand-deep: #70230e;
+	--camp-primary: #c83410;
+	--camp-primary-ink: #ffffff;
+	--camp-surface: #f3efe6;
+	--camp-accent: #70230e;
+	--aw-camp-brand: var(--camp-primary);
+	--aw-camp-brand-deep: var(--camp-accent);
 	--aw-camp-dark: #16130e;
-	--aw-camp-paper: #f3efe6;
+	--aw-camp-paper: var(--camp-surface);
 	--aw-camp-meta: #544b44;
-	--aw-camp-on-brand: #ffffff;
+	--aw-camp-on-brand: var(--camp-primary-ink);
 }
 
 /* Bands */
@@ -25,15 +30,25 @@
 .aw-camp-hero a:not(.wp-element-button) { color: var(--aw-camp-on-brand); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-camp-paper { background: var(--aw-camp-paper); }
 .aw-camp-dark { background: var(--aw-camp-dark); color: var(--kit-color-on-ink); }
-.aw-camp-dark :is(h2, h3, p, li, strong) { color: var(--kit-color-on-ink); }
+.aw-camp-dark :is(h2, h3, h4, p, li, strong) { color: var(--kit-color-on-ink); }
 
 /* Type: the artwork's heavy, tight headlines, in the site face (Inter) */
-.aw-camp :is(h1, h2) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
+.aw-camp :is(h1, h2, h3.aw-camp-mod-h) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
 .aw-camp h1 { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem); margin: 0 0 var(--kit-space-4); }
-.aw-camp h2 { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
+.aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); } /* a module (H3) that has its own band reads like a section */
 .aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
 .aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
 .aw-camp-section > * { max-width: 1120px; }
+
+/* Status (hero): the action window, and after closing the outcome beside it as its own label */
+.aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
+.aw-camp-status > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
+.aw-camp-status-window { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
+.aw-camp-status-outcome, .aw-camp-status-asof { box-shadow: inset 0 0 0 1px var(--aw-camp-on-brand); }
+.aw-camp-hero .aw-camp-status .aw-date { color: inherit; }
+.aw-camp-hero .aw-camp-count { margin: var(--kit-space-4) 0 0; }
+.aw-camp-count-asof { color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
+.aw-camp-hero .aw-camp-count-asof { color: inherit; opacity: 0.85; }
 
 /* Hero: text left, poster panel right */
 .aw-camp-hero-cols { gap: var(--kit-space-6); }
@@ -91,7 +106,7 @@
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
-.aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
+.aw-camp-tier h4 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
 .aw-camp-tier { --fill: 100%; }
 .aw-camp-tier--1 { --fill: 25%; }
@@ -120,7 +135,7 @@
 .aw-camp-ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
 .aw-camp-ways li { display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); }
 .aw-camp-ways li > .kit-ico { --kit-ico-size: 1.5rem; color: var(--aw-camp-brand); margin-top: 0.15em; }
-.aw-camp-ways h3 { margin: 0 0 var(--kit-space-1); font-size: var(--kit-type-h4, 1.125rem); }
+.aw-camp-ways h4 { margin: 0 0 var(--kit-space-1); font-size: var(--kit-type-h4, 1.125rem); }
 .aw-camp-ways p { margin: 0; }
 
 /* Questions: heading column sticks beside the answers */
@@ -256,6 +271,17 @@
 .aw-camp .aw-camp-band-ghost { background: transparent; color: var(--aw-camp-on-brand); box-shadow: inset 0 0 0 2px var(--aw-camp-on-brand); }
 .aw-camp .aw-camp-band-ghost:hover { background: var(--aw-camp-on-brand); color: var(--aw-camp-brand); }
 .aw-camp-band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-3); margin: var(--kit-space-3) 0 0; }
+
+/* Support: the site's volunteer banner, inside the section's own band */
+.aw-camp-slot--support .aw-vol-banner { margin-block: 0; }
+
+/* Card pictures on a campaign page: press cards show the publisher's logo on the campaign surface; items without a
+   picture of their own show the campaign tile (its document number as a stamp) instead of a general category photo */
+.aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface, var(--aw-camp-paper)); }
+.aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface, var(--aw-camp-paper)); border-bottom-color: var(--camp-primary, var(--aw-camp-brand)); }
+.aw-camp-thumb-tile { display: grid; place-items: center; width: 100%; height: 100%; background: var(--camp-surface, var(--aw-camp-paper)); box-shadow: inset 0 -6px 0 var(--camp-primary, var(--aw-camp-brand)); }
+.aw-camp-thumb-tile .aw-camp-stamp { margin: 0; color: var(--camp-accent, var(--aw-camp-brand-deep)); font-size: var(--kit-type-h4, 1.125rem); }
+.aw-camp-thumb > a { display: block; height: 100%; }
 
 /* In the press: the Media & PR cards; partners (only when the campaign has some) */
 .aw-camp-press { margin-top: var(--kit-space-4); }

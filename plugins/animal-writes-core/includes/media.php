@@ -119,6 +119,16 @@ add_filter(
 			return $content;
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
+		// On a campaign page (class aw-camp-thumb): an item without a picture of its own shows the campaign's tile, not a
+		// general category photo. The publisher's image of an ingested item still leads (owner 17 Oct 2026).
+		if ( false !== strpos( $cls, 'aw-camp-thumb' ) && '' === trim( $content ) && ! ( aw_is_ingested( $post_id ) && function_exists( 'aw_publisher_image' ) && '' !== aw_publisher_image( $post_id ) ) ) {
+			$camp  = function_exists( 'aw_camp_id' ) ? aw_camp_id( get_queried_object_id() ) : 0;
+			$doc   = $camp ? (int) get_post_meta( $camp, 'aw_campaign_doc', true ) : 0;
+			$label = $doc ? (string) get_post_meta( $doc, 'aw_legal_number', true ) : '';
+			$tile  = '<span class="aw-camp-thumb-tile" aria-hidden="true"><span class="aw-camp-stamp">' . esc_html( $label ? $label : ( $camp ? get_the_title( $camp ) : get_the_title( $post_id ) ) ) . '</span></span>';
+			$tile  = $link ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $tile . '</a>' : $tile;
+			return '<figure class="wp-block-post-featured-image kit-card-media ' . esc_attr( $cls ) . '" style="aspect-ratio:4/3">' . $tile . '</figure>';
+		}
 		$url    = aw_item_image( $post_id );
 		// The item's own page leads with a real photo only: a placard would repeat the title,
 		// and a document's first page is already shown by the PDF viewer below.

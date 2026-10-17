@@ -1965,15 +1965,29 @@
     "aw-camp-docs-q",
     "aw-camp-press",
     "aw-camp-partners",
-    "aw-camp-band-kicker"
+    "aw-camp-band-kicker",
+    "aw-camp-slot",
+    "aw-camp-mod-h",
+    "aw-camp-status",
+    "aw-camp-count-asof",
+    "aw-camp-thumb",
+    "aw-camp-thumb-tile",
+    "aw-camp-if-count",
+    "aw-camp-if-filled",
+    "aw-camp-pre"
    ],
    "states": [
-    "open",
-    "closed (after the last day)",
+    "pre (upcoming)",
+    "active: open, last day",
+    "post: closed, with outcome (pending, achieved, partially achieved, not achieved, inconclusive) and its as-of date",
     "letter: ready, error (no name or city), sent (asked to confirm), confirmed",
     "chip: closed, dialog open"
    ],
    "tokens": [
+    "--camp-primary",
+    "--camp-primary-ink",
+    "--camp-surface",
+    "--camp-accent",
     "--aw-camp-brand",
     "--aw-camp-brand-deep",
     "--aw-camp-dark",
@@ -1991,10 +2005,10 @@
     "sr": "visible text; letter preview read as it changes"
    },
    "seo": {
-    "heading": "page H1 + H2 sections; band H2",
+    "heading": "page H1; one H2 per section of the Campaign Content Standard (slug = anchor id); modules H3; band H2",
     "link": "descriptive",
     "alt": "n/a",
-    "schema": "campaign CreativeWork about the Library Legislation; FAQ from the Rank Math FAQ block"
+    "schema": "campaign CreativeWork about the Library Legislation; ItemList (rule-change cards) and DefinedTermSet (pain-scale tiers) read from the page; FAQ from the Rank Math FAQ block"
    }
   },
   {

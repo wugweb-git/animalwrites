@@ -44,7 +44,7 @@ function aw_hub_blocks() {
 		'org-actions'   => array( 'Organisation buttons', 'aw_block_org_actions', array() ),
 		'result-head'   => array( 'Result count and sort', 'aw_block_result_head', array() ),
 		'browse-states' => array( 'Browse by state', 'aw_block_browse_states', array() ),
-		'press-media'   => array( 'Press thumbnail', 'aw_block_press_media', array() ),
+		'press-media'   => array( 'Press thumbnail', 'aw_block_press_media', array( 'logo' => array( 'type' => 'boolean', 'default' => false ) ) ),
 		'press-meta'    => array( 'Press date and format', 'aw_block_press_meta', array() ),
 		'posted-by'     => array( 'Posted by', 'aw_block_posted_by', array() ),
 		'volunteer'     => array( 'Volunteer form', 'aw_block_volunteer', array( 'open' => array( 'type' => 'boolean', 'default' => false ) ) ),
@@ -471,13 +471,16 @@ function aw_block_browse_states() {
 
 /* ---------- Media & PR ---------- */
 
-/** Thumbnail with the publisher logo as fallback, and a play mark on videos. */
+/**
+ * Thumbnail with the publisher logo as fallback, and a play mark on videos. With logo=true the card shows the publisher's
+ * logo (or its name) and never the article photo copied at import (campaign pages, owner 17 Oct 2026).
+ */
 function aw_block_press_media( $a, $id ) {
 	$pub      = (string) get_post_meta( $id, 'aw_press_publisher', true );
 	$fmt      = (string) get_post_meta( $id, 'aw_press_format', true );
 	$logo     = (int) get_post_meta( $id, 'aw_press_logo', true );
 	$logo     = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
-	$thumb    = (string) get_the_post_thumbnail_url( $id, 'medium_large' );
+	$thumb    = empty( $a['logo'] ) ? (string) get_the_post_thumbnail_url( $id, 'medium_large' ) : '';
 	$video    = (string) get_post_meta( $id, 'aw_press_video', true );
 	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr( $pub ) . '" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
 	$media    = $thumb

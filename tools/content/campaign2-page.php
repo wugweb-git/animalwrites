@@ -2,8 +2,9 @@
 /**
  * Campaign 2.0 page (draft lab animal rules 2026), 16 Oct 2026. Creates the campaign as a DRAFT; re-running updates the
  * same item (by slug) and never publishes it. Copy: Claude outputs/campaign2/campaign2-copy.md (letter grounds checked
- * against G.S.R. 864(E), the 1998 Rules with the 2001 and 2006 amendments, and the PCA Act). No supporters section
- * (owner's rule). Run: wp eval-file campaign2-page.php
+ * against G.S.R. 864(E), the 1998 Rules with the 2001 and 2006 amendments, and the PCA Act). Sections follow the
+ * Campaign Content Standard v1.0 (Notion, 17 Oct 2026); partners only from the owner's list (none yet).
+ * Run: wp eval-file campaign2-page.php
  */
 
 $doc = get_page_by_path( 'draft-laboratory-animals-rules-2026', OBJECT, 'aw_legal' );
@@ -19,7 +20,7 @@ function c2p( $t, $cls = '' ) {
 	$c = $cls ? ' class="' . $cls . '"' : '';
 	return "<!-- wp:paragraph$a -->\n<p$c>$t</p>\n<!-- /wp:paragraph -->\n\n";
 }
-function c2h( $t, $level = 2, $anchor = '' ) {
+function c2h( $t, $level = 2, $anchor = '', $cls = '' ) {
 	$attrs = array();
 	if ( 2 !== $level ) {
 		$attrs['level'] = $level;
@@ -27,9 +28,16 @@ function c2h( $t, $level = 2, $anchor = '' ) {
 	if ( $anchor ) {
 		$attrs['anchor'] = $anchor;
 	}
+	if ( $cls ) {
+		$attrs['className'] = $cls;
+	}
 	$a  = $attrs ? ' ' . wp_json_encode( $attrs ) : '';
 	$id = $anchor ? ' id="' . $anchor . '"' : '';
-	return "<!-- wp:heading$a -->\n<h$level class=\"wp-block-heading\"$id>$t</h$level>\n<!-- /wp:heading -->\n\n";
+	return "<!-- wp:heading$a -->\n<h$level class=\"wp-block-heading" . ( $cls ? ' ' . $cls : '' ) . "\"$id>$t</h$level>\n<!-- /wp:heading -->\n\n";
+}
+/** A module heading: H3 under its section's H2, styled like a section heading (Campaign Content Standard D1). */
+function c2mod( $t ) {
+	return c2h( $t, 3, '', 'aw-camp-mod-h' );
 }
 function c2sc( $sc ) {
 	return "<!-- wp:shortcode -->\n$sc\n<!-- /wp:shortcode -->\n\n";
@@ -59,6 +67,15 @@ function c2sec( $anchor, $inner, $cls = '' ) {
 	}
 	$id = $anchor ? ' id="' . $anchor . '"' : '';
 	return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n<div$id class=\"wp-block-group alignfull $classes\" style=\"padding-top:var(--wp--preset--spacing--60);padding-right:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--60);padding-left:var(--wp--preset--spacing--40)\">$inner</div>\n<!-- /wp:group -->\n\n";
+}
+/**
+ * A section of the Campaign Content Standard (Notion, 17 Oct 2026): the slug is its anchor id; it holds one or more
+ * module bands (c2sec), which keep their own older ids so existing links still land.
+ */
+function c2slot( $slug, $inner, $cls = '' ) {
+	$classes = trim( 'aw-camp-slot aw-camp-slot--' . $slug . ' ' . $cls );
+	$attrs   = array( 'anchor' => $slug, 'align' => 'full', 'className' => $classes, 'layout' => array( 'type' => 'default' ) );
+	return '<!-- wp:group ' . wp_json_encode( $attrs ) . " -->\n<div id=\"$slug\" class=\"wp-block-group alignfull $classes\">$inner</div>\n<!-- /wp:group -->\n\n";
 }
 function c2grid( $cards ) {
 	$inner = '';
@@ -119,10 +136,12 @@ $hero = c2sec(
 	'top',
 	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-hero-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-hero-cols">'
 	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
+	. c2sc( '[aw_camp_status]' )
 	. c2h( 'Labs could soon approve their own animal experiments.', 1 )
 	. c2p( 'Draft rules would move most approvals for animal experiments from the national regulator to each lab\'s own committee.', 'aw-camp-hero-summary' )
-	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#send">Send your objection</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
+	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#how-to-help">Send your objection</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
 	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#rules">What the rules say</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n"
+	. c2sc( '[aw_campaign_count min="100"]' ) // the key metric (same value as impact), hidden below 100
 	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
 	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
 	. c2html( $poster )
@@ -131,7 +150,8 @@ $hero = c2sec(
 );
 $hero_closed = c2sec( // copy for the owner to edit (17 Oct 2026 brief: [OWNER COPY]); facts only until then
 	'',
-	c2h( 'Objections to the draft lab animal rules have closed.', 1 )
+	c2sc( '[aw_camp_status]' )
+	. c2h( 'Objections to the draft lab animal rules have closed.', 1 )
 	. c2p( 'The public could send objections to CCSEA until 5 November 2026. CCSEA now reviews them before publishing final rules in the Gazette.', 'aw-camp-hero-summary' )
 	. c2sc( '[aw_campaign_count min="100"]' )
 	. c2buttons( array( array( 'Read the draft rules', $lib_draft ) ) ),
@@ -175,11 +195,11 @@ $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"classN
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
 	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
-		. '<h3>' . $name . '</h3><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
+		. '<h4>' . $name . '</h4><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
 };
 $pain = c2sec(
 	'pain-scale',
-	c2h( 'The pain scale decides who says yes' )
+	c2mod( 'The pain scale decides who says yes' )
 	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.', 'aw-camp-lede' )
 	. c2html(
 		'<ol class="aw-camp-ladder">'
@@ -196,7 +216,7 @@ $pain = c2sec(
 /* 5. Today vs the draft */
 $compare = c2sec(
 	'compare',
-	c2h( 'Today vs the draft' )
+	c2mod( 'Today vs the draft' )
 	. c2table(
 		array( '', 'Today', 'Draft 2026' ),
 		array(
@@ -238,18 +258,17 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2sc( '[aw_campaign_count min="100"]' )
 	. c2p( c2i( 'check' ) . 'We store nothing from this form. Your letter goes from your own email account.', 'aw-camp-note' ),
 	'aw-camp-paper aw-camp-open'
 );
 
 /* 7. Other ways to send: icon list. */
 $way = function ( $icon, $title, $text ) {
-	return '<li>' . c2i( $icon ) . '<div><h3>' . $title . '</h3><p>' . $text . '</p></div></li>';
+	return '<li>' . c2i( $icon ) . '<div><h4>' . $title . '</h4><p>' . $text . '</p></div></li>';
 };
 $how = c2sec(
 	'how',
-	c2h( 'Other ways to send' )
+	c2mod( 'Other ways to send' )
 	. c2html(
 		'<ul class="aw-camp-ways">'
 		. $way( 'file', 'Copy and paste', 'Copy the letter and the address, and paste them into any email app.' )
@@ -261,8 +280,8 @@ $how = c2sec(
 );
 
 /* 8. Questions: heading column and answers column. */
-$faq = c2sec(
-	'faq',
+$faq = c2sec( // the section's id (faq) is on its c2slot
+	'',
 	'<!-- wp:columns {"className":"aw-camp-faq-cols"} -->' . "\n" . '<div class="wp-block-columns aw-camp-faq-cols">'
 	. '<!-- wp:column {"width":"34%"} -->' . "\n" . '<div class="wp-block-column" style="flex-basis:34%">'
 	. c2h( 'Questions' )
@@ -306,8 +325,7 @@ $next_inner = c2h( 'What happens next' )
 		. '<li><strong>We report back</strong><span>Here and in our newsletter</span></li>'
 		. '</ol>'
 	);
-$next        = c2sec( 'next', $next_inner, 'aw-camp-open' );
-$next_closed = c2sec( 'next', $next_inner, 'aw-camp-closed' ); // after closing it moves directly under the hero
+$next = c2sec( 'next', $next_inner ); // in the next-steps section: near the end while open, under the hero once closed
 
 /* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec(
@@ -315,25 +333,24 @@ $updates = c2sec(
 	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/resources/">All guides ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
 	. '<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"aw-camp-thumb"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"aw-camp-thumb"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
 );
 
 /* In the press: Media & PR items with the campaign tag, in the Media & PR hub's cards; then the campaign's partners
    (none listed for now; the shortcode prints nothing until the owner names them). */
 $press = c2sec(
-	'press',
+	'',
 	c2html( '<header class="kit-ed-head"><div><h2>In the press</h2></div><a class="kit-ed-more" href="/media/?tag=campaign-lab-animals-2026">All coverage ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:query {"queryId":85,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->' . "\n"
 	. '<!-- wp:group {"tagName":"article","className":"aw-story aw-story\\u002d\\u002dcard aw-story\\u002d\\u002dexternal","layout":{"type":"default"}} -->' . "\n"
-	. '<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media /-->' . "\n\n"
+	. '<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media {"logo":true} /-->' . "\n\n"
 	. '<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->' . "\n\n"
 	. '<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-story-title"} /-->' . "\n\n" . '<!-- wp:animal-writes/press-meta /--></div>' . "\n" . '<!-- /wp:group --></article>' . "\n" . '<!-- /wp:group -->' . "\n"
-	. '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n"
-	. c2sc( '[aw_campaign_partners title="Partners"]' ),
+	. '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
 	'aw-camp-paper'
 );
 
@@ -341,7 +358,7 @@ $press = c2sec(
 $share_url = rawurlencode( home_url( '/campaigns/lab-animals-rules-2026/' ) );
 $share_txt = rawurlencode( 'Object to India\'s draft lab animal rules before 5 November:' );
 $loop      = c2sec(
-	'updates',
+	'',
 	c2h( 'Get updates on these rules' )
 	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.' ) // the footer has the form on every page
 	. c2html(
@@ -356,10 +373,45 @@ $loop      = c2sec(
 	'aw-camp-dark'
 );
 
+/* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
+$impact = c2sec( '', c2h( 'Objections sent' ) . c2sc( '[aw_campaign_count min="100"]' ), 'aw-camp-paper' );
+
+/* Support: the volunteer sign-up (the site's "Help animals near you" banner with its form opening in place). Being on
+   the page, it also stands in for the banner that is otherwise added under every campaign. */
+$support = c2sec(
+	'',
+	'<!-- wp:group {"align":"wide","className":"aw-vol-banner","layout":{"type":"default"}} -->' . "\n"
+	. '<div class="wp-block-group alignwide aw-vol-banner"><!-- wp:image {"id":8856,"width":"800px","height":"600px","sizeSlug":"full","linkDestination":"none","className":"aw-vol-banner-photo"} -->' . "\n"
+	. '<figure class="wp-block-image size-full is-resized aw-vol-banner-photo"><img src="/wp-content/uploads/2026/10/banner-category-cattle-gaushalas-phone.webp" alt="A woman feeding cows on a street in India" class="wp-image-8856" width="800" height="600" loading="lazy"/></figure>' . "\n"
+	. '<!-- /wp:image -->' . "\n\n"
+	. '<!-- wp:group {"className":"aw-vol-banner-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-vol-banner-body">'
+	. c2h( 'Help animals near you', 2, '', 'aw-vol-banner-title' )
+	. c2p( 'Join volunteers across India who rescue, feed and speak up for animals. Pick what you can do; we\'ll connect you.' )
+	. '<!-- wp:animal-writes/volunteer /--></div>' . "\n" . '<!-- /wp:group --></div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
+);
+
+/*
+ * Sections in the Active order of the Campaign Content Standard (C2). campaign-goal is folded into the hero and context,
+ * and opportunities is reserved, so neither is printed. aw-camp-open sections show until the close date, aw-camp-closed
+ * after it (campaign-tools.php); after closing, next-steps comes straight after the hero.
+ */
 $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rules","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-group alignfull aw-camp aw-camp--lab-rules">'
-	. $hero . $hero_closed . $next_closed . $what . $rules . $pain . $compare . $send . $how . $faq . $read . $next . $updates . $press . $loop
-	. c2sc( '[aw_sticky_cta href="#send" label="Send your objection"]' )
+	. c2slot( 'hero', $hero . $hero_closed )
+	. c2slot( 'next-steps', $next, 'aw-camp-closed' )
+	. c2slot( 'context', $what )
+	. c2slot( 'why-it-matters', $rules . $pain . $compare )
+	. c2slot( 'how-to-help', $send . $how, 'aw-camp-open' )
+	. c2slot( 'impact', $impact, 'aw-camp-if-count' )
+	. c2slot( 'support', $support )
+	. c2slot( 'faq', $faq )
+	. c2slot( 'news', $updates )
+	. c2slot( 'library', $read )
+	. c2slot( 'press', $press )
+	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-paper' ), 'aw-camp-if-filled' )
+	. c2slot( 'next-steps', $next, 'aw-camp-open' )
+	. c2slot( 'updates', $loop )
+	. c2sc( '[aw_sticky_cta href="#how-to-help" label="Send your objection"]' )
 	. "</div>\n<!-- /wp:group -->";
 
 $existing = get_page_by_path( 'lab-animals-rules-2026', OBJECT, 'aw_campaign' );
@@ -384,7 +436,10 @@ wp_set_object_terms( $id, array( (int) $tag->term_id ), 'post_tag', true );
 wp_set_object_terms( $id, array( 'campaigns-civic-action', 'laws-rules' ), 'category', false );
 foreach ( array(
 	'_wp_page_template'          => 'campaign-page',
+	'aw_campaign_open'           => '2026-10-06', // Gazette publication: the window opened
 	'aw_campaign_close'          => '2026-11-05',
+	'aw_campaign_metric_min'     => '100', // objections sent: shown from 100 (Campaign Content Standard D3)
+	'aw_campaign_metric_stale'   => '1', // days before the count shows an "as of" date
 	'aw_campaign_doc'            => (int) $doc->ID,
 	'rank_math_title'            => 'Object to the Draft Lab Animal Rules 2026 – Animal Writes',
 	'rank_math_description'      => 'India\'s draft lab animal rules would let labs approve most animal experiments themselves. Read what they say and send your objection by 5 November.',

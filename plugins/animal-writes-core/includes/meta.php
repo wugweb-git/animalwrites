@@ -85,6 +85,13 @@ function aw_meta_schema() {
 		'aw_campaign_close'  => array( 'string', array( 'aw_campaign' ), 'Closes on (Y-m-d)' ),
 		'aw_campaign_doc'    => array( 'string', array( 'aw_campaign' ), 'Campaign document (Library item ID)' ),
 		'aw_campaign_partners' => array( 'string', array( 'aw_campaign' ), 'Partners (Directory listing IDs, comma-separated; only the owner\'s list)' ),
+		'aw_campaign_open'   => array( 'string', array( 'aw_campaign' ), 'Opens on (Y-m-d, IST)' ),
+		'aw_campaign_outcome' => array( 'string', array( 'aw_campaign' ), 'Outcome after closing: pending, achieved, partial, not, inconclusive' ),
+		'aw_campaign_outcome_asof' => array( 'string', array( 'aw_campaign' ), 'Outcome as of (Y-m-d)' ),
+		'aw_campaign_state_override' => array( 'string', array( 'aw_campaign' ), 'State override: pre, active or post (needs a reason)' ),
+		'aw_campaign_override_note' => array( 'string', array( 'aw_campaign' ), 'Reason for the state override' ),
+		'aw_campaign_metric_min' => array( 'string', array( 'aw_campaign' ), 'Show the count from this number' ),
+		'aw_campaign_metric_stale' => array( 'string', array( 'aw_campaign' ), 'Days without a new letter before the count shows an as-of date' ),
 
 		// Resources: the date a guide was last checked (schema lastReviewed).
 		'kits_last_reviewed' => array( 'string', array( 'post' ), 'Last reviewed (Y-m-d)' ),
@@ -107,7 +114,7 @@ function aw_meta_schema() {
  */
 function aw_sanitize_meta( $value, $key ) {
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url', 'aw_ngobase_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'kits_last_reviewed' );
+	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );

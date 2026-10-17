@@ -592,6 +592,45 @@ function aw_campaign_schema( $id ) {
 }
 
 /**
+ * A campaign page's own lists, read from its text so the markup and the page say the same thing: the rule-change cards
+ * (aw-camp-card, ItemList) and the pain-scale tiers (aw-camp-tier, DefinedTermSet). Nothing when the page has neither.
+ *
+ * @param int $id Campaign ID.
+ * @return array
+ */
+function aw_campaign_list_nodes( $id ) {
+	$html  = (string) get_post_field( 'post_content', $id );
+	$url   = get_permalink( $id );
+	$plain = fn( $h ) => aw_seo_plain( trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( preg_replace( '/\[[^\]]*\]/', '', $h ) ) ) ) );
+	$nodes = array();
+	$items = array();
+	if ( preg_match_all( '#<div class="wp-block-group aw-camp-card">(.*?)</div>\s*<!-- /wp:group -->#s', $html, $cards ) ) {
+		foreach ( $cards[1] as $c ) {
+			if ( ! preg_match( '#<h[34][^>]*>(.*?)</h[34]>#s', $c, $t ) ) {
+				continue;
+			}
+			preg_match( '#<p>(.*?)</p>#s', $c, $d );
+			$items[] = array_filter( array( '@type' => 'ListItem', 'position' => count( $items ) + 1, 'name' => $plain( $t[1] ), 'description' => isset( $d[1] ) ? $plain( $d[1] ) : null, 'url' => $url . '#why-it-matters' ) );
+		}
+	}
+	if ( $items ) {
+		$head    = preg_match( '#<h2[^>]*>(.*?)</h2>\s*<!-- /wp:heading -->\s*<!-- wp:group \{"className":"aw-camp-grid"#s', $html, $h ) ? $plain( $h[1] ) : 'What the draft does';
+		$nodes[] = array( '@type' => 'ItemList', '@id' => $url . '#rule-changes', 'name' => $head, 'numberOfItems' => count( $items ), 'itemListElement' => $items, 'isPartOf' => array( '@id' => $url . '#campaign' ) );
+	}
+	$terms = array();
+	if ( preg_match_all( '#<li class="aw-camp-tier[^"]*">.*?<h[34]>(.*?)</h[34]>(.*?)</li>#s', $html, $tiers, PREG_SET_ORDER ) ) {
+		foreach ( $tiers as $t ) {
+			$terms[] = array( '@type' => 'DefinedTerm', 'name' => $plain( $t[1] ), 'description' => $plain( str_replace( '</p><p>', '.</p> <p>', $t[2] ) ), 'inDefinedTermSet' => array( '@id' => $url . '#pain-scale' ) );
+		}
+	}
+	if ( $terms ) {
+		$head    = preg_match( '#<h[23][^>]*>([^<]*pain scale[^<]*)</h[23]>#i', $html, $h ) ? $plain( $h[1] ) : 'Pain scale';
+		$nodes[] = array( '@type' => 'DefinedTermSet', '@id' => $url . '#pain-scale', 'name' => $head, 'url' => $url . '#pain-scale', 'hasDefinedTerm' => $terms );
+	}
+	return $nodes;
+}
+
+/**
  * Every inLanguage in the graph as en-IN: Rank Math writes the WordPress locale (en-US) on its WebPage nodes, while the
  * site, its pages and its items are Indian English. Plain-text values lose their HTML entities (&#039;, &#8217; from
  * WordPress titles), so the graph carries the characters themselves.
@@ -924,6 +963,7 @@ function aw_schema_nodes() {
 		$nodes[] = aw_opportunity_schema( get_queried_object_id() ); // JobPosting, Event, programme, grant or course
 	} elseif ( is_singular( 'aw_campaign' ) ) {
 		$nodes[] = aw_campaign_schema( get_queried_object_id() );
+		$nodes   = array_merge( $nodes, aw_campaign_list_nodes( get_queried_object_id() ) );
 	} elseif ( is_page( 'contact' ) ) {
 		$nodes[] = array(
 			'@type'      => 'ContactPage',
