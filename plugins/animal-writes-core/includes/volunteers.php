@@ -1,7 +1,8 @@
 <?php
 /**
  * Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to
- * help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from.
+ * help, consent. Entries go to the volunteers table (the backup) with the page they came from, and to FluentCRM: a
+ * contact tagged Volunteer with the details in custom fields (fluentcrm.php).
  *
  * @package animal-writes-core
  */
@@ -150,9 +151,12 @@ function aw_volunteer_save( $v, $source ) {
 		)
 	);
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
-	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in WP Admin > Inbox > Volunteer sign-ups." );
+	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
 	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers are newsletter subscribers (owner, 16 Oct 2026); no email from this
 		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
+	}
+	if ( function_exists( 'aw_crm_volunteer_sync' ) ) { // their volunteer details on the FluentCRM contact (custom fields)
+		aw_crm_volunteer_sync( $v['email'] );
 	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );

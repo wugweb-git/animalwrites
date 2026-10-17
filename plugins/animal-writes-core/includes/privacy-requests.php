@@ -8,6 +8,8 @@
  *    media), the request is marked completed and the person gets WordPress's "data erased" email.
  * The request record (email, dates, items removed) stays in Tools → Erase Personal Data as the log.
  * Contact messages (Inbox › Messages) go too (owner, 16 Oct 2026); the log keeps only how many.
+ * The FluentCRM contact goes too (fluentcrm.php), with its notes (the copies of their messages), volunteer fields and
+ * the emails sent to them.
  *
  * @package animal-writes-core
  */

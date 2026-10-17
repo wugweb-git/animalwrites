@@ -13,7 +13,9 @@
  *   original To address (vedanshu@ / contact@ / other), deduplicated on Message-ID. Spam is skipped. Attachments:
  *   names only. A one-time import brings in the mail already in the mailbox, newest first (Settings → Incoming mail,
  *   or wp aw-mail import).
- * - Nothing is ever sent from WordPress (no auto-reply); replies stay in webmail.
+ * - Each message is also a note on the sender's FluentCRM contact (found, or made as "transactional"; tag "Emailed
+ *   us"); see fluentcrm.php. No auto-reply is ever sent. Replies can be sent from webmail or from the contact's
+ *   profile in FluentCRM (Reply-To = the address the person wrote to, so their answer comes back here).
  *
  * @package animal-writes-core
  */
@@ -202,6 +204,9 @@ function aw_mail_in( WP_REST_Request $req ) {
 		$t = (string) ( aw_mail_pick( $msg, array( 'text', 'plainBody', 'plain', 'body' ) ) ?? '' );
 		if ( '' !== trim( $t ) && '' === trim( (string) get_post_field( 'post_content', $dup[0] ) ) ) {
 			wp_update_post( array( 'ID' => $dup[0], 'post_content' => sanitize_textarea_field( $t ) ) );
+			if ( function_exists( 'aw_crm_message_note' ) ) {
+				aw_crm_message_note( $dup[0] ); // the note gets the text too
+			}
 			return new WP_REST_Response( array( 'status' => 'filled' ), 200 );
 		}
 		return new WP_REST_Response( array( 'status' => 'duplicate' ), 200 );
@@ -267,6 +272,9 @@ function aw_mail_in( WP_REST_Request $req ) {
 		update_post_meta( $id, $k, sanitize_text_field( (string) $v ) );
 	}
 	update_post_meta( $id, 'aw_review', 'held: email — to review' );
+	if ( function_exists( 'aw_crm_message_note' ) ) {
+		aw_crm_message_note( $id ); // a note on the sender's FluentCRM contact (fluentcrm.php)
+	}
 	if ( '' === trim( $text ) && $box && $uid ) {
 		// The webhook arrives as the mail lands; the text may not be ready yet. Fetch it again in a minute.
 		wp_schedule_single_event( time() + 60, 'aw_mail_refill', array( $id, $box, $folder, $uid ) );
@@ -302,7 +310,7 @@ function aw_mail_in_screen() {
 	$ids  = '' !== aw_mail_setting( 'api_token' ) ? aw_mail_box_ids() : array();
 	$last = get_option( 'aw_mail_last' );
 	echo '<div class="wrap"><h1>Incoming mail</h1>';
-	echo '<p>Hostinger Mail sends each new message in vedanshu@animalwrites.in (contact@ is its alias) and support@animalwrites.in to this address. Each arrives in Inbox → Contact messages, tagged Email, with the mailbox it came to and the address it was sent to. Nothing is ever sent from WordPress.</p>';
+	echo '<p>Hostinger Mail sends each new message in vedanshu@animalwrites.in (contact@ is its alias) and support@animalwrites.in to this address. Each arrives in Inbox → Contact messages, tagged Email, with the mailbox it came to and the address it was sent to, and as a note on the sender\'s contact in FluentCRM. Nothing is sent automatically.</p>';
 	echo '<p><strong>Webhook URL (hPanel → Emails → each mailbox → Agentic mail → Webhooks, event "message.received"):</strong><br><code>' . esc_html( rest_url( 'aw/v1/mail-in' ) ) . '</code></p>';
 	echo '<p>Last message received: <strong>' . esc_html( is_array( $last ) ? $last['at'] . ' — ' . ( $last['mailbox'] ?? '' ) . ' — to ' . $last['to'] . ' — ' . $last['subject'] : 'none yet' ) . '</strong></p>';
 	echo '<form method="post">' . wp_nonce_field( 'aw_mail_in', 'aw_mail_nonce', true, false ) . '<table class="form-table">';
@@ -393,6 +401,9 @@ add_action(
 		$t = is_array( $t ) ? ( '' !== trim( (string) ( $t['text'] ?? '' ) ) ? (string) $t['text'] : wp_strip_all_tags( (string) ( $t['html'] ?? '' ) ) ) : (string) $t;
 		if ( '' !== trim( $t ) ) {
 			wp_update_post( array( 'ID' => $id, 'post_content' => sanitize_textarea_field( $t ) ) );
+			if ( function_exists( 'aw_crm_message_note' ) ) {
+				aw_crm_message_note( $id );
+			}
 		}
 	},
 	10,

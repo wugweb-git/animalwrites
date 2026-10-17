@@ -163,6 +163,9 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_m_source', $source ); // the page it was sent from (S5.8)
+	if ( function_exists( 'aw_crm_message_note' ) ) {
+		aw_crm_message_note( $id ); // a note on the sender's FluentCRM contact (fluentcrm.php); none for a removal request
+	}
 	if ( 'remove-data' === $v['about'] ) {
 		// DPDP: tagged for the Inbox, and WordPress's own confirmation email is sent. Nothing is deleted until the person
 		// opens that link (privacy-requests.php runs the erasers then, and the request record is the log).

@@ -10,11 +10,13 @@
  *   true, so no sender ever sees a failure. WP-Cron (every 5 minutes) sends the queue as the budget frees: highest
  *   priority first, oldest first within a priority. A queued email that fails 5 times is kept as "failed" (shown on
  *   Settings → Mail), never dropped.
- * - Priorities: 1 owner/admin notices and replies (everything not listed below), 2 sign-up confirmations (Fluent Forms),
- *   3 FluentCRM campaign emails.
+ * - Priorities: 0 replies typed by hand in FluentCRM (a contact's profile → Send Email; fluentcrm.php marks them with
+ *   an X-AW-Priority header, removed before sending), 1 owner/admin notices (everything not listed here), 2 sign-up
+ *   confirmations (Fluent Forms), 3 FluentCRM campaign emails.
  * - Campaign emails may use the budget minus a reserve (default 10), so notices and confirmations always have room.
  * - FluentCRM: sending speed 1 per second (fluent_crm/global_email_limit_per_second); its sender does not start while
- *   the campaign share is used up or campaign emails wait in the site's queue (fluent_crm/disable_email_processing),
+ *   the campaign share is used up or campaign emails wait in the site's queue (fluent_crm/disable_email_processing;
+ *   not while FluentCRM sends one contact's emails at once, as it does for a reply from the profile),
  *   so the rest of a campaign stays in FluentCRM's own queue ("pending") and goes out on the following days; each run
  *   pulls at most the remaining campaign share (fluent_crm/mailer_handler_chunk_size). FluentCRM marks an email failed
  *   when wp_mail returns false; that never happens here: an email past the budget within a run is queued here, wp_mail
@@ -89,8 +91,11 @@ function aw_mail_room( $priority ) {
 	return max( 0, ( 3 === $priority ? $s['budget'] - $s['reserve'] : $s['budget'] ) - aw_mail_sent_24h() );
 }
 
-/** 1 notices and replies, 2 sign-up confirmations (Fluent Forms), 3 FluentCRM campaigns. */
+/** 0 replies from FluentCRM, 1 notices, 2 sign-up confirmations (Fluent Forms), 3 FluentCRM campaigns. */
 function aw_mail_priority() {
+	if ( isset( $GLOBALS['aw_mail_next_priority'] ) ) { // set from the email's own X-AW-Priority header (below)
+		return (int) $GLOBALS['aw_mail_next_priority'];
+	}
 	if ( ! empty( $GLOBALS['aw_mail_priority'] ) ) {
 		return (int) $GLOBALS['aw_mail_priority'];
 	}
@@ -113,14 +118,38 @@ function aw_mail_stat( $key, $n = 1 ) {
 	update_option( 'aw_mail_stats', $s, false );
 }
 
+// An email may carry its priority as an "X-AW-Priority: n" header: it is read here and removed before sending.
+add_filter(
+	'wp_mail',
+	function ( $atts ) {
+		unset( $GLOBALS['aw_mail_next_priority'] );
+		$h    = $atts['headers'] ?? '';
+		$list = is_array( $h ) ? $h : explode( "\n", str_replace( "\r\n", "\n", (string) $h ) );
+		$keep = array();
+		foreach ( $list as $line ) {
+			if ( is_string( $line ) && preg_match( '/^X-AW-Priority:\s*([0-3])\s*$/i', trim( $line ), $m ) ) {
+				$GLOBALS['aw_mail_next_priority'] = (int) $m[1];
+				continue;
+			}
+			$keep[] = $line;
+		}
+		if ( isset( $GLOBALS['aw_mail_next_priority'] ) ) {
+			$atts['headers'] = is_array( $h ) ? $keep : implode( "\n", $keep );
+		}
+		return $atts;
+	},
+	PHP_INT_MAX
+);
+
 add_filter(
 	'pre_wp_mail',
 	function ( $return, $atts ) {
+		$p = aw_mail_priority();
+		unset( $GLOBALS['aw_mail_next_priority'] ); // for this email only
 		if ( null !== $return || ! empty( $GLOBALS['aw_mail_flushing'] ) ) {
 			return $return; // another filter decided, or this is the queue sending
 		}
 		global $wpdb;
-		$p   = aw_mail_priority();
 		$now = gmdate( 'Y-m-d H:i:s' );
 		if ( aw_mail_room( $p ) > 0 && 0 === aw_mail_queued( $p ) ) {
 			$wpdb->insert( aw_mail_table(), array( 'priority' => $p, 'status' => 'sent', 'created_at' => $now, 'sent_at' => $now ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -208,7 +237,7 @@ add_action(
 /* ---------- FluentCRM: slowest speed, and campaigns wait for the budget ---------- */
 
 add_filter( 'fluent_crm/global_email_limit_per_second', fn() => 1 );
-add_filter( 'fluent_crm/disable_email_processing', fn( $off ) => $off || aw_mail_room( 3 ) < 1 || aw_mail_queued( 3 ) > 0 );
+add_filter( 'fluent_crm/disable_email_processing', fn( $off ) => $off || ( empty( $GLOBALS['aw_crm_contact_job'] ) && ( aw_mail_room( 3 ) < 1 || aw_mail_queued( 3 ) > 0 ) ) );
 add_filter( 'fluent_crm/mailer_handler_chunk_size', fn( $n ) => max( 1, min( (int) $n, aw_mail_room( 3 ) ) ) );
 
 /* ---------- Settings → Mail: the cap, today's count and the queue ---------- */
@@ -230,11 +259,12 @@ add_action(
 		} elseif ( 'flushed' === $note ) {
 			echo '<div class="notice notice-success inline"><p>Sent ' . (int) ( $_GET['n'] ?? 0 ) . ' queued emails.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
-		echo '<p>The mailbox may send 100 emails in any 24 hours. The site keeps under the limit below; anything over it waits in the queue and is sent as the limit frees, notices first, then sign-up confirmations, then newsletter campaigns.</p>';
+		echo '<p>The mailbox may send 100 emails in any 24 hours. The site keeps under the limit below; anything over it waits in the queue and is sent as the limit frees: replies typed in FluentCRM first, then notices, then sign-up confirmations, then newsletter campaigns.</p>';
 		echo '<table class="widefat striped" style="max-width:40rem"><tbody>';
 		$rows = array(
 			'Sent in the last 24 hours'              => aw_mail_sent_24h() . ' of ' . $s['budget'],
-			'Waiting: notices and replies'           => (int) ( $q[1] ?? 0 ),
+			'Waiting: replies from FluentCRM'        => (int) ( $q[0] ?? 0 ),
+			'Waiting: notices'                       => (int) ( $q[1] ?? 0 ),
 			'Waiting: sign-up confirmations'         => (int) ( $q[2] ?? 0 ),
 			'Waiting: newsletter campaigns'          => (int) ( $q[3] ?? 0 ),
 			'Oldest waiting since (UTC)'             => $old ? $old : '–',

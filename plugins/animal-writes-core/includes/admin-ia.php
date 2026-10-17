@@ -4,7 +4,8 @@
  *
  * - Posts are Resources (content-types.php); Comments hidden and off sitewide. Testimonials (1.0 leftover) hidden.
  * - Categories are shared by every section: shown once, under "Classification".
- * - "Inbox": Messages and Listing claims, with unread counts. "Audience": Newsletter and Volunteers.
+ * - "Inbox": Messages and Listing claims, with unread counts. Volunteers and the Newsletter live in FluentCRM (owner,
+ *   17 Oct 2026): the site's Volunteers and Newsletter screens are hidden from the menu (their pages and tables stay).
  * - Menu order follows the site: Directory · News · Resources · Library · Opportunities · Campaigns · Pages · Media …
  * - Labels: Library types → Kind, Source types → Issuers, Campaign Hub → Campaigns (slugs and URLs unchanged).
  *
@@ -155,14 +156,10 @@ add_action(
 		global $submenu, $menu;
 		// Hidden: Comments.
 		remove_menu_page( 'edit-comments.php' );
-		// Volunteer sign-ups go under Inbox; Newsletter stays its own item with its Subscribers list (pages keep their URLs).
-		foreach ( $menu as $i => $item ) {
-			if ( 'aw-volunteers' === $item[2] ) {
-				unset( $menu[ $i ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-				$submenu['aw-inbox'][] = array( 'Volunteer sign-ups', AW_VOL_CAP, 'aw-volunteers', 'Volunteer sign-ups' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-			}
-		}
-		$submenu['aw-newsletter'] = array( array( 'Subscribers', AW_VOL_CAP, 'aw-newsletter', 'Subscribers' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+		// Volunteers and Newsletter (with Not subscribed) are in FluentCRM now (owner, 17 Oct 2026): hidden from the menu
+		// only; their pages keep their URLs and the site's tables stay as the backup.
+		remove_menu_page( 'aw-volunteers' );
+		remove_menu_page( 'aw-newsletter' );
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
 		// Inbox: the two post-type lists (registered with show_in_menu = aw-inbox), with their own counts.
 		list( $msg, $claims ) = aw_inbox_counts();
@@ -174,8 +171,8 @@ add_action(
 			}
 		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
-		// Inbox order (S2.3): Contact messages · Listing claims · Reports · Volunteer sign-ups · To review (was Press to review).
-		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'aw-volunteers' => 4, 'aw-review' => 5 );
+		// Inbox order (S2.3): Contact messages · Listing claims · Reports · To review (was Press to review).
+		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'aw-review' => 5 );
 		if ( isset( $submenu['aw-inbox'] ) ) {
 			usort( $submenu['aw-inbox'], fn( $x, $y ) => ( $rank[ $x[2] ] ?? 9 ) <=> ( $rank[ $y[2] ] ?? 9 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		}
@@ -260,7 +257,6 @@ add_filter(
 			'upload.php',
 			'aw-classification',
 			'aw-inbox',
-			'aw-newsletter',
 			'separator2',
 			'themes.php',
 			'plugins.php',
