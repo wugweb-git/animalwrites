@@ -333,9 +333,9 @@ $updates = c2sec(
 	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/resources/">All guides ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
 	. '<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"aw-camp-thumb"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"aw-camp-thumb"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
 );
 
