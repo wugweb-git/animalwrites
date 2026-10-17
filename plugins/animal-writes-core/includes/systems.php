@@ -422,3 +422,20 @@ add_filter(
 	10,
 	2
 );
+
+/*
+ * Same for a post type with no public pages (Media & PR, aw_press): WordPress keeps "postType" only when the type is
+ * viewable and otherwise lists posts, so a Query Loop of press items showed Resources guides. Keep the type asked for.
+ */
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $vars, $block ) {
+		$type = (string) ( $block->context['query']['postType'] ?? '' );
+		if ( $type && post_type_exists( $type ) && ! is_post_type_viewable( $type ) ) {
+			$vars['post_type'] = $type;
+		}
+		return $vars;
+	},
+	10,
+	2
+);

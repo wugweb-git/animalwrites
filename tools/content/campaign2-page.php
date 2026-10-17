@@ -142,7 +142,7 @@ $hero_closed = c2sec( // copy for the owner to edit (17 Oct 2026 brief: [OWNER C
 $what = c2sec(
 	'what',
 	c2h( 'What\'s happening' )
-	. c2p( 'The Gazette of India has published draft rules (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' )
+	. c2p( 'The Gazette of India has published the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026 (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' )
 	. c2html(
 		'<ol class="aw-camp-dates">'
 		. '<li><span class="aw-camp-dates-when">30 Sep 2026</span><span class="aw-camp-dates-what">Notification signed</span></li>'
