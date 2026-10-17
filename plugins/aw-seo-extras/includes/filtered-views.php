@@ -10,8 +10,11 @@
  * - Several filters at once (?category_name=a&state=b) or several values (?tag=a,b) are noindex: the combinations
  *   would multiply without end. A parameter the hub does not filter by is noindex too.
  * - ?state= and ?publisher= (one value) follow the ?category_name= rule (16 Oct 2026): from 3 items their own title
- *   ("Animal Welfare News from Kerala", "Animal Welfare News from LiveLaw"), description, breadcrumb step and
- *   self-canonical; fewer, noindex. They had the hub's own title before, so each one duplicated it.
+ *   ("Animal Welfare News from Kerala", "Animal Welfare News from LiveLaw"), description, breadcrumb step,
+ *   self-canonical and filtered-sitemap.xml entry; fewer, noindex. They had the hub's own title before, so each one
+ *   duplicated it.
+ * - A view kept out of the index has the section page (without filters) as its canonical URL (owner, 17 Oct 2026).
+ *   Rank Math prints no canonical tag on a noindex page, so the value shows in its data (og:url), not as a tag.
  * - ?q= (a name or word search inside a list, the Directory's included) is a site search result: noindex, links
  *   followed (Google's guidance on internal search result pages).
  * - Any other single filter keeps the earlier rule (indexed, canonical with the filter).
@@ -297,8 +300,8 @@ add_filter(
 /* ---------- Sitemap: filtered-sitemap.xml ---------- */
 
 /**
- * The indexable ?category_name= views of every hub (3 or more items each), cached for 12 hours. ?tag= views are not
- * listed: their tag pages are (Rank Math's tag sitemap).
+ * The indexable ?category_name=, ?state= and ?publisher= views of every hub (3 or more items each), cached for 12
+ * hours. ?tag= views are not listed: their tag pages are (Rank Math's tag sitemap).
  *
  * @return array List of ['loc' => URL].
  */
@@ -316,10 +319,42 @@ function aw_sitemap_filtered_urls() {
 			}
 		}
 	}
+	foreach ( AW_FILTERED_PLACE_TITLE_WORDS as $key => $types ) { // ?state= and ?publisher= views from 3 items (17 Oct 2026)
+		foreach ( array_keys( $types ) as $type ) {
+			foreach ( aw_sitemap_filtered_values( $type, $key ) as $slug ) {
+				if ( aw_seo_filtered_place( $type, $key, $slug )[1] >= AW_FILTERED_MIN_ITEMS ) {
+					$urls[] = array( 'loc' => add_query_arg( $key, rawurlencode( $slug ), aw_hub_url( $type ) ) );
+				}
+			}
+		}
+	}
 	set_transient( 'aw_sitemap_filtered', $urls, 12 * HOUR_IN_SECONDS );
 	return $urls;
 }
 add_action( 'transition_post_status', fn( $new, $old ) => $new !== $old && delete_transient( 'aw_sitemap_filtered' ), 10, 2 );
+
+/**
+ * Candidate ?state= or ?publisher= values of a hub: the states and publishers its published items carry at least
+ * AW_FILTERED_MIN_ITEMS times (the exact count, with the hub's own rules, comes from aw_seo_filtered_place()).
+ *
+ * @return string[] URL values (state slugs, publisher keys).
+ */
+function aw_sitemap_filtered_values( $type, $key ) {
+	global $wpdb;
+	$meta = 'state' === $key ? 'aw_state_code' : 'aw_publisher';
+	$rows = $wpdb->get_col( $wpdb->prepare( "SELECT m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = %s AND p.post_type = %s AND p.post_status = 'publish' GROUP BY m.meta_value HAVING COUNT( DISTINCT p.ID ) >= %d", $meta, $type, AW_FILTERED_MIN_ITEMS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	if ( 'publisher' === $key ) {
+		return array_values( array_filter( array_map( 'sanitize_title', $rows ) ) );
+	}
+	$out = array();
+	foreach ( $rows as $code ) {
+		$s = function_exists( 'aw_place_state' ) ? aw_place_state( $code ) : null;
+		if ( $s ) {
+			$out[] = (string) $s->slug;
+		}
+	}
+	return array_values( array_unique( $out ) );
+}
 
 add_filter(
 	'rank_math/sitemap/providers',

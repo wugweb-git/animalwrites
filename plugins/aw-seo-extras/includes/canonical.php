@@ -75,7 +75,7 @@ function aw_seo_canonical() {
 	}
 	if ( aw_is_filtered_list() ) {
 		$view = function_exists( 'aw_seo_filtered_view' ) ? aw_seo_filtered_view() : null;
-		$url  = ( $view && '' !== $view['canonical'] ) ? $view['canonical'] : aw_list_canonical(); // ?category_name= / ?tag= views: filtered-views.php
+		$url  = ( $view && '' !== $view['canonical'] ) ? $view['canonical'] : ( $view && ! $view['index'] ? aw_hub_canonical() : aw_list_canonical() ); // filtered-views.php: noindex views point at the section page
 	}
 	if ( '' !== $url ) {
 		return $url;
