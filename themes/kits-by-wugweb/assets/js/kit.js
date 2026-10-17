@@ -715,8 +715,8 @@
 		var href = a.getAttribute('href') || '';
 		if (a.closest('.kit-dd--sort, .kit-segment') || a.classList.contains('kit-dd-opt') && a.closest('[data-kit-sort], .kit-sort')) { track('sort_change', { value: a.textContent.trim().slice(0, 60) }); return; }
 		// share buttons first: their WhatsApp and email buttons are shares, not contact clicks
-		var share = a.closest('.scriptlesssocialsharing__buttons');
-		if (share) { track('share_click', { network: (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
+		var share = a.closest('.scriptlesssocialsharing__buttons, [data-kit-share]'); // a link marked data-kit-share="network" is a share too
+		if (share) { track('share_click', { network: a.dataset.kitShare || (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
 		if (/^tel:/i.test(href)) { track('call_click', { number: href.slice(4) }); return; }
 		if (/(^|\/\/|\.)(wa\.me|whatsapp\.com)\b/i.test(href)) { track('whatsapp_click', {}); return; }
 		if (/^mailto:/i.test(href)) { track('email_click', {}); return; }

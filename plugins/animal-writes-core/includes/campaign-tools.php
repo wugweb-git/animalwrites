@@ -48,11 +48,61 @@ function aw_camp_days_left( $id ) {
 	return $ts ? max( 0, (int) ceil( ( $ts - DAY_IN_SECONDS - time() ) / DAY_IN_SECONDS ) ) : 0;
 }
 
+/*
+ * Preview the other state (admins and editors only): ?aw_camp_preview=closed or =open on a campaign page or the home
+ * page. Logged-in views are not cached, so visitors never see it.
+ */
+add_filter(
+	'aw_camp_is_open',
+	function ( $open ) {
+		$p = sanitize_key( wp_unslash( $_GET['aw_camp_preview'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		return in_array( $p, array( 'open', 'closed' ), true ) && current_user_can( 'edit_posts' ) ? 'open' === $p : $open;
+	},
+	20
+);
+
+/*
+ * The switch at closing time, cache-safe: while a campaign is open, its page (and the home page with its band) is cached
+ * only until the moment it closes (LiteSpeed TTL), and a one-off cron event purges the whole cache at that moment.
+ */
+function aw_camp_cache_until( $id ) {
+	$ts = aw_camp_close_ts( $id );
+	if ( $ts && time() < $ts ) {
+		do_action( 'litespeed_control_set_ttl', max( 60, $ts - time() ) );
+	}
+}
+function aw_camp_schedule_close( $id ) {
+	$ts = aw_camp_close_ts( $id );
+	wp_clear_scheduled_hook( 'aw_camp_closed', array( (int) $id ) );
+	if ( $ts && time() < $ts && 'publish' === get_post_status( $id ) ) {
+		wp_schedule_single_event( $ts + 5, 'aw_camp_closed', array( (int) $id ) );
+	}
+}
+add_action( 'save_post_aw_campaign', fn( $id ) => aw_camp_schedule_close( $id ), 20 );
+add_action( 'updated_post_meta', fn( $mid, $id, $key ) => 'aw_campaign_close' === $key && aw_camp_schedule_close( $id ), 10, 3 );
+add_action( 'aw_camp_closed', fn() => do_action( 'litespeed_purge_all' ) );
+add_action(
+	'admin_init',
+	function () { // campaigns published before this existed: schedule once
+		if ( get_option( 'aw_camp_close_scheduled' ) ) {
+			return;
+		}
+		foreach ( get_posts( array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $cid ) {
+			aw_camp_schedule_close( $cid );
+		}
+		update_option( 'aw_camp_close_scheduled', 1, false );
+	}
+);
+
 /* ---------- Open / closed blocks ---------- */
 add_filter(
 	'render_block',
 	function ( $html, $block ) {
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
+		if ( preg_match( '/(^|\s)aw-camp(\s|$)/', $cls ) && aw_camp_id() ) { // the page wrapper: is-closed lets CSS reorder sections
+			aw_camp_cache_until( aw_camp_id() );
+			return aw_camp_is_open( aw_camp_id() ) ? $html : preg_replace( '/class="([^"]*\baw-camp\b)/', 'class="$1 is-closed', $html, 1 );
+		}
 		if ( ! preg_match( '/\baw-camp-(open|closed)\b/', $cls, $m ) ) {
 			return $html;
 		}
@@ -313,11 +363,20 @@ add_shortcode(
 	function ( $atts ) {
 		$a    = shortcode_atts( array( 'campaign' => '', 'title' => '', 'text' => '', 'button' => 'Send your objection', 'link' => 'Read what the rules say', 'theme' => '' ), $atts );
 		$post = $a['campaign'] ? get_page_by_path( sanitize_title( $a['campaign'] ), OBJECT, 'aw_campaign' ) : null;
-		if ( ! $post || 'publish' !== $post->post_status || ! aw_camp_is_open( $post->ID ) ) {
+		if ( ! $post || 'publish' !== $post->post_status ) {
 			return '';
 		}
 		$url = get_permalink( $post );
 		$day = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
+		if ( ! aw_camp_is_open( $post->ID ) ) { // after closing: a quieter "Latest campaign" card in the same place
+			$out  = '<section class="aw-camp aw-camp-band aw-camp-band--closed' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t">';
+			$out .= '<p class="aw-camp-band-kicker">Latest campaign</p>';
+			$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
+			$out .= '<p>' . ( $day ? 'Objections closed on ' . aw_date( $day ) . '. ' : '' ) . 'See what happens next and read the rules.</p>';
+			$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#next' ) . '">What happens next</a></p>';
+			return $out . '</section>';
+		}
+		aw_camp_cache_until( $post->ID );
 		$out = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t">';
 		$out .= do_shortcode( '[aw_countdown date="' . esc_attr( $day ) . '" label="Last day"]' );
 		$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
@@ -340,6 +399,63 @@ add_action(
 		wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/campaign.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/campaign.css' ) );
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/campaign.js', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/campaign.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	}
+);
+
+/* ---------- WP Admin: Campaign details box and list columns ---------- */
+add_action(
+	'add_meta_boxes_aw_campaign',
+	fn() => add_meta_box( 'aw-campaign-details', 'Campaign details', 'aw_camp_details_box', 'aw_campaign', 'side', 'high' )
+);
+
+/** The box: close date, campaign document, partners, letters sent (read-only) and how the tools work. */
+function aw_camp_details_box( $post ) {
+	wp_nonce_field( 'aw_camp_details', 'aw_camp_details_nonce' );
+	$close = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
+	$doc   = (string) get_post_meta( $post->ID, 'aw_campaign_doc', true );
+	$parts = (string) get_post_meta( $post->ID, 'aw_campaign_partners', true );
+	$sent  = (int) get_post_meta( $post->ID, 'aw_campaign_sent', true );
+	echo '<p><label for="aw-camp-close"><strong>Closes on</strong> (last day)</label><br><input type="date" id="aw-camp-close" name="aw_campaign_close" value="' . esc_attr( $close ) . '"></p>';
+	echo '<p><label for="aw-camp-doc"><strong>Campaign document</strong> (Library item ID)</label><br><input type="number" id="aw-camp-doc" name="aw_campaign_doc" value="' . esc_attr( $doc ) . '" class="small-text">' . ( $doc ? ' <a href="' . esc_url( get_edit_post_link( (int) $doc ) ) . '">' . esc_html( get_the_title( (int) $doc ) ) . '</a>' : '' ) . '</p>';
+	echo '<p><label for="aw-camp-partners"><strong>Partners</strong> (Directory listing IDs, comma-separated)</label><br><input type="text" id="aw-camp-partners" name="aw_campaign_partners" value="' . esc_attr( $parts ) . '" class="widefat"></p>';
+	echo '<p><strong>Letters sent:</strong> ' . esc_html( number_format_i18n( $sent ) ) . '<br><span class="description">"Yes, I sent it" clicks, at most one a minute per visitor. Shown on the page from 100.</span></p>';
+	echo '<details><summary>How this campaign works</summary><ul style="list-style:disc;margin-left:1.2em">'
+		. '<li><code>[aw_letter_tool]</code>: the letter builder; its grounds are the list with class <code>aw-letter-grounds</code> just before it.</li>'
+		. '<li><code>[aw_rule_chip rule="11-3"]</code>: a button that opens that clause of the campaign document.</li>'
+		. '<li><code>[aw_campaign_count min="100"]</code>, <code>[aw_sticky_cta]</code>, <code>[aw_campaign_partners]</code>.</li>'
+		. '<li><code>[aw_campaign_band campaign="slug"]</code> on the home page: the band while open, "Latest campaign" after.</li>'
+		. '<li>Blocks with class <code>aw-camp-open</code> show until the close date; <code>aw-camp-closed</code> after it.</li>'
+		. '<li>Preview the other state (logged in): add <code>?aw_camp_preview=closed</code> or <code>=open</code> to the page URL.</li>'
+		. '</ul></details>';
+}
+add_action(
+	'save_post_aw_campaign',
+	function ( $id ) {
+		if ( ! isset( $_POST['aw_camp_details_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_camp_details_nonce'] ), 'aw_camp_details' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
+			return;
+		}
+		$close = sanitize_text_field( wp_unslash( $_POST['aw_campaign_close'] ?? '' ) );
+		update_post_meta( $id, 'aw_campaign_close', preg_match( '/^\d{4}-\d{2}-\d{2}$/', $close ) ? $close : '' );
+		update_post_meta( $id, 'aw_campaign_doc', (string) absint( $_POST['aw_campaign_doc'] ?? 0 ) );
+		update_post_meta( $id, 'aw_campaign_partners', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_partners'] ?? '' ) ) ) ) ) ) );
+	},
+	10
+);
+add_filter(
+	'manage_aw_campaign_posts_columns',
+	fn( $c ) => array_merge( $c, array( 'aw_camp_close' => 'Closes on', 'aw_camp_sent' => 'Letters sent' ) )
+);
+add_action(
+	'manage_aw_campaign_posts_custom_column',
+	function ( $col, $id ) {
+		if ( 'aw_camp_close' === $col ) {
+			$d = (string) get_post_meta( $id, 'aw_campaign_close', true );
+			echo $d ? esc_html( wp_date( AW_DATE_FORMAT, strtotime( $d . ' 12:00' ) ) ) . ( aw_camp_is_open( $id ) ? '' : ' (closed)' ) : '—';
+		} elseif ( 'aw_camp_sent' === $col ) {
+			echo esc_html( number_format_i18n( (int) get_post_meta( $id, 'aw_campaign_sent', true ) ) );
+		}
+	},
+	10,
+	2
 );
 
 // No ads on a page with a letter tool (a form page with one job).

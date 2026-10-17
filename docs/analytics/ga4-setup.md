@@ -49,8 +49,11 @@ The container has GA4 event tags for the campaign tools (`plugins/animal-writes-
 `objection_confirmed`, `rule_card_open` (rule), `home_campaign_click` (link_text). Import the container again (Merge →
 Overwrite) to add them.
 
-- Key events: mark `objection_sent` and `objection_confirmed`.
-- Custom dimensions (scope Event): `route` (Letter route), `rule` (Rule chip), `ground` (Letter ground).
+- 17 Oct 2026: `newsletter_optin` (source: e.g. `campaign2`) fires when the newsletter form succeeds on a campaign page
+  (after the server confirms). Share links on campaign pages fire the site's existing `share_click` (network: whatsapp,
+  x, facebook, linkedin, copy_link); any link marked `data-kit-share="network"` counts as a share.
+- Key events: mark `objection_sent`, `objection_confirmed` and `newsletter_optin`.
+- Custom dimensions (scope Event): `route` (Letter route), `rule` (Rule chip), `ground` (Letter ground), `source` (Sign-up source).
 - Funnel exploration: `campaign_view` → `letter_open` → `objection_sent` → `objection_confirmed`, broken down by
   `route` and device category.
 - Search Console: page group for `/campaigns/lab-animals-rules-2026/` and the two Library items

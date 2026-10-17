@@ -18,6 +18,23 @@
 		});
 	});
 
+	/* Share row: the copy-link button (links marked data-kit-share are counted by kit.js); newsletter sign-ups made on a
+	   campaign page, once the form plugin reports success. Source: the share row's data-source (e.g. campaign2). */
+	var shareRow = document.querySelector('.aw-camp-share');
+	var source = shareRow && shareRow.dataset.source || 'campaign';
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest && e.target.closest('button[data-kit-share]');
+		if (b) track('share_click', { network: b.dataset.kitShare });
+	});
+	document.addEventListener('fluentform_submission_success', function (e) {
+		var f = e.detail && e.detail.form;
+		f = f && f.jquery ? f[0] : f;
+		if (f && f.querySelector && f.querySelector('input[type=email]')) track('newsletter_optin', { source: source });
+	});
+	document.addEventListener('kit:form-done', function (e) {
+		if (e.target && e.target.querySelector && e.target.querySelector('input[type=email]') && !e.target.closest('.aw-letter')) track('newsletter_optin', { source: source });
+	});
+
 	/* Home band. */
 	document.querySelectorAll('[data-track]').forEach(function (a) {
 		a.addEventListener('click', function () { track(a.dataset.track, { link_text: a.textContent.trim() }); });
@@ -164,17 +181,29 @@
 	});
 })();
 
-/* Phone bar: hidden while the letter tool is on screen, and after a letter is confirmed. */
+/* Phone bar: shows once the hero has scrolled away; hidden while the letter tool or the footer is on screen, and for the
+   rest of the session after a letter is confirmed. */
 (function () {
 	var bar = document.querySelector('.aw-sticky-cta');
 	if (!bar) return;
 	var target = document.querySelector(bar.dataset.target);
-	var sent = false;
+	var hero = document.querySelector('.aw-camp-hero');
+	var foot = document.querySelector('.wp-site-blocks > footer, footer.wp-block-template-part');
+	var sent = false, onSend = false, onHero = !!hero, onFoot = false;
 	try { sent = sessionStorage.getItem('aw-letter-sent') === '1'; } catch (e) { /* private mode */ }
-	function hide(h) { bar.classList.toggle('is-hidden', h); }
-	hide(sent);
-	document.addEventListener('aw:letter-sent', function () { sent = true; hide(true); });
-	if (target && 'IntersectionObserver' in window) {
-		new IntersectionObserver(function (entries) { hide(sent || entries[0].isIntersecting); }).observe(target);
+	function update() {
+		var h = sent || onSend || onHero || onFoot;
+		bar.classList.toggle('is-hidden', h);
+		bar.inert = h; // off screen: not reachable by keyboard either
+	}
+	update();
+	document.addEventListener('aw:letter-sent', function () { sent = true; update(); });
+	if ('IntersectionObserver' in window) {
+		if (target) new IntersectionObserver(function (en) { onSend = en[0].isIntersecting; update(); }).observe(target);
+		if (hero) new IntersectionObserver(function (en) { onHero = en[0].isIntersecting; update(); }).observe(hero);
+		if (foot) new IntersectionObserver(function (en) { onFoot = en[0].isIntersecting; update(); }).observe(foot);
+	} else {
+		onHero = false;
+		update();
 	}
 })();

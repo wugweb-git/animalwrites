@@ -151,9 +151,9 @@
 /* Share row */
 .aw-camp-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-4); }
 .aw-camp-share-label { flex-basis: 100%; font-weight: var(--kit-weight-strong); }
-.aw-camp .aw-camp-share a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
-.aw-camp .aw-camp-share a:hover { background: var(--aw-camp-brand); box-shadow: none; }
-.aw-camp-share a:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
+.aw-camp .aw-camp-share :is(a, button):hover { background: var(--aw-camp-brand); box-shadow: none; }
+.aw-camp-share :is(a, button):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-camp-note { display: flex; align-items: center; gap: var(--kit-space-2); color: var(--aw-camp-meta); font-size: var(--kit-type-sm); }
 
 /* Countdown: one settle on load */
@@ -263,3 +263,12 @@
 .aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-3); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
 .aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--aw-camp-brand); }
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
+
+/* Closed (the wrapper gets is-closed after the close date): "What happens after 5 November?" leads the questions */
+.aw-camp.is-closed .wp-block-rank-math-faq-block { display: flex; flex-direction: column; }
+.aw-camp.is-closed #faq-078f9b7a10 { order: -1; } /* id from the question text (campaign2-page.php c2faq) */
+
+/* Home band after closing: "Latest campaign", on paper */
+.aw-camp-band--closed { background: var(--aw-camp-paper); color: var(--kit-color-text); }
+.aw-camp-band--closed :is(h2, p) { color: var(--kit-color-text); }
+.aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--aw-camp-brand); font-weight: var(--kit-weight-strong); }

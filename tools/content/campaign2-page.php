@@ -129,10 +129,12 @@ $hero = c2sec(
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
 	'aw-camp-hero aw-camp-open'
 );
-$hero_closed = c2sec(
+$hero_closed = c2sec( // copy for the owner to edit (17 Oct 2026 brief: [OWNER COPY]); facts only until then
 	'',
 	c2h( 'Objections to the draft lab animal rules have closed.', 1 )
-	. c2p( 'The public could send objections to CCSEA until 5 November 2026. CCSEA now reviews them before publishing final rules in the Gazette. <a href="#next">What happens next</a>.' ),
+	. c2p( 'The public could send objections to CCSEA until 5 November 2026. CCSEA now reviews them before publishing final rules in the Gazette.', 'aw-camp-hero-summary' )
+	. c2sc( '[aw_campaign_count min="100"]' )
+	. c2buttons( array( array( 'Read the draft rules', $lib_draft ) ) ),
 	'aw-camp-hero aw-camp-closed'
 );
 
@@ -295,9 +297,7 @@ $read = c2sec(
 );
 
 /* 11. What happens next: a real sequence, so numbered. */
-$next = c2sec(
-	'next',
-	c2h( 'What happens next' )
+$next_inner = c2h( 'What happens next' )
 	. c2html(
 		'<ol class="aw-camp-steps">'
 		. '<li><strong>Objections close</strong><span>5 Nov 2026</span></li>'
@@ -305,8 +305,9 @@ $next = c2sec(
 		. '<li><strong>Final rules</strong><span>Published in the Gazette, revised or not</span></li>'
 		. '<li><strong>We report back</strong><span>Here and in our newsletter</span></li>'
 		. '</ol>'
-	)
-);
+	);
+$next        = c2sec( 'next', $next_inner, 'aw-camp-open' );
+$next_closed = c2sec( 'next', $next_inner, 'aw-camp-closed' ); // after closing it moves directly under the hero
 
 /* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec(
@@ -344,11 +345,12 @@ $loop      = c2sec(
 	c2h( 'Get updates on these rules' )
 	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.' ) // the footer has the form on every page
 	. c2html(
-		'<p class="aw-camp-share"><span class="aw-camp-share-label">Share this page</span>'
-		. '<a href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">' . c2i( 'brand-whatsapp' ) . 'WhatsApp</a>'
-		. '<a href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">' . c2i( 'x-brand' ) . 'X</a>'
-		. '<a href="https://www.facebook.com/sharer/sharer.php?u=' . $share_url . '">' . c2i( 'facebook' ) . 'Facebook</a>'
-		. '<a href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'link' ) . 'LinkedIn</a>'
+		'<p class="aw-camp-share" data-source="campaign2"><span class="aw-camp-share-label">Share this page</span>'
+		. '<a data-kit-share="whatsapp" href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">' . c2i( 'brand-whatsapp' ) . 'WhatsApp</a>'
+		. '<a data-kit-share="x" href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">' . c2i( 'x-brand' ) . 'X</a>'
+		. '<a data-kit-share="facebook" href="https://www.facebook.com/sharer/sharer.php?u=' . $share_url . '">' . c2i( 'facebook' ) . 'Facebook</a>'
+		. '<a data-kit-share="linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'link' ) . 'LinkedIn</a>'
+		. '<button type="button" class="kit-share-copy" data-kit-share="copy_link" data-url="' . esc_url( home_url( '/campaigns/lab-animals-rules-2026/' ) ) . '" data-done="Link copied">' . c2i( 'link' ) . 'Copy link</button>'
 		. '</p>'
 	),
 	'aw-camp-dark'
@@ -356,7 +358,7 @@ $loop      = c2sec(
 
 $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rules","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-group alignfull aw-camp aw-camp--lab-rules">'
-	. $hero . $hero_closed . $what . $rules . $pain . $compare . $send . $how . $faq . $read . $next . $updates . $press . $loop
+	. $hero . $hero_closed . $next_closed . $what . $rules . $pain . $compare . $send . $how . $faq . $read . $next . $updates . $press . $loop
 	. c2sc( '[aw_sticky_cta href="#send" label="Send your objection"]' )
 	. "</div>\n<!-- /wp:group -->";
 
@@ -369,8 +371,10 @@ $post     = array(
 	'post_content' => $content,
 	'post_status'  => $existing ? $existing->post_status : 'draft',
 );
-if ( $existing ) {
-	$post['ID'] = $existing->ID;
+if ( $existing ) { // keep the publish date (wp_insert_post would set it to now)
+	$post['ID']            = $existing->ID;
+	$post['post_date']     = $existing->post_date;
+	$post['post_date_gmt'] = $existing->post_date_gmt;
 }
 $id = wp_insert_post( wp_slash( $post ), true );
 if ( is_wp_error( $id ) ) {
