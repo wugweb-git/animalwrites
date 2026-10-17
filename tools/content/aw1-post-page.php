@@ -26,7 +26,7 @@ if ( ! $tag ) {
 }
 
 $blocks = array_values( array_filter( parse_blocks( (string) file_get_contents( $src ) ), fn( $b ) => ! empty( $b['blockName'] ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-$text   = fn( $b ) => trim( html_entity_decode( wp_strip_all_tags( render_block( $b ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+$text   = fn( $b ) => trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( serialize_block( $b ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ); // the stored words, not the rendered ones (dates are reformatted on render)
 
 /* What each reused block must say (start of its text), by position in the old page. */
 $expect = array(
