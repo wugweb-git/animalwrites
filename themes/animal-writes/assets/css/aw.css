@@ -1070,7 +1070,8 @@ body { background: var(--kit-color-canvas); }
 
 /* Animal Writes 1.0: photos in one row (sideways on phones and tablets), numbers and timeline compact */
 @media (max-width: 1199px) {
-	.aw-ed-mosaic { display: flex !important; overflow-x: auto; gap: var(--kit-space-2); height: 9rem; max-width: none; margin: 0 calc(-1 * var(--kit-space-gutter)) var(--kit-space-6) !important; padding: 0 var(--aw-mosaic-inset); scrollbar-width: none; --aw-mosaic-inset: calc(var(--kit-space-gutter) + max(0px, (100% - 1120px) / 2)); } /* edge to edge; the first picture lines up with the section's centred 1120px text */
+	.aw-ed-mosaic { display: flex !important; overflow-x: auto; gap: var(--kit-space-2); height: 9rem; max-width: none; margin: 0 calc(-1 * var(--kit-space-gutter)) var(--kit-space-6) !important; padding: 0 var(--aw-mosaic-inset); scrollbar-width: none; --aw-mosaic-inset: var(--kit-space-gutter); } /* edge to edge; the first picture lines up with the text */
+	.aw-camp-section .aw-ed-mosaic { --aw-mosaic-inset: calc(var(--kit-space-gutter) + max(0px, (100% - 1120px) / 2)); } /* a campaign section centres its text at 1120px */
 	.aw-ed-mosaic::-webkit-scrollbar { display: none; }
 	.aw-ed-mosaic img { flex: 0 0 auto; width: auto !important; height: 100% !important; aspect-ratio: auto; }
 	.aw-ed-mosaic .m1 { aspect-ratio: 16 / 9; }
@@ -1323,7 +1324,7 @@ body { background: var(--kit-color-canvas); }
 .kit-section-visual img.aw-tile-logo { object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-3); } /* a listing logo in a head band's pictures stays whole */
 
 /* Sideways rows on phones snap to an item, and the first and last items rest at the gutter (1.0 photos and timeline). */
-@media (max-width: 1199px) { .aw-ed-mosaic { scroll-snap-type: x mandatory; scroll-padding-inline: calc(var(--kit-space-gutter) + max(0px, (100% - 2 * var(--kit-space-gutter) - 1120px) / 2)); } /* % of the row itself here, which is two gutters wider than the text */ .aw-ed-mosaic > * { scroll-snap-align: start; } }
+@media (max-width: 1199px) { .aw-ed-mosaic { scroll-snap-type: x mandatory; scroll-padding-inline: var(--kit-space-gutter); } .aw-camp-section .aw-ed-mosaic { scroll-padding-inline: calc(var(--kit-space-gutter) + max(0px, (100% - 2 * var(--kit-space-gutter) - 1120px) / 2)); } /* % of the row itself here, two gutters wider than the text */ .aw-ed-mosaic > * { scroll-snap-align: start; } }
 /* A date never breaks inside itself ("15 / Oct 2026"). */
 .aw-date { white-space: nowrap; }
 /* Guide disclaimer ("This guide is general information, not legal advice."): the Kits "Note" look. */
