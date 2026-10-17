@@ -78,6 +78,13 @@ add_filter(
 				array( 'District and state', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_district_code', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_place( array(), $id ) ),
 				array( 'State only', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_state_code', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_district_code', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_place( array(), $id ) ),
 			),
+			'Press date and format (animal-writes/press-meta)' => array(
+				array( 'Date and format', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_date', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_press_format', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
+				array( 'Video format (badge)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_format', 'value' => array( 'facebook-video', 'instagram-reel', 'youtube-video' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
+				array( 'Social account handle', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_account', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
+				array( 'Date only', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_date', 'value' => '', 'compare' => '!=' ), array( 'relation' => 'OR', array( 'key' => 'aw_press_format', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_format', 'value' => '' ) ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
+				array( 'Format only (no date)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'relation' => 'OR', array( 'key' => 'aw_press_date', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_date', 'value' => '' ) ), array( 'key' => 'aw_press_format', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
+			),
 			'Press thumbnail and details (animal-writes/press-media, press-meta)' => array(
 				array( 'With a picture', aw_state_item( array( 'post_type' => 'aw_press', 'meta_key' => '_thumbnail_id' ) ), fn( $id ) => aw_block_press_media( array(), $id ) . aw_block_press_meta( array(), $id ) ),
 				array( 'No picture', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => '_thumbnail_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_press_media( array(), $id ) . aw_block_press_meta( array(), $id ) ),
