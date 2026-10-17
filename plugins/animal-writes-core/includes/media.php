@@ -23,6 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_item_image( $post_id, $size = 'large' ) {
 	if ( aw_is_ingested( $post_id ) && ! get_post_meta( $post_id, 'aw_file_id', true ) && ! get_post_meta( $post_id, 'aw_doc_preview', true ) ) {
 		$remote = function_exists( 'aw_publisher_image' ) ? aw_publisher_image( $post_id ) : '';
+		$stored = (int) get_post_meta( $post_id, 'aw_source_image_att', true ); // the publisher image kept in the Media Library (cc0-images.php)
+		if ( '' !== $remote && $stored && wp_attachment_is_image( $stored ) ) {
+			return (string) wp_get_attachment_image_url( $stored, $size );
+		}
 		if ( '' !== $remote ) {
 			return $remote;
 		}
@@ -132,7 +136,8 @@ add_filter(
 			$url = $doc;
 		}
 		$dims   = '';
-		$att    = $url && ! $doc ? aw_item_image_id( $post_id ) : (int) get_post_meta( $post_id, 'aw_file_id', true ); // own CC0 photo first for ingested items
+		$stored = (int) get_post_meta( $post_id, 'aw_source_image_att', true );
+		$att    = $url && ! $doc ? ( $stored && function_exists( 'aw_publisher_image' ) && aw_publisher_image( $post_id ) ? $stored : aw_item_image_id( $post_id ) ) : (int) get_post_meta( $post_id, 'aw_file_id', true ); // the stored publisher image, else own CC0 photo, for ingested items
 		$src    = $att ? wp_get_attachment_image_src( $att, 'large' ) : false;
 		if ( $src && ! empty( $src[1] ) && ! empty( $src[2] ) && $src[0] === $url ) {
 			$dims = ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"'; // the box is known before the image arrives

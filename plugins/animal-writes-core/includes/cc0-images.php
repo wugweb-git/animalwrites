@@ -93,6 +93,9 @@ function aw_cc0_run() {
 	// 0. Publisher images read from the source page when ingest stored none (or a broken one).
 	$fetched = aw_source_og_run( 40 );
 
+	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
+	$local = aw_source_localise_run( 25, 60 );
+
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . aw_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
@@ -133,8 +136,8 @@ function aw_cc0_run() {
 			++$none;
 		}
 	}
-	if ( $fetched || $checked || $done || $none ) {
-		aw_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d checked, %d photos added, %d without a match (%ds)', $fetched, $checked, $done, $none, time() - $start ) );
+	if ( $fetched || $local || $checked || $done || $none ) {
+		aw_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d stored locally, %d checked, %d photos added, %d without a match (%ds)', $fetched, $local, $checked, $done, $none, time() - $start ) );
 	}
 	if ( $done && function_exists( 'aw_thumb_schedule' ) ) {
 		aw_thumb_schedule();
@@ -196,12 +199,28 @@ function aw_source_og_image( $page ) {
 	if ( ! preg_match( '#^https?://#i', $page ) ) {
 		return '';
 	}
+	// YouTube: the video's own cover (owner, 17 Oct 2026).
+	if ( preg_match( '#(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})#', $page, $yt ) ) {
+		return 'https://i.ytimg.com/vi/' . $yt[1] . '/hqdefault.jpg';
+	}
+	// Link-preview crawlers first (social sites and many publishers give them the real picture), then a browser.
+	foreach ( array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0', 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)' ) as $ua ) {
+		$url = aw_source_og_image_as( $page, $ua );
+		if ( '' !== $url && ! ( function_exists( 'aw_press_is_platform_image' ) && aw_press_is_platform_image( $url ) ) ) {
+			return $url;
+		}
+	}
+	return '';
+}
+
+/** og:image (else twitter:image, image_src) of a page read with one User-Agent, or ''. */
+function aw_source_og_image_as( $page, $ua ) {
 	$r = wp_remote_get(
 		$page,
 		array(
 			'timeout'             => 12,
 			'redirection'         => 5,
-			'user-agent'          => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)',
+			'user-agent'          => $ua,
 			'limit_response_size' => 524288,
 			'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5' ),
 		)
@@ -280,6 +299,86 @@ function aw_source_og_run( $limit = 40 ) {
 			$stored += '' === $why ? 1 : 0;
 		}
 		sleep( 1 ); // one source page a second
+	}
+	return $stored;
+}
+
+/**
+ * A publisher image kept in our Media Library instead of linked (owner, 17 Oct 2026: no hotlinking; publisher CDN
+ * addresses change and expire). The address shown everywhere (aw_source_image) becomes the local copy; the original is
+ * kept in aw_source_image_orig and the attachment in aw_source_image_att. Alt text: the item's title.
+ *
+ * @param int $post_id Item.
+ * @return int Attachment ID, or 0.
+ */
+function aw_source_localise( $post_id ) {
+	$url  = (string) get_post_meta( $post_id, 'aw_source_image', true );
+	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	if ( '' === $url || false !== strpos( (string) wp_parse_url( $url, PHP_URL_HOST ), $host ) || '0' === (string) get_post_meta( $post_id, 'aw_source_image_ok', true ) ) {
+		return 0;
+	}
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$tmp = download_url( $url, 30 );
+	if ( is_wp_error( $tmp ) ) {
+		update_post_meta( $post_id, 'aw_source_localise', 'download failed: ' . $tmp->get_error_message() );
+		return 0;
+	}
+	$type = (string) wp_get_image_mime( $tmp );
+	$ext  = array( 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/avif' => 'avif', 'image/gif' => 'gif' )[ $type ] ?? '';
+	if ( '' === $ext ) {
+		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		update_post_meta( $post_id, 'aw_source_localise', 'not an image' );
+		return 0;
+	}
+	$name = sanitize_title( get_post_field( 'post_name', $post_id ) ?: 'item-' . $post_id );
+	$att  = media_handle_sideload( array( 'name' => substr( $name, 0, 80 ) . '-source.' . $ext, 'tmp_name' => $tmp ), $post_id, get_the_title( $post_id ) );
+	if ( is_wp_error( $att ) ) {
+		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		update_post_meta( $post_id, 'aw_source_localise', 'sideload failed: ' . $att->get_error_message() );
+		return 0;
+	}
+	update_post_meta( $att, '_wp_attachment_image_alt', wp_strip_all_tags( get_the_title( $post_id ) ) );
+	update_post_meta( $att, 'aw_source_image_from', $url );
+	$local = (string) wp_get_attachment_image_url( $att, 'full' );
+	$meta  = wp_get_attachment_metadata( $att );
+	update_post_meta( $post_id, 'aw_source_image_orig', $url );
+	update_post_meta( $post_id, 'aw_source_image_att', (int) $att );
+	update_post_meta( $post_id, 'aw_source_image', $local );
+	if ( ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) {
+		update_post_meta( $post_id, 'aw_source_image_w', (int) $meta['width'] );
+		update_post_meta( $post_id, 'aw_source_image_h', (int) $meta['height'] );
+	}
+	update_post_meta( $post_id, 'aw_source_localise', 'stored ' . current_time( 'mysql', true ) );
+	return (int) $att;
+}
+
+/** Store linked publisher images locally, newest first; each item is tried once a day. Returns how many were stored. */
+function aw_source_localise_run( $limit = 25, $budget = 60 ) {
+	global $wpdb;
+	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	$ids  = $wpdb->get_col( // phpcs:ignore WordPress.DB
+		$wpdb->prepare(
+			"SELECT p.ID FROM {$wpdb->posts} p
+			JOIN {$wpdb->postmeta} si ON si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%' AND si.meta_value NOT LIKE %s
+			LEFT JOIN {$wpdb->postmeta} ok ON ok.post_id = p.ID AND ok.meta_key = 'aw_source_image_ok'
+			LEFT JOIN {$wpdb->postmeta} lt ON lt.post_id = p.ID AND lt.meta_key = 'aw_source_localise_tried'
+			WHERE p.post_status = 'publish' AND ( ok.meta_value IS NULL OR ok.meta_value <> '0' ) AND ( lt.meta_value IS NULL OR lt.meta_value < %s )
+			ORDER BY p.post_date DESC LIMIT %d",
+			'%' . $wpdb->esc_like( $host ) . '%',
+			gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
+			$limit
+		)
+	);
+	$stored = 0;
+	$start  = time();
+	foreach ( $ids as $id ) {
+		if ( time() - $start > $budget ) {
+			break;
+		}
+		update_post_meta( $id, 'aw_source_localise_tried', current_time( 'mysql', true ) );
+		$stored += aw_source_localise( (int) $id ) ? 1 : 0;
 	}
 	return $stored;
 }

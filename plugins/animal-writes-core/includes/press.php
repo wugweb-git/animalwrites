@@ -66,6 +66,47 @@ add_action(
 	30
 );
 const AW_PRESS_UA      = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
+// Instagram, Facebook and Threads give a browser a login wall (og:image = the platform logo); their link-preview crawlers
+// get the post's own picture (owner, 18 Oct 2026). Tried in this order.
+const AW_PRESS_SOCIAL_UA = array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0' );
+
+/** A platform's own logo or generic share picture, never a post's thumbnail. */
+function aw_press_is_platform_image( $img ) {
+	return (bool) preg_match( '#static\.cdninstagram\.com|static\.xx\.fbcdn\.net|/rsrc\.php/|(instagram|facebook|threads|meta)[^/]*logo|/logo[^/]*\.(png|svg|webp|jpe?g)|-logo\.(png|webp|jpe?g)#i', (string) $img );
+}
+
+/**
+ * Download a picture into the Media Library (CDN addresses of social posts are signed and expire, so never hotlink).
+ * An Instagram post is named by its shortcode; alt text "<author>: <post title>".
+ *
+ * @return int Attachment ID, or 0.
+ */
+function aw_press_sideload( $image, $id ) {
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$url  = (string) get_post_meta( $id, 'aw_press_url', true );
+	$name = preg_match( '#instagram\.com/(?:[^/]+/)?(?:reel|p|tv)/([A-Za-z0-9_-]+)#', $url, $m ) ? 'instagram-' . $m[1]
+		: ( preg_match( '#facebook\.com/.*?(\d{8,})/?$#', $url, $m ) ? 'facebook-' . $m[1] : 'press-' . $id );
+	$tmp  = download_url( $image, 30 );
+	if ( is_wp_error( $tmp ) ) {
+		return 0;
+	}
+	$type = (string) wp_get_image_mime( $tmp );
+	$ext  = array( 'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/avif' => 'avif' )[ $type ] ?? '';
+	if ( ! $ext ) {
+		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	$att = media_handle_sideload( array( 'name' => sanitize_file_name( $name . '.' . $ext ), 'tmp_name' => $tmp ), $id, get_the_title( $id ) );
+	if ( is_wp_error( $att ) ) {
+		@unlink( $tmp ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	$who = trim( (string) ( get_post_meta( $id, 'aw_press_publisher', true ) ?: get_post_meta( $id, 'aw_press_account', true ) ) );
+	update_post_meta( $att, '_wp_attachment_image_alt', ( '' !== $who ? $who . ': ' : '' ) . wp_strip_all_tags( get_the_title( $id ) ) );
+	return (int) $att;
+}
 
 add_action(
 	'init',
@@ -179,34 +220,43 @@ function aw_press_fetch( $id ) {
 		return array();
 	}
 	$found = array();
-	$res   = wp_remote_get( $url, array( 'timeout' => 20, 'redirection' => 5, 'user-agent' => AW_PRESS_UA, 'headers' => array( 'Accept-Language' => 'en-IN,en;q=0.9' ) ) );
-	$html  = is_wp_error( $res ) ? '' : (string) wp_remote_retrieve_body( $res );
-	$meta  = array();
-	if ( $html && preg_match_all( '/<meta\s[^>]*(?:property|name)=["\']([^"\']+)["\'][^>]*content=["\']([^"\']*)["\'][^>]*>|<meta\s[^>]*content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']([^"\']+)["\'][^>]*>/i', $html, $m, PREG_SET_ORDER ) ) {
-		foreach ( $m as $x ) {
-			$k = strtolower( $x[1] ? $x[1] : $x[4] );
-			$v = html_entity_decode( $x[1] ? $x[2] : $x[3], ENT_QUOTES );
-			if ( ! isset( $meta[ $k ] ) ) {
-				$meta[ $k ] = $v;
-			}
-		}
-	}
-	// JSON-LD NewsArticle / VideoObject.
-	$ld = array();
-	if ( $html && preg_match_all( '#<script[^>]+application/ld\+json[^>]*>(.*?)</script>#is', $html, $s ) ) {
-		foreach ( $s[1] as $json ) {
-			$d    = json_decode( trim( $json ), true );
-			$list = isset( $d['@graph'] ) ? $d['@graph'] : ( isset( $d[0] ) ? $d : array( $d ) );
-			foreach ( (array) $list as $node ) {
-				$t = (array) ( $node['@type'] ?? array() );
-				if ( array_intersect( $t, array( 'NewsArticle', 'Article', 'VideoObject', 'ReportageNewsArticle' ) ) ) {
-					$ld = array_merge( $node, $ld );
+	$uas   = array_merge( AW_PRESS_SOCIAL_UA, array( AW_PRESS_UA ) ); // crawlers, then a browser (owner, 17–18 Oct 2026)
+	foreach ( $uas as $ua ) { // a social post: the next crawler when the first gives no picture or the platform logo
+		$res   = wp_remote_get( $url, array( 'timeout' => 20, 'redirection' => 5, 'user-agent' => $ua, 'headers' => array( 'Accept-Language' => 'en-IN,en;q=0.9' ) ) );
+		$html  = is_wp_error( $res ) ? '' : (string) wp_remote_retrieve_body( $res );
+		$meta  = array();
+		if ( $html && preg_match_all( '/<meta\s[^>]*(?:property|name)=["\']([^"\']+)["\'][^>]*content=["\']([^"\']*)["\'][^>]*>|<meta\s[^>]*content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']([^"\']+)["\'][^>]*>/i', $html, $m, PREG_SET_ORDER ) ) {
+			foreach ( $m as $x ) {
+				$k = strtolower( $x[1] ? $x[1] : $x[4] );
+				$v = html_entity_decode( $x[1] ? $x[2] : $x[3], ENT_QUOTES );
+				if ( ! isset( $meta[ $k ] ) ) {
+					$meta[ $k ] = $v;
 				}
 			}
 		}
+		// JSON-LD NewsArticle / VideoObject.
+		$ld = array();
+		if ( $html && preg_match_all( '#<script[^>]+application/ld\+json[^>]*>(.*?)</script>#is', $html, $s ) ) {
+			foreach ( $s[1] as $json ) {
+				$d    = json_decode( trim( $json ), true );
+				$list = isset( $d['@graph'] ) ? $d['@graph'] : ( isset( $d[0] ) ? $d : array( $d ) );
+				foreach ( (array) $list as $node ) {
+					$t = (array) ( $node['@type'] ?? array() );
+					if ( array_intersect( $t, array( 'NewsArticle', 'Article', 'VideoObject', 'ReportageNewsArticle' ) ) ) {
+						$ld = array_merge( $node, $ld );
+					}
+				}
+			}
+		}
+		$title = $meta['og:title'] ?? ( $ld['headline'] ?? '' );
+		$image = $meta['og:image'] ?? ( $meta['twitter:image'] ?? ( is_array( $ld['thumbnailUrl'] ?? null ) ? $ld['thumbnailUrl'][0] : ( $ld['thumbnailUrl'] ?? '' ) ) );
+		if ( $image && ! aw_press_is_platform_image( $image ) ) {
+			break;
+		}
 	}
-	$title = $meta['og:title'] ?? ( $ld['headline'] ?? '' );
-	$image = $meta['og:image'] ?? ( $meta['twitter:image'] ?? ( is_array( $ld['thumbnailUrl'] ?? null ) ? $ld['thumbnailUrl'][0] : ( $ld['thumbnailUrl'] ?? '' ) ) );
+	if ( aw_press_is_platform_image( $image ) ) {
+		$image = ''; // never a platform logo as a thumbnail
+	}
 	$date  = $meta['article:published_time'] ?? ( $ld['datePublished'] ?? ( $ld['uploadDate'] ?? '' ) );
 	$site  = $meta['og:site_name'] ?? '';
 	$video = $meta['og:video:url'] ?? ( $meta['og:video'] ?? ( $ld['embedUrl'] ?? '' ) );
@@ -226,11 +276,8 @@ function aw_press_fetch( $id ) {
 	$fill( 'aw_press_video', $video );
 	$fill( 'aw_press_format', $video || false !== strpos( $type, 'video' ) ? 'video' : 'article' );
 	if ( ! has_post_thumbnail( $id ) && $image && preg_match( '#^https?://#', $image ) ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$att = media_sideload_image( $image, $id, get_the_title( $id ), 'id' );
-		if ( ! is_wp_error( $att ) ) {
+		$att = aw_press_sideload( $image, $id );
+		if ( $att ) {
 			set_post_thumbnail( $id, $att );
 			update_post_meta( $id, 'aw_press_thumb_src', $image );
 			$found[] = 'thumbnail';
@@ -393,12 +440,9 @@ function aw_press_ingest( WP_REST_Request $req ) {
 	}
 	aw_press_campaign_tags( $id, (array) $req->get_param( 'tags' ) );
 	aw_press_fetch( $id ); // fill what the page itself says (thumbnail downloaded, never hotlinked)
-	if ( ! has_post_thumbnail( $id ) && $meta['aw_press_thumb_src'] ) {
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$att = media_sideload_image( $meta['aw_press_thumb_src'], $id, get_the_title( $id ), 'id' );
-		if ( ! is_wp_error( $att ) ) {
+	if ( ! has_post_thumbnail( $id ) && $meta['aw_press_thumb_src'] && ! aw_press_is_platform_image( $meta['aw_press_thumb_src'] ) ) {
+		$att = aw_press_sideload( $meta['aw_press_thumb_src'], $id );
+		if ( $att ) {
 			set_post_thumbnail( $id, $att );
 		}
 	}
