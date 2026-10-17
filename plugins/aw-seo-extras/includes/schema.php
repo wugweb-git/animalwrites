@@ -542,7 +542,8 @@ function aw_court_document_url( $id ) {
 
 /**
  * A campaign: an Event when its day is stored (aw_event_date, Y-m-d; place in aw_event_place), organised by its
- * organiser or Animal Writes; otherwise a CreativeWork by the organiser.
+ * organiser or Animal Writes; otherwise a CreativeWork by the organiser. The stored day is the whole event (one day:
+ * endDate the same). No offers (only when the campaign states free participation; none does), no performer.
  *
  * @param int $id Post ID.
  * @return array
@@ -569,7 +570,7 @@ function aw_campaign_schema( $id ) {
 	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
 		return array_filter(
 			array_merge(
-				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
+				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'endDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
 				$common,
 				array(
 					'location'  => $place ? array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ) : null,
@@ -1143,4 +1144,97 @@ add_filter(
 		return aw_schema_language( aw_schema_x_profiles( $data ) );
 	},
 	999
+);
+
+/**
+ * The page's share picture as og:image prints it: an image typed in Rank Math's Social tab, a category's photo, else
+ * the share image (helpers.php: a listing's own logo else the Directory band picture; News, Library and research the
+ * publisher's image; a hub or Page its band picture; else the site share image). Null on a missing page.
+ *
+ * @return array|null [url, width, height]
+ */
+function aw_schema_page_image() {
+	if ( is_404() ) {
+		return null;
+	}
+	$typed = (int) aw_seo_typed( 'facebook_image_id' );
+	$img   = $typed ? aw_seo_attachment( $typed, 'full' ) : null;
+	if ( ! $img && '' !== aw_seo_typed( 'facebook_image' ) ) {
+		return array( 'url' => aw_seo_typed( 'facebook_image' ), 'width' => 0, 'height' => 0 );
+	}
+	return $img ? $img : aw_seo_image();
+}
+
+/** Replace every reference {"@id": $from} in a graph with {"@id": $to}. */
+function aw_schema_swap_ref( $node, $from, $to ) {
+	if ( ! is_array( $node ) ) {
+		return $node;
+	}
+	if ( array( '@id' => $from ) === $node ) {
+		return array( '@id' => $to );
+	}
+	foreach ( $node as $k => $v ) {
+		$node[ $k ] = aw_schema_swap_ref( $v, $from, $to );
+	}
+	return $node;
+}
+
+// Every page's own node names its picture (primaryImageOfPage), the one its og:image shares, so Search Console shows
+// it beside the page (17 Oct 2026: only the home page had one). Collection, contact and category pages, which replace
+// Rank Math's WebPage, get it too; a Directory profile, which had no page node, gets a WebPage about its organisation.
+add_filter(
+	'rank_math/json_ld',
+	function ( $data ) {
+		if ( ! is_array( $data ) || ! $data || is_404() ) {
+			return $data;
+		}
+		$img = aw_schema_page_image();
+		if ( ! $img || empty( $img['url'] ) ) {
+			return $data;
+		}
+		$url   = (string) $img['url'];
+		$old   = isset( $data['primaryImage']['@id'] ) ? (string) $data['primaryImage']['@id'] : '';
+		$image = array_filter( array( '@type' => 'ImageObject', '@id' => $url, 'url' => $url, 'contentUrl' => $url, 'width' => (int) $img['width'], 'height' => (int) $img['height'] ) );
+		if ( '' !== $old && $old !== $url ) {
+			$data = aw_schema_swap_ref( $data, $old, $url ); // Rank Math's first content picture gives way to the shared one
+		}
+		$data = array( 'primaryImage' => $image ) + array_diff_key( $data, array( 'primaryImage' => 1 ) );
+		$page_types = array( 'WebPage', 'CollectionPage', 'ContactPage', 'AboutPage', 'ItemPage', 'FAQPage', 'SearchResultsPage' );
+		$found      = false;
+		foreach ( $data as $k => $node ) {
+			if ( is_array( $node ) && array_intersect( (array) ( $node['@type'] ?? array() ), $page_types ) ) {
+				$data[ $k ]['primaryImageOfPage'] = array( '@id' => $url );
+				$found                            = true;
+			}
+		}
+		if ( ! $found && is_singular() ) { // a Directory profile: the page about the organisation
+			$id    = get_queried_object_id();
+			$link  = get_permalink( $id );
+			$about = null;
+			foreach ( $data as $node ) {
+				if ( is_array( $node ) && ! empty( $node['@id'] ) && 0 === strpos( (string) $node['@id'], $link ) ) {
+					$about = array( '@id' => $node['@id'] );
+					break;
+				}
+			}
+			$data['WebPage'] = array_filter(
+				array(
+					'@type'              => 'WebPage',
+					'@id'                => $link . '#webpage',
+					'url'                => $link,
+					'name'               => aw_seo_plain( wp_get_document_title() ),
+					'description'        => aw_seo_plain( aw_seo_description() ),
+					'inLanguage'         => 'en-IN',
+					'isPartOf'           => array( '@id' => home_url( '/#website' ) ),
+					'primaryImageOfPage' => array( '@id' => $url ),
+					'breadcrumb'         => ! empty( $data['BreadcrumbList']['@id'] ) ? array( '@id' => $data['BreadcrumbList']['@id'] ) : null,
+					'mainEntity'         => $about,
+					'datePublished'      => get_the_date( 'c', $id ),
+					'dateModified'       => get_the_modified_date( 'c', $id ),
+				)
+			);
+		}
+		return $data;
+	},
+	1001
 );
