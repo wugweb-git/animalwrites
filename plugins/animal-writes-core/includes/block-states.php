@@ -192,7 +192,7 @@ add_filter(
 			'Home: News'                  => array( '/', '.aw-ed-news' ),
 			'Home: From the Library'      => array( '/', '.aw-ed-law' ),
 			'Home: Guides'                => array( '/', '.aw-ed-learn' ),
-			'Home: Animal Writes 1.0'     => array( '/', '.kit-ed-story' ),
+			'Home: India Writes for Its Community Dogs' => array( '/', '.kit-ed-story' ),
 			'Directory listing page'      => array( '/directory/org/wugweb-sample-listing/', 'main' ),
 			'Item page: text and sidebar (sidebar empty today)' => array( '/resources/reporting-illegal-pet-shops-and-breeders/', 'main' ),
 		);

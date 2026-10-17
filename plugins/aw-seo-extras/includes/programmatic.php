@@ -698,7 +698,7 @@ add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
  */
 const AW_SEO_TERM_TITLES = array(
 	'post_tag:campaign-lab-animals-2026' => 'Draft Lab Animal Rules 2026 News and Laws', // campaign tags (17 Oct 2026)
-	'post_tag:campaign-animal-writes-1-0' => 'India\'s Letter Petition for Community Dogs',
+	'post_tag:campaign-india-writes-community-dogs' => 'India\'s Letter Petition for Community Dogs',
 	'category:adoption' => 'Animal Adoption News and Guides for India',
 	'category:animal-birth-control' => 'ABC Animal Birth Control Rules and News',
 	'category:transport-slaughter' => 'Animal Transport and Slaughter in India',

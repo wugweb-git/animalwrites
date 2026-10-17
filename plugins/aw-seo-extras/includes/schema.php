@@ -633,6 +633,51 @@ function aw_campaign_list_nodes( $id ) {
 }
 
 /**
+ * A campaign in its Post state (campaign-record.php): its page is a retrospective, an Article about the campaign's own
+ * node (Event or CreativeWork) and about the Library records the page lists (the campaign's campaign-* tag on
+ * aw_legal items), each by the @id of its own node. Nothing before Post.
+ *
+ * @param int $id Post ID.
+ * @return array
+ */
+function aw_campaign_record_schema( $id ) {
+	if ( ! function_exists( 'aw_camp_state' ) || 'post' !== aw_camp_state( $id ) ) {
+		return array();
+	}
+	$url   = get_permalink( $id );
+	$own   = aw_campaign_schema( $id );
+	$about = array( array( '@id' => (string) ( $own['@id'] ?? $url . '#campaign' ) ) );
+	$tags  = array_values( array_filter( wp_get_post_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) ), fn( $s ) => 0 === strpos( $s, 'campaign-' ) ) );
+	if ( $tags && function_exists( 'aw_article_nodes' ) ) {
+		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tag' => $tags[0], 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) );
+		foreach ( $docs as $d ) {
+			$n = aw_article_nodes( $d );
+			if ( ! empty( $n[0]['@id'] ) ) {
+				$about[] = array( '@id' => $n[0]['@id'] );
+			}
+		}
+	}
+	$image = (string) get_the_post_thumbnail_url( $id, 'large' );
+	return array_filter(
+		array(
+			'@type'            => 'Article',
+			'@id'              => $url . '#article',
+			'headline'         => aw_seo_plain( get_the_title( $id ) ),
+			'url'              => $url,
+			'mainEntityOfPage' => array( '@id' => $url . '#webpage' ),
+			'description'      => function_exists( 'aw_text' ) ? aw_seo_plain( aw_text( $id, 40 ) ) : '',
+			'inLanguage'       => 'en-IN',
+			'image'            => $image ? array( $image ) : null,
+			'datePublished'    => get_the_date( 'c', $id ),
+			'dateModified'     => get_the_modified_date( 'c', $id ),
+			'author'           => array( '@id' => home_url( '/#organization' ) ),
+			'publisher'        => array( '@id' => home_url( '/#organization' ) ),
+			'about'            => $about,
+		)
+	);
+}
+
+/**
  * Every inLanguage in the graph as en-IN: Rank Math writes the WordPress locale (en-US) on its WebPage nodes, while the
  * site, its pages and its items are Indian English. Plain-text values lose their HTML entities (&#039;, &#8217; from
  * WordPress titles), so the graph carries the characters themselves.
@@ -966,6 +1011,10 @@ function aw_schema_nodes() {
 	} elseif ( is_singular( 'aw_campaign' ) ) {
 		$nodes[] = aw_campaign_schema( get_queried_object_id() );
 		$nodes   = array_merge( $nodes, aw_campaign_list_nodes( get_queried_object_id() ) );
+		$story   = aw_campaign_record_schema( get_queried_object_id() );
+		if ( $story ) {
+			$nodes[] = $story; // a closed campaign's page is also the record of what happened
+		}
 	} elseif ( is_page( 'contact' ) ) {
 		$nodes[] = array(
 			'@type'      => 'ContactPage',
@@ -1061,7 +1110,7 @@ function aw_hub_schema_nodes() {
 	$posts = aw_hub_posts( $type );
 	$extra = 0;
 	if ( 'aw_campaign' === $type && 1 === aw_hub_page() ) {
-		$lead = get_page_by_path( 'animal-writes-1-0', OBJECT, 'aw_campaign' ); // shown above the list as its own story (hubs.php)
+		$lead = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' ); // shown above the list as its own story (hubs.php)
 		if ( $lead && 'publish' === $lead->post_status ) {
 			array_unshift( $posts, $lead );
 			$extra = 1;

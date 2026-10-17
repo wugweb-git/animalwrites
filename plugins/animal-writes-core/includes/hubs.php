@@ -198,7 +198,7 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 			$v['orderby']              = array( 'closes' => 'ASC', 'date' => 'DESC' );
 		}
 	} elseif ( 'aw_campaign' === $type ) {
-		$aw1 = get_page_by_path( 'animal-writes-1-0', OBJECT, 'aw_campaign' );
+		$aw1 = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' );
 		if ( $aw1 ) {
 			$v['post__not_in'] = array( $aw1->ID ); // shown above the list as its own story
 		}
