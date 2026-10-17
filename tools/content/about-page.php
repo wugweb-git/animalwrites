@@ -3,7 +3,8 @@
  * About page (page 58), owner-approved brief (17 Oct 2026): four sections (Who we are, What we do, Why we do it,
  * How you can help), built from theme blocks and styles. Takes out the first campaign's story blocks (A National
  * Movement of Compassion, the Campaign Timeline, the next-phase banner, "Historic achievement unlocked"), the
- * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). Sets the Rank Math
+ * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). No newsletter here:
+ * the footer form covers it (owner, 18 Oct 2026). Sets the Rank Math
  * title, description and focus keyword. The old content and meta go to ~/aw-about-backup-*.json first, and
  * WordPress keeps the old version as a revision.
  * Run: wp eval-file about-page.php            (dry run: wp eval-file about-page.php dry)
@@ -76,7 +77,7 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Discover animal-welfare organisations, gaushalas, veterinary services, and other relevant listings. Use available location filters to find options relevant to your area.</p>
+<p>Discover animal-welfare organisations, gaushalas, veterinary services, animal ambulances, and other relevant listings. Use available location filters to find options relevant to your area.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
@@ -365,16 +366,6 @@ $content = <<<'HTML'
 <p><a class="kit-ed-more" href="/contact/">Contact us <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"metadata":{"name":"Newsletter"},"className":"kit-dark aw-about-newsletter","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50","left":"var:preset|spacing|50","right":"var:preset|spacing|50"},"margin":{"top":"var:preset|spacing|50"}}},"backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->
-<div class="wp-block-group kit-dark aw-about-newsletter has-background-color has-secondary-background-color has-text-color has-background" style="margin-top:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--50)"><!-- wp:heading {"level":3,"textColor":"background"} -->
-<h3 class="wp-block-heading has-background-color has-text-color">Newsletter</h3>
-<!-- /wp:heading -->
-
-<!-- wp:shortcode -->
-[aw_newsletter]
-<!-- /wp:shortcode --></div>
 <!-- /wp:group -->
 
 <!-- wp:paragraph {"fontSize":"large","style":{"spacing":{"margin":{"top":"var:preset|spacing|50"}}}} -->
