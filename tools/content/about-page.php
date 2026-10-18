@@ -45,7 +45,7 @@ $content = <<<'HTML'
 
 <!-- wp:column {"verticalAlignment":"center"} -->
 <div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":17,"aspectRatio":"4/3","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
-<figure class="wp-block-image size-full"><img src="/wp-content/uploads/2026/10/aw1-im1.jpeg" alt="People seated with handwritten placards at a gathering for community dogs." class="wp-image-17" style="aspect-ratio:4/3;object-fit:cover"/></figure>
+<figure class="wp-block-image size-full"><img src="/wp-content/uploads/2026/10/aw1-im1.jpeg" alt="People seated with handwritten placards at a gathering for community dogs, a day of action by Animal Writes." class="wp-image-17" style="aspect-ratio:4/3;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
@@ -149,7 +149,7 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Explore court decisions, legislation, government notifications, and official documents that shape animal welfare. Find summaries alongside links to original sources.</p>
+<p>Explore court decisions, <a href="https://www.indiacode.nic.in/">legislation</a>, government notifications, and official documents that shape animal welfare. Find summaries alongside links to original sources.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
