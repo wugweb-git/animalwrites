@@ -924,6 +924,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 .kit-meta-row, .kit-meta-item { font-size: var(--kit-meta-size); font-weight: var(--kit-meta-weight); line-height: 1.3; color: var(--kit-color-muted); }
 .kit-meta-item { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); min-width: 0; }
 :is(.kit-meta-row, .kit-meta-item) .kit-ico { --kit-ico-size: var(--kit-meta-icon); vertical-align: middle; }
+.kit-meta-row.kit-tags { gap: var(--kit-meta-row-gap) var(--kit-meta-gap); } /* a meta row that also holds tags keeps the meta gaps */
 
 /* Meta always with an icon: date, author / posted by, reading time, place */
 .wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--kit-meta-icon-gap); }
