@@ -3,15 +3,60 @@
  * Title: Need help now
  * Slug: animal-writes/help-now
  * Categories: animal-writes, system
- * Description: Three large emergency actions: injured animal, report cruelty, find an organisation.
+ * Description: Dark band with four Kits tiles, two by two, (icon, title, one line): injured animal, report cruelty, veterinary care, find an organisation; then the national helplines line.
  * Inserter: yes
  *
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"align":"full","className":"kit-ed-help","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull kit-ed-help"><!-- wp:html -->
-<h2 class="kit-ed-help-title">Need help now?</h2><div class="kit-ed-acts"><a class="kit-ed-act" href="/resources/found-an-injured-animal-what-to-do/"><span class="kit-ico kit-ico--injured" aria-hidden="true"></span><strong>Injured animal</strong><span>Find a rescue group or vet, and what to do first.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a><a class="kit-ed-act" href="/resources/how-to-report-animal-cruelty/"><span class="kit-ico kit-ico--alert" aria-hidden="true"></span><strong>Report cruelty</strong><span>Know where to report it and how to record evidence.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a><a class="kit-ed-act" href="/directory/"><span class="kit-ico kit-ico--directory" aria-hidden="true"></span><strong>Find an organisation</strong><span>Animal welfare organisations, Gaushalas, vets and ABC centres, searchable by state and district.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></div><p class="kit-ed-help-note"><a href="#helplines">National helplines</a>: 112, 1962 and AWBI.</p>
-<!-- /wp:html -->
-</div>
+<!-- wp:group {"tagName":"section","metadata":{"name":"Need help now"},"align":"full","className":"kit-section aw-ed-help","backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull kit-section aw-ed-help has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:heading -->
+<h2 class="wp-block-heading">Need help now?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
+<div class="wp-block-group kit-stack"><!-- wp:group {"className":"kit-tile kit-ico--injured","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--injured"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Find a rescue group or vet, and what to do first.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--alert","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--alert"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/resources/how-to-report-animal-cruelty/">Report cruelty</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Know where to report it and how to record evidence.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--building","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--building"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/directory/?tag=veterinary">Find veterinary care</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Government vet hospitals, dispensaries and mobile units near you.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"kit-tile kit-ico--directory","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-tile kit-ico--directory"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading"><a href="/directory/">Find an organisation</a></h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Animal welfare groups, Gaushalas and ABC centres, by state and district.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:paragraph {"fontSize":"small"} -->
+<p class="has-small-font-size"><a href="#helplines">National helplines</a>: 112, 1962 and AWBI.</p>
+<!-- /wp:paragraph --></section>
 <!-- /wp:group -->

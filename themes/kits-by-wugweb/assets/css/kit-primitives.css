@@ -247,7 +247,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 /* Brand is the site's brand colour, or a campaign's own colour inside a campaign palette (campaign.css sets
    --kit-btn-brand-bg/-fg); every state derives from that one pair. */
 /* Dark surfaces: ink would vanish, so primary takes the brand fill (and its hover); outlines and text turn light. */
-:is(.kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark) {
+:is(.kit-dark, .has-secondary-background-color, .wp-block-cover.is-dark, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark) {
 	--kit-btn-primary-bg: var(--kit-btn-brand-bg); --kit-btn-primary-fg: var(--kit-btn-brand-fg);
 	--kit-btn-primary-bg-hover: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); --kit-btn-primary-fg-hover: var(--kit-btn-brand-fg);
 	--kit-btn-secondary-bg: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent);
@@ -256,6 +256,10 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-line: var(--kit-color-on-ink);
 	--kit-btn-ghost-bg-hover: var(--kit-color-on-ink); --kit-btn-ghost-fg-hover: var(--kit-color-ink);
 }
+
+/* Headings and lead text on a dark surface take its light text colour (theme.json gives headings the ink colour and
+   large text the muted colour, which vanish on ink); a card inside keeps its own colour. */
+:is(.kit-dark, .has-secondary-background-color, .wp-block-cover.is-dark) :is(h1, h2, h3, h4, h5, h6, .has-large-font-size, .kit-lead) { color: inherit; }
 
 /* Shape, type and motion (the same for every variant) */
 .kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button {
@@ -457,6 +461,7 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
 /* One height for every form control: fields (--kit-field-height) and form buttons (--kit-btn-height) are both
    --kit-size-control, so a field and its button line up in any row. Colours and states: section 10. */
+form, .kit-form, .fluentform { --kit-btn-height: var(--kit-size-control); --kit-btn-pad: var(--s-6); } /* buttons elsewhere step 44/48/52px by breakpoint; in a form they match the fields */
 /* Layout: one column under 768px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

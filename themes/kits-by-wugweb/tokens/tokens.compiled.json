@@ -706,9 +706,9 @@
       "lg": "color-mix(in srgb, var(--color-ash) 60%, transparent)"
     },
     "btn-height": {
-      "sm": "var(--kit-size-control)",
+      "sm": "var(--kit-size-target)",
       "md": "var(--kit-size-control)",
-      "lg": "var(--kit-size-control)"
+      "lg": "var(--kit-size-control-lg)"
     },
     "btn-height-sm": {
       "sm": "var(--kit-size-target)",
@@ -721,7 +721,7 @@
       "lg": "var(--kit-size-control)"
     },
     "btn-pad": {
-      "sm": "var(--s-6)",
+      "sm": "var(--s-4)",
       "md": "var(--s-6)",
       "lg": "var(--s-6)"
     },

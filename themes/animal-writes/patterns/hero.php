@@ -1,33 +1,34 @@
 <?php
 /**
- * Title: Homepage hero
+ * Title: Hero
  * Slug: animal-writes/hero
  * Categories: animal-writes
- * Description: Full-bleed campaign photograph with the identity line, the promise and two actions.
+ * Description: Home hero: a core Cover with the community dogs photograph, the H1, one line and two Kits buttons.
  * Inserter: yes
  *
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"align":"full","className":"kit-ed-hero","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull kit-ed-hero"><!-- wp:html -->
-<figure class="aw-ed-hero-media"><img src="/wp-content/uploads/2026/10/aw1-im5-1536x866.jpeg" srcset="/wp-content/uploads/2026/10/aw1-im5-768x433.jpeg 768w, /wp-content/uploads/2026/10/aw1-im5-1024x578.jpeg 1024w, /wp-content/uploads/2026/10/aw1-im5-1536x866.jpeg 1536w, /wp-content/uploads/2026/10/aw1-im5-2048x1155.jpeg 2048w" sizes="100vw" alt="Hundreds of people seated together holding placards for India’s community dogs." width="2048" height="1155" fetchpriority="high" decoding="async"><figcaption>India Writes for Its Community Dogs, 29 November 2025</figcaption></figure>
-<!-- /wp:html -->
+<!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw1-im5-1536x866.jpeg","id":21,"alt":"Hundreds of people seated together holding placards for India’s community dogs.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"minHeight":560,"contentPosition":"bottom left","isDark":true,"metadata":{"name":"Hero"},"align":"full","style":{"spacing":{"padding":{"right":"var(--wp--style--root--padding-right)","left":"var(--wp--style--root--padding-left)"}}},"layout":{"type":"constrained","contentSize":"1200px"}} -->
+<div class="wp-block-cover alignfull is-dark has-custom-content-position is-position-bottom-left" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:560px"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-60 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-21" alt="Hundreds of people seated together holding placards for India’s community dogs." src="/wp-content/uploads/2026/10/aw1-im5-1536x866.jpeg" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":1,"fontSize":"display"} -->
+<h1 class="wp-block-heading has-display-font-size">Not strays.<br>Ours.</h1>
+<!-- /wp:heading -->
 
-<!-- wp:group {"className":"aw-ed-hero-copy","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-ed-hero-copy"><!-- wp:html -->
-<h1 class="aw-ed-hero-title">Not strays.<br> Ours.</h1>
-<p class="aw-ed-hero-sub">India’s independent animal-welfare information platform.</p>
-<!-- /wp:html -->
+<!-- wp:paragraph {"fontSize":"large"} -->
+<p class="has-large-font-size">India’s independent animal-welfare information platform.</p>
+<!-- /wp:paragraph -->
 
-<!-- wp:buttons {"className":"aw-ed-hero-actions"} -->
-<div class="wp-block-buttons aw-ed-hero-actions"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
 <div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/directory/">Find help</a></div>
 <!-- /wp:button -->
 
 <!-- wp:button {"className":"is-style-kits-secondary"} -->
 <div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/library/">Understand the law</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group -->
+<!-- /wp:buttons -->
+
+<!-- wp:paragraph {"fontSize":"caption"} -->
+<p class="has-caption-font-size">India writes for its community dogs, 29 November 2025</p>
+<!-- /wp:paragraph --></div></div>
+<!-- /wp:cover -->

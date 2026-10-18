@@ -44,7 +44,7 @@ Icon names: phone, mail, whatsapp, search, send, download, check, alert, person,
 
 | Size | Class | Height | Padding | Type |
 |---|---|---|---|---|
-| Default | — | `--kit-btn-height` (48px) | `--kit-btn-pad` | `--fluid-body-md` |
+| Default | — | `--kit-btn-height`: 44px on phones, 48px from 768, 52px from 1200 (in forms always 48px, the field height) | `--kit-btn-pad`: 16px on phones, 24px from 768 | `--fluid-body-md` |
 | Small | `kit-btn--sm` | `--kit-btn-height-sm` (44px, the minimum target) | `--kit-btn-pad-sm` | `--fluid-body-sm` |
 
 In forms, every field (`--kit-field-height`) and every form button use the same height, `--kit-size-control` (48px), so a field and its button line up in any row. The footer newsletter field uses the standard field style too.

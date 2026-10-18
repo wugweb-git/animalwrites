@@ -1,37 +1,36 @@
 <?php
 /**
- * Title: Learn
+ * Title: Guides
  * Slug: animal-writes/learn
  * Categories: animal-writes
- * Description: The three newest guides, with a link to all guides.
+ * Description: The three newest guides from Resources as short Resources cards (icon, title, updated date and reading time), with a link to all guides.
  * Inserter: yes
  *
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"align":"full","className":"aw-ed-learn","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull aw-ed-learn"><!-- wp:html -->
-<header class="kit-ed-head"><div><h2>Guides and research</h2><p class="kit-ed-desc">Practical guides, the law in full, and letters you can send today.</p></div></header>
-<!-- /wp:html -->
-<!-- wp:query {"queryId":44,"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1042]}},"className":"aw-hub-list aw-ed-guides kit-scroll-row"} -->
-<div class="wp-block-query aw-hub-list aw-ed-guides kit-scroll-row"><!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","className":"kit-case kit-case--text","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-case kit-case--text"><!-- wp:group {"className":"aw-case-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-case-body"><!-- wp:animal-writes/type-date /-->
+<!-- wp:group {"tagName":"section","metadata":{"name":"Guides"},"align":"full","className":"kit-section kit-bg-canvas aw-ed-learn","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull kit-section kit-bg-canvas aw-ed-learn"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-sec-head"><!-- wp:heading -->
+<h2 class="wp-block-heading">Guides</h2>
+<!-- /wp:heading -->
 
-<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-case-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":24,"className":"aw-case-sum aw-case-sum--one"} /--></div>
+<!-- wp:paragraph -->
+<p><a class="kit-ed-more" href="/resources/?tag=guide">All guides</a></p>
+<!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:html -->
-<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span>
-<!-- /wp:html --></article>
+<!-- wp:query {"queryId":44,"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,"taxQuery":{"post_tag":[1042]}},"className":"aw-hub-list","layout":{"type":"default"}} -->
+<div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"aw-tasks","layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-task","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-task"><!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-task-body"><!-- wp:animal-writes/task-icon /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-task-title"} /-->
+
+<!-- wp:animal-writes/read-meta /--></div>
+<!-- /wp:group --></article>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
-<!-- /wp:query -->
-<!-- wp:html -->
-<a class="kit-ed-more" href="/resources/?tag=guide">See all guides <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>
-<!-- /wp:html -->
-</div>
+<!-- /wp:query --></section>
 <!-- /wp:group -->

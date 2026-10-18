@@ -3,34 +3,48 @@
  * Title: Take action
  * Slug: animal-writes/take-action
  * Categories: animal-writes
- * Description: Volunteering, letters and templates, and opportunities beside a campaign photograph (open campaigns have their own banner).
+ * Description: Two photo blocks (core Cover, dark overlay) side by side above the footer, each with one Brand button: volunteer, and claim your Directory listing (owner, 18 Oct 2026).
  * Inserter: yes
  *
  * @package animal-writes
  */
 ?>
-<!-- wp:group {"align":"full","className":"aw-ed-act-band","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-group alignfull aw-ed-act-band"><!-- wp:group {"className":"aw-ed-act-grid","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-ed-act-grid"><!-- wp:html -->
-<figure class="aw-ed-act-media"><img src="/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg" alt="Women holding placards for community dogs in a park." width="873" height="1024" loading="lazy" decoding="async"></figure>
-<!-- /wp:html -->
-<!-- wp:group {"className":"kit-ed-act-copy","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-ed-act-copy"><!-- wp:html -->
-<h2>Take action</h2><p class="kit-ed-desc">Animal Writes began with people writing to the Supreme Court. Here is how to take part now.</p><ul class="aw-ed-steps"><li><a href="/volunteer/"><strong>Volunteer with Animal Writes</strong><span>Coordinate in your city, write, design, or help with legal work.</span><span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></li></ul><a class="kit-ed-more aw-ed-templates" href="/library/?tag=template">Letters and templates <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a><h3 class="aw-ed-col-title">Opportunities near you</h3>
-<!-- /wp:html -->
-<!-- wp:query {"queryId":47,"query":{"perPage":2,"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} -->
-<div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template -->
-<!-- wp:post-title {"level":3,"isLink":true} /-->
-<!-- wp:post-terms {"term":"post_tag"} /-->
-<!-- wp:animal-writes/opp-line /-->
-<!-- /wp:post-template --></div>
-<!-- /wp:query -->
-<!-- wp:html -->
-<a class="kit-ed-more" href="/opportunities/">All opportunities <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>
-<!-- /wp:html -->
-</div>
-<!-- /wp:group -->
-</div>
-<!-- /wp:group -->
-</div>
+<!-- wp:group {"tagName":"section","metadata":{"name":"Take action"},"align":"full","className":"kit-section kit-bg-canvas","layout":{"type":"constrained","contentSize":"1200px"}} -->
+<section class="wp-block-group alignfull kit-section kit-bg-canvas"><!-- wp:heading -->
+<h2 class="wp-block-heading">Take action</h2>
+<!-- /wp:heading -->
+
+<!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"18rem"}} -->
+<div class="wp-block-group kit-stack"><!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg","id":18,"alt":"Women holding placards for community dogs in a park.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.5,"y":0.35},"minHeight":420,"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card","layout":{"type":"default"}} -->
+<div class="wp-block-cover is-dark has-custom-content-position is-position-bottom-left kit-photo-card" style="min-height:420px"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-60 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-18" alt="Women holding placards for community dogs in a park." src="/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg" style="object-position:50% 35%" data-object-fit="cover" data-object-position="50% 35%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":3,"fontSize":"2x-large"} -->
+<h3 class="wp-block-heading has-2-x-large-font-size">Volunteer</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Coordinate in your city, write, design, or help with legal work.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/volunteer/">Register as a volunteer</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div></div>
+<!-- /wp:cover -->
+
+<!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw-category-dog-vaccination.jpg","id":8752,"alt":"A vet vaccinating a dog.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.5,"y":0.5},"minHeight":420,"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card","layout":{"type":"default"}} -->
+<div class="wp-block-cover is-dark has-custom-content-position is-position-bottom-left kit-photo-card" style="min-height:420px"><span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-60 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-8752" alt="A vet vaccinating a dog." src="/wp-content/uploads/2026/10/aw-category-dog-vaccination.jpg" style="object-position:50% 50%" data-object-fit="cover" data-object-position="50% 50%"/><div class="wp-block-cover__inner-container"><!-- wp:heading {"level":3,"fontSize":"2x-large"} -->
+<h3 class="wp-block-heading has-2-x-large-font-size">Claim your listing</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Run an organisation or service listed in the Directory? Claim its listing to keep its details up to date.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/claim/">Claim your listing</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div></div>
+<!-- /wp:cover --></div>
+<!-- /wp:group --></section>
 <!-- /wp:group -->

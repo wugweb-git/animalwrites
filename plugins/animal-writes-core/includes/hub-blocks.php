@@ -244,6 +244,9 @@ function aw_block_doc_date( $a, $id ) {
 	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
 		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
 	}
+	if ( ! $cover && function_exists( 'aw_placard_html' ) ) { // no picture: the card system's placard state, so every card keeps its picture column (owner, 18 Oct 2026)
+		$cover = str_replace( 'class="kit-placard"', 'class="kit-placard aw-case-cover aw-case-placard"', aw_placard_html( $id ) );
+	}
 	$kind  = wp_list_pluck( 'aw_legal' === get_post_type( $id ) ? aw_legal_kinds( $id ) : aw_item_tags( $id ), 'name' );
 	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );

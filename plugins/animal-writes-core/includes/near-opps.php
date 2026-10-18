@@ -3,7 +3,7 @@
  * Home "Opportunities near you" (owner, 16 Oct 2026): the list shows opportunities in the visitor's state. The home
  * page is cached for everyone, so the server draws the newest ones and aw.js swaps in the local rows from
  * GET /wp-json/aw/v1/opps-near?state={slug} when the visitor has chosen a state in a Directory search (kept in
- * their own browser only). Rows are the same Query Loop markup as the pattern; fewer than two local items are
+ * their own browser only). Rows are the same Query Loop markup as the pattern (the Opportunities list's card); fewer than two local items are
  * filled with the newest.
  *
  * @package animal-writes-core
@@ -48,15 +48,15 @@ add_action(
 					if ( ! $state || 'state' !== $state->kind ) {
 						return new WP_REST_Response( array( 'local' => 0, 'html' => '' ), 200 );
 					}
-					$key  = 'aw_near_opps_' . $state->code;
+					$key  = 'aw_near_opps_card_' . $state->code; // rows are the Opportunities card since 18 Oct 2026
 					$data = get_transient( $key );
 					if ( false === $data ) {
 						list( $ids, $local ) = aw_near_opps_ids( $state );
 						$html                = '';
-						if ( $local && function_exists( 'aw_related_queries' ) ) {
+						if ( $local && function_exists( 'aw_related_queries' ) && function_exists( 'aw_hub_item' ) ) {
 							aw_related_queries( AW_NEAR_OPPS_QUERY_ID, $ids ); // the Query Loop shows exactly these, in order
 							$GLOBALS['aw_near_state_code'] = (int) $state->code; // the rows name the place in this state
-							$out = do_blocks( '<!-- wp:query {"queryId":' . AW_NEAR_OPPS_QUERY_ID . ',"query":{"perPage":' . count( $ids ) . ',"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"kit-ed-titles aw-ed-opps"} --><div class="wp-block-query kit-ed-titles aw-ed-opps"><!-- wp:post-template --><!-- wp:post-title {"level":3,"isLink":true} /--><!-- wp:post-terms {"term":"post_tag"} /--><!-- wp:animal-writes/opp-line /--><!-- /wp:post-template --></div><!-- /wp:query -->' );
+							$out = do_blocks( '<!-- wp:query {"queryId":' . AW_NEAR_OPPS_QUERY_ID . ',"query":{"perPage":' . count( $ids ) . ',"pages":0,"offset":0,"postType":"aw_opportunity","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list aw-ed-opps","layout":{"type":"default"}} --><div class="wp-block-query aw-hub-list aw-ed-opps"><!-- wp:post-template {"className":"aw-opps","layout":{"type":"default"}} -->' . str_replace( '"level":2', '"level":4', aw_hub_item( 'aw_opportunity' ) ) . '<!-- /wp:post-template --></div><!-- /wp:query -->' ); // the Opportunities list's card, as in the home pattern
 							unset( $GLOBALS['aw_near_state_code'] );
 							$html = preg_match( '#<ul\b[^>]*wp-block-post-template.*</ul>#s', $out, $m ) ? $m[0] : '';
 						}

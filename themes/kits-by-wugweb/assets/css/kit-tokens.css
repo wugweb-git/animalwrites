@@ -161,10 +161,10 @@
   --kit-surface-section-alt: var(--neutral-2);
   --kit-surface-card: var(--neutral-0);
   --kit-overlay: color-mix(in srgb, var(--color-ash) 60%, transparent);
-  --kit-btn-height: var(--kit-size-control);
+  --kit-btn-height: var(--kit-size-target);
   --kit-btn-height-sm: var(--kit-size-target);
   --kit-field-height: var(--kit-size-control);
-  --kit-btn-pad: var(--s-6);
+  --kit-btn-pad: var(--s-4);
   --kit-btn-pad-sm: var(--s-4);
   --kit-btn-gap: var(--s-2);
   --kit-btn-ico-size: 1.125em;
@@ -201,6 +201,8 @@
     --kit-carousel-item: auto;
     --kit-grid-gap: 24px;
     --kit-grid-columns: 8;
+    --kit-btn-height: var(--kit-size-control);
+    --kit-btn-pad: var(--s-6);
   }
 }
 @media (min-width: 1200px) {
@@ -212,5 +214,6 @@
     --kit-card-columns: 3;
     --kit-grid-gap: 32px;
     --kit-grid-columns: 12;
+    --kit-btn-height: var(--kit-size-control-lg);
   }
 }

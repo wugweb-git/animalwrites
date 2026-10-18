@@ -98,7 +98,7 @@ function aw_published_ts( $id ) {
 function aw_rel_time_html( $id ) {
 	$ts   = aw_published_ts( $id );
 	$diff = time() - $ts;
-	if ( $diff < 7 * DAY_IN_SECONDS && $diff >= 0 ) {
+	if ( $diff < 7 * DAY_IN_SECONDS && $diff >= 0 && ! is_front_page() ) { // the home page shows the date, like its Library cards (owner, 18 Oct 2026)
 		/* translators: %s: human time difference, e.g. 3 hours. */
 		$label = $diff < MINUTE_IN_SECONDS * 2 ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) );
 	} else {

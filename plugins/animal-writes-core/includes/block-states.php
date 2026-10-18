@@ -188,11 +188,11 @@ add_filter(
 			'Campaign: news grid'         => array( '/campaigns/lab-animals-rules-2026/', '.aw-news-grid', array( 375, 640, 768, 1024, 1200 ) ),
 			'Category page: News rows'    => array( '/category/community-dogs/', '.aw-hub-news' ),
 			'Search results'              => array( '/search/?q=dog', 'main h3' ),
-			'Home: Need help now'         => array( '/', '.kit-ed-help' ),
+			'Home: Need help now'         => array( '/', '.aw-ed-help' ),
 			'Home: News'                  => array( '/', '.aw-ed-news' ),
 			'Home: From the Library'      => array( '/', '.aw-ed-law' ),
 			'Home: Guides'                => array( '/', '.aw-ed-learn' ),
-			'Home: India Writes for Its Community Dogs' => array( '/', '.kit-ed-story' ),
+			'Home: India writes for its community dogs' => array( '/', '.aw-ed-story' ),
 			'Directory listing page'      => array( '/directory/org/wugweb-sample-listing/', 'main' ),
 			'Item page: text and sidebar (sidebar empty today)' => array( '/resources/reporting-illegal-pet-shops-and-breeders/', 'main' ),
 		);

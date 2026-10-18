@@ -575,7 +575,7 @@
 (function () {
 	if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	var main = document.getElementById('main');
-	if (!main) return;
+	if (!main || main.classList.contains('kit-static')) return; // a template can opt out: its sections are always visible
 	var root = main.querySelector(':scope > .wp-block-post-content') || main;
 	var sections = Array.prototype.slice.call(root.querySelectorAll(':scope > section, :scope > header, :scope > .alignfull, [data-reveal]'));
 	var ease = 'back.out(1.2)'; // a light spring

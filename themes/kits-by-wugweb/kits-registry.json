@@ -1431,7 +1431,8 @@
    "type": "primitive",
    "status": "live",
    "classes": [
-    "kit-grid"
+    "kit-grid",
+    "kit-stack"
    ],
    "states": [
     "4 columns (small)",
@@ -1482,6 +1483,71 @@
    "seo": {
     "heading": "none",
     "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Static page (no scroll reveal)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-static"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on a template's <main>: its sections never fade or rise in, so they are visible without scrolling or JavaScript",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Block components (tile, promo, rows, link list, photo card)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-promo",
+    "kit-rows",
+    "kit-links",
+    "kit-photo-card"
+   ],
+   "states": [
+    "tile: default, urgent (accent icon square), hover, focus",
+    "promo: kraft, success tint",
+    "rows: default, hover",
+    "stacked on phones (kit-stack on the grid)"
+   ],
+   "tokens": [
+    "kit-color-surface",
+    "kit-color-success",
+    "kit-color-line",
+    "kit-radius-card"
+   ],
+   "a11y": {
+    "element": "core Group with a Heading link (the link covers the block); core List of links; Query Loop rows",
+    "aria": "none",
+    "keyboard": "Tab to the heading link",
+    "focus": "outline on the block (:focus-within)",
+    "target": "the whole block",
+    "motion": "arrow nudge on hover; none under reduced motion",
+    "sr": "heading text, then the line"
+   },
+   "seo": {
+    "heading": "H3",
+    "link": "one internal link per block",
     "alt": "n/a",
     "schema": "none"
    }
