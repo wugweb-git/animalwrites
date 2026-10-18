@@ -167,7 +167,7 @@
 			joined = true;
 			var join = wantsUpdates();
 			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0' })
-				.then(function () { if (join) track('newsletter_optin', { source: cfg.source || '' }); })
+				.then(function () { track('newsletter_optin', { source: cfg.source || '' }); })
 				.catch(function () { joined = false; });
 		}
 	}
