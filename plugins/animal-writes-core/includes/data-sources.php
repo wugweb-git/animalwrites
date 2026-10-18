@@ -64,7 +64,7 @@ function aw_listing_sources( $id ) {
 	}
 	if ( 'AWBI ABC list' === $name ) {
 		$slugs[] = 'awbi-abc';
-	} elseif ( $name && ! array_intersect( $slugs, AW_IMPORT_SOURCES ) ) { // an import source names itself
+	} elseif ( $name && ! array_intersect( $slugs, AW_IMPORT_SOURCES ) && ! ( get_post_meta( $id, 'aw_awbi_code', true ) && false !== stripos( $name, 'AWBI list' ) ) ) { // an import source names itself; an older AWBI list is the AWBI label
 		$slugs[] = false !== stripos( $name, 'google' ) ? 'gmaps' : 'gov'; // a Google profile is not a government list
 	}
 	if ( get_post_meta( $id, 'aw_g_profile', true ) ) {
