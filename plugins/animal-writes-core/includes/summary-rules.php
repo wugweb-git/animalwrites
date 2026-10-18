@@ -99,6 +99,11 @@ function aw_summary_problem( $text, $section, $short_ok = false ) {
 	if ( ! $sec ) {
 		return '';
 	}
+	// No summary at all is never "short": an item without one is never published (owner, 18 Oct 2026, after two News
+	// items went live empty on 16 Oct). The workers write it from the source or other coverage first.
+	if ( '' === $text ) {
+		return 'no summary';
+	}
 	if ( preg_match( '#<[a-z/][^>]*>|https?://|www\.|\[[^\]]+\]\([^)]+\)|\*\*|\n#i', $text ) ) {
 		return 'summary is not plain text (link, HTML, markup or line break)';
 	}
