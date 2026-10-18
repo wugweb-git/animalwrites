@@ -3,7 +3,7 @@
  * Plugin Name:       Wug Mail
  * Plugin URI:        https://animalwrites.in/
  * Description:       Mail for animalwrites.in in WordPress: one inbox for every Hostinger mailbox (vedanshu@ with contact@, support@, noreply@) and the website forms — read, reply, reply all, forward, new message, archive, move, spam, trash, read/unread, attachments — through the Hostinger Mail API, so webmail stays in step. Mail → Settings holds incoming mail, mailboxes, profiles and site sending. The webhook POST /wp-json/aw/v1/mail-in refreshes the counts.
- * Version:           2.5.0
+ * Version:           2.5.1
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AW_MAIL_VERSION', '2.5.0' );
+define( 'AW_MAIL_VERSION', '2.5.1' );
 define( 'AW_MAIL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AW_MAIL_WEBMAIL', 'https://mail.hostinger.com' );
 
