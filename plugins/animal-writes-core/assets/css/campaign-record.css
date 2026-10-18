@@ -75,6 +75,12 @@
 .aw-camp.aw-camp--community-dogs .aw-date { white-space: nowrap; }
 
 /* ---------- Hero: words left, the stamp and its postmark right (below on phones and tablets) ---------- */
+/* Owner, 18 Oct 2026: white text on the #ffa500 hero (asked after being told it is 2:1, under the 4.5:1 minimum).
+   Only the hero's ink token changes, so the palette (and the deploy contrast check, which reads the palette block)
+   keeps ink for brand buttons and the follow button. "Closed" becomes an ink pill so its orange text is not on white. */
+.aw-camp.aw-camp--community-dogs .aw-camp-hero { --camp-primary-ink: #ffffff; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-status-window { background: var(--camp-dark); color: #ffffff; }
+.aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-metric-note { opacity: 1 !important; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero { column-gap: clamp(2rem, 1rem + 4vw, 5rem); padding-top: clamp(2.5rem, 1.5rem + 3vw, 4.5rem) !important; overflow: hidden; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero h1 { font-size: clamp(2.75rem, 1.5rem + 4.6vw, 4.75rem) !important; letter-spacing: -0.045em; line-height: 0.95 !important; margin: 0 0 var(--kit-space-5) !important; text-wrap: balance; }
 .aw-camp.aw-camp--community-dogs .aw-camp-hero .aw-camp-lede { max-width: 46ch; margin: 0 !important; font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem); font-weight: var(--kit-weight-strong); }
