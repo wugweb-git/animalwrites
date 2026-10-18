@@ -305,6 +305,30 @@ function aw_source_og_run( $limit = 40 ) {
 }
 
 /**
+ * Download a picture to a temporary file. Not core download_url(): it fails fatally on a content-type header sent
+ * twice (it indexes an array with it), which some publishers' CDNs do.
+ *
+ * @return string|WP_Error Temporary file path.
+ */
+function aw_source_download( $url ) {
+	$r = wp_remote_get( $url, array( 'timeout' => 30, 'redirection' => 5, 'user-agent' => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'limit_response_size' => 15 * MB_IN_BYTES ) );
+	if ( is_wp_error( $r ) ) {
+		return $r;
+	}
+	if ( 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
+		return new WP_Error( 'aw_http', 'HTTP ' . (int) wp_remote_retrieve_response_code( $r ) );
+	}
+	if ( ! function_exists( 'wp_tempnam' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+	}
+	$tmp = wp_tempnam( 'aw-source' );
+	if ( ! $tmp || false === file_put_contents( $tmp, (string) wp_remote_retrieve_body( $r ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+		return new WP_Error( 'aw_tmp', 'could not write a temporary file' );
+	}
+	return $tmp;
+}
+
+/**
  * A publisher image kept in our Media Library instead of linked (owner, 17 Oct 2026: no hotlinking; publisher CDN
  * addresses change and expire). The address shown everywhere (aw_source_image) becomes the local copy; the original is
  * kept in aw_source_image_orig and the attachment in aw_source_image_att. Alt text: the item's title.
@@ -321,7 +345,7 @@ function aw_source_localise( $post_id ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = download_url( $url, 30 );
+	$tmp = aw_source_download( $url );
 	if ( is_wp_error( $tmp ) ) {
 		update_post_meta( $post_id, 'aw_source_localise', 'download failed: ' . $tmp->get_error_message() );
 		return 0;
