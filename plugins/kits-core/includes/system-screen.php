@@ -326,7 +326,7 @@ function kits_spot_map( $rebuild = false ) {
 			foreach ( $want as $p ) {
 				if ( $c === $p || 0 === strpos( $c, $p . '-' ) ) {
 					$map[ $it['name'] ] = $url;
-					break 3;
+					break 2; // next entry
 				}
 			}
 		}
