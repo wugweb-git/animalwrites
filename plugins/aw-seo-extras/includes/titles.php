@@ -58,7 +58,9 @@ function aw_seo_is_hub_page( $post ) {
  * @return string
  */
 function aw_seo_item_title( $post ) {
-	return aw_seo_no_hyphens_title( aw_seo_item_title_rules( $post ) ); // no hyphens in any title (owner, 18 Oct 2026)
+	$post = get_post( $post );
+	$t    = aw_seo_item_title_rules( $post );
+	return $post && 'aw_listing' === $post->post_type ? $t : aw_seo_no_hyphens_title( $t ); // no hyphens in any title, except organisation names (owner, 18 Oct 2026)
 }
 
 /** The title by the rules of its type, before hyphens are removed (see aw_seo_item_title). */
@@ -167,7 +169,7 @@ function aw_seo_fill_post( $post_id ) {
 /** A listing's focus keyword: its name, plain, without a trailing place or bracketed abbreviation clutter. */
 function aw_seo_listing_keyword( $post ) {
 	$name = aw_seo_plain( get_post_field( 'post_title', $post ) );
-	$name = aw_seo_no_hyphens( preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $name ), false ); // no hyphens in a keyword either
+	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', $name ); // organisation names keep their hyphens
 	return trim( str_replace( array( '"', '“', '”' ), '', $name ) );
 }
 
@@ -607,6 +609,11 @@ add_filter(
  * and its <title> and share titles print that entity as is. Titles are plain text, so entities are decoded last; the
  * output is still escaped by Rank Math.
  */
-add_filter( 'rank_math/frontend/title', fn( $t ) => aw_seo_no_hyphens_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 ); // and no hyphen joining two words (owner, 18 Oct 2026)
-add_filter( 'rank_math/opengraph/facebook/og_title', fn( $t ) => aw_seo_no_hyphens_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
-add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => aw_seo_no_hyphens_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
+/** A printed title without hyphens, except in the Directory (organisation and place names are official names, owner 18 Oct 2026). */
+function aw_seo_printed_title( $t ) {
+	$dir = is_singular( 'aw_listing' ) || ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) || ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() );
+	return $dir ? $t : aw_seo_no_hyphens_title( $t );
+}
+add_filter( 'rank_math/frontend/title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 ); // and no hyphen joining two words (owner, 18 Oct 2026)
+add_filter( 'rank_math/opengraph/facebook/og_title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
+add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );

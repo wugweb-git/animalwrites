@@ -373,7 +373,7 @@ function aw_seo_fit( array $titles, $max = 60 ) {
 
 /** "{Name} in {District}" or "{Name} in {State}" (no comma as a separator; the place is not repeated when the name has it). */
 function aw_seo_listing_name( $id ) {
-	$name = aw_seo_no_hyphens( preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) ), false ); // no hyphens (owner, 18 Oct 2026)
+	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) ); // organisation names keep their hyphens (owner, 18 Oct 2026)
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = $district ? $district : $state;
 	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ' in ' . $where : $name;
