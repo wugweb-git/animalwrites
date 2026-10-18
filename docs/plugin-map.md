@@ -1,6 +1,6 @@
 # Plugin map
 
-Each file in the two plugins and what it does. Both load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there). Forms: see `how-to-change-a-form.md`.
+Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Wug Mail (`aw-mail`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
 ## animal-writes-core
 
@@ -45,6 +45,19 @@ Each file in the two plugins and what it does. Both load from `animal-writes-cor
 | `topic-images.php` | Category photos, set in WP Admin on each category screen (Topics, Listing types, Opportunity types): add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). Topic photos are also used on news and Legal Watch items in that topic. News and Legal Watch items show their topic's photo (see aw_item_image() in media.php). Stored as term meta `aw_topic_image` (attachment ID). The general photos for items without a topic stay in the option aw_topic_images['default']. |
 | `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
 | `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from. |
+
+## aw-mail (Wug Mail)
+
+Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending (SMTP, the daily cap and queue, `mail-cap.php`) stays in core. No mail client: replies are written in Hostinger webmail.
+
+| File | What it does |
+|---|---|
+| `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
+| `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
+| `includes/overview.php` | Mail menu (admins) with the unread badge for vedanshu@ + support@, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
+| `includes/telegram.php` | Telegram reminder to the owner for mail from a person (skips Hostinger, the site, automatic senders, lists and the block list in Settings → Incoming mail). wp-config: `AW_TELEGRAM_BOT_TOKEN`, `AW_TELEGRAM_CHAT_ID`. |
+| `includes/mail-reply.php` | The former Inbox → Reply. Kept, not loaded (replies happen in webmail). |
+| `uninstall.php` | Deletes nothing. |
 
 ## kits-core
 

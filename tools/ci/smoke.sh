@@ -21,6 +21,8 @@ wp plugin activate animal-writes-core --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
 wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
 wp plugin activate aw-seo-extras --quiet
+# Wug Mail: incoming mail (webhook /wp-json/aw/v1/mail-in), Mail menu, dashboard widget, Telegram reminder.
+wp plugin activate aw-mail --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
@@ -44,7 +46,7 @@ trap 'kill $SERVER 2>/dev/null || true' EXIT
 sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
-URLS=(/ /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
+URLS=(/ "/?rest_route=/aw/v1/mail-in" /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
   /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/ /tag/ci-tag/ "/news/?category_name=community-dogs"
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
