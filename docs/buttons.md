@@ -58,6 +58,6 @@ The **Styles** panel picks the variant: Primary (the default), Secondary, Ghost 
 - Every button here is a link, except form buttons (Send, Subscribe, Search), which submit their form. Both use the same classes, variants, states and content options.
 
 - A link styled as a button is never a heading, and a heading is never styled as a button.
-- The underlined text link (`.kit-ed-more`) is a link, not a button. Use it only for "see all" links in a section head (home: What's happening, Learn, Take action; Kits pattern lead-list). Calls to action are buttons.
+- A section's "see all" link (All news, Browse the Library, All guides) is a small Ghost button (`is-style-kits-ghost kit-btn--sm`) in the section head (owner, 18 Oct 2026). The underlined text link (`.kit-ed-more`) is only for old markup that has no Button block.
 - A component restyles a button by setting the `--_bg`, `--_fg`, `--_line` (and `-h` hover) values or plain properties in one class rule; never copy the button rules.
 - The site's own host is added by `functions.php`, so absolute links to this site show →, not ↗.

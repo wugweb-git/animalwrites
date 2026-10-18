@@ -15,9 +15,11 @@
 <h2 class="wp-block-heading">What’s happening</h2>
 <!-- /wp:heading -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/news/">All news</a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost kit-btn--sm"} -->
+<div class="wp-block-button is-style-kits-ghost kit-btn--sm"><a class="wp-block-button__link wp-element-button" href="/news/">All news</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:query {"queryId":41,"query":{"perPage":5,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false},"className":"aw-hub-list","layout":{"type":"default"}} -->
