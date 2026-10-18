@@ -1414,3 +1414,17 @@ body { background: var(--kit-color-canvas); }
 .aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
 .aw-about-what .is-style-kits-card:hover { background: color-mix(in srgb, var(--kit-color-ink) 6%, var(--kit-color-canvas)) !important; }
 .aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
+/* Adoption (beta landing page, /adoption/): the About page bands and tiles, plus a clear "Coming soon" block, the three
+   plans in a row from 768 (stacked on phones) and a muted note under the contact button. */
+.aw-adopt-beta { margin: 0; }
+.aw-adopt-soon { max-width: 62ch; }
+.aw-adopt-soon > * { margin: 0 !important; }
+.aw-adopt-soon > * + * { margin-top: var(--kit-space-3) !important; }
+.aw-adopt-soon > h2 { font-size: var(--kit-type-h1) !important; line-height: 1.05; }
+.aw-adopt-soon-ico { display: grid; place-items: center; width: 4rem; height: 4rem; border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
+.aw-adopt-soon-ico .kit-ico { --kit-ico-size: 2rem; }
+.aw-about-inner > .aw-adopt-towards { margin-block-start: var(--kit-space-7); }
+.aw-adopt-plans { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+@media (min-width: 768px) { .aw-adopt-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-adopt-plans .aw-about-act > p:not(.aw-about-act-ico) { font-size: var(--kit-type-lead); color: var(--kit-color-ink); }
+.aw-about-inner > .aw-adopt-note { margin-block-start: var(--kit-space-5); font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }

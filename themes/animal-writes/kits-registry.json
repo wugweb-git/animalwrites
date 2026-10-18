@@ -2134,6 +2134,40 @@
     "alt": "photograph alt in the block",
     "schema": "none"
    }
+  },
+  {
+   "name": "Adoption beta page",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-adopt"
+   ],
+   "states": [
+    "beta: no listings yet; Coming soon block, three plans, contact call to action"
+   ],
+   "tokens": [
+    "--kit-type-h1",
+    "--kit-type-lead",
+    "--kit-color-canvas",
+    "--kit-color-raised",
+    "--kit-color-on-ink",
+    "--kit-space-7"
+   ],
+   "a11y": {
+    "element": "groups, headings, one contact button",
+    "aria": "icons aria-hidden",
+    "keyboard": "button link",
+    "focus": "button",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "plain text; the Beta badge is text"
+   },
+   "seo": {
+    "heading": "H2 per band, H3 for the plans",
+    "link": "contact",
+    "alt": "photograph alt in the block",
+    "schema": "WebPage"
+   }
   }
  ],
  "nav_status": {
