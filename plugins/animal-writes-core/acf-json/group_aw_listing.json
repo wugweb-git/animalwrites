@@ -527,6 +527,85 @@
             "append": ""
         },
         {
+            "key": "field_aw_listing_reg_authority",
+            "label": "Registration authority",
+            "name": "aw_reg_authority",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_act",
+            "label": "Registered under (Act)",
+            "name": "aw_reg_act",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_date",
+            "label": "Registration date",
+            "name": "aw_reg_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "display_format": "j M Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_listing_sectors",
+            "label": "Sectors (NGO Darpan)",
+            "name": "aw_sectors",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Sectors of work as NGO Darpan lists them, comma separated. Not shown on the listing.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_listing_fcra",
             "label": "FCRA",
             "name": "aw_fcra",
@@ -1581,5 +1660,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1792306169
+    "modified": 1792308131
 }

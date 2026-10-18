@@ -29,8 +29,9 @@ function aw_dir_place( $slug ) {
 	return aw_place_by_slug( $slug );
 }
 
-/** "Veterinary" is one filter for people; the listings keep their separate veterinary types. */
-const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office', 'bird-hospital' );
+/** "Veterinary" is one filter for people; the listings keep their separate veterinary types. Bird Hospital is its own
+ * choice (owner, 18 Oct 2026). */
+const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office' );
 
 /** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or "veterinary". */
 function aw_listing_type_ok( $slug ) {

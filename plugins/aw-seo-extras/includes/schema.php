@@ -47,10 +47,18 @@ function aw_listing_schema( $id ) {
 			$stype[] = $t;
 		}
 	}
-	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOffice', $stype, true ) && in_array( 'gov', wp_list_pluck( aw_listing_sources( $id ), 0 ), true ) ) {
+	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOffice', $stype, true ) && array_intersect( array( 'gov', 'gujforest' ), wp_list_pluck( aw_listing_sources( $id ), 0 ) ) ) {
 		$stype[] = 'GovernmentOffice'; // a government vet (from a government list)
 	}
-	if ( ! $stype || has_term( array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'legal-aid', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' ), 'post_tag', $id ) ) {
+	$srcs = wp_list_pluck( aw_listing_sources( $id ), 0 );
+	if ( has_term( 'legal-aid', 'post_tag', $id ) && in_array( 'nalsa', $srcs, true ) ) {
+		$stype[] = 'GovernmentOffice'; // a District Legal Services Authority: a government office, not an NGO
+	}
+	$ngo = array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' );
+	if ( ! in_array( 'nalsa', $srcs, true ) ) {
+		$ngo[] = 'legal-aid';
+	}
+	if ( ! $stype || has_term( $ngo, 'post_tag', $id ) ) {
 		array_unshift( $stype, 'NGO' );
 	}
 	$stype = array_values( array_unique( $stype ) );
