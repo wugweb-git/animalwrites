@@ -15,8 +15,9 @@ import sys
 
 from places import Places
 
-AVY = ("Avyarth Commons: animal welfare directory (Bhopal)", "https://commons.avyarth.org/directory/ngos", "2026-10-18")
-AVY_SH = ("Avyarth Commons: shelters and recovery homes (Bhopal)", "https://commons.avyarth.org/directory/shelters", "2026-10-18")
+# Avyarth's directory lists Google Maps places: the source shown is Google Maps (owner, 18 Oct 2026).
+AVY = ("Google Maps", "https://www.google.com/maps/", "2026-10-18")
+AVY_SH = AVY
 N4Y = ("ngo4you.com: Top NGO for Animals in India", "https://www.ngo4you.com/ngo-for-animals-in-india/", "2025-05-28")
 
 # name, state, district, source, types, phone, email, website, address (shown for an organisation's own office), what
@@ -54,7 +55,7 @@ def main():
         if not dist:
             raise SystemExit(f"district not in LGD: {district}, {state}")
         rows.append({"key": "web3|" + re.sub(r"\W+", "-", name.lower()).strip("-"), "name": name,
-                     "types": (["animal-welfare-organisation"] + types)[:3], "state": st["code"], "district": dist["code"],
+                     "types": ["animal-welfare-organisation"] + types, "state": st["code"], "district": dist["code"],
                      "area": f"{dist['name']}, {st['name']}", "phone": phone, "email": email, "website": site, "address": addr,
                      "address_private": "", "data_source": "web", "source_name": src[0], "source_url": src[1], "source_date": src[2],
                      "content": f"{name} is {what}. It is listed in {src[0]}."})

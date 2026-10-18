@@ -45,7 +45,7 @@ def main(csv_file):
         sectors = r["sectors"]
         out.append({
             "key": "darpan-search|" + re.sub(r"\W+", "-", (r["name"] + "|" + r["registration"]).lower()).strip("-"),
-            "name": name, "types": types[:3], "state": st["code"], "district": dist["code"],
+            "name": name, "types": types, "state": st["code"], "district": dist["code"],
             "area": f"{dist['name']}, {st['name']}", "phone": "", "address_private": r["address"],
             "registration": r["registration"], "sectors": sectors, "data_source": "darpan",
             "source_name": "NGO Darpan (NITI Aayog)", "source_url": URL, "source_date": ON,

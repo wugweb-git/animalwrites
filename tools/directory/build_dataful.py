@@ -106,7 +106,7 @@ def main(listings_file, folder):
             if not st:
                 rep.skip("state not in LGD", sample)
                 continue
-            types = [t for t, rx in RULES if rx.search(name)][:3] or ["animal-welfare-organisation"]
+            types = [t for t, rx in RULES if rx.search(name)] or ["animal-welfare-organisation"]
             on = ymd(r.get("as_on_date")) or "2026-05-26"
             fields = {
                 "darpan_id": uid,

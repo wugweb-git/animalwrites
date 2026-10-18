@@ -123,7 +123,7 @@ def main(listings_file):
         _, label, url, on, keep = SRC[src]
         c = contacts(src, block(src, key), keep)
         rows.append(dict(c, key="web2|" + re.sub(r"\W+", "-", name.lower()).strip("-"), name=name,
-                         types=(["animal-welfare-organisation"] + types)[:3], state=st["code"], district=dist["code"],
+                         types=["animal-welfare-organisation"] + types, state=st["code"], district=dist["code"],
                          area=f"{dist['name']}, {st['name']}", address_private="", data_source="web", source_name=label,
                          source_url=url, source_date=on,
                          content=(f"{name} is {what}. " if what else f"{name} is an animal welfare organisation in {dist['name']}, {st['name']}. ")

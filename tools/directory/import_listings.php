@@ -7,12 +7,13 @@
  * - new listing: key, name, types[], state, district, area, phone, address_private, content, source_name, source_url,
  *   source_date; optional: data_source (registry slug, data-sources.php), email, website, address (a public office's, shown), founded (year), darpan_id, registration,
  *   reg_type, reg_authority, reg_act, reg_date, sectors, awbi_code / awbi_recognised / awbi_renewed / awbi_valid /
- *   awbi_list_on / awbi_address (an AWBI list row; the address is kept private), places[] (more [state, district] pairs), abc_valid.
+ *   awbi_list_on / awbi_address (an AWBI list row; the address is kept private), services[] (AW_SERVICES slugs, added
+ *   only), places[] (more [state, district] pairs), abc_valid.
  *   Matched by aw_import_key; created published and unverified.
  * - update of an existing listing: post_id, types[] (added, never removed) and any optional field above (filled only
  *   when empty), abc_centres[] (kept private), abc_valid (only a later date: a renewed recognition). Verified or claimed listings are left alone (types too).
  *
- * Types are Directory tags (post_tag). A listing has at most 3 types; types it already has are never removed or
+ * Types are Directory tags (post_tag); a listing can have any number (owner, 18 Oct 2026). Types it already has are never removed or
  * reordered. Every change is appended to the log (one JSON object per line: post, field, old, new, kind) for
  * undo_import.php.
  */
@@ -25,15 +26,12 @@ $note     = function ( $id, $field, $old, $new, $kind ) use ( $log ) {
 };
 $type_slugs = aw_listing_type_slugs();
 
-/** Add types (Directory tags) up to 3 in all; returns the slugs added. */
+/** Add types (Directory tags; no limit on how many); returns the slugs added. */
 $add_types = function ( $id, $types ) use ( $type_slugs, $note, &$kind ) {
 	$have  = wp_get_post_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
 	$count = count( array_intersect( $have, $type_slugs ) );
 	$add   = array();
 	foreach ( (array) $types as $t ) {
-		if ( $count >= 3 ) {
-			break;
-		}
 		if ( in_array( $t, $have, true ) || ! in_array( $t, $type_slugs, true ) ) {
 			continue; // already there, or not a Directory type (never invented here)
 		}
@@ -45,6 +43,17 @@ $add_types = function ( $id, $types ) use ( $type_slugs, $note, &$kind ) {
 		$note( $id, 'types', array(), $add, $kind );
 	}
 	return $add;
+};
+
+/** Add services (the fixed services list, AW_SERVICES): added, never removed. */
+$add_services = function ( $id, $services ) use ( $note, &$kind ) {
+	$ok   = function_exists( 'aw_service_slugs' ) ? aw_service_slugs() : array();
+	$have = wp_get_post_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
+	$add  = array_values( array_diff( array_intersect( (array) $services, $ok ), $have ) );
+	if ( $add ) {
+		wp_set_object_terms( $id, $add, 'post_tag', true );
+		$note( $id, 'services', array(), $add, $kind );
+	}
 };
 
 /** Fill one meta field only when the listing has none. */
@@ -105,6 +114,7 @@ foreach ( $rows as $r ) {
 			continue;
 		}
 		$add_types( $id, $r['types'] ?? array() );
+		$add_services( $id, $r['services'] ?? array() );
 		$fields( $id, $r );
 		if ( ! empty( $r['source_name'] ) ) { // where the added details come from, when the listing names no source yet
 			foreach ( array( 'source_name', 'source_url', 'source_date' ) as $k ) {
@@ -159,6 +169,7 @@ foreach ( $rows as $r ) {
 		WP_CLI::warning( 'Place not in LGD for ' . $r['name'] . ': ' . $r['state'] . '/' . $r['district'] );
 	}
 	$add_types( $id, $r['types'] );
+	$add_services( $id, $r['services'] ?? array() );
 	update_post_meta( $id, 'aw_import_key', $r['key'] );
 	update_post_meta( $id, 'aw_area', $r['area'] );
 	foreach ( array( 'source_name', 'source_url', 'source_date' ) as $k ) {

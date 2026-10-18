@@ -58,7 +58,7 @@ def main():
         label, url, said = SRC[src]
         out.append({
             "key": "web|" + re.sub(r"\W+", "-", name.lower()).strip("-"), "name": name,
-            "types": (["animal-welfare-organisation"] + types)[:3], "state": st["code"], "district": dist["code"],
+            "types": ["animal-welfare-organisation"] + types, "state": st["code"], "district": dist["code"],
             "area": f"{dist['name']}, {st['name']}", "phone": phone, "website": site, "address_private": addr,
             "data_source": "web", "source_name": label, "source_url": url, "source_date": ON,
             "content": (f"{name} is {what}. " if what else f"{name} is an animal welfare organisation in {dist['name']}, {st['name']}. ") + said,

@@ -7,8 +7,7 @@
     bird hospital / pakshi chikitsalaya / charity birds -> Bird Hospital
     ambulance                                       -> Animal Ambulance
 
-Whole words only ("Homoeopathy" is not "home"). Types are added, never removed; at most 3 types per listing (the
-listing's existing types come first); verified or claimed listings are left alone.
+Whole words only ("Homoeopathy" is not "home"). Types are added, never removed; no limit on types (owner, 18 Oct 2026); verified or claimed listings are left alone.
 Usage: python3 build_name_types.py data/listings.json
 """
 import re
@@ -52,11 +51,6 @@ def main(listings_file):
         if l.get("protected"):
             rep.skip("verified or claimed", {"id": l["id"], "title": title, "would_add": add})
             continue
-        room = max(0, 3 - len(have))
-        if not room:
-            rep.skip("already 3 types", {"id": l["id"], "title": title, "types": have, "would_add": add})
-            continue
-        add = add[:room]
         rep.match({"post_id": l["id"], "types": add}, {"id": l["id"], "title": title, "types": have, "adds": add})
     rep.write(n=40)
 

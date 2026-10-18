@@ -53,8 +53,6 @@ def main(listings_file):
             rep.skip("already has the type")
         elif l.get("protected"):
             rep.skip("verified or claimed", dict(sample, listing=l["title"]))
-        elif len(have) >= 3:
-            rep.skip("already 3 types", dict(sample, listing=l["title"], types=have))
         else:
             rep.match({"post_id": l["id"], "types": ["animal-ambulance"]},
                       dict(sample, listing=l["id"], listing_title=l["title"], types=have, adds=["animal-ambulance"]))
