@@ -111,9 +111,9 @@
       "lg": "var(--fluid-label)"
     },
     "type-2xs": {
-      "sm": "0.625rem",
-      "md": "0.625rem",
-      "lg": "0.625rem"
+      "sm": "0.5rem",
+      "md": "0.5rem",
+      "lg": "0.5rem"
     },
     "type-sm": {
       "sm": "var(--fluid-body-sm)",
