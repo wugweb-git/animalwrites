@@ -353,6 +353,11 @@ add_shortcode(
 				$as     = (string) get_post_meta( $id, 'aw_reg_type', true );
 				$rows[] = array( 'research', 'Registered on NGO Darpan (NITI Aayog), Darpan ID ' . esc_html( $darpan ) . ( $as ? ', as ' . esc_html( $as ) : '' ), true );
 			}
+			$bl_on = (string) get_post_meta( $id, 'aw_darpan_blacklisted_on', true );
+			if ( $bl_on ) { // NITI Aayog's list of blacklisted NPOs (ngodarpan.gov.in/#/blacklisted)
+				$bl_by  = (string) get_post_meta( $id, 'aw_darpan_blacklisted_by', true );
+				$rows[] = array( 'alert', 'NGO Darpan (NITI Aayog) lists this organisation as blacklisted' . ( $bl_by ? ' by ' . esc_html( $bl_by ) : '' ) . ', from ' . aw_date( $bl_on ) . '.', true );
+			}
 			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
 			if ( $abc ) {
 				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . aw_date( $abc ), true );

@@ -65,6 +65,8 @@ function aw_meta_schema() {
 		'aw_reg_12a'         => array( 'string', array( 'aw_listing' ), '12A registration number' ),
 		'aw_reg_80g'         => array( 'string', array( 'aw_listing' ), '80G registration number' ),
 		'aw_darpan_id'       => array( 'string', array( 'aw_listing' ), 'NGO Darpan ID' ),
+		'aw_darpan_blacklisted_by' => array( 'string', array( 'aw_listing' ), 'Blacklisted on NGO Darpan by (as Darpan lists it)' ),
+		'aw_darpan_blacklisted_on' => array( 'string', array( 'aw_listing' ), 'Blacklisted on NGO Darpan from (Y-m-d)' ),
 		'aw_reg_authority'   => array( 'string', array( 'aw_listing' ), 'Registration authority (from NGO Darpan; admin only)' ),
 		'aw_reg_act'         => array( 'string', array( 'aw_listing' ), 'Registered under (Act; from NGO Darpan; admin only)' ),
 		'aw_reg_date'        => array( 'string', array( 'aw_listing' ), 'Registration date (Y-m-d; from NGO Darpan; admin only)' ),
