@@ -310,7 +310,11 @@ $content = <<<'HTML'
 
 <!-- wp:group {"metadata":{"name":"Actions"},"layout":{"type":"grid","minimumColumnWidth":"20rem"}} -->
 <div class="wp-block-group"><!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-act"><!-- wp:paragraph {"className":"aw-about-act-ico"} -->
+<p class="aw-about-act-ico"><span class="kit-ico kit-ico--heart" aria-hidden="true"></span></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Volunteer</h3>
 <!-- /wp:heading -->
 
@@ -326,7 +330,11 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-act"><!-- wp:paragraph {"className":"aw-about-act-ico"} -->
+<p class="aw-about-act-ico"><span class="kit-ico kit-ico--building" aria-hidden="true"></span></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Claim your listing</h3>
 <!-- /wp:heading -->
 
@@ -342,7 +350,11 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-act"><!-- wp:paragraph {"className":"aw-about-act-ico"} -->
+<p class="aw-about-act-ico"><span class="kit-ico kit-ico--mail" aria-hidden="true"></span></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Help improve the information</h3>
 <!-- /wp:heading -->
 

@@ -1382,12 +1382,16 @@ body { background: var(--kit-color-canvas); }
 .aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-what .aw-about-pic img, .aw-about-act { transition: none; } }
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
-/* The three principles: one column on phones, three from 768. The three actions: one column below 1200 (their buttons
-   would wrap in a third of 768), three from 1200. Never two plus one alone. */
+/* The three principles: one column on phones, three from 768. The three actions: one column on phones, a row of three
+   from 768 (tighter tiles and buttons up to 1199, so no button label wraps). Never two plus one alone. */
 :is(.aw-about-why, .aw-about-help) .aw-about-inner > .wp-block-group { grid-template-columns: minmax(0, 1fr) !important; }
 @media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
-@media (min-width: 1200px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (min-width: 768px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: var(--kit-space-4); } }
+@media (min-width: 768px) and (max-width: 1199px) { .aw-about-act { padding: var(--kit-space-4); } .aw-about-act .wp-block-button__link { padding-inline: var(--kit-space-3); font-size: var(--kit-type-sm); } }
 :is(.aw-about-what, .aw-about-help) .wp-block-button__link { white-space: nowrap; }
 /* About page pictures: 4:3 cover at the top of each card and principle (owner uploads, 18 Oct 2026) */
 .aw-about-band .aw-about-pic { margin: 0 0 var(--kit-space-3) !important; }
 .aw-about-band .aw-about-pic img { display: block; width: 100%; height: auto; border-radius: var(--kit-radius-media); }
+/* How you can help: an icon in a grey circle at the top of each tile */
+.aw-about-act > .aw-about-act-ico { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: var(--kit-space-2); border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
+.aw-about-act > .aw-about-act-ico .kit-ico { --kit-ico-size: 1.5rem; }
