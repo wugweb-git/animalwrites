@@ -86,6 +86,8 @@ require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
 require_once AW_CORE_DIR . 'includes/newsletter.php';
 require_once AW_CORE_DIR . 'includes/model.php';
+require_once AW_CORE_DIR . 'includes/featured.php';
+require_once AW_CORE_DIR . 'includes/org-people.php';
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/press.php';

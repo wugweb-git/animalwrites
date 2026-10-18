@@ -189,6 +189,12 @@ function aw_listing_schema( $id ) {
 	if ( $ids ) {
 		$org['identifier'] = 1 === count( $ids ) ? $ids[0] : $ids;
 	}
+	if ( function_exists( 'aw_featured_subject_schema' ) && aw_featured_subject_schema( $id ) ) {
+		$org['subjectOf'] = aw_featured_subject_schema( $id ); // what it is featured in: news, Library, resources, press, campaigns
+	}
+	if ( function_exists( 'aw_org_people_schema' ) && aw_org_people_schema( $id ) ) {
+		$org['member'] = aw_org_people_schema( $id ); // volunteers shown on the page (OrganizationRole, roleName Volunteer)
+	}
 	return array_filter( $org );
 }
 
@@ -1052,6 +1058,12 @@ function aw_schema_nodes() {
 		$nodes = array_merge( $nodes, aw_page_lists_schema_nodes( get_queried_object_id() ) ); // a section page of several lists (Adoption)
 	} elseif ( aw_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
+	}
+	if ( $nodes && is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) ) && function_exists( 'aw_featured_mentions_schema' ) ) {
+		$mentions = aw_featured_mentions_schema( get_queried_object_id() ); // the organisations it features (featured.php)
+		if ( $mentions ) {
+			$nodes[0]['mentions'] = array_merge( (array) ( $nodes[0]['mentions'] ?? array() ), $mentions );
+		}
 	}
 	return array_values( array_filter( $nodes ) );
 }

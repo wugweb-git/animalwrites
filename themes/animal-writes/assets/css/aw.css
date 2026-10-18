@@ -368,6 +368,8 @@ body { background: var(--kit-color-canvas); }
 .aw-org-links-group h2 { font-size: var(--kit-type-h, 1.25rem); margin: 0 0 var(--kit-space-2, .5rem); }
 .aw-org-links-group ul { margin: 0; padding-inline-start: 1.1em; }
 .aw-org-links-group li { margin-block: var(--kit-space-1, .25rem); }
+.aw-featured-type { font-size: var(--kit-type-xs, .75rem); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--kit-color-muted); margin-inline-end: .35em; }
+.aw-featured-item .aw-date { margin-inline-start: .35em; color: var(--kit-color-muted); font-size: var(--kit-type-sm, .875rem); }
 .aw-org-claim { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-org-claim a { display: inline-flex; align-items: center; min-height: var(--kit-size-target, 44px); }
 

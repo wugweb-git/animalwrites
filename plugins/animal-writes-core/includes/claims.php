@@ -393,6 +393,9 @@ add_action(
 				update_post_meta( $lid, 'aw_featured', 1 );
 				update_post_meta( $lid, 'aw_featured_until', wp_date( 'Y-m-d', time() + AW_FEATURE_DAYS * DAY_IN_SECONDS ) );
 			}
+			if ( function_exists( 'aw_org_people_from_claim' ) ) {
+				aw_org_people_from_claim( $id, $lid ); // the claimant becomes one of its people, not shown (org-people.php)
+			}
 			update_post_meta( $id, 'aw_c_status', 'approved' );
 		} else {
 			update_post_meta( $id, 'aw_c_status', 'rejected' );

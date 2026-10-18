@@ -32,7 +32,7 @@ const AW_SERVICES = array( 'rescue' => 'Rescue', 'treatment' => 'Treatment / vet
 function aw_relations() {
 	return array(
 		'aw_rel_legal'    => array( array( 'aw_news' ), 'aw_legal', 'Legal Watch items in this story', 'News about this', 0 ),
-		'aw_rel_org'      => array( array( 'aw_news' ), 'aw_listing', 'Organisations in this story', 'News mentions', 0 ),
+		'aw_rel_org'      => array( array( 'aw_news', 'aw_legal', 'post', 'aw_press', 'aw_campaign' ), 'aw_listing', 'Organisations featured', 'Featured in', 0 ), // "Featured in" on the organisation's page (featured.php)
 		'aw_organiser'    => array( array( 'aw_campaign' ), 'aw_listing', 'Organiser', 'Campaigns organised', 1 ),
 		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0 ),
 		'aw_organisation' => array( array( 'aw_opportunity' ), 'aw_listing', 'Organisation', 'Opportunities', 1 ),
@@ -192,6 +192,9 @@ function aw_related_box( $post ) {
 		}
 		echo '</ul><input type="search" class="regular-text aw-rel-q" placeholder="Search to add"><ul class="aw-rel-hits"></ul></div></td></tr>';
 	}
+	if ( function_exists( 'aw_featured_admin_rows' ) ) {
+		aw_featured_admin_rows( $post ); // organisations found in the text, each with a tick
+	}
 	if ( 'post' === $post->post_type ) {
 		$cur = array_map( 'intval', (array) get_post_meta( $post->ID, 'aw_rel_listing_type', false ) );
 		echo '<tr><th>Listing types</th><td>';
@@ -340,8 +343,8 @@ add_action(
 /* ---------- Organisation profile (restructure Phase 8) ---------- */
 
 /**
- * [aw_org_links]: on a listing, what links to it — campaigns it organised or joined, its open opportunities and
- * news that mentions it — plus "Claim or update this listing". Each group shows only when it has something.
+ * [aw_org_links]: on a listing, what links to it — campaigns it organised or joined, its open opportunities, what it is
+ * featured in (featured.php) and its volunteers shown by choice (org-people.php). Each group shows only when it has something.
  */
 add_shortcode(
 	'aw_org_links',
@@ -363,7 +366,6 @@ add_shortcode(
 			'Campaigns organised' => $find( 'aw_organiser', 'aw_campaign' ),
 			'Campaigns joined'    => $find( 'aw_participant', 'aw_campaign' ),
 			'Open opportunities'  => $find( 'aw_organisation', 'aw_opportunity', $open ),
-			'In the news'         => $find( 'aw_rel_org', 'aw_news' ),
 		);
 		$html = '';
 		foreach ( $groups as $label => $posts ) {
@@ -376,6 +378,8 @@ add_shortcode(
 			}
 			$html .= '</ul></section>';
 		}
+		$html .= function_exists( 'aw_featured_html' ) ? aw_featured_html( $id ) : ''; // news, Library, resources, press, campaigns (featured.php)
+		$html .= function_exists( 'aw_org_people_html' ) ? aw_org_people_html( $id ) : ''; // volunteers shown by choice (org-people.php)
 		return $html ? '<div class="aw-org-links">' . $html . '</div>' : ''; // claiming is in the "Is this your organisation?" card
 	}
 );
