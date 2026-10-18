@@ -15,7 +15,7 @@
    "states": [
     "lead",
     "row",
-    "no picture (logo or placeholder)",
+    "no picture (stacked row: meta, title, summary)",
     "video (play mark)"
    ],
    "tokens": [],

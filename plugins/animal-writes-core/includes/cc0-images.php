@@ -95,6 +95,11 @@ function aw_cc0_run() {
 
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
 	$local = aw_source_localise_run( 25, 60 );
+	// 0c. Documents whose source is a PDF: the first page as their picture.
+	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
+		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
+		aw_source_pdf_cover( (int) $pid );
+	}
 
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
@@ -204,8 +209,14 @@ function aw_source_og_image( $page ) {
 	if ( preg_match( '#(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|embed/|live/)|youtu\.be/)([A-Za-z0-9_-]{11})#', $page, $yt ) ) {
 		return 'https://i.ytimg.com/vi/' . $yt[1] . '/hqdefault.jpg';
 	}
+	// PIB: every release declares the same site picture; the release's own first photo is the item's (owner, 18 Oct 2026).
+	if ( preg_match( '#^https?://(www\.)?pib\.gov\.in/#i', $page ) ) {
+		$r = wp_remote_get( $page, array( 'timeout' => 15, 'user-agent' => AW_PRESS_UA ) ); // a browser's agent: PIB refuses bot-style ones
+		$h = is_wp_error( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
+		return preg_match( '#<img[^>]+src=["\'](https://static\.pib\.gov\.in/WriteReadData/userfiles/image/[^"\']+)#i', $h, $m ) ? esc_url_raw( $m[1] ) : '';
+	}
 	// Link-preview crawlers first (social sites and many publishers give them the real picture), then a browser.
-	foreach ( array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0', 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)' ) as $ua ) {
+	foreach ( array( 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0', AW_PRESS_UA ) as $ua ) { // then a browser (owner, 17 Oct 2026)
 		$url = aw_source_og_image_as( $page, $ua );
 		if ( '' !== $url && ! ( function_exists( 'aw_press_is_platform_image' ) && aw_press_is_platform_image( $url ) ) ) {
 			return $url;
@@ -285,6 +296,7 @@ function aw_source_og_run( $limit = 40 ) {
 			break;
 		}
 		$found = aw_source_og_image( (string) get_post_meta( $id, 'aw_source_url', true ) );
+		$found = '' !== $found ? $found : aw_source_also_image( (int) $id ); // another report of the same story
 		$have  = (string) get_post_meta( $id, 'aw_source_image', true );
 		update_post_meta( $id, 'aw_source_og_tried', current_time( 'mysql', true ) );
 		update_post_meta( $id, 'aw_source_og_result', '' === $found ? 'none' : ( $found === $have ? 'same as the broken one' : $found ) );
@@ -302,6 +314,73 @@ function aw_source_og_run( $limit = 40 ) {
 		sleep( 1 ); // one source page a second
 	}
 	return $stored;
+}
+
+/**
+ * The picture of a story reported by several publishers: the first other report whose page has one (owner, 18 Oct
+ * 2026: a story from more than one source takes its picture from another when its own has none).
+ */
+function aw_source_also_image( $post_id ) {
+	foreach ( array_filter( (array) get_post_meta( $post_id, 'aw_also_reported', true ) ) as $a ) {
+		$url = is_array( $a ) ? (string) ( $a['url'] ?? '' ) : (string) $a;
+		$img = '' !== $url ? aw_source_og_image( $url ) : '';
+		if ( '' !== $img ) {
+			return $img;
+		}
+	}
+	return '';
+}
+
+/**
+ * A document whose source is a PDF (AWBI circulars and the like): its first page as its picture, the Library's
+ * "preview only (not hosted)" state (aw_doc_preview). Replaces a stand-in CC0 photo; the old one is kept in aw_cc0_prev.
+ *
+ * @return int Attachment ID, or 0.
+ */
+function aw_source_pdf_cover( $post_id ) {
+	$src = (string) get_post_meta( $post_id, 'aw_source_url', true );
+	if ( ! preg_match( '#^https?://[^?#]+\.pdf(\?|$)#i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || ! class_exists( 'Imagick' ) ) {
+		return 0;
+	}
+	$pdf = aw_source_download( $src );
+	if ( is_wp_error( $pdf ) || '%PDF' !== (string) file_get_contents( $pdf, false, null, 0, 4 ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
+		is_string( $pdf ) && @unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	try {
+		$im = new Imagick();
+		$im->setResolution( 150, 150 );
+		$im->readImage( $pdf . '[0]' );
+		$im->setImageBackgroundColor( 'white' );
+		$im = $im->mergeImageLayers( Imagick::LAYERMETHOD_FLATTEN );
+		if ( $im->getImageWidth() > 1600 ) {
+			$im->resizeImage( 1600, 0, Imagick::FILTER_LANCZOS, 1 );
+		}
+		$im->setImageFormat( 'jpeg' );
+		$im->setImageCompressionQuality( 82 );
+		$jpg = wp_tempnam( 'aw-page' );
+		$im->writeImage( $jpg );
+		$im->clear();
+	} catch ( Exception $e ) {
+		@unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	@unlink( $pdf ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	require_once ABSPATH . 'wp-admin/includes/media.php';
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$att = media_handle_sideload( array( 'name' => substr( sanitize_title( get_post_field( 'post_name', $post_id ) ?: 'document-' . $post_id ), 0, 80 ) . '-page-1.jpg', 'tmp_name' => $jpg ), $post_id, get_the_title( $post_id ) . ', page 1' );
+	if ( is_wp_error( $att ) ) {
+		@unlink( $jpg ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		return 0;
+	}
+	update_post_meta( $att, '_wp_attachment_image_alt', 'Page 1 of ' . wp_strip_all_tags( get_the_title( $post_id ) ) );
+	$old = (int) get_post_thumbnail_id( $post_id );
+	if ( $old ) {
+		update_post_meta( $post_id, 'aw_cc0_prev', $old );
+	}
+	set_post_thumbnail( $post_id, $att );
+	update_post_meta( $post_id, 'aw_doc_preview', (int) $att );
+	return (int) $att;
 }
 
 /**

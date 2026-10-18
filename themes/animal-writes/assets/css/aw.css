@@ -554,6 +554,7 @@ body { background: var(--kit-color-canvas); }
 .aw-story--external .kit-story-media.is-failed > img:not(.aw-story-logo) { display: none; }
 .aw-story-logo { width: var(--kit-space-7); height: var(--kit-space-7); object-fit: contain; }
 .aw-story-fallback img.aw-story-logo { object-fit: contain; } /* a publisher's logo standing in for a photo stays whole inside the card frame (logos are never masked) */
+.kit-card-media.is-logo { position: relative; } .kit-card-media.is-logo .aw-story-fallback { display: flex; } .kit-card-media.is-logo .aw-story-logo { width: 40%; height: 40%; } /* an organisation's logo standing in for an Opportunity's picture, whole */
 .aw-story-play { position: absolute; left: var(--kit-space-3); bottom: var(--kit-space-3); display: inline-flex; align-items: center; justify-content: center; width: var(--s-10); height: var(--s-10); border-radius: var(--radius-full); background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .aw-story--external .aw-story-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the one link */
 .aw-story--external .aw-story-title .kit-ico { --kit-ico-size: 0.8em; vertical-align: baseline; }

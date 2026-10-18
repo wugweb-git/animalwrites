@@ -72,7 +72,16 @@ foreach ( $ids as $id ) {
 		$add( $type, 'has its own document page (kept)' );
 		continue;
 	}
+	if ( preg_match( '#\.pdf(\?|$)#i', $src ) ) { // a PDF: its first page
+		$ok = $apply ? (bool) aw_source_pdf_cover( (int) $id ) : class_exists( 'Imagick' );
+		$add( $type, $ok ? 'first page of the PDF' : 'still missing' );
+		if ( ! $ok ) {
+			$miss[] = array( $id, $type, get_the_title( $id ), $src );
+		}
+		continue;
+	}
 	$img  = aw_source_og_image( $src );
+	$img  = '' !== $img ? $img : aw_source_also_image( (int) $id ); // another report of the same story
 	$have = (string) get_post_meta( $id, 'aw_source_image', true );
 	$ok   = '' !== $img && ! isset( $shared[ $img ] ); // the same picture as before is checked again (the check now reads the file's bytes)
 	if ( $ok && $apply ) {
@@ -94,6 +103,23 @@ foreach ( $ids as $id ) {
 		$miss[] = array( $id, $type, get_the_title( $id ), $src );
 	}
 	usleep( 300000 );
+}
+
+// 2b. Opportunities with no picture: their organisation's own logo (Directory listing, else its website's icon).
+foreach ( get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+	if ( has_post_thumbnail( $id ) || get_post_meta( $id, 'aw_org_logo', true ) || aw_item_image( $id ) ) {
+		continue;
+	}
+	$org  = (int) get_post_meta( $id, 'aw_organisation', true );
+	$logo = $org ? (int) get_post_thumbnail_id( $org ) : 0;
+	$site = $org ? (string) get_post_meta( $org, 'aw_website', true ) : '';
+	if ( ! $logo && $site && $apply ) {
+		$logo = (int) aw_press_site_logo( $site );
+	}
+	$add( 'aw_opportunity', $logo || ( ! $apply && $site ) ? 'organisation logo' : 'no organisation logo' );
+	if ( $logo && $apply ) {
+		update_post_meta( $id, 'aw_org_logo', $logo );
+	}
 }
 
 // 3. Linked publisher pictures into the Media Library.
