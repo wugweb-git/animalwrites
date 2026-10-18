@@ -1330,8 +1330,8 @@ body { background: var(--kit-color-canvas); }
 .aw-date { white-space: nowrap; }
 /* Guide disclaimer ("This guide is general information, not legal advice."): the Kits "Note" look. */
 .aw-guide-disclaimer { margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
-/* About page (page 58): four full-width bands. Who we are on the page canvas, What we do on white, Why we do it on ink
-   (the home page's story band: yellow rule over the heading), How you can help on cream. Module cards and action tiles
+/* About page (page 58): four full-width bands. Who we are on the page canvas, What we do on white, Why we do it on ink,
+   How you can help on cream. Module cards and action tiles
    are clickable as a whole; hover and focus darken the border. */
 .wp-block-post-content > .aw-about-band { width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) !important; padding: var(--kit-space-section) var(--kit-space-gutter); }
 .wp-block-post-content > .aw-about-band + .aw-about-band { margin-top: 0 !important; }
@@ -1347,7 +1347,6 @@ body { background: var(--kit-color-canvas); }
 .aw-about-band--ink { background: var(--kit-color-ink); color: color-mix(in srgb, var(--kit-color-on-ink) 85%, transparent); }
 .aw-about-band--ink :is(h2, h3, .aw-about-pivot) { color: var(--kit-color-on-ink) !important; }
 .aw-about-band--ink .is-style-kits-label { color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }
-.aw-about-band--ink h2 { padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-accent); }
 /* Who we are: photograph at 4:3 beside the story; the text column first on phones */
 .aw-about-who .wp-block-columns { margin: 0; }
 .aw-about-who .wp-block-column > * + * { margin-block-start: var(--kit-space-4); }
