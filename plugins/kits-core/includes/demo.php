@@ -280,7 +280,7 @@ add_action(
 				. 'var root=document.querySelector(".kit-demo");if(!root)return;var first=root.querySelector(":scope>section");if(first&&first.nextElementSibling)first.hidden=true;'
 				. 'root.querySelectorAll("h2").forEach(function(h){h.hidden=true;if(h.nextElementSibling&&h.nextElementSibling.tagName==="P")h.nextElementSibling.hidden=true;});var keep=0;'
 				. 'root.querySelectorAll("h3.kit-demo-h").forEach(function(h){if(h.closest("[hidden]"))return;var g=[h],n=h.nextElementSibling;while(n&&!n.matches("h3.kit-demo-h,h2,section")){g.push(n);n=n.nextElementSibling;}'
-				. 'var hit=(nm&&h.textContent.trim().indexOf(nm)===0)||(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
+				. 'var hit=(nm&&h.textContent.trim().replace(/^[0-9]+[a-z]?\s+/,"").indexOf(nm)===0)||(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
 				. 'if(!keep){var u=q.get("kits_spot_url")||"none";if(u==="none"){root.insertAdjacentHTML("afterbegin","<p style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not drawn on the states sheet and not found on the sample pages: it may appear only in a state, a form step or wp-admin.</p>");}else{location.replace(u+(u.indexOf("?")>-1?"&":"?")+"kits_spot="+encodeURIComponent(sel||(".wp-block-"+blk.replace("/","-"))));}}})();</script>';
 		}
 		if ( isset( $_GET['kits_spot'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
