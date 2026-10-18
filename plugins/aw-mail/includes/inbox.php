@@ -487,6 +487,9 @@ function aw_mail_compose_screen( $s, $mode ) {
 			$quote = '<p></p><p>' . esc_html( 'forward' === $mode ? '---------- Forwarded message ----------' : 'On ' . $when . ', ' . aw_mail_who( $m['from'] ?? array() ) . ' wrote:' ) . '</p><blockquote>' . $body . '</blockquote>';
 		}
 	}
+	if ( 'new' !== $mode && isset( $boxes['support'] ) && 'vedanshu' === $from ) {
+		$from = 'support'; // replies go from support@ (or contact@ once it is a mailbox), never from vedanshu@
+	}
 	$sig    = function_exists( 'aw_mail_profile' ) ? trim( (string) aw_mail_profile( $boxes[ $from ] ?? '' )['signature'] ) : '';
 	$start  = '<p></p>' . ( '' !== $sig ? '<div class="signature">' . wp_kses_post( $sig ) . '</div>' : '' ) . $quote;
 	$title  = array( 'new' => 'New message', 'reply' => 'Reply', 'all' => 'Reply all', 'forward' => 'Forward' )[ $mode ];
@@ -506,17 +509,17 @@ function aw_mail_compose_screen( $s, $mode ) {
 	wp_editor( $start, 'awm_body', array( 'textarea_name' => 'body', 'media_buttons' => false, 'textarea_rows' => 18, 'editor_height' => 360 ) );
 	echo '</div></div><div id="postbox-container-1" class="postbox-container">';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Send</h2></div><div class="inside"><p><label for="awm-from"><strong>From</strong></label><br>';
-	echo '<select id="awm-from" name="from" style="width:100%"' . ( $ref ? ' disabled' : '' ) . '>';
+	echo '<select id="awm-from" name="from" style="width:100%">';
 	foreach ( $boxes as $k => $a ) {
 		$p = function_exists( 'aw_mail_profile' ) ? aw_mail_profile( $a )['name'] : '';
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $from, false ) . '>' . esc_html( ( '' !== $p ? $p . ' – ' : '' ) . $a ) . '</option>';
 	}
-	echo '</select>' . ( $ref ? '<input type="hidden" name="from" value="' . esc_attr( $from ) . '"><span class="description">Replies go from the mailbox the message is in.</span>' : '' ) . '</p>';
+	echo '</select>' . ( $ref ? '<span class="description">Sent from a different mailbox than the one the message is in, the reply carries no thread link (most mail apps still group it by subject).</span>' : '' ) . '</p>';
 	echo '<div id="major-publishing-actions" style="margin:12px -12px -12px;display:flex;justify-content:space-between;align-items:center"><div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( $cancel ) . '">Discard</a></div><div id="publishing-action"><button type="submit" class="button button-primary button-large">Send</button></div></div>';
 	echo '</div></div>';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Attachments</h2></div><div class="inside"><input type="file" id="awm-files" name="files[]" multiple><p class="description">Up to 10 MB in total.' . ( 'forward' === $mode ? ' The forwarded message\'s attachments are included.' : '' ) . '</p></div></div>';
 	echo '</div></div></div></form>';
-	if ( ! $ref && function_exists( 'aw_mail_profile' ) ) {
+	if ( function_exists( 'aw_mail_profile' ) ) {
 		// Switching From swaps in that mailbox's signature.
 		$sigs = array();
 		foreach ( $boxes as $k => $a ) {
@@ -731,7 +734,7 @@ function aw_mail_send_from_form( $in, $refbox ) {
 	$cc    = aw_mail_parse_addrs( $in['cc'] ?? '' );
 	$bcc   = aw_mail_parse_addrs( $in['bcc'] ?? '' );
 	$subj  = sanitize_text_field( (string) ( $in['subject'] ?? '' ) );
-	$html  = wp_kses_post( (string) ( $in['body'] ?? '' ) );
+	$html  = wpautop( wp_kses_post( (string) ( $in['body'] ?? '' ) ) ); // the editor saves line breaks as newlines
 	$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => 'inbox' ), admin_url( 'admin.php' ) );
 	$retry = wp_get_referer() ? wp_get_referer() : $back;
 	if ( ! $to || ( '' === $subj && '' === trim( wp_strip_all_tags( $html ) ) ) ) {
@@ -756,11 +759,13 @@ function aw_mail_send_from_form( $in, $refbox ) {
 	if ( $bcc ) {
 		$req['bcc'] = $bcc;
 	}
-	$ref = explode( '|', (string) ( $in['ref'] ?? '' ) );
-	if ( 2 === count( $ref ) && preg_match( '/^INBOX(\.[\w .-]+)?$/', $ref[0] ) && absint( $ref[1] ) ) {
-		$from = isset( $boxes[ $refbox ] ) ? $refbox : $from; // a reply goes from the mailbox the message is in
-		$r    = array( 'uid' => absint( $ref[1] ), 'folder' => $ref[0] );
-		$req[ 'forward' === $mode ? 'forwardOf' : 'inReplyTo' ] = $r;
+	$ref  = explode( '|', (string) ( $in['ref'] ?? '' ) );
+	$orig = null; // the message replied to or forwarded: [mailbox key, folder, uid]
+	if ( 2 === count( $ref ) && preg_match( '/^INBOX(\.[\w .-]+)?$/', $ref[0] ) && absint( $ref[1] ) && isset( $boxes[ $refbox ] ) ) {
+		$orig = array( $refbox, $ref[0], absint( $ref[1] ) );
+		if ( $refbox === $from ) { // the API threads only within one mailbox
+			$req[ 'forward' === $mode ? 'forwardOf' : 'inReplyTo' ] = array( 'uid' => $orig[2], 'folder' => $orig[1] );
+		}
 	}
 	// Attachments: uploaded files, and a forwarded message's own.
 	$atts  = array();
@@ -777,13 +782,13 @@ function aw_mail_send_from_form( $in, $refbox ) {
 			$atts[] = array( 'filename' => $name, 'content' => base64_encode( $bin ), 'contentType' => $type ? $type : 'application/octet-stream' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
 		}
 	}
-	if ( 'forward' === $mode && isset( $req['forwardOf'] ) ) {
-		$msg = aw_mail_get( $from, $req['forwardOf']['folder'], $req['forwardOf']['uid'] );
+	if ( 'forward' === $mode && $orig ) {
+		$msg = aw_mail_get( $orig[0], $orig[1], $orig[2] );
 		foreach ( (array) ( $msg['m']['attachments'] ?? array() ) as $a ) {
 			if ( $total + (int) ( $a['sizeBytes'] ?? 0 ) > 10485760 ) {
 				continue;
 			}
-			list( $code, $bin ) = aw_mail_call( 'GET', aw_mail_fpath( $from, $req['forwardOf']['folder'] ) . '/messages/' . (int) $req['forwardOf']['uid'] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
+			list( $code, $bin ) = aw_mail_call( 'GET', aw_mail_fpath( $orig[0], $orig[1] ) . '/messages/' . (int) $orig[2] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
 			if ( 200 === $code ) {
 				$total += strlen( $bin );
 				$one    = array( 'filename' => sanitize_file_name( (string) ( $a['filename'] ?? 'attachment' ) ), 'content' => base64_encode( $bin ), 'contentType' => (string) ( $a['contentType'] ?? 'application/octet-stream' ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
@@ -806,13 +811,18 @@ function aw_mail_send_from_form( $in, $refbox ) {
 		wp_safe_redirect( add_query_arg( 'aw_done', 'fail', $retry ) );
 		exit;
 	}
+	if ( $orig && ! isset( $req['inReplyTo'] ) && ! isset( $req['forwardOf'] ) ) {
+		// Sent from another mailbox: flag the original Answered / Forwarded ourselves, as webmail would.
+		aw_mail_call( 'PATCH', aw_mail_fpath( $orig[0], $orig[1] ) . '/messages/' . $orig[2], array( 'addFlags' => array( 'forward' === $mode ? '$Forwarded' : '\\Answered' ) ) );
+		delete_transient( 'aw_mail_folders_' . $orig[0] );
+	}
 	$log[] = time();
 	update_option( 'aw_mail_send_log', $log, false ); // times only: no addresses, subjects or text
 	if ( $item && 'aw_message' === get_post_type( $item ) ) {
 		update_post_meta( $item, 'aw_m_replied', current_time( 'mysql' ) );
 	}
 	delete_transient( 'aw_mail_folders_' . $from );
-	$dest = isset( $req['inReplyTo'] ) || isset( $req['forwardOf'] ) ? add_query_arg( array( 'page' => 'aw-mail', 'box' => 'all', 'folder' => aw_mail_role_of( ( $req['inReplyTo'] ?? $req['forwardOf'] )['folder'] ) ), admin_url( 'admin.php' ) ) : add_query_arg( array( 'page' => 'aw-mail', 'box' => 'all', 'folder' => 'sent' ), admin_url( 'admin.php' ) );
+	$dest = add_query_arg( array( 'page' => 'aw-mail', 'box' => 'all', 'folder' => $orig ? aw_mail_role_of( $orig[1] ) : 'sent' ), admin_url( 'admin.php' ) );
 	wp_safe_redirect( add_query_arg( 'aw_done', 'sent', $dest ) );
 	exit;
 }
