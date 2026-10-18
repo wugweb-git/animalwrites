@@ -58,6 +58,13 @@
 	--dg-raised: var(--kit-color-raised, #fff);
 }
 
+/* Brand colour (owner, 18 Oct 2026: "use correct brand color"): on this page the marks (rail stops, icons, rules,
+   rings, the outcome label) are the campaign orange #ffa500, not the darker #9a5b00; text stays ink. Plain bands are
+   white (owner: "you can also use white bg"), paper bands stay the campaign surface. */
+.aw-camp.aw-camp--community-dogs { --camp-mark: var(--camp-primary); --dg-band: var(--dg-raised); }
+.aw-camp.aw-camp--community-dogs > .aw-camp-section:not(.aw-camp-paper, .aw-camp-dark, .aw-camp-hero) { background: var(--dg-band); }
+.aw-camp.aw-camp--community-dogs .aw-camp-dates .is-key .aw-camp-dates-when { color: var(--camp-dark); }
+
 /* Sections: bands meet edge to edge; a grid column of 1120px instead of centred blocks, so text lines start on one
    edge; two plain bands in a row get a rule between them */
 .aw-camp.aw-camp--community-dogs > .aw-camp-section {
@@ -129,7 +136,7 @@
 
 /* ---------- Campaign goal: the heading beside two statements, the outcome under them ---------- */
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) { max-width: 40ch; margin: 0 !important; font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem); font-weight: 500; line-height: 1.3; letter-spacing: -0.015em; }
-.aw-camp.aw-camp--community-dogs #campaign-goal > p strong { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-mark); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); letter-spacing: 0; }
+.aw-camp.aw-camp--community-dogs #campaign-goal > p strong { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-dark); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); letter-spacing: 0; }
 .aw-camp.aw-camp--community-dogs #campaign-goal > p:not(.aw-camp-status) + p:not(.aw-camp-status) { margin-top: var(--kit-space-5) !important; padding-top: var(--kit-space-5); border-top: 1px solid var(--dg-line); }
 .aw-camp.aw-camp--community-dogs #campaign-goal > .aw-camp-status { margin-top: var(--kit-space-5) !important; }
 @media (min-width: 1200px) {
@@ -140,12 +147,12 @@
 
 /* Status labels off the hero: rings and fills in the mark colour (the hero's white ring disappears on paper) */
 .aw-camp.aw-camp--community-dogs .aw-camp-section:not(.aw-camp-hero) :is(.aw-camp-status-outcome, .aw-camp-status-asof) { box-shadow: inset 0 0 0 1px var(--camp-mark); color: var(--camp-dark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-status-window { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-camp.aw-camp--community-dogs .aw-camp-section:not(.aw-camp-hero) .aw-camp-status-window { background: var(--camp-primary); color: #ffffff; }
 .aw-camp.aw-camp--community-dogs .aw-camp-status > .aw-camp-impact-evidence { display: inline; padding: 0; border-radius: 0; font-weight: var(--kit-weight-regular); }
 
 /* ---------- Why it mattered: three short points and the long one as a dark card across the row ---------- */
 .aw-camp.aw-camp--community-dogs #why-it-matters .is-layout-grid { gap: var(--kit-space-4); }
-.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card { display: flex; flex-direction: column; padding: clamp(1.5rem, 1.2rem + 1vw, 2rem); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp.aw-camp--community-dogs #why-it-matters .aw-card { display: flex; flex-direction: column; padding: clamp(1.5rem, 1.2rem + 1vw, 2rem); border-radius: var(--kit-radius-card); background: var(--camp-surface); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card > * { margin: 0 0 var(--kit-space-3) !important; }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card > :last-child { margin-bottom: 0 !important; }
 .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card::before { content: ""; display: block; flex: none; width: 2rem; height: 2rem; margin-bottom: var(--kit-space-5); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
@@ -200,8 +207,8 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline { grid-template-columns: 1fr; gap: 0; margin: var(--kit-space-6) 0 0; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline li { position: relative; margin: 0; padding: 0 0 var(--kit-space-5) var(--kit-space-6); border: 0; border-left: 2px solid var(--dg-line); }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li::before { content: ""; position: absolute; left: -0.5625rem; top: 0.3rem; width: 1rem; height: 1rem; box-sizing: border-box; border-radius: 50%; background: var(--kit-color-bg); box-shadow: inset 0 0 0 3px var(--camp-mark); }
-.aw-camp.aw-camp--community-dogs .aw-camp-timeline li.is-key::before { left: -0.8125rem; top: 0.1rem; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); box-shadow: 0 0 0 4px var(--kit-color-bg); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline li::before { content: ""; position: absolute; left: -0.5625rem; top: 0.3rem; width: 1rem; height: 1rem; box-sizing: border-box; border-radius: 50%; background: var(--dg-raised); box-shadow: inset 0 0 0 3px var(--camp-mark); }
+.aw-camp.aw-camp--community-dogs .aw-camp-timeline li.is-key::before { left: -0.8125rem; top: 0.1rem; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); box-shadow: 0 0 0 4px var(--dg-raised); }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when { font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem); line-height: 1.2; white-space: nowrap; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-when .kit-ico { --kit-ico-size: 0.75em; }
 .aw-camp.aw-camp--community-dogs .aw-camp-timeline .aw-camp-dates-what { display: block; margin-top: var(--kit-space-1); max-width: 34ch; }
@@ -224,8 +231,8 @@
 @media (min-width: 1200px) { .aw-camp.aw-camp--community-dogs .aw-camp-results { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .aw-camp.aw-camp--community-dogs #impact > ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-4); }
 .aw-camp.aw-camp--community-dogs #impact > p:not(.aw-camp-status) { margin: 0 0 var(--kit-space-4) !important; font-weight: var(--kit-weight-strong); }
-.aw-camp.aw-camp--community-dogs #impact > ul li, .aw-camp.aw-camp--community-dogs #press ul li { color: var(--camp-meta); font-size: var(--kit-type-sm); }
-.aw-camp.aw-camp--community-dogs #impact > ul li a, .aw-camp.aw-camp--community-dogs #press ul li a { display: block; margin-bottom: var(--kit-space-1); color: var(--kit-color-text); font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.35; }
+.aw-camp.aw-camp--community-dogs #impact > ul li { color: var(--camp-meta); font-size: var(--kit-type-sm); }
+.aw-camp.aw-camp--community-dogs #impact > ul li a { display: block; margin-bottom: var(--kit-space-1); color: var(--kit-color-text); font-size: var(--kit-type-base); font-weight: var(--kit-weight-strong); line-height: 1.35; }
 .aw-camp.aw-camp--community-dogs #impact > .aw-camp-impact { margin: 0 !important; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); gap: var(--kit-space-3); }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs #impact { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--kit-space-7); }
@@ -257,30 +264,16 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure a:hover img { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 .aw-camp.aw-camp--community-dogs .aw-camp-partner-logos > figure figcaption { position: static !important; max-height: none !important; margin: 0 !important; padding: var(--kit-space-2) 0 0 !important; background: none !important; color: var(--kit-color-text) !important; font-size: var(--kit-type-sm); line-height: 1.3; text-align: center; text-shadow: none !important; overflow: visible !important; }
 
-/* ---------- Media coverage: the reports as clippings, headline first, the paper and date under it ---------- */
-.aw-camp.aw-camp--community-dogs #press ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
-@media (min-width: 768px) { .aw-camp.aw-camp--community-dogs #press ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.aw-camp.aw-camp--community-dogs #press ul li { margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--dg-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); letter-spacing: 0.01em; }
-.aw-camp.aw-camp--community-dogs #press ul li { position: relative; transition: box-shadow var(--kit-motion-fast, 150ms) var(--kit-motion-ease, ease); }
-.aw-camp.aw-camp--community-dogs #press ul li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
-.aw-camp.aw-camp--community-dogs #press ul li a { font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); letter-spacing: -0.01em; text-wrap: pretty; text-decoration: none; }
-.aw-camp.aw-camp--community-dogs #press ul li a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole clipping is the link */
-.aw-camp.aw-camp--community-dogs #press ul li:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+/* ---------- Media coverage and News and guides: the Media & PR, News and Resources sections' own cards ---------- */
+.aw-camp.aw-camp--community-dogs .aw-camp-cards { margin: 0 0 var(--kit-space-7) !important; }
+.aw-camp.aw-camp--community-dogs .aw-camp-cards:last-child { margin-bottom: 0 !important; }
+.aw-camp.aw-camp--community-dogs .aw-camp-section .kit-ed-head { margin: 0 0 var(--kit-space-6) !important; }
+.aw-camp.aw-camp--community-dogs .aw-camp-section .kit-ed-head h3 { margin: 0 !important; }
+.aw-camp.aw-camp--community-dogs .aw-camp-section .kit-ed-head h2 { margin: 0 !important; }
 
 /* ---------- Read the law and the record: the Kits card arrow gets its own space ---------- */
 .aw-camp.aw-camp--community-dogs .aw-camp-docs-q li { align-items: center; background: var(--dg-raised); padding-right: calc(36px + 2 * var(--kit-space-4)); }
 .aw-camp.aw-camp--community-dogs .aw-camp-docs-q li::after { top: 50%; bottom: auto; right: var(--kit-space-4); transform: translateY(-50%); }
-
-/* ---------- News and guides: the guides in columns over the full width ---------- */
-@media (min-width: 768px) {
-	.aw-camp.aw-camp--community-dogs #news > .kit-ed-list .wp-block-post-template { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-6); align-items: start; }
-	.aw-camp.aw-camp--community-dogs #news > .kit-ed-list .wp-block-post-template > li { max-width: none; }
-	.aw-camp.aw-camp--community-dogs #news > .kit-ed-list .wp-block-post-template > li:nth-child(2) { border-top: 0 !important; padding-top: 0 !important; }
-}
-@media (min-width: 1200px) {
-	.aw-camp.aw-camp--community-dogs #news > .kit-ed-list .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-	.aw-camp.aw-camp--community-dogs #news > .kit-ed-list .wp-block-post-template > li:nth-child(3) { border-top: 0 !important; padding-top: 0 !important; }
-}
 
 /* ---------- Stay connected: the closing band; the two channels as buttons with their icons ---------- */
 .aw-camp.aw-camp--community-dogs #updates > h2 { color: var(--kit-color-on-ink); }

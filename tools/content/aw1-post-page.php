@@ -306,43 +306,50 @@ foreach ( $logos['innerBlocks'] as &$im ) {
 unset( $im );
 $partners = a1sec( 'partners', $ser( $take( 75 ) ) . $ser( $logos ) );
 
-/* ---------- 10 press: the existing list, with dates; LawChakra added ---------- */
-$dates = array( 'indiatvnews.com' => '2025-11-29', 'outlookindia.com' => '2025-11-29', 'deccanherald.com' => '2025-11-29', 'timesofindia.indiatimes.com' => '2025-11-27', 'newindianexpress.com' => '2025-11-30', 'indiatv.in' => '2025-11-29', 'dtnext.in' => '2025-11-30' );
-$plist = $take( 86 );
-foreach ( $plist['innerBlocks'] as &$it ) {
-	$host = preg_replace( '/^www\./', '', (string) wp_parse_url( preg_replace( '#.*href="([^"]+)".*#s', '$1', $it['innerHTML'] ), PHP_URL_HOST ) );
-	if ( isset( $dates[ $host ] ) ) {
-		$h                  = str_replace( '</li>', ' · ' . a1date( $dates[ $host ] ) . '</li>', $it['innerHTML'] );
-		$it['innerHTML']    = $h;
-		$it['innerContent'] = array( $h );
+/* ---------- 10 press: the campaign's coverage as the Media & PR section's own cards (picture, publisher mark,
+   title, date), owner 18 Oct 2026. The news reports only: the campaign tag also covers Instagram and Facebook posts,
+   which "All coverage" lists on the Media & PR page. The old hand-written list (block 86) is no longer printed. ---------- */
+$take( 86 );
+$tq     = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
+$social = '#^https?://([a-z0-9-]+\.)*(instagram\.com|facebook\.com|fb\.watch|youtube\.com|youtu\.be|x\.com|twitter\.com|threads\.net|linkedin\.com)/#i';
+$skip   = array_values(
+	array_filter(
+		get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tag_id' => (int) $tag->term_id ) ),
+		fn( $pid ) => (bool) preg_match( $social, (string) get_post_meta( $pid, 'aw_press_url', true ) )
+	)
+);
+/** A Query Loop of one section's own cards (aw_hub_item(), the section pages' markup), titles at H3 under the section H2. */
+function a1cards( $qid, $type, $per, $tq, $grid, $exclude = array() ) {
+	$q = array( 'perPage' => $per, 'pages' => 0, 'offset' => 0, 'postType' => $type, 'order' => 'desc', 'orderBy' => 'date', 'inherit' => false );
+	if ( $exclude ) {
+		$q['exclude'] = array_map( 'intval', $exclude );
 	}
+	$attrs = wp_json_encode( array( 'queryId' => $qid, 'query' => $q ) );
+	$attrs = substr( $attrs, 0, -2 ) . ',' . $tq . '},"className":"aw-hub-list aw-camp-cards","layout":{"type":"default"}}'; // the campaign tag, as the other loops
+	return '<!-- wp:query ' . $attrs . " -->\n" . '<div class="wp-block-query aw-hub-list aw-camp-cards"><!-- wp:post-template {"className":"' . $grid . '","layout":{"type":"default"}} -->' . "\n"
+		. str_replace( '"level":2', '"level":3', aw_hub_item( $type ) ) . "\n<!-- /wp:post-template --></div>\n<!-- /wp:query -->\n\n";
 }
-unset( $it );
-$lc                     = '<li><a href="https://lawchakra.in/legal-updates/indian-supreme-court-letters-stray-dogs/">Over 50,000 Indians Flood Supreme Court With Handwritten Letters Opposing Stray Dogs Removal Order</a> — LAWCHAKRA · ' . a1date( '2025-12-01' ) . '</li>';
-$plist['innerBlocks'][] = array( 'blockName' => 'core/list-item', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => $lc, 'innerContent' => array( $lc ) );
-$plist['innerContent']  = array_merge( array( $plist['innerContent'][0] ), array_fill( 0, count( $plist['innerBlocks'] ), null ), array( end( $plist['innerContent'] ) ) );
-$press = a1sec( 'press', $ser( $take( 84 ) ) . $ser( $plist ), 'aw-camp-paper' );
+$take( 84 ); // the "Media coverage" heading, as the section head below
+$press = a1sec(
+	'press',
+	a1html( '<header class="kit-ed-head"><div><h2>Media coverage</h2></div><a class="kit-ed-more" href="/media/?tag=campaign-india-writes-community-dogs">All coverage ' . a1i( 'arrow-right' ) . '</a></header>' )
+	. a1cards( 95, 'aw_press', 12, $tq, 'aw-news-grid', $skip ),
+	'aw-camp-paper'
+);
 
 /* ---------- 11 library and 12 news: the campaign tag (pattern of the Campaign 2.0 page) ---------- */
-$tq      = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $library = a1sec(
 	'library',
 	a1h( 'Read the law and the record' )
 	. '<!-- wp:query {"queryId":91,"query":{"perPage":20,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
 	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n"
 );
-$news = a1sec(
+$news = a1sec( // News and guides as the News and Resources sections' own cards (owner, 18 Oct 2026)
 	'news',
 	a1html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/news/?tag=campaign-india-writes-community-dogs">All news ' . a1i( 'arrow-right' ) . '</a></header>' )
-	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
-	. '<!-- wp:query {"queryId":92,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '<!-- wp:query {"queryId":93,"query":{"perPage":9,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
-	. a1h( 'Guides and research', 3 )
-	. '<!-- wp:query {"queryId":94,"query":{"perPage":12,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n"
+	. a1cards( 96, 'aw_news', 6, $tq, 'aw-news-grid' )
+	. a1html( '<header class="kit-ed-head"><div><h3>Guides and research</h3></div><a class="kit-ed-more" href="/resources/?tag=campaign-india-writes-community-dogs">All guides ' . a1i( 'arrow-right' ) . '</a></header>' )
+	. a1cards( 97, 'post', 6, $tq, 'aw-tasks' )
 );
 
 /* ---------- 13 support: none (owner, 17 Oct 2026: the Lessons learned module removed; nothing else in it, so the
