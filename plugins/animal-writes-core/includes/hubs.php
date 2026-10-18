@@ -399,9 +399,7 @@ function aw_hub_item( $type ) {
 <article class="wp-block-group kit-card kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
 
 <!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-body"><!-- wp:animal-writes/task-icon /-->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-task-title"} /-->
+<div class="wp-block-group aw-task-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-task-title"} /-->
 
 <!-- wp:post-excerpt {"excerptLength":22,"className":"aw-task-sum"} /-->
 

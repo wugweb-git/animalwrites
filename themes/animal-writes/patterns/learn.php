@@ -26,9 +26,7 @@
 <div class="wp-block-query aw-hub-list"><!-- wp:post-template {"className":"aw-tasks is-three","layout":{"type":"default"}} -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-task","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-task"><!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-body"><!-- wp:animal-writes/task-icon /-->
-
-<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-task-title"} /-->
+<div class="wp-block-group aw-task-body"><!-- wp:post-title {"level":3,"isLink":true,"className":"aw-task-title"} /-->
 
 <!-- wp:animal-writes/read-meta /--></div>
 <!-- /wp:group --></article>
