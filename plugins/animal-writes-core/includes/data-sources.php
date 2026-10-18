@@ -9,7 +9,7 @@
  * - awol       AWO List compiled by Saumya Garg (Dec 2023 – Jan 2025), schema 1.2: name, address, phone, whether the
  *              organisation said it has a shelter, rescue and treatment, notes from the call.
  * - organisation  What the organisation itself told us (claim approved).
- * - darpan     NGO Darpan (NITI Aayog) data as published by Dataful: Darpan ID, registration, sectors, email.
+ * - darpan     NGO Darpan (NITI Aayog), read from its own search (owner types the CAPTCHA): Darpan ID, registration, sectors.
  * - datagov    data.gov.in (Open Government Data Platform India) datasets.
  * - nalsa      District Legal Services Authorities (NALSA / State Legal Services Authorities): office, address, phone.
  * - gujforest  Gujarat Forest Department (Karuna Abhiyan): permanent bird treatment centres.
@@ -36,7 +36,7 @@ function aw_data_sources() {
 		'gmaps'        => array( 'MAPS', 'Google Maps', '', '' ), // link: the listing's own Google Maps link
 		'ngobase'      => array( 'NGOB', 'ngobase.org', '2026-10-09', '' ), // link: the organisation's ngobase.org profile
 		'organisation' => array( 'ORG', 'The organisation', '', '' ),
-		'darpan'       => array( 'DARPAN', 'NGO Darpan (NITI Aayog) via Dataful', '', '' ),
+		'darpan'       => array( 'DARPAN', 'NGO Darpan (NITI Aayog)', '', 'https://ngodarpan.gov.in/' ),
 		'datagov'      => array( 'OGD', 'data.gov.in', '', '' ),
 		'nalsa'        => array( 'NALSA', 'Legal Services Authority', '', '' ),
 		'gujforest'    => array( 'GUJ', 'Gujarat Forest Department', '', '' ),
