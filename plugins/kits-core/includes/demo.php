@@ -34,6 +34,9 @@ function kits_demo_panel( $suffix = '' ) {
 	$opts = array( array( 'All', '#', false, null ), array( 'Act', '#', true, 9 ), array( 'Rule', '#', false, 7 ), array( 'Judgment', '#', false, 1 ) );
 	$o .= $h( '4 Filter bar (dropdowns, Sort) · 5 Active filters' ) . kits_filter_bar( kits_filter_dropdown( 'Kind', 'kind', array( array( 'Act', 'act', true, 9 ), array( 'Rule', 'rule', false, 7 ), array( 'Judgment', 'judgment', false, 1 ) ) ) . kits_filter_dropdown( 'Category', 'category', array( array( 'Rabies', 'rabies', false, 3 ), array( 'Wildlife', 'wildlife', false, 5 ) ) ), array( array( 'Kind: Act', '#' ) ), '#', kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ) ) ) );
 	$o .= $h( '6 Badge' ) . '<div class="kit-tags">' . kits_badge( 'Verified', 'verified' ) . kits_badge( 'Not yet confirmed', 'unconfirmed' ) . kits_badge( 'Featured', 'featured' ) . kits_badge( 'Sponsored', 'sponsored' ) . kits_badge( 'Advertisement', 'ad' ) . kits_badge( 'Closed', 'closed' ) . kits_badge( 'New', 'new' ) . '</div>';
+	$mi = fn( $ico, $text ) => '<span class="kit-meta-item"><span class="kit-ico kit-ico--' . $ico . '" aria-hidden="true"></span>' . $text . '</span>';
+	$o .= $h( '6b Meta row (date, time, place, author, reading time)' ) . '<p class="kit-meta-row">' . $mi( 'calendar', '<time datetime="2026-10-18">18 Oct 2026</time>' ) . $mi( 'clock', '3 min read' ) . $mi( 'map-pin', 'Pune' ) . $mi( 'user', 'Posted by Blue Cross' ) . '</p>'
+		. '<p class="kit-demo-note">One meta row for every such line: text 12 / 13 / 14px at 0 / 768 / 1200 (<code>--kit-meta-size</code>, "Meta" in the editor), weight 500, the muted colour; icons 16px; 6px icon to text, 16px between items. A date inside a sentence keeps the sentence\'s own text.</p>';
 	$o .= $h( '7 Eyebrow · 8 Count' ) . '<p>' . kits_eyebrow( 'Resources' ) . '</p><p>Act ' . kits_count( 1234 ) . '</p>';
 	$o .= $h( '9 Segmented control' ) . '<nav class="kit-segment" aria-label="Demo"><a href="#" aria-current="true">A–Z</a><a href="#">Most details first</a></nav>';
 	$o .= $h( '10 Button' ) . kits_demo_buttons();
@@ -176,6 +179,26 @@ add_shortcode(
 			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
 			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel( '-site' ) . '</section>'
 			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states
+	}
+);
+
+// The states sheet lives in Appearance > Kits system (owner, 18 Oct 2026): opening the page directly goes there; inside
+// that screen the page is shown without the site's header, footer and ads.
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_page( 'kits-demo' ) && ! isset( $_GET['kits_embed'] ) && current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( admin_url( 'themes.php?page=kits-system&tab=states' ) );
+			exit;
+		}
+	}
+);
+add_action(
+	'wp_head',
+	function () {
+		if ( is_page( 'kits-demo' ) && isset( $_GET['kits_embed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<style>html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,header.wp-block-template-part,footer.wp-block-template-part,.kit-ad,.kit-ad-item{display:none!important}</style>';
+		}
 	}
 );
 

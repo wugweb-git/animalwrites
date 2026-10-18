@@ -112,6 +112,11 @@
 					"size": "clamp(0.75rem, 0.6932rem + 0.2424vw, 0.875rem)"
 				},
 				{
+					"slug": "meta",
+					"name": "Meta",
+					"size": "var(--kit-meta-size)"
+				},
+				{
 					"slug": "small",
 					"name": "Small",
 					"size": "clamp(0.8125rem, 0.7841rem + 0.1212vw, 0.875rem)"

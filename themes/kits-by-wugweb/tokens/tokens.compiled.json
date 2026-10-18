@@ -441,9 +441,9 @@
       "lg": "6px"
     },
     "meta-size": {
-      "sm": "var(--kit-type-xs)",
-      "md": "var(--kit-type-xs)",
-      "lg": "var(--kit-type-xs)"
+      "sm": "12px",
+      "md": "13px",
+      "lg": "14px"
     },
     "meta-weight": {
       "sm": "var(--kit-weight-medium)",

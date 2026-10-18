@@ -140,14 +140,14 @@ function kits_system_page() {
 	$used  = kits_class_usage();
 	$vals  = kits_token_values();
 	$demo  = get_page_by_path( 'kits-demo' );
-	$tabs  = array( 'components' => 'Components, blocks and patterns', 'menus' => 'Menu types', 'contrast' => 'Colour contrast', 'tokens' => 'Tokens' );
+	$tabs  = array( 'components' => 'Components, blocks and patterns', 'states' => 'States sheet', 'menus' => 'Menu types', 'contrast' => 'Colour contrast', 'tokens' => 'Tokens' );
 	$pref  = array();
 	foreach ( $reg['items'] as $it ) {
 		$pref = array_merge( $pref, (array) ( $it['classes'] ?? array() ) );
 	}
 	$missing = array_filter( array_keys( $used ), fn( $c ) => ! array_filter( $pref, fn( $p ) => $c === $p || 0 === strpos( $c, $p . '-' ) ) );
 
-	echo '<div class="wrap"><h1 class="wp-heading-inline">Kits system</h1>' . ( $demo ? ' <a class="page-title-action" href="' . esc_url( get_permalink( $demo ) ) . '">States sheet</a>' : '' ) . '<hr class="wp-header-end">';
+	echo '<div class="wrap"><h1 class="wp-heading-inline">Kits system</h1><hr class="wp-header-end">';
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
 		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry:</strong> ' . esc_html( implode( ', ', $missing ) ) . '. The deploy check stops on these.</p></div>';
@@ -158,6 +158,15 @@ function kits_system_page() {
 	}
 	echo '</nav>';
 
+	if ( 'states' === $tab ) { // every primitive and block in every state, drawn by the site's own styles (the private page /kits-demo/)
+		if ( ! $demo ) {
+			echo '<p>No states sheet yet: create a private page with the slug <code>kits-demo</code> holding <code>[kits_demo]</code>.</p></div>';
+			return;
+		}
+		echo '<p style="margin:1em 0 .5em"><a href="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '" target="_blank" rel="noopener">Open the sheet on its own</a></p>'
+			. '<iframe title="States sheet" src="' . esc_url( add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) ) . '" style="width:100%;height:calc(100vh - 210px);min-height:640px;border:1px solid #c3c4c7;background:#fff"></iframe></div>';
+		return;
+	}
 	if ( 'menus' === $tab ) {
 		echo '<table class="widefat striped" style="margin-top:1em"><thead><tr><th>Menu type</th><th>On this site</th><th>Where</th><th>Accessibility</th></tr></thead><tbody>';
 		foreach ( $reg['nav'] as $n ) {

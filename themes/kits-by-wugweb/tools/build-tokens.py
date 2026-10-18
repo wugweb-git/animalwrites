@@ -92,6 +92,8 @@ def wp_bindings(src, compiled, prims, parent=None):
             for name in e.get("primitives", []):
                 values.add(prims[name])
                 prim_lines[name] = f"var({var}, {prims[name]})"
+            if e.get("value"):  # a preset whose value is a token itself (a size that changes by breakpoint, e.g. meta text)
+                values.add(e["value"])
             if len(values) > 1:
                 sys.exit(f"preset {e['slug']}: bound tokens disagree {values}")
             if path and values:

@@ -1478,16 +1478,27 @@
    "type": "primitive",
    "status": "live",
    "classes": [
-    "kit-meta"
+    "kit-meta",
+    "kit-meta-item",
+    "kit-meta-row"
    ],
    "states": [
     "date (calendar)",
     "author (person)",
     "time (clock)",
-    "place (pin)"
+    "place (pin)",
+    "meta row (several items, wraps)",
+    "single meta item",
+    "inside a sentence (keeps the sentence text)"
    ],
    "tokens": [
     "kit-color-muted",
+    "kit-meta-gap",
+    "kit-meta-icon",
+    "kit-meta-icon-gap",
+    "kit-meta-row-gap",
+    "kit-meta-size",
+    "kit-meta-weight",
     "kit-type-xs"
    ],
    "a11y": {

@@ -108,7 +108,7 @@
   --kit-icon-lg: 24px;
   --kit-icon-xl: 28px;
   --kit-icon-gap: 6px;
-  --kit-meta-size: var(--kit-type-xs);
+  --kit-meta-size: 12px;
   --kit-meta-weight: var(--kit-weight-medium);
   --kit-meta-icon: var(--kit-icon-sm);
   --kit-meta-icon-gap: var(--kit-icon-gap);
@@ -194,6 +194,7 @@
     --kit-space-gutter: 32px;
     --kit-space-grid: 24px;
     --kit-offset: 14px;
+    --kit-meta-size: 13px;
     --kit-card-columns: 2;
     --kit-placard-ratio: 16/9;
     --kit-carousel-item: auto;
@@ -206,6 +207,7 @@
     --kit-space-section: 96px;
     --kit-space-gutter: 48px;
     --kit-space-grid: 32px;
+    --kit-meta-size: 14px;
     --kit-card-columns: 3;
     --kit-grid-gap: 32px;
     --kit-grid-columns: 12;
