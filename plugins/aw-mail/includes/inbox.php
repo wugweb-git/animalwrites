@@ -516,6 +516,14 @@ function aw_mail_compose_screen( $s, $mode ) {
 	echo '</div></div>';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Attachments</h2></div><div class="inside"><input type="file" id="awm-files" name="files[]" multiple><p class="description">Up to 10 MB in total.' . ( 'forward' === $mode ? ' The forwarded message\'s attachments are included.' : '' ) . '</p></div></div>';
 	echo '</div></div></div></form>';
+	if ( ! $ref && function_exists( 'aw_mail_profile' ) ) {
+		// Switching From swaps in that mailbox's signature.
+		$sigs = array();
+		foreach ( $boxes as $k => $a ) {
+			$sigs[ $k ] = wp_kses_post( (string) aw_mail_profile( $a )['signature'] );
+		}
+		echo '<script>(function(){var sigs=' . wp_json_encode( $sigs ) . ',sel=document.getElementById("awm-from");if(!sel)return;sel.addEventListener("change",function(){var html=sigs[sel.value]||"",ed=window.tinymce&&tinymce.get("awm_body");if(ed&&!ed.isHidden()){var d=ed.getDoc().querySelector("div.signature");if(d){html?d.innerHTML=html:d.parentNode.removeChild(d);}else if(html){ed.dom.add(ed.getBody(),"div",{"class":"signature"},html);}ed.save();}else{var t=document.getElementById("awm_body");t.value=t.value.replace(/<div class="signature">[\\s\\S]*?<\\/div>/,html?\'<div class="signature">\'+html+"</div>":"");}});})();</script>';
+	}
 }
 
 /** A website form message: same layout as a mail message. */
