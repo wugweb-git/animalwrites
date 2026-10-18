@@ -13,6 +13,7 @@
  * - datagov    data.gov.in (Open Government Data Platform India) datasets.
  * - nalsa      District Legal Services Authorities (NALSA / State Legal Services Authorities): office, address, phone.
  * - gujforest  Gujarat Forest Department (Karuna Abhiyan): permanent bird treatment centres.
+ * - pfa        People For Animals: the unit's phone and email from its unit page.
  *   These four carry their own date (aw_source_date) and link (aw_source_url) from the import.
  * A listing shows only the sources it really has; nothing is shown for a source it does not come from.
  * Imports record their source in the listing meta aw_data_sources (list of slugs); older imports are recognised from
@@ -39,11 +40,12 @@ function aw_data_sources() {
 		'datagov'      => array( 'OGD', 'data.gov.in', '', '' ),
 		'nalsa'        => array( 'NALSA', 'Legal Services Authority', '', '' ),
 		'gujforest'    => array( 'GUJ', 'Gujarat Forest Department', '', '' ),
+		'pfa'          => array( 'PFA', 'People For Animals', '', '' ),
 	);
 }
 
 /** Import sources that carry their own date and link on the listing (aw_source_date, aw_source_url). */
-const AW_IMPORT_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest' );
+const AW_IMPORT_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'pfa' );
 
 /**
  * The sources of one listing: list of [slug, mark, label, as of, link].
@@ -131,7 +133,7 @@ function aw_source_labels( $id, $full = false ) {
 }
 
 /** Hosts whose logo stands for a source. */
-const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://www.google.com/maps/', 'darpan' => 'https://ngodarpan.gov.in/', 'datagov' => 'https://www.data.gov.in/', 'nalsa' => 'https://nalsa.gov.in/', 'gujforest' => 'https://forests.gujarat.gov.in/' );
+const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://www.google.com/maps/', 'darpan' => 'https://ngodarpan.gov.in/', 'datagov' => 'https://www.data.gov.in/', 'nalsa' => 'https://nalsa.gov.in/', 'gujforest' => 'https://forests.gujarat.gov.in/', 'pfa' => 'https://peopleforanimalsindia.org/' );
 
 /**
  * The logo of a source as an <img>: the list's site (AWBI, the department, Google Maps) or, for "The organisation", the

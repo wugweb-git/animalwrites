@@ -58,7 +58,7 @@ def main(listings_file):
             rep.skip("state not in LGD", sample)
             continue
         phone, email = sample["phone"], sample["email"]
-        fields = {"phone": phone, "email": email if "@" in email else "", "source_name": "People For Animals (unit page)",
+        fields = {"phone": phone, "email": email if "@" in email else "", "data_source": "pfa", "source_name": "People For Animals (unit page)",
                   "source_url": r["detail_url"], "source_date": "2026-10-18"}
         town = re.sub(r"\s+(I{1,3}|\d)$", "", city.split("/")[-1].strip())
         hits = [l for l in L if PFA.search(l["title"]) and (
