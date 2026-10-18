@@ -738,6 +738,7 @@ function aw_mail_send_from_form( $in, $refbox ) {
 	$bcc   = aw_mail_parse_addrs( $in['bcc'] ?? '' );
 	$subj  = sanitize_text_field( (string) ( $in['subject'] ?? '' ) );
 	$html  = wpautop( wp_kses_post( (string) ( $in['body'] ?? '' ) ) ); // the editor saves line breaks as newlines
+	$html  = preg_replace( '/<div class="signature"[^>]*>/', '<div class="signature" style="margin-top:28px">', $html, 1 ); // space between message and signature
 	$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => 'inbox' ), admin_url( 'admin.php' ) );
 	$retry = wp_get_referer() ? wp_get_referer() : $back;
 	if ( ! $to || ( '' === $subj && '' === trim( wp_strip_all_tags( $html ) ) ) ) {
