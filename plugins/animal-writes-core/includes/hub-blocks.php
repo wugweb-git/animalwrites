@@ -409,6 +409,10 @@ function aw_block_org_mark( $a, $id ) {
 
 /** Up to two listing types (the card's labels). */
 function aw_block_badges( $a, $id ) {
+	if ( 'post' === get_post_type( $id ) ) { // a Resource: its type (Guide, Research ...) as a label, as the Library card shows its kind
+		$t = function_exists( 'aw_item_tags' ) ? aw_item_tags( $id ) : array();
+		return $t ? '<span class="kit-tag">' . ( function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t[0]->slug ) : '' ) . esc_html( $t[0]->name ) . '</span>' : '';
+	}
 	$out = '';
 	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
 	foreach ( array_slice( aw_listing_types( $id ), 0, 2 ) as $t ) {

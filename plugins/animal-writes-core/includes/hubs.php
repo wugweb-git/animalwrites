@@ -406,7 +406,7 @@ function aw_hub_item( $type ) {
 <!-- wp:post-excerpt {"excerptLength":22,"className":"aw-task-sum"} /-->
 
 <!-- wp:group {"className":"aw-task-tags kit-tags","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-tags kit-tags"><!-- wp:post-terms {"term":"post_tag"} /-->
+<div class="wp-block-group aw-task-tags kit-tags"><!-- wp:animal-writes/badges /-->
 
 <!-- wp:post-terms {"term":"category"} /--></div>
 <!-- /wp:group --></div>
