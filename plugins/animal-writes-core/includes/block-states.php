@@ -239,6 +239,8 @@ add_action(
 add_filter(
 	'kits_spot_pages',
 	function ( $pages ) {
+		$pages = array_values( array_filter( $pages, fn( $u ) => false === strpos( $u, '?s=' ) ) ); // search lives at /search/?q= here (the ?s= address redirects and drops the spot)
+		$pages[] = home_url( '/search/?q=animal' );
 		foreach ( array( 'news', 'library', 'resources', 'opportunities', 'directory', 'media', 'campaigns', 'about', 'contact', 'volunteer', 'category/community-dogs' ) as $slug ) {
 			$pages[] = home_url( '/' . $slug . '/' );
 		}
