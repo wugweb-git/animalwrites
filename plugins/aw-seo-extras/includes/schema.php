@@ -69,13 +69,18 @@ function aw_listing_schema( $id ) {
 		$org['image'] = $logo;
 	}
 	if ( $state || $district ) {
-		$street = $m( 'aw_area' );
+		$street = $m( 'aw_address' ) ? $m( 'aw_address' ) : $m( 'aw_area' ); // the full address when a source gives it
 		$rest   = str_ireplace( array_filter( array( $district, $state, 'India' ) ), '', $street );
 		if ( '' === trim( preg_replace( '/[\s,.\-–]+/u', '', $rest ) ) ) {
 			$street = ''; // only repeats the district and state
 		}
 		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
 		$org['areaServed'] = array_values( array_filter( array( $district ? array( '@type' => 'AdministrativeArea', 'name' => $district ) : null, $state ? array( '@type' => 'State', 'name' => $state ) : null ) ) );
+		foreach ( array_filter( array_map( 'trim', explode( ',', $m( 'aw_areas_served' ) ) ) ) as $area ) { // as the organisation states them
+			if ( ! in_array( $area, array( $district, $state ), true ) ) {
+				$org['areaServed'][] = array( '@type' => 'Place', 'name' => $area );
+			}
+		}
 	}
 	// Phone numbers from the list: every number as telephone (one, or a list), and each number marked WhatsApp as a
 	// WhatsApp contact point.
@@ -96,7 +101,7 @@ function aw_listing_schema( $id ) {
 	if ( $wa ) {
 		$org['contactPoint'] = 1 === count( $wa ) ? $wa[0] : $wa;
 	}
-	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ) ) ) );
+	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ), $m( 'aw_linkedin' ), $m( 'aw_wikidata' ) ? 'https://www.wikidata.org/wiki/' . $m( 'aw_wikidata' ) : '' ) ) );
 	if ( $same ) {
 		$org['sameAs'] = $same;
 	}
@@ -168,7 +173,7 @@ function aw_listing_schema( $id ) {
 		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
 	}
 	$ids = isset( $org['identifier'] ) ? array( $org['identifier'] ) : array();
-	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
+	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
 		if ( $m( $k ) ) { // as the organisation states them; words without a number are a note, not an identifier
 			$ids[] = preg_match( '/\d/', $m( $k ) ) ? array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'value' => $m( $k ) ) : array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'description' => $m( $k ) );
 		}

@@ -80,7 +80,7 @@ function aw_listing_sources( $id ) {
 		}
 		$out[] = array( $slug, $mark, $label, $on, $link );
 	}
-	return $out;
+	return apply_filters( 'aw_listing_sources', $out, $id ); // enrichment.php adds the enrichment worker's sources
 }
 
 /**
@@ -126,6 +126,9 @@ const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => '
  * @return string
  */
 function aw_source_logo( $slug, $id, $link ) {
+	if ( 0 === strpos( $slug, 'enrich-' ) && function_exists( 'aw_enrich_icon' ) ) { // a source of the enrichment worker: its site's favicon
+		return aw_enrich_icon( array( 'key' => substr( $slug, 7 ), 'name' => '', 'url' => $link ), $id );
+	}
 	if ( 'organisation' === $slug ) {
 		$tid = (int) get_post_thumbnail_id( $id );
 		return $tid ? (string) wp_get_attachment_image( $tid, 'thumbnail', false, array( 'alt' => '', 'width' => 20, 'height' => 20, 'loading' => 'lazy' ) ) : '';

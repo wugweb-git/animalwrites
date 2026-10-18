@@ -57,7 +57,7 @@ function aw_meta_schema() {
 		'aw_ngobase_url'     => array( 'string', array( 'aw_listing' ), 'ngobase.org profile' ),
 		'aw_x'               => array( 'string', array( 'aw_listing' ), 'X (Twitter)' ),
 		'aw_youtube'         => array( 'string', array( 'aw_listing' ), 'YouTube' ),
-		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 4 media IDs, comma separated' ),
+		'aw_gallery'         => array( 'string', array( 'aw_listing' ), 'Photos: up to 6 media IDs, comma separated' ),
 		'aw_founded'         => array( 'string', array( 'aw_listing' ), 'Year established' ),
 		'aw_head'            => array( 'string', array( 'aw_listing' ), 'Head of the organisation (name and role, as the organisation publishes it)' ),
 		'aw_registration'    => array( 'string', array( 'aw_listing' ), 'Registration (Trust/Society number)' ),
@@ -123,8 +123,8 @@ function aw_sanitize_meta( $value, $key ) {
 		$value = (string) $value;
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ? $value : '';
 	}
-	if ( 'aw_gallery' === $key ) { // up to four media IDs
-		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 4 ) );
+	if ( 'aw_gallery' === $key ) { // up to six media IDs
+		return implode( ',', array_slice( array_filter( array_map( 'absint', explode( ',', (string) $value ) ) ), 0, 6 ) );
 	}
 	if ( in_array( $key, array( 'aw_lat', 'aw_lng', 'aw_g_rating' ), true ) ) {
 		return is_numeric( trim( (string) $value ) ) ? trim( (string) $value ) : '';

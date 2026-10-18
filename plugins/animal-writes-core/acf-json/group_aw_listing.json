@@ -165,6 +165,26 @@
             "append": ""
         },
         {
+            "key": "field_aw_listing_address",
+            "label": "Full address",
+            "name": "aw_address",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As the organisation or a named source publishes it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_listing_maps_url",
             "label": "Google Maps link",
             "name": "aw_maps_url",
@@ -487,6 +507,46 @@
             "append": ""
         },
         {
+            "key": "field_aw_listing_reg_type",
+            "label": "Registered as",
+            "name": "aw_reg_type",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Trust, Society or Section 8 company.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_fcra",
+            "label": "FCRA",
+            "name": "aw_fcra",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "FCRA registration number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_listing_awbi_code",
             "label": "AWBI recognition code",
             "name": "aw_awbi_code",
@@ -636,6 +696,26 @@
             "default_value": "",
             "maxlength": "",
             "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_areas_served",
+            "label": "Areas served",
+            "name": "aw_areas_served",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Comma separated.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
             "prepend": "",
             "append": ""
         },
@@ -835,6 +915,103 @@
             "placeholder": "https://"
         },
         {
+            "key": "field_aw_listing_linkedin",
+            "label": "LinkedIn",
+            "name": "aw_linkedin",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_listing_wikidata",
+            "label": "Wikidata ID",
+            "name": "aw_wikidata",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. Q4929028.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_ig_followers",
+            "label": "Instagram followers",
+            "name": "aw_ig_followers",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_ig_posts",
+            "label": "Instagram posts",
+            "name": "aw_ig_posts",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_last_post",
+            "label": "Latest social post",
+            "name": "aw_last_post",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "YYYY-MM-DD.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_listing_ngobase_url",
             "label": "ngobase.org profile",
             "name": "aw_ngobase_url",
@@ -981,7 +1158,7 @@
             "return_format": "id",
             "library": "all",
             "min": 0,
-            "max": 4,
+            "max": 6,
             "min_width": "",
             "min_height": "",
             "min_size": "",
@@ -1025,6 +1202,43 @@
             },
             "default_value": "",
             "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_adopt_url",
+            "label": "Adopt link",
+            "name": "aw_adopt_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_listing_upi",
+            "label": "UPI ID",
+            "name": "aw_upi",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "For donations, e.g. name@okhdfc.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
         },
         {
             "key": "field_aw_listing_rel_nofollow",
@@ -1367,5 +1581,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1792141200
+    "modified": 1792306169
 }

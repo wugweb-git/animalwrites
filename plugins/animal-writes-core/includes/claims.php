@@ -354,6 +354,7 @@ add_action(
 		}
 		$lid = (int) get_post_meta( $id, 'aw_c_listing', true );
 		if ( 'approve' === ( $_GET['do'] ?? '' ) && 'aw_listing' === get_post_type( $lid ) ) {
+			do_action( 'aw_claim_before_apply', $lid, (array) get_post_meta( $id, 'aw_c_proposed', true ), $id ); // enrichment.php logs the organisation as the source
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
 				if ( isset( AW_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {

@@ -352,6 +352,10 @@ add_shortcode(
 			if ( $abc ) {
 				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . aw_date( $abc ), true );
 			}
+			$closed = (string) get_post_meta( $id, 'aw_reported_closed', true );
+			if ( $closed ) { // enrichment.php: Google Maps reports it permanently closed (the listing is out of search until reviewed)
+				$rows[] = array( 'alert', 'Reported closed: Google Maps showed this place as permanently closed on ' . aw_date( $closed ) . '. We are checking.', true );
+			}
 			$labels = aw_source_labels( $id, true );
 			if ( $labels ) {
 				$rows[] = array( 'link', 'Details from: ' . $labels, true );

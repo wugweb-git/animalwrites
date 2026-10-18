@@ -494,7 +494,7 @@ function aw_sourcing_page() {
 	submit_button( 'Apply', 'action', '', false );
 	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Status</th><th>Rating</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
 	foreach ( $pubs as $h => $p ) {
-		if ( $filter && $filter !== $p['status'] ) {
+		if ( ( $filter && $filter !== $p['status'] ) || ! empty( $p['kind'] ) ) { // kind: a host kept only for its icon (e.g. a directory source), not a publisher
 			continue;
 		}
 		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';

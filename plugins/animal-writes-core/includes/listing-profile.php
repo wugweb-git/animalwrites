@@ -91,14 +91,14 @@ function aw_listing_details_box( $post ) {
 		. '<tr><th scope="row"><label for="aw_hours_lines">Opening hours by day</label></th><td><textarea class="large-text" rows="4" id="aw_hours_lines" name="aw_hours_lines">' . esc_textarea( $hr ) . '</textarea><p class="description">One day per line: Monday 09:00-18:00, or Sunday closed. Open all day: 00:00-23:59.</p></td></tr>'
 		. '</tbody></table>';
 	$ids = (string) get_post_meta( $post->ID, 'aw_gallery', true );
-	echo '<h3 style="margin:1.25em 0 .5em">Photos (up to 4)</h3><input type="hidden" id="aw_gallery" name="aw_gallery" value="' . esc_attr( $ids ) . '"><div id="aw-gallery-prev" style="display:flex;gap:8px;margin-bottom:8px">';
+	echo '<h3 style="margin:1.25em 0 .5em">Photos (up to 6)</h3><input type="hidden" id="aw_gallery" name="aw_gallery" value="' . esc_attr( $ids ) . '"><div id="aw-gallery-prev" style="display:flex;gap:8px;margin-bottom:8px">';
 	foreach ( array_filter( array_map( 'absint', explode( ',', $ids ) ) ) as $id ) {
 		echo wp_get_attachment_image( $id, array( 80, 80 ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 	echo '</div><button type="button" class="button" id="aw-gallery-pick">Choose photos</button> <button type="button" class="button-link" id="aw-gallery-clear">Remove all</button>';
 	echo "<script>(function(){var f,inp=document.getElementById('aw_gallery'),prev=document.getElementById('aw-gallery-prev');"
-		. "document.getElementById('aw-gallery-pick').addEventListener('click',function(){f=f||wp.media({title:'Photos (up to 4)',multiple:true,library:{type:'image'}});"
-		. "f.off('select').on('select',function(){var s=f.state().get('selection').toArray().slice(0,4);inp.value=s.map(function(a){return a.id}).join(',');prev.innerHTML='';s.forEach(function(a){var i=document.createElement('img');i.src=(a.attributes.sizes&&a.attributes.sizes.thumbnail?a.attributes.sizes.thumbnail.url:a.attributes.url);i.width=80;i.height=80;i.style.objectFit='cover';prev.appendChild(i);});});f.open();});"
+		. "document.getElementById('aw-gallery-pick').addEventListener('click',function(){f=f||wp.media({title:'Photos (up to 6)',multiple:true,library:{type:'image'}});"
+		. "f.off('select').on('select',function(){var s=f.state().get('selection').toArray().slice(0,6);inp.value=s.map(function(a){return a.id}).join(',');prev.innerHTML='';s.forEach(function(a){var i=document.createElement('img');i.src=(a.attributes.sizes&&a.attributes.sizes.thumbnail?a.attributes.sizes.thumbnail.url:a.attributes.url);i.width=80;i.height=80;i.style.objectFit='cover';prev.appendChild(i);});});f.open();});"
 		. "document.getElementById('aw-gallery-clear').addEventListener('click',function(){inp.value='';prev.innerHTML='';});})();</script>";
 }
 
@@ -140,7 +140,7 @@ add_action(
 function aw_block_org_details( $a, $id ) {
 	$m     = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$links = '';
-	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x-brand', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ) ) as $k => $l ) {
+	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x-brand', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_linkedin' => array( 'link', 'LinkedIn' ), 'aw_donate_url' => array( 'heart', 'Donate' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ), 'aw_adopt_url' => array( 'home', 'Adopt' ) ) as $k => $l ) {
 		if ( $m( $k ) ) {
 			$rel    = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
 			$links .= '<a class="kit-btn kit-btn--secondary kit-btn--sm" href="' . esc_url( $m( $k ) ) . '" rel="' . esc_attr( $rel ) . '" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>'; // data-act: analytics (aw-analytics.js)
@@ -149,7 +149,7 @@ function aw_block_org_details( $a, $id ) {
 		}
 	}
 	$photos = '';
-	foreach ( array_slice( array_filter( array_map( 'absint', explode( ',', $m( 'aw_gallery' ) ) ) ), 0, 4 ) as $pid ) {
+	foreach ( array_slice( array_filter( array_map( 'absint', explode( ',', $m( 'aw_gallery' ) ) ) ), 0, 6 ) as $pid ) {
 		$cap     = trim( (string) wp_get_attachment_caption( $pid ) );
 		$cap     = $cap ? $cap : trim( (string) get_post_meta( $pid, '_wp_attachment_image_alt', true ) ); // the caption, else the description of the photo
 		$photos .= '<figure><div class="aw-org-photo">' . wp_get_attachment_image( $pid, 'medium_large', false, array( 'loading' => 'lazy' ) ) . '</div>' . ( $cap ? '<figcaption>' . esc_html( $cap ) . '</figcaption>' : '' ) . '</figure>';
@@ -173,8 +173,8 @@ function aw_block_org_details( $a, $id ) {
 	foreach ( $contact as $k => $c ) {
 		$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $c[0] ) . '</span>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
 	}
-	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
-	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_fcra' => 'research', 'aw_reg_type' => 'research', 'aw_areas_served' => 'map-pin', 'aw_upi' => 'heart', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
+	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_areas_served' => 'Areas served', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_reg_type' => 'Registered as', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_upi' => 'Donate by UPI', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( 'aw_hours' === $k ) { // the hours table, from the list only
 			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
 		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {
@@ -182,20 +182,22 @@ function aw_block_org_details( $a, $id ) {
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . aw_date( $m( 'aw_services_on' ) ) : '' ) . '</span>';
 			}
-			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) );
+			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && $m( 'aw_address' ) ? $m( 'aw_address' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );
 			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
 		} elseif ( isset( $na[ $k ] ) ) {
 			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $missing( $k ) . '</dd></div>';
 		}
 	}
-	if ( '' === $links . $photos . $facts ) {
+	$extra = function_exists( 'aw_enrich_profile_extras' ) ? aw_enrich_profile_extras( $id ) : ''; // live Google block, signals, news mentions
+	if ( '' === $links . $photos . $facts . $extra ) {
 		return '';
 	}
 	return '<section class="aw-org-details" aria-label="About the organisation">'
 		. ( $links ? '<div class="aw-org-details-links">' . $links . '</div>' : '' )
 		. ( $photos ? '<div class="aw-org-gallery">' . $photos . '</div>' : '' )
 		. ( $facts ? '<h2 class="aw-profile-h">Details</h2><dl class="aw-org-facts">' . $facts . '</dl>' : '' )
+		. $extra
 		. '</section>';
 }
 
