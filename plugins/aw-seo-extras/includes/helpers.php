@@ -476,7 +476,7 @@ function aw_seo_hub_intro_description( $type ) {
 /** AWBI-recognised listing without a description of its own: one line of its facts ('' when it does not apply). */
 function aw_seo_awbi_description( $id, $desc ) {
 	$code = trim( (string) get_post_meta( $id, 'aw_awbi_code', true ) );
-	if ( '' === $code || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
+	if ( '' === $code || get_post_meta( $id, 'aw_awbi_dropped', true ) || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
 		return '';
 	}
 	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();

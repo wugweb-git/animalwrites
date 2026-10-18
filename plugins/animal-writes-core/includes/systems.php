@@ -344,9 +344,12 @@ add_shortcode(
 			if ( $code ) {
 				$since  = (string) get_post_meta( $id, 'aw_awbi_recognised', true );
 				$until  = (string) get_post_meta( $id, 'aw_awbi_valid', true );
-				$rows[] = aw_awbi_lapsed( $id )
+				$dropped = (string) get_post_meta( $id, 'aw_awbi_dropped', true );
+				$rows[]  = $dropped // on an older AWBI list, not on the current one (owner, 18 Oct 2026)
+					? array( 'alert', 'On the Animal Welfare Board of India\'s list of ' . aw_date( (string) get_post_meta( $id, 'aw_awbi_list_on', true ) ) . ' (code ' . esc_html( $code ) . '), but not on its current list (' . aw_date( $dropped ) . '). Its recognition may have lapsed.', true )
+					: ( aw_awbi_lapsed( $id )
 					? array( 'alert', 'AWBI recognition (code ' . esc_html( $code ) . ') was valid until ' . aw_date( $until ) . '. Needs re-check.', true )
-					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . esc_html( $code ) . ( $since ? ', since ' . aw_date( $since ) : '' ) . ( $until ? ', valid until ' . aw_date( $until ) : '' ) . ' (list as on ' . aw_date( get_post_meta( $id, 'aw_awbi_list_on', true ) ? get_post_meta( $id, 'aw_awbi_list_on', true ) : '2026-05-31' ) . ')', true );
+					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . esc_html( $code ) . ( $since ? ', since ' . aw_date( $since ) : '' ) . ( $until ? ', valid until ' . aw_date( $until ) : '' ) . ' (list as on ' . aw_date( get_post_meta( $id, 'aw_awbi_list_on', true ) ? get_post_meta( $id, 'aw_awbi_list_on', true ) : '2026-05-31' ) . ')', true ) );
 			}
 			$darpan = (string) get_post_meta( $id, 'aw_darpan_id', true );
 			if ( $darpan ) { // like the AWBI code (owner, 18 Oct 2026): the NITI Aayog NGO registry's ID

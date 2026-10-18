@@ -179,6 +179,9 @@ function aw_listing_schema( $id ) {
 	$code = $m( 'aw_awbi_code' );
 	if ( $code ) {
 		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
+		if ( $m( 'aw_awbi_dropped' ) ) { // on an older AWBI list only
+			$org['identifier']['description'] = 'Not on the AWBI list of ' . wp_date( 'j M Y', strtotime( $m( 'aw_awbi_dropped' ) ) ) . '; recognition may have lapsed';
+		}
 	}
 	$ids = isset( $org['identifier'] ) ? array( $org['identifier'] ) : array();
 	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
