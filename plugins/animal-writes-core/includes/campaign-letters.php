@@ -10,7 +10,9 @@
  * - Opt-in at send: a box under the letter preview, ticked by default (owner, 18 Oct 2026) ("Email me updates ..."). Ticked, the email becomes
  *   required, and sending signs the person up as a volunteer (volunteers table, tag Volunteer) and through the
  *   newsletter path (aw_newsletter_join: the site's list and FluentCRM's Newsletter, tag campaign-<slug>), with a note on the contact holding the name, city, grounds, date and
- *   the wording agreed to. Unticked, nothing but the anonymous row is kept. "Remove my data" deletes the contact.
+ *   the wording agreed to. Unticked, the sender is still recorded (owner, 18 Oct 2026): a FluentCRM contact with no
+ *   newsletter (transactional), tagged campaign-<slug>, with a note of name, city, grounds and date. "Remove my data"
+ *   deletes the contact.
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
  *   of the anonymous rows.
  *
@@ -134,13 +136,29 @@ add_action(
 					if ( ! $id ) {
 						return new WP_Error( 'aw_closed', 'Not open', array( 'status' => 404 ) );
 					}
-					if ( ! is_email( $email ) || '1' !== (string) $req['consent'] || ! function_exists( 'aw_newsletter_join' ) ) {
+					if ( ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) {
 						return new WP_Error( 'aw_optin', 'Check the email address.', array( 'status' => 400 ) );
 					}
 					$name    = mb_substr( sanitize_text_field( (string) $req['name'] ), 0, 80 );
 					$city    = aw_cl_city( $req['city'] );
 					$grounds = aw_cl_grounds( $req['grounds'] );
 					$slug    = get_post_field( 'post_name', $id );
+					if ( '1' !== (string) $req['consent'] ) { // box unticked: the sender is still recorded (owner, 18 Oct 2026), as a
+						// FluentCRM contact that gets no newsletter (transactional), tagged with the campaign, and a note
+						$c = function_exists( 'aw_crm_contact_for' ) ? aw_crm_contact_for( $email, $name, array( 'campaign-' . $slug ), 'site:campaign:' . $slug ) : null;
+						if ( $c ) {
+							\FluentCrm\App\Models\SubscriberNote::create(
+								array(
+									'subscriber_id' => (int) $c->id,
+									'type'          => 'note',
+									'title'         => 'Campaign letter: ' . get_the_title( $id ),
+									'description'   => '<p>Name: ' . esc_html( $name ) . '<br>City: ' . esc_html( $city ) . '<br>Grounds: ' . esc_html( $grounds ) . '<br>Date: ' . esc_html( wp_date( 'j M Y, H:i' ) ) . '</p><p>Left the updates box unticked: not on the newsletter or the volunteer list.</p>',
+									'created_at'    => current_time( 'mysql' ),
+								)
+							);
+						}
+						return array( 'ok' => true, 'joined' => false );
+					}
 					// Newsletter and volunteers (owner, 18 Oct 2026): a volunteer row with what the letter gives (name, email, city),
 					// then the newsletter with the Volunteer tag, as the volunteer form does; no team email for these.
 					if ( function_exists( 'aw_vol_upsert' ) ) {

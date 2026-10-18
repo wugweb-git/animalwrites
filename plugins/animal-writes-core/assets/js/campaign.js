@@ -135,20 +135,15 @@
 		else fallback();
 	}
 
-	/* Opt-in at send (campaign-letters.php): ticked, the email is asked for and required. */
+	/* Sign-up at send (campaign-letters.php): name, city and email are required; every letter sent records the sender
+	   (owner, 18 Oct 2026), and the box (ticked by default) also joins them to the newsletter and the volunteers. */
 	var optin = form.elements.optin;
-	var emailRow = form.querySelector('.aw-letter-email');
-	if (optin && emailRow) {
-		emailRow.hidden = !optin.checked; // ticked by default (owner, 18 Oct 2026): the email field shows from the start
-		optin.addEventListener('change', function () { emailRow.hidden = !optin.checked; if (optin.checked) form.elements.email.focus(); });
-	}
 	function wantsUpdates() { return !!(optin && optin.checked); }
 	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
 
 	function ready() {
-		var named = val('name') && val('city');
-		var ok = named && (!wantsUpdates() || emailOk());
-		errorEl.textContent = named ? 'Add your email to get updates, or untick the box.' : 'Add your name and city first.';
+		var ok = val('name') && val('city') && emailOk();
+		errorEl.textContent = 'Add your name, city and email first.';
 		errorEl.hidden = !!ok;
 		if (!ok) (!val('name') ? form.elements.name : !val('city') ? form.elements.city : form.elements.email).focus();
 		return ok;
@@ -168,10 +163,11 @@
 			counted = true;
 			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device() }).catch(function () {});
 		}
-		if (wantsUpdates() && !joined) {
+		if (!joined) {
 			joined = true;
-			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: '1' })
-				.then(function () { track('newsletter_optin', { source: cfg.source || '' }); })
+			var join = wantsUpdates();
+			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0' })
+				.then(function () { if (join) track('newsletter_optin', { source: cfg.source || '' }); })
 				.catch(function () { joined = false; });
 		}
 	}

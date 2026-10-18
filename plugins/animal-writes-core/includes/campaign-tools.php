@@ -326,6 +326,8 @@ add_shortcode(
 			<input id="aw-letter-name" name="name" type="text" autocomplete="name" required maxlength="80"></p>
 		<p class="aw-letter-field"><label for="aw-letter-city">Your city <span aria-hidden="true">*</span></label>
 			<input id="aw-letter-city" name="city" type="text" autocomplete="address-level2" required maxlength="60"></p>
+		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
+			<input id="aw-letter-email" name="email" type="email" autocomplete="email" required maxlength="190"></p>
 		<p class="aw-letter-field"><label for="aw-letter-own">Add a line in your own words <span class="aw-letter-hint">(optional, up to 300 characters)</span></label>
 			<textarea id="aw-letter-own" name="own" maxlength="300" rows="3"></textarea></p>
 		</div>
@@ -335,9 +337,7 @@ add_shortcode(
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
-		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
-			<input id="aw-letter-email" name="email" type="email" autocomplete="email" maxlength="190"></p>
-		<p class="aw-letter-error" role="alert" hidden>Add your name and city first.</p>
+		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<div class="aw-letter-routes">
 			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'send' ); ?>Send with Gmail</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="outlook">Outlook</button>
