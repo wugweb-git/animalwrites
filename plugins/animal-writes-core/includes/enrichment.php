@@ -640,8 +640,14 @@ function aw_enrich_listing_source_keys( $lid ) {
 }
 
 /** Listing flags (Invite to claim, Reported closed, Possible duplicate): aw_enrich_flags = [flag => detail]. */
+function aw_enrich_flags( $lid ) {
+	$f = get_post_meta( $lid, 'aw_enrich_flags', true );
+	return is_array( $f ) ? array_filter( $f ) : array();
+}
+
+/** Set or clear one flag. */
 function aw_enrich_flag( $lid, $flag, $detail ) {
-	$f = (array) get_post_meta( $lid, 'aw_enrich_flags', true );
+	$f = aw_enrich_flags( $lid );
 	if ( false === $detail || null === $detail || array() === $detail ) {
 		unset( $f[ $flag ] );
 	} else {
@@ -899,7 +905,7 @@ function aw_enrich_duplicates( $lid ) {
 			);
 			foreach ( array_unique( array_map( 'intval', $other ) ) as $o ) {
 				$dups[ $o ] = $field;
-				$theirs     = (array) ( ( (array) get_post_meta( $o, 'aw_enrich_flags', true ) )['duplicate'] ?? array() );
+				$theirs     = (array) ( aw_enrich_flags( $o )['duplicate'] ?? array() );
 				$theirs[ $lid ] = $field;
 				aw_enrich_flag( $o, 'duplicate', $theirs );
 			}

@@ -139,7 +139,7 @@ function aw_enrich_prov_box( $post ) {
 			$rows .= '<li><strong>' . esc_html( $def[0] ) . '</strong><br>' . aw_enrich_sources_html( $p['sources'], $post->ID ) . '</li>';
 		}
 	}
-	$flags = (array) get_post_meta( $post->ID, 'aw_enrich_flags', true );
+	$flags = aw_enrich_flags( $post->ID );
 	$chk   = (string) get_post_meta( $post->ID, 'aw_enrich_checked', true );
 	echo $rows ? '<ul>' . $rows . '</ul>' : '<p>Nothing set by the enrichment worker yet.</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	if ( $flags ) {
@@ -330,7 +330,7 @@ function aw_enrich_review_page() {
 	foreach ( $rows as $r ) {
 		$r     = aw_enrich_decode( $r );
 		$lid   = (int) $r['listing_id'];
-		$flags = (array) get_post_meta( $lid, 'aw_enrich_flags', true );
+		$flags = aw_enrich_flags( $lid );
 		$fl    = $flags ? '<br><small>' . esc_html( implode( ' · ', array_map( 'aw_enrich_flag_label', array_keys( $flags ) ) ) ) . '</small>' : '';
 		if ( ! empty( $flags['duplicate'] ) ) {
 			$fl .= '<br><small>Same ' . esc_html( implode( ', ', array_unique( (array) $flags['duplicate'] ) ) ) . ' as ' . implode( ', ', array_map( fn( $o ) => '<a href="' . esc_url( get_edit_post_link( (int) $o ) ) . '">' . esc_html( get_the_title( (int) $o ) ) . '</a>', array_keys( (array) $flags['duplicate'] ) ) ) . '</small>';
