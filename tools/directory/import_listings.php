@@ -1,6 +1,7 @@
 <?php
 /**
- * Directory import from public lists. Idempotent; never deletes; never overwrites a value a listing already has.
+ * Directory import from public lists. Idempotent; never deletes; never overwrites a value a listing already has, except
+ * from a row marked "newer" (the organisation's own website, the newest source: its values replace older ones, logged).
  * Usage: wp eval-file import_listings.php <rows.json> <offset> <limit> [<log.jsonl>]
  *
  * Row kinds:
@@ -11,7 +12,8 @@
  *   only), places[] (more [state, district] pairs), abc_valid.
  *   Matched by aw_import_key; created published and unverified.
  * - update of an existing listing: post_id, types[] (added, never removed) and any optional field above (filled only
- *   when empty), abc_centres[] (kept private), abc_valid (only a later date: a renewed recognition). Verified or claimed listings are left alone (types too).
+ *   when empty), abc_centres[] (kept private), abc_valid (only a later date: a renewed recognition),
+ *   phones[] ({number, label, whatsapp}: the whole list), facebook, instagram, x, youtube, donate_url, volunteer_url, newer. Verified or claimed listings are left alone (types too).
  *
  * Types are Directory tags (post_tag); a listing can have any number (owner, 18 Oct 2026). Types it already has are never removed or
  * reordered. Every change is appended to the log (one JSON object per line: post, field, old, new, kind) for
@@ -56,18 +58,20 @@ $add_services = function ( $id, $services ) use ( $note, &$kind ) {
 	}
 };
 
-/** Fill one meta field only when the listing has none. */
-$fill = function ( $id, $key, $value ) use ( $note, &$kind ) {
+/** Fill one meta field only when the listing has none; a newer source ($newer, e.g. the organisation's own website) replaces it. */
+$newer = false;
+$fill  = function ( $id, $key, $value ) use ( $note, &$kind, &$newer ) {
 	$value = is_string( $value ) ? trim( $value ) : $value;
-	if ( '' === $value || null === $value || '' !== trim( (string) get_post_meta( $id, $key, true ) ) ) {
+	$old   = trim( (string) get_post_meta( $id, $key, true ) );
+	if ( '' === $value || null === $value || $old === $value || ( '' !== $old && ! $newer ) ) {
 		return;
 	}
 	update_post_meta( $id, $key, $value );
-	$note( $id, $key, '', $value, $kind );
+	$note( $id, $key, $old, $value, $kind );
 };
 
 /** The optional fields a source gives. */
-$fields = function ( $id, $r ) use ( $fill, $note, &$kind ) {
+$fields = function ( $id, $r ) use ( $fill, $note, &$kind, &$newer ) {
 	foreach ( array( 'darpan_id', 'registration', 'reg_type', 'reg_authority', 'reg_act', 'reg_date', 'sectors', 'awbi_code', 'awbi_recognised', 'awbi_renewed', 'awbi_valid', 'awbi_list_on', 'awbi_dropped', 'awbi_address' ) as $k ) {
 		if ( ! empty( $r[ $k ] ) ) {
 			$fill( $id, 'aw_' . $k, sanitize_text_field( is_array( $r[ $k ] ) ? implode( ', ', $r[ $k ] ) : $r[ $k ] ) );
@@ -85,7 +89,19 @@ $fields = function ( $id, $r ) use ( $fill, $note, &$kind ) {
 	if ( ! empty( $r['website'] ) && wp_http_validate_url( $r['website'] ) ) {
 		$fill( $id, 'aw_website', esc_url_raw( $r['website'] ) );
 	}
-	if ( ! empty( $r['phone'] ) && ! aw_listing_phones( $id ) ) {
+	foreach ( array( 'facebook', 'instagram', 'x', 'youtube', 'donate_url', 'volunteer_url' ) as $k ) {
+		if ( ! empty( $r[ $k ] ) && wp_http_validate_url( $r[ $k ] ) ) {
+			$fill( $id, 'aw_' . $k, esc_url_raw( $r[ $k ] ) );
+		}
+	}
+	if ( ! empty( $r['phones'] ) && ( $newer || ! aw_listing_phones( $id ) ) ) { // [{number, label, whatsapp}]: the source's whole list
+		$old = aw_listing_phones( $id );
+		$new = array_map( fn( $p ) => array( 'number' => (string) $p['number'], 'label' => (string) ( $p['label'] ?? '' ), 'whatsapp' => ! empty( $p['whatsapp'] ) ), $r['phones'] );
+		if ( wp_list_pluck( $old, 'number' ) !== wp_list_pluck( $new, 'number' ) || wp_list_pluck( $old, 'label' ) !== wp_list_pluck( $new, 'label' ) ) {
+			aw_set_listing_list( $id, 'aw_phones', $new );
+			$note( $id, 'aw_phones', $old, $new, $kind );
+		}
+	} elseif ( ! empty( $r['phone'] ) && ! aw_listing_phones( $id ) ) {
 		aw_listing_put_phone( $id, $r['phone'] ); // into the Phone numbers list (only when it has none)
 		$note( $id, 'aw_phones', '', $r['phone'], $kind );
 	}
@@ -103,8 +119,9 @@ wp_suspend_cache_invalidation( true );
 $made = $updated = $attached = $protected = 0;
 foreach ( $rows as $r ) {
 	if ( ! empty( $r['post_id'] ) ) {
-		$kind = 'extended';
-		$id   = (int) $r['post_id'];
+		$kind  = 'extended';
+		$newer = ! empty( $r['newer'] ); // the organisation's own website: its values replace older ones (owner, 18 Oct 2026)
+		$id    = (int) $r['post_id'];
 		$id   = (int) get_post_meta( $id, 'aw_merged_into', true ) ? (int) get_post_meta( $id, 'aw_merged_into', true ) : $id; // merged: extend the listing it went into
 		if ( 'aw_listing' !== get_post_type( $id ) ) {
 			continue;

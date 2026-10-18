@@ -26,11 +26,14 @@ foreach ( $lines as $l ) {
 	} elseif ( 'aw_data_sources' === $e['field'] ) {
 		update_post_meta( $id, 'aw_data_sources', (array) $e['old'] );
 		$fields++;
+	} elseif ( 'aw_phones' === $e['field'] && is_array( $e['old'] ) ) {
+		aw_set_listing_list( $id, 'aw_phones', $e['old'] ); // a whole list replaced from a newer source: put the old list back
+		$fields++;
 	} elseif ( 'aw_phones' === $e['field'] ) {
 		$kept++; // phone lists are not taken back automatically (listed for a person to check)
 		WP_CLI::log( "phone added to $id: " . $e['new'] );
 	} elseif ( (string) get_post_meta( $id, $e['field'], true ) === (string) $e['new'] ) {
-		delete_post_meta( $id, $e['field'] );
+		'' === (string) $e['old'] ? delete_post_meta( $id, $e['field'] ) : update_post_meta( $id, $e['field'], $e['old'] ); // a replaced value comes back
 		$fields++;
 	} else {
 		$kept++; // changed since the import
