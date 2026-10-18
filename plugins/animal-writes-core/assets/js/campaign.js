@@ -138,7 +138,10 @@
 	/* Opt-in at send (campaign-letters.php): ticked, the email is asked for and required. */
 	var optin = form.elements.optin;
 	var emailRow = form.querySelector('.aw-letter-email');
-	if (optin && emailRow) optin.addEventListener('change', function () { emailRow.hidden = !optin.checked; if (optin.checked) form.elements.email.focus(); });
+	if (optin && emailRow) {
+		emailRow.hidden = !optin.checked; // ticked by default (owner, 18 Oct 2026): the email field shows from the start
+		optin.addEventListener('change', function () { emailRow.hidden = !optin.checked; if (optin.checked) form.elements.email.focus(); });
+	}
 	function wantsUpdates() { return !!(optin && optin.checked); }
 	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
 

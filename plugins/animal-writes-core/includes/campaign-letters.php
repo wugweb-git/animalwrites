@@ -7,7 +7,7 @@
  *   {prefix}aw_camp_letters: campaign, the city as typed (trimmed, title case), the grounds ticked, the route (gmail,
  *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width) and the date. No name,
  *   email or IP address is read or kept. Kept to report on campaigns.
- * - Opt-in at send: an unticked box under the letter preview ("Email me updates ..."). Ticked, the email becomes
+ * - Opt-in at send: a box under the letter preview, ticked by default (owner, 18 Oct 2026) ("Email me updates ..."). Ticked, the email becomes
  *   required, and sending signs the person up through the newsletter path (aw_newsletter_join: the site's list and
  *   FluentCRM's Newsletter, tag campaign-<slug>), with a note on the contact holding the name, city, grounds, date and
  *   the wording agreed to. Unticked, nothing but the anonymous row is kept. "Remove my data" deletes the contact.
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_CL_DB_VERSION = '1';
 const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns. I can unsubscribe at any time.';
-const AW_CL_CONSENT    = 'v1-campaign-optin'; // the wording above
+const AW_CL_CONSENT    = 'v2-campaign-optin-preticked'; // the wording above; the box is ticked by default (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
 const AW_CL_DEVICES    = array( 'phone' => 'Phone', 'tablet' => 'Tablet', 'desktop' => 'Desktop' );
 

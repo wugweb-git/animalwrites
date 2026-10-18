@@ -334,8 +334,8 @@ add_shortcode(
 		<p class="aw-letter-head"><span class="aw-letter-step">3</span>Check and send</p>
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
-		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1"> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
-		<p class="aw-letter-field aw-letter-email" hidden><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
+		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
+		<p class="aw-letter-field aw-letter-email"><label for="aw-letter-email">Your email <span aria-hidden="true">*</span></label>
 			<input id="aw-letter-email" name="email" type="email" autocomplete="email" maxlength="190"></p>
 		<p class="aw-letter-error" role="alert" hidden>Add your name and city first.</p>
 		<div class="aw-letter-routes">
