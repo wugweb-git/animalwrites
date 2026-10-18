@@ -1420,11 +1420,12 @@ body { background: var(--kit-color-canvas); }
 .aw-adopt-soon { max-width: 62ch; }
 .aw-adopt-soon > * { margin: 0 !important; }
 .aw-adopt-soon > * + * { margin-top: var(--kit-space-3) !important; }
-.aw-adopt-soon > h2 { font-size: var(--kit-type-h1) !important; line-height: 1.05; }
+main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(--kit-type-h1) !important; line-height: 1.05 !important; } /* outranks the sitewide h2 size */
 .aw-adopt-soon-ico { display: grid; place-items: center; width: 4rem; height: 4rem; border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
 .aw-adopt-soon-ico .kit-ico { --kit-ico-size: 2rem; }
 .aw-about-inner > .aw-adopt-towards { margin-block-start: var(--kit-space-7); }
 .aw-adopt-plans { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); }
+.aw-adopt-plans > * { margin: 0 !important; } /* no flow-layout top margin on the second and third tile */
 @media (min-width: 768px) { .aw-adopt-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-adopt-plans .aw-about-act > p:not(.aw-about-act-ico) { font-size: var(--kit-type-lead); color: var(--kit-color-ink); }
 .aw-about-inner > .aw-adopt-note { margin-block-start: var(--kit-space-5); font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }
