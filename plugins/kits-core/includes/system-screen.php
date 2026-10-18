@@ -277,6 +277,12 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 		} elseif ( ! empty( $it['classes'] ) ) {
 			$src = add_query_arg( 'kits_only_classes', rawurlencode( implode( ',', (array) $it['classes'] ) ), $url );
 		}
+		if ( ! $src && $demo && 'pattern' !== ( $it['type'] ?? '' ) ) { // no class or block (e.g. core block styles): its section by name
+			$src = add_query_arg( 'kits_only_classes', '', add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) );
+		}
+		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) {
+			$src = add_query_arg( 'kits_only_name', rawurlencode( $it['name'] ), $src );
+		}
 		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) { // where it is used, for an entry the sheet does not draw
 			$spot = kits_spot_map()[ $it['name'] ] ?? '';
 			$src  = add_query_arg( 'kits_spot_url', rawurlencode( '' !== $spot ? $spot : 'none' ), $src );

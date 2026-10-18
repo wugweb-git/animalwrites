@@ -168,6 +168,59 @@ add_filter(
 	2
 );
 
+/**
+ * Kits components drawn nowhere else on the sheet (owner, 18 Oct 2026), each under its registry name in its states.
+ * Fixed or phone-only pieces (sticky bar, carousel dots) are shown in place here (.kit-demo-static).
+ */
+function kits_demo_more() {
+	$h   = fn( $t ) => '<h3 class="kit-demo-h">' . esc_html( $t ) . '</h3>';
+	$st  = fn( $t ) => '<p class="kit-demo-state">' . esc_html( $t ) . '</p>';
+	$ico = fn( $n ) => '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
+	$img = '';
+	$pic = get_posts( array( 'post_type' => 'any', 'post_status' => 'publish', 'numberposts' => 1, 'meta_key' => '_thumbnail_id', 'fields' => 'ids' ) );
+	if ( $pic ) {
+		$img = (string) get_the_post_thumbnail_url( $pic[0], 'large' );
+	}
+	$o  = '<style>.kit-demo-static .kit-sticky-help{position:static!important;display:flex!important;transform:none!important}.kit-demo-static .kit-carousel-dots{display:flex!important}.kit-demo-state{margin:var(--s-3) 0 var(--s-1);font-size:var(--kit-meta-size);color:var(--kit-color-muted)}.kit-demo-grid>span{display:grid;place-items:center;min-height:2.5rem;background:var(--kit-color-surface);border-radius:var(--kit-radius-control);font-size:var(--kit-meta-size)}.kit-demo-surfaces{display:grid;gap:var(--s-3);grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}.kit-demo-surfaces>div{padding:var(--s-4);border-radius:var(--kit-radius-card);border:1px solid var(--kit-color-line);min-height:5rem}</style>';
+	$o .= $h( 'Sticky action bar' ) . $st( 'Default (phones only; fixed to the bottom of the screen, hidden while scrolling down)' )
+		. '<div class="kit-demo-static"><div class="kit-sticky-help"><a class="kit-sh-primary" href="#">' . $ico( 'helpline' ) . 'Call 1962</a><a class="kit-sh-secondary" href="#">Find help near you</a></div></div>';
+	$o .= $h( 'Banner' ) . $st( 'Default (a section page banner; nothing is printed until it has a picture)' )
+		. ( $img ? '<div class="wp-block-cover kit-banner"><span aria-hidden="true" class="wp-block-cover__background has-secondary-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background" alt="" src="' . esc_url( $img ) . '" data-object-fit="cover"><div class="wp-block-cover__inner-container"></div></div>' : '<p><em>No picture on the site yet to draw it with.</em></p>' );
+	$share = function ( $copied ) use ( $ico ) {
+		return '<div class="kit-share" role="group" aria-label="Share"><span class="kit-share-label">Share</span>'
+			. '<a class="kit-share-whatsapp" href="#">' . $ico( 'whatsapp' ) . 'WhatsApp</a><a class="kit-share-facebook" href="#">' . $ico( 'facebook' ) . 'Facebook</a><a class="kit-share-x kit-share-icon" href="#" aria-label="X">' . $ico( 'x-brand' ) . '</a>'
+			. '<button type="button" class="kit-share-copy">' . $ico( $copied ? 'check' : 'link' ) . ( $copied ? 'Link copied' : 'Copy link' ) . '</button></div>';
+	};
+	if ( function_exists( 'aw_share_html' ) && $pic ) { // the real share row, then the copy button in its done state
+		$real  = aw_share_html( $pic[0] );
+		$share = fn( $copied ) => $copied ? (string) preg_replace( '#(<button[^>]*kit-share-copy[^>]*>)(.*?)(</button>)#s', '$1' . $ico( 'check' ) . 'Link copied$3', $real ) : $real;
+	}
+	$o .= $h( 'Share' ) . $st( 'Default' ) . $share( false ) . $st( 'Copied (after Copy link)' ) . $share( true );
+	$o .= $h( 'Table' ) . $st( 'Default (zebra rows; hover darkens a row; on phones the table scrolls sideways inside its box)' )
+		. '<div class="kit-table" style="overflow-x:auto"><table><thead><tr><th>Who approves</th><th>Today</th><th>Draft 2026</th></tr></thead><tbody><tr><td>Small animals</td><td>Lab committee</td><td>Lab committee</td></tr><tr><td>Large animals</td><td>National committee</td><td>Lab committee</td></tr><tr><td>Penalty</td><td>Up to ₹200</td><td>Up to ₹200</td></tr></tbody></table></div>';
+	$o .= $h( 'Carousel dots' ) . $st( 'Default and current (phones only, under a card row that scrolls sideways)' )
+		. '<div class="kit-demo-static"><div class="kit-carousel-dots" role="group" aria-label="Choose a card"><button type="button" aria-label="Card 1 of 4" aria-current="true"></button><button type="button" aria-label="Card 2 of 4"></button><button type="button" aria-label="Card 3 of 4"></button><button type="button" aria-label="Card 4 of 4"></button></div></div>';
+	$o .= $h( 'Claim panel' ) . $st( 'Closed' ) . '<div class="kit-claim"><details><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p></details></div>'
+		. $st( 'Open' ) . '<div class="kit-claim"><details open><summary>Is this your organisation?</summary><p>Claim this listing to update its details.</p><p><a class="kit-btn kit-btn--sm" href="#">Claim this listing</a></p></details></div>';
+	$o .= $h( 'More link' ) . $st( 'Default' ) . '<p class="kit-more">More in the Library: <a href="#">all court orders</a></p>';
+	$counter = fn( $n, $text ) => '<div class="kit-field"><label>Your message</label><div class="kit-field-control"><textarea rows="3" maxlength="1500" data-counter="1200">' . esc_html( str_repeat( 'Lorem ipsum dolor sit amet. ', $n ) ) . '</textarea></div><span class="kit-field-hint kit-counter" aria-live="polite">' . esc_html( $text ) . '</span></div>';
+	$o .= $h( 'Character counter' ) . $st( 'Default (nothing shown below the limit warning)' ) . $counter( 2, '' ) . $st( 'Near the limit (from 1,200 of 1,500 characters)' ) . $counter( 2, '1,240 of 1,500 characters' );
+	$o .= $h( 'Print button' ) . $st( 'Default (on a printable letter; hidden when printing)' ) . '<p class="kit-print"><button type="button" class="wp-element-button">Print this letter</button> <span>Sign it, then post it by Speed Post.</span></p>';
+	$o .= $h( 'Layout grid' ) . $st( 'This frame shows the grid for its own width: 4 columns on phones, 8 from 768, 12 from 1200' ) . '<div class="kit-grid kit-demo-grid">' . implode( '', array_map( fn( $i ) => '<span>' . $i . '</span>', range( 1, 12 ) ) ) . '</div>';
+	$o .= $h( 'Surfaces and overlay' ) . '<div class="kit-demo-surfaces">'
+		. '<div style="background:var(--kit-color-bg)">' . $st( 'Page grey' ) . '</div><div class="kit-surface-section">' . $st( 'Section white' ) . '</div><div class="kit-surface-alt">' . $st( 'Section darker grey' ) . '</div><div style="background:var(--kit-surface-card,var(--kit-color-raised))">' . $st( 'Card white' ) . '</div>'
+		. '<div class="kit-overlay" style="background:' . ( $img ? 'url(' . esc_url( $img ) . ') center/cover' : 'var(--kit-color-ink)' ) . ';color:var(--kit-color-on-ink)"><p class="kit-demo-state" style="color:inherit">Image with dark overlay</p></div></div>';
+	$o .= $h( 'Preview only' ) . $st( 'Shown to administrators and in previews; hidden from visitors' ) . '<div class="kits-preview-only" style="padding:var(--s-3);border:1px dashed var(--kit-color-line)">Preview-only content (for example an empty ad slot or a note to editors).</div>';
+	$core = '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Primary</a></div><!-- /wp:button --><!-- wp:button {"className":"is-style-kits-secondary"} --><div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="#">Secondary</a></div><!-- /wp:button --><!-- wp:button {"className":"is-style-kits-ghost"} --><div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="#">Ghost</a></div><!-- /wp:button --></div><!-- /wp:buttons -->'
+		. '<!-- wp:quote --><blockquote class="wp-block-quote"><!-- wp:paragraph --><p>Every animal deserves a voice.</p><!-- /wp:paragraph --><cite>Animal Writes</cite></blockquote><!-- /wp:quote -->'
+		. '<!-- wp:separator --><hr class="wp-block-separator has-alpha-channel-opacity"/><!-- /wp:separator -->'
+		. '<!-- wp:list --><ul class="wp-block-list"><!-- wp:list-item --><li>A list item</li><!-- /wp:list-item --><!-- wp:list-item --><li>Another list item</li><!-- /wp:list-item --></ul><!-- /wp:list -->'
+		. '<!-- wp:table --><figure class="wp-block-table"><table><thead><tr><th>Block</th><th>Style</th></tr></thead><tbody><tr><td>Table</td><td>Kits</td></tr></tbody></table></figure><!-- /wp:table -->';
+	$o .= $h( 'Core block styles (Site Editor > Styles > Blocks)' ) . $st( 'Default; hover and focus as on the buttons above; on dark surfaces Primary stays yellow, Secondary and Ghost keep their outline' ) . do_blocks( $core )
+		. '<div class="kit-demo-ink">' . do_blocks( '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Primary on dark</a></div><!-- /wp:button --><!-- wp:button {"className":"is-style-kits-secondary"} --><div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="#">Secondary on dark</a></div><!-- /wp:button --></div><!-- /wp:buttons -->' ) . '</div>';
+	return $o;
+}
+
 add_shortcode(
 	'kits_demo',
 	function () {
@@ -182,6 +235,7 @@ add_shortcode(
 			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark,.kit-demo-btns-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-dark{padding:var(--s-3);border-radius:var(--kit-radius-control)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
 			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
 			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel( '-site' ) . '</section>'
+			. '<section class="kit-demo-blocks"><h2>More Kits components</h2>' . kits_demo_more() . '</section>'
 			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states
 	}
 );
@@ -221,12 +275,12 @@ add_action(
 			return;
 		}
 		if ( is_page( 'kits-demo' ) && ( isset( $_GET['kits_only_classes'] ) || isset( $_GET['kits_only_block'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<script>(function(){var q=new URLSearchParams(location.search),cls=(q.get("kits_only_classes")||"").split(",").filter(Boolean),blk=q.get("kits_only_block")||"";'
+			echo '<script>(function(){var q=new URLSearchParams(location.search),cls=(q.get("kits_only_classes")||"").split(",").filter(Boolean),blk=q.get("kits_only_block")||"",nm=q.get("kits_only_name")||"";'
 				. 'var sel=cls.map(function(c){return "[class~=\""+c+"\"],[class*=\" "+c+"-\"],[class^=\""+c+"-\"]";}).join(",");'
 				. 'var root=document.querySelector(".kit-demo");if(!root)return;var first=root.querySelector(":scope>section");if(first&&first.nextElementSibling)first.hidden=true;'
 				. 'root.querySelectorAll("h2").forEach(function(h){h.hidden=true;if(h.nextElementSibling&&h.nextElementSibling.tagName==="P")h.nextElementSibling.hidden=true;});var keep=0;'
 				. 'root.querySelectorAll("h3.kit-demo-h").forEach(function(h){if(h.closest("[hidden]"))return;var g=[h],n=h.nextElementSibling;while(n&&!n.matches("h3.kit-demo-h,h2")){g.push(n);n=n.nextElementSibling;}'
-				. 'var hit=(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
+				. 'var hit=(nm&&h.textContent.trim().indexOf(nm)===0)||(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
 				. 'if(!keep){var u=q.get("kits_spot_url")||"none";if(u==="none"){root.insertAdjacentHTML("afterbegin","<p style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not drawn on the states sheet and not found on the sample pages: it may appear only in a state, a form step or wp-admin.</p>");}else{location.replace(u+(u.indexOf("?")>-1?"&":"?")+"kits_spot="+encodeURIComponent(sel||(".wp-block-"+blk.replace("/","-"))));}}})();</script>';
 		}
 		if ( isset( $_GET['kits_spot'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification

@@ -253,3 +253,43 @@ add_filter(
 		return $pages;
 	}
 );
+
+/* States sheet: the Animal Writes pieces drawn nowhere else (owner, 18 Oct 2026), each under its registry name. */
+add_filter(
+	'kits_demo_sections',
+	function ( $html ) {
+		$h  = fn( $t ) => '<h3 class="kit-demo-h">' . esc_html( $t ) . '</h3>';
+		$st = fn( $t ) => '<p class="aw-state-name">' . esc_html( $t ) . '</p>';
+		$o  = '<h2>More Animal Writes components</h2>';
+		$o .= '<div>' . $h( 'Helplines' ) . $st( 'Default: the first card is the emergency one (red bar)' )
+			. '<div class="aw-helplines"><div class="aw-helpline"><h3>Emergency</h3><a class="aw-helpline-num" href="tel:112">112</a><p>Police, fire and ambulance, anywhere in India.</p><p class="aw-helpline-src">Ministry of Home Affairs</p></div>'
+			. '<div class="aw-helpline"><h3>Mobile Veterinary Units</h3><a class="aw-helpline-num" href="tel:1962">1962</a><p>A vet comes to the animal, in most states.</p><p class="aw-helpline-src">State animal husbandry departments</p></div></div>'
+			. '<p class="aw-emergency">An animal in danger right now: call 112 first.</p></div>';
+		$o .= '<div>' . $h( 'Category index' ) . $st( 'Default (every Category with its picture and count)' ) . '<div style="max-height:26rem;overflow:auto">' . do_shortcode( '[aw_categories_index]' ) . '</div></div>';
+		$o .= '<div>' . $h( 'Footer extras' ) . $st( 'Default: the Categories as chips on the dark footer' ) . '<div class="kit-demo-ink">' . do_shortcode( '[aw_categories_list]' ) . '</div></div>';
+		$o .= '<div>' . $h( 'Buttons (Animal Writes)' ) . $st( 'Default: the home hero buttons (full width on phones)' ) . '<div class="aw-ed-hero-actions" style="display:flex;flex-wrap:wrap;gap:var(--kit-space-3)"><a class="kit-btn aw-btn" href="#">Find help near you</a><a class="kit-btn kit-btn--secondary aw-btn" href="#">Report cruelty</a></div></div>';
+		$o .= '<div>' . $h( 'Finder band' ) . $st( 'Default: the band around the place finder' ) . '<section class="aw-finder-band" style="padding-inline:var(--kit-space-4);background:var(--kit-color-surface);border-radius:var(--kit-radius-card)"><h2>Find animal help near you</h2><p>Rescue groups, shelters and government vets by state and district.</p></section></div>';
+		$o .= '<div>' . $h( 'Local card' ) . ( function_exists( 'aw_local_card' )
+			? $st( 'News: Organisations in {State}' ) . aw_local_card( 'Organisations in Kerala', 'Rescue groups, shelters and government vets you can contact in Kerala.', '<a class="kit-btn kit-btn--secondary" href="#">See all in Kerala</a>' )
+				. $st( 'Directory district with fewer than 3 listings: Few listings in {District} yet' ) . aw_local_card( 'Few listings in Wayanad yet', 'Know an organisation here? Add it, or see the whole state.', '<a class="kit-btn kit-btn--secondary" href="#">Add an organisation</a><a class="kit-btn kit-btn--ghost" href="#">See all in Kerala</a>' )
+			: '<p><em>Not available.</em></p>' ) . '</div>';
+		$sp = function_exists( 'aw_block_sponsored_item' ) ? get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'meta_key' => 'aw_sponsored', 'meta_value' => '1', 'fields' => 'ids' ) ) : array();
+		$o .= '<div>' . $h( 'Sponsored Resource' ) . ( $sp ? $st( 'Resource with Sponsored ticked' ) . aw_block_sponsored_item( array( 'postId' => $sp[0] ) ) : $st( 'Resource with Sponsored ticked' ) . '<p><em>No sponsored Resource yet.</em></p>' )
+			. $st( 'Nothing (Resource not sponsored or not published)' ) . '<p><em>(prints nothing)</em></p></div>';
+		$pic = (int) get_post_thumbnail_id( $sp ? $sp[0] : 0 );
+		if ( ! $pic ) {
+			$any = get_posts( array( 'post_type' => 'any', 'post_status' => 'publish', 'numberposts' => 1, 'meta_key' => '_thumbnail_id', 'fields' => 'ids' ) );
+			$pic = $any ? (int) get_post_thumbnail_id( $any[0] ) : 0;
+		}
+		if ( function_exists( 'aw_block_sponsored_banner' ) ) {
+			$o .= '<div>' . $h( 'Sponsored banner' )
+				. $st( 'Picture + heading + text + button' ) . aw_block_sponsored_banner( array( 'url' => home_url( '/' ), 'heading' => 'Support animal shelters near you', 'text' => 'A partner message shown on Resources.', 'linkText' => 'Learn more', 'mediaId' => $pic, 'sponsor' => 'Example partner' ) )
+				. $st( 'Heading as the link (no button text)' ) . aw_block_sponsored_banner( array( 'url' => home_url( '/' ), 'heading' => 'Support animal shelters near you', 'text' => 'A partner message shown on Resources.', 'mediaId' => $pic, 'sponsor' => 'Example partner' ) )
+				. $st( 'No picture' ) . aw_block_sponsored_banner( array( 'url' => home_url( '/' ), 'heading' => 'Support animal shelters near you', 'text' => 'A partner message shown on Resources.', 'linkText' => 'Learn more', 'sponsor' => 'Example partner' ) ) . '</div>';
+		}
+		$o .= '<div>' . $h( 'Map picker (listing edit screen)' ) . $st( 'Lives on the listing edit screen in wp-admin (Directory > edit a listing): no coordinates shows India, a click drops a pin; with coordinates the pin is at the point at zoom 16; typing latitude or longitude moves the pin' )
+			. '<div class="aw-map-picker" style="display:grid;place-items:center;min-height:10rem;border:1px dashed var(--kit-color-line);border-radius:var(--kit-radius-card);color:var(--kit-color-muted)">Map (OpenStreetMap) · Latitude · Longitude</div></div>';
+		return $html . '<section class="kit-demo-blocks">' . $o . '</section>';
+	},
+	20
+);
