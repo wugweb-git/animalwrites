@@ -79,3 +79,19 @@ add_action(
 	},
 	99999
 );
+
+/**
+ * A term created, renamed or edited purges only its own archive page, not the whole site (owner, 18 Oct 2026). The
+ * LiteSpeed setting "purge-hook_all" no longer lists create_term / edit_terms; the workers create tags all day.
+ */
+add_action(
+	'edited_term',
+	function ( $term_id, $tt_id, $taxonomy ) {
+		$link = get_term_link( (int) $term_id, $taxonomy );
+		if ( ! is_wp_error( $link ) ) {
+			do_action( 'litespeed_purge_url', $link );
+		}
+	},
+	10,
+	3
+);
