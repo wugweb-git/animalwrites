@@ -141,6 +141,28 @@ function aw_cc0_run() {
 			++$none;
 		}
 	}
+	// 2b. Our own guides with no picture (owner, 18 Oct 2026): a CC0 photo of their own, used once site-wide. A guide
+	// tagged for a campaign (campaign-*) is left to the campaign's own pictures (its motif), never a stock photo.
+	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p
+		WHERE p.post_status = 'publish' AND p.post_type = 'post'
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} su WHERE su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> '')
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value NOT IN ('','0'))
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} te ON te.term_id = tt.term_id AND te.slug LIKE 'campaign-%%' WHERE tr.object_id = p.ID)
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
+		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr2 WHERE tr2.post_id = p.ID AND tr2.meta_key = 'aw_cc0_tried' AND tr2.meta_value > %s)
+		ORDER BY p.post_date DESC LIMIT 5", AW_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
+	foreach ( $own as $id ) {
+		if ( time() - $start > AW_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! aw_ov_quota_left() ) {
+			break;
+		}
+		$r = aw_cc0_assign( (int) $id );
+		if ( $r ) {
+			++$done;
+		} elseif ( null !== $r ) {
+			++$none;
+		}
+	}
+
 	if ( $fetched || $local || $checked || $done || $none ) {
 		aw_cc0_log( sprintf( 'run: %d publisher images read from source pages, %d stored locally, %d checked, %d photos added, %d without a match (%ds)', $fetched, $local, $checked, $done, $none, time() - $start ) );
 	}
