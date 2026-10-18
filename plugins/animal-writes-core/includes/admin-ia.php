@@ -257,6 +257,7 @@ add_filter(
 			'upload.php',
 			'aw-classification',
 			'aw-inbox',
+			'aw-mail', // Mail (Wug Mail plugin): unread count and latest messages
 			'separator2',
 			'themes.php',
 			'plugins.php',
