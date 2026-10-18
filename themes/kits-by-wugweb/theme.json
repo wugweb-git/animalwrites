@@ -412,7 +412,7 @@
 							"text": "var(--kit-btn-ghost-fg)"
 						},
 						"border": {
-							"color": "transparent"
+							"color": "var(--kit-btn-ghost-line)"
 						}
 					},
 					"kits-brand": {

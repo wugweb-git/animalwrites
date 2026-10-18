@@ -8,7 +8,7 @@ One button system for the Kits master theme. `.kit-btn` (theme and plugin markup
 |---|---|---|---|---|---|
 | Primary | the main action, one per area | `kit-btn` | Default (shown as Primary) | ink fill, white text | brand fill, ink text (ink would vanish) |
 | Secondary | other actions next to a primary | `kit-btn--secondary` | Secondary | outline, ink text | light outline, white text |
-| Ghost | low emphasis: Clear, Cancel, Show more | `kit-btn--ghost` | Ghost | text only | white text only |
+| Ghost | an outlined action that needs more weight than Secondary | `kit-btn--ghost` | Ghost | dark (ink) outline, ink text | white outline, white text |
 | Brand | brand moments: the primary shape in the brand colour | `kit-btn--brand` | Brand | brand fill (yellow, ink text), or the campaign's colour | the same |
 
 Brand reads one pair of tokens, `--kit-btn-brand-bg` and `--kit-btn-brand-fg`. By default that is the site's brand (yellow with ink text). A campaign palette sets the pair to the campaign's own colour (`--camp-primary` / `--camp-primary-ink` in `.aw-camp--lab-rules` and `.aw-camp--community-dogs`), so Brand buttons on a campaign page are in the campaign colour. Hover mixes the brand with ink (`--kit-btn-hover-mix`), so every state follows the same pair. A new campaign palette adds the same line; the contrast check tests each palette's pair.
@@ -22,7 +22,7 @@ Old names still render: `is-style-kits-primary` renders as Brand (it was yellow)
 | State | What changes | Motion |
 |---|---|---|
 | Default | variant colours | none |
-| Hover (pointer devices only) | primary lightens; secondary fills with ink (white on dark); brand darkens towards ink; ghost gets a tint | colours fade over `--kit-motion-fast`; the icon nudges with a spring (`--kit-duration-spring`) |
+| Hover (pointer devices only) | primary lightens; secondary fills with ink (white on dark); brand darkens towards ink; ghost fills with ink (white on dark) | colours fade over `--kit-motion-fast`; the icon nudges with a spring (`--kit-duration-spring`) |
 | Focus-visible | `--kit-focus-width` ring in `--kit-color-focus`; colours unchanged | the icon nudges, as on hover |
 | Active (pressed) | moves down `--kit-btn-press` (1px) | instant |
 | Disabled | `disabled` on buttons, `aria-disabled="true"` on links (they stop navigating); `--opacity-disabled`; no hover, no press | none |

@@ -770,10 +770,20 @@
       "md": "var(--kit-color-ink)",
       "lg": "var(--kit-color-ink)"
     },
+    "btn-ghost-line": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
     "btn-ghost-bg-hover": {
-      "sm": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)",
-      "md": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)",
-      "lg": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)"
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-ghost-fg-hover": {
+      "sm": "var(--kit-color-on-ink)",
+      "md": "var(--kit-color-on-ink)",
+      "lg": "var(--kit-color-on-ink)"
     },
     "btn-brand-bg": {
       "sm": "var(--kit-color-accent)",

@@ -174,7 +174,9 @@
   --kit-btn-secondary-bg-hover: var(--kit-color-ink);
   --kit-btn-secondary-fg-hover: var(--kit-color-on-ink);
   --kit-btn-ghost-fg: var(--kit-color-ink);
-  --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-ink) 8%, transparent);
+  --kit-btn-ghost-line: var(--kit-color-ink);
+  --kit-btn-ghost-bg-hover: var(--kit-color-ink);
+  --kit-btn-ghost-fg-hover: var(--kit-color-on-ink);
   --kit-btn-brand-bg: var(--kit-color-accent);
   --kit-btn-brand-fg: var(--kit-color-on-accent);
   --kit-btn-hover-mix: 85%;

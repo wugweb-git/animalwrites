@@ -205,7 +205,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-segment :is(button, a):is([aria-pressed=true], [aria-current]) { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); font-weight: var(--kit-weight-bold); }
 
 /* ---------- 10. Button: one system for .kit-btn and the core Button block (spec: docs/buttons.md; registry "Button") ----------
-   Variants   primary (default: ink fill) · secondary (outline) · ghost (text weight, low emphasis) · brand (the primary shape
+   Variants   primary (default: ink fill) · secondary (outline) · ghost (dark outline) · brand (the primary shape
               in the brand colour). Each variant reads --kit-btn-<variant>-* tokens; a dark surface swaps those tokens, so
               every variant works on light and on dark surfaces.
    States     default · hover · focus-visible · active (pressed) · disabled · loading.
@@ -229,8 +229,8 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 	--_bg-h: var(--kit-btn-secondary-bg-hover); --_fg-h: var(--kit-btn-secondary-fg-hover); --_line-h: var(--kit-btn-secondary-bg-hover);
 }
 :where(.kit-btn--ghost, .is-style-kits-ghost > .wp-block-button__link) {
-	--_bg: transparent; --_fg: var(--kit-btn-ghost-fg); --_line: transparent;
-	--_bg-h: var(--kit-btn-ghost-bg-hover); --_fg-h: var(--kit-btn-ghost-fg); --_line-h: transparent;
+	--_bg: transparent; --_fg: var(--kit-btn-ghost-fg); --_line: var(--kit-btn-ghost-line);
+	--_bg-h: var(--kit-btn-ghost-bg-hover); --_fg-h: var(--kit-btn-ghost-fg-hover); --_line-h: var(--kit-btn-ghost-bg-hover);
 }
 :where(.kit-btn--brand, .is-style-kits-brand > .wp-block-button__link, .is-style-kits-primary > .wp-block-button__link) {
 	--_bg: var(--kit-btn-brand-bg); --_fg: var(--kit-btn-brand-fg); --_line: var(--kit-btn-brand-bg);
@@ -244,7 +244,8 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 	--kit-btn-primary-bg-hover: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); --kit-btn-primary-fg-hover: var(--kit-btn-brand-fg);
 	--kit-btn-secondary-fg: var(--kit-color-on-ink); --kit-btn-secondary-line: color-mix(in srgb, var(--kit-color-on-ink) 60%, transparent);
 	--kit-btn-secondary-bg-hover: var(--kit-color-on-ink); --kit-btn-secondary-fg-hover: var(--kit-color-ink);
-	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent);
+	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-line: var(--kit-color-on-ink);
+	--kit-btn-ghost-bg-hover: var(--kit-color-on-ink); --kit-btn-ghost-fg-hover: var(--kit-color-ink);
 }
 
 /* Shape, type and motion (the same for every variant) */

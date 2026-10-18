@@ -94,6 +94,11 @@
       "kit-color-ink",
       "kit-color-on-ink",
       "hover on dark (white fill)"
+     ],
+     [
+      "kit-btn-ghost-fg-hover",
+      "kit-btn-ghost-bg-hover",
+      "ghost hover"
      ]
     ]
    },
@@ -116,18 +121,18 @@
       "dark": "takes the brand pair (fill and hover), since ink would vanish"
      },
      "secondary": {
-      "use": "other actions beside a primary",
+      "use": "other actions next to a primary (light outline)",
       "kit": "kit-btn--secondary (old: kit-btn--outline)",
       "block": "Secondary (old: Outline)",
       "light": "1px --kit-color-line outline, ink text; hover ink fill",
       "dark": "60% white outline, white text; hover white fill, ink text"
      },
      "ghost": {
-      "use": "low emphasis (Clear, Cancel, Show more)",
+      "use": "an outlined action with more weight than Secondary",
       "kit": "kit-btn--ghost",
       "block": "Ghost",
-      "light": "no fill, no outline, ink text; hover 8% ink tint",
-      "dark": "white text; hover 14% white tint"
+      "light": "ink outline, ink text; hover ink fill, white text",
+      "dark": "white outline, white text; hover white fill, ink text"
      },
      "brand": {
       "use": "brand moments: the primary shape in the brand colour",
