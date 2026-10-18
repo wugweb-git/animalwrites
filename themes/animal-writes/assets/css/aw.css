@@ -254,6 +254,9 @@ body { background: var(--kit-color-canvas); }
 .kit-task:hover .aw-task-cta .kit-ico { transform: translateX(3px); }
 @media (prefers-reduced-motion: reduce) { .kit-task:hover .aw-task-cta .kit-ico { transform: none; } }
 .aw-task-meta { margin-top: auto; }
+.aw-task-body > .aw-task-meta:first-child { margin: 0; } /* the date and read time lead the card, as the meta row does on News and Library */
+.aw-task-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: auto; padding-top: var(--kit-space-2); }
+.aw-task-tags .wp-block-post-terms { display: contents; }
 .aw-also h2 { font-size: var(--kit-type-h3); margin-bottom: var(--kit-space-5); }
 
 /* HELP — Resources */

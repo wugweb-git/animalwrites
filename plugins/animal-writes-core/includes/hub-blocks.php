@@ -334,7 +334,7 @@ function aw_block_task_icon( $a, $id ) {
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return '<p class="aw-task-meta kit-meta-row">' . $badge . '<span class="kit-meta-item">Updated ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	return '<p class="aw-task-meta kit-meta-row">' . $badge . '<span class="kit-meta-item">' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */
