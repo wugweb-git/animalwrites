@@ -188,6 +188,8 @@ def main(listings_file):
                 continue
             if dist["code"] not in (l.get("districts") or []):
                 continue
+            if l.get("awbi_code"):
+                continue  # has its own AWBI code: a different unit or organisation (18 Oct fix)
             a, b = " ".join(fold(name).split()), " ".join(fold(clean_title(l["title"])).split())
             if name_sim(name, clean_title(l["title"])) >= 0.9 and SequenceMatcher(None, a, b).ratio() >= 0.8:
                 hit = l
