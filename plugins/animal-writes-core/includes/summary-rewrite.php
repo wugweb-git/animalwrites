@@ -12,6 +12,7 @@
  *        only, so post_date and post_modified never move), entities and the search description follow, only this
  *        item's cache is purged.
  *   POST aw/v1/summary-rewrite {id, before_md5, failed:"reason"}   an attempt that produced nothing usable.
+ *   POST aw/v1/summary-rewrite {id, before_md5, settle:"reason"}   the summary stays as it is: nothing better can be said.
  *
  * State lives in the meta aw_summary_rw = {state: ok|done|short|failed, md5, at, tries, model, reason}. A state counts
  * only while the summary still has the md5 it was settled with. Nothing is deleted.
@@ -172,6 +173,11 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 	if ( '' !== $failed ) {
 		aw_summary_rw_set( $id, $p->post_excerpt, 'failed', array( 'reason' => mb_substr( sanitize_text_field( $failed ), 0, 300 ) ) );
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'failed' ) );
+	}
+	$settle = trim( (string) $req->get_param( 'settle' ) );
+	if ( '' !== $settle ) { // the best that can be said from the source and other coverage is what is already there
+		aw_summary_rw_set( $id, $p->post_excerpt, 'short', array( 'reason' => mb_substr( sanitize_text_field( $settle ), 0, 300 ) ) );
+		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short' ) );
 	}
 	$summary = trim( preg_replace( '/\s+/u', ' ', sanitize_textarea_field( (string) $req->get_param( 'summary' ) ) ) );
 	$state   = 'short' === $req->get_param( 'state' ) ? 'short' : 'done';
