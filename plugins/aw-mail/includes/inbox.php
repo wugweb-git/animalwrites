@@ -137,99 +137,182 @@ function aw_mail_own() {
 	return array_merge( array_values( aw_mail_all_boxes() ), array_keys( aw_mail_aliases() ) );
 }
 
-/* ---------- Screen state ---------- */
+/* ---------- Folders by role (so "All mailboxes" can mix them) ---------- */
 
-/** Current mailbox key, folder, page, search, message UID (validated). */
-function aw_mail_state() {
-	$boxes = aw_mail_all_boxes();
-	$key   = sanitize_key( wp_unslash( $_GET['box'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$key   = isset( $boxes[ $key ] ) ? $key : (string) array_key_first( $boxes );
-	$f     = (string) wp_unslash( $_GET['folder'] ?? 'INBOX' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$f     = AW_MAIL_FORMS === $f || preg_match( '/^INBOX(\.[\w .-]+)?$/', $f ) ? $f : 'INBOX';
+/** Folder roles shown above the list, in order: role => [label, path]. */
+function aw_mail_roles() {
 	return array(
-		'box'    => $key,
-		'folder' => $f,
-		'page'   => max( 1, absint( $_GET['p'] ?? 1 ) ), // phpcs:ignore WordPress.Security.NonceVerification
-		'q'      => trim( sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ) ), // phpcs:ignore WordPress.Security.NonceVerification
-		'uid'    => absint( $_GET['uid'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification
-		'item'   => absint( $_GET['item'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification
+		'inbox'   => array( 'Inbox', 'INBOX' ),
+		'sent'    => array( 'Sent', 'INBOX.Sent' ),
+		'archive' => array( 'Archive', 'INBOX.Archive' ),
+		'spam'    => array( 'Spam', 'INBOX.Junk' ),
+		'trash'   => array( 'Trash', 'INBOX.Trash' ),
 	);
 }
 
-/** Mail screen URL with the given state changes. */
-function aw_mail_url( $args = array() ) {
-	$s    = aw_mail_state();
-	$base = array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $s['folder'] );
-	return add_query_arg( array_filter( array_merge( $base, $args ), fn( $v ) => null !== $v && '' !== $v && 0 !== $v ), admin_url( 'admin.php' ) );
+function aw_mail_role_path( $role ) {
+	return aw_mail_roles()[ $role ][1] ?? 'INBOX';
 }
 
-/** URL of an action (admin-post, nonced). */
+function aw_mail_role_of( $path ) {
+	foreach ( aw_mail_roles() as $r => $v ) {
+		if ( $v[1] === $path ) {
+			return $r;
+		}
+	}
+	return 'inbox';
+}
+
+/* ---------- Screen state ---------- */
+
+/** Current view: box (a mailbox key or 'all'), folder role, page, search, message UID or form item. */
+function aw_mail_state() {
+	$boxes = aw_mail_all_boxes();
+	$key   = sanitize_key( wp_unslash( $_GET['box'] ?? 'all' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$key   = isset( $boxes[ $key ] ) ? $key : 'all';
+	$f     = sanitize_key( wp_unslash( $_GET['folder'] ?? 'inbox' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$f     = AW_MAIL_FORMS === $f || isset( aw_mail_roles()[ $f ] ) ? $f : 'inbox';
+	return array(
+		'box'    => $key,
+		'folder' => $f,
+		'page'   => max( 1, absint( $_GET['paged'] ?? 1 ) ), // phpcs:ignore WordPress.Security.NonceVerification
+		'q'      => trim( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ), // phpcs:ignore WordPress.Security.NonceVerification
+		'uid'    => absint( $_GET['uid'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification
+		'item'   => absint( $_GET['item'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification
+		'view'   => sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification -- the list (box) a message was opened from
+	);
+}
+
+/** Mail screen URL. */
+function aw_mail_url( $args = array() ) {
+	$s = aw_mail_state();
+	return add_query_arg( array_filter( array_merge( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $s['folder'] ), $args ), fn( $v ) => null !== $v && '' !== $v && 0 !== $v ), admin_url( 'admin.php' ) );
+}
+
+/** URL of a single action (admin-post, nonced). */
 function aw_mail_act_url( $act, $args = array() ) {
 	return wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'aw_mail_act', 'do' => $act ), $args ), admin_url( 'admin-post.php' ) ), 'aw_mail_act' );
 }
 
+/** Mailboxes in the current view. */
+function aw_mail_view_boxes( $box ) {
+	$all = aw_mail_all_boxes();
+	return 'all' === $box ? $all : array( $box => $all[ $box ] );
+}
+
+/** Unread count of a role across the boxes in view. */
+function aw_mail_role_unread( $role, $box ) {
+	$n = 0;
+	foreach ( array_keys( aw_mail_view_boxes( $box ) ) as $k ) {
+		$n += (int) ( aw_mail_folders( $k )[ aw_mail_role_path( $role ) ][1] ?? 0 );
+	}
+	return $n;
+}
+
 /* ---------- The screen ---------- */
+
+// Bulk actions from the list (WordPress list table form, GET to this page): done before any output, then back.
+add_action(
+	'load-toplevel_page_aw-mail',
+	function () {
+		$act = sanitize_key( wp_unslash( $_REQUEST['action'] ?? '-1' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$act = '-1' === $act || '' === $act ? sanitize_key( wp_unslash( $_REQUEST['action2'] ?? '-1' ) ) : $act; // phpcs:ignore WordPress.Security.NonceVerification
+		$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_REQUEST['message'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( '-1' === $act || '' === $act || ! $ids ) {
+			return;
+		}
+		check_admin_referer( 'bulk-messages' );
+		if ( ! current_user_can( AW_MAIL_CAP ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$s    = aw_mail_state();
+		$done = aw_mail_bulk( $act, $ids, $s['folder'] ) ? 'flagged' : 'fail';
+		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $s['folder'], 's' => $s['q'] ? $s['q'] : null, 'aw_done' => $done ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+);
+
+/**
+ * Apply one action to several messages ("box|uid") or website form items ("form|id").
+ *
+ * @return bool All succeeded.
+ */
+function aw_mail_bulk( $act, $ids, $role ) {
+	$boxes = aw_mail_all_boxes();
+	$ok    = true;
+	foreach ( $ids as $id ) {
+		list( $key, $uid ) = array_pad( explode( '|', (string) $id, 2 ), 2, '' );
+		$uid = absint( $uid );
+		if ( 'form' === $key ) {
+			if ( 'aw_message' !== get_post_type( $uid ) ) {
+				continue;
+			}
+			if ( 'read' === $act ) {
+				update_post_meta( $uid, 'aw_read', current_time( 'mysql' ) );
+			} elseif ( 'unread' === $act ) {
+				delete_post_meta( $uid, 'aw_read' );
+			} elseif ( 'trash' === $act ) {
+				wp_trash_post( $uid );
+			}
+			continue;
+		}
+		if ( ! isset( $boxes[ $key ] ) || ! $uid ) {
+			continue;
+		}
+		$path = aw_mail_role_path( $role );
+		if ( 'read' === $act || 'unread' === $act ) {
+			list( $code ) = aw_mail_call( 'PATCH', aw_mail_fpath( $key, $path ) . '/messages/' . $uid, array( ( 'read' === $act ? 'addFlags' : 'removeFlags' ) => array( '\\Seen' ) ) );
+		} else {
+			$to = aw_mail_role_folder( $key, array( 'archive' => 'archive', 'trash' => 'trash', 'spam' => 'junk', 'inbox' => 'inbox' )[ $act ] ?? 'inbox' );
+			if ( $to === $path ) {
+				continue;
+			}
+			list( $code ) = aw_mail_call( 'POST', aw_mail_fpath( $key, $path ) . '/messages/' . $uid . '/move', array( 'targetFolder' => $to ) );
+		}
+		$ok = $ok && $code >= 200 && $code < 300;
+		delete_transient( 'aw_mail_folders_' . $key );
+	}
+	if ( function_exists( 'aw_mail_overview_flush' ) ) {
+		aw_mail_overview_flush();
+	}
+	return $ok;
+}
 
 function aw_mail_inbox_page() {
 	if ( ! current_user_can( AW_MAIL_CAP ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
-	$s     = aw_mail_state();
-	$tab   = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$boxes = aw_mail_all_boxes();
-	echo '<div class="wrap" id="aw-mail"><h1 class="wp-heading-inline">Mail</h1> ';
-	echo '<a class="page-title-action" href="' . esc_url( aw_mail_url( array( 'compose' => 'new', 'folder' => 'INBOX' ) ) ) . '">New message</a>';
-	if ( current_user_can( 'manage_options' ) ) {
-		echo ' <a class="page-title-action" href="' . esc_url( admin_url( 'admin.php?page=aw-mail&tab=settings' ) ) . '">Settings</a>';
-	}
-	echo '<hr class="wp-header-end">';
-	aw_mail_notice();
+	$s   = aw_mail_state();
+	$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<style>#aw-mail tr.unread td,#aw-mail tr.unread th{background-color:#fcf9e8}#aw-mail tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#aw-mail tr.unread .column-from,#aw-mail tr.unread .column-subject>a{font-weight:600}#aw-mail .column-date{width:9em}#aw-mail .column-mailbox{width:12em}#aw-mail .column-from{width:22%}#aw-mail .awm-box{float:right;margin-top:9px}#aw-mail .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#aw-mail .awm-meta th{text-align:left;padding:2px 12px 2px 0;color:#50575e;font-weight:400;vertical-align:top;width:4em}#aw-mail .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#aw-mail #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#aw-mail .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#aw-mail .awm-field label{flex:0 0 3.5em;color:#50575e}#aw-mail .awm-field input{flex:1}@media (max-width:767px){#aw-mail .awm-box{float:none;margin:8px 0}}</style>';
+	echo '<div class="wrap" id="aw-mail">';
 	if ( 'settings' === $tab && current_user_can( 'manage_options' ) ) {
+		echo '<h1>Mail settings</h1>';
+		aw_mail_notice();
 		do_action( 'aw_mail_settings_tab' );
 		echo '</div>';
 		return;
 	}
-	echo '<style>#aw-mail .awm{display:flex;gap:20px;align-items:flex-start}#aw-mail .awm-nav{flex:0 0 220px}#aw-mail .awm-main{flex:1;min-width:0}#aw-mail .awm-nav ul{margin:0 0 16px}#aw-mail .awm-nav li{margin:0}#aw-mail .awm-nav a{display:flex;justify-content:space-between;padding:6px 10px;border-radius:4px;text-decoration:none}#aw-mail .awm-nav a.current{background:#2271b1;color:#fff}#aw-mail .awm-nav h3{margin:12px 0 4px;font-size:12px;text-transform:uppercase;color:#646970}#aw-mail tr.unread td{font-weight:600}#aw-mail td.awm-date{white-space:nowrap;width:8em}#aw-mail td.awm-from{width:26%}#aw-mail .awm-row a{color:inherit;text-decoration:none;display:block}#aw-mail .awm-frame{width:100%;height:70vh;border:1px solid #dcdcde;background:#fff}#aw-mail .awm-head th{width:5em;text-align:left;vertical-align:top;padding:2px 8px 2px 0;color:#646970}#aw-mail .awm-tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}@media (max-width:767px){#aw-mail .awm{flex-direction:column}#aw-mail .awm-nav{flex:none;width:100%}}</style>';
-	if ( $s['uid'] && ! isset( $_GET['compose'] ) && AW_MAIL_FORMS !== $s['folder'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		aw_mail_get( $s['box'], $s['folder'], $s['uid'] ); // opening marks it read: fetch first so the counts below are current
-		delete_transient( 'aw_mail_folders_' . $s['box'] );
-	}
-	if ( AW_MAIL_FORMS === $s['folder'] && $s['item'] && ! isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		update_post_meta( $s['item'], 'aw_read', current_time( 'mysql' ) );
-	}
-	echo '<div class="awm"><nav class="awm-nav" aria-label="Mailboxes and folders">';
-	foreach ( $boxes as $key => $addr ) {
-		$alias = aw_mail_aliases_of( $addr );
-		echo '<h3>' . esc_html( $addr ) . '</h3>' . ( $alias ? '<p class="description" style="margin:0 0 4px 10px">also ' . esc_html( implode( ', ', $alias ) ) . '</p>' : '' ) . '<ul>';
-		foreach ( aw_mail_folders( $key ) as $path => $f ) {
-			$cur = $key === $s['box'] && $path === $s['folder'];
-			echo '<li><a' . ( $cur ? ' class="current" aria-current="page"' : '' ) . ' href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'box' => $key, 'folder' => $path ), admin_url( 'admin.php' ) ) ) . '"><span>' . esc_html( $f[0] ) . '</span>' . ( $f[1] ? '<strong>' . (int) $f[1] . '</strong>' : '' ) . '</a></li>';
-		}
-		echo '</ul>';
-	}
-	$forms_unread = aw_mail_forms_unread();
-	echo '<h3>Website</h3><ul><li><a' . ( AW_MAIL_FORMS === $s['folder'] ? ' class="current" aria-current="page"' : '' ) . ' href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) ) ) . '"><span>Website forms</span>' . ( $forms_unread ? '<strong>' . (int) $forms_unread . '</strong>' : '' ) . '</a></li></ul>';
-	echo '<p><a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">Open webmail</a></p></nav><div class="awm-main">';
 	if ( isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		aw_mail_compose_screen( $s, sanitize_key( $_GET['compose'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	} elseif ( AW_MAIL_FORMS === $s['folder'] ) {
-		$s['item'] ? aw_mail_form_item_screen( $s['item'] ) : aw_mail_forms_list( $s );
-	} elseif ( $s['uid'] ) {
+	} elseif ( AW_MAIL_FORMS === $s['folder'] && $s['item'] ) {
+		aw_mail_form_item_screen( $s );
+	} elseif ( $s['uid'] && 'all' !== $s['box'] ) {
 		aw_mail_message_screen( $s );
 	} else {
 		aw_mail_list_screen( $s );
 	}
-	echo '</div></div></div>';
+	echo '</div>';
 }
 
-/** One-line result notice after an action. */
+/** Result notice after an action. */
 function aw_mail_notice() {
 	$n = sanitize_key( $_GET['aw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$t = array(
-		'sent'     => array( 'success', 'Sent. A copy is in Sent.' ),
-		'moved'    => array( 'success', 'Moved.' ),
+		'sent'     => array( 'success', 'Message sent. A copy is in Sent.' ),
+		'moved'    => array( 'success', 'Message moved.' ),
 		'trashed'  => array( 'success', 'Moved to Trash.' ),
-		'flagged'  => array( 'success', 'Updated.' ),
+		'flagged'  => array( 'success', 'Done.' ),
 		'fail'     => array( 'error', 'That did not work: the mail server refused it. Nothing was changed.' ),
 		'limit'    => array( 'error', 'Sending paused: ' . AW_MAIL_SEND_HOUR . ' messages were sent in the last hour. Try again later.' ),
 		'missing'  => array( 'error', 'Add a recipient and a subject or message.' ),
@@ -246,50 +329,228 @@ function aw_mail_day( $date ) {
 	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
 }
 
-/** Mailbox folder: the list. */
+/** The list: title, mailbox picker, folder links, the WordPress list table. */
 function aw_mail_list_screen( $s ) {
-	$folders = aw_mail_folders( $s['box'] );
-	$label   = $folders[ $s['folder'] ][0] ?? aw_mail_folder_label( $s['folder'] );
-	$q       = array( 'page' => $s['page'], 'perPage' => AW_MAIL_PER_PAGE, 'sort' => '-date' );
-	if ( '' !== $s['q'] ) {
-		list( $code, $j ) = aw_mail_call( 'POST', aw_mail_fpath( $s['box'], $s['folder'] ) . '/messages/search?' . http_build_query( $q ), array( 'text' => $s['q'] ) );
-	} else {
-		list( $code, $j ) = aw_mail_call( 'GET', aw_mail_fpath( $s['box'], $s['folder'] ) . '/messages?' . http_build_query( $q ) );
+	require_once AW_MAIL_DIR . 'includes/list-table.php';
+	$boxes = aw_mail_all_boxes();
+	echo '<h1 class="wp-heading-inline">Mail</h1> <a class="page-title-action" href="' . esc_url( aw_mail_url( array( 'compose' => 'new', 'paged' => null, 's' => null ) ) ) . '">New message</a>';
+	if ( current_user_can( 'manage_options' ) ) {
+		echo ' <a class="page-title-action" href="' . esc_url( admin_url( 'admin.php?page=aw-mail&tab=settings' ) ) . '">Settings</a>';
 	}
-	echo '<h2 style="margin-top:0">' . esc_html( $label ) . ' <span class="description" style="font-weight:400">' . esc_html( aw_mail_all_boxes()[ $s['box'] ] ) . '</span></h2>';
-	echo '<form method="get" style="margin:0 0 10px"><input type="hidden" name="page" value="aw-mail"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $s['folder'] ) . '"><label class="screen-reader-text" for="awm-q">Search this folder</label><input type="search" id="awm-q" name="q" value="' . esc_attr( $s['q'] ) . '" placeholder="Search sender, subject, text"> <button class="button">Search</button>' . ( '' !== $s['q'] ? ' <a href="' . esc_url( aw_mail_url() ) . '">Clear</a>' : '' ) . '</form>';
-	if ( 200 !== $code ) {
-		echo '<div class="notice notice-error inline"><p>The mailbox could not be read just now. Try again in a minute, or <a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">open webmail</a>.</p></div>';
-		return;
+	// Mailbox picker (right).
+	echo '<form class="awm-box" method="get"><input type="hidden" name="page" value="aw-mail"><input type="hidden" name="folder" value="' . esc_attr( AW_MAIL_FORMS === $s['folder'] ? 'inbox' : $s['folder'] ) . '"><label for="awm-box" class="screen-reader-text">Mailbox</label><select id="awm-box" name="box" onchange="this.form.submit()"><option value="all"' . selected( 'all', $s['box'], false ) . '>All mailboxes</option>';
+	foreach ( $boxes as $k => $a ) {
+		$al = aw_mail_aliases_of( $a );
+		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $s['box'], false ) . '>' . esc_html( $a . ( $al ? ' (+ ' . implode( ', ', $al ) . ')' : '' ) ) . '</option>';
 	}
-	$rows = (array) ( $j['data'] ?? array() );
-	$pg   = (array) ( $j['pagination'] ?? array() );
-	if ( ! $rows ) {
-		echo '<p>' . ( '' !== $s['q'] ? 'Nothing matches.' : 'No messages.' ) . '</p>';
-		return;
+	echo '</select> <noscript><button class="button">Show</button></noscript></form>';
+	echo '<hr class="wp-header-end">';
+	aw_mail_notice();
+	// Folder links, as WordPress lists have them.
+	$links = array();
+	foreach ( aw_mail_roles() as $r => $v ) {
+		$n       = 'sent' === $r ? 0 : aw_mail_role_unread( $r, $s['box'] );
+		$links[] = '<a href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $r ), admin_url( 'admin.php' ) ) ) . '"' . ( $r === $s['folder'] ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $v[0] ) . ( $n ? ' <span class="count">(' . (int) $n . ')</span>' : '' ) . '</a>';
 	}
-	$sent = 'INBOX.Sent' === $s['folder'];
-	echo '<table class="widefat striped"><thead><tr><th scope="col">' . ( $sent ? 'To' : 'From' ) . '</th><th scope="col">Subject</th><th scope="col">Date</th></tr></thead><tbody>';
-	foreach ( $rows as $m ) {
-		$url    = aw_mail_url( array( 'uid' => (int) $m['uid'], 'p' => $s['page'] > 1 ? $s['page'] : null, 'q' => $s['q'] ) );
-		$unseen = ! empty( $m['unseen'] );
-		$who    = $sent ? implode( ', ', array_map( fn( $a ) => aw_mail_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : aw_mail_who( $m['from'] ?? array(), true );
-		$clip   = ! empty( $m['attachments'] ) ? ' <span class="dashicons dashicons-paperclip" aria-label="has attachments" style="font-size:16px;color:#646970"></span>' : '';
-		echo '<tr class="awm-row' . ( $unseen ? ' unread' : '' ) . '"><td class="awm-from"><a href="' . esc_url( $url ) . '">' . ( $unseen ? '<span class="screen-reader-text">Unread: </span>' : '' ) . esc_html( '' !== $who ? $who : '(unknown)' ) . '</a></td><td><a href="' . esc_url( $url ) . '">' . esc_html( '' !== trim( (string) $m['subject'] ) ? $m['subject'] : '(no subject)' ) . $clip . '</a></td><td class="awm-date">' . aw_mail_day( $m['date'] ?? '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped parts
+	$fn      = aw_mail_forms_unread();
+	$links[] = '<a href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) ) ) . '"' . ( AW_MAIL_FORMS === $s['folder'] ? ' class="current" aria-current="page"' : '' ) . '>Website forms' . ( $fn ? ' <span class="count">(' . (int) $fn . ')</span>' : '' ) . '</a>';
+	echo '<ul class="subsubsub"><li>' . implode( ' |</li><li>', $links ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+	$table = new AW_Mail_List_Table( $s );
+	$table->prepare_items();
+	echo '<form method="get"><input type="hidden" name="page" value="aw-mail"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $s['folder'] ) . '">';
+	if ( AW_MAIL_FORMS !== $s['folder'] ) {
+		$table->search_box( 'Search mail', 'awm-search' );
 	}
-	echo '</tbody></table>';
-	$pages = (int) ( $pg['totalPages'] ?? 1 );
-	if ( $pages > 1 ) {
-		echo '<p class="tablenav-pages" style="margin-top:10px">Page ' . (int) $s['page'] . ' of ' . (int) $pages . ' ';
-		if ( $s['page'] > 1 ) {
-			echo '<a class="button" href="' . esc_url( aw_mail_url( array( 'p' => $s['page'] - 1, 'q' => $s['q'] ) ) ) . '">Newer</a> ';
-		}
-		if ( $s['page'] < $pages ) {
-			echo '<a class="button" href="' . esc_url( aw_mail_url( array( 'p' => $s['page'] + 1, 'q' => $s['q'] ) ) ) . '">Older</a>';
-		}
-		echo '</p>';
-	}
+	$table->display();
+	echo '</form><p class="description" style="clear:both">Read in step with <a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">Hostinger webmail</a>: what you read, move or send here shows there too.</p>';
 }
+
+/** One mailbox message: edit-screen layout, message left, actions right. */
+function aw_mail_message_screen( $s ) {
+	$path = aw_mail_role_path( $s['folder'] );
+	$msg  = aw_mail_get( $s['box'], $path, $s['uid'] );
+	$view = 'all' === $s['view'] || isset( aw_mail_all_boxes()[ $s['view'] ] ) ? $s['view'] : $s['box'];
+	$back = add_query_arg( array( 'page' => 'aw-mail', 'box' => $view, 'folder' => $s['folder'] ), admin_url( 'admin.php' ) );
+	echo '<h1 class="wp-heading-inline">' . esc_html( aw_mail_roles()[ $s['folder'] ][0] ) . '</h1> <a class="page-title-action" href="' . esc_url( $back ) . '">Back to the list</a><hr class="wp-header-end">';
+	aw_mail_notice();
+	if ( ! $msg ) {
+		echo '<div class="notice notice-error"><p>This message could not be opened (moved or deleted in webmail?).</p></div>';
+		return;
+	}
+	delete_transient( 'aw_mail_folders_' . $s['box'] );
+	if ( function_exists( 'aw_mail_overview_flush' ) ) {
+		aw_mail_overview_flush();
+	}
+	$m      = $msg['m'];
+	$images = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
+	$inline = array();
+	foreach ( (array) ( $m['attachments'] ?? array() ) as $a ) {
+		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
+			list( $code, $bin ) = aw_mail_call( 'GET', aw_mail_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
+			if ( 200 === $code ) {
+				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+			}
+		}
+	}
+	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
+	$doc    = '' !== $html ? aw_mail_safe_html( $html, $images, $inline ) : aw_mail_text_html( (string) ( $msg['t']['text'] ?? '' ) );
+	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']https?:#i', $html );
+	$u      = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
+	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
+	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
+	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) $m['subject'] ) ? $m['subject'] : '(no subject)' ) . '</h2>';
+	echo '<div class="postbox"><div class="inside"><table class="awm-meta"><tbody>';
+	echo '<tr><th scope="row">From</th><td><strong>' . esc_html( aw_mail_who( $m['from'] ?? array() ) ) . '</strong></td></tr>';
+	echo '<tr><th scope="row">To</th><td>' . esc_html( implode( ', ', array_map( 'aw_mail_who', (array) ( $m['to'] ?? array() ) ) ) ) . '</td></tr>';
+	if ( ! empty( $m['cc'] ) ) {
+		echo '<tr><th scope="row">Cc</th><td>' . esc_html( implode( ', ', array_map( 'aw_mail_who', (array) $m['cc'] ) ) ) . '</td></tr>';
+	}
+	echo '<tr><th scope="row">Date</th><td>' . aw_mail_day( $m['date'] ?? '' ) . ( ! empty( $m['date'] ) ? ', ' . esc_html( wp_date( 'g:i a', strtotime( (string) $m['date'] ) ) ) : '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+	echo '</tbody></table></div></div>';
+	if ( $remote && ! $images ) {
+		echo '<div class="notice notice-info inline" style="margin:0 0 12px"><p>Pictures from the internet are hidden: they can tell the sender you opened the message. <a href="' . esc_url( add_query_arg( 'images', 1 ) ) . '">Show pictures</a></p></div>';
+	}
+	echo '<iframe class="awm-frame" title="Message" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" srcdoc="' . esc_attr( $doc ) . '"></iframe>';
+	$files = array_filter( (array) ( $m['attachments'] ?? array() ), fn( $a ) => empty( $a['inline'] ) || empty( $a['contentId'] ) );
+	if ( $files ) {
+		echo '<div class="postbox" style="margin-top:16px"><div class="postbox-header"><h2 class="hndle">Attachments</h2></div><div class="inside"><ul>';
+		foreach ( $files as $a ) {
+			echo '<li><span class="dashicons dashicons-paperclip" aria-hidden="true"></span> <a href="' . esc_url( aw_mail_act_url( 'file', $u + array( 'att' => (string) $a['id'] ) ) ) . '">' . esc_html( (string) ( $a['filename'] ?? 'attachment' ) ) . '</a> <span class="description">' . esc_html( size_format( (int) ( $a['sizeBytes'] ?? 0 ) ) ) . '</span></li>';
+		}
+		echo '</ul></div></div>';
+	}
+	echo '</div><div id="postbox-container-1" class="postbox-container">';
+	echo '<div class="postbox awm-actions"><div class="postbox-header"><h2 class="hndle">Reply</h2></div><div class="inside">';
+	echo '<a class="button button-primary button-large" href="' . esc_url( $c( 'reply' ) ) . '">Reply</a><a class="button" href="' . esc_url( $c( 'all' ) ) . '">Reply all</a><a class="button" href="' . esc_url( $c( 'forward' ) ) . '">Forward</a>';
+	echo '<p class="description">Sent from ' . esc_html( aw_mail_all_boxes()[ $s['box'] ] ) . '.</p></div></div>';
+	echo '<div class="postbox awm-actions"><div class="postbox-header"><h2 class="hndle">Message</h2></div><div class="inside">';
+	if ( 'archive' !== $s['folder'] && 'trash' !== $s['folder'] ) {
+		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'archive', $u ) ) . '">Archive</a>';
+	}
+	if ( 'inbox' !== $s['folder'] ) {
+		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'inbox', $u ) ) . '">' . ( 'spam' === $s['folder'] ? 'Not spam' : 'Move to Inbox' ) . '</a>';
+	}
+	if ( 'spam' !== $s['folder'] && 'sent' !== $s['folder'] ) {
+		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'spam', $u ) ) . '">Spam</a>';
+	}
+	echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'unread', $u ) ) . '">Mark unread</a>';
+	$others = array_diff_key( aw_mail_folders( $s['box'] ), array( $path => 1 ) );
+	if ( $others ) {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:flex;gap:4px;margin:4px 0 10px">';
+		wp_nonce_field( 'aw_mail_act' );
+		echo '<input type="hidden" name="action" value="aw_mail_act"><input type="hidden" name="do" value="move"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $path ) . '"><input type="hidden" name="uid" value="' . (int) $s['uid'] . '"><input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
+		echo '<label class="screen-reader-text" for="awm-move">Move to folder</label><select id="awm-move" name="to" style="flex:1">';
+		foreach ( $others as $p => $f ) {
+			echo '<option value="' . esc_attr( $p ) . '">' . esc_html( $f[0] ) . '</option>';
+		}
+		echo '</select><button class="button">Move</button></form>';
+	}
+	if ( 'trash' !== $s['folder'] ) {
+		echo '<div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( aw_mail_act_url( 'trash', $u ) ) . '">Move to Trash</a></div>';
+	}
+	echo '</div></div></div></div></div>';
+}
+
+/** New message / reply / forward: laid out like Add New Post. */
+function aw_mail_compose_screen( $s, $mode ) {
+	$mode  = in_array( $mode, array( 'new', 'reply', 'all', 'forward' ), true ) ? $mode : 'new';
+	$boxes = aw_mail_all_boxes();
+	$from  = 'all' === $s['box'] ? (string) array_key_first( $boxes ) : $s['box'];
+	$to    = $cc = array();
+	$subj  = '';
+	$quote = '';
+	$ref   = '';
+	if ( 'new' !== $mode && AW_MAIL_FORMS === $s['folder'] && $s['item'] ) {
+		$from  = (string) array_search( (string) ( aw_mail_aliases()['contact@animalwrites.in'] ?? 'vedanshu@animalwrites.in' ), $boxes, true );
+		$to    = array( (string) get_post_meta( $s['item'], 'aw_m_email', true ) );
+		$subj  = 'Re: ' . trim( preg_replace( '/^Contact form:\s*/', '', (string) get_the_title( $s['item'] ) ) );
+		$quote = '<p></p><blockquote>' . wpautop( esc_html( (string) get_post_field( 'post_content', $s['item'] ) ) ) . '</blockquote>';
+	} elseif ( 'new' !== $mode && $s['uid'] && 'all' !== $s['box'] ) {
+		$path = aw_mail_role_path( $s['folder'] );
+		$msg  = aw_mail_get( $s['box'], $path, $s['uid'] );
+		if ( $msg ) {
+			$m   = $msg['m'];
+			$own = aw_mail_own();
+			if ( 'forward' === $mode ) {
+				$subj = aw_mail_prefix( 'Fwd:', $m['subject'] ?? '' );
+			} else {
+				$subj = aw_mail_prefix( 'Re:', $m['subject'] ?? '' );
+				$to   = 'sent' === $s['folder'] ? aw_mail_addr_list( $m['to'] ?? array() ) : aw_mail_addr_list( array( $m['from'] ?? array() ) );
+				if ( 'all' === $mode ) {
+					$cc = array_values( array_diff( array_merge( aw_mail_addr_list( $m['to'] ?? array() ), aw_mail_addr_list( $m['cc'] ?? array() ) ), $own, $to ) );
+				}
+			}
+			$ref   = $path . '|' . (int) $s['uid'];
+			$body  = trim( (string) ( $msg['t']['html'] ?? '' ) );
+			$body  = '' !== $body ? wp_kses_post( preg_replace( '#<(script|style|head|title)[^>]*>.*?</\1>#is', '', $body ) ) : wpautop( esc_html( (string) ( $msg['t']['text'] ?? '' ) ) );
+			$when  = ! empty( $m['date'] ) ? wp_date( 'j M Y, g:i a', strtotime( (string) $m['date'] ) ) : '';
+			$quote = '<p></p><p>' . esc_html( 'forward' === $mode ? '---------- Forwarded message ----------' : 'On ' . $when . ', ' . aw_mail_who( $m['from'] ?? array() ) . ' wrote:' ) . '</p><blockquote>' . $body . '</blockquote>';
+		}
+	}
+	$sig    = function_exists( 'aw_mail_profile' ) ? trim( (string) aw_mail_profile( $boxes[ $from ] ?? '' )['signature'] ) : '';
+	$start  = '<p></p>' . ( '' !== $sig ? '<div class="signature">' . wp_kses_post( $sig ) . '</div>' : '' ) . $quote;
+	$title  = array( 'new' => 'New message', 'reply' => 'Reply', 'all' => 'Reply all', 'forward' => 'Forward' )[ $mode ];
+	$cancel = $ref ? add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'view' => $s['view'] ), admin_url( 'admin.php' ) ) : add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => 'inbox' ), admin_url( 'admin.php' ) );
+	echo '<h1 class="wp-heading-inline">' . esc_html( $title ) . '</h1><hr class="wp-header-end">';
+	aw_mail_notice();
+	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	wp_nonce_field( 'aw_mail_act' );
+	echo '<input type="hidden" name="action" value="aw_mail_act"><input type="hidden" name="do" value="send"><input type="hidden" name="mode" value="' . esc_attr( $mode ) . '"><input type="hidden" name="ref" value="' . esc_attr( $ref ) . '"><input type="hidden" name="refbox" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="item" value="' . (int) $s['item'] . '">';
+	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
+	echo '<div class="awm-field"><label for="awm-to">To</label><input type="text" id="awm-to" name="to" class="regular-text" value="' . esc_attr( implode( ', ', $to ) ) . '" required autocomplete="email" placeholder="name@example.com, …"></div>';
+	$show_cc = (bool) $cc;
+	echo '<p style="margin:-4px 0 8px 4.1em"' . ( $show_cc ? ' hidden' : '' ) . ' id="awm-cc-toggle"><a href="#" onclick="document.getElementById(\'awm-ccbcc\').hidden=false;this.parentNode.hidden=true;return false;">Add Cc / Bcc</a></p>';
+	echo '<div id="awm-ccbcc"' . ( $show_cc ? '' : ' hidden' ) . '><div class="awm-field"><label for="awm-cc">Cc</label><input type="text" id="awm-cc" name="cc" value="' . esc_attr( implode( ', ', $cc ) ) . '" autocomplete="email"></div><div class="awm-field"><label for="awm-bcc">Bcc</label><input type="text" id="awm-bcc" name="bcc" value="" autocomplete="email"></div></div>';
+	echo '<div id="titlediv"><div id="titlewrap"><label class="screen-reader-text" for="title">Subject</label><input type="text" name="subject" id="title" value="' . esc_attr( $subj ) . '" placeholder="Subject" autocomplete="off"></div></div>';
+	echo '<div id="postdivrich" class="postarea" style="margin-top:12px">';
+	wp_editor( $start, 'awm_body', array( 'textarea_name' => 'body', 'media_buttons' => false, 'textarea_rows' => 18, 'editor_height' => 360 ) );
+	echo '</div></div><div id="postbox-container-1" class="postbox-container">';
+	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Send</h2></div><div class="inside"><p><label for="awm-from"><strong>From</strong></label><br>';
+	echo '<select id="awm-from" name="from" style="width:100%"' . ( $ref ? ' disabled' : '' ) . '>';
+	foreach ( $boxes as $k => $a ) {
+		$p = function_exists( 'aw_mail_profile' ) ? aw_mail_profile( $a )['name'] : '';
+		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $from, false ) . '>' . esc_html( ( '' !== $p ? $p . ' – ' : '' ) . $a ) . '</option>';
+	}
+	echo '</select>' . ( $ref ? '<input type="hidden" name="from" value="' . esc_attr( $from ) . '"><span class="description">Replies go from the mailbox the message is in.</span>' : '' ) . '</p>';
+	echo '<div id="major-publishing-actions" style="margin:12px -12px -12px;display:flex;justify-content:space-between;align-items:center"><div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( $cancel ) . '">Discard</a></div><div id="publishing-action"><button type="submit" class="button button-primary button-large">Send</button></div></div>';
+	echo '</div></div>';
+	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Attachments</h2></div><div class="inside"><input type="file" id="awm-files" name="files[]" multiple><p class="description">Up to 10 MB in total.' . ( 'forward' === $mode ? ' The forwarded message\'s attachments are included.' : '' ) . '</p></div></div>';
+	echo '</div></div></div></form>';
+}
+
+/** A website form message: same layout as a mail message. */
+function aw_mail_form_item_screen( $s ) {
+	$id = $s['item'];
+	$back = add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) );
+	echo '<h1 class="wp-heading-inline">Website forms</h1> <a class="page-title-action" href="' . esc_url( $back ) . '">Back to the list</a><hr class="wp-header-end">';
+	aw_mail_notice();
+	if ( 'aw_message' !== get_post_type( $id ) ) {
+		echo '<p>Not found.</p>';
+		return;
+	}
+	update_post_meta( $id, 'aw_read', current_time( 'mysql' ) );
+	$m = fn( $k ) => trim( (string) get_post_meta( $id, 'aw_m_' . $k, true ) );
+	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
+	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( trim( preg_replace( '/^Contact form:\s*/', '', get_the_title( $id ) ) ) ) . '</h2>';
+	echo '<div class="postbox"><div class="inside"><table class="awm-meta"><tbody>';
+	foreach ( array( 'From' => trim( $m( 'name' ) . ' <' . $m( 'email' ) . '>' ), 'Organisation' => $m( 'org' ), 'Page' => $m( 'source' ), 'Newsletter' => $m( 'contact' ) ) as $k => $v ) {
+		if ( '' !== $v && '<>' !== $v ) {
+			echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . esc_html( $v ) . '</td></tr>';
+		}
+	}
+	echo '<tr><th scope="row">Date</th><td>' . aw_mail_day( get_post_field( 'post_date', $id ) ) . '</td></tr></tbody></table></div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
+	echo '<div class="postbox"><div class="inside">' . wpautop( esc_html( (string) get_post_field( 'post_content', $id ) ) ) . '</div></div>';
+	echo '</div><div id="postbox-container-1" class="postbox-container"><div class="postbox awm-actions"><div class="postbox-header"><h2 class="hndle">Reply</h2></div><div class="inside">';
+	if ( is_email( $m( 'email' ) ) ) {
+		echo '<a class="button button-primary button-large" href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => AW_MAIL_FORMS, 'item' => $id, 'compose' => 'reply' ), admin_url( 'admin.php' ) ) ) . '">Reply</a>';
+	}
+	echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'formunread', array( 'item' => $id ) ) ) . '">Mark unread</a>';
+	echo '<div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( aw_mail_act_url( 'formtrash', array( 'item' => $id ) ) ) . '">Move to Trash</a></div>';
+	echo '</div></div></div></div></div>';
+}
+
+
+/* ---------- Reading ---------- */
 
 /** One message: meta and text (text fetch marks it read), cached per request. */
 function aw_mail_get( $key, $folder, $uid ) {
@@ -335,160 +596,13 @@ function aw_mail_text_html( $text ) {
 	return '<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:12px;white-space:pre-wrap;word-wrap:break-word}</style></head><body>' . make_clickable( esc_html( (string) $text ) ) . '</body></html>';
 }
 
-/** Mailbox message: read screen. */
-function aw_mail_message_screen( $s ) {
-	$msg = aw_mail_get( $s['box'], $s['folder'], $s['uid'] );
-	if ( ! $msg ) {
-		echo '<div class="notice notice-error inline"><p>This message could not be opened (moved or deleted in webmail?). <a href="' . esc_url( aw_mail_url() ) . '">Back to the folder</a>.</p></div>';
-		return;
-	}
-	delete_transient( 'aw_mail_folders_' . $s['box'] );
-	if ( function_exists( 'aw_mail_overview_flush' ) ) {
-		aw_mail_overview_flush(); // read now: the badge follows
-	}
-	$m      = $msg['m'];
-	$images = ! empty( $_GET['images'] ); // phpcs:ignore WordPress.Security.NonceVerification
-	$inline = array();
-	foreach ( (array) ( $m['attachments'] ?? array() ) as $a ) {
-		if ( ! empty( $a['contentId'] ) && (int) ( $a['sizeBytes'] ?? 0 ) < 1048576 ) {
-			list( $code, $bin, $h ) = aw_mail_call( 'GET', aw_mail_fpath( $s['box'], $s['folder'] ) . '/messages/' . (int) $s['uid'] . '/attachments/' . rawurlencode( (string) $a['id'] ), null, true );
-			if ( 200 === $code && preg_match( '#^image/(png|jpe?g|gif|webp)$#', (string) ( $a['contentType'] ?? '' ) ) ) {
-				$inline[ trim( (string) $a['contentId'], '<>' ) ] = 'data:' . $a['contentType'] . ';base64,' . base64_encode( $bin ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
-			}
-		}
-	}
-	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
-	$doc    = '' !== $html ? aw_mail_safe_html( $html, $images, $inline ) : aw_mail_text_html( (string) ( $msg['t']['text'] ?? '' ) );
-	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']https?:#i', $html );
-	$back   = aw_mail_url( array( 'p' => $s['page'] > 1 ? $s['page'] : null, 'q' => $s['q'] ) );
-	$u      = array( 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'] );
-	$in     = $s['folder'];
-	echo '<p><a href="' . esc_url( $back ) . '">&larr; ' . esc_html( aw_mail_folder_label( $in ) ) . '</a></p>';
-	echo '<h2 style="margin:0 0 8px">' . esc_html( '' !== trim( (string) $m['subject'] ) ? $m['subject'] : '(no subject)' ) . '</h2>';
-	echo '<table class="awm-head"><tbody>';
-	echo '<tr><th scope="row">From</th><td>' . esc_html( aw_mail_who( $m['from'] ?? array() ) ) . '</td></tr>';
-	echo '<tr><th scope="row">To</th><td>' . esc_html( implode( ', ', array_map( 'aw_mail_who', (array) ( $m['to'] ?? array() ) ) ) ) . '</td></tr>';
-	if ( ! empty( $m['cc'] ) ) {
-		echo '<tr><th scope="row">Cc</th><td>' . esc_html( implode( ', ', array_map( 'aw_mail_who', (array) $m['cc'] ) ) ) . '</td></tr>';
-	}
-	echo '<tr><th scope="row">Date</th><td>' . aw_mail_day( $m['date'] ?? '' ) . ( ! empty( $m['date'] ) ? ' ' . esc_html( wp_date( 'g:i a', strtotime( (string) $m['date'] ) ) ) : '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	echo '</tbody></table>';
-	echo '<div class="awm-tools">';
-	echo '<a class="button button-primary" href="' . esc_url( aw_mail_url( array( 'compose' => 'reply', 'uid' => $s['uid'] ) ) ) . '">Reply</a>';
-	echo '<a class="button" href="' . esc_url( aw_mail_url( array( 'compose' => 'all', 'uid' => $s['uid'] ) ) ) . '">Reply all</a>';
-	echo '<a class="button" href="' . esc_url( aw_mail_url( array( 'compose' => 'forward', 'uid' => $s['uid'] ) ) ) . '">Forward</a>';
-	if ( 'INBOX.Archive' !== $in && 'INBOX.Trash' !== $in ) {
-		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'archive', $u ) ) . '">Archive</a>';
-	}
-	if ( 'INBOX' !== $in ) {
-		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'inbox', $u ) ) . '">' . ( 'INBOX.Junk' === $in ? 'Not spam' : 'Move to Inbox' ) . '</a>';
-	}
-	if ( 'INBOX.Junk' !== $in && 'INBOX.Sent' !== $in ) {
-		echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'spam', $u ) ) . '">Spam</a>';
-	}
-	echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'unread', $u ) ) . '">Mark unread</a>';
-	if ( 'INBOX.Trash' !== $in ) {
-		echo '<a class="button" style="color:#b32d2e;border-color:#b32d2e" href="' . esc_url( aw_mail_act_url( 'trash', $u ) ) . '">Delete</a>';
-	}
-	$others = array_diff_key( aw_mail_folders( $s['box'] ), array( $in => 1 ) );
-	if ( $others ) {
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline-flex;gap:4px">';
-		wp_nonce_field( 'aw_mail_act' );
-		echo '<input type="hidden" name="action" value="aw_mail_act"><input type="hidden" name="do" value="move"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $in ) . '"><input type="hidden" name="uid" value="' . (int) $s['uid'] . '">';
-		echo '<label class="screen-reader-text" for="awm-move">Move to folder</label><select id="awm-move" name="to">';
-		foreach ( $others as $p => $f ) {
-			echo '<option value="' . esc_attr( $p ) . '">' . esc_html( $f[0] ) . '</option>';
-		}
-		echo '</select><button class="button">Move</button></form>';
-	}
-	echo '</div>';
-	if ( $remote && ! $images ) {
-		echo '<p class="description">Pictures from the internet are hidden (they can tell the sender you opened it). <a href="' . esc_url( aw_mail_url( array( 'uid' => $s['uid'], 'images' => 1 ) ) ) . '">Show pictures</a></p>';
-	}
-	echo '<iframe class="awm-frame" title="Message" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" srcdoc="' . esc_attr( $doc ) . '"></iframe>';
-	$files = array_filter( (array) ( $m['attachments'] ?? array() ), fn( $a ) => empty( $a['inline'] ) || empty( $a['contentId'] ) );
-	if ( $files ) {
-		echo '<h3>Attachments</h3><ul>';
-		foreach ( $files as $a ) {
-			echo '<li><span class="dashicons dashicons-paperclip" aria-hidden="true"></span> <a href="' . esc_url( aw_mail_act_url( 'file', $u + array( 'att' => (string) $a['id'] ) ) ) . '">' . esc_html( (string) ( $a['filename'] ?? 'attachment' ) ) . '</a> <span class="description">' . esc_html( size_format( (int) ( $a['sizeBytes'] ?? 0 ) ) ) . '</span></li>';
-		}
-		echo '</ul>';
-	}
-}
-
-/* ---------- Compose / reply / forward ---------- */
-
 /** "Re: " / "Fwd: " once. */
 function aw_mail_prefix( $p, $subject ) {
 	$subject = trim( (string) $subject );
 	return preg_match( '/^' . preg_quote( $p, '/' ) . '/i', $subject ) ? $subject : $p . ' ' . ( '' !== $subject ? $subject : '(no subject)' );
 }
 
-function aw_mail_compose_screen( $s, $mode ) {
-	$mode  = in_array( $mode, array( 'new', 'reply', 'all', 'forward' ), true ) ? $mode : 'new';
-	$boxes = aw_mail_all_boxes();
-	$from  = $s['box'];
-	$to    = $cc = array();
-	$subj  = '';
-	$quote = '';
-	$ref   = '';
-	if ( 'new' !== $mode && AW_MAIL_FORMS === $s['folder'] && $s['item'] ) {
-		// A website form message: reply from the contact@ mailbox to the person who wrote.
-		$from = (string) array_search( (string) ( aw_mail_aliases()['contact@animalwrites.in'] ?? 'vedanshu@animalwrites.in' ), $boxes, true );
-		$to   = array( (string) get_post_meta( $s['item'], 'aw_m_email', true ) );
-		$subj = 'Re: ' . trim( preg_replace( '/^Contact form:\s*/', '', (string) get_the_title( $s['item'] ) ) );
-		$quote = '<p></p><blockquote>' . wpautop( esc_html( (string) get_post_field( 'post_content', $s['item'] ) ) ) . '</blockquote>';
-	} elseif ( 'new' !== $mode && $s['uid'] ) {
-		$msg = aw_mail_get( $s['box'], $s['folder'], $s['uid'] );
-		if ( $msg ) {
-			$m    = $msg['m'];
-			$own  = aw_mail_own();
-			$fr   = aw_mail_addr_list( array( $m['from'] ?? array() ) );
-			$sent = 'INBOX.Sent' === $s['folder'];
-			if ( 'forward' === $mode ) {
-				$subj = aw_mail_prefix( 'Fwd:', $m['subject'] ?? '' );
-			} else {
-				$subj = aw_mail_prefix( 'Re:', $m['subject'] ?? '' );
-				$to   = $sent ? aw_mail_addr_list( $m['to'] ?? array() ) : $fr;
-				if ( 'all' === $mode ) {
-					$cc = array_values( array_diff( array_merge( aw_mail_addr_list( $m['to'] ?? array() ), aw_mail_addr_list( $m['cc'] ?? array() ) ), $own, $to ) );
-				}
-			}
-			$ref   = $s['folder'] . '|' . (int) $s['uid'];
-			$body  = trim( (string) ( $msg['t']['html'] ?? '' ) );
-			$body  = '' !== $body ? wp_kses_post( preg_replace( '#<(script|style|head|title)[^>]*>.*?</\1>#is', '', $body ) ) : wpautop( esc_html( (string) ( $msg['t']['text'] ?? '' ) ) );
-			$when  = ! empty( $m['date'] ) ? wp_date( 'j M Y, g:i a', strtotime( (string) $m['date'] ) ) : '';
-			$quote = '<p></p><p>' . esc_html( ( 'forward' === $mode ? '---------- Forwarded message ----------' : 'On ' . $when . ', ' . aw_mail_who( $m['from'] ?? array() ) . ' wrote:' ) ) . '</p><blockquote>' . $body . '</blockquote>';
-		}
-	}
-	$sig   = function_exists( 'aw_mail_profile' ) ? trim( (string) aw_mail_profile( $boxes[ $from ] ?? '' )['signature'] ) : '';
-	$start = '<p></p>' . ( '' !== $sig ? '<div class="signature">' . wp_kses_post( $sig ) . '</div>' : '' ) . $quote;
-	$title = array( 'new' => 'New message', 'reply' => 'Reply', 'all' => 'Reply all', 'forward' => 'Forward' )[ $mode ];
-	echo '<h2 style="margin-top:0">' . esc_html( $title ) . '</h2>';
-	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-	wp_nonce_field( 'aw_mail_act' );
-	echo '<input type="hidden" name="action" value="aw_mail_act"><input type="hidden" name="do" value="send"><input type="hidden" name="mode" value="' . esc_attr( $mode ) . '"><input type="hidden" name="ref" value="' . esc_attr( $ref ) . '"><input type="hidden" name="refbox" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="item" value="' . (int) $s['item'] . '">';
-	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="awm-from">From</label></th><td><select id="awm-from" name="from"' . ( $ref ? ' disabled' : '' ) . '>';
-	foreach ( $boxes as $k => $a ) {
-		$p = function_exists( 'aw_mail_profile' ) ? aw_mail_profile( $a )['name'] : '';
-		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $from, false ) . '>' . esc_html( ( '' !== $p ? $p . ' ' : '' ) . '<' . $a . '>' ) . '</option>';
-	}
-	echo '</select>' . ( $ref ? '<input type="hidden" name="from" value="' . esc_attr( $from ) . '"><p class="description">A reply goes from the mailbox the message is in.</p>' : '' ) . '</td></tr>';
-	foreach ( array( 'to' => array( 'To', $to ), 'cc' => array( 'Cc', $cc ), 'bcc' => array( 'Bcc', array() ) ) as $k => $v ) {
-		echo '<tr><th scope="row"><label for="awm-' . esc_attr( $k ) . '">' . esc_html( $v[0] ) . '</label></th><td><input class="large-text" type="text" id="awm-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" value="' . esc_attr( implode( ', ', $v[1] ) ) . '"' . ( 'to' === $k ? ' required' : '' ) . ' autocomplete="email"><p class="description">' . ( 'to' === $k ? 'Separate addresses with commas.' : '' ) . '</p></td></tr>';
-	}
-	echo '<tr><th scope="row"><label for="awm-subject">Subject</label></th><td><input class="large-text" type="text" id="awm-subject" name="subject" value="' . esc_attr( $subj ) . '"></td></tr>';
-	echo '<tr><th scope="row">Message</th><td>';
-	wp_editor( $start, 'awm_body', array( 'textarea_name' => 'body', 'media_buttons' => false, 'teeny' => true, 'textarea_rows' => 14, 'quicktags' => array( 'buttons' => 'strong,em,link,ul,ol,li' ) ) );
-	echo '</td></tr>';
-	echo '<tr><th scope="row"><label for="awm-files">Attachments</label></th><td><input type="file" id="awm-files" name="files[]" multiple><p class="description">Up to 10 MB in total.' . ( 'forward' === $mode ? ' The forwarded message\'s own attachments are included.' : '' ) . '</p></td></tr>';
-	echo '</tbody></table>';
-	submit_button( 'Send' );
-	echo '</form>';
-}
-
-/* ---------- Website forms (contact form messages kept in WordPress) ---------- */
+/* ---------- Website forms ---------- */
 
 function aw_mail_forms_query( $page = 1 ) {
 	return new WP_Query(
@@ -507,60 +621,7 @@ function aw_mail_forms_unread() {
 	return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_m_about' LEFT JOIN {$wpdb->postmeta} r ON r.post_id = p.ID AND r.meta_key = 'aw_read' WHERE p.post_type = 'aw_message' AND p.post_status NOT IN ('trash','auto-draft') AND ( a.meta_value IS NULL OR a.meta_value <> 'email' ) AND r.meta_id IS NULL" ); // phpcs:ignore
 }
 
-function aw_mail_forms_list( $s ) {
-	$q = aw_mail_forms_query( $s['page'] );
-	echo '<h2 style="margin-top:0">Website forms <span class="description" style="font-weight:400">contact form messages</span></h2>';
-	if ( ! $q->posts ) {
-		echo '<p>No messages.</p>';
-		return;
-	}
-	echo '<table class="widefat striped"><thead><tr><th scope="col">From</th><th scope="col">About</th><th scope="col">Date</th></tr></thead><tbody>';
-	foreach ( $q->posts as $p ) {
-		$url    = add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS, 'item' => $p->ID ), admin_url( 'admin.php' ) );
-		$unread = '' === (string) get_post_meta( $p->ID, 'aw_read', true );
-		$name   = trim( (string) get_post_meta( $p->ID, 'aw_m_name', true ) );
-		$email  = trim( (string) get_post_meta( $p->ID, 'aw_m_email', true ) );
-		echo '<tr class="awm-row' . ( $unread ? ' unread' : '' ) . '"><td class="awm-from"><a href="' . esc_url( $url ) . '">' . esc_html( '' !== $name ? $name : $email ) . '</a></td><td><a href="' . esc_url( $url ) . '">' . esc_html( trim( preg_replace( '/^Contact form:\s*/', '', $p->post_title ) ) ) . '</a></td><td class="awm-date">' . aw_mail_day( $p->post_date ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	}
-	echo '</tbody></table>';
-	if ( $q->max_num_pages > 1 ) {
-		echo '<p style="margin-top:10px">Page ' . (int) $s['page'] . ' of ' . (int) $q->max_num_pages . ' ';
-		if ( $s['page'] > 1 ) {
-			echo '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS, 'p' => $s['page'] - 1 ), admin_url( 'admin.php' ) ) ) . '">Newer</a> ';
-		}
-		if ( $s['page'] < $q->max_num_pages ) {
-			echo '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS, 'p' => $s['page'] + 1 ), admin_url( 'admin.php' ) ) ) . '">Older</a>';
-		}
-		echo '</p>';
-	}
-}
-
-function aw_mail_form_item_screen( $id ) {
-	if ( 'aw_message' !== get_post_type( $id ) ) {
-		echo '<p>Not found.</p>';
-		return;
-	}
-	update_post_meta( $id, 'aw_read', current_time( 'mysql' ) );
-	$m    = fn( $k ) => trim( (string) get_post_meta( $id, 'aw_m_' . $k, true ) );
-	$back = add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) );
-	echo '<p><a href="' . esc_url( $back ) . '">&larr; Website forms</a></p>';
-	echo '<h2 style="margin:0 0 8px">' . esc_html( trim( preg_replace( '/^Contact form:\s*/', '', get_the_title( $id ) ) ) ) . '</h2><table class="awm-head"><tbody>';
-	foreach ( array( 'From' => trim( $m( 'name' ) . ' <' . $m( 'email' ) . '>' ), 'Organisation' => $m( 'org' ), 'Sent from' => $m( 'source' ), 'Newsletter' => $m( 'contact' ) ) as $k => $v ) {
-		if ( '' !== $v && '<>' !== $v ) {
-			echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . esc_html( $v ) . '</td></tr>';
-		}
-	}
-	echo '<tr><th scope="row">Date</th><td>' . aw_mail_day( get_post_field( 'post_date', $id ) ) . '</td></tr></tbody></table>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	echo '<div class="awm-tools">';
-	if ( is_email( $m( 'email' ) ) ) {
-		echo '<a class="button button-primary" href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS, 'item' => $id, 'compose' => 'reply' ), admin_url( 'admin.php' ) ) ) . '">Reply</a>';
-	}
-	echo '<a class="button" href="' . esc_url( aw_mail_act_url( 'formunread', array( 'item' => $id ) ) ) . '">Mark unread</a>';
-	echo '<a class="button" style="color:#b32d2e;border-color:#b32d2e" href="' . esc_url( aw_mail_act_url( 'formtrash', array( 'item' => $id ) ) ) . '">Delete</a>';
-	echo '</div><div class="card" style="max-width:none">' . wpautop( esc_html( (string) get_post_field( 'post_content', $id ) ) ) . '</div>';
-}
-
-/* ---------- Actions ---------- */
+/* ---------- Single actions ---------- */
 
 add_action(
 	'admin_post_aw_mail_act',
@@ -577,7 +638,9 @@ add_action(
 		$f     = preg_match( '/^INBOX(\.[\w .-]+)?$/', $f ) ? $f : 'INBOX';
 		$uid   = absint( $in['uid'] ?? 0 );
 		$item  = absint( $in['item'] ?? 0 );
-		$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $key, 'folder' => $f ), admin_url( 'admin.php' ) );
+		$view  = sanitize_key( $in['view'] ?? '' );
+		$view  = 'all' === $view || isset( $boxes[ $view ] ) ? $view : $key;
+		$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $view, 'folder' => aw_mail_role_of( $f ) ), admin_url( 'admin.php' ) );
 		$go    = function ( $url, $done ) {
 			wp_safe_redirect( add_query_arg( 'aw_done', $done, $url ) );
 			exit;
@@ -603,7 +666,8 @@ add_action(
 				$go( $back, $code >= 200 && $code < 300 ? ( 'trash' === $do ? 'trashed' : 'moved' ) : 'fail' );
 				break;
 			case 'unread':
-				list( $code ) = aw_mail_call( 'PATCH', aw_mail_fpath( $key, $f ) . '/messages/' . $uid, array( 'removeFlags' => array( '\\Seen' ) ) );
+			case 'read':
+				list( $code ) = aw_mail_call( 'PATCH', aw_mail_fpath( $key, $f ) . '/messages/' . $uid, array( ( 'read' === $do ? 'addFlags' : 'removeFlags' ) => array( '\\Seen' ) ) );
 				$flush();
 				$go( $back, $code >= 200 && $code < 300 ? 'flagged' : 'fail' );
 				break;
@@ -613,7 +677,7 @@ add_action(
 				$meta           = $msg ? current( array_filter( (array) ( $msg['m']['attachments'] ?? array() ), fn( $a ) => (string) ( $a['id'] ?? '' ) === $att ) ) : null;
 				list( $code, $bin ) = $meta ? aw_mail_call( 'GET', aw_mail_fpath( $key, $f ) . '/messages/' . $uid . '/attachments/' . rawurlencode( $att ), null, true ) : array( 0, '' );
 				if ( 200 !== $code ) {
-					$go( add_query_arg( 'uid', $uid, $back ), 'fail' );
+					$go( $back, 'fail' );
 				}
 				nocache_headers();
 				header( 'Content-Type: application/octet-stream' );
@@ -622,6 +686,10 @@ add_action(
 				header( 'Content-Length: ' . strlen( $bin ) );
 				echo $bin; // phpcs:ignore WordPress.Security.EscapeOutput -- file download
 				exit;
+			case 'formread':
+				update_post_meta( $item, 'aw_read', current_time( 'mysql' ) );
+				$go( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) ), 'flagged' );
+				break;
 			case 'formunread':
 				delete_post_meta( $item, 'aw_read' );
 				$go( add_query_arg( array( 'page' => 'aw-mail', 'folder' => AW_MAIL_FORMS ), admin_url( 'admin.php' ) ), 'flagged' );
@@ -656,7 +724,7 @@ function aw_mail_send_from_form( $in, $refbox ) {
 	$bcc   = aw_mail_parse_addrs( $in['bcc'] ?? '' );
 	$subj  = sanitize_text_field( (string) ( $in['subject'] ?? '' ) );
 	$html  = wp_kses_post( (string) ( $in['body'] ?? '' ) );
-	$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => 'INBOX' ), admin_url( 'admin.php' ) );
+	$back  = add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => 'inbox' ), admin_url( 'admin.php' ) );
 	$retry = wp_get_referer() ? wp_get_referer() : $back;
 	if ( ! $to || ( '' === $subj && '' === trim( wp_strip_all_tags( $html ) ) ) ) {
 		wp_safe_redirect( add_query_arg( 'aw_done', 'missing', $retry ) );
@@ -736,7 +804,7 @@ function aw_mail_send_from_form( $in, $refbox ) {
 		update_post_meta( $item, 'aw_m_replied', current_time( 'mysql' ) );
 	}
 	delete_transient( 'aw_mail_folders_' . $from );
-	$dest = isset( $req['inReplyTo'] ) || isset( $req['forwardOf'] ) ? add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => ( $req['inReplyTo'] ?? $req['forwardOf'] )['folder'] ), admin_url( 'admin.php' ) ) : add_query_arg( array( 'page' => 'aw-mail', 'box' => $from, 'folder' => 'INBOX.Sent' ), admin_url( 'admin.php' ) );
+	$dest = isset( $req['inReplyTo'] ) || isset( $req['forwardOf'] ) ? add_query_arg( array( 'page' => 'aw-mail', 'box' => 'all', 'folder' => aw_mail_role_of( ( $req['inReplyTo'] ?? $req['forwardOf'] )['folder'] ) ), admin_url( 'admin.php' ) ) : add_query_arg( array( 'page' => 'aw-mail', 'box' => 'all', 'folder' => 'sent' ), admin_url( 'admin.php' ) );
 	wp_safe_redirect( add_query_arg( 'aw_done', 'sent', $dest ) );
 	exit;
 }
