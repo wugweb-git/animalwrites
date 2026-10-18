@@ -108,6 +108,12 @@
   --kit-icon-lg: 24px;
   --kit-icon-xl: 28px;
   --kit-icon-gap: 6px;
+  --kit-meta-size: var(--kit-type-xs);
+  --kit-meta-weight: var(--kit-weight-medium);
+  --kit-meta-icon: var(--kit-icon-sm);
+  --kit-meta-icon-gap: var(--kit-icon-gap);
+  --kit-meta-gap: var(--kit-space-4);
+  --kit-meta-row-gap: var(--kit-space-1);
   --kit-radius-hair: 2px;
   --kit-radius-mark: 3px;
   --kit-radius-xs: 4px;

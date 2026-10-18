@@ -213,7 +213,7 @@ function aw_block_publisher( $a, $id ) {
 		$fav  = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
 		$fav  = $fav ? $fav : $logo;
 		$mark = $icon ? $icon : ( $fav ? '<img class="aw-src-icon" src="' . esc_url( $fav ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : ( $name ? '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>' : '' ) );
-		return $name ? '<p class="aw-src">' . $mark . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
+		return $name ? '<p class="aw-src kit-meta-item">' . $mark . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
 	}
 	return aw_news_meta_row( $id );
 }
@@ -227,8 +227,8 @@ function aw_block_publisher( $a, $id ) {
  */
 function aw_news_meta_row( $id ) {
 	$src  = function_exists( 'aw_source_row_html' ) ? aw_source_row_html( $id ) : '';
-	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date aw-card-time">' . aw_rel_time_html( $id ) . '</span>' : '';
-	return '' === $src . $time ? '' : '<div class="aw-card-meta">' . $src . $time . '</div>';
+	$time = function_exists( 'aw_rel_time_html' ) ? '<span class="wp-block-post-date aw-card-time kit-meta-item">' . aw_rel_time_html( $id ) . '</span>' : '';
+	return '' === $src . $time ? '' : '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
 }
 
 /** Library: the law's year (Acts, Rules), the source date, or the template icon. */
@@ -249,7 +249,7 @@ function aw_block_doc_date( $a, $id ) {
 	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
 	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
 	$text  = $year ? aw_date( $year . '-01-01', 'Y' ) : aw_date( aw_src_date( $id, 'Y-m-d' ) ); // publisher, then the date; the type is a label with the others (owner, 14 Oct 2026)
-	$when  = '<span class="d">' . $src . ( $text ? '<span class="aw-kind-date">' . $text . '</span>' : '' ) . '</span>';
+	$when  = '<span class="d kit-meta-row">' . $src . ( $text ? '<span class="aw-kind-date kit-meta-item">' . $text . '</span>' : '' ) . '</span>';
 	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
 }
 
@@ -264,7 +264,7 @@ function aw_block_type_date( $a, $id ) {
 	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
 	$text = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . $date;
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return $text || $badge ? '<p class="aw-case-meta">' . $badge . ( $badge && $text ? ' ' : '' ) . $text . '</p>' : '';
+	return $text || $badge ? '<p class="aw-case-meta kit-meta-row">' . $badge . ( $badge && $text ? ' ' : '' ) . $text . '</p>' : '';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
@@ -273,10 +273,8 @@ function aw_block_law_date( $a, $id ) {
 		return '';
 	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
-	if ( $d ) {
-		return aw_date( $d . ' 12:00:00' );
-	}
-	return preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? aw_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '';
+	$date = $d ? aw_date( $d . ' 12:00:00' ) : ( preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? aw_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '' );
+	return '' !== $date ? '<span class="kit-meta-item">' . $date . '</span>' : '';
 }
 
 /** "Issued by …" (a label, not a filter); "Template" for templates. */
@@ -333,14 +331,14 @@ function aw_block_task_icon( $a, $id ) {
 function aw_block_read_meta( $a, $id ) {
 	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return '<p class="aw-task-meta">' . $badge . '<span>Updated ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span>' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	return '<p class="aw-task-meta kit-meta-row">' . $badge . '<span class="kit-meta-item">Updated ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
 }
 
 /* ---------- Opportunities ---------- */
 
 function aw_block_place( $a, $id ) {
 	$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
-	return $p ? '<span class="aw-place">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
+	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
 /** "Checked by Animal Writes on …" and "Apply by …" (validThrough). */
@@ -360,7 +358,7 @@ function aw_opp_line_place( $id ) {
 			break;
 		}
 	}
-	return $p ? '<span class="aw-place">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
+	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
 /** Compact line for title lists (home "Opportunities near you"): organisation · place · Apply by {date}. Empty parts are left out. */
@@ -373,12 +371,12 @@ function aw_block_opp_line( $a, $id ) {
 	$dl    = (string) get_post_meta( $id, 'aw_deadline', true );
 	$parts = array_filter(
 		array(
-			'' !== $org ? '<span class="aw-opp-line-org">' . esc_html( $org ) . '</span>' : '',
+			'' !== $org ? '<span class="aw-opp-line-org kit-meta-item">' . esc_html( $org ) . '</span>' : '',
 			aw_opp_line_place( $id ),
-			$dl ? '<span class="aw-opp-line-by">Apply by ' . aw_date( $dl ) . '</span>' : '',
+			$dl ? '<span class="aw-opp-line-by kit-meta-item">Apply by ' . aw_date( $dl ) . '</span>' : '',
 		)
 	);
-	return $parts ? '<p class="aw-opp-line">' . implode( '', $parts ) . '</p>' : '';
+	return $parts ? '<p class="aw-opp-line kit-meta-row">' . implode( '', $parts ) . '</p>' : '';
 }
 
 function aw_block_opp_actions( $a, $id ) {
@@ -392,9 +390,9 @@ function aw_block_posted_by( $a, $id ) {
 	$listing = (int) get_post_meta( $id, 'aw_organisation', true );
 	if ( $listing && 'publish' === get_post_status( $listing ) ) {
 		$name = $name ? $name : get_the_title( $listing );
-		return '<p class="aw-posted-by">Posted by <a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( $name ) . '</a></p>';
+		return '<p class="aw-posted-by kit-meta-item">Posted by <a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( $name ) . '</a></p>';
 	}
-	return $name ? '<p class="aw-posted-by">Posted by ' . esc_html( $name ) . '</p>' : '';
+	return $name ? '<p class="aw-posted-by kit-meta-item">Posted by ' . esc_html( $name ) . '</p>' : '';
 }
 
 /* ---------- Directory ---------- */
@@ -492,7 +490,7 @@ function aw_block_press_meta( $a, $id ) {
 	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
 	$handle = (string) get_post_meta( $id, 'aw_press_account', true );
 	$video  = $fmt && 'videos' === aw_press_group( $fmt );
-	return '<p class="aw-story-meta kit-tags">' . ( $handle ? '<span class="aw-press-handle">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? aw_date( $date ) : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
+	return '<p class="aw-story-meta kit-tags kit-meta-row">' . ( $handle ? '<span class="aw-press-handle kit-meta-item">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? aw_date( $date ) : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
 }
 
 // Hub Pages in the editor: the H1 in the band is the title (no second title field above it).

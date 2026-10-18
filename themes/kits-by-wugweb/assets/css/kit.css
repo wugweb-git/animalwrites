@@ -917,10 +917,18 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 
 
 
+/* Meta row and meta item: one look for every date, time, place, author, reading time, source and handle line (owner,
+   18 Oct 2026). Size, weight, icon size and both gaps are tokens; the colour is the muted text colour of where it sits.
+   A date inside a sentence keeps the sentence's own text. */
+.kit-meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-meta-row-gap) var(--kit-meta-gap); margin: 0; }
+.kit-meta-row, .kit-meta-item { font-size: var(--kit-meta-size); font-weight: var(--kit-meta-weight); line-height: 1.3; color: var(--kit-color-muted); }
+.kit-meta-item { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap); min-width: 0; }
+:is(.kit-meta-row, .kit-meta-item) .kit-ico { --kit-ico-size: var(--kit-meta-icon); vertical-align: middle; }
+
 /* Meta always with an icon: date, author / posted by, reading time, place */
-.wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--kit-space-1); }
+.wp-block-post-date, .kit-meta { display: inline-flex !important; align-items: center; gap: var(--kit-meta-icon-gap); }
 .wp-block-post-date::before, .kit-meta::before {
-	content: "" !important; display: inline-block !important; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
+	content: "" !important; display: inline-block !important; flex: none; width: var(--kit-meta-icon); height: var(--kit-meta-icon); background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
 }
 
 

@@ -440,6 +440,36 @@
       "md": "6px",
       "lg": "6px"
     },
+    "meta-size": {
+      "sm": "var(--kit-type-xs)",
+      "md": "var(--kit-type-xs)",
+      "lg": "var(--kit-type-xs)"
+    },
+    "meta-weight": {
+      "sm": "var(--kit-weight-medium)",
+      "md": "var(--kit-weight-medium)",
+      "lg": "var(--kit-weight-medium)"
+    },
+    "meta-icon": {
+      "sm": "var(--kit-icon-sm)",
+      "md": "var(--kit-icon-sm)",
+      "lg": "var(--kit-icon-sm)"
+    },
+    "meta-icon-gap": {
+      "sm": "var(--kit-icon-gap)",
+      "md": "var(--kit-icon-gap)",
+      "lg": "var(--kit-icon-gap)"
+    },
+    "meta-gap": {
+      "sm": "var(--kit-space-4)",
+      "md": "var(--kit-space-4)",
+      "lg": "var(--kit-space-4)"
+    },
+    "meta-row-gap": {
+      "sm": "var(--kit-space-1)",
+      "md": "var(--kit-space-1)",
+      "lg": "var(--kit-space-1)"
+    },
     "radius-hair": {
       "sm": "2px",
       "md": "2px",
