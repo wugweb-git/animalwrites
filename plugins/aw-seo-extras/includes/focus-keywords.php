@@ -47,7 +47,7 @@ const AW_SEO_GENERIC_WORDS = array( 'animal', 'animals', 'welfare', 'india', 'in
  * @return string
  */
 function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
-	$kw = mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) );
+	$kw = aw_seo_no_hyphens( mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) ), false ); // a hyphen joining two words becomes a space: titles have none (owner, 18 Oct 2026)
 	$kw = trim( preg_replace( array( '/["“”`#]+/u', "/['‘’](?![\\p{L}\\p{N}])|(?<![\\p{L}\\p{N}])['‘’]/u", '/\s+/u' ), array( '', '', ' ' ), $kw ), " \t\n.,;:'-" ); // an apostrophe inside a word stays ("taneja's")
 	$parts = explode( ' ', $kw );
 	$n     = count( $parts );

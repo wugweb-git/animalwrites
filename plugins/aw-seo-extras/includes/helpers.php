@@ -87,6 +87,53 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
 	return (string) preg_replace( '/^[\s\-–—:;|,]+|[\s\-–—:;|,]+$/u', '', preg_replace( '/\s+/u', ' ', $t ) ); // not trim(): its byte list would eat the opening quote of "‘Supreme Court’…" (owner, 15 Oct 2026)
 }
 
+/**
+ * A title without hyphens (owner, 18 Oct 2026, standing: no extra dashes or hyphens): a hyphen or dash joining two
+ * words becomes a space ("Human-Elephant" → "Human Elephant", "WII-SACON" → "WII SACON", "Bhaniyawala–Jollygrant" →
+ * "Bhaniyawala Jollygrant"); a year range becomes "2025 to 2026" (also "2025-26"), another number range "5 to 10".
+ * With $case (a title already in Title Case) the word after the hyphen starts with a capital, unless it is a
+ * connector or a unit ("Bull-and-Horse" → "Bull and Horse", "8.5-kg" → "8.5 kg"). The " – " before the site name, URLs
+ * and the text of a slug are not touched (only a dash directly between two letters or digits is).
+ *
+ * @param string $text Title.
+ * @param bool   $case Capitalise the word after a removed hyphen.
+ * @return string
+ */
+function aw_seo_no_hyphens( $text, $case = true ) {
+	$t = (string) $text;
+	if ( ! preg_match( '/[\p{L}\p{N}]\p{Pd}|\p{Pd}\s*[\p{L}\p{N}]/u', $t ) ) {
+		return $t;
+	}
+	$d = '[-\x{2010}-\x{2015}\x{2212}]';
+	$t = preg_replace_callback( '/(?<![\p{L}\p{N}.])(\d{4})\s*' . $d . '\s*(\d{4})(?![\p{L}\p{N}])/u', fn( $m ) => $m[1] . ' to ' . $m[2], $t );
+	$t = preg_replace_callback( '/(?<![\p{L}\p{N}.])(\d{4})\s*' . $d . '\s*(\d{2})(?![\p{L}\p{N}])/u', fn( $m ) => $m[1] . ' to ' . substr( $m[1], 0, 2 ) . $m[2], $t );
+	$t = preg_replace( '/(?<![\p{L}\p{N}.])(\d+(?:\.\d+)?)\s*' . $d . '\s*(\d+(?:\.\d+)?)(?![\p{L}\p{N}])/u', '$1 to $2', $t );
+	$units = array( 'kg', 'km', 'cm', 'mm', 'ml', 'mg', 'g', 'm', 'kw', 'mw' );
+	$t     = preg_replace_callback(
+		'/(?<=[\p{L}\p{N}])' . $d . '\s*(?=[\p{L}\p{N}])|(?<=\p{L})' . $d . '\s+(?=\p{L})/u',
+		fn() => ' ',
+		$case ? preg_replace_callback(
+			'/(?<=[\p{L}\p{N}])' . $d . '(\p{Ll})([\p{L}\p{N}\x{2019}\x{27}]*)/u',
+			function ( $m ) use ( $units ) {
+				$word = $m[1] . $m[2];
+				return '-' . ( in_array( $word, AW_SEO_SMALL_WORDS, true ) || in_array( $word, $units, true ) ? $word : mb_strtoupper( $m[1] ) . $m[2] );
+			},
+			$t
+		) : $t
+	);
+	return trim( (string) preg_replace( '/\s+/u', ' ', $t ) );
+}
+
+/** A title (with or without " – Animal Writes" at the end) without hyphens; the separator before the site name stays. */
+function aw_seo_no_hyphens_title( $title, $case = true ) {
+	$brand = ' – ' . get_bloginfo( 'name' );
+	$title = (string) $title;
+	if ( mb_substr( $title, -mb_strlen( $brand ) ) === $brand ) {
+		return aw_seo_no_hyphens( mb_substr( $title, 0, -mb_strlen( $brand ) ), $case ) . $brand;
+	}
+	return aw_seo_no_hyphens( $title, $case );
+}
+
 /** $text with the page suffix, unless it already names the page. */
 function aw_seo_with_page( $text ) {
 	$suffix = aw_seo_page_suffix();
@@ -235,7 +282,7 @@ const AW_SEO_SMALL_WORDS = array( 'a', 'an', 'the', 'and', 'or', 'nor', 'but', '
  * inside (NHAI, CBI-DRI, iPhone) stay as written. A headline written all in capitals is lowered first.
  */
 function aw_seo_headline_case( $text ) {
-	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	$text = trim( preg_replace( '/\s+/u', ' ', aw_seo_no_hyphens( (string) $text ) ) ); // no hyphens in a title (owner, 18 Oct 2026)
 	if ( ! preg_match( '/\p{Ll}/u', $text ) ) {
 		$text = mb_strtolower( $text );
 	}
@@ -299,7 +346,7 @@ function aw_seo_resource_kind( $post ) {
 	$tags = wp_get_post_terms( $post->ID, 'post_tag', array( 'fields' => 'all' ) );
 	$by   = is_wp_error( $tags ) ? array() : array_column( $tags, 'name', 'slug' );
 	if ( 'post' === $post->post_type ) {
-		foreach ( array( 'research' => 'Research Summary', 'faq' => 'FAQ', 'how-to' => 'How-to Guide', 'guide' => 'Guide' ) as $slug => $label ) {
+		foreach ( array( 'research' => 'Research Summary', 'faq' => 'FAQ', 'how-to' => 'How To Guide', 'guide' => 'Guide' ) as $slug => $label ) {
 			if ( isset( $by[ $slug ] ) ) {
 				return $label;
 			}
@@ -326,7 +373,7 @@ function aw_seo_fit( array $titles, $max = 60 ) {
 
 /** "{Name} in {District}" or "{Name} in {State}" (no comma as a separator; the place is not repeated when the name has it). */
 function aw_seo_listing_name( $id ) {
-	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
+	$name = aw_seo_no_hyphens( preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) ), false ); // no hyphens (owner, 18 Oct 2026)
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
 	$where = $district ? $district : $state;
 	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ' in ' . $where : $name;
