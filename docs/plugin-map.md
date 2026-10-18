@@ -54,7 +54,8 @@ Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-c
 |---|---|
 | `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
 | `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
-| `includes/overview.php` | Mail menu (admins) with the unread badge for vedanshu@ + support@, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
+| `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
+| `includes/overview.php` | Mail menu (admins) with the unread badge across every mailbox, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
 | `includes/telegram.php` | Telegram reminder to the owner for mail from a person (skips Hostinger, the site, automatic senders, lists and the block list in Settings → Incoming mail). wp-config: `AW_TELEGRAM_BOT_TOKEN`, `AW_TELEGRAM_CHAT_ID`. |
 | `includes/mail-reply.php` | The former Inbox → Reply. Kept, not loaded (replies happen in webmail). |
 | `uninstall.php` | Deletes nothing. |

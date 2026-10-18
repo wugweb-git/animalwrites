@@ -52,18 +52,27 @@ function aw_mail_setting( $key ) {
 	return $opt;
 }
 
-/** Mailbox IDs (resourceId) for our mailboxes, looked up from the token with GET /api/v1/me and remembered. */
+/**
+ * Mailbox IDs (resourceId) for every mailbox the token can see (GET /api/v1/me), keyed by local part (vedanshu,
+ * support, noreply), and remembered with their addresses (aw_mail_all_boxes, mailboxes.php).
+ */
 function aw_mail_box_ids( $refresh = false ) {
 	$ids = (array) get_option( 'aw_mail_box_ids', array() );
-	if ( $refresh || count( $ids ) < count( AW_MAIL_BOXES ) ) {
+	if ( $refresh || count( $ids ) < count( AW_MAIL_BOXES ) || false === get_option( 'aw_mail_box_addresses', false ) ) {
 		$me = aw_mail_api( '/api/v1/me' );
-		foreach ( (array) ( $me['mailboxes'] ?? array() ) as $mb ) {
-			$key = array_search( strtolower( (string) ( $mb['address'] ?? '' ) ), AW_MAIL_BOXES, true );
-			if ( false !== $key ) {
-				$ids[ $key ] = (string) $mb['resourceId'];
+		if ( is_array( $me ) && isset( $me['mailboxes'] ) ) {
+			$adr = array();
+			foreach ( (array) $me['mailboxes'] as $mb ) {
+				$a = strtolower( (string) ( $mb['address'] ?? '' ) );
+				if ( is_email( $a ) && ! empty( $mb['resourceId'] ) ) {
+					$key         = sanitize_key( strstr( $a, '@', true ) );
+					$ids[ $key ] = (string) $mb['resourceId'];
+					$adr[ $key ] = $a;
+				}
 			}
+			update_option( 'aw_mail_box_ids', $ids, false );
+			update_option( 'aw_mail_box_addresses', $adr, false );
 		}
-		update_option( 'aw_mail_box_ids', $ids, false );
 	}
 	return $ids;
 }
@@ -291,7 +300,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 	 * Not fired during the one-time import.
 	 */
 	if ( empty( $GLOBALS['aw_mail_importing'] ) ) {
-		do_action( 'aw_mail_received', $id, array( 'mailbox' => $boxadr, 'name' => trim( preg_replace( '/<[^>]*>/', '', $from_s ) ), 'email' => $from_addr ? $from_addr[0] : '', 'subject' => $subject, 'text' => (string) $text, 'date' => $date, 'source' => $source ) );
+		do_action( 'aw_mail_received', $id, array( 'mailbox' => $boxadr, 'to' => $orig, 'name' => trim( preg_replace( '/<[^>]*>/', '', $from_s ) ), 'email' => $from_addr ? $from_addr[0] : '', 'subject' => $subject, 'text' => (string) $text, 'date' => $date, 'source' => $source ) );
 	}
 	return new WP_REST_Response( array( 'status' => 'created', 'id' => $id ), 201 );
 }
@@ -334,7 +343,7 @@ function aw_mail_in_screen() {
 	$field( 'secret_vedanshu', 'Webhook secret — vedanshu@', 'Shown once when the webhook is created on vedanshu@animalwrites.in.' );
 	$field( 'secret_support', 'Webhook secret — support@', 'Shown once when the webhook is created on support@animalwrites.in.' );
 	$field( 'api_token', 'Mail API token', 'From Agentic mail → API (scope: vedanshu@ and support@). Lets WordPress read the full message, its headers and attachment names, and fills the mailbox IDs below.' . ( defined( 'AW_HOSTINGER_MAIL_TOKEN' ) && AW_HOSTINGER_MAIL_TOKEN ? ' Set in wp-config (AW_HOSTINGER_MAIL_TOKEN): that one is used.' : '' ) );
-	foreach ( AW_MAIL_BOXES as $key => $addr ) {
+	foreach ( aw_mail_all_boxes() as $key => $addr ) {
 		echo '<tr><th>Mailbox ID — ' . esc_html( strtok( $addr, '@' ) . '@' ) . '</th><td><input class="regular-text code" readonly value="' . esc_attr( (string) ( $ids[ $key ] ?? '' ) ) . '" placeholder="Filled from the token"><p class="description">' . esc_html( $addr ) . ' (read only)</p></td></tr>';
 	}
 	echo '</table>';

@@ -65,7 +65,7 @@ function aw_mail_overview_box( $key ) {
 /** Unread emails across our mailboxes (cached). */
 function aw_mail_overview_unread() {
 	$n = 0;
-	foreach ( array_keys( AW_MAIL_BOXES ) as $key ) {
+	foreach ( array_keys( aw_mail_all_boxes() ) as $key ) {
 		$n += (int) ( aw_mail_overview_box( $key )['unread'] ?? 0 );
 	}
 	return $n;
@@ -73,7 +73,7 @@ function aw_mail_overview_unread() {
 
 /** Forget the cached counts and lists (a new email arrived). */
 function aw_mail_overview_flush() {
-	foreach ( array_keys( AW_MAIL_BOXES ) as $key ) {
+	foreach ( array_keys( aw_mail_all_boxes() ) as $key ) {
 		delete_transient( 'aw_mail_overview_' . $key );
 		delete_transient( 'aw_mail_overview_down_' . $key );
 	}
@@ -95,9 +95,10 @@ function aw_mail_overview_date( $date ) {
  */
 function aw_mail_overview_render( $max, $compact = false ) {
 	$link = '<a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">Open in webmail<span class="screen-reader-text"> (opens in a new tab)</span></a>';
-	foreach ( AW_MAIL_BOXES as $key => $addr ) {
-		$box = aw_mail_overview_box( $key );
-		echo '<h3>' . esc_html( $addr ) . ' — ' . ( $box ? esc_html( sprintf( _n( '%d unread', '%d unread', (int) $box['unread'], 'aw-mail' ), (int) $box['unread'] ) ) : 'not available' ) . '</h3>';
+	foreach ( aw_mail_all_boxes() as $key => $addr ) {
+		$box   = aw_mail_overview_box( $key );
+		$alias = aw_mail_aliases_of( $addr );
+		echo '<h3>' . esc_html( $addr . ( $alias ? ' (also ' . implode( ', ', $alias ) . ')' : '' ) ) . ' — ' . ( $box ? esc_html( sprintf( _n( '%d unread', '%d unread', (int) $box['unread'], 'aw-mail' ), (int) $box['unread'] ) ) : 'not available' ) . '</h3>';
 		if ( ! $box ) {
 			echo '<p>The Mail API could not be reached for this mailbox (token missing or not scoped to it). ' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 			continue;

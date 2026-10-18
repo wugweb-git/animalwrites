@@ -98,7 +98,9 @@ add_action(
 		$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( (string) ( $m['text'] ?? '' ) ) ) );
 		$name = '' !== trim( (string) ( $m['name'] ?? '' ) ) ? trim( (string) $m['name'] ) : (string) $m['email'];
 		$subj = '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? (string) $m['subject'] : '(no subject)';
-		aw_mail_tg_send( 'New mail to ' . $m['mailbox'] . ' from ' . $name . ' — ' . $subj . ' — ' . mb_substr( $text, 0, 100 ) . ( mb_strlen( $text ) > 100 ? '…' : '' ) . "\n" . AW_MAIL_WEBMAIL );
+		$to   = strtolower( (string) ( $m['to'] ?? '' ) );
+		$box  = ( '' !== $to && $to !== $m['mailbox'] && function_exists( 'aw_mail_mailbox_of' ) && aw_mail_mailbox_of( $to ) === $m['mailbox'] ) ? $to . ' (' . $m['mailbox'] . ')' : $m['mailbox']; // an alias: "contact@… (vedanshu@…)"
+		aw_mail_tg_send( 'New mail to ' . $box . ' from ' . $name . ' — ' . $subj . ' — ' . mb_substr( $text, 0, 100 ) . ( mb_strlen( $text ) > 100 ? '…' : '' ) . "\n" . AW_MAIL_WEBMAIL );
 	},
 	10,
 	2
