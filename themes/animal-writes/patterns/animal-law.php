@@ -3,7 +3,7 @@
  * Title: From the Library
  * Slug: animal-writes/animal-law
  * Categories: animal-writes
- * Description: The three newest Library items as cards (the News card: picture, publisher, date, title), then four Kits tiles into the Library by type.
+ * Description: The three newest Library items as cards (the News card: picture, publisher, date, title), then four Kits tiles into the Library by type, two by two.
  * Inserter: yes
  *
  * @package animal-writes
@@ -32,7 +32,7 @@
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 
-<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}},"layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"15rem"}} -->
+<!-- wp:group {"className":"kit-stack","style":{"spacing":{"margin":{"top":"var:preset|spacing|70"}}},"layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group kit-stack" style="margin-top:var(--wp--preset--spacing--70)"><!-- wp:group {"className":"kit-tile kit-ico--legal","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-tile kit-ico--legal"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading"><a href="/library/?tag=act">Acts and Rules</a></h3>
