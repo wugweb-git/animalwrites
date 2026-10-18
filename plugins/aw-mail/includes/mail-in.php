@@ -334,7 +334,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 	}
 	update_option( 'aw_mail_last', array( 'at' => current_time( 'mysql' ), 'to' => $orig, 'mailbox' => $boxadr, 'subject' => $subject ), false );
 	/**
-	 * A new email is in the Inbox (unread badge refresh, owner's Telegram reminder: overview.php, telegram.php).
+	 * A new email is in the Inbox (unread badge refresh: overview.php).
 	 * Not fired during the one-time import.
 	 */
 	if ( empty( $GLOBALS['aw_mail_importing'] ) ) {
@@ -390,7 +390,7 @@ function aw_mail_in_screen() {
 	$imp = get_option( 'aw_mail_imported' );
 	echo '<h2>Mail already in the mailboxes</h2><p>' . esc_html( is_array( $imp ) ? 'Imported ' . $imp['at'] . ': ' . wp_json_encode( $imp['counts'] ) : 'Not imported yet. Needs the API token.' ) . '</p>';
 	echo '<p><a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_mail_import' ), 'aw_mail_import' ) ) . '">Import existing mail (newest first)</a></p>';
-	do_action( 'aw_mail_settings_after' ); // Telegram reminder and its block list (telegram.php)
+	do_action( 'aw_mail_settings_after' ); // mailboxes and aliases, profiles (mailboxes.php, profiles.php)
 	echo '</div>';
 }
 

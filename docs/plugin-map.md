@@ -57,7 +57,6 @@ Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-c
 | `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
 | `includes/profiles.php` | Per-mailbox display name, signature and picture (copied from Hostinger webmail; no API). Shown on the Mail page; site emails from that address use the name and end with the signature (not FluentCRM; not with `X-AW-No-Signature`). |
 | `includes/overview.php` | Mail menu (admins) with the unread badge across every mailbox, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
-| `includes/telegram.php` | Telegram reminder to the owner for mail from a person (skips Hostinger, the site, automatic senders, lists and the block list in Settings → Incoming mail). wp-config: `AW_TELEGRAM_BOT_TOKEN`, `AW_TELEGRAM_CHAT_ID`. |
 | `includes/mail-reply.php` | The former Inbox → Reply. Kept, not loaded (replies happen in webmail). |
 | `uninstall.php` | Deletes nothing. |
 
