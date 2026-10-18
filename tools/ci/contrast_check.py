@@ -106,6 +106,9 @@ def main():
             pair = (it.get("a11y") or {}).get("contrast")
             if pair:
                 check(f"{reg.parent.name} / {it.get('name')}", pair[0].lstrip("-"), pair[1].lstrip("-"), TEXT, vals)
+            # More pairs for one item (e.g. every button variant): [foreground, background, where]
+            for fg, bg, *where in (it.get("a11y") or {}).get("contrast_pairs", []):
+                check(f"{reg.parent.name} / {it.get('name')} ({where[0] if where else fg})", fg.lstrip("-"), bg.lstrip("-"), TEXT, vals)
 
     css = strip(CAMPAIGN_CSS.read_text() + "\n" + "\n".join(f.read_text() for f in CAMPAIGN_CSS_MORE if f.exists()))
     base = {}

@@ -36,8 +36,7 @@ function kits_demo_panel() {
 	$o .= $h( '6 Badge' ) . '<div class="kit-tags">' . kits_badge( 'Verified', 'verified' ) . kits_badge( 'Not yet confirmed', 'unconfirmed' ) . kits_badge( 'Featured', 'featured' ) . kits_badge( 'Sponsored', 'sponsored' ) . kits_badge( 'Advertisement', 'ad' ) . kits_badge( 'Closed', 'closed' ) . kits_badge( 'New', 'new' ) . '</div>';
 	$o .= $h( '7 Eyebrow · 8 Count' ) . '<p>' . kits_eyebrow( 'Resources' ) . '</p><p>Act ' . kits_count( 1234 ) . '</p>';
 	$o .= $h( '9 Segmented control' ) . '<nav class="kit-segment" aria-label="Demo"><a href="#" aria-current="true">A–Z</a><a href="#">Most details first</a></nav>';
-	$o .= $h( '10 Button' ) . '<p class="kit-tags"><button class="kit-btn" type="button">Primary</button><button class="kit-btn kit-btn--secondary" type="button">Secondary</button><button class="kit-btn kit-btn--ghost" type="button">Ghost</button><button class="kit-btn kit-btn--ink" type="button">Ink</button><button class="kit-btn kit-btn--sm" type="button">Small</button><button class="kit-btn is-demo-focus" type="button">Focus</button><button class="kit-btn" type="button" disabled>Disabled</button><button class="kit-btn is-loading" type="button" aria-busy="true">Sending</button></p>'
-		. '<p class="kit-tags"><a class="kit-btn" href="#"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span>Label and icon</a><a class="kit-btn kit-btn--secondary" href="#">Label only</a><button class="kit-btn kit-btn--secondary kit-btn--icon" type="button" aria-label="Search"><span class="kit-ico kit-ico--search" aria-hidden="true"></span></button><button class="kit-btn kit-btn--sm kit-btn--icon" type="button" aria-label="Copy link"><span class="kit-ico kit-ico--link" aria-hidden="true"></span></button></p>';
+	$o .= $h( '10 Button' ) . kits_demo_buttons();
 	$f  = function ( $label, $state, $control, $msg = '' ) {
 		return '<div class="kit-field"><label>' . esc_html( $label ) . ( 'Optional' === $state ? ' <span class="kit-optional">(optional)</span>' : '' ) . '</label><div class="kit-field-control">' . $control . '</div><span class="kit-field-message">' . esc_html( $msg ) . '</span></div>';
 	};
@@ -84,6 +83,59 @@ function kits_demo_panel() {
 	return $o;
 }
 
+/**
+ * The button matrix (docs/buttons.md): every variant in every state, the content types and sizes, for .kit-btn and the
+ * core Button block, on a light and on a dark surface. Hover and active are drawn with demo classes.
+ */
+function kits_demo_buttons() {
+	$variants = array(
+		'primary'   => array( '', '' ),
+		'secondary' => array( ' kit-btn--secondary', ' is-style-kits-secondary' ),
+		'ghost'     => array( ' kit-btn--ghost', ' is-style-kits-ghost' ),
+		'brand'     => array( ' kit-btn--brand', ' is-style-kits-brand' ),
+	);
+	$states   = array(
+		'Default'  => array( '', '' ),
+		'Hover'    => array( ' is-demo-hover', '' ),
+		'Focus'    => array( ' is-demo-focus', '' ),
+		'Pressed'  => array( ' is-demo-active', '' ),
+		'Disabled' => array( '', ' disabled' ),
+		'Loading'  => array( ' is-loading', ' aria-busy="true"' ),
+	);
+	$ico      = fn( $n ) => '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
+	$surface  = function ( $title, $class ) use ( $variants, $states, $ico ) {
+		$o = '<div class="kit-demo-btns ' . $class . '"><p class="kit-demo-btns-h">' . esc_html( $title ) . '</p>';
+		foreach ( $variants as $name => $v ) {
+			$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">' . esc_html( ucfirst( $name ) ) . '</span>';
+			foreach ( $states as $state => $s ) {
+				$o .= '<button class="kit-btn' . $v[0] . $s[0] . '" type="button"' . $s[1] . '>' . esc_html( $state ) . '</button>';
+			}
+			$o .= '</p>';
+		}
+		$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">Content</span>'
+			. '<a class="kit-btn" href="/demo/">Icon + label (link)</a>'
+			. '<a class="kit-btn kit-btn--secondary" href="tel:+910000000000">Call</a>'
+			. '<a class="kit-btn kit-btn--ghost" href="https://example.org/">Leaves the site</a>'
+			. '<button class="kit-btn kit-btn--secondary kit-btn--label" type="submit">Label only</button>'
+			. '<button class="kit-btn kit-btn--icon" type="button" aria-label="Search">' . $ico( 'search' ) . '</button>'
+			. '<button class="kit-btn kit-btn--secondary kit-btn--icon" type="button" aria-label="Copy link">' . $ico( 'link' ) . '</button></p>';
+		$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">Small</span>'
+			. '<a class="kit-btn kit-btn--sm" href="/demo/">Primary</a><a class="kit-btn kit-btn--sm kit-btn--secondary" href="/demo/">Secondary</a>'
+			. '<a class="kit-btn kit-btn--sm kit-btn--ghost" href="/demo/">Ghost</a><a class="kit-btn kit-btn--sm kit-btn--brand" href="/demo/">Brand</a>'
+			. '<button class="kit-btn kit-btn--sm kit-btn--secondary kit-btn--icon" type="button" aria-label="Share">' . $ico( 'link' ) . '</button></p>';
+		$o .= '<div class="kit-demo-btns-row"><span class="kit-demo-btns-label">Block</span><div class="wp-block-buttons is-layout-flex">';
+		foreach ( $variants as $name => $v ) {
+			$o .= '<div class="wp-block-button' . $v[1] . '"><a class="wp-block-button__link wp-element-button" href="/demo/">' . esc_html( ucfirst( $name ) ) . '</a></div>';
+		}
+		$o .= '<div class="wp-block-button is-style-kits-secondary kit-btn--ico-mail"><a class="wp-block-button__link wp-element-button" href="/contact/">Email</a></div>'
+			. '<div class="wp-block-button kit-btn--sm is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/demo/">Small</a></div>'
+			. '<div class="wp-block-button kit-btn--icon kit-btn--ico-search"><a class="wp-block-button__link wp-element-button" href="/search/">Search</a></div>'
+			. '</div></div></div>';
+		return $o;
+	};
+	return $surface( 'On a light surface', 'kit-demo-btns--light' ) . $surface( 'On a dark surface', 'kit-dark' );
+}
+
 add_shortcode(
 	'kits_demo',
 	function () {
@@ -91,7 +143,7 @@ add_shortcode(
 			return '';
 		}
 		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
-			. '.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
+			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
 			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel() . '</section>'
 			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel() . '</section>'
 			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states

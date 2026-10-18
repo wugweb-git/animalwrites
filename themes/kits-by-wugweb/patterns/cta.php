@@ -11,8 +11,8 @@
 <!-- /wp:heading -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"primary","textColor":"secondary"} -->
-<div class="wp-block-button"><a class="wp-block-button__link has-secondary-color has-primary-background-color has-text-color has-background wp-element-button">Action</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button">Action</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

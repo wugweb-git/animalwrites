@@ -21,12 +21,12 @@
 <!-- /wp:html -->
 
 <!-- wp:buttons {"className":"aw-ed-hero-actions"} -->
-<div class="wp-block-buttons aw-ed-hero-actions"><!-- wp:button {"className":"is-style-kits-primary"} -->
-<div class="wp-block-button is-style-kits-primary"><a class="wp-block-button__link wp-element-button" href="/directory/">Find help</a></div>
+<div class="wp-block-buttons aw-ed-hero-actions"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/directory/">Find help</a></div>
 <!-- /wp:button -->
 
-<!-- wp:button {"className":"is-style-kits-ghost"} -->
-<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/library/">Understand the law</a></div>
+<!-- wp:button {"className":"is-style-kits-secondary"} -->
+<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/library/">Understand the law</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div>

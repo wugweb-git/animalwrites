@@ -60,61 +60,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 
 /* 4. Shared components ------------------------------------------------------- */
 
-/* 4.1 Button — variants: primary (default), outline, ink; states: hover, active, focus, disabled, loading.
-   Core buttons (.wp-element-button) take colour, border, radius, padding and type from theme.json styles.elements.button
-   and the block style variations (Primary, Secondary, Ghost, Small); the form buttons below repeat the same tokens. */
-.wp-element-button ,.wp-block-button__link {
-	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2);
-	min-height: var(--kit-size-control);
-	cursor: pointer;
-	font-variant: inherit; font-stretch: inherit; font-kerning: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-feature-settings: inherit; font-variation-settings: inherit; word-spacing: inherit;
-	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
-		transform var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
-}
-.kit-form button[type=submit] ,.kit-finder button ,.kit-print button {
-	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-space-2);
-	min-height: var(--kit-size-control);
-	padding: 0 var(--kit-space-5);
-	border: var(--kit-border-control) solid transparent;
-	border-radius: var(--kit-radius-pill);
-	background: var(--kit-color-ink);
-	color: var(--kit-color-on-ink);
-	font: inherit; font-weight: var(--kit-weight-medium);
-	text-decoration: none;
-	cursor: pointer;
-	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
-		transform var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease);
-}
-.wp-element-button:hover ,.wp-block-button__link:hover ,.kit-form button[type=submit]:hover ,.kit-finder button:hover ,.kit-print button:hover {
-	background: var(--neutral-8); color: var(--kit-color-on-ink);
-}
-.wp-element-button:active ,.wp-block-button__link:active ,.kit-form button[type=submit]:active ,.kit-finder button:active { transform: translateY(1px) scale(0.99); box-shadow: none; }
-.is-style-outline > .wp-block-button__link {
-	background: transparent; color: inherit; border-color: var(--kit-color-line);
-}
-.is-style-outline > .wp-block-button__link:hover {
-	background: var(--kit-color-ink); color: var(--kit-color-on-ink); border-color: var(--kit-color-ink);
-}
-/* Block styles (theme.json holds their colours, border, padding and size; here: height and hover) */
-.wp-block-button.is-style-kits-primary .wp-block-button__link:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) .wp-block-buttons > .wp-block-button.is-style-kits-primary > .wp-block-button__link.wp-element-button:hover { /* outranks the dark-surface fill below */ background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
-.is-style-kits-secondary .wp-block-button__link:hover { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.is-style-kits-ghost .wp-block-button__link:hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
-.is-style-kits-small .wp-block-button__link { min-height: var(--kit-size-target); }
+/* 4.1 Button: the whole button system (core Button block, .kit-btn, form buttons) is in kit-primitives.css section 10. */
 .is-style-kits-hairline { border-width: var(--kit-border-width) 0 0 !important; height: 0; opacity: 1; }
-.kit-finder button { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.kit-finder button:hover { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-:is(.wp-element-button, button)[disabled] ,:is(.wp-element-button, button)[aria-disabled=true] {
-	opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
-}
-:is(.wp-element-button, button):not(.kit-btn).is-loading { position: relative; color: transparent !important; pointer-events: none; }
-:is(.wp-element-button, button):not(.kit-btn).is-loading::after {
-	content: ""; position: absolute; width: 1.1em; height: 1.1em; border-radius: 50%;
-	border: var(--kit-border-width) solid var(--kit-color-on-accent); border-right-color: transparent;
-	animation: kit-spin 700ms linear infinite;
-}
-
-/* 4.1b Button sizes and outline (moved with the button component) */
 
 /* 4.2 Card — one component for news, legal, research, guide, opportunity, listing, resource.
    Anatomy: media (flush top) / chips / title (h3 style) / excerpt / date. Surface: raised + border + elevation-1.
@@ -635,11 +582,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-trust.is-unverified li:first-child > .kit-ico { color: var(--kit-color-warning); }
 .kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-regular); }
 
-/* Shared button size used in rows */
-.kit-btn .kit-ico { --kit-ico-size: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .kit-task ,.kit-res-card ,.kit-story-media img ,.kit-case > .kit-ico { transition: none; } .kit-task:hover ,.kit-res-card:hover { transform: none; } }
-/* Filled yellow buttons always use ink text, even inside dark areas that set light link colours */
-/* (filled-button text colour on dark areas: kit-primitives.css) */
 
 /* Editorial building blocks: section head, ghost button, "three big actions", lead + list, editorial queries */
 .kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); margin-bottom: var(--kit-space-6); }
@@ -844,9 +787,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 :where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
 html:not(.kits-preview) :where(.wp-block-post-content, main) > .alignfull + :is(.kit-ad--empty, .kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"])) + .alignfull { margin-block-start: 0 !important; } /* a hidden ad slot between two sections adds no gap */
 
-/* Buttons: ink is the main button; yellow only on dark surfaces (header, hero, help band, footer), where ink would vanish. */
-:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .wp-element-button:not(:is(.is-style-outline, .is-style-kits-secondary, .is-style-kits-ghost) *), .kit-form button[type=submit]) { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-:is(.kit-dark, .kit-site-header, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-site-footer) :is(.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink), .kit-form button[type=submit]):hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
+/* Buttons on dark surfaces (primary takes the brand fill): kit-primitives.css section 10. */
 
 /* Hub head height follows its content (no min-height: it left an empty band under short intros). */
 @media (max-width: 767px) { .kit-section-band .kit-section-head { align-content: start; } }
@@ -1000,14 +941,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 .wp-block-query-pagination-numbers .page-numbers { display: inline-flex; align-items: center; justify-content: center; min-width: var(--kit-size-target); min-height: var(--kit-size-target); border-radius: var(--radius-sm); text-decoration: none; }
 .wp-block-query-pagination-numbers .page-numbers.current { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 
-/* Buttons carry an icon by what they do (only when the button has no icon of its own) */
-:is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico)):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [type=submit], [data-ico])::before,
-.kit-disclosure[data-ico] > summary::before {
-	content: ""; flex: none; width: 1.125em; height: 1.125em; background: currentColor; -webkit-mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat; mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat;
-}
-[href^="tel:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-phone); }
-[href^="mailto:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-mail); }
-[href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
+/* Button icons by function: kit-primitives.css section 10 */
 .kit-disclosure > summary { gap: var(--kit-space-2); }
 .kit-disclosure[open] > summary::before { display: none; }
 
@@ -1105,33 +1039,7 @@ body { background: var(--kit-surface-page); }
 :is(.wp-block-query-pagination-previous, .wp-block-query-pagination-next, .kit-pager .prev, .kit-pager .next)::after { width: 20px !important; height: 20px !important; }
 
 
-/* CTA buttons (owner, 9 Oct 2026): every button carries an icon by what it does, and it moves when you point at it.
-   Function icons (call, email, WhatsApp, send, search, download, claim, report, volunteer) sit before the label; a link
-   button with no function icon gets an arrow after its label — → inside the site, ↗ when it leaves the site. The icon
-   nudges 3px on hover and focus (spring motion); nothing moves under reduced motion. */
-:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button):not(:has(.kit-ico)):not([href^="tel:"]):not([href^="mailto:"]):not([href*="wa.me"]):not([download]):not([href$=".pdf"]):not([data-ico]):not(.kit-btn--icon):not(.kit-dd-btn):not([aria-haspopup])::after {
-	content: ""; flex: none; width: 1.125em; height: 1.125em; margin-left: .45em; background: currentColor;
-	-webkit-mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat; mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat;
-	transition: transform var(--kit-duration-spring) var(--kit-ease-spring);
-}
-:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"]:not([href*="animalwrites.in"]) { --kit-cta-arrow: var(--kit-ico-arrow-up-right); }
-:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button):is([download], [href$=".pdf"])::before {
-	content: ""; flex: none; width: 1.125em; height: 1.125em; margin-right: .45em; background: currentColor;
-	-webkit-mask: var(--kit-ico-download) center / contain no-repeat; mask: var(--kit-ico-download) center / contain no-repeat;
-	transition: transform var(--kit-duration-spring) var(--kit-ease-spring);
-}
-:is(.kit-btn, .wp-block-button__link, .wp-element-button) { display: inline-flex; align-items: center; justify-content: center; }
-:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]) > .kit-ico,
-:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary)::before { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
-:is(.kit-btn, .wp-block-button__link, .wp-element-button):is(:hover, :focus-visible)::after { transform: translateX(3px); }
-:is(.kit-btn, .wp-block-button__link, .wp-element-button)[href^="http"]:not([href*="animalwrites.in"]):is(:hover, :focus-visible)::after { transform: translate(2px, -2px); }
-:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary):is(:hover, :focus-visible)::before,
-:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(:hover, :focus-visible) > .kit-ico { transform: translateX(2px) scale(1.06); }
-.kit-btn.is-loading::before { transform: none !important; }
-@media (prefers-reduced-motion: reduce) {
-	:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary)::before,
-	:is(.kit-btn, .wp-block-button__link, .wp-element-button)::after, :is(.kit-btn, .wp-block-button__link, .wp-element-button) > .kit-ico { transition: none; transform: none !important; }
-}
+/* CTA buttons (owner, 9 Oct 2026): every link button carries an icon, which nudges on hover and focus: kit-primitives.css section 10. */
 
 /* Sideways scroll row (phones): a list of cards scrolls across instead of stacking down the screen. Add kit-scroll-row
    to a Query Loop; from 768px the list lays out as the section decides. */

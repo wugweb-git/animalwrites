@@ -113,11 +113,12 @@ add_action( 'init', 'kits_pattern_categories' );
  */
 function kits_block_styles() {
 	$styles = array(
+		// Default (core "fill", shown as Primary) + these three. Size and content are extra CSS classes (docs/buttons.md).
+		// Retired names still render: kits-primary (= Brand), kits-small (= small Primary), core outline (= Secondary).
 		'core/button'    => array(
-			'kits-primary'   => __( 'Primary', 'kits-by-wugweb' ),
 			'kits-secondary' => __( 'Secondary', 'kits-by-wugweb' ),
 			'kits-ghost'     => __( 'Ghost', 'kits-by-wugweb' ),
-			'kits-small'     => __( 'Small', 'kits-by-wugweb' ),
+			'kits-brand'     => __( 'Brand', 'kits-by-wugweb' ),
 		),
 		'core/group'     => array(
 			'kits-card'    => __( 'Card', 'kits-by-wugweb' ),
@@ -147,6 +148,46 @@ function kits_block_styles() {
 	}
 }
 add_action( 'init', 'kits_block_styles' );
+
+/**
+ * Core Button keeps one built-in style, its default, named Primary; core Outline is replaced by Kits Secondary.
+ */
+add_filter(
+	'block_type_metadata',
+	function ( $meta ) {
+		if ( 'core/button' === ( $meta['name'] ?? '' ) ) {
+			$meta['styles'] = array(
+				array(
+					'name'      => 'fill',
+					'label'     => __( 'Primary', 'kits-by-wugweb' ),
+					'isDefault' => true,
+				),
+			);
+		}
+		return $meta;
+	}
+);
+
+/**
+ * Link buttons: an absolute link shows the "leaves the site" arrow (kit-primitives.css section 10) unless it points at
+ * this site's own host, which is only known here.
+ */
+function kits_button_own_host_css() {
+	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	if ( '' === $host ) {
+		return;
+	}
+	$host = preg_replace( '/^www\./', '', $host );
+	$sel  = array();
+	foreach ( array( $host, 'www.' . $host ) as $h ) {
+		$sel[] = ':is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"][href*="//' . esc_attr( $h ) . '/"]';
+		$sel[] = ':is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"][href$="//' . esc_attr( $h ) . '"]';
+	}
+	wp_register_style( 'kits-button-host', false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_enqueue_style( 'kits-button-host' );
+	wp_add_inline_style( 'kits-button-host', implode( ',', $sel ) . '{--kit-cta-arrow:var(--kit-ico-arrow-right);--_nudge:translateX(var(--kit-btn-nudge))}' );
+}
+add_action( 'enqueue_block_assets', 'kits_button_own_host_css' );
 
 /**
  * Theme pattern files are cached by WordPress; refresh the cache when the pattern files of the active theme

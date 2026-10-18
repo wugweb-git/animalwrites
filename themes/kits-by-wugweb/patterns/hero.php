@@ -23,8 +23,8 @@
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button">Primary action</a></div>
 <!-- /wp:button -->
 
-<!-- wp:button {"className":"is-style-outline"} -->
-<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button">Secondary action</a></div>
+<!-- wp:button {"className":"is-style-kits-secondary"} -->
+<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button">Secondary action</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

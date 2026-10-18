@@ -108,7 +108,7 @@ function aw_claim_finder() {
 	$q    = sanitize_text_field( wp_unslash( $_GET['org'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$html = '<form class="kit-form aw-claim-find" method="get" action="' . esc_url( home_url( '/claim/' ) ) . '" role="search">'
 		. '<p class="kit-field"><label for="aw-claim-org">Organisation name</label><input id="aw-claim-org" type="search" name="org" value="' . esc_attr( $q ) . '" required minlength="3" autocomplete="organization"></p>'
-		. '<p><button class="kit-btn kit-btn--primary" type="submit">Find your organisation</button></p></form>';
+		. '<p><button class="kit-btn" type="submit">Find your organisation</button></p></form>';
 	if ( mb_strlen( $q ) >= 3 ) {
 		$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'numberposts' => 20, 'fields' => 'ids', 'orderby' => 'relevance' ) );
 		if ( $ids ) {

@@ -12,29 +12,93 @@
    "states": [
     "default",
     "hover",
-    "focus",
-    "active",
+    "focus-visible",
+    "active (pressed)",
     "disabled",
     "loading"
    ],
    "tokens": [
-    "kit-color-ink",
-    "kit-color-on-ink",
-    "kit-color-accent (on dark surfaces)",
+    "kit-btn-height",
+    "kit-btn-height-sm",
+    "kit-btn-pad",
+    "kit-btn-pad-sm",
+    "kit-btn-gap",
+    "kit-btn-ico-size",
+    "kit-btn-ico-size-only",
+    "kit-btn-press",
+    "kit-btn-nudge",
+    "kit-btn-spinner-width",
+    "kit-btn-primary-*",
+    "kit-btn-secondary-*",
+    "kit-btn-ghost-*",
+    "kit-btn-brand-*",
     "kit-radius-pill",
-    "kit-size-control"
+    "kit-border-control",
+    "kit-focus-width",
+    "kit-color-focus",
+    "kit-motion-fast",
+    "kit-duration-spring",
+    "kit-ease-spring",
+    "opacity-disabled"
    ],
    "a11y": {
     "element": "<button> for actions, <a> for navigation",
     "aria": "aria-busy=\"true\" while sending; disabled buttons use the disabled attribute",
     "keyboard": "Tab; Enter (links); Enter or Space (buttons)",
-    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
-    "target": "44px minimum height",
-    "motion": "colour change only; transitions off with reduced motion",
-    "sr": "visible label; icon-only buttons carry aria-label",
+    "focus": "--kit-focus-width ring in --kit-color-focus, --kit-focus-offset offset (:focus-visible)",
+    "target": "44px minimum (small); 48px default",
+    "motion": "colour fade, 1px press and a 3px icon nudge; none with prefers-reduced-motion",
+    "sr": "visible label; icon-only <button> carries aria-label; icon-only core block keeps its text for screen readers",
     "contrast": [
-     "kit-color-on-ink",
-     "kit-color-ink"
+     "kit-btn-primary-fg",
+     "kit-btn-primary-bg"
+    ],
+    "contrast_pairs": [
+     [
+      "kit-btn-primary-fg",
+      "kit-btn-primary-bg",
+      "primary on light"
+     ],
+     [
+      "kit-btn-brand-fg",
+      "kit-btn-brand-bg",
+      "brand (and primary on dark)"
+     ],
+     [
+      "kit-btn-secondary-fg",
+      "kit-color-bg",
+      "secondary on the page"
+     ],
+     [
+      "kit-btn-secondary-fg",
+      "kit-color-raised",
+      "secondary on a card"
+     ],
+     [
+      "kit-btn-ghost-fg",
+      "kit-color-bg",
+      "ghost on the page"
+     ],
+     [
+      "kit-btn-secondary-fg-hover",
+      "kit-btn-secondary-bg-hover",
+      "secondary hover"
+     ],
+     [
+      "kit-btn-brand-fg-hover",
+      "kit-btn-brand-bg-hover",
+      "brand hover on light"
+     ],
+     [
+      "kit-color-on-ink",
+      "kit-color-ink",
+      "secondary and ghost on dark"
+     ],
+     [
+      "kit-color-ink",
+      "kit-color-on-ink",
+      "hover on dark (white fill)"
+     ]
     ]
    },
    "seo": {
@@ -42,6 +106,73 @@
     "link": "says what happens (\"Apply or sign up\", not \"Click here\")",
     "alt": "n/a",
     "schema": "none"
+   },
+   "spec": {
+    "doc": "docs/buttons.md",
+    "css": "kit-primitives.css section 10 (the only place button rules live)",
+    "systems": "<a|button class=\"kit-btn …\"> and the core Button block render the same",
+    "variants": {
+     "primary": {
+      "use": "the main action; one per area",
+      "kit": "kit-btn (old: kit-btn--primary, kit-btn--ink)",
+      "block": "Default (shown as Primary)",
+      "light": "ink fill, white text; hover --neutral-8",
+      "dark": "brand fill, ink text (ink would vanish); hover white"
+     },
+     "secondary": {
+      "use": "other actions beside a primary",
+      "kit": "kit-btn--secondary (old: kit-btn--outline)",
+      "block": "Secondary (old: Outline)",
+      "light": "1px --kit-color-line outline, ink text; hover ink fill",
+      "dark": "60% white outline, white text; hover white fill, ink text"
+     },
+     "ghost": {
+      "use": "low emphasis (Clear, Cancel, Show more)",
+      "kit": "kit-btn--ghost",
+      "block": "Ghost",
+      "light": "no fill, no outline, ink text; hover 8% ink tint",
+      "dark": "white text; hover 14% white tint"
+     },
+     "brand": {
+      "use": "campaign or brand moments; the primary shape in the brand colour",
+      "kit": "kit-btn--brand",
+      "block": "Brand (old: is-style-kits-primary)",
+      "light": "brand fill, on-accent text; hover ink fill",
+      "dark": "brand fill; hover white fill"
+     }
+    },
+    "dark_surfaces": ".kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark",
+    "states": {
+     "default": "variant colours",
+     "hover": "fill/outline/text change to the variant's hover colours over --kit-motion-fast; the icon nudges (spring, --kit-duration-spring); pointer devices only",
+     "focus-visible": "--kit-focus-width ring in --kit-color-focus at --kit-focus-offset; colours unchanged; the icon nudges as on hover",
+     "active": "pressed: moves down --kit-btn-press (1px)",
+     "disabled": "disabled attribute (buttons) or aria-disabled=\"true\" (links, which then do not navigate); --opacity-disabled; no hover, no press",
+     "loading": "class is-loading or aria-busy=\"true\": spinner in place of the icon, label stays, no clicks"
+    },
+    "content": {
+     "icon + label": "function icon before the label (tel:, mailto:, WhatsApp, submit, download automatic; or kit-btn--ico-<name>, or a .kit-ico span); a link with no function icon gets → after the label, ↗ when it leaves the site",
+     "label only": "kit-btn--label: buttons that are not links only (e.g. Apply, Clear); links always carry an icon (owner rule 9 Oct 2026)",
+     "icon only": "kit-btn--icon: square (height × height); <button> needs aria-label; on the core block the button text is the accessible name and is hidden on screen"
+    },
+    "sizes": {
+     "default": "--kit-btn-height (48px), padding --kit-btn-pad, --fluid-body-md",
+     "small": "kit-btn--sm: --kit-btn-height-sm (44px), padding --kit-btn-pad-sm, --fluid-body-sm"
+    },
+    "motion": "colours fade --kit-motion-fast; icon nudge spring 3px (→), 2px diagonal (↗), leading icon 2px + scale 1.06; press 1px; spinner 700ms; prefers-reduced-motion: no transitions, no movement, spinner still at 60%",
+    "rules": [
+     "a link styled as a button is never a heading, and a heading is never styled as a button",
+     "the underlined text link (kit-ed-more) is a link, not a button: only for \"see all\" links in a section head",
+     "block styles set the variant; size and content are extra CSS classes, so a button can be e.g. small secondary icon-only"
+    ],
+    "retired": {
+     "is-style-kits-primary": "renders as Brand",
+     "is-style-kits-small": "renders as small Primary",
+     "is-style-outline": "renders as Secondary",
+     "kit-btn--ink": "= primary",
+     "kit-btn--primary": "= primary",
+     "kit-btn--outline": "= secondary"
+    }
    }
   },
   {

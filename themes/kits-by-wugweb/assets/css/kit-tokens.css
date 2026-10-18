@@ -154,6 +154,31 @@
   --kit-surface-section-alt: var(--neutral-2);
   --kit-surface-card: var(--neutral-0);
   --kit-overlay: color-mix(in srgb, var(--color-ash) 60%, transparent);
+  --kit-btn-height: var(--kit-size-control);
+  --kit-btn-height-sm: var(--kit-size-target);
+  --kit-btn-pad: var(--s-6);
+  --kit-btn-pad-sm: var(--s-4);
+  --kit-btn-gap: var(--s-2);
+  --kit-btn-ico-size: 1.125em;
+  --kit-btn-ico-size-only: var(--kit-icon-md);
+  --kit-btn-press: 1px;
+  --kit-btn-nudge: 3px;
+  --kit-btn-spinner-width: 2px;
+  --kit-btn-primary-bg: var(--kit-color-ink);
+  --kit-btn-primary-fg: var(--kit-color-on-ink);
+  --kit-btn-primary-bg-hover: var(--neutral-8);
+  --kit-btn-primary-fg-hover: var(--kit-color-on-ink);
+  --kit-btn-secondary-bg: transparent;
+  --kit-btn-secondary-fg: var(--kit-color-ink);
+  --kit-btn-secondary-line: var(--kit-color-line);
+  --kit-btn-secondary-bg-hover: var(--kit-color-ink);
+  --kit-btn-secondary-fg-hover: var(--kit-color-on-ink);
+  --kit-btn-ghost-fg: var(--kit-color-ink);
+  --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-ink) 8%, transparent);
+  --kit-btn-brand-bg: var(--kit-color-accent);
+  --kit-btn-brand-fg: var(--kit-color-on-accent);
+  --kit-btn-brand-bg-hover: var(--kit-color-ink);
+  --kit-btn-brand-fg-hover: var(--kit-color-on-ink);
 }
 @media (min-width: 768px) {
   :root {

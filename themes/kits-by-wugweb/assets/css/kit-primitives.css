@@ -204,39 +204,149 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 }
 .kit-segment :is(button, a):is([aria-pressed=true], [aria-current]) { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); font-weight: var(--kit-weight-bold); }
 
-/* ---------- 10. Button ---------- */
-.kit-btn {
-	display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
-	min-height: var(--kit-size-control); padding: 0 var(--s-6);
-	border: var(--kit-border-control) solid var(--kit-color-accent); border-radius: var(--kit-radius-pill);
-	background: var(--kit-color-accent); color: var(--kit-color-on-accent);
-	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-medium); text-decoration: none; cursor: pointer;
-	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
+/* ---------- 10. Button: one system for .kit-btn and the core Button block (spec: docs/buttons.md; registry "Button") ----------
+   Variants   primary (default: ink fill) · secondary (outline) · ghost (text weight, low emphasis) · brand (the primary shape
+              in the brand colour). Each variant reads --kit-btn-<variant>-* tokens; a dark surface swaps those tokens, so
+              every variant works on light and on dark surfaces.
+   States     default · hover · focus-visible · active (pressed) · disabled · loading.
+   Content    icon + label · label only (buttons that are not links) · icon only (square; needs an accessible name).
+   Sizes      default (--kit-btn-height) · small (--kit-btn-height-sm).
+   Markup     <a|button class="kit-btn [kit-btn--secondary|--ghost|--brand] [kit-btn--sm] [kit-btn--icon|--label] [kit-btn--ico-<name>]">
+              Core Button block: block style Default (= primary), Secondary, Ghost or Brand; size and content as extra CSS
+              classes on the block: kit-btn--sm, kit-btn--icon, kit-btn--label, kit-btn--ico-<name>.
+   Old names  keep working: is-style-kits-primary = brand, is-style-outline = secondary, is-style-kits-small = primary small,
+              kit-btn--primary and kit-btn--ink = primary, kit-btn--outline = secondary.
+   Rules      variant rules only set the private --_* values, so a component may restyle a button with one plain class rule. */
+
+/* Primary (default) values; :where() keeps them at zero specificity so any variant class wins */
+:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button) {
+	--_bg: var(--kit-btn-primary-bg); --_fg: var(--kit-btn-primary-fg); --_line: var(--kit-btn-primary-bg);
+	--_bg-h: var(--kit-btn-primary-bg-hover); --_fg-h: var(--kit-btn-primary-fg-hover); --_line-h: var(--kit-btn-primary-bg-hover);
+	--_nudge: translateX(var(--kit-btn-nudge));
 }
-.kit-btn--secondary, .kit-btn--outline { background: transparent; border-color: var(--kit-color-line); color: var(--kit-color-ink); }
-.kit-btn--ghost { background: transparent; border-color: currentColor; color: inherit; }
-/* Filled buttons keep their own text colour inside dark areas that recolour links */
-a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { color: var(--kit-color-on-ink); }
-a.kit-btn--ink { color: var(--kit-color-on-ink); }
-.kit-btn--ink { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
-.kit-btn--sm { min-height: var(--kit-size-target); padding: 0 var(--s-4); font-size: var(--fluid-body-sm); }
-/* Icon only: square, the icon in the middle; needs an aria-label (or screen-reader text) naming the action. */
-.kit-btn--icon { width: var(--kit-size-control); padding: 0; gap: 0; }
-.kit-btn--icon.kit-btn--sm { width: var(--kit-size-target); }
-.kit-btn .kit-ico { --kit-ico-size: 1.125em; }
+:where(.kit-btn--secondary, .kit-btn--outline, .is-style-kits-secondary > .wp-block-button__link, .is-style-outline > .wp-block-button__link) {
+	--_bg: var(--kit-btn-secondary-bg); --_fg: var(--kit-btn-secondary-fg); --_line: var(--kit-btn-secondary-line);
+	--_bg-h: var(--kit-btn-secondary-bg-hover); --_fg-h: var(--kit-btn-secondary-fg-hover); --_line-h: var(--kit-btn-secondary-bg-hover);
+}
+:where(.kit-btn--ghost, .is-style-kits-ghost > .wp-block-button__link) {
+	--_bg: transparent; --_fg: var(--kit-btn-ghost-fg); --_line: transparent;
+	--_bg-h: var(--kit-btn-ghost-bg-hover); --_fg-h: var(--kit-btn-ghost-fg); --_line-h: transparent;
+}
+:where(.kit-btn--brand, .is-style-kits-brand > .wp-block-button__link, .is-style-kits-primary > .wp-block-button__link) {
+	--_bg: var(--kit-btn-brand-bg); --_fg: var(--kit-btn-brand-fg); --_line: var(--kit-btn-brand-bg);
+	--_bg-h: var(--kit-btn-brand-bg-hover); --_fg-h: var(--kit-btn-brand-fg-hover); --_line-h: var(--kit-btn-brand-bg-hover);
+}
+/* Dark surfaces: ink would vanish, so primary takes the brand fill; outlines and text turn light; hover fills light. */
+:is(.kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark) {
+	--kit-btn-primary-bg: var(--kit-color-accent); --kit-btn-primary-fg: var(--kit-color-on-accent);
+	--kit-btn-primary-bg-hover: var(--kit-color-on-ink); --kit-btn-primary-fg-hover: var(--kit-color-ink);
+	--kit-btn-secondary-fg: var(--kit-color-on-ink); --kit-btn-secondary-line: color-mix(in srgb, var(--kit-color-on-ink) 60%, transparent);
+	--kit-btn-secondary-bg-hover: var(--kit-color-on-ink); --kit-btn-secondary-fg-hover: var(--kit-color-ink);
+	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent);
+	--kit-btn-brand-bg-hover: var(--kit-color-on-ink); --kit-btn-brand-fg-hover: var(--kit-color-ink);
+}
+
+/* Shape, type and motion (the same for every variant) */
+.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button {
+	display: inline-flex; align-items: center; justify-content: center; gap: var(--kit-btn-gap);
+	box-sizing: border-box; min-height: var(--kit-btn-height); padding: 0 var(--kit-btn-pad);
+	border: var(--kit-border-control) solid var(--_line); border-radius: var(--kit-radius-pill);
+	background: var(--_bg); color: var(--_fg);
+	font: inherit; font-size: var(--fluid-body-md); font-weight: var(--kit-weight-medium); line-height: 1.2;
+	text-align: center; text-decoration: none; cursor: pointer;
+	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), color var(--kit-motion-fast) var(--kit-motion-ease),
+		border-color var(--kit-motion-fast) var(--kit-motion-ease), transform var(--kit-motion-fast) var(--kit-motion-ease);
+}
+a:is(.kit-btn, .wp-block-button__link, .wp-element-button) { color: var(--_fg); } /* outranks "links in this area are light" rules */
+.kit-btn .kit-ico { --kit-ico-size: var(--kit-btn-ico-size); }
+
+/* Hover: the fill changes colour (secondary and brand fill with ink, or with white on dark) */
 @media (hover: hover) {
-	.kit-btn:hover { background: var(--neutral-8); border-color: var(--neutral-8); color: var(--kit-color-on-ink); }
-	.kit-btn--ink:hover { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-	.kit-btn--ghost:hover { background: var(--kit-color-on-ink); border-color: var(--kit-color-on-ink); color: var(--kit-color-ink); }
-	a.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink):hover { color: var(--kit-color-on-ink); }
+	:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button):hover:not([disabled], [aria-disabled=true], .is-loading, [aria-busy=true]),
+	a:where(.kit-btn, .wp-block-button__link, .wp-element-button):hover:not([aria-disabled=true], .is-loading, [aria-busy=true]) {
+		background: var(--_bg-h); border-color: var(--_line-h); color: var(--_fg-h);
+	}
 }
-.kit-btn:active { transform: translateY(1px); }
-.kit-btn:is([disabled], [aria-disabled=true]) { opacity: var(--opacity-disabled); cursor: not-allowed; transform: none; }
-.kit-btn.is-loading, .kit-btn[aria-busy=true] { position: relative; pointer-events: none; }
-.kit-btn.is-loading::before, .kit-btn[aria-busy=true]::before {
-	content: ""; width: 1em; height: 1em; border-radius: var(--radius-full);
-	border: var(--kit-border-control) solid currentColor; border-right-color: transparent;
+/* Focus: the site's focus ring, colours unchanged */
+:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button):focus-visible {
+	outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset);
+}
+/* Active: a 1px press */
+:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button):active:not([disabled], [aria-disabled=true]) { transform: translateY(var(--kit-btn-press)); }
+/* Disabled: faded, no hover, no press; a disabled link does not navigate */
+:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button):is([disabled], [aria-disabled=true]) {
+	opacity: var(--opacity-disabled); cursor: not-allowed; transform: none;
+}
+a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true] { pointer-events: none; }
+/* Loading (class is-loading or aria-busy="true"): a spinner in place of the icon, the label stays, no clicks */
+:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(.is-loading, [aria-busy=true]) { position: relative; pointer-events: none; }
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(.is-loading, [aria-busy=true])::before {
+	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); box-sizing: border-box;
+	border-radius: var(--radius-full); border: var(--kit-btn-spinner-width) solid currentColor; border-right-color: transparent;
+	background: none; -webkit-mask: none; mask: none; transform: none !important;
 	animation: kit-spin 700ms linear infinite;
+}
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(.is-loading, [aria-busy=true])::after { display: none; }
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(.is-loading, [aria-busy=true]) > .kit-ico { display: none; }
+
+/* Sizes: small */
+.kit-btn.kit-btn--sm, .wp-block-button.kit-btn--sm > .wp-block-button__link, .is-style-kits-small > .wp-block-button__link {
+	min-height: var(--kit-btn-height-sm); padding-inline: var(--kit-btn-pad-sm); font-size: var(--fluid-body-sm);
+}
+/* Icon only: square, the icon in the middle. <button>: aria-label names the action. Core block: the button text is the
+   name; it stays for screen readers and is hidden on screen. */
+.kit-btn.kit-btn--icon, .wp-block-button.kit-btn--icon > .wp-block-button__link { width: var(--kit-btn-height); min-width: var(--kit-btn-height); padding: 0; gap: 0; }
+.kit-btn.kit-btn--icon.kit-btn--sm, .wp-block-button.kit-btn--icon.kit-btn--sm > .wp-block-button__link { width: var(--kit-btn-height-sm); min-width: var(--kit-btn-height-sm); }
+.kit-btn.kit-btn--icon .kit-ico { --kit-ico-size: var(--kit-btn-ico-size-only); }
+.wp-block-button.kit-btn--icon > .wp-block-button__link { font-size: 0; --kit-btn-ico-size: var(--kit-btn-ico-size-only); }
+
+/* Icons. Function icons sit before the label: automatic for tel:, mailto:, WhatsApp, submit and download, or chosen with
+   kit-btn--ico-<name> (or data-ico plus --kit-btn-ico). A link with no function icon gets an arrow after its label: → inside
+   the site, ↗ when it leaves it (functions.php marks the site's own host). Label only (kit-btn--label) applies to buttons
+   that are not links; links always carry an icon (owner rule, 9 Oct 2026). */
+.kit-btn--ico-phone { --kit-btn-ico: var(--kit-ico-phone); } .kit-btn--ico-mail { --kit-btn-ico: var(--kit-ico-mail); }
+.kit-btn--ico-whatsapp { --kit-btn-ico: var(--kit-ico-wa); } .kit-btn--ico-search { --kit-btn-ico: var(--kit-ico-search); }
+.kit-btn--ico-send { --kit-btn-ico: var(--kit-ico-send); } .kit-btn--ico-download { --kit-btn-ico: var(--kit-ico-download); }
+.kit-btn--ico-check { --kit-btn-ico: var(--kit-ico-check); } .kit-btn--ico-alert { --kit-btn-ico: var(--kit-ico-alert); }
+.kit-btn--ico-person { --kit-btn-ico: var(--kit-ico-person); } .kit-btn--ico-calendar { --kit-btn-ico: var(--kit-ico-calendar); }
+.kit-btn--ico-file { --kit-btn-ico: var(--kit-ico-file); } .kit-btn--ico-link { --kit-btn-ico: var(--kit-ico-link); }
+.kit-btn--ico-map-pin { --kit-btn-ico: var(--kit-ico-map-pin); } .kit-btn--ico-megaphone { --kit-btn-ico: var(--kit-ico-megaphone); }
+.kit-btn--ico-arrow-right { --kit-btn-ico: var(--kit-ico-arrow-right); } .kit-btn--ico-next { --kit-btn-ico: var(--kit-ico-next); }
+.kit-btn--ico-prev { --kit-btn-ico: var(--kit-ico-prev); }
+[href^="tel:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-phone); }
+[href^="mailto:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-mail); }
+[href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
+:is(.kit-btn, .wp-block-button__link):is([download], [href$=".pdf"]) { --kit-btn-ico: var(--kit-ico-download); }
+:is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico), .kit-btn--label:not(a), .kit-btn--label > :not(a)):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [type=submit], [data-ico], [class*="kit-btn--ico-"])::before,
+.wp-block-button[class*="kit-btn--ico-"] > .wp-block-button__link::before,
+.kit-disclosure[data-ico] > summary::before {
+	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
+	-webkit-mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat; mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat;
+}
+:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button):not(:where(:has(.kit-ico), [href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [data-ico], [class*="kit-btn--ico-"], .kit-dd-btn, [aria-haspopup], .wp-block-button[class*="kit-btn--ico-"] > *))::after {
+	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
+	-webkit-mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat; mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat;
+}
+/* Leaving the site: every absolute link is treated as external until functions.php marks the site's own host */
+:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"] { --kit-cta-arrow: var(--kit-ico-arrow-up-right); --_nudge: translate(calc(var(--kit-btn-nudge) - 1px), calc(1px - var(--kit-btn-nudge))); }
+/* Label only (kit-btn--label, above): no automatic icon on a submit button. Links ignore it and keep their arrow. */
+
+/* Motion: on hover and focus the icon nudges (spring): the arrow 3px along its direction, a leading icon 2px and a touch
+   larger. Colours fade in --kit-motion-fast. */
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]) > .kit-ico,
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary)::before,
+:is(.kit-btn, .wp-block-button__link, .wp-element-button)::after { transition: transform var(--kit-duration-spring) var(--kit-ease-spring); }
+:is(.kit-btn, .wp-block-button__link, .wp-element-button):is(:hover, :focus-visible)::after { transform: var(--_nudge); }
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary):is(:hover, :focus-visible)::before,
+:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(:hover, :focus-visible) > .kit-ico { transform: translateX(calc(var(--kit-btn-nudge) - 1px)) scale(1.06); }
+
+@media (prefers-reduced-motion: reduce) {
+	.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button { transition: none; }
+	:where(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-finder button, .kit-print button):active { transform: none; }
+	:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]) > .kit-ico,
+	:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit], .kit-disclosure > summary)::before,
+	:is(.kit-btn, .wp-block-button__link, .wp-element-button)::after { transition: none; transform: none !important; }
+	:is(.kit-btn, .wp-block-button__link, .wp-element-button, .kit-form button[type=submit]):is(.is-loading, [aria-busy=true])::before { animation: none; opacity: var(--opacity-60); }
 }
 
 /* ---------- 11. Form field ---------- */
@@ -299,9 +409,7 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-breadcrumb { margin: 0 0 var(--s-2); font-size: var(--fluid-body-sm); color: var(--kit-color-muted); }
 
 @media (prefers-reduced-motion: reduce) {
-	:is(.kit-chip, .wp-block-post-terms a, .kit-filter-pill, .kit-btn, .kit-field :is(input, select, textarea)) { transition: opacity var(--kit-motion-fast) linear; }
-	.kit-btn:active { transform: none; }
-	.kit-btn.is-loading::before, .kit-btn[aria-busy=true]::before { animation: none; opacity: var(--opacity-60); }
+	:is(.kit-chip, .wp-block-post-terms a, .kit-filter-pill, .kit-field :is(input, select, textarea)) { transition: opacity var(--kit-motion-fast) linear; }
 }
 
 /* ---------- 16. Form standard (S5.2): one look for every form, from tokens ---------- */
@@ -328,9 +436,8 @@ a.kit-btn--ink { color: var(--kit-color-on-ink); }
 .kit-check-group { border: 0; padding: 0; margin: 0 0 var(--s-4); min-width: 0; }
 .kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
 .kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
-/* Button: primary yellow, dark text, 44px, radius --r-2; loading = spinner + label */
-:is(.kit-form, .kit-form) .kit-btn, .kit-disclosure > summary.kit-btn { min-height: 44px; }
-.kit-btn:not(.kit-btn--secondary):not(.kit-btn--outline):not(.kit-btn--ghost):not(.kit-btn--ink) { background: var(--kit-color-ink); border-color: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+/* Buttons in forms and disclosures: the 44px target height (colours and states: section 10) */
+.kit-form .kit-btn, .kit-disclosure > summary.kit-btn { min-height: var(--kit-size-target); }
 /* Layout: one column under 768px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

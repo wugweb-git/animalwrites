@@ -16,8 +16,8 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-primary"} -->
-<div class="wp-block-button is-style-kits-primary"><a class="wp-block-button__link wp-element-button" href="/campaigns/lab-animals-rules-2026/#send">Write and send yours in two minutes</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/lab-animals-rules-2026/#send">Write and send yours in two minutes</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->

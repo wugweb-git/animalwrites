@@ -669,6 +669,131 @@
       "sm": "color-mix(in srgb, var(--color-ash) 60%, transparent)",
       "md": "color-mix(in srgb, var(--color-ash) 60%, transparent)",
       "lg": "color-mix(in srgb, var(--color-ash) 60%, transparent)"
+    },
+    "btn-height": {
+      "sm": "var(--kit-size-control)",
+      "md": "var(--kit-size-control)",
+      "lg": "var(--kit-size-control)"
+    },
+    "btn-height-sm": {
+      "sm": "var(--kit-size-target)",
+      "md": "var(--kit-size-target)",
+      "lg": "var(--kit-size-target)"
+    },
+    "btn-pad": {
+      "sm": "var(--s-6)",
+      "md": "var(--s-6)",
+      "lg": "var(--s-6)"
+    },
+    "btn-pad-sm": {
+      "sm": "var(--s-4)",
+      "md": "var(--s-4)",
+      "lg": "var(--s-4)"
+    },
+    "btn-gap": {
+      "sm": "var(--s-2)",
+      "md": "var(--s-2)",
+      "lg": "var(--s-2)"
+    },
+    "btn-ico-size": {
+      "sm": "1.125em",
+      "md": "1.125em",
+      "lg": "1.125em"
+    },
+    "btn-ico-size-only": {
+      "sm": "var(--kit-icon-md)",
+      "md": "var(--kit-icon-md)",
+      "lg": "var(--kit-icon-md)"
+    },
+    "btn-press": {
+      "sm": "1px",
+      "md": "1px",
+      "lg": "1px"
+    },
+    "btn-nudge": {
+      "sm": "3px",
+      "md": "3px",
+      "lg": "3px"
+    },
+    "btn-spinner-width": {
+      "sm": "2px",
+      "md": "2px",
+      "lg": "2px"
+    },
+    "btn-primary-bg": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-primary-fg": {
+      "sm": "var(--kit-color-on-ink)",
+      "md": "var(--kit-color-on-ink)",
+      "lg": "var(--kit-color-on-ink)"
+    },
+    "btn-primary-bg-hover": {
+      "sm": "var(--neutral-8)",
+      "md": "var(--neutral-8)",
+      "lg": "var(--neutral-8)"
+    },
+    "btn-primary-fg-hover": {
+      "sm": "var(--kit-color-on-ink)",
+      "md": "var(--kit-color-on-ink)",
+      "lg": "var(--kit-color-on-ink)"
+    },
+    "btn-secondary-bg": {
+      "sm": "transparent",
+      "md": "transparent",
+      "lg": "transparent"
+    },
+    "btn-secondary-fg": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-secondary-line": {
+      "sm": "var(--kit-color-line)",
+      "md": "var(--kit-color-line)",
+      "lg": "var(--kit-color-line)"
+    },
+    "btn-secondary-bg-hover": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-secondary-fg-hover": {
+      "sm": "var(--kit-color-on-ink)",
+      "md": "var(--kit-color-on-ink)",
+      "lg": "var(--kit-color-on-ink)"
+    },
+    "btn-ghost-fg": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-ghost-bg-hover": {
+      "sm": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)",
+      "md": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)",
+      "lg": "color-mix(in srgb, var(--kit-color-ink) 8%, transparent)"
+    },
+    "btn-brand-bg": {
+      "sm": "var(--kit-color-accent)",
+      "md": "var(--kit-color-accent)",
+      "lg": "var(--kit-color-accent)"
+    },
+    "btn-brand-fg": {
+      "sm": "var(--kit-color-on-accent)",
+      "md": "var(--kit-color-on-accent)",
+      "lg": "var(--kit-color-on-accent)"
+    },
+    "btn-brand-bg-hover": {
+      "sm": "var(--kit-color-ink)",
+      "md": "var(--kit-color-ink)",
+      "lg": "var(--kit-color-ink)"
+    },
+    "btn-brand-fg-hover": {
+      "sm": "var(--kit-color-on-ink)",
+      "md": "var(--kit-color-on-ink)",
+      "lg": "var(--kit-color-on-ink)"
     }
   }
 }
