@@ -97,6 +97,27 @@ function aw_mail_api( $path ) {
 	return is_array( $json ) ? ( $json['data'] ?? $json ) : $body;
 }
 
+/**
+ * Put \Seen back off a message that was unread before WordPress read it: the Mail API's text endpoint marks a message
+ * read (Hostinger docs), which made filed mail show as read in webmail (found 18 Oct 2026). Read state stays the owner's.
+ */
+function aw_mail_restore_unseen( $box, $folder, $uid ) {
+	$token = aw_mail_setting( 'api_token' );
+	if ( '' === $token || '' === (string) $box || '' === (string) $uid ) {
+		return false;
+	}
+	$r = wp_remote_request(
+		'https://api.mail.hostinger.com/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ),
+		array( 'method' => 'PATCH', 'timeout' => 15, 'headers' => array( 'Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json', 'Accept' => 'application/json' ), 'body' => wp_json_encode( array( 'removeFlags' => array( '\\Seen' ) ) ) )
+	);
+	return ! is_wp_error( $r ) && wp_remote_retrieve_response_code( $r ) < 300;
+}
+
+/** Was this message unread (API message array)? */
+function aw_mail_was_unseen( $m ) {
+	return is_array( $m ) && ( ! empty( $m['unseen'] ) || ( isset( $m['flags'] ) && ! in_array( '\\Seen', (array) $m['flags'], true ) ) );
+}
+
 /** First non-empty value among several possible payload keys (the webhook's field names are not documented). */
 function aw_mail_pick( $a, $keys ) {
 	foreach ( $keys as $k ) {
@@ -187,6 +208,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 	if ( $box && $uid ) {
 		$full = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) );
 		if ( is_array( $full ) ) {
+			$unseen = aw_mail_was_unseen( $full );
 			$msg  = $full + $msg;
 			$text = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
 			if ( ! $text || ( is_array( $text ) && '' === trim( (string) ( $text['text'] ?? '' ) . (string) ( $text['html'] ?? '' ) ) ) ) {
@@ -201,6 +223,9 @@ function aw_mail_in( WP_REST_Request $req ) {
 			}
 			$src    = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/source' );
 			$source = is_array( $src ) ? (string) ( $src['source'] ?? $src['raw'] ?? '' ) : (string) $src;
+			if ( $unseen ) {
+				aw_mail_restore_unseen( $box, $folder, $uid ); // reading it here must not mark it read in webmail
+			}
 		}
 	}
 
@@ -233,7 +258,20 @@ function aw_mail_in( WP_REST_Request $req ) {
 	$to      = aw_mail_addresses( aw_mail_pick( $msg, array( 'to', 'recipients' ) ) ?? array() );
 	// Forwarded mail keeps the address it was sent to in the headers (vedanshu@, contact@, any@ via the catch-all).
 	$orig = '';
-	foreach ( array( 'X-Original-To', 'X-Forwarded-To', 'Delivered-To', 'To' ) as $h ) {
+	// An alias it was written to (contact@ → vedanshu@) wins: Delivered-To names only the mailbox (18 Oct 2026).
+	$aliases = function_exists( 'aw_mail_aliases' ) ? array_keys( aw_mail_aliases() ) : array();
+	foreach ( array( 'X-Original-To', 'X-Forwarded-To', 'To', 'Cc' ) as $h ) {
+		$hit = array_values( array_intersect( aw_mail_addresses( aw_mail_header( $source, $h ) ), $aliases ) );
+		if ( $hit ) {
+			$orig = $hit[0];
+			break;
+		}
+	}
+	$hit = array_values( array_intersect( $to, $aliases ) );
+	if ( '' === $orig && $hit ) {
+		$orig = $hit[0];
+	}
+	foreach ( '' === $orig ? array( 'X-Original-To', 'X-Forwarded-To', 'Delivered-To', 'To' ) : array() as $h ) {
 		$a = aw_mail_addresses( aw_mail_header( $source, $h ) );
 		$a = array_values( array_filter( $a, fn( $x ) => str_ends_with( $x, '@animalwrites.in' ) && 'noreply@animalwrites.in' !== $x ) );
 		if ( $a ) {
@@ -423,8 +461,12 @@ add_action(
 		if ( '' !== trim( (string) get_post_field( 'post_content', $id ) ) ) {
 			return;
 		}
-		$t = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
-		$t = is_array( $t ) ? ( '' !== trim( (string) ( $t['text'] ?? '' ) ) ? (string) $t['text'] : wp_strip_all_tags( (string) ( $t['html'] ?? '' ) ) ) : (string) $t;
+		$was = aw_mail_was_unseen( aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) ) );
+		$t   = aw_mail_api( '/api/v1/mailboxes/' . rawurlencode( $box ) . '/folders/' . rawurlencode( $folder ) . '/messages/' . rawurlencode( $uid ) . '/text' );
+		if ( $was ) {
+			aw_mail_restore_unseen( $box, $folder, $uid );
+		}
+		$t   = is_array( $t ) ? ( '' !== trim( (string) ( $t['text'] ?? '' ) ) ? (string) $t['text'] : wp_strip_all_tags( (string) ( $t['html'] ?? '' ) ) ) : (string) $t;
 		if ( '' !== trim( $t ) ) {
 			wp_update_post( array( 'ID' => $id, 'post_content' => sanitize_textarea_field( $t ) ) );
 			if ( function_exists( 'aw_crm_message_note' ) ) {
