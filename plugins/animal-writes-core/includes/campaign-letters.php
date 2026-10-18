@@ -8,8 +8,8 @@
  *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width) and the date. No name,
  *   email or IP address is read or kept. Kept to report on campaigns.
  * - Opt-in at send: a box under the letter preview, ticked by default (owner, 18 Oct 2026) ("Email me updates ..."). Ticked, the email becomes
- *   required, and sending signs the person up through the newsletter path (aw_newsletter_join: the site's list and
- *   FluentCRM's Newsletter, tag campaign-<slug>), with a note on the contact holding the name, city, grounds, date and
+ *   required, and sending signs the person up as a volunteer (volunteers table, tag Volunteer) and through the
+ *   newsletter path (aw_newsletter_join: the site's list and FluentCRM's Newsletter, tag campaign-<slug>), with a note on the contact holding the name, city, grounds, date and
  *   the wording agreed to. Unticked, nothing but the anonymous row is kept. "Remove my data" deletes the contact.
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
  *   of the anonymous rows.
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_CL_DB_VERSION = '1';
-const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns. I can unsubscribe at any time.';
-const AW_CL_CONSENT    = 'v2-campaign-optin-preticked'; // the wording above; the box is ticked by default (owner, 18 Oct 2026)
+const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns, and add me as a volunteer. I can unsubscribe at any time.';
+const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
 const AW_CL_DEVICES    = array( 'phone' => 'Phone', 'tablet' => 'Tablet', 'desktop' => 'Desktop' );
 
@@ -141,7 +141,15 @@ add_action(
 					$city    = aw_cl_city( $req['city'] );
 					$grounds = aw_cl_grounds( $req['grounds'] );
 					$slug    = get_post_field( 'post_name', $id );
-					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT, array( 'city' => $city ), array( 'newsletter', 'campaign-' . $slug ) );
+					// Newsletter and volunteers (owner, 18 Oct 2026): a volunteer row with what the letter gives (name, email, city),
+					// then the newsletter with the Volunteer tag, as the volunteer form does; no team email for these.
+					if ( function_exists( 'aw_vol_upsert' ) ) {
+						aw_vol_upsert( array( 'name' => $name, 'email' => $email, 'city_text' => $city, 'page_source' => 'campaign:' . $slug, 'source' => 'v2_form', 'consent_scope' => 'volunteering_and_updates', 'consent_text_version' => AW_CL_CONSENT ) );
+					}
+					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT, array( 'city' => $city ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
+					if ( function_exists( 'aw_crm_volunteer_sync' ) ) {
+						aw_crm_volunteer_sync( $email );
+					}
 					if ( function_exists( 'aw_crm_on' ) && aw_crm_on() ) { // the details the Privacy Policy lists, on the contact
 						$c = FluentCrmApi( 'contacts' )->getContact( strtolower( $email ) );
 						if ( $c ) {
