@@ -551,6 +551,22 @@ add_filter(
 	3
 );
 
+/** A listing NGO Darpan has blacklisted: a red label after its name on cards, lists and the profile (owner, 18 Oct 2026). */
+add_filter(
+	'render_block_core/post-title',
+	function ( $html, $block, $instance ) {
+		$id = (int) ( $instance->context['postId'] ?? get_the_ID() );
+		if ( ! $id || 'aw_listing' !== get_post_type( $id ) || ! get_post_meta( $id, 'aw_darpan_blacklisted_on', true ) || ( is_singular( 'aw_listing' ) && get_queried_object_id() === $id ) ) {
+			return $html; // its own page has the badge in the header instead
+		}
+		$end = strrpos( $html, '</h' );
+		$tag = ' <span class="kit-tag kit-tag--danger aw-blacklisted-mark" title="' . esc_attr( 'NGO Darpan (NITI Aayog) lists this organisation as blacklisted' ) . '">Blacklisted on NGO Darpan</span>';
+		return false === $end ? $html . $tag : substr_replace( $html, $tag, $end, 0 );
+	},
+	26,
+	3
+);
+
 /** The Verified mark on a listing's name, on cards and on the profile (owner, 12 Oct 2026). */
 function aw_verified_mark() {
 	return ' <span class="aw-verified-mark" title="Verified by Animal Writes">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified</span></span>';

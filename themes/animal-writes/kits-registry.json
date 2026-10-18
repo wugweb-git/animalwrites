@@ -147,7 +147,8 @@
     "aw-listing",
     "aw-place",
     "aw-contact",
-    "aw-dir"
+    "aw-dir",
+    "aw-blacklisted"
    ],
    "states": [
     "verified",
