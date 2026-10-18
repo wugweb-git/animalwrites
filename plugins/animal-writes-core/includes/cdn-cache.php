@@ -44,7 +44,9 @@ function aw_cdn_ttl() {
 		return 0;
 	}
 	// Any query string (filters, ?q=, ?s=, tracking, previews) stays out; only the test flag is allowed.
-	$qs = $_GET; // phpcs:ignore WordPress.Security.NonceVerification
+	// The raw query string, not $_GET: blocks add their own keys to $_GET (query-N-page) while rendering.
+	$qs = array();
+	parse_str( (string) ( $_SERVER['QUERY_STRING'] ?? '' ), $qs );
 	unset( $qs['cdnprobe'] );
 	if ( $qs || ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
 		return 0;
