@@ -339,7 +339,7 @@ function aw_source_also_image( $post_id ) {
  */
 function aw_source_pdf_cover( $post_id ) {
 	$src = (string) get_post_meta( $post_id, 'aw_source_url', true );
-	if ( ! preg_match( '#^https?://[^?#]+\.pdf(\?|$)#i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || ! class_exists( 'Imagick' ) ) {
+	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || ! class_exists( 'Imagick' ) ) {
 		return 0;
 	}
 	$pdf = aw_source_download( $src );
