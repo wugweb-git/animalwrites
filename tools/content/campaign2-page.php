@@ -275,7 +275,7 @@ $send = c2sec(
 	. c2p( 'Choose your grounds, sign it, and send it from your own email. Letters with a name, a city and a line in your own words count as individual responses.', 'aw-camp-lede' )
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
-	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account. We keep your name, city, email and the grounds you chose as a record of your letter. <a href="/privacy-policy/">Privacy Policy</a>', 'aw-camp-note' ),
+	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' ),
 	'aw-camp-paper aw-camp-open'
 );
 
@@ -314,7 +314,6 @@ $faq = c2sec( // the section's id (faq) is on its c2slot
 			array( 'Can community dogs be used?', 'The draft says strays should not be used, but allows exemptions by "competent authorities", a term it does not define (Rule 5(3)). In September 2022 the regulator told labs stray dogs may be used for new vaccine trials; it withdrew that in October 2023 "till further orders".' ),
 			array( 'Is Animal Writes against medical research?', 'We ask for the oversight that exists today to stay, for non-animal methods to come first, and for clear limits on where animals come from.' ),
 			array( 'What happens after 5 November?', 'CCSEA reviews objections and may revise the draft before final notification. We will publish updates here.' ),
-			array( 'Is my data stored?', 'Your letter is sent from your own email, and we never receive it. When you send it, we keep your name, city, email address, the grounds you chose and the date as a record of your part in the campaign. If you leave "Email me updates" ticked, you also join our newsletter and volunteer list, and you can unsubscribe at any time. See our <a href="/privacy-policy/">Privacy Policy</a>.' ),
 		)
 	)
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n"
