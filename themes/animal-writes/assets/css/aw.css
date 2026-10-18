@@ -1429,3 +1429,8 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 @media (min-width: 768px) { .aw-adopt-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-adopt-plans .aw-about-act > p:not(.aw-about-act-ico) { font-size: var(--kit-type-lead); color: var(--kit-color-ink); }
 .aw-about-inner > .aw-adopt-note { margin-block-start: var(--kit-space-5); font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 70%, transparent); }
+
+/* Live Google block on listings (enrichment-front.php): reuses the facts grid; hours as a plain list; attribution line. */
+.aw-glive-hours { list-style: none; margin: 0; padding: 0; font-size: var(--kit-type-sm); }
+.aw-glive-attr { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin: var(--kit-space-2) 0 0; }
+.aw-org-news { margin: 0; padding-inline-start: 1.1em; }

@@ -2168,6 +2168,69 @@
     "alt": "photograph alt in the block",
     "schema": "WebPage"
    }
+  },
+  {
+   "name": "Live Google block",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-glive"
+   ],
+   "states": [
+    "rating",
+    "open or closed now",
+    "hours",
+    "phone",
+    "latest review",
+    "hidden: no key, cap reached or crawler"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section aria-label> with a <dl> of facts (aw-org-facts) and an attribution line",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "View on Google Maps (external, nofollow)",
+    "alt": "n/a",
+    "schema": "none (Google's rating is never in the schema)"
+   }
+  },
+  {
+   "name": "Enrichment review (admin)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-enrich",
+    "aw-er"
+   ],
+   "states": [
+    "waiting",
+    "applied",
+    "rejected",
+    "undone"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "WP Admin table; source links with the page and date as title",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "n/a",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "n/a"
+   }
   }
  ],
  "nav_status": {
