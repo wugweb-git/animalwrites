@@ -14,6 +14,7 @@
  * - nalsa      District Legal Services Authorities (NALSA / State Legal Services Authorities): office, address, phone.
  * - gujforest  Gujarat Forest Department (Karuna Abhiyan): permanent bird treatment centres.
  * - pfa        People For Animals: the unit's phone and email from its unit page.
+ * - web        A public web page listing organisations (adopt-a-pet.in, AWBP Trust, dogsindia.com); the page names itself.
  *   These four carry their own date (aw_source_date) and link (aw_source_url) from the import.
  * A listing shows only the sources it really has; nothing is shown for a source it does not come from.
  * Imports record their source in the listing meta aw_data_sources (list of slugs); older imports are recognised from
@@ -41,11 +42,12 @@ function aw_data_sources() {
 		'nalsa'        => array( 'NALSA', 'Legal Services Authority', '', '' ),
 		'gujforest'    => array( 'GUJ', 'Gujarat Forest Department', '', '' ),
 		'pfa'          => array( 'PFA', 'People For Animals', '', '' ),
+		'web'          => array( 'WEB', 'Public list', '', '' ),
 	);
 }
 
 /** Import sources that carry their own date and link on the listing (aw_source_date, aw_source_url). */
-const AW_IMPORT_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'pfa' );
+const AW_IMPORT_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'pfa', 'web' );
 
 /**
  * The sources of one listing: list of [slug, mark, label, as of, link].
