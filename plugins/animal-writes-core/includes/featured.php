@@ -24,6 +24,9 @@ const AW_FEATURED_TYPES = array( 'aw_news' => 'News', 'aw_legal' => 'Library', '
 /** Names too common to mean one organisation, after the words every NGO name shares are taken out. */
 const AW_FEATURED_GENERIC = array( 'people for animals', 'animal welfare society', 'animal welfare organisation', 'animal welfare trust', 'animal care society', 'animal care trust', 'animal rescue trust', 'animal rescue', 'blue cross society', 'gaushala samiti', 'shri gaushala', 'shri gaushala samiti', 'gau seva samiti', 'gau sewa samiti', 'jeev daya', 'jivdaya trust', 'panjrapole', 'shri panjrapole', 'animal welfare board', 'animal welfare board of india', 'society for prevention of cruelty to animals', 'spca', 'district spca' );
 
+/** Words common to animal-welfare names: a name of four words or fewer made only of these is an ordinary phrase. */
+const AW_FEATURED_COMMON = array( 'a', 'an', 'the', 'of', 'for', 'and', 'in', 'to', 'india', 'indian', 'animal', 'animals', 'welfare', 'care', 'rescue', 'trust', 'foundation', 'society', 'organisation', 'organization', 'centre', 'center', 'rights', 'programme', 'program', 'birth', 'control', 'conservation', 'initiative', 'initiatives', 'stray', 'strays', 'dog', 'dogs', 'cat', 'cats', 'cow', 'cows', 'cattle', 'gau', 'gou', 'go', 'gaushala', 'goshala', 'seva', 'sewa', 'samiti', 'sansthan', 'sanstha', 'people', 'protection', 'prevention', 'cruelty', 'home', 'shelter', 'sanctuary', 'hospital', 'clinic', 'service', 'services', 'help', 'friends', 'lovers', 'association', 'group', 'club', 'charitable', 'mission', 'network', 'wildlife', 'nature', 'environment', 'development', 'education', 'research', 'voice', 'life', 'love', 'hope', 'kindness', 'compassion', 'humane', 'international', 'national', 'mandal', 'sangh', 'sabha', 'nyas', 'kendra', 'shri', 'shree', 'sri', 'jeev', 'jiv', 'daya', 'pashu', 'pakshi', 'bird', 'birds', 'pfa', 'spca', 'aid', 'unit', 'district', 'state', 'board', 'council', 'committee', 'federation', 'world', 'global', 'save', 'our', 'paws', 'tails', 'street', 'community' );
+
 /**
  * Distinctive organisation names: lowercased name => listing ID. Cached until a listing is saved.
  *
@@ -40,7 +43,7 @@ function aw_featured_names() {
 	$by    = array();
 	foreach ( $rows as $r ) {
 		$n = mb_strtolower( trim( preg_replace( '/\s+/u', ' ', preg_replace( '/\s*\([^)]*\)\s*$/u', '', html_entity_decode( $r->post_title, ENT_QUOTES ) ) ) ) );
-		$n = trim( $n, " ,.-–" );
+		$n = trim( preg_replace( '/\s*[–-]\s*$/u', '', $n ), " ,.-–" );
 		if ( '' === $n ) {
 			continue;
 		}
@@ -51,6 +54,10 @@ function aw_featured_names() {
 	foreach ( $by as $n => $id ) {
 		if ( 1 !== $count[ $n ] || mb_strlen( $n ) < 12 || str_word_count( $n ) < 2 || in_array( $n, AW_FEATURED_GENERIC, true ) ) {
 			continue;
+		}
+		$words = preg_split( '/[^\p{L}\p{N}]+/u', $n, -1, PREG_SPLIT_NO_EMPTY );
+		if ( count( $words ) <= 4 && ! array_diff( $words, AW_FEATURED_COMMON ) ) {
+			continue; // e.g. "Animal Birth Control Programme", "Care for Animals": an ordinary phrase, not one organisation
 		}
 		$names[ $n ] = $id;
 	}
