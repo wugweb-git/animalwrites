@@ -3,14 +3,38 @@
  * Title: India writes for its community dogs
  * Slug: animal-writes/aw1-story
  * Categories: animal-writes
- * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures, its timeline and a Kits Brand button.
+ * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures (each with its Kits icon), its timeline as a rail, a Kits Brand button, and beside them four of the campaign's own photographs and the outlets that covered it (publisher marks).
  * Inserter: yes
  *
  * @package animal-writes
  */
+
+// The outlets that reported on the campaign: its Media & PR items, news reports only (no social posts), one per outlet.
+$aw1_tag    = get_term_by( 'slug', 'campaign-india-writes-community-dogs', 'post_tag' );
+$aw1_skip   = array();
+$aw1_hosts  = array();
+$aw1_social = '#^https?://([a-z0-9-]+\.)*(instagram\.com|facebook\.com|fb\.watch|youtube\.com|youtu\.be|x\.com|twitter\.com|threads\.net|linkedin\.com)/#i';
+if ( $aw1_tag ) {
+	foreach ( get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'publish', 'numberposts' => -1, 'tag_id' => (int) $aw1_tag->term_id, 'orderby' => 'date', 'order' => 'DESC' ) ) as $aw1_p ) {
+		$aw1_url  = (string) get_post_meta( $aw1_p->ID, 'aw_press_url', true );
+		$aw1_host = preg_replace( '/^www\./', '', (string) wp_parse_url( $aw1_url, PHP_URL_HOST ) );
+		if ( preg_match( $aw1_social, $aw1_url ) || isset( $aw1_hosts[ $aw1_host ] ) ) {
+			$aw1_skip[] = (int) $aw1_p->ID;
+		} else {
+			$aw1_hosts[ $aw1_host ] = true;
+		}
+	}
+}
+$aw1_photo = function ( $id, $cls ) {
+	return '<!-- wp:image {"id":' . $id . ',"sizeSlug":"medium_large","linkDestination":"none","className":"' . $cls . '"} -->' . "\n"
+		. '<figure class="wp-block-image size-medium_large ' . $cls . '"><img src="' . esc_url( (string) wp_get_attachment_image_url( $id, 'medium_large' ) ) . '" alt="' . esc_attr( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) . '" class="wp-image-' . $id . '"/></figure>' . "\n"
+		. '<!-- /wp:image -->';
+};
 ?>
 <!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw1-im6-1536x866.jpeg","id":22,"alt":"","dimRatio":100,"customGradient":"linear-gradient(90deg,rgba(20,20,20,0.94) 0%,rgba(20,20,20,0.82) 55%,rgba(20,20,20,0.55) 100%)","isUserOverlayColor":true,"focalPoint":{"x":0.7,"y":0.5},"minHeight":620,"isDark":true,"metadata":{"name":"India writes for its community dogs"},"align":"full","className":"kit-section aw-ed-story aw-camp--community-dogs","style":{"spacing":{"padding":{"right":"var(--wp--style--root--padding-right)","left":"var(--wp--style--root--padding-left)"}}},"layout":{"type":"constrained","contentSize":"1200px"}} -->
-<div class="wp-block-cover alignfull is-dark kit-section aw-ed-story aw-camp--community-dogs" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:620px"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(90deg,rgba(20,20,20,0.94) 0%,rgba(20,20,20,0.82) 55%,rgba(20,20,20,0.55) 100%)"></span><img class="wp-block-cover__image-background wp-image-22" alt="" src="/wp-content/uploads/2026/10/aw1-im6-1536x866.jpeg" style="object-position:70% 50%" data-object-fit="cover" data-object-position="70% 50%"/><div class="wp-block-cover__inner-container"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"constrained","contentSize":"640px","justifyContent":"left"}} -->
+<div class="wp-block-cover alignfull is-dark kit-section aw-ed-story aw-camp--community-dogs" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:620px"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim has-background-gradient" style="background:linear-gradient(90deg,rgba(20,20,20,0.94) 0%,rgba(20,20,20,0.82) 55%,rgba(20,20,20,0.55) 100%)"></span><img class="wp-block-cover__image-background wp-image-22" alt="" src="/wp-content/uploads/2026/10/aw1-im6-1536x866.jpeg" style="object-position:70% 50%" data-object-fit="cover" data-object-position="70% 50%"/><div class="wp-block-cover__inner-container"><!-- wp:group {"metadata":{"name":"Story and photographs"},"className":"aw-ed-story-cols","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-cols"><!-- wp:group {"metadata":{"name":"Story"},"className":"aw-ed-story-text","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-text"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">India writes for its community dogs</h2>
 <!-- /wp:heading -->
@@ -20,10 +44,10 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Figures"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}}},"layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"9rem"}} -->
-<div class="wp-block-group" style="margin-top:var(--wp--preset--spacing--60)"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"2x-large"} -->
-<p class="has-2-x-large-font-size"><strong>2.5 lakh</strong></p>
+<!-- wp:group {"metadata":{"name":"Figures"},"className":"aw-ed-story-figures","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-figures"><!-- wp:group {"className":"kit-ico--mail","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group kit-ico--mail"><!-- wp:paragraph {"className":"aw-ed-story-num","fontSize":"2x-large"} -->
+<p class="aw-ed-story-num has-2-x-large-font-size"><strong>2.5 lakh</strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"fontSize":"small"} -->
@@ -31,9 +55,9 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"2x-large"} -->
-<p class="has-2-x-large-font-size"><strong>10,000+</strong></p>
+<!-- wp:group {"className":"kit-ico--user","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group kit-ico--user"><!-- wp:paragraph {"className":"aw-ed-story-num","fontSize":"2x-large"} -->
+<p class="aw-ed-story-num has-2-x-large-font-size"><strong>10,000+</strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"fontSize":"small"} -->
@@ -41,9 +65,9 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"2x-large"} -->
-<p class="has-2-x-large-font-size"><strong>100+</strong></p>
+<!-- wp:group {"className":"kit-ico--map-pin","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group kit-ico--map-pin"><!-- wp:paragraph {"className":"aw-ed-story-num","fontSize":"2x-large"} -->
+<p class="aw-ed-story-num has-2-x-large-font-size"><strong>100+</strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"fontSize":"small"} -->
@@ -51,9 +75,9 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph {"fontSize":"2x-large"} -->
-<p class="has-2-x-large-font-size"><strong>100+</strong></p>
+<!-- wp:group {"className":"kit-ico--megaphone","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group kit-ico--megaphone"><!-- wp:paragraph {"className":"aw-ed-story-num","fontSize":"2x-large"} -->
+<p class="aw-ed-story-num has-2-x-large-font-size"><strong>100+</strong></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph {"fontSize":"small"} -->
@@ -62,8 +86,8 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Timeline"},"layout":{"type":"grid","columnCount":4,"minimumColumnWidth":"9rem"}} -->
-<div class="wp-block-group"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":"Timeline"},"className":"aw-ed-story-dates","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-dates"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:paragraph -->
 <p><strong>1 Nov 2025</strong></p>
 <!-- /wp:paragraph -->
@@ -83,8 +107,8 @@
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:paragraph -->
+<!-- wp:group {"className":"is-key","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group is-key"><!-- wp:paragraph -->
 <p><strong>29 Nov 2025</strong></p>
 <!-- /wp:paragraph -->
 
@@ -104,9 +128,29 @@
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:buttons {"style":{"spacing":{"margin":{"top":"var:preset|spacing|60"}}}} -->
-<div class="wp-block-buttons" style="margin-top:var(--wp--preset--spacing--60)"><!-- wp:button {"className":"is-style-kits-brand"} -->
+<!-- wp:buttons {"className":"aw-ed-story-actions"} -->
+<div class="wp-block-buttons aw-ed-story-actions"><!-- wp:button {"className":"is-style-kits-brand"} -->
 <div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/campaigns/india-writes-for-its-community-dogs/">Read the full story</a></div>
 <!-- /wp:button --></div>
-<!-- /wp:buttons --></div></div>
+<!-- /wp:buttons --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Photographs and coverage"},"className":"aw-ed-story-media","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-media"><!-- wp:group {"metadata":{"name":"Photographs"},"className":"aw-ed-story-photos","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-photos"><?php echo $aw1_photo( 23, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 24, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 25, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 26, 'aw-ed-story-photo' ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Coverage"},"className":"aw-ed-story-press","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-ed-story-press"><!-- wp:paragraph {"className":"aw-ed-story-press-head"} -->
+<p class="aw-ed-story-press-head"><a href="/press-coverage/?tag=campaign-india-writes-community-dogs">In the press</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:query {"queryId":98,"query":{"perPage":10,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,"exclude":<?php echo wp_json_encode( $aw1_skip ); ?>,"taxQuery":{"post_tag":[<?php echo (int) ( $aw1_tag ? $aw1_tag->term_id : 0 ); ?>]}},"className":"aw-ed-story-outlets"} -->
+<div class="wp-block-query aw-ed-story-outlets"><!-- wp:post-template -->
+<!-- wp:animal-writes/publisher /-->
+<!-- /wp:post-template --></div>
+<!-- /wp:query --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div></div>
 <!-- /wp:cover -->
