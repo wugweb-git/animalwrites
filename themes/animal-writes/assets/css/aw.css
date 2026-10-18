@@ -131,7 +131,7 @@
 .kit-share-copy { cursor: pointer; }
 
 /* Directory search bar (Phase 11 E2): the main element of /directory/. One row from 1024px; Name on its own row
-   from 768px; stacked below 768px. Fields come from kit-field (44px, label above). */
+   from 768px; stacked below 768px. Fields come from kit-field (--kit-field-height, label above). */
 .aw-dir-search {
 	display: grid; gap: var(--kit-space-3) var(--kit-space-4); grid-template-columns: minmax(0, 1fr); align-items: end;
 	margin: 0; max-width: var(--kit-width-wide);
@@ -142,7 +142,7 @@
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
-.aw-dir-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
+.aw-dir-submit .kit-btn { width: 100%; }
 .aw-dir-check { grid-column: 1 / -1; }
 @media (min-width: 768px) { .aw-dir-search { grid-template-columns: repeat(4, minmax(0, 1fr)); } .aw-dir-q { grid-column: 1 / -1; } }
 .aw-dir-search select { font-size: var(--fluid-body-sm); }
@@ -859,16 +859,17 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-el-input--label label { display: block; margin: 0; font-weight: var(--kit-weight-regular); color: inherit; }
 .aw-newsletter-form .ff-el-input--label.ff-el-is-required label::after { content: none; }
 .aw-newsletter-form .ff-el-form-control {
-	width: 100%; box-sizing: border-box; min-height: var(--kit-size-control); padding: 0 var(--kit-space-3);
-	font: inherit; color: var(--kit-color-ink); background: var(--kit-color-raised);
-	border: var(--kit-border-control) solid var(--kit-color-ink); border-radius: var(--kit-radius-control);
+	/* the standard field (kit-primitives.css section 16): height, border, radius, hover and focus */
+	width: 100%; box-sizing: border-box; height: var(--kit-field-height); min-height: var(--kit-field-height); padding: 0 var(--s-3);
+	font: inherit; color: var(--neutral-10); background-color: var(--neutral-0);
+	border: var(--kit-border-control) solid var(--neutral-3); border-radius: var(--r-2);
 	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
 }
-.aw-newsletter-form .ff-el-form-control:hover { box-shadow: 0 0 0 3px var(--kit-color-surface); }
-.aw-newsletter-form .ff-el-form-control:focus-visible { outline: none; box-shadow: 0 0 0 var(--kit-focus-ring-width) var(--kit-color-accent); }
+@media (hover: hover) { .aw-newsletter-form .ff-el-form-control:hover { border-color: var(--neutral-5); box-shadow: none; } }
+.aw-newsletter-form .ff-el-form-control:focus, .aw-newsletter-form .ff-el-form-control:focus-visible { outline: none; border-color: var(--color-blue); box-shadow: 0 0 0 var(--kit-focus-outline) var(--color-blue); }
 .aw-newsletter-form .ff-el-is-error .ff-el-form-control { border-color: var(--kit-color-danger); background: var(--kit-color-danger-soft); }
 .aw-newsletter-form .ff-el-is-error .text-danger { display: block; margin-top: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-accent); }
-.aw-newsletter-form .ff-btn-submit.kit-btn { width: 100%; min-height: var(--kit-size-target); }
+.aw-newsletter-form .ff-btn-submit.kit-btn { width: 100%; }
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-4) var(--kit-space-5); border: 0; border-left: var(--kit-border-accent) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
@@ -900,7 +901,7 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-vol-roles .ff-el-input--content { display: grid; gap: var(--kit-space-3); }
 .aw-form-ff .aw-vol-roles::before, .aw-form-ff .aw-vol-roles::after { content: none; }
 .aw-form-ff .aw-vol-roles.ff-el-is-error .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
-.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: 100%; justify-content: center; min-height: var(--kit-size-control-lg); }
+.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: 100%; justify-content: center; }
 @media (min-width: 768px) {
 	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); }
 	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > * { grid-column: 1 / -1; }
@@ -1138,7 +1139,7 @@ body { background: var(--kit-color-canvas); }
 .aw-vol-roles.is-invalid .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
 
 .aw-vol-details { margin-bottom: var(--kit-space-5); }
-.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: 100%; justify-content: center; min-height: var(--kit-size-control-lg); }
+.aw-vol-page .aw-volunteer-form .kit-form-actions .kit-btn { width: 100%; justify-content: center; }
 
 @media (min-width: 768px) {
 	.aw-vol-page .aw-vol-banner-photo img { height: 240px; }

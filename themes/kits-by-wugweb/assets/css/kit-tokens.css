@@ -156,6 +156,7 @@
   --kit-overlay: color-mix(in srgb, var(--color-ash) 60%, transparent);
   --kit-btn-height: var(--kit-size-control);
   --kit-btn-height-sm: var(--kit-size-target);
+  --kit-field-height: var(--kit-size-control);
   --kit-btn-pad: var(--s-6);
   --kit-btn-pad-sm: var(--s-4);
   --kit-btn-gap: var(--s-2);

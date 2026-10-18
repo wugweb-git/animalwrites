@@ -47,6 +47,8 @@ Icon names: phone, mail, whatsapp, search, send, download, check, alert, person,
 | Default | — | `--kit-btn-height` (48px) | `--kit-btn-pad` | `--fluid-body-md` |
 | Small | `kit-btn--sm` | `--kit-btn-height-sm` (44px, the minimum target) | `--kit-btn-pad-sm` | `--fluid-body-sm` |
 
+In forms, every field (`--kit-field-height`) and every form button use the same height, `--kit-size-control` (48px), so a field and its button line up in any row. The footer newsletter field uses the standard field style too.
+
 ## On the Button block
 
 The **Styles** panel picks the variant: Primary (the default), Secondary, Ghost or Brand. The **Size and content** panel in the block sidebar sets Size (Default, Small), Content (icon and label, label only, icon only) and Icon (automatic or a named icon). Those write the classes `kit-btn--sm`, `kit-btn--label` / `kit-btn--icon` and `kit-btn--ico-<name>`, which can also be typed in **Advanced → Additional CSS class(es)**. In the editor the button shows the arrow it will have, and an icon-only button shows its text while you edit it. They combine, so `kit-btn--sm kit-btn--icon kit-btn--ico-search` with the Secondary style gives a small outlined search button.

@@ -381,11 +381,11 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-field textarea { padding-block: var(--s-3); min-height: 7rem; }
 /* Selects: same height and look as text fields in every browser (Safari draws native selects shorter) */
 .kit-field select, :where(select:not([multiple]):not([size])) { /* every single select, in or out of a field */
-	-webkit-appearance: none; appearance: none; height: var(--kit-size-target); padding-right: calc(var(--s-3) + 1.25rem);
+	-webkit-appearance: none; appearance: none; height: var(--kit-field-height); padding-right: calc(var(--s-3) + 1.25rem);
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 	background-repeat: no-repeat; background-position: right var(--s-3) center; background-size: 1rem;
 }
-.kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]) { height: var(--kit-size-target); }
+.kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]) { height: var(--kit-field-height); }
 @media (hover: hover) { .kit-field :is(input, select, textarea):hover:not([disabled]):not([readonly]) { box-shadow: 0 0 0 var(--kit-focus-width) var(--kit-color-surface); } }
 .kit-field :is(input, select, textarea):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .kit-field :is(input, select, textarea)[aria-invalid=true] { border-color: var(--color-peach); }
@@ -427,10 +427,10 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-field > label, .kit-field > .kit-field-label, .kit-check-group > legend { font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
 .kit-field .kit-optional { font-weight: 400; color: var(--kit-color-muted); } /* neutral-5 was 4.1:1 on white */
 .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
-	min-height: 44px; padding: 0 var(--s-3); border-radius: var(--r-2);
+	min-height: var(--kit-field-height); padding: 0 var(--s-3); border-radius: var(--r-2);
 	background-color: var(--neutral-0); border: 1px solid var(--neutral-3); color: var(--neutral-10);
 }
-.kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]), .kit-field select { height: 44px; }
+.kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]), .kit-field select { height: var(--kit-field-height); }
 .kit-field textarea { padding-block: var(--s-3); min-height: calc(5 * 1.5em + 2 * var(--s-3)); }
 .kit-field :is(input, textarea)::placeholder { color: var(--neutral-4); opacity: 1; }
 .kit-field-control > .kit-field-icon { --kit-ico-size: 18px; width: 18px; height: 18px; color: var(--neutral-5); }
@@ -447,8 +447,8 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-check-group { border: 0; padding: 0; margin: 0 0 var(--s-4); min-width: 0; }
 .kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
 .kit-check-group.is-invalid .kit-checkbox input { outline: 2px solid var(--color-peach); outline-offset: 2px; }
-/* Buttons in forms and disclosures: the 44px target height (colours and states: section 10) */
-.kit-form .kit-btn, .kit-disclosure > summary.kit-btn { min-height: var(--kit-size-target); }
+/* One height for every form control: fields (--kit-field-height) and form buttons (--kit-btn-height) are both
+   --kit-size-control, so a field and its button line up in any row. Colours and states: section 10. */
 /* Layout: one column under 768px, at most two; the button bottom-left */
 .kit-form-grid { display: grid; gap: 0 var(--s-4); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

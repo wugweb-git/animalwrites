@@ -175,7 +175,8 @@
      "kit-btn--primary": "= primary",
      "kit-btn--outline": "= secondary"
     },
-    "elements": "every button is a link (<a>), except form buttons (<button type=submit>: Send, Subscribe, Search), which share the same classes"
+    "elements": "every button is a link (<a>), except form buttons (<button type=submit>: Send, Subscribe, Search), which share the same classes",
+    "forms": "form buttons use the default height (--kit-btn-height = --kit-size-control, 48px), the same as fields (--kit-field-height), so a field and its button line up"
    }
   },
   {

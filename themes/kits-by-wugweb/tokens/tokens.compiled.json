@@ -680,6 +680,11 @@
       "md": "var(--kit-size-target)",
       "lg": "var(--kit-size-target)"
     },
+    "field-height": {
+      "sm": "var(--kit-size-control)",
+      "md": "var(--kit-size-control)",
+      "lg": "var(--kit-size-control)"
+    },
     "btn-pad": {
       "sm": "var(--s-6)",
       "md": "var(--s-6)",

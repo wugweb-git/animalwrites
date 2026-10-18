@@ -752,7 +752,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-newsletter label, .kit-footer-newsletter .kit-optional { color: inherit; }
 .kit-footer-newsletter .kit-field-message { color: var(--kit-color-accent); }
 .kit-footer-newsletter .kit-field-error:empty { display: none; }
-.kit-footer-newsletter .kit-nl-submit .kit-btn { width: 100%; min-height: var(--kit-size-target); }
+.kit-footer-newsletter .kit-nl-submit .kit-btn { width: 100%; }
 .kit-footer-newsletter .kit-field--checkbox .kit-checkbox { min-height: 0; font-size: var(--kit-type-xs); }
 .kit-footer-newsletter .kit-form-done { background: transparent; border-left-color: var(--kit-color-accent); color: inherit; }
 
