@@ -6,7 +6,8 @@
  * - Wug Mail: the picture and name head each mailbox on the Mail page and widget.
  * - Site emails: an email the site sends from one of these addresses (normally noreply@) leaves with that mailbox's
  *   display name, and its signature is added at the end (HTML emails get the HTML signature, plain-text emails a text
- *   version). FluentCRM emails are left alone, as is anything sent with the header "X-AW-No-Signature: 1".
+ *   version). Only for emails to people outside: notices to our own addresses (contact@, the admin email) get none.
+ *   FluentCRM emails are left alone, as is anything sent with the header "X-AW-No-Signature: 1".
  * Empty fields change nothing.
  *
  * @package aw-mail
@@ -74,6 +75,11 @@ add_filter(
 		$sig = trim( (string) aw_mail_profile( apply_filters( 'wp_mail_from', '' ) )['signature'] );
 		if ( '' === $sig || ! empty( $GLOBALS['aw_mail_flushing'] ) || aw_mail_profile_is_crm() ) { // a queued email already has it (mail-cap.php)
 			return $atts;
+		}
+		$to       = function_exists( 'aw_mail_addresses' ) ? aw_mail_addresses( $atts['to'] ?? '' ) : array();
+		$internal = array_filter( $to, fn( $a ) => str_ends_with( $a, '@animalwrites.in' ) || strtolower( (string) get_option( 'admin_email' ) ) === $a );
+		if ( ! $to || count( $internal ) === count( $to ) ) {
+			return $atts; // a notice to ourselves
 		}
 		$msg  = (string) ( $atts['message'] ?? '' );
 		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
