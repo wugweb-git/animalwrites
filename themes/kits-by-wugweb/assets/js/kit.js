@@ -812,7 +812,18 @@
 			if (window.MutationObserver) new MutationObserver(check).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
 			check();
 			var wait = function () { setTimeout(function () { if (!status) report(window.adsbygoogle && window.adsbygoogle.loaded ? 'no_response' : 'not_loaded'); }, 15000); };
-			if (document.readyState === 'complete') wait(); else window.addEventListener('load', wait, { once: true });
+			var lz = el.getAttribute('data-kit-lazy');
+			if (lz === 'fold') {
+				status = 'fold'; /* never requested on a phone: nothing to report */
+			} else if (lz === 'wait' && window.MutationObserver) {
+				/* lazy slot (kits-core): the 15 s clock starts when its request goes out, not at page load */
+				var lmo = new MutationObserver(function () {
+					var v = el.getAttribute('data-kit-lazy');
+					if (v === 'fold') { status = 'fold'; lmo.disconnect(); }
+					else if (v !== 'wait') { lmo.disconnect(); wait(); }
+				});
+				lmo.observe(el, { attributes: true, attributeFilter: ['data-kit-lazy'] });
+			} else if (document.readyState === 'complete') wait(); else window.addEventListener('load', wait, { once: true });
 		}
 		if ('IntersectionObserver' in window) {
 			var timer;

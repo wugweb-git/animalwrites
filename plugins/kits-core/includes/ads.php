@@ -19,6 +19,9 @@
  * - list pages (archives, the blog, a theme's list Pages via kits_ads_is_list): 3, e.g. list card 1, card 2, above footer;
  * - the homepage: 2, e.g. top and middle;
  * - every other page (profiles, single items, plain pages): 2.
+ * Loading (owner, 18 Oct 2026): AdSense units are requested lazily, when the slot is within 500px of the screen (see
+ * kits_ads_lazy_script()); on phones (under 768px) a slot that starts inside the first screen is dropped, so the first ad
+ * always sits below it. Space stays reserved while a slot waits and while the network answers (theme: kit.css).
  * None at all where kits_ads_excluded() (forms, 404, search … via kits_ads_skip). Every slot sits in its own full-width
  * row with a margin, never inside a form or next to a button.
  *
@@ -105,8 +108,61 @@ function aw_ad( $slot ) {
 	++$shown;
 	// One line inside a block element, so wpautop in list shortcodes adds no <p>/<br> around the network code.
 	$code = (string) preg_replace( '/\s*[\r\n]+\s*/', ' ', $code );
-	return '<aside class="kit-ad aw-ad-' . esc_attr( $slot ) . '" aria-label="Advertisement">' . $badge . '<div class="kit-ad-unit aw-ad-unit">' . $code . '</div></aside>';
+	// AdSense units load lazily (owner, 18 Oct 2026): the unit's own request line `(adsbygoogle = ...).push({})` is taken out
+	// and sent by kits_ads_lazy_script() when the slot nears the screen. Other networks' code is left as pasted.
+	$lazy = '';
+	$bare = (string) preg_replace( '#<script>\s*\(\s*adsbygoogle\s*=\s*window\.adsbygoogle\s*\|\|\s*\[\s*\]\s*\)\.push\(\s*\{\s*\}\s*\)\s*;?\s*</script>#i', '', $code, -1, $n );
+	if ( $n > 0 && false !== stripos( $bare, 'adsbygoogle' ) && false === stripos( $bare, '.push(' ) ) {
+		$code = $bare;
+		$lazy = ' data-kit-lazy="wait"';
+		kits_ads_lazy_script( true );
+	}
+	return '<aside class="kit-ad aw-ad-' . esc_attr( $slot ) . '"' . $lazy . ' aria-label="Advertisement">' . $badge . '<div class="kit-ad-unit aw-ad-unit">' . $code . '</div></aside>';
 }
+
+/**
+ * Lazy AdSense: the loader, printed once in the footer when a page has a lazy slot. A slot (aside.kit-ad[data-kit-lazy])
+ * is "wait" (space reserved by the theme, no request), "pending" (request sent, space kept until the network answers,
+ * at most 6 s) and "done". The request goes out when the slot is within 500px of the screen, never before the page has
+ * loaded. On phones (under 768px wide) a slot that starts inside the first screen is never requested and never shown
+ * ("fold"): the first ad on a phone always sits below the first screen.
+ */
+function kits_ads_lazy_script( $needed = false ) {
+	static $need = false;
+	if ( true === $needed ) {
+		$need = true;
+		return;
+	}
+	if ( ! $need ) {
+		return;
+	}
+	$js = '(function(){function init(){var s=document.querySelectorAll("aside.kit-ad[data-kit-lazy=wait]");if(!s.length)return;'
+		. 'var phone=window.matchMedia&&matchMedia("(max-width:767px)").matches;'
+		. 'function done(a){a.setAttribute("data-kit-lazy","done");}'
+		. 'function go(a){if(a.getAttribute("data-kit-lazy")!=="wait")return;a.setAttribute("data-kit-lazy","pending");'
+		. 'var ins=a.querySelectorAll("ins.adsbygoogle");'
+		. 'for(var i=0;i<ins.length;i++){if(!ins[i].getAttribute("data-adsbygoogle-status")){try{(window.adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}}}'
+		. 'function answered(){for(var j=0;j<ins.length;j++){if(ins[j].getAttribute("data-ad-status"))return true;}return false;}'
+		. 'if(answered()||!window.MutationObserver){setTimeout(function(){done(a);},answered()?0:6000);return;}'
+		. 'var mo=new MutationObserver(function(){if(answered()){mo.disconnect();done(a);}});'
+		. 'for(var k=0;k<ins.length;k++){mo.observe(ins[k],{attributes:true,attributeFilter:["data-ad-status"]});}'
+		. 'setTimeout(function(){mo.disconnect();done(a);},6000);}'
+		. 'var io="IntersectionObserver" in window?new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);go(e.target);}});},{rootMargin:"500px 0px"}):null;'
+		. 'for(var n=0;n<s.length;n++){var r=s[n].getBoundingClientRect();'
+		. 'if(phone&&r.top+(window.pageYOffset||0)<window.innerHeight){s[n].setAttribute("data-kit-lazy","fold");continue;}'
+		. 'if(io){io.observe(s[n]);}else{go(s[n]);}}}'
+		. 'if(document.readyState==="complete"){init();}else{window.addEventListener("load",init,{once:true});}})();';
+	echo '<script id="kits-ads-lazy">' . $js . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+}
+add_action( 'wp_footer', 'kits_ads_lazy_script', 99 );
+// Without JavaScript a lazy slot would stay an empty reserved box, so it is not shown.
+add_action(
+	'wp_head',
+	function () {
+		echo '<noscript><style>aside.kit-ad[data-kit-lazy]{display:none!important}</style></noscript>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
+	},
+	6
+);
 
 /** No ads on this page at all (also no head code and no auto ads): forms, 404, search, crisis pages… (kits_ads_skip). */
 function kits_ads_excluded( $slot = 'head' ) {
@@ -328,7 +384,7 @@ add_action(
 					do_action( 'kits_ads_settings_save' );
 					echo '<div class="updated"><p>Saved.</p></div>';
 				}
-				echo '<div class="wrap"><h1>Ads</h1><p>Paste the code from your ad network. Every ad is labelled "Ad". An empty slot shows only in preview (administrators, preview IP addresses and preview devices); visitors see nothing there.</p><form method="post">';
+				echo '<div class="wrap"><h1>Ads</h1><p>Paste the code from your ad network. Every ad is labelled "Ad". An empty slot shows only in preview (administrators, preview IP addresses and preview devices); visitors see nothing there. AdSense units load only when they come near the screen, and on phones no ad sits in the first screen.</p><form method="post">';
 				wp_nonce_field( 'aw_ads', 'aw_ads_nonce' );
 				$groups = array(
 					'block'  => 'Fixed positions (placed with the "Ad slot" block)',

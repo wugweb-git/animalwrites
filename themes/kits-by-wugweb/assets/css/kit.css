@@ -508,15 +508,20 @@ html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad--empty, .kit-ad-item
 html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad, .kit-ad-item):has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
 /* Until the network fills it (e.g. while the account awaits approval) a slot shows nothing: no grey box, "Ad" label or
    rules. It stays in the layout at full width because the network measures that width before it serves. */
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { border: 0; padding: 0; margin-block: 0; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) :is(.kit-ad-label) { display: none; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) .kit-ad-unit { min-height: 0; background: none; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > .kit-ad { border: 0; padding: 0; background: none; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { border: 0; padding: 0; margin-block: 0; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) :is(.kit-ad-label) { display: none; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) .kit-ad-unit { min-height: 0; background: none; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:not(:has(> .kit-ad:is([data-kit-lazy="wait"], [data-kit-lazy="pending"]))):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > .kit-ad { border: 0; padding: 0; background: none; }
 /* A list slot the network has not filled yet does not hold a grid cell (it left a card-sized hole beside the cards):
    it moves to the end of the list at full width and no height, where the network can still measure it. Once filled
    it takes its own cell again. */
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { order: 99; grid-column: 1 / -1 !important; grid-row: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; min-height: 0; }
+html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:not(:has(> .kit-ad:is([data-kit-lazy="wait"], [data-kit-lazy="pending"]))):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { order: 99; grid-column: 1 / -1 !important; grid-row: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; min-height: 0; }
 html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-adsbygoogle-status="done"]:not([data-ad-status]) { max-height: 0 !important; overflow: hidden !important; } /* the request has gone with its size; until AdSense answers (filled or unfilled) the unit takes no height, so no blank box */
+/* Lazy ads (kits-core ads.php, owner 18 Oct 2026): a slot keeps its space (phone 320×100, in a list 300×250, from 768px
+   728×90) and its "Ad" label while it waits to come near the screen and while the network answers; it gives the space back
+   only when the network says unfilled or does not answer in 6 s (data-kit-lazy="done" returns the rules above). A slot that
+   would start inside the first screen of a phone is never loaded and never shown (data-kit-lazy="fold"). */
+.kit-ad[data-kit-lazy="fold"], .kit-ad-item:has(> .kit-ad[data-kit-lazy="fold"]) { display: none !important; }
 .kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
 
 /* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
