@@ -585,7 +585,7 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 @media (prefers-reduced-motion: reduce) { .kit-task ,.kit-res-card ,.kit-story-media img ,.kit-case > .kit-ico { transition: none; } .kit-task:hover ,.kit-res-card:hover { transform: none; } }
 
 /* Editorial building blocks: section head, ghost button, "three big actions", lead + list, editorial queries */
-.kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); margin-bottom: var(--kit-space-6); }
+.kit-ed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--kit-space-4); margin-bottom: var(--kit-space-6); }
 .kit-ed-head h2 ,.kit-ed-act-copy h2 ,.kit-ed-find-head h2 ,.kit-ed-story-head h2 { font-size: var(--kit-type-h2); line-height: 1.15; letter-spacing: var(--kit-tracking-heading); margin: 0; }
 .kit-ed-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-3) 0 0; max-width: 52ch; }
 .kit-ed-more { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); font-weight: var(--kit-weight-strong); font-size: var(--kit-type-sm); color: var(--kit-color-ink); text-decoration: none; border-bottom: var(--kit-border-width) solid currentColor; white-space: nowrap; }
