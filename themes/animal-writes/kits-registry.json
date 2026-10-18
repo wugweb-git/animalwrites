@@ -215,7 +215,8 @@
     "aw-org-fact-na",
     "aw-org-services",
     "aw-org-phones",
-    "aw-org-hours"
+    "aw-org-hours",
+    "aw-featured"
    ],
    "states": [
     "links only",
