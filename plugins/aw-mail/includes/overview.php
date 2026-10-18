@@ -51,6 +51,7 @@ function aw_mail_overview_box( $key ) {
 		$addr   = is_array( $from ) ? (string) ( $from['address'] ?? '' ) : implode( '', aw_mail_addresses( $from ) );
 		$msgs[] = array(
 			'from'    => '' !== $name ? $name . ( $addr ? ' <' . $addr . '>' : '' ) : $addr,
+			'name'    => '' !== $name ? $name : $addr,
 			'subject' => trim( wp_strip_all_tags( (string) ( $m['subject'] ?? '' ) ) ),
 			'date'    => (string) ( $m['date'] ?? '' ),
 			'unseen'  => ! empty( $m['unseen'] ) || ! in_array( '\\Seen', (array) ( $m['flags'] ?? array() ), true ),
@@ -79,18 +80,20 @@ function aw_mail_overview_flush() {
 }
 add_action( 'aw_mail_received', 'aw_mail_overview_flush' );
 
-/** A message date as "j M Y, g:i a" with the calendar icon. */
+/** A message date as "j M Y" (the site's one date format) with the calendar icon. */
 function aw_mail_overview_date( $date ) {
 	$t = $date ? strtotime( $date ) : false;
-	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y, g:i a', $t ) ) : '–';
+	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
 }
 
 /**
- * Per mailbox: heading with the unread count and a table of the newest $max messages.
+ * Per mailbox: heading with the unread count and a table of the newest $max messages. The Mail page shows the full
+ * sender and a webmail link on each row; the narrow dashboard widget shows the sender's name and one link per mailbox.
  *
- * @param int $max Messages per mailbox.
+ * @param int  $max     Messages per mailbox.
+ * @param bool $compact Dashboard widget layout.
  */
-function aw_mail_overview_render( $max ) {
+function aw_mail_overview_render( $max, $compact = false ) {
 	$link = '<a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">Open in webmail<span class="screen-reader-text"> (opens in a new tab)</span></a>';
 	foreach ( AW_MAIL_BOXES as $key => $addr ) {
 		$box = aw_mail_overview_box( $key );
@@ -104,12 +107,16 @@ function aw_mail_overview_render( $max ) {
 			echo '<p>No messages in the Inbox.</p>';
 			continue;
 		}
-		echo '<table class="widefat striped"><thead><tr><th scope="col">From</th><th scope="col">Subject</th><th scope="col">Date</th><th scope="col"><span class="screen-reader-text">Webmail</span></th></tr></thead><tbody>';
+		echo '<table class="widefat striped" style="table-layout:fixed;overflow-wrap:anywhere"><thead><tr><th scope="col"' . ( $compact ? ' style="width:30%"' : '' ) . '>From</th><th scope="col">Subject</th><th scope="col" style="width:' . ( $compact ? '7.5em' : '8.5em' ) . '">Date</th>' . ( $compact ? '' : '<th scope="col" style="width:8em"><span class="screen-reader-text">Webmail</span></th>' ) . '</tr></thead><tbody>';
 		foreach ( $msgs as $m ) {
-			$b = $m['unseen'] ? array( '<strong>', '</strong>' ) : array( '', '' );
-			echo '<tr><td>' . $b[0] . esc_html( $m['from'] ) . $b[1] . '</td><td>' . $b[0] . esc_html( '' !== $m['subject'] ? $m['subject'] : '(no subject)' ) . $b[1] . ( $m['unseen'] ? ' <span class="screen-reader-text">(unread)</span>' : '' ) . '</td><td>' . aw_mail_overview_date( $m['date'] ) . '</td><td>' . $link . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+			$b    = $m['unseen'] ? array( '<strong>', '</strong>' ) : array( '', '' );
+			$from = $compact ? (string) ( $m['name'] ?? $m['from'] ) : $m['from'];
+			echo '<tr><td>' . $b[0] . esc_html( $from ) . $b[1] . '</td><td>' . $b[0] . esc_html( '' !== $m['subject'] ? $m['subject'] : '(no subject)' ) . $b[1] . ( $m['unseen'] ? ' <span class="screen-reader-text">(unread)</span>' : '' ) . '</td><td>' . aw_mail_overview_date( $m['date'] ) . '</td>' . ( $compact ? '' : '<td>' . $link . '</td>' ) . '</tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 		}
 		echo '</tbody></table>';
+		if ( $compact ) {
+			echo '<p>' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+		}
 	}
 }
 
@@ -142,7 +149,7 @@ add_action(
 	'wp_dashboard_setup',
 	function () {
 		if ( current_user_can( 'manage_options' ) ) {
-			wp_add_dashboard_widget( 'aw_mail_widget', 'Mail', fn() => aw_mail_overview_render( 5 ) );
+			wp_add_dashboard_widget( 'aw_mail_widget', 'Mail', fn() => aw_mail_overview_render( 5, true ) );
 		}
 	}
 );
