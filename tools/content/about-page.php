@@ -116,7 +116,7 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card">{{IMG:15544|A vet examines a dog lying on a clinic table.}}
+<div class="wp-block-group is-style-kits-card">{{IMG:15530|A woman holds a dog while a man in a green shirt checks it, on a street.}}
 
 <!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Emergency help</h3>
@@ -294,8 +294,8 @@ $content = <<<'HTML'
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"How you can help"},"align":"full","className":"aw-about-band aw-about-help aw-about-band--surface","layout":{"type":"default"}} -->
-<div class="wp-block-group alignfull aw-about-band aw-about-help aw-about-band--surface"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":"How you can help"},"align":"full","className":"aw-about-band aw-about-help aw-about-band--canvas","layout":{"type":"default"}} -->
+<div class="wp-block-group alignfull aw-about-band aw-about-help aw-about-band--canvas"><!-- wp:group {"className":"aw-about-inner","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-about-inner"><!-- wp:paragraph {"className":"is-style-kits-label"} -->
 <p class="is-style-kits-label">Take part</p>
 <!-- /wp:paragraph -->
