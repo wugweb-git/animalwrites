@@ -348,6 +348,11 @@ add_shortcode(
 					? array( 'alert', 'AWBI recognition (code ' . esc_html( $code ) . ') was valid until ' . aw_date( $until ) . '. Needs re-check.', true )
 					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . esc_html( $code ) . ( $since ? ', since ' . aw_date( $since ) : '' ) . ( $until ? ', valid until ' . aw_date( $until ) : '' ) . ' (list as on ' . aw_date( '2026-05-31' ) . ')', true );
 			}
+			$darpan = (string) get_post_meta( $id, 'aw_darpan_id', true );
+			if ( $darpan ) { // like the AWBI code (owner, 18 Oct 2026): the NITI Aayog NGO registry's ID
+				$as     = (string) get_post_meta( $id, 'aw_reg_type', true );
+				$rows[] = array( 'research', 'Registered on NGO Darpan (NITI Aayog), Darpan ID ' . esc_html( $darpan ) . ( $as ? ', as ' . esc_html( $as ) : '' ), true );
+			}
 			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
 			if ( $abc ) {
 				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . aw_date( $abc ), true );
