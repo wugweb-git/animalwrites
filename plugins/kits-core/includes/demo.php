@@ -174,6 +174,10 @@ add_shortcode(
 		if ( ! current_user_can( 'edit_pages' ) && ! defined( 'KITS_DEMO_RENDER' ) ) {
 			return '';
 		}
+		$pattern = sanitize_text_field( wp_unslash( $_GET['kits_pattern'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( '' !== $pattern && WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern ) ) { // one pattern drawn on its own (Kits system > Components)
+			return do_blocks( '<!-- wp:pattern {"slug":"' . esc_attr( $pattern ) . '"} /-->' );
+		}
 		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
 			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark,.kit-demo-btns-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-dark{padding:var(--s-3);border-radius:var(--kit-radius-control)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
 			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
@@ -198,6 +202,31 @@ add_action(
 	function () {
 		if ( is_page( 'kits-demo' ) && isset( $_GET['kits_embed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<style>html{margin-top:0!important}#wpadminbar,.wp-site-blocks>header,.wp-site-blocks>footer,header.wp-block-template-part,footer.wp-block-template-part,.kit-ad,.kit-ad-item{display:none!important}</style>';
+		}
+	}
+);
+
+// Kits system > Components shows each entry's own visual: the states sheet keeps only the sections drawing that entry
+// (its classes, or its block named in the heading); an entry the sheet does not draw is shown on a live page instead,
+// scrolled to its first use and outlined (kits_spot).
+add_action(
+	'wp_footer',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( is_page( 'kits-demo' ) && ( isset( $_GET['kits_only_classes'] ) || isset( $_GET['kits_only_block'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<script>(function(){var q=new URLSearchParams(location.search),cls=(q.get("kits_only_classes")||"").split(",").filter(Boolean),blk=q.get("kits_only_block")||"";'
+				. 'var sel=cls.map(function(c){return "[class~=\""+c+"\"],[class*=\" "+c+"-\"],[class^=\""+c+"-\"]";}).join(",");'
+				. 'var root=document.querySelector(".kit-demo");if(!root)return;var first=root.querySelector(":scope>section");if(first&&first.nextElementSibling)first.hidden=true;'
+				. 'root.querySelectorAll("h2").forEach(function(h){h.hidden=true;if(h.nextElementSibling&&h.nextElementSibling.tagName==="P")h.nextElementSibling.hidden=true;});var keep=0;'
+				. 'root.querySelectorAll("h3.kit-demo-h").forEach(function(h){if(h.closest("[hidden]"))return;var g=[h],n=h.nextElementSibling;while(n&&!n.matches("h3.kit-demo-h,h2")){g.push(n);n=n.nextElementSibling;}'
+				. 'var hit=(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
+				. 'if(!keep){location.replace(' . wp_json_encode( home_url( '/' ) ) . '+"?kits_spot="+encodeURIComponent(sel||(".wp-block-"+blk.replace("/","-"))));}})();</script>';
+		}
+		if ( isset( $_GET['kits_spot'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<style>html{margin-top:0!important}#wpadminbar{display:none!important}.kits-spot{outline:3px solid #2271b1!important;outline-offset:4px}</style>'
+				. '<script>(function(){var s=new URLSearchParams(location.search).get("kits_spot"),e;try{e=document.querySelector(s);}catch(x){}if(e){e.classList.add("kits-spot");e.scrollIntoView({block:"center"});}else{document.body.insertAdjacentHTML("afterbegin","<p style=\"padding:1em;background:#fcf0f1\">Not on this page.</p>");}})();</script>';
 		}
 	}
 );

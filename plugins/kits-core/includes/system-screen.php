@@ -244,6 +244,44 @@ function kits_system_page() {
 			. '<td>' . esc_html( $it['owner'] ) . '</td><td>' . $what . '</td><td>' . esc_html( implode( ' · ', (array) $it['states'] ) ) . '</td>'
 			. '<td>' . implode( '<br>', $acc ) . '</td><td>' . ( $seo ? implode( '<br>', $seo ) : '—' ) . '</td>'
 			. '<td>' . ( ! empty( $it['block'] ) ? '—' : ( $files ? '<details><summary>' . count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ) . '</summary>' . implode( '<br>', array_map( 'esc_html', $files ) ) . '</details>' : '<span style="color:#b32d2e">not used</span>' ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		echo kits_system_visual_row( $it, $vals, $demo ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 	echo '</tbody></table></div>';
+}
+
+/**
+ * Under each entry: its states, its token values and its visual (owner, 18 Oct 2026). The visual is the states sheet
+ * showing only that entry (its classes, or its block in the heading), a pattern drawn on its own, or a live page at the
+ * entry's first use; it loads only when opened.
+ */
+function kits_system_visual_row( $it, $vals, $demo ) {
+	$toks = array();
+	foreach ( (array) ( $it['tokens'] ?? array() ) as $t ) {
+		$t     = ltrim( (string) $t, '-' );
+		$names = '*' === substr( $t, -1 ) ? array_filter( array_keys( $vals ), fn( $k ) => 0 === strpos( $k, substr( $t, 0, -1 ) ) ) : ( isset( $vals[ $t ] ) ? array( $t ) : array() );
+		foreach ( array_slice( array_values( $names ), 0, 12 ) as $k ) {
+			$r      = kits_token_resolve( $k, $vals );
+			$toks[] = '<tr><td><code>--' . esc_html( $k ) . '</code></td><td><code>' . esc_html( $r ) . '</code></td></tr>';
+		}
+		if ( ! $names ) {
+			$toks[] = '<tr><td colspan="2"><code>' . esc_html( $t ) . '</code></td></tr>';
+		}
+	}
+	$src = '';
+	if ( $demo ) {
+		$url = add_query_arg( 'kits_embed', '1', get_permalink( $demo ) );
+		if ( 'pattern' === ( $it['type'] ?? '' ) && ! empty( $it['block'] ) ) {
+			$src = add_query_arg( 'kits_pattern', rawurlencode( $it['block'] ), $url );
+		} elseif ( ! empty( $it['block'] ) ) {
+			$src = add_query_arg( 'kits_only_block', rawurlencode( $it['block'] ), $url );
+		} elseif ( ! empty( $it['classes'] ) ) {
+			$src = add_query_arg( 'kits_only_classes', rawurlencode( implode( ',', (array) $it['classes'] ) ), $url );
+		}
+	}
+	$states = ! empty( $it['states'] ) ? '<ul style="margin:.25em 0 1em 1.2em;list-style:disc">' . implode( '', array_map( fn( $x ) => '<li>' . esc_html( $x ) . '</li>', (array) $it['states'] ) ) . '</ul>' : '<p>—</p>';
+	return '<tr class="kits-vis"><td colspan="7" style="padding-top:0"><details><summary style="cursor:pointer;color:#2271b1">Visual, values and states</summary>'
+		. '<div style="display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:16px;align-items:start;margin:8px 0">'
+		. '<div><strong>States</strong>' . $states . '<strong>Values</strong>' . ( $toks ? '<table class="widefat" style="margin-top:.25em"><tbody>' . implode( '', $toks ) . '</tbody></table>' : '<p>No tokens listed.</p>' ) . '</div>'
+		. ( $src ? '<iframe loading="lazy" title="' . esc_attr( $it['name'] . ' in its states' ) . '" src="' . esc_url( $src ) . '" style="width:100%;height:560px;border:1px solid #c3c4c7;background:#fff"></iframe>' : '<p>No visual: this entry styles core blocks (see Appearance &gt; Editor &gt; Styles).</p>' )
+		. '</div></details></td></tr>';
 }
