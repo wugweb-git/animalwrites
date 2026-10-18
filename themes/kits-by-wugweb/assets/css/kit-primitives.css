@@ -205,7 +205,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-segment :is(button, a):is([aria-pressed=true], [aria-current]) { background: var(--kit-color-raised); box-shadow: var(--kit-elevation-1); font-weight: var(--kit-weight-bold); }
 
 /* ---------- 10. Button: one system for .kit-btn and the core Button block (spec: docs/buttons.md; registry "Button") ----------
-   Variants   primary (default: ink fill) · secondary (outline) · ghost (dark outline) · brand (the primary shape
+   Variants   primary (default: ink fill) · secondary (soft grey fill, light outline) · ghost (dark outline) · brand (the primary shape
               in the brand colour). Each variant reads --kit-btn-<variant>-* tokens; a dark surface swaps those tokens, so
               every variant works on light and on dark surfaces.
    States     default · hover · focus-visible · active (pressed) · disabled · loading.
@@ -242,6 +242,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 :is(.kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark) {
 	--kit-btn-primary-bg: var(--kit-btn-brand-bg); --kit-btn-primary-fg: var(--kit-btn-brand-fg);
 	--kit-btn-primary-bg-hover: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); --kit-btn-primary-fg-hover: var(--kit-btn-brand-fg);
+	--kit-btn-secondary-bg: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent);
 	--kit-btn-secondary-fg: var(--kit-color-on-ink); --kit-btn-secondary-line: color-mix(in srgb, var(--kit-color-on-ink) 60%, transparent);
 	--kit-btn-secondary-bg-hover: var(--kit-color-on-ink); --kit-btn-secondary-fg-hover: var(--kit-color-ink);
 	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-line: var(--kit-color-on-ink);

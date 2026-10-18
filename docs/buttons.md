@@ -7,7 +7,7 @@ One button system for the Kits master theme. `.kit-btn` (theme and plugin markup
 | Variant | Use it for | `.kit-btn` | Button block style | Light surface | Dark surface |
 |---|---|---|---|---|---|
 | Primary | the main action, one per area | `kit-btn` | Default (shown as Primary) | ink fill, white text | brand fill, ink text (ink would vanish) |
-| Secondary | other actions next to a primary | `kit-btn--secondary` | Secondary | outline, ink text | light outline, white text |
+| Secondary | other actions next to a primary | `kit-btn--secondary` | Secondary | soft grey fill, light outline, ink text | soft white tint, light outline, white text |
 | Ghost | an outlined action that needs more weight than Secondary | `kit-btn--ghost` | Ghost | dark (ink) outline, ink text | white outline, white text |
 | Brand | brand moments: the primary shape in the brand colour | `kit-btn--brand` | Brand | brand fill (yellow, ink text), or the campaign's colour | the same |
 

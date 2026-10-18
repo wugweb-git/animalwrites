@@ -168,7 +168,7 @@
   --kit-btn-primary-fg: var(--kit-color-on-ink);
   --kit-btn-primary-bg-hover: var(--neutral-8);
   --kit-btn-primary-fg-hover: var(--kit-color-on-ink);
-  --kit-btn-secondary-bg: transparent;
+  --kit-btn-secondary-bg: color-mix(in srgb, var(--kit-color-ink) 6%, transparent);
   --kit-btn-secondary-fg: var(--kit-color-ink);
   --kit-btn-secondary-line: var(--kit-color-line);
   --kit-btn-secondary-bg-hover: var(--kit-color-ink);

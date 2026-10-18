@@ -741,9 +741,9 @@
       "lg": "var(--kit-color-on-ink)"
     },
     "btn-secondary-bg": {
-      "sm": "transparent",
-      "md": "transparent",
-      "lg": "transparent"
+      "sm": "color-mix(in srgb, var(--kit-color-ink) 6%, transparent)",
+      "md": "color-mix(in srgb, var(--kit-color-ink) 6%, transparent)",
+      "lg": "color-mix(in srgb, var(--kit-color-ink) 6%, transparent)"
     },
     "btn-secondary-fg": {
       "sm": "var(--kit-color-ink)",

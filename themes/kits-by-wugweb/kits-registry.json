@@ -121,11 +121,11 @@
       "dark": "takes the brand pair (fill and hover), since ink would vanish"
      },
      "secondary": {
-      "use": "other actions next to a primary (light outline)",
+      "use": "other actions next to a primary",
       "kit": "kit-btn--secondary (old: kit-btn--outline)",
       "block": "Secondary (old: Outline)",
-      "light": "1px --kit-color-line outline, ink text; hover ink fill",
-      "dark": "60% white outline, white text; hover white fill, ink text"
+      "light": "soft grey fill (6% ink), 1px --kit-color-line outline, ink text; hover ink fill",
+      "dark": "soft white tint (12%), 60% white outline, white text; hover white fill, ink text"
      },
      "ghost": {
       "use": "an outlined action with more weight than Secondary",
