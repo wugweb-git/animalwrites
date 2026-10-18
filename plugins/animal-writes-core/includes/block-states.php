@@ -234,3 +234,20 @@ add_action(
 	},
 	40
 );
+
+/* Kits system > Components: the site's pages a component is looked for on, when the states sheet does not draw it. */
+add_filter(
+	'kits_spot_pages',
+	function ( $pages ) {
+		foreach ( array( 'news', 'library', 'resources', 'opportunities', 'directory', 'media', 'campaigns', 'about', 'contact', 'volunteer', 'category/community-dogs' ) as $slug ) {
+			$pages[] = home_url( '/' . $slug . '/' );
+		}
+		foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing', 'aw_campaign' ) as $type ) {
+			$id = aw_state_item( array( 'post_type' => $type ) );
+			if ( $id ) {
+				$pages[] = get_permalink( $id );
+			}
+		}
+		return $pages;
+	}
+);
