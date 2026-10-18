@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The order of Pages in llms.txt, by slug ("" = the home page). Pages not named here follow, as Rank Math lists them. */
-const AW_LLMS_PAGE_ORDER = array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'media', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' );
+const AW_LLMS_PAGE_ORDER = array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'press-coverage', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' );
 
 /** Resource types that are guides (listed before research). */
 const AW_LLMS_GUIDE_TYPES = array( 'guide', 'faq', 'how-to' );

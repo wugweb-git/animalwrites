@@ -145,7 +145,7 @@ add_action(
  * tool does, unattended: they read the analyzer values below (built by Rank Math's own Update_Score tool, so with the
  * rendered <main> from the filter above, and each item's own test list), run Rank Math's bundled analyzer.js on them
  * and send the numbers back. Only published items with a focus keyword and no stored score; Media & PR items have no
- * page of their own (they 301 to /media/) and are not scored.
+ * page of their own (they 301 to /press-coverage/) and are not scored.
  */
 
 /** Published items with a page and a focus keyword but no stored Rank Math score (newest first). */

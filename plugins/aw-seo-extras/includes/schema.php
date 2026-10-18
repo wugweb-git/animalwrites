@@ -1036,7 +1036,7 @@ function aw_schema_nodes() {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => aw_seo_plain( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
 	} elseif ( is_page( 'categories' ) ) {
 		$nodes = array_merge( $nodes, aw_categories_schema() );
-	} elseif ( is_page( 'media' ) && function_exists( 'aw_press_schema' ) ) {
+	} elseif ( is_page( array( 'press-coverage', 'media' ) ) && function_exists( 'aw_press_schema' ) ) {
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)

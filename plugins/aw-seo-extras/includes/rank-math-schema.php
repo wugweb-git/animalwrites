@@ -62,7 +62,7 @@ function aw_rm_page_schema_type( $id ) {
 	if ( in_array( $slug, array( 'search', 'thank-you' ), true ) ) {
 		return '';
 	}
-	if ( in_array( $slug, array( 'categories', 'media' ), true ) || 'page-hub' === get_page_template_slug( $post ) ) {
+	if ( in_array( $slug, array( 'categories', 'press-coverage' ), true ) || 'page-hub' === get_page_template_slug( $post ) ) {
 		return 'CollectionPage';
 	}
 	$map = array(

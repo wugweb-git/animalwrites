@@ -143,7 +143,7 @@ add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'po
 add_filter(
 	'kits_page_context',
 	function ( $c ) {
-		$hub_types = array( 'aw_news' => 'news', 'aw_legal' => 'library', 'post' => 'resources', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_listing' => 'directory', 'aw_press' => 'media' );
+		$hub_types = array( 'aw_news' => 'news', 'aw_legal' => 'library', 'post' => 'resources', 'aw_opportunity' => 'opportunities', 'aw_campaign' => 'campaigns', 'aw_listing' => 'directory', 'aw_press' => 'press-coverage' );
 		$hub       = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
 		if ( is_page( 'search' ) ) {
 			$c['page_type'] = 'search';

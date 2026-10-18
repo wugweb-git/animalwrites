@@ -184,7 +184,7 @@ add_filter(
 			'Resources card'              => array( '/resources/', '.wp-block-post-template' ),
 			'Opportunity card'            => array( '/opportunities/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
 			'Directory card'              => array( '/directory/', '.wp-block-post-template' ),
-			'Media & PR card'             => array( '/media/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
+			'Media & PR card'             => array( '/press-coverage/', '.wp-block-post-template', array( 375, 640, 768, 1024, 1200 ) ),
 			'Campaign: news grid'         => array( '/campaigns/lab-animals-rules-2026/', '.aw-news-grid', array( 375, 640, 768, 1024, 1200 ) ),
 			'Category page: News rows'    => array( '/category/community-dogs/', '.aw-hub-news' ),
 			'Search results'              => array( '/search/?q=dog', 'main h3' ),
@@ -241,7 +241,7 @@ add_filter(
 	function ( $pages ) {
 		$pages = array_values( array_filter( $pages, fn( $u ) => false === strpos( $u, '?s=' ) ) ); // search lives at /search/?q= here (the ?s= address redirects and drops the spot)
 		$pages[] = home_url( '/search/?q=animal' );
-		foreach ( array( 'news', 'library', 'resources', 'opportunities', 'directory', 'media', 'campaigns', 'about', 'contact', 'volunteer', 'category/community-dogs' ) as $slug ) {
+		foreach ( array( 'news', 'library', 'resources', 'opportunities', 'directory', 'press-coverage', 'campaigns', 'about', 'contact', 'volunteer', 'category/community-dogs' ) as $slug ) {
 			$pages[] = home_url( '/' . $slug . '/' );
 		}
 		foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing', 'aw_campaign' ) as $type ) {

@@ -28,7 +28,7 @@ const AW_HUBS = array(
 	'aw_opportunity' => array( 'opportunities', 104, 24, 'Opportunities list' ),
 	'aw_campaign'    => array( 'campaigns', 105, 20, 'Campaigns list' ),
 	'aw_listing'     => array( 'directory', 106, 24, 'Directory list' ),
-	'aw_press'       => array( 'media', 107, 100, 'Press list' ),
+	'aw_press'       => array( 'press-coverage', 107, 100, 'Press list' ), // was /media/ until 18 Oct 2026 (301 kept)
 );
 
 /** URL of a hub. */
@@ -88,9 +88,9 @@ add_action(
 				add_rewrite_rule( '^' . $h[0] . '/feed/?$', 'index.php?post_type=' . $type . '&feed=rss2', 'top' );
 			}
 		}
-		if ( '3' !== get_option( 'aw_hub_rewrite' ) ) {
+		if ( '4' !== get_option( 'aw_hub_rewrite' ) ) { // 4: /press-coverage/ (18 Oct 2026)
 			flush_rewrite_rules( false );
-			update_option( 'aw_hub_rewrite', '3', true );
+			update_option( 'aw_hub_rewrite', '4', true );
 		}
 	},
 	40
@@ -499,9 +499,13 @@ function aw_hub_list( $type ) {
 <h2 class="wp-block-heading">More campaigns for animals</h2>
 <!-- /wp:heading -->
 
+' : ( 'aw_press' === $type ? '<!-- wp:heading -->
+<h2 class="wp-block-heading">Latest press coverage</h2>
+<!-- /wp:heading -->
+
 ' : ( 'aw_listing' === $type ? '<!-- wp:animal-writes/result-head /-->
 
-' : '' );
+' : '' ) );
 	$pager = in_array( $type, array( 'aw_press', 'aw_campaign' ), true ) ? '' : '
 
 <!-- wp:query-pagination {"className":"kit-pager","layout":{"type":"flex","justifyContent":"center"}} -->

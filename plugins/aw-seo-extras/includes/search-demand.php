@@ -53,7 +53,7 @@ function aw_sd_static(): array {
 			array( 'Hub', '/directory/', 'animal welfare ngos in india', '"animal ngo" T 28 ("near me" leads); "gaushala" T 383', 'Y', 'Hub 17; place pages 2,540 impr, pos about 8' ),
 			array( 'Hub', '/opportunities/', 'animal welfare volunteer', 'T 0; "ngo jobs" T 67', 'Y ("volunteering near me"); "animal welfare jobs india" Y', 'Hub 0' ),
 			array( 'Hub', '/campaigns/', 'animal welfare campaigns', 'T 0', 'Y', 'Hub 18; "petition campaign" 113, "letter petition" 48, "stray dog petition india" 14 (all on Home)' ),
-			array( 'Hub', '/media/', 'animal writes in the news', 'T 0', '–', 'Brand only ("nodogsnovote" 605 on Home)' ),
+			array( 'Hub', '/press-coverage/', 'animal writes in the news', 'T 0', '–', 'Brand only ("nodogsnovote" 605 on Home)' ),
 			array( 'Directory', 'State (/directory/{state}/)', 'animal welfare ngos in {state}', '', 'Mostly – for states (Google suggests cities)', 'State pages about 1,400 impr, pos 8–10' ),
 			array( 'Directory', 'District (/directory/{state}/{district}/)', 'animal ngo in {district}', '"animal helpline" T 59, "animal rescue" T 100', 'Y for big cities (Delhi, Noida, Dehradun, Pune, Bangalore)', '"animal helpline number {district}" / "animal rescue {district} contact number" about 240 impr, 0 clicks' ),
 			array( 'Directory', 'Type in a place (/directory/{state}/{district}/{type}/)', '{type} in {district}', '"gaushala" T 383; "veterinary hospital" T 315', 'Y ("gaushala in jaipur", "government veterinary hospital {city}")', '"jhajjar gaushala" 22' ),

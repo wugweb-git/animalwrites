@@ -23,7 +23,7 @@ function aw_site_check_urls() {
 		'Directory'           => '/directory/',
 		'Directory: a state'  => '/directory/kerala/',
 		'Directory: district' => '/directory/kerala/ernakulam/',
-		'Media & PR'          => '/media/',
+		'Media & PR'          => '/press-coverage/',
 		'Contact'             => '/contact/',
 		'Volunteer'           => '/volunteer/',
 		'Search'              => '/search/?q=dog',

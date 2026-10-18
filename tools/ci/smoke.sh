@@ -46,7 +46,7 @@ trap 'kill $SERVER 2>/dev/null || true' EXIT
 sleep 2
 curl -s -o /dev/null http://127.0.0.1:8080/ || true # first request runs the one-time steps
 single() { wp post list --post_type="$1" --posts_per_page=1 --field=url | sed 's#http://127.0.0.1:8080##'; }
-URLS=(/ "/?rest_route=/aw/v1/mail-in" /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /media/ /contact/ /volunteer/ "/search/?q=dog"
+URLS=(/ "/?rest_route=/aw/v1/mail-in" /news/ /library/ /resources/ /opportunities/ /campaigns/ /directory/ /press-coverage/ /contact/ /volunteer/ "/search/?q=dog"
   /directory/kerala/ /directory/kerala/ernakulam/ /category/community-dogs/ /tag/ci-tag/ "/news/?category_name=community-dogs"
   "$(single aw_news)" "$(single aw_legal)" "$(single post)" "$(single aw_opportunity)" "$(single aw_campaign)" "$(single aw_listing)")
 FAIL=0
