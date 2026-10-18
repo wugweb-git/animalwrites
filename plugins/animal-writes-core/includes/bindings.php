@@ -139,8 +139,8 @@ function aw_binding_value( $key, $post_id ) {
 			return $m( 'aw_website' );
 		case 'org_name':
 			return $m( 'aw_org_name' );
-		case 'apply_url':
-			return $m( 'aw_apply_url' );
+		case 'apply_url': // empty once the opportunity is closed, so the Apply button is removed (owner, 18 Oct 2026)
+			return function_exists( 'aw_retention_state' ) && 'closed' === aw_retention_state( $post_id ) ? '' : $m( 'aw_apply_url' );
 		case 'deadline_label':
 			$d = aw_format_date( $m( 'aw_deadline' ) );
 			/* translators: %s: date. */
@@ -149,6 +149,10 @@ function aw_binding_value( $key, $post_id ) {
 			// "Apply by" with the one date component (aw_date: calendar icon directly before the date). HTML, kept by
 			// the source's wp_kses_post. Empty without a deadline, so the bound block is removed.
 			$d = $m( 'aw_deadline' );
+			if ( $d && function_exists( 'aw_date' ) && function_exists( 'aw_retention_state' ) && 'closed' === aw_retention_state( $post_id ) ) {
+				// Past its deadline: a visible "Closed" tag and the date it closed (owner, 18 Oct 2026).
+				return '<span class="kit-tag kit-tag--closed">' . esc_html__( 'Closed', 'animal-writes-core' ) . '</span> ' . __( 'Applications closed on', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' );
+			}
 			return $d && function_exists( 'aw_date' ) ? __( 'Apply by', 'animal-writes-core' ) . ' ' . aw_date( $d . ' 12:00:00' ) : '';
 		case 'file_url':
 			return $m( 'aw_file_url' );

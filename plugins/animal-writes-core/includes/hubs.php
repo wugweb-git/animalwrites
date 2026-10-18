@@ -496,7 +496,7 @@ function aw_hub_list( $type ) {
 	$lists = array( 'aw_news' => 'aw-news-list', 'aw_legal' => 'aw-cases', 'post' => 'aw-tasks', 'aw_opportunity' => 'aw-opps', 'aw_campaign' => 'aw-news-grid', 'aw_listing' => 'aw-orgs', 'aw_press' => 'aw-news-grid' );
 	$cls   = 'aw-hub-list aw-hub-' . $h[0] . ( 'aw_campaign' === $type ? ' aw-camp-more aw-hide-empty' : '' );
 	$head  = 'aw_campaign' === $type ? '<!-- wp:heading -->
-<h2 class="wp-block-heading">More campaigns</h2>
+<h2 class="wp-block-heading">More campaigns for animals</h2>
 <!-- /wp:heading -->
 
 ' : ( 'aw_listing' === $type ? '<!-- wp:animal-writes/result-head /-->

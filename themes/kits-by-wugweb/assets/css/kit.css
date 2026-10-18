@@ -906,6 +906,7 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 .kit-tag.kit-tag--category { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
 .kit-tag.kit-tag--type { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
 .kit-tag.kit-tag--issuer { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
+.kit-tag.kit-tag--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); }
 .kit-tag.kit-tag--place { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
 
 .kit-tag .kit-ico, .kit-chip .kit-ico { --kit-ico-size: 1em; }

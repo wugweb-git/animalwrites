@@ -191,6 +191,7 @@
     "category (blue)",
     "type (grey)",
     "issuer (green)",
+    "closed (danger, opportunity past its deadline)",
     "place (violet, pin icon)",
     "plain",
     "with icon",
