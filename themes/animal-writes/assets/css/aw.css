@@ -1382,6 +1382,9 @@ body { background: var(--kit-color-canvas); }
 .aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } }
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
-/* The three principles and the three actions: one column on phones, three from 768 (never two plus one alone) */
+/* The three principles: one column on phones, three from 768. The three actions: one column below 1200 (their buttons
+   would wrap in a third of 768), three from 1200. Never two plus one alone. */
 :is(.aw-about-why, .aw-about-help) .aw-about-inner > .wp-block-group { grid-template-columns: minmax(0, 1fr) !important; }
-@media (min-width: 768px) { :is(.aw-about-why, .aw-about-help) .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+@media (min-width: 1200px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+:is(.aw-about-what, .aw-about-help) .wp-block-button__link { white-space: nowrap; }
