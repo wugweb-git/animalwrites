@@ -1395,3 +1395,5 @@ body { background: var(--kit-color-canvas); }
 /* How you can help: an icon in a grey circle at the top of each tile */
 .aw-about-act > .aw-about-act-ico { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: var(--kit-space-2); border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
 .aw-about-act > .aw-about-act-ico .kit-ico { --kit-ico-size: 1.5rem; }
+/* What we do: stacked on phones (below 768) like the other two grids; columns from 768 */
+@media (max-width: 767px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; } }
