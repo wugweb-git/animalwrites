@@ -1361,8 +1361,8 @@ body { background: var(--kit-color-canvas); }
 .aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
 .aw-about-what .is-style-kits-card:hover { border-color: var(--kit-color-ink); }
 .aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-/* How we work: a note with the brand's yellow rule */
-.aw-about-how { padding: var(--kit-space-4) var(--kit-space-5); border-left: 4px solid var(--kit-color-accent); background: var(--kit-color-canvas); border-radius: 0 var(--kit-radius-control) var(--kit-radius-control) 0; }
+/* How we work: a plain note on the page grey */
+.aw-about-how { padding: var(--kit-space-4) var(--kit-space-5); background: var(--kit-color-canvas); border-radius: var(--kit-radius-control); }
 .aw-about-how > * { margin-block: 0; }
 .aw-about-how > * + * { margin-block-start: var(--kit-space-2); }
 /* Why we do it: the turn in the copy, set large; three principles under hairlines */
