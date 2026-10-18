@@ -1372,16 +1372,15 @@ body { background: var(--kit-color-canvas); }
 .aw-about-principle { padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 30%, transparent); }
 .aw-about-principle > * { margin-block: 0; }
 .aw-about-principle > * + * { margin-block-start: var(--kit-space-2); }
-/* How you can help: white tiles on cream; the whole tile follows its link */
+/* How you can help: white tiles on cream, each with a primary (ink) button; the whole tile follows the button */
 .aw-about-act { position: relative; display: flex; flex-direction: column; height: 100%; padding: var(--kit-space-5); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); transition: border-color var(--kit-motion-base) var(--kit-motion-ease); }
 .aw-about-act > * { margin-block: 0; }
 .aw-about-act > * + * { margin-block-start: var(--kit-space-2); }
-.aw-about-act > p:last-child { margin-block-start: auto; padding-top: var(--kit-space-3); }
-.aw-about-act .kit-ed-more::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.aw-about-act > .wp-block-buttons { margin-block-start: auto; padding-top: var(--kit-space-4); }
+.aw-about-act .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
 .aw-about-act:hover { border-color: var(--kit-color-ink); }
-.aw-about-act:hover .kit-ed-more .kit-ico { transform: translateX(3px); }
-.aw-about-act:has(.kit-ed-more:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } .aw-about-act:hover .kit-ed-more .kit-ico { transform: none; } }
+.aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } }
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
 /* The three principles: one column on phones, three from 768 (never two plus one alone) */
 .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: minmax(0, 1fr) !important; }

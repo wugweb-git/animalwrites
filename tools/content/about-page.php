@@ -299,9 +299,11 @@ $content = <<<'HTML'
 <p>Looking for help or hoping to support existing work? Explore organisations and services relevant to your location and needs.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/directory/">Find an organisation <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/directory/">Find an organisation</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
@@ -313,9 +315,11 @@ $content = <<<'HTML'
 <p>Use emergency guides, research, the Library, and practical resources to understand an issue and identify appropriate next steps.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/resources/">Explore resources <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/resources/">Explore resources</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
@@ -327,9 +331,11 @@ $content = <<<'HTML'
 <p>Explore active campaigns and available templates or participation opportunities.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/campaigns/">Explore current campaigns <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/campaigns/">Explore current campaigns</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
@@ -341,9 +347,11 @@ $content = <<<'HTML'
 <p>Join volunteers across India who rescue, feed and speak up for animals.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/volunteer/">Register as a volunteer <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/volunteer/">Register as a volunteer</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
@@ -355,9 +363,11 @@ $content = <<<'HTML'
 <p>Run an organisation or service listed in the Directory? Claim its listing to keep its details up to date.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/claim/">Claim your listing <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/claim/">Claim your listing</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
@@ -369,9 +379,11 @@ $content = <<<'HTML'
 <p>If you find an outdated listing, incorrect detail, or information that needs correction, contact Animal Writes with the relevant page and supporting information.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><a class="kit-ed-more" href="/contact/">Contact us <span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a></p>
-<!-- /wp:paragraph --></div>
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/contact/">Contact us</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
