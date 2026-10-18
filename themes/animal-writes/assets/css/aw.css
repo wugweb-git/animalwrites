@@ -1363,9 +1363,8 @@ body { background: var(--kit-color-canvas); }
 .aw-about-how { padding: var(--kit-space-4) var(--kit-space-5); background: var(--kit-color-canvas); border-radius: var(--kit-radius-control); }
 .aw-about-how > * { margin-block: 0; }
 .aw-about-how > * + * { margin-block-start: var(--kit-space-2); }
-/* Why we do it: the turn in the copy, set large; three principles under hairlines */
+/* Why we do it: the turn in the copy, set large; three principles, each with its picture */
 .aw-about-band--ink .aw-about-inner > .aw-about-pivot { max-width: 22ch; margin-block: var(--kit-space-6); font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: 1.15; letter-spacing: var(--kit-tracking-heading, -0.01em); }
-.aw-about-principle { padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 30%, transparent); }
 .aw-about-principle > * { margin-block: 0; }
 .aw-about-principle > * + * { margin-block-start: var(--kit-space-2); }
 /* How you can help: white tiles on cream, each with a primary (ink) button; the whole tile follows the button */
@@ -1384,3 +1383,6 @@ body { background: var(--kit-color-canvas); }
 @media (min-width: 768px) { .aw-about-why .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
 @media (min-width: 1200px) { .aw-about-help .aw-about-inner > .wp-block-group { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
 :is(.aw-about-what, .aw-about-help) .wp-block-button__link { white-space: nowrap; }
+/* About page pictures: 4:3 cover at the top of each card and principle (owner uploads, 18 Oct 2026) */
+.aw-about-band .aw-about-pic { margin: 0 0 var(--kit-space-3) !important; }
+.aw-about-band .aw-about-pic img { display: block; width: 100%; height: auto; border-radius: var(--kit-radius-media); }

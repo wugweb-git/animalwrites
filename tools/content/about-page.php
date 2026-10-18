@@ -72,7 +72,9 @@ $content = <<<'HTML'
 
 <!-- wp:group {"metadata":{"name":"Modules"},"layout":{"type":"grid","minimumColumnWidth":"18rem"}} -->
 <div class="wp-block-group"><!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15529|A woman smiles as she pets two community dogs on a street.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Directory</h3>
 <!-- /wp:heading -->
 
@@ -92,7 +94,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15545|A woman sits on a step beside dogs sleeping on a shelf, in black and white.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">News</h3>
 <!-- /wp:heading -->
 
@@ -112,7 +116,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15544|A vet examines a dog lying on a clinic table.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Emergency help</h3>
 <!-- /wp:heading -->
 
@@ -132,7 +138,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15540|A puppy looks out from under a painted handcart.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Library</h3>
 <!-- /wp:heading -->
 
@@ -152,7 +160,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15533|Three puppies sit together on a gravel road.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Resources</h3>
 <!-- /wp:heading -->
 
@@ -172,7 +182,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"is-style-kits-card","layout":{"type":"flow"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group is-style-kits-card">{{IMG:15543|A puppy sits beside a yellow box painted “Voice for voiceless” on a street.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Campaigns and civic action</h3>
 <!-- /wp:heading -->
 
@@ -244,7 +256,9 @@ $content = <<<'HTML'
 
 <!-- wp:group {"metadata":{"name":"Principles"},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group"><!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-principle">{{IMG:15536|A dog stands on an open road, looking ahead.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Make information easier to find</h3>
 <!-- /wp:heading -->
 
@@ -254,7 +268,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-principle">{{IMG:15535|A dog looks straight up at the camera.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Make complex issues easier to understand</h3>
 <!-- /wp:heading -->
 
@@ -264,7 +280,9 @@ $content = <<<'HTML'
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-about-principle","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-principle"><!-- wp:heading {"level":3} -->
+<div class="wp-block-group aw-about-principle">{{IMG:15539|A white dog rests at the steps of a busy entrance as people pass.}}
+
+<!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Help people find their next step</h3>
 <!-- /wp:heading -->
 
@@ -346,6 +364,28 @@ $content = <<<'HTML'
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 HTML;
+
+// Card and principle pictures (owner uploads, 18 Oct 2026): {{IMG:id|alt}} becomes a 4:3 cover image block with the
+// large copy; an attachment with no alt text in the media library gets this alt too.
+$content = preg_replace_callback(
+	'/\{\{IMG:(\d+)\|([^}]*)\}\}/',
+	function ( $m ) use ( $dry ) {
+		$aid = (int) $m[1];
+		$alt = $m[2];
+		$src = wp_get_attachment_image_url( $aid, 'large' );
+		if ( ! $src ) {
+			WP_CLI::error( "Picture $aid not found; nothing changed" );
+		}
+		if ( ! $dry && '' === (string) get_post_meta( $aid, '_wp_attachment_image_alt', true ) ) {
+			update_post_meta( $aid, '_wp_attachment_image_alt', $alt );
+		}
+		$src = wp_make_link_relative( $src );
+		return '<!-- wp:image {"id":' . $aid . ',"aspectRatio":"4/3","scale":"cover","sizeSlug":"large","linkDestination":"none","className":"aw-about-pic"} -->' . "\n"
+			. '<figure class="wp-block-image size-large aw-about-pic"><img src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '" class="wp-image-' . $aid . '" style="aspect-ratio:4/3;object-fit:cover"/></figure>' . "\n"
+			. '<!-- /wp:image -->';
+	},
+	$content
+);
 
 $meta = array(
 	'rank_math_title'         => 'About Us: India’s Animal Welfare Resource – Animal Writes',
