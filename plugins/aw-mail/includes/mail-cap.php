@@ -23,7 +23,10 @@
  *   returns true, FluentCRM records it as sent, and the site's queue delivers it later.
  * After sending, a queued email's content is cleared; the log keeps time, priority and status (30 days).
  *
- * @package animal-writes-core
+ * Moved from animal-writes-core to Wug Mail (aw-mail) on 18 Oct 2026 (owner: all mail settings under Mail); same
+ * table, options and hooks. Its section shows on Mail → Settings → Site sending.
+ *
+ * @package aw-mail
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

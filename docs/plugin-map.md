@@ -48,12 +48,13 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 
 ## aw-mail (Wug Mail)
 
-Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending (SMTP, the daily cap and queue, `mail-cap.php`) stays in core. No mail client: replies are written in Hostinger webmail.
+Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending: the SMTP mailbox stays in Kits Core (`mail.php`); the daily cap and queue (`mail-cap.php`) moved here on 18 Oct 2026. Both show on Mail → Settings → Site sending. No mail client: replies are written in Hostinger webmail.
 
 | File | What it does |
 |---|---|
 | `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
 | `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets; since 18 Oct 2026 it only refreshes counts, no copies), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
+| `includes/mail-cap.php` | Site-wide daily email cap and queue (moved from core 18 Oct 2026): budget per 24 hours, priorities, retries, pause on refusal, FluentCRM pacing. |
 | `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
 | `includes/profiles.php` | Per-mailbox display name, signature and picture (copied from Hostinger webmail; no API). Shown on the Mail page; site emails from that address use the name and end with the signature (not FluentCRM; not with `X-AW-No-Signature`). |
 | `includes/inbox.php` | The Mail inbox (18 Oct 2026, owner: real inbox in WP): mailboxes and folders, list and search, read (sandboxed, remote pictures off), Reply / Reply all / Forward / New message via the Mail API (threads kept, copy in Sent, signature added), Archive / Move / Spam / Delete to Trash / unread, attachments; plus the Website forms folder (contact form messages). Admins and editors; 30 sends an hour; nothing logged but send times. |
