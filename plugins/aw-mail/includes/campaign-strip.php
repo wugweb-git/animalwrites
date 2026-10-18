@@ -49,7 +49,8 @@ function aw_mail_campaign_strip_html() {
 		return '';
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
-	return '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;max-width:560px;margin-top:14px"><tr><td style="background:' . esc_attr( $c[3] ) . ';border-radius:4px;padding:7px 12px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.35"><a href="' . esc_url( $c[1] ) . '" style="color:#ffffff;text-decoration:none;display:block"><strong>' . esc_html( $c[0] ) . '</strong>' . ( $close ? ' · Closes ' . esc_html( $close ) : '' ) . ' &rarr;</a></td></tr></table>';
+	// Thin: one 11px line, a small CAMPAIGN label, as wide as the signature block (owner, 18 Oct 2026).
+	return '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:10px;max-width:420px"><tr><td style="background:' . esc_attr( $c[3] ) . ';border-radius:3px;padding:4px 10px;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.3;white-space:nowrap"><a href="' . esc_url( $c[1] ) . '" style="color:#ffffff;text-decoration:none"><span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.85">Campaign</span>&nbsp;&nbsp;<strong>' . esc_html( $c[0] ) . '</strong>' . ( $close ? ' &middot; closes ' . esc_html( $close ) : '' ) . ' &rarr;</a></td></tr></table>';
 }
 
 /** The strip as one plain-text line ('' when none). */
@@ -58,7 +59,7 @@ function aw_mail_campaign_strip_text() {
 	if ( ! $c ) {
 		return '';
 	}
-	return $c[0] . ( $c[2] ? ' · Closes ' . wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '' ) . ': ' . $c[1];
+	return $c[0] . ( $c[2] ? ' · closes ' . wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '' ) . ': ' . $c[1];
 }
 
 /** Put the strip right under the signature in an HTML email (or at the end when there is no signature block). */
