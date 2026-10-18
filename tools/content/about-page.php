@@ -5,8 +5,8 @@
  * Movement of Compassion, the Campaign Timeline, the next-phase banner, "Historic achievement unlocked"), the
  * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). How you can help lists only
  * actions What we do does not already link (owner, 18 Oct 2026: no repeats). No newsletter here:
- * the footer form covers it (owner, 18 Oct 2026). Sets the Rank Math
- * title, description and focus keyword. The old content and meta go to ~/aw-about-backup-*.json first, and
+ * the footer form covers it (owner, 18 Oct 2026). The Rank Math title,
+ * description and focus keyword are left as they are on the site. The old content and meta go to ~/aw-about-backup-*.json first, and
  * WordPress keeps the old version as a revision.
  * Run: wp eval-file about-page.php            (dry run: wp eval-file about-page.php dry)
  */
@@ -399,11 +399,7 @@ $content = preg_replace_callback(
 	$content
 );
 
-$meta = array(
-	'rank_math_title'         => 'About Us: India’s Animal Welfare Resource – Animal Writes',
-	'rank_math_description'   => 'Animal Writes brings together animal welfare news, court orders, laws, guides and a directory of organisations in India, so you can understand issues and act.',
-	'rank_math_focus_keyword' => 'about animal writes, animal welfare india',
-);
+$meta = array(); // Rank Math title, description and focus keyword are no longer set here (owner, 18 Oct 2026: keep the live ones)
 
 if ( $dry ) {
 	WP_CLI::success( 'DRY RUN: ' . strlen( $content ) . ' bytes of content; ' . count( parse_blocks( $content ) ) . ' top-level blocks; nothing written' );
