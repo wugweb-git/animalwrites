@@ -182,7 +182,7 @@ function aw_block_org_details( $a, $id ) {
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . aw_date( $m( 'aw_services_on' ) ) : '' ) . '</span>';
 			}
-			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && $m( 'aw_address' ) ? $m( 'aw_address' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_merge( array( $m( 'aw_area' ) ), array_reverse( array_filter( aw_listing_place( $id ) ) ), array( $m( 'aw_pincode' ) ) ) ) ) : $m( $k ) ) );
+			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && $m( 'aw_address' ) ? $m( 'aw_address' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? aw_listing_location_text( $m( 'aw_area' ), aw_listing_place( $id ), $m( 'aw_pincode' ) ) : $m( $k ) ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );
 			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
 		} elseif ( isset( $na[ $k ] ) ) {
@@ -262,3 +262,20 @@ add_filter(
 	5
 );
 
+/**
+ * "Area, District, State, PIN" with each place named once (an import's area often already names the district and state).
+ *
+ * @param string $area    Area or landmark.
+ * @param array  $place   [state, district] names.
+ * @param string $pincode PIN code.
+ * @return string
+ */
+function aw_listing_location_text( $area, $place, $pincode ) {
+	$out = array();
+	foreach ( array_merge( array_map( 'trim', explode( ',', (string) $area ) ), array_reverse( array_filter( (array) $place ) ), array( $pincode ) ) as $part ) {
+		if ( '' !== $part && ! in_array( strtolower( $part ), array_map( 'strtolower', $out ), true ) ) {
+			$out[] = $part;
+		}
+	}
+	return implode( ', ', $out );
+}

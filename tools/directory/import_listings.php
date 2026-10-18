@@ -5,7 +5,7 @@
  *
  * Row kinds:
  * - new listing: key, name, types[], state, district, area, phone, address_private, content, source_name, source_url,
- *   source_date; optional: data_source (registry slug, data-sources.php), email, website, darpan_id, registration,
+ *   source_date; optional: data_source (registry slug, data-sources.php), email, website, address (a public office's, shown), darpan_id, registration,
  *   reg_type, reg_authority, reg_act, reg_date, sectors, places[] (more [state, district] pairs), abc_valid.
  *   Matched by aw_import_key; created published and unverified.
  * - update of an existing listing: post_id, types[] (added, never removed) and any optional field above (filled only
@@ -62,6 +62,9 @@ $fields = function ( $id, $r ) use ( $fill, $note, &$kind ) {
 		if ( ! empty( $r[ $k ] ) ) {
 			$fill( $id, 'aw_' . $k, sanitize_text_field( is_array( $r[ $k ] ) ? implode( ', ', $r[ $k ] ) : $r[ $k ] ) );
 		}
+	}
+	if ( ! empty( $r['address'] ) ) {
+		$fill( $id, 'aw_address', sanitize_text_field( $r['address'] ) ); // a public office's address (shown)
 	}
 	if ( ! empty( $r['email'] ) && is_email( $r['email'] ) ) {
 		$fill( $id, 'aw_email', sanitize_email( $r['email'] ) );

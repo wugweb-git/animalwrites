@@ -38,9 +38,13 @@ STATES = [
 ALIAS = {"East Godavari at Rajamahendravaram": "East Godavari", "Mewat": "Nuh", "Narnaul": "Mahendragarh",
          "Mangaluru (D.K)": "Dakshina Kannada", "Ramanagara": "Bengaluru South", "Karwar (U.K.)": "Uttara Kannada",
          "U. S. Nagar": "Udham Singh Nagar", "City Civil Court Legal Services Authority, Hyderabad": "Hyderabad",
-         "MLSA, Hyderabad": "Hyderabad"}
+         "MLSA, Hyderabad": "Hyderabad", "Jaipur District": "Jaipur", "Jaipur-Metro I": "Jaipur",
+         "Jaipur-Metro II": "Jaipur", "Jodhpur-District": "Jodhpur", "Jodhpur-Metro": "Jodhpur"}
 OWN_NAME = {"City Civil Court Legal Services Authority, Hyderabad": "City Civil Court Legal Services Authority, Hyderabad",
-            "MLSA, Hyderabad": "Metropolitan Legal Services Authority, Hyderabad"}
+            "MLSA, Hyderabad": "Metropolitan Legal Services Authority, Hyderabad",
+            "Jaipur-Metro I": "District Legal Services Authority, Jaipur Metro I",
+            "Jaipur-Metro II": "District Legal Services Authority, Jaipur Metro II",
+            "Jodhpur-Metro": "District Legal Services Authority, Jodhpur Metro"}
 OFFICE_MAIL = re.compile(r"(dlsa|legal|lsa|slsa|nyaya|\.nic\.in$|\.gov\.in$)", re.I)
 
 
@@ -106,9 +110,9 @@ def main(listings_file):
                 rep.maybe(dict(sample, listing=hit["id"], listing_title=hit["title"], score=score))
                 continue
             rep.new(dict(fields, key=f"dlsa|{st['slug']}|{dist['code']}" + ("|" + re.sub(r"\W+", "-", dname.lower()) if dname in OWN_NAME else ""), name=name, types=["legal-aid"],
-                         state=st["code"], district=dist["code"], area=f"{dist['name']}, {st['name']}", phone=phone,
+                         state=st["code"], district=dist["code"], area=f"{dist['name']}, {st['name']}", phone=phone, address=address,
                          address_private="",
-                         content=(f"The {name.split(',')[0]} ({dist['name']}) gives free legal aid and "
+                         content=(f"The {name.split(',')[0]} ({name.split(', ', 1)[1]}) gives free legal aid and "
                                   f"advice to people who qualify under the Legal Services Authorities Act, 1987." + (f" Office: {address}." if address else "") +
                                   f" Contact details from the {state_name} State Legal Services Authority, as on {jmy(on)}. "
                                   f"NALSA's national legal aid helpline is 15100.")),

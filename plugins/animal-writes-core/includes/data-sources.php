@@ -81,7 +81,8 @@ function aw_listing_sources( $id ) {
 			$link  = (string) get_post_meta( $id, 'aw_source_url', true );
 		}
 		if ( in_array( $slug, AW_IMPORT_SOURCES, true ) ) {
-			$on   = (string) get_post_meta( $id, 'aw_source_date', true );
+			$label = $name ? $name : $label; // the list's own publisher, e.g. "Telangana State Legal Services Authority"
+			$on    = (string) get_post_meta( $id, 'aw_source_date', true );
 			$link = (string) get_post_meta( $id, 'aw_source_url', true );
 		}
 		if ( 'organisation' === $slug ) {
