@@ -3,7 +3,8 @@
  * About page (page 58), owner-approved brief (17 Oct 2026): four sections (Who we are, What we do, Why we do it,
  * How you can help), built from theme blocks and styles, in four full-width bands (aw.css: About page). Takes out the first campaign's story blocks (A National
  * Movement of Compassion, the Campaign Timeline, the next-phase banner, "Historic achievement unlocked"), the
- * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). No newsletter here:
+ * separate Corrections line and the volunteer banner (Volunteer is one of the actions now). How you can help lists only
+ * actions What we do does not already link (owner, 18 Oct 2026: no repeats). No newsletter here:
  * the footer form covers it (owner, 18 Oct 2026). Sets the Rank Math
  * title, description and focus keyword. The old content and meta go to ~/aw-about-backup-*.json first, and
  * WordPress keeps the old version as a revision.
@@ -43,8 +44,8 @@ $content = <<<'HTML'
 <!-- /wp:column -->
 
 <!-- wp:column {"verticalAlignment":"center"} -->
-<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":22,"aspectRatio":"4/3","scale":"cover","sizeSlug":"large","linkDestination":"none"} -->
-<figure class="wp-block-image size-large"><img src="/wp-content/uploads/2026/10/aw1-im6-1024x578.jpeg" alt="A large crowd seated with placards at the day of action." class="wp-image-22" style="aspect-ratio:4/3;object-fit:cover"/></figure>
+<div class="wp-block-column is-vertically-aligned-center"><!-- wp:image {"id":17,"aspectRatio":"4/3","scale":"cover","sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="/wp-content/uploads/2026/10/aw1-im1.jpeg" alt="People seated with handwritten placards at a gathering for community dogs." class="wp-image-17" style="aspect-ratio:4/3;object-fit:cover"/></figure>
 <!-- /wp:image --></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
@@ -291,54 +292,6 @@ $content = <<<'HTML'
 
 <!-- wp:group {"metadata":{"name":"Actions"},"layout":{"type":"grid","minimumColumnWidth":"20rem"}} -->
 <div class="wp-block-group"><!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Find an organisation</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Looking for help or hoping to support existing work? Explore organisations and services relevant to your location and needs.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/directory/">Find an organisation</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Learn before you act</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Use emergency guides, research, the Library, and practical resources to understand an issue and identify appropriate next steps.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/resources/">Explore resources</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
-<div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">Take part in a campaign</h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Explore active campaigns and available templates or participation opportunities.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="/campaigns/">Explore current campaigns</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"aw-about-act","layout":{"type":"flow"}} -->
 <div class="wp-block-group aw-about-act"><!-- wp:heading {"level":3} -->
 <h3 class="wp-block-heading">Volunteer</h3>
 <!-- /wp:heading -->
