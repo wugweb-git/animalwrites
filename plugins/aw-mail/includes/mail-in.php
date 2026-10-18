@@ -384,7 +384,9 @@ function aw_mail_in_screen() {
 	echo '<p>The Mail inbox reads vedanshu@ (with contact@), support@ and noreply@ live through the Mail API with the token below; nothing from the mailboxes is copied into WordPress. Hostinger calls the webhook below when mail arrives, which refreshes the unread counts.</p>';
 	echo '<p><strong>Webhook URL (hPanel → Emails → each mailbox → Agentic mail → Webhooks, event "message.received"):</strong><br><code>' . esc_html( rest_url( 'aw/v1/mail-in' ) ) . '</code></p>';
 	echo '<p>Last message received: <strong>' . esc_html( is_array( $last ) ? $last['at'] . ' — ' . ( $last['mailbox'] ?? '' ) . ' — to ' . $last['to'] . ' — ' . $last['subject'] : 'none yet' ) . '</strong></p>';
-	echo '<form method="post">' . wp_nonce_field( 'aw_mail_in', 'aw_mail_nonce', true, false ) . '<table class="form-table">';
+	echo '<form method="post">';
+	wp_nonce_field( 'aw_mail_in', 'aw_mail_nonce' );
+	echo '<table class="form-table">';
 	$field = function ( $k, $label, $help ) {
 		$saved = '' !== aw_mail_setting( $k );
 		echo '<tr><th><label for="aw_mail_' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td><input class="regular-text code" type="password" autocomplete="off" id="aw_mail_' . esc_attr( $k ) . '" name="aw_mail_' . esc_attr( $k ) . '" value=""' . ( $saved ? ' placeholder="Saved. Leave empty to keep it."' : '' ) . '><p class="description">' . esc_html( $help ) . '</p></td></tr>';

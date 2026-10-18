@@ -116,7 +116,7 @@ function aw_mail_mark_failed( $id, $msg ) {
 	}
 	$tries = (int) $row->tries + 1;
 	$wait  = array( 1 => 15 * MINUTE_IN_SECONDS, 2 => HOUR_IN_SECONDS, 3 => 6 * HOUR_IN_SECONDS );
-	$wpdb->update(
+	$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- the plugin's own queue table
 		aw_mail_table(),
 		array(
 			'tries'    => $tries,
@@ -369,7 +369,7 @@ add_action(
 		} elseif ( 'retry' === $note ) {
 			echo '<div class="notice notice-success inline"><p>Held emails will be tried again.</p></div>';
 		} elseif ( 'flushed' === $note ) {
-			echo '<div class="notice notice-success inline"><p>Sent ' . (int) ( $_GET['n'] ?? 0 ) . ' queued emails.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success inline"><p>Sent ' . absint( wp_unslash( $_GET['n'] ?? 0 ) ) . ' queued emails.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a count in the redirect after the nonced action
 		}
 		if ( $pause ) {
 			echo '<div class="notice notice-error inline"><p><strong>Sending is paused.</strong> The mail server refused an email on ' . esc_html( wp_date( 'j M Y, H:i', (int) $pause['at'] ) ) . ': ' . esc_html( (string) $pause['error'] ) . '. Nothing is being sent and nothing is lost; emails wait in the queue. Resume only when the mailbox is working again.</p>';
@@ -412,18 +412,19 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_mail_cap' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		if ( 'resume' === ( $_POST['do'] ?? '' ) ) {
+		$do = sanitize_key( wp_unslash( $_POST['do'] ?? '' ) );
+		if ( 'resume' === $do ) {
 			delete_option( 'aw_mail_pause' );
 			wp_safe_redirect( admin_url( 'options-general.php?page=kits-mail&aw_cap=resumed#cap' ) );
 			exit;
 		}
-		if ( 'retry' === ( $_POST['do'] ?? '' ) ) {
+		if ( 'retry' === $do ) {
 			global $wpdb;
 			$wpdb->query( "UPDATE " . aw_mail_table() . " SET status = 'failed', tries = 0, next_try = NULL WHERE status = 'held' AND mail IS NOT NULL" ); // phpcs:ignore
 			wp_safe_redirect( admin_url( 'options-general.php?page=kits-mail&aw_cap=retry#cap' ) );
 			exit;
 		}
-		if ( 'flush' === ( $_POST['do'] ?? '' ) ) {
+		if ( 'flush' === $do ) {
 			$n = aw_mail_flush();
 			wp_safe_redirect( admin_url( 'options-general.php?page=kits-mail&aw_cap=flushed&n=' . (int) $n . '#cap' ) );
 			exit;

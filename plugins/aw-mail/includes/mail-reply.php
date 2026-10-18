@@ -74,7 +74,7 @@ function aw_reply_page() {
 	if ( ! aw_reply_can() ) {
 		wp_die( 'You cannot reply to emails.', 403 );
 	}
-	$id = aw_reply_email_item( (int) ( $_GET['message'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$id = aw_reply_email_item( absint( wp_unslash( $_GET['message'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which message to show; nothing is changed
 	echo '<div class="wrap"><h1>Reply</h1>';
 	if ( ! $id ) {
 		echo '<p>Only an incoming email can be answered here. Open one from Inbox → Contact messages.</p></div>';
@@ -106,7 +106,7 @@ function aw_reply_page() {
 	}
 	echo '</tbody></table>';
 	$text = trim( (string) $post->post_content );
-	echo '<div class="card">' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '<p><em>(no text)</em></p>' ) . '</div>';
+	echo '<div class="card">' . ( '' !== $text ? wp_kses_post( wpautop( esc_html( $text ) ) ) : '<p><em>(no text)</em></p>' ) . '</div>';
 	$links = '<a href="' . esc_url( admin_url( 'post.php?post=' . $id . '&action=edit' ) ) . '">Open in Inbox</a>';
 	if ( $c ) {
 		$links .= ' · <a href="' . esc_url( admin_url( 'admin.php?page=fluentcrm-admin#/subscribers/' . (int) $c->id . '/notes' ) ) . '">Contact\'s notes in FluentCRM</a>';
@@ -210,7 +210,7 @@ function aw_reply_send( $id, $subject, $text ) {
 add_action(
 	'admin_post_aw_reply_send',
 	function () {
-		$id = (int) ( $_POST['message'] ?? 0 );
+		$id = absint( wp_unslash( $_POST['message'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the nonce is named after this ID and checked next
 		if ( ! aw_reply_can() || ! check_admin_referer( 'aw_reply_' . $id, 'aw_reply_nonce' ) ) {
 			wp_die( 'You cannot reply to emails.', 403 );
 		}

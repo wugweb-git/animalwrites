@@ -70,7 +70,7 @@ add_action(
 add_action(
 	'load-edit.php',
 	function () {
-		if ( 'aw_message' === ( $_GET['post_type'] ?? '' ) && empty( $_GET['post_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'aw_message' === sanitize_key( wp_unslash( $_GET['post_type'] ?? '' ) ) && empty( $_GET['post_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a redirect between list screens
 			wp_safe_redirect( admin_url( 'admin.php?page=aw-mail&folder=forms' ) );
 			exit;
 		}

@@ -98,7 +98,10 @@ function aw_mail_overview_render( $max, $compact = false ) {
 	foreach ( aw_mail_all_boxes() as $key => $addr ) {
 		$box   = aw_mail_overview_box( $key );
 		$alias = aw_mail_aliases_of( $addr );
-		echo '<h3>' . ( function_exists( 'aw_mail_profile_picture' ) ? aw_mail_profile_picture( $addr, 24 ) : '' ) . esc_html( $addr . ( $alias ? ' (also ' . implode( ', ', $alias ) . ')' : '' ) ) . ' — ' . ( $box ? esc_html( sprintf( _n( '%d unread', '%d unread', (int) $box['unread'], 'aw-mail' ), (int) $box['unread'] ) ) : 'not available' ) . '</h3>';
+		$n      = (int) ( $box['unread'] ?? 0 );
+		/* translators: %d: number of unread messages. */
+		$unread = sprintf( _n( '%d unread', '%d unread', $n, 'aw-mail' ), $n );
+		echo '<h3>' . ( function_exists( 'aw_mail_profile_picture' ) ? wp_kses_post( aw_mail_profile_picture( $addr, 24 ) ) : '' ) . esc_html( $addr . ( $alias ? ' (also ' . implode( ', ', $alias ) . ')' : '' ) ) . ' — ' . ( $box ? esc_html( $unread ) : 'not available' ) . '</h3>';
 		if ( ! $box ) {
 			echo '<p>The Mail API could not be reached for this mailbox (token missing or not scoped to it). ' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 			continue;

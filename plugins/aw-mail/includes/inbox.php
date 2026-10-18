@@ -553,7 +553,7 @@ function aw_mail_form_item_screen( $s ) {
 		}
 	}
 	echo '<tr><th scope="row">Date</th><td>' . aw_mail_day( get_post_field( 'post_date', $id ) ) . '</td></tr></tbody></table></div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	echo '<div class="postbox"><div class="inside">' . wpautop( esc_html( (string) get_post_field( 'post_content', $id ) ) ) . '</div></div>';
+	echo '<div class="postbox"><div class="inside">' . wp_kses_post( wpautop( esc_html( (string) get_post_field( 'post_content', $id ) ) ) ) . '</div></div>';
 	echo '</div><div id="postbox-container-1" class="postbox-container"><div class="postbox awm-actions"><div class="postbox-header"><h2 class="hndle">Reply</h2></div><div class="inside">';
 	if ( is_email( $m( 'email' ) ) ) {
 		echo '<a class="button button-primary button-large" href="' . esc_url( add_query_arg( array( 'page' => 'aw-mail', 'box' => $s['box'], 'folder' => AW_MAIL_FORMS, 'item' => $id, 'compose' => 'reply' ), admin_url( 'admin.php' ) ) ) . '">Reply</a>';
@@ -728,6 +728,7 @@ function aw_mail_parse_addrs( $s ) {
 }
 
 function aw_mail_send_from_form( $in, $refbox ) {
+	check_admin_referer( 'aw_mail_act' ); // also checked by the caller; here too because this reads $_FILES
 	$boxes = aw_mail_all_boxes();
 	$from  = sanitize_key( $in['from'] ?? '' );
 	$from  = isset( $boxes[ $from ] ) ? $from : (string) array_key_first( $boxes );
