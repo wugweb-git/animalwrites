@@ -53,10 +53,12 @@ Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-c
 | File | What it does |
 |---|---|
 | `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
-| `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
+| `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets; since 18 Oct 2026 it only refreshes counts, no copies), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
 | `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
 | `includes/profiles.php` | Per-mailbox display name, signature and picture (copied from Hostinger webmail; no API). Shown on the Mail page; site emails from that address use the name and end with the signature (not FluentCRM; not with `X-AW-No-Signature`). |
-| `includes/overview.php` | Mail menu (admins) with the unread badge across every mailbox, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
+| `includes/inbox.php` | The Mail inbox (18 Oct 2026, owner: real inbox in WP): mailboxes and folders, list and search, read (sandboxed, remote pictures off), Reply / Reply all / Forward / New message via the Mail API (threads kept, copy in Sent, signature added), Archive / Move / Spam / Delete to Trash / unread, attachments; plus the Website forms folder (contact form messages). Admins and editors; 30 sends an hour; nothing logged but send times. |
+| `includes/settings-tab.php` | Mail → Settings: Incoming mail and site sending (SMTP, daily limit) in one place; the old Settings pages redirect there; Inbox → Contact messages redirects to Mail → Website forms. |
+| `includes/overview.php` | Unread badge, cached counts and the Mail dashboard widget (the menu now opens the inbox); formerly the Mail menu (admins) with the unread badge across every mailbox, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
 | `includes/mail-reply.php` | The former Inbox → Reply. Kept, not loaded (replies happen in webmail). |
 | `uninstall.php` | Deletes nothing. |
 

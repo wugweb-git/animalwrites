@@ -181,6 +181,17 @@ add_action(
 
 /** Handle one webhook delivery. */
 function aw_mail_in( WP_REST_Request $req ) {
+	if ( ! apply_filters( 'aw_mail_file_copies', false ) && '' === (string) $req->get_param( '_aw_force' ) ) {
+		// The inbox reads the mailboxes live (inbox.php): a delivery only refreshes the counts (owner, 18 Oct 2026).
+		if ( function_exists( 'aw_mail_overview_flush' ) ) {
+			aw_mail_overview_flush();
+		}
+		foreach ( array_keys( AW_MAIL_BOXES ) as $k ) {
+			delete_transient( 'aw_mail_folders_' . $k );
+		}
+		update_option( 'aw_mail_last', array( 'at' => current_time( 'mysql' ), 'to' => '', 'mailbox' => AW_MAIL_BOXES[ (string) $req->get_param( '_aw_mailbox' ) ] ?? '', 'subject' => '' ), false );
+		return new WP_REST_Response( array( 'status' => 'noted' ), 200 );
+	}
 	$boxkey = isset( AW_MAIL_BOXES[ (string) $req->get_param( '_aw_mailbox' ) ] ) ? (string) $req->get_param( '_aw_mailbox' ) : 'vedanshu';
 	$boxadr = AW_MAIL_BOXES[ $boxkey ];
 	$p      = (array) $req->get_json_params();
@@ -369,8 +380,8 @@ function aw_mail_in_screen() {
 	}
 	$ids  = '' !== aw_mail_setting( 'api_token' ) ? aw_mail_box_ids() : array();
 	$last = get_option( 'aw_mail_last' );
-	echo '<div class="wrap"><h1>Incoming mail</h1>';
-	echo '<p>Hostinger Mail sends each new message in vedanshu@animalwrites.in (contact@ is its alias) and support@animalwrites.in to this address. Each arrives in Inbox → Contact messages, tagged Email, with the mailbox it came to and the address it was sent to, and as a note on the sender\'s contact in FluentCRM. Nothing is sent automatically.</p>';
+	echo '<div class="wrap"><h2>Incoming mail</h2>';
+	echo '<p>The Mail inbox reads vedanshu@ (with contact@), support@ and noreply@ live through the Mail API with the token below; nothing from the mailboxes is copied into WordPress. Hostinger calls the webhook below when mail arrives, which refreshes the unread counts.</p>';
 	echo '<p><strong>Webhook URL (hPanel → Emails → each mailbox → Agentic mail → Webhooks, event "message.received"):</strong><br><code>' . esc_html( rest_url( 'aw/v1/mail-in' ) ) . '</code></p>';
 	echo '<p>Last message received: <strong>' . esc_html( is_array( $last ) ? $last['at'] . ' — ' . ( $last['mailbox'] ?? '' ) . ' — to ' . $last['to'] . ' — ' . $last['subject'] : 'none yet' ) . '</strong></p>';
 	echo '<form method="post">' . wp_nonce_field( 'aw_mail_in', 'aw_mail_nonce', true, false ) . '<table class="form-table">';
@@ -388,8 +399,10 @@ function aw_mail_in_screen() {
 	submit_button();
 	echo '</form>';
 	$imp = get_option( 'aw_mail_imported' );
+	if ( apply_filters( 'aw_mail_file_copies', false ) ) {
 	echo '<h2>Mail already in the mailboxes</h2><p>' . esc_html( is_array( $imp ) ? 'Imported ' . $imp['at'] . ': ' . wp_json_encode( $imp['counts'] ) : 'Not imported yet. Needs the API token.' ) . '</p>';
 	echo '<p><a class="button" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_mail_import' ), 'aw_mail_import' ) ) . '">Import existing mail (newest first)</a></p>';
+	}
 	do_action( 'aw_mail_settings_after' ); // mailboxes and aliases, profiles (mailboxes.php, profiles.php)
 	echo '</div>';
 }
@@ -519,8 +532,11 @@ add_action( 'aw_mail_poll', 'aw_mail_poll' );
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_mail_poll' ) ) {
+		$on = apply_filters( 'aw_mail_file_copies', false ); // no copies since 18 Oct 2026: no poll either
+		if ( $on && ! wp_next_scheduled( 'aw_mail_poll' ) ) {
 			wp_schedule_event( time() + 120, 'aw_5min', 'aw_mail_poll' );
+		} elseif ( ! $on && wp_next_scheduled( 'aw_mail_poll' ) ) {
+			wp_clear_scheduled_hook( 'aw_mail_poll' );
 		}
 	}
 );

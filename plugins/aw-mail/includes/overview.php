@@ -94,7 +94,7 @@ function aw_mail_overview_date( $date ) {
  * @param bool $compact Dashboard widget layout.
  */
 function aw_mail_overview_render( $max, $compact = false ) {
-	$link = '<a href="' . esc_url( AW_MAIL_WEBMAIL ) . '" target="_blank" rel="noopener noreferrer">Open in webmail<span class="screen-reader-text"> (opens in a new tab)</span></a>';
+	$link = '<a href="' . esc_url( admin_url( 'admin.php?page=aw-mail' ) ) . '">Open Mail</a>';
 	foreach ( aw_mail_all_boxes() as $key => $addr ) {
 		$box   = aw_mail_overview_box( $key );
 		$alias = aw_mail_aliases_of( $addr );
@@ -125,16 +125,16 @@ function aw_mail_overview_render( $max, $compact = false ) {
 add_action(
 	'admin_menu',
 	function () {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( AW_MAIL_CAP ) ) {
 			return;
 		}
-		$n     = aw_mail_overview_unread();
+		$n     = aw_mail_overview_unread() + ( function_exists( 'aw_mail_forms_unread' ) ? aw_mail_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
-		add_menu_page( 'Mail', 'Mail' . $badge, 'manage_options', 'aw-mail', 'aw_mail_overview_page', 'dashicons-email', 27 );
+		add_menu_page( 'Mail', 'Mail' . $badge, AW_MAIL_CAP, 'aw-mail', 'aw_mail_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
 	}
 );
 
-/** Mail: unread counts and the last 10 messages per mailbox. */
+/** The former Mail list (replaced by the inbox, inbox.php, 18 Oct 2026). */
 function aw_mail_overview_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Not allowed.', 403 );
@@ -149,7 +149,7 @@ function aw_mail_overview_page() {
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( current_user_can( AW_MAIL_CAP ) ) {
 			wp_add_dashboard_widget( 'aw_mail_widget', 'Mail', fn() => aw_mail_overview_render( 5, true ) );
 		}
 	}
