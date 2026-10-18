@@ -3,28 +3,12 @@
  * Title: India writes for its community dogs
  * Slug: animal-writes/aw1-story
  * Categories: animal-writes
- * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures (each with its Kits icon), its timeline as a rail, a Kits Brand button, and beside them four of the campaign's own photographs and the outlets that covered it (publisher marks).
+ * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures (each with its Kits icon), its timeline as a rail, a Kits Brand button, and beside them four of the campaign's own photographs.
  * Inserter: yes
  *
  * @package animal-writes
  */
 
-// The outlets that reported on the campaign: its Media & PR items, news reports only (no social posts), one per outlet.
-$aw1_tag    = get_term_by( 'slug', 'campaign-india-writes-community-dogs', 'post_tag' );
-$aw1_skip   = array();
-$aw1_hosts  = array();
-$aw1_social = '#^https?://([a-z0-9-]+\.)*(instagram\.com|facebook\.com|fb\.watch|youtube\.com|youtu\.be|x\.com|twitter\.com|threads\.net|linkedin\.com)/#i';
-if ( $aw1_tag ) {
-	foreach ( get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'publish', 'numberposts' => -1, 'tag_id' => (int) $aw1_tag->term_id, 'orderby' => 'date', 'order' => 'DESC' ) ) as $aw1_p ) {
-		$aw1_url  = (string) get_post_meta( $aw1_p->ID, 'aw_press_url', true );
-		$aw1_host = preg_replace( '/^www\./', '', (string) wp_parse_url( $aw1_url, PHP_URL_HOST ) );
-		if ( preg_match( $aw1_social, $aw1_url ) || isset( $aw1_hosts[ $aw1_host ] ) ) {
-			$aw1_skip[] = (int) $aw1_p->ID;
-		} else {
-			$aw1_hosts[ $aw1_host ] = true;
-		}
-	}
-}
 $aw1_photo = function ( $id, $cls ) {
 	return '<!-- wp:image {"id":' . $id . ',"sizeSlug":"medium_large","linkDestination":"none","className":"' . $cls . '"} -->' . "\n"
 		. '<figure class="wp-block-image size-medium_large ' . $cls . '"><img src="' . esc_url( (string) wp_get_attachment_image_url( $id, 'medium_large' ) ) . '" alt="' . esc_attr( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) . '" class="wp-image-' . $id . '"/></figure>' . "\n"
@@ -135,21 +119,9 @@ $aw1_photo = function ( $id, $cls ) {
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
 
-<!-- wp:group {"metadata":{"name":"Photographs and coverage"},"className":"aw-ed-story-media","layout":{"type":"default"}} -->
+<!-- wp:group {"metadata":{"name":"Photographs"},"className":"aw-ed-story-media","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-story-media"><!-- wp:group {"metadata":{"name":"Photographs"},"className":"aw-ed-story-photos","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-story-photos"><?php echo $aw1_photo( 23, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 24, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 25, 'aw-ed-story-photo' ) . "\n\n" . $aw1_photo( 26, 'aw-ed-story-photo' ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"metadata":{"name":"Coverage"},"className":"aw-ed-story-press","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-ed-story-press"><!-- wp:paragraph {"className":"aw-ed-story-press-head"} -->
-<p class="aw-ed-story-press-head"><a href="/press-coverage/?tag=campaign-india-writes-community-dogs">In the press</a></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:query {"queryId":98,"query":{"perPage":10,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,"exclude":<?php echo wp_json_encode( $aw1_skip ); ?>,"taxQuery":{"post_tag":[<?php echo (int) ( $aw1_tag ? $aw1_tag->term_id : 0 ); ?>]}},"className":"aw-ed-story-outlets"} -->
-<div class="wp-block-query aw-ed-story-outlets"><!-- wp:post-template -->
-<!-- wp:animal-writes/publisher /-->
-<!-- /wp:post-template --></div>
-<!-- /wp:query --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div></div>

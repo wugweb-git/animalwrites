@@ -294,25 +294,27 @@
 
 /* ---------- The campaign band on Home and the Campaigns page (pattern animal-writes/aw1-story, core Cover) ----------
    Owner, 18 Oct 2026: redesign it with the campaign's photographs and facts, small icons consistent with the site,
-   the same background (the Cover photo and its dark gradient). Words left, photographs and the outlets right.
+   the same background (the Cover photo and its dark gradient); then "remove the press section, make it compact".
+   Words left, the photographs right, sized to the words.
    Icons: the Kits set, small, in the campaign orange. Breakpoints: 768, 1200. */
 .aw-ed-story.aw-camp--community-dogs { --dg-ico: 1.25rem; --dg-line: rgb(255 255 255 / 0.28); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-7); align-items: start; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols > * { margin: 0 !important; min-width: 0; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * + * { margin-top: var(--kit-space-6) !important; }
+.aw-camp--community-dogs.aw-ed-story { min-height: 0 !important; } /* the content sets the height, not a fixed 620px */
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * + * { margin-top: var(--kit-space-5) !important; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text h2 { max-width: 18ch; font-weight: 800 !important; letter-spacing: -0.035em; line-height: 1.02 !important; text-wrap: balance; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text h2 + p { max-width: 54ch; }
-@media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--kit-space-8, 4rem); } }
+@media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--kit-space-7); align-items: center; } }
 
 /* Figures: a 2 x 2 ledger, each with its icon (letters, citizens, cities, coordinators) */
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-5); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures > * { position: relative; margin: 0 !important; padding: var(--kit-space-4) 0 0 calc(var(--dg-ico) + var(--kit-space-3)); border-top: 1px solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-4) + 0.35rem); width: var(--dg-ico); height: var(--dg-ico); background: var(--camp-primary); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-4); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures > * { position: relative; margin: 0 !important; padding: var(--kit-space-3) 0 0 calc(var(--dg-ico) + var(--kit-space-2)); border-top: 1px solid var(--dg-line); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures > *::before { content: ""; position: absolute; left: 0; top: calc(var(--kit-space-3) + 0.3rem); width: var(--dg-ico); height: var(--dg-ico); background: var(--camp-primary); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures p { margin: 0 !important; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-num { font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem) !important; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-num { font-size: clamp(1.625rem, 1.3rem + 0.9vw, 2rem) !important; font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; white-space: nowrap; }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures .has-small-font-size { margin-top: var(--kit-space-1) !important; color: rgb(255 255 255 / 0.8); }
 @media (min-width: 768px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-5) var(--kit-space-6); } }
+
 
 /* Timeline: a rail with a small orange stop per date; the day of posting is the filled stop */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { display: grid; grid-template-columns: 1fr; }
@@ -326,27 +328,12 @@
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates .is-key p:first-child { color: var(--camp-primary); }
 @media (min-width: 768px) {
 	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *, .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :last-child { padding: var(--kit-space-4) var(--kit-space-3) 0 0; border-left: 0; border-top: 1px solid var(--dg-line); }
+	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *, .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > :last-child { padding: var(--kit-space-3) var(--kit-space-3) 0 0; border-left: 0; border-top: 1px solid var(--dg-line); }
 	.aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates > *::before { left: 0; top: -0.3125rem; }
 }
 
-/* Photographs: four of the campaign's own pictures, whole portraits in an even 2 x 2 (a row of four on phones) */
+/* Photographs: four of the campaign's own pictures as even squares, a 2 x 2 beside the words (a row of four below 1200) */
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--kit-space-2); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo { margin: 0 !important; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--kit-radius-media); }
+.aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo { margin: 0 !important; aspect-ratio: 1; overflow: hidden; border-radius: var(--kit-radius-media); }
 .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photo img { display: block; width: 100%; height: 100% !important; object-fit: cover; }
 @media (min-width: 1200px) { .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); } }
-
-/* In the press: the outlets that covered it, each with its own small mark */
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-press { margin-top: var(--kit-space-5) !important; padding-top: var(--kit-space-4); border-top: 1px solid var(--dg-line); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-press-head { margin: 0 0 var(--kit-space-3) !important; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-press-head a { color: #ffffff; text-decoration: underline; text-underline-offset: 0.2em; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .wp-block-post-template { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-4); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets li { margin: 0; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .aw-src { margin: 0; color: rgb(255 255 255 / 0.85); font-size: var(--kit-type-sm); }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .aw-src-icon { border-radius: 3px; background: #fff; }
-/* The outlets are a plain row, not cards: the Kits Post Template card styles (padding, surface, arrow) do not apply */
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .wp-block-post-template > li { padding: 0 !important; background: none !important; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; min-height: 0 !important; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .wp-block-post-template > li::after, .aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .wp-block-post-template > li::before { content: none !important; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .aw-src, .aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .aw-src-name { color: #ffffff !important; opacity: 0.9; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets { margin: 0 !important; }
-.aw-ed-story.aw-camp--community-dogs .aw-ed-story-outlets .aw-src { margin: 0 !important; }
