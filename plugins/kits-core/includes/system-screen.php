@@ -277,6 +277,10 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 		} elseif ( ! empty( $it['classes'] ) ) {
 			$src = add_query_arg( 'kits_only_classes', rawurlencode( implode( ',', (array) $it['classes'] ) ), $url );
 		}
+		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) { // where it is used, for an entry the sheet does not draw
+			$spot = kits_spot_map()[ $it['name'] ] ?? '';
+			$src  = add_query_arg( 'kits_spot_url', rawurlencode( '' !== $spot ? $spot : 'none' ), $src );
+		}
 	}
 	$states = ! empty( $it['states'] ) ? '<ul style="margin:.25em 0 1em 1.2em;list-style:disc">' . implode( '', array_map( fn( $x ) => '<li>' . esc_html( $x ) . '</li>', (array) $it['states'] ) ) . '</ul>' : '<p>—</p>';
 	return '<tr class="kits-vis"><td colspan="7" style="padding-top:0"><details><summary style="cursor:pointer;color:#2271b1">Visual, values and states</summary>'
@@ -285,3 +289,57 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 		. ( $src ? '<iframe loading="lazy" title="' . esc_attr( $it['name'] . ' in its states' ) . '" src="' . esc_url( $src ) . '" style="width:100%;height:560px;border:1px solid #c3c4c7;background:#fff"></iframe>' : '<p>No visual: this entry styles core blocks (see Appearance &gt; Editor &gt; Styles).</p>' )
 		. '</div></details></td></tr>';
 }
+
+/**
+ * Where each registry entry is first used on the site's sample pages (kits_spot_pages(), demo.php): read once a day from
+ * the pages' HTML as a visitor gets it, so an entry's visual opens on that page at once.
+ *
+ * @return array Entry name => page address.
+ */
+function kits_spot_map( $rebuild = false ) {
+	$map = get_option( 'kits_spot_map' );
+	if ( is_array( $map ) && ! $rebuild ) {
+		return $map;
+	}
+	$found = array(); // class => first page using it
+	foreach ( function_exists( 'kits_spot_pages' ) ? kits_spot_pages() : array() as $url ) {
+		$r = wp_remote_get( $url, array( 'timeout' => 30, 'cookies' => array() ) );
+		if ( is_wp_error( $r ) ) {
+			continue;
+		}
+		preg_match_all( '/class="([^"]+)"/', (string) wp_remote_retrieve_body( $r ), $m );
+		foreach ( $m[1] as $list ) {
+			foreach ( preg_split( '/\s+/', $list ) as $c ) {
+				if ( '' !== $c && ! isset( $found[ $c ] ) ) {
+					$found[ $c ] = $url;
+				}
+			}
+		}
+	}
+	$map = array();
+	foreach ( kits_registry()['items'] as $it ) {
+		$want = (array) ( $it['classes'] ?? array() );
+		if ( ! empty( $it['block'] ) ) {
+			$want[] = 'wp-block-' . str_replace( '/', '-', $it['block'] );
+		}
+		foreach ( $found as $c => $url ) {
+			foreach ( $want as $p ) {
+				if ( $c === $p || 0 === strpos( $c, $p . '-' ) ) {
+					$map[ $it['name'] ] = $url;
+					break 3;
+				}
+			}
+		}
+	}
+	update_option( 'kits_spot_map', $map, false );
+	return $map;
+}
+add_action( 'kits_spot_map_daily', fn() => kits_spot_map( true ) );
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'kits_spot_map_daily' ) ) {
+			wp_schedule_event( time() + 300, 'daily', 'kits_spot_map_daily' );
+		}
+	}
+);

@@ -209,7 +209,7 @@ add_action(
 // Kits system > Components shows each entry's own visual: the states sheet keeps only the sections drawing that entry
 // (its classes, or its block named in the heading); an entry the sheet does not draw is shown on a live page instead,
 // scrolled to its first use and outlined (kits_spot).
-/** Pages tried in turn to show an entry the states sheet does not draw; a site adds its own (filter kits_spot_pages). */
+/** Sample pages read daily to find where each entry is first used (kits_spot_map); a site adds its own (filter kits_spot_pages). */
 function kits_spot_pages() {
 	return array_values( array_unique( (array) apply_filters( 'kits_spot_pages', array( home_url( '/' ), home_url( '/?s=animal' ), home_url( '/kits-no-such-page/' ) ) ) ) );
 }
@@ -227,14 +227,11 @@ add_action(
 				. 'root.querySelectorAll("h2").forEach(function(h){h.hidden=true;if(h.nextElementSibling&&h.nextElementSibling.tagName==="P")h.nextElementSibling.hidden=true;});var keep=0;'
 				. 'root.querySelectorAll("h3.kit-demo-h").forEach(function(h){if(h.closest("[hidden]"))return;var g=[h],n=h.nextElementSibling;while(n&&!n.matches("h3.kit-demo-h,h2")){g.push(n);n=n.nextElementSibling;}'
 				. 'var hit=(blk&&h.textContent.indexOf(blk)>-1)||(sel&&g.some(function(x){return x!==h&&(x.matches(sel)||x.querySelector(sel));}));g.forEach(function(x){x.hidden=!hit;});if(hit)keep++;});'
-				. 'if(!keep){var t=' . wp_json_encode( kits_spot_pages() ) . ';location.replace(t[0]+(t[0].indexOf("?")>-1?"&":"?")+"kits_spot="+encodeURIComponent(sel||(".wp-block-"+blk.replace("/","-")))+"&kits_spot_i=0");}})();</script>';
+				. 'if(!keep){var u=q.get("kits_spot_url")||"none";if(u==="none"){root.insertAdjacentHTML("afterbegin","<p style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not drawn on the states sheet and not found on the sample pages: it may appear only in a state, a form step or wp-admin.</p>");}else{location.replace(u+(u.indexOf("?")>-1?"&":"?")+"kits_spot="+encodeURIComponent(sel||(".wp-block-"+blk.replace("/","-"))));}}})();</script>';
 		}
 		if ( isset( $_GET['kits_spot'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<style>html{margin-top:0!important}#wpadminbar{display:none!important}.kits-spot{outline:3px solid #2271b1!important;outline-offset:4px}</style>'
-				. '<script>(function(){var q=new URLSearchParams(location.search),s=q.get("kits_spot"),i=+(q.get("kits_spot_i")||0),t=' . wp_json_encode( kits_spot_pages() ) . ',e;try{e=document.querySelector(s);}catch(x){}'
-				. 'if(e){e.classList.add("kits-spot");e.scrollIntoView({block:"center"});document.body.insertAdjacentHTML("afterbegin","<p style=\\"padding:.5em 1em;background:#f0f6fc;font:13px sans-serif\\">Shown where it is used: "+location.pathname+"</p>");return;}'
-				. 'if(i+1<t.length){location.replace(t[i+1]+(t[i+1].indexOf("?")>-1?"&":"?")+"kits_spot="+encodeURIComponent(s)+"&kits_spot_i="+(i+1));return;}'
-				. 'document.body.insertAdjacentHTML("afterbegin","<p class=\\"kits-spot-none\\" style=\\"padding:1em;background:#fcf0f1;font:14px sans-serif\\">Not used on any of the "+t.length+" sample pages: it may appear only in a state, a form step or wp-admin.</p>");})();</script>';
+				. '<script>(function(){var s=new URLSearchParams(location.search).get("kits_spot"),e;try{e=document.querySelector(s);}catch(x){}if(e){e.classList.add("kits-spot");e.scrollIntoView({block:"center"});}document.body.insertAdjacentHTML("afterbegin","<p class=\\"kits-spot-note\\" style=\\"padding:.5em 1em;background:#f0f6fc;font:13px sans-serif\\">"+(e?"Shown where it is used: ":"Not found on ")+location.pathname+"</p>");})();</script>';
 		}
 	}
 );
