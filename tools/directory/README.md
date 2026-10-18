@@ -21,6 +21,10 @@ Common steps (on your Mac, then on the server):
 | Gujarat Karuna Abhiyan 2026 centre list | `python3 build_gujarat_birds.py data/listings.json` | Hand-picked permanent facilities only (rows checked against the sheet). |
 | NGO Darpan via Dataful (collection 637, CSVs in `data/dataful/`) | `python3 build_dataful.py data/listings.json` | Animal Welfare sector, or Animal Husbandry with an animal name; ≤5 sectors. Darpan ID, registration, sectors, email. |
 
+| AWBI ABC list of 04-08-2026 (pdfplumber; the text layer mixes up rows) | `parse_abc_tables.py abc.pdf > abc.json` then `python3 build_abc.py --report abc.json data/listings.json 2026-08-04` | Listed centres get the later validity date only (names and text kept); new centres become listings. |
+| AWBI Ambulance Grant Scheme lists (2015-16 … 2025-26) | `python3 build_ambulance.py data/listings.json` | Animal Ambulance type by AWBI code; nothing created. |
+| People For Animals unit pages (80 units) | `python3 build_pfa.py data/listings.json` | Unit phone and email (owner, 18 Oct 2026); no names; numbered or doubled units held back. |
+
 New builders share `match.py` (de-dupe against `wp eval-file export_listings.php > data/listings.json`) and `report.py` (dry-run report in `data/out/`). `data/` is not committed. Every import run logs its changes (`<rows>.log.jsonl`); `wp eval-file undo_import.php <log>` takes a run back (created listings to Trash) — only when the owner asks.
 
 `places.py` holds the shared state/district matching (alias tables come from `tools/awbi/match.py`).

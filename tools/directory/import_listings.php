@@ -9,7 +9,7 @@
  *   reg_type, reg_authority, reg_act, reg_date, sectors, places[] (more [state, district] pairs), abc_valid.
  *   Matched by aw_import_key; created published and unverified.
  * - update of an existing listing: post_id, types[] (added, never removed) and any optional field above (filled only
- *   when empty), abc_centres[] (kept private). Verified or claimed listings are left alone (types too).
+ *   when empty), abc_centres[] (kept private), abc_valid (only a later date: a renewed recognition). Verified or claimed listings are left alone (types too).
  *
  * Types are Directory tags (post_tag). A listing has at most 3 types; types it already has are never removed or
  * reordered. Every change is appended to the log (one JSON object per line: post, field, old, new, kind) for
@@ -106,6 +106,10 @@ foreach ( $rows as $r ) {
 			foreach ( array( 'source_name', 'source_url', 'source_date' ) as $k ) {
 				$fill( $id, 'aw_' . $k, $r[ $k ] ?? '' );
 			}
+		}
+		if ( ! empty( $r['abc_valid'] ) && empty( $r['abc_centres'] ) && $r['abc_valid'] > (string) get_post_meta( $id, 'aw_abc_valid', true ) ) {
+			$note( $id, 'aw_abc_valid', (string) get_post_meta( $id, 'aw_abc_valid', true ), $r['abc_valid'], $kind ); // a renewed ABC recognition
+			update_post_meta( $id, 'aw_abc_valid', $r['abc_valid'] );
 		}
 		if ( ! empty( $r['abc_centres'] ) ) {
 			update_post_meta( $id, 'aw_abc_centres', wp_json_encode( $r['abc_centres'] ) ); // private: centre addresses

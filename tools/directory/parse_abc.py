@@ -4,6 +4,8 @@
 Usage:
   pdftotext -bbox abc.pdf abc.html
   python3 parse_abc.py abc.html > abc.json
+  python3 parse_abc.py --centred abc.html > abc.json   (04-08-2026 list: cells are centred vertically, so a word
+                                                         belongs to the record whose serial number is nearest in y)
 
 Reads each word's position: the table columns sit at fixed x positions on every page. A record starts at a serial
 number in the first column and runs until the next one. Each row: n, org, awbi_code, centre, district, state,
@@ -18,6 +20,7 @@ import sys
 COLS = [("sl", 0), ("org", 45), ("centre", 170), ("district", 284), ("state", 362), ("recognised", 440), ("valid", 515)]
 DATE = re.compile(r"(\d\d)[.-](\d\d)[.-](\d{4})")
 WORD = re.compile(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="[\d.]+" yMax="[\d.]+">([^<]*)</word>')
+COLS_CENTRED = [("sl", 0), ("org", 50), ("centre", 160), ("district", 280), ("state", 365), ("recognised", 445), ("valid", 525)]
 TOP, BOTTOM = 20, 800  # skip anything outside the table body
 
 
@@ -27,6 +30,29 @@ def col_of(x):
         if x >= left - 2:
             name = n
     return name
+
+
+def parse_centred(src):
+    global COLS
+    COLS = COLS_CENTRED
+    rows = []
+    for page in src.split("<page ")[1:]:
+        words = [(float(y), float(x), html.unescape(t)) for x, y, t in WORD.findall(page)]
+        serials = sorted((y, int(t.rstrip("."))) for y, x, t in words if col_of(x) == "sl" and re.fullmatch(r"\d{1,3}\.", t))
+        if not serials:
+            continue
+        recs = {n: {k: [] for k, _ in COLS} for _, n in serials}
+        head = serials[0][0] - 40  # the header sits well above the first record
+        for y, x, t in sorted(words, key=lambda w: (round(w[0]), w[1])):
+            c = col_of(x)
+            if c == "sl" or y < head or y > BOTTOM:
+                continue
+            n = min(serials, key=lambda s: abs(s[0] - y))[1]
+            recs[n][c].append(t)
+        for _, n in serials:
+            recs[n]["n"] = n
+            rows.append(recs[n])
+    return finish(rows)
 
 
 def parse(src):
@@ -52,13 +78,17 @@ def parse(src):
                 continue
             if cur is not None and c != "sl":
                 cur[c].append(t)
+    return finish(rows)
+
+
+def finish(rows):
     out = []
     for r in rows:
         j = {k: re.sub(r"\s+", " ", " ".join(r[k])).strip(" ,") for k, _ in COLS if k != "sl"}
         if not (DATE.search(j["recognised"]) and DATE.search(j["valid"])):
             continue  # header rows or broken lines
-        code = re.search(r"\(\s*([A-Z]{2,3}\s?\d{1,4}\s?/\s?\d{4})\s*\)", j["org"])
-        org = re.sub(r"\(\s*(Offline|Online|[A-Z]{2,3}\s?\d{1,4}\s?/\s?\d{4})\s*\)", "", j["org"]).strip(" ,")
+        code = re.search(r"\(\s*([A-Z&]{2,4}\s?\d{1,4}\s?/\s?[\d\s]{2,4}(?:-\s?\d{2})?)\s*\)", j["org"])
+        org = re.sub(r"\(\s*(Offline|Online|[A-Z&]{2,4}\s?\d{1,4}\s?/\s?[\d\s]{2,4}(?:-\s?\d{2})?)\s*\)", "", j["org"]).strip(" ,")
         d1, d2 = DATE.search(j["recognised"]).groups(), DATE.search(j["valid"]).groups()
         out.append({
             "n": r["n"], "org": re.sub(r"\s+", " ", org),
@@ -70,7 +100,7 @@ def parse(src):
 
 
 if __name__ == "__main__":
-    rows = parse(open(sys.argv[1], encoding="utf-8").read())
+    rows = parse_centred(open(sys.argv[2], encoding="utf-8").read()) if sys.argv[1] == "--centred" else parse(open(sys.argv[1], encoding="utf-8").read())
     json.dump(rows, sys.stdout, ensure_ascii=False, indent=1)
     print(f"rows: {len(rows)}; with AWBI code: {sum(1 for r in rows if r['awbi_code'])}; "
           f"no state: {sum(1 for r in rows if not r['state'])}", file=sys.stderr)
