@@ -28,6 +28,7 @@
     "kit-btn-press",
     "kit-btn-nudge",
     "kit-btn-spinner-width",
+    "kit-btn-hover-mix",
     "kit-btn-primary-*",
     "kit-btn-secondary-*",
     "kit-btn-ghost-*",
@@ -85,11 +86,6 @@
       "secondary hover"
      ],
      [
-      "kit-btn-brand-fg-hover",
-      "kit-btn-brand-bg-hover",
-      "brand hover on light"
-     ],
-     [
       "kit-color-on-ink",
       "kit-color-ink",
       "secondary and ghost on dark"
@@ -117,7 +113,7 @@
       "kit": "kit-btn (old: kit-btn--primary, kit-btn--ink)",
       "block": "Default (shown as Primary)",
       "light": "ink fill, white text; hover --neutral-8",
-      "dark": "brand fill, ink text (ink would vanish); hover white"
+      "dark": "takes the brand pair (fill and hover), since ink would vanish"
      },
      "secondary": {
       "use": "other actions beside a primary",
@@ -134,17 +130,18 @@
       "dark": "white text; hover 14% white tint"
      },
      "brand": {
-      "use": "campaign or brand moments; the primary shape in the brand colour",
+      "use": "brand moments: the primary shape in the brand colour",
       "kit": "kit-btn--brand",
       "block": "Brand (old: is-style-kits-primary)",
-      "light": "brand fill, on-accent text; hover ink fill",
-      "dark": "brand fill; hover white fill"
+      "colour": "--kit-btn-brand-bg/-fg: the site's brand (yellow, ink text), or the campaign's own colour inside a campaign palette (.aw-camp--<name> sets the pair)",
+      "light": "brand fill; hover = brand mixed with ink (--kit-btn-hover-mix)",
+      "dark": "the same"
      }
     },
     "dark_surfaces": ".kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark",
     "states": {
      "default": "variant colours",
-     "hover": "fill/outline/text change to the variant's hover colours over --kit-motion-fast; the icon nudges (spring, --kit-duration-spring); pointer devices only",
+     "hover": "primary lightens; secondary fills with ink (white on dark); ghost gets a tint; brand darkens towards ink (--kit-btn-hover-mix); colours fade over --kit-motion-fast; the icon nudges (spring, --kit-duration-spring); pointer devices only",
      "focus-visible": "--kit-focus-width ring in --kit-color-focus at --kit-focus-offset; colours unchanged; the icon nudges as on hover",
      "active": "pressed: moves down --kit-btn-press (1px)",
      "disabled": "disabled attribute (buttons) or aria-disabled=\"true\" (links, which then do not navigate); --opacity-disabled; no hover, no press",

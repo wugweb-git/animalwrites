@@ -234,16 +234,17 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 }
 :where(.kit-btn--brand, .is-style-kits-brand > .wp-block-button__link, .is-style-kits-primary > .wp-block-button__link) {
 	--_bg: var(--kit-btn-brand-bg); --_fg: var(--kit-btn-brand-fg); --_line: var(--kit-btn-brand-bg);
-	--_bg-h: var(--kit-btn-brand-bg-hover); --_fg-h: var(--kit-btn-brand-fg-hover); --_line-h: var(--kit-btn-brand-bg-hover);
+	--_bg-h: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); --_fg-h: var(--kit-btn-brand-fg); --_line-h: var(--_bg-h);
 }
-/* Dark surfaces: ink would vanish, so primary takes the brand fill; outlines and text turn light; hover fills light. */
+/* Brand is the site's brand colour, or a campaign's own colour inside a campaign palette (campaign.css sets
+   --kit-btn-brand-bg/-fg); every state derives from that one pair. */
+/* Dark surfaces: ink would vanish, so primary takes the brand fill (and its hover); outlines and text turn light. */
 :is(.kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark) {
-	--kit-btn-primary-bg: var(--kit-color-accent); --kit-btn-primary-fg: var(--kit-color-on-accent);
-	--kit-btn-primary-bg-hover: var(--kit-color-on-ink); --kit-btn-primary-fg-hover: var(--kit-color-ink);
+	--kit-btn-primary-bg: var(--kit-btn-brand-bg); --kit-btn-primary-fg: var(--kit-btn-brand-fg);
+	--kit-btn-primary-bg-hover: color-mix(in srgb, var(--kit-btn-brand-bg) var(--kit-btn-hover-mix), var(--kit-color-ink)); --kit-btn-primary-fg-hover: var(--kit-btn-brand-fg);
 	--kit-btn-secondary-fg: var(--kit-color-on-ink); --kit-btn-secondary-line: color-mix(in srgb, var(--kit-color-on-ink) 60%, transparent);
 	--kit-btn-secondary-bg-hover: var(--kit-color-on-ink); --kit-btn-secondary-fg-hover: var(--kit-color-ink);
 	--kit-btn-ghost-fg: var(--kit-color-on-ink); --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent);
-	--kit-btn-brand-bg-hover: var(--kit-color-on-ink); --kit-btn-brand-fg-hover: var(--kit-color-ink);
 }
 
 /* Shape, type and motion (the same for every variant) */
@@ -329,6 +330,13 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 }
 /* Leaving the site: every absolute link is treated as external until functions.php marks the site's own host */
 :is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"] { --kit-cta-arrow: var(--kit-ico-arrow-up-right); --_nudge: translate(calc(var(--kit-btn-nudge) - 1px), calc(1px - var(--kit-btn-nudge))); }
+/* In the editor the button is editable text, not a link: show the arrow it will have, and show an icon-only button's
+   text while it is being edited. */
+.wp-block-button:not([class*="kit-btn--ico-"]) > .wp-block-button__link.block-editor-rich-text__editable::after {
+	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
+	-webkit-mask: var(--kit-ico-arrow-right) center / contain no-repeat; mask: var(--kit-ico-arrow-right) center / contain no-repeat;
+}
+.wp-block-button.kit-btn--icon > .wp-block-button__link.block-editor-rich-text__editable:focus { font-size: var(--fluid-body-sm); width: auto; padding-inline: var(--kit-btn-pad-sm); }
 /* Label only (kit-btn--label, above): no automatic icon on a submit button. Links ignore it and keep their arrow. */
 
 /* Motion: on hover and focus the icon nudges (spring): the arrow 3px along its direction, a leading icon 2px and a touch

@@ -24,7 +24,7 @@ function kits_demo_master_vars() {
 }
 
 /** The primitives, once. */
-function kits_demo_panel() {
+function kits_demo_panel( $suffix = '' ) {
 	$h  = fn( $t ) => '<h3 class="kit-demo-h">' . esc_html( $t ) . '</h3>';
 	$o  = '';
 	$o .= $h( '1 Tag (static)' ) . '<div class="kit-tags">' . kits_tag( 'Neutral' ) . kits_tag( 'Accent', 'accent' ) . kits_tag( 'Ink', 'ink' ) . kits_tag( 'Success', 'success' ) . kits_tag( 'Warning', 'warning' ) . kits_tag( 'Danger', 'danger' ) . kits_tag( 'Info', 'info' ) . kits_tag( 'Template', 'accent' ) . kits_tag( 'Hindi' ) . '</div>';
@@ -54,6 +54,7 @@ function kits_demo_panel() {
 		. '</div>';
 	$o .= $h( '12 Checkbox' ) . '<label class="kit-checkbox"><input type="checkbox"> <span>Unchecked (consent starts unchecked)</span></label><label class="kit-checkbox"><input type="checkbox" checked> <span>Checked</span></label><label class="kit-checkbox"><input type="checkbox" aria-invalid="true"> <span>Invalid</span></label>';
 	$o .= $h( '13 Form status' ) . '<div class="kit-form-status">Something went wrong. Your details are still here — try again.</div><div class="kit-form-status is-success">Message sent.</div>';
+	$o .= $h( '14 Banner' ) . '<p>A cover-block pattern (kits-by-wugweb/banner): 16:5 wide, 4:3 on phones. Insert it from Editor → Patterns.</p>';
 	$o .= $h( '15 Breadcrumb' ) . '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol><li><a href="#">Home</a></li><li><a href="#">Directory</a></li><li><span aria-current="page">Kerala</span></li></ol></nav>';
 	$dd   = array( array( 'Act', 'act', false, 9 ), array( 'Rule', 'rule', false, 7 ), array( 'Judgment', 'judgment', false, 1 ) );
 	$open = fn( $html ) => preg_replace( array( '/class="kit-dd( [^"]*)?"/', '/(class="kit-dd-panel[^"]*"[^>]*?) hidden(="[^"]*")?/' ), array( 'class="kit-dd$1 is-open"', '$1' ), $html, 1 );
@@ -63,8 +64,8 @@ function kits_demo_panel() {
 	$o   .= $h( '17 Sort: closed · open' ) . '<div class="kit-tags kit-demo-dd">' . kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ) ) ) . '</div>'
 		. '<div class="kit-demo-dd">' . $open( kits_sort_dropdown( array( array( 'Newest first', '#', true ), array( 'Oldest first', '#', false ), array( 'A–Z', '#', false ) ) ) ) . '</div>';
 	if ( function_exists( 'kits_disclosure' ) ) {
-		$o .= $h( '18 Disclosure (a form behind a button): closed · open' ) . kits_disclosure( 'kit-demo-d1', 'Claim this listing', '<p>Form here.</p>' )
-			. str_replace( '<details class="kit-disclosure"', '<details class="kit-disclosure" open', kits_disclosure( 'kit-demo-d2', 'Report a mistake', '<p>Form here.</p>', 'secondary' ) );
+		$o .= $h( '18 Disclosure (a form behind a button): closed · open' ) . kits_disclosure( 'kit-demo-d1' . $suffix, 'Claim this listing', '<p>Form here.</p>' )
+			. str_replace( '<details class="kit-disclosure"', '<details class="kit-disclosure" open', kits_disclosure( 'kit-demo-d2' . $suffix, 'Report a mistake', '<p>Form here.</p>', 'secondary' ) );
 	}
 	if ( function_exists( 'kits_form_steps' ) ) {
 		$o .= $h( '19 Steps (step 1 of 2; without JavaScript both show)' ) . kits_form_steps( array( array( 'About you', '<p>Fields.</p>' ), array( 'What to change', '<p>Fields.</p>' ) ), 'Send' );
@@ -133,8 +134,31 @@ function kits_demo_buttons() {
 			. '</div></div></div>';
 		return $o;
 	};
-	return $surface( 'On a light surface', 'kit-demo-btns--light' ) . $surface( 'On a dark surface', 'kit-dark' );
+	$o = $surface( 'On a light surface', 'kit-demo-btns--light' ) . $surface( 'On a dark surface', 'kit-dark' );
+	// Brand reads --kit-btn-brand-bg/-fg: the site's brand by default, a palette's own colour where a site sets one.
+	$palettes = array( 'Site brand' => '' ) + (array) apply_filters( 'kits_demo_button_palettes', array() ); // label => class
+	$o       .= '<div class="kit-demo-btns kit-demo-btns--light"><p class="kit-demo-btns-h">Brand in each palette (light, then dark)</p>';
+	foreach ( $palettes as $label => $class ) {
+		foreach ( array( '', ' kit-dark kit-demo-btns-dark' ) as $dark ) {
+			$o .= '<div class="kit-demo-btns-row ' . esc_attr( $class . $dark ) . '"><span class="kit-demo-btns-label">' . esc_html( $label . ( $dark ? ' · dark' : '' ) ) . '</span>';
+			foreach ( $states as $state => $st ) {
+				$o .= '<button class="kit-btn kit-btn--brand' . $st[0] . '" type="button"' . $st[1] . '>' . esc_html( $state ) . '</button>';
+			}
+			$o .= '<button class="kit-btn" type="button">Primary</button><div class="wp-block-buttons"><div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/demo/">Block</a></div></div></div>';
+		}
+	}
+	return $o . '</div>';
 }
+
+/* The page is private, so WordPress titles it "Private: Kits demo"; the sheet shows its plain title. */
+add_filter(
+	'private_title_format',
+	function ( $format, $post ) {
+		return 'kits-demo' === get_post_field( 'post_name', $post ) ? '%s' : $format;
+	},
+	10,
+	2
+);
 
 add_shortcode(
 	'kits_demo',
@@ -143,9 +167,9 @@ add_shortcode(
 			return '';
 		}
 		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
-			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
-			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel() . '</section>'
-			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel() . '</section>'
+			. '.kit-demo-btns{padding:var(--s-4);border-radius:var(--kit-radius-control);margin-top:var(--s-3);background:var(--kit-color-bg)}.kit-demo-btns.kit-dark,.kit-demo-btns-dark{background:var(--kit-color-ink);color:var(--kit-color-on-ink)}.kit-demo-btns-dark{padding:var(--s-3);border-radius:var(--kit-radius-control)}.kit-demo-btns-h{margin:0 0 var(--s-2);font-weight:var(--kit-weight-bold)}.kit-demo-btns-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);margin:0 0 var(--s-3)}.kit-demo-btns-row .wp-block-buttons{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0}.kit-demo-btns-label{flex:0 0 100%;font-size:var(--fluid-caption);text-transform:uppercase;letter-spacing:.06em;opacity:.75}.kit-btn.is-demo-hover{background:var(--_bg-h);border-color:var(--_line-h);color:var(--_fg-h)}.kit-btn.is-demo-active{transform:translateY(var(--kit-btn-press))}.is-demo-focus{outline:var(--kit-focus-width) solid var(--kit-color-focus)!important;outline-offset:var(--kit-focus-offset)}.kit-chip.is-demo-hover,.kit-filter-pill.is-demo-hover{border-color:var(--kit-color-ink)}.kit-chip.is-demo-active{background:var(--kit-color-surface)}.kit-demo-dd .kit-dd-panel{position:static;margin-top:var(--s-1)}.kit-demo-adbox{display:grid;place-items:center;height:5rem;border:1px dashed var(--kit-color-line);color:var(--kit-color-muted)}.kit-demo-icons{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:var(--s-2)}.kit-demo-icons li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--fluid-label)}.kit-demo-blocks{grid-column:1/-1}</style>'
+			. '<div class="kit-demo"><section style="' . esc_attr( kits_demo_master_vars() ) . '"><h2>Kits (master palette)</h2>' . kits_demo_panel( '-master' ) . '</section>'
+			. '<section><h2>' . esc_html( get_bloginfo( 'name' ) ) . ' palette</h2>' . kits_demo_panel( '-site' ) . '</section>'
 			. ( ( $extra = (string) apply_filters( 'kits_demo_sections', '' ) ) ? '<section class="kit-demo-blocks">' . $extra . '</section>' : '' ) . '</div>'; // a site's own blocks, in their states
 	}
 );

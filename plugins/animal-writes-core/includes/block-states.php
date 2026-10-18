@@ -27,7 +27,7 @@ add_filter(
 		$row = function ( $state, $id, $render ) {
 			$out = $id ? (string) call_user_func( $render, $id ) : '';
 			return '<div class="aw-state-row"><p class="aw-state-name">' . esc_html( $state ) . ( $id ? ' <a href="' . esc_url( get_permalink( $id ) ) . '">(item)</a>' : '' ) . '</p><div class="aw-state-out">'
-				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|kit-ico|kit-ico|<svg/', $out ) ? $out : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
+				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|kit-ico|kit-ico|<svg/', $out ) ? '<section aria-label="' . esc_attr( 'Demo: ' . $state ) . '">' . $out . '</section>' : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
 		};
 		$blocks = array(
 			'Document date (animal-writes/doc-date)' => array(
@@ -144,16 +144,16 @@ add_filter(
 		$page_blocks = array(
 			array( 'Breadcrumb (animal-writes/breadcrumb)', 'every page top', '/library/' ),
 			array( 'Head band (animal-writes/section-head)', 'Pages, archives, category and Directory place pages', '/about/' ),
-			array( 'Hub count (animal-writes/hub-count)', 'hub head bands (prints nothing: the count sits above the pagination, owner 9 Oct)', '/news/' ),
-			array( 'Hub pictures (animal-writes/hub-visual)', 'hub head bands (prints nothing: no pictures in page top bands, owner 8 Oct)', '/news/' ),
-			array( 'List filters (animal-writes/list-filters)', 'hub head bands: dropdowns, Sort; Directory search', '/opportunities/' ),
+			array( 'Section page count (animal-writes/hub-count)', 'section page head bands (prints nothing: the count sits above the pagination, owner 9 Oct)', '/news/' ),
+			array( 'Section page pictures (animal-writes/hub-visual)', 'section page head bands (prints nothing: no pictures in page top bands, owner 8 Oct)', '/news/' ),
+			array( 'List filters (animal-writes/list-filters)', 'section page head bands: dropdowns, Sort; Directory search', '/opportunities/' ),
 			array( 'Result count and sort (animal-writes/result-head)', 'Directory results: one result, many, filtered', '/directory/telangana/' ),
 		);
 		$out .= '<h2>Page-level blocks</h2><p>These draw from the page they are on, so each is shown on its page (and in the frames below).</p><div class="aw-state-grid">';
 		foreach ( $page_blocks as $pb ) {
 			$out .= '<div><h3 class="kit-demo-h">' . esc_html( $pb[0] ) . '</h3><div class="aw-state-row"><p class="aw-state-name">' . esc_html( $pb[1] ) . '</p><div class="aw-state-out"><a href="' . esc_url( home_url( $pb[2] ) ) . '">' . esc_html( $pb[2] ) . '</a></div></div></div>';
 		}
-		$out .= '<div><h3 class="kit-demo-h">Browse by state (animal-writes/browse-states)</h3><div class="aw-state-row"><p class="aw-state-name">Every state with listings</p><div class="aw-state-out">' . ( function_exists( 'aw_block_browse_states' ) ? aw_block_browse_states() : '' ) . '</div></div></div></div>';
+		$out .= '<div><h3 class="kit-demo-h">Browse by state (animal-writes/browse-states)</h3><div class="aw-state-row"><p class="aw-state-name">Every state with listings</p><div class="aw-state-out">' . ( function_exists( 'aw_block_browse_states' ) ? '<section aria-label="Demo: browse by state">' . aw_block_browse_states() . '</section>' : '' ) . '</div></div></div></div>';
 		// Picture states (owner, 16 Oct 2026): each real image in a 4:3 card frame, masked (cover); logos stay whole.
 		$pick = array( 'Landscape photo' => 0, 'Portrait photo' => 0, 'Square photo' => 0 );
 		foreach ( get_posts( array( 'post_type' => array( 'aw_news', 'post', 'aw_opportunity' ), 'post_status' => 'publish', 'numberposts' => 120, 'fields' => 'ids', 'meta_key' => '_thumbnail_id' ) ) as $pid ) {
@@ -210,4 +210,27 @@ add_filter(
 			. 'addEventListener("resize",function(){document.querySelectorAll(".aw-bp iframe").forEach(fit);});})();</script>';
 		return $html . $out;
 	}
+);
+
+/* States sheet (/kits-demo/): the Brand button in each campaign palette, with the palette styles loaded there. */
+add_filter(
+	'kits_demo_button_palettes',
+	function ( $palettes ) {
+		return $palettes + array(
+			'Campaign: lab rules'      => 'aw-camp--lab-rules',
+			'Campaign: community dogs' => 'aw-camp--community-dogs',
+		);
+	}
+);
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( ! is_page( 'kits-demo' ) ) {
+			return;
+		}
+		foreach ( array( 'aw-campaign' => 'campaign.css', 'aw-campaign-record' => 'campaign-record.css' ) as $handle => $file ) {
+			wp_enqueue_style( $handle, plugins_url( 'assets/css/' . $file, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . 'assets/css/' . $file ) );
+		}
+	},
+	40
 );

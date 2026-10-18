@@ -26,6 +26,7 @@
 	--camp-deep: var(--camp-accent);
 	--camp-dark: #1d1418;
 	--camp-meta: #5e4c51;
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
 }
 /* Crimson on the dark bands is under 3:1, so rules, outlines, bars and icons there are white */
 .aw-camp--lab-rules :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }

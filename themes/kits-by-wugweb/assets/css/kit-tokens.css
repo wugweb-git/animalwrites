@@ -177,8 +177,7 @@
   --kit-btn-ghost-bg-hover: color-mix(in srgb, var(--kit-color-ink) 8%, transparent);
   --kit-btn-brand-bg: var(--kit-color-accent);
   --kit-btn-brand-fg: var(--kit-color-on-accent);
-  --kit-btn-brand-bg-hover: var(--kit-color-ink);
-  --kit-btn-brand-fg-hover: var(--kit-color-on-ink);
+  --kit-btn-hover-mix: 85%;
 }
 @media (min-width: 768px) {
   :root {

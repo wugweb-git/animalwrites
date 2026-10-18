@@ -190,6 +190,15 @@ function kits_button_own_host_css() {
 add_action( 'enqueue_block_assets', 'kits_button_own_host_css' );
 
 /**
+ * Button block sidebar: Size, Content and Icon (assets/js/button-options.js), so size and content combine with any style.
+ */
+function kits_button_editor_options() {
+	$f = get_template_directory() . '/assets/js/button-options.js';
+	wp_enqueue_script( 'kits-button-options', get_template_directory_uri() . '/assets/js/button-options.js', array( 'wp-hooks', 'wp-compose', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ), (string) filemtime( $f ), true );
+}
+add_action( 'enqueue_block_editor_assets', 'kits_button_editor_options' );
+
+/**
  * Theme pattern files are cached by WordPress; refresh the cache when the pattern files of the active theme
  * (and its parent) change.
  */

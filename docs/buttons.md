@@ -1,6 +1,6 @@
 # Buttons
 
-One button system for the Kits master theme. `.kit-btn` (theme and plugin markup) and the core Button block render the same. All rules are in `themes/kits-by-wugweb/assets/css/kit-primitives.css` section 10. The values are `--kit-btn-*` tokens (`tokens/tokens.json`). The registry entry is "Button" in `kits-registry.json`, and every state is drawn on the states sheet (/kits-demo/, section 10).
+One button system for the Kits master theme. `.kit-btn` (theme and plugin markup) and the core Button block render the same. All rules are in `themes/kits-by-wugweb/assets/css/kit-primitives.css` section 10. The values are `--kit-btn-*` tokens (`tokens/tokens.json`). The registry entry is "Button" in `kits-registry.json`, and every state is drawn on the states sheet (/kits-demo/, section 10: both systems, light and dark, every variant, state, content type and size, and Brand in each campaign palette).
 
 ## Variants
 
@@ -9,9 +9,11 @@ One button system for the Kits master theme. `.kit-btn` (theme and plugin markup
 | Primary | the main action, one per area | `kit-btn` | Default (shown as Primary) | ink fill, white text | brand fill, ink text (ink would vanish) |
 | Secondary | other actions next to a primary | `kit-btn--secondary` | Secondary | outline, ink text | light outline, white text |
 | Ghost | low emphasis: Clear, Cancel, Show more | `kit-btn--ghost` | Ghost | text only | white text only |
-| Brand | brand moments: the primary shape in the brand colour | `kit-btn--brand` | Brand | brand fill, ink text | brand fill, ink text |
+| Brand | brand moments: the primary shape in the brand colour | `kit-btn--brand` | Brand | brand fill (yellow, ink text), or the campaign's colour | the same |
 
-Dark surfaces are `.kit-dark`, `.has-secondary-background-color`, the site header and footer, `.kit-ed-hero`, `.kit-ed-help`, `.kit-ed-story` and `.kit-form--on-dark`. Inside them the `--kit-btn-*` tokens switch, so every variant works without extra classes.
+Brand reads one pair of tokens, `--kit-btn-brand-bg` and `--kit-btn-brand-fg`. By default that is the site's brand (yellow with ink text). A campaign palette sets the pair to the campaign's own colour (`--camp-primary` / `--camp-primary-ink` in `.aw-camp--lab-rules` and `.aw-camp--community-dogs`), so Brand buttons on a campaign page are in the campaign colour. Hover mixes the brand with ink (`--kit-btn-hover-mix`), so every state follows the same pair. A new campaign palette adds the same line; the contrast check tests each palette's pair.
+
+Dark surfaces are `.kit-dark`, `.has-secondary-background-color`, the site header and footer, `.kit-ed-hero`, `.kit-ed-help`, `.kit-ed-story` and `.kit-form--on-dark`. Inside them the `--kit-btn-*` tokens switch, so every variant works without extra classes. Primary takes the brand pair there, because ink would vanish.
 
 Old names still render: `is-style-kits-primary` renders as Brand (it was yellow), `is-style-kits-small` as small Primary, and core `is-style-outline` as Secondary. `kit-btn--primary` and `kit-btn--ink` render as Primary, and `kit-btn--outline` as Secondary. The editor no longer offers the old names.
 
@@ -20,7 +22,7 @@ Old names still render: `is-style-kits-primary` renders as Brand (it was yellow)
 | State | What changes | Motion |
 |---|---|---|
 | Default | variant colours | none |
-| Hover (pointer devices only) | primary lightens; secondary and brand fill with ink (white on dark); ghost gets a tint | colours fade over `--kit-motion-fast`; the icon nudges with a spring (`--kit-duration-spring`) |
+| Hover (pointer devices only) | primary lightens; secondary fills with ink (white on dark); brand darkens towards ink; ghost gets a tint | colours fade over `--kit-motion-fast`; the icon nudges with a spring (`--kit-duration-spring`) |
 | Focus-visible | `--kit-focus-width` ring in `--kit-color-focus`; colours unchanged | the icon nudges, as on hover |
 | Active (pressed) | moves down `--kit-btn-press` (1px) | instant |
 | Disabled | `disabled` on buttons, `aria-disabled="true"` on links (they stop navigating); `--opacity-disabled`; no hover, no press | none |
@@ -47,7 +49,7 @@ Icon names: phone, mail, whatsapp, search, send, download, check, alert, person,
 
 ## On the Button block
 
-A block style picks the variant: Default, Secondary, Ghost or Brand. Size and content go in **Advanced → Additional CSS class(es)**: `kit-btn--sm`, `kit-btn--icon`, `kit-btn--label`, `kit-btn--ico-mail`, and so on. They combine, so `kit-btn--sm kit-btn--icon kit-btn--ico-search` with the Secondary style gives a small outlined search button.
+The **Styles** panel picks the variant: Primary (the default), Secondary, Ghost or Brand. The **Size and content** panel in the block sidebar sets Size (Default, Small), Content (icon and label, label only, icon only) and Icon (automatic or a named icon). Those write the classes `kit-btn--sm`, `kit-btn--label` / `kit-btn--icon` and `kit-btn--ico-<name>`, which can also be typed in **Advanced → Additional CSS class(es)**. In the editor the button shows the arrow it will have, and an icon-only button shows its text while you edit it. They combine, so `kit-btn--sm kit-btn--icon kit-btn--ico-search` with the Secondary style gives a small outlined search button.
 
 ## Rules
 

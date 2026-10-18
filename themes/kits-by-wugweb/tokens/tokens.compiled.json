@@ -785,15 +785,10 @@
       "md": "var(--kit-color-on-accent)",
       "lg": "var(--kit-color-on-accent)"
     },
-    "btn-brand-bg-hover": {
-      "sm": "var(--kit-color-ink)",
-      "md": "var(--kit-color-ink)",
-      "lg": "var(--kit-color-ink)"
-    },
-    "btn-brand-fg-hover": {
-      "sm": "var(--kit-color-on-ink)",
-      "md": "var(--kit-color-on-ink)",
-      "lg": "var(--kit-color-on-ink)"
+    "btn-hover-mix": {
+      "sm": "85%",
+      "md": "85%",
+      "lg": "85%"
     }
   }
 }

@@ -16,6 +16,7 @@
 	--camp-deep: #6b3f00;
 	--camp-dark: #16130e;
 	--camp-meta: #5c4a33;
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
 }
 /* The hero photo (a portrait) keeps its shape but not the whole screen. */
 .aw-camp--community-dogs .aw-camp-hero .wp-block-image { max-width: min(100%, 20rem); margin-top: var(--kit-space-5); }

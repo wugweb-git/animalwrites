@@ -37,6 +37,7 @@ CAMPAIGN_PAIRS = [
     ("camp-mark", "camp-surface", NON_TEXT, "card icon on the surface"),
     ("camp-on-mark", "camp-mark", NON_TEXT, "ghost button ring on the mark colour"),
     ("camp-primary-ink", "camp-primary", NON_TEXT, "hero chips and ghost ring on the primary colour"),
+    ("kit-btn-brand-fg", "kit-btn-brand-bg", TEXT, "Brand button: label on the campaign colour"),
 ]
 # Not checked: the poster's brand rule and chip outline on dark. The rule is a separator and the chip has its own
 # text, so WCAG 1.4.11 asks no 3:1 of them (the default palette has brand = dark there).
