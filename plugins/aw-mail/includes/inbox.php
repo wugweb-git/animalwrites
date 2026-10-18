@@ -101,7 +101,7 @@ function aw_mail_role_folder( $key, $role ) {
 	$want = array( 'trash' => 'INBOX.Trash', 'junk' => 'INBOX.Junk', 'archive' => 'INBOX.Archive', 'inbox' => 'INBOX' )[ $role ] ?? 'INBOX';
 	$have = aw_mail_folders( $key );
 	if ( 'INBOX.Archive' === $want && ! isset( $have[ $want ] ) ) {
-		aw_mail_call( 'POST', '/api/v1/mailboxes/' . rawurlencode( aw_mail_box_id( $key ) ) . '/folders', array( 'path' => 'INBOX.Archive' ) );
+		aw_mail_call( 'POST', '/api/v1/mailboxes/' . rawurlencode( aw_mail_box_id( $key ) ) . '/folders', array( 'name' => 'Archive' ) ); // makes INBOX.Archive
 		delete_transient( 'aw_mail_folders_' . $key );
 	}
 	return $want;
@@ -190,6 +190,13 @@ function aw_mail_inbox_page() {
 		return;
 	}
 	echo '<style>#aw-mail .awm{display:flex;gap:20px;align-items:flex-start}#aw-mail .awm-nav{flex:0 0 220px}#aw-mail .awm-main{flex:1;min-width:0}#aw-mail .awm-nav ul{margin:0 0 16px}#aw-mail .awm-nav li{margin:0}#aw-mail .awm-nav a{display:flex;justify-content:space-between;padding:6px 10px;border-radius:4px;text-decoration:none}#aw-mail .awm-nav a.current{background:#2271b1;color:#fff}#aw-mail .awm-nav h3{margin:12px 0 4px;font-size:12px;text-transform:uppercase;color:#646970}#aw-mail tr.unread td{font-weight:600}#aw-mail td.awm-date{white-space:nowrap;width:8em}#aw-mail td.awm-from{width:26%}#aw-mail .awm-row a{color:inherit;text-decoration:none;display:block}#aw-mail .awm-frame{width:100%;height:70vh;border:1px solid #dcdcde;background:#fff}#aw-mail .awm-head th{width:5em;text-align:left;vertical-align:top;padding:2px 8px 2px 0;color:#646970}#aw-mail .awm-tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}@media (max-width:767px){#aw-mail .awm{flex-direction:column}#aw-mail .awm-nav{flex:none;width:100%}}</style>';
+	if ( $s['uid'] && ! isset( $_GET['compose'] ) && AW_MAIL_FORMS !== $s['folder'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+		aw_mail_get( $s['box'], $s['folder'], $s['uid'] ); // opening marks it read: fetch first so the counts below are current
+		delete_transient( 'aw_mail_folders_' . $s['box'] );
+	}
+	if ( AW_MAIL_FORMS === $s['folder'] && $s['item'] && ! isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		update_post_meta( $s['item'], 'aw_read', current_time( 'mysql' ) );
+	}
 	echo '<div class="awm"><nav class="awm-nav" aria-label="Mailboxes and folders">';
 	foreach ( $boxes as $key => $addr ) {
 		$alias = aw_mail_aliases_of( $addr );
