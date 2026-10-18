@@ -17,7 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** One mailbox's profile: name, signature (HTML), picture (attachment ID). */
+/** Every address with a profile: the mailboxes and their aliases (contact@), key => address. */
+function aw_mail_profile_addresses() {
+	$out = aw_mail_all_boxes();
+	foreach ( array_keys( function_exists( 'aw_mail_aliases' ) ? aw_mail_aliases() : array() ) as $a ) {
+		$out[ 'alias-' . sanitize_key( strstr( $a, '@', true ) ) ] = $a;
+	}
+	return $out;
+}
+
+/** One address's profile (mailbox or alias): name, signature (HTML), picture (attachment ID). */
 function aw_mail_profile( $address ) {
 	$all = (array) get_option( 'aw_mail_profiles', array() );
 	return wp_parse_args( (array) ( $all[ strtolower( (string) $address ) ] ?? array() ), array( 'name' => '', 'signature' => '', 'picture' => 0 ) );
@@ -110,7 +119,7 @@ add_action(
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'aw_mail_profile' );
 		echo '<input type="hidden" name="action" value="aw_mail_profile">';
-		foreach ( aw_mail_all_boxes() as $key => $addr ) {
+		foreach ( aw_mail_profile_addresses() as $key => $addr ) {
 			$p = aw_mail_profile( $addr );
 			echo '<h3>' . aw_mail_profile_picture( $addr ) . esc_html( $addr ) . '</h3><table class="form-table">'; // phpcs:ignore WordPress.Security.EscapeOutput -- image markup from core
 			echo '<tr><th scope="row"><label for="aw-p-name-' . esc_attr( $key ) . '">Display name</label></th><td><input class="regular-text" id="aw-p-name-' . esc_attr( $key ) . '" name="p[' . esc_attr( $key ) . '][name]" value="' . esc_attr( $p['name'] ) . '"></td></tr>';
@@ -131,7 +140,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_mail_profile' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$boxes = aw_mail_all_boxes();
+		$boxes = aw_mail_profile_addresses();
 		$all   = (array) get_option( 'aw_mail_profiles', array() );
 		foreach ( (array) wp_unslash( $_POST['p'] ?? array() ) as $key => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each field sanitised below
 			if ( isset( $boxes[ $key ] ) && is_array( $v ) ) {
