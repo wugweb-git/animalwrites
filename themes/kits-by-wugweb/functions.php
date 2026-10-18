@@ -134,6 +134,10 @@ function kits_block_styles() {
 		'core/list'      => array(
 			'kits-sources' => __( 'Sources', 'kits-by-wugweb' ),
 		),
+		// A menu link with a "Beta" badge after its label (kits_nav_badge below; kit-primitives.css section 6).
+		'core/navigation-link' => array(
+			'kits-beta' => __( 'Beta', 'kits-by-wugweb' ),
+		),
 	);
 	foreach ( $styles as $block => $list ) {
 		foreach ( $list as $name => $label ) {
@@ -148,6 +152,29 @@ function kits_block_styles() {
 	}
 }
 add_action( 'init', 'kits_block_styles' );
+
+/**
+ * Badge after a menu label: "Beta" (block style kits-beta). The badge sits inside the link, so the link's name reads
+ * "{label}, Beta" (the comma is for screen readers only) and its target size is unchanged.
+ *
+ * @param string $text Badge text.
+ * @return string
+ */
+function kits_nav_badge( $text ) {
+	return '<span class="kit-badge kit-badge--beta"><span class="screen-reader-text">, </span>' . esc_html( $text ) . '</span>';
+}
+
+add_filter(
+	'render_block_core/navigation-link',
+	function ( $html, $block ) {
+		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'is-style-kits-beta' ) ) {
+			return $html;
+		}
+		return preg_replace( '#(<span class="wp-block-navigation-item__label">.*?</span>)#s', '$1' . kits_nav_badge( __( 'Beta', 'kits-by-wugweb' ) ), $html, 1 );
+	},
+	10,
+	2
+);
 
 /**
  * Core Button keeps one built-in style, its default, named Primary; core Outline is replaced by Kits Secondary.

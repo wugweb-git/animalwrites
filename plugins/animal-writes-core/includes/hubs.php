@@ -277,6 +277,21 @@ add_filter(
 	3
 );
 
+// Any other Query Loop of Opportunities (e.g. on the Adoption page) follows the section rule too: open ones only.
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $vars, $block ) {
+		if ( 'aw_opportunity' !== ( $block->context['query']['postType'] ?? '' ) || aw_hub_of_query( $block->context['queryId'] ?? 0 ) ) {
+			return $vars;
+		}
+		$vars['meta_query']            = (array) ( $vars['meta_query'] ?? array() );
+		$vars['meta_query']['aw_open'] = aw_open_opportunities_meta_query();
+		return $vars;
+	},
+	20,
+	2
+);
+
 /**
  * Hub list markup: the Query Loop carries the page state, pagination links use /page/N/ and keep the filters,
  * and a list marked "aw-hide-empty" shows nothing when it has no items.

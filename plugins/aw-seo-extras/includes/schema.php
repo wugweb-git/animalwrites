@@ -1035,6 +1035,8 @@ function aw_schema_nodes() {
 		$nodes[] = aw_press_schema();
 	} elseif ( function_exists( 'aw_hub_schema_nodes' ) && aw_hub_schema_nodes() ) {
 		$nodes = array_merge( $nodes, aw_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
+	} elseif ( is_page() && 'page-hub' === get_page_template_slug( get_queried_object_id() ) ) {
+		$nodes = array_merge( $nodes, aw_page_lists_schema_nodes( get_queried_object_id() ) ); // a section page of several lists (Adoption)
 	} elseif ( aw_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
 	}
@@ -1084,6 +1086,69 @@ function aw_category_schema_nodes() {
 	);
 	if ( $items ) {
 		$nodes[] = array( '@type' => 'ItemList', '@id' => $url . '#list', 'numberOfItems' => (int) $wp_query->found_posts, 'itemListElement' => $items );
+	}
+	return $nodes;
+}
+
+/**
+ * A section page whose lists are Query Loops in its own content (not one hub's list, e.g. Adoption: Directory listings,
+ * Opportunities, Resources and News of one category): CollectionPage + ItemList of the items those loops show, in page
+ * order. Synced patterns in the content are followed; noindex and preview-only items are left out.
+ *
+ * @param int $page_id Page ID.
+ * @return array
+ */
+function aw_page_lists_schema_nodes( $page_id ) {
+	$url    = get_permalink( $page_id );
+	$loops  = array();
+	$walk   = function ( $blocks, $depth = 0 ) use ( &$walk, &$loops ) {
+		foreach ( $blocks as $b ) {
+			if ( 'core/query' === $b['blockName'] ) {
+				$loops[] = (array) ( $b['attrs']['query'] ?? array() );
+			} elseif ( 'core/block' === $b['blockName'] && ! empty( $b['attrs']['ref'] ) && $depth < 3 ) {
+				$walk( parse_blocks( (string) get_post_field( 'post_content', (int) $b['attrs']['ref'] ) ), $depth + 1 );
+			}
+			if ( ! empty( $b['innerBlocks'] ) ) {
+				$walk( $b['innerBlocks'], $depth );
+			}
+		}
+	};
+	$walk( parse_blocks( (string) get_post_field( 'post_content', $page_id ) ) );
+	$items = array();
+	$seen  = array();
+	$skip  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
+	foreach ( $loops as $query ) {
+		$loop = (object) array( 'context' => array( 'query' => $query ) );
+		$vars = apply_filters( 'query_loop_block_query_vars', build_query_vars_from_query_block( $loop, 1 ), $loop, 1 ); // the same rules the list follows (open Opportunities only)
+		foreach ( get_posts( $vars + array( 'post_status' => 'publish', 'suppress_filters' => false ) ) as $p ) {
+			if ( isset( $seen[ $p->ID ] ) || aw_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, $skip, true ) ) {
+				continue;
+			}
+			$seen[ $p->ID ] = true;
+			$items[]        = array(
+				'@type'    => 'ListItem',
+				'position' => count( $items ) + 1,
+				'item'     => array( '@type' => AW_LIST_ITEM_TYPES[ $p->post_type ] ?? 'CreativeWork', '@id' => get_permalink( $p ), 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) ),
+			);
+		}
+	}
+	$nodes = array(
+		array_filter(
+			array(
+				'@type'       => 'CollectionPage',
+				'@id'         => $url . '#page',
+				'url'         => $url,
+				'name'        => aw_seo_plain( get_the_title( $page_id ) ),
+				'description' => aw_seo_description(),
+				'inLanguage'  => 'en-IN',
+				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
+				'publisher'   => array( '@id' => home_url( '/#organization' ) ),
+				'mainEntity'  => $items ? array( '@id' => $url . '#list' ) : null,
+			)
+		),
+	);
+	if ( $items ) {
+		$nodes[] = array( '@type' => 'ItemList', '@id' => $url . '#list', 'numberOfItems' => count( $items ), 'itemListElement' => $items );
 	}
 	return $nodes;
 }

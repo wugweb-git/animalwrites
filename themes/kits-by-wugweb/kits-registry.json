@@ -260,7 +260,9 @@
    "type": "primitive",
    "status": "live",
    "classes": [
-    "kit-badge"
+    "kit-badge",
+    "kit-badge--beta",
+    "is-style-kits-beta"
    ],
    "states": [
     "verified",
@@ -269,9 +271,18 @@
     "sponsored",
     "ad",
     "closed",
-    "new"
+    "new",
+    "beta (accent pill after a menu label: Navigation Link block style \"Beta\" = is-style-kits-beta, or the same span in a footer list)"
    ],
-   "tokens": [],
+   "tokens": [
+    "kit-color-accent",
+    "kit-color-on-accent",
+    "kit-radius-pill",
+    "kit-meta-size",
+    "kit-leading-heading",
+    "s-0",
+    "s-2"
+   ],
    "a11y": {
     "element": "<span>",
     "aria": "none",
@@ -279,10 +290,11 @@
     "focus": "n/a",
     "target": "n/a",
     "motion": "none",
-    "sr": "state shown as text, not colour only",
+    "sr": "state shown as text, not colour only; in a menu link the badge is inside the link with a screen-reader comma, so the link reads \"{label}, Beta\"",
     "contrast": [
      "kit-color-ink",
-     "kit-color-surface"
+     "kit-color-surface",
+     "kit-color-on-accent on kit-color-accent (beta)"
     ]
    },
    "seo": {

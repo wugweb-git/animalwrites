@@ -189,6 +189,13 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-badge--sponsored, .kit-badge--ad { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-badge--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); }
 .kit-badge--new { background: var(--kit-color-info-soft); color: var(--kit-color-info); }
+/* Beta: a small pill after a menu label (block style kits-beta on a Navigation Link, or the same span in a footer list).
+   Accent on dark and light surfaces; one line, so the link keeps its height. */
+.kit-badge--beta {
+	margin-inline-start: var(--s-2); padding: var(--s-0) var(--s-2); border-radius: var(--kit-radius-pill);
+	font-size: var(--kit-meta-size); line-height: var(--kit-leading-heading); white-space: nowrap; vertical-align: middle;
+	background: var(--kit-color-accent); color: var(--kit-color-on-accent);
+}
 
 /* ---------- 7. Eyebrow / 8. Count ---------- */
 .kit-eyebrow { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-label); font-weight: var(--weight-label); color: var(--kit-color-muted); }
