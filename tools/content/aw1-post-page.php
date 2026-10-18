@@ -106,13 +106,13 @@ function a1sec( $anchor, $inner, $cls = '' ) {
 function a1owner( $note ) {
 	return '<!-- wp:paragraph {"className":"aw-owner-copy"} -->' . "\n<p class=\"aw-owner-copy\">[OWNER COPY] $note</p>\n<!-- /wp:paragraph -->\n\n";
 }
-function a1card( $inner ) {
-	return a1group( $inner, 'aw-card' );
+function a1card( $inner, $ico = '' ) {
+	return a1group( $inner, trim( 'aw-card ' . ( $ico ? 'kit-ico--' . $ico : '' ) ) );
 }
-function a1grid( $cards ) {
+function a1grid( $cards, $icons = array() ) {
 	$inner = '';
-	foreach ( $cards as $c ) {
-		$inner .= a1card( $c );
+	foreach ( $cards as $n => $c ) {
+		$inner .= a1card( $c, $icons[ $n ] ?? '' );
 	}
 	return "<!-- wp:group {\"layout\":{\"type\":\"grid\",\"minimumColumnWidth\":\"16rem\"}} -->\n<div class=\"wp-block-group\">$inner</div>\n<!-- /wp:group -->\n\n";
 }
@@ -126,6 +126,20 @@ function a1rehead( $b, $t, $level = 2 ) {
 	$b['innerHTML']     = $h;
 	$b['innerContent']  = array( $h );
 	return $b;
+}
+/** A block with an extra class on its outer tag (a layout hook; the words are unchanged). */
+function a1class( $b, $cls ) {
+	$b['attrs']['className'] = trim( ( $b['attrs']['className'] ?? '' ) . ' ' . $cls );
+	$add = fn( $h ) => preg_replace_callback( '/^(\s*<[a-z0-9]+)( class="([^"]*)")?/i', fn( $m ) => $m[1] . ' class="' . trim( ( $m[3] ?? '' ) . ' ' . $cls ) . '"', $h, 1 );
+	$b['innerHTML'] = $add( $b['innerHTML'] );
+	if ( isset( $b['innerContent'][0] ) && is_string( $b['innerContent'][0] ) ) {
+		$b['innerContent'][0] = $add( $b['innerContent'][0] );
+	}
+	return $b;
+}
+/** A list of document links (file icon from the Kits icon set). */
+function a1doclist( $items ) {
+	return '<!-- wp:list {"className":"aw-camp-doclist kit-ico--file"} -->' . "\n<ul class=\"wp-block-list aw-camp-doclist kit-ico--file\">$items</ul>\n<!-- /wp:list -->\n\n";
 }
 
 $lib = function ( $slug ) {
@@ -147,7 +161,7 @@ $hero = a1sec(
 	. a1p( 'Nationwide letter petition to the Supreme Court against the 7 Nov 2025 removal order · 29 Nov 2025', 'aw-camp-lede' )
 	. a1sc( '[aw_camp_status]' )
 	. a1p( 'In November 2025, people across India wrote by hand to the Supreme Court, asking it to reconsider its 7 November order to remove community dogs from public institutions. On 29 November they walked to their post offices to send the letters together.', 'aw-camp-hero-summary' ) // owner's copy, 17 Oct 2026
-	. $ser( $take( 2 ) ) // 29 November 2025 · All GPOs and HPOs
+	. $ser( a1class( $take( 2 ), 'aw-camp-postmark' ) ) // 29 November 2025 · All GPOs and HPOs, drawn as the postmark on the photo
 	. a1sc( '[aw_campaign_metric key="letters"]' )
 	. '<!-- wp:image {"id":15,"sizeSlug":"large","linkDestination":"none"} -->' . "\n" . '<figure class="wp-block-image size-large"><img src="' . esc_url( (string) wp_get_attachment_image_url( 15, 'large' ) ) . '" alt="' . esc_attr( (string) get_post_meta( 15, '_wp_attachment_image_alt', true ) ) . '" class="wp-image-15"/></figure>' . "\n<!-- /wp:image -->\n\n",
 	'aw-camp-hero'
@@ -173,7 +187,8 @@ $why = a1sec(
 			$ser( $take( 17 ) ) . $ser( $take( 18 ) ),
 			$ser( $take( 19 ) ) . $ser( $take( 20 ) ),
 			$ser( $take( 21 ) ) . $ser( $take( 22 ) ) . $ser( $take( 23 ) ) . $ser( $take( 24 ) ) . $ser( $take( 25 ) ),
-		)
+		),
+		array( 'building', 'injured', 'heart', 'mail' ) // a Kits icon per point
 	)
 );
 
@@ -201,7 +216,7 @@ $how = a1sec(
 	. a1p( 'Volunteer coordinators in more than 100 cities helped people find their nearest post office, use the letter templates and post on the same day. After posting, participants uploaded their postal receipts as proof that each letter had gone out.' )
 	. a1p( 'As reported by <a href="https://lawchakra.in/legal-updates/indian-supreme-court-letters-stray-dogs/">LawChakra</a>, letters were posted from cities as far apart as Imphal, Vadodara and Chennai, and many participants uploaded their postal receipts as proof.' )
 	. a1h( 'The letters', 3 )
-	. "<!-- wp:list -->\n<ul class=\"wp-block-list\">$tlist</ul>\n<!-- /wp:list -->\n\n"
+	. a1doclist( $tlist )
 	. $ser( a1rehead( $take( 79 ), 'Moments', 3 ) )
 	. $ser( $take( 80 ) )
 	. a1html( $mosaic )
@@ -267,7 +282,7 @@ $next = a1sec(
 	'next-steps',
 	a1h( 'What happened next' )
 	. a1p( 'On 19 May 2026, the Supreme Court delivered its final judgment in the case (2026 INSC 506). It dismissed all applications to modify its 7 November 2025 order, upheld the Animal Welfare Board of India’s standard operating procedure, and allowed the euthanasia of rabid or dangerously aggressive dogs within legal safeguards. It directed every High Court to open its own case to monitor compliance, and several, including Delhi, <a href="/news/madras-high-court-directs-tamil-nadu-puducherry-govts-to-report-steps-taken-to-remove-stray-dogs-from/">Madras</a> and Kerala, have since done so. The full judgment and earlier orders are in the Library.' )
-	. ( $nlinks ? "<!-- wp:list -->\n<ul class=\"wp-block-list\">$nlinks</ul>\n<!-- /wp:list -->\n\n" : '' ),
+	. ( $nlinks ? a1doclist( $nlinks ) : '' ),
 	'aw-camp-paper'
 );
 
@@ -334,7 +349,13 @@ $news = a1sec(
    section is not printed) ---------- */
 
 /* ---------- 14 updates ---------- */
-$updates = a1sec( 'updates', a1h( 'Stay connected' ) . $ser( $take( 102 ) ) . $ser( $take( 111 ) ), 'aw-camp-dark' );
+$follow = a1class( $take( 111 ), 'aw-camp-follow' ); // the two links as buttons with their Kits icons; the dot between them is hidden (the buttons stand apart)
+$fhtml  = str_replace( '</a> · <a', '</a><span class="aw-camp-sep" aria-hidden="true"> · </span><a', $follow['innerHTML'] );
+$fhtml  = preg_replace( '#(<a href="https://www\.instagram\.com/[^"]*"[^>]*>)#', '$1' . a1i( 'instagram' ), $fhtml, 1 );
+$fhtml  = preg_replace( '#(<a href="https://chat\.whatsapp\.com/[^"]*"[^>]*>)#', '$1' . a1i( 'brand-whatsapp' ), $fhtml, 1 );
+$follow['innerHTML']    = $fhtml;
+$follow['innerContent'] = array( $fhtml );
+$updates = a1sec( 'updates', a1h( 'Stay connected' ) . $ser( $take( 102 ) ) . $ser( $follow ), 'aw-camp-dark' );
 
 /* ---------- Unused (review): built for the record only. The owner had the group deleted on 17 Oct 2026 (archive:
    Claude outputs/campaign2/aw1-unused-blocks-archive.html; WP revision 14283), so it is not put on the page. ---------- */
