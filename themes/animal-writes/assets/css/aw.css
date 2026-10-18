@@ -1351,21 +1351,8 @@ body { background: var(--kit-color-canvas); }
 .aw-about-who .wp-block-column > p.has-large-font-size { margin-block-start: var(--kit-space-6); font-weight: var(--kit-weight-strong); }
 .aw-about-who .wp-block-image { margin: 0; }
 .aw-about-who .wp-block-image img { width: 100%; height: auto; border-radius: var(--kit-radius-media); }
-/* What we do: open cards on white (picture, text, button; no fill or border); the whole card opens its section */
-.aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; height: 100%; transition: border-color var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-about-what .is-style-kits-card > * { margin-block: 0; }
-.aw-about-what .is-style-kits-card > * + * { margin-block-start: var(--kit-space-2); }
-.aw-about-what .is-style-kits-card > .wp-block-buttons { margin-block-start: auto; padding-top: var(--kit-space-4); }
-.aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
-.aw-about-what .is-style-kits-card { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; }
-.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { column-gap: var(--kit-space-6); row-gap: var(--kit-space-8); }
-.aw-about-what .is-style-kits-card .aw-about-pic { overflow: hidden; border-radius: var(--kit-radius-media); }
-.aw-about-what .is-style-kits-card .aw-about-pic img { transition: filter var(--kit-motion-base) var(--kit-motion-ease); }
-.aw-about-what .is-style-kits-card:hover .aw-about-pic img { filter: brightness(.9); }
-.aw-about-what .is-style-kits-card:hover h3 { text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }
-.aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 6px; border-radius: var(--kit-radius-media) !important; }
-/* How we work: a plain note on the page grey */
-.aw-about-how { padding: var(--kit-space-4) var(--kit-space-5); background: var(--kit-color-canvas); border-radius: var(--kit-radius-control); }
+/* How we work: plain heading and text under the tiles */
+.aw-about-how { max-width: 62ch; }
 .aw-about-how > * { margin-block: 0; }
 .aw-about-how > * + * { margin-block-start: var(--kit-space-2); }
 /* Why we do it: the turn in the copy, set large; three principles, each with its picture */
@@ -1380,7 +1367,7 @@ body { background: var(--kit-color-canvas); }
 .aw-about-act .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
 .aw-about-act:hover { border-color: var(--kit-color-ink); }
 .aw-about-act:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-what .aw-about-pic img, .aw-about-act { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .aw-about-what .is-style-kits-card, .aw-about-act { transition: none; } }
 .wp-block-post-content > .aw-about-band:first-child { margin-top: 0 !important; padding-top: var(--kit-space-2); }
 /* The three principles: one column on phones, three from 768. The three actions: one column on phones, a row of three
    from 768 (tighter tiles and buttons up to 1199, so no button label wraps). Never two plus one alone. */
@@ -1395,5 +1382,24 @@ body { background: var(--kit-color-canvas); }
 /* How you can help: an icon in a grey circle at the top of each tile */
 .aw-about-act > .aw-about-act-ico { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: var(--kit-space-2); border-radius: var(--kit-radius-pill); background: color-mix(in srgb, var(--kit-color-ink) 7%, var(--kit-color-raised)); color: var(--kit-color-ink); }
 .aw-about-act > .aw-about-act-ico .kit-ico { --kit-ico-size: 1.5rem; }
-/* What we do: stacked on phones (below 768) like the other two grids; columns from 768 */
-@media (max-width: 767px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; } }
+/* What we do: an index of the six sections. Grey tiles on the white band (the mirror of How you can help's white tiles on
+   grey): picture left at 4:3, then name, promise, description and a Ghost button. Two columns from 1200, one column with the
+   picture beside the text from 768, stacked on phones. The whole tile is the link; hover deepens the grey. */
+.aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: minmax(0, 1fr) !important; gap: var(--kit-space-4); }
+@media (min-width: 1200px) { .aw-about-what .aw-about-inner > .wp-block-group:not(.aw-about-how) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+.aw-about-what .is-style-kits-card { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); height: 100%; margin: 0 !important; padding: var(--kit-space-4) !important; background: var(--kit-color-canvas) !important; border: 0 !important; border-radius: var(--kit-radius-card) !important; transition: background-color var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-about-what .is-style-kits-card > * { margin: 0 !important; }
+.aw-about-what .is-style-kits-card > .aw-about-pic { margin-bottom: var(--kit-space-2) !important; }
+.aw-about-what .is-style-kits-card > h3 + p { font-size: var(--kit-type-lead); }
+.aw-about-what .is-style-kits-card > h3 + p strong { font-weight: var(--kit-weight-strong); }
+.aw-about-what .is-style-kits-card > h3 + p + p { color: var(--kit-color-muted); }
+.aw-about-what .is-style-kits-card > .wp-block-buttons { margin-top: auto !important; padding-top: var(--kit-space-3); }
+@media (min-width: 768px) {
+	.aw-about-what .is-style-kits-card { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); grid-template-rows: auto auto 1fr auto; column-gap: var(--kit-space-5); row-gap: var(--kit-space-2); align-items: start; }
+	.aw-about-what .is-style-kits-card > .aw-about-pic { grid-column: 1; grid-row: 1 / -1; margin-bottom: 0 !important; }
+	.aw-about-what .is-style-kits-card > :not(.aw-about-pic) { grid-column: 2; }
+	.aw-about-what .is-style-kits-card > .wp-block-buttons { align-self: end; }
+}
+.aw-about-what .is-style-kits-card .wp-block-button__link::before { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* ::after is the button's arrow */
+.aw-about-what .is-style-kits-card:hover { background: color-mix(in srgb, var(--kit-color-ink) 6%, var(--kit-color-canvas)) !important; }
+.aw-about-what .is-style-kits-card:has(.wp-block-button__link:focus-visible) { outline: 2px solid var(--kit-color-focus); outline-offset: 2px; }

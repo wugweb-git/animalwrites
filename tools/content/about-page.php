@@ -87,8 +87,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/directory/">Find an organisation</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/directory/">Find an organisation</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -109,8 +109,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/news/">Read the latest news</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/news/">Read the latest news</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -131,8 +131,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/">Find emergency help</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/">Find emergency help</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -153,8 +153,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/library/">Browse the Library</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/library/">Browse the Library</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -175,8 +175,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/resources/">Explore resources</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/resources/">Explore resources</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group -->
@@ -197,8 +197,8 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
-<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/campaigns/">Explore campaigns</a></div>
+<div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost"} -->
+<div class="wp-block-button is-style-kits-ghost"><a class="wp-block-button__link wp-element-button" href="/campaigns/">Explore campaigns</a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:group --></div>
