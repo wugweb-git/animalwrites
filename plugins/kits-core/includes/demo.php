@@ -86,7 +86,8 @@ function kits_demo_panel( $suffix = '' ) {
 
 /**
  * The button matrix (docs/buttons.md): every variant in every state, the content types and sizes, for .kit-btn and the
- * core Button block, on a light and on a dark surface. Hover and active are drawn with demo classes.
+ * core Button block, on a light and on a dark surface. Hover and active are drawn with demo classes. Every button is a
+ * link, as on the site; form buttons (submit) have their own row.
  */
 function kits_demo_buttons() {
 	$variants = array(
@@ -100,7 +101,7 @@ function kits_demo_buttons() {
 		'Hover'    => array( ' is-demo-hover', '' ),
 		'Focus'    => array( ' is-demo-focus', '' ),
 		'Pressed'  => array( ' is-demo-active', '' ),
-		'Disabled' => array( '', ' disabled' ),
+		'Disabled' => array( '', ' aria-disabled="true"' ),
 		'Loading'  => array( ' is-loading', ' aria-busy="true"' ),
 	);
 	$ico      = fn( $n ) => '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
@@ -109,27 +110,31 @@ function kits_demo_buttons() {
 		foreach ( $variants as $name => $v ) {
 			$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">' . esc_html( ucfirst( $name ) ) . '</span>';
 			foreach ( $states as $state => $s ) {
-				$o .= '<button class="kit-btn' . $v[0] . $s[0] . '" type="button"' . $s[1] . '>' . esc_html( $state ) . '</button>';
+				$o .= '<a class="kit-btn' . $v[0] . $s[0] . '" href="/demo/"' . $s[1] . '>' . esc_html( $state ) . '</a>';
 			}
 			$o .= '</p>';
 		}
 		$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">Content</span>'
-			. '<a class="kit-btn" href="/demo/">Icon + label (link)</a>'
+			. '<a class="kit-btn" href="/demo/">Icon + label</a>'
 			. '<a class="kit-btn kit-btn--secondary" href="tel:+910000000000">Call</a>'
 			. '<a class="kit-btn kit-btn--ghost" href="https://example.org/">Leaves the site</a>'
-			. '<button class="kit-btn kit-btn--secondary kit-btn--label" type="submit">Label only</button>'
-			. '<button class="kit-btn kit-btn--icon" type="button" aria-label="Search">' . $ico( 'search' ) . '</button>'
-			. '<button class="kit-btn kit-btn--secondary kit-btn--icon" type="button" aria-label="Copy link">' . $ico( 'link' ) . '</button></p>';
+			. '<a class="kit-btn kit-btn--secondary kit-btn--label" href="/demo/">Label only</a>'
+			. '<a class="kit-btn kit-btn--icon" href="/search/" aria-label="Search">' . $ico( 'search' ) . '</a>'
+			. '<a class="kit-btn kit-btn--secondary kit-btn--icon" href="/demo/" aria-label="Copy link">' . $ico( 'link' ) . '</a></p>';
+		$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">Form buttons (submit)</span>'
+			. '<button class="kit-btn" type="submit">Send</button><button class="kit-btn kit-btn--secondary" type="submit">Search</button>'
+			. '<button class="kit-btn kit-btn--label" type="submit">Label only</button><button class="kit-btn is-loading" type="submit" aria-busy="true">Sending</button><button class="kit-btn" type="submit" disabled>Disabled</button></p>';
 		$o .= '<p class="kit-demo-btns-row"><span class="kit-demo-btns-label">Small</span>'
 			. '<a class="kit-btn kit-btn--sm" href="/demo/">Primary</a><a class="kit-btn kit-btn--sm kit-btn--secondary" href="/demo/">Secondary</a>'
 			. '<a class="kit-btn kit-btn--sm kit-btn--ghost" href="/demo/">Ghost</a><a class="kit-btn kit-btn--sm kit-btn--brand" href="/demo/">Brand</a>'
-			. '<button class="kit-btn kit-btn--sm kit-btn--secondary kit-btn--icon" type="button" aria-label="Share">' . $ico( 'link' ) . '</button></p>';
+			. '<a class="kit-btn kit-btn--sm kit-btn--secondary kit-btn--icon" href="/demo/" aria-label="Share">' . $ico( 'link' ) . '</a></p>';
 		$o .= '<div class="kit-demo-btns-row"><span class="kit-demo-btns-label">Block</span><div class="wp-block-buttons is-layout-flex">';
 		foreach ( $variants as $name => $v ) {
 			$o .= '<div class="wp-block-button' . $v[1] . '"><a class="wp-block-button__link wp-element-button" href="/demo/">' . esc_html( ucfirst( $name ) ) . '</a></div>';
 		}
 		$o .= '<div class="wp-block-button is-style-kits-secondary kit-btn--ico-mail"><a class="wp-block-button__link wp-element-button" href="/contact/">Email</a></div>'
 			. '<div class="wp-block-button kit-btn--sm is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" href="/demo/">Small</a></div>'
+			. '<div class="wp-block-button is-style-kits-secondary kit-btn--label"><a class="wp-block-button__link wp-element-button" href="/demo/">Label only</a></div>'
 			. '<div class="wp-block-button kit-btn--icon kit-btn--ico-search"><a class="wp-block-button__link wp-element-button" href="/search/">Search</a></div>'
 			. '</div></div></div>';
 		return $o;
@@ -142,9 +147,9 @@ function kits_demo_buttons() {
 		foreach ( array( '', ' kit-dark kit-demo-btns-dark' ) as $dark ) {
 			$o .= '<div class="kit-demo-btns-row ' . esc_attr( $class . $dark ) . '"><span class="kit-demo-btns-label">' . esc_html( $label . ( $dark ? ' · dark' : '' ) ) . '</span>';
 			foreach ( $states as $state => $st ) {
-				$o .= '<button class="kit-btn kit-btn--brand' . $st[0] . '" type="button"' . $st[1] . '>' . esc_html( $state ) . '</button>';
+				$o .= '<a class="kit-btn kit-btn--brand' . $st[0] . '" href="/demo/"' . $st[1] . '>' . esc_html( $state ) . '</a>';
 			}
-			$o .= '<button class="kit-btn" type="button">Primary</button><div class="wp-block-buttons"><div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/demo/">Block</a></div></div></div>';
+			$o .= '<a class="kit-btn" href="/demo/">Primary</a><div class="wp-block-buttons"><div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="/demo/">Block</a></div></div></div>';
 		}
 	}
 	return $o . '</div>';

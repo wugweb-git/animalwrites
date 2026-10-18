@@ -209,7 +209,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
               in the brand colour). Each variant reads --kit-btn-<variant>-* tokens; a dark surface swaps those tokens, so
               every variant works on light and on dark surfaces.
    States     default · hover · focus-visible · active (pressed) · disabled · loading.
-   Content    icon + label · label only (buttons that are not links) · icon only (square; needs an accessible name).
+   Content    icon + label (the default) · label only (no icon) · icon only (square; needs an accessible name).
    Sizes      default (--kit-btn-height) · small (--kit-btn-height-sm).
    Markup     <a|button class="kit-btn [kit-btn--secondary|--ghost|--brand] [kit-btn--sm] [kit-btn--icon|--label] [kit-btn--ico-<name>]">
               Core Button block: block style Default (= primary), Secondary, Ghost or Brand; size and content as extra CSS
@@ -303,8 +303,8 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 
 /* Icons. Function icons sit before the label: automatic for tel:, mailto:, WhatsApp, submit and download, or chosen with
    kit-btn--ico-<name> (or data-ico plus --kit-btn-ico). A link with no function icon gets an arrow after its label: → inside
-   the site, ↗ when it leaves it (functions.php marks the site's own host). Label only (kit-btn--label) applies to buttons
-   that are not links; links always carry an icon (owner rule, 9 Oct 2026). */
+   the site, ↗ when it leaves it (functions.php marks the site's own host). Label only (kit-btn--label) is the explicit
+   choice of no icon: no arrow, no function icon, on any button. */
 .kit-btn--ico-phone { --kit-btn-ico: var(--kit-ico-phone); } .kit-btn--ico-mail { --kit-btn-ico: var(--kit-ico-mail); }
 .kit-btn--ico-whatsapp { --kit-btn-ico: var(--kit-ico-wa); } .kit-btn--ico-search { --kit-btn-ico: var(--kit-ico-search); }
 .kit-btn--ico-send { --kit-btn-ico: var(--kit-ico-send); } .kit-btn--ico-download { --kit-btn-ico: var(--kit-ico-download); }
@@ -318,13 +318,13 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 [href^="mailto:"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-mail); }
 [href*="wa.me"]:is(.kit-btn, .wp-block-button__link) { --kit-btn-ico: var(--kit-ico-wa); }
 :is(.kit-btn, .wp-block-button__link):is([download], [href$=".pdf"]) { --kit-btn-ico: var(--kit-ico-download); }
-:is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico), .kit-btn--label:not(a), .kit-btn--label > :not(a)):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [type=submit], [data-ico], [class*="kit-btn--ico-"])::before,
-.wp-block-button[class*="kit-btn--ico-"] > .wp-block-button__link::before,
+:is(.kit-btn, .wp-block-button__link, .kit-form button[type=submit], .kit-disclosure > summary):not(:has(.kit-ico), .kit-btn--label, .kit-btn--label > *):is([href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [type=submit], [data-ico], [class*="kit-btn--ico-"])::before,
+.wp-block-button:not(.kit-btn--label)[class*="kit-btn--ico-"] > .wp-block-button__link::before,
 .kit-disclosure[data-ico] > summary::before {
 	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
 	-webkit-mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat; mask: var(--kit-btn-ico, var(--kit-ico-send)) center / contain no-repeat;
 }
-:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button):not(:where(:has(.kit-ico), [href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [data-ico], [class*="kit-btn--ico-"], .kit-dd-btn, [aria-haspopup], .wp-block-button[class*="kit-btn--ico-"] > *))::after {
+:is(a.kit-btn, a.wp-block-button__link, a.wp-element-button):not(:where(:has(.kit-ico), [href^="tel:"], [href^="mailto:"], [href*="wa.me"], [download], [href$=".pdf"], [data-ico], [class*="kit-btn--ico-"], .kit-dd-btn, [aria-haspopup], .kit-btn--label, .wp-block-button[class*="kit-btn--ico-"] > *, .kit-btn--label > *))::after {
 	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
 	-webkit-mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat; mask: var(--kit-cta-arrow, var(--kit-ico-arrow-right)) center / contain no-repeat;
 }
@@ -332,12 +332,13 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 :is(a.kit-btn, a.wp-block-button__link, a.wp-element-button)[href^="http"] { --kit-cta-arrow: var(--kit-ico-arrow-up-right); --_nudge: translate(calc(var(--kit-btn-nudge) - 1px), calc(1px - var(--kit-btn-nudge))); }
 /* In the editor the button is editable text, not a link: show the arrow it will have, and show an icon-only button's
    text while it is being edited. */
-.wp-block-button:not([class*="kit-btn--ico-"]) > .wp-block-button__link.block-editor-rich-text__editable::after {
+.wp-block-button:not([class*="kit-btn--ico-"], .kit-btn--label) > .wp-block-button__link.block-editor-rich-text__editable::after {
 	content: ""; flex: none; width: var(--kit-btn-ico-size); height: var(--kit-btn-ico-size); background: currentColor;
 	-webkit-mask: var(--kit-ico-arrow-right) center / contain no-repeat; mask: var(--kit-ico-arrow-right) center / contain no-repeat;
 }
 .wp-block-button.kit-btn--icon > .wp-block-button__link.block-editor-rich-text__editable:focus { font-size: var(--fluid-body-sm); width: auto; padding-inline: var(--kit-btn-pad-sm); }
-/* Label only (kit-btn--label, above): no automatic icon on a submit button. Links ignore it and keep their arrow. */
+/* Label only: an icon written into the markup is hidden too */
+.kit-btn--label > .kit-ico, .kit-btn--label > .wp-block-button__link > .kit-ico { display: none; }
 
 /* Motion: on hover and focus the icon nudges (spring): the arrow 3px along its direction, a leading icon 2px and a touch
    larger. Colours fade in --kit-motion-fast. */

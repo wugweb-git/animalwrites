@@ -43,7 +43,7 @@
     "opacity-disabled"
    ],
    "a11y": {
-    "element": "<button> for actions, <a> for navigation",
+    "element": "<a> for every button; <button type=submit> for form buttons",
     "aria": "aria-busy=\"true\" while sending; disabled buttons use the disabled attribute",
     "keyboard": "Tab; Enter (links); Enter or Space (buttons)",
     "focus": "--kit-focus-width ring in --kit-color-focus, --kit-focus-offset offset (:focus-visible)",
@@ -148,8 +148,8 @@
      "loading": "class is-loading or aria-busy=\"true\": spinner in place of the icon, label stays, no clicks"
     },
     "content": {
-     "icon + label": "function icon before the label (tel:, mailto:, WhatsApp, submit, download automatic; or kit-btn--ico-<name>, or a .kit-ico span); a link with no function icon gets → after the label, ↗ when it leaves the site",
-     "label only": "kit-btn--label: buttons that are not links only (e.g. Apply, Clear); links always carry an icon (owner rule 9 Oct 2026)",
+     "icon + label": "the default. A function icon before the label (tel:, mailto:, WhatsApp, form submit and download automatic; or kit-btn--ico-<name>, or a .kit-ico span); otherwise → after the label, ↗ when the link leaves the site",
+     "label only": "kit-btn--label: a button with no icon (no arrow, no function icon); an explicit choice on any button",
      "icon only": "kit-btn--icon: square (height × height); <button> needs aria-label; on the core block the button text is the accessible name and is hidden on screen"
     },
     "sizes": {
@@ -169,7 +169,8 @@
      "kit-btn--ink": "= primary",
      "kit-btn--primary": "= primary",
      "kit-btn--outline": "= secondary"
-    }
+    },
+    "elements": "every button is a link (<a>), except form buttons (<button type=submit>: Send, Subscribe, Search), which share the same classes"
    }
   },
   {

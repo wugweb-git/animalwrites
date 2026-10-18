@@ -35,7 +35,7 @@ With `prefers-reduced-motion: reduce` there are no transitions or movement. The 
 | Content | How | Notes |
 |---|---|---|
 | Icon + label | a function icon before the label is automatic for `tel:`, `mailto:`, WhatsApp, submit and downloads; choose one with `kit-btn--ico-<name>` or a `.kit-ico` span. A link with no function icon gets an arrow after its label: → inside the site, ↗ when it leaves the site. | the arrow moves 3px, a leading icon 2px and slightly larger |
-| Label only | `kit-btn--label` | only for buttons that are not links, such as Apply and Clear. Links always keep an icon (owner rule, 9 Oct 2026). |
+| Label only | `kit-btn--label` (Content: Label only) | a button with no icon: no arrow and no function icon. An explicit choice; icon + label stays the default. |
 | Icon only | `kit-btn--icon`: a square, as wide as it is tall | `<button>` needs `aria-label`. On the Button block, the button text is the accessible name; it stays for screen readers and is hidden on screen. |
 
 Icon names: phone, mail, whatsapp, search, send, download, check, alert, person, calendar, file, link, map-pin, megaphone, arrow-right, next, prev.
@@ -52,6 +52,8 @@ Icon names: phone, mail, whatsapp, search, send, download, check, alert, person,
 The **Styles** panel picks the variant: Primary (the default), Secondary, Ghost or Brand. The **Size and content** panel in the block sidebar sets Size (Default, Small), Content (icon and label, label only, icon only) and Icon (automatic or a named icon). Those write the classes `kit-btn--sm`, `kit-btn--label` / `kit-btn--icon` and `kit-btn--ico-<name>`, which can also be typed in **Advanced → Additional CSS class(es)**. In the editor the button shows the arrow it will have, and an icon-only button shows its text while you edit it. They combine, so `kit-btn--sm kit-btn--icon kit-btn--ico-search` with the Secondary style gives a small outlined search button.
 
 ## Rules
+
+- Every button here is a link, except form buttons (Send, Subscribe, Search), which submit their form. Both use the same classes, variants, states and content options.
 
 - A link styled as a button is never a heading, and a heading is never styled as a button.
 - The underlined text link (`.kit-ed-more`) is a link, not a button. Use it only for "see all" links in a section head (home: What's happening, Learn, Take action; Kits pattern lead-list). Calls to action are buttons.

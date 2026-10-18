@@ -56,10 +56,10 @@
 						value: content,
 						options: [
 							{ label: __( 'Icon and label', 'kits-by-wugweb' ), value: '' },
-							{ label: __( 'Label only (buttons that are not links)', 'kits-by-wugweb' ), value: 'kit-btn--label' },
+							{ label: __( 'Label only (no icon)', 'kits-by-wugweb' ), value: 'kit-btn--label' },
 							{ label: __( 'Icon only (the text stays as its name)', 'kits-by-wugweb' ), value: 'kit-btn--icon' },
 						],
-						help: 'kit-btn--icon' === content ? __( 'The button text is read out by screen readers and hidden on screen. Choose an icon below.', 'kits-by-wugweb' ) : __( 'A link always keeps an icon: → inside the site, ↗ when it leaves it, or the icon chosen below.', 'kits-by-wugweb' ),
+						help: 'kit-btn--icon' === content ? __( 'The button text is read out by screen readers and hidden on screen. Choose an icon below.', 'kits-by-wugweb' ) : ( 'kit-btn--label' === content ? __( 'No arrow and no icon.', 'kits-by-wugweb' ) : __( 'The icon is → inside the site, ↗ when the link leaves it, or the icon chosen below.', 'kits-by-wugweb' ) ),
 						onChange: set( 'content' ),
 						__nextHasNoMarginBottom: true,
 					} ),
