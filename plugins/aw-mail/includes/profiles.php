@@ -93,11 +93,12 @@ add_filter(
 		$msg  = (string) ( $atts['message'] ?? '' );
 		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
 		if ( $html ) {
-			$block           = '<div class="signature" style="margin-top:24px">' . wp_kses_post( $sig ) . '</div>';
+			$block           = '<div class="signature" style="margin-top:24px">' . wp_kses_post( $sig ) . '</div>' . ( function_exists( 'aw_mail_campaign_strip_html' ) ? aw_mail_campaign_strip_html() : '' );
 			$atts['message'] = false !== stripos( $msg, '</body>' ) ? str_ireplace( '</body>', $block . '</body>', $msg ) : $msg . $block;
 		} else {
 			$text            = trim( html_entity_decode( wp_strip_all_tags( preg_replace( '/<br\s*\/?>|<\/p>|<\/div>/i', "\n", $sig ) ), ENT_QUOTES ) );
-			$atts['message'] = rtrim( $msg ) . "\n\n-- \n" . $text . "\n";
+			$strip           = function_exists( 'aw_mail_campaign_strip_text' ) ? aw_mail_campaign_strip_text() : '';
+			$atts['message'] = rtrim( $msg ) . "\n\n-- \n" . $text . "\n" . ( '' !== $strip ? "\n" . $strip . "\n" : '' );
 		}
 		return $atts;
 	},

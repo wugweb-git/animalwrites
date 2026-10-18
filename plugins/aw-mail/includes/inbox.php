@@ -507,6 +507,9 @@ function aw_mail_compose_screen( $s, $mode ) {
 	echo '<div id="titlediv"><div id="titlewrap"><label class="screen-reader-text" for="title">Subject</label><input type="text" name="subject" id="title" value="' . esc_attr( $subj ) . '" placeholder="Subject" autocomplete="off"></div></div>';
 	echo '<div id="postdivrich" class="postarea" style="margin-top:12px">';
 	wp_editor( $start, 'awm_body', array( 'textarea_name' => 'body', 'media_buttons' => false, 'textarea_rows' => 18, 'editor_height' => 360 ) );
+	if ( function_exists( 'aw_mail_campaign_strip_html' ) && '' !== aw_mail_campaign_strip_html() ) {
+		echo '<p class="description" style="margin:10px 0 4px">Added under your signature when sent (the open campaign):</p>' . aw_mail_campaign_strip_html(); // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+	}
 	echo '</div></div><div id="postbox-container-1" class="postbox-container">';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">Send</h2></div><div class="inside"><p><label for="awm-from"><strong>From</strong></label><br>';
 	echo '<select id="awm-from" name="from" style="width:100%">';
@@ -749,7 +752,7 @@ function aw_mail_send_from_form( $in, $refbox ) {
 	$req = array(
 		'to'          => $to,
 		'subject'     => '' !== $subj ? $subj : '(no subject)',
-		'html'        => '<div style="font:14px/1.5 Arial,Helvetica,sans-serif">' . $html . '</div>',
+		'html'        => '<div style="font:14px/1.5 Arial,Helvetica,sans-serif">' . ( function_exists( 'aw_mail_add_campaign_strip' ) ? aw_mail_add_campaign_strip( $html ) : $html ) . '</div>', // open campaign strip under the signature
 		'text'        => trim( html_entity_decode( wp_strip_all_tags( preg_replace( '#<br\s*/?>|</p>|</div>|</li>#i', "\n", preg_replace( '#<blockquote[^>]*>(.*?)</blockquote>#is', "\n> $1\n", $html ) ) ), ENT_QUOTES ) ),
 		'displayName' => function_exists( 'aw_mail_profile' ) && '' !== aw_mail_profile( $boxes[ $from ] )['name'] ? aw_mail_profile( $boxes[ $from ] )['name'] : 'Animal Writes',
 	);
