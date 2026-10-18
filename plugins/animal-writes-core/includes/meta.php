@@ -35,6 +35,7 @@ function aw_meta_schema() {
 		'aw_awbi_renewed'    => array( 'string', array( 'aw_listing' ), 'AWBI renewed on (Y-m-d)' ),
 		'aw_awbi_valid'      => array( 'string', array( 'aw_listing' ), 'AWBI recognition valid until (Y-m-d)' ),
 		'aw_awbi_code'       => array( 'string', array( 'aw_listing' ), 'AWBI recognition code (from the AWBI list; read only)' ),
+		'aw_awbi_list_on'    => array( 'string', array( 'aw_listing' ), 'Date of the AWBI list the code comes from (Y-m-d; empty = 31 May 2026 list)' ),
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
 		'aw_featured'        => array( 'integer', array( 'aw_listing' ), 'Featured (1) or not (0)' ),
 		'aw_featured_until'  => array( 'string', array( 'aw_listing' ), 'Featured until (Y-m-d)' ),

@@ -6,7 +6,8 @@
  * Row kinds:
  * - new listing: key, name, types[], state, district, area, phone, address_private, content, source_name, source_url,
  *   source_date; optional: data_source (registry slug, data-sources.php), email, website, address (a public office's, shown), darpan_id, registration,
- *   reg_type, reg_authority, reg_act, reg_date, sectors, places[] (more [state, district] pairs), abc_valid.
+ *   reg_type, reg_authority, reg_act, reg_date, sectors, awbi_code / awbi_recognised / awbi_renewed / awbi_valid /
+ *   awbi_list_on / awbi_address (an AWBI list row; the address is kept private), places[] (more [state, district] pairs), abc_valid.
  *   Matched by aw_import_key; created published and unverified.
  * - update of an existing listing: post_id, types[] (added, never removed) and any optional field above (filled only
  *   when empty), abc_centres[] (kept private), abc_valid (only a later date: a renewed recognition). Verified or claimed listings are left alone (types too).
@@ -58,7 +59,7 @@ $fill = function ( $id, $key, $value ) use ( $note, &$kind ) {
 
 /** The optional fields a source gives. */
 $fields = function ( $id, $r ) use ( $fill, $note, &$kind ) {
-	foreach ( array( 'darpan_id', 'registration', 'reg_type', 'reg_authority', 'reg_act', 'reg_date', 'sectors' ) as $k ) {
+	foreach ( array( 'darpan_id', 'registration', 'reg_type', 'reg_authority', 'reg_act', 'reg_date', 'sectors', 'awbi_code', 'awbi_recognised', 'awbi_renewed', 'awbi_valid', 'awbi_list_on', 'awbi_address' ) as $k ) {
 		if ( ! empty( $r[ $k ] ) ) {
 			$fill( $id, 'aw_' . $k, sanitize_text_field( is_array( $r[ $k ] ) ? implode( ', ', $r[ $k ] ) : $r[ $k ] ) );
 		}

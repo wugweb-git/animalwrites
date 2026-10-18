@@ -89,6 +89,9 @@ function aw_listing_sources( $id ) {
 			$on    = (string) get_post_meta( $id, 'aw_source_date', true );
 			$link = (string) get_post_meta( $id, 'aw_source_url', true );
 		}
+		if ( 'awbi' === $slug && get_post_meta( $id, 'aw_awbi_list_on', true ) ) {
+			$on = (string) get_post_meta( $id, 'aw_awbi_list_on', true ); // an older AWBI list (e.g. active list of 21 Feb 2025)
+		}
 		if ( 'organisation' === $slug ) {
 			$on = (string) get_post_meta( $id, 'aw_verified_on', true );
 		}
