@@ -110,6 +110,11 @@
       "md": "var(--fluid-label)",
       "lg": "var(--fluid-label)"
     },
+    "type-2xs": {
+      "sm": "0.625rem",
+      "md": "0.625rem",
+      "lg": "0.625rem"
+    },
     "type-sm": {
       "sm": "var(--fluid-body-sm)",
       "md": "var(--fluid-body-sm)",

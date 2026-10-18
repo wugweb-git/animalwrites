@@ -273,7 +273,7 @@
     "ad",
     "closed",
     "new",
-    "beta (accent pill after a menu label: Navigation Link block style \"Beta\" = is-style-kits-beta, or the same span in a footer list)"
+    "beta (very small blue tag at the top right of a menu label: Navigation Link block style \"Beta\" = is-style-kits-beta, or the same span in a footer list)"
    ],
    "tokens": [
     "kit-color-accent",
@@ -295,7 +295,7 @@
     "contrast": [
      "kit-color-ink",
      "kit-color-surface",
-     "kit-color-on-accent on kit-color-accent (beta)"
+     "kit-color-on-ink on kit-color-info (beta)"
     ]
    },
    "seo": {

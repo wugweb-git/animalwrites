@@ -42,6 +42,7 @@
   --kit-font-display: var(--wp--preset--font-family--display);
   --kit-font-body: var(--wp--preset--font-family--base);
   --kit-type-xs: var(--fluid-label);
+  --kit-type-2xs: 0.625rem;
   --kit-type-sm: var(--fluid-body-sm);
   --kit-type-base: var(--fluid-body-md);
   --kit-type-lead: var(--fluid-body-lg);

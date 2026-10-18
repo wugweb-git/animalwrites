@@ -190,11 +190,12 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-badge--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); }
 .kit-badge--new { background: var(--kit-color-info-soft); color: var(--kit-color-info); }
 /* Beta: a very small tag at the top right of a menu label (block style kits-beta on a Navigation Link, or the same span
-   in a footer list). Raised with relative positioning, so the link keeps its height and target. Accent on dark and light. */
+   in a footer list). Regular weight, small corner, info blue with white text (readable on dark and light surfaces).
+   Raised with relative positioning, so the link keeps its height and target. */
 .kit-badge--beta {
-	position: relative; top: -0.75em; margin-inline-start: var(--s-1); padding: var(--s-0) var(--s-1); border-radius: var(--kit-radius-pill);
-	font-size: var(--fluid-caption); font-weight: var(--kit-weight-bold); line-height: 1.4; letter-spacing: 0.02em; white-space: nowrap; vertical-align: baseline;
-	background: var(--kit-color-accent); color: var(--kit-color-on-accent);
+	position: relative; top: -0.8em; margin-inline-start: var(--s-1); padding: var(--s-0) var(--s-1); border-radius: var(--kit-radius-xs);
+	font-size: var(--kit-type-2xs); font-weight: var(--kit-weight-regular); line-height: 1.4; letter-spacing: 0.02em; white-space: nowrap; vertical-align: baseline;
+	background: var(--kit-color-info); color: var(--kit-color-on-ink);
 }
 
 /* ---------- 7. Eyebrow / 8. Count ---------- */
