@@ -2,6 +2,12 @@
 /**
  * Ad slots. Admins paste network code (e.g. AdSense) per slot in Settings > Ads; also serves /ads.txt.
  *
+ * With Advanced Ads active (owner, 19 Oct 2026) the plugin manages the ads: each slot is an Advanced Ads placement of
+ * type Manual whose slug is the slot name (Advanced Ads → Placements). The placement decides which ad or group shows,
+ * the ad's own display and visitor conditions decide where, and a slot is on while its placement is published. Settings >
+ * Ads steps aside; /ads.txt serves the records typed in Advanced Ads → Settings → Ads.txt. This file keeps the positions,
+ * the per-page maximum, the excluded pages, the "Ad" label and the lazy AdSense loading.
+ *
  * Two kinds of slot:
  * - Fixed positions ('block'): placed with the "Ad slot" block (kits/ad-slot, inserter group "Ads") in templates,
  *   template parts, patterns or pages. The Site Editor shows where each one sits.
@@ -71,13 +77,35 @@ function kits_ad_label( $slot ) {
 	return (string) ( kits_ad_slots()[ $slot ][0] ?? '' );
 }
 
-/** Is a slot switched on (Settings > Ads; every slot is on unless switched off)? */
+/** Advanced Ads manages the ads (see the top of this file). */
+function kits_ads_plugin() {
+	return function_exists( 'get_the_placement' );
+}
+
+/** The published Advanced Ads placement of a slot (slug = slot name), 0 if none. */
+function kits_ad_placement( $slot ) {
+	static $ids = array();
+	if ( ! isset( $ids[ $slot ] ) ) {
+		$p            = get_page_by_path( $slot, OBJECT, 'advanced_ads_plcmnt' );
+		$ids[ $slot ] = $p && 'publish' === $p->post_status ? (int) $p->ID : 0;
+	}
+	return $ids[ $slot ];
+}
+
+/** Is a slot switched on (Settings > Ads; every slot is on unless switched off)? With Advanced Ads: its placement is published. */
 function kits_ad_on( $slot ) {
+	if ( kits_ads_plugin() ) {
+		return kits_ad_placement( $slot ) > 0;
+	}
 	return ! in_array( $slot, (array) get_option( 'kits_ads_off', array() ), true );
 }
 
 /** The code for a slot: its own box, else its fallback's (followed up to three steps). */
 function kits_ad_code( $slot ) {
+	if ( kits_ads_plugin() ) {
+		$id = kits_ad_placement( $slot );
+		return $id ? trim( (string) get_the_placement( $id ) ) : '';
+	}
 	$slots = kits_ad_slots();
 	for ( $i = 0; $i < 4 && '' !== $slot; $i++ ) {
 		$code = trim( (string) get_option( 'aw_ad_' . $slot, '' ) );
@@ -349,7 +377,9 @@ add_action(
 	function () {
 		$path = (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ); // phpcs:ignore
 		if ( '/ads.txt' === $path ) {
-			$txt = (string) get_option( 'aw_ads_txt', '' );
+			// With Advanced Ads: the records typed in Advanced Ads → Settings → Ads.txt. Its own /ads.txt reads another key
+			// (2.0.29), so it would serve nothing; this serves them instead.
+			$txt = kits_ads_plugin() ? (string) ( get_option( 'advanced_ads_ads_txt', array() )['custom'] ?? '' ) : (string) get_option( 'aw_ads_txt', '' );
 			if ( '' !== trim( $txt ) ) {
 				header( 'Content-Type: text/plain; charset=utf-8' );
 				echo $txt; // phpcs:ignore
@@ -361,9 +391,22 @@ add_action(
 
 /* ---------- Settings > Ads (administrators only) ---------- */
 
+// With Advanced Ads, the old Settings > Ads address (no longer a page, so access is "denied") opens its Placements screen.
+add_action(
+	'admin_page_access_denied',
+	function () {
+		if ( kits_ads_plugin() && 'aw-ads' === ( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( admin_url( 'edit.php?post_type=advanced_ads_plcmnt' ) );
+			exit;
+		}
+	}
+);
 add_action(
 	'admin_menu',
 	function () {
+		if ( kits_ads_plugin() ) {
+			return;
+		}
 		add_options_page(
 			'Ads',
 			'Ads',
