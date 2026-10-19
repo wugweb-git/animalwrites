@@ -299,9 +299,23 @@
 
 /* Home band */
 .aw-camp-band {
-	padding: var(--kit-space-6) var(--kit-space-gutter);
+	padding: var(--kit-space-section) var(--kit-space-gutter); /* the section padding: 48/70/96 top and bottom, the gutter at the sides */
+	max-width: none; /* full width, like every section; the content keeps the page column */
 	background: var(--camp-mark); color: var(--camp-on-mark);
 }
+/* Two columns on the page column: the ask, then the objection window (columns from the space, no breakpoint) */
+.aw-camp-band-inner { max-width: var(--kit-width-wide); margin-inline: auto; display: grid; gap: var(--kit-space-7) var(--kit-space-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); align-items: end; }
+.aw-camp-band-text > p:not(.aw-camp-band-actions) { font-size: var(--kit-type-lead); max-width: 34rem; margin: 0; }
+.aw-camp-band-text h2 { font-size: var(--wp--preset--font-size--3-x-large); max-width: 16ch; }
+.aw-camp-band .aw-countdown { margin: 0 0 var(--kit-space-4); align-items: baseline; }
+.aw-camp-band .aw-cd-num { font-size: clamp(4.5rem, 3rem + 6vw, 8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
+.aw-camp-band .aw-countdown:has(+ .aw-camp-band-days) .aw-cd-when { display: none; } /* the dates are under the day marks */
+.aw-camp-band-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 3px; align-items: end; height: 3rem; }
+.aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--camp-on-mark); }
+.aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.28); }
+.aw-camp-band-days li.is-today { height: 100%; }
+.aw-camp-band-range { justify-content: space-between; margin: var(--kit-space-3) 0 0; }
+.aw-camp-band-range .kit-meta-item { color: var(--camp-on-mark); }
 .aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
 .aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }

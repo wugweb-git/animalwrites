@@ -496,11 +496,24 @@ add_shortcode(
 			return $out . '</section>';
 		}
 		aw_camp_cache_until( $post->ID );
-		$out = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>';
-		$out .= do_shortcode( '[aw_countdown date="' . esc_attr( $day ) . '" label="Last day"]' );
+		// The objection window as one mark per day: days gone dimmed, today raised, the days left bright.
+		$open_ts  = aw_camp_open_ts( $post->ID );
+		$close_ts = aw_camp_close_ts( $post->ID );
+		$window   = do_shortcode( '[aw_countdown date="' . esc_attr( $day ) . '" label="Last day"]' );
+		if ( $open_ts && $close_ts > $open_ts ) {
+			$total   = (int) round( ( $close_ts - $open_ts ) / DAY_IN_SECONDS );
+			$today   = (int) floor( ( time() - $open_ts ) / DAY_IN_SECONDS );
+			$window .= '<ol class="aw-camp-band-days" style="--days:' . $total . '" aria-hidden="true">';
+			for ( $i = 0; $i < $total; $i++ ) {
+				$window .= '<li' . ( $i < $today ? ' class="is-past"' : ( $i === $today ? ' class="is-today"' : '' ) ) . '></li>';
+			}
+			$window .= '</ol><p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open_ts ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>';
+		}
+		$out  = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
 		$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 		$out .= $a['text'] ? '<p>' . esc_html( $a['text'] ) . '</p>' : '';
 		$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#send' ) . '">' . esc_html( $a['button'] ) . '</a> <a class="wp-element-button aw-camp-band-ghost" href="' . esc_url( $url . '#rules' ) . '" data-track="home_campaign_click">' . esc_html( $a['link'] ) . '</a></p>';
+		$out .= '</div><div class="aw-camp-band-window">' . $window . '</div></div>';
 		return $out . '</section>';
 	}
 );
