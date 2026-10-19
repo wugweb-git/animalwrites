@@ -172,6 +172,26 @@
 		}
 	}
 
+	/* On phones, Gmail opens in the installed app; Gmail on the web is the fallback when the app is not there. */
+	function gmailApp(to, subject, body, web) {
+		var ua = navigator.userAgent || '', e = encodeURIComponent;
+		if (/Android/i.test(ua)) {
+			window.location.href = 'intent:' + to + '?subject=' + e(subject) + '&body=' + e(body) +
+				'#Intent;scheme=mailto;package=com.google.android.gm;S.browser_fallback_url=' + e(web) + ';end';
+			return true;
+		}
+		if (/iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+			var left = false, stop = function () { left = true; };
+			window.addEventListener('pagehide', stop, { once: true });
+			window.addEventListener('blur', stop, { once: true });
+			document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); }, { once: true });
+			setTimeout(function () { if (!left && !document.hidden) window.location.href = web; }, 2000);
+			window.location.href = 'googlegmail://co?to=' + e(to) + '&subject=' + e(subject) + '&body=' + e(body);
+			return true;
+		}
+		return false;
+	}
+
 	form.querySelectorAll('[data-route]').forEach(function (btn) {
 		btn.addEventListener('click', function () {
 			var route = btn.dataset.route;
@@ -198,6 +218,7 @@
 				copy(body);
 				if (!copied.textContent || btn.dataset.route === 'copy') copied.textContent = 'Letter copied. Paste it into a new email to ' + cfg.to + '.';
 			}
+			if (url && route === 'gmail' && gmailApp(cfg.to, cfg.subject, body, url)) url = '';
 			if (url) {
 				if (route === 'mailto') window.location.href = url;
 				else window.open(url, '_blank', 'noopener');
