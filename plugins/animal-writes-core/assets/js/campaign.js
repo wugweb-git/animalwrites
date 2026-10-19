@@ -45,7 +45,7 @@
 		/* The link travels with the picture: in the text (WhatsApp, Facebook, X keep it) and on the clipboard for
 		   Instagram, which drops text: the note says to paste it into the Link sticker. */
 		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
-		shareNote(where, canShare ? 'Link copied. On Instagram, add it to your story with the Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
+		shareNote(where, canShare ? 'Link copied. Paste it in a Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
 		var url = sh[kind], name = (sh.slug || 'campaign') + '-' + kind + url.slice(url.lastIndexOf('.'));
 		fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
 			var ext = name.split('.').pop().toLowerCase(), type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/png';
