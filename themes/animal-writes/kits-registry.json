@@ -1982,6 +1982,7 @@
     "aw-camp-doc-strip",
     "aw-camp-doc-page",
     "aw-letter-optin",
+    "aw-letter-copy-addr",
     "aw-letter-email"
    ],
    "states": [

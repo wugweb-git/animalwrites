@@ -192,14 +192,23 @@
 		return false;
 	}
 
+	/* After a copy: the note names the address, with its own small copy button (Copy address is not a send button). */
+	function copiedNote(msg) {
+		copied.textContent = msg + ' ';
+		var b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'aw-letter-copy-addr';
+		b.textContent = 'Copy address';
+		b.addEventListener('click', function () {
+			copy(cfg.to);
+			b.textContent = 'Address copied';
+		});
+		copied.appendChild(b);
+	}
+
 	form.querySelectorAll('[data-route]').forEach(function (btn) {
 		btn.addEventListener('click', function () {
 			var route = btn.dataset.route;
-			if (route === 'copy-address') {
-				copy(cfg.to);
-				copied.textContent = 'Address copied: ' + cfg.to;
-				return;
-			}
 			if (!ready()) return;
 			var body = letter();
 			var e = encodeURIComponent;
@@ -209,14 +218,14 @@
 			if (route === 'mailto') {
 				if (body.length > 1800) { // long links fail in some mail apps: copy instead
 					route = 'copy';
-					copied.textContent = 'Your letter is long for an email app link, so it was copied. Paste it into a new email to ' + cfg.to + '.';
+					copiedNote('Your letter is long for an email app link, so it was copied. Paste it into a new email to ' + cfg.to + '.');
 				} else {
 					url = 'mailto:' + cfg.to + '?subject=' + e(cfg.subject) + '&body=' + e(body);
 				}
 			}
 			if (route === 'copy') {
 				copy(body);
-				if (!copied.textContent || btn.dataset.route === 'copy') copied.textContent = 'Letter copied. Paste it into a new email to ' + cfg.to + '.';
+				if (!copied.textContent || btn.dataset.route === 'copy') copiedNote('Letter copied. Paste it into a new email to ' + cfg.to + '.');
 			}
 			if (url && route === 'gmail' && gmailApp(cfg.to, cfg.subject, body, url)) url = '';
 			if (url) {

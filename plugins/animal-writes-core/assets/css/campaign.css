@@ -276,6 +276,7 @@
 .aw-letter [hidden] { display: none; }
 .aw-letter .aw-letter-alt { background: transparent; color: var(--kit-color-text); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-letter-copied:empty { display: none; }
+.aw-letter-copy-addr { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
 
 .aw-camp-count { font-size: var(--kit-type-lead); }
 

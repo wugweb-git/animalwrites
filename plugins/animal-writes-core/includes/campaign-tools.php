@@ -342,7 +342,6 @@ add_shortcode(
 			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy-address"><?php echo aw_i( 'copy' ); ?>Copy address</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
