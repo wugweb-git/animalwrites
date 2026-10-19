@@ -123,7 +123,7 @@ add_action(
 		);
 		update_option( 'kits_mail', $new, false );
 		$note = 'saved';
-		if ( 'test' === ( $_POST['do'] ?? '' ) ) {
+		if ( 'test' === sanitize_key( wp_unslash( $_POST['do'] ?? '' ) ) ) {
 			$err = '';
 			$cb  = function ( $e ) use ( &$err ) {
 				$err = $e->get_error_message();
