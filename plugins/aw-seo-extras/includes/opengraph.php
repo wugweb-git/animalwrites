@@ -49,7 +49,7 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 }
 unset( $aw_seo_net );
 
-/* A share image typed in Rank Math (or a category photo) that is AVIF goes out as its WebP copy too, with its type. */
+/* On a campaign page, a share image typed in Rank Math that is AVIF goes out as its WebP copy too, with its type. */
 foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $aw_seo_tag ) {
 	add_filter(
 		"rank_math/opengraph/{$aw_seo_tag}",

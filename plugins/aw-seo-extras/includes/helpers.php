@@ -529,16 +529,17 @@ function aw_seo_attachment( $att, $size = 'large' ) {
 }
 
 /**
- * A share picture every app shows (owner, 19 Oct 2026: PNG or WebP, never AVIF). Uploads are turned into AVIF (Modern
- * Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so an AVIF picture from our uploads is
- * swapped for a WebP copy, made once and kept beside it ({name}-og.webp). Other pictures pass through unchanged.
+ * A share picture every app shows (owner, 19 Oct 2026: PNG or WebP, never AVIF; campaign pages only, News stays as it
+ * is). Uploads are turned into AVIF (Modern Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so
+ * on a campaign page an AVIF picture from our uploads is swapped for a WebP copy, made once and kept beside it
+ * ({name}-og.webp). Everything else passes through unchanged.
  *
  * @param string $url Picture address.
  * @return array [url, width, height]; width and height 0 when unchanged.
  */
 function aw_seo_share_safe_url( $url ) {
 	$plain = strtok( (string) $url, '?' );
-	if ( ! preg_match( '/\.avif$/i', (string) $plain ) ) {
+	if ( ! is_singular( 'aw_campaign' ) || ! preg_match( '/\.avif$/i', (string) $plain ) ) {
 		return array( $url, 0, 0 );
 	}
 	$up   = wp_get_upload_dir();
@@ -555,7 +556,10 @@ function aw_seo_share_safe_url( $url ) {
 			return array( $url, 0, 0 );
 		}
 		$ed->set_quality( 82 );
-		if ( is_wp_error( $ed->save( $out, 'image/webp' ) ) || ! file_exists( $out ) ) {
+		add_filter( 'image_editor_output_format', '__return_empty_array', 99 ); // or Modern Image Formats saves AVIF again
+		$saved = $ed->save( $out, 'image/webp' );
+		remove_filter( 'image_editor_output_format', '__return_empty_array', 99 );
+		if ( is_wp_error( $saved ) || ! file_exists( $out ) ) {
 			return array( $url, 0, 0 );
 		}
 	}
