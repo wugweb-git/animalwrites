@@ -3,7 +3,7 @@
  * Title: Guides
  * Slug: animal-writes/learn
  * Categories: animal-writes
- * Description: The three newest guides from Resources as Resources cards (cover picture, title, date and reading time), with a link to all guides.
+ * Description: The three newest guides from Resources as the same cards the Resources list uses, with a link to all guides.
  * Inserter: yes
  *
  * @package animal-writes
@@ -28,9 +28,17 @@
 <article class="wp-block-group kit-card kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
 
 <!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-body"><!-- wp:post-title {"level":3,"isLink":true,"className":"aw-task-title"} /-->
+<div class="wp-block-group aw-task-body"><!-- wp:animal-writes/read-meta /-->
 
-<!-- wp:animal-writes/read-meta /--></div>
+<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-task-title"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":22,"className":"aw-task-sum"} /-->
+
+<!-- wp:group {"className":"aw-task-tags kit-tags","layout":{"type":"default"}} -->
+<div class="wp-block-group aw-task-tags kit-tags"><!-- wp:animal-writes/badges /-->
+
+<!-- wp:post-terms {"term":"category"} /--></div>
+<!-- /wp:group --></div>
 <!-- /wp:group --></article>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
