@@ -41,12 +41,16 @@
 	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
 	var sh = window.awCampShare || {};
 	var canShare = !!navigator.share;
-	function shareImage(kind) {
+	function shareImage(kind, where) {
+		/* The link travels with the picture: in the text (WhatsApp, Facebook, X keep it) and on the clipboard for
+		   Instagram, which drops text: the note says to paste it into the Link sticker. */
+		if (navigator.clipboard) navigator.clipboard.writeText(sh.url).catch(function () {});
+		shareNote(where, canShare ? 'Link copied. On Instagram, add it to your story with the Link sticker.' : 'Image saved. The link is copied too: paste it with your post.');
 		var url = sh[kind], name = (sh.slug || 'campaign') + '-' + kind + url.slice(url.lastIndexOf('.'));
 		fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
 			var ext = name.split('.').pop().toLowerCase(), type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/png';
 			var file = new File([blob], name, { type: type }); // apps only take an image they can recognise
-			if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file] }).catch(function () {});
+			if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: sh.title, text: sh.text + ' ' + sh.url }).catch(function () {});
 			var a = document.createElement('a');
 			a.href = URL.createObjectURL(blob);
 			a.download = name;
@@ -54,6 +58,16 @@
 			a.click();
 			a.remove();
 		});
+	}
+	function shareNote(where, msg) {
+		var n = where.nextElementSibling;
+		if (!n || !n.classList.contains('aw-camp-share-note')) {
+			n = document.createElement('p');
+			n.className = 'aw-camp-share-note';
+			n.setAttribute('role', 'status');
+			where.parentNode.insertBefore(n, where.nextSibling);
+		}
+		n.textContent = msg;
 	}
 	function shareKit(where) {
 		var out = [];
@@ -68,8 +82,8 @@
 			out.push(b);
 		}
 		if (canShare) btn('Share', 'share', 'native', function () { navigator.share({ title: sh.title, text: sh.text, url: sh.url }).catch(function () {}); });
-		if (sh.story) btn(canShare ? 'Share to story' : 'Story image', canShare ? 'instagram' : 'download', 'story_image', function () { shareImage('story'); });
-		if (sh.post) btn(canShare ? 'Share as post' : 'Post image', canShare ? 'instagram' : 'download', 'post_image', function () { shareImage('post'); });
+		if (sh.story) btn(canShare ? 'Share to story' : 'Story image', canShare ? 'instagram' : 'download', 'story_image', function () { shareImage('story', where); });
+		if (sh.post) btn(canShare ? 'Share as post' : 'Post image', canShare ? 'instagram' : 'download', 'post_image', function () { shareImage('post', where); });
 		out.reverse().forEach(function (b) { where.insertBefore(b, where.firstChild && where.firstChild.classList && where.firstChild.classList.contains('aw-camp-share-label') ? where.firstChild.nextSibling : where.firstChild); });
 	}
 	if (sh.url) {

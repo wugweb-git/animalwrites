@@ -199,6 +199,7 @@
 .aw-letter-share { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
 .aw-letter-share .aw-camp-share-btn { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); }
 .aw-letter-share .aw-camp-share-btn:hover { box-shadow: inset 0 0 0 1px currentColor; }
+.aw-camp-share-note { margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
 .aw-camp .aw-camp-share :is(a, button):hover { background: var(--camp-mark); box-shadow: none; }
 .aw-camp-share :is(a, button):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
