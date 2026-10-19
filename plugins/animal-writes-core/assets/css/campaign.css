@@ -43,6 +43,12 @@
 .aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
 :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 1020px; } /* these two campaign heroes only: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
 @media (min-width: 1200px) { :is(.aw-camp--lab-rules, .aw-camp--community-dogs) .aw-camp-hero, .aw-camp--community-dogs.aw-camp-hero { min-height: 800px; } }
+/* Lab Rules hero fits 1020 / 1020 / 800: a tighter gap between the stacked columns and a shorter Gazette strip */
+@media (max-width: 1199px) {
+	.aw-camp--lab-rules .aw-camp-hero-cols { gap: var(--kit-space-4); }
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 4 / 1; }
+}
+@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 2 / 1; } }
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-camp-paper { background: var(--camp-surface); }
