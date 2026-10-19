@@ -339,11 +339,10 @@ add_shortcode(
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<div class="aw-letter-routes">
-			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'send' ); ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="outlook">Outlook</button>
+			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto">Email app</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy">Copy letter</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy-address">Copy address</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy-address"><?php echo aw_i( 'copy' ); ?>Copy address</button>
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
