@@ -528,6 +528,41 @@ function aw_seo_attachment( $att, $size = 'large' ) {
 	return array( 'id' => (int) $att, 'url' => (string) $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] );
 }
 
+/**
+ * A share picture every app shows (owner, 19 Oct 2026: PNG or WebP, never AVIF). Uploads are turned into AVIF (Modern
+ * Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so an AVIF picture from our uploads is
+ * swapped for a WebP copy, made once and kept beside it ({name}-og.webp). Other pictures pass through unchanged.
+ *
+ * @param string $url Picture address.
+ * @return array [url, width, height]; width and height 0 when unchanged.
+ */
+function aw_seo_share_safe_url( $url ) {
+	$plain = strtok( (string) $url, '?' );
+	if ( ! preg_match( '/\.avif$/i', (string) $plain ) ) {
+		return array( $url, 0, 0 );
+	}
+	$up   = wp_get_upload_dir();
+	$base = set_url_scheme( $up['baseurl'], 'https' );
+	$abs  = set_url_scheme( $plain, 'https' );
+	if ( 0 !== strpos( $abs, $base ) ) {
+		return array( $url, 0, 0 );
+	}
+	$path = $up['basedir'] . substr( $abs, strlen( $base ) );
+	$out  = preg_replace( '/\.avif$/i', '-og.webp', $path );
+	if ( ! file_exists( $out ) ) {
+		$ed = file_exists( $path ) ? wp_get_image_editor( $path ) : null;
+		if ( ! $ed || is_wp_error( $ed ) ) {
+			return array( $url, 0, 0 );
+		}
+		$ed->set_quality( 82 );
+		if ( is_wp_error( $ed->save( $out, 'image/webp' ) ) || ! file_exists( $out ) ) {
+			return array( $url, 0, 0 );
+		}
+	}
+	$size = wp_getimagesize( $out );
+	return array( preg_replace( '/\.avif$/i', '-og.webp', $abs ), (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ) );
+}
+
 /** The site's default share image (Settings), as aw_seo_attachment(). */
 function aw_seo_default_image() {
 	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // made at share size (1200×630)
@@ -616,6 +651,12 @@ function aw_seo_image() {
 	}
 	if ( ! $img ) {
 		$img = aw_seo_attachment( (int) get_option( 'site_icon' ) );
+	}
+	if ( $img ) {
+		list( $url, $w, $h ) = aw_seo_share_safe_url( $img['url'] );
+		if ( $url !== $img['url'] ) {
+			$img = array_merge( $img, array( 'url' => $url, 'type' => 'image/webp' ), $w ? array( 'width' => $w, 'height' => $h ) : array() );
+		}
 	}
 	return $img;
 }

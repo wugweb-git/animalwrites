@@ -42,12 +42,28 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 					$obj = get_queried_object();
 					$alt = $obj instanceof WP_Post ? aw_seo_plain( $obj->post_title ) : ( $obj instanceof WP_Term ? aw_seo_plain( $obj->name ) : get_bloginfo( 'name' ) );
 				}
-				$image->add_image( array_filter( array( 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'], 'type' => (string) get_post_mime_type( (int) ( $img['id'] ?? 0 ) ), 'alt' => $alt ) ) );
+				$image->add_image( array_filter( array( 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'], 'type' => (string) ( $img['type'] ?? get_post_mime_type( (int) ( $img['id'] ?? 0 ) ) ), 'alt' => $alt ) ) );
 			}
 		}
 	);
 }
 unset( $aw_seo_net );
+
+/* A share image typed in Rank Math (or a category photo) that is AVIF goes out as its WebP copy too, with its type. */
+foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $aw_seo_tag ) {
+	add_filter(
+		"rank_math/opengraph/{$aw_seo_tag}",
+		function ( $url ) {
+			$safe = aw_seo_share_safe_url( (string) $url )[0];
+			if ( $safe !== $url ) {
+				$GLOBALS['aw_seo_og_webp'] = true;
+			}
+			return $safe;
+		}
+	);
+}
+unset( $aw_seo_tag );
+add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty( $GLOBALS['aw_seo_og_webp'] ) || 'image/avif' === $type ? 'image/webp' : $type );
 
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );
