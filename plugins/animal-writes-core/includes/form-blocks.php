@@ -271,7 +271,7 @@ add_filter(
 			return $content;
 		}
 		if ( preg_match( '/\baw-camp--([a-z0-9-]+)/', $content, $m ) ) {
-			return $content . '<div class="aw-camp-end aw-camp--' . esc_attr( $m[1] ) . '">' . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/take-action"} /-->' ) . '</div>';
+			return $content . '<div class="alignfull aw-camp-end aw-camp--' . esc_attr( $m[1] ) . '">' . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/take-action"} /-->' ) . '</div>';
 		}
 		return $content . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/volunteer-banner"} /-->' );
 	},
