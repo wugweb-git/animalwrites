@@ -5,7 +5,8 @@
  * - One table (owner, 15 Oct 2026): every Search Console query of the latest 3 months merged with the keyword map's
  *   target phrases, ranked by Importance; Gaps sit collapsed under it. No filters, no CSV.
  * - Search Console (last 28 days and last 3 months) comes through Site Kit's own search-console module, the same
- *   call the 15 Oct research used. It refreshes weekly by WP-Cron and on "Refresh now". Site Kit keeps the Google
+ *   call the 15 Oct research used. It refreshes daily by WP-Cron (19 Oct 2026; weekly before, so a reload showed
+ *   week-old figures) and on "Refresh now". Site Kit keeps the Google
  *   connection; this file never reads its tokens.
  * - The keyword map, gaps, Google Trends, autocomplete and Wikipedia figures are a fixed snapshot of
  *   docs/seo/keyword-map.md and docs/seo/keyword-demand-2026-10-15.md (bump AW_SD_STATIC_VERSION when they change).
@@ -307,9 +308,10 @@ add_action( AW_SD_CRON, 'aw_sd_refresh' );
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( AW_SD_CRON ) ) {
-			$next = new DateTimeImmutable( 'next monday 07:00', wp_timezone() ); // Mondays, 07:00 IST.
-			wp_schedule_event( $next->getTimestamp(), 'weekly', AW_SD_CRON );
+		if ( 'daily' !== wp_get_schedule( AW_SD_CRON ) ) {
+			wp_clear_scheduled_hook( AW_SD_CRON ); // The weekly event of 15 Oct 2026.
+			$next = new DateTimeImmutable( 'tomorrow 07:00', wp_timezone() ); // Daily, 07:00 IST.
+			wp_schedule_event( $next->getTimestamp(), 'daily', AW_SD_CRON );
 		}
 	}
 );
@@ -466,7 +468,9 @@ function aw_sd_screen() {
 
 	echo '<div class="wrap"><h1>Search demand</h1>';
 	if ( isset( $_GET['refreshed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success"><p>Search Console figures refreshed.</p></div>';
+		$up_to = $gsc['periods']['28d']['end'] ?? '';
+		$count = count( $gsc['periods']['3m']['queries'] ?? array() );
+		echo '<div class="notice notice-success is-dismissible"><p>Refreshed at ' . esc_html( wp_date( 'H:i', (int) ( $gsc['fetched'] ?? time() ) ) ) . ' IST: ' . esc_html( aw_sd_num( $count ) ) . ' searches from Search Console, figures up to ' . ( $up_to ? aw_sd_date( $up_to ) : 'yesterday' ) . '. Google adds a new day once a day, so a second refresh the same day shows the same figures.</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
 	}
 	if ( isset( $_GET['refresh_failed'] ) && ! empty( $data['gsc_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-error"><p>Refresh failed: ' . esc_html( $data['gsc_error']['message'] ) . '</p></div>';
@@ -477,7 +481,8 @@ function aw_sd_screen() {
 
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_search_demand_refresh">';
 	wp_nonce_field( 'aw_search_demand_refresh' );
-	echo '<p>Search Console data updated ' . ( ! empty( $gsc['fetched'] ) ? aw_sd_date( $gsc['fetched'] ) : 'never' ) . ' · next refresh Mon 07:00 IST '; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
+	$up_to = $gsc['periods']['28d']['end'] ?? '';
+	echo '<p>Search Console figures up to ' . ( $up_to ? aw_sd_date( $up_to ) : 'never fetched' ) . ' · fetched ' . ( ! empty( $gsc['fetched'] ) ? aw_sd_date( $gsc['fetched'] ) . ' ' . esc_html( wp_date( 'H:i', (int) $gsc['fetched'] ) ) . ' IST' : 'never' ) . ' · fetches by itself daily at 07:00 IST '; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
 	submit_button( 'Refresh now', 'secondary', 'submit', false );
 	echo '</p></form>';
 
@@ -517,6 +522,10 @@ function aw_sd_screen() {
 	?>
 <script>
 ( function () {
+	// A browser reload after Refresh now shows the page, not the old "Refreshed" notice again.
+	if ( window.history.replaceState && /[?&](refreshed|refresh_failed)=/.test( location.search ) ) {
+		window.history.replaceState( null, '', location.href.replace( /[?&](refreshed|refresh_failed)=1/, '' ) );
+	}
 	var table = document.getElementById( 'aw-sd-table' );
 	if ( ! table ) { return; }
 	var heads = table.tHead.rows[0].cells, body = table.tBodies[0];
