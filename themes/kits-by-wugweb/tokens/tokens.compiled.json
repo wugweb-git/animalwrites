@@ -250,6 +250,11 @@
       "md": "70px",
       "lg": "96px"
     },
+    "hero-min": {
+      "sm": "560px",
+      "md": "560px",
+      "lg": "660px"
+    },
     "space-gutter": {
       "sm": "16px",
       "md": "32px",

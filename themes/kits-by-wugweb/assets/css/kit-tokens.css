@@ -70,6 +70,7 @@
   --kit-space-8: 4rem;
   --kit-space-9: 6rem;
   --kit-space-section: 48px;
+  --kit-hero-min: 560px;
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;
   --kit-width-content: 720px;
@@ -208,6 +209,7 @@
 @media (min-width: 1200px) {
   :root {
     --kit-space-section: 96px;
+    --kit-hero-min: 660px;
     --kit-space-gutter: 48px;
     --kit-space-grid: 32px;
     --kit-meta-size: 14px;

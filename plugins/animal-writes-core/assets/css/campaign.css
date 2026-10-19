@@ -41,6 +41,8 @@
 
 /* Bands */
 .aw-camp-hero { background: var(--camp-mark); color: var(--camp-on-mark); }
+.aw-camp-hero { min-height: 1020px; } /* every campaign hero: 1020 below 1200, 800 from 1200 (owner, 19 Oct 2026) */
+@media (min-width: 1200px) { .aw-camp-hero { min-height: 800px; } }
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-camp-paper { background: var(--camp-surface); }
