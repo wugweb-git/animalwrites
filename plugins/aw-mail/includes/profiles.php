@@ -85,11 +85,6 @@ add_filter(
 		if ( '' === $sig || ! empty( $GLOBALS['aw_mail_flushing'] ) || aw_mail_profile_is_crm() ) { // a queued email already has it (mail-cap.php)
 			return $atts;
 		}
-		if ( false !== strpos( (string) ( $atts['message'] ?? '' ), 'class="signature"' ) ) {
-			// A designed email that carries its own signature block: no second one, only the campaign strip under it.
-			$atts['message'] = function_exists( 'aw_mail_add_campaign_strip' ) ? aw_mail_add_campaign_strip( (string) $atts['message'] ) : $atts['message'];
-			return $atts;
-		}
 		$to       = function_exists( 'aw_mail_addresses' ) ? aw_mail_addresses( $atts['to'] ?? '' ) : array();
 		$internal = array_filter( $to, fn( $a ) => str_ends_with( $a, '@animalwrites.in' ) || strtolower( (string) get_option( 'admin_email' ) ) === $a );
 		if ( ! $to || count( $internal ) === count( $to ) ) {

@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, signature, contact form
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.9.1
+Stable tag: 2.9.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,8 +67,8 @@ Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
 
-= 2.9.1 =
-* A designed email that already carries a signature block gets no second signature, only the campaign strip under it.
+= 2.9.2 =
+* Removed the 2.9.1 change (no second signature on emails with their own); back to 2.9.0 behaviour.
 
 = 2.9.0 =
 * FluentCRM sync for mail is back: each incoming email from a person finds or creates their contact (tag "Emailed us") with a note holding the full text and an "Open in Mail" link; replies sent from Mail are noted too. Checked every 5 minutes and when the webhook fires; `wp aw-mail crm-sync --all` catches up.
