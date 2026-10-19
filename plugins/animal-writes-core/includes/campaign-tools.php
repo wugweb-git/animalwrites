@@ -24,7 +24,8 @@
  *   [aw_camp_status]                                             the hero's status: action window, and the outcome
  *   [aw_sticky_cta href="#send" label="..."]                     phone-only bar with the days left
  *   [aw_campaign_band campaign="slug" theme="lab-rules"]       home band; shown only while the campaign is
- *                                                                published and open
+ *                                                                published and open; label="…" a pill above the
+ *                                                                title, art="ID" art_phone="ID" the artwork behind it
  * Blocks with class aw-camp-open show only while the campaign is open (Active); aw-camp-closed only after it closes
  * (Post); aw-camp-pre only before it opens. aw-camp-if-count shows once the count reaches the threshold;
  * aw-camp-if-filled hides a section that has nothing in it (e.g. no partners).
@@ -476,7 +477,7 @@ add_shortcode(
 add_shortcode(
 	'aw_campaign_band',
 	function ( $atts ) {
-		$a    = shortcode_atts( array( 'campaign' => '', 'title' => '', 'text' => '', 'button' => 'Send your objection', 'link' => 'Read what the rules say', 'theme' => '' ), $atts );
+		$a    = shortcode_atts( array( 'campaign' => '', 'title' => '', 'text' => '', 'button' => 'Send your objection', 'link' => 'Read what the rules say', 'theme' => '', 'label' => '', 'art' => '', 'art_phone' => '' ), $atts );
 		$post = $a['campaign'] ? get_page_by_path( sanitize_title( $a['campaign'] ), OBJECT, 'aw_campaign' ) : null;
 		if ( ! $post || 'publish' !== $post->post_status ) {
 			return '';
@@ -509,14 +510,24 @@ add_shortcode(
 			}
 			$window .= '</ol><p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open_ts ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>';
 		}
-		$out  = '<section class="aw-camp aw-camp-band' . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
-		$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
+		// The artwork is the band's background; the text sits on its plain left side (owner, 19 Oct 2026). Phones get
+		// their own crop of it.
+		$art   = (int) $a['art'];
+		$pic   = '';
+		if ( $art && wp_attachment_is_image( $art ) ) {
+			$phone = (int) $a['art_phone'];
+			$pic   = '<picture class="aw-camp-band-art">'
+				. ( $phone ? '<source media="(max-width: 767px)" srcset="' . esc_attr( (string) wp_get_attachment_image_srcset( $phone, 'full' ) ) . '" sizes="100vw">' : '' )
+				. wp_get_attachment_image( $art, 'full', false, array( 'alt' => '', 'sizes' => '100vw', 'loading' => 'lazy', 'decoding' => 'async' ) )
+				. '</picture>';
+		}
+		$out  = '<section class="aw-camp aw-camp-band' . ( $pic ? ' has-art' : '' ) . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>' . $pic . '<div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
+		$out .= $a['label'] ? '<p class="aw-camp-band-pill">' . esc_html( $a['label'] ) . '</p>' : '';
+		$out .= '<h2 id="aw-camp-band-t" class="aw-camp-band-title">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 		$out .= $a['text'] ? '<p>' . esc_html( $a['text'] ) . '</p>' : '';
+		$out .= $window;
 		$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#send' ) . '">' . esc_html( $a['button'] ) . '</a> <a class="wp-element-button aw-camp-band-ghost" href="' . esc_url( $url . '#rules' ) . '" data-track="home_campaign_click">' . esc_html( $a['link'] ) . '</a></p>';
-		$doc  = (int) get_post_meta( $post->ID, 'aw_campaign_motif', true ); // the campaign's Gazette cover (its page hero shows it too)
-		$doc  = $doc ? $doc : 14253;
-		$img  = wp_get_attachment_image( $doc, 'large', false, array( 'loading' => 'lazy', 'decoding' => 'async', 'alt' => '' ) );
-		$out .= '</div><div class="aw-camp-poster aw-camp-band-window">' . ( $img ? '<figure class="aw-camp-poster-doc">' . $img . '</figure>' : '' ) . '<p class="aw-camp-stamp">G.S.R. 864(E)</p>' . $window . '</div></div>';
+		$out .= '</div></div>';
 		return $out . '</section>';
 	}
 );

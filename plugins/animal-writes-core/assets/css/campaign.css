@@ -26,6 +26,7 @@
 	--camp-deep: var(--camp-accent);
 	--camp-dark: #1d1418;
 	--camp-meta: #5e4c51;
+	--camp-art-bg: #a10825; /* the artwork's own crimson (home band), so its edges meet the band with no line */
 	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink); /* Brand buttons in the campaign colour */
 }
 /* Crimson on the dark bands is under 3:1, so rules, outlines, bars and icons there are white */
@@ -321,22 +322,35 @@
 	background: var(--camp-mark); color: var(--camp-on-mark);
 }
 .wp-block-post-content > :is(.aw-camp-band, .aw-camp-end) { margin-block: 0; } /* sections: no block gap between them */
-/* Two columns on the page column: the ask, then the campaign's poster (Gazette cover, stamp, countdown, the objection
-   window as day marks), the same pieces as the campaign page hero. Columns come from the space, no breakpoint. */
-.aw-camp-band-inner { max-width: var(--kit-width-wide); margin-inline: auto; display: grid; gap: var(--kit-space-7) var(--kit-space-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); align-items: center; }
-.aw-camp-band .aw-camp-band-text h2 { margin: 0 0 var(--kit-space-4); max-width: 18ch; } /* the H2 size is the site's (aw.css) */
-.aw-camp-band .aw-camp-poster-doc { aspect-ratio: 3 / 1; } /* the Gazette masthead as a strip at every width; the countdown leads */
-.aw-camp-band-text > p:not(.aw-camp-band-actions) { font-size: var(--kit-type-lead); max-width: 34rem; margin: 0; }
-.aw-camp-band-actions { margin-top: var(--kit-space-6); }
-.aw-camp-band .aw-countdown { margin: 0 0 var(--kit-space-4); align-items: baseline; }
-.aw-camp-band .aw-cd-num { font-size: clamp(5rem, 3rem + 7vw, 8.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
+/* The artwork is the background, nothing laid over it; the text sits on its plain left side (owner, 19 Oct 2026).
+   1200+: the artwork covers the band. Below: the whole scene under the text (phones get their own crop). */
+.aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }
+.aw-camp-band-art { position: absolute; inset: 0; z-index: 0; }
+.aw-camp-band-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: right center; }
+.aw-camp-band-inner { position: relative; z-index: 1; max-width: var(--kit-width-wide); margin-inline: auto; }
+.aw-camp-band-text { max-width: 36rem; }
+.aw-camp-band-pill { display: inline-block; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-1) var(--kit-space-4); border: 2px solid var(--camp-on-mark); border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-sm); }
+.aw-camp-band .aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; max-width: 14ch; } /* the band's headline, as on the campaign's link card (exempt from the site H2 size, aw.css) */
+.aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
+.aw-camp-band .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); align-items: baseline; }
+.aw-camp-band .aw-cd-num { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
 .aw-camp-band .aw-countdown:has(+ .aw-camp-band-days) .aw-cd-when { display: none; } /* the dates are under the day marks */
-.aw-camp-band-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 3px; align-items: end; height: 2.5rem; }
-.aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--kit-color-on-ink); }
-.aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.22); }
+.aw-camp-band-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--days), minmax(0, 1fr)); gap: 3px; align-items: end; height: 2rem; }
+.aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--camp-on-mark); }
+.aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.28); }
 .aw-camp-band-days li.is-today { height: 100%; }
 .aw-camp-band-range { justify-content: space-between; max-width: none; margin: var(--kit-space-3) 0 0; } /* the dates sit under the two ends of the day marks */
-.aw-camp-band-range .kit-meta-item { color: var(--kit-color-on-ink); }
+.aw-camp-band-range .kit-meta-item { color: var(--camp-on-mark); }
+.aw-camp-band .aw-camp-band-actions { margin-top: var(--kit-space-6); }
+@media (max-width: 1199px) {
+	.aw-camp-band.has-art { padding-bottom: calc(52.5vw - 1rem); } /* the scene's height (1730 x 909) */
+	.aw-camp-band-art { inset: auto 0 0 0; }
+	.aw-camp-band-art img { height: auto; object-fit: initial; }
+	.aw-camp-band-text { max-width: none; }
+}
+@media (max-width: 767px) {
+	.aw-camp-band.has-art { padding-bottom: calc(75vw + var(--kit-space-4)); } /* the phone crop is 4:3 */
+}
 .aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
 .aw-camp .aw-camp-band-ghost { background: transparent; color: var(--camp-on-mark); box-shadow: inset 0 0 0 2px var(--camp-on-mark); }

@@ -837,7 +837,7 @@ body { background: var(--kit-color-canvas); }
    H1 page title · H2 section heading · H3 card / sub-section title · H4 compact list title · H5 small heading ·
    Lead · Body · Secondary body (muted) · Meta (small, muted). Sizes come from the fluid type tokens (scale from 375 to 1200).
    ====================================================================================================== */
-:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head) {
+:is(main h2, .aw-hub-group > h2, .aw-also h2, .kit-ed-head h2, .aw-vol-banner-title):not(.aw-story-title, .aw-case-title, .kit-eyebrow, .screen-reader-text, .wp-block-post-title, .aw-local-card-head, .aw-camp-band-title) {
 	font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; letter-spacing: var(--kit-tracking-heading, -0.01em);
 }
 :is(.aw-case-title, .aw-story-title, .aw-org-name, .kit-ed-lead .wp-block-post-title, main .entry-content h3, main h3.wp-block-heading, .aw-local-card-head, .aw-contact-row h3, .aw-task-title) {
