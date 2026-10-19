@@ -513,7 +513,10 @@ add_shortcode(
 		$out .= '<h2 id="aw-camp-band-t">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 		$out .= $a['text'] ? '<p>' . esc_html( $a['text'] ) . '</p>' : '';
 		$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#send' ) . '">' . esc_html( $a['button'] ) . '</a> <a class="wp-element-button aw-camp-band-ghost" href="' . esc_url( $url . '#rules' ) . '" data-track="home_campaign_click">' . esc_html( $a['link'] ) . '</a></p>';
-		$out .= '</div><div class="aw-camp-band-window">' . $window . '</div></div>';
+		$doc  = (int) get_post_meta( $post->ID, 'aw_campaign_motif', true ); // the campaign's Gazette cover (its page hero shows it too)
+		$doc  = $doc ? $doc : 14253;
+		$img  = wp_get_attachment_image( $doc, 'large', false, array( 'loading' => 'lazy', 'decoding' => 'async', 'alt' => '' ) );
+		$out .= '</div><div class="aw-camp-poster aw-camp-band-window">' . ( $img ? '<figure class="aw-camp-poster-doc">' . $img . '</figure>' : '' ) . '<p class="aw-camp-stamp">G.S.R. 864(E)</p>' . $window . '</div></div>';
 		return $out . '</section>';
 	}
 );
