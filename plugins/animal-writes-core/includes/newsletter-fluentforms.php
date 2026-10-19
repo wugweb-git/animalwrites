@@ -103,6 +103,9 @@ add_filter(
 			return $body;
 		}
 		$row = aw_nl_get( 'email', strtolower( trim( (string) ( $data['email'] ?? '' ) ) ) );
+		if ( $row ) { // %%aw_unsubscribe_url%%: the bare address, for a link with its own text (branded email, 19 Oct 2026)
+			$body = str_replace( '%%aw_unsubscribe_url%%', esc_url( aw_nl_link( 'unsubscribe', $row['token'] ) ), $body );
+		}
 		return $row ? str_replace( '%%aw_unsubscribe%%', '<a href="' . esc_url( aw_nl_link( 'unsubscribe', $row['token'] ) ) . '">' . esc_html( aw_nl_link( 'unsubscribe', $row['token'] ) ) . '</a>', $body ) : $body;
 	},
 	10,
