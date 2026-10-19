@@ -35,10 +35,6 @@ function c2h( $t, $level = 2, $anchor = '', $cls = '' ) {
 	$id = $anchor ? ' id="' . $anchor . '"' : '';
 	return "<!-- wp:heading$a -->\n<h$level class=\"wp-block-heading" . ( $cls ? ' ' . $cls : '' ) . "\"$id>$t</h$level>\n<!-- /wp:heading -->\n\n";
 }
-/** A module heading: H3 under its section's H2, styled like a section heading (Campaign Content Standard D1). */
-function c2mod( $t ) {
-	return c2h( $t, 3, '', 'aw-camp-mod-h' );
-}
 function c2sc( $sc ) {
 	return "<!-- wp:shortcode -->\n$sc\n<!-- /wp:shortcode -->\n\n";
 }
@@ -53,7 +49,7 @@ function c2list( $items, $ordered = false, $cls = '' ) {
 	$c     = 'wp-block-list' . ( $cls ? ' ' . $cls : '' );
 	return "<!-- wp:list$a -->\n<$tag class=\"$c\">$li</$tag>\n<!-- /wp:list -->\n\n";
 }
-/** A full-width section with an anchor; $cls adds the band style (aw-camp-hero, aw-camp-paper, aw-camp-dark). */
+/** A full-width section with an anchor; $cls adds the band style (aw-camp-hero, aw-camp-white, aw-camp-grey, aw-camp-dark). */
 function c2sec( $anchor, $inner, $cls = '' ) {
 	$classes = trim( 'aw-camp-section ' . $cls );
 	$attrs   = array(
@@ -186,17 +182,17 @@ $what = c2sec(
 		. '</ol>'
 	)
 	. c2p( '<a class="aw-camp-more" href="' . $lib_draft . '">Read the full draft in our Library ' . c2i( 'arrow-right' ) . '</a>' ),
-	'aw-camp-paper'
+	'aw-camp-white'
 );
 
 /* 3. What the draft does: icon grid, the main change leads. */
-$card = function ( $icon, $title, $text, $chips, $doc = '' ) { // $doc: the clause on its Gazette page, above the chips
-	return c2p( c2i( $icon ), 'aw-camp-card-ico' ) . c2h( $title, 3 ) . c2p( $text ) . ( $doc ? c2html( c2gz( $doc, 'aw-camp-card-doc' ) ) : '' ) . c2p( $chips, 'aw-camp-card-chips' );
+$card = function ( $icon, $title, $text, $chips ) {
+	return c2p( c2i( $icon ), 'aw-camp-card-ico' ) . c2h( $title, 3 ) . c2p( $text ) . c2p( $chips, 'aw-camp-card-chips' );
 };
 $cards = array(
-	$card( 'building', 'Labs approve most experiments themselves', 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.', chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ), 'rule-11-3' ),
-	$card( 'world', 'Some animals could come from open markets', 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.', chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ), 'rule-21-2' ),
-	$card( 'alert', 'Strays: banned, with exemptions', 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.', chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ), 'rule-5-3' ),
+	$card( 'building', 'Labs approve most experiments themselves', 'Mild and moderate experiments on any species, including dogs and monkeys, would be approved by the lab\'s own ethics committee and not sent to CCSEA. CCSEA only receives reports for animals larger than rabbits.', chip( '11-3', 'Rule 11(3)', 'The lab committee alone approves mild and moderate experiments on every species.' ) . ' ' . chip( '11-4', 'Rule 11(4)', 'For animals larger than rabbits, the committee reports to CCSEA at three stages; CCSEA does not approve.' ) ),
+	$card( 'world', 'Some animals could come from open markets', 'If registered breeders can\'t supply them, livestock, farm animals, fish and birds could be bought from unregistered sources or the open market, with only the lab committee\'s approval.', chip( '21-2', 'Rule 21(2)', 'Buying from unregistered sources or the open market with the lab committee\'s approval and a quarantine.' ) ),
+	$card( 'alert', 'Strays: banned, with exemptions', 'Stray and feral animals are not to be used, but "competent authorities", never defined in the draft, can grant exemptions. In 2022 the regulator told labs stray dogs may be used in vaccine trials, and withdrew that in 2023.', chip( '5-3', 'Rule 5(3)', 'Exemptions for studies on animal health, the environment or human or animal health, when only strays will do.' ) ),
 	$card( 'heart', 'Wildlife and monkeys: allowed under conditions', 'Protected species and primates can be used for listed purposes with justification and permission. The draft is unclear on primates.', chip( '5-1-c', 'Rule 5(1)(c)' ) . ' ' . chip( '6-2', 'Rule 6(2)' ) ),
 	$card( 'home', 'A lab doesn\'t need walls', 'Places that are not wholly enclosed, and mobile facilities, count as labs.', chip( '2-i', 'Rule 2(i)' ) ),
 	$card( 'knowledge', 'Training is a reason to use animals', 'Higher education and professional training are listed purposes, and teaching approvals can last five years.', chip( '4-6', 'Rule 4(6)' ) . ' ' . chip( '11-11', 'Rule 11(11)' ) ),
@@ -206,16 +202,16 @@ foreach ( $cards as $i => $c ) { // each card has its own anchor (change-1 ...),
 	$n     = $i + 1;
 	$grid .= "<!-- wp:group {\"anchor\":\"change-$n\",\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"change-$n\" class=\"wp-block-group aw-camp-card\">$c</div>\n<!-- /wp:group -->\n\n";
 }
-$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n" );
+$rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-grey' );
 
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
-	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
+	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '">'
 		. '<h4>' . $name . '</h4><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
 };
 $pain = c2sec(
 	'pain-scale',
-	c2mod( 'The pain scale decides who says yes' )
+	c2h( 'The pain scale decides who says yes' )
 	. c2p( 'Every experiment would be labelled by how much pain it is expected to cause. The label decides whether anyone outside the lab reviews it.', 'aw-camp-lede' )
 	. c2html(
 		'<ol class="aw-camp-ladder">'
@@ -224,7 +220,6 @@ $pain = c2sec(
 		. $tier( 3, 'Severe', 'CCSEA, for animals larger than rodents and rabbits', true, 'Toxicity tests where death is the endpoint; inescapable electric shock; long isolation of dogs and monkeys.' )
 		. $tier( 4, 'Non-recovery', 'CCSEA, for animals larger than rodents and rabbits', true, 'Done fully under anaesthesia; the animal does not wake up.' )
 		. '</ol>'
-		. c2gz( 'annexure-1', 'aw-camp-card-doc aw-camp-gap-doc' ) // Annexure I (the scale itself), above its chip
 		. '<p class="aw-camp-gap">' . c2i( 'alert' ) . '<span>The draft does not say who approves severe experiments on rats, mice or rabbits. ' . chip( '11-2', 'Rule 11(2)' ) . ' ' . chip( 'annexure-1', 'Annexure I' ) . '</span></p>'
 	),
 	'aw-camp-dark'
@@ -233,7 +228,7 @@ $pain = c2sec(
 /* 5. Today vs the draft */
 $compare = c2sec(
 	'compare',
-	c2mod( 'Today vs the draft' )
+	c2h( 'Today vs the draft' )
 	. c2table(
 		array( '', 'Today', 'Draft 2026' ),
 		array(
@@ -245,7 +240,7 @@ $compare = c2sec(
 			array( 'Penalty in the Act', 'Up to ₹200', 'Up to ₹200 (Act unchanged); the draft adds suspension or revocation of registration' ),
 		)
 	),
-	'aw-camp-paper aw-camp-compare'
+	'aw-camp-white aw-camp-compare'
 );
 
 /* 6. Send your objection */
@@ -276,7 +271,7 @@ $send = c2sec(
 	. c2list( $grounds, true, 'aw-letter-grounds' )
 	. c2sc( $letter_sc )
 	. c2p( c2i( 'check' ) . 'Your letter goes from your own email account.', 'aw-camp-note' ),
-	'aw-camp-paper aw-camp-open'
+	'aw-camp-grey aw-camp-open'
 );
 
 /* 7. Other ways to send: icon list. */
@@ -285,7 +280,7 @@ $way = function ( $icon, $title, $text ) {
 };
 $how = c2sec(
 	'how',
-	c2mod( 'Other ways to send' )
+	c2h( 'Other ways to send' )
 	. c2html(
 		'<ul class="aw-camp-ways">'
 		. $way( 'file', 'Copy and paste', 'Copy the letter and the address, and paste them into any email app.' )
@@ -293,7 +288,7 @@ $how = c2sec(
 		. $way( 'send', 'Write your own', 'Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.' )
 		. '</ul>'
 	),
-	'aw-camp-open'
+	'aw-camp-white aw-camp-open'
 );
 
 /* 8. Questions: heading column and answers column. */
@@ -316,7 +311,8 @@ $faq = c2sec( // the section's id (faq) is on its c2slot
 			array( 'What happens after 5 November?', 'CCSEA reviews objections and may revise the draft before final notification. We will publish updates here.' ),
 		)
 	)
-	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n"
+	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
+	'aw-camp-grey'
 );
 
 /* 10. Read the law: every Library document with the campaign tag (the draft, the Act, the 1998 Rules, circulars, orders). */
@@ -324,12 +320,11 @@ $tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
 $tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
-	c2html( '<div class="aw-camp-doc-strip">' . c2gz( 14254, 'aw-camp-doc-page' ) . c2gz( 14255, 'aw-camp-doc-page' ) . c2gz( 14256, 'aw-camp-doc-page' ) . c2gz( 14257, 'aw-camp-doc-page' ) . '</div>' ) // pages of the draft, on dark
-	. c2h( 'Read the law and the record' )
+	c2h( 'Read the law and the record' )
 	. c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' )
 	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
 	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
-	'aw-camp-paper'
+	'aw-camp-grey'
 );
 
 /* 11. What happens next: a real sequence, so numbered. */
@@ -353,7 +348,8 @@ $updates = c2sec(
 	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
 	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
+	'aw-camp-white'
 );
 
 /* In the press: Media & PR items with the campaign tag, in the Media & PR hub's cards; then the campaign's partners
@@ -368,7 +364,7 @@ $press = c2sec(
 	. '<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->' . "\n\n"
 	. '<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-story-title"} /-->' . "\n\n" . '<!-- wp:animal-writes/press-meta /--></div>' . "\n" . '<!-- /wp:group --></article>' . "\n" . '<!-- /wp:group -->' . "\n"
 	. '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
-	'aw-camp-paper'
+	'aw-camp-white'
 );
 
 /* 12. Stay in the loop: share row with the theme's brand icons. */
@@ -391,7 +387,7 @@ $loop      = c2sec(
 );
 
 /* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
-$impact = c2sec( '', c2h( 'Objections sent' ) . c2sc( '[aw_campaign_count min="100"]' ), 'aw-camp-paper' );
+$impact = c2sec( '', c2h( 'Objections sent' ) . c2sc( '[aw_campaign_count min="100"]' ), 'aw-camp-white' );
 
 /* Support (volunteers, local networks, help) has no content yet, so it is not printed. Volunteer registration is not
    support: the site's "Help animals near you" banner stays where every campaign page has it, after the content. */
@@ -413,7 +409,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
 	. c2slot( 'press', $press )
-	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-paper' ), 'aw-camp-if-filled' )
+	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. c2slot( 'next-steps', $next, 'aw-camp-open' )
 	. c2slot( 'updates', $loop )
 	. c2sc( '[aw_sticky_cta href="#how-to-help" label="Send your objection"]' )

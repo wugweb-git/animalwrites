@@ -19,7 +19,7 @@
 .aw-camp--lab-rules {
 	--camp-primary: #a3122f; /* "Gazette crimson", palette A (owner, 17 Oct 2026) */
 	--camp-primary-ink: #ffffff;
-	--camp-surface: #fbeef0;
+	--camp-surface: var(--kit-color-bg); /* no tinted surfaces: brand, white, grey or black only (owner, 19 Oct 2026) */
 	--camp-accent: #6b0f22;
 	--camp-mark: var(--camp-primary);
 	--camp-on-mark: #ffffff;
@@ -43,6 +43,9 @@
 .aw-camp-hero :is(h1, h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-hero a:not(.wp-element-button) { color: var(--camp-on-mark); text-decoration: underline; text-underline-offset: 0.2em; }
 .aw-camp-paper { background: var(--camp-surface); }
+/* White and grey bands alternate; whatever sits on a band (cards, grounds, fields) takes the other one (--camp-tile) */
+.aw-camp-white { background: var(--kit-color-raised); --camp-tile: var(--kit-color-bg); }
+.aw-camp-grey { background: var(--kit-color-bg); --camp-tile: var(--kit-color-raised); }
 .aw-camp-dark { background: var(--camp-dark); color: var(--kit-color-on-ink); }
 .aw-camp-dark :is(h2, h3, h4, p, li, strong) { color: var(--kit-color-on-ink); }
 
@@ -55,6 +58,17 @@
 .aw-camp h3 { letter-spacing: -0.01em; text-wrap: balance; }
 .aw-camp-lede { max-width: 62ch; font-size: var(--kit-type-lead); }
 .aw-camp-section > * { max-width: 1120px; }
+
+/* Lab rules (owner, 19 Oct 2026): section titles are plain theme H2s, cards and the letter tool stand off their band */
+.aw-camp--lab-rules h2 { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: 1.2; }
+.aw-camp--lab-rules :is(.aw-camp-white, .aw-camp-grey) .aw-camp-card:not(:first-child) { background: var(--camp-tile); }
+.aw-camp--lab-rules .aw-letter { --camp-tile: var(--kit-color-bg); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 24px rgb(29 20 24 / 0.08); }
+@media (min-width: 768px) { .aw-camp--lab-rules .aw-letter { padding: var(--kit-space-6); } }
+.aw-camp--lab-rules .aw-letter :is(.aw-letter-ground, .aw-letter-field input, .aw-letter-field textarea, .aw-letter-preview) { background: var(--kit-color-raised); }
+.aw-camp--lab-rules .aw-letter :is(.aw-letter-field input, .aw-letter-field textarea) { border: 1px solid var(--kit-color-muted); }
+.aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
+.aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+.aw-camp--lab-rules .aw-camp-compare tbody td { background: var(--kit-color-raised); border-color: var(--kit-color-line); }
 
 /* Status (hero): the action window, and after closing the outcome beside it as its own label */
 .aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
@@ -196,8 +210,10 @@
 /* Share row */
 .aw-camp-share { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin-top: var(--kit-space-4); }
 .aw-camp-share-label { flex-basis: 100%; font-weight: var(--kit-weight-strong); }
+.aw-letter-share-box { margin-top: var(--kit-space-4); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); }
+.aw-letter-share-head { margin: 0; }
 .aw-letter-share { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); margin-top: var(--kit-space-3); }
-.aw-letter-share .aw-camp-share-btn { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); }
+.aw-letter-share .aw-camp-share-btn { text-decoration: none;  border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); }
 .aw-letter-share .aw-camp-share-btn:hover { box-shadow: inset 0 0 0 1px currentColor; }
 .aw-camp-share-note { margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }

@@ -69,32 +69,38 @@
 		}
 		n.textContent = msg;
 	}
+	/* The share row shown the moment a letter is sent (owner, 19 Oct 2026; not the page's own share row): on a phone
+	   the share sheet and the story and post images; on a computer WhatsApp, X, Facebook and the images to download. */
 	function shareKit(where) {
-		var out = [];
+		function add(el, label, ico, network) {
+			el.className = 'aw-camp-share-btn';
+			el.dataset.kitShare = network;
+			el.innerHTML = '<span class="kit-ico kit-ico--' + ico + '" aria-hidden="true"></span>';
+			el.appendChild(document.createTextNode(label));
+			where.appendChild(el);
+			return el;
+		}
 		function btn(label, ico, network, fn) {
 			var b = document.createElement('button');
 			b.type = 'button';
-			b.className = 'aw-camp-share-btn';
-			b.dataset.kitShare = network;
-			b.innerHTML = '<span class="kit-ico kit-ico--' + ico + '" aria-hidden="true"></span>';
-			b.appendChild(document.createTextNode(label));
-			b.addEventListener('click', fn);
-			out.push(b);
+			add(b, label, ico, network).addEventListener('click', fn);
 		}
+		function link(label, ico, network, href) {
+			var a = document.createElement('a');
+			a.href = href;
+			a.target = '_blank';
+			a.rel = 'noopener';
+			add(a, label, ico, network);
+		}
+		var u = encodeURIComponent(sh.url), t = encodeURIComponent(sh.text);
 		if (canShare) btn('Share', 'share', 'native', function () { navigator.share({ title: sh.title, text: sh.text, url: sh.url }).catch(function () {}); });
+		else {
+			link('WhatsApp', 'brand-whatsapp', 'whatsapp', 'https://wa.me/?text=' + t + '%20' + u);
+			link('X', 'x-brand', 'x', 'https://twitter.com/intent/tweet?text=' + t + '&url=' + u);
+			link('Facebook', 'facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u);
+		}
 		if (sh.story) btn(canShare ? 'Share to story' : 'Story image', canShare ? 'instagram' : 'download', 'story_image', function () { shareImage('story', where); });
 		if (sh.post) btn(canShare ? 'Share as post' : 'Post image', canShare ? 'instagram' : 'download', 'post_image', function () { shareImage('post', where); });
-		out.reverse().forEach(function (b) { where.insertBefore(b, where.firstChild && where.firstChild.classList && where.firstChild.classList.contains('aw-camp-share-label') ? where.firstChild.nextSibling : where.firstChild); });
-	}
-	if (sh.url) {
-		if (shareRow) shareKit(shareRow);
-		var thanks = document.querySelector('.aw-letter-thanks');
-		if (thanks && (canShare || sh.story || sh.post)) {
-			var row = document.createElement('p');
-			row.className = 'aw-letter-share';
-			thanks.appendChild(row);
-			shareKit(row);
-		}
 	}
 
 	document.addEventListener('fluentform_submission_success', function (e) {
@@ -266,6 +272,19 @@
 		copied.appendChild(b);
 	}
 
+	var sendShare = null;
+	function showSendShare() {
+		if (sendShare || !sh.url) return;
+		sendShare = document.createElement('div');
+		sendShare.className = 'aw-letter-share-box';
+		sendShare.innerHTML = '<p class="aw-letter-share-head"><strong>Now ask others to send theirs.</strong></p>';
+		var row = document.createElement('p');
+		row.className = 'aw-letter-share';
+		sendShare.appendChild(row);
+		confirmBox.parentNode.insertBefore(sendShare, confirmBox);
+		shareKit(row);
+	}
+
 	form.querySelectorAll('[data-route]').forEach(function (btn) {
 		btn.addEventListener('click', function () {
 			var route = btn.dataset.route;
@@ -295,6 +314,7 @@
 			track('objection_sent', { route: route });
 			recordSend(route);
 			confirmBox.hidden = false;
+			showSendShare();
 		});
 	});
 

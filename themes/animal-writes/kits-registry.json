@@ -1984,6 +1984,10 @@
     "aw-letter-optin",
     "aw-letter-copy-addr",
     "aw-letter-share",
+    "aw-letter-share-box",
+    "aw-letter-share-head",
+    "aw-camp-white",
+    "aw-camp-grey",
     "aw-camp-share-btn",
     "aw-camp-share-note",
     "aw-letter-email"
