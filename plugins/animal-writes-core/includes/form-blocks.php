@@ -262,12 +262,16 @@ add_action(
 	45
 );
 
-// Every campaign page ends with the volunteer banner.
+// Every campaign page ends with the volunteer banner. Campaign 2.0 pages (built in slots) end with the Home page's last
+// section instead, Take action (Volunteer, Claim your listing), in the campaign's own colours (owner, 19 Oct 2026).
 add_filter(
 	'the_content',
 	function ( $content ) {
 		if ( ! is_singular( 'aw_campaign' ) || ! in_the_loop() || ! is_main_query() || false !== strpos( $content, 'aw-vol-banner' ) ) {
 			return $content;
+		}
+		if ( false !== strpos( $content, 'aw-camp-slot' ) && preg_match( '/\baw-camp--([a-z0-9-]+)/', $content, $m ) ) {
+			return $content . '<div class="aw-camp-end aw-camp--' . esc_attr( $m[1] ) . '">' . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/take-action"} /-->' ) . '</div>';
 		}
 		return $content . do_blocks( '<!-- wp:pattern {"slug":"animal-writes/volunteer-banner"} /-->' );
 	},

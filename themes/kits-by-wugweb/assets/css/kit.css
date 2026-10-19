@@ -1166,6 +1166,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-ed-more:not(:has(.kit-ico)):hover::after { transform: translateX(3px); }
 .kit-sec-head > p:has(> .kit-ed-more) { margin: 0; }
 /* Photo blocks (core Cover with the card radius) in a grid: the text sits at the bottom, the button last */
+/* A full-width Cover with placed content (bottom left and the like) keeps that content on the page column, where every page head starts */
+.wp-block-cover.alignfull.has-custom-content-position > .wp-block-cover__inner-container.is-layout-constrained { width: 100%; }
 .wp-block-cover.kit-photo-card { border-radius: var(--kit-radius-card); overflow: hidden; }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > * { margin-block: 0 var(--kit-space-3); }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }
