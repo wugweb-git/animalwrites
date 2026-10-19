@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, signature, contact form
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.9.2
+Stable tag: 2.9.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 2.9.3 =
+* FluentCRM's dashboard no longer shows the "Set Up FluentSMTP" card; Mailweb sends the site's email.
 
 = 2.9.2 =
 * Removed the 2.9.1 change (no second signature on emails with their own); back to 2.9.0 behaviour.

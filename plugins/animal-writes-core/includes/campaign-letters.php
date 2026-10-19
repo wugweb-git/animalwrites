@@ -247,3 +247,55 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * Dashboard box "Campaign letters" (owner, 19 Oct 2026): for the newest campaign with letters, the total, the last
+ * 7 days (IST), the top 3 grounds and cities, and a link to the full Letter report.
+ */
+add_action(
+	'wp_dashboard_setup',
+	function () {
+		if ( current_user_can( 'edit_posts' ) && aw_cl_campaigns() ) {
+			wp_add_dashboard_widget( 'aw_cl_widget', 'Campaign letters', 'aw_cl_widget' );
+		}
+	}
+);
+
+function aw_cl_widget() {
+	global $wpdb;
+	$all   = aw_cl_campaigns();
+	$cid   = (int) array_key_first( $all );
+	$t     = aw_cl_table();
+	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d", $cid ) ); // phpcs:ignore
+	$week  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d AND sent_on >= %s", $cid, wp_date( 'Y-m-d', strtotime( '-6 days' ) ) ) ); // phpcs:ignore
+	$labels = aw_cl_ground_labels( $cid );
+	$ground = array();
+	foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT grounds FROM {$t} WHERE campaign_id = %d", $cid ) ) as $g ) { // phpcs:ignore
+		foreach ( array_filter( explode( ',', (string) $g ) ) as $n ) {
+			$ground[ (int) $n ] = ( $ground[ (int) $n ] ?? 0 ) + 1;
+		}
+	}
+	arsort( $ground );
+	$cities = wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( "SELECT city AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d AND city <> '' GROUP BY city ORDER BY n DESC LIMIT 3", $cid ) ), 'n', 'k' ); // phpcs:ignore
+	echo '<p><strong>' . esc_html( $all[ $cid ] ) . '</strong></p>';
+	echo '<p style="font-size:14px">' . esc_html( sprintf( '%s sent · %s in the last 7 days', number_format_i18n( $total ), number_format_i18n( $week ) ) ) . '</p>';
+	$list = function ( $title, $rows ) {
+		echo '<p style="margin:12px 0 4px"><strong>' . esc_html( $title ) . '</strong></p>';
+		if ( ! $rows ) {
+			echo '<p class="description">None yet.</p>';
+			return;
+		}
+		echo '<table class="widefat striped"><tbody>';
+		foreach ( $rows as $label => $n ) {
+			echo '<tr><td>' . esc_html( $label ) . '</td><td style="width:4rem;text-align:right">' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+	};
+	$top = array();
+	foreach ( array_slice( $ground, 0, 3, true ) as $n => $c ) {
+		$top[ $n . '. ' . ( $labels[ $n ] ?? '' ) ] = $c;
+	}
+	$list( 'Top grounds', $top );
+	$list( 'Top cities', $cities );
+	echo '<p style="margin-top:12px"><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_campaign&page=aw-letter-report&campaign=' . $cid ) ) . '">Full letter report →</a></p>';
+}

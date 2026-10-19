@@ -157,3 +157,6 @@ add_action(
 		}
 	}
 );
+
+// FluentCRM's dashboard: no "Set Up FluentSMTP" card; Mailweb sends the site's email (owner, 19 Oct 2026).
+add_filter( 'fluent_crm/fluentmail_suggest', '__return_true' );

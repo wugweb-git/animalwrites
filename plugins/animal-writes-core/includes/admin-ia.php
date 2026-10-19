@@ -138,7 +138,9 @@ add_action(
 	function () {
 		global $submenu;
 		list( $msg, $claims ) = aw_inbox_counts();
-		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $msg + $claims + ( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ) ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
+		// The count is what the sections inside show: pending claims and To review. Contact messages moved to Mailweb
+		// (Mail → Website forms), so old filed email copies no longer count here (owner, 19 Oct 2026).
+		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $claims + ( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ) ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
