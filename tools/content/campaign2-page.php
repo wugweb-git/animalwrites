@@ -181,7 +181,7 @@ $hero_closed = c2sec( // owner's copy, 17 Oct 2026
 $what = c2sec(
 	'what',
 	c2split( c2h( 'What\'s happening' )
-	. c2p( 'The Gazette of India has published the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026 (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' ), 16859, '78% 60%' )
+	. c2p( 'The Gazette of India has published the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026 (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' ), 16859, '100% 50%' )
 	. c2html(
 		'<ol class="aw-camp-dates">'
 		. '<li><span class="aw-camp-dates-when">30 Sep 2026</span><span class="aw-camp-dates-what">Notification signed</span></li>'
@@ -328,7 +328,7 @@ $tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
 $tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
-	c2split( c2h( 'Read the law and the record' ) . c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' ), 16856, '70% 50%' )
+	c2split( c2h( 'Read the law and the record' ) . c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' ), 16856, '100% 50%' )
 	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
 	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
 	'aw-camp-grey'
