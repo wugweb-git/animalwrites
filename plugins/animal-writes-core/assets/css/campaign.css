@@ -315,7 +315,7 @@
 .aw-camp-band-days li { height: 70%; border-radius: 2px; background: var(--camp-on-mark); }
 .aw-camp-band-days li.is-past { background: rgb(255 255 255 / 0.28); }
 .aw-camp-band-days li.is-today { height: 100%; }
-.aw-camp-band-range { justify-content: space-between; margin: var(--kit-space-3) 0 0; }
+.aw-camp-band-range { justify-content: space-between; max-width: none; margin: var(--kit-space-3) 0 0; } /* the dates sit under the two ends of the day marks */
 .aw-camp-band-range .kit-meta-item { color: var(--camp-on-mark); }
 .aw-camp-band :is(h2, p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-on-mark); }
 .aw-camp-band h2 { margin: 0 0 var(--kit-space-2); }
