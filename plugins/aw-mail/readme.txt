@@ -1,10 +1,10 @@
-=== Wug Mail ===
+=== Mailweb ===
 Contributors: wugweb
 Tags: email, inbox, hostinger, signature, contact form
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.7.1
+Stable tag: 2.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ One WordPress inbox for every Hostinger mailbox and the website forms, kept in s
 
 == Description ==
 
-Wug Mail puts a site's Hostinger mailboxes inside WordPress, so the team reads and answers mail where they already work. Everything is read from and written to the mailboxes through the Hostinger Mail API, so webmail and WordPress always show the same messages, folders and read state. Nothing from the mailboxes is copied into WordPress.
+Mailweb puts a site's Hostinger mailboxes inside WordPress, so the team reads and answers mail where they already work. Everything is read from and written to the mailboxes through the Hostinger Mail API, so webmail and WordPress always show the same messages, folders and read state. Nothing from the mailboxes is copied into WordPress.
 
 = Inbox =
 
@@ -42,7 +42,7 @@ Administrators and editors. Every action checks a nonce and the user's capabilit
 
 == Installation ==
 
-1. Upload the `aw-mail` folder to `/wp-content/plugins/` and activate Wug Mail.
+1. Upload the `aw-mail` folder to `/wp-content/plugins/` and activate Mailweb.
 2. In hPanel, create a Mail API token for the domain's mailboxes and add it to `wp-config.php`: `define( 'AW_HOSTINGER_MAIL_TOKEN', '...' );`
 3. Open Mail, then Settings, to check the mailboxes and aliases and to fill in the profiles.
 4. Optional: add a webhook in hPanel for "message.received" pointing to `/wp-json/aw/v1/mail-in` so unread counts refresh as soon as mail arrives.
@@ -63,8 +63,11 @@ Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
 
+= 2.8.0 =
+* Renamed from Wug Mail to Mailweb. The folder, settings, webhook address and everything saved stay the same.
+
 = 2.7.0 =
-* The SMTP connection (mailbox, password, server, port, sender name, default Reply-To) moved here from Kits Core: all of a site's mail is now in Wug Mail. Same saved settings; nothing to re-enter.
+* The SMTP connection (mailbox, password, server, port, sender name, default Reply-To) moved here from Kits Core: all of a site's mail is now in Mailweb. Same saved settings; nothing to re-enter.
 
 = 2.6.0 =
 * Plugin Check fixes: output escaped where it is printed, request values sanitised, nonce checks where uploads are read, translator comment for the unread count.

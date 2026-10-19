@@ -3,7 +3,7 @@
  * Mailbox profiles (owner, 18 Oct 2026): each mailbox's display name, signature and picture, as set in Hostinger
  * webmail (the Mail API has no endpoint for them, so they are copied in here: Settings → Incoming mail → Profiles).
  *
- * - Wug Mail: the picture and name head each mailbox on the Mail page and widget.
+ * - Mailweb: the picture and name head each mailbox on the Mail page and widget.
  * - Site emails: an email the site sends from one of these addresses (normally noreply@) leaves with that mailbox's
  *   display name, and its signature is added at the end (HTML emails get the HTML signature, plain-text emails a text
  *   version). Only for emails to people outside: notices to our own addresses (contact@, the admin email) get none.

@@ -1,6 +1,6 @@
 # Plugin map
 
-Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Wug Mail (`aw-mail`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
+Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Mailweb (`aw-mail`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
 ## animal-writes-core
 
@@ -46,7 +46,7 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 | `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
 | `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from. |
 
-## aw-mail (Wug Mail)
+## aw-mail (Mailweb)
 
 Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending: the SMTP mailbox (`smtp.php`, from Kits Core on 19 Oct 2026) and the daily cap and queue (`mail-cap.php`, from core on 18 Oct 2026) are here. Both show on Mail → Settings → Site sending. No mail client: replies are written in Hostinger webmail.
 

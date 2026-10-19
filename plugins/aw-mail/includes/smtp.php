@@ -2,9 +2,9 @@
 /**
  * Outgoing mail through the site's own mailbox (SMTP), set in Mail → Settings → Site sending.
  *
- * Moved from Kits Core to Wug Mail on 19 Oct 2026 (owner: all mail in one plugin). Same option (kits_mail), password
+ * Moved from Kits Core to Mailweb on 19 Oct 2026 (owner: all mail in one plugin). Same option (kits_mail), password
  * constant (KITS_MAIL_PASSWORD), function and hook names (kits_mail_*), so nothing is re-entered and other code keeps
- * working. Sites built on Kits that send through SMTP install Wug Mail.
+ * working. Sites built on Kits that send through SMTP install Mailweb.
  *
  * Until a password is saved, WordPress sends mail the default way. The password is stored in the option
  * kits_mail (not autoloaded) and is never shown again on the screen.

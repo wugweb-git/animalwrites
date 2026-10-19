@@ -21,7 +21,7 @@ wp plugin activate animal-writes-core --quiet
 # Rank Math is the site's SEO system; aw-seo-extras adds what it cannot do (it does nothing without Rank Math).
 wp plugin install seo-by-rank-math --version=1.0.280 --activate --quiet
 wp plugin activate aw-seo-extras --quiet
-# Wug Mail: incoming mail (webhook /wp-json/aw/v1/mail-in), Mail menu, dashboard widget, Telegram reminder.
+# Mailweb: all site mail (inbox, webhook /wp-json/aw/v1/mail-in, SMTP sending, daily limit, signatures).
 wp plugin activate aw-mail --quiet
 # One item of each kind.
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet

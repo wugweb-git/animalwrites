@@ -16,7 +16,7 @@
  *   hold both sides; the email keeps a list of its replies (time, subject, who sent it, queued or sent).
  * - Who may reply: administrators and FluentCRM users with "manage contacts". The form carries a nonce.
  *
- * Moved to Wug Mail (aw-mail) on 18 Oct 2026 and not loaded: replies happen in Hostinger webmail (owner, 18 Oct 2026).
+ * Moved to Mailweb (aw-mail) on 18 Oct 2026 and not loaded: replies happen in Hostinger webmail (owner, 18 Oct 2026).
  * Kept so nothing is lost; aw-mail.php loads it only if the owner turns replies in WordPress back on.
  *
  * @package aw-mail

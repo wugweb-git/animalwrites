@@ -18,7 +18,7 @@
  *   (Inbox row, its screen, or its note on the contact → Inbox → Reply, mail-reply.php): Reply-To = the address that
  *   email was sent to, threaded on its Message-ID, so the answer comes back here.
  *
- * Moved from animal-writes-core to Wug Mail (aw-mail) on 18 Oct 2026: same route, options, post type and meta keys.
+ * Moved from animal-writes-core to Mailweb (aw-mail) on 18 Oct 2026: same route, options, post type and meta keys.
  *
  * @package aw-mail
  */
