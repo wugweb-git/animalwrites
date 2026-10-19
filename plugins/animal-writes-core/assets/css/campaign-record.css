@@ -124,15 +124,15 @@
 .aw-camp.aw-camp--community-dogs .aw-camp-postmark::after { content: ""; position: absolute; left: 92%; top: 50%; width: 6.5rem; height: 1.75rem; transform: translateY(-50%); background: repeating-linear-gradient(to bottom, var(--camp-primary-ink) 0 2px, transparent 2px 8px); opacity: 0.85; pointer-events: none; }
 /* The hero fits 1020 below 1200 (owner, 19 Oct 2026): tighter gaps between its parts and a smaller stamp and postmark */
 @media (max-width: 1199px) {
-	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-heading { margin-bottom: var(--kit-space-4); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-heading { margin-bottom: var(--kit-space-2); }
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-status { margin-top: var(--kit-space-2); }
-	.aw-camp.aw-camp--community-dogs .aw-camp-hero > :is(.aw-camp-hero-summary, .aw-camp-metric) { margin-top: var(--kit-space-4); }
-	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: min(54%, 11.5rem); margin-top: var(--kit-space-4) !important; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > :is(.aw-camp-hero-summary, .aw-camp-metric) { margin-top: var(--kit-space-3); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: 9.5rem; margin-top: var(--kit-space-4) !important; }
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { width: 7rem; height: 7rem; padding: 0.75rem; font-size: 0.6875rem; }
 }
 @media (min-width: 768px) {
-	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: 14.5rem; justify-self: center; }
-	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { justify-self: center; transform: translateX(-8.5rem) rotate(-12deg); }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .wp-block-image { width: 12.5rem; justify-self: center; }
+	.aw-camp.aw-camp--community-dogs .aw-camp-hero > .aw-camp-postmark { justify-self: center; transform: translateX(-7.5rem) rotate(-12deg); }
 }
 @media (min-width: 1200px) {
 	.aw-camp.aw-camp--community-dogs .aw-camp-hero { grid-template-columns: minmax(0, 1fr) 21rem; align-items: start; }
