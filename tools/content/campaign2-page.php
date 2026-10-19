@@ -111,6 +111,14 @@ function c2html( $h ) {
 function c2i( $n ) {
 	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
 }
+/** A section opening in two columns: the heading and lede beside a piece of the campaign artwork (owner, 19 Oct 2026). */
+function c2split( $text, $img_id, $pos = 'right center' ) {
+	$img = wp_get_attachment_image( $img_id, 'large', false, array( 'loading' => 'lazy', 'decoding' => 'async', 'style' => 'object-position:' . $pos ) );
+	return '<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-split"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-split">'
+		. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">' . $text . '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
+		. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">' . c2html( '<figure class="aw-camp-art">' . $img . '</figure>' ) . '</div>' . "\n" . '<!-- /wp:column -->'
+		. '</div>' . "\n" . '<!-- /wp:columns -->' . "\n\n";
+}
 function chip( $rule, $label, $allows = '' ) {
 	return '[aw_rule_chip rule="' . $rule . '" label="' . $label . '"' . ( $allows ? ' allows="' . $allows . '"' : '' ) . ']';
 }
@@ -172,8 +180,8 @@ $hero_closed = c2sec( // owner's copy, 17 Oct 2026
 /* 2. What's happening: the artwork's date strip. */
 $what = c2sec(
 	'what',
-	c2h( 'What\'s happening' )
-	. c2p( 'The Gazette of India has published the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026 (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' )
+	c2split( c2h( 'What\'s happening' )
+	. c2p( 'The Gazette of India has published the draft Prevention of Cruelty to Animals (Control and Supervision of Experiment, Breeding and Trading of Laboratory Animals) Rules, 2026 (G.S.R. 864(E)) to replace the 1968 and 1998 rules on experiments on animals. The public has 30 days to send objections to the Committee for Control and Supervision of Experiments on Animals (CCSEA).', 'aw-camp-lede' ), 16859, '78% 60%' )
 	. c2html(
 		'<ol class="aw-camp-dates">'
 		. '<li><span class="aw-camp-dates-when">30 Sep 2026</span><span class="aw-camp-dates-what">Notification signed</span></li>'
@@ -320,8 +328,7 @@ $tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
 $tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
-	c2h( 'Read the law and the record' )
-	. c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' )
+	c2split( c2h( 'Read the law and the record' ) . c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' ), 16856, '70% 50%' )
 	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
 	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
 	'aw-camp-grey'

@@ -1171,6 +1171,10 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .wp-block-cover.alignfull.has-custom-content-position > .wp-block-cover__inner-container.is-layout-constrained { width: 100%; }
 .wp-block-cover.alignfull { padding-block: var(--kit-space-section); } /* the section padding, top and bottom, like every section */
 .wp-block-post-content > .alignfull { margin-block: 0; } /* full-width sections carry the section padding, so no block gap (white strip) between them */
+/* Everywhere, not only at the top level: full-width section groups nested in a wrapper (campaign pages) get no block gap
+   either, and every full-width section with its own padding uses the one section padding (owner, 19 Oct 2026) */
+.wp-block-post-content .wp-block-group.alignfull { margin-block: 0; }
+.wp-block-post-content .wp-block-group.alignfull[style*="padding-top"] { padding-top: var(--kit-section-y) !important; padding-bottom: var(--kit-section-y) !important; }
 .wp-block-cover.kit-photo-card { border-radius: var(--kit-radius-card); overflow: hidden; }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > * { margin-block: 0 var(--kit-space-3); }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }

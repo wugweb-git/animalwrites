@@ -71,6 +71,11 @@
 .aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 .aw-camp--lab-rules .aw-camp-compare tbody td:nth-child(n) { background: var(--kit-color-raised); border-color: var(--kit-color-line); } /* also the draft column: no tint */
 
+/* Campaign artwork beside a section's opening (c2split): a 4:3 crop of the artwork's busy side */
+.aw-camp-split { margin-bottom: var(--kit-space-5); }
+.aw-camp-art { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-card); background: var(--camp-mark); }
+.aw-camp-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
 /* Status (hero): the action window, and after closing the outcome beside it as its own label */
 .aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
 .aw-camp-status > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-strong); }
