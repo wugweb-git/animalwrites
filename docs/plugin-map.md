@@ -48,12 +48,13 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 
 ## aw-mail (Wug Mail)
 
-Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending: the SMTP mailbox stays in Kits Core (`mail.php`); the daily cap and queue (`mail-cap.php`) moved here on 18 Oct 2026. Both show on Mail → Settings → Site sending. No mail client: replies are written in Hostinger webmail.
+Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending: the SMTP mailbox (`smtp.php`, from Kits Core on 19 Oct 2026) and the daily cap and queue (`mail-cap.php`, from core on 18 Oct 2026) are here. Both show on Mail → Settings → Site sending. No mail client: replies are written in Hostinger webmail.
 
 | File | What it does |
 |---|---|
 | `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
 | `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets; since 18 Oct 2026 it only refreshes counts, no copies), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
+| `includes/smtp.php` | The site's SMTP mailbox: server, port, mailbox and password (option kits_mail or wp-config KITS_MAIL_PASSWORD), sender name, default Reply-To (filter kits_mail_reply_to), test email. Moved from Kits Core 19 Oct 2026; names kept. |
 | `includes/mail-cap.php` | Site-wide daily email cap and queue (moved from core 18 Oct 2026): budget per 24 hours, priorities, retries, pause on refusal, FluentCRM pacing. |
 | `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
 | `includes/campaign-strip.php` | Countdown strip for the open campaign (days left on a deep tab, title and closing date in the campaign colour, white button) added under the signature of Mail replies and signed site emails; follows aw_campaign_open/close, none when no campaign is open. |
@@ -76,7 +77,6 @@ Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-c
 | `demo.php` | [kits_demo]: every Kits primitive in every state, on the master palette and on the site's own palette side by side (Phase 11 B.3). Used on the private, noindex page /kits-demo/ (administrators only). |
 | `form-kit.php` | Form kit (S5): the field dictionary (one definition per field, used by every form), clean-up helpers, the source tag on every entry, a fresh form key for cached pages, and two patterns: the expandable form (S5.6) and the multi-step form (S5.7). Field markup, the spam guard and messages live in forms.php; behaviour in kit.js. |
 | `forms.php` | Shared form component (S5): the field dictionary, field markup, spam guard, server-side per-field errors, the expandable and multi-step patterns, and one set of messages for every form. |
-| `mail.php` | Outgoing mail through the site's own mailbox (SMTP), set in WP Admin > Settings > Mail. |
 | `primitives.php` | Kits primitives (Phase 11 B.2): markup helpers so every page uses the same component for the same job. Styles: themes/kits-by-wugweb/assets/css/kit-primitives.css. Behaviour (sheet, show more): kit.js. |
 | `seo-fields.php` | Editable SEO fields, no SEO plugin needed. |
 | `seo.php` | Meta description, Open Graph and Twitter card tags. Skipped automatically if a dedicated SEO plugin (Yoast, Rank Math, SEOPress, AIOSEO) is active. |
