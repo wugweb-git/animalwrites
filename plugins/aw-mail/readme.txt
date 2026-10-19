@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, signature, contact form
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.6.0
+Stable tag: 2.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -32,6 +32,7 @@ Wug Mail puts a site's Hostinger mailboxes inside WordPress, so the team reads a
 
 = Sending =
 
+* Sends the site's own email (notices, confirmations, newsletters) through its SMTP mailbox, with the sender name and a default Reply-To. Until a password is saved, WordPress sends the default way. A test email can be sent from the settings.
 * A daily sending limit with a queue, for mailboxes that allow a fixed number of emails a day: priorities, retries, a pause when the mail server refuses mail, and pacing for FluentCRM campaigns.
 * All mail settings in one place: Mail, then Settings.
 
@@ -61,6 +62,9 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 2.7.0 =
+* The SMTP connection (mailbox, password, server, port, sender name, default Reply-To) moved here from Kits Core: all of a site's mail is now in Wug Mail. Same saved settings; nothing to re-enter.
 
 = 2.6.0 =
 * Plugin Check fixes: output escaped where it is printed, request values sanitised, nonce checks where uploads are read, translator comment for the unread count.
