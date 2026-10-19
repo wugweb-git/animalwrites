@@ -340,7 +340,7 @@ add_shortcode(
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<div class="aw-letter-routes">
 			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
-			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto">Email app</button>
+			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy"><?php echo aw_i( 'copy' ); ?>Copy letter</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="copy-address"><?php echo aw_i( 'copy' ); ?>Copy address</button>
 		</div>
