@@ -304,6 +304,7 @@
 	max-width: none; margin-inline: calc(50% - 50vw) !important; /* full width, like every section (out of the page padding; core sets auto !important); the content keeps the page column */
 	background: var(--camp-mark); color: var(--camp-on-mark);
 }
+.wp-block-post-content > :is(.aw-camp-band, .aw-camp-end) { margin-block: 0; } /* sections: no block gap between them */
 /* Two columns on the page column: the ask, then the objection window (columns from the space, no breakpoint) */
 .aw-camp-band-inner { max-width: var(--kit-width-wide); margin-inline: auto; display: grid; gap: var(--kit-space-7) var(--kit-space-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); align-items: end; }
 .aw-camp-band-text > p:not(.aw-camp-band-actions) { font-size: var(--kit-type-lead); max-width: 34rem; margin: 0; }

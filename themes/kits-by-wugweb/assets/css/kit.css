@@ -1170,6 +1170,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* A full-width Cover with placed content (bottom left and the like) keeps that content on the page column, where every page head starts */
 .wp-block-cover.alignfull.has-custom-content-position > .wp-block-cover__inner-container.is-layout-constrained { width: 100%; }
 .wp-block-cover.alignfull { padding-block: var(--kit-space-section); } /* the section padding, top and bottom, like every section */
+.wp-block-post-content > .alignfull { margin-block: 0; } /* full-width sections carry the section padding, so no block gap (white strip) between them */
 .wp-block-cover.kit-photo-card { border-radius: var(--kit-radius-card); overflow: hidden; }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > * { margin-block: 0 var(--kit-space-3); }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }
