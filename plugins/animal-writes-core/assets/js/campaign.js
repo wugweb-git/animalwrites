@@ -44,7 +44,8 @@
 	function shareImage(kind) {
 		var url = sh[kind], name = (sh.slug || 'campaign') + '-' + kind + url.slice(url.lastIndexOf('.'));
 		fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
-			var file = new File([blob], name, { type: blob.type });
+			var ext = name.split('.').pop().toLowerCase(), type = /^image\//.test(blob.type) ? blob.type : ({ png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' })[ext] || 'image/png';
+			var file = new File([blob], name, { type: type }); // apps only take an image they can recognise
 			if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file] }).catch(function () {});
 			var a = document.createElement('a');
 			a.href = URL.createObjectURL(blob);
