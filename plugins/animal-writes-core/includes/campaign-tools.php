@@ -517,7 +517,7 @@ add_shortcode(
 		if ( $art && wp_attachment_is_image( $art ) ) {
 			$phone = (int) $a['art_phone'];
 			$pic   = '<picture class="aw-camp-band-art">'
-				. ( $phone ? '<source media="(max-width: 767px)" srcset="' . esc_attr( (string) wp_get_attachment_image_srcset( $phone, 'full' ) ) . '" sizes="100vw">' : '' )
+				. ( $phone ? '<source media="(max-width: 767px)" srcset="' . esc_attr( (string) wp_get_attachment_image_srcset( $phone, 'full' ) ) . '" sizes="100vw" width="' . (int) ( wp_get_attachment_metadata( $phone )['width'] ?? 0 ) . '" height="' . (int) ( wp_get_attachment_metadata( $phone )['height'] ?? 0 ) . '">' : '' ) // its own shape on phones
 				. wp_get_attachment_image( $art, 'full', false, array( 'alt' => '', 'sizes' => '100vw', 'loading' => 'lazy', 'decoding' => 'async' ) )
 				. '</picture>';
 		}

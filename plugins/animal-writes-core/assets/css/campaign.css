@@ -336,7 +336,7 @@
 .aw-camp-band-text { max-width: 36rem; }
 .aw-camp-band-pill { display: inline-block; margin: 0 0 var(--kit-space-5); padding: var(--kit-space-1) var(--kit-space-4); border: 2px solid var(--camp-on-mark); border-radius: var(--kit-radius-pill); font-weight: var(--kit-weight-bold); font-size: var(--kit-type-sm); }
 .aw-camp-band h2.aw-camp-band-title { margin: 0 0 var(--kit-space-4); font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.02; max-width: 14ch; } /* the band's headline, as on the campaign's link card (exempt from the site H2 size, aw.css) */
-.aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
+.aw-camp-band-text > p:not(.aw-camp-band-pill, .aw-camp-band-actions, .aw-camp-band-range, .aw-countdown) { font-size: var(--kit-type-lead); max-width: 30rem; margin: 0; }
 .aw-camp-band .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); align-items: baseline; }
 .aw-camp-band .aw-cd-num { font-size: clamp(3rem, 2rem + 3vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 0.85; font-variant-numeric: tabular-nums; }
 .aw-camp-band .aw-countdown:has(+ .aw-camp-band-days) .aw-cd-when { display: none; } /* the dates are under the day marks */
