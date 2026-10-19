@@ -206,7 +206,7 @@ $rules = c2sec( 'rules', c2h( 'What the draft does' ) . "<!-- wp:group {\"classN
 
 /* 4. Pain scale: a four-step ladder; who approves sits on each step. */
 $tier = function ( $lvl, $name, $who, $ext, $text ) {
-	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '">'
+	return '<li class="aw-camp-tier aw-camp-tier--' . $lvl . '"><span class="aw-camp-tier-bar" aria-hidden="true"></span>'
 		. '<h4>' . $name . '</h4><p class="aw-camp-tier-who' . ( $ext ? ' is-ext' : '' ) . '">' . c2i( $ext ? 'legal' : 'building' ) . $who . '</p><p>' . $text . '</p></li>';
 };
 $pain = c2sec(
