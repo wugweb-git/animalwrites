@@ -1983,6 +1983,8 @@
     "aw-camp-doc-page",
     "aw-letter-optin",
     "aw-letter-copy-addr",
+    "aw-letter-share",
+    "aw-camp-share-btn",
     "aw-letter-email"
    ],
    "states": [

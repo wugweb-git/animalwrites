@@ -99,6 +99,9 @@ function aw_meta_schema() {
 		'aw_campaign_state_override' => array( 'string', array( 'aw_campaign' ), 'State override: pre, active or post (needs a reason)' ),
 		'aw_campaign_override_note' => array( 'string', array( 'aw_campaign' ), 'Reason for the state override' ),
 		'aw_campaign_metric_min' => array( 'string', array( 'aw_campaign' ), 'Show the count from this number' ),
+		'aw_campaign_share_text' => array( 'string', array( 'aw_campaign' ), 'Line shared with the link' ),
+		'aw_campaign_share_story' => array( 'string', array( 'aw_campaign' ), 'Story image (attachment ID, 1080x1920)' ),
+		'aw_campaign_share_post' => array( 'string', array( 'aw_campaign' ), 'Post image (attachment ID, 1080x1080)' ),
 		'aw_campaign_metric_stale' => array( 'string', array( 'aw_campaign' ), 'Days without a new letter before the count shows an as-of date' ),
 
 		// Resources: the date a guide was last checked (schema lastReviewed).

@@ -37,6 +37,51 @@
 		var b = e.target.closest && e.target.closest('button[data-kit-share]');
 		if (b) track('share_click', { network: b.dataset.kitShare });
 	});
+	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
+	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
+	var sh = window.awCampShare || {};
+	var canShare = !!navigator.share;
+	function shareImage(kind) {
+		var url = sh[kind], name = (sh.slug || 'campaign') + '-' + kind + url.slice(url.lastIndexOf('.'));
+		fetch(url).then(function (r) { return r.blob(); }).then(function (blob) {
+			var file = new File([blob], name, { type: blob.type });
+			if (navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file] }).catch(function () {});
+			var a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = name;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+		});
+	}
+	function shareKit(where) {
+		var out = [];
+		function btn(label, ico, network, fn) {
+			var b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'aw-camp-share-btn';
+			b.dataset.kitShare = network;
+			b.innerHTML = '<span class="kit-ico kit-ico--' + ico + '" aria-hidden="true"></span>';
+			b.appendChild(document.createTextNode(label));
+			b.addEventListener('click', fn);
+			out.push(b);
+		}
+		if (canShare) btn('Share', 'share', 'native', function () { navigator.share({ title: sh.title, text: sh.text, url: sh.url }).catch(function () {}); });
+		if (sh.story) btn(canShare ? 'Share to story' : 'Story image', canShare ? 'instagram' : 'download', 'story_image', function () { shareImage('story'); });
+		if (sh.post) btn(canShare ? 'Share as post' : 'Post image', canShare ? 'instagram' : 'download', 'post_image', function () { shareImage('post'); });
+		out.reverse().forEach(function (b) { where.insertBefore(b, where.firstChild && where.firstChild.classList && where.firstChild.classList.contains('aw-camp-share-label') ? where.firstChild.nextSibling : where.firstChild); });
+	}
+	if (sh.url) {
+		if (shareRow) shareKit(shareRow);
+		var thanks = document.querySelector('.aw-letter-thanks');
+		if (thanks && (canShare || sh.story || sh.post)) {
+			var row = document.createElement('p');
+			row.className = 'aw-letter-share';
+			thanks.appendChild(row);
+			shareKit(row);
+		}
+	}
+
 	document.addEventListener('fluentform_submission_success', function (e) {
 		var f = e.detail && e.detail.form;
 		f = f && f.jquery ? f[0] : f;

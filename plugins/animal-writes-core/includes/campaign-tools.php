@@ -12,6 +12,9 @@
  *   aw_campaign_state_override pre|active|post, with aw_campaign_override_note (the reason; required)
  *   aw_campaign_metric_min     the count is shown from this number (default 100)
  *   aw_campaign_metric_stale   days after the last letter before the count shows an "as of" date (default 1)
+ *   aw_campaign_share_text     the line shared with the link (Share button, WhatsApp, X); default: the title
+ *   aw_campaign_share_story    attachment ID: 1080x1920 image for Instagram/Facebook/WhatsApp stories (owner-approved)
+ *   aw_campaign_share_post     attachment ID: 1080x1080 image for feed posts (owner-approved)
  *
  * Shortcodes:
  *   [aw_rule_chip rule="11-3" label="Rule 11(3)" allows="..."]  a chip that opens the clause, word for word
@@ -514,6 +517,11 @@ add_action(
 		$v = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
 		wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/campaign.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/campaign.css' ) );
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/campaign.js', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/campaign.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)
+			$img = fn( $k ) => ( $a = (int) get_post_meta( $id, $k, true ) ) ? (string) wp_get_attachment_url( $a ) : '';
+			$txt = (string) get_post_meta( $id, 'aw_campaign_share_text', true );
+			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ) ) ) . ';', 'before' );
+		}
 	}
 );
 
@@ -549,6 +557,7 @@ function aw_camp_details_box( $post ) {
 	}
 	echo '</select><br><label for="aw-camp-override-note">Reason (required for an override)</label><input type="text" id="aw-camp-override-note" name="aw_campaign_override_note" value="' . esc_attr( $m( 'aw_campaign_override_note' ) ) . '" class="widefat"></p>';
 	echo '<p><label for="aw-camp-min"><strong>Show the count from</strong></label> <input type="number" min="0" id="aw-camp-min" name="aw_campaign_metric_min" value="' . esc_attr( $m( 'aw_campaign_metric_min' ) ? $m( 'aw_campaign_metric_min' ) : '100' ) . '" class="small-text"><br><label for="aw-camp-stale">"As of" date after</label> <input type="number" min="1" id="aw-camp-stale" name="aw_campaign_metric_stale" value="' . esc_attr( $m( 'aw_campaign_metric_stale' ) ? $m( 'aw_campaign_metric_stale' ) : '1' ) . '" class="small-text"> days without a new letter</p>';
+	echo '<p><label for="aw-camp-share-text"><strong>Share line</strong> (sent with the link)</label><input type="text" id="aw-camp-share-text" name="aw_campaign_share_text" value="' . esc_attr( $m( 'aw_campaign_share_text' ) ) . '" class="widefat"><br><label for="aw-camp-share-story">Story image ID (1080×1920)</label> <input type="number" id="aw-camp-share-story" name="aw_campaign_share_story" value="' . esc_attr( $m( 'aw_campaign_share_story' ) ) . '" class="small-text"><br><label for="aw-camp-share-post">Post image ID (1080×1080)</label> <input type="number" id="aw-camp-share-post" name="aw_campaign_share_post" value="' . esc_attr( $m( 'aw_campaign_share_post' ) ) . '" class="small-text"></p>';
 	echo '<p><strong>Letters sent:</strong> ' . esc_html( number_format_i18n( $sent ) ) . '<br><span class="description">"Yes, I sent it" clicks, at most one a minute per visitor. Shown on the page from 100.</span></p>';
 	echo '<details><summary>How this campaign works</summary><ul style="list-style:disc;margin-left:1.2em">'
 		. '<li><code>[aw_letter_tool]</code>: the letter builder; its grounds are the list with class <code>aw-letter-grounds</code> just before it.</li>'
@@ -581,6 +590,9 @@ add_action(
 		update_post_meta( $id, 'aw_campaign_override_note', $note );
 		update_post_meta( $id, 'aw_campaign_metric_min', (string) absint( $_POST['aw_campaign_metric_min'] ?? 100 ) );
 		update_post_meta( $id, 'aw_campaign_metric_stale', (string) max( 1, absint( $_POST['aw_campaign_metric_stale'] ?? 1 ) ) );
+		update_post_meta( $id, 'aw_campaign_share_text', sanitize_text_field( wp_unslash( $_POST['aw_campaign_share_text'] ?? '' ) ) );
+		update_post_meta( $id, 'aw_campaign_share_story', (string) absint( $_POST['aw_campaign_share_story'] ?? 0 ) );
+		update_post_meta( $id, 'aw_campaign_share_post', (string) absint( $_POST['aw_campaign_share_post'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_partners', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_partners'] ?? '' ) ) ) ) ) ) );
 	},
 	10
