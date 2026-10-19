@@ -485,7 +485,7 @@ function aw_seo_awbi_description( $id, $desc ) {
 	}
 	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
 	list( $state, $district ) = aw_item_place_names( $id );
-	$where = implode( ', ', array_filter( array( $district, $state ) ) );
+	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
 	$name  = preg_replace( '/[\s,;:]+$/u', '', aw_seo_plain( get_post_field( 'post_title', $id ) ) );
 	$line  = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );
 	return mb_strlen( $line ) <= 120 ? $line . ' Address, contact and how to help.' : $line; // whole sentences only
@@ -496,7 +496,7 @@ function aw_listing_fact_description( $id ) {
 	$types = function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array();
 	$type  = $types ? $types[0]->name : '';
 	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
-	$where = implode( ', ', array_filter( array( $district, $state ) ) );
+	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
 	if ( '' === $type && '' === $where ) {
 		return '';
 	}
