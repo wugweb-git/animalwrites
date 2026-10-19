@@ -308,7 +308,8 @@
 /* Two columns on the page column: the ask, then the campaign's poster (Gazette cover, stamp, countdown, the objection
    window as day marks), the same pieces as the campaign page hero. Columns come from the space, no breakpoint. */
 .aw-camp-band-inner { max-width: var(--kit-width-wide); margin-inline: auto; display: grid; gap: var(--kit-space-7) var(--kit-space-8); grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); align-items: center; }
-.aw-camp-band-text h2 { margin: 0 0 var(--kit-space-4); font-size: var(--wp--preset--font-size--4-x-large); font-weight: 800; letter-spacing: -0.035em; line-height: 1.04; max-width: 14ch; }
+.aw-camp-band .aw-camp-band-text h2 { margin: 0 0 var(--kit-space-4); max-width: 18ch; } /* the H2 size is the site's (aw.css) */
+.aw-camp-band .aw-camp-poster-doc { aspect-ratio: 3 / 1; } /* the Gazette masthead as a strip at every width; the countdown leads */
 .aw-camp-band-text > p:not(.aw-camp-band-actions) { font-size: var(--kit-type-lead); max-width: 34rem; margin: 0; }
 .aw-camp-band-actions { margin-top: var(--kit-space-6); }
 .aw-camp-band .aw-countdown { margin: 0 0 var(--kit-space-4); align-items: baseline; }
