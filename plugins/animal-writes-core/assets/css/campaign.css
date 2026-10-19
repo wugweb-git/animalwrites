@@ -330,7 +330,7 @@
 /* The artwork is the background, nothing laid over it; the text sits on its plain left side (owner, 19 Oct 2026).
    1200+: the artwork covers the band. Below: the whole scene under the text (phones get their own crop). */
 .aw-camp-band.has-art { position: relative; overflow: hidden; background-color: var(--camp-art-bg, var(--camp-mark)); }
-.aw-camp-band-art { position: absolute; inset: 0; z-index: 0; }
+.aw-camp-band-art { position: absolute; inset: 0 0 0 auto; width: max(calc(50% + var(--kit-width-wide) / 2 - 34rem), 60rem); z-index: 0; } /* from the end of the text column to the right edge, so the scene never grows under the text on wide screens; its plain left side meets the band colour */
 .aw-camp-band-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: right center; }
 .aw-camp-band-inner { position: relative; z-index: 1; max-width: var(--kit-width-wide); margin-inline: auto; }
 .aw-camp-band-text { max-width: 36rem; }
@@ -349,7 +349,7 @@
 .aw-camp-band .aw-camp-band-actions { margin-top: var(--kit-space-6); }
 @media (max-width: 1199px) {
 	.aw-camp-band.has-art { padding-bottom: calc(52.5vw - 1rem); } /* the scene's height (1730 x 909) */
-	.aw-camp-band-art { inset: auto 0 0 0; }
+	.aw-camp-band-art { inset: auto 0 0 0; width: auto; }
 	.aw-camp-band-art img { height: auto; object-fit: initial; }
 	.aw-camp-band-text { max-width: none; }
 }
