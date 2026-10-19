@@ -68,7 +68,7 @@
 .aw-camp--lab-rules .aw-letter :is(.aw-letter-field input, .aw-letter-field textarea) { border: 1px solid var(--kit-color-muted); }
 .aw-camp--lab-rules .aw-letter-ground:not(:hover, :has(input:checked)) { box-shadow: inset 0 0 0 1px var(--kit-color-muted); }
 .aw-camp--lab-rules .aw-camp-compare table { background: var(--kit-color-raised); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
-.aw-camp--lab-rules .aw-camp-compare tbody td { background: var(--kit-color-raised); border-color: var(--kit-color-line); }
+.aw-camp--lab-rules .aw-camp-compare tbody td:nth-child(n) { background: var(--kit-color-raised); border-color: var(--kit-color-line); } /* also the draft column: no tint */
 
 /* Status (hero): the action window, and after closing the outcome beside it as its own label */
 .aw-camp-status { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-4); }
