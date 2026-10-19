@@ -190,6 +190,7 @@ function aw_mail_in( WP_REST_Request $req ) {
 			delete_transient( 'aw_mail_folders_' . $k );
 		}
 		update_option( 'aw_mail_last', array( 'at' => current_time( 'mysql' ), 'to' => '', 'mailbox' => AW_MAIL_BOXES[ (string) $req->get_param( '_aw_mailbox' ) ] ?? '', 'subject' => '' ), false );
+		do_action( 'aw_mail_webhook_noted', (string) $req->get_param( '_aw_mailbox' ) ); // FluentCRM notes (crm-sync.php)
 		return new WP_REST_Response( array( 'status' => 'noted' ), 200 );
 	}
 	$boxkey = isset( AW_MAIL_BOXES[ (string) $req->get_param( '_aw_mailbox' ) ] ) ? (string) $req->get_param( '_aw_mailbox' ) : 'vedanshu';

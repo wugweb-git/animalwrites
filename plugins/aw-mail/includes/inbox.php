@@ -821,6 +821,9 @@ function aw_mail_send_from_form( $in, $refbox ) {
 		aw_mail_call( 'PATCH', aw_mail_fpath( $orig[0], $orig[1] ) . '/messages/' . $orig[2], array( 'addFlags' => array( 'forward' === $mode ? '$Forwarded' : '\\Answered' ) ) );
 		delete_transient( 'aw_mail_folders_' . $orig[0] );
 	}
+	if ( function_exists( 'aw_mail_crm_note_reply' ) ) {
+		aw_mail_crm_note_reply( $boxes[ $from ], array_merge( $to, $cc ), $req['subject'], $req['html'] ); // "Reply sent" on their FluentCRM contact
+	}
 	$log[] = time();
 	update_option( 'aw_mail_send_log', $log, false ); // times only: no addresses, subjects or text
 	if ( $item && 'aw_message' === get_post_type( $item ) ) {

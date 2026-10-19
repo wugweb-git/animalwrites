@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, signature, contact form
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.8.0
+Stable tag: 2.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,10 @@ Mailweb puts a site's Hostinger mailboxes inside WordPress, so the team reads an
 * A daily sending limit with a queue, for mailboxes that allow a fixed number of emails a day: priorities, retries, a pause when the mail server refuses mail, and pacing for FluentCRM campaigns.
 * All mail settings in one place: Mail, then Settings.
 
+= FluentCRM =
+
+* Incoming email from people is noted on their FluentCRM contact (found or created, tag "Emailed us"), with the full text and an "Open in Mail" link; replies sent from Mail are noted as "Reply sent".
+
 = Who can use it =
 
 Administrators and editors. Every action checks a nonce and the user's capability, sending is limited to 30 messages an hour, and no message text is written to any log.
@@ -62,6 +66,9 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 2.9.0 =
+* FluentCRM sync for mail is back: each incoming email from a person finds or creates their contact (tag "Emailed us") with a note holding the full text and an "Open in Mail" link; replies sent from Mail are noted too. Checked every 5 minutes and when the webhook fires; `wp aw-mail crm-sync --all` catches up.
 
 = 2.8.0 =
 * Renamed from Wug Mail to Mailweb. The folder, settings, webhook address and everything saved stay the same.
