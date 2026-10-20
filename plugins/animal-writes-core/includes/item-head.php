@@ -249,6 +249,10 @@ add_filter(
 		$body   = array();
 		foreach ( $blocks as $b ) {
 			if ( 'rank-math/faq-block' === $b['blockName'] ) {
+				$prev = end( $body );
+				if ( $prev && 'core/heading' === $prev['blockName'] ) { // the FAQ's own heading moves with it
+					$faq[] = array_pop( $body );
+				}
 				$faq[] = $b;
 			} else {
 				$body[] = $b;
@@ -272,10 +276,15 @@ add_filter(
 		$at      = null;
 		foreach ( $body as $i => $b ) {
 			if ( $words >= AW_ITEM_AD1_WORDS && ( $i > 0 || $summary ) ) {
-				$at = $i;
-				foreach ( array_slice( $body, $i, null, true ) as $j => $c ) { // the next H2, where the text has headings
+				$at   = $i;
+				$more = 0;
+				foreach ( array_slice( $body, $i, null, true ) as $j => $c ) { // the next H2, when it comes within about 150 more words
 					if ( 'core/heading' === $c['blockName'] && 2 === (int) ( $c['attrs']['level'] ?? 2 ) ) {
 						$at = $j;
+						break;
+					}
+					$more += aw_item_block_words( $c );
+					if ( $more > AW_ITEM_AD1_WORDS ) {
 						break;
 					}
 				}
