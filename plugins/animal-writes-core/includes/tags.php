@@ -29,7 +29,7 @@ const AW_TAG_ICONS = array(
 	// Directory: services.
 	'rescue', 'treatment', 'shelter', 'adoption', 'feeding', 'sterilisation', 'vaccination', 'ambulance', 'boarding-foster', 'legal-help', 'cattle-care', 'animal-welfare', 'bird-treatment',
 	// Resources, Opportunities, Library.
-	'research', 'guide', 'faq', 'how-to', 'job', 'volunteer', 'event', 'internship', 'fellowship', 'grant', 'draft',
+	'research', 'guide', 'faq', 'job', 'volunteer', 'event', 'internship', 'fellowship', 'grant', 'draft',
 );
 
 /* ---------- Registration ---------- */

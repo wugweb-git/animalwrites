@@ -346,7 +346,7 @@ function aw_seo_resource_kind( $post ) {
 	$tags = wp_get_post_terms( $post->ID, 'post_tag', array( 'fields' => 'all' ) );
 	$by   = is_wp_error( $tags ) ? array() : array_column( $tags, 'name', 'slug' );
 	if ( 'post' === $post->post_type ) {
-		foreach ( array( 'research' => 'Research Summary', 'faq' => 'FAQ', 'how-to' => 'How To Guide', 'guide' => 'Guide' ) as $slug => $label ) {
+		foreach ( array( 'research' => 'Research Summary', 'faq' => 'FAQ', 'guide' => 'Guide' ) as $slug => $label ) {
 			if ( isset( $by[ $slug ] ) ) {
 				return $label;
 			}

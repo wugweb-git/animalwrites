@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_LLMS_PAGE_ORDER = array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'press-coverage', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' );
 
 /** Resource types that are guides (listed before research). */
-const AW_LLMS_GUIDE_TYPES = array( 'guide', 'faq', 'how-to' );
+const AW_LLMS_GUIDE_TYPES = array( 'guide', 'faq' );
 
 add_filter( 'rank_math/llms_txt/remove_credit', '__return_true' );
 
