@@ -208,6 +208,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
 .kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; padding-bottom: var(--kit-space-head); } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
 .kit-section-band:not(:has(.kit-section-filters)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
+.kit-section-band:not(:has(.kit-section-filters)) .kit-section-visual { overflow: hidden; } /* the pictures stay inside the head, off the filters below */
 .kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
 /* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
