@@ -101,10 +101,12 @@ add_filter(
 			$atts['headers'] = is_array( $h ) ? $keep : implode( "\n", $keep );
 			return $atts;
 		}
-		if ( ! empty( $GLOBALS['aw_mail_flushing'] ) ) {
-			return $atts; // a queued email was laid out when it was queued (mail-cap.php)
+		if ( ! empty( $GLOBALS['aw_mail_flushing'] ) || aw_mail_profile_is_crm() ) {
+			// A queued email was laid out when it was queued (mail-cap.php); FluentCRM's emails use its own templates,
+			// which carry the logo and signature already (owner, 20 Oct 2026).
+			return $atts;
 		}
-		// Every email, to anyone (notices to ourselves too, FluentCRM too), carries the signature (owner, 20 Oct 2026).
+		// Every other email, to anyone (notices to ourselves too), carries the signature (owner, 20 Oct 2026).
 		$sig = trim( (string) aw_mail_profile( apply_filters( 'wp_mail_from', '' ) )['signature'] );
 		$msg = (string) ( $atts['message'] ?? '' );
 		if ( false !== strpos( $msg, 'class="signature"' ) ) {
@@ -112,7 +114,7 @@ add_filter(
 		}
 		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
 		if ( $html && false !== stripos( $msg, '</body>' ) ) {
-			// A complete HTML email with its own design (FluentCRM, Fluent Forms): signature and strip before </body>.
+			// A complete HTML email with its own design (Fluent Forms): signature and strip before </body>.
 			$block           = ( '' !== $sig ? '<div class="signature" style="margin:28px auto 0;max-width:600px;font:15px/1.6 Arial,Helvetica,sans-serif">' . wp_kses_post( $sig ) . '</div>' : '' ) . ( function_exists( 'aw_mail_campaign_strip_html' ) ? aw_mail_campaign_strip_html() : '' );
 			$atts['message'] = str_ireplace( '</body>', $block . '</body>', $msg );
 			return $atts;
