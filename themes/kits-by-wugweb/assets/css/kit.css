@@ -844,6 +844,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-cats .aw-footer-list { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
 .kit-footer-cats .kit-chip { font-size: var(--kit-meta-size) !important; --kit-chip-fg: var(--kit-footer-muted); }
 .kit-footer-cats .kit-chip:is(:hover, :focus-visible) { --kit-chip-fg: var(--kit-color-on-ink); }
+.kit-footer-cats .kit-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* the small chip still gets a full 44px tap area (the shared rule assumes a 32px chip) */
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-footer-inline a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
 

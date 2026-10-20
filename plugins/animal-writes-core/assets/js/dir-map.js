@@ -198,6 +198,11 @@
 			pin.focus();
 		}
 	} );
+	// /directory/#near-me (the footer's "Find helplines near you") opens Near me straight away.
+	if ( '#near-me' === window.location.hash && near.hidden ) {
+		openBtn.click();
+		near.scrollIntoView( { block: 'start' } );
+	}
 
 	function show( res ) {
 		var types = res.types || {};
