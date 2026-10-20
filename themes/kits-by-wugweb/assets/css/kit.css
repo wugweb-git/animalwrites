@@ -807,6 +807,15 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-help-more { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); margin-left: auto; color: var(--kit-color-on-ink); font-weight: var(--kit-weight-strong); text-decoration: none; white-space: nowrap; }
 .kit-footer-help-more:hover { color: var(--kit-color-accent); text-decoration: underline; text-underline-offset: 0.2em; }
 .kit-footer-help-more:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+/* 1200 and up (owner, 21 Oct 2026): one row, label · the three numbers (number over its purpose, which may wrap) · the
+   link at the end */
+@media (min-width: 1200px) {
+	.kit-footer-helprow { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto; align-items: center; column-gap: var(--kit-space-6); }
+	.kit-footer-helplines { display: contents; }
+	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-2); row-gap: 0; align-items: center; padding: var(--kit-space-1) 0; }
+	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
+	.kit-footer-help-what::before { content: none; }
+}
 /* 768–1199 (owner, 21 Oct 2026): label above, the numbers in three equal columns, number on line 1, purpose on line 2 */
 @media (min-width: 768px) and (max-width: 1199px) {
 	.kit-footer-helprow { display: block; }
