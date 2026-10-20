@@ -27,6 +27,16 @@ function aw_mail_all_boxes() {
 	return array_map( 'strtolower', array_filter( $all, 'is_email' ) );
 }
 
+/**
+ * Mailboxes the inbox may send from (owner, 20 Oct 2026): never vedanshu@ (personal) or noreply@ (site notices only);
+ * support@ (and contact@ once it is a mailbox) answer people.
+ */
+function aw_mail_send_boxes() {
+	$all  = aw_mail_all_boxes();
+	$send = array_diff_key( $all, array_flip( array( 'vedanshu', 'noreply' ) ) );
+	return $send ? $send : $all;
+}
+
 /** Alias map: alias address => mailbox address. */
 function aw_mail_aliases() {
 	$map = get_option( 'aw_mail_aliases', false );

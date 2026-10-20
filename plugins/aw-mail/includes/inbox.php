@@ -454,8 +454,8 @@ function aw_mail_message_screen( $s ) {
 /** New message / reply / forward: laid out like Add New Post. */
 function aw_mail_compose_screen( $s, $mode ) {
 	$mode  = in_array( $mode, array( 'new', 'reply', 'all', 'forward' ), true ) ? $mode : 'new';
-	$boxes = aw_mail_all_boxes();
-	$from  = 'all' === $s['box'] ? (string) array_key_first( $boxes ) : $s['box'];
+	$boxes = aw_mail_send_boxes();
+	$from  = isset( $boxes[ $s['box'] ] ) ? $s['box'] : ( isset( $boxes['support'] ) ? 'support' : (string) array_key_first( $boxes ) );
 	$to    = $cc = array();
 	$subj  = '';
 	$quote = '';
@@ -487,8 +487,8 @@ function aw_mail_compose_screen( $s, $mode ) {
 			$quote = '<p></p><p>' . esc_html( 'forward' === $mode ? '---------- Forwarded message ----------' : 'On ' . $when . ', ' . aw_mail_who( $m['from'] ?? array() ) . ' wrote:' ) . '</p><blockquote>' . $body . '</blockquote>';
 		}
 	}
-	if ( 'new' !== $mode && isset( $boxes['support'] ) && 'vedanshu' === $from ) {
-		$from = 'support'; // replies go from support@ (or contact@ once it is a mailbox), never from vedanshu@
+	if ( ! isset( $boxes[ $from ] ) ) {
+		$from = isset( $boxes['support'] ) ? 'support' : (string) array_key_first( $boxes ); // never from vedanshu@ or noreply@
 	}
 	$sig    = function_exists( 'aw_mail_profile' ) ? trim( (string) aw_mail_profile( $boxes[ $from ] ?? '' )['signature'] ) : '';
 	$start  = '<p></p>' . ( '' !== $sig ? '<div class="signature">' . wp_kses_post( $sig ) . '</div>' : '' ) . $quote;
@@ -729,9 +729,9 @@ function aw_mail_parse_addrs( $s ) {
 
 function aw_mail_send_from_form( $in, $refbox ) {
 	check_admin_referer( 'aw_mail_act' ); // also checked by the caller; here too because this reads $_FILES
-	$boxes = aw_mail_all_boxes();
+	$boxes = aw_mail_send_boxes(); // never vedanshu@ or noreply@, whatever the form sends
 	$from  = sanitize_key( $in['from'] ?? '' );
-	$from  = isset( $boxes[ $from ] ) ? $from : (string) array_key_first( $boxes );
+	$from  = isset( $boxes[ $from ] ) ? $from : ( isset( $boxes['support'] ) ? 'support' : (string) array_key_first( $boxes ) );
 	$mode  = sanitize_key( $in['mode'] ?? 'new' );
 	$item  = absint( $in['item'] ?? 0 );
 	$to    = aw_mail_parse_addrs( $in['to'] ?? '' );

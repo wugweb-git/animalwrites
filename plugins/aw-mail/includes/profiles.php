@@ -59,6 +59,26 @@ add_filter(
 	20
 );
 
+/**
+ * The site's email layout (owner, 20 Oct 2026: every email styled, with the signature): the message in a white card,
+ * then the sending mailbox's signature (logo) and the open campaign's strip.
+ *
+ * @param string $inner Message HTML.
+ * @param string $sig   Signature HTML ('' for none).
+ */
+function aw_mail_layout( $inner, $sig ) {
+	$block = ( '' !== $sig ? '<div class="signature" style="margin-top:28px">' . wp_kses_post( $sig ) . '</div>' : '' ) . ( function_exists( 'aw_mail_campaign_strip_html' ) ? aw_mail_campaign_strip_html() : '' );
+	return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+		. '<body style="margin:0;padding:24px 12px;background:#f4f4f4">'
+		. '<div style="max-width:600px;margin:0 auto;background:#ffffff;padding:28px 24px;font:15px/1.6 Arial,Helvetica,sans-serif;color:#1a1a1a">'
+		. $inner . $block . '</div></body></html>';
+}
+
+/** Plain text as HTML: escaped, links clickable, paragraphs kept. */
+function aw_mail_text_to_html( $text ) {
+	return wpautop( make_clickable( esc_html( str_replace( "\r\n", "\n", (string) $text ) ) ) );
+}
+
 add_filter(
 	'wp_mail',
 	function ( $atts ) {
@@ -81,24 +101,28 @@ add_filter(
 			$atts['headers'] = is_array( $h ) ? $keep : implode( "\n", $keep );
 			return $atts;
 		}
+		if ( ! empty( $GLOBALS['aw_mail_flushing'] ) ) {
+			return $atts; // a queued email was laid out when it was queued (mail-cap.php)
+		}
+		// Every email, to anyone (notices to ourselves too, FluentCRM too), carries the signature (owner, 20 Oct 2026).
 		$sig = trim( (string) aw_mail_profile( apply_filters( 'wp_mail_from', '' ) )['signature'] );
-		if ( '' === $sig || ! empty( $GLOBALS['aw_mail_flushing'] ) || aw_mail_profile_is_crm() ) { // a queued email already has it (mail-cap.php)
+		$msg = (string) ( $atts['message'] ?? '' );
+		if ( false !== strpos( $msg, 'class="signature"' ) ) {
+			return $atts; // already signed (inbox, or a second pass)
+		}
+		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
+		if ( $html && false !== stripos( $msg, '</body>' ) ) {
+			// A complete HTML email with its own design (FluentCRM, Fluent Forms): signature and strip before </body>.
+			$block           = ( '' !== $sig ? '<div class="signature" style="margin:28px auto 0;max-width:600px;font:15px/1.6 Arial,Helvetica,sans-serif">' . wp_kses_post( $sig ) . '</div>' : '' ) . ( function_exists( 'aw_mail_campaign_strip_html' ) ? aw_mail_campaign_strip_html() : '' );
+			$atts['message'] = str_ireplace( '</body>', $block . '</body>', $msg );
 			return $atts;
 		}
-		$to       = function_exists( 'aw_mail_addresses' ) ? aw_mail_addresses( $atts['to'] ?? '' ) : array();
-		$internal = array_filter( $to, fn( $a ) => str_ends_with( $a, '@animalwrites.in' ) || strtolower( (string) get_option( 'admin_email' ) ) === $a );
-		if ( ! $to || count( $internal ) === count( $to ) ) {
-			return $atts; // a notice to ourselves
-		}
-		$msg  = (string) ( $atts['message'] ?? '' );
-		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
-		if ( $html ) {
-			$block           = '<div class="signature" style="margin-top:28px">' . wp_kses_post( $sig ) . '</div>' . ( function_exists( 'aw_mail_campaign_strip_html' ) ? aw_mail_campaign_strip_html() : '' );
-			$atts['message'] = false !== stripos( $msg, '</body>' ) ? str_ireplace( '</body>', $block . '</body>', $msg ) : $msg . $block;
-		} else {
-			$text            = trim( html_entity_decode( wp_strip_all_tags( preg_replace( '/<br\s*\/?>|<\/p>|<\/div>/i', "\n", $sig ) ), ENT_QUOTES ) );
-			$strip           = function_exists( 'aw_mail_campaign_strip_text' ) ? aw_mail_campaign_strip_text() : '';
-			$atts['message'] = rtrim( $msg ) . "\n\n-- \n" . $text . "\n" . ( '' !== $strip ? "\n" . $strip . "\n" : '' );
+		// A fragment or plain text: in the site's layout, sent as HTML.
+		$atts['message'] = aw_mail_layout( $html ? $msg : aw_mail_text_to_html( $msg ), $sig );
+		if ( ! $html ) {
+			$keep            = array_values( array_filter( $keep, fn( $l ) => ! is_string( $l ) || ! preg_match( '/^Content-Type:/i', trim( $l ) ) ) );
+			$keep[]          = 'Content-Type: text/html; charset=UTF-8';
+			$atts['headers'] = is_array( $h ) ? $keep : implode( "\n", $keep );
 		}
 		return $atts;
 	},
