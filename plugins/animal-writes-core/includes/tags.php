@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_TAG_ICONS = array(
 	// Directory: organisation types.
-	'abc-centre', 'adoption-network', 'animal-ambulance', 'animal-shelter', 'animal-welfare-organisation', 'bird-hospital', 'boarding-and-foster', 'emergency-rescue', 'feeder-network', 'gaushala', 'legal-aid', 'mobile-veterinary-unit', 'rescue-group', 'sanctuary', 'veterinary-clinic', 'veterinary-dispensary', 'veterinary-hospital', 'veterinary-office', 'wildlife-rescue',
+	'abc-centre', 'adoption-network', 'animal-ambulance', 'animal-shelter', 'animal-welfare-organisation', 'bird-hospital', 'emergency-rescue', 'feeder-network', 'gaushala', 'legal-aid', 'mobile-veterinary-unit', 'rescue-group', 'sanctuary', 'veterinary-clinic', 'veterinary-dispensary', 'veterinary-hospital', 'veterinary-office', 'wildlife-rescue',
 	// Directory: services.
 	'rescue', 'treatment', 'shelter', 'adoption', 'feeding', 'sterilisation', 'vaccination', 'ambulance', 'boarding-foster', 'legal-help', 'cattle-care',
 	// Resources, Opportunities, Library.
@@ -161,7 +161,7 @@ function aw_tag_icon( $slug ) {
 }
 
 /** A service and the organisation type that does it (owner, 20 Oct 2026: "See all <type>" on the service's tag page). */
-const AW_SERVICE_TYPE = array( 'rescue' => 'rescue-group', 'treatment' => 'veterinary-hospital', 'shelter' => 'animal-shelter', 'adoption' => 'adoption-network', 'feeding' => 'feeder-network', 'sterilisation' => 'abc-centre', 'ambulance' => 'animal-ambulance', 'boarding-foster' => 'boarding-and-foster', 'legal-help' => 'legal-aid', 'cattle-care' => 'gaushala' );
+const AW_SERVICE_TYPE = array( 'rescue' => 'rescue-group', 'treatment' => 'veterinary-hospital', 'shelter' => 'animal-shelter', 'adoption' => 'adoption-network', 'feeding' => 'feeder-network', 'sterilisation' => 'abc-centre', 'ambulance' => 'animal-ambulance', 'legal-help' => 'legal-aid', 'cattle-care' => 'gaushala' );
 
 /**
  * On a service's tag page: a link to its organisation type's page ("See all Animal shelter (139)"), when that page lists

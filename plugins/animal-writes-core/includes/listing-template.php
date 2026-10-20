@@ -252,7 +252,6 @@ const AW_TYPE_SERVICES = array(
 	'mobile-veterinary-unit'      => array( 'treatment', 'ambulance' ),
 	'legal-aid'                   => array( 'legal-help' ),
 	'adoption-network'            => array( 'adoption' ),
-	'boarding-and-foster'         => array( 'boarding-foster' ),
 	'feeder-network'              => array( 'feeding' ),
 );
 

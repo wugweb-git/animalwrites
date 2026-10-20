@@ -416,7 +416,6 @@ function aw_seo_type_plural( $slug ) {
 		'wildlife-rescue'        => 'wildlife rescue groups',
 		'emergency-rescue'       => 'emergency rescue groups',
 		'legal-aid'              => 'legal aid groups',
-		'boarding-and-foster'    => 'boarding and foster homes',
 	);
 	if ( isset( $fixed[ $slug ] ) ) {
 		return $fixed[ $slug ];

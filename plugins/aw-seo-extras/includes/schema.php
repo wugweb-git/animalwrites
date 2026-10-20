@@ -54,7 +54,7 @@ function aw_listing_schema( $id ) {
 	if ( has_term( 'legal-aid', 'post_tag', $id ) && in_array( 'nalsa', $srcs, true ) ) {
 		$stype[] = 'GovernmentOffice'; // a District Legal Services Authority: a government office, not an NGO
 	}
-	$ngo = array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance', 'boarding-and-foster' );
+	$ngo = array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance' );
 	if ( ! in_array( 'nalsa', $srcs, true ) ) {
 		$ngo[] = 'legal-aid';
 	}
