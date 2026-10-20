@@ -44,15 +44,20 @@ function aw_section_tile( $p ) {
  * The head band: breadcrumb, H1, intro, count, pictures, then the page's filters or search. One renderer for every
  * page top (archives and category pages, Pages, new hub Pages); the markup is what the section band CSS expects.
  *
- * @param array $a crumbs (HTML), title (text), title_class, icon (HTML, before the title), desc (text), note (HTML, after the description), count (text), visual (HTML), filters (HTML), compact (bool).
+ * @param array $a crumbs (HTML), title (text), title_class, icon (HTML, before the title), desc (text), note (HTML, after the description), count (text), visual (HTML), filters (HTML), compact (bool), below (bool: filters and count go under the band, above the list; owner 20 Oct 2026).
  * @return string
  */
 function aw_head_band( $a ) {
-	$a = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false ) );
+	$a     = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false, 'below' => false ) );
+	$count = '' !== $a['count'] ? '<p class="kit-section-count" role="status">' . esc_html( $a['count'] ) . '</p>' : '';
+	if ( $a['below'] ) { // list pages: the head is breadcrumb › H1 › description; filters › count open the list
+		$under = '' !== ( $a['filters'] . $count ) ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $a['filters'] . $count . '</div>' : '';
+		return aw_head_band( array_merge( $a, array( 'count' => '', 'filters' => '', 'compact' => false, 'below' => false ) ) ) . $under;
+	}
 	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
 		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . $a['icon'] . esc_html( $a['title'] ) . '</h1>'
 		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . esc_html( $a['desc'] ) . '</p>' : '' ) . $a['note']
-		. ( '' !== $a['count'] ? '<p class="kit-section-count">' . esc_html( $a['count'] ) . '</p>' : '' )
+		. $count
 		. '</div>' . $a['visual'] . '</div>' . ( '' !== $a['filters'] ? '<div class="kit-section-filters">' . $a['filters'] . '</div>' : '' ) . '</div></header>';
 }
 
@@ -140,6 +145,7 @@ function aw_section_head_archive() {
 				'visual'  => $visual,
 				'filters' => $filters ? $filters : '',
 				'compact' => 'aw_listing' === $type && ! $term_page,
+				'below'   => aw_list_page( $type, $term_page ),
 			)
 		);
 }
@@ -171,9 +177,30 @@ function aw_block_section_head( $a ) {
 			'title_class' => $hub ? 'wp-block-query-title wp-block-post-title' : 'wp-block-post-title',
 			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '',
 			'filters'     => (string) $filt,
+			'count'       => $hub && 'aw_listing' !== $type && aw_list_page( $type, false ) && function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '', // the Directory's count stays with its results
 			'compact'     => 'aw_listing' === $type,
+			'below'       => $hub && aw_list_page( $type, false ),
 		)
 	);
+}
+
+/**
+ * List pages, whose filters and count sit under the head band (owner, 20 Oct 2026): News, Library, Resources,
+ * Opportunities, Press coverage, Directory place and type pages, tag and category pages. Not the campaigns (Campaign
+ * Content Standard) or the Directory home page.
+ *
+ * @param string $type      Post type of the page's list.
+ * @param bool   $term_page A tag or category page.
+ * @return bool
+ */
+function aw_list_page( $type, $term_page ) {
+	if ( $term_page ) {
+		return true;
+	}
+	if ( 'aw_listing' === $type ) {
+		return (bool) ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) );
+	}
+	return '' !== $type && 'aw_campaign' !== $type;
 }
 
 /**

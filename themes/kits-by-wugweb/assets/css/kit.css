@@ -206,14 +206,21 @@ body.single-aw_research .kit-lead-media { display: none; }
    breadcrumb, the heading and the page's search or filters, all on the same left edge as the content below. */
 .kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--kit-space-head) var(--kit-space-gutter) var(--kit-space-6); }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
-.kit-section-band:not(:has(.kit-section-desc, .kit-section-count, .kit-section-filters, .kit-section-visual)) { margin-bottom: 0 !important; padding-bottom: var(--kit-space-head); } /* band with only breadcrumb and H1 (plain Pages): H1 › first content 16 */
-.kit-section-band:not(:has(.kit-section-desc, .kit-section-count, .kit-section-filters, .kit-section-visual)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
+.kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; padding-bottom: var(--kit-space-head); } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
+.kit-section-band:not(:has(.kit-section-filters)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
 .kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
 /* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
 .kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
 .kit-section-filters { margin-top: var(--kit-space-head); }
 .kit-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .kit-section-filters .kit-filters, .kit-section-filters .kit-filter-active { margin-bottom: 0; }
+/* List pages: the filters and count sit under the head band, then the list and its pagination, 16 apart (--kit-space-collection) */
+.kit-section-filters--below { margin: 0 0 var(--kit-space-collection); }
+.kit-section-filters--below > .kit-section-count { margin-top: var(--kit-space-collection); }
+.kit-section-filters--below > .kit-section-count:first-child { margin-top: 0; }
+.kit-section-filters--below + * { margin-top: 0; }
+.kit-section-filters--below + .wp-block-query > .wp-block-post-template { margin-block: 0; }
+.kit-section-filters--below + .wp-block-query > .wp-block-query-pagination { margin-top: var(--kit-space-collection); }
 /* Phones: drop the picture strip */
 @media (max-width: 767px) {
 	.kit-section-band .kit-section-visual { display: none; }

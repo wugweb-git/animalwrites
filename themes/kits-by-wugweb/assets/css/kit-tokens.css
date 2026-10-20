@@ -71,6 +71,7 @@
   --kit-space-9: 6rem;
   --kit-space-head: var(--s-4);
   --kit-space-head-meta: var(--s-3);
+  --kit-space-collection: var(--s-4);
   --kit-space-section: 48px;
   --kit-hero-min: 560px;
   --kit-space-gutter: 16px;

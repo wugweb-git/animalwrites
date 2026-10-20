@@ -255,6 +255,11 @@
       "md": "var(--s-3)",
       "lg": "var(--s-3)"
     },
+    "space-collection": {
+      "sm": "var(--s-4)",
+      "md": "var(--s-4)",
+      "lg": "var(--s-4)"
+    },
     "space-section": {
       "sm": "48px",
       "md": "70px",
