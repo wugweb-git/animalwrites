@@ -1165,12 +1165,12 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; }
 .kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); }
 .kit-card--stacked-lg { gap: var(--kit-space-5) !important; padding: var(--kit-space-5) !important; }
-.kit-card--stacked-lg > .kit-card-media { width: 40%; }
+.kit-card--stacked-lg > .kit-card-media { width: 40% !important; max-width: 40%; }
 .kit-card--stacked-lg .kit-card-title { font-size: var(--kit-type-h3) !important; }
-.kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg); }
+.kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-lg) !important; max-width: 40%; }
 .kit-card:is(.kit-card--stacked-md, .kit-card--stacked-sm, .kit-card--block-sm) .kit-card-sum { display: none; }
 .kit-card--stacked-sm { align-items: center !important; gap: var(--kit-space-3) !important; }
-.kit-card--stacked-sm > .kit-card-media { width: var(--kit-thumb-sm); }
+.kit-card--stacked-sm > .kit-card-media { width: var(--kit-thumb-sm) !important; }
 .kit-card--stacked-sm .kit-card-title { font-size: var(--kit-type-sm) !important; }
 .kit-card--stacked-sm > .kit-card-body { gap: var(--kit-space-1); }
 .kit-card--stacked-sm::before { content: ""; flex: none; width: 1.5rem; height: 1.5rem; background: var(--kit-card-icon-color, var(--kit-color-ink)); -webkit-mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; mask: var(--kit-card-icon, var(--kit-ico-file, none)) center / contain no-repeat; }
