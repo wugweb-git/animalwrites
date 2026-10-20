@@ -279,7 +279,7 @@ function aw_publisher_schema() {
 				'@type'         => 'Organization',
 				'@id'           => home_url( '/#organization' ),
 				'name'          => '' !== $name ? $name : get_bloginfo( 'name' ),
-				'alternateName' => array( 'Animal Writes India', 'AnimalWrites.in' ),
+				'alternateName' => AW_SITE_ALT_NAMES,
 				'url'           => home_url( '/' ),
 				'description'   => aw_seo_plain( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
@@ -725,12 +725,16 @@ function aw_schema_language( $node ) {
 	return $node;
 }
 
+/** Other names of the site and organisation (owner, 20 Oct 2026); Google reads the WebSite's for the site name in results. */
+const AW_SITE_ALT_NAMES = array( 'AnimalWrites', 'animalwrites.in' );
+
 /** The site itself, with site search (shown on every page). */
 function aw_website_schema() {
 	return array(
 		'@type'           => 'WebSite',
 		'@id'             => home_url( '/#website' ),
 		'name'            => get_bloginfo( 'name' ),
+		'alternateName'   => AW_SITE_ALT_NAMES,
 		'url'             => home_url( '/' ),
 		'inLanguage'      => 'en-IN',
 		'publisher'       => array( '@id' => home_url( '/#organization' ) ),

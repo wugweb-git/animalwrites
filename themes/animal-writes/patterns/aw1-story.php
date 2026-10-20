@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: India writes for its community dogs
+ * Title: India Writes for Its Community Dogs
  * Slug: animal-writes/aw1-story
  * Categories: animal-writes
  * Description: The past handwritten-letter campaign as a full-bleed photograph band (core Cover): the story, the campaign's figures (each with its Kits icon), its timeline as a rail, a Kits Brand button, and beside them four of the campaign's own photographs.
@@ -20,7 +20,7 @@ $aw1_photo = function ( $id, $cls ) {
 <div class="wp-block-group aw-ed-story-cols"><!-- wp:group {"metadata":{"name":"Story"},"className":"aw-ed-story-text","layout":{"type":"default"}} -->
 <div class="wp-block-group aw-ed-story-text"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
-<h2 class="wp-block-heading">India writes for its community dogs</h2>
+<h2 class="wp-block-heading">India Writes for Its Community Dogs</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->

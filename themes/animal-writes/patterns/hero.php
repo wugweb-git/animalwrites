@@ -29,6 +29,6 @@
 <!-- /wp:buttons -->
 
 <!-- wp:paragraph {"fontSize":"caption"} -->
-<p class="has-caption-font-size">India writes for its community dogs, 29 November 2025</p>
+<p class="has-caption-font-size">India Writes for Its Community Dogs, 29 Nov 2025</p>
 <!-- /wp:paragraph --></div></div>
 <!-- /wp:cover -->
