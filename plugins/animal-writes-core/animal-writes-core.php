@@ -80,6 +80,7 @@ require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
 require_once AW_CORE_DIR . 'includes/mailweb-aw.php';
+require_once AW_CORE_DIR . 'includes/geocode.php';
 require_once AW_CORE_DIR . 'includes/backups.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
