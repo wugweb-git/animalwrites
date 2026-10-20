@@ -160,36 +160,26 @@ function aw_tag_icon( $slug ) {
 	return aw_type_icon( in_array( $slug, AW_TAG_ICONS, true ) ? $slug : 'default' );
 }
 
-// Tag pages: the heading carries the tag's icon.
-add_filter(
-	'render_block_core/query-title',
-	function ( $html ) {
-		if ( ! is_tag() || ! ( get_queried_object() instanceof WP_Term ) ) {
-			return $html;
-		}
-		return preg_replace( '#(<h1\b[^>]*>)#', '$1' . aw_tag_icon( get_queried_object()->slug ), $html, 1 );
-	}
-);
-
 /** A service and the organisation type that does it (owner, 20 Oct 2026: "See all <type>" on the service's tag page). */
 const AW_SERVICE_TYPE = array( 'rescue' => 'rescue-group', 'treatment' => 'veterinary-hospital', 'shelter' => 'animal-shelter', 'adoption' => 'adoption-network', 'feeding' => 'feeder-network', 'sterilisation' => 'abc-centre', 'ambulance' => 'animal-ambulance', 'boarding-foster' => 'boarding-and-foster', 'legal-help' => 'legal-aid', 'cattle-care' => 'gaushala' );
 
-// A service's tag page links to its organisation type's page ("See all Animal shelter"), when that page lists any.
-add_filter(
-	'render_block_core/query-title',
-	function ( $html ) {
-		$q = get_queried_object();
-		if ( ! is_tag() || ! ( $q instanceof WP_Term ) || ! isset( AW_SERVICE_TYPE[ $q->slug ] ) ) {
-			return $html;
-		}
-		$type = get_term_by( 'slug', AW_SERVICE_TYPE[ $q->slug ], 'post_tag' );
-		if ( ! $type || (int) $type->count < 1 ) {
-			return $html;
-		}
-		return $html . '<p class="kit-note"><a href="' . esc_url( get_term_link( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
-	},
-	20
-);
+/**
+ * On a service's tag page: a link to its organisation type's page ("See all Animal shelter (139)"), when that page lists
+ * any; '' otherwise. Shown under the page's description (sections.php).
+ *
+ * @param WP_Term $q The tag.
+ * @return string
+ */
+function aw_service_type_note( $q ) {
+	if ( ! ( $q instanceof WP_Term ) || ! isset( AW_SERVICE_TYPE[ $q->slug ] ) ) {
+		return '';
+	}
+	$type = get_term_by( 'slug', AW_SERVICE_TYPE[ $q->slug ], 'post_tag' );
+	if ( ! $type || (int) $type->count < 1 ) {
+		return '';
+	}
+	return '<p class="kit-note"><a href="' . esc_url( get_term_link( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
+}
 
 // Settings: the Tags screen lists the tags still on the default icon.
 add_action(

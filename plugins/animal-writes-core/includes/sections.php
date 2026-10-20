@@ -44,14 +44,14 @@ function aw_section_tile( $p ) {
  * The head band: breadcrumb, H1, intro, count, pictures, then the page's filters or search. One renderer for every
  * page top (archives and category pages, Pages, new hub Pages); the markup is what the section band CSS expects.
  *
- * @param array $a crumbs (HTML), title (text), title_class, desc (text), count (text), visual (HTML), filters (HTML), compact (bool).
+ * @param array $a crumbs (HTML), title (text), title_class, icon (HTML, before the title), desc (text), note (HTML, after the description), count (text), visual (HTML), filters (HTML), compact (bool).
  * @return string
  */
 function aw_head_band( $a ) {
-	$a = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'desc' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false ) );
+	$a = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false ) );
 	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
-		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . esc_html( $a['title'] ) . '</h1>'
-		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . esc_html( $a['desc'] ) . '</p>' : '' )
+		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . $a['icon'] . esc_html( $a['title'] ) . '</h1>'
+		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . esc_html( $a['desc'] ) . '</p>' : '' ) . $a['note']
 		. ( '' !== $a['count'] ? '<p class="kit-section-count">' . esc_html( $a['count'] ) . '</p>' : '' )
 		. '</div>' . $a['visual'] . '</div>' . ( '' !== $a['filters'] ? '<div class="kit-section-filters">' . $a['filters'] . '</div>' : '' ) . '</div></header>';
 }
@@ -131,7 +131,9 @@ function aw_section_head_archive() {
 			array(
 				'crumbs'  => $crumbs,
 				'title'   => $title,
+				'icon'    => is_tag() && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( (string) get_queried_object()->slug ) : '', // every tag has an icon (tags.php)
 				'desc'    => $desc ? $desc : '',
+				'note'    => is_tag() && function_exists( 'aw_service_type_note' ) ? aw_service_type_note( get_queried_object() ) : '',
 				'count'   => $count ? $count_label : '',
 				'visual'  => $visual,
 				'filters' => $filters ? $filters : '',
