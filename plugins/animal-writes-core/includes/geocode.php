@@ -7,8 +7,10 @@
  * 1. Its address (aw_address, else the AWBI or import address, with the PIN code and "India") → Nominatim. A street or
  *    building match (place_rank 26+) within 60 km of the listing's district centre is "address"; a coarser match
  *    (locality) in the same range is approximate ("locality").
- * 2. Else its PIN code → Nominatim postal code search, approximate (pin).
- * 3. Else its district centre (data/district-centroids.json), approximate (district).
+ * 2. Else the locality named in the address (its last part that is not a PIN, district or state, without "P.O.",
+ *    "Tehsil" and the like) with the district and state → Nominatim, approximate (locality).
+ * 3. Else its PIN code (the PIN field, or one in the address) → Nominatim postal code search, approximate (pin).
+ * 4. Else its district centre (data/district-centroids.json), approximate (district).
  * Found points go to aw_geo_lat / aw_geo_lng with aw_geo_precision. aw_lat / aw_lng stay for the listing's own Google
  * Maps location (enrichment), which wins wherever it exists; geocoded points never show in the listing's schema.
  * Everything but "address" is labelled "approximate" on the map.
@@ -79,6 +81,36 @@ function aw_geo_address( $id ) {
 	return '';
 }
 
+/** The listing's PIN code: the PIN field, else a 6-digit number in its address ('' when none). */
+function aw_geo_pin( $id ) {
+	$pin = (string) get_post_meta( $id, 'aw_pincode', true );
+	if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
+		return $pin;
+	}
+	return preg_match( '/\b([1-9]\d{2})\s?(\d{3})\b/', aw_geo_address( $id ), $m ) ? $m[1] . $m[2] : '';
+}
+
+/**
+ * The locality named in an address: its last part that is not the PIN, district, state or country.
+ *
+ * @param string $addr     Address.
+ * @param array  $skip     Names to leave out (district, state), lower case.
+ * @return string
+ */
+function aw_geo_locality( $addr, $skip ) {
+	$parts = array_reverse( array_map( 'trim', explode( ',', $addr ) ) );
+	foreach ( $parts as $part ) {
+		$x = preg_replace( '/\b[1-9]\d{2}\s?\d{3}\b/', '', $part );
+		$x = preg_replace( '/\b(p\.?\s?o\.?|post|tehsil|teh\.?|tel\.?|tq\.?|taluk|taluka|mandal|block|dist\.?|district|via|near|opp\.?|india)\b\.?/i', '', $x );
+		$x = trim( preg_replace( '/\s+/', ' ', $x ), " .-–" );
+		if ( strlen( $x ) < 3 || preg_match( '/\d/', $x ) || in_array( strtolower( $x ), $skip, true ) ) {
+			continue;
+		}
+		return $x;
+	}
+	return '';
+}
+
 /**
  * A listing's map point: [lat, lng, precision] (address, locality, pin, district, own) or null.
  *
@@ -131,8 +163,17 @@ function aw_geocode_listing( $id, $redo_approx = false ) {
 			return $save( $p[0], $p[1], $p[2] >= 26 ? 'address' : 'locality' );
 		}
 	}
-	$pin = (string) get_post_meta( $id, 'aw_pincode', true );
-	if ( preg_match( '/^\d{6}$/', $pin ) ) {
+	list( $sname, $dname ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+	$dname                 = trim( preg_replace( '/\s*\(.*?\)/', '', $dname ) );
+	$loc                   = '' !== $addr ? aw_geo_locality( $addr, array_filter( array( strtolower( $dname ), strtolower( $sname ) ) ) ) : '';
+	if ( '' !== $loc && '' !== $sname ) {
+		$p = aw_geo_nominatim( array( 'q' => implode( ', ', array_filter( array( $loc, $dname, $sname, 'India' ) ) ) ) );
+		if ( $p && $near( $p ) ) {
+			return $save( $p[0], $p[1], 'locality' );
+		}
+	}
+	$pin = aw_geo_pin( $id );
+	if ( '' !== $pin ) {
 		$p = aw_geo_nominatim( array( 'postalcode' => $pin, 'country' => 'India' ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], 'pin' );
