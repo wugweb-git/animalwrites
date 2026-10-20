@@ -569,9 +569,10 @@
 	});
 })();
 
-/* Motion: load and scroll-in (transform and opacity only; nothing under prefers-reduced-motion).
-   The first group (page header, hero) arrives at 0.4 s, the second (first content section) at 0.9 s; later sections
-   rise in as they scroll into view. Elements can opt in with data-reveal. */
+/* Motion: scroll-in (transform and opacity only; nothing under prefers-reduced-motion).
+   The first two groups (page header or hero, first content section) are shown at once, never faded in: they hold the
+   page's largest text or picture, and hiding them until this script ran delayed LCP by 1-2 s on phones (owner, 20 Oct
+   2026). Later sections rise in as they scroll into view. Elements can opt in with data-reveal. */
 (function () {
 	if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 	var main = document.getElementById('main');
@@ -580,10 +581,7 @@
 	var sections = Array.prototype.slice.call(root.querySelectorAll(':scope > section, :scope > header, :scope > .alignfull, [data-reveal]'));
 	var ease = 'back.out(1.2)'; // a light spring
 	sections.forEach(function (s, i) {
-		if (i < 2) {
-			window.gsap.from(s, { opacity: 0, y: 16, duration: 0.4, delay: i === 0 ? 0 : 0.5, ease: ease, clearProps: 'transform,opacity' }); // done at 0.4 s and 0.9 s
-			return;
-		}
+		if (i < 2) return; // above the fold: shown as rendered
 		if (!('IntersectionObserver' in window)) return;
 		s.style.opacity = '0';
 		var io = new IntersectionObserver(function (entries) {

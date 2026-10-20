@@ -129,6 +129,7 @@ add_filter(
 			return $content;
 		}
 		$link   = ! empty( $block['attrs']['isLink'] );
+		$lead   = is_singular() && get_queried_object_id() === $post_id && ! $link; // the picture at the top of the item's own page
 		$url    = aw_item_image( $post_id );
 		// The item's own page leads with a real photo only: a placard would repeat the title,
 		// and a document's first page is already shown by the PDF viewer below.
@@ -151,7 +152,11 @@ add_filter(
 			// than the large one are left out, so a picture that loads at once never picks a bigger file than before.
 			$set  = implode( ', ', array_filter( array_map( 'trim', explode( ',', (string) wp_get_attachment_image_srcset( $att, 'large' ) ) ), fn( $c ) => preg_match( '/\s(\d+)w$/', $c, $w ) && (int) $w[1] <= (int) $src[1] ) );
 			if ( '' !== $set ) {
-				$dims .= ' srcset="' . esc_attr( $set ) . '" sizes="auto, ' . esc_attr( (string) wp_calculate_image_sizes( 'large', null, null, $att ) ) . '"';
+				// On a list the card is never wider than half the page below 1200px and a third above (the lead card a little
+				// more), so a card that loads at once (Optimization Detective drops "auto" from those) no longer picks the
+				// 1024px file (owner, 20 Oct 2026). The item's own lead keeps WordPress's sizes.
+				$fit   = $lead ? (string) wp_calculate_image_sizes( 'large', null, null, $att ) : '(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 33vw';
+				$dims .= ' srcset="' . esc_attr( $set ) . '" sizes="auto, ' . esc_attr( $fit ) . '"';
 			}
 		} elseif ( $url && ! $doc && (int) get_post_meta( $post_id, 'aw_source_image_w', true ) > 0 && (int) get_post_meta( $post_id, 'aw_source_image_h', true ) > 0 && (string) get_post_meta( $post_id, 'aw_source_image', true ) === $url ) {
 			$dims = ' width="' . (int) get_post_meta( $post_id, 'aw_source_image_w', true ) . '" height="' . (int) get_post_meta( $post_id, 'aw_source_image_h', true ) . '"'; // the publisher's image, measured at ingest
@@ -159,7 +164,8 @@ add_filter(
 		if ( ! $url ) {
 			return ''; // no picture after every source was tried: the card is the stacked row (meta, title, summary), as on the Library list (owner, 18 Oct 2026)
 		}
-		$inner  = '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( aw_seo_plain( get_the_title( $post_id ) ) ) . '"' . $dims . ' loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">';
+		$load   = $lead ? ' fetchpriority="high" loading="eager"' : ' loading="lazy"'; // the item page's lead is its largest picture: it starts at once (owner, 20 Oct 2026)
+		$inner  = '<img src="' . esc_url( $url ) . '" alt="' . esc_attr( aw_seo_plain( get_the_title( $post_id ) ) ) . '"' . $dims . $load . ' decoding="async" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'kit-img-failed\')">';
 		if ( $url ) {
 			$inner .= aw_placard_html( $post_id ); // Shown only if the remote image fails to load.
 		}

@@ -10,6 +10,15 @@
  *   measurements from any screen size, and preloads the measured main picture only for the sizes it has measured. Wide
  *   screens (few visits, so often no measurements) were then left with no priority on any picture. When no preload
  *   covers the widest group, that picture is preloaded with high priority for the widest group only.
+ * - Render-blocking files (owner, 20 Oct 2026):
+ *   - the footer scripts jQuery, jQuery Migrate, Fluent Forms' submit script, wp-hooks, wp-i18n and Accessibility
+ *     Checker's front-end fixes are deferred. WordPress's own strategy check keeps any of them blocking when an inline
+ *     script after it, or a blocking script that needs it, would break;
+ *   - Fluent Forms' two stylesheets load without blocking the first paint, except on a page whose own content has a
+ *     form (there the form may be near the top). Elsewhere the only form is the footer sign-up, far below the fold;
+ *   - Accessibility Checker's sr-only stylesheet loads only on a page whose content uses its sr-only text format;
+ *   - no emoji script or styles (the site shows emoji as text).
+ *   Ads scripts (Advanced Ads, AdSense) are left as they are.
  *
  * @package kits-core
  */
@@ -81,4 +90,45 @@ add_filter(
 		return $html;
 	},
 	20
+);
+
+/** Whether the main content of the current singular page contains $needle (a form, a format class). */
+function kits_content_has( $needle ) {
+	return is_singular() && false !== strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), $needle );
+}
+
+remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+remove_action( 'wp_print_styles', 'print_emoji_styles' );
+add_filter( 'emoji_svg_url', '__return_false' );
+
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
+		$scripts = wp_scripts();
+		foreach ( array( 'jquery-core', 'jquery-migrate', 'fluent-form-submission', 'wp-hooks', 'wp-i18n', 'edac-frontend-fixes' ) as $handle ) {
+			if ( isset( $scripts->registered[ $handle ] ) && ! $scripts->get_data( $handle, 'strategy' ) ) {
+				$scripts->add_data( $handle, 'strategy', 'defer' );
+			}
+		}
+		if ( ! kits_content_has( 'text-format-sr-only' ) ) {
+			wp_dequeue_style( 'edac-sr-only-format' );
+		}
+	},
+	PHP_INT_MAX
+);
+
+add_filter(
+	'style_loader_tag',
+	function ( $tag, $handle ) {
+		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || kits_content_has( 'fluentform' ) ) {
+			return $tag;
+		}
+		$late = preg_replace( "/\smedia=(['\"])[^'\"]*\\1/", " media='print' onload=\"this.media='all'\"", $tag, 1 );
+		return $late === $tag ? $tag : $late . '<noscript>' . trim( $tag ) . "</noscript>\n";
+	},
+	10,
+	2
 );
