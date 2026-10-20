@@ -245,6 +245,16 @@
       "md": "6rem",
       "lg": "6rem"
     },
+    "space-head": {
+      "sm": "var(--s-4)",
+      "md": "var(--s-4)",
+      "lg": "var(--s-4)"
+    },
+    "space-head-meta": {
+      "sm": "var(--s-3)",
+      "md": "var(--s-3)",
+      "lg": "var(--s-3)"
+    },
     "space-section": {
       "sm": "48px",
       "md": "70px",

@@ -342,7 +342,7 @@ body { background: var(--kit-color-canvas); }
 /* ---------- Item page (item-head.php, docs/item-template.md) ---------- */
 /* 3 Meta row: date, Updated, Sponsored, type, place, deadline, status, categories; one font, size, weight and colour;
    spaced by the gap only, so a wrap never leaves a separator behind */
-.aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-3) 0 var(--kit-space-5); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
+.aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-head-meta) 0 var(--kit-space-head); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
 .aw-item-meta > :is(.aw-item-date, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
 .aw-item-meta .aw-date { color: inherit; font: inherit; }
 .aw-item-place { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap, var(--kit-space-1)); color: inherit; text-decoration: none; } /* the place reads like the date: icon and text, no chip (owner, 20 Oct 2026) */
@@ -391,7 +391,8 @@ body { background: var(--kit-color-canvas); }
 .kit-main > .aw-org-mark { width: 4rem; height: 4rem; margin: 0 0 var(--kit-space-5); }
 /* ---------- Directory profile (listing-template.php, docs/listing-template.md) ---------- */
 .aw-item-verified .kit-ico { --kit-ico-size: 0.9em; }
-.aw-listing-about { margin: var(--kit-space-5) 0 0; }
+.aw-listing-about { margin: var(--kit-space-head) 0 0; }
+.kit-item .aw-item-meta + *, body.single-aw_research .kit-item .aw-item-meta + .kit-lead-media + * { margin-top: var(--kit-space-head); } /* meta row › lead (picture, logo + About, first block): 16 */
 .aw-listing-about.has-logo { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: var(--kit-space-4); align-items: start; }
 @media (min-width: 768px) { .aw-listing-about.has-logo { grid-template-columns: 6rem minmax(0, 1fr); gap: var(--kit-space-5); } }
 .aw-listing-logo-box { aspect-ratio: 1; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
@@ -701,9 +702,9 @@ body { background: var(--kit-color-canvas); }
 
 /* Band on hub Pages: no block gaps from the editor's flow layout; the band's own spacing as before */
 .kit-section-band :where(.kit-section-inner, .kit-section-head, .kit-section-head > .wp-block-group) > * { margin-block-start: 0; }
-.kit-section-band .kit-section-desc { margin-top: var(--kit-space-3); }
+.kit-section-band .kit-section-desc { margin-top: var(--kit-space-head); }
 .kit-section-band .kit-section-count { margin-top: var(--kit-space-2); }
-.kit-section-band .kit-section-filters { margin-top: var(--kit-space-5); }
+.kit-section-band .kit-section-filters { margin-top: var(--kit-space-head); }
 .kit-section-band .kit-crumbs li > a:not([class]) { color: inherit; } /* not the content-link blue */
 .aw-hub-list .wp-block-post-template > li { max-width: none; } /* not a prose list */
 .aw-hub-list .wp-block-post-template .wp-block-post-excerpt__excerpt { display: block; -webkit-line-clamp: unset; overflow: visible; }

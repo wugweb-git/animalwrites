@@ -204,11 +204,12 @@ body.single-aw_research .kit-lead-media { display: none; }
 /* 4.6 Section header (archives): full-width kraft band with title, description, count and a three-tile visual */
 /* The band runs edge to edge at every width, flush under the header (no gap above or at the sides). It holds the
    breadcrumb, the heading and the page's search or filters, all on the same left edge as the content below. */
-.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--kit-space-4) var(--kit-space-gutter) var(--kit-space-6); }
+.kit-section-band { background: var(--kit-color-surface); width: auto; max-width: none !important; margin: 0 calc(50% - 50vw) var(--kit-space-6) !important; padding: var(--kit-space-head) var(--kit-space-gutter) var(--kit-space-6); }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
 .kit-section-inner { max-width: var(--kit-width-wide); margin-inline: auto; }
-.kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-6); }
-.kit-section-filters { margin-top: var(--kit-space-5); }
+/* Page head: nav › breadcrumb › H1 › description › lead, 16 apart (--kit-space-head) */
+.kit-section-inner > .kit-crumbs { margin: 0 0 var(--kit-space-head); }
+.kit-section-filters { margin-top: var(--kit-space-head); }
 .kit-section-filters .kit-filter-active { margin-top: var(--kit-space-3); }
 .kit-section-filters .kit-filters, .kit-section-filters .kit-filter-active { margin-bottom: 0; }
 /* Phones: drop the picture strip */
@@ -218,7 +219,7 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 html { overflow-x: clip; }
 .kit-section-head { display: grid; gap: var(--kit-space-5); align-items: end; max-width: var(--kit-width-wide); margin-inline: auto; }
 .kit-section-head :is(.wp-block-query-title, .wp-block-post-title) { margin: 0; } /* the band's H1, archive or Page */
-.kit-section-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-3) 0 0; }
+.kit-section-desc { font-size: var(--kit-type-lead); color: var(--kit-color-muted); margin: var(--kit-space-head) 0 0; }
 .kit-section-count { font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); font-size: var(--kit-type-sm); margin: var(--kit-space-2) 0 0; } /* ink: accent-ink on kraft is only 4.3:1 */
 .kit-section-visual { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--kit-space-2); min-width: 0; }
 .kit-section-visual > * { min-width: 0; }
@@ -840,7 +841,9 @@ main > .alignfull, .wp-block-post-content > .alignfull { isolation: isolate; }
 .wp-block-post-content > :is(p, ul, ol, blockquote, h2, h3, h4, .wp-block-list, .wp-block-quote) { max-width: min(72ch, var(--kit-width-wide)); margin-left: max(0px, calc((100% - var(--kit-width-wide)) / 2)) !important; margin-right: auto !important; }
 /* Single items and pages: vertical rhythm = section padding */
 main.wp-block-group[style*="padding-top"] { padding-top: var(--kit-section-y) !important; padding-bottom: var(--kit-section-y) !important; }
-main.wp-block-group.kit-item-page[style*="padding-top"] { padding-top: var(--kit-space-4) !important; } /* item pages: the breadcrumb starts as high as on every other page (the section band's 16px), not a section's 48/70/96 */
+main.wp-block-group.kit-item-page[style*="padding-top"] { padding-top: var(--kit-space-head) !important; }
+.kit-item > .kit-crumbs { margin-bottom: var(--kit-space-head); }
+.kit-item > .kit-crumbs + .wp-block-post-title { margin-top: var(--kit-space-head); } /* item head: breadcrumb › H1 16, like the section band */ /* item pages: the breadcrumb starts as high as on every other page (the section band's 16px), not a section's 48/70/96 */
 /* Layout grid utility: 4 / 8 / 12 columns, gap 16 / 24 / 32 */
 .kit-grid { display: grid; grid-template-columns: repeat(var(--kit-grid-columns), minmax(0, 1fr)); gap: var(--kit-grid-gap); }
 
