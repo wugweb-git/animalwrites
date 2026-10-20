@@ -733,6 +733,8 @@ const AW_SEO_TERM_TITLES = array(
 	'post_tag:legal-aid' => 'Free Legal Aid (DLSA) by State and District',
 	'post_tag:rescue-group' => 'Animal Rescue Groups by State and District',
 	'post_tag:sanctuary' => 'Animal Sanctuaries by State and District',
+	'post_tag:animal-welfare' => 'NGOs Doing Animal Welfare Work in India', // owner-approved 20 Oct 2026
+	'post_tag:bird-treatment' => 'NGOs Treating Injured Birds across India',
 	'post_tag:adoption' => 'NGOs Offering Animal Adoption across India',
 	'post_tag:ambulance' => 'NGOs Running Animal Ambulances in India',
 	'post_tag:boarding-foster' => 'NGOs Offering Pet Boarding and Fostering',
@@ -912,6 +914,8 @@ function aw_seo_tag_keyword( $term ) {
 		'ambulance'                   => 'animal ambulance,animal ambulance number',
 		'animal-ambulance'            => 'animal ambulance,animal ambulance number',
 		'animal-shelter'              => 'animal shelter,animal shelter near me',
+		'animal-welfare'              => 'animal welfare work,animal welfare ngo',
+		'bird-treatment'              => 'injured birds,bird treatment,injured bird helpline',
 		'animal-welfare-organisation' => 'animal welfare ngo,animal ngo near me,animal welfare organisation',
 		'bird-hospital'               => 'bird hospital,bird hospital near me',
 		'boarding-foster'             => 'pet boarding,dog foster home',
