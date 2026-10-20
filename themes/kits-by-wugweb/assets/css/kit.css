@@ -219,6 +219,13 @@ main > .kit-section-band:first-child, main > p:first-child + .kit-section-band {
 .kit-section-filters--below { margin: 0 0 var(--kit-space-collection); }
 .kit-section-filters--below > .kit-section-count { margin-top: var(--kit-space-collection); }
 .kit-section-filters--below > .kit-section-count:first-child { margin-top: 0; }
+/* Filters and count on one row (owner, 21 Oct 2026): the count after the filters, at the end of the row; on a narrow
+   screen it wraps under them. Active-filter chips keep their own row. */
+.kit-section-filters--below:has(> .kit-filterbar + * + .kit-section-count, > .kit-filterbar + .kit-section-count) { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-4); row-gap: var(--kit-space-3); }
+.kit-section-filters--below:has(> .kit-filterbar ~ .kit-section-count) > * { flex: 1 1 100%; }
+.kit-section-filters--below:has(> .kit-filterbar ~ .kit-section-count) > .kit-filterbar { flex: 0 1 auto; min-width: 0; }
+.kit-section-filters--below > .kit-filterbar ~ .kit-section-count { flex: 0 0 auto; margin: 0 0 0 auto !important; }
+.kit-section-filters--below:has(> .kit-filterbar ~ .kit-section-count) > .screen-reader-text { flex: none; }
 .kit-section-filters--below + * { margin-top: 0; }
 .kit-section-filters--below + .wp-block-query > .wp-block-post-template { margin-block: 0; }
 .kit-section-filters--below + .wp-block-query > .wp-block-query-pagination { margin-top: var(--kit-space-collection); }
@@ -1114,7 +1121,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* Card states (owner, 20 Oct 2026): one card for every list, kit-card kit-card--{state}. Any state at any width; the
    list picks it. block-lg · block-md · block-sm: picture on top. stacked-lg · stacked-md · stacked-sm: picture left (or
    none); stacked-sm is the reference list (icon + title + type). Anatomy: .kit-card-media (4:3; .is-logo whole; label
-   top-left) › .kit-card-meta (date, read time, place: one row) › .kit-card-chips (one row, one chip high: a chip that
+   top-left) › .kit-card-meta (date, read time, place) and .kit-card-chips on one row, .kit-card-metarow (one chip high: a chip that
    does not fit wraps out of sight, so the last goes first and the first, the source, stays) › .kit-card-title (3 lines,
    cut at a word by kit.js) › .kit-card-sum (block-lg/md, stacked-lg; plain text) › action. The whole card is the link. */
 .wp-block-post-template > li:has(> .kit-card[class*="kit-card--"]) { padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; transform: none !important; overflow: visible !important; }
@@ -1144,6 +1151,11 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-chips .kit-tag-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .kit-card-chips .aw-src-icon { width: var(--kit-icon-sm, 16px); height: var(--kit-icon-sm, 16px); flex: none; border-radius: var(--kit-radius-mark); object-fit: contain; }
 .kit-card-chips .aw-sponsored-label { display: contents; }
+/* Meta and chips on one row (owner, 21 Oct 2026): .kit-card-metarow holds the meta row, then the chips, which take the
+   space left; a chip that does not fit still wraps out of sight. */
+.kit-card-metarow { display: flex; align-items: center; gap: var(--kit-space-2); min-width: 0; }
+.kit-card-metarow > .kit-card-meta { flex: 0 1 auto; min-width: 0; }
+.kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: 0; margin: 0; }
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
 .kit-card-chips-lead > :is(.kit-card-label, .aw-sponsored-label) { flex: none; }

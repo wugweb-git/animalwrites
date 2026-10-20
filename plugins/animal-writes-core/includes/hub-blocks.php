@@ -640,6 +640,20 @@ function aw_card_ts( $id ) {
 	return function_exists( 'aw_published_ts' ) ? (int) aw_published_ts( $id ) : (int) get_post_time( 'U', true, $id );
 }
 
+// The meta row and the chips share one row on a card (owner, 21 Oct 2026): date (read time, place), then the chips; a chip
+// that does not fit still wraps out of sight, so the source stays.
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'kit-card-body' ) || false === strpos( $html, 'kit-card-chips' ) ) {
+			return $html;
+		}
+		return preg_replace( '#(<p class="kit-card-meta kit-meta-row">.*?</p>)\s*(<p class="kit-card-chips kit-tags">.*?</p>)#s', '<div class="kit-card-metarow">$1$2</div>', $html, 1 );
+	},
+	10,
+	2
+);
+
 /** Meta row: date (calendar icon; "3 hours ago" within 7 days), read time (Resources), place. One row, plain text. */
 function aw_card_meta( $id ) {
 	$ts   = aw_card_ts( $id );

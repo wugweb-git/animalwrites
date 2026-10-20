@@ -870,7 +870,7 @@ body { background: var(--kit-color-canvas); }
 /* The publisher is a chip like every other (owner, 20 Oct 2026): favicon + name in the one chip component; the favicon
    loses its own frame inside it. On a card it is static (the card is the link); on an item page it links to the original. */
 .aw-src.aw-src { display: inline-flex; align-items: center; gap: var(--s-1); width: fit-content; max-width: 100%; box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2); border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm); background: var(--kit-chip-bg); color: var(--kit-chip-fg) !important; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; line-height: 1.2; }
-.aw-src.aw-src .aw-src-icon:not(.aw-src-icon--letter) { padding: 0 !important; border: 0 !important; background: transparent !important; }
+.aw-src.aw-src .aw-src-icon:not(.aw-src-icon--letter), .kit-tag--source .aw-src-icon:not(.aw-src-icon--letter) { padding: 0 !important; border: 0 !important; background: transparent !important; } /* card chips too (owner, 21 Oct 2026: no frame inside the chip) */
 .aw-src.aw-src--link { position: relative; }
 .aw-src.aw-src--link a { min-height: 0; gap: var(--s-1); color: inherit; }
 .aw-src--link a::before { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* the whole chip is the link, 44px tall */
