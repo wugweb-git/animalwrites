@@ -303,6 +303,11 @@ function aw_press_fetch( $id ) {
  */
 function aw_press_site_logo( $url ) {
 	$host  = preg_replace( '/^www\./', '', (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	// A social platform's icon is not a publisher logo (owner, 20 Oct 2026: the 22 Instagram reels kept the Instagram
+	// logo as their fallback); those cards fall back to the account's name.
+	if ( preg_match( '/(^|\.)(instagram|facebook|fb|threads|x|twitter|linkedin|youtube|youtu|reddit|tiktok|pinterest|whatsapp)\.(com|be|net)$/i', $host ) ) {
+		return 0;
+	}
 	$cache = (array) get_option( 'aw_press_logos', array() );
 	if ( isset( $cache[ $host ] ) ) {
 		return (int) $cache[ $host ];

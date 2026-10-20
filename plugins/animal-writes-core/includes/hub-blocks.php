@@ -236,7 +236,9 @@ function aw_block_doc_date( $a, $id ) {
 	if ( has_term( 'template', 'post_tag', $id ) ) {
 		return '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>';
 	}
-	$year  = has_term( array( 'act', 'rule' ), 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
+	// The law's year only when the item has no document date of its own (owner, 20 Oct 2026: the draft rules dated
+	// 6 Oct 2026 showed "2026" between "8 Oct" and "5 Oct", in an order by document date).
+	$year  = '' === (string) get_post_meta( $id, 'aw_source_date', true ) && has_term( array( 'act', 'rule' ), 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
 	$thumb = (int) get_post_thumbnail_id( $id );
 	$alt   = wp_strip_all_tags( get_the_title( $id ) ); // the picture is this item's: its first page or its publisher's image
 	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => $alt, 'loading' => 'lazy' ) ) : ''; // the document's first page
