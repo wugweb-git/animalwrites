@@ -156,7 +156,7 @@ function aw_block_item_meta( $a, $id ) {
 		foreach ( aw_item_places( $id ) as $p ) {
 			$st    = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
 			$label = $st ? $p->name . ', ' . $st->name : $p->name;
-			$row  .= '<a class="kit-chip aw-place-chip" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--pin" aria-hidden="true"></span>' . esc_html( $label ) . '</a>';
+			$row  .= '<a class="kit-chip aw-place-chip" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $label ) . '</a>';
 		}
 	}
 	if ( 'opportunity' === $kind ) {

@@ -245,8 +245,8 @@ add_action(
 add_filter(
 	'render_block_data',
 	function ( $block ) {
-		// The post-excerpt block cuts at 55 words by default; on a News or Library page the summary is shown whole.
-		if ( 'core/post-excerpt' === ( $block['blockName'] ?? '' ) && ! isset( $block['attrs']['excerptLength'] ) && is_singular( array( 'aw_news', 'aw_legal' ) ) ) {
+		// The post-excerpt block cuts at 55 words by default; on an item's own page (News, Library, research) the summary is shown whole.
+		if ( 'core/post-excerpt' === ( $block['blockName'] ?? '' ) && ! isset( $block['attrs']['excerptLength'] ) && is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
 			$block['attrs']['excerptLength'] = 1000;
 		}
 		return $block;
