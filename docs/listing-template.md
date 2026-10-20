@@ -27,6 +27,8 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | 18 | Claim | `animal-writes/listing-help` | "Is this your organisation?" and Claim, only while the listing is not claimed (claimed = verified). |
 | 19 | More organisations | `animal-writes/item-more` | "More organisations in {District}": up to 6, filled from the state (same type in the nearest districts first); cards with the logo whole in a 4:3 box, or the initials. |
 
+Critical details never hide (owner, 20 Oct 2026): a missing phone, email, website, address, opening hours, services or registration shows "Data not yet available" with a "Suggest an update" link (the Report form), so the Contact, Location, Services and Registrations groups always show.
+
 `aw_rel_nofollow` (or a sponsored listing): every link to the organisation gets `rel="nofollow sponsored"`.
 
 Not shown on the page (stored only): aw_g_category, aw_g_rating, aw_g_reviews, aw_ig_followers, aw_ig_posts, aw_last_post,

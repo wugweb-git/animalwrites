@@ -13,7 +13,8 @@
  *   animal-writes/listing-support        Donate, Volunteer, Adopt; UPI with a copy button
  *   animal-writes/listing-photos         the organisation's own photos (never stock or CC images)
  *
- * Rows are "Label: value" (definition lists). Separators between parts of a value are CSS, never typed. Expiry is
+ * Rows are "Label: value" (definition lists). Critical details the listing lacks (phone, email, website, address, opening
+ * hours, services, registration) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
  * worked out at render time from today's date in India, not stored. docs/listing-template.md describes each block.
  *
  * @package animal-writes-core
@@ -70,6 +71,16 @@ function aw_listing_parts( $parts ) {
 	return implode( '', array_map( fn( $p ) => '<span class="aw-facts-part">' . $p . '</span>', $parts ) );
 }
 
+/**
+ * A critical detail the listing does not have yet (owner, 20 Oct 2026: never hide it): "Data not yet available" and a
+ * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services and
+ * registration.
+ */
+function aw_listing_na( $id ) {
+	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'animal-writes-core' ) . '</span>'
+		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'animal-writes-core' ) . '</a>' : '' );
+}
+
 /** "valid until <date>", or "expired <date>" in the warning colour once the date has passed (today, India). */
 function aw_listing_validity( $date ) {
 	$date = trim( (string) $date );
@@ -109,7 +120,7 @@ function aw_block_listing_registrations( $a, $id ) {
 	$rows = array(
 		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="aw-facts-expired">' . esc_html__( 'not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : '' ),
 		/* translators: %s: registration type, e.g. Trust. */
-		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_registration' ) ) ),
+		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ) ),
 		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ) ),
 		array( '80G', esc_html( aw_lf( $id, 'aw_reg_80g' ) ) ),
 		array( 'FCRA', esc_html( aw_lf( $id, 'aw_fcra' ) ) ),
@@ -142,13 +153,15 @@ function aw_block_listing_contact( $a, $id ) {
 	if ( aw_lf( $id, 'aw_website' ) ) {
 		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . aw_i( 'world' ) . esc_html__( 'Website', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'animal-writes-core' ) . '</span></a>';
 	}
-	if ( '' === $btns ) {
-		return ''; // no contact field at all: no Contact group (Directions alone is not a way to reach them)
-	}
 	$btns .= aw_lf( $id, 'aw_maps_url' )
 		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</a>'
 		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
+	foreach ( array( array( '' === $first, __( 'Phone', 'animal-writes-core' ) ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'animal-writes-core' ) ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'animal-writes-core' ) ) ) as $na ) {
+		if ( $na[0] ) { // a missing way to reach them is said, never hidden
+			$more[] = array( $na[1], aw_listing_na( $id ) );
+		}
+	}
 	foreach ( array_slice( $phones, 1 ) as $p ) {
 		$tel = aw_tel_url( $p['number'] );
 		if ( '' === $tel ) {
@@ -176,9 +189,9 @@ function aw_block_listing_location( $a, $id ) {
 	}
 	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'aw_listing_hours' ) ? aw_org_hours_html( aw_listing_hours( $id ) ) : '';
 	$rows  = array(
-		array( __( 'Address', 'animal-writes-core' ), esc_html( $addr ) ),
+		array( __( 'Address', 'animal-writes-core' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id ) ),
 		array( __( 'District', 'animal-writes-core' ), $place ),
-		array( __( 'Opening hours', 'animal-writes-core' ), $hours ),
+		array( __( 'Opening hours', 'animal-writes-core' ), '' !== $hours ? $hours : aw_listing_na( $id ) ),
 	);
 	return aw_listing_group( 'location', __( 'Location', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }
@@ -197,7 +210,7 @@ function aw_block_listing_services( $a, $id ) {
 		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'animal-writes-core' ), 'organisation' === $by ? __( 'the organisation', 'animal-writes-core' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . aw_date( aw_lf( $id, 'aw_services_on' ) ) : '' ) . '</span>';
 	}
 	$rows = array(
-		array( __( 'Services', 'animal-writes-core' ), $svc ),
+		array( __( 'Services', 'animal-writes-core' ), '' !== $svc ? $svc : aw_listing_na( $id ) ),
 		array( __( 'Animals helped', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_animals' ) ) ),
 		array( __( 'Areas served', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_areas_served' ) ) ),
 		array( __( 'Languages', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_languages' ) ) ),

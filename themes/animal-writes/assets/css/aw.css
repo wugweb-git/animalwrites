@@ -397,6 +397,8 @@ body { background: var(--kit-color-canvas); }
 .aw-facts dd { margin: 0; color: var(--kit-color-text); }
 .aw-facts-part + .aw-facts-part::before { content: "·" / ""; margin: 0 0.4em; color: var(--kit-color-muted); } /* the separator is CSS, never typed */
 .aw-facts-expired { color: var(--kit-color-warning); font-weight: var(--kit-weight-medium); }
+.aw-facts-na { color: var(--kit-color-muted); }
+.aw-facts-suggest { margin-left: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-facts-note { display: block; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-facts .aw-org-hours { margin: 0; border-collapse: collapse; }
 .aw-facts .aw-org-hours th { padding: 0 var(--kit-space-4) 0 0; text-align: left; font-weight: var(--kit-weight-regular); }
