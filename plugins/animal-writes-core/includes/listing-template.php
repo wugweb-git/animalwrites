@@ -8,7 +8,7 @@
  *   animal-writes/listing-contact        Call, WhatsApp, Email, Website, Directions; other numbers
  *   animal-writes/listing-location       address, district, opening hours
  *   animal-writes/listing-services       services, animals helped, areas served, languages
- *   animal-writes/listing-organisation   established, head of the organisation
+ *   animal-writes/listing-organisation   established, incorporated, head of the organisation
  *   animal-writes/listing-profiles       small icon links: Instagram, Facebook, X, YouTube, LinkedIn, Google
  *   animal-writes/listing-support        Donate, Volunteer, Adopt; UPI with a copy button
  *   animal-writes/listing-photos         the organisation's own photos (never stock or CC images)
@@ -209,10 +209,11 @@ function aw_block_listing_services( $a, $id ) {
 
 function aw_block_listing_organisation( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Organisation: established, head of the organisation' ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Organisation: established, incorporated, head of the organisation' ) : '';
 	}
 	$rows = array(
 		array( __( 'Established', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_founded' ) ) ),
+		array( __( 'Incorporated', 'animal-writes-core' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? aw_date( aw_lf( $id, 'aw_reg_date' ) ) : '' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
 		array( __( 'Head of the organisation', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_head' ) ) ),
 	);
 	return aw_listing_group( 'organisation', __( 'Organisation', 'animal-writes-core' ), aw_listing_dl( $rows ) );

@@ -532,7 +532,7 @@
             "name": "aw_reg_authority",
             "aria-label": "",
             "type": "text",
-            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -552,7 +552,7 @@
             "name": "aw_reg_act",
             "aria-label": "",
             "type": "text",
-            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -572,7 +572,7 @@
             "name": "aw_reg_date",
             "aria-label": "",
             "type": "date_picker",
-            "instructions": "As NGO Darpan lists it. Not shown on the listing.",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
