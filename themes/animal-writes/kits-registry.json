@@ -2787,6 +2787,36 @@
    "block": "animal-writes/listing-opportunities"
   },
   {
+   "name": "Listing: campaigns",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-listing-campaigns",
+    "aw-camp-role"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/listing-campaigns"
+  },
+  {
    "name": "Claim your listing",
    "type": "block",
    "status": "live",

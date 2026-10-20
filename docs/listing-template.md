@@ -28,6 +28,7 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | 18 | Claim | `animal-writes/listing-help` | "Is this your organisation?" and Claim, only while the listing is not claimed (claimed = verified). |
 | 18b | In the press | `animal-writes/listing-press` | Published News, Library, Resources, Campaigns and Media & PR items that name the organisation (featured.php: chosen by hand in an item's Related box, aw_rel_org, or found when the item is saved, aw_rel_org_auto: the listing's exact name in the item's title, summary or text, only names of 2+ words and 12+ letters that no other listing shares and that are not generic; an editor can untick a wrong one). Newest first, 5 cards; "See all (n)" opens ?press=all on the same profile (noindex). |
 | 18c | Opportunities at {organisation} | `animal-writes/listing-opportunities` | Open opportunities whose organisation (aw_organisation) is this listing, up to 3. |
+| 18d | Campaigns with {organisation} | `animal-writes/listing-campaigns` | Published campaigns linked to the listing, newest first, up to 3, each with its role chip: Organiser (the campaign's aw_organiser) or Partner (aw_campaign_partners, or aw_participant). There is no Supporter field yet, so no Supporter chip. |
 | 19 | More organisations | `animal-writes/item-more` | "More organisations in {District}": up to 6, filled from the state (same type in the nearest districts first); cards with the logo whole in a 4:3 box, or the initials. |
 
 Critical details never hide (owner, 20 Oct 2026): a missing phone, email, website, address, opening hours, services, registration or AWBI number shows "Data not yet available" with a "Suggest an update" link (the Report form), so the Contact, Location, Services and Registrations groups always show.
@@ -37,7 +38,7 @@ Critical details never hide (owner, 20 Oct 2026): a missing phone, email, websit
 Not shown on the page (stored only): aw_g_category, aw_g_rating, aw_g_reviews, aw_ig_followers, aw_ig_posts, aw_last_post,
 aw_detail_sources (except their dates in Last updated). Schema only: aw_lat/aw_lng, aw_place_id, aw_wikidata,
 aw_ngobase_url. Removed from the page: the trust box, the old Details list and links row, the "About" heading, the
-live Google and Activity boxes, the campaigns/opportunities links box (`[aw_org_links]`) and the "Organisations in"
+live Google and Activity boxes, the old campaigns/opportunities links box (`[aw_org_links]`; campaigns are back as row 18d) and the "Organisations in"
 news card.
 
 ## Schema

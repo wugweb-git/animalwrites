@@ -503,6 +503,42 @@ function aw_block_listing_opportunities( $a, $id ) {
 	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }
 
+/* ---------- Campaigns with {organisation} (owner, 20 Oct 2026): role chip, up to 3 ---------- */
+
+/** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organiser; Partner = aw_campaign_partners or aw_participant. */
+function aw_listing_campaigns( $id, $max = 3 ) {
+	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
+	$roles = array();
+	foreach ( get_posts( $base + array( 'meta_key' => 'aw_organiser', 'meta_value' => (string) $id ) ) as $c ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+		$roles[ $c ] = __( 'Organiser', 'animal-writes-core' );
+	}
+	$partners = get_posts( $base + array( 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_participant', 'value' => (string) $id ), array( 'key' => 'aw_campaign_partners', 'value' => (string) $id, 'compare' => 'LIKE' ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	foreach ( $partners as $c ) {
+		$listed = array_map( 'intval', explode( ',', (string) get_post_meta( $c, 'aw_campaign_partners', true ) ) );
+		if ( ! isset( $roles[ $c ] ) && ( in_array( (int) $id, $listed, true ) || (string) $id === (string) get_post_meta( $c, 'aw_participant', true ) ) ) {
+			$roles[ $c ] = __( 'Partner', 'animal-writes-core' );
+		}
+	}
+	return array_slice( $roles, 0, $max, true );
+}
+
+function aw_block_listing_campaigns( $a, $id ) {
+	if ( ! aw_listing_here( $id ) ) {
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner, up to 3)' ) : '';
+	}
+	$roles = aw_listing_campaigns( $id );
+	if ( ! $roles || ! function_exists( 'aw_item_more_card' ) ) {
+		return '';
+	}
+	$cards = '';
+	foreach ( $roles as $c => $role ) {
+		$chip   = '<span class="kit-tag aw-camp-role">' . esc_html( $role ) . '</span>';
+		$cards .= preg_replace( '/(<p class="aw-more-meta kit-meta-row">)/', '$1' . $chip, aw_item_more_card( $c ), 1 );
+	}
+	/* translators: %s: organisation. */
+	return '<section class="aw-more-group aw-listing-campaigns" aria-labelledby="aw-camps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-camps-h">' . esc_html( sprintf( __( 'Campaigns with %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . $cards . '</ul></section>';
+}
+
 /* ---------- Sidebar: Claim your listing (everywhere but an unclaimed profile, which has its own claim box) ---------- */
 
 function aw_block_claim_cta( $a = array(), $id = 0 ) {

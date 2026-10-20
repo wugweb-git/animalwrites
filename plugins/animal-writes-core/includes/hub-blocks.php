@@ -70,6 +70,7 @@ function aw_hub_blocks() {
 		'listing-activity'      => array( 'Listing: activity', 'aw_block_listing_activity', array() ),
 		'listing-press'         => array( 'Listing: in the press', 'aw_block_listing_press', array() ),
 		'listing-opportunities' => array( 'Listing: opportunities', 'aw_block_listing_opportunities', array() ),
+		'listing-campaigns'     => array( 'Listing: campaigns', 'aw_block_listing_campaigns', array() ),
 		'claim-cta'             => array( 'Claim your listing', 'aw_block_claim_cta', array() ), // the sidebar's claim box
 	);
 }
