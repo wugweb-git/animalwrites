@@ -123,7 +123,7 @@
 				style: cfg.style,
 				center: [ 79.0, 22.5 ],
 				zoom: 3.6,
-				attributionControl: { compact: true },
+				attributionControl: { compact: false, customAttribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>' },
 				cooperativeGestures: true,
 			} );
 			map.addControl( new window.maplibregl.NavigationControl( { showCompass: false } ), 'top-right' );
@@ -205,11 +205,19 @@
 		if ( res.count ) {
 			html += '<p class="aw-near-head">' + res.count + ' within ' + res.km + ' km' + ( res.origin ? ' of ' + esc( res.origin ) : '' ) + ', nearest first' + ( res.count > 50 ? ' (first 50)' : '' ) + '.</p><ol class="aw-near-list">';
 			res.results.forEach( function ( p ) {
-				html += '<li><a href="' + esc( p.u ) + '">' + esc( p.n ) + '</a> <span class="aw-near-km-val">' + p.km + ' km' + ( Number( p.a ) ? ' (approx.)' : '' ) + '</span><br><span class="aw-near-meta">' + esc( [ types[ p.t ], p.d ].filter( Boolean ).join( ' · ' ) ) + '</span></li>';
+				var approx = 'locality' === p.p || 'pin' === p.p;
+				html += '<li><a href="' + esc( p.u ) + '">' + esc( p.n ) + '</a> <span class="aw-near-km-val">' + ( approx ? '~' : '' ) + p.km + ' km</span><br><span class="aw-near-meta">' + esc( [ types[ p.t ], p.d ].filter( Boolean ).join( ' · ' ) ) + '</span></li>';
 			} );
 			html += '</ol>';
 		} else {
 			html += '<p class="aw-near-head">None within ' + res.km + ' km' + ( res.origin ? ' of ' + esc( res.origin ) : '' ) + '.</p>';
+		}
+		if ( res.in_district && res.in_district.length ) {
+			html += '<p class="aw-near-head">In your district (location approximate)' + ( res.in_district_count > res.in_district.length ? ': first ' + res.in_district.length + ' of ' + res.in_district_count : '' ) + '</p><ul class="aw-near-list">';
+			res.in_district.forEach( function ( p ) {
+				html += '<li><a href="' + esc( p.u ) + '">' + esc( p.n ) + '</a><br><span class="aw-near-meta">' + esc( [ types[ p.t ], p.d ].filter( Boolean ).join( ' · ' ) ) + '</span></li>';
+			} );
+			html += '</ul>';
 		}
 		if ( res.district && res.district.url ) {
 			html += '<p class="aw-near-fallback"><a href="' + esc( res.district.url ) + '">All organisations in ' + esc( res.district.name ) + ' district' + ( res.district.count ? ' (' + res.district.count + ')' : '' ) + '</a></p>';

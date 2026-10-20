@@ -9,7 +9,9 @@
  *   (geocode.php), shown as approximate unless it was a street match. Listings with no point are counted, not shown.
  * - Near me: the visitor's location (asked only when they press the button) or a PIN code (PIN → district through
  *   aw_pin_lookup; the district centre is the starting point) → listings within 5 / 10 / 25 / 50 km, nearest first.
- *   When none are within reach, the nearest district's Directory page is offered instead.
+ *   Only street, locality and PIN points are ranked (locality and PIN distances shown as "~N km"); listings placed
+ *   only at their district's centre are never ranked: they follow as "In your district (location approximate)". The
+ *   nearest district's Directory page is always offered.
  * - REST: GET /aw/v1/dir-points (filtered points for the map), GET /aw/v1/dir-near (nearest listings). Both read one
  *   cached list of every published listing's point (12 hours; cleared when a listing is saved or geocoded).
  * The map's text alternative is the list itself (the switch returns to it; the map says so).
@@ -26,7 +28,8 @@ const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
  * Every published listing as a compact row, cached: [id, lat|null, lng|null, approx 0/1, primary type slug, name,
- * district name, path, state codes, district codes, tag slugs, verified 0/1].
+ * district name, path, state codes, district codes, tag slugs, verified 0/1, precision (own, address, locality, pin,
+ * district)].
  */
 function aw_dir_points_all() {
 	$all = get_transient( 'aw_dir_points' );
@@ -57,6 +60,7 @@ function aw_dir_points_all() {
 			$dt,
 			$tags,
 			'1' === (string) get_post_meta( $id, 'aw_verified', true ) ? 1 : 0,
+			$pt ? (string) $pt[2] : '',
 		);
 	}
 	set_transient( 'aw_dir_points', $all, 12 * HOUR_IN_SECONDS );
@@ -108,6 +112,7 @@ function aw_dir_point_out( $row, $km = null ) {
 		'n'  => $row[5],
 		'd'  => $row[6],
 		'u'  => $row[7],
+		'p'  => (string) ( $row[12] ?? '' ),
 	);
 	if ( null !== $km ) {
 		$o['km'] = round( $km, 1 );
@@ -197,9 +202,35 @@ function aw_dir_near( WP_REST_Request $r ) {
 	} elseif ( $lat < 6 || $lat > 37.5 || $lng < 68 || $lng > 97.5 ) {
 		return new WP_Error( 'aw_where', 'That location is outside India.', array( 'status' => 400 ) );
 	}
-	$near = array();
+	// The nearest district (by centre): the PIN's own district, else the closest centre to the point.
+	$best = null;
+	if ( '' !== $pin && ! empty( $found['district'] ) ) {
+		$best = array( 0, aw_place_district( (int) $found['district'] ) );
+	} else {
+		foreach ( aw_place_states() as $s ) {
+			foreach ( aw_place_districts( $s->code ) as $dist ) {
+				$c = aw_district_centroid( $dist->code );
+				if ( $c ) {
+					$d = aw_geo_km( $lat, $lng, $c[0], $c[1] );
+					if ( ! $best || $d < $best[0] ) {
+						$best = array( $d, $dist );
+					}
+				}
+			}
+		}
+	}
+	$dcode = $best && $best[1] ? (int) $best[1]->code : 0;
+	$near  = array();
+	$inds  = array();
 	foreach ( aw_dir_points_filter( $r ) as $row ) {
 		if ( null === $row[1] ) {
+			continue;
+		}
+		$prec = (string) ( $row[12] ?? ( $row[3] ? 'district' : 'own' ) );
+		if ( 'district' === $prec ) {
+			if ( $dcode && in_array( $dcode, $row[9], true ) ) {
+				$inds[] = $row; // never ranked by distance
+			}
 			continue;
 		}
 		$d = aw_geo_km( $lat, $lng, $row[1], $row[2] );
@@ -208,20 +239,7 @@ function aw_dir_near( WP_REST_Request $r ) {
 		}
 	}
 	usort( $near, fn( $a, $b ) => $a[0] <=> $b[0] );
-	// The nearest district (by centre) for the fallback link.
-	$best = null;
-	foreach ( aw_place_states() as $s ) {
-		foreach ( aw_place_districts( $s->code ) as $dist ) {
-			$c = aw_district_centroid( $dist->code );
-			if ( $c ) {
-				$d = aw_geo_km( $lat, $lng, $c[0], $c[1] );
-				if ( ! $best || $d < $best[0] ) {
-					$best = array( $d, $dist );
-				}
-			}
-		}
-	}
-	$district = $best ? array( 'name' => $best[1]->name, 'url' => wp_make_link_relative( aw_directory_url( $best[1]->slug ) ), 'count' => function_exists( 'aw_place_count' ) ? (int) aw_place_count( $best[1] ) : 0 ) : null;
+	$district = $best && $best[1] ? array( 'name' => $best[1]->name, 'url' => wp_make_link_relative( aw_directory_url( $best[1]->slug ) ), 'count' => function_exists( 'aw_place_count' ) ? (int) aw_place_count( $best[1] ) : 0 ) : null;
 	return array(
 		'origin'   => $origin,
 		'lat'      => round( $lat, 4 ),
@@ -230,6 +248,8 @@ function aw_dir_near( WP_REST_Request $r ) {
 		'count'    => count( $near ),
 		'types'    => aw_dir_type_names(),
 		'results'  => array_map( fn( $x ) => aw_dir_point_out( $x[1], $x[0] ), array_slice( $near, 0, 50 ) ),
+		'in_district' => array_map( 'aw_dir_point_out', array_slice( $inds, 0, 50 ) ),
+		'in_district_count' => count( $inds ),
 		'district' => $district,
 	);
 }

@@ -17,7 +17,10 @@
  * Every Nominatim answer (hit or miss) is cached for 90 days; requests are at least 1.1 seconds apart and carry the
  * site's name and contact address, as Nominatim's usage policy asks.
  *
- * Run: `wp aw geocode [--limit=<n>] [--redo-approx]` (the first run takes about 1.5 hours for 6,000 listings).
+ * The whole Directory was geocoded once (`wp aw geocode`, 20–21 Oct 2026). After that only new or changed listings are:
+ * when a listing is published, or its address, PIN code or district changes, it is looked up again (one cron job per
+ * listing) — but only if those inputs really differ from the ones it was last looked up with (aw_geo_hash).
+ * Run by hand: `wp aw geocode [--limit=<n>] [--redo-approx]`.
  *
  * @package animal-writes-core
  */
@@ -43,13 +46,15 @@ function aw_geo_nominatim( $args ) {
 	if ( false !== $hit ) {
 		return 'none' === $hit ? null : $hit;
 	}
-	static $last = 0.0;
+	// At most one request a second across every process on the site (cron, WP-CLI, admin).
+	$last = (float) get_option( 'aw_geo_last_request', 0 );
 	$wait = 1.1 - ( microtime( true ) - $last );
 	if ( $wait > 0 ) {
 		usleep( (int) ( $wait * 1000000 ) );
 	}
-	$r    = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => AW_GEO_UA ) );
-	$last = microtime( true );
+	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
+	$r = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => AW_GEO_UA ) );
+	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
 	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
 		return null; // not cached: tried again on the next run
 	}
@@ -154,6 +159,7 @@ function aw_geocode_listing( $id, $redo_approx = false ) {
 		update_post_meta( $id, 'aw_geo_lng', number_format( $lng, 6, '.', '' ) );
 		update_post_meta( $id, 'aw_geo_precision', $prec );
 		update_post_meta( $id, 'aw_geo_at', current_time( 'mysql' ) );
+		update_post_meta( $id, 'aw_geo_hash', aw_geo_inputs_hash( $id ) );
 		return $prec;
 	};
 	$addr = aw_geo_address( $id );
@@ -184,6 +190,81 @@ function aw_geocode_listing( $id, $redo_approx = false ) {
 	}
 	return '';
 }
+
+/** What a listing's lookup depends on: its address, PIN code and district. */
+function aw_geo_inputs_hash( $id ) {
+	$codes = function_exists( 'aw_item_codes' ) ? aw_item_codes( $id ) : array( array(), array() );
+	return md5( aw_geo_address( $id ) . '|' . aw_geo_pin( $id ) . '|' . implode( ',', (array) $codes[1] ) );
+}
+
+/* ---------- New and changed listings ---------- */
+
+/** Queue one listing for a lookup (deduplicated by WordPress for 10 minutes). */
+function aw_geo_queue( $id ) {
+	if ( 'aw_listing' === get_post_type( $id ) && ! wp_next_scheduled( 'aw_geocode_one', array( (int) $id ) ) ) {
+		wp_schedule_single_event( time() + 60, 'aw_geocode_one', array( (int) $id ) );
+	}
+}
+
+add_action(
+	'transition_post_status',
+	function ( $new, $old, $post ) {
+		if ( 'publish' === $new && 'publish' !== $old && 'aw_listing' === $post->post_type ) {
+			aw_geo_queue( $post->ID );
+		}
+	},
+	10,
+	3
+);
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_geo_hook ) {
+	add_action(
+		$aw_geo_hook,
+		function ( $mid, $id, $key ) {
+			if ( in_array( $key, array( 'aw_address', 'aw_awbi_address', 'aw_import_address', 'aw_pincode', 'aw_district_code' ), true ) ) {
+				aw_geo_queue( (int) $id );
+			}
+		},
+		10,
+		3
+	);
+}
+unset( $aw_geo_hook );
+
+add_action(
+	'aw_geocode_one',
+	function ( $id ) {
+		if ( 'publish' !== get_post_status( $id ) || is_numeric( get_post_meta( $id, 'aw_lat', true ) ) ) {
+			return;
+		}
+		$was  = (string) get_post_meta( $id, 'aw_geo_hash', true );
+		$now  = aw_geo_inputs_hash( $id );
+		$prec = (string) get_post_meta( $id, 'aw_geo_precision', true );
+		if ( '' === $was && '' !== $prec ) {
+			update_post_meta( $id, 'aw_geo_hash', $now ); // looked up before hashes were kept: this is its baseline
+			return;
+		}
+		if ( $was === $now ) {
+			return; // address, PIN and district unchanged: never asked again
+		}
+		aw_geocode_listing( $id, true );
+		delete_transient( 'aw_dir_points' );
+	}
+);
+
+// Sources on the listing: where a looked-up location came from.
+add_filter(
+	'aw_listing_sources',
+	function ( $out, $id ) {
+		$prec = (string) get_post_meta( $id, 'aw_geo_precision', true );
+		if ( '' !== $prec && ! is_numeric( get_post_meta( $id, 'aw_lat', true ) ) ) {
+			$at    = (string) get_post_meta( $id, 'aw_geo_at', true );
+			$out[] = array( 'geo', 'OSM', 'Location: OpenStreetMap (Nominatim)', $at ? wp_date( 'Y-m-d', strtotime( $at ) ) : '', 'https://nominatim.openstreetmap.org/' );
+		}
+		return $out;
+	},
+	20,
+	2
+);
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
