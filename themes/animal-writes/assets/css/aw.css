@@ -441,6 +441,25 @@ body { background: var(--kit-color-canvas); }
 .kit-sidebar .aw-vol-banner-body { padding: var(--kit-space-4); }
 .kit-sidebar .aw-vol-banner-title { font-size: var(--kit-type-lg, 1.125rem); }
 .kit-sidebar .kit-ad { margin: 0; }
+/* Directory profile: Activity (stored Google and Instagram figures), In the press, Opportunities */
+.aw-activity { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-activity { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aw-activity-box { padding: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-activity-box > * { margin: 0 0 var(--kit-space-1); }
+.aw-activity-name { display: flex; align-items: center; gap: var(--kit-space-2); font-weight: var(--kit-weight-medium); }
+.aw-activity-figures { font-size: var(--kit-type-lg, 1.125rem); }
+.aw-activity-on { font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-activity-link { font-size: var(--kit-type-sm); }
+.aw-activity-link::after { content: none !important; }
+.kit-main > .aw-more-group { margin: var(--kit-space-7) 0 0; }
+.kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aw-more-all { margin: var(--kit-space-3) 0 0; }
+/* Sidebar: Claim your listing */
+.aw-side-claim { padding: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-side-claim > * { margin: 0 0 var(--kit-space-3); }
+.aw-side-claim > :last-child { margin-bottom: 0; }
+.aw-side-claim-title { font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
 .aw-block-preview { padding: var(--kit-space-2) var(--kit-space-3); border: 1px dashed var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); } /* editor only */
 .aw-card-time { margin-top: auto; padding-right: var(--kit-space-7); min-height: 36px; display: flex; align-items: center; }
 .aw-story-body > .aw-src:first-child { margin-top: var(--kit-space-4); }

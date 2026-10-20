@@ -67,6 +67,10 @@ function aw_hub_blocks() {
 		'listing-profiles'      => array( 'Listing: online profiles', 'aw_block_listing_profiles', array() ),
 		'listing-support'       => array( 'Listing: support', 'aw_block_listing_support', array() ),
 		'listing-photos'        => array( 'Listing: photos', 'aw_block_listing_photos', array() ),
+		'listing-activity'      => array( 'Listing: activity', 'aw_block_listing_activity', array() ),
+		'listing-press'         => array( 'Listing: in the press', 'aw_block_listing_press', array() ),
+		'listing-opportunities' => array( 'Listing: opportunities', 'aw_block_listing_opportunities', array() ),
+		'claim-cta'             => array( 'Claim your listing', 'aw_block_claim_cta', array() ), // the sidebar's claim box
 	);
 }
 

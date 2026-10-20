@@ -601,7 +601,8 @@
     "aw-facts",
     "aw-more-logo",
     "aw-more-initials",
-    "aw-upi-copy"
+    "aw-upi-copy",
+    "aw-more-all"
    ],
    "states": [
     "default",
@@ -2697,6 +2698,122 @@
     "schema": "none"
    },
    "block": "animal-writes/current-campaign"
+  },
+  {
+   "name": "Listing: activity",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-activity"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/listing-activity"
+  },
+  {
+   "name": "Listing: in the press",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-listing-press"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/listing-press"
+  },
+  {
+   "name": "Listing: opportunities",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-listing-opps"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/listing-opportunities"
+  },
+  {
+   "name": "Claim your listing",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-side-claim"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/claim-cta"
   }
  ],
  "nav_status": {

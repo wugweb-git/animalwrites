@@ -359,3 +359,108 @@ function aw_listing_stock_galleries() {
 	}
 	return $out;
 }
+
+/* ---------- Activity (after Photos): stored Google and Instagram figures, never fetched on page load ---------- */
+
+/** "as on" date for a profile's figures: a dated detail source for that site, else the last enrichment check, else the source date. */
+function aw_listing_figures_on( $id, $host ) {
+	$n = (int) get_post_meta( $id, 'aw_detail_sources', true );
+	for ( $i = 0; $i < $n; $i++ ) {
+		$url = (string) get_post_meta( $id, "aw_detail_sources_{$i}_url", true );
+		$on  = trim( (string) get_post_meta( $id, "aw_detail_sources_{$i}_checked", true ) );
+		if ( $on && false !== stripos( $url, $host ) ) {
+			return $on;
+		}
+	}
+	$chk = trim( (string) get_post_meta( $id, 'aw_enrich_checked', true ) );
+	return $chk ? substr( $chk, 0, 10 ) : aw_lf( $id, 'aw_source_date' );
+}
+
+function aw_block_listing_activity( $a, $id ) {
+	if ( ! aw_listing_here( $id ) ) {
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Activity: Google rating and reviews, Instagram followers, posts, last post' ) : '';
+	}
+	$rel   = aw_listing_rel( $id );
+	$boxes = '';
+	if ( aw_lf( $id, 'aw_g_rating' ) ) {
+		$on     = aw_listing_figures_on( $id, 'google' );
+		$parts  = aw_listing_parts( array( '<span aria-hidden="true">★</span> ' . esc_html( aw_lf( $id, 'aw_g_rating' ) ) . '<span class="screen-reader-text"> ' . esc_html__( 'out of 5', 'animal-writes-core' ) . '</span>', aw_lf( $id, 'aw_g_reviews' ) ? esc_html( sprintf( /* translators: %s: number. */ _n( '%s review', '%s reviews', (int) aw_lf( $id, 'aw_g_reviews' ), 'animal-writes-core' ), number_format_i18n( (int) aw_lf( $id, 'aw_g_reviews' ) ) ) ) : '' ) );
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . aw_i( 'map-pin' ) . esc_html__( 'Google', 'animal-writes-core' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'animal-writes-core' ) . ' ' . aw_date( $on ) . '</p>' : '' )
+			. ( aw_lf( $id, 'aw_g_profile' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_g_profile' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Google', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
+	}
+	if ( aw_lf( $id, 'aw_ig_followers' ) || aw_lf( $id, 'aw_ig_posts' ) || aw_lf( $id, 'aw_last_post' ) ) {
+		$on     = aw_listing_figures_on( $id, 'instagram' );
+		$parts  = aw_listing_parts(
+			array(
+				aw_lf( $id, 'aw_ig_followers' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s followers', 'animal-writes-core' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_followers' ) ) ) ) : '',
+				aw_lf( $id, 'aw_ig_posts' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s posts', 'animal-writes-core' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_posts' ) ) ) ) : '',
+				aw_lf( $id, 'aw_last_post' ) ? esc_html__( 'last post', 'animal-writes-core' ) . ' ' . aw_date( aw_lf( $id, 'aw_last_post' ) ) : '',
+			)
+		);
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . aw_i( 'instagram' ) . esc_html__( 'Instagram', 'animal-writes-core' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'animal-writes-core' ) . ' ' . aw_date( $on ) . '</p>' : '' )
+			. ( aw_lf( $id, 'aw_instagram' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_instagram' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Instagram', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
+	}
+	return aw_listing_group( 'activity', __( 'Activity', 'animal-writes-core' ), '' !== $boxes ? '<div class="aw-activity">' . $boxes . '</div>' : '' );
+}
+
+/* ---------- After Claim: In the press, Opportunities at the organisation ---------- */
+
+/** A small card for "In the press": 4:3 picture, type and date, title (press coverage links to the article itself). */
+function aw_listing_press_card( $pid ) {
+	$type = get_post_type( $pid );
+	$url  = function_exists( 'aw_featured_url' ) ? aw_featured_url( $pid ) : get_permalink( $pid );
+	$ext  = 'aw_press' === $type;
+	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
+	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
+	return '<li><article class="kit-card aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $ts ? aw_date( $ts ) : '' ) . '</p>'
+		. '<h3 class="aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
+}
+
+function aw_block_listing_press( $a, $id ) {
+	if ( ! aw_listing_here( $id ) || ! function_exists( 'aw_featured_items' ) ) {
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'In the press: items on the site that name this organisation' ) : '';
+	}
+	$all  = isset( $_GET['press'] ) && 'all' === $_GET['press']; // phpcs:ignore WordPress.Security.NonceVerification
+	$ids  = aw_featured_items( $id, $all ? 100 : 6 );
+	if ( ! $ids ) {
+		return '';
+	}
+	$n    = $all ? count( $ids ) : count( aw_featured_items( $id, 100 ) );
+	$show = $all ? $ids : array_slice( $ids, 0, 5 );
+	$more = ! $all && $n > 5 ? '<p class="aw-more-all"><a href="' . esc_url( add_query_arg( 'press', 'all', get_permalink( $id ) ) . '#aw-press-h' ) . '">' . esc_html( sprintf( /* translators: %d: number. */ __( 'See all (%d)', 'animal-writes-core' ), $n ) ) . '</a></p>' : '';
+	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
+}
+
+// "?press=all" lists every item on the profile: the same page, kept out of the index.
+add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
+
+function aw_block_listing_opportunities( $a, $id ) {
+	if ( ! aw_listing_here( $id ) ) {
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Opportunities at the organisation (open only)' ) : '';
+	}
+	$q = array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => 3, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC', 'meta_query' => array( array( 'key' => 'aw_organisation', 'value' => (string) $id ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( function_exists( 'aw_open_opportunities_meta_query' ) ) {
+		$q['meta_query'][] = aw_open_opportunities_meta_query();
+		$q['meta_query']['relation'] = 'AND';
+	}
+	$ids = get_posts( $q );
+	if ( ! $ids || ! function_exists( 'aw_item_more_card' ) ) {
+		return '';
+	}
+	/* translators: %s: organisation. */
+	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
+}
+
+/* ---------- Sidebar: Claim your listing (everywhere but an unclaimed profile, which has its own claim box) ---------- */
+
+function aw_block_claim_cta( $a = array(), $id = 0 ) {
+	$q = get_queried_object_id();
+	if ( is_singular( 'aw_listing' ) && ! get_post_meta( $q, 'aw_verified', true ) ) {
+		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Claim your listing', 'animal-writes-core' ) . '</p>' : '';
+	}
+	return '<section class="aw-side-claim" aria-labelledby="aw-side-claim-h"><h2 class="aw-side-claim-title" id="aw-side-claim-h">' . esc_html__( 'Claim your listing', 'animal-writes-core' ) . '</h2>'
+		. '<p>' . esc_html__( 'Run an organisation listed in our Directory? Claim it to correct its details and add your logo and photos.', 'animal-writes-core' ) . '</p>'
+		. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/claim/' ) ) . '">' . esc_html__( 'Claim your listing', 'animal-writes-core' ) . '</a></section>';
+}
