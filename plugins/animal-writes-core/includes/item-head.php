@@ -49,6 +49,8 @@ add_shortcode(
 		$parts = array();
 		$src   = do_shortcode( '[aw_source_row link="1"]' ); // same-story.php adds the "also reported by" logos
 		if ( '' !== $src ) {
+			// Inline elements only: the shortcode block runs wpautop, which would open a stray <p> after a <p>, <div> or <ul>.
+			$src = preg_replace( array( '#^<(?:p|div) class="#', '#</(?:p|div)>$#', '#<ul class="aw-src-also"#', '#</ul>#', '#<li>#', '#</li>#' ), array( '<span class="', '</span>', '<span role="list" class="aw-src-also"', '</span>', '<span role="listitem">', '</span>' ), trim( $src ) );
 			$parts[] = $src;
 		}
 		$day     = (string) get_post_meta( $id, 'aw_source_date', true );

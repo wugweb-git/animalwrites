@@ -79,9 +79,17 @@ add_filter(
 				break;
 			}
 		}
-		// The first h1/h2 that comes before any list item in this section names it.
-		$hid = '';
-		while ( $p->next_tag() ) {
+		// The first h1/h2 that comes before any list item in this section names it (a breadcrumb <nav> before it does not count).
+		$hid    = '';
+		$in_nav = false;
+		while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+			if ( 'NAV' === $p->get_tag() ) {
+				$in_nav = ! $p->is_tag_closer();
+				continue;
+			}
+			if ( $in_nav || $p->is_tag_closer() ) {
+				continue;
+			}
 			if ( 'LI' === $p->get_tag() ) {
 				break;
 			}
