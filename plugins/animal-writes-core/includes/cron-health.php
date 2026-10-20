@@ -118,7 +118,74 @@ add_action(
 				}
 				echo '</tbody></table>';
 				$last = aw_cron_last();
+				do_action( 'aw_cron_health_after' );
 				echo '<p>' . ( $last && $now - $last < AW_CRON_STALE ? 'Running: last run ' . esc_html( aw_cron_span( $now - $last ) ) . ' ago.' : '<strong>No run for 30 minutes or more.</strong> The owner is emailed.' ) . '</p>';
+			}
+		);
+	}
+);
+
+/*
+ * Sourcing on time (owner, 20 Oct 2026): GitHub's own schedule runs late (6–8 of 8 runs a day, gaps up to 6.5 hours),
+ * so Hostinger's server cron starts the workers through GitHub's API every 3 hours:
+ *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp eval 'aw_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'
+ * A run started this way begins at once. GitHub's schedule stays as the backup; the workflow's concurrency group keeps
+ * runs from overlapping. The token is a fine-grained GitHub token for wugweb-git/animal-writes-workers only, with
+ * Actions read and write, kept in wp-config.php as AW_GITHUB_DISPATCH_TOKEN (never in a repository).
+ */
+
+/**
+ * Start a workflow in the workers repository now.
+ *
+ * @param string $file   Workflow file, e.g. sourcing.yml.
+ * @param array  $inputs workflow_dispatch inputs (strings).
+ * @return true|WP_Error
+ */
+function aw_dispatch_workflow( $file, $inputs = array() ) {
+	$token = defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '';
+	$file  = sanitize_file_name( $file );
+	if ( '' === $token ) {
+		$res = new WP_Error( 'aw_dispatch_token', 'AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );
+	} else {
+		$resp = wp_remote_post(
+			'https://api.github.com/repos/wugweb-git/animal-writes-workers/actions/workflows/' . rawurlencode( $file ) . '/dispatches',
+			array(
+				'timeout' => 20,
+				'headers' => array(
+					'Authorization'        => 'Bearer ' . $token,
+					'Accept'               => 'application/vnd.github+json',
+					'X-GitHub-Api-Version' => '2022-11-28',
+					'User-Agent'           => 'animalwrites.in',
+					'Content-Type'         => 'application/json',
+				),
+				'body'    => wp_json_encode( array( 'ref' => 'main', 'inputs' => (object) array_map( 'strval', $inputs ) ) ),
+			)
+		);
+		$code = is_wp_error( $resp ) ? 0 : (int) wp_remote_retrieve_response_code( $resp );
+		$res  = 204 === $code ? true : new WP_Error( 'aw_dispatch_failed', is_wp_error( $resp ) ? $resp->get_error_message() : 'GitHub answered HTTP ' . $code . ': ' . mb_substr( (string) wp_remote_retrieve_body( $resp ), 0, 200 ) );
+	}
+	$log          = (array) get_option( 'aw_dispatch_log', array() );
+	$log[ $file ] = array( 'at' => time(), 'ok' => true === $res, 'msg' => true === $res ? 'started' : $res->get_error_message() );
+	update_option( 'aw_dispatch_log', $log, false );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		echo esc_html( $file . ': ' . $log[ $file ]['msg'] ) . "\n";
+	}
+	return $res;
+}
+
+// The dashboard box also shows the last start of each workflow from the server.
+add_action(
+	'wp_dashboard_setup',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		add_action(
+			'aw_cron_health_after',
+			function () {
+				foreach ( (array) get_option( 'aw_dispatch_log', array() ) as $file => $r ) {
+					echo '<p>' . esc_html( $file ) . ' started from the server: ' . esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ) . ' — ' . ( $r['ok'] ? 'started' : '<strong>' . esc_html( $r['msg'] ) . '</strong>' ) . '</p>';
+				}
 			}
 		);
 	}
