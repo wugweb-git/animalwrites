@@ -50,7 +50,7 @@ add_filter(
 		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
 	}
 );
-add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ) ); // up to 3 ads a page: Ad 1, Ad 2 and the sidebar (item-head.php)
+add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing' ) ); // up to 3 ads a page: Ad 1, Ad 2 and the sidebar (item-head.php)
 add_filter( 'kits_ads_end_after_content_types', fn() => array( 'post' ) ); // guides have no end bar: the end ad follows the text
 /*
  * Animal Writes slots (owner, 12 Oct 2026), on top of the Kits Core ones (home-top/mid/bottom, article-incontent-1/2,
@@ -67,7 +67,7 @@ add_filter(
 			array(
 				'directory-feed'         => array( 'Directory – in results', 'Directory state and district pages: a card after result 5', 'directory', 'auto' ),
 				'directory-district-end' => array( 'Directory – end of district page', 'Directory district pages, after the list', '', 'auto' ),
-				'profile'                => array( 'Directory profile', 'Directory profiles, above "Is this your organisation?"', 'article-end', 'auto' ),
+				'profile'                => array( 'Directory profile', 'Directory profiles: Ad 1, after the Organisation details (block)', 'article-end', 'block' ),
 				'opportunity-end'        => array( 'Opportunity – end', 'Opportunity pages, after the Apply button (block)', '', 'block' ),
 				'resources-hub'          => array( 'Resources page', 'The Resources page, after the list (block)', '', 'block' ),
 				'media-feed'             => array( 'Media & PR – in list', 'Media & PR: a card after item 6', '', 'auto' ),
@@ -97,11 +97,7 @@ add_filter(
 		return in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ? $slots : array();
 	}
 );
-// Directory profiles: the ad sits above "Is this your organisation?".
-add_filter(
-	'render_block_animal-writes/listing-help',
-	fn( $html ) => is_singular( 'aw_listing' ) && function_exists( 'aw_ad' ) ? aw_ad( 'profile' ) . $html : $html
-);
+// Directory profiles: Ad 1 is the "profile" Ad slot block after the Organisation group, Ad 2 "article-end" after Share (single-aw_listing.html).
 // Directory district pages: after the list (and after the "Few listings" card).
 add_filter(
 	'render_block_core/query',

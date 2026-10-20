@@ -595,7 +595,13 @@
     "aw-place-chip",
     "aw-block-preview",
     "aw-ad1-mark",
-    "aw-doc-toc"
+    "aw-doc-toc",
+    "kit-item-page",
+    "aw-listing",
+    "aw-facts",
+    "aw-more-logo",
+    "aw-more-initials",
+    "aw-upi-copy"
    ],
    "states": [
     "default",
@@ -2419,6 +2425,249 @@
     "schema": "none"
    },
    "block": "animal-writes/item-more"
+  },
+  {
+   "name": "Listing: logo and description",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-about"
+  },
+  {
+   "name": "Listing: registrations",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-registrations"
+  },
+  {
+   "name": "Listing: contact",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-contact"
+  },
+  {
+   "name": "Listing: location",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-location"
+  },
+  {
+   "name": "Listing: services",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-services"
+  },
+  {
+   "name": "Listing: organisation",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-organisation"
+  },
+  {
+   "name": "Listing: online profiles",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-profiles"
+  },
+  {
+   "name": "Listing: support",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-support"
+  },
+  {
+   "name": "Listing: photos",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "section labelled by its H2 (profiles: aria-label)",
+    "keyboard": "Tab to its links and buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "definition list Label: value"
+   },
+   "seo": {
+    "heading": "H2 per group",
+    "link": "organisation links rel noopener (nofollow sponsored when set)",
+    "alt": "logo alt empty; photo captions",
+    "schema": "NGO node (aw-seo-extras)"
+   },
+   "block": "animal-writes/listing-photos"
   }
  ],
  "nav_status": {

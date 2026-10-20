@@ -5,7 +5,7 @@
  *
  *   1 Breadcrumb   animal-writes/breadcrumb   Home › Section › primary category (the BreadcrumbList is the same trail)
  *   2 Title        core/post-title (H1)
- *   3 Meta row     animal-writes/item-meta    date, Updated, Sponsored, type, place, deadline, status, categories
+ *   3 Meta row     animal-writes/item-meta    one date, Sponsored, type, place, deadline, status, categories
  *   4 Image        core/post-featured-image
  *   5 Content      core/post-excerpt (summary) + core/post-content (document, findings, guide, description) + Apply;
  *                  FAQ moved last; Ad 1 inside it after about 150 words, or after it when shorter
@@ -14,7 +14,7 @@
  *   7 Tags         animal-writes/item-tags    labels that are not the type (no categories)
  *   8 Share        animal-writes/item-share   share.php's one-row bar
  *   9 Ad 2         kits/ad-slot "article-end"
- *  10 More         animal-writes/item-more    at most 2 groups of 3 small cards
+ *  10 More         animal-writes/item-more    at most 2 groups of 3 cards (4:3 picture, type, date, title, one line)
  *
  * Rows print nothing when they have nothing. The blocks are registered with the others (hub-blocks.php), so the Site
  * Editor shows and arranges them. docs/item-template.md describes each one.
@@ -118,8 +118,11 @@ function aw_item_chip( $t ) {
 	return '<a class="kit-chip" href="' . esc_url( get_term_link( $t ) ) . '" rel="tag">' . $icon . esc_html( $t->name ) . '</a>';
 }
 
-/** The item's date: the original's for sourced items, else the post date (0 for none). */
+/** The item's date: the original's for sourced items, the day posted for opportunities, else the post date (0 for none). */
 function aw_item_date_ts( $id ) {
+	if ( 'aw_opportunity' === get_post_type( $id ) ) {
+		return (int) get_post_time( 'U', true, $id );
+	}
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
 	if ( $d && $d > '1900' ) {
 		return (int) strtotime( $d . ' 12:00:00' );
@@ -131,7 +134,7 @@ function aw_item_date_ts( $id ) {
 
 function aw_block_item_meta( $a, $id ) {
 	if ( ! aw_item_here( $id ) ) {
-		return aw_item_editor_preview( 'Meta row: date, Updated, type, place, deadline, status, categories' );
+		return aw_item_editor_preview( 'Meta row: date, type, place, deadline, status, categories' );
 	}
 	$kind = aw_item_kind( $id );
 	$row  = '';
@@ -140,16 +143,14 @@ function aw_block_item_meta( $a, $id ) {
 		if ( $ts ) {
 			$row .= '<span class="aw-item-date">' . aw_date( $ts ) . '</span>';
 		}
-		$pub = (string) get_post_time( 'Y-m-d', false, $id );
-		$mod = (string) get_post_modified_time( 'Y-m-d', false, $id );
-		if ( $mod > $pub && ( ! $ts || $mod > wp_date( 'Y-m-d', $ts ) ) ) { // edited on a later day
-			$row .= '<span class="aw-item-updated">' . esc_html__( 'Updated', 'animal-writes-core' ) . ' ' . aw_date( $mod . ' 12:00:00' ) . '</span>';
-		}
+		// One date (owner, 20 Oct 2026): News, Library and research the original's publication date, Opportunities the
+		// day posted (their deadline follows), guides the day published. Never "Updated"; dateModified stays in the schema.
 		if ( get_post_meta( $id, 'aw_sponsored', true ) ) {
 			$row .= '<span class="kit-tag aw-item-sponsored">' . esc_html( (string) aw_binding_value( 'sponsored_label', $id ) ) . '</span>';
 		}
 	}
-	foreach ( aw_item_type_terms( $id ) as $t ) {
+	$types = aw_item_type_terms( $id );
+	foreach ( 'listing' === $kind ? array_slice( $types, 0, 3 ) : $types as $t ) { // a listing: at most 3 types, primary first
 		$row .= aw_item_chip( $t );
 	}
 	if ( in_array( $kind, array( 'opportunity', 'listing' ), true ) && function_exists( 'aw_item_places' ) ) {
@@ -168,11 +169,16 @@ function aw_block_item_meta( $a, $id ) {
 		if ( '' !== $bl ) {
 			$row .= '<span class="kit-tag kit-tag--danger">' . esc_html( $bl ) . '</span>';
 		}
-		if ( '' !== (string) aw_binding_value( 'verified_label', $id ) ) {
-			$re   = (bool) get_post_meta( $id, 'aw_needs_reverify', true );
+		if ( get_post_meta( $id, 'aw_verified', true ) ) { // one status: Needs re-check instead of Verified while it is due
 			$on   = (string) get_post_meta( $id, 'aw_verified_on', true );
-			$row .= '<span class="kit-tag kit-tag--' . ( $re ? 'warning' : 'success' ) . '">' . esc_html( $re ? __( 'Needs re-check', 'animal-writes-core' ) : __( 'Verified', 'animal-writes-core' ) ) . '</span>'
-				. ( ! $re && $on ? '<span class="aw-item-verified-on">' . aw_date( $on ) . '</span>' : '' );
+			$row .= get_post_meta( $id, 'aw_needs_reverify', true )
+				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'animal-writes-core' ) . '</span>'
+				/* translators: %s: date. */
+				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Verified on %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Verified', 'animal-writes-core' ) ) . '</span>';
+		}
+		$until = (string) get_post_meta( $id, 'aw_featured_until', true );
+		if ( get_post_meta( $id, 'aw_featured', true ) && ( '' === $until || wp_date( 'Y-m-d' ) <= $until ) ) {
+			$row .= '<span class="kit-badge kit-badge--sponsored">' . esc_html__( 'Featured', 'animal-writes-core' ) . '</span>';
 		}
 	} else {
 		$cats = get_the_terms( $id, 'category' );
@@ -323,10 +329,20 @@ add_filter(
 /* ---------- 6. Sources ---------- */
 
 function aw_block_item_sources( $a, $id ) {
-	if ( ! aw_item_here( $id ) || 'aw_listing' === get_post_type( $id ) ) {
+	if ( ! aw_item_here( $id ) ) {
 		return aw_item_editor_preview( 'Sources: publisher, issuer or study, the original, notes, Editorial policy, Report a mistake' );
 	}
 	$kind   = aw_item_kind( $id );
+	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( home_url( '/contact/?about=correction#write' ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
+	$hid    = 'aw-sources-' . $id;
+	if ( 'listing' === $kind ) { // the listing's data sources with their "as on" dates, and when it was last updated
+		$list = function_exists( 'aw_listing_sources_html' ) ? aw_listing_sources_html( $id ) : '';
+		$last = function_exists( 'aw_listing_last_updated' ) ? aw_listing_last_updated( $id ) : '';
+		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>'
+			. ( '' !== $list ? '<div class="aw-sources-list">' . $list . '</div>' : '' )
+			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'animal-writes-core' ) . ' ' . aw_date( $last ) . '</p>' : '' )
+			. $links . '</section>';
+	}
 	$url    = (string) get_post_meta( $id, 'aw_source_url', true );
 	$credit = '';
 	$note   = '';
@@ -379,12 +395,11 @@ function aw_block_item_sources( $a, $id ) {
 	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : '';
 	$ad   = 'inline' !== aw_item_state( 'ad1' ) && function_exists( 'aw_ad' ) ? aw_ad( 'article-incontent-1' ) : ''; // Ad 1 after a short text
 	aw_item_state( 'ad1', 'inline' );
-	$hid  = 'aw-sources-' . $id;
 	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';
 	$out .= '' !== $refs ? '<div class="aw-sources-refs">' . do_blocks( $refs ) . '</div>' : '';
-	$out .= '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( home_url( '/contact/?about=correction#write' ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
+	$out .= $links;
 	return $ad . $out . '</section>';
 }
 
@@ -450,6 +465,15 @@ function aw_item_more_groups( $id ) {
 			$open     = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => aw_open_opportunities_meta_query() ) : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
 			$groups[] = array( __( 'More opportunities', 'animal-writes-core' ), aw_related_pick( $id, 'aw_opportunity', 3, array(), $open ) );
 			break;
+		case 'aw_listing': // its district first, filled from the state up to 6 (same type in the nearest districts first)
+			$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+			if ( $p ) {
+				$local = aw_related_pick( $id, 'aw_listing', 6, array(), array( 'orderby' => 'title', 'order' => 'ASC', 'posts_per_page' => 300 ), true );
+				$fill  = 'district' === $p->kind && count( $local ) < 6 ? aw_related_state_fill( $id, $p, 6 - count( $local ), $local ) : array();
+				/* translators: %s: district or state. */
+				$groups[] = array( sprintf( __( 'More organisations in %s', 'animal-writes-core' ), $p->name ), array_merge( $local, $fill ) );
+			}
+			break;
 	}
 	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, 2 );
 	set_transient( $key, $groups, 12 * HOUR_IN_SECONDS );
@@ -457,20 +481,42 @@ function aw_item_more_groups( $id ) {
 }
 add_action( 'save_post', fn( $id ) => delete_transient( 'aw_more_' . (int) $id ) );
 
-/** A small card: type and date, title, one line (no picture, no category chips). */
+/**
+ * A card's 4:3 picture through core's Post Featured Image block, so it gets the cards' own handling (the item's
+ * picture, else its primary category's fallback; never an unrelated stock photo).
+ */
+function aw_item_card_media( $pid ) {
+	$b = new WP_Block(
+		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media aw-more-media' ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
+		array( 'postId' => (int) $pid, 'postType' => get_post_type( $pid ) )
+	);
+	return (string) $b->render();
+}
+
+/** A small card: 4:3 picture, type and date, title, one line (no category chips). */
 function aw_item_more_card( $pid ) {
 	$type = aw_item_type_terms( $pid );
 	$name = $type ? $type[0]->name : ( 'aw_news' === get_post_type( $pid ) ? __( 'News', 'animal-writes-core' ) : '' );
+	if ( 'aw_listing' === get_post_type( $pid ) ) { // an organisation: its logo whole in the 4:3 box (or its initials), type and place
+		$logo  = get_the_post_thumbnail( $pid, 'medium', array( 'alt' => '', 'loading' => 'lazy' ) );
+		$words = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $pid ) ) ) ) );
+		$mark  = $logo ? $logo : '<span class="aw-more-initials" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) ) ) . '</span>';
+		$place = function_exists( 'aw_item_place' ) ? aw_item_place( $pid ) : null;
+		$line  = wp_strip_all_tags( (string) get_the_excerpt( $pid ) );
+		return '<li><article class="kit-card aw-more-card aw-more-card--org"><div class="aw-more-media aw-more-logo">' . $mark . '</div><div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $place ? '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>' : '' ) . '</p>'
+			. '<h3 class="aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
+			. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
+	}
 	$ts   = aw_item_date_ts( $pid );
 	$line = wp_strip_all_tags( (string) get_the_excerpt( $pid ) );
-	return '<li><article class="kit-card aw-more-card"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $ts ? aw_date( $ts ) : '' ) . '</p>'
+	return '<li><article class="kit-card aw-more-card">' . aw_item_card_media( $pid ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $ts ? aw_date( $ts ) : '' ) . '</p>'
 		. '<h3 class="aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
-		. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</article></li>';
+		. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 }
 
 function aw_block_item_more( $a, $id ) {
-	if ( ! aw_item_here( $id ) || 'aw_listing' === get_post_type( $id ) || 'publish' !== get_post_status( $id ) ) {
-		return aw_item_editor_preview( 'More: up to two groups of three items' );
+	if ( ! aw_item_here( $id ) || 'publish' !== get_post_status( $id ) ) {
+		return aw_item_editor_preview( 'More: up to two groups of three items (listings: one group of up to six organisations)' );
 	}
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {

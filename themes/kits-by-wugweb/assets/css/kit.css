@@ -826,6 +826,7 @@ main > .alignfull, .wp-block-post-content > .alignfull { isolation: isolate; }
 .wp-block-post-content > :is(p, ul, ol, blockquote, h2, h3, h4, .wp-block-list, .wp-block-quote) { max-width: min(72ch, var(--kit-width-wide)); margin-left: max(0px, calc((100% - var(--kit-width-wide)) / 2)) !important; margin-right: auto !important; }
 /* Single items and pages: vertical rhythm = section padding */
 main.wp-block-group[style*="padding-top"] { padding-top: var(--kit-section-y) !important; padding-bottom: var(--kit-section-y) !important; }
+main.wp-block-group.kit-item-page[style*="padding-top"] { padding-top: var(--kit-space-4) !important; } /* item pages: the breadcrumb starts as high as on every other page (the section band's 16px), not a section's 48/70/96 */
 /* Layout grid utility: 4 / 8 / 12 columns, gap 16 / 24 / 32 */
 .kit-grid { display: grid; grid-template-columns: repeat(var(--kit-grid-columns), minmax(0, 1fr)); gap: var(--kit-grid-gap); }
 

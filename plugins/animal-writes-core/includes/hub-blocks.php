@@ -56,6 +56,16 @@ function aw_hub_blocks() {
 		'item-tags'     => array( 'Item: tags', 'aw_block_item_tags', array() ),
 		'item-share'    => array( 'Item: share', 'aw_block_item_share', array() ),
 		'item-more'     => array( 'Item: more', 'aw_block_item_more', array() ),
+		// The Directory profile's groups (listing-template.php, docs/listing-template.md).
+		'listing-about'         => array( 'Listing: logo and description', 'aw_block_listing_about', array() ),
+		'listing-registrations' => array( 'Listing: registrations', 'aw_block_listing_registrations', array() ),
+		'listing-contact'       => array( 'Listing: contact', 'aw_block_listing_contact', array() ),
+		'listing-location'      => array( 'Listing: location', 'aw_block_listing_location', array() ),
+		'listing-services'      => array( 'Listing: services', 'aw_block_listing_services', array() ),
+		'listing-organisation'  => array( 'Listing: organisation', 'aw_block_listing_organisation', array() ),
+		'listing-profiles'      => array( 'Listing: online profiles', 'aw_block_listing_profiles', array() ),
+		'listing-support'       => array( 'Listing: support', 'aw_block_listing_support', array() ),
+		'listing-photos'        => array( 'Listing: photos', 'aw_block_listing_photos', array() ),
 	);
 }
 

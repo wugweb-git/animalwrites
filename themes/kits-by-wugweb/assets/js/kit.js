@@ -66,7 +66,7 @@
 		var b = e.target.closest('.kit-share-copy, .aw-share-copy');
 		if (!b || !navigator.clipboard) return;
 		navigator.clipboard.writeText(b.dataset.url).then(function () {
-			var ico = b.querySelector('.kit-ico'), name = b.querySelector('.kit-share-name'), label = b.getAttribute('aria-label');
+			var ico = b.querySelector('.kit-ico'), name = b.querySelector('.kit-share-name'), label = b.getAttribute('aria-label'), text = name ? name.textContent : '';
 			var live = b.parentNode.querySelector('[role=status]');
 			if (ico) ico.classList.replace('kit-ico--link', 'kit-ico--check');
 			if (name) name.textContent = b.dataset.done;
@@ -74,7 +74,7 @@
 			if (live) live.textContent = b.dataset.done;
 			setTimeout(function () {
 				if (ico) ico.classList.replace('kit-ico--check', 'kit-ico--link');
-				if (name) name.textContent = label;
+				if (name) name.textContent = text;
 				b.setAttribute('aria-label', label); b.title = label;
 				if (live) live.textContent = '';
 			}, 2000);

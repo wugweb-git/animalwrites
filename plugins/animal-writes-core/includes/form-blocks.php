@@ -55,7 +55,7 @@ function aw_block_volunteer( $a ) {
 
 /* ---------- Directory profile card (S7) ---------- */
 
-/** "Is this your organisation?" with Claim (two steps) and Report a mistake. */
+/** "Is this your organisation?" with Claim (two steps); shown only while the listing is not claimed (listing-template.php). */
 function aw_block_listing_help( $a, $id ) {
 	$listing = get_post( $id );
 	if ( ! $listing || 'aw_listing' !== $listing->post_type ) {
@@ -65,8 +65,7 @@ function aw_block_listing_help( $a, $id ) {
 	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h">Is this your organisation?</h2>'
 		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.</p>' )
 		. '<div class="aw-listing-help-actions">'
-		. '<a class="kit-btn aw-claim-link" href="' . esc_url( aw_claim_url( $id ) ) . '" rel="nofollow">Claim this listing</a>'
-		. '<a class="kit-btn kit-btn--secondary aw-report-link" href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">Report a mistake</a>'
+		. '<a class="kit-btn aw-claim-link" href="' . esc_url( aw_claim_url( $id ) ) . '" rel="nofollow">Claim this listing</a>' // Report a mistake is in the Sources block
 		. '</div></section>';
 }
 

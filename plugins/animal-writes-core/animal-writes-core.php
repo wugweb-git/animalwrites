@@ -92,6 +92,7 @@ require_once AW_CORE_DIR . 'includes/org-people.php';
 require_once AW_CORE_DIR . 'includes/breadcrumbs.php';
 require_once AW_CORE_DIR . 'includes/item-head.php';
 require_once AW_CORE_DIR . 'includes/research-citation.php';
+require_once AW_CORE_DIR . 'includes/listing-template.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/press.php';
 require_once AW_CORE_DIR . 'includes/review-queue.php';

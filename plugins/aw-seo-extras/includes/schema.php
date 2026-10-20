@@ -109,7 +109,7 @@ function aw_listing_schema( $id ) {
 	if ( $wa ) {
 		$org['contactPoint'] = 1 === count( $wa ) ? $wa[0] : $wa;
 	}
-	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ), $m( 'aw_linkedin' ), $m( 'aw_wikidata' ) ? 'https://www.wikidata.org/wiki/' . $m( 'aw_wikidata' ) : '' ) ) );
+	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ), $m( 'aw_linkedin' ), $m( 'aw_wikidata' ) ? 'https://www.wikidata.org/wiki/' . $m( 'aw_wikidata' ) : '', $m( 'aw_ngobase_url' ) ) ) );
 	if ( $same ) {
 		$org['sameAs'] = $same;
 	}
@@ -120,7 +120,8 @@ function aw_listing_schema( $id ) {
 		$org['geo'] = array( '@type' => 'GeoCoordinates', 'latitude' => (float) $m( 'aw_lat' ), 'longitude' => (float) $m( 'aw_lng' ) );
 	}
 	// The Google rating is shown on the page only: Google does not accept third-party ratings in an organisation's schema.
-	$photos = array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_image_url( (int) $p, 'large' ), array_filter( explode( ',', $m( 'aw_gallery' ) ) ) ) ) );
+	$own    = function_exists( 'aw_listing_photo_ids' ) ? aw_listing_photo_ids( $id ) : array_filter( explode( ',', $m( 'aw_gallery' ) ) ); // never stock or CC images
+	$photos = array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_image_url( (int) $p, 'large' ), $own ) ) );
 	if ( $photos ) {
 		$org['image'] = array_values( array_unique( array_merge( (array) ( $org['image'] ?? array() ), $photos ) ) );
 	}

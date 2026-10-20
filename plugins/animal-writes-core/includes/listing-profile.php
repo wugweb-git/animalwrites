@@ -250,17 +250,7 @@ function aw_org_hours_html( $rows ) {
 	return '<table class="aw-org-hours"><caption class="screen-reader-text">Opening hours by day</caption><tbody>' . $trs . '</tbody></table>';
 }
 
-// The description gets its heading ("About"), so the page reads: name, details, about.
-add_filter(
-	'the_content',
-	function ( $content ) {
-		if ( ! is_singular( 'aw_listing' ) || ! in_the_loop() || ! is_main_query() || '' === trim( wp_strip_all_tags( $content ) ) ) {
-			return $content;
-		}
-		return '<h2 class="aw-profile-h">About</h2>' . $content;
-	},
-	5
-);
+// The description sits beside the logo with no heading of its own (owner, 20 Oct 2026; listing-template.php).
 
 /**
  * "Area, District, State, PIN" with each place named once (an import's area often already names the district and state).

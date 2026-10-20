@@ -1,50 +1,40 @@
 <!-- wp:template-part {"slug":"header","tagName":"header","area":"header"} /-->
 
-<!-- wp:group {"tagName":"main","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
-<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
+<!-- wp:group {"tagName":"main","metadata":{"name":"Directory profile"},"className":"kit-item-page","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group kit-item-page" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
 <!-- wp:group {"align":"wide","className":"kit-with-sidebar","layout":{"type":"default"}} -->
-<div class="wp-block-group alignwide kit-with-sidebar"><!-- wp:group {"className":"kit-main","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-main"><!-- wp:animal-writes/breadcrumb /-->
+<div class="wp-block-group alignwide kit-with-sidebar"><!-- wp:group {"className":"kit-main kit-item","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-main kit-item"><!-- wp:animal-writes/breadcrumb /-->
 
 <!-- wp:post-title {"level":1} /-->
 
 <!-- wp:animal-writes/item-meta /-->
 
-<!-- wp:animal-writes/org-mark /-->
+<!-- wp:animal-writes/listing-about /-->
 
-<!-- wp:post-excerpt {"className":"aw-profile-bio"} /-->
+<!-- wp:animal-writes/listing-registrations /-->
 
-<!-- wp:shortcode -->
-[aw_trust]
-<!-- /wp:shortcode -->
+<!-- wp:animal-writes/listing-contact /-->
 
-<!-- wp:buttons {"className":"aw-profile-actions"} -->
-<div class="wp-block-buttons aw-profile-actions"><!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"whatsapp_url"}}}},"linkTarget":"_blank","rel":"noreferrer noopener"} -->
-<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">WhatsApp</a></div>
-<!-- /wp:button -->
+<!-- wp:animal-writes/listing-location /-->
 
-<!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"phone_url"}}}},"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button">Call</a></div>
-<!-- /wp:button -->
+<!-- wp:animal-writes/listing-services /-->
 
-<!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"email_url"}}}},"className":"is-style-kits-secondary"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button">Email</a></div>
-<!-- /wp:button -->
+<!-- wp:animal-writes/listing-organisation /-->
 
-<!-- wp:button {"metadata":{"bindings":{"url":{"source":"animal-writes/field","args":{"key":"website"}}}},"className":"is-style-kits-secondary","linkTarget":"_blank","rel":"noreferrer noopener"} -->
-<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button" target="_blank" rel="noreferrer noopener">Website</a></div>
-<!-- /wp:button --></div>
-<!-- /wp:buttons -->
+<!-- wp:kits/ad-slot {"slot":"profile"} /-->
 
-<!-- wp:animal-writes/org-details /-->
+<!-- wp:animal-writes/listing-profiles /-->
 
+<!-- wp:animal-writes/listing-support /-->
 
+<!-- wp:animal-writes/listing-photos /-->
 
-<!-- wp:post-content {"layout":{"type":"constrained"}} /-->
+<!-- wp:animal-writes/item-sources /-->
 
-<!-- wp:shortcode -->
-[aw_org_links]
-<!-- /wp:shortcode -->
+<!-- wp:animal-writes/item-share /-->
+
+<!-- wp:kits/ad-slot {"slot":"article-end"} /-->
 
 <!-- wp:animal-writes/listing-help /--></div>
 <!-- /wp:group -->
@@ -52,10 +42,7 @@
 <!-- wp:template-part {"slug":"sidebar","tagName":"aside","area":"sidebar","className":"kit-sidebar"} /--></div>
 <!-- /wp:group -->
 
-<!-- wp:shortcode {"metadata":{"name":"Related items"}} -->
-[aw_related]
-<!-- /wp:shortcode -->
-</main>
+<!-- wp:animal-writes/item-more /--></main>
 <!-- /wp:group -->
 
 <!-- wp:template-part {"slug":"footer","tagName":"footer","area":"footer"} /-->

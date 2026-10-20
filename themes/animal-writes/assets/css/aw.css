@@ -340,7 +340,7 @@ body { background: var(--kit-color-canvas); }
 /* 3 Meta row: date, Updated, Sponsored, type, place, deadline, status, categories; one font, size, weight and colour;
    spaced by the gap only, so a wrap never leaves a separator behind */
 .aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-3) 0 var(--kit-space-5); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
-.aw-item-meta > :is(.aw-item-date, .aw-item-updated, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
+.aw-item-meta > :is(.aw-item-date, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
 .aw-item-meta .aw-date { color: inherit; font: inherit; }
 .aw-item-meta .kit-tag--closed { margin-right: var(--kit-space-1); }
 /* 5 Content */
@@ -363,19 +363,67 @@ body { background: var(--kit-color-canvas); }
 .aw-item-tags { margin: var(--kit-space-5) 0 0; }
 .aw-item-share { margin: var(--kit-space-6) 0 0; }
 .aw-item-share .kit-share { border-top: 0; padding-top: 0; }
-/* 10 More: at most two groups of three small cards (type and date, title, one line) */
+/* 10 More: at most two groups of three cards (4:3 picture, type and date, title, one line) */
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
 .aw-more-head { font-size: var(--kit-type-h3); line-height: 1.25; margin: 0 0 var(--kit-space-4); }
 .aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
 @media (min-width: 768px) { .aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 .aw-more-list > li { margin: 0; }
-.aw-more-card { height: 100%; box-sizing: border-box; padding: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-more-card { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-more-card .aw-more-media { margin: 0; aspect-ratio: 4 / 3; border-radius: 0; }
+.aw-more-card .aw-more-media img { width: 100%; height: 100%; object-fit: cover; }
+.aw-more-body { padding: var(--kit-space-4); }
 .aw-more-meta { margin: 0 0 var(--kit-space-2); }
 .aw-more-title { margin: 0; font-size: var(--kit-type-base, 1rem); line-height: 1.35; }
 .aw-more-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
 .aw-more-line { margin: var(--kit-space-1) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 /* Directory profile, row 4: the organisation's logo only */
 .kit-main > .aw-org-mark { width: 4rem; height: 4rem; margin: 0 0 var(--kit-space-5); }
+/* ---------- Directory profile (listing-template.php, docs/listing-template.md) ---------- */
+.aw-item-verified .kit-ico { --kit-ico-size: 0.9em; }
+.aw-listing-about { margin: var(--kit-space-5) 0 0; }
+.aw-listing-about.has-logo { display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: var(--kit-space-4); align-items: start; }
+@media (min-width: 768px) { .aw-listing-about.has-logo { grid-template-columns: 6rem minmax(0, 1fr); gap: var(--kit-space-5); } }
+.aw-listing-logo-box { aspect-ratio: 1; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-listing-logo-box img { display: block; width: 100%; height: 100%; object-fit: contain; padding: var(--kit-space-1); box-sizing: border-box; }
+.aw-listing-desc > :first-child { margin-top: 0; }
+.aw-listing-desc > :last-child { margin-bottom: 0; }
+.aw-listing-group { margin: var(--kit-space-7) 0 0; }
+.aw-listing-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
+.aw-facts { display: grid; gap: var(--kit-space-2); margin: 0; }
+.aw-facts-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--kit-space-4); }
+@media (min-width: 768px) { .aw-facts-row { grid-template-columns: 12rem minmax(0, 1fr); } }
+.aw-facts dt { font-weight: var(--kit-weight-medium); color: var(--kit-color-text); }
+.aw-facts dd { margin: 0; color: var(--kit-color-text); }
+.aw-facts-part + .aw-facts-part::before { content: "·" / ""; margin: 0 0.4em; color: var(--kit-color-muted); } /* the separator is CSS, never typed */
+.aw-facts-expired { color: var(--kit-color-warning); font-weight: var(--kit-weight-medium); }
+.aw-facts-note { display: block; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-facts .aw-org-hours { margin: 0; border-collapse: collapse; }
+.aw-facts .aw-org-hours th { padding: 0 var(--kit-space-4) 0 0; text-align: left; font-weight: var(--kit-weight-regular); }
+.aw-facts .aw-org-hours td { padding: 0; }
+.aw-facts .aw-place-chip { margin: 0 var(--kit-space-1) var(--kit-space-1) 0; }
+.aw-facts--phones { margin-top: var(--kit-space-3); }
+/* Contact: labelled organisation buttons (never icon-only, never beside Share) */
+.aw-listing-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
+.aw-listing-wa { display: inline-flex; vertical-align: middle; margin-left: var(--kit-space-1); color: var(--kit-color-text); }
+/* Online profiles: small icon links */
+.aw-listing-profiles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin: var(--kit-space-7) 0 0; }
+.aw-listing-profiles-label { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-listing-profiles-links { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
+.aw-listing-profile { display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-target); height: var(--kit-size-target); color: var(--kit-color-text); border-radius: var(--radius-sm); }
+.aw-listing-profile::after { content: none !important; }
+.aw-listing-profile .kit-ico { --kit-ico-size: 1.25rem; }
+@media (hover: hover) { .aw-listing-profile:hover { background: var(--kit-chip-hover); } }
+.aw-listing-profile:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-listing-upi { margin-right: var(--kit-space-2); font-family: var(--kit-font-mono, monospace); }
+.aw-listing-support .aw-facts { margin-top: var(--kit-space-3); }
+/* Sources (listing): the data sources with their "as on" dates, and Last updated */
+.aw-sources-list { margin: 0 0 var(--kit-space-2); }
+.aw-sources-updated { margin: 0 0 var(--kit-space-2); }
+/* More organisations: the logo whole in the 4:3 box, or the initials */
+.aw-more-logo { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 3; background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-more-logo img { max-width: 60%; max-height: 70%; width: auto; height: auto; object-fit: contain; }
+.aw-more-initials { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); color: var(--kit-color-muted); }
 .aw-block-preview { padding: var(--kit-space-2) var(--kit-space-3); border: 1px dashed var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); } /* editor only */
 .aw-card-time { margin-top: auto; padding-right: var(--kit-space-7); min-height: 36px; display: flex; align-items: center; }
 .aw-story-body > .aw-src:first-child { margin-top: var(--kit-space-4); }
