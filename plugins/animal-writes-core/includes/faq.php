@@ -107,6 +107,16 @@ function aw_faq_doc_name( $id ) {
 	return preg_replace( '/^The\s+/u', '', aw_faq_plain( get_the_title( $id ) ) );
 }
 
+/** Whether a document name is plural ("ABC Rules 2023", "… Amendment Rules, 2026"): "Are … in force?", "were notified". */
+function aw_faq_plural( $name ) {
+	return (bool) preg_match( '/\b(Rules|Acts|Regulations|Guidelines|Orders|Judgments)\b/iu', (string) $name );
+}
+
+/** "is"/"are", "was"/"were" for a document name. */
+function aw_faq_be( $name, $past = false ) {
+	return aw_faq_plural( $name ) ? ( $past ? 'were' : 'are' ) : ( $past ? 'was' : 'is' );
+}
+
 /**
  * A document's short name, the way people search it (owner, 20 Oct 2026): the "Short name" field ("PCA Act 1960", "ABC
  * Rules 2023"), else the primary focus keyphrase, else the title. Questions use it; the first answer gives the full
@@ -350,11 +360,11 @@ function aw_faq_legal_force( $id, $doc ) {
 	$draft = has_term( 'draft', 'post_tag', $id ) || preg_match( '/^Draft\b/i', $doc );
 	switch ( $f ) {
 		case 'InForce':
-			return array( 'Yes. The ' . esc_html( $doc ) . ' is in force.' . $read, 'force' );
+			return array( 'Yes. The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc ) . ' in force.' . $read, 'force' );
 		case 'PartiallyInForce':
-			return array( 'The ' . esc_html( $doc ) . ' is partly in force.' . $read, 'force' );
+			return array( 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc ) . ' partly in force.' . $read, 'force' );
 		case 'NotInForce':
-			return array( 'No. The ' . esc_html( $doc ) . ( $draft ? ' is a draft and is not in force.' : ' is not in force.' ) . $read, 'force' );
+			return array( 'No. The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc ) . ( $draft ? ( aw_faq_plural( $doc ) ? ' draft rules and are not in force.' : ' a draft and is not in force.' ) : ' not in force.' ) . $read, 'force' );
 	}
 	return null;
 }
@@ -372,7 +382,7 @@ function aw_faq_legal_date( $id, $doc ) {
 		return null;
 	}
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$a   = 'The ' . esc_html( $doc ) . ' was ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
+	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
 	return array( $a, 'date' );
 }
 
@@ -383,7 +393,7 @@ function aw_faq_legal_issuer( $id, $doc ) {
 	}
 	$act = aw_faq_plain( get_post_meta( $id, 'aw_legal_act', true ) );
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$a   = 'The ' . esc_html( $doc ) . ' was issued by ' . esc_html( $iss->name ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
+	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( $iss->name ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
 	return array( $a, 'issuer' );
 }
 
@@ -598,7 +608,11 @@ function aw_faq_candidates( $ctx ) {
 		}
 		if ( isset( $r[0] ) && is_string( $r[0] ) ) { // one answer: [ html, fact ]
 			$verb  = 'date' === $e['key'] ? aw_faq_legal_verb( $ctx['id'] ) : '';
-			$out[] = array( 'q' => sprintf( $e['q'], $ctx['entity'], $verb ), 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'], 'counts' => $r[2] ?? true, 'answer' => $e['answer'] );
+			$q     = sprintf( $e['q'], $ctx['entity'], $verb );
+			if ( 'legal' === $ctx['kind'] && aw_faq_plural( $ctx['entity'] ) ) { // "Are the ABC Rules 2023 in force?", "When were … notified?"
+				$q = preg_replace( array( '/^Is the /', '/^When was the /' ), array( 'Are the ', 'When were the ' ), $q );
+			}
+			$out[] = array( 'q' => $q, 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'], 'counts' => $r[2] ?? true, 'answer' => $e['answer'] );
 			continue;
 		}
 		foreach ( $r as $i => $x ) { // several (key sections)

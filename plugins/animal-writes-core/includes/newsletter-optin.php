@@ -4,7 +4,8 @@
  *
  * - Contact and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
  *   person goes onto the newsletter list as "active" with the form as source (16 Oct 2026). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
- * - Volunteers get the same unticked box (owner, 20 Oct 2026; was automatic from 16 Oct; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
+ * - Volunteers: the updates box is shown ticked and volunteers join the newsletter whether or not it stays ticked
+ *   (owner, 20 Oct 2026; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
  *   lists them (name, email, source, date) with a CSV export, for a one-time opt-in invite sent outside WordPress.
  *
  * @package animal-writes-core
@@ -16,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_NL_OPTIN_LABEL = 'Email me Animal Writes updates. I can unsubscribe at any time.';
 
-/** The unticked opt-in box for a form. */
-function aw_nl_optin_box( $form ) {
-	return aw_field( $form, array( 'name' => 'nl_optin', 'label' => AW_NL_OPTIN_LABEL, 'type' => 'checkbox' ) );
+/** The opt-in box for a form: unticked, or ticked when $ticked (the volunteer form, owner 20 Oct 2026). */
+function aw_nl_optin_box( $form, $ticked = false ) {
+	return aw_field( $form, array( 'name' => 'nl_optin', 'label' => AW_NL_OPTIN_LABEL, 'type' => 'checkbox', 'value' => $ticked ? '1' : '' ) );
 }
 
 /** After a form succeeds: only when the box was ticked, add to the newsletter (site list active, FluentCRM subscribed;

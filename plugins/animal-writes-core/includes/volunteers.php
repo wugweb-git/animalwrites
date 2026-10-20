@@ -81,7 +81,7 @@ function aw_volunteer_form( $source = '' ) {
 	$html  .= aw_place_fields( $form );
 	$html  .= '</div>';
 	$html .= kits_dict_field( $form, 'consent', array( 'label' => AW_VOL_CONSENT_LABEL ) );
-	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : ''; // updates: their own unticked box (owner, 20 Oct 2026; DPDP)
+	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form, true ) : ''; // updates: their own box, ticked (owner, 20 Oct 2026)
 	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
 	return $html;
 }
@@ -103,7 +103,7 @@ function aw_volunteer_values( $in ) {
 		'state'    => sanitize_title( (string) ( $in['state'] ?? '' ) ),
 		'district' => sanitize_title( (string) ( $in['district'] ?? '' ) ),
 		'consent'  => empty( $in['consent'] ) ? '' : '1',
-		'updates'  => ! empty( $in['nl_optin'] ), // ticked "Email me Animal Writes updates"
+		'updates'  => ! empty( $in['nl_optin'] ), // the updates box as sent (recorded only; volunteers join either way)
 		'roles'    => array_values( array_intersect( array_keys( AW_VOL_ROLES ), array_map( 'sanitize_key', (array) $roles ) ) ),
 	);
 }
@@ -130,7 +130,8 @@ function aw_volunteer_errors( $v ) {
 
 /**
  * Save a checked sign-up to the volunteers table (one row per email; signing up again updates it), email the team, add
- * the volunteer to FluentCRM (tag Volunteer) and, only when they ticked the updates box, to the newsletter.
+ * the volunteer to FluentCRM (tag Volunteer) and to the newsletter (owner, 20 Oct 2026: they join whether or not the
+ * updates box stays ticked).
  *
  * @return array array{url, title, text} for the thank-you page.
  */
@@ -155,7 +156,7 @@ function aw_volunteer_save( $v, $source ) {
 	);
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
 	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
-	if ( ! empty( $v['updates'] ) && function_exists( 'aw_newsletter_join' ) ) { // updates only when ticked (owner, 20 Oct 2026); no email from this
+	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers join the newsletter (owner, 20 Oct 2026); no email from this
 		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
 	}
 	if ( function_exists( 'aw_crm_volunteer_sync' ) ) { // their volunteer details on the FluentCRM contact (custom fields); not subscribed unless ticked
