@@ -1,13 +1,14 @@
 <?php
 /**
- * News headlines in sentence case (owner, 20 Oct 2026): letter case only, never a word changed. New headlines are cased
- * by the workers on ingest (aw_workers/headline_case.py; a headline they could not case safely keeps its original and
- * carries aw_title_case_flag). Existing headlines change only from a CSV the owner has reviewed:
+ * News headlines in sentence case (owner, 20 Oct 2026): letter case only, never a word changed. Press coverage titles
+ * follow the same rule (owner, 20 Oct 2026). New titles are cased by the workers on ingest (aw_workers/headline_case.py;
+ * a title they could not case safely keeps its original and carries aw_title_case_flag). Existing titles change only
+ * from a CSV the owner has reviewed:
  *
- *   wp aw news-titles apply <file.csv> [--dry-run] [--lead-ins]
+ *   wp aw news-titles apply <file.csv> [--dry-run] [--lead-ins] [--type=aw_press]
  *
  * CSV columns: id, before, after (also status, lead_in, without_lead_in from the dry run). A row is applied only when the
- * item is published News, its title is still "before", and "after" differs from it in letter case only. The slug and
+ * item is published News (with --type=aw_press: a published press item), its title is still "before", and "after" differs from it in letter case only. The slug and
  * URL never change. With --lead-ins, a row whose without_lead_in the owner approved (non-empty, not "needs rewording")
  * gets that title instead (words removed: only with this flag). Library titles are never touched.
  *
@@ -56,7 +57,11 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		'aw news-titles',
 		function ( $args, $assoc ) {
 			if ( 'apply' !== ( $args[0] ?? '' ) || empty( $args[1] ) || ! is_readable( $args[1] ) ) {
-				WP_CLI::error( 'Usage: wp aw news-titles apply <file.csv> [--dry-run] [--lead-ins]' );
+				WP_CLI::error( 'Usage: wp aw news-titles apply <file.csv> [--dry-run] [--lead-ins] [--type=aw_press]' );
+			}
+			$type = (string) ( $assoc['type'] ?? 'aw_news' );
+			if ( ! in_array( $type, array( 'aw_news', 'aw_press' ), true ) ) {
+				WP_CLI::error( '--type is aw_news or aw_press' );
 			}
 			$dry  = ! empty( $assoc['dry-run'] );
 			$lead = ! empty( $assoc['lead-ins'] );
@@ -71,8 +76,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$after  = trim( (string) $r['after'] );
 				$strip  = trim( (string) ( $r['without_lead_in'] ?? '' ) );
 				$why    = '';
-				if ( ! $post || 'aw_news' !== $post->post_type || 'publish' !== $post->post_status ) {
-					$why = 'not published News';
+				if ( ! $post || $type !== $post->post_type || 'publish' !== $post->post_status ) {
+					$why = 'aw_news' === $type ? 'not published News' : 'not a published press item';
 				} elseif ( $post->post_title !== $before ) {
 					$why = 'title changed since the CSV';
 				} elseif ( $lead && '' !== $strip && 'needs rewording' !== $strip ) {

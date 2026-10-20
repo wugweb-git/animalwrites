@@ -572,16 +572,32 @@ add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_p
 
 
 /*
- * Library hub (owner, 17 Oct 2026): the list has its own heading (for screen readers; nothing visible changes) and each
- * card title is an H3 under it, so headings go H1 Library > H2 list > H3 items. Only the Library Page's list.
+ * Card lists (owner, 17 Oct 2026 for the Library; 20 Oct 2026 for every list): each list has its own H2 (the section's
+ * visible heading, or one for screen readers when the page shows none) and each card title in it is an H3, so headings
+ * go H1 > H2 list > H3 items. A card title inside any Query Loop at H2 is printed as an H3; a section page's list or a
+ * tag or category page's list without an H2 of its own gets one for screen readers.
  */
 function aw_is_library_hub() {
 	return ! is_admin() && is_page( 'library' );
 }
+function aw_card_lists_live() {
+	return ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST );
+}
+add_filter(
+	'pre_render_block',
+	function ( $pre, $parsed ) {
+		if ( null === $pre && 'core/query' === ( $parsed['blockName'] ?? '' ) && aw_card_lists_live() ) {
+			$GLOBALS['aw_query_depth'] = (int) ( $GLOBALS['aw_query_depth'] ?? 0 ) + 1;
+		}
+		return $pre;
+	},
+	10,
+	2
+);
 add_filter(
 	'render_block_data',
 	function ( $parsed ) {
-		if ( 'core/post-title' === ( $parsed['blockName'] ?? '' ) && false !== strpos( (string) ( $parsed['attrs']['className'] ?? '' ), 'aw-case-title' ) && 2 === (int) ( $parsed['attrs']['level'] ?? 2 ) && aw_is_library_hub() ) {
+		if ( 'core/post-title' === ( $parsed['blockName'] ?? '' ) && 2 === (int) ( $parsed['attrs']['level'] ?? 2 ) && ! empty( $GLOBALS['aw_query_depth'] ) && aw_card_lists_live() ) {
 			$parsed['attrs']['level'] = 3;
 		}
 		return $parsed;
@@ -590,12 +606,20 @@ add_filter(
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		static $done = false;
-		if ( $done || ! aw_is_library_hub() || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-hub-list' ) ) {
+		if ( ! aw_card_lists_live() ) {
 			return $html;
 		}
-		$done = true;
-		return '<h2 class="screen-reader-text">' . esc_html__( 'Library documents', 'animal-writes-core' ) . '</h2>' . $html;
+		$GLOBALS['aw_query_depth'] = max( 0, (int) ( $GLOBALS['aw_query_depth'] ?? 0 ) - 1 );
+		static $done = false;
+		$type = aw_hub_of_query( (int) ( $block['attrs']['queryId'] ?? 0 ) );
+		$main = '' !== $type || ( ! empty( $block['attrs']['query']['inherit'] ) && ( is_tag() || is_category() || is_tax() ) );
+		if ( $done || ! $main || preg_match( '/<h2[\s>]/', $html ) ) { // the list's own heading (Press, Campaigns) is its H2
+			return $html;
+		}
+		$done  = true;
+		$type  = '' !== $type ? $type : ( is_tag() && function_exists( 'aw_tag_section' ) ? ( aw_tag_section( (string) get_queried_object()->slug ) ?: 'aw_news' ) : 'aw_news' );
+		$label = array( 'aw_news' => 'News stories', 'aw_legal' => 'Library documents', 'post' => 'Resources', 'aw_opportunity' => 'Opportunities', 'aw_listing' => 'Organisations', 'aw_campaign' => 'Campaigns', 'aw_press' => 'Press coverage' );
+		return '<h2 class="screen-reader-text">' . esc_html( $label[ $type ] ?? 'Items' ) . '</h2>' . $html;
 	},
 	10,
 	2

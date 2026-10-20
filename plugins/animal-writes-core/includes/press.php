@@ -440,6 +440,9 @@ function aw_press_ingest( WP_REST_Request $req ) {
 			update_post_meta( $id, $k, $v );
 		}
 	}
+	if ( $req->get_param( 'title_flag' ) ) { // the worker kept the title as published: its sentence-case version changed more than letter case (owner, 20 Oct 2026)
+		update_post_meta( $id, 'aw_title_case_flag', sanitize_text_field( (string) $req->get_param( 'title_flag' ) ) );
+	}
 	if ( function_exists( 'aw_relevance_store' ) ) {
 		aw_relevance_store( $id, $req->get_param( 'relevance' ) );
 	}
