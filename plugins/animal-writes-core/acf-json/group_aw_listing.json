@@ -719,6 +719,26 @@
             "selected": 0
         },
         {
+            "key": "field_aw_listing_aliases",
+            "label": "Also known as",
+            "name": "aw_aliases",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Other names people use for this organisation, comma separated (e.g. CUPA, Compassion Unlimited). Each is matched as a whole word in News, Library, Resources, Campaigns and Media & PR for \"In the press\"; set by an editor only.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_aw_listing_founded",
             "label": "Year established",
             "name": "aw_founded",
@@ -1660,5 +1680,5 @@
     "active": true,
     "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
     "show_in_rest": 0,
-    "modified": 1792308131
+    "modified": 1792503856
 }
