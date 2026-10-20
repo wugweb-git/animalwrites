@@ -803,10 +803,33 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-helplines a { display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--kit-footer-muted); text-decoration: none; }
 .kit-footer-helplines strong { color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); white-space: nowrap; }
 .kit-footer-helplines .kit-ico { color: var(--kit-color-accent); }
-@media (max-width: 767px) { .kit-footer-helprow, .kit-footer-helplines { flex-direction: column; align-items: flex-start; } .kit-footer-helprow { border-top: 0; padding-top: 0; order: -1; padding-bottom: var(--kit-space-5); } }
+.kit-footer-help-what::before { content: "– "; } /* one row (1200 and up): "112 – Emergency" */
+/* 768–1199 (owner, 21 Oct 2026): label above, the numbers in three equal columns, number on line 1, purpose on line 2 */
+@media (min-width: 768px) and (max-width: 1199px) {
+	.kit-footer-helprow { display: block; }
+	.kit-footer-helplines { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-2) var(--kit-space-6); margin-top: var(--kit-space-2); }
+	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-2); row-gap: 0; align-items: center; padding: var(--kit-space-1) 0; }
+	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
+	.kit-footer-help-what::before { content: none; }
+}
+/* Under 768: each number a full-width tap row, 48 high or more: icon, the number large, its purpose under it */
+@media (max-width: 767px) {
+	.kit-footer-helprow, .kit-footer-helplines { flex-direction: column; align-items: stretch; }
+	.kit-footer-helprow { border-top: 0; padding-top: 0; order: -1; padding-bottom: var(--kit-space-5); }
+	.kit-footer-helplines { gap: 0; width: 100%; }
+	.kit-footer-helplines li + li { border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
+	.kit-footer-helplines a { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: center; width: 100%; min-height: 48px; padding: var(--kit-space-2) 0; box-sizing: border-box; }
+	.kit-footer-helplines a > .kit-ico { grid-row: 1 / 3; }
+	.kit-footer-helplines strong { font-size: var(--kit-type-h4); line-height: 1.2; }
+	.kit-footer-help-what::before { content: none; }
+}
 
-/* Row 3: Categories, plain links at every width */
+/* Row 3: Categories as one wrapping row of small outlined chips, dark-footer variant (owner, 21 Oct 2026): meta size
+   (12 / 13 / 14), one size for all, 8 apart both ways; the chip stays small, its ::after gives the 44px tap area. */
 .kit-footer-cats { padding: var(--kit-space-4) 0; border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
+.kit-footer-cats .aw-footer-list { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); list-style: none; margin: 0; padding: 0; }
+.kit-footer-cats .kit-chip { font-size: var(--kit-meta-size) !important; --kit-chip-fg: var(--kit-footer-muted); }
+.kit-footer-cats .kit-chip:is(:hover, :focus-visible) { --kit-chip-fg: var(--kit-color-on-ink); }
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-footer-inline a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
 
