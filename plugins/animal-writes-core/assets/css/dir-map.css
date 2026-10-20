@@ -1,0 +1,22 @@
+/* Directory: List / Map switch, Near me and the map (directory-map.php, dir-map.js). */
+.aw-dir-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); width: 100%; margin-top: var(--s-2, .5rem); }
+.aw-near { width: 100%; max-width: var(--kit-width-content); margin: var(--s-3, .75rem) 0; padding: var(--s-4, 1rem); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); }
+.aw-near-form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); }
+.aw-near-or { color: var(--kit-color-muted); }
+.aw-near-pin { width: 8.5em; }
+.aw-near-pin, .aw-near-km { min-height: 44px; padding: 0 .75em; border: 1px solid var(--kit-color-line); border-radius: var(--radius-sm, 6px); background: var(--kit-color-raised); color: var(--kit-color-text); font: inherit; }
+.aw-near-note { margin: var(--s-2, .5rem) 0 0; font-size: .875em; color: var(--kit-color-muted); }
+.aw-near-results:not(:empty) { margin-top: var(--s-3, .75rem); }
+.aw-near-head { margin: 0 0 var(--s-2, .5rem); font-weight: var(--kit-weight-strong, 600); color: var(--kit-color-ink); }
+.aw-near-list { margin: 0; padding-left: 1.4em; }
+.aw-near-list li { margin: 0 0 var(--s-2, .5rem); }
+.aw-near-km-val { white-space: nowrap; color: var(--kit-color-muted); }
+.aw-near-meta { font-size: .875em; color: var(--kit-color-muted); }
+.aw-near-fallback { margin: var(--s-2, .5rem) 0 0; }
+.aw-dir-map { width: 100%; margin: var(--s-3, .75rem) 0; }
+.aw-dir-map-note { margin: 0 0 var(--s-2, .5rem); color: var(--kit-color-muted); }
+.aw-dir-map-canvas { width: 100%; height: clamp(360px, 70vh, 640px); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); overflow: hidden; background: var(--kit-color-surface); }
+.aw-map-pop-name { margin: 0 0 .25em; font-weight: var(--kit-weight-strong, 600); }
+.aw-map-pop-meta, .aw-map-pop-approx { margin: 0; font-size: .875em; color: var(--kit-color-muted); }
+.aw-map-pop-approx { margin-top: .25em; font-style: italic; }
+@media (min-width: 768px) { .aw-dir-tools { width: auto; margin-top: 0; } }

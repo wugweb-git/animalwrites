@@ -495,7 +495,8 @@ function aw_block_result_head() {
 	$sort  = 'details' === ( $_GET['sort'] ?? '' ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 	$here  = add_query_arg( array_map( 'rawurlencode', array_diff_key( wp_unslash( $_GET ), array( 'sort' => 1, 'paged' => 1, 'query-106-page' => 1 ) ) ), strtok( aw_hub_base_url(), '?' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	return '<div class="aw-dir-results-head"><p role="status">' . esc_html( $line ) . '</p>'
-		. '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav></div>';
+		. '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav></div>'
+		. ( function_exists( 'aw_dir_tools_html' ) ? aw_dir_tools_html() : '' ); // List / Map and Near me (directory-map.php)
 }
 
 function aw_block_browse_states() {
