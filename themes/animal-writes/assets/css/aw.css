@@ -120,6 +120,9 @@
 .aw-dir-search .kit-field { margin: 0; min-width: 0; }
 .aw-dir-search > p:empty, .aw-dir-search > br { display: none; } /* left by auto-paragraphs around the shortcode */
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
+.kit-section-band--compact:not(:has(.kit-section-filters)) { padding-bottom: var(--kit-space-head) !important; } /* Directory place and type pages: head band only, its search sits under it (owner, 20 Oct 2026) */
+.kit-section-filters--below + .aw-system > .screen-reader-text:first-child + * { margin-top: 0; } /* list pages: no gap for a list's hidden heading */
+.kit-section-filters--below + .aw-system .aw-dir-results-head + .aw-dir-tools { margin-top: 0; }
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; }
