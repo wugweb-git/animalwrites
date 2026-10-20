@@ -617,3 +617,27 @@ function aw_seo_printed_title( $t ) {
 add_filter( 'rank_math/frontend/title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 ); // and no hyphen joining two words (owner, 18 Oct 2026)
 add_filter( 'rank_math/opengraph/facebook/og_title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
 add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => aw_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
+
+/*
+ * Yearly SEO titles (owner, 21 Oct 2026: "World Animal Day 2026 Date, Theme, History – Animal Writes", the year
+ * updated each year; the slug has no year). A post with meta aw_seo_title_yearly = 1 gets the year in its Rank Math
+ * title moved to the current one, checked once a day. A plain number in the stored field, never a %variable%.
+ */
+add_action(
+	'init',
+	function () {
+		$year = wp_date( 'Y' );
+		if ( get_transient( 'aw_seo_title_year_checked' ) ) {
+			return;
+		}
+		set_transient( 'aw_seo_title_year_checked', 1, DAY_IN_SECONDS );
+		foreach ( get_posts( array( 'post_type' => 'any', 'post_status' => 'publish', 'numberposts' => 50, 'fields' => 'ids', 'meta_key' => 'aw_seo_title_yearly', 'meta_value' => '1' ) ) as $id ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+			$t = (string) get_post_meta( $id, 'rank_math_title', true );
+			$n = preg_replace( '/\b20\d\d\b/', $year, $t, 1 );
+			if ( '' !== $t && $n !== $t ) {
+				update_post_meta( $id, 'rank_math_title', wp_slash( $n ) );
+			}
+		}
+	},
+	50
+);

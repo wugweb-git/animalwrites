@@ -107,7 +107,9 @@ function aw_section_head_archive() {
 					$with[]       = $p;
 				}
 			}
-			$rest  = array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
+			// Category and tag pages: no placards (owner, 21 Oct 2026: the same source placard repeated three times on tag
+			// pages); the term's own photo, then items' distinct pictures, else no visual.
+			$rest  = $term_page ? array() : array_filter( $pool, fn( $p ) => ! in_array( $p, $with, true ) && ! aw_item_image( $p->ID ) );
 			$posts = array_slice( array_merge( $with, $rest ), 0, 3 );
 			foreach ( $posts as $p ) {
 				$tiles .= aw_section_tile( $p );
