@@ -842,11 +842,11 @@ body { background: var(--kit-color-canvas); }
 /* A publisher with no logo yet: its letter on an ink tile, never a blank square (owner, 15 Oct 2026). */
 .aw-src-icon.aw-src-icon--letter { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .aw-datasrcs.is-full { grid-template-columns: max-content minmax(0, 1fr); }
-.aw-law-date, .aw-posted-by, .aw-press-handle { display: inline-flex !important; align-items: center; gap: var(--kit-meta-icon-gap); }
-.aw-law-date::before, .aw-posted-by::before, .aw-press-handle::before {
+.aw-law-date, .aw-posted-by { display: inline-flex !important; align-items: center; gap: var(--kit-meta-icon-gap); }
+.aw-law-date::before, .aw-posted-by::before {
 	content: "" !important; display: inline-block !important; flex: none; width: var(--kit-meta-icon); height: var(--kit-meta-icon); background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat;
 }
-.aw-posted-by::before, .aw-press-handle::before { -webkit-mask-image: var(--kit-ico-user); mask-image: var(--kit-ico-user); }
+.aw-posted-by::before { -webkit-mask-image: var(--kit-ico-user); mask-image: var(--kit-ico-user); }
 /* Mobile menu: the wordmark on the same left edge as the links, where it sits in the header */
 .kit-site-header .wp-block-navigation__responsive-container.is-menu-open::before { content: ""; position: fixed; top: calc(var(--kit-toggle-top, 28px) + 22px - 24px); left: var(--kit-space-gutter); width: 150px; height: var(--kit-size-control); background: url("../wordmark-light.svg") left center / contain no-repeat; }
 
@@ -866,7 +866,7 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-news .aw-card-meta > p { margin: 0; }
 
 /* Icon + text meta labels: one text style and a tight gap everywhere (publisher, date, year, posted by). */
-:is(.aw-src, .aw-card-time, .wp-block-post-date, .kit-meta, .aw-law-date, .aw-posted-by, .aw-press-handle) { gap: var(--kit-meta-icon-gap) !important; font-size: var(--kit-meta-size) !important; font-weight: var(--kit-meta-weight) !important; color: var(--kit-color-muted) !important; line-height: 1.3; } /* the same tokens as .kit-meta-item (kit.css) */
+:is(.aw-src, .aw-card-time, .wp-block-post-date, .kit-meta, .aw-law-date, .aw-posted-by) { gap: var(--kit-meta-icon-gap) !important; font-size: var(--kit-meta-size) !important; font-weight: var(--kit-meta-weight) !important; color: var(--kit-color-muted) !important; line-height: 1.3; } /* the same tokens as .kit-meta-item (kit.css) */
 /* The publisher is a chip like every other (owner, 20 Oct 2026): favicon + name in the one chip component; the favicon
    loses its own frame inside it. On a card it is static (the card is the link); on an item page it links to the original. */
 .aw-src.aw-src { display: inline-flex; align-items: center; gap: var(--s-1); width: fit-content; max-width: 100%; box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2); border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm); background: var(--kit-chip-bg); color: var(--kit-chip-fg) !important; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; line-height: 1.2; }
@@ -1113,7 +1113,6 @@ body { background: var(--kit-color-canvas); }
 /* Calendar icon never touches the date. */
 .aw-date > .kit-ico { margin-right: var(--kit-icon-gap); flex: none; }
 
-.aw-kind-date { line-height: 1; }
 /* "23 minutes ago" outside a card (story pages): the same calendar icon, directly before it. Inside cards the post-date wrapper already carries it. */
 :not(.wp-block-post-date) > time.aw-rel-time { display: inline-flex; align-items: center; }
 :not(.wp-block-post-date) > time.aw-rel-time::before { content: ""; flex: none; width: var(--kit-meta-icon); height: var(--kit-meta-icon); margin-right: var(--kit-icon-gap); background: currentColor; -webkit-mask: var(--kit-ico-calendar) center / contain no-repeat; mask: var(--kit-ico-calendar) center / contain no-repeat; }

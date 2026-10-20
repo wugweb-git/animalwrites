@@ -365,7 +365,6 @@
 /* Press cards on a campaign page: an item without a photo shows the publisher's logo on the campaign surface */
 .aw-camp .aw-camp-press .aw-story-fallback { background: var(--camp-surface); }
 .aw-camp .aw-camp-press .aw-story-fallback img.aw-story-logo { width: auto !important; height: auto !important; max-width: 45%; max-height: 45%; } /* a logo tile, whole, not a photo-sized logo */
-.aw-camp .aw-camp-press .aw-story-ph { background: var(--camp-surface); border-bottom-color: var(--camp-primary); }
 
 /* In the press: the Media & PR cards; partners (only when the campaign has some) */
 .aw-camp-press { margin-top: var(--kit-space-4); }

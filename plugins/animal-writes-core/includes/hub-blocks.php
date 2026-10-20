@@ -26,17 +26,9 @@ function aw_hub_blocks() {
 		'hub-count'     => array( 'Section page count', 'aw_block_hub_count', $type_attr ),
 		'hub-visual'    => array( 'Section page pictures', 'aw_block_hub_visual', $type_attr ),
 		'list-filters'  => array( 'List filters', 'aw_block_list_filters', $type_attr ),
-		'publisher'     => array( 'Publisher', 'aw_block_publisher', array() ),
-		'doc-date'      => array( 'Document date', 'aw_block_doc_date', array() ),
-		'type-date'     => array( 'Type and date (one line)', 'aw_block_type_date', array() ),
 		'law-date'      => array( 'Law date (one line)', 'aw_block_law_date', array() ),
-		'issuer'        => array( 'Issued by', 'aw_block_issuer', array() ),
-		'doc-link'      => array( 'Document source and PDF', 'aw_block_doc_link', array() ),
-		'task-icon'     => array( 'Guide icon', 'aw_block_task_icon', array() ),
 		'read-meta'     => array( 'Card meta row (date, read time, place)', 'aw_block_read_meta', array() ),
 		'place'         => array( 'Place', 'aw_block_place', array() ),
-		'deadline'      => array( 'Apply by (deadline)', 'aw_block_deadline', array() ),
-		'opp-line'      => array( 'Opportunity line (organisation, place, apply by)', 'aw_block_opp_line', array() ),
 		'opp-actions'   => array( 'Opportunity buttons', 'aw_block_opp_actions', array() ),
 		'org-mark'      => array( 'Organisation logo', 'aw_block_org_mark', array() ),
 		'badges'        => array( 'Card chips (source, type, category)', 'aw_block_badges', array( 'state' => array( 'type' => 'string', 'default' => 'block-md' ) ) ),
@@ -44,8 +36,6 @@ function aw_hub_blocks() {
 		'org-actions'   => array( 'Organisation buttons', 'aw_block_org_actions', array() ),
 		'result-head'   => array( 'Result count and sort', 'aw_block_result_head', array() ),
 		'browse-states' => array( 'Browse by state', 'aw_block_browse_states', array() ),
-		'press-media'   => array( 'Press thumbnail', 'aw_block_press_media', array() ),
-		'press-meta'    => array( 'Press date and format', 'aw_block_press_meta', array() ),
 		'posted-by'     => array( 'Posted by', 'aw_block_posted_by', array() ),
 		'volunteer'     => array( 'Volunteer form', 'aw_block_volunteer', array( 'open' => array( 'type' => 'boolean', 'default' => false ) ) ),
 		'listing-help'  => array( 'Is this your organisation?', 'aw_block_listing_help', array() ),
@@ -226,25 +216,6 @@ function aw_block_list_filters( $a ) {
 
 /* ---------- News, Library, Resources ---------- */
 
-/** Publisher label (favicon + name) for News; publisher and logo for press items. */
-function aw_block_publisher( $a, $id ) {
-	if ( 'aw_press' === get_post_type( $id ) ) {
-		$pub  = (string) get_post_meta( $id, 'aw_press_publisher', true );
-		$logo = (int) get_post_meta( $id, 'aw_press_logo', true );
-		$logo = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
-		$plat = (string) get_post_meta( $id, 'aw_press_platform', true );
-		$icon = in_array( $plat, array( 'instagram', 'facebook', 'x' ), true ) ? aw_i( 'x' === $plat ? 'x-brand' : $plat ) : '';
-		$name = $pub ? $pub : ( 'web' !== $plat && $plat ? ( AW_PRESS_PLATFORMS[ $plat ] ?? '' ) : '' );
-		// Same row as News: the publisher's small logo (News favicon for that site, else its own logo), else a letter tile.
-		$host = function_exists( 'aw_host' ) ? aw_host( (string) get_post_meta( $id, 'aw_press_url', true ) ) : '';
-		$fav  = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
-		$fav  = $fav ? $fav : $logo;
-		$mark = $icon ? $icon : ( $fav ? '<img class="aw-src-icon" src="' . esc_url( $fav ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : ( $name ? '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>' : '' ) );
-		return $name ? '<p class="aw-src kit-meta-item">' . $mark . '<span class="aw-src-name">' . esc_html( $name ) . '</span></p>' : '';
-	}
-	return aw_news_meta_row( $id );
-}
-
 /**
  * The news card's meta, one row on every news card (News, home, category pages): publisher (logo tile + name) on the
  * left, when it was published (calendar icon, relative time) after it.
@@ -258,47 +229,6 @@ function aw_news_meta_row( $id ) {
 	return '' === $src . $time ? '' : '<div class="aw-card-meta kit-meta-row">' . $src . $time . '</div>';
 }
 
-/** Library: the law's year (Acts, Rules), the source date, or the template icon. */
-function aw_block_doc_date( $a, $id ) {
-	if ( has_term( 'template', 'post_tag', $id ) ) {
-		return '<div class="aw-case-date aw-case-icon">' . aw_i( 'resources' ) . '</div>';
-	}
-	// The law's year only when the item has no document date of its own (owner, 20 Oct 2026: the draft rules dated
-	// 6 Oct 2026 showed "2026" between "8 Oct" and "5 Oct", in an order by document date).
-	$year  = '' === (string) get_post_meta( $id, 'aw_source_date', true ) && has_term( array( 'act', 'rule' ), 'post_tag', $id ) && preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? $ym[0] : '';
-	$thumb = (int) get_post_thumbnail_id( $id );
-	$alt   = wp_strip_all_tags( get_the_title( $id ) ); // the picture is this item's: its first page or its publisher's image
-	$cover = $thumb ? (string) wp_get_attachment_image( $thumb, 'medium', false, array( 'class' => 'aw-case-cover', 'alt' => $alt, 'loading' => 'lazy' ) ) : ''; // the document's first page
-	$pub   = function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && ! get_post_meta( $id, 'aw_file_id', true ) ? (string) aw_item_image( $id, 'medium' ) : '';
-	if ( $pub && ( ! $thumb || false === strpos( $cover, $pub ) ) ) { // ingested Library items: the publisher's image first, like News (owner, 14 Oct 2026)
-		$cover = '<img class="aw-case-cover aw-case-cover--photo" src="' . esc_url( $pub ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">';
-	}
-	if ( ! $cover && function_exists( 'aw_placard_html' ) ) { // no picture: the card system's placard state, so every card keeps its picture column (owner, 18 Oct 2026)
-		$cover = str_replace( 'class="kit-placard"', 'class="kit-placard aw-case-cover aw-case-placard"', aw_placard_html( $id ) );
-	}
-	$kind  = wp_list_pluck( 'aw_legal' === get_post_type( $id ) ? aw_legal_kinds( $id ) : aw_item_tags( $id ), 'name' );
-	$kind  = is_wp_error( $kind ) || ! $kind ? '' : $kind[0];
-	$date  = $year ? $year : aw_src_date( $id, 'j M Y' );
-	$src   = function_exists( 'aw_source_row_html' ) && get_post_meta( $id, 'aw_source_name', true ) ? aw_source_row_html( $id ) : ''; // publisher logo + name first, as on News
-	$text  = $year ? aw_date( $year . '-01-01', 'Y' ) : aw_date( aw_src_date( $id, 'Y-m-d' ) ); // publisher, then the date; the type is a label with the others (owner, 14 Oct 2026)
-	$when  = '<span class="d kit-meta-row">' . $src . ( $text ? '<span class="aw-kind-date kit-meta-item">' . $text . '</span>' : '' ) . '</span>';
-	return '<div class="aw-case-date' . ( $cover ? ' has-cover' : '' ) . '">' . $cover . $when . '</div>';
-}
-
-/** "{Type} · {Date}" above a card title: a Resource's type and when it was last updated, or a Library item's kind and date. */
-function aw_block_type_date( $a, $id ) {
-	$type = get_post_type( $id );
-	$name = '';
-	if ( in_array( $type, array( 'post', 'aw_legal' ), true ) ) { // the Resource or Library type: the item's tag from its section's list
-		$t    = 'aw_legal' === $type ? aw_legal_kinds( $id ) : aw_item_tags( $id ); // a Library label (campaign tag) is not its type
-		$name = $t ? $t[0]->name : '';
-	}
-	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
-	$text = ( $name ? '<span class="kit-meta-item">' . esc_html( $name ) . '</span>' : '' ) . $date; // spaced by the row's gap, no typed "·" (owner, 20 Oct 2026)
-	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return $text || $badge ? '<p class="aw-case-meta kit-meta-row">' . $badge . $text . '</p>' : '';
-}
-
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
 function aw_block_law_date( $a, $id ) {
 	if ( has_term( 'template', 'post_tag', $id ) ) {
@@ -307,16 +237,6 @@ function aw_block_law_date( $a, $id ) {
 	$d = (string) get_post_meta( $id, 'aw_source_date', true );
 	$date = $d ? aw_date( $d . ' 12:00:00' ) : ( preg_match( '/\b(1[89]|20)\d{2}\b/', get_the_title( $id ), $ym ) ? aw_date( $ym[0] . '-01-01 12:00:00', 'Y' ) : '' );
 	return '' !== $date ? '<span class="kit-meta-item">' . $date . '</span>' : '';
-}
-
-/** "Issued by …" (a label, not a filter); "Template" for templates. */
-function aw_block_issuer( $a, $id ) {
-	if ( has_term( 'template', 'post_tag', $id ) ) {
-		return aw_legal_kind_tag( $id );
-	}
-	$iss  = aw_item_issuer( $id );
-	$kind = aw_legal_kind_tag( $id ); // the Library type (Official release, Circular, Judgment ...) as a label
-	return $kind . ( $iss ? kits_tag( $iss->name, in_array( $iss->slug, AW_COURT_ISSUERS, true ) ? 'ink' : 'info' ) : '' ); // just the court / body (owner, 14 Oct 2026)
 }
 
 /**
@@ -335,31 +255,6 @@ function aw_legal_kind_tag( $id ) {
 	return '<span class="kit-tag' . ( 'template' === $t->slug ? ' kit-tag--accent' : '' ) . '">' . aw_type_icon( 'lib-' . $t->slug ) . esc_html( $t->name ) . '</span>';
 }
 
-/** Source line and the official document (PDF) on Library items. */
-function aw_block_doc_link( $a, $id ) {
-	if ( has_term( 'template', 'post_tag', $id ) ) {
-		return '';
-	}
-	$fid  = (int) get_post_meta( $id, 'aw_file_id', true );
-	$pdf  = $fid ? (string) wp_get_attachment_url( $fid ) : '';
-	$html = ( $pdf ? ' <a class="aw-doc" href="' . esc_url( $pdf ) . '">' . aw_i( 'research' ) . ' Official document (PDF)</a>' : '' );
-	return '' !== trim( $html ) ? '<p class="aw-case-src">' . $html . '</p>' : '';
-}
-
-/** Resources: the guide's icon (by subject). */
-function aw_block_task_icon( $a, $id ) {
-	$icons = array( 'injur' => 'injured', 'cruel' => 'alert', 'birth' => 'knowledge', 'abc' => 'knowledge', 'caring' => 'opportunities', 'communit' => 'opportunities' );
-	$slug  = (string) get_post_field( 'post_name', $id );
-	$ico   = 'knowledge';
-	foreach ( $icons as $k => $v ) {
-		if ( false !== strpos( $slug, $k ) ) {
-			$ico = $v;
-			break;
-		}
-	}
-	return aw_i( $ico );
-}
-
 function aw_block_read_meta( $a, $id ) {
 	return aw_card_meta( $id );
 }
@@ -369,13 +264,6 @@ function aw_block_read_meta( $a, $id ) {
 function aw_block_place( $a, $id ) {
 	$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
 	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
-}
-
-/** "Apply by …" (validThrough). No "Checked by Animal Writes on …": opportunities have no check date, and the last-edited
- *  date is not one (owner, 20 Oct 2026). */
-function aw_block_deadline( $a, $id ) {
-	$dl = (string) get_post_meta( $id, 'aw_deadline', true );
-	return $dl ? '<p class="aw-opp-trust kit-meta-row"><span class="kit-meta-item">Apply by ' . aw_date( $dl ) . '</span></p>' : '';
 }
 
 /** The place for the opportunity line: in a list for one state ("near you"), that state's district or the state; else the first place. */
@@ -390,24 +278,6 @@ function aw_opp_line_place( $id ) {
 		}
 	}
 	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
-}
-
-/** Compact line for title lists (home "Opportunities near you"): organisation · place · Apply by {date}. Empty parts are left out. */
-function aw_block_opp_line( $a, $id ) {
-	$org = (string) get_post_meta( $id, 'aw_org_name', true );
-	if ( '' === $org ) {
-		$l   = (int) get_post_meta( $id, 'aw_organisation', true );
-		$org = $l && 'publish' === get_post_status( $l ) ? get_the_title( $l ) : '';
-	}
-	$dl    = (string) get_post_meta( $id, 'aw_deadline', true );
-	$parts = array_filter(
-		array(
-			'' !== $org ? '<span class="aw-opp-line-org kit-meta-item">' . esc_html( $org ) . '</span>' : '',
-			aw_opp_line_place( $id ),
-			$dl ? '<span class="aw-opp-line-by kit-meta-item">Apply by ' . aw_date( $dl ) . '</span>' : '',
-		)
-	);
-	return $parts ? '<p class="aw-opp-line kit-meta-row">' . implode( '', $parts ) . '</p>' : '';
 }
 
 function aw_block_opp_actions( $a, $id ) {
@@ -503,32 +373,6 @@ function aw_block_result_head() {
 
 function aw_block_browse_states() {
 	return function_exists( 'aw_browse_states' ) ? aw_browse_states() : '';
-}
-
-/* ---------- Media & PR ---------- */
-
-/** Thumbnail with the publisher logo as fallback, and a play mark on videos. */
-function aw_block_press_media( $a, $id ) {
-	$pub      = (string) get_post_meta( $id, 'aw_press_publisher', true );
-	$fmt      = (string) get_post_meta( $id, 'aw_press_format', true );
-	$logo     = (int) get_post_meta( $id, 'aw_press_logo', true );
-	$logo     = $logo ? (string) wp_get_attachment_image_url( $logo, 'thumbnail' ) : '';
-	$thumb    = (string) get_the_post_thumbnail_url( $id, 'medium_large' );
-	$video    = (string) get_post_meta( $id, 'aw_press_video', true );
-	$fallback = $logo ? '<img class="aw-story-logo" src="' . esc_url( $logo ) . '" alt="' . esc_attr( $pub ) . '" loading="lazy">' : '<span class="aw-story-ph">' . esc_html( $pub ? $pub : 'Media' ) . '</span>';
-	$media    = $thumb
-		? '<img src="' . esc_url( $thumb ) . '" alt="' . esc_attr( wp_strip_all_tags( get_the_title( $id ) ) ) . '" loading="lazy" decoding="async" onerror="this.parentNode.classList.add(\'is-failed\')"><span class="aw-story-fallback">' . $fallback . '</span>'
-		: '<span class="aw-story-fallback">' . $fallback . '</span>';
-	return '<div class="kit-story-media' . ( $thumb ? '' : ' is-failed' ) . '">' . $media . ( $video || 'video' === $fmt ? '<span class="aw-story-play" aria-hidden="true">▶</span>' : '' ) . '</div>';
-}
-
-/** Date and format tag (Article, Video …). */
-function aw_block_press_meta( $a, $id ) {
-	$date = (string) get_post_meta( $id, 'aw_press_date', true );
-	$fmt  = (string) get_post_meta( $id, 'aw_press_format', true );
-	$handle = (string) get_post_meta( $id, 'aw_press_account', true );
-	$video  = $fmt && 'videos' === aw_press_group( $fmt );
-	return '<p class="aw-story-meta kit-tags kit-meta-row">' . ( $handle ? '<span class="aw-press-handle kit-meta-item">' . esc_html( $handle ) . '</span>' : '' ) . ( $date ? aw_date( $date ) : '' ) . ( $video ? kits_badge( 'Video', 'new' ) : ( $fmt ? kits_tag( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) : '' ) ) . '</p>';
 }
 
 // Hub Pages in the editor: the H1 in the band is the title (no second title field above it).

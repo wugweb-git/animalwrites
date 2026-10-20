@@ -30,23 +30,9 @@ add_filter(
 				. ( $id ? ( '' !== trim( wp_strip_all_tags( $out, true ) ) || preg_match( '/<img|kit-ico|kit-ico|<svg/', $out ) ? '<section aria-label="' . esc_attr( 'Demo: ' . $state ) . '">' . $out . '</section>' : '<em>(prints nothing in this state)</em>' ) : '<em>No item in this state yet.</em>' ) . '</div></div>';
 		};
 		$blocks = array(
-			'Document date (animal-writes/doc-date)' => array(
-				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule' ) ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
-				array( 'Dated document: day and month', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule', 'template' ), 'operator' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
-				array( 'Template: icon', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_doc_date( array(), $id ) ),
-			),
 			'Law date, one line (animal-writes/law-date)' => array(
 				array( 'Own date', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date' ) ), fn( $id ) => aw_block_law_date( array(), $id ) ),
 				array( 'Act or Rule: the year', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'act' ) ) ) ), fn( $id ) => aw_block_law_date( array(), $id ) ),
-			),
-			'Issued by (animal-writes/issuer)' => array(
-				array( 'A court (dark)', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_issuer', 'value' => AW_COURT_ISSUERS, 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
-				array( 'A board or ministry', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_issuer', 'value' => AW_COURT_ISSUERS, 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
-				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
-			),
-			'Apply by (animal-writes/deadline)' => array(
-				array( 'With a deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_deadline', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_deadline( array(), $id ) ),
-				array( 'No deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_deadline', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_deadline', 'value' => '' ) ) ) ), fn( $id ) => aw_block_deadline( array(), $id ) ),
 			),
 			'Opportunity buttons (animal-writes/opp-actions)' => array(
 				array( 'With an apply link', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_apply_url', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_opp_actions( array(), $id ) ),
@@ -78,49 +64,12 @@ add_filter(
 				array( 'District and state', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_district_code', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_place( array(), $id ) ),
 				array( 'State only', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_state_code', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_district_code', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_place( array(), $id ) ),
 			),
-			'Press date and format (animal-writes/press-meta)' => array(
-				array( 'Date and format', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_date', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_press_format', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
-				array( 'Video format (badge)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_format', 'value' => array( 'facebook-video', 'instagram-reel', 'youtube-video' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
-				array( 'Social account handle', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_account', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
-				array( 'Date only', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_date', 'value' => '', 'compare' => '!=' ), array( 'relation' => 'OR', array( 'key' => 'aw_press_format', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_format', 'value' => '' ) ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
-				array( 'Format only (no date)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'relation' => 'OR', array( 'key' => 'aw_press_date', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_date', 'value' => '' ) ), array( 'key' => 'aw_press_format', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_press_meta( array(), $id ) ),
-			),
-			'Press thumbnail and details (animal-writes/press-media, press-meta)' => array(
-				array( 'With a picture', aw_state_item( array( 'post_type' => 'aw_press', 'meta_key' => '_thumbnail_id' ) ), fn( $id ) => aw_block_press_media( array(), $id ) . aw_block_press_meta( array(), $id ) ),
-				array( 'No picture', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => '_thumbnail_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_press_media( array(), $id ) . aw_block_press_meta( array(), $id ) ),
-			),
 			'Is this your organisation? (animal-writes/listing-help)' => array(
 				array( 'Not confirmed: note, Claim and Report', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_listing_help( array(), $id ) ),
-			),
-			'Publisher (animal-writes/publisher)' => array(
-				array( 'Media & PR: its own logo', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( array( 'key' => 'aw_press_logo', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
-				array( 'Media & PR: no logo (letter mark)', aw_state_item( array( 'post_type' => 'aw_press', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_press_logo', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_press_logo', 'value' => '' ) ) ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
-				array( 'News story', aw_state_item( array( 'post_type' => 'aw_news' ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
-				array( 'Library item', aw_state_item( array( 'post_type' => 'aw_legal' ) ), fn( $id ) => aw_block_publisher( array(), $id ) ),
-			),
-			'Type and date (animal-writes/type-date)' => array(
-				array( 'Act or Rule', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( 'act', 'rule' ) ) ) ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
-				array( 'Dated document', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_key' => 'aw_source_date' ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
-				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_type_date( array(), $id ) ),
-			),
-			'Document link (animal-writes/doc-link)' => array(
-				array( 'Hosted PDF', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_file_id', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
-				array( 'Preview only (not hosted)', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_doc_preview', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ), array( 'key' => 'aw_file_id', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
-				array( 'Source link only', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_file_id', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_doc_preview', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_source_url', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_doc_link( array(), $id ) ),
-			),
-			'Resource icon (animal-writes/task-icon)' => array(
-				array( 'Guide', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'guide' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
-				array( 'FAQ page', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'faq' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
-				array( 'Research summary', aw_state_item( array( 'post_type' => 'post', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'research' ) ) ) ), fn( $id ) => aw_block_task_icon( array(), $id ) ),
 			),
 			'Reading meta (animal-writes/read-meta)' => array(
 				array( 'Updated after publishing', (int) ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'orderby' => 'modified', 'order' => 'DESC' ) )[0] ?? 0 ), fn( $id ) => aw_block_read_meta( array(), $id ) ),
 				array( 'Not updated', (int) ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'orderby' => 'modified', 'order' => 'ASC' ) )[0] ?? 0 ), fn( $id ) => aw_block_read_meta( array(), $id ) ),
-			),
-			'Opportunity line (animal-writes/opp-line)' => array(
-				array( 'Organisation, place and deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_deadline', 'value' => '', 'compare' => '!=' ), array( 'key' => 'aw_state_code', 'compare' => 'EXISTS' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
-				array( 'No deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_deadline', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_deadline', 'value' => '' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
-				array( 'No place', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_state_code', 'compare' => 'NOT EXISTS' ) ) ) ), fn( $id ) => aw_block_opp_line( array(), $id ) ),
 			),
 			'Organisation details (animal-writes/org-details)' => array(
 				array( 'Verified', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_org_details( array(), $id ) ),
