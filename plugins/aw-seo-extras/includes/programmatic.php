@@ -877,6 +877,13 @@ function aw_seo_tag_description( $term ) {
 		$what = aw_seo_sentence_case( aw_seo_tag_plural( $term ) );
 	}
 	$num  = 0 === $n ? '' : ( 1 === $n ? 'One ' : number_format_i18n( $n ) . ' ' );
+	if ( $svc && '' === $sec ) { // a service with no listings of its own (Animal welfare, Bird treatment): a short factual line, not the general fallback (owner, 20 Oct 2026)
+		$what = aw_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) );
+		$text = 0 === $n
+			? sprintf( 'Organisations offering %s in India, with phone numbers and addresses.', $what )
+			: sprintf( '%1$s organisation%2$s offering %3$s in India, with phone numbers and addresses.', 1 === $n ? 'One' : number_format_i18n( $n ), 1 === $n ? '' : 's', $what );
+		return aw_seo_cut( $text, AW_SEO_DESC_MAX );
+	}
 	switch ( $sec ) {
 		case 'aw_listing':
 			$text = sprintf( '%1$s%2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
@@ -914,8 +921,8 @@ function aw_seo_tag_keyword( $term ) {
 		'ambulance'                   => 'animal ambulance,animal ambulance number',
 		'animal-ambulance'            => 'animal ambulance,animal ambulance number',
 		'animal-shelter'              => 'animal shelter,animal shelter near me',
-		'animal-welfare'              => 'animal welfare work,animal welfare ngo',
-		'bird-treatment'              => 'injured birds,bird treatment,injured bird helpline',
+		'animal-welfare'              => 'animal welfare work,animal welfare ngo', // pending owner approval (20 Oct 2026): keep as set, no new keyphrase without sign-off
+		'bird-treatment'              => 'injured birds,bird treatment,injured bird helpline', // pending owner approval (20 Oct 2026): keep as set, no new keyphrase without sign-off
 		'animal-welfare-organisation' => 'animal welfare ngo,animal ngo near me,animal welfare organisation',
 		'bird-hospital'               => 'bird hospital,bird hospital near me',
 		'boarding-foster'             => 'pet boarding,dog foster home',
