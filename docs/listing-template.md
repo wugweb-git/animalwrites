@@ -16,7 +16,7 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | 7 | Contact | `animal-writes/listing-contact` | Labelled buttons: Call {first number} · WhatsApp (first number marked WhatsApp) · Email · Website ↗ · Directions (aw_maps_url; greyed out without it). Then the other numbers, one per line: "{label}: {number}" (+ WhatsApp link). Contact data appears only here. |
 | 7b | Online profiles | `animal-writes/listing-profiles` | Right after Contact (owner, 20 Oct 2026): small icon links, only those present. |
 | 8 | Location | `animal-writes/listing-location` | Address (aw_address, else aw_area with district, state, PIN) · District (place chip) · Opening hours (one line per day; split days on one line; "Closed"; days with no row not shown). |
-| 9 | Services | `animal-writes/listing-services` | Services (service tags, else aw_services; "Stated by …" aw_services_source, aw_services_on) · Animals helped · Areas served · Languages. |
+| 9 | Services | `animal-writes/listing-services` | Services (service tags, else aw_services; "Stated by …" aw_services_source, aw_services_on; nothing stated: the services its type(s) imply, combined, marked "Based on type" — AW_TYPE_SERVICES, Notion "Page templates: items and listings" §3) · Animals helped · Areas served · Languages. |
 | 10 | Organisation | `animal-writes/listing-organisation` | Established · Incorporated (aw_reg_date, the registration date as NGO Darpan lists it) · Head of the organisation. |
 | 11 | Ad 1 | `kits/ad-slot` "profile" | The "Directory profile" ad. |
 | 13 | Support | `animal-writes/listing-support` | Donate · Volunteer · Adopt buttons; "UPI: {aw_upi}" with a copy button. |

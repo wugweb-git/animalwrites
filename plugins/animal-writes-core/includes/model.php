@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template', 'advisory' => 'Advisory', 'official-release' => 'Official release' ); // government press releases (PIB); reports about cases (LiveLaw, Bar & Bench) are News (owner, 14 Oct 2026)
 const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
 /** Services a listing offers: a fixed list (owner, 9 Oct 2026). Shown as tags; a Directory filter once 3+ listings use one. Names are activities, sentence case (owner, 20 Oct 2026). */
-const AW_SERVICES = array( 'rescue' => 'Rescue work', 'treatment' => 'Treatment and vet care', 'shelter' => 'Sheltering', 'adoption' => 'Adoption', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance service', 'boarding-foster' => 'Boarding and fostering', 'wildlife-rescue' => 'Wildlife rescue', 'legal-help' => 'Legal help', 'cattle-care' => 'Cattle care' );
+const AW_SERVICES = array( 'rescue' => 'Rescue work', 'treatment' => 'Treatment and vet care', 'shelter' => 'Sheltering', 'adoption' => 'Adoption', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance service', 'boarding-foster' => 'Boarding and fostering', 'wildlife-rescue' => 'Wildlife rescue', 'legal-help' => 'Legal help', 'cattle-care' => 'Cattle care', 'animal-welfare' => 'Animal welfare', 'bird-treatment' => 'Bird treatment' ); // Animal welfare, Bird treatment: added 20 Oct 2026 for services implied by type
 
 /**
  * Post-to-post relations: meta key => from types, target post type, label, label on the other side, max links (0 = any).
@@ -46,7 +46,7 @@ function aw_relations() {
 add_action(
 	'init',
 	function () {
-		if ( '1' === get_option( 'aw_services_seeded' ) ) {
+		if ( '2' === get_option( 'aw_services_seeded' ) ) { // 2: Animal welfare and Bird treatment added (20 Oct 2026)
 			return;
 		}
 		foreach ( AW_SERVICES as $slug => $name ) {
@@ -54,7 +54,7 @@ add_action(
 				wp_insert_term( $name, 'post_tag', array( 'slug' => $slug ) );
 			}
 		}
-		update_option( 'aw_services_seeded', '1', false );
+		update_option( 'aw_services_seeded', '2', false );
 	},
 	21
 );

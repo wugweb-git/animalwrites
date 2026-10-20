@@ -213,6 +213,10 @@ function aw_block_listing_services( $a, $id ) {
 	$names = function_exists( 'aw_listing_service_names' ) ? aw_listing_service_names( $id ) : array();
 	$svc   = $names ? esc_html( implode( ', ', $names ) ) : esc_html( aw_lf( $id, 'aw_services' ) );
 	$by    = aw_lf( $id, 'aw_services_source' );
+	if ( '' === $svc && aw_listing_type_services( $id ) ) { // nothing stated: the services its type implies, said so
+		$svc = esc_html( implode( ', ', aw_listing_type_services( $id ) ) ) . '<span class="aw-facts-note">' . esc_html__( 'Based on type', 'animal-writes-core' ) . '</span>';
+		$by  = '';
+	}
 	if ( '' !== $svc && '' !== $by ) { // who said so, and when
 		/* translators: %s: who stated the services. */
 		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'animal-writes-core' ), 'organisation' === $by ? __( 'the organisation', 'animal-writes-core' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . aw_date( aw_lf( $id, 'aw_services_on' ) ) : '' ) . '</span>';
@@ -224,6 +228,44 @@ function aw_block_listing_services( $a, $id ) {
 		array( __( 'Languages', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_languages' ) ), 'world' ),
 	);
 	return aw_listing_group( 'services', __( 'Services', 'animal-writes-core' ), aw_listing_dl( $rows ) );
+}
+
+/**
+ * Services implied by a listing's type (owner, 20 Oct 2026; Notion "Page templates: items and listings" §3): shown,
+ * marked "Based on type", only when the listing states no services. Type slug => service tag slugs.
+ */
+const AW_TYPE_SERVICES = array(
+	'animal-welfare-organisation' => array( 'animal-welfare' ),
+	'animal-shelter'              => array( 'shelter' ),
+	'rescue-group'                => array( 'rescue' ),
+	'emergency-rescue'            => array( 'emergency-rescue' ),
+	'animal-ambulance'            => array( 'ambulance' ),
+	'abc-centre'                  => array( 'sterilisation' ),
+	'gaushala'                    => array( 'cattle-care', 'shelter' ),
+	'sanctuary'                   => array( 'shelter' ),
+	'wildlife-rescue'             => array( 'wildlife-rescue' ),
+	'bird-hospital'               => array( 'bird-treatment' ),
+	'veterinary-hospital'         => array( 'treatment', 'vaccination', 'sterilisation' ),
+	'veterinary-dispensary'       => array( 'treatment', 'vaccination' ),
+	'veterinary-clinic'           => array( 'treatment', 'vaccination' ),
+	'veterinary-office'           => array( 'vaccination' ),
+	'mobile-veterinary-unit'      => array( 'treatment', 'ambulance' ),
+	'legal-aid'                   => array( 'legal-help' ),
+	'adoption-network'            => array( 'adoption' ),
+	'boarding-and-foster'         => array( 'boarding-foster' ),
+	'feeder-network'              => array( 'feeding' ),
+);
+
+/** The service names a listing's types imply, combined and without repeats, in the tags' current names. */
+function aw_listing_type_services( $id ) {
+	$out = array();
+	foreach ( function_exists( 'aw_listing_types' ) ? aw_listing_types( $id ) : array() as $t ) {
+		foreach ( AW_TYPE_SERVICES[ $t->slug ] ?? array() as $svc ) {
+			$term         = get_term_by( 'slug', $svc, 'post_tag' );
+			$out[ $svc ] = $term ? $term->name : ( AW_SERVICES[ $svc ] ?? $svc );
+		}
+	}
+	return array_values( $out );
 }
 
 /* ---------- 10 Organisation ---------- */
