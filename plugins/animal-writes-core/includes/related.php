@@ -83,6 +83,10 @@ function aw_related_pick( $id, $type, $n, $first = array(), $extra = array(), $p
 	if ( $tags ) {
 		$tax[] = array( 'taxonomy' => 'post_tag', 'terms' => $tags );
 	}
+	$camp = function_exists( 'aw_campaign_links' ) ? wp_list_pluck( aw_campaign_links( $id ), 'term_id' ) : array();
+	if ( $camp && taxonomy_exists( 'aw_campaign_link' ) ) { // the same campaign (campaign-links.php)
+		$tax[] = array( 'taxonomy' => 'aw_campaign_link', 'terms' => array_map( 'intval', $camp ) );
+	}
 	if ( count( $tax ) > 1 && ! $place_only ) {
 		$pool = array_merge( $pool, ( new WP_Query( $base + array( 'tax_query' => $tax ) ) )->posts ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	}

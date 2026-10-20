@@ -671,9 +671,9 @@ function aw_campaign_record_schema( $id ) {
 	$url   = get_permalink( $id );
 	$own   = aw_campaign_schema( $id );
 	$about = array( array( '@id' => (string) ( $own['@id'] ?? $url . '#campaign' ) ) );
-	$tags  = array_values( array_filter( wp_get_post_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) ), fn( $s ) => 0 === strpos( $s, 'campaign-' ) ) );
+	$tags  = function_exists( 'aw_campaign_links' ) ? wp_list_pluck( aw_campaign_links( $id ), 'term_id' ) : array(); // the campaign's own link (campaign-links.php)
 	if ( $tags && function_exists( 'aw_article_nodes' ) ) {
-		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tag' => $tags[0], 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) );
+		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tax_query' => array( array( 'taxonomy' => 'aw_campaign_link', 'terms' => array( (int) $tags[0] ) ) ), 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		foreach ( $docs as $d ) {
 			$n = aw_article_nodes( $d );
 			if ( ! empty( $n[0]['@id'] ) ) {

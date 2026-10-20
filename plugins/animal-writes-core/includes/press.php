@@ -455,20 +455,12 @@ function aw_press_ingest( WP_REST_Request $req ) {
 }
 
 /**
- * Campaign tags on a press item: only existing tags whose slug starts with "campaign-" (the workers send the topic tags
- * they matched, e.g. campaign-lab-animals-2026); anything else is ignored. Added to the item's tags, never replacing them.
+ * A press item's campaign: the workers send the topic slugs they matched (campaign-lab-animals-2026 ...); each existing
+ * one becomes a campaign link (campaign-links.php; a campaign is not a tag, owner, 20 Oct 2026). Others are ignored.
  */
 function aw_press_campaign_tags( $id, $tags ) {
-	$ids = array();
-	foreach ( array_filter( $tags, 'is_scalar' ) as $t ) {
-		$slug = sanitize_title( (string) $t );
-		$term = 0 === strpos( $slug, 'campaign-' ) ? get_term_by( 'slug', $slug, 'post_tag' ) : false;
-		if ( $term ) {
-			$ids[] = (int) $term->term_id;
-		}
-	}
-	if ( $ids ) {
-		wp_set_object_terms( $id, $ids, 'post_tag', true );
+	if ( function_exists( 'aw_set_campaign_links' ) ) {
+		aw_set_campaign_links( $id, $tags );
 	}
 }
 

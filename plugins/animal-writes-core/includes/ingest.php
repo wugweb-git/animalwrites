@@ -300,6 +300,12 @@ function aw_ingest( WP_REST_Request $req ) {
 	// Tags: only those the item's section uses (Settings → Sourcing → Sections); unknown ones are ignored.
 	$allowed = function_exists( 'aw_section_tags' ) ? aw_section_tags( $type ) : array();
 	$tags    = array_values( array_unique( array_map( 'sanitize_title', array_filter( $tags, 'is_scalar' ) ) ) );
+	// A campaign is not a tag (owner, 20 Oct 2026): campaign-* slugs file the item under its campaign (campaign-links.php).
+	$camp = array_values( array_filter( $tags, fn( $t ) => 0 === strpos( $t, 'campaign-' ) ) );
+	if ( $camp && function_exists( 'aw_set_campaign_links' ) ) {
+		aw_set_campaign_links( $post_id, $camp );
+	}
+	$tags = array_values( array_diff( $tags, $camp ) );
 	foreach ( array_diff( $tags, $allowed ) as $bad ) {
 		$ignored[] = 'tag: ' . $bad;
 	}
