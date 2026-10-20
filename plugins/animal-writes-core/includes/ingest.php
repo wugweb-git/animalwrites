@@ -319,6 +319,9 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 	// A summary below its section's minimum after the workers' fallback (source re-read, other coverage merged) is
 	// published like any other (owner, 15 Oct 2026); it is marked so a later rewrite pass can find it.
+	if ( $req->get_param( 'title_flag' ) ) { // the worker kept the headline as published: its sentence-case version changed more than letter case (owner, 20 Oct 2026)
+		update_post_meta( $post_id, 'aw_title_case_flag', sanitize_text_field( (string) $req->get_param( 'title_flag' ) ) );
+	}
 	if ( $req->get_param( 'summary_short' ) ) {
 		update_post_meta( $post_id, 'aw_summary_short', current_time( 'Y-m-d' ) );
 	}
