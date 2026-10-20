@@ -5,9 +5,8 @@
  * related terms. The last four are blocks in the tag and category templates (Site Editor):
  * animal-writes/term-faq, animal-writes/term-share, the List – card 2 ad, animal-writes/term-related.
  *
- * FAQ: term meta aw_faq, [ [ 'q' => text, 'a' => HTML ], … ], edited on the term's screen. The page shows every question
- * (answers open and close); FAQPage schema (aw-seo-extras/schema.php) is built from the same aw_term_faq() so the
- * markup never holds a question the page does not show.
+ * FAQ: the topic questions approved for the term (faq.php), rendered by aw_faq_html(); the FAQPage schema is parsed from
+ * the same HTML. Only organisation types, services and categories have one.
  *
  * @package animal-writes-core
  */
@@ -15,14 +14,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/** Tags allowed in an FAQ answer (the page and the schema print the same HTML). */
-const AW_FAQ_ANSWER_HTML = array(
-	'a'      => array( 'href' => true ),
-	'strong' => array(),
-	'em'     => array(),
-	'br'     => array(),
-);
 
 /** Taxonomies with term pages. */
 function aw_term_page_taxonomies() {
@@ -33,78 +24,6 @@ function aw_term_page_taxonomies() {
 function aw_term_page_term() {
 	$t = get_queried_object();
 	return ( is_tag() || is_category() ) && $t instanceof WP_Term ? $t : null;
-}
-
-/**
- * A term's FAQ: complete pairs only.
- *
- * @param WP_Term|int $term Term or term ID.
- * @return array[] [ [ 'q' => string, 'a' => string (HTML) ], … ]
- */
-function aw_term_faq( $term ) {
-	$id  = $term instanceof WP_Term ? $term->term_id : (int) $term;
-	$raw = json_decode( (string) get_term_meta( $id, 'aw_faq', true ), true );
-	$out = array();
-	foreach ( is_array( $raw ) ? $raw : array() as $row ) {
-		$q = trim( wp_strip_all_tags( (string) ( $row['q'] ?? '' ) ) );
-		$a = trim( wp_kses( (string) ( $row['a'] ?? '' ), AW_FAQ_ANSWER_HTML ) );
-		if ( '' !== $q && '' !== $a ) {
-			$out[] = array( 'q' => $q, 'a' => $a );
-		}
-	}
-	return $out;
-}
-
-/* ---------- Editing: the term's screen ---------- */
-
-foreach ( aw_term_page_taxonomies() as $aw_tp_tax ) {
-	add_action(
-		"{$aw_tp_tax}_edit_form_fields",
-		function ( $term ) {
-			$rows = aw_term_faq( $term );
-			$n    = max( 5, count( $rows ) + 2 );
-			wp_nonce_field( 'aw_term_faq', 'aw_term_faq_nonce' );
-			echo '<tr class="form-field"><th scope="row">FAQ</th><td><p class="description">3 to 5 questions people search, each with a short answer. Shown on the page (answers open and close) and as FAQ schema. Answers may use links, bold and italic. Leave a row empty to remove it.</p>';
-			for ( $i = 0; $i < $n; $i++ ) {
-				$r = $rows[ $i ] ?? array( 'q' => '', 'a' => '' );
-				echo '<p><label for="aw-faq-q-' . (int) $i . '"><strong>Question ' . (int) ( $i + 1 ) . '</strong></label><br><input type="text" class="large-text" id="aw-faq-q-' . (int) $i . '" name="aw_faq[' . (int) $i . '][q]" value="' . esc_attr( $r['q'] ) . '"></p>';
-				echo '<p><label for="aw-faq-a-' . (int) $i . '">Answer ' . (int) ( $i + 1 ) . '</label><br><textarea class="large-text" rows="3" id="aw-faq-a-' . (int) $i . '" name="aw_faq[' . (int) $i . '][a]">' . esc_textarea( $r['a'] ) . '</textarea></p>';
-			}
-			echo '</td></tr>';
-		}
-	);
-	add_action(
-		"edited_{$aw_tp_tax}",
-		function ( $term_id ) {
-			if ( ! isset( $_POST['aw_term_faq_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['aw_term_faq_nonce'] ) ), 'aw_term_faq' ) || ! current_user_can( 'manage_categories' ) ) {
-				return;
-			}
-			aw_term_faq_save( $term_id, (array) wp_unslash( $_POST['aw_faq'] ?? array() ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- cleaned in aw_term_faq_save()
-		}
-	);
-}
-unset( $aw_tp_tax );
-
-/**
- * Store a term's FAQ (also used by WP-CLI imports).
- *
- * @param int   $term_id Term ID.
- * @param array $rows    [ [ 'q' => …, 'a' => … ], … ].
- */
-function aw_term_faq_save( $term_id, array $rows ) {
-	$clean = array();
-	foreach ( $rows as $row ) {
-		$q = trim( sanitize_text_field( (string) ( $row['q'] ?? '' ) ) );
-		$a = trim( wp_kses( (string) ( $row['a'] ?? '' ), AW_FAQ_ANSWER_HTML ) );
-		if ( '' !== $q && '' !== $a ) {
-			$clean[] = array( 'q' => $q, 'a' => $a );
-		}
-	}
-	if ( $clean ) {
-		update_term_meta( $term_id, 'aw_faq', wp_slash( wp_json_encode( $clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
-	} else {
-		delete_term_meta( $term_id, 'aw_faq' );
-	}
 }
 
 /* ---------- Blocks ---------- */
@@ -130,21 +49,9 @@ function aw_term_section( $slug, $head, $body ) {
 	return '<section class="aw-more-group aw-term-' . esc_attr( $slug ) . '" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-more-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html( $head ) . '</h2>' . $body . '</section>';
 }
 
-/** FAQ: every question shown, each answer opens and closes (core Details markup, Kits FAQ style). */
+/** FAQ: the term's approved topic questions (faq.php; none on later pages, none with fewer than 3). */
 function aw_block_term_faq() {
-	$term = aw_term_page_term();
-	if ( ! $term ) {
-		return aw_term_block_preview( 'FAQ: the questions and answers set on the category or tag.' );
-	}
-	$faq = is_paged() ? array() : aw_term_faq( $term ); // page 1 only, where the FAQPage schema is
-	if ( ! $faq ) {
-		return '';
-	}
-	$body = '';
-	foreach ( $faq as $f ) {
-		$body .= '<details class="wp-block-details"><summary>' . esc_html( $f['q'] ) . '</summary><p>' . $f['a'] . '</p></details>'; // answer: kses-cleaned in aw_term_faq()
-	}
-	return aw_term_section( 'faq', __( 'Questions and answers', 'animal-writes-core' ), $body );
+	return aw_term_page_term() ? aw_faq_html() : aw_term_block_preview( 'FAQ: the questions approved for the category or tag (3 to 6).' );
 }
 
 /** Share: the page's address and its name. */

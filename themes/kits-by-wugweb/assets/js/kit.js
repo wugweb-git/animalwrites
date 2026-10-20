@@ -896,3 +896,15 @@
 		});
 	});
 })();
+
+/* FAQ accordion (kit-faq): every answer is in the HTML and shown without JavaScript; here each closes, and its
+   question's button opens and closes it (aria-expanded). A link to #faq or to an answer opens what it points to. */
+(function () {
+	document.querySelectorAll('.kit-faq-btn').forEach(function (b) {
+		var a = document.getElementById(b.getAttribute('aria-controls'));
+		if (!a) return;
+		var set = function (open) { b.setAttribute('aria-expanded', open ? 'true' : 'false'); a.hidden = !open; };
+		set(location.hash && location.hash === '#' + a.id);
+		b.addEventListener('click', function () { set(b.getAttribute('aria-expanded') !== 'true'); });
+	});
+})();

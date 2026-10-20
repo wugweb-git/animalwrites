@@ -502,6 +502,20 @@ html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-ads
 .rank-math-answer[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rank-math-question > button::after { transition: none; } }
 
+/* FAQ accordion (kit-faq): an H2 at h4 size; each question an H3 holding a button (aria-expanded) that opens its answer.
+   Answers are in the HTML; kit.js closes them after load, so without JavaScript every answer shows. Rows like Details. */
+.kit-faq-head { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); margin: 0 0 var(--kit-space-3); }
+.kit-faq-item { border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
+.kit-faq-q { margin: 0; font-size: var(--kit-type-body); line-height: var(--kit-leading-heading); }
+.kit-faq-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--kit-space-4); min-height: var(--kit-size-target); padding-block: var(--kit-space-3); cursor: pointer; font-weight: var(--kit-weight-strong); }
+.kit-faq-btn::after { content: "+"; flex: none; font-size: 1.4em; line-height: 1; transition: transform var(--kit-motion-base) var(--kit-motion-ease); }
+.kit-faq-btn[aria-expanded="true"]::after { transform: rotate(45deg); }
+.kit-faq-btn:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.kit-faq-a { padding-bottom: var(--kit-space-4); }
+.kit-faq-a > p { margin: 0; }
+.kit-faq-a[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .kit-faq-btn::after { transition: none; } }
+
 /* Note (block style "Note" on core/paragraph): a small, muted line set apart above it, e.g. "general information, not advice". */
 .is-style-kits-note { margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 

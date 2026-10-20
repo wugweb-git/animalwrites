@@ -1887,6 +1887,43 @@
     "alt": "n/a",
     "schema": "none"
    }
+  },
+  {
+   "name": "FAQ accordion",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-faq"
+   ],
+   "states": [
+    "closed (default after load)",
+    "open (aria-expanded true)",
+    "no JavaScript: every answer shown",
+    "focus-visible ring on the question"
+   ],
+   "tokens": [
+    "kit-type-h4",
+    "kit-type-body",
+    "kit-color-line",
+    "kit-size-target",
+    "kit-space-3",
+    "kit-space-4"
+   ],
+   "a11y": {
+    "element": "<section> with an H2; each question an <h3> holding a <button>",
+    "aria": "aria-expanded + aria-controls on the button; the answer is role=region aria-labelledby the button",
+    "keyboard": "Tab to each question; Enter or Space opens and closes",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "plus sign turns; none with prefers-reduced-motion",
+    "sr": "H2 'Questions about …'; each question a button that says whether it is expanded"
+   },
+   "seo": {
+    "heading": "H2 (h4 size), H3 per question",
+    "link": "one per answer, descriptive",
+    "alt": "n/a",
+    "schema": "FAQPage parsed from this markup (site plugin)"
+   }
   }
  ],
  "nav": [

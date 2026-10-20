@@ -464,6 +464,8 @@ body { background: var(--kit-color-canvas); }
 .kit-main > .aw-more-group { margin: var(--kit-space-7) 0 0; }
 .aw-term-end > * + * { margin-top: var(--kit-space-7); } /* category and tag pages: FAQ, share, ad, related (term-page.php) */
 .aw-term-end { margin-top: var(--kit-space-7); }
+.kit-item .kit-faq, .aw-hub-faq { margin-top: var(--kit-space-7); } /* FAQ: last in a Library item's content, before a listing's Sources, after a hub's list (faq.php) */
+.aw-hub-faq { margin-bottom: var(--kit-space-7); }
 .aw-term-chips { list-style: none; margin: 0; padding: 0; }
 .kit-main .aw-more-list { grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .kit-main .aw-more-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

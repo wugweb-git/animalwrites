@@ -14,6 +14,8 @@
  *   nodes replace its default, which cannot carry these properties.
  * - Section hubs, Directory places and category pages: CollectionPage + ItemList of the page's items. Categories
  *   page: CollectionPage + ItemList of the categories. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
+ * - FAQPage (listings, Library documents, type/service/category pages, four hubs): parsed from the page's own FAQ
+ *   accordion (animal-writes-core faq.php), so its text is the visible text; isPartOf the page, about its main entity.
  * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
  *   site's own search address), replacing Rank Math's defaults (same @id). The BreadcrumbList is Rank Math's own
  *   (breadcrumbs.php gives it the trail people see).
@@ -1067,9 +1069,6 @@ function aw_schema_nodes() {
 		$nodes = array_merge( $nodes, aw_page_lists_schema_nodes( get_queried_object_id() ) ); // a section page of several lists (Adoption)
 	} elseif ( aw_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
-		if ( function_exists( 'aw_term_faq' ) && ! is_paged() ) {
-			$nodes[] = aw_term_faq_schema( get_queried_object() );
-		}
 	}
 	if ( $nodes && is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) ) && function_exists( 'aw_featured_mentions_schema' ) ) {
 		$mentions = aw_featured_mentions_schema( get_queried_object_id() ); // the organisations it features (featured.php)
@@ -1078,29 +1077,6 @@ function aw_schema_nodes() {
 		}
 	}
 	return array_values( array_filter( $nodes ) );
-}
-
-/**
- * FAQPage of a category or tag page: the questions and answers its FAQ block shows, word for word (term-page.php), or
- * null when it has none.
- *
- * @param WP_Term $term Term.
- * @return array|null
- */
-function aw_term_faq_schema( $term ) {
-	$faq = $term instanceof WP_Term ? aw_term_faq( $term ) : array();
-	if ( ! $faq ) {
-		return null;
-	}
-	$url = (string) get_term_link( $term );
-	return array(
-		'@type'      => 'FAQPage',
-		'@id'        => $url . '#faq',
-		'url'        => $url,
-		'inLanguage' => 'en-IN',
-		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
-		'mainEntity' => array_map( fn( $f ) => array( '@type' => 'Question', 'name' => $f['q'], 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $f['a'] ) ), $faq ),
-	);
 }
 
 /** The schema.org type of an item in a category or tag page's list. */
@@ -1349,6 +1325,10 @@ add_filter(
 			}
 			$data[ 'aw_node_' . $i ] = $node;
 		}
+		$faq = function_exists( 'aw_faq_schema' ) ? aw_faq_schema() : null; // parsed from the page's own FAQ accordion (animal-writes-core faq.php)
+		if ( $faq ) {
+			$data['aw_faq'] = $faq;
+		}
 		if ( ! empty( $data['BreadcrumbList']['@id'] ) ) { // Rank Math's own trail (breadcrumbs.php gives it the places and sections)
 			foreach ( $data as $k => $node ) {
 				if ( is_array( $node ) && in_array( $node['@type'] ?? '', array( 'WebPage', 'CollectionPage', 'ContactPage', 'AboutPage' ), true ) ) {
@@ -1427,6 +1407,9 @@ add_filter(
 		$page_types = array( 'WebPage', 'CollectionPage', 'ContactPage', 'AboutPage', 'ItemPage', 'FAQPage', 'SearchResultsPage' );
 		$found      = false;
 		foreach ( $data as $k => $node ) {
+			if ( 'aw_faq' === $k ) {
+				continue; // our FAQ is part of the page, not the page itself (a Directory profile still gets its WebPage below)
+			}
 			if ( is_array( $node ) && array_intersect( (array) ( $node['@type'] ?? array() ), $page_types ) ) {
 				$data[ $k ]['primaryImageOfPage'] = array( '@id' => $url );
 				$found                            = true;
