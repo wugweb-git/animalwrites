@@ -327,6 +327,53 @@ add_action(
 	}
 );
 
+/**
+ * Why an incoming item is not News (owner, 20 Oct 2026), '' when it may be: an archive or tag page of a news site
+ * ("Read all latest updates on and about …", "Latest news on …"), or a job vacancy from a source that is not an
+ * opportunity source ("… vacancy at …", "… recruitment 2026 - apply offline", /job-updates/ addresses). The same rules
+ * as the workers' sources.not_an_article(); a story about vacancies ("flags 63.81% vacancies in …") passes.
+ *
+ * @param string $title Headline.
+ * @param string $url   Source URL.
+ * @param string $type  Post type it would become.
+ * @return string
+ */
+function aw_not_news_reason( $title, $url, $type ) {
+	$title = (string) $title;
+	$path  = (string) wp_parse_url( (string) $url, PHP_URL_PATH ) . '/';
+	$host  = strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) );
+	if ( preg_match( '#/(?:tags?|topics?|category|categories|author|authors|search|section)/#i', $path )
+		|| preg_match( '/^\s*(?:read\s+)?(?:all\s+)?(?:the\s+)?latest\s+(?:news|updates|stories|headlines|articles)\b(?:\s*(?:,|and|&)\s*\w+){0,3}\s+(?:on|about|from|for|of)\b|\blatest\s+news\s*,\s*(?:photos|videos|updates)\b|^\s*(?:all\s+)?(?:news|updates)\s+(?:on\s+and\s+)?about\b/i', $title ) ) {
+		return 'an archive or tag page of a news site, not a news report';
+	}
+	if ( 'aw_opportunity' !== $type && (
+		preg_match( '/(?:^|\.)(?:freejobalert|sarkariresult|sarkarinaukri\w*|employmentnews|naukri|indeed|freshersworld|jobsarkari|govtjobsalert\w*)\.(?:com|in|co\.in|gov\.in|org)$/i', $host )
+		|| preg_match( '#/(?:jobs?|job-updates?|careers?|recruitments?|vacanc(?:y|ies))(?:/|-)#i', $path )
+		|| preg_match( '/\bvacancy\s+(?:at|in|for|with)\b|\bvacancies\s+(?:at|in|for|with)\b.{0,80}\b(?:apply|recruitment|notification|last\s+date)\b|\brecruitment\s+20\d\d\b|\b(?:apply|applications?)\s+(?:online|offline|now|invited)\b|\bwalk[- ]in\s+interview\b|\b(?:job|career)\s+(?:opening|openings|alert|notification|vacancy)\b|\bnow\s+hiring\b|\bis\s+hiring\b/i', $title ) ) ) {
+		return 'a job vacancy, not a news report (jobs come from the opportunity sources)';
+	}
+	return '';
+}
+
+/** Add one entry to the Rejected log (Settings → Sourcing → Rejected), as the relevance-rejected endpoint does. */
+function aw_relevance_log_one( $title, $url, $reason, $type ) {
+	$url = esc_url_raw( (string) $url );
+	$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
+	array_unshift(
+		$log,
+		array(
+			'title'  => sanitize_text_field( (string) $title ),
+			'url'    => $url,
+			'reason' => sanitize_text_field( (string) $reason ),
+			'type'   => sanitize_key( (string) $type ),
+			'feed'   => '',
+			'model'  => 'site rule',
+			'at'     => current_time( 'Y-m-d H:i' ),
+		)
+	);
+	update_option( AW_RELEVANCE_LOG, array_slice( $log, 0, AW_RELEVANCE_LOG_MAX ), false );
+}
+
 /** Stored verdict says "not relevant". */
 function aw_relevance_failed( $post_id ) {
 	$v = (string) get_post_meta( $post_id, 'aw_relevance', true );

@@ -23,6 +23,34 @@ function aw_news_title_case_only( $before, $after ) {
 	return '' !== $after && mb_strlen( $before ) === mb_strlen( $after ) && mb_strtolower( $before ) === mb_strtolower( $after );
 }
 
+/**
+ * A News headline without a trailing section label or publisher tail (owner, 20 Oct 2026), applied on ingest:
+ * "| India News", "| Mumbai news", "| Watch", "| Videos", "| Trending", "- Blog", "| SCC Times", "| Akashvani News",
+ * the publisher's own name after " | " or " - ", and after " | " a tail that starts with it ("| DIPR Nagaland
+ * Department of …"). A real headline part ("– go vegan", "| World Farm Animals Day 2026") stays. The workers do the same
+ * (titles.no_section) and fetch the full headline when a feed cut it off with "…".
+ *
+ * @param string $title     Headline.
+ * @param string $publisher Publisher or source name.
+ * @return string
+ */
+function aw_news_title_tail( $title, $publisher = '' ) {
+	$t   = trim( (string) $title );
+	$key = static fn( $s ) => preg_replace( '/[^a-z0-9]/', '', preg_replace( '/^the(?=.{4})/', '', strtolower( (string) $s ) ) );
+	$pub = $key( $publisher );
+	do {
+		$before = $t;
+		$t      = rtrim( preg_replace( '/\s+[|\-\x{2013}\x{2014}]\s+(?:(?:India|World|City|Mumbai|Delhi|Bengaluru|Kolkata|Chennai|Hyderabad|Pune|Lucknow|Latest|Breaking|Akashvani)\s+news|news|watch|videos?|trending|blogs?|photos?|scc times)\s*$/iu', '', $t ) );
+		if ( strlen( $pub ) >= 4 && preg_match( '/^(.{20,}?)\s+([|\-\x{2013}\x{2014}])\s+([^|\-\x{2013}\x{2014}]+)$/u', $t, $m ) ) {
+			$tail = $key( $m[3] );
+			if ( $tail === $pub || ( '|' === $m[2] && 0 === strpos( $tail, $pub ) ) ) {
+				$t = rtrim( $m[1] );
+			}
+		}
+	} while ( $t !== $before );
+	return '' !== $t ? $t : trim( (string) $title );
+}
+
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw news-titles',

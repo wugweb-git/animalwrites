@@ -171,6 +171,19 @@ function aw_ingest( WP_REST_Request $req ) {
 		}
 	}
 
+	// Not News (owner, 20 Oct 2026): archive or tag pages, and job vacancies from sources that are not opportunity
+	// sources, are never created; they go to the Rejected log (relevance.php).
+	if ( 'aw_listing' !== $type && function_exists( 'aw_not_news_reason' ) ) {
+		$why = aw_not_news_reason( $title, $source_url, $type );
+		if ( $why ) {
+			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ) );
+			return new WP_REST_Response( array( 'status' => 'filtered', 'reason' => $why ), 200 );
+		}
+	}
+	if ( 'aw_news' === $type && function_exists( 'aw_news_title_tail' ) ) {
+		$title = aw_news_title_tail( $title, (string) $req->get_param( 'source_name' ) ); // no "| India News", "- Blog" tail
+	}
+
 	// Backfill (owner, 9 Oct 2026): older items for review only — never before the floor, never published or merged here.
 	$backfill = (bool) $req->get_param( 'backfill' );
 	if ( $backfill ) {
