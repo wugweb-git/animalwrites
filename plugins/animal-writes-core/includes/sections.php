@@ -51,7 +51,7 @@ function aw_head_band( $a ) {
 	$a     = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false, 'below' => false ) );
 	$count = '' !== $a['count'] ? '<p class="kit-section-count" role="status">' . esc_html( $a['count'] ) . '</p>' : '';
 	if ( $a['below'] ) { // list pages: the head is breadcrumb › H1 › description; filters › count open the list
-		$under = '' !== ( $a['filters'] . $count ) ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $a['filters'] . $count . '</div>' : '';
+		$under = aw_head_below( $a['filters'], $count );
 		return aw_head_band( array_merge( $a, array( 'count' => '', 'filters' => '', 'compact' => false, 'below' => false ) ) ) . $under;
 	}
 	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
@@ -183,6 +183,33 @@ function aw_block_section_head( $a ) {
 		)
 	);
 }
+
+/**
+ * The filters and count of a list page, under its head band (existing .kit-section-filters, placed below).
+ *
+ * @param string $filters Filters HTML.
+ * @param string $count   Count HTML (p.kit-section-count).
+ * @return string
+ */
+function aw_head_below( $filters, $count ) {
+	return '' !== ( $filters . $count ) ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $filters . $count . '</div>' : '';
+}
+
+// Section Pages keep their band as saved blocks: list-filters (hub-blocks.php) holds the filters and count, and the
+// band group prints them under itself.
+add_filter(
+	'render_block_core/group',
+	function ( $html, $block ) {
+		if ( empty( $GLOBALS['aw_head_below'] ) || false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'kit-section-band' ) ) {
+			return $html;
+		}
+		$below                    = $GLOBALS['aw_head_below'];
+		$GLOBALS['aw_head_below'] = '';
+		return $html . $below;
+	},
+	10,
+	2
+);
 
 /**
  * List pages, whose filters and count sit under the head band (owner, 20 Oct 2026): News, Library, Resources,

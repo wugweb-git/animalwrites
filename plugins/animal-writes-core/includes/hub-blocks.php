@@ -117,7 +117,7 @@ function aw_block_breadcrumb() {
 }
 
 function aw_block_hub_count( $a ) {
-	return ''; // owner, 9 Oct: the count sits above the pagination (hubs.php), not in the band
+	return ''; // the count sits with the filters, under the band (aw_block_list_filters; owner, 20 Oct 2026)
 }
 
 /** "23 stories": the number of items in a hub list with the current filters. */
@@ -216,6 +216,11 @@ function aw_block_hub_visual( $a ) {
 function aw_block_list_filters( $a ) {
 	$type = (string) ( $a['postType'] ?? '' );
 	$out  = 'aw_listing' === $type ? aw_directory_filter() : ( function_exists( 'aw_list_filters' ) && isset( AW_LIST_FILTERS[ $type ] ) ? aw_list_filters( $type ) : '' );
+	if ( function_exists( 'aw_list_page' ) && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) && aw_list_page( $type, false ) ) { // list pages: filters › count under the band (owner, 20 Oct 2026); the Directory's count stays with its results
+		$count                    = 'aw_listing' !== $type ? aw_hub_count_label( $type ) : '';
+		$GLOBALS['aw_head_below'] = aw_head_below( $out, '' !== $count ? '<p class="kit-section-count" role="status">' . esc_html( $count ) . '</p>' : '' );
+		return '';
+	}
 	return $out ? '<div class="kit-section-filters">' . $out . '</div>' : '';
 }
 

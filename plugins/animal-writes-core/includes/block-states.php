@@ -144,9 +144,9 @@ add_filter(
 		$page_blocks = array(
 			array( 'Breadcrumb (animal-writes/breadcrumb)', 'every page top', '/library/' ),
 			array( 'Head band (animal-writes/section-head)', 'Pages, archives, category and Directory place pages', '/about/' ),
-			array( 'Section page count (animal-writes/hub-count)', 'section page head bands (prints nothing: the count sits above the pagination, owner 9 Oct)', '/news/' ),
+			array( 'Section page count (animal-writes/hub-count)', 'section page head bands (prints nothing: the count sits with the filters under the band, owner 20 Oct)', '/news/' ),
 			array( 'Section page pictures (animal-writes/hub-visual)', 'section page head bands (prints nothing: no pictures in page top bands, owner 8 Oct)', '/news/' ),
-			array( 'List filters (animal-writes/list-filters)', 'section page head bands: dropdowns, Sort; Directory search', '/opportunities/' ),
+			array( 'List filters (animal-writes/list-filters)', 'section page head bands: dropdowns, Sort; Directory search (list pages: printed under the band with the count)', '/opportunities/' ),
 			array( 'Result count and sort (animal-writes/result-head)', 'Directory results: one result, many, filtered', '/directory/telangana/' ),
 		);
 		$out .= '<h2>Page-level blocks</h2><p>These draw from the page they are on, so each is shown on its page (and in the frames below).</p><div class="aw-state-grid">';
