@@ -20,9 +20,13 @@
 	var data = null;
 	var nearMarker = null;
 
-	function qs( extra ) {
+	function qs( extra, noPlace ) {
 		var p = new URLSearchParams();
-		Object.keys( filters ).forEach( function ( k ) { p.set( k, filters[ k ] ); } );
+		Object.keys( filters ).forEach( function ( k ) {
+			if ( ! ( noPlace && 'place' === k ) ) {
+				p.set( k, filters[ k ] ); // Near me: distance replaces the page's place
+			}
+		} );
 		Object.keys( extra || {} ).forEach( function ( k ) { p.set( k, extra[ k ] ); } );
 		return p.toString();
 	}
@@ -223,7 +227,7 @@
 	function ask( extra ) {
 		last = extra;
 		out.textContent = 'Finding the nearest…';
-		fetch( cfg.near + '?' + qs( Object.assign( { km: km.value }, extra ) ) ).then( function ( r ) {
+		fetch( cfg.near + '?' + qs( Object.assign( { km: km.value }, extra ), true ) ).then( function ( r ) {
 			return r.json().then( function ( j ) { return { ok: r.ok, j: j }; } );
 		} ).then( function ( x ) {
 			if ( ! x.ok ) {
