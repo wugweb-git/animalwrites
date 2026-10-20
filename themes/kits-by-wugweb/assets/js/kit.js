@@ -908,3 +908,39 @@
 		b.addEventListener('click', function () { set(b.getAttribute('aria-expanded') !== 'true'); });
 	});
 })();
+
+/* Card titles and summaries (kit-card states): cut at a whole word with "…" when they run past their lines (the CSS
+   line clamp alone can cut inside a word). The full title stays the link's accessible name. Chips that do not fit on
+   the one row are hidden from screen readers too. Runs again when a card changes width. */
+(function () {
+	var els = document.querySelectorAll('.kit-card[class*="kit-card--"] .kit-card-title a, .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt');
+	if (!els.length) return;
+	var textNode = function (el) { for (var n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.nodeValue.trim()) return n; return null; };
+	var fit = function (el) {
+		var t = textNode(el);
+		if (!t) return;
+		if (el.dataset.full == null) el.dataset.full = t.nodeValue;
+		var full = el.dataset.full, words = full.trim().split(/\s+/);
+		t.nodeValue = full;
+		if (el.scrollHeight <= el.clientHeight + 1) return;
+		if (el.tagName === 'A' && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', full.trim());
+		var lo = 1, hi = words.length - 1, best = 1;
+		while (lo <= hi) {
+			var mid = (lo + hi) >> 1;
+			t.nodeValue = words.slice(0, mid).join(' ').replace(/[,;:–—-]$/, '') + '… ';
+			if (el.scrollHeight <= el.clientHeight + 1) { best = mid; lo = mid + 1; } else hi = mid - 1;
+		}
+		t.nodeValue = words.slice(0, best).join(' ').replace(/[,;:–—-]$/, '') + '… ';
+	};
+	var chips = function (card) {
+		card.querySelectorAll('.kit-card-chips').forEach(function (row) {
+			var top = row.getBoundingClientRect().top;
+			Array.prototype.forEach.call(row.children, function (c) { c.toggleAttribute('aria-hidden', c.getBoundingClientRect().top - top > 4); });
+		});
+	};
+	var run = function () { els.forEach(fit); document.querySelectorAll('.kit-card[class*="kit-card--"]').forEach(chips); };
+	run();
+	if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
+	var w = window.innerWidth, timer;
+	window.addEventListener('resize', function () { if (window.innerWidth === w) return; w = window.innerWidth; clearTimeout(timer); timer = setTimeout(run, 150); });
+})();

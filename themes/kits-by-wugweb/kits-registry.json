@@ -1727,12 +1727,29 @@
    "type": "component",
    "status": "live",
    "classes": [
-    "kit-card"
+    "kit-card",
+    "kit-card--block-lg",
+    "kit-card--block-md",
+    "kit-card--block-sm",
+    "kit-card--stacked-lg",
+    "kit-card--stacked-md",
+    "kit-card--stacked-sm",
+    "kit-card-media",
+    "kit-card-meta",
+    "kit-card-chips",
+    "kit-card-title",
+    "kit-card-sum",
+    "kit-card-label"
    ],
    "states": [
+    "block-lg",
+    "block-md",
+    "block-sm (picture on top)",
+    "stacked-lg",
+    "stacked-md",
+    "stacked-sm (picture left or none; reference list)",
     "hover: title underline",
-    "focus: card outline",
-    "arrow nudge"
+    "focus: card outline"
    ],
    "a11y": {
     "link": "the title link covers the card"
@@ -1740,7 +1757,16 @@
    "seo": {
     "heading": "card title",
     "schema": "none"
-   }
+   },
+   "anatomy": "media 4:3 (logo whole; label top-left) > meta row (date, read time, place) > chips (source, type, category; lg 3, md 2, sm 1; one row) > title (3 lines, word-safe) > summary (block-lg/md, stacked-lg) > action",
+   "patterns": [
+    "kits-by-wugweb/card-block-lg",
+    "kits-by-wugweb/card-block-md",
+    "kits-by-wugweb/card-block-sm",
+    "kits-by-wugweb/card-stacked-lg",
+    "kits-by-wugweb/card-stacked-md",
+    "kits-by-wugweb/card-stacked-sm"
+   ]
   },
   {
    "name": "Preview only",

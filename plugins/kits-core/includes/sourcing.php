@@ -327,6 +327,13 @@ add_action(
 				$pubs[ $new ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $new ] ?? array(), array( 'status' => $ns ) );
 				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns );
 			}
+			$shorts = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ); // short names for card chips
+			foreach ( $shorts as $h => $v ) {
+				if ( isset( $pubs[ $h ] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
+					$pubs[ $h ]['short'] = $v;
+					kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ) );
+				}
+			}
 			update_option( AW_PUB_OPTION, $pubs, false );
 		}
 		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) ) );
@@ -489,15 +496,18 @@ function aw_sourcing_page() {
 		echo '<li><a href="' . esc_url( $base . ( $k ? '&status=' . $k : '' ) ) . '"' . ( $filter === $k ? ' class="current"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . (int) $n . ')</span></a> | </li>';
 	}
 	echo '</ul><br class="clear">';
+	echo '<p>Short name: what cards show on the source chip (e.g. TOI, PIB, Sentinel). The full name stays on the item page.</p>';
 	echo '<p>Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.</p>';
 	echo '<div class="tablenav top"><select name="bulk_status"><option value="">Change status to…</option><option value="block">Blocked</option><option value="neutral">Neutral</option><option value="allow">Allowed</option></select> ';
 	submit_button( 'Apply', 'action', '', false );
-	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Status</th><th>Rating</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
+	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Short name</th><th>Status</th><th>Rating</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
 	foreach ( $pubs as $h => $p ) {
 		if ( ( $filter && $filter !== $p['status'] ) || ! empty( $p['kind'] ) ) { // kind: a host kept only for its icon (e.g. a directory source), not a publisher
 			continue;
 		}
-		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
+		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><input type="text" name="short[' . esc_attr( $h ) . ']" value="' . esc_attr( (string) ( $p['short'] ?? '' ) ) . '" maxlength="24" size="12" aria-label="' . esc_attr( 'Short name for ' . $h ) . '"></td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
 	}
-	echo '</tbody></table></form></div>';
+	echo '</tbody></table>';
+	submit_button( 'Save short names', 'secondary' );
+	echo '</form></div>';
 }

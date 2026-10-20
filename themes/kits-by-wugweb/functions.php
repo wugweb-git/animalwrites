@@ -323,3 +323,51 @@ add_action(
 	},
 	1000
 );
+
+/**
+ * Card (kit-card kit-card--{state}, kit.css "Card states"): one Query Loop item in core blocks. A site adds its own
+ * meta row and chips blocks in its lists; these patterns use core's date and category terms.
+ *
+ * @param string $state block-lg|block-md|block-sm|stacked-lg|stacked-md|stacked-sm.
+ * @return string Block markup.
+ */
+function kits_card_markup( $state = 'block-md' ) {
+	$media   = 'stacked-sm' === $state ? '' : '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","className":"kit-card-media"} /-->
+
+';
+	$summary = in_array( $state, array( 'block-lg', 'block-md', 'stacked-lg' ), true ) ? '
+
+<!-- wp:post-excerpt {"excerptLength":30,"className":"kit-card-sum"} /-->' : '';
+	return '<!-- wp:group {"tagName":"article","className":"kit-card kit-card--' . $state . '","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--' . $state . '">' . $media . '<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:post-date {"className":"kit-card-meta kit-meta-row"} /-->
+
+<!-- wp:post-terms {"term":"category","className":"kit-card-chips kit-tags"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /-->' . $summary . '</div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->';
+}
+
+/** The six card states as patterns (Editor › Patterns › Kits: Lists): a Query Loop of cards in that state. */
+add_action(
+	'init',
+	function () {
+		foreach ( array( 'block-lg', 'block-md', 'block-sm', 'stacked-lg', 'stacked-md', 'stacked-sm' ) as $state ) {
+			$grid = 0 === strpos( $state, 'block' ) ? '{"type":"grid","columnCount":' . ( 'block-lg' === $state ? 2 : 3 ) . '}' : '{"type":"default"}';
+			register_block_pattern(
+				'kits-by-wugweb/card-' . $state,
+				array(
+					'title'      => sprintf( /* translators: %s: card state */ __( 'Card: %s', 'kits-by-wugweb' ), $state ),
+					'categories' => array( 'kits-lists' ),
+					'blockTypes' => array( 'core/query' ),
+					'content'    => '<!-- wp:query {"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false},"align":"wide"} -->
+<div class="wp-block-query alignwide"><!-- wp:post-template {"layout":' . $grid . '} -->
+' . kits_card_markup( $state ) . '
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->',
+				)
+			);
+		}
+	}
+);

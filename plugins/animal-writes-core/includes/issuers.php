@@ -32,6 +32,22 @@ function aw_issuers() {
 	return array_merge( $base, (array) get_option( 'aw_issuers_added', array() ) );
 }
 
+/**
+ * An issuer's short name for card chips (owner, 20 Oct 2026): option aw_issuer_short (slug => short), else the defaults
+ * below, else one made from the name (aw_short_name()). The full name stays on the item page.
+ */
+function aw_issuer_short( $slug ) {
+	$short = array_merge(
+		array( 'national-green-tribunal' => 'NGT', 'awbi' => 'AWBI', 'pib' => 'PIB', 'gazette' => 'Gazette', 'central-ministry' => 'Ministry', 'state-government' => 'State govt', 'municipal-body' => 'Municipal', 'research-journal' => 'Journal' ),
+		(array) get_option( 'aw_issuer_short', array() )
+	);
+	if ( isset( $short[ $slug ] ) && '' !== $short[ $slug ] ) {
+		return $short[ $slug ];
+	}
+	$name = aw_issuers()[ $slug ] ?? $slug;
+	return function_exists( 'aw_short_name' ) ? aw_short_name( $name ) : $name;
+}
+
 /** An item's issuer: object {slug, name}, or null. */
 function aw_item_issuer( $id ) {
 	$slug = (string) get_post_meta( $id, 'aw_issuer', true );

@@ -357,81 +357,50 @@ function aw_hub_band( $type ) {
 <!-- wp:pattern {"slug":"kits-by-wugweb/banner"} /-->';
 }
 
-/** One Post Template item per hub (core blocks, plus small blocks for data core blocks cannot show). */
+/** The card state each hub list uses (kit-card--{state}; hub-blocks.php "Card parts"). */
+const AW_HUB_CARD_STATE = array( 'aw_news' => 'block-md', 'aw_legal' => 'stacked-lg', 'post' => 'block-md', 'aw_opportunity' => 'block-md', 'aw_press' => 'block-md' );
+
+/**
+ * One card (core blocks plus the card's meta row and chips), the same anatomy for News, Library, Resources,
+ * Opportunities and press: picture 4:3 › meta row › chips › title › summary › action.
+ *
+ * @param string $type  Post type.
+ * @param string $state block-lg|block-md|block-sm|stacked-lg|stacked-md|stacked-sm ('' = the hub's own).
+ * @param int    $level Title heading level.
+ * @return string Block markup.
+ */
+function aw_card_item( $type, $state = '', $level = 2 ) {
+	$state   = '' !== $state ? $state : ( AW_HUB_CARD_STATE[ $type ] ?? 'block-md' );
+	$ref     = 'stacked-sm' === $state; // the reference list: icon + title (+ type chip), no picture, no meta row
+	$media   = $ref ? '' : '<!-- wp:post-featured-image {"isLink":' . ( 'aw_press' === $type ? 'false' : 'true' ) . ',"className":"kit-card-media"} /-->
+
+';
+	$summary = in_array( $state, array( 'block-lg', 'block-md', 'stacked-lg' ), true ) ? '
+
+<!-- wp:post-excerpt {"excerptLength":40,"className":"kit-card-sum"} /-->' : '';
+	$action  = 'aw_opportunity' === $type ? '
+
+<!-- wp:animal-writes/opp-actions /-->' : '';
+	return '<!-- wp:group {"tagName":"article","className":"kit-card kit-card--' . $state . '","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--' . $state . '">' . $media . '<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body">' . ( $ref ? '' : '<!-- wp:animal-writes/read-meta /-->
+
+' ) . '<!-- wp:animal-writes/badges {"state":"' . $state . '"} /-->
+
+<!-- wp:post-title {"level":' . (int) $level . ',"isLink":true,"className":"kit-card-title"} /-->' . $summary . $action . '</div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->';
+}
+
+/** One Post Template item per hub. */
 function aw_hub_item( $type ) {
 	switch ( $type ) {
 		case 'aw_news':
-			return '<!-- wp:group {"tagName":"article","className":"kit-card aw-story","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card aw-story"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
-
-<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-story-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":40,"className":"aw-story-sum"} /--></div>
-<!-- /wp:group --></article>
-<!-- /wp:group -->';
 		case 'aw_legal':
-			return '<!-- wp:group {"tagName":"article","className":"kit-card kit-case","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-case"><!-- wp:animal-writes/doc-date /-->
-
-<!-- wp:group {"className":"aw-case-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-case-body"><!-- wp:post-title {"level":2,"isLink":true,"className":"aw-case-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":30,"className":"aw-case-sum"} /-->
-
-<!-- wp:group {"className":"aw-case-tags kit-tags","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-case-tags kit-tags"><!-- wp:animal-writes/issuer /-->
-
-<!-- wp:post-terms {"term":"category"} /--></div>
-<!-- /wp:group -->
-
-<!-- wp:animal-writes/doc-link /--></div>
-<!-- /wp:group -->
-
-<!-- wp:html -->
-<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span>
-<!-- /wp:html --></article>
-<!-- /wp:group -->';
 		case 'post':
-			return '<!-- wp:group {"tagName":"article","className":"kit-card kit-task","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-task"><!-- wp:post-featured-image {"isLink":true,"className":"aw-task-media aw-no-fallback"} /-->
-
-<!-- wp:group {"className":"aw-task-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-body"><!-- wp:animal-writes/read-meta /-->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-task-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":22,"className":"aw-task-sum"} /-->
-
-<!-- wp:group {"className":"aw-task-tags kit-tags","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-task-tags kit-tags"><!-- wp:animal-writes/badges /-->
-
-<!-- wp:post-terms {"term":"category"} /--></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></article>
-<!-- /wp:group -->';
 		case 'aw_opportunity':
-			return '<!-- wp:group {"tagName":"article","className":"kit-card aw-opp","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card aw-opp"><!-- wp:post-featured-image {"className":"aw-opp-media aw-no-fallback"} /-->
-
-<!-- wp:group {"className":"aw-opp-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-opp-body"><!-- wp:group {"className":"aw-opp-tags kit-tags","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-opp-tags kit-tags"><!-- wp:post-terms {"term":"post_tag"} /-->
-
-<!-- wp:animal-writes/place /--></div>
-<!-- /wp:group -->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-opp-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":22,"className":"aw-opp-sum"} /-->
-
-<!-- wp:animal-writes/deadline /-->
-
-<!-- wp:animal-writes/opp-actions /--></div>
-<!-- /wp:group --></article>
-<!-- /wp:group -->';
+		case 'aw_press':
+			return aw_card_item( $type, '', 'aw_legal' === $type ? 3 : 2 );
 		case 'aw_campaign':
 			return '<!-- wp:group {"tagName":"article","className":"aw-story aw-story--card","layout":{"type":"default"}} -->
 <article class="wp-block-group aw-story aw-story--card"><!-- wp:post-featured-image {"isLink":true,"className":"kit-story-media"} /-->
@@ -459,18 +428,6 @@ function aw_hub_item( $type ) {
 <!-- /wp:group -->
 
 <!-- wp:animal-writes/org-actions /--></article>
-<!-- /wp:group -->';
-		case 'aw_press':
-			return '<!-- wp:group {"tagName":"article","className":"aw-story aw-story--card aw-story--external","layout":{"type":"default"}} -->
-<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media /-->
-
-<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->
-
-<!-- wp:post-title {"level":2,"isLink":true,"className":"aw-story-title"} /-->
-
-<!-- wp:animal-writes/press-meta /--></div>
-<!-- /wp:group --></article>
 <!-- /wp:group -->';
 	}
 	return '';
@@ -564,7 +521,7 @@ function aw_hub_page_content( $type, $pattern_id ) {
  * Create the hub Pages and list patterns (once per version). A Page or pattern the owner has edited since it was
  * written here is left alone.
  */
-const AW_HUBS_VERSION = '2';
+const AW_HUBS_VERSION = '3'; // 3: one card for every list (20 Oct 2026)
 add_action(
 	'init',
 	function () {
@@ -611,7 +568,7 @@ add_action(
 
 add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_page( 'search' ) );
 
-// The list's count sits under the filters, above the list (sections.php, owner 20 Oct 2026); none above the pagination.
+// The list's count opens its Collection block, under the filters (sections.php, owner 20 Oct 2026); no count above the pagination.
 
 
 /*
@@ -639,6 +596,30 @@ add_filter(
 		}
 		$done = true;
 		return '<h2 class="screen-reader-text">' . esc_html__( 'Library documents', 'animal-writes-core' ) . '</h2>' . $html;
+	},
+	10,
+	2
+);
+
+/*
+ * News, first page: the lead story is a block-lg card and the next three are stacked-md rows; the rest stay block-md
+ * (one card, its state picked by place in the list).
+ */
+add_filter(
+	'render_block_core/post-template',
+	function ( $html, $block ) {
+		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-news-list' ) || aw_hub_page() > 1 ) {
+			return $html;
+		}
+		$n = 0;
+		return preg_replace_callback(
+			'/kit-card kit-card--block-md/',
+			function ( $m ) use ( &$n ) {
+				$n++;
+				return 1 === $n ? 'kit-card kit-card--block-lg' : ( $n <= 4 ? 'kit-card kit-card--stacked-md' : $m[0] );
+			},
+			$html
+		);
 	},
 	10,
 	2

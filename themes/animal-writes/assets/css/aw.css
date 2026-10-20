@@ -1424,3 +1424,9 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--kit-space-7); }
 	.aw-news-mosaic > li:nth-child(n+2) > .aw-story { grid-template-columns: minmax(0, 1fr) 7.5rem; }
 }
+
+/* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
+.aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
+.aw-camp-docs-q li:has(> .kit-card) { display: block; padding: 0; border: 0; background: none; box-shadow: none; }
+.aw-camp-docs-q li:has(> .kit-card)::before { content: none; }
+.aw-camp .kit-card--stacked-sm { --kit-card-icon-color: var(--camp-mark, var(--kit-color-ink)); }

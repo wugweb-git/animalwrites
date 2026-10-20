@@ -33,13 +33,13 @@ function aw_hub_blocks() {
 		'issuer'        => array( 'Issued by', 'aw_block_issuer', array() ),
 		'doc-link'      => array( 'Document source and PDF', 'aw_block_doc_link', array() ),
 		'task-icon'     => array( 'Guide icon', 'aw_block_task_icon', array() ),
-		'read-meta'     => array( 'Updated and reading time', 'aw_block_read_meta', array() ),
+		'read-meta'     => array( 'Card meta row (date, read time, place)', 'aw_block_read_meta', array() ),
 		'place'         => array( 'Place', 'aw_block_place', array() ),
 		'deadline'      => array( 'Apply by (deadline)', 'aw_block_deadline', array() ),
 		'opp-line'      => array( 'Opportunity line (organisation, place, apply by)', 'aw_block_opp_line', array() ),
 		'opp-actions'   => array( 'Opportunity buttons', 'aw_block_opp_actions', array() ),
 		'org-mark'      => array( 'Organisation logo', 'aw_block_org_mark', array() ),
-		'badges'        => array( 'Badges and labels', 'aw_block_badges', array() ),
+		'badges'        => array( 'Card chips (source, type, category)', 'aw_block_badges', array( 'state' => array( 'type' => 'string', 'default' => 'block-md' ) ) ),
 		'contact'       => array( 'Contact icons', 'aw_block_contact', array() ),
 		'org-actions'   => array( 'Organisation buttons', 'aw_block_org_actions', array() ),
 		'result-head'   => array( 'Result count and sort', 'aw_block_result_head', array() ),
@@ -356,9 +356,7 @@ function aw_block_task_icon( $a, $id ) {
 }
 
 function aw_block_read_meta( $a, $id ) {
-	$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
-	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return '<p class="aw-task-meta kit-meta-row">' . $badge . '<span class="kit-meta-item">' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span><span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span></p>';
+	return aw_card_meta( $id );
 }
 
 /* ---------- Opportunities ---------- */
@@ -409,7 +407,7 @@ function aw_block_opp_line( $a, $id ) {
 
 function aw_block_opp_actions( $a, $id ) {
 	$apply = (string) get_post_meta( $id, 'aw_apply_url', true ); // the card itself links to the item page (title ::after)
-	return $apply ? '<div class="aw-opp-actions"><a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener" aria-label="' . esc_attr( 'Apply or sign up: ' . get_the_title( $id ) ) . '">Apply or sign up</a></div>' : '';
+	return $apply ? '<div class="aw-opp-actions"><a class="kit-btn kit-btn--sm" href="' . esc_url( $apply ) . '" rel="noopener" aria-label="' . esc_attr( 'Apply or sign up: ' . get_the_title( $id ) ) . '">Apply</a></div>' : '';
 }
 
 /** Single opportunity: "Posted by {organisation}", linked to its Directory profile when there is one. */
@@ -435,11 +433,10 @@ function aw_block_org_mark( $a, $id ) {
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';
 }
 
-/** Up to two listing types (the card's labels). */
+/** Up to two listing types (the card's labels); on every other card, its chips (aw_card_chips()). */
 function aw_block_badges( $a, $id ) {
-	if ( 'post' === get_post_type( $id ) ) { // a Resource: its type (Guide, Research ...) as a label, as the Library card shows its kind
-		$t = function_exists( 'aw_item_tags' ) ? aw_item_tags( $id ) : array();
-		return $t ? '<span class="kit-tag">' . ( function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t[0]->slug ) : '' ) . esc_html( $t[0]->name ) . '</span>' : '';
+	if ( 'aw_listing' !== get_post_type( $id ) ) {
+		return aw_card_chips( $id, (string) ( $a['state'] ?? 'block-md' ) );
 	}
 	$out = '';
 	// Cards show the type only (owner, 12 Oct 2026): Verified sits on the name, sources are on the profile (Details from).
@@ -610,6 +607,230 @@ add_filter(
 		$end = strrpos( $html, '</a>' );
 		$end = false !== $end ? $end : strrpos( $html, '</h' );
 		return false === $end ? $html : substr_replace( $html, aw_verified_mark(), $end, 0 );
+	},
+	25,
+	3
+);
+
+/* ---------- Card parts: one card for every list (kit-card kit-card--{state}, kit.css 4.2) ----------
+ * States: block-lg · block-md · block-sm (picture on top) and stacked-lg · stacked-md · stacked-sm (picture left, or none;
+ * stacked-sm is the reference list). Anatomy: picture 4:3 › meta row (read-meta) › chips (badges) › title › summary ›
+ * action. The chips: source (short name), type, primary category; lg 3 · md 2 · sm 1 (owner, 20 Oct 2026). */
+
+/** Chips per card size. */
+function aw_card_chip_cap( $state ) {
+	return array( 'lg' => 3, 'md' => 2, 'sm' => 1 )[ substr( (string) $state, -2 ) ] ?? 2;
+}
+
+/** The date a card shows: when the item was published at its source (Unix time), else when it was posted here. */
+function aw_card_ts( $id ) {
+	$type = get_post_type( $id );
+	if ( 'aw_press' === $type ) {
+		$d = (string) get_post_meta( $id, 'aw_press_date', true );
+		return $d ? (int) strtotime( $d . ' 12:00:00 Asia/Kolkata' ) : (int) get_post_time( 'U', true, $id );
+	}
+	if ( 'post' === $type && ! aw_is_ingested( $id ) ) {
+		return (int) get_post_modified_time( 'U', true, $id ); // our own guides: when they were last updated
+	}
+	return function_exists( 'aw_published_ts' ) ? (int) aw_published_ts( $id ) : (int) get_post_time( 'U', true, $id );
+}
+
+/** Meta row: date (calendar icon; "3 hours ago" within 7 days), read time (Resources), place. One row, plain text. */
+function aw_card_meta( $id ) {
+	$ts   = aw_card_ts( $id );
+	$diff = time() - $ts;
+	/* translators: %s: time difference, e.g. 3 hours. */
+	$when = ( $diff >= 0 && $diff < 7 * DAY_IN_SECONDS ) ? ( $diff < 2 * MINUTE_IN_SECONDS ? __( 'Just now', 'animal-writes-core' ) : sprintf( __( '%s ago', 'animal-writes-core' ), human_time_diff( $ts, time() ) ) ) : wp_date( AW_DATE_FORMAT, $ts );
+	$out  = '<span class="kit-meta-item aw-date">' . aw_i( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '" title="' . esc_attr( wp_date( AW_DATE_FORMAT, $ts ) ) . '">' . esc_html( $when ) . '</time></span>';
+	if ( 'post' === get_post_type( $id ) && ! aw_is_ingested( $id ) ) {
+		$mins = max( 1, (int) round( str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) ) ) / 200 ) );
+		$out .= '<span class="kit-meta-item">' . aw_i( 'clock' ) . (int) $mins . ' min read</span>';
+	}
+	$place = in_array( get_post_type( $id ), array( 'aw_news', 'aw_legal', 'aw_opportunity' ), true ) && function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+	if ( 'aw_opportunity' === get_post_type( $id ) && function_exists( 'aw_opp_line_place' ) ) {
+		$out .= str_replace( aw_i( 'directory' ), aw_i( 'map-pin' ), aw_opp_line_place( $id ) );
+	} elseif ( $place ) {
+		$out .= '<span class="kit-meta-item">' . aw_i( 'map-pin' ) . esc_html( $place->name ) . '</span>';
+	}
+	return '<p class="kit-card-meta kit-meta-row">' . $out . '</p>';
+}
+
+/**
+ * A short source name for a chip: the publisher record's short name (Settings → Sourcing), an issuer's short name, or one
+ * made from the full name ("The Sentinel – of this Land, for its People" → "Sentinel"; "… (CCSEA)" → "CCSEA").
+ * The full name stays in the item page's Sources block.
+ */
+function aw_short_name( $name ) {
+	$name = trim( preg_replace( '/\s+/u', ' ', (string) $name ) );
+	$known = array(
+		'the times of india' => 'TOI', 'times of india' => 'TOI', 'live law' => 'LiveLaw', 'the new indian express' => 'TNIE',
+		'the indian express' => 'Indian Express', 'free press journal' => 'FPJ', 'hindustan times' => 'HT', 'the economic times' => 'ET',
+		'animal welfare board of india' => 'AWBI', 'press information bureau' => 'PIB', 'press trust of india' => 'PTI',
+		'united news of india' => 'UNI', 'ani news' => 'ANI', 'national green tribunal' => 'NGT', 'supreme court of india' => 'Supreme Court',
+		'gazette of india' => 'Gazette', 'mathrubhumi english' => 'Mathrubhumi', 'thewire.in' => 'The Wire', 'yourstory.com' => 'YourStory',
+		'people for the ethical treatment of animals (peta)' => 'PETA', 'abc news - breaking news, latest news and videos' => 'ABC News',
+		'fundsforngos - grants and resources for sustainability' => 'fundsforNGOs', 'committee for control and supervision of experiments on animals' => 'CCSEA',
+	);
+	$base = trim( preg_replace( '/\s+(?:[–—-]|·|\|)\s+.*$|\s*\((?:via|text on)\b[^)]*\)$/iu', '', $name ) ); // "The Hindu – Energy & Environment", "Gazette of India (via CCSEA)"
+	if ( isset( $known[ mb_strtolower( $base ) ] ) ) {
+		return $known[ mb_strtolower( $base ) ];
+	}
+	if ( preg_match( '/\(([A-Z][A-Za-z]{1,9})\)\s*$/u', $base, $m ) ) { // "Committee for … Animals (CCSEA)" → CCSEA
+		return $m[1];
+	}
+	$base = preg_replace( '/^(?:www\.)|\.(?:com|in|org|net)$/i', '', $base );
+	$base = preg_replace( '/^The\s+(?=\S)/u', '', $base );
+	if ( mb_strlen( $base ) > 24 ) { // a long journal or body name: its initials ("International Journal of Research in Medical Sciences" → IJRMS)
+		$init = implode( '', array_map( fn( $w ) => mb_strtoupper( mb_substr( $w, 0, 1 ) ), array_filter( preg_split( '/[\s:,&()]+/u', $base ), fn( $w ) => '' !== $w && ! in_array( mb_strtolower( $w ), array( 'of', 'and', 'the', 'for', 'in', 'on', 'a', 'an', 'to' ), true ) ) ) );
+		return mb_strlen( $init ) >= 2 ? $init : mb_substr( $base, 0, 24 );
+	}
+	return $base;
+}
+
+/** An item's source for its chip: [short name, full name, favicon URL]. Empty name when it has none (our own content). */
+function aw_card_source( $id ) {
+	$type = get_post_type( $id );
+	if ( 'aw_press' === $type ) {
+		$name = (string) get_post_meta( $id, 'aw_press_publisher', true );
+		$host = aw_host( (string) get_post_meta( $id, 'aw_press_url', true ) );
+	} elseif ( 'aw_opportunity' === $type ) {
+		$name = (string) get_post_meta( $id, 'aw_org_name', true );
+		$host = aw_host( (string) get_post_meta( $id, 'aw_apply_url', true ) );
+		return array( aw_short_name( $name ), $name, '' );
+	} else {
+		list( $name, $host ) = function_exists( 'aw_publisher_of' ) ? aw_publisher_of( $id ) : array( '', '' );
+		$name = (string) get_post_meta( $id, 'aw_source_name', true ) ? $name : '';
+		if ( '' === $name && 'aw_legal' === $type && function_exists( 'aw_item_issuer' ) && ( $iss = aw_item_issuer( $id ) ) ) { // Library: the issuer when there is no publisher
+			return array( aw_issuer_short( $iss->slug ), $iss->name, '' );
+		}
+	}
+	if ( '' === $name ) {
+		return array( '', '', '' );
+	}
+	$rec   = $host ? ( aw_publishers()[ $host ] ?? array() ) : array();
+	$short = '' !== (string) ( $rec['short'] ?? '' ) ? (string) $rec['short'] : aw_short_name( $name );
+	return array( $short, $name, $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '' );
+}
+
+/** The campaign an item belongs to, for its label: [short name, colour, text colour], or null. */
+function aw_card_campaign( $id ) {
+	$t = function_exists( 'aw_campaign_links' ) ? aw_campaign_links( $id ) : array();
+	if ( ! $t || 'aw_campaign' === get_post_type( $id ) ) {
+		return null;
+	}
+	$page  = (int) get_term_meta( $t[0]->term_id, 'aw_campaign_page', true );
+	$slug  = $page ? (string) get_post_field( 'post_name', $page ) : '';
+	$look  = defined( 'AW_MAIL_CAMPAIGN_LOOKS' ) ? ( AW_MAIL_CAMPAIGN_LOOKS[ $slug ] ?? null ) : null;
+	$short = (string) get_term_meta( $t[0]->term_id, 'aw_campaign_short', true );
+	return array( '' !== $short ? $short : $t[0]->name, $look ? $look[0] : '#141414', '#ffffff' );
+}
+
+/** The campaign label as a chip. */
+function aw_card_campaign_label( $id ) {
+	$c = aw_card_campaign( $id );
+	return $c ? '<span class="kit-tag kit-card-label" style="' . esc_attr( '--kit-card-label-bg:' . $c[1] . ';--kit-card-label-fg:' . $c[2] ) . '">' . esc_html( $c[0] ) . '</span>' : '';
+}
+
+/**
+ * Chips: source (favicon + short name), type (with its icon), primary category, capped by size. The source shows only here.
+ * The campaign label leads the row only on a card without a picture (stacked-sm); it is outside the cap.
+ */
+function aw_card_chips( $id, $state = 'block-md' ) {
+	$type  = get_post_type( $id );
+	$chips = array();
+	list( $short, $full, $icon ) = aw_card_source( $id );
+	if ( '' !== $short ) {
+		$mark    = $icon ? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">' : '';
+		$chips[] = '<span class="kit-tag kit-tag--source"' . ( $full !== $short ? ' title="' . esc_attr( $full ) . '"' : '' ) . '>' . $mark . '<span class="kit-tag-text">' . esc_html( $short ) . '</span></span>';
+	}
+	$kind = array();
+	if ( 'aw_legal' === $type ) {
+		$kind = aw_legal_kinds( $id );
+	} elseif ( in_array( $type, array( 'post', 'aw_opportunity' ), true ) ) {
+		$kind = aw_item_tags( $id );
+	}
+	if ( $kind ) {
+		$chips[] = '<span class="kit-tag kit-tag--type">' . aw_tag_icon( $kind[0]->slug ) . '<span class="kit-tag-text">' . esc_html( $kind[0]->name ) . '</span></span>';
+	} elseif ( 'aw_press' === $type ) { // a press item's format, except the generic "Article"
+		$fmt = (string) get_post_meta( $id, 'aw_press_format', true );
+		if ( $fmt && 'article' !== $fmt ) {
+			$chips[] = '<span class="kit-tag kit-tag--type">' . ( 'videos' === aw_press_group( $fmt ) ? aw_i( 'youtube' ) : '' ) . '<span class="kit-tag-text">' . esc_html( AW_PRESS_FORMATS[ $fmt ] ?? $fmt ) . '</span></span>';
+		}
+	}
+	$cat = function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+	if ( $cat ) {
+		$chips[] = '<span class="kit-tag kit-tag--category"><span class="kit-tag-text">' . esc_html( $cat->name ) . '</span></span>';
+	}
+	$lead = ( 'stacked-sm' === $state ? aw_card_campaign_label( $id ) : '' ) . ( function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '' );
+	$row  = $lead . implode( '', array_slice( $chips, 0, aw_card_chip_cap( $state ) ) );
+	return '' !== $row ? '<p class="kit-card-chips kit-tags">' . $row . '</p>' : '';
+}
+
+/**
+ * A card picture when the item has none of its own: its primary category's card picture (never a text tile or a
+ * blurred document preview). URL, or ''.
+ */
+function aw_card_fallback_image( $id ) {
+	$att = function_exists( 'aw_category_card_id' ) ? (int) aw_category_card_id( $id ) : 0;
+	if ( ! $att ) {
+		$def = (array) ( get_option( 'aw_category_images', array() )['default'] ?? array() );
+		$att = (int) ( $def ? $def[ $id % count( $def ) ] : 0 );
+	}
+	return $att ? (string) wp_get_attachment_image_url( $att, 'large' ) : '';
+}
+
+/** Whether a block sits in a card (a kit-card group's picture, title or summary in a list). */
+function aw_in_card( $block ) {
+	return false !== strpos( (string) ( $block['attrs']['className'] ?? '' ), 'kit-card-' );
+}
+
+// Card summaries are plain text (no icons or dates inside).
+add_filter(
+	'render_block_core/post-excerpt',
+	function ( $html, $block ) {
+		if ( ! aw_in_card( $block ) ) {
+			return $html;
+		}
+		return preg_replace_callback( '#(<p class="wp-block-post-excerpt__excerpt">)(.*?)(</p>)#s', fn( $m ) => $m[1] . esc_html( trim( html_entity_decode( wp_strip_all_tags( $m[2] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) . $m[3], $html );
+	},
+	50,
+	2
+);
+
+/*
+ * Card pictures (kit-card-media): 4:3; an item with no picture gets its primary category's card picture, and so does a
+ * picture that fails to load or a blurred document preview (never a text tile). A press item without a picture shows its
+ * publisher's logo whole. The campaign label sits top-left on the picture.
+ */
+add_filter(
+	'render_block_core/post-featured-image',
+	function ( $html, $block, $instance ) {
+		if ( ! aw_in_card( $block ) ) {
+			return $html;
+		}
+		$id   = (int) ( $instance->context['postId'] ?? 0 );
+		$fall = $id ? aw_card_fallback_image( $id ) : '';
+		$prev = 'aw_legal' === get_post_type( $id ) && ! get_post_meta( $id, 'aw_file_id', true ) ? (int) get_post_meta( $id, 'aw_doc_preview', true ) : 0;
+		if ( $prev && false !== strpos( $html, (string) wp_basename( (string) get_attached_file( $prev ) ) ) ) {
+			$html = ''; // a blurred document preview is not a card picture
+		}
+		if ( '' === trim( $html ) ) {
+			$logo = 'aw_press' === get_post_type( $id ) ? (int) get_post_meta( $id, 'aw_press_logo', true ) : 0;
+			$src  = $logo ? (string) wp_get_attachment_image_url( $logo, 'medium' ) : $fall;
+			if ( '' === $src ) {
+				return '';
+			}
+			$img  = '<img src="' . esc_url( $src ) . '" alt="" loading="lazy" decoding="async">';
+			$img  = ! empty( $block['attrs']['isLink'] ) && 'aw_press' !== get_post_type( $id ) ? '<a href="' . esc_url( get_permalink( $id ) ) . '" tabindex="-1" aria-hidden="true">' . $img . '</a>' : $img;
+			$html = '<figure class="wp-block-post-featured-image kit-card-media' . ( $logo ? ' is-logo' : '' ) . ' ' . esc_attr( (string) $block['attrs']['className'] ) . '">' . $img . '</figure>';
+		}
+		$html = preg_replace( '#<div class="kit-placard"[^>]*>.*?</div>#s', '', $html ); // no text tile behind the picture
+		if ( '' !== $fall ) { // a picture that fails: the category's picture
+			$html = preg_replace( '/onerror="[^"]*"/', 'onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=\'' . esc_url( $fall ) . '\'"', $html, 1 );
+			$html = false === strpos( $html, 'onerror=' ) ? preg_replace( '/<img /', '<img onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=\'' . esc_url( $fall ) . '\'" ', $html, 1 ) : $html;
+		}
+		$label = aw_card_campaign_label( $id );
+		return '' !== $label ? preg_replace( '#</figure>\s*$#', str_replace( 'kit-tag kit-card-label', 'kit-card-label', $label ) . '</figure>', $html, 1 ) : $html;
 	},
 	25,
 	3
