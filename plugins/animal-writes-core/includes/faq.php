@@ -165,7 +165,7 @@ function aw_faq_registry() {
 			array( 'key' => 'volunteer', 'priority' => 5, 'q' => 'How can I volunteer with %s?', 'needs' => array( 'aw_volunteer_url' ), 'pattern' => '<org> volunteer', 'answer' => 'aw_faq_listing_volunteer' ),
 			array( 'key' => 'donate', 'priority' => 6, 'q' => 'How can I donate to %s? Is it tax-deductible?', 'needs' => array( 'aw_donate_url', 'aw_upi', 'aw_reg_80g' ), 'pattern' => '<org> donate', 'answer' => 'aw_faq_listing_donate' ),
 			array( 'key' => 'hours', 'priority' => 7, 'q' => 'What are the opening hours of %s?', 'needs' => array( 'aw_opening_hours' ), 'pattern' => '<org> timings', 'answer' => 'aw_faq_listing_hours' ),
-			array( 'key' => 'adoption', 'priority' => 8, 'q' => 'Does %s offer adoption?', 'needs' => array( 'aw_adopt_url', 'Adoption service' ), 'pattern' => '<org> adoption', 'answer' => 'aw_faq_listing_adoption' ),
+			array( 'key' => 'adoption', 'priority' => 8, 'q' => 'Does %s offer adoption?', 'needs' => array( 'aw_adopt_url', 'Adoption Service' ), 'pattern' => '<org> adoption', 'answer' => 'aw_faq_listing_adoption' ),
 			array( 'key' => 'registration', 'priority' => 9, 'q' => 'What is the registration number or NGO Darpan ID of %s?', 'needs' => array( 'aw_registration', 'aw_darpan_id' ), 'pattern' => '<org> registration', 'answer' => 'aw_faq_listing_registration' ),
 			array( 'key' => 'animals', 'priority' => 10, 'q' => 'Which animals does %s help?', 'needs' => array( 'aw_animals' ), 'pattern' => '—', 'answer' => 'aw_faq_listing_animals' ),
 		),
