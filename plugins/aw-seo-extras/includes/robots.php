@@ -6,7 +6,7 @@
  * archives; site search).
  *
  * - Closed opportunities (past their deadline or review date): noindex, links followed.
- * - Directory district × type pages with fewer listings than AW_THIN_DISTRICT_TYPE: noindex.
+ * - Directory district × type pages with fewer listings than AW_THIN_DISTRICT_TYPE: noindex, unless on AW_DIRECTORY_KEEP_INDEXED.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
@@ -18,7 +18,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_THIN_DISTRICT_TYPE = 1; // owner, 10 Oct 2026: every district × type page with a listing is indexed
+/**
+ * Owner, 20 Oct 2026 (was 1 since 10 Oct): a district × type page listing fewer than 3 organisations is noindex (links
+ * followed) and out of the sitemap; it becomes indexable again by itself when it reaches 3 (stored counts).
+ */
+const AW_THIN_DISTRICT_TYPE = 3;
+
+/**
+ * Thin district × type pages that stay indexed: every one with Search Console clicks or impressions in the 90 days to
+ * 20 Oct 2026 (owner). Paths under /directory/.
+ */
+const AW_DIRECTORY_KEEP_INDEXED = array(
+	'haryana/jhajjar/animal-welfare-organisation',
+	'madhya-pradesh/sheopur/animal-welfare-organisation',
+	'maharashtra/pune/animal-welfare-organisation',
+	'maharashtra/pune/wildlife-rescue',
+	'telangana/kumuram-bheem-asifabad/veterinary-office',
+	'telangana/mancherial/veterinary-office',
+	'telangana/medchal-malkajgiri/veterinary-office',
+	'telangana/nizamabad/animal-welfare-organisation',
+	'uttar-pradesh/chandauli/veterinary-office',
+	'uttar-pradesh/gautam-buddha-nagar/animal-welfare-organisation',
+	'uttar-pradesh/kushinagar/animal-welfare-organisation',
+	'uttar-pradesh/mahrajganj/animal-welfare-organisation',
+	'uttar-pradesh/siddharthnagar/gaushala',
+	'uttarakhand/chamoli/animal-welfare-organisation',
+	'west-bengal/purba-medinipur/veterinary-office',
+);
+
+/** Whether a district × type page (its URL) is on the keep-indexed list. */
+function aw_directory_keep_indexed( $url ) {
+	$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
+	return in_array( preg_replace( '#^directory/#', '', $path ), AW_DIRECTORY_KEEP_INDEXED, true );
+}
 
 /** District × type page with too few listings to be worth indexing. */
 function aw_is_thin_directory_page() {
@@ -33,7 +65,7 @@ function aw_is_thin_directory_page() {
 	$type = (string) get_query_var( 'aw_dir_type' );
 	foreach ( aw_place_counts()['pairs'] as $p ) {
 		if ( (string) $p[0] === (string) $place->code && $p[1] === $type ) {
-			return (int) $p[3] < AW_THIN_DISTRICT_TYPE;
+			return (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! aw_directory_keep_indexed( aw_directory_url( $place->slug, $type ) );
 		}
 	}
 	return true; // no listings of this type here

@@ -26,7 +26,7 @@ function aw_sitemap_directory_pairs() {
 	$pairs = array();
 	foreach ( aw_place_counts()['pairs'] as $p ) {
 		$d = aw_place_district( $p[0] );
-		if ( $d && $p[3] >= AW_THIN_DISTRICT_TYPE ) {
+		if ( $d && ( $p[3] >= AW_THIN_DISTRICT_TYPE || aw_directory_keep_indexed( aw_directory_url( $d->slug, $p[1] ) ) ) ) {
 			$pairs[] = array( 'city' => $d->slug, 'type' => $p[1], 'modified' => $p[2], 'n' => $p[3] );
 		}
 	}
