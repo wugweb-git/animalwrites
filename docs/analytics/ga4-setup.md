@@ -16,6 +16,13 @@ on Initialization when it is `true`. If Site Kit's Analytics snippet is ever swi
 cleared, `gtag` becomes `true`, kit.js sends events to GA4 directly and the GTM tags stand down by themselves.
 Keep it as it is: Site Kit Analytics snippet off, `kits_ga4_via_gtm` = 1.
 
+20 Oct 2026: GTM's import ignores a top-level `"negate": true` on a condition. Versions 4–6 therefore went live with
+"DLV - gtag **equals** true" on every event trigger, and no GA4 event tag fired from 17 Oct (only Google tag page views
+and enhanced measurement reached GA4). The file now puts the negation where GTM reads it, as a condition parameter
+(`{"type": "BOOLEAN", "key": "negate", "value": "true"}`). It was imported again (Merge → Overwrite: 43 triggers
+modified, nothing added or deleted) and published as version 7; campaign_view showed in GA4 Realtime straight away.
+After any import, check that Triggers lists "DLV - gtag does not equal true".
+
 ## Import the container
 
 File: `docs/analytics/gtm-container-animalwrites.json` (replaces `docs/gtm/animalwrites-container.json`; same tag,
