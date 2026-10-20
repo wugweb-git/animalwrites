@@ -9,7 +9,7 @@
  * - On submit the entry is saved where the site's own form saves it (contact messages, the volunteers table, claims for
  *   review, reports, data removal requests) by the same code (aw_*_save()); the Fluent Forms entry is an extra copy.
  *   The same server rules run (aw_*_errors()), with the spam check (ALTCHA, honeypot, timing) and the per-connection limit.
- * - Emails: the site's own (wp_mail, so the daily cap applies). The Fluent Forms forms have no email notifications.
+ * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (aw_ff_mail_off).
  * - Fields Fluent Forms (free) does not have are its custom fields here: PIN code with State and District (LGD), the
  *   spam check, step breaks (claim), the logo upload (to the private folder) and the listing's services.
  * - After sending: the thank-you page with the form's own message, as before. Analytics: kit.js (data-kit-form names
@@ -21,6 +21,33 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// No email from a Fluent Forms submission, to anyone (owner, 21 Oct 2026): Fluent Forms' own email notifications are
+// switched off, and while a submission is handled every wp_mail is dropped (the contact@ alerts for messages,
+// volunteers and claims, the newsletter confirmation, any opt-in email). Entries are still saved where they always are.
+// On again: wp option update aw_ff_send_email 1
+function aw_ff_mail_off() {
+	return '1' !== (string) get_option( 'aw_ff_send_email', '0' );
+}
+add_filter(
+	'fluentform/global_notification_active_types',
+	function ( $keys ) {
+		if ( aw_ff_mail_off() ) {
+			unset( $keys['notifications'] );
+		}
+		return $keys;
+	},
+	999
+);
+add_action(
+	'fluentform/before_insert_submission',
+	function () {
+		if ( aw_ff_mail_off() ) {
+			add_filter( 'pre_wp_mail', '__return_true', 999 ); // "handled": nothing is sent
+		}
+	},
+	0
+);
 
 const AW_FF_OPTION = 'aw_ff_forms'; // key => Fluent Forms form ID
 const AW_FF_FORMS  = array(
