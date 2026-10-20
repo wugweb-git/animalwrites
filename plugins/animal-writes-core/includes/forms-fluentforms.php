@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // No email from a Fluent Forms submission, to anyone (owner, 21 Oct 2026): Fluent Forms' own email notifications are
 // switched off, and while a submission is handled every wp_mail is dropped (the contact@ alerts for messages,
 // volunteers and claims, the newsletter confirmation, any opt-in email). Entries are still saved where they always are.
+// One exception: the "Remove my data" confirmation link to the person asking (privacy-requests.php).
 // On again: wp option update aw_ff_send_email 1
 function aw_ff_mail_off() {
 	return '1' !== (string) get_option( 'aw_ff_send_email', '0' );

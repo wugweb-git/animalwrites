@@ -46,7 +46,13 @@ add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
 function aw_remove_data_save( $email ) {
 	$id = wp_create_user_request( $email, 'remove_personal_data' );
 	if ( ! is_wp_error( $id ) ) {
-		wp_send_user_request( $id ); // WordPress's confirmation email
+		// WordPress's confirmation email: the one email a form still sends (owner, 21 Oct 2026), even while form
+		// submissions send nothing else (aw_ff_mail_off, forms-fluentforms.php).
+		$blocked = remove_filter( 'pre_wp_mail', '__return_true', 999 );
+		wp_send_user_request( $id );
+		if ( $blocked ) {
+			add_filter( 'pre_wp_mail', '__return_true', 999 );
+		}
 	}
 	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $email );
 	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'title' => 'Check your inbox', 'text' => $text );
