@@ -186,7 +186,7 @@ add_filter(
 		if ( ! $type || (int) $type->count < 1 ) {
 			return $html;
 		}
-		return $html . '<p class="kit-note aw-see-type"><a href="' . esc_url( get_term_link( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
+		return $html . '<p class="kit-note"><a href="' . esc_url( get_term_link( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
 	},
 	20
 );
