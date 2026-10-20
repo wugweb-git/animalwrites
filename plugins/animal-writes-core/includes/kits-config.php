@@ -118,8 +118,9 @@ add_filter(
 	20,
 	2
 );
-// The Wugweb sample listing: only the owner sees it (preview), everyone else gets a 404 and no trace in lists.
-add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ) ) );
+// The sample listings (the Wugweb sample, and test samples listed in the option aw_sample_listing_ids): only the owner
+// sees them (preview), everyone else gets a 404 and no trace in lists, sitemaps, counts or related blocks.
+add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ), array_map( 'intval', (array) get_option( 'aw_sample_listing_ids', array() ) ) ) );
 
 // Section names for sections without a visible heading (shell spec: every section labelled).
 add_filter(

@@ -909,7 +909,6 @@ html.kit-scroll-locked body { position: fixed; left: 0; right: 0; overflow: hidd
 /* Tags: one chip component (kit-primitives.css 1–2), every kind the same; only the leading icon differs. The kind
    classes (--category, --type, --issuer, --place, --info, --ink, --accent) stay in the markup for meaning only. */
 .kit-tag, .kit-chip, .wp-block-post-terms a { font-style: normal; letter-spacing: 0; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; text-decoration: none !important; }
-.kit-tag.kit-tag--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); border-color: transparent; }
 
 .kit-tag .kit-ico, .kit-chip .kit-ico { --kit-ico-size: 1em; }
 

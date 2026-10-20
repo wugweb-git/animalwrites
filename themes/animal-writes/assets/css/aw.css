@@ -342,13 +342,18 @@ body { background: var(--kit-color-canvas); }
 .aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-3) 0 var(--kit-space-5); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
 .aw-item-meta > :is(.aw-item-date, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
 .aw-item-meta .aw-date { color: inherit; font: inherit; }
+.aw-item-place { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap, var(--kit-space-1)); color: inherit; text-decoration: none; } /* the place reads like the date: icon and text, no chip (owner, 20 Oct 2026) */
+.aw-item-place .kit-ico { --kit-ico-size: var(--kit-meta-icon, 1em); }
+.aw-item-place::after { content: none !important; }
+@media (hover: hover) { .aw-item-place:hover { text-decoration: underline; text-underline-offset: 2px; } }
+.aw-item-place:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--kit-radius-hair); }
 .aw-item-meta .kit-tag--closed { margin-right: var(--kit-space-1); }
 /* 5 Content */
 .aw-item-content > * + * { margin-top: var(--kit-space-5); }
 .aw-item-content .wp-block-post-content > :first-child { margin-top: 0; }
 /* 6 Sources: one block, every type; plain text, no card */
 .aw-sources { margin: var(--kit-space-7) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-text); }
-.aw-sources-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
+.aw-sources-head { margin: 0 0 var(--kit-space-3); font-weight: var(--kit-weight-strong); } /* size: has-x-large-font-size (the Kits h4) */
 .aw-sources-credit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-2); }
 .aw-sources-credit > .aw-src { margin: 0 !important; }
 .aw-sources-by, .aw-posted-by { display: inline-flex; align-items: center; gap: var(--kit-space-2); font-weight: var(--kit-weight-medium); }
@@ -365,7 +370,7 @@ body { background: var(--kit-color-canvas); }
 .aw-item-share .kit-share { border-top: 0; padding-top: 0; }
 /* 10 More: at most two groups of three cards (4:3 picture, type and date, title, one line) */
 .aw-more { display: grid; gap: var(--kit-space-7); margin: var(--kit-space-8) 0 0; }
-.aw-more-head { font-size: var(--kit-type-h3); line-height: 1.25; margin: 0 0 var(--kit-space-4); }
+.aw-more-head { margin: 0 0 var(--kit-space-4); font-weight: var(--kit-weight-strong); } /* size: has-x-large-font-size (the Kits h4) */
 .aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
 @media (min-width: 768px) { .aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 .aw-more-list > li { margin: 0; }
@@ -391,28 +396,27 @@ body { background: var(--kit-color-canvas); }
 .aw-listing-desc > :first-child { margin-top: 0; }
 .aw-listing-desc > :last-child { margin-bottom: 0; }
 .aw-listing-group { margin: var(--kit-space-7) 0 0; }
-.aw-listing-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
+.aw-listing-head { margin: 0 0 var(--kit-space-3); font-weight: var(--kit-weight-strong); } /* size: has-x-large-font-size (the Kits h4) */
 .aw-facts { display: grid; gap: var(--kit-space-2); margin: 0; }
 .aw-facts-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--kit-space-4); }
 @media (min-width: 768px) { .aw-facts-row { grid-template-columns: 12rem minmax(0, 1fr); } }
 .aw-facts dt { font-weight: var(--kit-weight-medium); color: var(--kit-color-text); }
 .aw-facts dd { margin: 0; color: var(--kit-color-text); }
 .aw-facts-part + .aw-facts-part::before { content: "·" / ""; margin: 0 0.4em; color: var(--kit-color-muted); } /* the separator is CSS, never typed */
-.aw-facts-expired { color: var(--kit-color-warning); font-weight: var(--kit-weight-medium); }
+.aw-facts-part:has(.aw-facts-expired)::before { content: none; } /* the Expired chip needs no separator before it */
+.aw-facts .aw-facts-expired { margin-left: var(--kit-space-2); }
 .aw-facts-na { color: var(--kit-color-muted); }
 .aw-facts-suggest { margin-left: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-facts-note { display: block; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-facts .aw-org-hours { margin: 0; border-collapse: collapse; }
 .aw-facts .aw-org-hours th { padding: 0 var(--kit-space-4) 0 0; text-align: left; font-weight: var(--kit-weight-regular); }
 .aw-facts .aw-org-hours td { padding: 0; }
-.aw-facts .aw-place-chip { margin: 0 var(--kit-space-1) var(--kit-space-1) 0; }
+.aw-facts .aw-item-place { margin: 0 var(--kit-space-3) var(--kit-space-1) 0; }
 .aw-facts--phones { margin-top: var(--kit-space-3); }
 /* Contact: labelled organisation buttons (never icon-only, never beside Share) */
 .aw-listing-actions { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .aw-listing-wa { display: inline-flex; vertical-align: middle; margin-left: var(--kit-space-1); color: var(--kit-color-text); }
 /* Online profiles: small icon links */
-.aw-listing-profiles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); margin: var(--kit-space-7) 0 0; }
-.aw-listing-profiles-label { margin: 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 .aw-listing-profiles-links { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
 .aw-listing-profile { display: inline-flex; align-items: center; justify-content: center; width: var(--kit-size-target); height: var(--kit-size-target); color: var(--kit-color-text); border-radius: var(--radius-sm); }
 .aw-listing-profile::after { content: none !important; }
@@ -818,7 +822,7 @@ body { background: var(--kit-color-canvas); }
 .aw-org-hours-closed td { color: var(--kit-color-muted); }
 @media (min-width: 768px) { .aw-org-fact--wide { grid-column: 1 / -1; } }
 /* "Is this your organisation?": a section heading, not a page title */
-.aw-listing-help h2 { font-size: var(--kit-type-h4) !important; font-weight: var(--kit-weight-strong); margin: 0 0 var(--kit-space-3); }
+.aw-listing-help h2 { font-weight: var(--kit-weight-strong); margin: 0 0 var(--kit-space-3); } /* size: has-x-large-font-size (the Kits h4) */
 /* Library rows on phones: date (and a small first-page thumbnail) on one line above the title, no side column;
    "Issued by" on one line; labels on one line */
 @media (max-width: 767px) {

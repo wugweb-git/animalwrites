@@ -62,7 +62,7 @@ function aw_block_listing_help( $a, $id ) {
 		return '';
 	}
 	$verified = (bool) get_post_meta( $id, 'aw_verified', true );
-	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h">Is this your organisation?</h2>'
+	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h" class="has-x-large-font-size">Is this your organisation?</h2>'
 		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.</p>' )
 		. '<div class="aw-listing-help-actions">'
 		. '<a class="kit-btn aw-claim-link" href="' . esc_url( aw_claim_url( $id ) ) . '" rel="nofollow">Claim this listing</a>' // Report a mistake is in the Sources block

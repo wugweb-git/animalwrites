@@ -40,9 +40,14 @@
 }
 .kit-tag { cursor: default; }
 a.kit-tag { cursor: pointer; }
-.kit-tag--success { background: var(--kit-color-success-soft); color: var(--kit-color-success); border-color: transparent; }
-.kit-tag--warning { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); border-color: transparent; }
-.kit-tag--danger { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); border-color: transparent; }
+/* Status chips (Verified, Needs re-check, Expired, Closed, Blacklisted, Featured): the same chip, solid fill in the status
+   colour, white text and icon (4.5:1 or more; the danger fill is darkened a little so any theme's red passes). */
+.kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) { --kit-status: var(--kit-color-ink); background: var(--kit-status); border-color: var(--kit-status); color: var(--kit-color-on-ink); }
+.kit-tag--success { --kit-status: var(--kit-color-success) !important; }
+.kit-tag--warning { --kit-status: var(--kit-color-warning) !important; }
+.kit-tag:is(.kit-tag--danger, .kit-tag--closed) { --kit-status: color-mix(in srgb, var(--kit-color-danger) 85%, #000) !important; }
+.kit-tag--featured { --kit-status: var(--kit-color-ink) !important; }
+.kit-tag:is(.kit-tag--success, .kit-tag--warning, .kit-tag--danger, .kit-tag--closed, .kit-tag--featured) .aw-date { color: inherit; }
 .kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
 .kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* 44px hit area */
 :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):visited { color: var(--kit-chip-fg); }

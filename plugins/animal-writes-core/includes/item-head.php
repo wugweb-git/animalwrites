@@ -157,7 +157,7 @@ function aw_block_item_meta( $a, $id ) {
 		foreach ( aw_item_places( $id ) as $p ) {
 			$st    = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
 			$label = $st ? $p->name . ', ' . $st->name : $p->name;
-			$row  .= '<a class="kit-chip aw-place-chip" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $label ) . '</a>';
+			$row  .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $label ) . '</a>';
 		}
 	}
 	if ( 'opportunity' === $kind ) {
@@ -178,7 +178,7 @@ function aw_block_item_meta( $a, $id ) {
 		}
 		$until = (string) get_post_meta( $id, 'aw_featured_until', true );
 		if ( get_post_meta( $id, 'aw_featured', true ) && ( '' === $until || wp_date( 'Y-m-d' ) <= $until ) ) {
-			$row .= '<span class="kit-badge kit-badge--sponsored">' . esc_html__( 'Featured', 'animal-writes-core' ) . '</span>';
+			$row .= '<span class="kit-tag kit-tag--featured">' . esc_html__( 'Featured', 'animal-writes-core' ) . '</span>';
 		}
 	} else {
 		$cats = get_the_terms( $id, 'category' );
@@ -338,7 +338,7 @@ function aw_block_item_sources( $a, $id ) {
 	if ( 'listing' === $kind ) { // the listing's data sources with their "as on" dates, and when it was last updated
 		$list = function_exists( 'aw_listing_sources_html' ) ? aw_listing_sources_html( $id ) : '';
 		$last = function_exists( 'aw_listing_last_updated' ) ? aw_listing_last_updated( $id ) : '';
-		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>'
+		return '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>'
 			. ( '' !== $list ? '<div class="aw-sources-list">' . $list . '</div>' : '' )
 			. ( '' !== $last ? '<p class="aw-sources-updated">' . esc_html__( 'Last updated:', 'animal-writes-core' ) . ' ' . aw_date( $last ) . '</p>' : '' )
 			. $links . '</section>';
@@ -395,7 +395,7 @@ function aw_block_item_sources( $a, $id ) {
 	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : '';
 	$ad   = 'inline' !== aw_item_state( 'ad1' ) && function_exists( 'aw_ad' ) ? aw_ad( 'article-incontent-1' ) : ''; // Ad 1 after a short text
 	aw_item_state( 'ad1', 'inline' );
-	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>';
+	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';
 	$out .= '' !== $refs ? '<div class="aw-sources-refs">' . do_blocks( $refs ) . '</div>' : '';
@@ -521,7 +521,7 @@ function aw_block_item_more( $a, $id ) {
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {
 		$hid  = 'aw-more-' . $n;
-		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
+		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
 	}
 	return '' !== $out ? '<div class="aw-more">' . $out . '</div>' : '';
 }

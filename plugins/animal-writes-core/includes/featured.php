@@ -52,7 +52,11 @@ function aw_featured_names() {
 		$by[ $n ]    = (int) $r->ID;
 	}
 	$names = array();
+	$skip  = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(); // sample listings never match
 	foreach ( $by as $n => $id ) {
+		if ( in_array( (int) $id, $skip, true ) ) {
+			continue;
+		}
 		if ( 1 !== $count[ $n ] || mb_strlen( $n ) < 12 || str_word_count( $n ) < 2 || in_array( $n, AW_FEATURED_GENERIC, true ) ) {
 			continue;
 		}
@@ -111,7 +115,7 @@ function aw_featured_shared() {
 	$shared   = array();
 	foreach ( $wpdb->get_results( "SELECT ID, post_title FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_status = 'publish'" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$n = aw_featured_title_key( $r->post_title );
-		if ( '' === $n || isset( $distinct[ $n ] ) || str_word_count( $n ) < 2 ) {
+		if ( '' === $n || isset( $distinct[ $n ] ) || str_word_count( $n ) < 2 || in_array( (int) $r->ID, function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(), true ) ) {
 			continue;
 		}
 		$places = aw_featured_places( (int) $r->ID );
@@ -132,6 +136,9 @@ function aw_featured_aliases() {
 	global $wpdb;
 	$al = array();
 	foreach ( $wpdb->get_results( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = 'aw_aliases' AND m.meta_value <> '' AND p.post_type = 'aw_listing' AND p.post_status = 'publish'" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( in_array( (int) $r->post_id, function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array(), true ) ) {
+			continue;
+		}
 		foreach ( explode( ',', (string) $r->meta_value ) as $a ) {
 			$a = trim( aw_featured_norm( $a ) );
 			if ( mb_strlen( $a ) >= 2 ) {
@@ -192,7 +199,11 @@ function aw_featured_link_keys() {
 	$fields = array( 'aw_website', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_linkedin', 'aw_g_profile' );
 	$rows   = $wpdb->get_results( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key IN ('" . implode( "','", $fields ) . "') AND m.meta_value <> '' AND p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
 	$by     = array();
+	$skip   = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
 	foreach ( $rows as $r ) {
+		if ( in_array( (int) $r->post_id, $skip, true ) ) {
+			continue;
+		}
 		$k = aw_featured_url_key( $r->meta_value );
 		if ( '' !== $k ) {
 			$by[ $k ][ (int) $r->post_id ] = true;

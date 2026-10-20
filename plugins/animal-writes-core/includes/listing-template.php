@@ -62,7 +62,7 @@ function aw_listing_group( $slug, $head, $body ) {
 		return '';
 	}
 	$hid = 'aw-' . $slug . '-h';
-	return '<section class="aw-listing-group aw-listing-' . esc_attr( $slug ) . '" aria-labelledby="' . $hid . '"><h2 class="aw-listing-head" id="' . $hid . '">' . esc_html( $head ) . '</h2>' . $body . '</section>';
+	return '<section class="aw-listing-group aw-listing-' . esc_attr( $slug ) . '" aria-labelledby="' . $hid . '"><h2 class="aw-listing-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $head ) . '</h2>' . $body . '</section>';
 }
 
 /** A value's parts, separated by CSS. */
@@ -89,7 +89,7 @@ function aw_listing_validity( $date ) {
 	}
 	$day = wp_date( 'Y-m-d', strtotime( $date . ' 12:00:00' ) );
 	return $day < wp_date( 'Y-m-d' )
-		? '<span class="aw-facts-expired">' . esc_html__( 'expired', 'animal-writes-core' ) . ' ' . aw_date( $day ) . '</span>'
+		? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Expired', 'animal-writes-core' ) . ' ' . aw_date( $day ) . '</span>'
 		: esc_html__( 'valid until', 'animal-writes-core' ) . ' ' . aw_date( $day );
 }
 
@@ -118,7 +118,7 @@ function aw_block_listing_registrations( $a, $id ) {
 	$drop = aw_lf( $id, 'aw_awbi_dropped' );
 	$type = aw_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="aw-facts-expired">' . esc_html__( 'not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) ),
+		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ) ),
 		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ) ),
@@ -185,7 +185,7 @@ function aw_block_listing_location( $a, $id ) {
 	$place = '';
 	foreach ( function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array() as $p ) {
 		$st     = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
-		$place .= '<a class="kit-chip aw-place-chip" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
+		$place .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
 	}
 	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'aw_listing_hours' ) ? aw_org_hours_html( aw_listing_hours( $id ) ) : '';
 	$rows  = array(
@@ -247,7 +247,7 @@ function aw_block_listing_profiles( $a, $id ) {
 			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '"><span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span></a>';
 		}
 	}
-	return '' !== $links ? '<section class="aw-listing-profiles" aria-label="' . esc_attr__( 'Online profiles', 'animal-writes-core' ) . '"><p class="aw-listing-profiles-label">' . esc_html__( 'Online profiles', 'animal-writes-core' ) . '</p><div class="aw-listing-profiles-links">' . $links . '</div></section>' : '';
+	return aw_listing_group( 'profiles', __( 'Online profiles', 'animal-writes-core' ), '' !== $links ? '<div class="aw-listing-profiles-links">' . $links . '</div>' : '' );
 }
 
 /* ---------- 13 Support ---------- */
@@ -430,7 +430,7 @@ function aw_block_listing_press( $a, $id ) {
 	$n    = $all ? count( $ids ) : count( aw_featured_items( $id, 100 ) );
 	$show = $all ? $ids : array_slice( $ids, 0, 5 );
 	$more = ! $all && $n > 5 ? '<p class="aw-more-all"><a href="' . esc_url( add_query_arg( 'press', 'all', get_permalink( $id ) ) . '#aw-press-h' ) . '">' . esc_html( sprintf( /* translators: %d: number. */ __( 'See all (%d)', 'animal-writes-core' ), $n ) ) . '</a></p>' : '';
-	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
+	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
 }
 
 // "?press=all" lists every item on the profile: the same page, kept out of the index.
@@ -450,7 +450,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 		return '';
 	}
 	/* translators: %s: organisation. */
-	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
+	return '<section class="aw-more-group aw-listing-opps" aria-labelledby="aw-opps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-opps-h">' . esc_html( sprintf( __( 'Opportunities at %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $ids ) ) . '</ul></section>';
 }
 
 /* ---------- Sidebar: Claim your listing (everywhere but an unclaimed profile, which has its own claim box) ---------- */
