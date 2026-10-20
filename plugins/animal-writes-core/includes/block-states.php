@@ -44,7 +44,7 @@ add_filter(
 				array( 'A board or ministry', aw_state_item( array( 'post_type' => 'aw_legal', 'meta_query' => array( array( 'key' => 'aw_issuer', 'value' => AW_COURT_ISSUERS, 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
 				array( 'Template', aw_state_item( array( 'post_type' => 'aw_legal', 'tax_query' => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => 'template' ) ) ) ), fn( $id ) => aw_block_issuer( array(), $id ) ),
 			),
-			'Checked and deadline (animal-writes/deadline)' => array(
+			'Apply by (animal-writes/deadline)' => array(
 				array( 'With a deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( array( 'key' => 'aw_deadline', 'value' => '', 'compare' => '!=' ) ) ) ), fn( $id ) => aw_block_deadline( array(), $id ) ),
 				array( 'No deadline', aw_state_item( array( 'post_type' => 'aw_opportunity', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_deadline', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_deadline', 'value' => '' ) ) ) ), fn( $id ) => aw_block_deadline( array(), $id ) ),
 			),

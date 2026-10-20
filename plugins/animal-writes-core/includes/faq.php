@@ -107,6 +107,19 @@ function aw_faq_doc_name( $id ) {
 	return preg_replace( '/^The\s+/u', '', aw_faq_plain( get_the_title( $id ) ) );
 }
 
+/**
+ * A document's short name, the way people search it (owner, 20 Oct 2026): the "Short name" field ("PCA Act 1960", "ABC
+ * Rules 2023"), else the primary focus keyphrase, else the title. Questions use it; the first answer gives the full
+ * official title once.
+ */
+function aw_faq_doc_short( $id ) {
+	$s = aw_faq_plain( get_post_meta( $id, 'aw_short_name', true ) );
+	if ( '' === $s ) {
+		$s = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
+	}
+	return '' !== $s ? $s : aw_faq_doc_name( $id );
+}
+
 /* ---------- A. Directory listings ---------- */
 
 /** "Monday to Saturday 9:00 am – 5:00 pm; Sunday closed" from aw_listing_hours(). */
@@ -234,7 +247,7 @@ function aw_faq_listing_services( $id, $name ) {
 	$extra = max( 0, count( $names ) - 8 ); // a long list stays under 50 words
 	$list  = aw_faq_and( array_map( 'aw_faq_lc', array_slice( $names, 0, 8 ) ) ) . ( $extra ? ' and ' . $extra . ' more' : '' );
 	$a     = esc_html( $name ) . ' offers ' . esc_html( $list ) . ( $typed ? ' (based on type)' : '' ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'services' ), 'See its services' ) . '.';
-	return array( $a, 'services' );
+	return array( $a, 'services', ! $typed ); // "based on type" is shown but does not count toward the 3 (owner, 20 Oct 2026)
 }
 
 function aw_faq_listing_awbi( $id, $name ) {
@@ -549,11 +562,12 @@ function aw_faq_context( $obj = null ) {
 			'kind'    => $legal ? 'legal' : 'listing',
 			'id'      => $obj->ID,
 			'type'    => $obj->post_type,
-			'entity'  => $legal ? aw_faq_doc_name( $obj->ID ) : aw_faq_plain( get_the_title( $obj ) ),
+			'entity'  => $legal ? aw_faq_doc_short( $obj->ID ) : aw_faq_plain( get_the_title( $obj ) ),
+			'full'    => $legal ? aw_faq_doc_name( $obj->ID ) : '',
 			'url'     => $url,
 			'page_id' => $url . '#webpage',
 			'about'   => $url . ( $legal ? ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) ) : '#organization' ),
-			'head'    => 'Questions about ' . ( $legal ? 'the ' . aw_faq_doc_name( $obj->ID ) : aw_faq_plain( get_the_title( $obj ) ) ),
+			'head'    => 'Questions about ' . ( $legal ? 'the ' . aw_faq_doc_short( $obj->ID ) : aw_faq_plain( get_the_title( $obj ) ) ),
 		);
 	}
 	if ( $obj instanceof WP_Term && aw_faq_term_allowed( $obj ) ) {
@@ -584,18 +598,18 @@ function aw_faq_candidates( $ctx ) {
 		}
 		if ( isset( $r[0] ) && is_string( $r[0] ) ) { // one answer: [ html, fact ]
 			$verb  = 'date' === $e['key'] ? aw_faq_legal_verb( $ctx['id'] ) : '';
-			$out[] = array( 'q' => sprintf( $e['q'], $ctx['entity'], $verb ), 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'] );
+			$out[] = array( 'q' => sprintf( $e['q'], $ctx['entity'], $verb ), 'a' => $r[0], 'fact' => $r[1], 'priority' => $e['priority'], 'key' => $e['key'], 'counts' => $r[2] ?? true, 'answer' => $e['answer'] );
 			continue;
 		}
 		foreach ( $r as $i => $x ) { // several (key sections)
-			$out[] = array( 'q' => $x['q'], 'a' => $x['a'], 'fact' => $x['fact'], 'priority' => $e['priority'] + $i / 100, 'key' => $e['key'] );
+			$out[] = array( 'q' => $x['q'], 'a' => $x['a'], 'fact' => $x['fact'], 'priority' => $e['priority'] + $i / 100, 'key' => $e['key'], 'counts' => true, 'answer' => $e['answer'] );
 		}
 	}
 	if ( in_array( $ctx['kind'], array( 'term', 'hub' ), true ) ) {
 		$i = 0;
 		foreach ( aw_faq_items( 'term' === $ctx['kind'] ? 'term' : 'post', $ctx['id'] ) as $it ) {
 			if ( 'approved' === $it['status'] ) {
-				$out[] = array( 'q' => $it['q'], 'a' => $it['a'], 'fact' => 'topic:' . strtolower( $it['q'] ), 'priority' => 100 + $i++, 'key' => 'topic' ); // in the owner's order
+				$out[] = array( 'q' => $it['q'], 'a' => $it['a'], 'fact' => 'topic:' . strtolower( $it['q'] ), 'priority' => 100 + $i++, 'key' => 'topic', 'counts' => true ); // in the owner's order
 			}
 		}
 	}
@@ -637,7 +651,20 @@ function aw_faq_build( $ctx = null, $holdout = true ) {
 		$seen[ $qk ]               = true;
 	}
 	$faq = array_slice( $keep, 0, AW_FAQ_MAX );
-	return $cache[ $key ] = count( $faq ) < AW_FAQ_MIN ? null : array( 'ctx' => $ctx, 'items' => $faq );
+	if ( count( array_filter( $faq, fn( $c ) => $c['counts'] ) ) < AW_FAQ_MIN ) { // "based on type" answers do not count toward the 3
+		return $cache[ $key ] = null;
+	}
+	if ( 'legal' === $ctx['kind'] && '' !== $ctx['full'] && $ctx['full'] !== $ctx['entity'] ) { // the full official title, once, in the first answer
+		$r = call_user_func( $faq[0]['answer'], $ctx['id'], $ctx['full'] );
+		if ( isset( $r[0] ) && is_string( $r[0] ) ) {
+			$faq[0]['a'] = $r[0];
+		} elseif ( is_array( $r ) ) {
+			foreach ( $r as $x ) {
+				$faq[0]['a'] = $x['fact'] === $faq[0]['fact'] ? $x['a'] : $faq[0]['a'];
+			}
+		}
+	}
+	return $cache[ $key ] = array( 'ctx' => $ctx, 'items' => $faq );
 }
 
 /**
@@ -864,6 +891,7 @@ add_action(
 	'init',
 	function () {
 		$auth = fn() => current_user_can( 'edit_posts' );
+		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960); used in FAQ questions', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_file_hi_url', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Hindi version (link to the official Hindi text)', 'sanitize_callback' => 'esc_url_raw', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_legal_act', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Issued under (the parent Act, as the document states it)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_key_sections', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Key sections (Acts and Rules): one per line, "number | one-line plain summary | link"', 'sanitize_callback' => 'sanitize_textarea_field', 'auth_callback' => $auth ) );
@@ -879,6 +907,7 @@ add_action(
 			function ( $post ) {
 				wp_nonce_field( 'aw_faq_legal', 'aw_faq_legal_nonce' );
 				echo '<p class="description">Questions on this page come from its own fields (PDF, in force, date and number, issuer). These add more when filled.</p>';
+				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Questions use it; empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
 				echo '<p><label for="aw-file-hi">Hindi version (link to the official Hindi text)</label><br><input type="url" class="large-text" id="aw-file-hi" name="aw_file_hi_url" value="' . esc_attr( get_post_meta( $post->ID, 'aw_file_hi_url', true ) ) . '"></p>';
 				echo '<p><label for="aw-legal-act">Issued under (the parent Act, as the document states it)</label><br><input type="text" class="large-text" id="aw-legal-act" name="aw_legal_act" value="' . esc_attr( get_post_meta( $post->ID, 'aw_legal_act', true ) ) . '"></p>';
 				echo '<p><label for="aw-key-sections">Key sections (Acts and Rules only): one per line, "number | one-line plain summary | link"</label><br><textarea class="large-text" rows="4" id="aw-key-sections" name="aw_key_sections" placeholder="11 | punishment for treating animals cruelly | https://…">' . esc_textarea( get_post_meta( $post->ID, 'aw_key_sections', true ) ) . '</textarea></p>';
@@ -895,7 +924,7 @@ add_action(
 		if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['aw_faq_legal_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['aw_faq_legal_nonce'] ) ), 'aw_faq_legal' ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		foreach ( array( 'aw_file_hi_url' => 'esc_url_raw', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
+		foreach ( array( 'aw_short_name' => 'sanitize_text_field', 'aw_file_hi_url' => 'esc_url_raw', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
 			$v = call_user_func( $clean, wp_unslash( (string) ( $_POST[ $k ] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			'' !== trim( $v ) ? update_post_meta( $post_id, $k, $v ) : delete_post_meta( $post_id, $k );
 		}

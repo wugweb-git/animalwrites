@@ -4,7 +4,7 @@
  *
  * - Contact and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
  *   person goes onto the newsletter list as "active" with the form as source (16 Oct 2026). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
- * - Volunteers join the newsletter on signing up (owner, 16 Oct 2026; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
+ * - Volunteers get the same unticked box (owner, 20 Oct 2026; was automatic from 16 Oct; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
  *   lists them (name, email, source, date) with a CSV export, for a one-time opt-in invite sent outside WordPress.
  *
  * @package animal-writes-core

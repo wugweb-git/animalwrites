@@ -1269,7 +1269,7 @@
    "block": "animal-writes/place"
   },
   {
-   "name": "Checked and deadline",
+   "name": "Apply by (deadline)",
    "type": "block",
    "status": "live",
    "classes": [],

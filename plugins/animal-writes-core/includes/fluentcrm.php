@@ -357,8 +357,7 @@ function aw_crm_volunteer_sync( $email ) {
 		if ( 'active' !== $r['status'] ) {
 			return 'skipped';
 		}
-		aw_crm_subscribe( $r['email'], $r['name'], aw_crm_volunteer_fields( $st ? $st->slug : '', $di ? $di->slug : '', $r['city_text'], $r['pincode'], $r['phone'] ) + array( 'source' => $r['source'] ), array( 'volunteer' ) );
-		$c   = FluentCrmApi( 'contacts' )->getContact( $r['email'] );
+		$c   = aw_crm_contact_for( $r['email'], $r['name'], array( 'volunteer' ), (string) $r['source'] ); // a contact, not a subscriber: the newsletter needs its own tick (owner, 20 Oct 2026)
 		$res = 'created';
 		if ( ! $c ) {
 			return 'skipped';

@@ -627,6 +627,7 @@ function aw_ff_form_fields( $key ) {
 				aw_ff_dict( 'phone', '', array( 'class' => 'kit-field aw-form-ff-half' ) ),
 				aw_ff_field( 'aw_places', 'places', 'PIN code, State and District' ),
 				aw_ff_field( 'input_checkbox', 'consent', '', array( 'required' => 'Tick the box to agree', 'options' => array( '1' => AW_VOL_CONSENT_LABEL ) ) ),
+				aw_ff_field( 'input_checkbox', 'nl_optin', '', array( 'options' => array( '1' => AW_NL_OPTIN_LABEL ) ) ), // unticked (owner, 20 Oct 2026; DPDP)
 				aw_ff_field( 'aw_check', 'check', 'Spam check (ALTCHA)' ),
 			);
 			return array( $f, 'Sign up to volunteer' );

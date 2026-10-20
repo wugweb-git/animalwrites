@@ -35,7 +35,7 @@ function aw_hub_blocks() {
 		'task-icon'     => array( 'Guide icon', 'aw_block_task_icon', array() ),
 		'read-meta'     => array( 'Updated and reading time', 'aw_block_read_meta', array() ),
 		'place'         => array( 'Place', 'aw_block_place', array() ),
-		'deadline'      => array( 'Checked and deadline', 'aw_block_deadline', array() ),
+		'deadline'      => array( 'Apply by (deadline)', 'aw_block_deadline', array() ),
 		'opp-line'      => array( 'Opportunity line (organisation, place, apply by)', 'aw_block_opp_line', array() ),
 		'opp-actions'   => array( 'Opportunity buttons', 'aw_block_opp_actions', array() ),
 		'org-mark'      => array( 'Organisation logo', 'aw_block_org_mark', array() ),
@@ -368,10 +368,11 @@ function aw_block_place( $a, $id ) {
 	return $p ? '<span class="aw-place kit-meta-item">' . aw_i( 'directory' ) . esc_html( $p->name ) . '</span>' : '';
 }
 
-/** "Checked by Animal Writes on …" and "Apply by …" (validThrough). */
+/** "Apply by …" (validThrough). No "Checked by Animal Writes on …": opportunities have no check date, and the last-edited
+ *  date is not one (owner, 20 Oct 2026). */
 function aw_block_deadline( $a, $id ) {
 	$dl = (string) get_post_meta( $id, 'aw_deadline', true );
-	return '<p class="aw-opp-trust kit-meta-row"><span class="kit-meta-item">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span>' . ( $dl ? '<span class="kit-meta-item">Apply by ' . aw_date( $dl ) . '</span>' : '' ) . '</p>';
+	return $dl ? '<p class="aw-opp-trust kit-meta-row"><span class="kit-meta-item">Apply by ' . aw_date( $dl ) . '</span></p>' : '';
 }
 
 /** The place for the opportunity line: in a list for one state ("near you"), that state's district or the state; else the first place. */
