@@ -118,6 +118,7 @@ require_once AW_CORE_DIR . 'includes/newsletter-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/forms-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
+require_once AW_CORE_DIR . 'includes/form-alerts.php';
 require_once AW_CORE_DIR . 'includes/ai-keys.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
 require_once AW_CORE_DIR . 'includes/relay.php';

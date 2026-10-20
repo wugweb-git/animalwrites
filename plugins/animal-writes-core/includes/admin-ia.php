@@ -140,7 +140,8 @@ add_action(
 		list( $msg, $claims ) = aw_inbox_counts();
 		// The count is what the sections inside show: pending claims and To review. Contact messages moved to Mailweb
 		// (Mail → Website forms), so old filed email copies no longer count here (owner, 19 Oct 2026).
-		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $claims + ( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ) ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
+		// Reports, volunteer sign-ups and data removal requests count too: the forms send no email (form-alerts.php, 21 Oct 2026).
+		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $claims + ( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ) + ( function_exists( 'aw_alert_total' ) ? aw_alert_total() : 0 ) ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
@@ -170,11 +171,13 @@ add_action(
 				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( $msg ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 			} elseif ( 'edit.php?post_type=aw_claim' === $item[2] ) {
 				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( $claims ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+			} elseif ( 'edit.php?post_type=aw_report' === $item[2] && function_exists( 'aw_alert_reports' ) ) {
+				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( aw_alert_reports() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 			}
 		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
-		// Inbox order (S2.3): Contact messages · Listing claims · Reports · To review (was Press to review).
-		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'aw-review' => 5 );
+		// Inbox order (S2.3): Contact messages · Listing claims · Reports · Volunteer sign-ups · Data removal · To review.
+		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'admin.php?page=aw-volunteers' => 4, 'erase-personal-data.php' => 4.5, 'aw-review' => 5 );
 		if ( isset( $submenu['aw-inbox'] ) ) {
 			usort( $submenu['aw-inbox'], fn( $x, $y ) => ( $rank[ $x[2] ] ?? 9 ) <=> ( $rank[ $y[2] ] ?? 9 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		}
