@@ -2844,6 +2844,89 @@
     "schema": "none"
    },
    "block": "animal-writes/claim-cta"
+  },
+  {
+   "name": "Term page: FAQ",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-term"
+   ],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "H2 'Questions and answers'; each question a <summary> that opens its answer"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "FAQPage from the same questions (aw-seo-extras schema.php)"
+   },
+   "block": "animal-writes/term-faq"
+  },
+  {
+   "name": "Term page: share",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "group 'Share'; each button aria-label + title; copy link announces 'Link copied'"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/term-share"
+  },
+  {
+   "name": "Term page: related",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "H2 then a list of chip links with the tag's icon"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/term-related"
   }
  ],
  "nav_status": {

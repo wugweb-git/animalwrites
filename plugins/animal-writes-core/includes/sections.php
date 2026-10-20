@@ -126,6 +126,8 @@ function aw_section_head_archive() {
 			$filters = aw_directory_filter();
 		} elseif ( is_post_type_archive() && function_exists( 'aw_list_filters' ) ) {
 			$filters = aw_list_filters( $type );
+		} elseif ( is_tag() && function_exists( 'aw_directory_filter' ) && in_array( (string) get_queried_object()->slug, aw_listing_type_slugs(), true ) ) {
+			$filters = aw_directory_filter( (string) get_queried_object()->slug ); // an organisation type's page: the Directory search with the type chosen (owner, 20 Oct 2026)
 		}
 		return aw_head_band(
 			array(

@@ -73,6 +73,7 @@ require_once AW_CORE_DIR . 'includes/campaign-record.php';
 require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
+require_once AW_CORE_DIR . 'includes/term-page.php';
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';

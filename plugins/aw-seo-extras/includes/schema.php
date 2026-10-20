@@ -1067,6 +1067,9 @@ function aw_schema_nodes() {
 		$nodes = array_merge( $nodes, aw_page_lists_schema_nodes( get_queried_object_id() ) ); // a section page of several lists (Adoption)
 	} elseif ( aw_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, aw_category_schema_nodes() );
+		if ( function_exists( 'aw_term_faq' ) && ! is_paged() ) {
+			$nodes[] = aw_term_faq_schema( get_queried_object() );
+		}
 	}
 	if ( $nodes && is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) ) && function_exists( 'aw_featured_mentions_schema' ) ) {
 		$mentions = aw_featured_mentions_schema( get_queried_object_id() ); // the organisations it features (featured.php)
@@ -1075,6 +1078,29 @@ function aw_schema_nodes() {
 		}
 	}
 	return array_values( array_filter( $nodes ) );
+}
+
+/**
+ * FAQPage of a category or tag page: the questions and answers its FAQ block shows, word for word (term-page.php), or
+ * null when it has none.
+ *
+ * @param WP_Term $term Term.
+ * @return array|null
+ */
+function aw_term_faq_schema( $term ) {
+	$faq = $term instanceof WP_Term ? aw_term_faq( $term ) : array();
+	if ( ! $faq ) {
+		return null;
+	}
+	$url = (string) get_term_link( $term );
+	return array(
+		'@type'      => 'FAQPage',
+		'@id'        => $url . '#faq',
+		'url'        => $url,
+		'inLanguage' => 'en-IN',
+		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
+		'mainEntity' => array_map( fn( $f ) => array( '@type' => 'Question', 'name' => $f['q'], 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $f['a'] ) ), $faq ),
+	);
 }
 
 /** The schema.org type of an item in a category or tag page's list. */

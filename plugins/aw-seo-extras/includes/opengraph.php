@@ -35,7 +35,7 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 				$up   = wp_get_upload_dir();
 				$base = set_url_scheme( $up['baseurl'], 'https' );
 				$size = 0 === strpos( set_url_scheme( $url, 'https' ), $base ) ? wp_getimagesize( $up['basedir'] . substr( set_url_scheme( $url, 'https' ), strlen( $base ) ) ) : false;
-				$image->add_image( array_filter( array( 'url' => $url, 'width' => $size ? $size[0] : 0, 'height' => $size ? $size[1] : 0, 'type' => 'image/jpeg', 'alt' => aw_seo_plain( get_queried_object()->name ) ) ) );
+				$image->add_image( array_filter( array( 'url' => $url, 'width' => $size ? $size[0] : 0, 'height' => $size ? $size[1] : 0, 'type' => 'image/jpeg', 'alt' => aw_term_share_alt( get_queried_object() ) ) ) );
 				return;
 			}
 			if ( aw_seo_typed( 'facebook_image_id' ) || aw_seo_typed( 'facebook_image' ) || aw_seo_typed( 'twitter_image_id' ) ) {
@@ -77,3 +77,9 @@ add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );
 add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => 'en_IN' );
+
+/** A term's share picture alt text: "<focus keyphrase> in India – Animal Writes" (owner, 20 Oct 2026), else its name. */
+function aw_term_share_alt( $term ) {
+	$kw = trim( explode( ',', (string) get_term_meta( $term->term_id, 'rank_math_focus_keyword', true ) )[0] );
+	return ( '' !== $kw ? $kw : aw_seo_plain( $term->name ) ) . ' in India – Animal Writes';
+}
