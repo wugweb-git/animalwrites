@@ -7,6 +7,7 @@
  *
  * Organisation:      Home › Directory › State › District › Organisation
  * District × type:   Home › Directory › State › District › Type
+ * News, Library:     Home › Section › primary category
  * Other items:       Home › Section › Item
  * Section hub:       Home › Section
  * Filtered hub:      Home › Section › Category or tag (one ?category_name= or ?tag=; filtered-views.php)
@@ -70,7 +71,13 @@ function aw_seo_breadcrumb_trail() {
 		$type    = get_post_type( $id );
 		$obj     = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
-		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+		$cat     = in_array( $type, array( 'aw_news', 'aw_legal' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+		if ( $cat ) { // News and Library (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
+			$n       = function_exists( 'aw_seo_filtered_count' ) ? aw_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
+			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : get_term_link( $cat ) );
+		} else {
+			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+		}
 	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && aw_current_place() ) {
 		$city  = aw_current_place();
 		$trail = array_merge( array( $dir ), $place( $city ) );

@@ -47,6 +47,8 @@ function aw_breadcrumbs_html() {
 		return '';
 	}
 	$last = count( $trail ) - 1;
+	$here = is_singular() ? (string) get_permalink( get_queried_object_id() ) : '';
+	$self = ! $here || untrailingslashit( $trail[ $last ][1] ) === untrailingslashit( $here ); // News and Library end at the category, a link (item-head.php)
 	$html = '<nav class="kit-crumbs" aria-label="Breadcrumb"><ol>';
 	foreach ( $trail as $i => $c ) {
 		if ( $last > 3 && $i > 0 && $i < $last - 1 ) { // longer than Home + 2 levels: the middle folds into "…" (schema keeps the full trail)
@@ -57,7 +59,7 @@ function aw_breadcrumbs_html() {
 			$html .= '<li class="kit-crumbs-home"><a href="' . esc_url( $c[1] ) . '" aria-label="Home"><span class="kit-ico kit-ico--home" aria-hidden="true"></span></a></li>';
 			continue;
 		}
-		$html .= $i === $last
+		$html .= $i === $last && $self
 			? '<li><span aria-current="page">' . esc_html( wp_strip_all_tags( $c[0] ) ) . '</span></li>'
 			: '<li><a href="' . esc_url( $c[1] ) . '">' . esc_html( wp_strip_all_tags( $c[0] ) ) . '</a></li>';
 	}
@@ -90,7 +92,7 @@ add_filter(
 add_filter(
 	'render_block_core/post-terms',
 	function ( $html, $block, $instance ) {
-		if ( ! is_singular() || isset( $instance->context['queryId'] ) ) { // the page's own chips, not those in lists
+		if ( ! is_singular() || isset( $instance->context['queryId'] ) || (int) ( $instance->context['postId'] ?? 0 ) !== get_queried_object_id() ) { // the page's own chips, not those in lists (Related renders first, as a shortcode)
 			return $html;
 		}
 		return aw_breadcrumbs_prepend( $html );

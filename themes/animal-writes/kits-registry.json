@@ -583,6 +583,36 @@
    }
   },
   {
+   "name": "Item meta row and source line",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-item-meta",
+    "aw-source-line"
+   ],
+   "states": [
+    "default",
+    "no picture",
+    "Library (type chip first)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div> row; <p> source line",
+    "aria": "none",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "24px",
+    "motion": "none",
+    "sr": "visible text; \"(opens in a new tab)\" on Read the original"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "publisher and Read the original: nofollow, new tab; categories: rel=tag",
+    "alt": "publisher logo decorative",
+    "schema": "NewsArticle (aw-seo-extras)"
+   }
+  },
+  {
    "name": "Related items (item pages)",
    "type": "component",
    "status": "live",

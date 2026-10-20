@@ -330,7 +330,9 @@ add_filter(
 );
 
 // End of an article: before its categories and share buttons (kits_endbar), or after the text where there is no end bar.
-add_filter( 'kits_endbar_before', fn( $html ) => $html . ( is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) ? aw_ad( 'article-end' ) : '' ) );
+// Types in kits_ads_end_after_share_types get it after the share buttons instead.
+add_filter( 'kits_endbar_before', fn( $html ) => $html . ( is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && ! is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
+add_filter( 'kits_endbar_after', fn( $html ) => $html . ( is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
