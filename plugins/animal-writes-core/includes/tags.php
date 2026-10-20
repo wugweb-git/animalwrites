@@ -27,7 +27,7 @@ const AW_TAG_ICONS = array(
 	// Directory: organisation types.
 	'abc-centre', 'adoption-network', 'animal-ambulance', 'animal-shelter', 'animal-welfare-organisation', 'bird-hospital', 'emergency-rescue', 'feeder-network', 'gaushala', 'legal-aid', 'mobile-veterinary-unit', 'rescue-group', 'sanctuary', 'veterinary-clinic', 'veterinary-dispensary', 'veterinary-hospital', 'veterinary-office', 'wildlife-rescue',
 	// Directory: services.
-	'rescue', 'treatment', 'shelter', 'adoption', 'feeding', 'sterilisation', 'vaccination', 'ambulance', 'boarding-foster', 'legal-help', 'cattle-care',
+	'rescue', 'treatment', 'shelter', 'adoption', 'feeding', 'sterilisation', 'vaccination', 'ambulance', 'boarding-foster', 'legal-help', 'cattle-care', 'animal-welfare', 'bird-treatment',
 	// Resources, Opportunities, Library.
 	'research', 'guide', 'faq', 'how-to', 'job', 'volunteer', 'event', 'internship', 'fellowship', 'grant', 'draft',
 );
@@ -87,9 +87,9 @@ function aw_section_categories( $type ) {
 	return $cats ? $cats : get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false, 'fields' => 'slugs' ) );
 }
 
-/** Service slugs (the fixed list; "wildlife-rescue" is also a listing type, and counts as one). */
+/** Service slugs (the fixed list; "wildlife-rescue" and "emergency-rescue" are also listing types, and count as types). */
 function aw_service_slugs() {
-	return array_values( array_diff( array_keys( AW_SERVICES ), array( 'wildlife-rescue' ) ) );
+	return array_values( array_diff( array_keys( AW_SERVICES ), array( 'wildlife-rescue', 'emergency-rescue' ) ) );
 }
 
 /** Listing-type slugs: the Directory's tags that are not services. */

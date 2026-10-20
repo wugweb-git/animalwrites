@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Block name => [title, render callback, attributes]. */
 function aw_hub_blocks() {
 	$type_attr = array( 'postType' => array( 'type' => 'string', 'default' => '' ) );
-	return array(
+	return (array) apply_filters( 'aw_hub_blocks', array( // term-page.php adds the category and tag page blocks
 		'breadcrumb'    => array( 'Breadcrumb', 'aw_block_breadcrumb', array() ),
 		'section-head'  => array( 'Head band', 'aw_block_section_head', $type_attr ),
 		'hub-count'     => array( 'Section page count', 'aw_block_hub_count', $type_attr ),
@@ -71,7 +71,7 @@ function aw_hub_blocks() {
 		'listing-press'         => array( 'Listing: in the press', 'aw_block_listing_press', array() ),
 		'listing-opportunities' => array( 'Listing: opportunities', 'aw_block_listing_opportunities', array() ),
 		'claim-cta'             => array( 'Claim your listing', 'aw_block_claim_cta', array() ), // the sidebar's claim box
-	);
+	) );
 }
 
 add_action(

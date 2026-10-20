@@ -402,9 +402,9 @@ function aw_directory_service_field( $field ) {
 	return $opts ? $field( 'aw-dir-service', 'Service', '<select id="aw-dir-service" name="tag[]"><option value="">All services</option>' . $opts . '</select>', 'service' ) : '';
 }
 
-function aw_directory_filter() {
+function aw_directory_filter( $type = '' ) {
 	$cur_city = aw_current_place();
-	$cur_type = (string) get_query_var( 'aw_dir_type' );
+	$cur_type = '' !== $type ? (string) $type : (string) get_query_var( 'aw_dir_type' ); // $type: an organisation type's tag page (sections.php)
 	if ( '' === $cur_type ) {
 		$cur_type = aw_request_type();
 	}

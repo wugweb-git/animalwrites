@@ -18,8 +18,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function aw_share_html( $post_id ) {
-	$url   = get_permalink( $post_id );
-	$title = html_entity_decode( get_the_title( $post_id ), ENT_QUOTES );
+	return kits_share_html( (string) get_permalink( $post_id ), html_entity_decode( get_the_title( $post_id ), ENT_QUOTES ) );
+}
+
+/**
+ * The share bar for any address and title (a post, a category or tag page).
+ *
+ * @param string $url   Page address.
+ * @param string $title Plain-text title.
+ * @return string
+ */
+function kits_share_html( $url, $title ) {
 	$site  = html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 	$nets  = array( // key => [name, icon, link]
 		'x'        => array( 'X', 'x-brand', 'https://x.com/intent/post?text=' . rawurlencode( $title ) . '&url=' . rawurlencode( $url ) ),
