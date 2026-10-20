@@ -633,8 +633,8 @@ function aw_seo_term_image() {
 /**
  * The share image of the current view (og:image and article schema): the item's own image when it is landscape (or of
  * unknown shape), a category page's category photo, for a listing the Directory band picture, else the site share image,
- * else the site icon. Tags keep the site
- * share image (they have no picture of their own).
+ * else the site icon. Other tags keep the site share image; Directory type tags have their own, set in Rank Math's
+ * Social tab (20 Oct 2026), which Rank Math prints (opengraph.php).
  *
  * @return array|null
  */
