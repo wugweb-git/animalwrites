@@ -104,6 +104,7 @@ require_once AW_CORE_DIR . 'includes/listing-profile.php';
 require_once AW_CORE_DIR . 'includes/map-picker.php';
 require_once AW_CORE_DIR . 'includes/privacy-requests.php';
 require_once AW_CORE_DIR . 'includes/local-cards.php';
+require_once AW_CORE_DIR . 'includes/district-helplines.php';
 require_once AW_CORE_DIR . 'includes/related.php';
 require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';

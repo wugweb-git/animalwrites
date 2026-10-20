@@ -49,6 +49,9 @@
 .aw-helpline-num { font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-stat); line-height: 1; text-decoration: none; color: var(--kit-color-ink); display: inline-block; min-height: var(--kit-size-target); }
 .aw-helpline:first-child { border-color: var(--kit-color-danger); box-shadow: inset var(--kit-accent-bar) 0 0 var(--kit-color-danger); }
 .aw-helpline-src { font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
+.aw-district-helplines { margin: 0 0 var(--kit-space-6); }
+.aw-district-helplines .aw-helplines { margin-bottom: var(--kit-space-3); }
+.aw-district-helplines .aw-helpline h3 a { color: inherit; }
 
 /* PDF viewer */
 .aw-pdf { margin-block: var(--kit-space-6); }
