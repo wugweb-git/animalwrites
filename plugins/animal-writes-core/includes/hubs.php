@@ -460,8 +460,8 @@ function aw_hub_list( $type ) {
 <h2 class="wp-block-heading">More campaigns for animals</h2>
 <!-- /wp:heading -->
 
-' : ( 'aw_press' === $type ? '<!-- wp:heading -->
-<h2 class="wp-block-heading">Latest press coverage</h2>
+' : ( 'aw_press' === $type ? '<!-- wp:heading {"className":"screen-reader-text"} -->
+<h2 class="wp-block-heading screen-reader-text">Latest press coverage</h2>
 <!-- /wp:heading -->
 
 ' : ( 'aw_listing' === $type ? '<!-- wp:animal-writes/result-head /-->
