@@ -429,8 +429,7 @@ body { background: var(--kit-color-canvas); }
 /* ---------- Sidebar (1200+): the current campaign, Register as a volunteer, the sidebar ad (parts/sidebar.html) ---------- */
 .kit-sidebar { display: grid; gap: var(--kit-space-6); align-content: start; }
 .aw-side-camp { overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-side-camp-media { aspect-ratio: 4 / 3; overflow: hidden; }
-.aw-side-camp-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.aw-side-camp-media img { display: block; width: 100%; height: auto; } /* whole, never cropped: campaign pictures carry text */
 .aw-side-camp-body { padding: var(--kit-space-4); }
 .aw-side-camp-meta { margin: 0 0 var(--kit-space-2); }
 .aw-side-camp-title { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
