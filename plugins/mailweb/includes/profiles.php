@@ -53,7 +53,7 @@ function mailweb_profile_is_crm() {
 add_filter(
 	'wp_mail_from_name',
 	function ( $name ) {
-		$p = mailweb_profile( apply_filters( 'wp_mail_from', '' ) );
+		$p = mailweb_profile( apply_filters( 'wp_mail_from', '' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- reads WordPress core's own mail filter
 		return '' !== trim( $p['name'] ) && ! mailweb_profile_is_crm() ? $p['name'] : $name;
 	},
 	20
@@ -126,12 +126,12 @@ add_filter(
 			return $atts;
 		}
 		// Every other email carries the sending mailbox's signature.
-		$sig = trim( (string) mailweb_profile( apply_filters( 'wp_mail_from', '' ) )['signature'] );
+		$sig = trim( (string) mailweb_profile( apply_filters( 'wp_mail_from', '' ) )['signature'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- reads WordPress core's own mail filter
 		$msg = (string) ( $atts['message'] ?? '' );
 		if ( false !== strpos( $msg, 'class="signature"' ) ) {
 			return $atts; // already signed (inbox, or a second pass)
 		}
-		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg );
+		$html = $html || 'text/html' === apply_filters( 'wp_mail_content_type', 'text/plain' ) || (bool) preg_match( '/<(html|body|p|div|table|br)\b/i', $msg ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- reads WordPress core's own mail filter
 		if ( $html && false !== stripos( $msg, '</body>' ) ) {
 			// A complete HTML email with its own design (a form plugin's): signature and block before </body>.
 			$block           = ( '' !== $sig ? '<div class="signature" style="margin:28px auto 0;max-width:600px;font:15px/1.6 Arial,Helvetica,sans-serif">' . wp_kses_post( $sig ) . '</div>' : '' ) . mailweb_after_signature( 'site' );
