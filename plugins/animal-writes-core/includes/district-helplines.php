@@ -13,7 +13,7 @@
  *   4. Up to six listings in the district that have a phone number: ambulance and rescue services first, then
  *      government vets, then the rest; listings reported closed are left out. Each card links to its listing, where
  *      the number's source is shown.
- * The block shows only when the district has at least one number of its own (3 or 4); 112 and 1962 alone are in the
+ * Legal aid listings are left out. The block shows only when the district has at least one number of its own (3 or 4); 112 and 1962 alone are in the
  * footer already.
  *
  * @package animal-writes-core
@@ -66,6 +66,9 @@ function aw_district_helpline_listings( $code, $max = 6 ) {
 			continue;
 		}
 		$types = wp_list_pluck( aw_listing_types( $id ), 'slug' );
+		if ( in_array( 'legal-aid', $types, true ) ) {
+			continue; // legal services authorities help with cases, not with an animal in need
+		}
 		$svcs  = wp_list_pluck( aw_item_tags( $id, aw_service_slugs() ), 'slug' );
 		$rank  = array_intersect( $svcs, AW_HELPLINE_FIRST ) ? 0 : ( array_intersect( $types, AW_VET_TYPES ) ? 1 : 2 );
 		$type  = aw_listing_types( $id );
@@ -114,10 +117,10 @@ function aw_district_helplines_html( $d ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( 'aw_listing' !== ( $block['attrs']['query']['postType'] ?? '' ) || ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || (int) get_query_var( 'paged' ) > 1 ) {
+		if ( 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) || ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || aw_hub_page() > 1 ) {
 			return $html;
 		}
-		$d = aw_dir_place( (string) get_query_var( 'aw_place' ) );
+		$d = aw_current_place();
 		if ( ! $d || 'district' !== $d->kind ) {
 			return $html;
 		}
