@@ -84,7 +84,7 @@ function aw_binding_value( $key, $post_id ) {
 			/* translators: %s: source name. */
 			return $m( 'aw_source_url' ) ? ( $name ? sprintf( __( 'Read at %s', 'animal-writes-core' ), $name ) : __( 'Read at source', 'animal-writes-core' ) ) : '';
 		case 'source_meta':
-			return trim( implode( ' · ', array_filter( array( $m( 'aw_source_name' ), aw_format_date( $m( 'aw_source_date' ) ) ) ) ) );
+			return trim( implode( ', ', array_filter( array( $m( 'aw_source_name' ), aw_format_date( $m( 'aw_source_date' ) ) ) ) ) ); // no typed "·" (owner, 20 Oct 2026)
 		case 'sponsored_label':
 			if ( ! get_post_meta( $post_id, 'aw_sponsored', true ) ) {
 				return '';
@@ -101,7 +101,7 @@ function aw_binding_value( $key, $post_id ) {
 			}
 			$on = aw_format_date( $m( 'aw_verified_on' ) );
 			/* translators: %s: date. */
-			return $on ? sprintf( __( 'Verified · %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );
+			return $on ? sprintf( __( 'Verified on %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );
 		case 'blacklisted_label':
 			return get_post_meta( $post_id, 'aw_darpan_blacklisted_on', true ) ? __( 'Blacklisted on NGO Darpan', 'animal-writes-core' ) : ''; // the trust panel says by whom and from when
 		case 'featured_label':

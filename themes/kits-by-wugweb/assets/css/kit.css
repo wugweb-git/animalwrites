@@ -1104,8 +1104,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 /* Item page with a sidebar (owner, 16 Oct 2026): .kit-with-sidebar > .kit-main + .kit-sidebar (the "sidebar" template
    part). The text column is the reading width (--kit-width-content). Below lg the sidebar follows the text, at most the
    same width; at lg it is a second column beside it. A sidebar with nothing to show (no blocks, or only an ad slot that
-   is empty, waiting or unfilled) takes no space, and the text stays centred. */
-.kit-with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+   is empty, waiting or unfilled) takes no space, and the text column stays at the left edge. */
+.kit-with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; } /* the text column starts at the page's left edge (owner, 20 Oct 2026) */
 .kit-with-sidebar > :is(.kit-main, .kit-sidebar) { width: 100%; max-width: var(--kit-width-content); margin-block: 0; }
 .kit-with-sidebar > .kit-sidebar:is(:has(> :not(.kit-ad)), :has(ins.adsbygoogle[data-ad-status="filled"])) { margin-top: var(--kit-space-7); }
 @media (max-width: 1199px) { .kit-with-sidebar > .kit-sidebar { display: none; } } /* no sidebar below lg (owner, 20 Oct 2026): it would only follow the article; its ad is never requested there */
@@ -1177,3 +1177,11 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }
 .wp-block-cover.kit-photo-card .wp-block-buttons { margin: var(--kit-space-4) 0 0 !important; }
 @media (prefers-reduced-motion: reduce) { .kit-ed-more::after { transition: none; } }
+
+/* Contents list (kit-toc): a collapsible list of a long document's headings, before its text. Closed by default. */
+.kit-toc { margin: 0 0 var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.kit-toc > summary { display: flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); font-weight: var(--kit-weight-medium); cursor: pointer; }
+.kit-toc > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.kit-toc ol { margin: 0; padding: 0 var(--kit-space-4) var(--kit-space-4) var(--kit-space-7); font-size: var(--kit-type-sm); }
+.kit-toc li { margin: var(--kit-space-1) 0; }
+.kit-toc li.is-sub { margin-left: var(--kit-space-4); list-style-type: lower-alpha; }

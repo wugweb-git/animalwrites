@@ -116,8 +116,8 @@
 }
 .aw-camp-poster-chips { margin: var(--kit-space-4) 0 0; }
 .aw-camp-poster-label { display: block; margin-bottom: var(--kit-space-1); font-size: var(--kit-type-sm); opacity: 0.8; }
-.aw-camp-poster .aw-rule-chip { border-color: rgb(255 255 255 / 0.45); }
-.aw-camp-poster .aw-rule-chip:hover { border-color: var(--kit-color-on-ink); background: var(--camp-mark); }
+.aw-camp-poster .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.45); }
+.aw-camp-poster .aw-rule-chip { --kit-chip-border-strong: var(--kit-color-on-ink); --kit-chip-hover: var(--camp-mark); }
 
 /* Legal-document motif: pages of the Gazette (owner, 17 Oct 2026). Muted, never behind text. */
 .aw-camp-poster-doc { margin: calc(-1 * var(--kit-space-5)) calc(-1 * var(--kit-space-5)) var(--kit-space-4); aspect-ratio: 3 / 1; overflow: hidden; border-radius: var(--kit-radius-card) var(--kit-radius-card) 0 0; background: var(--kit-color-bg); } /* phones: the masthead strip */
@@ -156,7 +156,7 @@
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
-.aw-camp-grid > :first-child .aw-rule-chip { border-color: var(--camp-on-mark); }
+.aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
 
 /* Pain scale: four steps, the bar grows with the pain */
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
@@ -178,7 +178,7 @@
 .aw-camp-tier-who.is-ext { background: var(--camp-mark); }
 .aw-camp-gap { display: flex; gap: var(--kit-space-3); align-items: flex-start; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); box-shadow: inset 0 0 0 2px var(--camp-mark); }
 .aw-camp-gap > .kit-ico { --kit-ico-size: 1.5rem; flex: none; color: var(--camp-mark); margin-top: 0.15em; }
-.aw-camp-dark .aw-rule-chip { border-color: rgb(255 255 255 / 0.45); }
+.aw-camp-dark .aw-rule-chip { --kit-chip-border: rgb(255 255 255 / 0.45); }
 
 /* Today vs the draft: the draft column carries the campaign colour */
 .aw-camp-compare table { background: var(--kit-color-bg); border-radius: var(--kit-radius-card); overflow: hidden; }
@@ -240,17 +240,9 @@
 @keyframes aw-camp-settle { from { transform: translateY(0.25em); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .aw-camp-hero .aw-cd-num { animation: none; } }
 
-/* Rule chips */
-.aw-rule-chip {
-	display: inline-flex; align-items: center; gap: var(--kit-space-1);
-	margin: var(--kit-space-1) var(--kit-space-1) 0 0; padding: var(--kit-space-1) var(--kit-space-2);
-	border: 1px solid var(--camp-meta, var(--kit-color-line)); border-radius: var(--kit-radius-control);
-	background: transparent; color: inherit; font: inherit; font-size: var(--kit-type-small, 0.875rem); font-variant-numeric: tabular-nums;
-	cursor: pointer; min-height: 2.75rem;
-}
-.aw-rule-chip:hover { border-color: currentColor; }
-.aw-rule-chip:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-camp-hero .aw-rule-chip { border-color: var(--camp-on-mark); }
+/* Rule chips: the one Kits chip (kit-primitives.css), tinted with the campaign's own colours (owner, 20 Oct 2026) */
+.aw-rule-chip { --kit-chip-bg: transparent; --kit-chip-fg: currentColor; --kit-chip-border: var(--camp-meta, var(--kit-color-line)); --kit-chip-border-strong: currentColor; --kit-chip-hover: color-mix(in srgb, currentColor 10%, transparent); margin: var(--kit-space-1) var(--kit-space-1) 0 0; font-variant-numeric: tabular-nums; cursor: pointer; }
+.aw-camp-hero .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
 .aw-rule-chip--plain { cursor: default; }
 .aw-rule-chip-dialog {
 	width: min(40rem, calc(100vw - 2 * var(--kit-space-4))); max-height: 80vh; overflow: auto;

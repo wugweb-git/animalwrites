@@ -257,19 +257,19 @@ add_shortcode(
 		$label  = $a['label'] ? $a['label'] : 'Rule ' . $a['rule'];
 		$clause = $doc && $anchor ? aw_camp_clause( $doc, $anchor ) : '';
 		if ( '' === $clause ) {
-			return '<span class="aw-rule-chip aw-rule-chip--plain">' . esc_html( $label ) . '</span>';
+			return '<span class="kit-tag aw-rule-chip aw-rule-chip--plain">' . esc_html( $label ) . '</span>';
 		}
 		++$n;
 		$dlg  = 'aw-rule-' . $n;
 		$link = 'publish' === get_post_status( $doc ) ? get_permalink( $doc ) . '#' . $anchor : (string) get_post_meta( $doc, 'aw_source_url', true );
-		$btn  = '<button type="button" class="aw-rule-chip" aria-haspopup="dialog" aria-controls="' . esc_attr( $dlg ) . '" data-rule="' . esc_attr( $a['rule'] ) . '">' . esc_html( $label ) . '</button>';
+		$btn  = '<button type="button" class="kit-chip aw-rule-chip" aria-haspopup="dialog" aria-controls="' . esc_attr( $dlg ) . '" data-rule="' . esc_attr( $a['rule'] ) . '">' . esc_html( $label ) . '</button>';
 		$out  = '<dialog class="aw-rule-chip-dialog" id="' . esc_attr( $dlg ) . '" aria-labelledby="' . esc_attr( $dlg ) . '-t">';
 		$out .= '<p class="aw-rule-chip-head" id="' . esc_attr( $dlg ) . '-t"><strong>' . esc_html( $label ) . ': what it says</strong></p>';
 		$out .= '<div class="aw-rule-chip-text">' . $clause . '</div>';
 		if ( '' !== $a['allows'] ) {
 			$out .= '<p class="aw-rule-chip-head"><strong>What it allows</strong></p><p>' . esc_html( $a['allows'] ) . '</p>';
 		}
-		$out .= '<p class="aw-rule-chip-src">' . esc_html( get_the_title( $doc ) ) . ( $link ? ' · <a href="' . esc_url( $link ) . '">Read the full text</a>' : '' ) . '</p>';
+		$out .= '<p class="aw-rule-chip-src">' . esc_html( get_the_title( $doc ) ) . ( $link ? ' <a href="' . esc_url( $link ) . '">Read the full text</a>' : '' ) . '</p>';
 		$out .= '<button type="button" class="aw-rule-chip-close" data-close>Close</button></dialog>';
 		aw_camp_dialogs( $out ); // printed at the end of the page: a dialog holds paragraphs, so it cannot sit inside one
 		return $btn;

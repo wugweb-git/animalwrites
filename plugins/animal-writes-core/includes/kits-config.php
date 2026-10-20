@@ -50,7 +50,7 @@ add_filter(
 		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
 	}
 );
-add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post' ) );
+add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ) ); // up to 3 ads a page: Ad 1, Ad 2 and the sidebar (item-head.php)
 add_filter( 'kits_ads_end_after_content_types', fn() => array( 'post' ) ); // guides have no end bar: the end ad follows the text
 /*
  * Animal Writes slots (owner, 12 Oct 2026), on top of the Kits Core ones (home-top/mid/bottom, article-incontent-1/2,

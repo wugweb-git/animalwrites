@@ -555,7 +555,6 @@
     "aw-rel",
     "aw-also",
     "aw-elsewhere",
-    "aw-byline",
     "aw-item",
     "aw-src--also",
     "aw-src-also",
@@ -583,17 +582,25 @@
    }
   },
   {
-   "name": "Item meta row and source line",
+   "name": "Item page rows",
    "type": "component",
    "status": "live",
    "classes": [
+    "kit-item",
     "aw-item-meta",
-    "aw-source-line"
+    "aw-item-content",
+    "aw-item-share",
+    "aw-sources",
+    "aw-more",
+    "aw-place-chip",
+    "aw-block-preview",
+    "aw-ad1-mark",
+    "aw-doc-toc"
    ],
    "states": [
     "default",
-    "no picture",
-    "Library (type chip first)"
+    "row empty (not printed)",
+    "listing (rows 1-4)"
    ],
    "tokens": [],
    "a11y": {
@@ -1063,7 +1070,10 @@
     "alt": "see note",
     "schema": "none"
    },
-   "block": "animal-writes/type-date"
+   "block": "animal-writes/type-date",
+   "states": [
+    "see the states sheet"
+   ]
   },
   {
    "name": "Law date (one line)",
@@ -2274,6 +2284,141 @@
     "alt": "n/a",
     "schema": "n/a"
    }
+  },
+  {
+   "name": "Item: meta row",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "date, Updated, type, place, deadline, status and category chips as text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none (dates mirror datePublished/dateModified)"
+   },
+   "block": "animal-writes/item-meta"
+  },
+  {
+   "name": "Item: sources",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "credit, Read the original (opens in a new tab), notes, Editorial policy, Report a mistake"
+   },
+   "seo": {
+    "heading": "H2 Sources",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "isBasedOn / sourceOrganization (aw-seo-extras)"
+   },
+   "block": "animal-writes/item-sources"
+  },
+  {
+   "name": "Item: tags",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "tag chips as links"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/item-tags"
+  },
+  {
+   "name": "Item: share",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "group 'Share'; each button aria-label + title; copy link announces 'Link copied'"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/item-share"
+  },
+  {
+   "name": "Item: more",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "see the states sheet",
+    "empty (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "server-rendered block",
+    "aria": "none",
+    "keyboard": "Tab to its links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "sections with H2, cards with H3 links"
+   },
+   "seo": {
+    "heading": "H2 per group, H3 per card",
+    "link": "descriptive",
+    "alt": "decorative icons alt empty",
+    "schema": "none"
+   },
+   "block": "animal-writes/item-more"
   }
  ],
  "nav_status": {

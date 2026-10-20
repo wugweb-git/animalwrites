@@ -5,9 +5,9 @@
  * (animal-writes-core breadcrumbs.php) shows Rank Math's items, and Rank Math prints them as the page's one
  * BreadcrumbList.
  *
- * Organisation:      Home › Directory › State › District › Organisation
+ * Organisation:      Home › Directory › State › District (its place; the name is the H1)
  * District × type:   Home › Directory › State › District › Type
- * News, Library:     Home › Section › primary category
+ * Item (any type):   Home › Section › primary category (the item itself when it has none)
  * Other items:       Home › Section › Item
  * Section hub:       Home › Section
  * Filtered hub:      Home › Section › Category or tag (one ?category_name= or ?tag=; filtered-views.php)
@@ -65,14 +65,18 @@ function aw_seo_breadcrumb_trail() {
 	if ( is_singular( 'aw_listing' ) ) {
 		$id    = get_queried_object_id();
 		$best  = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null; // the district if there is one, else the state
-		$trail = array_merge( array( $dir ), $place( $best ), array( array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) ) ) );
+		// Owner, 20 Oct 2026: the trail ends at the organisation's place (its district, else its state), like an item's ends at its category.
+		$trail = array_merge( array( $dir ), $place( $best ) );
+		if ( count( $trail ) < 2 ) {
+			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+		}
 	} elseif ( is_singular( array_keys( aw_post_types() ) ) ) {
 		$id      = get_queried_object_id();
 		$type    = get_post_type( $id );
 		$obj     = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
-		$cat     = in_array( $type, array( 'aw_news', 'aw_legal' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
-		if ( $cat ) { // News and Library (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
+		$cat     = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
 			$n       = function_exists( 'aw_seo_filtered_count' ) ? aw_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
 			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : get_term_link( $cat ) );
 		} else {

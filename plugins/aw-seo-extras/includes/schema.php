@@ -541,7 +541,8 @@ function aw_article_nodes( $id ) {
 					'url'        => $src_url,
 					'sameAs'     => $doi ? 'https://doi.org/' . $doi : null,
 					'identifier' => $doi ? array( '@type' => 'PropertyValue', 'propertyID' => 'DOI', 'value' => $doi ) : null,
-					'isPartOf'   => $doi && $src_name ? array( '@type' => 'Periodical', 'name' => $src_name ) : null,
+					'author'     => $research ? ( array_map( fn( $n ) => array( '@type' => 'Person', 'name' => $n ), array_values( (array) get_post_meta( $id, 'aw_authors', true ) ) ) ?: null ) : null, // research-citation.php
+					'isPartOf'   => $doi && ( get_post_meta( $id, 'aw_journal', true ) ?: $src_name ) ? array( '@type' => 'Periodical', 'name' => (string) ( get_post_meta( $id, 'aw_journal', true ) ?: $src_name ) ) : null,
 					'publisher'  => ! $doi && $src_name ? array( '@type' => 'Organization', 'name' => $src_name ) : null,
 					'datePublished' => $src_date,
 				)

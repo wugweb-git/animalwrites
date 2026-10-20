@@ -394,7 +394,7 @@ add_shortcode(
 			$rows[] = array(
 				'',
 				$pub === $added ? 'Published ' . $t( $pub, '' ) // same day: one date (owner, 15 Oct 2026)
-					: ( $pub ? 'Published ' . $t( $pub, '' ) . ' · added ' : 'Added ' ) . $t( $added, '' ),
+					: ( $pub ? 'Published ' . $t( $pub, '' ) . ', added ' : 'Added ' ) . $t( $added, '' ),
 				true,
 			);
 			if ( get_post_meta( $id, 'aw_file_id', true ) ) {

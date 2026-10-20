@@ -320,6 +320,13 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $req->get_param( 'summary_short' ) ) {
 		update_post_meta( $post_id, 'aw_summary_short', current_time( 'Y-m-d' ) );
 	}
+	// A research paper's credit (research-citation.php): authors and journal from the worker, else from doi.org later.
+	if ( 'research' === $req->get_param( 'type' ) && function_exists( 'aw_research_save_citation' ) ) {
+		aw_research_save_citation( $post_id, (array) $req->get_param( 'authors' ), (string) ( $req->get_param( 'journal' ) ?: $req->get_param( 'source_name' ) ) );
+		if ( ! get_post_meta( $post_id, 'aw_authors', true ) ) {
+			wp_schedule_single_event( time() + 60, 'aw_research_citation', array( $post_id ) );
+		}
+	}
 	if ( 'aw_legal' === $type && '' !== $number ) {
 		update_post_meta( $post_id, 'aw_legal_number', $number );
 	}

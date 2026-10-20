@@ -369,23 +369,9 @@ add_shortcode(
 	}
 );
 
-/* ---------- Resources: byline and last-updated date (a trust signal) ---------- */
+/* ---------- Resources: no byline (owner, 20 Oct 2026) ---------- */
 
-add_filter(
-	'render_block_core/post-title',
-	function ( $html, $block ) {
-		if ( ! is_singular( 'post' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() ) {
-			return $html;
-		}
-		$id  = get_queried_object_id();
-		$pub = aw_date( get_the_date( 'Y-m-d', $id ) );
-		$upd = get_the_modified_date( 'Y-m-d', $id ) > get_the_date( 'Y-m-d', $id ) // edited on a later day: say so
-			? ' · Updated ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) : '';
-		return $html . '<p class="aw-byline">By Animal Writes · ' . $pub . $upd . '</p>';
-	},
-	20,
-	2
-);
+// "By Animal Writes" is in the item's Sources block and the dates are in its meta row (item-head.php).
 
 // One date line on a Resource: the byline above carries it, so the template's own date block is not repeated (12 Oct 2026).
 add_filter(
@@ -410,19 +396,7 @@ function aw_sponsored_badge( $id ) {
 	return aw_is_sponsored( $id ) && function_exists( 'kits_badge' ) ? kits_badge( 'Sponsored', 'sponsored' ) : '';
 }
 
-// Item page: "Sponsored by {name}" above the title (the same label News and Library items use).
-add_filter(
-	'render_block_core/post-title',
-	function ( $html, $block ) {
-		if ( ! is_singular( 'post' ) || 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || get_queried_object_id() !== get_the_ID() || ! aw_is_sponsored( get_the_ID() ) ) {
-			return $html;
-		}
-		$label = function_exists( 'aw_binding_value' ) ? (string) aw_binding_value( 'sponsored_label', get_the_ID() ) : 'Sponsored';
-		return '<p class="is-style-kits-label">' . esc_html( $label ) . '</p>' . $html;
-	},
-	5,
-	2
-);
+// Item page: "Sponsored by {name}" is a label in the meta row (item-head.php).
 
 // Every outbound link in a sponsored Resource: rel="sponsored noopener".
 add_filter(

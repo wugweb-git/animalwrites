@@ -1855,6 +1855,38 @@
     "alt": "n/a",
     "schema": "none"
    }
+  },
+  {
+   "name": "Contents list",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-toc"
+   ],
+   "states": [
+    "closed (default)",
+    "open"
+   ],
+   "tokens": [
+    "--kit-color-line",
+    "--kit-radius-card",
+    "--kit-size-target"
+   ],
+   "a11y": {
+    "element": "<details> with <ol> of links",
+    "aria": "none",
+    "keyboard": "Enter/Space toggles; Tab to links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px summary",
+    "motion": "none",
+    "sr": "summary 'Contents'"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "in-page anchors",
+    "alt": "n/a",
+    "schema": "none"
+   }
   }
  ],
  "nav": [

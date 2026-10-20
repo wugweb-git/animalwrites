@@ -50,6 +50,12 @@ function aw_hub_blocks() {
 		'volunteer'     => array( 'Volunteer form', 'aw_block_volunteer', array( 'open' => array( 'type' => 'boolean', 'default' => false ) ) ),
 		'listing-help'  => array( 'Is this your organisation?', 'aw_block_listing_help', array() ),
 		'org-details'   => array( 'Organisation details', 'aw_block_org_details', array() ),
+		// The item page's rows (item-head.php, docs/item-template.md).
+		'item-meta'     => array( 'Item: meta row', 'aw_block_item_meta', array() ),
+		'item-sources'  => array( 'Item: sources', 'aw_block_item_sources', array() ),
+		'item-tags'     => array( 'Item: tags', 'aw_block_item_tags', array() ),
+		'item-share'    => array( 'Item: share', 'aw_block_item_share', array() ),
+		'item-more'     => array( 'Item: more', 'aw_block_item_more', array() ),
 	);
 }
 
@@ -267,9 +273,9 @@ function aw_block_type_date( $a, $id ) {
 		$name = $t ? $t[0]->name : '';
 	}
 	$date = aw_date( 'post' === $type ? get_the_modified_date( 'Y-m-d', $id ) : aw_src_date( $id, 'Y-m-d' ) );
-	$text = ( $name ? esc_html( $name ) . ( $date ? ' · ' : '' ) : '' ) . $date;
+	$text = ( $name ? '<span class="kit-meta-item">' . esc_html( $name ) . '</span>' : '' ) . $date; // spaced by the row's gap, no typed "·" (owner, 20 Oct 2026)
 	$badge = function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '';
-	return $text || $badge ? '<p class="aw-case-meta kit-meta-row">' . $badge . ( $badge && $text ? ' ' : '' ) . $text . '</p>' : '';
+	return $text || $badge ? '<p class="aw-case-meta kit-meta-row">' . $badge . $text . '</p>' : '';
 }
 
 /** One-line date of a Library item: its own date ("1st November, 2025"), or the year of an Act or Rule; never the import date. */
@@ -349,7 +355,7 @@ function aw_block_place( $a, $id ) {
 /** "Checked by Animal Writes on …" and "Apply by …" (validThrough). */
 function aw_block_deadline( $a, $id ) {
 	$dl = (string) get_post_meta( $id, 'aw_deadline', true );
-	return '<p class="aw-opp-trust">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . ( $dl ? ' · Apply by ' . aw_date( $dl ) . '' : '' ) . '</p>';
+	return '<p class="aw-opp-trust kit-meta-row"><span class="kit-meta-item">' . aw_i( 'check' ) . 'Checked by Animal Writes on ' . aw_date( get_the_modified_date( 'Y-m-d', $id ) ) . '</span>' . ( $dl ? '<span class="kit-meta-item">Apply by ' . aw_date( $dl ) . '</span>' : '' ) . '</p>';
 }
 
 /** The place for the opportunity line: in a list for one state ("near you"), that state's district or the state; else the first place. */
@@ -404,6 +410,9 @@ function aw_block_posted_by( $a, $id ) {
 
 function aw_block_org_mark( $a, $id ) {
 	$logo     = get_the_post_thumbnail_url( $id, 'thumbnail' );
+	if ( ! $logo && function_exists( 'aw_item_here' ) && aw_item_here( $id ) ) {
+		return ''; // the profile's own row 4: the logo, or nothing (no initials placeholder; owner, 20 Oct 2026)
+	}
 	$words    = array_values( array_filter( preg_split( '/\s+/', preg_replace( '/[^\p{L}\s]/u', '', get_the_title( $id ) ) ) ) ); // "1962 Mobile Veterinary Unit" → MV
 	$initials = mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) );
 	return '<div class="aw-org-mark">' . ( $logo ? '<img src="' . esc_url( $logo ) . '" alt="" loading="lazy">' : '<span aria-hidden="true">' . esc_html( $initials ) . '</span>' ) . '</div>';

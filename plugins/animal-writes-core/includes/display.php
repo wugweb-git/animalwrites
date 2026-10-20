@@ -174,28 +174,8 @@ add_filter(
 	2
 );
 
-// Research papers (Resources of the Research type) keep their summary in the excerpt and their journal and DOI in
-// the source fields, with no body text: the page shows that stored summary and "Source: {journal}, {DOI link}" where
-// the body goes (SEO audit, 10 Oct 2026). A paper with body text of its own is left as written.
-add_filter(
-	'the_content',
-	function ( $content ) {
-		$id = (int) get_the_ID();
-		if ( '' !== trim( (string) $content ) || ! $id || ! is_singular( 'post' ) || get_queried_object_id() !== $id || ! has_term( 'research', 'post_tag', $id ) ) {
-			return $content;
-		}
-		$summary = trim( (string) get_post_field( 'post_excerpt', $id ) );
-		$url     = (string) get_post_meta( $id, 'aw_source_url', true );
-		$journal = trim( (string) get_post_meta( $id, 'aw_source_name', true ) );
-		$out     = '' !== $summary ? wpautop( esc_html( $summary ) ) : '';
-		if ( $url ) {
-			$label = preg_match( '#^https?://(?:dx\.)?doi\.org/#i', $url ) ? $url : (string) wp_parse_url( $url, PHP_URL_HOST );
-			$out  .= '<p>Source: ' . ( '' !== $journal ? esc_html( $journal ) . ', ' : '' ) . '<a href="' . esc_url( $url ) . '" rel="noopener">' . esc_html( $label ) . '</a></p>';
-		}
-		return $out;
-	},
-	20
-);
+// Research papers keep their summary in the excerpt: the item template shows it as the summary, and the journal and
+// DOI in the Sources block (item-head.php), so their body stays empty (owner, 20 Oct 2026).
 
 /** Plain text of a title or name: tags removed, entities decoded, spaces collapsed. */
 function aw_seo_plain( $text ) {

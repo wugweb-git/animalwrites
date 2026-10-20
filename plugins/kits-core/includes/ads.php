@@ -50,9 +50,9 @@ function kits_ad_slots() {
 			'home-top'            => array( 'Homepage – top', 'Homepage, after the first sections (block)', 'home', 'block' ),
 			'home-mid'            => array( 'Homepage – middle', 'Homepage, between the middle sections (block)', '', 'block' ),
 			'home-bottom'         => array( 'Homepage – bottom', 'Homepage, before the last section (block)', '', 'block' ),
-			'article-incontent-1' => array( 'Article – in text 1', 'Inside an article, after paragraph 3 (articles with 6+ paragraphs)', 'incontent', 'auto' ),
+			'article-incontent-1' => array( 'Article – in text 1', 'Inside an article, after paragraph 3 (articles with 6+ paragraphs); in a site\'s own item template, after about 150 words', 'incontent', 'auto' ),
 			'article-incontent-2' => array( 'Article – in text 2', 'Inside an article, after paragraph 9 (articles with 14+ paragraphs)', '', 'auto' ),
-			'article-end'         => array( 'Article – end', 'End of an article, before its categories and share buttons', 'article', 'auto' ),
+			'article-end'         => array( 'Article – end', 'End of an article: the Ad slot block after its share buttons, or before the end bar', 'article', 'block' ),
 			'list-feed-1'         => array( 'List – card 1', 'Lists: a card after item 6', 'archive', 'auto' ),
 			'list-feed-2'         => array( 'List – card 2', 'Lists: a card after item 18 (pages with 20+ items)', 'archive', 'auto' ),
 			'sidebar'             => array( 'Sidebar', 'A sidebar column, in templates that have one (block)', '', 'block' ),
@@ -301,12 +301,16 @@ add_action(
 
 /* ---------- Counted positions ---------- */
 
-// Inside an article: after paragraph 3 (6+ paragraphs) and after paragraph 9 (14+ paragraphs).
+// Inside an article: after paragraph 3 (6+ paragraphs) and after paragraph 9 (14+ paragraphs). Types whose template places
+// its own ads (kits_ads_placed_types) get none of the automatic positions below.
+function kits_ads_placed_here() {
+	return is_singular( (array) apply_filters( 'kits_ads_placed_types', array() ) );
+}
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
 		static $done = false;
-		if ( $done || ! is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) ) {
+		if ( $done || kits_ads_placed_here() || ! is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) ) {
 			return $content;
 		}
 		$done  = true;
@@ -331,13 +335,13 @@ add_filter(
 
 // End of an article: before its categories and share buttons (kits_endbar), or after the text where there is no end bar.
 // Types in kits_ads_end_after_share_types get it after the share buttons instead.
-add_filter( 'kits_endbar_before', fn( $html ) => $html . ( is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && ! is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
-add_filter( 'kits_endbar_after', fn( $html ) => $html . ( is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
+add_filter( 'kits_endbar_before', fn( $html ) => $html . ( ! kits_ads_placed_here() && is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && ! is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
+add_filter( 'kits_endbar_after', fn( $html ) => $html . ( ! kits_ads_placed_here() && is_singular( (array) apply_filters( 'kits_ads_article_types', array( 'post' ) ) ) && is_singular( (array) apply_filters( 'kits_ads_end_after_share_types', array() ) ) ? aw_ad( 'article-end' ) : '' ) );
 add_filter(
 	'render_block_core/post-content',
 	function ( $content ) {
 		static $done = false;
-		if ( $done || ! is_singular( (array) apply_filters( 'kits_ads_end_after_content_types', array() ) ) ) {
+		if ( $done || kits_ads_placed_here() || ! is_singular( (array) apply_filters( 'kits_ads_end_after_content_types', array() ) ) ) {
 			return $content;
 		}
 		$done = true;

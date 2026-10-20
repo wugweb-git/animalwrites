@@ -1,8 +1,8 @@
 <?php
 /**
  * Local cards (owner copy, 9 Oct 2026):
- * - [aw_news_local] on a News item that has a place: "Organisations in {State}", linked to that state's Directory page
- *   (a district with listings instead, plus its state, 15 Oct 2026).
+ * - (The News item card "Organisations in {State}" was removed with the one item template, owner 20 Oct 2026: an item
+ *   page ends with at most two "More" groups.)
  * - Directory district pages with fewer than 3 listings: "Few listings in {District} yet", with the state and
  *   "Add an organisation" (Contact, reason "List your organisation").
  *
@@ -18,29 +18,6 @@ function aw_local_card( $head, $line, $actions ) {
 	$id = 'aw-local-' . wp_unique_id();
 	return '<aside class="aw-local-card" aria-labelledby="' . esc_attr( $id ) . '"><h2 class="aw-local-card-head" id="' . esc_attr( $id ) . '">' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
 }
-
-add_shortcode(
-	'aw_news_local',
-	function () {
-		$id = get_queried_object_id();
-		if ( ! is_singular( 'aw_news' ) || ! function_exists( 'aw_item_place' ) ) {
-			return '';
-		}
-		$p     = aw_item_place( $id );
-		$state = $p && 'district' === $p->kind ? aw_place_state( $p->state ) : $p;
-		if ( ! $state ) {
-			return '';
-		}
-		// A story about a district with listings: that district's Directory page first, then the state's (Phase 7).
-		$near = $p && 'district' === $p->kind && aw_place_count( $p ) > 0 ? $p : $state;
-		$more = $near !== $state ? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>' : '';
-		return aw_local_card(
-			sprintf( 'Organisations in %s', $near->name ),
-			sprintf( 'Rescue groups, shelters and government vets you can contact in %s.', $near->name ),
-			'<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_directory_url( $near->slug ) ) . '">' . esc_html( sprintf( 'See all in %s', $near->name ) ) . '</a>' . $more
-		);
-	}
-);
 
 // District page with fewer than 3 listings: the card after the list.
 add_filter(
