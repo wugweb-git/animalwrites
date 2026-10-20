@@ -1153,9 +1153,9 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-chips .aw-sponsored-label { display: contents; }
 /* Meta and chips on one row (owner, 21 Oct 2026): .kit-card-metarow holds the meta row, then the chips, which take the
    space left; a chip that does not fit still wraps out of sight. */
-.kit-card-metarow { display: flex; align-items: center; gap: var(--kit-space-2); min-width: 0; }
+.kit-card-metarow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); min-width: 0; }
 .kit-card-metarow > .kit-card-meta { flex: 0 1 auto; min-width: 0; }
-.kit-card-metarow > .kit-card-chips { flex: 1 1 0; min-width: 0; margin: 0; }
+.kit-card-metarow > .kit-card-chips { flex: 1 1 8rem; min-width: 0; margin: 0; } /* under the date only when the source chip would not fit (narrow cards) */
 .kit-card-chips-lead { display: inline-flex; flex-wrap: nowrap; gap: var(--s-1, 4px); min-width: 0; max-width: 100%; }
 .kit-card-chips-lead > * { min-width: 0; }
 .kit-card-chips-lead > :is(.kit-card-label, .aw-sponsored-label) { flex: none; }
