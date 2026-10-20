@@ -81,8 +81,8 @@ function aw_summary_rw_list( WP_REST_Request $req ) {
 				continue;
 			}
 			$sec = aw_summary_section( $id );
-			if ( '' === $sec ) {
-				continue;
+			if ( '' === $sec || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ) {
+				continue; // our own content (templates, guides) has no source: never rewritten (20 Oct 2026: two letter templates got unrelated stories)
 			}
 			$m     = get_post_meta( $id, 'aw_summary_rw', true );
 			$out[] = array(
@@ -119,8 +119,8 @@ function aw_summary_rw_progress() {
 	foreach ( $rows as $r ) {
 		$id  = (int) $r->ID;
 		$sec = aw_summary_section( $id );
-		if ( '' === $sec ) {
-			continue;
+		if ( '' === $sec || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ) {
+			continue; // own content: not counted, never rewritten
 		}
 		$m  = get_post_meta( $id, 'aw_summary_rw', true );
 		$st = ( is_array( $m ) && md5( (string) $r->post_excerpt ) === ( $m['md5'] ?? '' ) ) ? ( $m['state'] ?? 'open' ) : 'open';
