@@ -22,7 +22,11 @@ Owner-approved spec, 20 Oct 2026. Code: `plugins/animal-writes-core/includes/faq
 
 `aw_faq_registry()`: question template, fields needed, answer builder, priority, search pattern. Nothing is stored per page. Candidates are kept when their fields have values, deduped by the fact they state (e.g. "Does X offer adoption?" from the Adoption service tag repeats the services answer and is dropped), sorted by priority, capped at 6.
 
-Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Three fields were added for Library documents (box "FAQ fields"): Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
+- A listing's services answer "based on type" is shown but does not count toward the 3 (owner, 20 Oct 2026): a listing needs 3 answers from its own data.
+- Library questions use the document's short name: the "Short name" field (`aw_short_name`, e.g. PCA Act 1960, ABC Rules 2023), else the primary focus keyphrase. The first answer gives the full official title once.
+- The accordion is texturized before the schema is parsed from it (WordPress texturizes the page: " - " → " – ", "24x7" → "24×7"), so both hold the same characters.
+
+Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Four fields were added for Library documents (box "FAQ fields"): Short name (`aw_short_name`), Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
 
 ## Topic items
 
@@ -30,7 +34,7 @@ Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword,
 
 ## Experiment
 
-10% of eligible listings and Library documents (crc32 of salt + ID, stable) show no FAQ until the owner rolls out (Tools → FAQ). Option `aw_faq_experiment` holds start, weeks (6), pct (10), salt, on. The page context pushed to GTM has `faq_group` = faq | holdout | none on listings and Library documents.
+10% of eligible listings and Library documents (crc32 of salt + ID, stable) show no FAQ until the owner rolls out (Tools → FAQ). Option `aw_faq_experiment` holds start, weeks (6), pct (10), salt, on. The page context pushed to GTM has `faq_group` = faq | holdout | none on listings and Library documents; GTM variable `DLV - faq_group` sends it on the GA4 Google tag (GTM version 8, 20 Oct 2026) and GA4 has the event-scoped custom dimension "Has FAQ" (`faq_group`).
 
 Compare after 6 weeks: Search Console impressions, clicks and CTR for queries containing "contact number", "pdf", "in hindi", "address" on FAQ pages vs holdout pages (page lists: `wp aw-faq holdout`), and GA4 sessions referred by chatgpt.com, perplexity.ai and gemini.google.com by landing page.
 
