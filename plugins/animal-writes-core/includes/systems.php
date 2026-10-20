@@ -42,7 +42,8 @@ if ( ! defined( 'AW_DATE_FORMAT' ) ) {
 add_filter( 'pre_option_date_format', fn() => AW_DATE_FORMAT );
 
 function aw_date( $when, $fmt = AW_DATE_FORMAT ) {
-	$ts = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
+	$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when; // the date picker stores Ymd, which is not a Unix time
+	$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
 	if ( ! $ts ) {
 		return '';
 	}
