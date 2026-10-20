@@ -188,6 +188,8 @@ function aw_ingest( WP_REST_Request $req ) {
 			// and go live directly (owner's decision, 7 Oct 2026). Everything else waits for review.
 			'post_status'  => 'aw_opportunity' === $type ? 'publish' : 'pending',
 			'post_title'   => $title,
+			// A research paper's short keyword slug from its headline (research_titles.py, owner 20 Oct 2026).
+			'post_name'    => 'research' === $req->get_param( 'type' ) ? sanitize_title( (string) $req->get_param( 'slug' ) ) : '',
 			'post_excerpt' => $summary,
 			'post_content' => 'aw_opportunity' === $type ? '<!-- wp:paragraph --><p>' . esc_html( $summary ) . '</p><!-- /wp:paragraph -->' : '',
 		),
@@ -323,8 +325,18 @@ function aw_ingest( WP_REST_Request $req ) {
 	// A research paper's credit (research-citation.php): authors and journal from the worker, else from doi.org later.
 	if ( 'research' === $req->get_param( 'type' ) && function_exists( 'aw_research_save_citation' ) ) {
 		aw_research_save_citation( $post_id, (array) $req->get_param( 'authors' ), (string) ( $req->get_param( 'journal' ) ?: $req->get_param( 'source_name' ) ) );
-		if ( ! get_post_meta( $post_id, 'aw_authors', true ) ) {
+		aw_research_save_study_title( $post_id, (string) $req->get_param( 'study_title' ) ); // the paper's own title; the post title is the headline
+		if ( ! get_post_meta( $post_id, 'aw_authors', true ) || '' === aw_research_study_title( $post_id ) ) {
 			wp_schedule_single_event( time() + 60, 'aw_research_citation', array( $post_id ) );
+		}
+		// The headline's SEO title and focus keyphrase (research_titles.py), stored as written so Rank Math shows them.
+		$seo = sanitize_text_field( (string) $req->get_param( 'seo_title' ) );
+		$kw  = sanitize_text_field( (string) $req->get_param( 'focus_keyword' ) );
+		if ( '' !== $seo ) {
+			update_post_meta( $post_id, 'rank_math_title', $seo );
+		}
+		if ( '' !== $kw ) {
+			update_post_meta( $post_id, 'rank_math_focus_keyword', $kw );
 		}
 	}
 	if ( 'aw_legal' === $type && '' !== $number ) {

@@ -365,21 +365,22 @@ function aw_block_item_sources( $a, $id ) {
 			$credit = $ours . esc_html__( 'Created by Animal Writes', 'animal-writes-core' ) . '</span>';
 			$read   = '';
 			break;
-		case 'research':
+		case 'research': // "Study: <study title> by <authors> in <journal> · Read the original ↗" (owner, 20 Oct 2026)
 			$journal = (string) ( get_post_meta( $id, 'aw_journal', true ) ?: get_post_meta( $id, 'aw_source_name', true ) );
 			$authors = function_exists( 'aw_research_authors_text' ) ? aw_research_authors_text( $id ) : '';
-			$cite    = '<cite>' . esc_html( $journal ) . '</cite>';
-			if ( '' !== $authors && '' !== $journal ) {
-				/* translators: 1: authors, 2: journal. */
-				$study = sprintf( esc_html__( 'Study by %1$s in %2$s.', 'animal-writes-core' ), esc_html( $authors ), $cite );
-			} elseif ( '' !== $journal ) {
-				/* translators: %s: journal. */
-				$study = sprintf( esc_html__( 'Study in %s.', 'animal-writes-core' ), $cite );
-			} else {
+			$paper   = function_exists( 'aw_research_study_title' ) ? aw_research_study_title( $id ) : '';
+			$study   = '' !== $paper ? '<cite class="aw-sources-study-title">' . esc_html( $paper ) . '</cite>' : '';
+			if ( '' !== $authors ) {
 				/* translators: %s: authors. */
-				$study = '' !== $authors ? sprintf( esc_html__( 'Study by %s.', 'animal-writes-core' ), esc_html( $authors ) ) : '';
+				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'by %s', 'animal-writes-core' ), esc_html( $authors ) );
 			}
-			$credit = '' !== $study ? '<span class="aw-sources-study">' . $study . '</span>' : '';
+			if ( '' !== $journal ) {
+				/* translators: %s: journal. */
+				$study .= ( '' !== $study ? ' ' : '' ) . sprintf( esc_html__( 'in %s', 'animal-writes-core' ), '<cite>' . esc_html( $journal ) . '</cite>' );
+			}
+			$study  = '' !== $study ? esc_html__( 'Study:', 'animal-writes-core' ) . ' ' . $study : '';
+			$credit = '' !== $study . $read ? '<span class="aw-sources-study">' . $study . ( '' !== $study && '' !== $read ? ' <span aria-hidden="true">·</span> ' : '' ) . $read . '</span>' : '';
+			$read   = ''; // in the study line
 			$note   = $sumnote;
 			break;
 		case 'guide':
