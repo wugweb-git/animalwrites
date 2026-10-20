@@ -70,10 +70,12 @@ function aw_item_image_id( $post_id ) {
 	// A category photo belongs to one item at a time across the whole site (thumbs.php). Ingested items without their own
 	// image may share their category's photo as a last fallback before the placard (owner 12 Oct 2026).
 	$own = function_exists( 'aw_thumb_for' ) ? (int) aw_thumb_for( $post_id ) : 0;
-	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_category_image_id' ) ) {
-		return $own;
+	if ( ! aw_is_ingested( $post_id ) ) {
+		return $own; // our own content: a category photo used once site-wide
 	}
-	return aw_category_card_id( $post_id );
+	// Ingested items with no picture: their primary category's own card fallback (owner, 20 Oct 2026; may repeat).
+	$card = aw_category_card_id( $post_id );
+	return $card ? $card : $own;
 }
 
 /**
