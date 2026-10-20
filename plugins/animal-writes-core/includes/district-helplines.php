@@ -113,7 +113,7 @@ function aw_district_helplines_html( $d ) {
 		. '<p class="aw-emergency">' . esc_html__( 'An animal in danger right now: call 112 first.', 'animal-writes-core' ) . '</p></section>';
 }
 
-// Before the list on a district page (page 1, no type filter).
+// After the list on a district page (page 1, no type filter; owner, 21 Oct 2026: the toolbar's count is followed by the list).
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
@@ -124,7 +124,7 @@ add_filter(
 		if ( ! $d || 'district' !== $d->kind ) {
 			return $html;
 		}
-		return aw_district_helplines_html( $d ) . $html;
+		return $html . aw_district_helplines_html( $d );
 	},
 	9,
 	2

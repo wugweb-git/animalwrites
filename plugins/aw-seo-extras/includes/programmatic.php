@@ -511,12 +511,13 @@ function aw_seo_dir_facts() {
 	return '' !== $out ? '<p class="kit-note">' . $out . '</p>' : '';
 }
 
-// Under the result count and sort.
+// Under the list (owner, 21 Oct 2026: the toolbar's count is followed by the list itself).
 add_filter(
-	'render_block_animal-writes/result-head',
+	'render_block_core/query',
 	function ( $html ) {
-		return '' === trim( (string) $html ) ? $html : $html . aw_seo_dir_facts();
-	}
+		return false === strpos( (string) $html, 'aw-dir-toolbar' ) ? $html : $html . aw_seo_dir_facts();
+	},
+	11
 );
 
 /* ---------- Categories ---------- */

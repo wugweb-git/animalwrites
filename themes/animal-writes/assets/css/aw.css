@@ -122,7 +122,6 @@
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
 .kit-section-band--compact:not(:has(.kit-section-filters)) { padding-bottom: var(--kit-space-head) !important; } /* Directory place and type pages: head band only, its search sits under it (owner, 20 Oct 2026) */
 .kit-section-filters--below + .aw-system > .screen-reader-text:first-child + * { margin-top: 0; } /* list pages: no gap for a list's hidden heading */
-.kit-section-filters--below + .aw-system .aw-dir-results-head + .aw-dir-tools { margin-top: 0; }
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; }
@@ -132,8 +131,12 @@
 @media (min-width: 1200px) { .aw-dir-search { grid-template-columns: minmax(9rem, 2fr) repeat(3, minmax(11.5rem, 1fr)) auto; } .aw-dir-q { grid-column: auto; } .aw-dir-submit .kit-btn { width: auto; } } /* "Choose a state first" fits whole */
 
 /* Directory results: count line and sort */
-.aw-dir-results-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin: 0 0 var(--kit-space-4); }
-.aw-dir-results-head p { margin: 0; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+/* Directory toolbar (hub-blocks.php aw_block_result_head): count left, Sort · View · Near me right; under 768 the controls wrap under the count */
+.aw-dir-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin: 0 0 var(--kit-space-collection); }
+.aw-dir-count { margin: 0; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.aw-dir-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); }
+.aw-dir-controls .aw-dir-tools { width: auto; margin: 0; }
+.aw-dir-toolbar ~ :is(.aw-near, .aw-dir-map):not([hidden]) { margin: 0 0 var(--kit-space-collection); }
 .aw-org-contact { display: inline-flex; gap: var(--kit-space-2); color: var(--kit-color-muted); }
 
 /* Browse by state (Directory hub and home): every state/UT with listings, A–Z, with counts */

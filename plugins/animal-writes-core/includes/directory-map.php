@@ -274,19 +274,23 @@ function aw_dir_view_filters() {
 	);
 }
 
-/** The tools markup (added under the result count by aw_block_result_head()). */
+/** The view controls in the Directory toolbar (aw_block_result_head()): List / Map and Near me. */
 function aw_dir_tools_html() {
 	wp_enqueue_script( 'aw-dir-map' );
 	wp_enqueue_style( 'aw-dir-map' );
+	return '<div class="aw-dir-tools" data-filters="' . esc_attr( wp_json_encode( (object) aw_dir_view_filters() ) ) . '">'
+		. '<div class="kit-segment" role="group" aria-label="View"><button type="button" data-view="list" aria-pressed="true">List</button><button type="button" data-view="map" aria-pressed="false">Map</button></div>'
+		. '<button type="button" class="kit-btn kit-btn--ghost kit-btn--ico-map-pin aw-near-open" aria-expanded="false" aria-controls="aw-near">Near me</button>'
+		. '</div>';
+}
+
+/** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
+function aw_dir_panels_html() {
 	$icons = '';
 	foreach ( aw_listing_type_slugs() as $slug ) {
 		$icons .= '<span class="aw-type-ico aw-type-ico--' . esc_attr( $slug ) . '" data-type="' . esc_attr( $slug ) . '"></span>';
 	}
-	return '<div class="aw-dir-tools" data-filters="' . esc_attr( wp_json_encode( (object) aw_dir_view_filters() ) ) . '">'
-		. '<div class="kit-segment" role="group" aria-label="View"><button type="button" data-view="list" aria-pressed="true">List</button><button type="button" data-view="map" aria-pressed="false">Map</button></div>'
-		. '<button type="button" class="kit-btn kit-btn--ghost kit-btn--ico-map-pin aw-near-open" aria-expanded="false" aria-controls="aw-near">Near me</button>'
-		. '</div>'
-		. '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
+	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'
 		. '<span class="aw-near-or">or</span>'
 		. '<label class="screen-reader-text" for="aw-near-pin">PIN code</label><input id="aw-near-pin" class="aw-near-pin" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="PIN code" autocomplete="postal-code">'

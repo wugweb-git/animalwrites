@@ -78,7 +78,7 @@
 	function viewList(ul) {
 		var list = listOf(ul), off = offset(ul), items = cards(ul).map(function (li, i) { return cardItem(li, off + i + 1, list); });
 		if (!items.length) return;
-		var status = document.querySelector('.aw-dir-results-head [role=status]');
+		var status = document.querySelector('.aw-dir-count');
 		track('view_item_list', { item_list_id: list.id, item_list_name: list.name, results: status ? parseInt(status.textContent.replace(/[^\d]/g, ''), 10) || items.length : items.length, listing_type: page.listing_type || undefined, state: page.state || undefined, district: page.district || undefined, ecommerce: { item_list_id: list.id, item_list_name: list.name, items: items } });
 	}
 
