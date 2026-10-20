@@ -1,0 +1,29 @@
+{
+	"name": "wugweb/mailweb",
+	"description": "Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus SMTP sending with a daily limit and queue.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Wugweb",
+			"homepage": "https://wugweb.com/"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"ext-openssl": "*"
+	},
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor .",
+		"make-pot": "wp i18n make-pot . languages/mailweb.pot --domain=mailweb --exclude=vendor"
+	}
+}

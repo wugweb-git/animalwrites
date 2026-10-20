@@ -223,8 +223,8 @@ add_action(
 );
 
 // Mail (owner, 9 Oct 2026): sent as "Animal Writes <noreply@animalwrites.in>", replies to contact@ (vedanshu@'s alias).
-add_filter( 'kits_mail_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
-add_filter( 'kits_mail_reply_to', fn() => 'contact@animalwrites.in' );
+add_filter( 'mailweb_smtp_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
+add_filter( 'mailweb_smtp_reply_to', fn() => 'contact@animalwrites.in' );
 
 // The Directory carries as many in-list ads as its length allows (one every 6 results); other pages keep the Kits caps.
 add_filter( 'kits_ads_max', fn( $max ) => ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) ? 40 : $max );

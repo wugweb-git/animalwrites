@@ -257,14 +257,9 @@ add_filter(
 	4
 );
 
-// The profile's Send Email runs FluentCRM's per-contact job at once; while it runs the campaign share of the daily cap
-// does not hold it back (mail-cap.php). The cap itself still applies: past it, the reply waits first in the queue.
-add_action( 'fluentcrm_process_contact_jobs', fn() => $GLOBALS['aw_crm_contact_job'] = true, 1 );
-add_action( 'fluentcrm_process_contact_jobs', fn() => $GLOBALS['aw_crm_contact_job'] = false, 1000 );
-
 // A reply FluentCRM could not hand over at once (its sender was busy) is retried with the site's mail queue.
 add_action(
-	'aw_mail_flush',
+	'mailweb_flush',
 	function () {
 		global $wpdb;
 		if ( ! aw_crm_on() ) {
@@ -446,7 +441,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$all = (array) get_option( 'fluentcrm-global-settings', array() );
 			$em  = \FluentCrm\App\Services\Helper::getGlobalEmailSettings();
 			$em['from_name']         = 'Animal Writes';
-			$em['from_email']        = function_exists( 'kits_mail_settings' ) ? kits_mail_settings()['user'] : get_option( 'admin_email' );
+			$em['from_email']        = function_exists( 'mailweb_smtp_settings' ) ? mailweb_smtp_settings()['user'] : get_option( 'admin_email' );
 			$em['emails_per_second'] = 4; // the lowest FluentCRM accepts; the filter in mail-cap.php lowers it to 1
 			$all['email_settings']   = $em;
 			$biz                     = (array) ( $all['business_settings'] ?? array() );

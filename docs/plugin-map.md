@@ -1,6 +1,6 @@
 # Plugin map
 
-Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Mailweb (`aw-mail`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
+Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Mailweb (`mailweb`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
 ## animal-writes-core
 
@@ -46,26 +46,28 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 | `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
 | `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from. |
 
-## aw-mail (Mailweb)
+## mailweb (Mailweb)
 
-Separate plugin since 18 Oct 2026; the mail code moved here from animal-writes-core with the same webhook URL, options, post type (`aw_message`) and meta keys. Sending: the SMTP mailbox (`smtp.php`, from Kits Core on 19 Oct 2026) and the daily cap and queue (`mail-cap.php`, from core on 18 Oct 2026) are here. Both show on Mail → Settings → Site sending. No mail client: replies are written in Hostinger webmail.
+A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-only inside; Animal Writes' parts are in `animal-writes-core/includes/mailweb-aw.php`. Prefix `mailweb_`, text domain `mailweb`, webhook `POST /wp-json/mailweb/v1/mail-in` (the old `/wp-json/aw/v1/mail-in` still answers, from core).
 
 | File | What it does |
 |---|---|
-| `aw-mail.php` | Loader. Loads the moved files only when core no longer defines them, so the webhook answers throughout the switch. |
-| `includes/mail-in.php` | Webhook `POST /wp-json/aw/v1/mail-in` (per-mailbox secrets; since 18 Oct 2026 it only refreshes counts, no copies), Settings → Incoming mail (secrets, API token, mailbox IDs), the one-time import and the 5-minute poll. Each email becomes an Inbox → Contact messages item and a FluentCRM note. API token: wp-config `AW_HOSTINGER_MAIL_TOKEN` first. |
-| `includes/smtp.php` | The site's SMTP mailbox: server, port, mailbox and password (option kits_mail or wp-config KITS_MAIL_PASSWORD), sender name, default Reply-To (filter kits_mail_reply_to), test email. Moved from Kits Core 19 Oct 2026; names kept. |
-| `includes/mail-cap.php` | Site-wide daily email cap and queue (moved from core 18 Oct 2026): budget per 24 hours, priorities, retries, pause on refusal, FluentCRM pacing. |
-| `includes/mailboxes.php` | Every mailbox the Mail API token sees (vedanshu@, support@, noreply@) and the alias map (contact@ → vedanshu@; the API does not list aliases, so it is kept in Settings → Incoming mail). Only vedanshu@ and support@ are filed into the Inbox. |
-| `includes/campaign-strip.php` | Countdown strip for the open campaign (days left on a deep tab, title and closing date in the campaign colour, white button) added under the signature of Mail replies and signed site emails; follows aw_campaign_open/close, none when no campaign is open. |
-| `includes/profiles.php` | Per-mailbox display name, signature and picture (copied from Hostinger webmail; no API). Shown on the Mail page; site emails from that address use the name and end with the signature (not FluentCRM; not with `X-AW-No-Signature`). |
-| `includes/inbox.php` | The Mail inbox (18 Oct 2026, owner: real inbox in WP): mailboxes and folders, list and search, read (sandboxed, remote pictures off), Reply / Reply all / Forward / New message via the Mail API (threads kept, copy in Sent, signature added), Archive / Move / Spam / Delete to Trash / unread, attachments; plus the Website forms folder (contact form messages). Admins and editors; 30 sends an hour; nothing logged but send times. |
-| `includes/list-table.php` | The Mail list as a WordPress list table: folder links, mailbox picker (All mailboxes mixes them newest first, with a Mailbox column), checkboxes and bulk actions (read, unread, archive, spam, trash, back to Inbox), row actions, search, pagination. |
-| `includes/crm-sync.php` | FluentCRM feed (19 Oct 2026, owner: full text as before): each incoming email from a person to vedanshu@/support@ finds or makes the contact (tag Emailed us) and adds a note with the full text and an Open in Mail link, once per Message-ID; every 5 minutes and on webhook; replies sent from Mail are noted. `wp aw-mail crm-sync --all` catches up. |
-| `includes/settings-tab.php` | Mail → Settings: Incoming mail and site sending (SMTP, daily limit) in one place; the old Settings pages redirect there; Inbox → Contact messages redirects to Mail → Website forms. |
-| `includes/overview.php` | Unread badge, cached counts and the Mail dashboard widget (the menu now opens the inbox); formerly the Mail menu (admins) with the unread badge across every mailbox, the last 10 messages per mailbox (no bodies) with "Open in webmail", and the Mail dashboard widget (last 5). Cached 5 minutes; refreshed when an email arrives. |
-| `includes/mail-reply.php` | The former Inbox → Reply. Kept, not loaded (replies happen in webmail). |
+| `mailweb.php` | Loader, plugin header, text domain, 5-minute schedule; deactivation clears its cron jobs. |
+| `includes/crypto.php` | Secrets saved on the settings screen (API token, webhook secrets, SMTP password) are encrypted (AES-256-GCM, key from the site's salts). wp-config / environment values are never stored. |
+| `includes/mail-in.php` | Settings (`mailweb_setting`: environment, then wp-config `MAILWEB_*`, then the encrypted option), Mail API helpers, mailbox IDs from the token, the webhook (per-mailbox secrets; refreshes counts, fires `mailweb_webhook_noted`), Mail → Settings → Incoming mail. |
+| `includes/mailboxes.php` | Mailboxes from the token only; per mailbox "send from it" and the default From (options `mailweb_mailboxes`, `mailweb_default_from`); the alias map. |
+| `includes/inbox.php` | The Mail inbox: mailboxes and folders, list and search, read (sandboxed), Reply / Reply all / Forward / New via the Mail API, Archive / Move / Spam / Trash / unread, attachments (10 MB in total, uploads checked before reading). Website forms folder through the `mailweb_forms_source` filter. |
+| `includes/list-table.php` | The Mail list as a WordPress list table (`Mailweb_List_Table`). |
+| `includes/profiles.php` | Per-mailbox display name, signature, picture; site emails laid out with the signature; `mailweb_after_signature` filter for a block under it; header `X-Mailweb-No-Signature: 1` skips it. |
+| `includes/smtp.php` | The site's SMTP mailbox (option `mailweb_smtp`, password encrypted or `MAILWEB_SMTP_PASSWORD`), filters `mailweb_smtp_defaults`, `mailweb_smtp_reply_to`, test email. |
+| `includes/mail-cap.php` | Daily limit and queue (table `{prefix}mailweb_queue`): priorities (`X-Mailweb-Priority`), retries, pause on refusal, FluentCRM pacing. |
+| `includes/crm-sync.php` | FluentCRM feed (option `mailweb_crm`: on, tag, mailboxes): incoming email noted on the sender's contact (made "transactional"), replies noted; every 5 minutes and on webhook; `wp mailweb crm-sync --all`. |
+| `includes/settings-tab.php` | Mail → Settings tabs: Incoming mail (token, secrets, mailboxes, aliases, profiles, FluentCRM) and Site sending (SMTP, daily limit). |
+| `includes/overview.php` | Unread badge, cached counts, the Mail dashboard widget; hides FluentCRM's FluentSMTP card. |
+| `languages/`, `composer.json` | Translation template (`mailweb.pot`), coding-standard and make-pot scripts. |
 | `uninstall.php` | Deletes nothing. |
+
+Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-campaign-strip.php`): `MAILWEB_API_TOKEN` from wp-config `AW_HOSTINGER_MAIL_TOKEN`; the campaign countdown strip under signatures; Website forms = Contact form messages (`aw_message`); Inbox → Contact messages redirects there; the old webhook address; the Check site line; the one-time move from aw-mail (options copied, secrets encrypted, table renamed, old options kept) with Animal Writes' choices (send from support@ only, contact@ → vedanshu@, FluentCRM for vedanshu@ and support@, tag "Emailed us").
 
 ## kits-core
 

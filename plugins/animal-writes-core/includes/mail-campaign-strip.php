@@ -5,7 +5,7 @@
  * itself: the campaign whose window (aw_campaign_open … aw_campaign_close) includes today, closing soonest; no open
  * campaign, no strip. Added to replies from the Mail inbox and to site emails that carry a signature.
  *
- * @package aw-mail
+ * @package animal-writes-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
