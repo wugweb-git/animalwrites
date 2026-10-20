@@ -384,6 +384,14 @@ function aw_block_item_sources( $a, $id ) {
 			$note   = $sumnote;
 			break;
 		case 'guide':
+			$by = (string) get_post_meta( $id, 'aw_source_name', true );
+			if ( $url && '' !== $by ) { // a Resource taken from another body (WHO fact sheet): their credit and link, not ours
+				/* translators: %s: organisation that published the original. */
+				$credit = '<span class="aw-sources-study">' . sprintf( esc_html__( 'Source: %s', 'animal-writes-core' ), esc_html( $by ) ) . ' <span aria-hidden="true">·</span> ' . $read . '</span>';
+				$read   = '';
+				$note   = $sumnote;
+				break;
+			}
 			$credit = $ours . esc_html__( 'By Animal Writes', 'animal-writes-core' ) . '</span>';
 			$read   = '';
 			break;
