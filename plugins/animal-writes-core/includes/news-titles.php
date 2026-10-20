@@ -60,7 +60,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					continue;
 				}
 				if ( ! $dry ) {
-					wp_update_post( array( 'ID' => $id, 'post_title' => $after, 'post_name' => $post->post_name ) ); // slug kept
+					global $wpdb;
+					wp_update_post( array( 'ID' => $id, 'post_title' => $after, 'post_name' => $post->post_name ) );
+					if ( get_post_field( 'post_name', $id ) !== $post->post_name ) { // a save hook trimmed it (a publisher suffix, 20 Oct 2026): the URL stays
+						$wpdb->update( $wpdb->posts, array( 'post_name' => $post->post_name ), array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+						delete_post_meta( $id, '_wp_old_slug', $post->post_name );
+						clean_post_cache( $id );
+					}
 					delete_post_meta( $id, 'aw_title_case_flag' );
 				}
 				++$n['applied'];
