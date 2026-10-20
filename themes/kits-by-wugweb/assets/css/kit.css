@@ -1113,6 +1113,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; }
 .kit-with-sidebar > :is(.kit-main, .kit-sidebar) { width: 100%; max-width: var(--kit-width-content); margin-block: 0; }
 .kit-with-sidebar > .kit-sidebar:is(:has(> :not(.kit-ad)), :has(ins.adsbygoogle[data-ad-status="filled"])) { margin-top: var(--kit-space-7); }
+@media (max-width: 1199px) { .kit-with-sidebar > .kit-sidebar > .kit-ad { display: none; } } /* below lg the sidebar follows the article's own end ad: one ad there, not two (owner, 20 Oct 2026); a hidden slot is never requested */
 @media (min-width: 1200px) {
 	.kit-with-sidebar:is(:has(> .kit-sidebar > :not(.kit-ad)), :has(> .kit-sidebar ins.adsbygoogle[data-ad-status="filled"])) { grid-template-columns: minmax(0, var(--kit-width-content)) minmax(0, 1fr); column-gap: var(--kit-space-7); justify-items: stretch; align-items: start; } /* :has() cannot be nested */
 	.kit-with-sidebar > .kit-sidebar:is(:has(> :not(.kit-ad)), :has(ins.adsbygoogle[data-ad-status="filled"])) { margin-top: 0; max-width: none; }

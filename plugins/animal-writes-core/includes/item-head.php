@@ -34,6 +34,24 @@ function aw_primary_category( $id ) {
 	return aw_first_term( $id, 'category' );
 }
 
+/**
+ * A summary up to its last full sentence (owner, 20 Oct 2026): a tail cut off mid-sentence ("…of Kerala's Th") is
+ * dropped, never cut mid-word. Only the first paragraph is checked (Library summaries carry a note on a line of their
+ * own). Text without any full sentence is returned as it is.
+ *
+ * @param string $text Summary.
+ * @return string
+ */
+function aw_whole_sentences( $text ) {
+	$lines = explode( "\n", trim( (string) $text ) );
+	$first = trim( $lines[0] );
+	if ( '' !== $first && ! preg_match( '/[.!?…]["\'”’)\]]*$/u', $first ) && preg_match_all( '/[.!?…]["\'”’)\]]*(?=\s|$)/u', $first, $m, PREG_OFFSET_CAPTURE ) ) {
+		$last     = end( $m[0] );
+		$lines[0] = substr( $first, 0, $last[1] + strlen( $last[0] ) );
+	}
+	return implode( "\n", $lines );
+}
+
 /** Whether this shortcode runs for the page's own item (not a card in a list). */
 function aw_item_head_here() {
 	return is_singular( AW_ITEM_HEAD_TYPES ) && get_the_ID() === get_queried_object_id();
@@ -66,8 +84,12 @@ add_shortcode(
 		if ( '' !== $chips . $cats ) {
 			$parts[] = '<span class="aw-item-meta-chips wp-block-post-terms taxonomy-category">' . $chips . $cats . '</span>';
 		}
-		$sep = '<span class="aw-item-meta-sep" aria-hidden="true">·</span>';
-		return '<div class="aw-item-meta">' . implode( $sep, $parts ) . '</div>';
+		// The "·" between parts is CSS (aw.css), so one that wraps to the start of a line is never shown.
+		$row = '';
+		foreach ( $parts as $p ) {
+			$row .= '<span class="aw-item-meta-part">' . $p . '</span>';
+		}
+		return '<div class="aw-item-meta"><span class="aw-item-meta-row">' . $row . '</span></div>';
 	}
 );
 

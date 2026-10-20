@@ -130,6 +130,9 @@ function aw_ingest( WP_REST_Request $req ) {
 	// The workers mark legal summaries "[Needs legal review]": an internal flag, never part of the published text.
 	$legal_flag = false !== strpos( $summary, '[Needs legal review]' );
 	$summary    = trim( str_replace( '[Needs legal review]', '', $summary ) );
+	if ( in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) && function_exists( 'aw_whole_sentences' ) ) {
+		$summary = aw_whole_sentences( $summary ); // never a tail cut off mid-sentence (item-head.php)
+	}
 	$source_url = esc_url_raw( (string) $req->get_param( 'source_url' ) );
 
 	if ( '' === $title ) {

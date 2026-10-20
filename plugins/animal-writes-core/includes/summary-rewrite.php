@@ -180,6 +180,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short' ) );
 	}
 	$summary = trim( preg_replace( '/\s+/u', ' ', sanitize_textarea_field( (string) $req->get_param( 'summary' ) ) ) );
+	$summary = function_exists( 'aw_whole_sentences' ) ? aw_whole_sentences( $summary ) : $summary; // never cut mid-sentence
 	$state   = 'short' === $req->get_param( 'state' ) ? 'short' : 'done';
 	$why     = aw_summary_problem( $summary, $sec, 'short' === $state );
 	if ( '' !== $why || '' === $summary ) {
