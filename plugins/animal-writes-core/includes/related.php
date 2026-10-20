@@ -7,7 +7,8 @@
  *   Library      Related in the Library · News about this · Resources
  *   Resources    Related resources · From the Library
  *   Opportunity  More opportunities (open ones only)
- *   Listing      More organisations in {District} · News from {District}
+ *   Listing      More organisations in {District} · More organisations in {State} (only to fill up to 6: same type
+ *                nearby, other types nearby, then the rest of the state; aw_related_state_fill()) · News from {District}
  *
  * - Picked with WordPress's own queries: shared categories (category__in), shared tags (tag__in) and the same place
  *   (aw_state_code / aw_district_code meta). Links set by hand in WP Admin (aw_rel_legal, aw_rel_resource) come first.
@@ -124,6 +125,86 @@ function aw_related_pick( $id, $type, $n, $first = array(), $extra = array(), $p
 	return array_slice( array_values( array_unique( array_merge( $first, $pool ) ) ), 0, $n );
 }
 
+/** Within this distance (km) of a listing's district, another district counts as nearby for the state fill. */
+const AW_RELATED_NEAR_KM = 150;
+
+/** District centres [lat, lng] by LGD district code (data/district-centroids.json, OpenStreetMap Nominatim, 20 Oct 2026). */
+function aw_district_centroid( $code ) {
+	static $c = null;
+	if ( null === $c ) {
+		$f = dirname( __DIR__ ) . '/data/district-centroids.json';
+		$c = is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	}
+	return $c[ (string) (int) $code ] ?? null;
+}
+
+/** Distance in km between two districts' centres; null when either is not known. */
+function aw_district_km( $a, $b ) {
+	$p = aw_district_centroid( $a );
+	$q = aw_district_centroid( $b );
+	if ( ! $p || ! $q ) {
+		return null;
+	}
+	$r = M_PI / 180;
+	$h = sin( ( $q[0] - $p[0] ) * $r / 2 ) ** 2 + cos( $p[0] * $r ) * cos( $q[0] * $r ) * sin( ( $q[1] - $p[1] ) * $r / 2 ) ** 2;
+	return 12742 * asin( min( 1, sqrt( $h ) ) );
+}
+
+/**
+ * A state's published listings: [ID, district code, title, type slugs], cached for 12 hours per state.
+ *
+ * @param int $state State code.
+ * @return array
+ */
+function aw_related_state_pool( $state ) {
+	$key  = 'aw_related_state_' . (int) $state;
+	$pool = get_transient( $key );
+	if ( is_array( $pool ) ) {
+		return $pool;
+	}
+	global $wpdb;
+	$types = "'" . implode( "','", array_map( 'esc_sql', function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array() ) ) . "'";
+	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT p.ID id, p.post_title title, MIN(CAST(dm.meta_value AS UNSIGNED)) district, GROUP_CONCAT(DISTINCT t.slug) types FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' AND sm.meta_value = %s LEFT JOIN {$wpdb->postmeta} dm ON dm.post_id = p.ID AND dm.meta_key = 'aw_district_code' LEFT JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID LEFT JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' LEFT JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ({$types}) WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND p.post_name <> '' GROUP BY p.ID", (string) (int) $state ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$pool  = array();
+	foreach ( $rows as $r ) {
+		$pool[] = array( (int) $r['id'], (int) $r['district'], (string) $r['title'], array_filter( explode( ',', (string) $r['types'] ) ) );
+	}
+	set_transient( $key, $pool, 12 * HOUR_IN_SECONDS );
+	return $pool;
+}
+
+/**
+ * Organisations elsewhere in a listing's state, to fill its related list when its district has too few (owner, 20 Oct 2026):
+ * the same type in nearby districts first, then other types nearby, then the rest of the state; nearest first, then
+ * A–Z, so the order is the same on every load.
+ *
+ * @param int   $id    The listing.
+ * @param object $place Its district.
+ * @param int   $n     How many.
+ * @param int[] $skip  IDs already shown.
+ * @return int[]
+ */
+function aw_related_state_fill( $id, $place, $n, $skip ) {
+	if ( $n < 1 || ! $place || 'district' !== $place->kind ) {
+		return array();
+	}
+	$tags = wp_get_object_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) );
+	$own  = array_flip( array_intersect( function_exists( 'aw_listing_type_slugs' ) ? aw_listing_type_slugs() : array(), is_array( $tags ) ? $tags : array() ) );
+	$skip = array_flip( array_merge( array( (int) $id ), array_map( 'intval', $skip ), aw_related_skip_ids() ) );
+	$rows = array();
+	foreach ( aw_related_state_pool( $place->state ) as $r ) {
+		if ( isset( $skip[ $r[0] ] ) || (int) $r[1] === (int) $place->code ) {
+			continue; // this listing, ones already shown, and its own district (the district group has those)
+		}
+		$km   = $r[1] ? aw_district_km( $place->code, $r[1] ) : null;
+		$near = null !== $km && $km <= AW_RELATED_NEAR_KM;
+		$same = (bool) array_intersect_key( array_flip( $r[3] ), $own );
+		$rows[] = array( $near ? ( $same ? 0 : 1 ) : 2, $km ?? INF, mb_strtolower( $r[2] ), $r[0] );
+	}
+	usort( $rows, fn( $a, $b ) => array( $a[0], $a[1], $a[2], $a[3] ) <=> array( $b[0], $b[1], $b[2], $b[3] ) );
+	return array_slice( array_column( $rows, 3 ), 0, $n );
+}
+
 /** Items that link to this one by hand (the other side of a relation): IDs. */
 function aw_related_back( $id, $key, $type ) {
 	return get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 10, 'fields' => 'ids', 'meta_key' => $key, 'meta_value' => (string) $id ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -170,7 +251,12 @@ function aw_related_groups( $id ) {
 		case 'aw_listing':
 			$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
 			if ( $p ) {
-				$groups[] = array( sprintf( 'More organisations in %s', $p->name ), 'aw_listing', aw_related_pick( $id, 'aw_listing', $c['aw_listing'], array(), array( 'orderby' => 'title', 'order' => 'ASC', 'posts_per_page' => 300 ), true ) );
+				$local    = aw_related_pick( $id, 'aw_listing', $c['aw_listing'], array(), array( 'orderby' => 'title', 'order' => 'ASC', 'posts_per_page' => 300 ), true );
+				$groups[] = array( sprintf( 'More organisations in %s', $p->name ), 'aw_listing', $local );
+				$state    = 'district' === $p->kind ? aw_place_state( $p->state ) : null;
+				if ( $state ) { // too few in the district: fill up from the state
+					$groups[] = array( sprintf( 'More organisations in %s', $state->name ), 'aw_listing', aw_related_state_fill( $id, $p, $c['aw_listing'] - count( $local ), $local ) );
+				}
 				$groups[] = array( sprintf( 'News from %s', $p->name ), 'aw_news', aw_related_pick( $id, 'aw_news', $c['aw_news'], aw_related_back( $id, 'aw_rel_org', 'aw_news' ), array(), true ) );
 			}
 			break;
