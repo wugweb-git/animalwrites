@@ -108,6 +108,8 @@ require_once AW_CORE_DIR . 'includes/forms-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/ai-keys.php';
+require_once AW_CORE_DIR . 'includes/cron-health.php';
+require_once AW_CORE_DIR . 'includes/relay.php';
 
 register_activation_hook(
 	__FILE__,

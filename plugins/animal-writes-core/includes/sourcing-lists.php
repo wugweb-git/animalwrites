@@ -312,7 +312,10 @@ add_filter(
 			unset( $s['on'], $s['filter'] );
 			$sources[] = $s;
 		}
-		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $words, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'], 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
+		// Search words: the Keywords tab's Include list. Each English one is a Google News search per run; the animal words
+		// (dog, cat, pet ...) are for checking feed items, never searches (77 words would be 71 searches, 20 Oct 2026).
+		$search = array_values( array_unique( (array) ( $rel['strong'] ?? array() ) ) );
+		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $search, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'], 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
 		return $data;
 	}
 );

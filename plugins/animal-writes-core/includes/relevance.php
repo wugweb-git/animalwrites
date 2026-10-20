@@ -413,6 +413,11 @@ function aw_ingest_problems( $now = null ) {
 	if ( ! $last || $now - $last >= 8 * HOUR_IN_SECONDS ) {
 		$out['no_run'] = $last ? sprintf( 'No worker run has reported for %d hours (last: %s). The GitHub Actions schedule may have stopped, or runs are failing before the end.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $last ) ) : 'No worker run has reported yet.';
 	}
+	// Scheduled tasks (cron-health.php): no trigger has called wp-cron.php for 30 minutes.
+	$cron = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
+	if ( $cron && $now - $cron >= AW_CRON_STALE ) {
+		$out['cron'] = sprintf( 'Scheduled tasks have not run for %d minutes (last: %s). Hostinger\'s server cron, the GitHub "WordPress cron" job and the outside monitor have all stopped.', floor( ( $now - $cron ) / MINUTE_IN_SECONDS ), wp_date( 'j M Y, g:i a', $cron ) );
+	}
 	$n    = (int) ( $hb['sources'] ?? 0 );
 	$fail = (int) ( $hb['sources_failed'] ?? 0 );
 	if ( $n && $fail * 2 >= $n ) {
@@ -442,13 +447,15 @@ function aw_ingest_watchdog() {
 	}
 }
 add_action( 'aw_ingest_watchdog', 'aw_ingest_watchdog' );
-// WordPress's own cron is off (DISABLE_WP_CRON) and the GitHub job that runs it gets 5-8 runs a day, and stops with
-// Actions itself, which is one of the failures the watchdog is for. So any request that reaches PHP also runs the
-// check when the last one is an hour old (one autoloaded option read otherwise).
+// The check must not depend on what it watches (cron, GitHub): any request that reaches PHP also runs it when the last
+// one is an hour old, or 10 minutes old while scheduled tasks look stopped (two autoloaded option reads otherwise).
 add_action(
 	'shutdown',
 	function () {
-		if ( time() - (int) get_option( 'aw_ingest_watchdog_at', 0 ) >= HOUR_IN_SECONDS && ! wp_installing() ) {
+		$age   = time() - (int) get_option( 'aw_ingest_watchdog_at', 0 );
+		$cron  = function_exists( 'aw_cron_last' ) ? aw_cron_last() : 0;
+		$stale = $cron && time() - $cron >= AW_CRON_STALE;
+		if ( ( $age >= HOUR_IN_SECONDS || ( $stale && $age >= 10 * MINUTE_IN_SECONDS ) ) && ! wp_installing() ) {
 			aw_ingest_watchdog();
 		}
 	}
@@ -482,6 +489,7 @@ add_action(
 					$hb['published']      = $published;
 					$hb['sources']        = max( 0, (int) $req->get_param( 'sources' ) );
 					$hb['sources_failed'] = max( 0, (int) $req->get_param( 'sources_failed' ) );
+					$hb['lists']          = sanitize_key( (string) $req->get_param( 'lists' ) ); // site or yaml: which lists the run used
 					$hb['errors']         = array_map( 'sanitize_text_field', array_slice( array_filter( (array) $req->get_param( 'errors' ), 'is_scalar' ), 0, 10 ) );
 					if ( $published > 0 || empty( $hb['last_new'] ) ) {
 						$hb['last_new'] = $now;
