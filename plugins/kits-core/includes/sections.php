@@ -180,19 +180,18 @@ add_filter( 'scriptlesssocialsharing_heading_element', fn() => 'h2' );
 /**
  * End of an article: its tags bottom left (crawlable text links) and the share buttons bottom right, one row.
  * Printed by [kits_endbar] at the end of the single templates (news has no post content, so not on the_content).
- * The share plugin's automatic placement is off; its "manual" output is on for these types.
  */
 function kits_endbar( $id = 0 ) {
 	$id    = $id ? (int) $id : get_the_ID();
 	$tax   = (string) apply_filters( 'kits_endbar_taxonomy', 'category', get_post_type( $id ) );
 	$tags  = get_the_term_list( $id, $tax, '<div class="kit-endbar-tags wp-block-post-terms taxonomy-' . esc_attr( $tax ) . '">', '', '</div>' );
 	$tags  = is_wp_error( $tags ) ? '' : (string) $tags;
-	$share = function_exists( 'scriptlesssocialsharing_do_buttons' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? (string) scriptlesssocialsharing_do_buttons( false ) : '';
+	$share = function_exists( 'aw_share_html' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? aw_share_html( $id ) : ''; // the Kits share bar (share.php): X, Facebook, LinkedIn, WhatsApp, Email, Copy link
 	$before = (string) apply_filters( 'kits_endbar_before', '' ); // e.g. the end-of-article ad
 	$after  = (string) apply_filters( 'kits_endbar_after', '' ); // or the ad after the share buttons (kits_ads_end_after_share_types)
 	if ( '' === $tags . $share ) {
 		return $before . $after;
 	}
-	return $before . '<div class="kit-endbar' . ( '' === $tags ? ' kit-endbar--share-only' : '' ) . '">' . $tags . ( $share ? '<div class="kit-endbar-share"><span class="kit-endbar-label">Share</span>' . $share . '</div>' : '' ) . '</div>' . $after;
+	return $before . '<div class="kit-endbar' . ( '' === $tags ? ' kit-endbar--share-only' : '' ) . '">' . $tags . ( $share ? '<div class="kit-endbar-share">' . $share . '</div>' : '' ) . '</div>' . $after;
 }
 add_shortcode( 'kits_endbar', fn() => is_singular() ? kits_endbar( get_queried_object_id() ) : '' );

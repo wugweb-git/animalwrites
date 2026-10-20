@@ -61,16 +61,42 @@
 		mark();
 	});
 
-	/* Copy link (share bar). */
+	/* Copy link (share bar): the icon turns to a check and the label to "Link copied" for 2 s; screen readers hear it. */
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest('.kit-share-copy, .aw-share-copy');
 		if (!b || !navigator.clipboard) return;
-		var html = b.innerHTML; // icon + label
 		navigator.clipboard.writeText(b.dataset.url).then(function () {
-			b.textContent = b.dataset.done;
-			setTimeout(function () { b.innerHTML = html; }, 2000);
+			var ico = b.querySelector('.kit-ico'), name = b.querySelector('.kit-share-name'), label = b.getAttribute('aria-label');
+			var live = b.parentNode.querySelector('[role=status]');
+			if (ico) ico.classList.replace('kit-ico--link', 'kit-ico--check');
+			if (name) name.textContent = b.dataset.done;
+			b.setAttribute('aria-label', b.dataset.done); b.title = b.dataset.done;
+			if (live) live.textContent = b.dataset.done;
+			setTimeout(function () {
+				if (ico) ico.classList.replace('kit-ico--check', 'kit-ico--link');
+				if (name) name.textContent = label;
+				b.setAttribute('aria-label', label); b.title = label;
+				if (live) live.textContent = '';
+			}, 2000);
 		});
 	});
+
+	/* Share bar names: only at lg, and only when the whole row still fits on one line (never two rows). */
+	var shares = document.querySelectorAll('.kit-share');
+	if (shares.length) {
+		var lg = window.matchMedia('(min-width: 1200px)');
+		var fit = function () {
+			Array.prototype.forEach.call(shares, function (s) {
+				s.classList.remove('is-labelled');
+				if (!lg.matches) return;
+				s.classList.add('is-labelled');
+				if (s.scrollWidth > s.clientWidth + 1) s.classList.remove('is-labelled');
+			});
+		};
+		fit();
+		var fitT;
+		window.addEventListener('resize', function () { clearTimeout(fitT); fitT = setTimeout(fit, 150); }, { passive: true });
+	}
 
 	/* 4. Shared form behaviour for every .kit-form (Phase 11 F.1).
 	   Validate on submit; after the first submit, check a field again when it loses focus, and clear its message as

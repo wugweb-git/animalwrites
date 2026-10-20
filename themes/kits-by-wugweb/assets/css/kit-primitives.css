@@ -13,42 +13,43 @@
 	outline-offset: var(--kit-focus-offset);
 }
 
-/* ---------- 1. Tag: static metadata, not interactive ---------- */
-.kit-tag {
-	display: inline-flex; align-items: center; gap: var(--s-1);
-	min-height: 1.75rem; padding: 0 var(--s-2);
-	border-radius: var(--radius-sm);
-	background: color-mix(in srgb, var(--kit-color-ink) 6%, transparent); color: var(--kit-color-text);
-	font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); line-height: 1.2;
-	cursor: default;
+/* ---------- 1–2. Chip: one component for every tag, label, category, type, place, issuer and publisher (owner,
+   20 Oct 2026). Outlined: white fill, a 1px border in the body-text colour at reduced strength (at least 3:1 on the grey
+   page), text and icons in the body-text colour. Only the leading icon differs (favicon, type icon, Library icon).
+   .kit-tag is static; .kit-chip and core post-terms links navigate (hover: a light text-colour overlay and the
+   full-strength border; focus: the same plus the focus ring). Selected (an active filter): a stronger overlay.
+   Status tags (--success, --warning, --danger, --closed) keep their colours. A campaign page may set the
+   --kit-chip-* tokens to its own. ---------- */
+:root {
+	--kit-chip-bg: var(--kit-color-raised);
+	--kit-chip-fg: var(--kit-color-text);
+	--kit-chip-border: color-mix(in srgb, var(--kit-color-text) 60%, var(--kit-color-raised)); /* at least 3:1 on a light page or surface colour (check a theme's own palette) */
+	--kit-chip-border-strong: var(--kit-color-text);
+	--kit-chip-hover: color-mix(in srgb, var(--kit-color-text) 7%, var(--kit-color-raised));
+	--kit-chip-selected: color-mix(in srgb, var(--kit-color-text) 14%, var(--kit-color-raised));
 }
-.kit-tag--accent { background: var(--kit-color-accent); color: var(--kit-color-on-accent); box-shadow: none; }
-.kit-tag--ink { background: var(--kit-color-ink); color: var(--kit-color-on-ink); box-shadow: none; }
-.kit-tag--success { background: var(--kit-color-success-soft); color: var(--kit-color-success); }
-.kit-tag--warning { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); }
-.kit-tag--danger { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); }
-.kit-tag--info { background: var(--kit-color-info-soft); color: var(--kit-color-info); }
-.kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
-
-/* ---------- 2. Link chip: a tag that navigates (also category links from the core post-terms block) ---------- */
-.kit-chip, .wp-block-post-terms a {
+.kit-tag, .kit-chip, .wp-block-post-terms a {
 	position: relative;
-	display: inline-flex; align-items: center;
-	min-height: 1.75rem; padding: 0 var(--s-2);
-	border-radius: var(--radius-sm);
-	background: color-mix(in srgb, var(--kit-color-ink) 6%, transparent); color: var(--kit-color-ink);
-	border: 0;
-	font-size: var(--fluid-label); font-weight: var(--kit-weight-regular);
-	text-decoration: none;
+	display: inline-flex; align-items: center; gap: var(--s-1);
+	box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2);
+	border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm);
+	background: var(--kit-chip-bg); color: var(--kit-chip-fg);
+	font-family: inherit; font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); line-height: 1.2;
+	white-space: nowrap; text-decoration: none;
 	transition: background-color var(--kit-motion-fast) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease);
 }
+.kit-tag { cursor: default; }
+a.kit-tag { cursor: pointer; }
+.kit-tag--success { background: var(--kit-color-success-soft); color: var(--kit-color-success); border-color: transparent; }
+.kit-tag--warning { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); border-color: transparent; }
+.kit-tag--danger { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); border-color: transparent; }
+.kit-tags { display: flex; flex-wrap: wrap; gap: var(--s-1); align-items: center; }
 .kit-chip::after, .wp-block-post-terms a::after { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* 44px hit area */
-.kit-chip:visited, .wp-block-post-terms a:visited { color: var(--kit-color-ink); }
-.kit-chip:active { background: color-mix(in srgb, var(--kit-color-ink) 16%, transparent); }
-@media (hover: hover) { :is(.kit-chip, .wp-block-post-terms a):hover { background: color-mix(in srgb, var(--kit-color-ink) 12%, transparent); text-decoration: underline; text-underline-offset: 2px; } }
-.kit-chip--on-ink { background: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent); color: var(--kit-color-on-ink); }
-.kit-chip--on-ink:visited { color: var(--kit-color-on-ink); }
-@media (hover: hover) { .kit-chip--on-ink:hover { background: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent); border-color: var(--kit-color-on-ink); } }
+:is(.kit-chip, .wp-block-post-terms a, a.kit-tag):visited { color: var(--kit-chip-fg); }
+:is(.kit-chip, .wp-block-post-terms a, a.kit-tag):focus-visible { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+:is(.kit-chip, .wp-block-post-terms a, a.kit-tag):active, :is(.kit-chip, .wp-block-post-terms a, a.kit-tag)[aria-current], .kit-chip.is-selected { background: var(--kit-chip-selected); border-color: var(--kit-chip-border-strong); }
+@media (hover: hover) { :is(.kit-chip, .wp-block-post-terms a, a.kit-tag):hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); color: var(--kit-chip-fg); text-decoration: none; } }
+.kit-chip--on-ink { --kit-chip-bg: transparent; --kit-chip-fg: var(--kit-color-on-ink); --kit-chip-border: color-mix(in srgb, var(--kit-color-on-ink) 55%, transparent); --kit-chip-border-strong: var(--kit-color-on-ink); --kit-chip-hover: color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent); }
 
 /* ---------- 3. Filter pill: toggles a filter value ---------- */
 .kit-filter-pill {
@@ -163,8 +164,8 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-filter-active { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: calc(-1 * var(--s-4)) 0 var(--s-6); }
 .kit-filter-active .kit-removable {
 	display: inline-flex; align-items: center; gap: var(--s-1);
-	padding-left: var(--s-3); border-radius: var(--radius-full);
-	background: var(--kit-color-surface-soft); box-shadow: inset 0 0 0 1px var(--kit-color-line);
+	padding-left: var(--s-3); border-radius: var(--radius-sm);
+	background: var(--kit-chip-selected); box-shadow: inset 0 0 0 1px var(--kit-chip-border-strong); color: var(--kit-chip-fg); /* a selected chip */
 	font-size: var(--fluid-body-sm);
 }
 .kit-filter-active .kit-removable a {

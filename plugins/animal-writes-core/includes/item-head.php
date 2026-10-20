@@ -2,11 +2,13 @@
 /**
  * News and Library item pages (owner, 20 Oct 2026): one order, each element once.
  *
- * Breadcrumb (Home › Section › primary category) › H1 › meta row › image › summary › source line › share › ad › related.
+ * Breadcrumb (Home › Section › primary category) › H1 › meta row › image › summary › source line › tags › share › ad ›
+ * related.
  *
- * - [aw_item_meta]   one row: publisher logo + name (linked to the original, with the "also reported by" logos) ·
- *                    the original's date (j M Y, calendar icon) · chips (Library type first, then the categories).
+ * - [aw_item_meta]   one row: the original's date (j M Y, calendar icon), category chips, the publisher chip (favicon +
+ *                    name, linked to the original, then the "also reported by" logos). Spacing is the CSS gap only.
  *                    The publisher, the date and the categories appear nowhere else on the page.
+ * - [aw_item_tags]   the other labels (Library types, tags) as chips, after the source line.
  * - [aw_source_line] plain text, no card: "Read the original ↗", the summary note and the Editorial policy link.
  *
  * @package animal-writes-core
@@ -63,33 +65,40 @@ add_shortcode(
 		if ( ! aw_item_head_here() ) {
 			return '';
 		}
-		$id    = get_queried_object_id();
-		$parts = array();
-		$src   = do_shortcode( '[aw_source_row link="1"]' ); // same-story.php adds the "also reported by" logos
+		$id  = get_queried_object_id();
+		$day = (string) get_post_meta( $id, 'aw_source_date', true );
+		$row = aw_date( $day ? $day . ' 12:00:00' : (int) get_post_time( 'U', true, $id ) ); // the original's date, absolute
+		// Each chip is its own item of the row, so the row wraps between chips only (owner, 20 Oct 2026).
+		$cats = get_the_terms( $id, 'category' );
+		foreach ( ( $cats && ! is_wp_error( $cats ) ) ? $cats : array() as $t ) {
+			$row .= '<a class="kit-chip" href="' . esc_url( get_term_link( $t ) ) . '" rel="tag">' . esc_html( $t->name ) . '</a>';
+		}
+		$src = do_shortcode( '[aw_source_row link="1"]' ); // the publisher chip; same-story.php adds the "also reported by" logos
 		if ( '' !== $src ) {
 			// Inline elements only: the shortcode block runs wpautop, which would open a stray <p> after a <p>, <div> or <ul>.
 			$src = preg_replace( array( '#^<(?:p|div) class="#', '#</(?:p|div)>$#', '#<ul class="aw-src-also"#', '#</ul>#', '#<li>#', '#</li>#' ), array( '<span class="', '</span>', '<span role="list" class="aw-src-also"', '</span>', '<span role="listitem">', '</span>' ), trim( $src ) );
-			$parts[] = $src;
+			$row .= $src;
 		}
-		$day     = (string) get_post_meta( $id, 'aw_source_date', true );
-		$parts[] = aw_date( $day ? $day . ' 12:00:00' : (int) get_post_time( 'U', true, $id ) ); // the original's date, absolute
-		$chips   = '';
-		if ( 'aw_legal' === get_post_type( $id ) && function_exists( 'aw_legal_kinds' ) ) {
-			foreach ( aw_legal_kinds( $id ) as $k ) {
-				$chips .= '<a class="kit-tag" href="' . esc_url( get_term_link( $k ) ) . '" rel="tag">' . ( function_exists( 'aw_type_icon' ) ? aw_type_icon( 'lib-' . $k->slug ) : '' ) . esc_html( $k->name ) . '</a>';
-			}
+		return '<div class="aw-item-meta">' . $row . '</div>';
+	}
+);
+
+// Labels that are not categories (Library types, other tags), after the source line, as chips with their icons.
+add_shortcode(
+	'aw_item_tags',
+	function () {
+		if ( ! aw_item_head_here() ) {
+			return '';
 		}
-		$cats = get_the_term_list( $id, 'category', '', '', '' );
-		$cats = is_wp_error( $cats ) ? '' : (string) $cats;
-		if ( '' !== $chips . $cats ) {
-			$parts[] = '<span class="aw-item-meta-chips wp-block-post-terms taxonomy-category">' . $chips . $cats . '</span>';
+		$tags = get_the_terms( get_queried_object_id(), 'post_tag' );
+		if ( ! $tags || is_wp_error( $tags ) ) {
+			return '';
 		}
-		// The "·" between parts is CSS (aw.css), so one that wraps to the start of a line is never shown.
-		$row = '';
-		foreach ( $parts as $p ) {
-			$row .= '<span class="aw-item-meta-part">' . $p . '</span>';
+		$out = '';
+		foreach ( $tags as $t ) {
+			$out .= '<a class="kit-chip" href="' . esc_url( get_term_link( $t ) ) . '" rel="tag">' . ( function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t->slug ) : '' ) . esc_html( $t->name ) . '</a>';
 		}
-		return '<div class="aw-item-meta"><span class="aw-item-meta-row">' . $row . '</span></div>';
+		return '<div class="kit-tags aw-item-tags">' . $out . '</div>';
 	}
 );
 

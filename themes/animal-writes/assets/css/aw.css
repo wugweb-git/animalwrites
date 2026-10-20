@@ -336,13 +336,11 @@ body { background: var(--kit-color-canvas); }
 .aw-src-also .aw-src-also-link:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); border-radius: var(--radius-sm); }
 .aw-rel-time { font-size: var(--kit-meta-size); font-weight: var(--kit-meta-weight); color: var(--kit-color-muted); }
 .aw-item-time { margin: 0 0 var(--kit-space-4); }
-.aw-item-meta { margin: var(--kit-space-3) 0 var(--kit-space-4); font-size: var(--kit-meta-size); color: var(--kit-color-muted); clip-path: inset(-6px -6px -6px -3px); } /* News and Library: publisher · date · categories, one row (item-head.php); the clip hides a "·" that wraps to a line start */
-.aw-item-meta-row { display: flex; flex-wrap: wrap; align-items: center; row-gap: var(--kit-space-1); margin-left: -1.25em; }
-.aw-item-meta-part { display: inline-flex; align-items: center; min-width: 0; }
-.aw-item-meta-part::before { content: "·" / ""; flex: none; width: 1.25em; text-align: center; color: var(--kit-color-muted); }
-.aw-item-meta .aw-src { margin: 0 !important; }
-.aw-item-meta .aw-src--link a { min-height: 0; }
-.aw-item-meta-chips.wp-block-post-terms { display: inline-flex; margin: 0; }
+.aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-3) 0 var(--kit-space-4); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); } /* News and Library (item-head.php): date, category chips, publisher chip; one font, size, weight and colour; spacing is the gap only */
+.aw-item-meta > .aw-date { color: inherit; font: inherit; }
+.aw-item-meta > .aw-src { margin: 0 !important; }
+.aw-item-meta .aw-src-also { margin-left: calc(-1 * var(--kit-space-1)); }
+.aw-item-tags { margin: var(--kit-space-4) 0 0; } /* labels (Library types, other tags) after the source line */
 .aw-source-line { margin: var(--kit-space-4) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); max-width: none; } /* plain text, no card */
 .aw-source-line-read { font-weight: var(--kit-weight-strong); }
 .aw-source-line-read::after { content: none !important; }
@@ -447,7 +445,8 @@ body { background: var(--kit-color-canvas); }
 .aw-datasrcs.is-full { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--kit-space-2) var(--kit-space-3); align-items: center; margin-top: var(--kit-space-2); }
 .aw-datasrcs.is-full .aw-datasrc-row { display: contents; }
 .aw-datasrc-text { min-width: 0; } /* label + date stay together in the text column */
-.aw-datasrcs.is-full .kit-tag { justify-content: center; min-width: 3.5rem; background: color-mix(in srgb, var(--kit-color-ink) 6%, transparent); color: var(--kit-color-text); }
+.aw-datasrcs.is-full .kit-tag { justify-content: center; min-width: 3.5rem; }
+.kit-tag.aw-datasrc { background: var(--kit-chip-bg); color: var(--kit-chip-fg); border-color: var(--kit-chip-border); } /* a source is a chip like a publisher, whatever its kind */
 .aw-datasrc-mark { font-weight: var(--kit-weight-medium); letter-spacing: 0.02em; }
 .aw-datasrc-row { display: inline-flex; align-items: center; gap: var(--kit-space-2); }
 
@@ -790,11 +789,9 @@ body { background: var(--kit-color-canvas); }
 	display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: 1.75rem; padding: 0 var(--kit-space-2); border: 0; border-radius: var(--radius-sm);
 	font-family: inherit; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; font-style: normal; letter-spacing: 0; line-height: 1.2; white-space: nowrap; text-decoration: none !important;
 }
-.taxonomy-category a { background: color-mix(in srgb, var(--kit-color-info) 10%, transparent); color: color-mix(in srgb, var(--kit-color-info) 75%, var(--kit-color-ink)); }
-.taxonomy-post_tag a, .aw-org-tags > .kit-tag:not([class*="--"]) { background: color-mix(in srgb, var(--kit-color-ink) 7%, transparent); color: var(--kit-color-text); }
-.kit-tag--info.aw-issuer, .aw-case-tags > .kit-tag--info, .aw-case-tags > .kit-tag--ink { background: color-mix(in srgb, var(--kit-color-success) 11%, transparent); color: var(--kit-color-success); }
-.taxonomy-aw_place a { background: color-mix(in srgb, #6d4bc4 10%, transparent); color: #5a3aa8; }
-:is(.kit-chip, .wp-block-post-terms a, .taxonomy-aw_place a):hover { filter: brightness(.92); text-decoration: none !important; }
+/* Categories, labels, places and issuers: the one chip (kit-primitives.css), no tint per kind (owner, 20 Oct 2026) */
+.taxonomy-aw_place a { border: 1px solid var(--kit-chip-border); background: var(--kit-chip-bg); color: var(--kit-chip-fg); }
+@media (hover: hover) { .taxonomy-aw_place a:hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); } }
 .taxonomy-aw_place a::before { content: ""; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--kit-ico-pin) center / contain no-repeat; mask: var(--kit-ico-pin) center / contain no-repeat; }
 .aw-src-icon, .aw-datasrc-logo img { width: var(--kit-meta-icon) !important; height: var(--kit-meta-icon) !important; object-fit: contain; border-radius: var(--kit-radius-mark); background: transparent; border: 0; padding: 0; }
 .aw-src-icon:not(.aw-src-icon--letter), .aw-datasrc-logo { box-sizing: content-box; padding: 3px !important; background: var(--kit-color-raised) !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--radius-sm) !important; }
@@ -833,6 +830,16 @@ body { background: var(--kit-color-canvas); }
 
 /* Icon + text meta labels: one text style and a tight gap everywhere (publisher, date, year, posted by). */
 :is(.aw-src, .aw-card-time, .wp-block-post-date, .kit-meta, .aw-law-date, .aw-posted-by, .aw-press-handle) { gap: var(--kit-meta-icon-gap) !important; font-size: var(--kit-meta-size) !important; font-weight: var(--kit-meta-weight) !important; color: var(--kit-color-muted) !important; line-height: 1.3; } /* the same tokens as .kit-meta-item (kit.css) */
+/* The publisher is a chip like every other (owner, 20 Oct 2026): favicon + name in the one chip component; the favicon
+   loses its own frame inside it. On a card it is static (the card is the link); on an item page it links to the original. */
+.aw-src.aw-src { display: inline-flex; align-items: center; gap: var(--s-1); width: fit-content; max-width: 100%; box-sizing: border-box; min-height: 1.75rem; padding: 0 var(--s-2); border: 1px solid var(--kit-chip-border); border-radius: var(--radius-sm); background: var(--kit-chip-bg); color: var(--kit-chip-fg) !important; font-size: var(--fluid-label) !important; font-weight: var(--kit-weight-regular) !important; line-height: 1.2; }
+.aw-src.aw-src .aw-src-icon:not(.aw-src-icon--letter) { padding: 0 !important; border: 0 !important; background: transparent !important; }
+.aw-src.aw-src--link { position: relative; }
+.aw-src.aw-src--link a { min-height: 0; gap: var(--s-1); color: inherit; }
+.aw-src--link a::before { content: ""; position: absolute; inset: calc((var(--s-8) - var(--kit-size-target)) / 2) 0; } /* the whole chip is the link, 44px tall */
+@media (hover: hover) { .aw-src.aw-src--link:hover { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); } .aw-src--link a:hover .aw-src-name { text-decoration: none; } }
+.aw-src.aw-src--link:focus-within { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-src--link a:focus-visible { outline: 0; }
 .aw-case-date .d { font-size: var(--kit-meta-size) !important; font-weight: var(--kit-meta-weight) !important; color: var(--kit-color-muted) !important; }
 .aw-src .aw-src-name, .aw-card-time .aw-rel-time { font: inherit; color: inherit; }
 
