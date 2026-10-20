@@ -423,6 +423,7 @@ function aw_ingest_problems( $now = null ) {
 
 /** Email the owner about ingestion problems (hourly event, and after every heartbeat). */
 function aw_ingest_watchdog() {
+	update_option( 'aw_ingest_watchdog_at', time(), true );
 	$problems = aw_ingest_problems();
 	update_option( 'aw_ingest_watchdog_last', array( 'at' => time(), 'problems' => $problems ), false );
 	if ( ! $problems ) {
@@ -441,6 +442,17 @@ function aw_ingest_watchdog() {
 	}
 }
 add_action( 'aw_ingest_watchdog', 'aw_ingest_watchdog' );
+// WordPress's own cron is off (DISABLE_WP_CRON) and the GitHub job that runs it gets 5-8 runs a day, and stops with
+// Actions itself, which is one of the failures the watchdog is for. So any request that reaches PHP also runs the
+// check when the last one is an hour old (one autoloaded option read otherwise).
+add_action(
+	'shutdown',
+	function () {
+		if ( time() - (int) get_option( 'aw_ingest_watchdog_at', 0 ) >= HOUR_IN_SECONDS && ! wp_installing() ) {
+			aw_ingest_watchdog();
+		}
+	}
+);
 add_action(
 	'init',
 	function () {

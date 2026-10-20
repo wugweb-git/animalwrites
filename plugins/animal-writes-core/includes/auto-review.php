@@ -32,6 +32,67 @@ function aw_title_words( $title ) {
 }
 
 /**
+ * States and districts a title names (LGD names in capitalised words, one to three at a time), as 'd' => district
+ * codes and 's' => state codes (a district's state included).
+ *
+ * @param string $title Title.
+ * @return array{d:string[],s:string[]}
+ */
+function aw_title_places( $title ) {
+	static $index = null;
+	if ( null === $index ) {
+		$index = array();
+		if ( function_exists( 'aw_lgd' ) ) {
+			$lgd = aw_lgd();
+			foreach ( $lgd['districts'] as $p ) {
+				$index[ aw_place_key( $p->name ) ][] = array( 'd' . $p->code, 's' . $p->state );
+			}
+			foreach ( $lgd['states'] as $p ) {
+				$index[ aw_place_key( $p->name, 'state' ) ][] = array( '', 's' . $p->code );
+			}
+		}
+	}
+	$out   = array( 'd' => array(), 's' => array() );
+	$words = preg_split( '/[^\p{L}]+/u', wp_strip_all_tags( (string) $title ), -1, PREG_SPLIT_NO_EMPTY );
+	$count = count( $words );
+	for ( $i = 0; $i < $count; $i++ ) {
+		for ( $n = 1; $n <= 3 && $i + $n <= $count; $n++ ) {
+			$run = array_slice( $words, $i, $n );
+			if ( array_filter( $run, fn( $w ) => ! preg_match( '/^\p{Lu}/u', $w ) ) ) {
+				break; // place names are capitalised
+			}
+			foreach ( $index[ aw_place_key( implode( ' ', $run ) ) ] ?? array() as $hit ) {
+				if ( $hit[0] ) {
+					$out['d'][] = $hit[0];
+				}
+				$out['s'][] = $hit[1];
+			}
+		}
+	}
+	return array( 'd' => array_values( array_unique( $out['d'] ) ), 's' => array_values( array_unique( $out['s'] ) ) );
+}
+
+/**
+ * Two titles name different places (both name districts and share none, or both name states and share none), so they
+ * are different stories however many words they share ("stray dog attack in X / in Y", audit of 12 Oct 2026).
+ *
+ * @param string $a Title.
+ * @param string $b Title.
+ * @return bool
+ */
+function aw_titles_differ_in_place( $a, $b ) {
+	$pa = aw_title_places( $a );
+	$pb = aw_title_places( $b );
+	if ( $pa['d'] && $pb['d'] ) {
+		return ! array_intersect( $pa['d'], $pb['d'] );
+	}
+	if ( $pa['s'] && $pb['s'] ) {
+		return ! array_intersect( $pa['s'], $pb['s'] );
+	}
+	return false;
+}
+
+/**
  * The workers' relevance check (stored on the item as aw_relevance) said: about animal welfare, and about India.
  *
  * @param int $id Post ID.
@@ -134,7 +195,8 @@ function aw_review_reason( $id ) {
 			$other  = aw_title_words( $r->post_title );
 			$shared = count( array_intersect( $mine, $other ) );
 			$union  = count( array_unique( array_merge( $mine, $other ) ) );
-			if ( $union && $shared / $union >= 0.6 ) { // 0.45 merged different stories ("stray dog attack in X / in Y")
+			// 0.45 merged different stories ("stray dog attack in X / in Y"); different places are never the same story.
+			if ( $union && $shared / $union >= 0.6 && ! aw_titles_differ_in_place( $post->post_title, $r->post_title ) ) {
 				return 'same story as #' . $r->ID . ' (' . wp_trim_words( $r->post_title, 8 ) . ')';
 			}
 		}
