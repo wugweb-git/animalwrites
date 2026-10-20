@@ -767,7 +767,11 @@ function aw_card_chips( $id, $state = 'block-md' ) {
 		$chips[] = '<span class="kit-tag kit-tag--category"><span class="kit-tag-text">' . esc_html( $cat->name ) . '</span></span>';
 	}
 	$lead = ( 'stacked-sm' === $state ? aw_card_campaign_label( $id ) : '' ) . ( function_exists( 'aw_sponsored_badge' ) ? aw_sponsored_badge( $id ) : '' );
-	$row  = $lead . implode( '', array_slice( $chips, 0, aw_card_chip_cap( $state ) ) );
+	$chips = array_slice( $chips, 0, aw_card_chip_cap( $state ) );
+	if ( '' !== $lead && $chips ) { // the label and the first chip (the source) share the first place, so the source never wraps away
+		$lead = '<span class="kit-card-chips-lead">' . $lead . array_shift( $chips ) . '</span>';
+	}
+	$row  = $lead . implode( '', $chips );
 	return '' !== $row ? '<p class="kit-card-chips kit-tags">' . $row . '</p>' : '';
 }
 
