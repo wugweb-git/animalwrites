@@ -690,7 +690,9 @@ function aw_faq_html( $faq = null ) {
 		$body .= '<div class="kit-faq-item"><h3 class="kit-faq-q"><button type="button" class="kit-faq-btn" id="kit-faq-q' . $n . '" aria-expanded="true" aria-controls="kit-faq-a' . $n . '">' . esc_html( $it['q'] ) . '</button></h3>'
 			. '<div class="kit-faq-a" id="kit-faq-a' . $n . '" role="region" aria-labelledby="kit-faq-q' . $n . '"><p>' . $it['a'] . '</p></div></div>'; // answers: escaped parts (registry) or kses-cleaned (topic items)
 	}
-	return $html[ $key ] = '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '"><h2 class="kit-faq-head" id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . $body . '</section>';
+	// wptexturize as the block template does to the whole page (" - " → " – ", "24x7" → "24×7"), so the text the schema is
+	// parsed from is the text the page shows; texturizing it again later changes nothing.
+	return $html[ $key ] = wptexturize( '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '"><h2 class="kit-faq-head" id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . $body . '</section>' );
 }
 
 /**
