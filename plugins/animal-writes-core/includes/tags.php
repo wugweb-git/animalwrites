@@ -18,8 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Tags that carry an icon (aw-type-ico--{slug}; Library types use lib-{slug}). */
-const AW_TAG_ICONS = array( 'abc-centre', 'adoption-network', 'animal-ambulance', 'animal-shelter', 'animal-welfare-organisation', 'bird-hospital', 'boarding-and-foster', 'emergency-rescue', 'feeder-network', 'gaushala', 'legal-aid', 'mobile-veterinary-unit', 'rescue-group', 'sanctuary', 'veterinary-clinic', 'veterinary-dispensary', 'veterinary-hospital', 'veterinary-office', 'wildlife-rescue' );
+/**
+ * Tags that have their own icon (aw-type-ico--{slug} in the theme's aw.css; Library types use lib-{slug}). Every other
+ * tag shows the default icon and is listed on the Tags screen as "Tags without their own icon" (owner, 20 Oct 2026).
+ * Services share their organisation type's icon (aw.css): Sheltering = Animal shelter, Ambulance service = Animal ambulance ...
+ */
+const AW_TAG_ICONS = array(
+	// Directory: organisation types.
+	'abc-centre', 'adoption-network', 'animal-ambulance', 'animal-shelter', 'animal-welfare-organisation', 'bird-hospital', 'boarding-and-foster', 'emergency-rescue', 'feeder-network', 'gaushala', 'legal-aid', 'mobile-veterinary-unit', 'rescue-group', 'sanctuary', 'veterinary-clinic', 'veterinary-dispensary', 'veterinary-hospital', 'veterinary-office', 'wildlife-rescue',
+	// Directory: services.
+	'rescue', 'treatment', 'shelter', 'adoption', 'feeding', 'sterilisation', 'vaccination', 'ambulance', 'boarding-foster', 'legal-help', 'cattle-care',
+	// Resources, Opportunities, Library.
+	'research', 'guide', 'faq', 'how-to', 'job', 'volunteer', 'event', 'internship', 'fellowship', 'grant', 'draft',
+);
 
 /* ---------- Registration ---------- */
 
@@ -133,13 +144,50 @@ function aw_set_item_tags( $id, array $new, array $list ) {
 	wp_set_object_terms( $id, array_values( array_unique( array_merge( $keep, array_intersect( $new, $list ) ) ) ), 'post_tag' );
 }
 
-/** A tag's icon ('' when it has none). */
+/** True when a tag has its own icon (not the default). */
+function aw_tag_has_icon( $slug ) {
+	return ( defined( 'AW_LEGAL_KINDS' ) && isset( AW_LEGAL_KINDS[ $slug ] ) ) || in_array( $slug, AW_TAG_ICONS, true );
+}
+
+/** A tag's icon: its own, else the default (a tag added later never shows without one). */
 function aw_tag_icon( $slug ) {
+	if ( ! function_exists( 'aw_type_icon' ) ) {
+		return '';
+	}
 	if ( defined( 'AW_LEGAL_KINDS' ) && isset( AW_LEGAL_KINDS[ $slug ] ) ) {
 		return aw_type_icon( 'lib-' . $slug );
 	}
-	return in_array( $slug, AW_TAG_ICONS, true ) && function_exists( 'aw_type_icon' ) ? aw_type_icon( $slug ) : '';
+	return aw_type_icon( in_array( $slug, AW_TAG_ICONS, true ) ? $slug : 'default' );
 }
+
+// Tag pages: the heading carries the tag's icon.
+add_filter(
+	'render_block_core/query-title',
+	function ( $html ) {
+		if ( ! is_tag() || ! ( get_queried_object() instanceof WP_Term ) ) {
+			return $html;
+		}
+		return preg_replace( '#(<h1\b[^>]*>)#', '$1' . aw_tag_icon( get_queried_object()->slug ), $html, 1 );
+	}
+);
+
+// Settings: the Tags screen lists the tags still on the default icon.
+add_action(
+	'admin_notices',
+	function () {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'edit-post_tag' !== $screen->id || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$missing = array();
+		foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) ) as $t ) {
+			if ( ! aw_tag_has_icon( $t->slug ) ) {
+				$missing[] = $t->name . ' (' . $t->slug . ')';
+			}
+		}
+		echo '<div class="notice ' . ( $missing ? 'notice-warning' : 'notice-success' ) . '"><p><strong>Tags without their own icon:</strong> ' . ( $missing ? esc_html( implode( ', ', $missing ) ) . '. They show the default icon until one is added in the theme (aw.css) and in AW_TAG_ICONS (tags.php).' : 'none. Every tag has its own icon.' ) . '</p></div>';
+	}
+);
 
 // Tag labels (the core post-terms block on item pages and cards) carry the tag's icon before the name.
 add_filter(

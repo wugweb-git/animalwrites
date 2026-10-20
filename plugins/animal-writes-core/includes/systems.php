@@ -279,7 +279,7 @@ function aw_list_filters( $type ) {
 				continue;
 			}
 			$on        = in_array( (string) $slug, $mine, true );
-			$options[] = array( $v[0], (string) $slug, $on, $v[1] );
+			$options[] = array( $v[0], (string) $slug, $on, $v[1], in_array( $source, array( 'post_tag', 'resource-kind' ), true ) && 'sponsored' !== $slug && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( (string) $slug ) : '' ); // tags carry their icon
 			if ( $on ) {
 				$rest    = array_values( array_diff( $mine, array( (string) $slug ) ) );
 				$without = $rest ? array_merge( $active, array( $param => $rest ) ) : $others;
