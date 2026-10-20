@@ -279,6 +279,85 @@ add_action(
 	}
 );
 
+/*
+ * Work done per key (owner, 20 Oct 2026): each worker run reports, per key, its calls, answers, rate-limited and failed
+ * calls (POST aw/v1/ai-usage, key id = aw_ai_key_id, never the key). Kept: each key's last run and its runs of the
+ * last 24 hours. Shown on this screen, keys from the GitHub secrets included.
+ */
+
+/** Usage by key id: [ last => run, runs => [ {at, workflow, calls, ok, limited, failed} ... (24 h) ], provider, last4 ]. */
+function aw_ai_usage(): array {
+	return (array) get_option( 'aw_ai_usage', array() );
+}
+
+/** "Sourcing workers, 20 Oct 06:17: 14 calls (12 answered, 2 rate-limited)". */
+function aw_ai_usage_line( array $u ): string {
+	$last = (array) ( $u['last'] ?? array() );
+	if ( ! $last ) {
+		return 'No run reported yet';
+	}
+	$bits = array( (int) $last['ok'] . ' answered' );
+	if ( (int) $last['limited'] ) {
+		$bits[] = (int) $last['limited'] . ' rate-limited';
+	}
+	if ( (int) $last['failed'] ) {
+		$bits[] = (int) $last['failed'] . ' failed';
+	}
+	$day = array( 'calls' => 0, 'ok' => 0 );
+	foreach ( (array) ( $u['runs'] ?? array() ) as $r ) {
+		$day['calls'] += (int) $r['calls'];
+		$day['ok']    += (int) $r['ok'];
+	}
+	return sprintf( '%s, %s%s: %d calls (%s) · 24 h: %d calls, %d answered', $last['workflow'], wp_date( 'j M, H:i', (int) $last['at'] ), empty( $last['dry_run'] ) ? '' : ' (dry run)', (int) $last['calls'], implode( ', ', $bits ), $day['calls'], $day['ok'] );
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/ai-usage',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => fn() => current_user_can( 'edit_posts' ) && did_action( 'application_password_did_authenticate' ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$now   = time();
+					$usage = aw_ai_usage();
+					$wf    = sanitize_text_field( (string) $req->get_param( 'workflow' ) );
+					$link  = esc_url_raw( (string) $req->get_param( 'link' ) );
+					$dry   = (bool) $req->get_param( 'dry_run' );
+					foreach ( (array) $req->get_param( 'keys' ) as $k ) {
+						$id = preg_replace( '/[^a-f0-9]/', '', strtolower( (string) ( $k['id'] ?? '' ) ) );
+						if ( 16 !== strlen( $id ) ) {
+							continue;
+						}
+						$n = array( 'calls' => 0, 'ok' => 0, 'limited' => 0, 'failed' => 0 );
+						foreach ( $n as $f => $_ ) {
+							$n[ $f ] = max( 0, (int) ( $k[ $f ] ?? 0 ) );
+						}
+						$models = array();
+						foreach ( (array) ( $k['models'] ?? array() ) as $m => $c ) {
+							$models[ sanitize_text_field( (string) $m ) ] = max( 0, (int) ( $c['calls'] ?? 0 ) );
+						}
+						$run  = array( 'at' => $now, 'workflow' => $wf, 'link' => $link, 'dry_run' => $dry, 'models' => $models ) + $n;
+						$u    = (array) ( $usage[ $id ] ?? array() );
+						$runs = array_values( array_filter( (array) ( $u['runs'] ?? array() ), fn( $r ) => $now - (int) $r['at'] < DAY_IN_SECONDS ) );
+						$runs[] = array( 'at' => $now, 'workflow' => $wf ) + $n;
+						$usage[ $id ] = array(
+							'provider' => sanitize_key( (string) ( $k['provider'] ?? '' ) ),
+							'last4'    => substr( preg_replace( '/[^A-Za-z0-9_-]/', '', (string) ( $k['last4'] ?? '' ) ), -4 ),
+							'last'     => $run,
+							'runs'     => array_slice( $runs, -200 ),
+						);
+					}
+					update_option( 'aw_ai_usage', $usage, false );
+					return new WP_REST_Response( array( 'keys' => count( (array) $req->get_param( 'keys' ) ) ) );
+				},
+			)
+		);
+	}
+);
+
 add_action(
 	'admin_post_aw_ai_keys',
 	function () {
@@ -360,21 +439,36 @@ function aw_ai_keys_screen() {
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
 	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
 	echo '<p>The news workers try the working keys from the top down, then the keys in their GitHub secrets. Every key is tested again twice a day.</p>';
-	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
+	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Work in the last run</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
 	if ( ! $rows ) {
-		echo '<tr><td colspan="8">No keys yet.</td></tr>';
+		echo '<tr><td colspan="9">No keys yet.</td></tr>';
 	}
+	$usage = aw_ai_usage();
+	$shown = array();
 	foreach ( $rows as $i => $r ) {
+		$uid     = aw_ai_key_id( $r['key'] );
+		$shown[] = $uid;
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
 			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
+			. '<td>' . esc_html( aw_ai_usage_line( (array) ( $usage[ $uid ] ?? array() ) ) ) . '</td>'
 			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
 			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="submit" form="aw-ai-remove" name="aw_ai_remove" value="' . esc_attr( aw_ai_key_id( $r['key'] ) ) . '" class="button-link button-link-delete" data-aw-remove="…' . esc_attr( substr( $r['key'], -4 ) ) . '">Remove</button></td></tr>';
 	}
 	echo '</tbody></table>';
+	// Keys the workers also use from their GitHub secrets (not saved here).
+	$other = array_diff_key( $usage, array_flip( $shown ) );
+	if ( $other ) {
+		echo '<h2>Keys in the workers\' GitHub secrets</h2><table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Work in the last run</th></tr></thead><tbody>';
+		uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
+		foreach ( $other as $u ) {
+			echo '<tr><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code></td><td>' . esc_html( AW_AI_PROVIDERS[ $u['provider'] ?? '' ][0] ?? (string) ( $u['provider'] ?? '' ) ) . '</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+	}
 	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check the working keys again too</label></p>';
 	submit_button( 'Save and check' );
 	echo '</form>';
