@@ -40,7 +40,8 @@ function aw_listing_here( $id ) {
 }
 
 /**
- * One definition list. $rows: [label, value HTML]; empty values are left out.
+ * One definition list. $rows: [label, value HTML, icon]; the icon is a Kits icon slug or an issuer's logo (HTML); empty
+ * values are left out.
  *
  * @param array  $rows  Rows.
  * @param string $class Extra class.
@@ -50,7 +51,8 @@ function aw_listing_dl( $rows, $class = '' ) {
 	$out = '';
 	foreach ( $rows as $r ) {
 		if ( '' !== trim( (string) $r[1] ) ) {
-			$out .= '<div class="aw-facts-row"><dt>' . esc_html( $r[0] ) . '</dt><dd>' . $r[1] . '</dd></div>';
+			$ico  = empty( $r[2] ) ? '' : ( 0 === strpos( $r[2], '<' ) ? '<span class="aw-facts-ico">' . $r[2] . '</span>' : aw_i( $r[2] ) );
+			$out .= '<div class="aw-facts-row"><dt>' . $ico . esc_html( $r[0] ) . '</dt><dd>' . $r[1] . '</dd></div>';
 		}
 	}
 	return '' !== $out ? '<dl class="aw-facts' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '">' . $out . '</dl>' : '';
@@ -108,6 +110,12 @@ function aw_block_listing_about( $a, $id ) {
 	return '<div class="aw-listing-about' . ( $logo ? ' has-logo' : '' ) . '">' . ( $logo ? '<div class="aw-listing-logo-box">' . $logo . '</div>' : '' ) . ( '' !== trim( wp_strip_all_tags( $text ) ) ? '<div class="aw-listing-desc">' . $text . '</div>' : '' ) . '</div>';
 }
 
+/** The issuing body's logo for a registration row (source registry, fetched once), else a Kits icon slug. */
+function aw_listing_issuer_icon( $slug, $id, $fallback ) {
+	$logo = function_exists( 'aw_source_logo' ) ? aw_source_logo( $slug, $id, '' ) : '';
+	return '' !== $logo ? $logo : $fallback;
+}
+
 /* ---------- 6 Registrations ---------- */
 
 function aw_block_listing_registrations( $a, $id ) {
@@ -118,13 +126,13 @@ function aw_block_listing_registrations( $a, $id ) {
 	$drop = aw_lf( $id, 'aw_awbi_dropped' );
 	$type = aw_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) ),
+		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) , aw_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
-		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ) ),
-		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ) ),
-		array( '80G', esc_html( aw_lf( $id, 'aw_reg_80g' ) ) ),
-		array( 'FCRA', esc_html( aw_lf( $id, 'aw_fcra' ) ) ),
-		array( __( 'NGO Darpan ID', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_darpan_id' ) ) ),
+		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ), 'file' ),
+		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ), aw_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
+		array( '80G', esc_html( aw_lf( $id, 'aw_reg_80g' ) ), aw_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
+		array( 'FCRA', esc_html( aw_lf( $id, 'aw_fcra' ) ), aw_listing_issuer_icon( 'mha', $id, 'legal' ) ),
+		array( __( 'NGO Darpan ID', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_darpan_id' ) ), aw_listing_issuer_icon( 'darpan', $id, 'legal' ) ),
 	);
 	return aw_listing_group( 'registrations', __( 'Registrations', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }
@@ -157,9 +165,9 @@ function aw_block_listing_contact( $a, $id ) {
 		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</a>'
 		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
-	foreach ( array( array( '' === $first, __( 'Phone', 'animal-writes-core' ) ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'animal-writes-core' ) ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'animal-writes-core' ) ) ) as $na ) {
+	foreach ( array( array( '' === $first, __( 'Phone', 'animal-writes-core' ), 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'animal-writes-core' ), 'mail' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'animal-writes-core' ), 'world' ) ) as $na ) {
 		if ( $na[0] ) { // a missing way to reach them is said, never hidden
-			$more[] = array( $na[1], aw_listing_na( $id ) );
+			$more[] = array( $na[1], aw_listing_na( $id ), $na[2] );
 		}
 	}
 	foreach ( array_slice( $phones, 1 ) as $p ) {
@@ -169,7 +177,7 @@ function aw_block_listing_contact( $a, $id ) {
 		}
 		$num    = '<a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>';
 		$waa    = $p['whatsapp'] && strlen( aw_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . aw_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . '</a>' : '';
-		$more[] = array( '' !== $p['label'] ? $p['label'] : __( 'Phone', 'animal-writes-core' ), $num . $waa );
+		$more[] = array( '' !== $p['label'] ? $p['label'] : __( 'Phone', 'animal-writes-core' ), $num . $waa, $p['whatsapp'] ? 'brand-whatsapp' : 'phone' );
 	}
 	return aw_listing_group( 'contact', __( 'Contact', 'animal-writes-core' ), '<div class="aw-listing-actions">' . $btns . '</div>' . aw_listing_dl( $more, 'aw-facts--phones' ) );
 }
@@ -189,9 +197,9 @@ function aw_block_listing_location( $a, $id ) {
 	}
 	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'aw_listing_hours' ) ? aw_org_hours_html( aw_listing_hours( $id ) ) : '';
 	$rows  = array(
-		array( __( 'Address', 'animal-writes-core' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id ) ),
-		array( __( 'District', 'animal-writes-core' ), $place ),
-		array( __( 'Opening hours', 'animal-writes-core' ), '' !== $hours ? $hours : aw_listing_na( $id ) ),
+		array( __( 'Address', 'animal-writes-core' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id ), 'map-pin' ),
+		array( __( 'District', 'animal-writes-core' ), $place, 'directory' ),
+		array( __( 'Opening hours', 'animal-writes-core' ), '' !== $hours ? $hours : aw_listing_na( $id ), 'clock' ),
 	);
 	return aw_listing_group( 'location', __( 'Location', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }
@@ -210,10 +218,10 @@ function aw_block_listing_services( $a, $id ) {
 		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'animal-writes-core' ), 'organisation' === $by ? __( 'the organisation', 'animal-writes-core' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . aw_date( aw_lf( $id, 'aw_services_on' ) ) : '' ) . '</span>';
 	}
 	$rows = array(
-		array( __( 'Services', 'animal-writes-core' ), '' !== $svc ? $svc : aw_listing_na( $id ) ),
-		array( __( 'Animals helped', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_animals' ) ) ),
-		array( __( 'Areas served', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_areas_served' ) ) ),
-		array( __( 'Languages', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_languages' ) ) ),
+		array( __( 'Services', 'animal-writes-core' ), '' !== $svc ? $svc : aw_listing_na( $id ), 'check' ),
+		array( __( 'Animals helped', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_animals' ) ), 'heart' ),
+		array( __( 'Areas served', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_areas_served' ) ), 'map-pin' ),
+		array( __( 'Languages', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_languages' ) ), 'world' ),
 	);
 	return aw_listing_group( 'services', __( 'Services', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }
@@ -225,9 +233,9 @@ function aw_block_listing_organisation( $a, $id ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Organisation: established, incorporated, head of the organisation' ) : '';
 	}
 	$rows = array(
-		array( __( 'Established', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_founded' ) ) ),
-		array( __( 'Incorporated', 'animal-writes-core' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? aw_date( aw_lf( $id, 'aw_reg_date' ) ) : '' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
-		array( __( 'Head of the organisation', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_head' ) ) ),
+		array( __( 'Established', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_founded' ) ), 'calendar' ),
+		array( __( 'Incorporated', 'animal-writes-core' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? aw_date( aw_lf( $id, 'aw_reg_date' ) ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
+		array( __( 'Head of the organisation', 'animal-writes-core' ), esc_html( aw_lf( $id, 'aw_head' ) ), 'user' ),
 	);
 	return aw_listing_group( 'organisation', __( 'Organisation', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }
@@ -244,7 +252,8 @@ function aw_block_listing_profiles( $a, $id ) {
 		if ( aw_lf( $id, $k ) ) {
 			/* translators: 1: organisation, 2: network. */
 			$label  = sprintf( __( '%1$s on %2$s', 'animal-writes-core' ), get_the_title( $id ), $l[1] );
-			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '"><span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span></a>';
+			$mark   = 'aw_g_profile' === $k ? '<img class="aw-listing-profile-img" src="' . esc_url( get_theme_file_uri( 'assets/img/google-maps.png' ) ) . '" alt="" width="20" height="20">' : '<span class="kit-ico kit-ico--' . esc_attr( $l[0] ) . '" aria-hidden="true"></span>'; // Google: its own Maps mark
+			$links .= '<a class="aw-listing-profile" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $l[1] ) . '">' . $mark . '</a>';
 		}
 	}
 	return aw_listing_group( 'profiles', __( 'Online profiles', 'animal-writes-core' ), '' !== $links ? '<div class="aw-listing-profiles-links">' . $links . '</div>' : '' );
@@ -265,7 +274,7 @@ function aw_block_listing_support( $a, $id ) {
 	}
 	$upi  = aw_lf( $id, 'aw_upi' );
 	$body = ( '' !== $btns ? '<div class="aw-listing-actions">' . $btns . '</div>' : '' )
-		. ( '' !== $upi ? aw_listing_dl( array( array( 'UPI', '<span class="aw-listing-upi">' . esc_html( $upi ) . '</span><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-share-copy aw-upi-copy" data-url="' . esc_attr( $upi ) . '" data-done="' . esc_attr__( 'UPI ID copied', 'animal-writes-core' ) . '" aria-label="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '" title="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '"><span class="kit-ico kit-ico--copy" aria-hidden="true"></span><span class="kit-share-name">' . esc_html__( 'Copy', 'animal-writes-core' ) . '</span></button><span class="screen-reader-text" role="status" aria-live="polite"></span>' ) ) ) : '' );
+		. ( '' !== $upi ? aw_listing_dl( array( array( 'UPI', '<span class="aw-listing-upi">' . esc_html( $upi ) . '</span><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-share-copy aw-upi-copy" data-url="' . esc_attr( $upi ) . '" data-done="' . esc_attr__( 'UPI ID copied', 'animal-writes-core' ) . '" aria-label="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '" title="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '"><span class="kit-ico kit-ico--copy" aria-hidden="true"></span><span class="kit-share-name">' . esc_html__( 'Copy', 'animal-writes-core' ) . '</span></button><span class="screen-reader-text" role="status" aria-live="polite"></span>', 'send' ) ) ) : '' );
 	return aw_listing_group( 'support', __( 'Support', 'animal-writes-core' ), $body );
 }
 

@@ -138,7 +138,7 @@ function aw_source_labels( $id, $full = false ) {
 }
 
 /** Hosts whose logo stands for a source. */
-const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://www.google.com/maps/', 'darpan' => 'https://ngodarpan.gov.in/', 'datagov' => 'https://www.data.gov.in/', 'nalsa' => 'https://nalsa.gov.in/', 'gujforest' => 'https://forests.gujarat.gov.in/', 'pfa' => 'https://peopleforanimalsindia.org/' );
+const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => 'https://awbi.gov.in/', 'gmaps' => 'https://www.google.com/maps/', 'darpan' => 'https://ngodarpan.gov.in/', 'datagov' => 'https://www.data.gov.in/', 'nalsa' => 'https://nalsa.gov.in/', 'gujforest' => 'https://forests.gujarat.gov.in/', 'pfa' => 'https://peopleforanimalsindia.org/', 'incometax' => 'https://www.incometax.gov.in/', 'mha' => 'https://www.mha.gov.in/' ); // incometax (12A, 80G) and mha (FCRA): the issuing bodies of a listing's registrations (listing-template.php)
 
 /**
  * The logo of a source as an <img>: the list's site (AWBI, the department, Google Maps) or, for "The organisation", the

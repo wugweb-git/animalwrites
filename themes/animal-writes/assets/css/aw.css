@@ -400,7 +400,11 @@ body { background: var(--kit-color-canvas); }
 .aw-facts { display: grid; gap: var(--kit-space-2); margin: 0; }
 .aw-facts-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--kit-space-4); }
 @media (min-width: 768px) { .aw-facts-row { grid-template-columns: 12rem minmax(0, 1fr); } }
-.aw-facts dt { font-weight: var(--kit-weight-medium); color: var(--kit-color-text); }
+.aw-facts dt { display: flex; align-items: center; gap: var(--s-1); font-weight: var(--kit-weight-medium); color: var(--kit-color-text); }
+.aw-facts dt > .kit-ico { --kit-ico-size: 1em; flex: none; } /* the same size and colour as a chip's icon */
+.aw-facts-ico { display: inline-flex; flex: none; }
+.aw-facts-ico img { width: 1em !important; height: 1em !important; object-fit: contain; border-radius: 2px; }
+.aw-listing-profile-img { width: 1.25rem; height: 1.25rem; object-fit: contain; }
 .aw-facts dd { margin: 0; color: var(--kit-color-text); }
 .aw-facts-part + .aw-facts-part::before { content: "·" / ""; margin: 0 0.4em; color: var(--kit-color-muted); } /* the separator is CSS, never typed */
 .aw-facts-part:has(.aw-facts-expired)::before { content: none; } /* the Expired chip needs no separator before it */
