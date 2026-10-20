@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_RELAY_MAX_BYTES = 5 * MB_IN_BYTES;
 const AW_RELAY_TIMEOUT   = 20;
 const AW_RELAY_RATE      = 30; // requests per host per 10 minutes
-const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com' );
+const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com', 'awbi.gov.in', 'ccsea.gov.in', 'egazette.gov.in' );
 
 /** Allowed hosts (a host or any of its subdomains). */
 function aw_relay_hosts() {
@@ -71,6 +71,22 @@ function aw_relay_resolve( $host ) {
 	}
 	$v4 = array_values( array_filter( $ips, fn( $ip ) => filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) );
 	return $v4 ? $v4[0] : $ips[0];
+}
+
+/**
+ * WordPress's CA bundle plus the intermediates some government sites do not send (data/certs: eGazette's Let's Encrypt
+ * YR1/YR2 and Root YR, AWBI's eMudhra chain), the same as the workers use. Cached in the temp folder by content.
+ */
+function aw_relay_ca_bundle() {
+	$text = (string) file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	foreach ( (array) glob( AW_CORE_DIR . 'data/certs/*.pem' ) as $pem ) {
+		$text .= "\n" . file_get_contents( $pem ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	}
+	$path = trailingslashit( get_temp_dir() ) . 'aw-relay-ca-' . substr( md5( $text ), 0, 12 ) . '.pem';
+	if ( ! file_exists( $path ) ) {
+		file_put_contents( $path, $text ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	}
+	return $path;
 }
 
 /** Append to the relay log (last 200). */
@@ -140,6 +156,7 @@ function aw_relay_fetch( $url ) {
 				'user-agent'          => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
 				'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml,application/xml,application/rss+xml;q=0.9,*/*;q=0.8' ),
 				'reject_unsafe_urls'  => true,
+				'sslcertificates'     => aw_relay_ca_bundle(),
 			)
 		);
 		remove_action( 'http_api_curl', $pin );
