@@ -505,7 +505,7 @@ function aw_block_listing_opportunities( $a, $id ) {
 
 /* ---------- Campaigns with {organisation} (owner, 20 Oct 2026): role chip, up to 3 ---------- */
 
-/** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organiser; Partner = aw_campaign_partners or aw_participant. */
+/** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organiser; Partner = aw_campaign_partners or aw_participant; Supporter = aw_campaign_supporters (owner, 20 Oct 2026). */
 function aw_listing_campaigns( $id, $max = 3 ) {
 	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
 	$roles = array();
@@ -519,12 +519,19 @@ function aw_listing_campaigns( $id, $max = 3 ) {
 			$roles[ $c ] = __( 'Partner', 'animal-writes-core' );
 		}
 	}
+	$sups = get_posts( $base + array( 'meta_query' => array( array( 'key' => 'aw_campaign_supporters', 'value' => (string) $id, 'compare' => 'LIKE' ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	foreach ( $sups as $c ) {
+		if ( ! isset( $roles[ $c ] ) && in_array( (int) $id, array_map( 'intval', explode( ',', (string) get_post_meta( $c, 'aw_campaign_supporters', true ) ) ), true ) ) {
+			$roles[ $c ] = __( 'Supporter', 'animal-writes-core' );
+		}
+	}
+	uksort( $roles, fn( $x, $y ) => strcmp( get_post_field( 'post_date', $y ), get_post_field( 'post_date', $x ) ) ); // newest first
 	return array_slice( $roles, 0, $max, true );
 }
 
 function aw_block_listing_campaigns( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner, up to 3)' ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Campaigns with the organisation (Organiser / Partner / Supporter, up to 3)' ) : '';
 	}
 	$roles = aw_listing_campaigns( $id );
 	if ( ! $roles || ! function_exists( 'aw_item_more_card' ) ) {

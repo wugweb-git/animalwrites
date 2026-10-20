@@ -569,10 +569,12 @@ function aw_camp_details_box( $post ) {
 	$close = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
 	$doc   = (string) get_post_meta( $post->ID, 'aw_campaign_doc', true );
 	$parts = (string) get_post_meta( $post->ID, 'aw_campaign_partners', true );
+	$sups  = (string) get_post_meta( $post->ID, 'aw_campaign_supporters', true );
 	$sent  = (int) get_post_meta( $post->ID, 'aw_campaign_sent', true );
 	echo '<p><label for="aw-camp-close"><strong>Closes on</strong> (last day)</label><br><input type="date" id="aw-camp-close" name="aw_campaign_close" value="' . esc_attr( $close ) . '"></p>';
 	echo '<p><label for="aw-camp-doc"><strong>Campaign document</strong> (Library item ID)</label><br><input type="number" id="aw-camp-doc" name="aw_campaign_doc" value="' . esc_attr( $doc ) . '" class="small-text">' . ( $doc ? ' <a href="' . esc_url( get_edit_post_link( (int) $doc ) ) . '">' . esc_html( get_the_title( (int) $doc ) ) . '</a>' : '' ) . '</p>';
 	echo '<p><label for="aw-camp-partners"><strong>Partners</strong> (Directory listing IDs, comma-separated)</label><br><input type="text" id="aw-camp-partners" name="aw_campaign_partners" value="' . esc_attr( $parts ) . '" class="widefat"></p>';
+	echo '<p><label for="aw-camp-supporters"><strong>Supporters</strong> (Directory listing IDs, comma-separated; "Supported by" on the page)</label><br><input type="text" id="aw-camp-supporters" name="aw_campaign_supporters" value="' . esc_attr( $sups ) . '" class="widefat"></p>';
 	echo '<p><label for="aw-camp-outcome"><strong>Outcome</strong> (after closing)</label><br><select id="aw-camp-outcome" name="aw_campaign_outcome">';
 	foreach ( array( 'pending' => 'Pending', 'achieved' => 'Achieved', 'partial' => 'Partially achieved', 'not' => 'Not achieved', 'inconclusive' => 'Inconclusive' ) as $k => $l ) {
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $m( 'aw_campaign_outcome' ) ? $m( 'aw_campaign_outcome' ) : 'pending', $k, false ) . '>' . esc_html( $l ) . '</option>';
@@ -621,6 +623,7 @@ add_action(
 		update_post_meta( $id, 'aw_campaign_share_story', (string) absint( $_POST['aw_campaign_share_story'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_share_post', (string) absint( $_POST['aw_campaign_share_post'] ?? 0 ) );
 		update_post_meta( $id, 'aw_campaign_partners', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_partners'] ?? '' ) ) ) ) ) ) );
+		update_post_meta( $id, 'aw_campaign_supporters', implode( ',', array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_campaign_supporters'] ?? '' ) ) ) ) ) ) );
 	},
 	10
 );

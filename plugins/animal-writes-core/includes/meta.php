@@ -93,6 +93,7 @@ function aw_meta_schema() {
 		'aw_campaign_close'  => array( 'string', array( 'aw_campaign' ), 'Closes on (Y-m-d)' ),
 		'aw_campaign_doc'    => array( 'string', array( 'aw_campaign' ), 'Campaign document (Library item ID)' ),
 		'aw_campaign_partners' => array( 'string', array( 'aw_campaign' ), 'Partners (Directory listing IDs, comma-separated; only the owner\'s list)' ),
+		'aw_campaign_supporters' => array( 'string', array( 'aw_campaign' ), 'Supporters (Directory listing IDs, comma-separated; "Supported by" on the campaign page)' ),
 		'aw_campaign_open'   => array( 'string', array( 'aw_campaign' ), 'Opens on (Y-m-d, IST)' ),
 		'aw_campaign_outcome' => array( 'string', array( 'aw_campaign' ), 'Outcome after closing: pending, achieved, partial, not, inconclusive' ),
 		'aw_campaign_outcome_asof' => array( 'string', array( 'aw_campaign' ), 'Outcome as of (Y-m-d)' ),
