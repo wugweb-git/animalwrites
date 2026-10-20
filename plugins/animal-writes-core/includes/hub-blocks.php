@@ -56,6 +56,7 @@ function aw_hub_blocks() {
 		'item-tags'     => array( 'Item: tags', 'aw_block_item_tags', array() ),
 		'item-share'    => array( 'Item: share', 'aw_block_item_share', array() ),
 		'item-more'     => array( 'Item: more', 'aw_block_item_more', array() ),
+		'current-campaign'      => array( 'Current campaign', 'aw_block_current_campaign', array() ), // campaign-tools.php: the sidebar's campaign card
 		// The Directory profile's groups (listing-template.php, docs/listing-template.md).
 		'listing-about'         => array( 'Listing: logo and description', 'aw_block_listing_about', array() ),
 		'listing-registrations' => array( 'Listing: registrations', 'aw_block_listing_registrations', array() ),

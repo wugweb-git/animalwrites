@@ -2668,6 +2668,35 @@
     "schema": "NGO node (aw-seo-extras)"
    },
    "block": "animal-writes/listing-photos"
+  },
+  {
+   "name": "Current campaign",
+   "type": "block",
+   "status": "live",
+   "classes": [
+    "aw-side-camp"
+   ],
+   "states": [
+    "open campaign shown",
+    "none open (prints nothing)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "section labelled by its H2",
+    "aria": "aria-describedby on Take part",
+    "keyboard": "Tab to title and button",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px button",
+    "motion": "none",
+    "sr": "Current campaign, days left, title, Take part"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "campaign page",
+    "alt": "decorative",
+    "schema": "none"
+   },
+   "block": "animal-writes/current-campaign"
   }
  ],
  "nav_status": {

@@ -14,7 +14,7 @@
  *   animal-writes/listing-photos         the organisation's own photos (never stock or CC images)
  *
  * Rows are "Label: value" (definition lists). Critical details the listing lacks (phone, email, website, address, opening
- * hours, services, registration) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
+ * hours, services, registration, AWBI number) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
  * worked out at render time from today's date in India, not stored. docs/listing-template.md describes each block.
  *
  * @package animal-writes-core
@@ -73,8 +73,8 @@ function aw_listing_parts( $parts ) {
 
 /**
  * A critical detail the listing does not have yet (owner, 20 Oct 2026: never hide it): "Data not yet available" and a
- * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services and
- * registration.
+ * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services,
+ * registration and the AWBI number.
  */
 function aw_listing_na( $id ) {
 	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'animal-writes-core' ) . '</span>'
@@ -118,7 +118,7 @@ function aw_block_listing_registrations( $a, $id ) {
 	$drop = aw_lf( $id, 'aw_awbi_dropped' );
 	$type = aw_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="aw-facts-expired">' . esc_html__( 'not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : '' ),
+		array( __( 'AWBI number', 'animal-writes-core' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="aw-facts-expired">' . esc_html__( 'not on the current AWBI list', 'animal-writes-core' ) . ' ' . aw_date( $drop ) . '</span>' : '' ) ) : aw_listing_na( $id ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'animal-writes-core' ), $type ) : __( 'Registration', 'animal-writes-core' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ) ),
 		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ) ),

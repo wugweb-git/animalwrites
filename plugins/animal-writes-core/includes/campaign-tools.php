@@ -644,3 +644,42 @@ add_action(
 
 // No ads on a page with a letter tool (a form page with one job).
 add_filter( 'kits_ads_skip', fn( $skip ) => $skip || ( is_singular() && has_shortcode( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw_letter_tool' ) ) );
+
+/* ---------- animal-writes/current-campaign: the sidebar's campaign card (owner, 20 Oct 2026) ---------- */
+
+/** The open campaign closing soonest (0 when none is open). */
+function aw_current_campaign_id() {
+	$best = 0;
+	$at   = PHP_INT_MAX;
+	foreach ( get_posts( array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 20, 'fields' => 'ids' ) ) as $id ) {
+		if ( ! aw_camp_is_open( $id ) ) {
+			continue;
+		}
+		$close = aw_camp_close_ts( $id ) ? aw_camp_close_ts( $id ) : PHP_INT_MAX - 1;
+		if ( $close < $at ) {
+			$best = (int) $id;
+			$at   = $close;
+		}
+	}
+	return $best;
+}
+
+/** A card for the current campaign: its picture, title, one or two lines, days left and Take part. Nothing when none is open. */
+function aw_block_current_campaign( $a = array(), $id = 0 ) {
+	$c = aw_current_campaign_id();
+	if ( ! $c || ( is_singular( 'aw_campaign' ) && get_queried_object_id() === $c ) ) {
+		return defined( 'REST_REQUEST' ) && REST_REQUEST ? '<p class="aw-block-preview">' . esc_html__( 'Current campaign (shows while a campaign is open)', 'animal-writes-core' ) . '</p>' : '';
+	}
+	$url  = get_permalink( $c );
+	$days = aw_camp_days_left( $c );
+	$img  = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
+	$hid  = 'aw-side-camp-' . $c;
+	/* translators: %d: days. */
+	$left = 'last-day' === aw_camp_window( $c ) ? __( 'Last day', 'animal-writes-core' ) : ( $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : '' );
+	return '<section class="kit-card aw-side-camp" aria-labelledby="' . esc_attr( $hid ) . '">'
+		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
+		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row"><span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' ) . '</p>'
+		. '<h2 class="aw-side-camp-title" id="' . esc_attr( $hid ) . '"><a href="' . esc_url( $url ) . '">' . esc_html( get_the_title( $c ) ) . '</a></h2>'
+		. ( has_excerpt( $c ) ? '<p class="aw-side-camp-line">' . esc_html( wp_strip_all_tags( get_the_excerpt( $c ) ) ) . '</p>' : '' )
+		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a></div></section>';
+}
