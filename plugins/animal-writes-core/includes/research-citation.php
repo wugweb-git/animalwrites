@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The DOI in a research post's source URL ('' when it is not a doi.org link). */
 function aw_research_doi( $id ) {
 	$url = (string) get_post_meta( $id, 'aw_source_url', true );
-	return preg_match( '#^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)#i', $url, $m ) ? rawurldecode( $m[1] ) : '';
+	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', $url, $m ) ? rawurldecode( $m[1] ) : '';
 }
 
 /**
