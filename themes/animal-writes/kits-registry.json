@@ -2958,6 +2958,38 @@
     "schema": "FAQPage parsed from the same accordion (faq.php)"
    },
    "block": "animal-writes/item-faq"
+  },
+  {
+   "name": "Directory map and Near me",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-near",
+    "aw-map-pop"
+   ],
+   "states": [
+    "list (default)",
+    "map loading",
+    "map",
+    "near me: empty",
+    "near me: results",
+    "near me: none in reach (district link)",
+    "location refused"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "List / Map toggle buttons (aria-pressed); Near me button (aria-expanded) controls a labelled section with a form",
+    "aria": "results in a polite live region; the map canvas is aria-hidden and its note says the list has the same organisations",
+    "keyboard": "Tab; Enter; Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "map easing only after a user action",
+    "sr": "visible text; the list is the map's text alternative"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "listing names link to their pages; nothing is indexed from the map or Near me"
+   }
   }
  ],
  "nav_status": {
