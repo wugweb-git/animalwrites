@@ -118,7 +118,9 @@ add_filter(
 		$cls = (string) ( $block['attrs']['className'] ?? '' );
 		$org = $post_id && 'aw_opportunity' === get_post_type( $post_id ) && '' === trim( $content ) ? (int) get_post_meta( $post_id, 'aw_org_logo', true ) : 0;
 		if ( $org && wp_attachment_is_image( $org ) ) { // an Opportunity with no picture of its own: its organisation's logo, whole (owner, 15 and 18 Oct 2026)
-			$logo = '<span class="aw-story-fallback"><img class="aw-story-logo" src="' . esc_url( (string) wp_get_attachment_image_url( $org, 'medium' ) ) . '" alt="' . esc_attr( (string) get_post_meta( $post_id, 'aw_org_name', true ) ) . '" loading="lazy"></span>';
+			$src  = wp_get_attachment_image_src( $org, 'medium' );
+			$wh   = $src && ! empty( $src[1] ) && ! empty( $src[2] ) ? ' width="' . (int) $src[1] . '" height="' . (int) $src[2] . '"' : ''; // its box is known before it arrives: the card does not grow (layout shift, 20 Oct 2026)
+			$logo = '<span class="aw-story-fallback"><img class="aw-story-logo" src="' . esc_url( $src ? $src[0] : '' ) . '"' . $wh . ' alt="' . esc_attr( (string) get_post_meta( $post_id, 'aw_org_name', true ) ) . '" loading="lazy"></span>';
 			$logo = ! empty( $block['attrs']['isLink'] ) ? '<a href="' . esc_url( get_permalink( $post_id ) ) . '" tabindex="-1" aria-hidden="true">' . $logo . '</a>' : $logo;
 			return '<figure class="wp-block-post-featured-image kit-card-media is-logo' . ( $cls ? ' ' . esc_attr( $cls ) : '' ) . '">' . $logo . '</figure>';
 		}
