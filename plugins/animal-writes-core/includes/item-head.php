@@ -487,7 +487,7 @@ add_action( 'save_post', fn( $id ) => delete_transient( 'aw_more_' . (int) $id )
  */
 function aw_item_card_media( $pid ) {
 	$b = new WP_Block(
-		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media aw-more-media' ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
+		array( 'blockName' => 'core/post-featured-image', 'attrs' => array( 'aspectRatio' => '4/3', 'scale' => 'cover', 'sizeSlug' => 'medium_large', 'className' => 'kit-story-media aw-more-media' . ( 'aw_opportunity' === get_post_type( $pid ) ? ' aw-more-media--logo' : '' ) ), 'innerBlocks' => array(), 'innerHTML' => '', 'innerContent' => array() ),
 		array( 'postId' => (int) $pid, 'postType' => get_post_type( $pid ) )
 	);
 	return (string) $b->render();
