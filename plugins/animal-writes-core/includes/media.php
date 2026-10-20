@@ -73,9 +73,24 @@ function aw_item_image_id( $post_id ) {
 	if ( $own || ! aw_is_ingested( $post_id ) || ! function_exists( 'aw_category_image_id' ) ) {
 		return $own;
 	}
+	return aw_category_card_id( $post_id );
+}
+
+/**
+ * The card fallback of an item's primary category (Rank Math's primary category first, then the others): the category's
+ * own 4:3 picture (term meta aw_category_card, its phone banner; owner, 20 Oct 2026), else its photo. 0 when none.
+ *
+ * @param int $post_id Post ID.
+ * @return int Attachment ID.
+ */
+function aw_category_card_id( $post_id ) {
 	$cats = wp_get_object_terms( $post_id, 'category' );
-	foreach ( is_wp_error( $cats ) ? array() : $cats as $t ) {
-		$att = (int) aw_category_image_id( $t );
+	$cats = is_wp_error( $cats ) ? array() : $cats;
+	$main = (int) get_post_meta( $post_id, 'rank_math_primary_category', true );
+	usort( $cats, fn( $a, $b ) => (int) ( $b->term_id === $main ) <=> (int) ( $a->term_id === $main ) );
+	foreach ( $cats as $t ) {
+		$att = (int) get_term_meta( $t->term_id, 'aw_category_card', true );
+		$att = $att ? $att : ( function_exists( 'aw_category_image_id' ) ? (int) aw_category_image_id( $t ) : 0 );
 		if ( $att ) {
 			return $att;
 		}
