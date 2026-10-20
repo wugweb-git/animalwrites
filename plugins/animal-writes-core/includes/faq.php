@@ -1193,7 +1193,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						}
 					}
 					$kw = strtolower( trim( explode( ',', (string) ( $o instanceof WP_Term ? get_term_meta( $o->term_id, 'rank_math_focus_keyword', true ) : get_post_meta( $o->ID, 'rank_math_focus_keyword', true ) ) )[0] ) );
-					if ( '' !== $kw && count( array_filter( wp_list_pluck( $qa, 'q' ), fn( $q ) => false !== strpos( strtolower( $q ), $kw ) ) ) < 2 ) {
+					$fold = fn( $t ) => preg_replace( '/\s+/u', ' ', str_replace( array( '–', '—', '’', '‘' ), array( '-', '-', "'", "'" ), mb_strtolower( $t ) ) ); // dashes and quotes as typed in a keyphrase
+					if ( '' !== $kw && count( array_filter( wp_list_pluck( $qa, 'q' ), fn( $q ) => false !== strpos( $fold( $q ), $fold( $kw ) ) ) ) < 2 ) {
 						++$kwmiss;
 						if ( ! empty( $assoc['verbose'] ) ) {
 							WP_CLI::line( $id . ': focus keyphrase "' . $kw . '" in fewer than 2 questions' );
