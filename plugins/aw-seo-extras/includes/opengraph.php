@@ -29,6 +29,15 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 			if ( is_404() || ! is_object( $image ) || ! method_exists( $image, 'add_image' ) ) {
 				return;
 			}
+			if ( is_tag() && '' !== aw_seo_typed( 'facebook_image' ) && ! aw_seo_typed( 'facebook_image_id' ) ) {
+				// A Directory type's share card is set as a URL (the JPG kept beside its AVIF; share sites do not read AVIF), which Rank Math does not print for a term.
+				$url  = aw_seo_typed( 'facebook_image' );
+				$up   = wp_get_upload_dir();
+				$base = set_url_scheme( $up['baseurl'], 'https' );
+				$size = 0 === strpos( set_url_scheme( $url, 'https' ), $base ) ? wp_getimagesize( $up['basedir'] . substr( set_url_scheme( $url, 'https' ), strlen( $base ) ) ) : false;
+				$image->add_image( array_filter( array( 'url' => $url, 'width' => $size ? $size[0] : 0, 'height' => $size ? $size[1] : 0, 'type' => 'image/jpeg', 'alt' => aw_seo_plain( get_queried_object()->name ) ) ) );
+				return;
+			}
 			if ( aw_seo_typed( 'facebook_image_id' ) || aw_seo_typed( 'facebook_image' ) || aw_seo_typed( 'twitter_image_id' ) ) {
 				return;
 			}
