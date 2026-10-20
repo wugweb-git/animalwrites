@@ -136,6 +136,7 @@
 .aw-dir-count { margin: 0; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
 .aw-dir-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); }
 .aw-dir-controls .aw-dir-tools { width: auto; margin: 0; }
+@media (min-width: 768px) { .aw-dir-controls { margin-left: auto; } } /* stays on the right when a long count wraps it */
 .aw-dir-toolbar ~ :is(.aw-near, .aw-dir-map):not([hidden]) { margin: 0 0 var(--kit-space-collection); }
 .aw-org-contact { display: inline-flex; gap: var(--kit-space-2); color: var(--kit-color-muted); }
 
