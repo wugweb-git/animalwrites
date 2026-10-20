@@ -15,7 +15,8 @@
  *     Checker's front-end fixes are deferred. WordPress's own strategy check keeps any of them blocking when an inline
  *     script after it, or a blocking script that needs it, would break;
  *   - Fluent Forms' two stylesheets load without blocking the first paint, except on a page whose own content has a
- *     form (there the form may be near the top). Elsewhere the only form is the footer sign-up, far below the fold;
+ *     form (there the form may be near the top; a site marks its own form shortcodes and blocks with the
+ *     kits_page_has_form filter). Elsewhere the only form is the footer sign-up, far below the fold;
  *   - Accessibility Checker's sr-only stylesheet loads only on a page whose content uses its sr-only text format;
  *   - no emoji script or styles (the site shows emoji as text).
  *   Ads scripts (Advanced Ads, AdSense) are left as they are.
@@ -123,7 +124,7 @@ add_action(
 add_filter(
 	'style_loader_tag',
 	function ( $tag, $handle ) {
-		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || kits_content_has( 'fluentform' ) ) {
+		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || apply_filters( 'kits_page_has_form', kits_content_has( 'fluentform' ) ) ) {
 			return $tag;
 		}
 		$late = preg_replace( "/\smedia=(['\"])[^'\"]*\\1/", " media='print' onload=\"this.media='all'\"", $tag, 1 );
