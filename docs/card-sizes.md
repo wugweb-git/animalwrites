@@ -5,9 +5,8 @@ Limits every list card keeps, set in `themes/animal-writes/assets/css/aw.css` (c
 | Limit | Value | Property |
 |---|---|---|
 | Card, minimum width | 18rem (288px, fits a 320px screen) | `--kit-card-min` |
-| Stacked card (picture beside text), maximum width | 45rem (720px) | `--kit-card-max` |
+| Card width | none: a card fills its grid cell; the grid (columns, gap) sets the width | n/a |
 | Stacked picture | 4.5rem to 15rem (72 to 240px); wide stacked cards 30% of the card inside those limits | `--kit-thumb-min`, `--kit-thumb-max` |
-| Block card and Campaign card (picture above text), maximum width | 31.25rem (500px) | `--kit-card-max-block` |
 | Block card picture (picture above text), maximum height | 22.5rem (360px) | `--kit-card-media-max` |
 | Text column in a stacked card, minimum width | 10rem (160px) | `--kit-body-min` |
 

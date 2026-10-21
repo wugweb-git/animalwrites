@@ -1107,7 +1107,7 @@ body { background: var(--kit-color-canvas); }
 /* Library list (owner, 14 Oct 2026): a stacked list, max 720px wide. Each row: the document's cover (or the publisher's
    picture) small on the left; on the right the publisher logo + name and the date with the calendar icon, then the
    title, a 3-line summary and the category labels. Design-system tokens only. */
-.aw-hub-library .aw-cases { display: block; max-width: var(--kit-width-content); border: 0 !important; }
+.aw-hub-library .aw-cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 32rem), 1fr)); gap: var(--kit-space-grid); border: 0 !important; } /* fills the page like the other lists; two across when there is room */
 .aw-hub-library .aw-cases > li { margin: 0 !important; min-width: 0; }
 
 /* News first page by breakpoint (owner, 14 Oct 2026): nothing runs the full page width except on phones.
@@ -1345,16 +1345,15 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-unverified .kit-ico { width: 1em; height: 1em; }
 
 /* Card sizes (owner, 21 Oct 2026; docs/card-sizes.md). One set of limits for every list card:
-   card   min 18rem (288px, a 320px screen), stacked cards max 45rem (720px), block cards max 31.25rem (500px);
+   card   min 18rem (288px, a 320px screen), cards fill their grid cell (no max width on the card; the grid sets it);
    picture  stacked: 4.5rem to 15rem (72 to 240px); block cards at most 22.5rem (360px) tall;
    text column in a stacked card at least 10rem (160px); the wide stacked card's gap runs 12 to 24px with the screen width. Three-across card rows (.is-three) drop to two when a card would get under 18rem. */
-:root { --kit-card-min: 18rem; --kit-card-max: 45rem; --kit-card-max-block: 31.25rem; --kit-card-media-max: 22.5rem; --kit-thumb-min: 4.5rem; --kit-thumb-max: 15rem; --kit-body-min: 10rem; }
+:root { --kit-card-min: 18rem; --kit-card-media-max: 22.5rem; --kit-thumb-min: 4.5rem; --kit-thumb-max: 15rem; --kit-body-min: 10rem; }
 .kit-card { min-width: min(100%, var(--kit-card-min)); }
-.kit-card[class*="kit-card--stacked"] { max-width: var(--kit-card-max); }
 .kit-card--stacked-lg > .kit-card-media { width: clamp(var(--kit-thumb-min), 30%, var(--kit-thumb-max)) !important; max-width: none !important; }
 .kit-card[class*="kit-card--stacked"] > .kit-card-media { flex: 0 1 auto; min-width: var(--kit-thumb-min); }
 .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1 1 0; min-width: var(--kit-body-min); }
 .kit-card--stacked-lg { gap: clamp(var(--kit-space-3), 5vw, var(--kit-space-5)) !important; } /* 12px on the narrowest screens up to the usual 24px (no width breakpoint) */
-.kit-card[class*="kit-card--block"], .aw-story--card { max-width: var(--kit-card-max-block); } /* picture-above-text cards: 500px at most (owner, 21 Oct 2026) */
+/* Cards fill their grid cell: the layout sets the width, never a max-width on the card (a capped card leaves a hole beside it) */
 .kit-card[class*="kit-card--block"] .kit-card-media { max-height: var(--kit-card-media-max); }
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { grid-template-columns: repeat(auto-fit, minmax(max(var(--kit-card-min), calc((100% - 2 * var(--kit-space-grid)) / 3)), 1fr)); } }
