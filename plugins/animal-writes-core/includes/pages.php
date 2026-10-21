@@ -172,7 +172,7 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
 		$req = wp_create_user_request( $v['email'], 'remove_personal_data' );
 		if ( ! is_wp_error( $req ) ) {
-			wp_send_user_request( $req );
+			function_exists( 'aw_send_removal_link' ) ? aw_send_removal_link( $req ) : wp_send_user_request( $req ); // sent even while form email is off
 			update_post_meta( $id, 'aw_m_request', (int) $req );
 		}
 	}

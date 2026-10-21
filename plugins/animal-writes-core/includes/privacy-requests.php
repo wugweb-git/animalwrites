@@ -38,6 +38,21 @@ function aw_remove_data_form() {
 add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
 
 /**
+ * WordPress's "Remove my data" confirmation email: the one email a form still sends (owner, 21 Oct 2026), even while form
+ * submissions send nothing else (aw_ff_mail_off, forms-fluentforms.php). Used by this form and the Contact form's
+ * "Remove my data" topic (pages.php).
+ *
+ * @param int $request_id user_request ID.
+ */
+function aw_send_removal_link( $request_id ) {
+	$blocked = remove_filter( 'pre_wp_mail', '__return_true', 999 );
+	wp_send_user_request( $request_id );
+	if ( $blocked ) {
+		add_filter( 'pre_wp_mail', '__return_true', 999 );
+	}
+}
+
+/**
  * Start a removal for an email: WordPress's own request and its confirmation email. The same answer whether or not a
  * request was already open, so the form says nothing about who is on file.
  *
@@ -46,13 +61,7 @@ add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
 function aw_remove_data_save( $email ) {
 	$id = wp_create_user_request( $email, 'remove_personal_data' );
 	if ( ! is_wp_error( $id ) ) {
-		// WordPress's confirmation email: the one email a form still sends (owner, 21 Oct 2026), even while form
-		// submissions send nothing else (aw_ff_mail_off, forms-fluentforms.php).
-		$blocked = remove_filter( 'pre_wp_mail', '__return_true', 999 );
-		wp_send_user_request( $id );
-		if ( $blocked ) {
-			add_filter( 'pre_wp_mail', '__return_true', 999 );
-		}
+		aw_send_removal_link( $id );
 	}
 	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm, and your details are deleted.', $email );
 	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'title' => 'Check your inbox', 'text' => $text );
