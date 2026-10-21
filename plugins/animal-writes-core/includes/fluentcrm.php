@@ -26,8 +26,8 @@
  *
  * Forms reach FluentCRM one way only (owner, 21 Oct 2026): aw_crm_sync(), called by each form's handler after its own
  * record is saved (Contact, Newsletter, Volunteer sign-up, Claim this listing, Campaign letter). Every call writes the
- * same "Form submission" custom fields: source form, newsletter box (yes/no), consent wording version, page URL, IP,
- * city/region/country (from the IP), device, browser, OS and time. The Fluent Forms → FluentCRM integration feeds are
+ * same "Form submission" custom fields: source form, ticks (1/0), consent wording versions, page URL, IP,
+ * city/region/country (found on this server: no IP leaves it), device, browser, OS and time. The Fluent Forms → FluentCRM integration feeds are
  * off for the site's forms (filter below; `wp aw crm-feeds --off`), so nothing is written twice. Report a mistake and
  * Remove my data never call it (comments in reports.php and privacy-requests.php).
  * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, volunteers, notes), `wp aw crm-feeds`.
@@ -141,7 +141,7 @@ const AW_CRM_FORMS = array(
 /** Custom fields (group "Form submission"): what the latest form sent. Every aw_crm_sync() call writes all of them. */
 const AW_CRM_FORM_FIELDS = array(
 	'form_source'          => 'Form: source form',
-	'form_newsletter_box'  => 'Form: newsletter box',
+	'form_ticks'           => 'Form: ticks (1/0)',
 	'form_consent_version' => 'Form: consent wording',
 	'form_page_url'        => 'Form: page URL',
 	'form_ip'              => 'Form: IP address',
@@ -156,19 +156,20 @@ const AW_CRM_FORM_FIELDS = array(
 
 /**
  * The one way a form reaches FluentCRM (owner, 21 Oct 2026). Each form's handler calls it after its own record is
- * saved; the Fluent Forms → FluentCRM integration feeds are off for these forms (aw_crm_feeds_off), so nothing is
- * written twice. Who joins the Newsletter list is the caller's rule, unchanged: 'subscribe' true adds the contact to
- * it as subscribed (someone who unsubscribed keeps that status); otherwise the person is a contact only (a new one is
- * "transactional"). Every call writes the same Form fields. Sends nothing.
+ * saved; the Fluent Forms → FluentCRM integration feeds are off for these forms (filter below), so nothing is written
+ * twice. Lists and tags are the caller's, and reproduce what each form's feed applied (21 Oct 2026: Newsletter #3 →
+ * list Newsletter, tag newsletter; Contact #4, only when nl_optin = 1 → list Newsletter, tags contact-form and
+ * newsletter). 'subscribe' true adds the contact to the Newsletter list as subscribed (someone who unsubscribed keeps
+ * that status); otherwise the person is a contact only (a new one is "transactional"). Every call writes the same
+ * Form fields from the record's ticks and visit block (kits-core forms.php). Sends nothing.
  *
  * @param string $email    Email.
  * @param string $name     Full name (optional).
  * @param string $form_key A key of AW_CRM_FORMS.
  * @param array  $args {
  *     @type bool   $subscribe Add to the Newsletter list (subscribed).
- *     @type bool   $box       The newsletter box as sent (the newsletter form itself counts as ticked).
- *     @type string $consent   Consent wording version shown on the form.
- *     @type string $page      Page URL, or the site path the form was sent from.
+ *     @type array  $ticks     The record's ticks (aw_form_record()).
+ *     @type array  $visit     The record's visit block (aw_form_record()).
  *     @type array  $tags      Tag slugs.
  *     @type array  $extra     FluentCRM contact fields (phone, address_line_1, city, state, postal_code, country).
  *     @type string $source    FluentCRM source.
@@ -182,16 +183,15 @@ function aw_crm_sync( $email, $name, $form_key, $args = array() ) {
 	if ( ! aw_crm_on() || ! is_email( $email ) || ! isset( AW_CRM_FORMS[ $form_key ] ) ) {
 		return 0;
 	}
-	$a      = $args + array( 'subscribe' => false, 'box' => false, 'consent' => '', 'page' => '', 'tags' => array(), 'extra' => array(), 'source' => 'form:' . $form_key, 'message' => 0, 'volunteer' => false );
-	$extra  = array_filter( (array) $a['extra'] ) + array( 'source' => $a['source'] );
-	$client = aw_crm_client();
-	$extra += array( 'ip' => $client['ip'] );
+	$a     = $args + array( 'subscribe' => false, 'ticks' => array(), 'visit' => array(), 'tags' => array(), 'extra' => array(), 'source' => 'form:' . $form_key, 'message' => 0, 'volunteer' => false );
+	$visit = (array) $a['visit'];
+	$extra = array_filter( (array) $a['extra'] ) + array( 'source' => $a['source'], 'ip' => (string) ( $visit['ip'] ?? '' ) );
 	if ( $a['subscribe'] ) {
 		$id = aw_crm_subscribe( $email, $name, $extra, $a['tags'] );
 	} else {
 		$c = aw_crm_contact_for( $email, $name, $a['tags'], $a['source'] );
-		if ( $c && $extra ) { // contact fields given (phone, address) are kept, as a subscriber's are
-			FluentCrmApi( 'contacts' )->createOrUpdate( array( 'email' => $email ) + array_diff_key( $extra, array( 'source' => 1 ) ) );
+		if ( $c && array_filter( array_diff_key( $extra, array( 'source' => 1 ) ) ) ) { // contact fields given (phone, address) are kept, as a subscriber's are
+			FluentCrmApi( 'contacts' )->createOrUpdate( array( 'email' => $email ) + array_filter( array_diff_key( $extra, array( 'source' => 1 ) ) ) );
 		}
 		$id = $c ? (int) $c->id : 0;
 	}
@@ -200,14 +200,32 @@ function aw_crm_sync( $email, $name, $form_key, $args = array() ) {
 		return 0;
 	}
 	aw_crm_form_fields_setup();
+	$ticks    = (array) $a['ticks'];
+	$tick_txt = array();
+	$versions = array();
+	foreach ( $ticks as $n => $t ) {
+		$v          = $t['value'] ?? 0;
+		$tick_txt[] = $n . '=' . ( is_array( $v ) ? implode( '/', array_map( fn( $k, $x ) => $k . ':' . (int) $x, array_keys( $v ), $v ) ) : (int) $v );
+		if ( ! empty( $t['version'] ) ) {
+			$versions[] = $n . ': ' . $t['version'];
+		}
+	}
 	$vals = array(
 		'form_source'          => AW_CRM_FORMS[ $form_key ],
-		'form_newsletter_box'  => $a['box'] ? 'yes' : 'no',
-		'form_consent_version' => (string) $a['consent'],
-		'form_page_url'        => aw_crm_page_url( $a['page'] ),
-		'form_time'            => wp_date( 'Y-m-d H:i:s T' ),
-	) + array_combine( array_map( fn( $k ) => 'form_' . $k, array_keys( $client ) ), array_values( $client ) );
-	// FluentCRM keeps no empty value, so "unknown" stands in: every contact then has every Form field.
+		'form_ticks'           => implode( ', ', $tick_txt ),
+		'form_consent_version' => implode( '; ', $versions ),
+		'form_page_url'        => (string) ( $visit['page'] ?? '' ),
+		'form_ip'              => (string) ( $visit['ip'] ?? '' ),
+		'form_city'            => (string) ( $visit['city'] ?? '' ),
+		'form_region'          => (string) ( $visit['region'] ?? '' ),
+		'form_country'         => (string) ( $visit['country'] ?? '' ),
+		'form_device'          => (string) ( $visit['device'] ?? '' ),
+		'form_browser'         => (string) ( $visit['browser'] ?? '' ),
+		'form_os'              => (string) ( $visit['os'] ?? '' ),
+		'form_time'            => ! empty( $visit['time'] ) ? wp_date( 'Y-m-d H:i:s T', strtotime( (string) $visit['time'] ) ) : wp_date( 'Y-m-d H:i:s T' ),
+	);
+	// FluentCRM keeps no empty value, so "none" / "unknown" stand in: every contact then has every Form field.
+	$vals['form_ticks'] = '' === $vals['form_ticks'] ? 'none' : $vals['form_ticks'];
 	$c->syncCustomFieldValues( array_map( fn( $v ) => '' === (string) $v ? 'unknown' : (string) $v, $vals ), false );
 	if ( $a['message'] ) {
 		aw_crm_message_note( (int) $a['message'] );
@@ -216,80 +234,6 @@ function aw_crm_sync( $email, $name, $form_key, $args = array() ) {
 		aw_crm_volunteer_sync( $email );
 	}
 	return $id;
-}
-
-/** A page URL from a URL or a site path ("home" is the front page); the request's referrer on this site when none. */
-function aw_crm_page_url( $page ) {
-	$page = trim( (string) $page );
-	if ( '' === $page ) {
-		$ref  = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$page = wp_parse_url( $ref, PHP_URL_HOST ) === wp_parse_url( home_url(), PHP_URL_HOST ) ? $ref : '';
-		return strtok( $page, '?#' ) ?: '';
-	}
-	if ( preg_match( '#^https?://#', $page ) ) {
-		return esc_url_raw( $page );
-	}
-	return 'home' === $page ? home_url( '/' ) : home_url( '/' . trim( $page, '/' ) . '/' );
-}
-
-/**
- * Who sent the form: IP, place (from the IP) and device, browser and operating system (from the user agent).
- *
- * @return array{ip:string, city:string, region:string, country:string, device:string, browser:string, os:string}
- */
-function aw_crm_client() {
-	$ip  = trim( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- LiteSpeed puts the client's address here (kits-core preview.php)
-	$ip  = filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
-	$ua  = (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	return array( 'ip' => $ip ) + aw_crm_geo( $ip ) + aw_crm_user_agent( $ua );
-}
-
-/**
- * City, region and country of an IP (ipapi.co, HTTPS, no key; 3 s at most). Kept 30 days per IP (hashed). Private
- * and local addresses, and a failed lookup, give empty values.
- *
- * @param string $ip IP.
- * @return array{city:string, region:string, country:string}
- */
-function aw_crm_geo( $ip ) {
-	$none = array( 'city' => '', 'region' => '', 'country' => '' );
-	if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-		return $none;
-	}
-	$key = 'aw_geo_' . md5( ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' ) . $ip );
-	$hit = get_transient( $key );
-	if ( is_array( $hit ) ) {
-		return $hit + $none;
-	}
-	$resp = wp_remote_get( (string) apply_filters( 'aw_crm_geo_url', 'https://ipapi.co/' . rawurlencode( $ip ) . '/json/', $ip ), array( 'timeout' => 3, 'user-agent' => 'Animal Writes' ) );
-	$d    = is_wp_error( $resp ) || 200 !== wp_remote_retrieve_response_code( $resp ) ? array() : (array) json_decode( wp_remote_retrieve_body( $resp ), true );
-	if ( ! $d || ! empty( $d['error'] ) ) {
-		return $none; // not kept: the next form tries again
-	}
-	$geo = array( 'city' => (string) ( $d['city'] ?? '' ), 'region' => (string) ( $d['region'] ?? '' ), 'country' => (string) ( $d['country_name'] ?? ( $d['country'] ?? '' ) ) );
-	set_transient( $key, $geo, 30 * DAY_IN_SECONDS );
-	return $geo;
-}
-
-/**
- * Device, browser and operating system from a user agent (names only, no versions).
- *
- * @param string $ua User agent.
- * @return array{device:string, browser:string, os:string}
- */
-function aw_crm_user_agent( $ua ) {
-	$pick = function ( $list ) use ( $ua ) {
-		foreach ( $list as $re => $name ) {
-			if ( preg_match( $re, $ua ) ) {
-				return $name;
-			}
-		}
-		return '' === $ua ? '' : 'Other';
-	};
-	$os      = $pick( array( '/Windows/i' => 'Windows', '/iPad/' => 'iPadOS', '/iPhone|iPod/' => 'iOS', '/Android/i' => 'Android', '/CrOS/' => 'ChromeOS', '/Mac OS X|Macintosh/' => 'macOS', '/Linux/i' => 'Linux' ) );
-	$browser = $pick( array( '/Edg(e|A|iOS)?\//' => 'Edge', '/OPR\/|Opera/' => 'Opera', '/SamsungBrowser/' => 'Samsung Internet', '/UCBrowser/' => 'UC Browser', '/FxiOS|Firefox\//' => 'Firefox', '/CriOS|Chrome\//' => 'Chrome', '/Safari\//' => 'Safari' ) );
-	$device  = '' === $ua ? '' : ( preg_match( '/iPad|Tablet|Android(?!.*Mobile)/i', $ua ) ? 'Tablet' : ( preg_match( '/Mobi|iPhone|iPod|Android/i', $ua ) ? 'Mobile' : 'Desktop' ) );
-	return array( 'device' => $device, 'browser' => $browser, 'os' => $os );
 }
 
 /** Add the Form fields and their group to FluentCRM's custom fields (keeps any others). Once per request. */

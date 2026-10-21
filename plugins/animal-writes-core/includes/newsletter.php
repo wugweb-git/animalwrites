@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_NL_DB_VERSION = '2'; // 2: source holds the page a sign-up came from
+const AW_NL_DB_VERSION = '3'; // 2: source holds the page a sign-up came from; 3: ticks and visit (kits-core forms.php)
 const AW_NL_CONSENT    = 'v2-newsletter-1';
 
 function aw_nl_table() {
@@ -41,6 +41,8 @@ add_action(
 			token char(32) NOT NULL,
 			consent_text_version varchar(40) NOT NULL DEFAULT '',
 			consent_at datetime NULL,
+			ticks text NULL,
+			visit text NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY  (id),
@@ -148,6 +150,8 @@ function aw_newsletter_submit() {
 	if ( ! $row ) {
 		aw_form_fail( $form, array(), $v, $back, 'newsletter', aw_form_generic_error( $form ) );
 	}
+	list( $visit, $ticks ) = aw_form_record( 'newsletter', array( 'page' => kits_submitted_source() ) ); // pending (double opt-in): not in FluentCRM until confirmed, as before
+	aw_record_row( aw_nl_table(), array( 'id' => (int) $row['id'] ), $visit, $ticks );
 	if ( 'pending' === $row['status'] ) { // double opt-in: confirm by email
 		wp_mail(
 			$row['email'],

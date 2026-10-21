@@ -399,3 +399,483 @@ function aw_form_validate( $rules, $values, $labels, $messages = array() ) {
 	}
 	return $errors;
 }
+
+/* ---------- What every form records (owner, 21 Oct 2026) ---------- */
+/*
+ * Next to each entry a form saves: every tick as 1/0 with its wording version (`aw_ticks`), and one visit block
+ * (`aw_visit`). The site's forms call aw_form_record() in their save function and keep both on their record (post meta
+ * aw_ticks/aw_visit, or the ticks/visit columns of a table row); WP Admin shows them read-only as "Visit details".
+ *
+ * Ticks (JSON): name => {value: 1|0 (a group of boxes: option => 1|0), version, label}. A box is recorded whatever the
+ * form then does with it. The boxes are the form's own list (filter aw_form_known_boxes), every check box of a Fluent
+ * Forms form, and every check box the page script finds in the form (aw_boxes), so a box added later is recorded too.
+ * The version is the consent wording's version for consent boxes, otherwise "label-" and a short hash of the wording.
+ *
+ * Visit (JSON): page URL, referrer, UTM source/medium/campaign (the page script: the page, and the browser session's
+ * landing referrer and UTM); IP, city/region/country (Cloudflare's CF-IPCountry/CF-IPCity headers when present,
+ * otherwise the DB-IP Lite database read on this server: no IP leaves the server), ISP and ASN (DB-IP ASN Lite),
+ * network type (the browser's, when it says); device, browser, OS (user agent); screen size, language, time zone;
+ * time, seconds from the form first showing to sending, first-visit date and visit count (first-party cookie aw_fv);
+ * GA4 client ID and Clarity session ID only when analytics consent is granted.
+ * GeoIP files: `wp aw geoip-update` (and monthly by cron) into the private uploads folder. IP geolocation by DB-IP
+ * (https://db-ip.com), CC BY 4.0. Reader: MaxMind DB Reader (vendor/maxmind-db, Apache 2.0).
+ */
+
+/** Posted by the page script: the browser's part of the visit block, and the form's check boxes. */
+const AW_VISIT_FIELD = 'aw_visit';
+const AW_BOXES_FIELD = 'aw_boxes';
+
+/** A private folder in uploads (not served): the site's own (aw_private_dir) when it has one. */
+function kits_private_dir() {
+	if ( function_exists( 'aw_private_dir' ) ) {
+		return aw_private_dir();
+	}
+	$up  = wp_upload_dir();
+	$dir = trailingslashit( $up['basedir'] ) . 'kits-private';
+	if ( ! is_dir( $dir ) ) {
+		wp_mkdir_p( $dir );
+		file_put_contents( $dir . '/.htaccess', "Require all denied\nDeny from all\n" ); // phpcs:ignore
+	}
+	return $dir;
+}
+
+/** A wording version from the wording itself, for a box without a consent version. */
+function aw_box_version( $label ) {
+	$label = trim( wp_strip_all_tags( (string) $label ) );
+	return '' === $label ? '' : 'label-' . substr( md5( $label ), 0, 8 );
+}
+
+/** Was a posted box ticked (a value, or a list with any value)? */
+function aw_box_on( $v ) {
+	return is_array( $v ) ? (bool) array_filter( $v, fn( $x ) => '' !== (string) $x && '0' !== (string) $x ) : ( '' !== (string) $v && '0' !== (string) $v && 'false' !== (string) $v );
+}
+
+/**
+ * Every tick of a submission as 1/0.
+ *
+ * @param string $form   Form key.
+ * @param array  $posted Submitted values (unslashed).
+ * @param array  $ctx    ff (bool); ff_form (Fluent Forms form object); groups (name => option values, for box groups).
+ * @return array name => array( value, version, label ).
+ */
+function aw_form_ticks( $form, $posted, $ctx = array() ) {
+	$boxes = array(); // name => array( label, version, options )
+	foreach ( (array) apply_filters( 'aw_form_known_boxes', array(), $form, $ctx ) as $name => $b ) {
+		$boxes[ $name ] = array( $b[0], $b[1], array() );
+	}
+	foreach ( (array) ( $ctx['groups'] ?? array() ) as $name => $opts ) {
+		$boxes[ $name ] = array( $boxes[ $name ][0] ?? $name, $boxes[ $name ][1] ?? '', array_map( 'strval', (array) $opts ) );
+	}
+	if ( ! empty( $ctx['ff_form'] ) ) { // every check box in the Fluent Forms form
+		foreach ( (array) ( $ctx['ff_form']->fields['fields'] ?? array() ) as $f ) {
+			if ( 'input_checkbox' !== ( $f['element'] ?? '' ) ) {
+				continue;
+			}
+			$name = (string) ( $f['attributes']['name'] ?? '' );
+			$opts = wp_list_pluck( (array) ( $f['settings']['advanced_options'] ?? array() ), 'label', 'value' );
+			if ( '' === $name ) {
+				continue;
+			}
+			$label          = (string) ( $boxes[ $name ][0] ?? ( 1 === count( $opts ) ? reset( $opts ) : wp_strip_all_tags( (string) ( $f['settings']['label'] ?? $name ) ) ) );
+			$boxes[ $name ] = array( $label, $boxes[ $name ][1] ?? '', count( $opts ) > 1 ? array_map( 'strval', array_keys( $opts ) ) : array() );
+		}
+	}
+	$seen = json_decode( (string) ( $posted[ AW_BOXES_FIELD ] ?? '' ), true ); // the boxes the page script (aw-analytics.js) found in the form
+	foreach ( is_array( $seen ) ? array_slice( $seen, 0, 30, true ) : array() as $name => $b ) {
+		$name = preg_replace( '/[^a-z0-9_]/', '', strtolower( (string) $name ) );
+		if ( '' === $name || isset( $boxes[ $name ] ) ) {
+			continue;
+		}
+		$opts           = array_slice( array_map( fn( $o ) => substr( sanitize_key( (string) $o ), 0, 40 ), (array) ( $b['options'] ?? array() ) ), 0, 30 );
+		$boxes[ $name ] = array( substr( sanitize_text_field( (string) ( $b['label'] ?? $name ) ), 0, 300 ), '', count( $opts ) > 1 ? $opts : array() );
+	}
+	$out = array();
+	foreach ( $boxes as $name => $b ) {
+		$v = $posted[ $name ] ?? ( $posted[ $name . '[]' ] ?? '' );
+		if ( $b[2] ) {
+			$on    = array_map( 'strval', (array) $v );
+			$value = array();
+			foreach ( $b[2] as $opt ) {
+				$value[ $opt ] = in_array( $opt, $on, true ) ? 1 : 0;
+			}
+		} else {
+			$value = aw_box_on( $v ) ? 1 : 0;
+		}
+		$out[ $name ] = array( 'value' => $value, 'version' => '' !== $b[1] ? $b[1] : aw_box_version( $b[0] ), 'label' => $b[0] );
+	}
+	return $out;
+}
+
+/** A tick's value (1/0), or null when the form has no such box. */
+function aw_tick( $ticks, $name ) {
+	return isset( $ticks[ $name ] ) && ! is_array( $ticks[ $name ]['value'] ) ? (int) $ticks[ $name ]['value'] : null;
+}
+
+/* ---------- One submission ---------- */
+
+/** What the form sent: the Fluent Forms entry while one is handled (forms-fluentforms.php), else the posted form. */
+function aw_form_posted() {
+	return isset( $GLOBALS['aw_ff_data'] ) ? (array) $GLOBALS['aw_ff_data'] : (array) wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification -- read only; each form's guard checks the request
+}
+
+/**
+ * The visit block and ticks of the submission being handled.
+ *
+ * @param string $form Form key (aw_form_known_boxes()).
+ * @param array  $o    page (site path or URL, when the browser sent none), groups (box groups: name => option values),
+ *                     posted (values to read the ticks from, when not the form's own), client (visit block's browser part).
+ * @return array{0: array, 1: array} visit, ticks.
+ */
+function aw_form_record( $form, $o = array() ) {
+	$posted = $o['posted'] ?? aw_form_posted();
+	if ( isset( $o['client_boxes'] ) ) {
+		$posted[ AW_BOXES_FIELD ] = is_string( $o['client_boxes'] ) ? $o['client_boxes'] : wp_json_encode( $o['client_boxes'] );
+	} elseif ( ! isset( $posted[ AW_BOXES_FIELD ] ) ) {
+		$posted[ AW_BOXES_FIELD ] = aw_form_posted()[ AW_BOXES_FIELD ] ?? '';
+	}
+	$ff    = isset( $GLOBALS['aw_ff_form'] ) ? $GLOBALS['aw_ff_form'] : null;
+	$ticks = aw_form_ticks( $form, $posted, array( 'ff' => (bool) $ff, 'ff_form' => $ff, 'groups' => $o['groups'] ?? array() ) );
+	$visit = aw_visit( array( 'page' => $o['page'] ?? '', 'started' => (int) ( aw_form_posted()['aw_t'] ?? 0 ) ) + ( array_key_exists( 'client', $o ) ? array( 'client' => $o['client'] ) : array() ) );
+	return array( $visit, $ticks );
+}
+
+/**
+ * Store a visit block and ticks on a table row (volunteers, newsletter, letters): columns visit and ticks.
+ *
+ * @param string $table Table.
+ * @param array  $where Column => value.
+ */
+function aw_record_row( $table, $where, $visit, $ticks ) {
+	global $wpdb;
+	$wpdb->update( $table, array( 'visit' => wp_json_encode( $visit ), 'ticks' => wp_json_encode( (object) $ticks ) ), $where ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/* ---------- The visit block ---------- */
+
+/**
+ * The visit block for this request.
+ *
+ * @param array $o page (URL or site path, when the browser sent none), started (form shown, Unix time; the
+ *                 form's aw_t), client (the browser's part, when not in $_POST).
+ * @return array
+ */
+function aw_visit( $o = array() ) {
+	$raw = $o['client'] ?? ( aw_form_posted()[ AW_VISIT_FIELD ] ?? '' );
+	$c   = is_array( $raw ) ? $raw : json_decode( (string) $raw, true );
+	$c   = is_array( $c ) ? $c : array();
+	$s   = fn( $k, $n = 200 ) => substr( sanitize_text_field( (string) ( $c[ $k ] ?? '' ) ), 0, $n );
+	$url = fn( $v ) => substr( esc_url_raw( (string) $v ), 0, 500 );
+	$ip  = trim( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- LiteSpeed puts the client address here (kits-core preview.php)
+	$ip  = filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+	$ua  = substr( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), 0, 400 ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$geo = aw_visit_geo( $ip );
+	$dev = aw_visit_user_agent( $ua );
+	$page = $url( $c['page'] ?? '' );
+	if ( '' === $page ) {
+		$page = aw_visit_page_url( (string) ( $o['page'] ?? '' ) );
+	}
+	$secs = isset( $c['secs'] ) && is_numeric( $c['secs'] ) ? (int) $c['secs'] : null;
+	if ( null === $secs && ! empty( $o['started'] ) ) {
+		$secs = max( 0, time() - (int) $o['started'] );
+	}
+	$consent = 'granted' === ( $c['consent'] ?? '' );
+	return array(
+		'time'            => wp_date( 'c' ),
+		'page'            => $page,
+		'referrer'        => $url( $c['referrer'] ?? '' ),
+		'utm_source'      => $s( 'utm_source', 100 ),
+		'utm_medium'      => $s( 'utm_medium', 100 ),
+		'utm_campaign'    => $s( 'utm_campaign', 100 ),
+		'ip'              => $ip,
+		'city'            => $geo['city'],
+		'region'          => $geo['region'],
+		'country'         => $geo['country'],
+		'geo_source'      => $geo['source'],
+		'isp'             => $geo['isp'],
+		'asn'             => $geo['asn'],
+		'network'         => $s( 'net', 20 ),
+		'device'          => $dev['device'],
+		'browser'         => $dev['browser'],
+		'os'              => $dev['os'],
+		'user_agent'      => sanitize_text_field( $ua ),
+		'screen'          => preg_match( '/^\d{2,5}x\d{2,5}$/', (string) ( $c['screen'] ?? '' ) ) ? (string) $c['screen'] : '',
+		'language'        => $s( 'lang', 35 ),
+		'timezone'        => $s( 'tz', 60 ),
+		'seconds'         => $secs,
+		'first_visit'     => preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $c['first'] ?? '' ) ) ? (string) $c['first'] : '',
+		'visits'          => isset( $c['visits'] ) && is_numeric( $c['visits'] ) ? (int) $c['visits'] : null,
+		'analytics'       => $consent ? 'granted' : ( '' === $s( 'consent', 10 ) ? 'unknown' : 'denied' ),
+		'ga_client_id'    => $consent && preg_match( '/^\d+\.\d+$/', (string) ( $c['ga'] ?? '' ) ) ? (string) $c['ga'] : '',
+		'clarity_session' => $consent ? substr( preg_replace( '/[^a-z0-9]/i', '', (string) ( $c['clarity'] ?? '' ) ), 0, 40 ) : '',
+	);
+}
+
+/** A page URL from a URL or a site path ("home" is the front page); this site's referrer when there is none. */
+function aw_visit_page_url( $page ) {
+	$page = trim( (string) $page );
+	if ( '' === $page ) {
+		$ref = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		return wp_parse_url( $ref, PHP_URL_HOST ) === wp_parse_url( home_url(), PHP_URL_HOST ) ? (string) strtok( $ref, '#' ) : '';
+	}
+	if ( preg_match( '#^https?://#', $page ) ) {
+		return esc_url_raw( $page );
+	}
+	return 'home' === $page ? home_url( '/' ) : home_url( '/' . trim( $page, '/' ) . '/' );
+}
+
+/** Store a visit block and ticks on a post (contact message, claim, report, data request). */
+function aw_record_post( $post_id, $visit, $ticks = array() ) {
+	update_post_meta( $post_id, 'aw_visit', wp_slash( wp_json_encode( $visit ) ) );
+	update_post_meta( $post_id, 'aw_ticks', wp_slash( wp_json_encode( (object) $ticks ) ) );
+}
+
+/** A record's visit block and ticks from a post. */
+function aw_record_get_post( $post_id ) {
+	return array( (array) json_decode( (string) get_post_meta( $post_id, 'aw_visit', true ), true ), (array) json_decode( (string) get_post_meta( $post_id, 'aw_ticks', true ), true ) );
+}
+
+/* ---------- Place and network from the IP (no outside service) ---------- */
+
+/** Where the GeoIP files live (private uploads folder, not served). */
+function aw_geoip_file( $kind ) {
+	return kits_private_dir() . '/geoip/dbip-' . ( 'asn' === $kind ? 'asn' : 'city' ) . '-lite.mmdb';
+}
+
+/** A DB-IP reader, or null when the file is not there. */
+function aw_geoip_reader( $kind ) {
+	static $r = array();
+	if ( array_key_exists( $kind, $r ) ) {
+		return $r[ $kind ];
+	}
+	$r[ $kind ] = null;
+	$file       = aw_geoip_file( $kind );
+	if ( is_readable( $file ) ) {
+		aw_geoip_load_reader();
+		try {
+			$r[ $kind ] = new \MaxMind\Db\Reader( $file );
+		} catch ( \Throwable $e ) {
+			$r[ $kind ] = null;
+		}
+	}
+	return $r[ $kind ];
+}
+
+/**
+ * City, region, country, ISP and ASN of an IP: Cloudflare's visitor headers when present, otherwise the local files.
+ *
+ * @return array{city:string, region:string, country:string, source:string, isp:string, asn:string}
+ */
+function aw_visit_geo( $ip ) {
+	$h   = fn( $k ) => sanitize_text_field( wp_unslash( (string) ( $_SERVER[ $k ] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$out = array( 'city' => '', 'region' => '', 'country' => '', 'source' => '', 'isp' => '', 'asn' => '' );
+	if ( '' !== $h( 'HTTP_CF_IPCOUNTRY' ) && 'XX' !== $h( 'HTTP_CF_IPCOUNTRY' ) ) {
+		$out = array( 'city' => $h( 'HTTP_CF_IPCITY' ), 'region' => $h( 'HTTP_CF_REGION' ), 'country' => $h( 'HTTP_CF_IPCOUNTRY' ), 'source' => 'cloudflare', 'isp' => '', 'asn' => $h( 'HTTP_CF_ASN' ) ? 'AS' . preg_replace( '/\D/', '', $h( 'HTTP_CF_ASN' ) ) : '' ) + $out;
+	}
+	if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+		return $out;
+	}
+	$city = '' === $out['country'] ? aw_geoip_reader( 'city' ) : null;
+	if ( $city ) {
+		try {
+			$d   = (array) $city->get( $ip );
+			$out = array(
+				'city'    => (string) ( $d['city']['names']['en'] ?? '' ),
+				'region'  => (string) ( $d['subdivisions'][0]['names']['en'] ?? '' ),
+				'country' => (string) ( $d['country']['names']['en'] ?? ( $d['country']['iso_code'] ?? '' ) ),
+				'source'  => $d ? 'geoip' : '',
+			) + $out;
+		} catch ( \Throwable $e ) {
+			unset( $e ); // a bad address or file: no place
+		}
+	}
+	$asn = aw_geoip_reader( 'asn' );
+	if ( $asn ) {
+		try {
+			$d          = (array) $asn->get( $ip );
+			$out['isp'] = (string) ( $d['autonomous_system_organization'] ?? '' );
+			$out['asn'] = ! empty( $d['autonomous_system_number'] ) ? 'AS' . (int) $d['autonomous_system_number'] : $out['asn'];
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
+	}
+	return $out;
+}
+
+/**
+ * Download this month's DB-IP Lite files (city, ASN) into the private folder. Keeps the old files on any failure.
+ *
+ * @return array kind => 'updated' | error message.
+ */
+function aw_geoip_update() {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	aw_geoip_load_reader();
+	$dir = dirname( aw_geoip_file( 'city' ) );
+	wp_mkdir_p( $dir );
+	$res = array();
+	foreach ( array( 'city', 'asn' ) as $kind ) {
+		$got = '';
+		foreach ( array( gmdate( 'Y-m' ), gmdate( 'Y-m', strtotime( 'first day of last month' ) ) ) as $month ) { // early in a month the new file may not be out yet
+			$tmp = download_url( 'https://download.db-ip.com/free/dbip-' . $kind . '-lite-' . $month . '.mmdb.gz', 600 );
+			if ( ! is_wp_error( $tmp ) ) {
+				$got = $tmp;
+				break;
+			}
+		}
+		if ( ! $got ) {
+			$res[ $kind ] = 'download failed';
+			continue;
+		}
+		$in  = gzopen( $got, 'rb' );
+		$out = fopen( $dir . '/.new-' . $kind, 'wb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		while ( $in && $out && ! gzeof( $in ) ) {
+			fwrite( $out, (string) gzread( $in, 1048576 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
+		$in && gzclose( $in );
+		$out && fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		wp_delete_file( $got );
+		try {
+			$check = new \MaxMind\Db\Reader( $dir . '/.new-' . $kind ); // throws on a broken file
+			$check->close();
+			rename( $dir . '/.new-' . $kind, aw_geoip_file( $kind ) );
+			$res[ $kind ] = 'updated';
+		} catch ( \Throwable $e ) {
+			wp_delete_file( $dir . '/.new-' . $kind );
+			$res[ $kind ] = 'broken file: ' . $e->getMessage();
+		}
+	}
+	update_option( 'aw_geoip_updated', array( 'at' => current_time( 'mysql' ), 'result' => $res ), false );
+	return $res;
+}
+
+// Monthly refresh of the GeoIP files (DB-IP publishes a new month at its start).
+add_action(
+	'init',
+	function () {
+		if ( ! wp_next_scheduled( 'aw_geoip_monthly' ) ) {
+			wp_schedule_event( time() + DAY_IN_SECONDS, 'monthly', 'aw_geoip_monthly' );
+		}
+	}
+);
+add_filter( 'cron_schedules', fn( $s ) => $s + array( 'monthly' => array( 'interval' => 30 * DAY_IN_SECONDS, 'display' => 'Monthly' ) ) );
+add_action(
+	'aw_geoip_monthly',
+	function () {
+		aw_geoip_load_reader();
+		aw_geoip_update();
+	}
+);
+
+/** Load the vendored reader (DB-IP files use the MaxMind DB format). */
+function aw_geoip_load_reader() {
+	if ( ! class_exists( '\MaxMind\Db\Reader' ) ) {
+		foreach ( array( 'Reader/InvalidDatabaseException', 'Reader/Util', 'Reader/Metadata', 'Reader/Decoder', 'Reader' ) as $f ) {
+			require_once KITS_CORE_DIR . 'vendor/maxmind-db/src/MaxMind/Db/' . $f . '.php';
+		}
+	}
+}
+
+/**
+ * Device, browser and operating system from a user agent (names only).
+ *
+ * @return array{device:string, browser:string, os:string}
+ */
+function aw_visit_user_agent( $ua ) {
+	$pick    = function ( $list ) use ( $ua ) {
+		foreach ( $list as $re => $name ) {
+			if ( preg_match( $re, $ua ) ) {
+				return $name;
+			}
+		}
+		return '' === $ua ? '' : 'Other';
+	};
+	$os      = $pick( array( '/Windows/i' => 'Windows', '/iPad/' => 'iPadOS', '/iPhone|iPod/' => 'iOS', '/Android/i' => 'Android', '/CrOS/' => 'ChromeOS', '/Mac OS X|Macintosh/' => 'macOS', '/Linux/i' => 'Linux' ) );
+	$browser = $pick( array( '/Edg(e|A|iOS)?\//' => 'Edge', '/OPR\/|Opera/' => 'Opera', '/SamsungBrowser/' => 'Samsung Internet', '/UCBrowser/' => 'UC Browser', '/FxiOS|Firefox\//' => 'Firefox', '/CriOS|Chrome\//' => 'Chrome', '/Safari\//' => 'Safari' ) );
+	$device  = '' === $ua ? '' : ( preg_match( '/iPad|Tablet|Android(?!.*Mobile)/i', $ua ) ? 'Tablet' : ( preg_match( '/Mobi|iPhone|iPod|Android/i', $ua ) ? 'Mobile' : 'Desktop' ) );
+	return array( 'device' => $device, 'browser' => $browser, 'os' => $os );
+}
+
+/* ---------- WP Admin: "Visit details" (read-only) ---------- */
+
+/** Labels for the visit block, in order. */
+const AW_VISIT_LABELS = array(
+	'time'            => 'Sent',
+	'page'            => 'Page',
+	'referrer'        => 'Referrer',
+	'utm_source'      => 'UTM source',
+	'utm_medium'      => 'UTM medium',
+	'utm_campaign'    => 'UTM campaign',
+	'ip'              => 'IP address',
+	'city'            => 'City',
+	'region'          => 'Region',
+	'country'         => 'Country',
+	'geo_source'      => 'Place from',
+	'isp'             => 'ISP',
+	'asn'             => 'ASN',
+	'network'         => 'Network type',
+	'device'          => 'Device',
+	'browser'         => 'Browser',
+	'os'              => 'Operating system',
+	'screen'          => 'Screen',
+	'language'        => 'Language',
+	'timezone'        => 'Time zone',
+	'seconds'         => 'Seconds from form open to send',
+	'first_visit'     => 'First visit',
+	'visits'          => 'Visits',
+	'analytics'       => 'Analytics consent',
+	'ga_client_id'    => 'GA4 client ID',
+	'clarity_session' => 'Clarity session ID',
+	'user_agent'      => 'User agent',
+);
+
+/** The read-only "Visit details" table: ticks first, then the visit block. */
+function aw_visit_details_html( $visit, $ticks ) {
+	$visit = (array) $visit;
+	$ticks = (array) $ticks;
+	if ( ! $visit && ! $ticks ) {
+		return '<p class="description">No visit details: sent before 21 Oct 2026, or added by hand.</p>';
+	}
+	$rows = '';
+	foreach ( $ticks as $name => $t ) {
+		$v     = $t['value'] ?? '';
+		$v     = is_array( $v ) ? implode( ', ', array_map( fn( $k, $x ) => $k . ' ' . (int) $x, array_keys( $v ), $v ) ) : (string) (int) $v;
+		$rows .= '<tr><th scope="row">Tick: ' . esc_html( $name ) . '</th><td><strong>' . esc_html( $v ) . '</strong>' . ( empty( $t['version'] ) ? '' : ' · wording ' . esc_html( $t['version'] ) ) . ( empty( $t['label'] ) ? '' : '<br><span class="description">' . esc_html( $t['label'] ) . '</span>' ) . '</td></tr>';
+	}
+	foreach ( AW_VISIT_LABELS as $k => $label ) {
+		$v = $visit[ $k ] ?? '';
+		if ( null === $v || '' === (string) $v ) {
+			$v = '—';
+		} elseif ( 'time' === $k ) {
+			$v = wp_date( 'j M Y, H:i:s', strtotime( (string) $v ) );
+		}
+		$rows .= '<tr><th scope="row">' . esc_html( $label ) . '</th><td style="word-break:break-all">' . esc_html( (string) $v ) . '</td></tr>';
+	}
+	return '<table class="widefat striped aw-visit-details"><tbody>' . $rows . '</tbody></table><p class="description">Read-only. Place and network: IP geolocation by <a href="https://db-ip.com" rel="noopener">DB-IP</a> (CC BY 4.0), on this server.</p>';
+}
+
+/**
+ * A table row's "Visit details" as a closed disclosure (volunteers, newsletter, letters lists).
+ *
+ * @param array $row Row with ticks and visit columns.
+ */
+function aw_visit_details_disclosure( $row ) {
+	$visit = (array) json_decode( (string) ( $row['visit'] ?? '' ), true );
+	$ticks = (array) json_decode( (string) ( $row['ticks'] ?? '' ), true );
+	if ( ! $visit && ! $ticks ) {
+		return '—';
+	}
+	return '<details><summary>Visit details</summary>' . aw_visit_details_html( $visit, $ticks ) . '</details>';
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	// wp aw geoip-update: this month's DB-IP Lite city and ASN files into the private folder (also monthly by cron).
+	WP_CLI::add_command(
+		'aw geoip-update',
+		function () {
+			aw_geoip_load_reader();
+			$res = aw_geoip_update();
+			WP_CLI::success( wp_json_encode( $res ) . ' · ' . size_format( (int) @filesize( aw_geoip_file( 'city' ) ) ) . ' city, ' . size_format( (int) @filesize( aw_geoip_file( 'asn' ) ) ) . ' ASN' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		}
+	);
+	// wp aw geoip-test <ip>: what the visit block would say for an address.
+	WP_CLI::add_command( 'aw geoip-test', fn( $args ) => WP_CLI::log( wp_json_encode( aw_visit_geo( (string) ( $args[0] ?? '' ) ) ) ) );
+}

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_VOL_DB_VERSION = '2'; // 2: page_source and pincode columns (S5.8, S6.6)
+const AW_VOL_DB_VERSION = '3'; // 2: page_source and pincode columns (S5.8, S6.6); 3: ticks and visit (kits-core forms.php)
 const AW_VOL_CAP        = 'edit_aw_volunteers';
 
 /** Table name. */
@@ -48,6 +48,8 @@ add_action(
 			consent_text_version varchar(40) NOT NULL DEFAULT '',
 			consent_at datetime NULL,
 			status varchar(20) NOT NULL DEFAULT 'active',
+			ticks text NULL,
+			visit text NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY  (id),

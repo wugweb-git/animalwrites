@@ -3,10 +3,11 @@
  * Campaign letters: anonymous statistics and the opt-in at send (owner, 17 Oct 2026; Privacy Policy section 7,
  * "Campaign actions and sign-ups"). The letter itself still goes from the visitor's own email; we never receive it.
  *
- * - Anonymous statistics: each time a letter is sent from the letter tool ([aw_letter_tool], campaign.js), one row in
+ * - Letter statistics: each time a letter is sent from the letter tool ([aw_letter_tool], campaign.js), one row in
  *   {prefix}aw_camp_letters: campaign, the city as typed (trimmed, title case), the grounds ticked, the route (gmail,
- *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width) and the date. No name,
- *   email or IP address is read or kept. Kept to report on campaigns.
+ *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width) and the date; since 21 Oct
+ *   2026 (owner) also every tick as 1/0 and the visit block (kits-core forms.php: IP, place, device, page). No name or
+ *   email. Kept to report on campaigns.
  * - At send: name, city and email are required. Every sender joins the volunteers (volunteers table, tag Volunteer)
  *   and the newsletter (aw_newsletter_join, tag campaign-<slug>), whatever the box says (owner, 18 Oct 2026).
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CL_DB_VERSION = '1';
+const AW_CL_DB_VERSION = '2'; // 2: ticks and visit (kits-core forms.php)
 const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns, and add me as a volunteer. I can unsubscribe at any time.';
 const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
@@ -47,6 +48,8 @@ add_action(
 			route varchar(20) NOT NULL DEFAULT '',
 			device varchar(10) NOT NULL DEFAULT '',
 			sent_on date NOT NULL,
+			ticks text NULL,
+			visit text NULL,
 			PRIMARY KEY  (id),
 			KEY campaign (campaign_id, sent_on)
 			) {$wpdb->get_charset_collate()};"
@@ -55,6 +58,30 @@ add_action(
 	},
 	5
 );
+
+/**
+ * A letter's ticks and visit block (kits-core forms.php): the box as nl_optin (the 'consent' or 'nl_optin' it sends) and
+ * every ground as ticked or not.
+ *
+ * @param WP_REST_Request $req Request.
+ * @param int             $id  Campaign.
+ * @return array{0: array, 1: array}
+ */
+function aw_cl_record( $req, $id ) {
+	$box    = null !== $req['nl_optin'] ? $req['nl_optin'] : $req['consent'];
+	$posted = array( 'nl_optin' => '1' === (string) $box ? '1' : '0', 'grounds' => array_filter( explode( ',', aw_cl_grounds( $req['grounds'] ) ) ) );
+	$all    = array_map( 'strval', array_keys( aw_cl_ground_labels( $id ) ) );
+	return aw_form_record(
+		'campaign-letter',
+		array(
+			'posted'       => $posted,
+			'client'       => is_array( $req['visit'] ) ? $req['visit'] : null,
+			'client_boxes' => is_array( $req['boxes'] ) ? $req['boxes'] : '',
+			'groups'       => $all ? array( 'grounds' => $all ) : array(),
+			'page'         => (string) get_permalink( $id ),
+		)
+	);
+}
 
 /** A city as typed, tidied: trimmed, single spaces, title case, at most 60 characters. */
 function aw_cl_city( $city ) {
@@ -105,6 +132,7 @@ add_action(
 					}
 					$route  = sanitize_key( (string) $req['route'] );
 					$device = sanitize_key( (string) $req['device'] );
+					list( $visit, $ticks ) = aw_cl_record( $req, $id );
 					$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 						aw_cl_table(),
 						array(
@@ -114,6 +142,8 @@ add_action(
 							'route'       => isset( AW_CL_ROUTES[ $route ] ) ? $route : '',
 							'device'      => isset( AW_CL_DEVICES[ $device ] ) ? $device : '',
 							'sent_on'     => wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Kolkata' ) ),
+							'ticks'       => wp_json_encode( (object) $ticks ),
+							'visit'       => wp_json_encode( $visit ),
 						)
 					);
 					return array( 'ok' => true );
@@ -140,12 +170,16 @@ add_action(
 					$slug    = get_post_field( 'post_name', $id );
 					// Every sender joins the volunteers and the newsletter, box ticked or not (owner, 18 Oct 2026): a volunteer row
 					// with what the letter gives (name, email, city), then the newsletter with the Volunteer tag; no team email.
+					// The box arrives as consent ('1'/'0') and is recorded as nl_optin; who joins does not depend on it.
+					list( $visit, $ticks ) = aw_cl_record( $req, $id );
 					if ( function_exists( 'aw_vol_upsert' ) ) {
 						aw_vol_upsert( array( 'name' => $name, 'email' => $email, 'city_text' => $city, 'page_source' => 'campaign:' . $slug, 'source' => 'v2_form', 'consent_scope' => 'volunteering_and_updates', 'consent_text_version' => AW_CL_CONSENT ) );
+						aw_record_row( aw_vol_table(), array( 'email' => strtolower( $email ) ), $visit, $ticks );
 					}
 					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT );
+					aw_record_row( aw_nl_table(), array( 'email' => strtolower( $email ) ), $visit, $ticks );
 					if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php)
-						aw_crm_sync( $email, $name, 'campaign-letter', array( 'subscribe' => true, 'box' => '1' === (string) $req['consent'], 'consent' => AW_CL_CONSENT, 'page' => (string) get_permalink( $id ), 'tags' => array( 'newsletter', 'volunteer', 'campaign-' . $slug ), 'extra' => array( 'city' => $city ), 'source' => 'site:campaign:' . $slug, 'volunteer' => true ) );
+						aw_crm_sync( $email, $name, 'campaign-letter', array( 'subscribe' => true, 'ticks' => $ticks, 'visit' => $visit, 'tags' => array( 'newsletter', 'volunteer', 'campaign-' . $slug ), 'extra' => array( 'city' => $city ), 'source' => 'site:campaign:' . $slug, 'volunteer' => true ) );
 					}
 					return array( 'ok' => true );
 				},
