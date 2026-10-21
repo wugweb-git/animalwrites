@@ -323,8 +323,8 @@ $faq = c2sec( // the section's id (faq) is on its c2slot
 );
 
 /* 10. Read the law: every Library document with the campaign tag (the draft, the Act, the 1998 Rules, circulars, orders). */
-$tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'post_tag' );
-$tq  = '"taxQuery":{"post_tag":[' . (int) $tag->term_id . ']}';
+$tag = get_term_by( 'slug', 'campaign-lab-animals-2026', 'aw_campaign_link' ); // campaign link, not a tag (campaign-links.php, 20 Oct 2026)
+$tq  = '"taxQuery":{"aw_campaign_link":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
 	c2split( c2h( 'Read the law and the record' ) . c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' ), 16856, '100% 50%' )
@@ -438,7 +438,7 @@ $id = wp_insert_post( wp_slash( $post ), true );
 if ( is_wp_error( $id ) ) {
 	WP_CLI::error( $id->get_error_message() );
 }
-wp_set_object_terms( $id, array( (int) $tag->term_id ), 'post_tag', true );
+wp_set_object_terms( $id, array( (int) $tag->term_id ), 'aw_campaign_link', true );
 wp_set_object_terms( $id, array( 'campaigns-civic-action', 'laws-rules' ), 'category', false );
 foreach ( array(
 	'_wp_page_template'          => 'campaign-page',
