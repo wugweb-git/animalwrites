@@ -288,6 +288,15 @@ function aw_list_filters( $type ) {
 				$chips[] = array( $label . ': ' . $v[0], add_query_arg( aw_filter_args( $without ) + $keep, $all ) );
 			}
 		}
+		foreach ( $mine as $slug ) { // a chosen value the other filters leave with no items stays visible and removable
+			if ( ! in_array( $slug, array_column( $options, 1 ), true ) ) {
+				$term      = 'place' === $source || 'publisher' === $source || 'press-format' === $source ? null : get_term_by( 'slug', $slug, 'resource-kind' === $source ? 'post_tag' : $source );
+				$name      = $term && ! is_wp_error( $term ) ? $term->name : ucwords( str_replace( '-', ' ', $slug ) );
+				$options[] = array( $name, $slug, true, 0, '' );
+				$rest      = array_values( array_diff( $mine, array( $slug ) ) );
+				$chips[]   = array( $label . ': ' . $name, add_query_arg( aw_filter_args( $rest ? array_merge( $active, array( $param => $rest ) ) : $others ) + $keep, $all ) );
+			}
+		}
 		$groups .= kits_filter_dropdown( $label, $param, $options ); // every hub the same (owner, 14 Oct 2026): one button per filter, Sort beside them; a "Filters" sheet on phones
 	}
 	$groups .= aw_sort_group( $type ); // phones: Sort is the first choice in the Filters sheet; from 768 the toolbar's segment (aw_sort_segment) is the control

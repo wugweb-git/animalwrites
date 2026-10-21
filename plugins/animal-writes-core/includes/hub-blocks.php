@@ -123,8 +123,24 @@ function aw_hub_count_label( $type ) {
 			return $label;
 		}
 	}
-	return $n ? number_format_i18n( $n ) . ' ' . $noun[ $type ][ 1 === $n ? 0 : 1 ] : '';
+	return $n || ( function_exists( 'aw_active_filters' ) && aw_active_filters( $type ) ) ? number_format_i18n( $n ) . ' ' . $noun[ $type ][ 1 === $n ? 0 : 1 ] : ''; // "0 documents" when the filters match nothing
 }
+
+/**
+ * Filters that match nothing (owner, 21 Oct 2026): the list's empty message says so, names what to do and has a Clear
+ * filters button; the toolbar keeps its count ("0 documents"), Filters button and chosen-filter chips so each can be removed.
+ */
+add_filter(
+	'render_block_core/query-no-results',
+	function ( $html ) {
+		$type = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
+		if ( ! $type || 'aw_listing' === $type || 'aw_campaign' === $type || ! function_exists( 'aw_active_filters' ) || ! aw_active_filters( $type ) ) {
+			return $html;
+		}
+		$noun = array( 'post' => 'guides', 'aw_opportunity' => 'opportunities', 'aw_legal' => 'documents', 'aw_news' => 'stories', 'aw_press' => 'items' );
+		return '<div class="kit-empty kit-empty--filtered" role="status"><p><strong>No ' . esc_html( $noun[ $type ] ?? 'items' ) . ' match these filters.</strong></p><p>Remove a filter below the page title, or clear them all.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_hub_url( $type ) ) . '">Clear filters</a></p></div>';
+	}
+);
 
 /**
  * What a Resources list holds, counted live by its type tags: "15 guides, 1 FAQ page and 143 research summaries".
