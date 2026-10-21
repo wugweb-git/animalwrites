@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CL_DB_VERSION = '2'; // 2: nl_optin and wa_optin (owner, 21 Oct 2026)
+const AW_CL_DB_VERSION = '3'; // 2: nl_optin and wa_optin (owner, 21 Oct 2026); 3: send_id, one row per letter from either call
 const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns, and add me as a volunteer. I can unsubscribe at any time.';
 const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
@@ -52,7 +52,9 @@ add_action(
 			sent_on date NOT NULL,
 			nl_optin tinyint(1) NULL,
 			wa_optin tinyint(1) NULL,
+			send_id char(16) NULL,
 			PRIMARY KEY  (id),
+			UNIQUE KEY send_id (send_id),
 			KEY campaign (campaign_id, sent_on)
 			) {$wpdb->get_charset_collate()};"
 		);
@@ -102,6 +104,40 @@ function aw_cl_ground_labels( $campaign ) {
 	return $out;
 }
 
+/** A random id campaign.js makes for one letter (16 hex characters), or '' when it sent none (an older cached script). */
+function aw_cl_send_id( $v ) {
+	return preg_match( '/^[a-f0-9]{16}$/', (string) $v ) ? (string) $v : '';
+}
+
+/**
+ * The anonymous row for one letter. Both calls (letter and optin) carry it, so the row is saved when either arrives; the
+ * send_id keeps it to one row (INSERT IGNORE on its unique key). The send_id is never stored with the person.
+ */
+function aw_cl_record_letter( $id, $req ) {
+	global $wpdb;
+	$route  = sanitize_key( (string) $req['route'] );
+	$device = sanitize_key( (string) $req['device'] );
+	$send   = aw_cl_send_id( $req['send_id'] );
+	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare(
+			'INSERT IGNORE INTO ' . aw_cl_table() . ' (campaign_id, city, grounds, route, device, sent_on, nl_optin, wa_optin, send_id) VALUES (%d, %s, %s, %s, %s, %s, %d, %d, ' . ( $send ? '%s' : 'NULL' ) . ')',
+			array_merge(
+				array(
+					$id,
+					aw_cl_city( $req['city'] ),
+					aw_cl_grounds( $req['grounds'] ),
+					isset( AW_CL_ROUTES[ $route ] ) ? $route : '',
+					isset( AW_CL_DEVICES[ $device ] ) ? $device : '',
+					wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Kolkata' ) ),
+					aw_cl_tick( $req['nl_optin'] ),
+					aw_cl_tick( $req['wa_optin'] ),
+				),
+				$send ? array( $send ) : array()
+			)
+		)
+	);
+}
+
 /* ---------- REST: a letter sent (anonymous), and the opt-in ---------- */
 add_action(
 	'rest_api_init',
@@ -117,26 +153,11 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => '__return_true',
 				'callback'            => function ( WP_REST_Request $req ) use ( $open ) {
-					global $wpdb;
 					$id = $open( $req['id'] );
 					if ( ! $id ) {
 						return new WP_Error( 'aw_closed', 'Not open', array( 'status' => 404 ) );
 					}
-					$route  = sanitize_key( (string) $req['route'] );
-					$device = sanitize_key( (string) $req['device'] );
-					$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-						aw_cl_table(),
-						array(
-							'campaign_id' => $id,
-							'city'        => aw_cl_city( $req['city'] ),
-							'grounds'     => aw_cl_grounds( $req['grounds'] ),
-							'route'       => isset( AW_CL_ROUTES[ $route ] ) ? $route : '',
-							'device'      => isset( AW_CL_DEVICES[ $device ] ) ? $device : '',
-							'sent_on'     => wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Kolkata' ) ),
-							'nl_optin'    => aw_cl_tick( $req['nl_optin'] ),
-							'wa_optin'    => aw_cl_tick( $req['wa_optin'] ),
-						)
-					);
+					aw_cl_record_letter( $id, $req );
 					return array( 'ok' => true );
 				},
 			)
@@ -163,7 +184,20 @@ add_action(
 					// recorded as 1/0 (it was dropped before 21 Oct 2026). FluentCRM's own API; no team email.
 					$wa  = trim( sanitize_text_field( (string) $req['whatsapp'] ) );
 					$wa  = '' !== $wa && kits_clean_phone( $wa ) ? kits_clean_phone( $wa ) : substr( $wa, 0, 20 );
+					// the letter's row too, in case its own call was lost (only when this script sent the letter's fields)
+					$send = aw_cl_send_id( $req['send_id'] );
+					if ( $send && '' !== (string) $req['route'] ) {
+						aw_cl_record_letter( $id, $req );
+					}
+					// a retried call (the first answer lost) gets the same reference, not a new one
+					$ref = $send ? get_transient( 'aw_cl_s_' . $send ) : '';
+					if ( $ref ) {
+						return array( 'ok' => true, 'ref' => $ref );
+					}
 					$ref = 'AW-L-' . aw_cl_next_ref();
+					if ( $send ) {
+						set_transient( 'aw_cl_s_' . $send, $ref, DAY_IN_SECONDS );
+					}
 					aw_crm_campaign_signer( $email, $name, $city, $slug, 1 === aw_cl_tick( $req['consent'] ), $wa, 1 === aw_cl_tick( $req['wa_optin'] ), $ref, AW_CL_CONSENT );
 					return array( 'ok' => true, 'ref' => $ref );
 				},

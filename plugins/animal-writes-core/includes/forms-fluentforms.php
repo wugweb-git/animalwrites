@@ -466,13 +466,18 @@ add_action(
 		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
 			$st = ! empty( $data['state'] ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
 			$di = ! empty( $data['district'] ) ? aw_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
-			$c->syncCustomFieldValues( array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) ), false );
+			// and the ticks as 1/0: an unticked box sends nothing, so the link leaves the field blank
+			$c->syncCustomFieldValues(
+				array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) )
+				+ array( 'vol_wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0', 'vol_org_show' => aw_ff_ticked( $data, 'org_show' ) ? '1' : '0' ),
+				false
+			);
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
 			$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
 			if ( '' !== $wa ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
-				$c->syncCustomFieldValues( array( 'whatsapp' => $wa, 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '' ), false );
+				$c->syncCustomFieldValues( array( 'whatsapp' => $wa, 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
 			}
 		}
 	},

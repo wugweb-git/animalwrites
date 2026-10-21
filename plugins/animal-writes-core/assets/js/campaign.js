@@ -215,25 +215,43 @@
 		return ok;
 	}
 
-	function post(url, data) {
+	/* keepalive: the browser finishes the call after the page leaves (Gmail or the mail app opening). One retry after
+	   2 s and one after 6 s when a call fails; the server keeps one row and one reference per send_id. */
+	function post(url, data, tries) {
 		if (!url || !window.fetch) return Promise.reject();
-		return fetch(url, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+		tries = tries === undefined ? 2 : tries;
+		return fetch(url, { method: 'POST', credentials: 'omit', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+			.then(function (r) { if (!r.ok && r.status >= 500) throw r; return r; })
+			.catch(function (err) {
+				if (tries <= 0) throw err;
+				return new Promise(function (ok) { setTimeout(ok, tries === 2 ? 2000 : 6000); }).then(function () { return post(url, data, tries - 1); });
+			})
 			.then(function (r) { if (!r.ok) throw r; return r; });
+	}
+	function sendId() {
+		var a = new Uint8Array(8);
+		if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
+		else for (var i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256);
+		return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
 	}
 	function chosen() { return grounds.filter(function (g) { return g.box.checked; }).map(function (g) { return g.box.value; }).join(','); }
 	function device() { return window.matchMedia('(max-width: 767px)').matches ? 'phone' : (window.matchMedia('(max-width: 1199px)').matches ? 'tablet' : 'desktop'); }
-	var counted = false, joined = false;
+	var counted = false, joined = false, sid = '';
 	/* One anonymous row per letter (city, grounds, route, device, date, the two boxes as 1/0; no name, email or IP), and
-	   the sign-up (FluentCRM), whose reference (AW-L-<n>) is shown in the thank-you. */
+	   the sign-up (FluentCRM), whose reference (AW-L-<n>) is shown in the thank-you. The sign-up carries the row's fields
+	   and the same send_id too, so the row is saved when either call arrives. Called before the page leaves. */
 	function recordSend(route) {
 		var join = wantsUpdates(), wa = form.elements.wa_optin, waOn = wa && wa.checked ? '1' : '0';
+		var row = { city: val('city'), grounds: chosen(), route: route, device: device(), nl_optin: join ? '1' : '0', wa_optin: waOn };
+		if (!sid) sid = sendId();
+		row.send_id = sid;
 		if (!counted) {
 			counted = true;
-			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device(), nl_optin: join ? '1' : '0', wa_optin: waOn }).catch(function () {});
+			post(cfg.letter, row).catch(function () { counted = false; });
 		}
 		if (!joined) {
 			joined = true;
-			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0', whatsapp: val('whatsapp'), wa_optin: waOn })
+			post(cfg.optin, Object.assign({ email: val('email'), name: val('name'), consent: join ? '1' : '0', whatsapp: val('whatsapp') }, row))
 				.then(function (r) {
 					r.json().then(function (d) {
 						var box = form.querySelector('.aw-letter-ref');
@@ -321,13 +339,13 @@
 				copy(body);
 				if (!copied.textContent || btn.dataset.route === 'copy') copiedNote('Letter copied. Paste it into a new email to ' + cfg.to + '.');
 			}
+			recordSend(route); // before Gmail or the mail app takes the page away
 			if (url && route === 'gmail' && gmailApp(cfg.to, cfg.subject, body, url)) url = '';
 			if (url) {
 				if (route === 'mailto') window.location.href = url;
 				else window.open(url, '_blank', 'noopener');
 			}
 			track('objection_sent', { route: route });
-			recordSend(route);
 			confirmBox.hidden = false;
 			showSendShare(true);
 			justSent = true;
@@ -359,7 +377,7 @@
 			thanks.focus();
 			try { sessionStorage.setItem('aw-letter-sent', '1'); } catch (e) { /* private mode */ }
 			document.dispatchEvent(new CustomEvent('aw:letter-sent'));
-			if (cfg.confirm && window.fetch) fetch(cfg.confirm, { method: 'POST', credentials: 'omit' }).catch(function () {});
+			if (cfg.confirm && window.fetch) fetch(cfg.confirm, { method: 'POST', credentials: 'omit', keepalive: true }).catch(function () {});
 		});
 	});
 })();

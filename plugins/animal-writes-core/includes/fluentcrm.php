@@ -545,7 +545,8 @@ function aw_crm_campaign_signer( $email, $name, $city, $slug, $box, $whatsapp, $
 		return 0;
 	}
 	aw_crm_nl_box( $c, $box, 'Campaign letter', $consent );
-	$c->syncCustomFieldValues( array_filter( array( 'vol_city' => (string) $city, 'vol_page' => 'campaign:' . $slug, 'vol_source' => 'campaign letter', 'vol_whatsapp' => (string) $whatsapp, 'vol_wa_optin' => $wa_optin ? '1' : '', 'campaign_ref' => (string) $ref ) ), false );
+	// the WhatsApp box as 1/0 every time, like the newsletter box (array_filter would drop the 0)
+	$c->syncCustomFieldValues( array_filter( array( 'vol_city' => (string) $city, 'vol_page' => 'campaign:' . $slug, 'vol_source' => 'campaign letter', 'vol_whatsapp' => (string) $whatsapp, 'campaign_ref' => (string) $ref ) ) + array( 'vol_wa_optin' => $wa_optin ? '1' : '0' ), false );
 	return $id;
 }
 
