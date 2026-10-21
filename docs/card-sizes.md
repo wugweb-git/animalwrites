@@ -10,7 +10,7 @@ Limits every list card keeps, set in `themes/animal-writes/assets/css/aw.css` (c
 | Block card picture (picture above text), maximum height | 22.5rem (360px) | `--kit-card-media-max` |
 | Text column in a stacked card, minimum width | 10rem (160px) | `--kit-body-min` |
 
-Card states: `kit-card--block-lg|md|sm` (picture above the text) and `kit-card--stacked-lg|md|sm` (picture left). The wide stacked card has 12px padding and a 30:70 picture-to-text split; below 480px its gap is 12px. Three-across rows (`.is-three`: Home News and Resources sections) become two across when a third card would be under 18rem.
+Card states: `kit-card--block-lg|md|sm` (picture above the text) and `kit-card--stacked-lg|md|sm` (picture left). The wide stacked card has 12px padding and a 30:70 picture-to-text split; its gap runs from 12px on the narrowest screens to 24px (`clamp`, no extra breakpoint: the CI check allows only 767/768 and 1199/1200). Three-across rows (`.is-three`: Home News and Resources sections) become two across when a third card would be under 18rem.
 
 Campaign cards (`aw-story--card`) and Directory rows (`aw-org`) are separate components: Directory rows are capped at 720px; campaign cards follow the card grid.
 
