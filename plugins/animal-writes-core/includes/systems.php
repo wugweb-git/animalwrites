@@ -289,7 +289,31 @@ function aw_list_filters( $type ) {
 		}
 		$groups .= kits_filter_dropdown( $label, $param, $options ); // every hub the same (owner, 14 Oct 2026): one button per filter, Sort beside them; a "Filters" sheet on phones
 	}
-	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, '', $keep ) : ''; // Sort is in the toolbar (aw_sort_segment)
+	$groups .= aw_sort_group( $type ); // phones: Sort is the first choice in the Filters sheet; from 768 the toolbar's segment (aw_sort_segment) is the control
+	unset( $keep['sort'] ); // the Sort choice carries it
+	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, '', $keep ) : '';
+}
+
+/** The sorts a list offers: key => label, none when it has one order or fewer than 2 items. */
+function aw_list_sorts( $type ) {
+	$sorts = AW_LIST_SORTS[ $type ] ?? array();
+	return count( $sorts ) < 2 || (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ? array() : $sorts;
+}
+
+/** Sort as a group of the Filters sheet (radio choices; the default sends nothing). Shown on phones only (aw.css). */
+function aw_sort_group( $type ) {
+	$sorts = aw_list_sorts( $type );
+	if ( ! $sorts || ! function_exists( 'kits_dd_open' ) ) {
+		return '';
+	}
+	$cur  = aw_active_sort( $type );
+	$id   = 'kit-dd-sort-' . wp_unique_id();
+	$html = kits_dd_open( $id, 'aw-dd-sort' ) . '<button type="button" class="kit-dd-btn" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-dd-label">Sort by</span> <span class="kit-dd-current">' . esc_html( preg_replace( '/ first$/', '', $sorts[ $cur ] ) ) . '</span><span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
+		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen"><legend class="screen-reader-text">Sort by</legend><ul class="kit-dd-list">';
+	foreach ( $sorts as $k => $l ) {
+		$html .= '<li><label class="kit-dd-opt"><input type="radio" class="kit-dd-check" name="sort" value="' . esc_attr( array_key_first( $sorts ) === $k ? '' : $k ) . '"' . checked( $k, $cur, false ) . '><span class="kit-dd-text">' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</span></label></li>';
+	}
+	return kits_dd_render( $html . '</ul></fieldset></div>' );
 }
 
 /**
@@ -297,8 +321,8 @@ function aw_list_filters( $type ) {
  * Empty when the list has one order or fewer than 2 items (nothing to order).
  */
 function aw_sort_segment( $type ) {
-	$sorts = AW_LIST_SORTS[ $type ] ?? array();
-	if ( count( $sorts ) < 2 || (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ) {
+	$sorts = aw_list_sorts( $type );
+	if ( ! $sorts ) {
 		return '';
 	}
 	$active = aw_active_filters( $type );
@@ -308,7 +332,7 @@ function aw_sort_segment( $type ) {
 		$url   = add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), aw_hub_url( $type ) );
 		$html .= '<a href="' . esc_url( $url ) . '"' . ( $k === $cur ? ' aria-current="true"' : '' ) . '>' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</a>';
 	}
-	return '<nav class="kit-segment" aria-label="Sort">' . $html . '</nav>';
+	return '<nav class="kit-segment aw-sort-seg" aria-label="Sort">' . $html . '</nav>';
 }
 
 /** Keep the publisher key current when a news item's source changes. */

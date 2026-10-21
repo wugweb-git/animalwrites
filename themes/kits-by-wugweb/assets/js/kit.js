@@ -576,6 +576,8 @@
 				if (!el.checked) return;
 				var n = el.name.replace(/\[\]$/, '');
 				(lists[n] = lists[n] || []).push(el.value);
+			} else if (el.type === 'radio') { // one choice (e.g. Sort); an empty value is the default and stays out of the URL
+				if (el.checked && el.value !== '') params.set(el.name, el.value);
 			} else if (el.type === 'hidden') {
 				params.set(el.name, el.value);
 			}

@@ -139,7 +139,15 @@
 .aw-toolbar .aw-dir-tools { width: auto; margin: 0; }
 .kit-section-filters--below > .aw-toolbar { margin: 0; }
 .aw-toolbar ~ :is(.aw-near, .aw-dir-map):not([hidden]) { margin: 0 0 var(--kit-space-collection); }
+/* Phones: count and one Filters button (with Sort inside its sheet) share the row; from 768 the dropdowns and the Sort segment show */
+@media (max-width: 767px) {
+	.aw-toolbar:has(> .kit-filterbar) > .aw-toolbar-count { flex: 1 1 8rem; min-width: 0; }
+	.aw-toolbar > .aw-sort-seg { display: none; }
+	.aw-toolbar .kit-filter-sheet > summary { gap: var(--kit-space-2); }
+	.aw-toolbar .kit-filter-sheet > summary .kit-ico { --kit-ico-size: 1.125rem; }
+}
 @media (min-width: 768px) {
+	.aw-dd-sort { display: none; }
 	.aw-toolbar { --aw-toolbar-h: 2.25rem; }
 	.aw-toolbar-count { flex: 1 1 12rem; }
 	.aw-toolbar :is(.kit-dd-btn, .kit-btn, .kit-filter-sheet > summary) { min-height: var(--aw-toolbar-h); }

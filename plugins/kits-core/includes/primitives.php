@@ -138,7 +138,7 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 	if ( false !== strpos( $groups, 'kit-dd--menu' ) ) { // one Filters menu: compact already, no phone sheet around it
 		$html .= '<div class="kit-filters" role="toolbar" aria-label="Filters">' . $groups . '</div>';
 	} elseif ( '' !== trim( $groups ) ) {
-		$html .= '<details class="kit-filter-sheet" open><summary>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
+		$html .= '<details class="kit-filter-sheet" open><summary><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
 			. '<div class="kit-filters" role="toolbar" aria-label="Filters">' . $groups
 			. '<noscript><button type="submit" class="kit-btn kit-btn--sm">Apply</button></noscript>'
 			. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $clear ) . '">Reset</a><button type="submit" class="kit-btn" data-kit-sheet-close>Apply</button></div>'

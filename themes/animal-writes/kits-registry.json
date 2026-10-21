@@ -258,6 +258,8 @@
     "aw-dir-check",
     "aw-toolbar",
     "aw-toolbar-count",
+    "aw-sort-seg",
+    "aw-dd-sort",
     "aw-browse-states",
     "aw-state"
    ],
