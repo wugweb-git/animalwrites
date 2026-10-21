@@ -1301,7 +1301,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    Search on one row, then the filters in one even row (2 across from 768, 4 across from 1200, "Verified only" last). Phones: the
    filter icon sits inside the search bar and opens the filters; the fold itself is unchanged. */
 .aw-dir-search .kit-field > label { font-size: .8125rem; }
-.aw-dir-search :is(input, select), .aw-dir-search select, .aw-dir-search .aw-dir-submit .kit-btn { font-size: .875rem; }
+.aw-dir-search.kit-section-search .kit-field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select), .aw-dir-search .aw-dir-submit .kit-btn { font-size: .875rem; } /* phones keep 16px (the kit rule): below that iOS zooms in on focus */
 .aw-dir-more > summary { display: none; }
 .aw-dir-filter-toggle { position: absolute; right: var(--kit-space-1); top: 50%; transform: translateY(-50%); width: var(--kit-size-target); height: var(--kit-size-target); display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--kit-color-ink); cursor: pointer; }
 .aw-dir-filter-toggle .kit-ico { --kit-ico-size: 1.25rem; }
