@@ -1329,7 +1329,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    line under every page title 14px. Preview numbers per page type are in docs/pending.md. */
 @media (min-width: 768px) {
 	:root { --kit-type-sm: clamp(.75rem, .7273rem + .0909vw, .8125rem); --kit-type-xs: clamp(.6875rem, .6591rem + .1136vw, .75rem); --kit-meta-size: .8125rem; }
-	.kit-btn, .wp-block-button__link { font-size: .875rem; }
+	.kit-btn, .wp-block-button__link, .fluentform .ff-btn.kit-btn { font-size: .875rem; } /* the Fluent Forms submit button carried its own 16px (ff-btn-md) */
 	:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: .875rem !important; }
 	.kit-section-desc { font-size: .875rem; }
 	.aw-dir-search .kit-field > label { font-size: .8125rem; }
