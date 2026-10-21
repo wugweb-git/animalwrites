@@ -1736,7 +1736,8 @@
     "kit-card-metarow",
     "kit-card-title",
     "kit-card-sum",
-    "kit-card-label"
+    "kit-card-label",
+    "kit-card-label--icon"
    ],
    "states": [
     "block-lg",

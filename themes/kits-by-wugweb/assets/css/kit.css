@@ -1155,6 +1155,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card:hover > .kit-card-media img { transform: scale(1.04); }
 .kit-card-label, .kit-tag.kit-card-label { display: inline-flex; align-items: center; box-sizing: border-box; min-height: 1.5rem; padding: 0 var(--kit-space-2); border: 1px solid var(--kit-card-label-bg, var(--kit-color-ink)); border-radius: var(--radius-sm, 4px); background: var(--kit-card-label-bg, var(--kit-color-ink)); color: var(--kit-card-label-fg, var(--kit-color-on-ink)); font-size: var(--fluid-label, 12px); font-weight: var(--kit-weight-strong) !important; line-height: 1.2; white-space: nowrap; }
 .kit-card-media > .kit-card-label { position: absolute; top: var(--kit-space-2); left: var(--kit-space-2); z-index: 1; max-width: calc(100% - 2 * var(--kit-space-2)); overflow: hidden; text-overflow: ellipsis; }
+.kit-tag.kit-card-label--icon { justify-content: center; width: 1.75rem; min-height: 1.75rem; height: 1.75rem; padding: 0; border-radius: 50%; }
+.kit-card-label--icon .kit-ico { --kit-ico-size: 0.95rem; }
 .kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: var(--kit-space-4); }
 .kit-card-body > * { margin: 0 !important; max-width: none; }
 .kit-card-meta { flex-wrap: nowrap !important; overflow: hidden; white-space: nowrap; }
