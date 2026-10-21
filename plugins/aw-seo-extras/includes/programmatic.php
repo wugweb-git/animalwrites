@@ -995,7 +995,7 @@ add_filter(
 
 /**
  * Keep each tag's Rank Math title, description, focus keyword and robots equal to the ones built here (marked automatic
- * in _aw_seo_auto), so the Rank Math box shows what is printed and the sitemap leaves out tags with fewer than 3 items.
+ * in _aw_seo_auto), so the Rank Math box shows what is printed and every tag is indexed (owner, 21 Oct 2026).
  * A typed title, description or keyword is never replaced. Daily, when a tag is added or saved, and from WP-CLI:
  * `wp eval 'print_r( aw_seo_sync_tags() );'`.
  *
@@ -1017,7 +1017,7 @@ function aw_seo_sync_tags() {
 				$auto[ $k ] = $value;
 			}
 		}
-		$robots = (int) $term->count >= 3 ? array( 'index' ) : array( 'noindex' );
+		$robots = array( 'index' ); // every category and tag page is indexed, however few items (owner, 21 Oct 2026: the minimum of 3 is withdrawn)
 		$have   = (array) get_term_meta( $term->term_id, 'rank_math_robots', true );
 		if ( $have !== $robots && ( ! array_filter( $have ) || $have === ( $auto['robots'] ?? null ) ) ) {
 			update_term_meta( $term->term_id, 'rank_math_robots', $robots );
