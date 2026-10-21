@@ -159,7 +159,6 @@ $hero = c2sec(
 	. c2p( 'Draft rules would move most approvals for animal experiments from the national regulator to each lab\'s own committee.', 'aw-camp-hero-summary' )
 	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons"><!-- wp:button -->' . "\n" . '<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#how-to-help">Send your objection</a></div>' . "\n" . '<!-- /wp:button -->' . "\n"
 	. '<!-- wp:button {"className":"is-style-outline aw-camp-ghost"} -->' . "\n" . '<div class="wp-block-button is-style-outline aw-camp-ghost"><a class="wp-block-button__link wp-element-button" href="#rules">What the rules say</a></div>' . "\n" . '<!-- /wp:button --></div>' . "\n" . '<!-- /wp:buttons -->' . "\n\n"
-	. c2sc( '[aw_campaign_count min="100"]' ) // the key metric (same value as impact), hidden below 100
 	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
 	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
 	. c2html( $poster )
@@ -393,21 +392,8 @@ $loop      = c2sec(
 	'aw-camp-dark'
 );
 
-/* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
-$impact = c2sec( // brand band: what the count is and a way in on the left, the count on a white tile on the right
-	'',
-	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-tally-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-tally-cols">'
-	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
-	. c2h( 'Objections sent' )
-	. c2p( 'Each one is a letter from a person to CCSEA, sent from this page. Add yours before 5 Nov 2026.' )
-	. c2buttons( array( array( 'Send your objection', '#how-to-help' ) ) )
-	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
-	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
-	. c2sc( '[aw_campaign_count min="100" label="objections sent"]' )
-	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n"
-	. '</div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
-	'aw-camp-brand aw-camp-tally'
-);
+/* Impact: no count on the page (owner, 21 Oct 2026: the stored number is not real). */
+
 
 /* Support (volunteers, local networks, help) has no content yet, so it is not printed. Volunteer registration is not
    support: the site's "Help animals near you" banner stays where every campaign page has it, after the content. */
@@ -424,7 +410,6 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'context', $what )
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $how, 'aw-camp-open' )
-	. c2slot( 'impact', $impact, 'aw-camp-if-count' )
 	. c2slot( 'faq', $faq )
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
