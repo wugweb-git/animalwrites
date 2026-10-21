@@ -424,11 +424,23 @@ function aw_enrich_sideload( $url, $lid, $alt ) {
 		wp_delete_file( $tmp );
 		return 0;
 	}
+	// No picture is used by two items (deploy check, owner 9 Oct 2026): one that another item already uses is not taken
+	// (the same organisation often has two listings; the first keeps the picture).
+	$hash = (string) md5_file( $tmp );
+	global $wpdb;
+	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = 'aw_md5' AND meta_value = %s LIMIT 10", $hash ) ) as $used ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$inuse = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_status = 'publish' WHERE ( pm.meta_key = '_thumbnail_id' AND pm.meta_value = %s ) OR ( pm.meta_key = 'aw_gallery' AND FIND_IN_SET( %s, pm.meta_value ) )", (string) $used, (string) $used ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( $inuse ) {
+			wp_delete_file( $tmp );
+			return 0;
+		}
+	}
 	$id = media_handle_sideload( array( 'name' => sanitize_title( $alt ) . '.' . $ext, 'tmp_name' => $tmp ), $lid, $alt );
 	if ( is_wp_error( $id ) ) {
 		return 0;
 	}
 	update_post_meta( $id, '_wp_attachment_image_alt', $alt );
+	update_post_meta( $id, 'aw_md5', $hash );
 	update_post_meta( $id, '_aw_source_url', esc_url_raw( $url ) ); // where the picture came from
 	return (int) $id;
 }
