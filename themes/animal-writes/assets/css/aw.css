@@ -1355,6 +1355,6 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .kit-card[class*="kit-card--stacked"] > .kit-card-media { flex: 0 1 auto; min-width: var(--kit-thumb-min); }
 .kit-card[class*="kit-card--stacked"] > .kit-card-body { flex: 1 1 0; min-width: var(--kit-body-min); }
 .kit-card--stacked-lg { gap: clamp(var(--kit-space-3), 5vw, var(--kit-space-5)) !important; } /* 12px on the narrowest screens up to the usual 24px (no width breakpoint) */
-.kit-card[class*="kit-card--block"] { max-width: var(--kit-card-max-block); } /* picture-above-text cards: 500px at most (owner, 21 Oct 2026) */
+.kit-card[class*="kit-card--block"], .aw-story--card { max-width: var(--kit-card-max-block); } /* picture-above-text cards: 500px at most (owner, 21 Oct 2026) */
 .kit-card[class*="kit-card--block"] .kit-card-media { max-height: var(--kit-card-media-max); }
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { grid-template-columns: repeat(auto-fit, minmax(max(var(--kit-card-min), calc((100% - 2 * var(--kit-space-grid)) / 3)), 1fr)); } }
