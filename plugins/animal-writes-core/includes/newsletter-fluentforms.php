@@ -5,7 +5,8 @@
  * - [aw_newsletter] (footer, the "Newsletter box" pattern, campaign pages) shows the Fluent Forms form "Newsletter"
  *   when Fluent Forms is active; otherwise the site's own form in newsletter.php, which stays installed.
  * - Each sign-up is saved to the site's subscriber list ({prefix}aw_subscribers) as active (an email already there is
- *   updated, never added twice) and to FluentCRM's Newsletter list as subscribed (fluentcrm.php).
+ *   updated, never added twice); FluentCRM's Newsletter list is the form's own Fluent Forms → FluentCRM link. State,
+ *   district and topics (optional) stay on the Fluent Forms entry.
  * - Fluent Forms sends one confirmation email per sign-up through wp_mail (the site's mailbox, kits-core), as it
  *   happens. newsletter.php sends nothing for these. The email carries the unsubscribe link.
  * - "Remove my data" also removes the person's Fluent Forms entries.
@@ -88,7 +89,7 @@ add_action(
 		$src  = $post ? get_post_field( 'post_name', $post ) : '';
 		$name = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
 		$src  = 'site:' . ( $src ? $src : 'footer' );
-		function_exists( 'aw_newsletter_join' ) ? aw_newsletter_join( $data['email'] ?? '', $name, $src, AW_NL_CONSENT, array(), array( 'newsletter' ) ) : aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT );
+		aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT ); // FluentCRM: the form's own link (everyone → Newsletter, tag newsletter; /forms/3-newsletter.json)
 	},
 	5,
 	3

@@ -2,6 +2,28 @@
 
 Every form uses one shared form kit: the field dictionary, the messages, the look and the behaviour are defined once. Change a field there and it changes in every form. A change to one form goes in that form's own file.
 
+## The forms are Fluent Forms forms (owner, 21 Oct 2026)
+
+Every site form is built in **Fluent Forms** (free) and connected to **FluentCRM** by its own Fluent Forms → FluentCRM link. Labels, options, help text, conditions (the Contact form's fields per reason), the Yes/No ticks (saved as 1/0), hidden fields, the thank-you redirect with the reference number and the FluentCRM link are all Fluent Forms settings. Change them in WP Admin → Fluent Forms; nothing about a form's fields is in code.
+
+| Form | ID | File | Reference | FluentCRM link |
+|---|---|---|---|---|
+| Newsletter (footer) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, tag newsletter |
+| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` = 1 → Newsletter, tags contact-form, newsletter |
+| Volunteer sign-up | 5 | `forms/5-volunteer-sign-up.json` | AW-V-… | everyone → Newsletter, tag volunteer; the new answers into Volunteer custom fields |
+| Claim this listing | 6 | `forms/6-claim-this-listing.json` | AW-C-… | `nl_optin` = 1 → Newsletter, tag newsletter |
+| Report a mistake | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none (never) |
+| Remove my data | 8 | `forms/8-remove-my-data.json` | AW-D-… | none (never) |
+
+**Versioned:** after changing a form in Fluent Forms, export it into the repo and commit:
+`wp eval-file tools/forms/forms.php export`. To put the repo's version on a site (keeps the form's ID, entries and link; the form as it was goes to `~/backups/forms-before-…`): `wp eval-file tools/forms/forms.php dry`, then `… import` (or `… import 4` for one form).
+
+**Hidden fields on every form:** `v_page_id`, `v_page_title` (Fluent Forms smartcodes); `v_referrer`, `v_utm_*`, `v_screen`, `v_lang`, `v_tz`, `v_secs`, `v_first_visit`, `v_visits`, and `v_ga`, `v_clarity` only with analytics consent (filled in the visitor's browser by `aw-analytics.js`, because the pages are cached); `v_country`, `v_city` (found on the server from the IP, DB-IP Lite, no outside service); `consent_version` (fixed: each tick's wording version). Fluent Forms itself saves the IP, browser, device and page with every entry.
+
+**What is still code** (`plugins/animal-writes-core/includes/forms-fluentforms.php`), because the plugins cannot do it: the spam check (ALTCHA), PIN code → State → District (LGD), the private upload (claim logo and proof), checks Fluent Forms cannot make (Indian mobile numbers, a real State and District, the claimed listing, an upload, a page on this site), the country and city lookup, and one small hook per form that also saves the entry where the rest of the site reads it (Inbox → Messages, the volunteers table, Listing claims, Reports, data requests). The campaign letter tool (`campaign-letters.php`, `campaign.js`) is not a Fluent Forms form and keeps its own code.
+
+The site's own forms below stay installed and show again if Fluent Forms is switched off (`wp aw ff-off <key>`).
+
 ## Shared parts (all forms)
 
 | What | File | Where |

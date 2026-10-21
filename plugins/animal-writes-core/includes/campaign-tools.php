@@ -341,6 +341,9 @@ add_shortcode(
 		<p class="aw-letter-meta"><span class="aw-letter-to"><?php echo aw_i( 'mail' ); ?><?php echo esc_html( $to ); ?></span><span><strong>Subject:</strong> <?php echo esc_html( $a['subject'] ); ?></span></p>
 		<div class="aw-letter-preview" aria-live="polite" tabindex="0" aria-label="Your letter"></div>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-optin" name="optin" value="1" checked> <label for="aw-letter-optin"><?php echo esc_html( defined( 'AW_CL_OPTIN' ) ? AW_CL_OPTIN : '' ); ?></label></p>
+		<p class="aw-letter-field"><label for="aw-letter-wa">WhatsApp number <span class="aw-letter-hint">(optional)</span></label>
+			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
+		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1"> <label for="aw-letter-wa-optin">OK to contact me on WhatsApp.</label></p>
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
 		<div class="aw-letter-routes">
 			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
@@ -355,6 +358,7 @@ add_shortcode(
 		</div>
 		<div class="aw-letter-thanks" hidden tabindex="-1">
 			<p><strong>Thank you.</strong> Ask one more person to send theirs.</p>
+			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
 		</div>
 	</div>
 </form>

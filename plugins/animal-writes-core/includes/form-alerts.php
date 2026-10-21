@@ -8,8 +8,9 @@
  * - Reports: Inbox → Reports, reports still New.
  * - Volunteer sign-ups: Inbox → Volunteer sign-ups, sign-ups since you last opened the list (counted per person,
  *   from 21 Oct 2026). The list is the site's volunteers table; FluentCRM has the same people (tag Volunteer).
- * - Data removal requests: Inbox → Data removal, requests not yet marked handled (any stage: waiting for the email
- *   link, confirmed, erased); and a notice on the Dashboard with "Mark handled".
+ * - Data removal requests: Inbox → Data removal, requests that are New (waiting for the email link) or Email verified
+ *   (waiting for an administrator to erase them in Tools → Erase Personal Data); and a notice on the Dashboard with
+ *   "Decline" (owner, 21 Oct 2026: request-only; nothing is erased automatically).
  * The Inbox menu's own count adds these up (admin-ia.php).
  *
  * @package animal-writes-core
@@ -46,16 +47,15 @@ function aw_alert_volunteers() {
 	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . aw_vol_table() . ' WHERE created_at > %s', aw_alert_volunteers_seen() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
 
-/** Data removal requests not yet marked handled, newest first. */
+/** Data removal requests that are New or Email verified, newest first. */
 function aw_alert_removals() {
 	static $open = null;
 	return $open ?? $open = get_posts(
 		array(
 			'post_type'   => 'user_request',
 			'name'        => 'remove_personal_data',
-			'post_status' => AW_REMOVAL_STATUSES,
+			'post_status' => array( 'request-pending', 'request-confirmed' ),
 			'numberposts' => 50,
-			'meta_query'  => array( array( 'key' => 'aw_handled', 'compare' => 'NOT EXISTS' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 		)
 	);
 }
@@ -90,10 +90,10 @@ add_action(
 /** Where a request stands, in words. */
 function aw_removal_stage( $p ) {
 	$stage = array(
-		'request-pending'   => 'waiting for them to open the confirmation email',
-		'request-confirmed' => 'confirmed, erasing',
-		'request-failed'    => 'failed',
-		'request-completed' => 'confirmed, data erased',
+		'request-pending'   => 'New: waiting for them to open the confirmation email',
+		'request-confirmed' => 'Email verified: review it, then erase in Tools → Erase Personal Data',
+		'request-failed'    => get_post_meta( $p->ID, 'aw_dr_declined', true ) ? 'Declined' : 'Failed',
+		'request-completed' => 'Done: data erased',
 	);
 	return $stage[ $p->post_status ] ?? $p->post_status;
 }
@@ -114,11 +114,13 @@ add_action(
 		foreach ( $open as $p ) {
 			$email = (string) get_post_meta( $p->ID, '_wp_user_request_user_email', true );
 			$email = '' !== $email ? $email : $p->post_title;
+			$scope = (string) get_post_meta( $p->ID, 'aw_dr_scope', true );
+			$ask   = array_filter( array( (string) get_post_meta( $p->ID, 'aw_dr_ref', true ), (string) get_post_meta( $p->ID, 'aw_dr_name', true ), 'remove: ' . ( AW_REMOVAL_SCOPES[ $scope ] ?? 'Everything' ), (string) get_post_meta( $p->ID, 'aw_dr_reason', true ) ) );
 			echo '<li><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline">'
-				. esc_html( $email ) . ' · received ' . esc_html( wp_date( 'j M Y, H:i', strtotime( $p->post_date_gmt . ' UTC' ) ) ) . ' · ' . esc_html( aw_removal_stage( $p ) ) . ' '
+				. esc_html( $email ) . ' · ' . esc_html( implode( ' · ', $ask ) ) . ' · received ' . esc_html( wp_date( 'j M Y, H:i', strtotime( $p->post_date_gmt . ' UTC' ) ) ) . ' · ' . esc_html( aw_removal_stage( $p ) ) . ' '
 				. '<input type="hidden" name="action" value="aw_removal_handled"><input type="hidden" name="request" value="' . (int) $p->ID . '">'
 				. wp_nonce_field( 'aw_removal_handled_' . $p->ID, '_wpnonce', true, false )
-				. '<button type="submit" class="button button-small">Mark handled</button></form></li>';
+				. '<button type="submit" class="button button-small" onclick="return confirm(\'Decline this request? Nothing is erased.\')">Decline</button></form></li>';
 		}
 		echo '</ul></div>';
 	}
@@ -131,7 +133,8 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_removal_handled_' . $id ) || 'user_request' !== get_post_type( $id ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		update_post_meta( $id, 'aw_handled', current_time( 'mysql' ) . ' by ' . wp_get_current_user()->user_login );
+		update_post_meta( $id, 'aw_dr_declined', current_time( 'mysql' ) . ' by ' . wp_get_current_user()->user_login );
+		wp_update_post( array( 'ID' => $id, 'post_status' => 'request-failed' ) ); // Declined (shown as Failed in Tools → Erase Personal Data)
 		wp_safe_redirect( admin_url( 'index.php' ) );
 		exit;
 	}

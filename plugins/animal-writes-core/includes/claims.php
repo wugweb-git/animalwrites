@@ -187,9 +187,10 @@ function aw_claim_logo_store( $tmp, $name = '' ) {
  * @param array   $v       Values.
  * @param WP_Post $listing Listing.
  * @param string  $file    Logo file name in the private folder, or ''.
+ * @param array   $extra   The Fluent Forms form: ref (AW-C-…), entry, proof (file in the private folder), whatsapp, wa_optin (1/0).
  * @return array|false array{url, title, text}, or false when it could not be saved.
  */
-function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) {
+function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null, $extra = array() ) {
 	$proposed = aw_claim_proposed( $v );
 	$id       = wp_insert_post(
 		array( 'post_type' => 'aw_claim', 'post_status' => 'private', 'post_title' => $listing->post_title . ': ' . $v['name'] ),
@@ -204,6 +205,14 @@ function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) 
 		update_post_meta( $id, 'aw_c_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_c_logo', $file );
+	foreach ( array( 'ref', 'entry', 'proof', 'whatsapp' ) as $k ) {
+		if ( ! empty( $extra[ $k ] ) ) {
+			update_post_meta( $id, 'aw_c_' . $k, $extra[ $k ] );
+		}
+	}
+	if ( isset( $extra['wa_optin'] ) ) {
+		update_post_meta( $id, 'aw_c_wa_optin', (string) (int) $extra['wa_optin'] );
+	}
 	update_post_meta( $id, 'aw_c_source', $source ); // the page it came from (S5.8)
 	foreach ( array( 'aw_phone', 'aw_whatsapp' ) as $pk ) { // phones as 10 digits
 		if ( isset( $proposed[ $pk ] ) && kits_clean_phone( $proposed[ $pk ] ) ) {
@@ -297,7 +306,9 @@ function aw_claim_review_box( $post ) {
 	$roles    = AW_CLAIM_ROLES;
 	echo '<p><strong>Listing:</strong> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank">' . esc_html( get_the_title( $lid ) ) . '</a> · <strong>Status:</strong> ' . esc_html( ucfirst( $status ) ) . '</p>';
 	echo '<p><strong>From:</strong> ' . esc_html( get_post_meta( $post->ID, 'aw_c_name', true ) ) . ' (' . esc_html( $roles[ get_post_meta( $post->ID, 'aw_c_role', true ) ] ?? '' ) . '), '
-		. esc_html( get_post_meta( $post->ID, 'aw_c_email', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, 'aw_c_phone', true ) ) . '</p>';
+		. esc_html( get_post_meta( $post->ID, 'aw_c_email', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, 'aw_c_phone', true ) )
+		. ( get_post_meta( $post->ID, 'aw_c_whatsapp', true ) ? ' · WhatsApp ' . esc_html( get_post_meta( $post->ID, 'aw_c_whatsapp', true ) ) . ' (OK on WhatsApp: ' . (int) get_post_meta( $post->ID, 'aw_c_wa_optin', true ) . ')' : '' )
+		. ( get_post_meta( $post->ID, 'aw_c_ref', true ) ? ' · <strong>Reference:</strong> ' . esc_html( get_post_meta( $post->ID, 'aw_c_ref', true ) ) : '' ) . '</p>';
 	echo '<table class="widefat striped"><thead><tr><th>Field</th><th>Now</th><th>Proposed</th></tr></thead><tbody>';
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
@@ -307,6 +318,10 @@ function aw_claim_review_box( $post ) {
 	if ( $logo ) {
 		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
 		echo '<tr><td>Logo</td><td>' . get_the_post_thumbnail( $lid, 'thumbnail' ) . '</td><td><img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto"></td></tr>';
+	}
+	if ( get_post_meta( $post->ID, 'aw_c_proof', true ) ) {
+		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, 'file' => 'proof', '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
+		echo '<tr><td>Proof</td><td></td><td><a href="' . esc_url( $src ) . '" target="_blank"><img src="' . esc_url( $src ) . '" alt="Proof sent with the claim" style="max-width:250px;height:auto"></a></td></tr>';
 	}
 	$feature = (bool) get_post_meta( $post->ID, 'aw_c_feature', true );
 	if ( $feature ) {
@@ -334,7 +349,7 @@ add_action(
 		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$path = aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) );
+		$path = aw_private_dir() . '/' . basename( (string) get_post_meta( $id, 'proof' === ( $_GET['file'] ?? '' ) ? 'aw_c_proof' : 'aw_c_logo', true ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked above
 		if ( ! is_file( $path ) ) {
 			wp_die( 'Not found.', 404 );
 		}

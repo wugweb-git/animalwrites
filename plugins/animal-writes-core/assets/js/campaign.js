@@ -223,16 +223,24 @@
 	function chosen() { return grounds.filter(function (g) { return g.box.checked; }).map(function (g) { return g.box.value; }).join(','); }
 	function device() { return window.matchMedia('(max-width: 767px)').matches ? 'phone' : (window.matchMedia('(max-width: 1199px)').matches ? 'tablet' : 'desktop'); }
 	var counted = false, joined = false;
-	/* One anonymous row per letter (city, grounds, route, device, date; no name, email or IP), and the sign-up if ticked. */
+	/* One anonymous row per letter (city, grounds, route, device, date, the box as 1/0 and the visit details; no name,
+	   email or IP), with its reference shown after sending; and the sign-up with the optional WhatsApp and its 1/0 tick. */
+	function visit() { return window.awVisit ? window.awVisit.data(form) : {}; }
+	function showRef(r) {
+		r.json().then(function (d) {
+			var box = form.querySelector('.aw-letter-ref');
+			if (box && d && d.ref) { box.querySelector('strong').textContent = d.ref; box.hidden = false; }
+		}).catch(function () {});
+	}
 	function recordSend(route) {
+		var join = wantsUpdates(), wa = form.elements.wa_optin;
 		if (!counted) {
 			counted = true;
-			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device() }).catch(function () {});
+			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device(), nl_optin: join ? '1' : '0', wa_optin: wa && wa.checked ? '1' : '0', visit: visit() }).then(showRef).catch(function () {});
 		}
 		if (!joined) {
 			joined = true;
-			var join = wantsUpdates();
-			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0' })
+			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0', whatsapp: val('whatsapp'), wa_optin: wa && wa.checked ? '1' : '0' })
 				.then(function () { track('newsletter_optin', { source: cfg.source || '' }); })
 				.catch(function () { joined = false; });
 		}

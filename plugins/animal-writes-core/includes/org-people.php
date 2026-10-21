@@ -7,6 +7,9 @@
  *   name or email to add one; a "Show on the page" tick per person (off by default); remove.
  * - An approved claim adds the claimant (claims.php): they are added to the volunteers table if not there yet, linked
  *   privately.
+ * - The Volunteer form's "Organisation name" (owner, 21 Oct 2026): the link waits as Pending on the volunteer's row.
+ *   The box lists pending volunteers whose organisation name matches this listing's; "Approve" links them (shown on
+ *   the page only if they ticked "Show my name", 1), "Not this one" sets them back to unmatched.
  * - Shown people: their name on the organisation's page under "Volunteers", and in the schema as member (Person).
  *   Email and phone are never shown.
  * Stored on the listing: aw_people (JSON list of {vid, public, role, on, via}) and aw_people_vid (one row per person,
@@ -77,7 +80,7 @@ function aw_org_people_volunteers( $ids ) {
 		return array();
 	}
 	$t    = aw_vol_table();
-	$rows = $wpdb->get_results( "SELECT id, name, email, city_text FROM {$t} WHERE id IN (" . implode( ',', $ids ) . ')', OBJECT_K ); // phpcs:ignore WordPress.DB
+	$rows = $wpdb->get_results( "SELECT id, name, email, city_text, org_show FROM {$t} WHERE id IN (" . implode( ',', $ids ) . ')', OBJECT_K ); // phpcs:ignore WordPress.DB
 	return $rows ? $rows : array();
 }
 
@@ -155,7 +158,16 @@ function aw_org_people_box( $post ) {
 			. esc_html( ( $r['on'] ?? '' ) . ( 'claim' === ( $r['via'] ?? '' ) ? ' (claim)' : '' ) ) . '</td><td><input type="checkbox" name="aw_people_public[]" value="' . (int) $r['vid'] . '"' . checked( ! empty( $r['public'] ), true, false ) . '></td>'
 			. '<td><input type="checkbox" name="aw_people_remove[]" value="' . (int) $r['vid'] . '"></td></tr>';
 	}
-	echo '</tbody></table><p><label for="aw-people-q">Add a volunteer</label><br><input type="search" id="aw-people-q" class="regular-text" placeholder="Name or email" autocomplete="off"> <span class="description">Role: Volunteer. Their name is shown only when "Show on the page" is ticked; email and phone never are.</span></p>'
+	echo '</tbody></table>';
+	$pending = aw_org_people_pending( $post );
+	if ( $pending ) {
+		echo '<p><strong>Waiting: volunteers who named an organisation like this one</strong></p><table class="widefat striped" style="margin-bottom:8px"><thead><tr><th>Volunteer</th><th>Organisation as given</th><th>Show my name (1/0)</th><th>Approve</th><th>Not this one</th></tr></thead><tbody>';
+		foreach ( $pending as $p ) {
+			echo '<tr><td>' . esc_html( $p->name . ' · ' . $p->email ) . '</td><td>' . esc_html( $p->org_name ) . '</td><td>' . (int) $p->org_show . '</td><td><input type="checkbox" name="aw_people_approve[]" value="' . (int) $p->id . '"></td><td><input type="checkbox" name="aw_people_reject[]" value="' . (int) $p->id . '"></td></tr>';
+		}
+		echo '</tbody></table>';
+	}
+	echo '<p><label for="aw-people-q">Add a volunteer</label><br><input type="search" id="aw-people-q" class="regular-text" placeholder="Name or email" autocomplete="off"> <span class="description">Role: Volunteer. Their name is shown only when "Show on the page" is ticked; email and phone never are.</span></p>'
 		. '<ul id="aw-people-hits"></ul><input type="hidden" name="aw_people_add" id="aw-people-add" value="">';
 	?>
 	<script>
@@ -213,6 +225,17 @@ add_action(
 			$rows[]      = $r;
 		}
 		aw_org_people_save( $lid, $rows );
+		global $wpdb;
+		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_people_approve'] ?? array() ) ) as $vid ) { // a pending organisation link, approved
+			$v = aw_org_people_volunteers( array( $vid ) )[ $vid ] ?? null;
+			if ( $v ) {
+				aw_org_people_add( $lid, $vid, ! empty( $v->org_show ), 'volunteer-form' );
+				$wpdb->update( aw_vol_table(), array( 'org_status' => 'approved:' . $lid ), array( 'id' => $vid ) ); // phpcs:ignore WordPress.DB
+			}
+		}
+		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_people_reject'] ?? array() ) ) as $vid ) {
+			$wpdb->update( aw_vol_table(), array( 'org_status' => 'unmatched' ), array( 'id' => $vid ) ); // phpcs:ignore WordPress.DB
+		}
 		foreach ( array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_people_add'] ?? '' ) ) ) ) ) as $vid ) {
 			if ( aw_org_people_volunteers( array( $vid ) ) ) {
 				aw_org_people_add( $lid, $vid );
@@ -220,6 +243,24 @@ add_action(
 		}
 	}
 );
+
+/**
+ * Volunteers whose organisation link is pending and whose organisation name matches this listing's title (either one
+ * contains the other, ignoring case and punctuation).
+ *
+ * @param WP_Post $post Listing.
+ * @return array rows (id, name, email, org_name, org_show)
+ */
+function aw_org_people_pending( $post ) {
+	global $wpdb;
+	$norm  = fn( $x ) => trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( (string) $x ) ) );
+	$title = $norm( $post->post_title );
+	if ( strlen( $title ) < 3 ) {
+		return array();
+	}
+	$rows = (array) $wpdb->get_results( 'SELECT id, name, email, org_name, org_show FROM ' . aw_vol_table() . " WHERE org_status = 'pending' AND org_name <> '' LIMIT 500" ); // phpcs:ignore WordPress.DB
+	return array_values( array_filter( $rows, fn( $r ) => strlen( $norm( $r->org_name ) ) >= 3 && ( false !== strpos( $title, $norm( $r->org_name ) ) || false !== strpos( $norm( $r->org_name ), $title ) ) ) );
+}
 
 /* ---------- An approved claim adds the claimant ---------- */
 

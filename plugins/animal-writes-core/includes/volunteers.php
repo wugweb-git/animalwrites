@@ -133,9 +133,13 @@ function aw_volunteer_errors( $v ) {
  * the volunteer to FluentCRM (tag Volunteer) and to the newsletter (owner, 20 Oct 2026: they join whether or not the
  * updates box stays ticked).
  *
+ * $extra (the Fluent Forms form, aw_volunteer_extra()): WhatsApp and its 1/0 tick, availability, travel range, skills,
+ * languages, the organisation named and its 1/0 "show my name" tick, the entry. While a Fluent Forms form is handled,
+ * FluentCRM is its own link, and the volunteer fields are copied after it (forms-fluentforms.php).
+ *
  * @return array array{url, title, text} for the thank-you page.
  */
-function aw_volunteer_save( $v, $source ) {
+function aw_volunteer_save( $v, $source, $extra = array() ) {
 	$term  = aw_place_by_slug( $v['state'] );
 	$dist  = $v['district'] ? aw_place_by_slug( $v['district'] ) : null;
 	$saved = aw_vol_upsert(
@@ -155,17 +159,133 @@ function aw_volunteer_save( $v, $source ) {
 		)
 	);
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
+	if ( $extra ) {
+		aw_vol_set_extra( $v['email'], $extra );
+	}
 	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
 	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers join the newsletter (owner, 20 Oct 2026); no email from this
 		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
 	}
-	if ( function_exists( 'aw_crm_volunteer_sync' ) ) { // their volunteer details on the FluentCRM contact (custom fields); not subscribed unless ticked
+	if ( empty( $GLOBALS['aw_ff_handling'] ) && function_exists( 'aw_crm_volunteer_sync' ) ) { // their volunteer details on the FluentCRM contact (custom fields)
 		aw_crm_volunteer_sync( $v['email'] );
 	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
 	return array( 'url' => kits_thanks_url( 'volunteer', array(), $title, $text ), 'title' => $title, 'text' => $text );
 }
+
+/** The Volunteer form's further answers (Fluent Forms entry data) for aw_vol_set_extra(). */
+function aw_volunteer_extra( $data ) {
+	return array(
+		'whatsapp'     => function_exists( 'aw_ff_whatsapp' ) ? aw_ff_whatsapp( $data ) : '',
+		'wa_optin'     => function_exists( 'aw_ff_tick' ) ? aw_ff_tick( $data, 'wa_optin' ) : 0,
+		'availability' => (array) ( $data['availability'] ?? array() ),
+		'travel_range' => sanitize_key( (string) ( $data['travel_range'] ?? '' ) ),
+		'skills'       => (array) ( $data['skills'] ?? array() ),
+		'languages'    => (string) ( $data['languages'] ?? '' ),
+		'org_name'     => trim( (string) ( $data['org_name'] ?? '' ) ),
+		'org_show'     => function_exists( 'aw_ff_tick' ) ? aw_ff_tick( $data, 'org_show' ) : 0,
+	);
+}
+
+/* ---------- The personal update link: /update/?t=<token> (owner, 21 Oct 2026) ---------- */
+
+/** Days an update link works. */
+const AW_VOL_LINK_DAYS = 30;
+
+/**
+ * A volunteer's update link: signed (HMAC with the site's own secret), for one row and its email, 30 days. Nothing is
+ * sent: an administrator copies it (Volunteers list) or exports the CSV for their own email tool.
+ *
+ * @param array $row Volunteers table row.
+ */
+function aw_vol_update_link( $row ) {
+	$exp = time() + AW_VOL_LINK_DAYS * DAY_IN_SECONDS;
+	$sig = hash_hmac( 'sha256', (int) $row['id'] . '|' . $exp . '|' . strtolower( (string) $row['email'] ), wp_salt( 'auth' ) );
+	return add_query_arg( 't', (int) $row['id'] . '.' . $exp . '.' . substr( $sig, 0, 32 ), home_url( '/update/' ) );
+}
+
+/**
+ * The row an update link is for.
+ *
+ * @param string $token The t value.
+ * @return array|string The row, or 'expired' | 'invalid'.
+ */
+function aw_vol_link_row( $token ) {
+	global $wpdb;
+	if ( ! preg_match( '/^(\d+)\.(\d+)\.([a-f0-9]{32})$/', (string) $token, $m ) ) {
+		return 'invalid';
+	}
+	$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . aw_vol_table() . ' WHERE id = %d', (int) $m[1] ), ARRAY_A ); // phpcs:ignore
+	$sig = $row ? substr( hash_hmac( 'sha256', (int) $m[1] . '|' . (int) $m[2] . '|' . strtolower( (string) $row['email'] ), wp_salt( 'auth' ) ), 0, 32 ) : '';
+	if ( ! $row || ! hash_equals( $sig, $m[3] ) || 'deleted' === $row['status'] ) {
+		return 'invalid';
+	}
+	return (int) $m[2] < time() ? 'expired' : $row;
+}
+
+/** [aw_volunteer_update] on /update/: the Volunteer form filled in with their details, or why the link does not work. */
+add_shortcode(
+	'aw_volunteer_update',
+	function () {
+		$row = aw_vol_link_row( sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! is_array( $row ) ) {
+			return '<p>' . esc_html( 'expired' === $row ? 'This link has expired. Ask us for a new one at contact@animalwrites.in.' : 'This link does not work. Check that it is complete, or ask us for a new one at contact@animalwrites.in.' ) . '</p>';
+		}
+		$html = apply_filters( 'aw_form_html', '', 'volunteer', array( 'vol_row' => $row ) );
+		return '' !== $html ? '<p>Check your details and change what is different. Saving updates your sign-up.</p>' . $html : aw_volunteer_form( 'update' );
+	}
+);
+
+/** On an update link, the Volunteer form's fields start with the row's values (forms-fluentforms.php calls this). */
+function aw_ff_update_values( $data, $form ) {
+	$row = function_exists( 'aw_ff_ctx' ) ? aw_ff_ctx( 'vol_row' ) : null;
+	if ( ! $row || 'volunteer' !== aw_ff_key( $form ) ) {
+		return $data;
+	}
+	$name = (string) ( $data['attributes']['name'] ?? '' );
+	$map  = array( 'name' => $row['name'], 'email' => $row['email'], 'phone' => $row['phone'], 'whatsapp' => $row['whatsapp'] ?? '', 'travel_range' => $row['travel_range'] ?? '', 'languages' => $row['languages'] ?? '', 'org_name' => $row['org_name'] ?? '' );
+	if ( isset( $map[ $name ] ) && '' !== (string) $map[ $name ] ) {
+		$data['attributes']['value'] = (string) $map[ $name ];
+	} elseif ( in_array( $name, array( 'availability', 'skills' ), true ) ) {
+		$data['attributes']['value'] = (array) json_decode( (string) ( $row[ $name ] ?? '' ), true );
+	} elseif ( 'roles' === $name ) {
+		$data['attributes']['value'] = array_map( 'trim', explode( ',', (string) $row['role'] ) );
+	} elseif ( 'wa_number' === $name && '' !== (string) ( $row['whatsapp'] ?? '' ) ) {
+		$data['attributes']['value'] = $row['whatsapp'] === $row['phone'] ? 'same' : 'other';
+	} elseif ( in_array( $name, array( 'wa_optin', 'org_show' ), true ) && null !== ( $row[ $name ] ?? null ) ) {
+		$data['attributes']['value'] = (string) (int) $row[ $name ];
+	}
+	return $data;
+}
+
+// /update/ is made once, never cached (it carries one person's details) and never indexed.
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_vol_update_page' ) ) {
+			return;
+		}
+		if ( ! get_page_by_path( 'update' ) ) {
+			$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Update your volunteer details', 'post_name' => 'update', 'post_content' => '<!-- wp:shortcode -->[aw_volunteer_update]<!-- /wp:shortcode -->' ) );
+			if ( $id && ! is_wp_error( $id ) ) {
+				update_post_meta( $id, 'rank_math_robots', array( 'noindex', 'nofollow' ) );
+			}
+		}
+		update_option( 'aw_vol_update_page', '1', false );
+	},
+	47
+);
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_page( 'update' ) ) {
+			nocache_headers();
+			do_action( 'litespeed_control_set_nocache', 'personal update link' );
+		}
+	}
+);
+add_filter( 'aw_cdn_excluded_slugs', fn( $s ) => array_merge( (array) $s, array( 'update' ) ) );
 
 /**
  * Handle a submission.

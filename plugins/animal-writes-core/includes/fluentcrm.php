@@ -115,10 +115,11 @@ function aw_crm_volunteer_fields( $state_slug, $district_slug, $city, $pincode, 
 	);
 }
 
-/** One sign-up onto both lists: the site's (active) and FluentCRM's Newsletter (subscribed). */
+/** One sign-up onto both lists: the site's (active) and FluentCRM's Newsletter (subscribed). While a Fluent Forms form
+ *  is handled, FluentCRM is that form's own Fluent Forms → FluentCRM link (forms-fluentforms.php), so only the site's. */
 function aw_newsletter_join( $email, $name, $source, $consent, $extra = array(), $tags = array() ) {
 	$res = function_exists( 'aw_nl_activate' ) ? aw_nl_activate( $email, $name, $source, $consent ) : false;
-	if ( aw_crm_on() ) {
+	if ( aw_crm_on() && empty( $GLOBALS['aw_ff_handling'] ) ) {
 		aw_crm_subscribe( $email, $name, $extra + array( 'source' => $source ), $tags );
 	}
 	return $res;
@@ -186,8 +187,8 @@ function aw_crm_message_note( $id ) {
 		$title = $post->post_title; // "Email: subject"
 		$head  = array( 'Sent to' => aw_crm_message_to( $id ), 'Mailbox' => $m( 'mailbox' ), 'Sent' => $when, 'Attachments' => str_replace( "\n", ', ', $m( 'attachments' ) ) );
 	} else {
-		$title = 'Contact form: ' . $about;
-		$head  = array( 'Form' => 'Contact (' . $about . ')', 'Organisation' => $m( 'org' ), 'Sent from' => $m( 'source' ), 'Sent' => $when );
+		$title = 'Contact form: ' . $about . ( '' !== $m( 'ref' ) ? ' (' . $m( 'ref' ) . ')' : '' );
+		$head  = array( 'Reference' => $m( 'ref' ), 'Form' => 'Contact (' . $about . ')', 'Organisation' => $m( 'org' ), 'Phone or WhatsApp' => $m( 'whatsapp' ), 'OK on WhatsApp' => '' !== $m( 'whatsapp' ) ? ( '1' === $m( 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '', 'Sent from' => $m( 'source' ), 'Sent' => $when );
 	}
 	$html = '';
 	foreach ( array_filter( $head ) as $k => $v ) {
@@ -293,6 +294,14 @@ const AW_CRM_VOL_FIELDS = array(
 	'vol_consent_at'      => array( 'Volunteer: consent given (UTC)', 'text' ),
 	'vol_status'          => array( 'Volunteer: status', 'text' ),
 	'vol_joined'          => array( 'Volunteer: joined', 'date' ),
+	// Filled by the Volunteer form's FluentCRM link (owner, 21 Oct 2026; /forms/5-volunteer-sign-up.json).
+	'vol_availability'    => array( 'Volunteer: availability', 'text' ),
+	'vol_travel_range'    => array( 'Volunteer: travel range', 'text' ),
+	'vol_skills'          => array( 'Volunteer: skills', 'text' ),
+	'vol_languages'       => array( 'Volunteer: languages', 'text' ),
+	'vol_whatsapp'        => array( 'Volunteer: WhatsApp', 'text' ),
+	'vol_wa_optin'        => array( 'Volunteer: OK on WhatsApp (1/0)', 'text' ),
+	'vol_organisation'    => array( 'Volunteer: organisation (as given)', 'text' ),
 );
 
 /** Add the volunteer fields and their group to FluentCRM's custom fields (keeps any others). */

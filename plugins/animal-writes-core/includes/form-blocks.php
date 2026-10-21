@@ -76,10 +76,23 @@ function aw_claim_url( $id ) {
 	return add_query_arg( 'listing', (int) $id, home_url( '/claim/' ) );
 }
 
-/** /report/?listing=<ID>. */
-function aw_report_url( $id ) {
-	return add_query_arg( 'listing', (int) $id, home_url( '/report/' ) );
+/** /report/?item=<ID> for a listing, News, Library or Resource item (owner, 21 Oct 2026), with a reason chosen
+ *  ("missing" from the "Data not yet available" links); /report/ alone asks for the page link. */
+function aw_report_url( $id, $reason = '' ) {
+	$args = array_filter( array( 'item' => (int) $id, 'reason' => sanitize_key( (string) $reason ) ) );
+	return add_query_arg( $args, home_url( '/report/' ) );
 }
+
+// Older links: /report/?listing=<ID> opens /report/?item=<ID>.
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_page( 'report' ) && ! empty( $_GET['listing'] ) && empty( $_GET['item'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			wp_safe_redirect( aw_report_url( absint( $_GET['listing'] ), sanitize_key( wp_unslash( $_GET['reason'] ?? '' ) ) ), 301, 'Animal Writes' ); // phpcs:ignore WordPress.Security.NonceVerification
+			exit;
+		}
+	}
+);
 
 /** The published listing a form page is about (?listing=), or null. */
 function aw_form_page_listing() {
@@ -87,9 +100,9 @@ function aw_form_page_listing() {
 	return $listing && 'aw_listing' === $listing->post_type && 'publish' === $listing->post_status ? $listing : null;
 }
 
-/** Which listing the page is about: its name (linked back to it) and place. */
+/** Which item the page is about: its name (linked back to it) and, for a listing, its place; otherwise its type. */
 function aw_form_page_for( $listing ) {
-	$place = function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '';
+	$place = 'aw_listing' !== $listing->post_type ? ( AW_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
 	return '<p class="aw-form-for"><a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( get_the_title( $listing ) ) . '</a>'
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
 }
@@ -134,8 +147,9 @@ add_shortcode(
 add_shortcode(
 	'aw_report_page',
 	function () {
-		$listing = aw_form_page_listing();
-		return $listing ? '<div class="aw-form-page" id="report">' . aw_form_page_for( $listing ) . aw_report_form( $listing ) . '</div>' : aw_form_page_missing();
+		$item   = aw_report_item( absint( wp_unslash( $_GET['item'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$reason = sanitize_key( wp_unslash( $_GET['reason'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		return '<div class="aw-form-page" id="report">' . ( $item ? aw_form_page_for( $item ) : '' ) . aw_report_form( $item, $reason ) . '</div>';
 	}
 );
 
@@ -145,7 +159,7 @@ add_shortcode(
 function aw_thanks_forms() {
 	return array(
 		'contact'     => array( 'contact', 'Message sent.', '' ),
-		'remove-data' => array( 'remove_data', 'Message sent.', '' ),
+		'remove-data' => array( 'remove_data', 'Check your inbox', 'We\'ve sent you a link. Open it to confirm the request; we then review it and remove your details.' ),
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
 		'newsletter'  => array( 'newsletter', 'Check your inbox', '' ),
 		'claim'       => array( 'claim', 'Request sent.', '' ),
@@ -165,8 +179,11 @@ add_shortcode(
 		$msg   = kits_thanks_message();
 		$title = $msg ? (string) $msg['title'] : $forms[ $form ][1];
 		$text  = $msg ? (string) $msg['text'] : $forms[ $form ][2];
+		$ref = strtoupper( preg_replace( '/[^A-Za-z0-9-]/', '', (string) wp_unslash( $_GET['ref'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- the Fluent Forms confirmation's reference (AW-…)
+		$ref = preg_match( '/^AW-([A-Z]-)?\d+$/', $ref ) ? $ref : '';
 		if ( in_array( $form, array( 'claim', 'report' ), true ) ) {
 			$listing = aw_form_page_listing();
+			$listing = $listing ? $listing : ( function_exists( 'aw_report_item' ) ? aw_report_item( absint( wp_unslash( $_GET['item'] ?? 0 ) ) ) : null ); // phpcs:ignore WordPress.Security.NonceVerification
 			$links  .= $listing ? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( 'Back to ' . get_the_title( $listing ) ) . '</a>' : '';
 		} else {
 			$links .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/' ) ) . '">Home</a>';
@@ -176,8 +193,8 @@ add_shortcode(
 				$links .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( $from ) . '">' . esc_html( $pid ? 'Back to ' . get_the_title( $pid ) : 'Back' ) . '</a>';
 			}
 		}
-		return '<div class="kit-form-done aw-thanks" role="status" tabindex="-1" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '"><p class="aw-form-done-title">' . esc_html( $title ) . '</p>'
-			. ( '' !== $text ? '<p>' . esc_html( $text ) . '</p>' : '' ) . '</div>'
+		return '<div class="kit-form-done aw-thanks" role="status" tabindex="-1" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '"' . ( $ref ? ' data-ref="' . esc_attr( $ref ) . '"' : '' ) . '><p class="aw-form-done-title">' . esc_html( $title ) . '</p>'
+			. ( '' !== $text ? '<p>' . esc_html( $text ) . '</p>' : '' ) . ( $ref ? '<p class="aw-thanks-ref">Your reference: <strong>' . esc_html( $ref ) . '</strong></p>' : '' ) . '</div>'
 			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' );
 	}
 );

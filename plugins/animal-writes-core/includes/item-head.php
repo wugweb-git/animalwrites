@@ -295,7 +295,7 @@ function aw_block_item_sources( $a, $id ) {
 		return aw_item_editor_preview( 'Sources: publisher, issuer or study, the original, notes, Editorial policy, Report a mistake' );
 	}
 	$kind   = aw_item_kind( $id );
-	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( home_url( '/contact/?about=correction#write' ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
+	$links  = '<p class="aw-sources-links"><a href="' . esc_url( home_url( '/editorial-policy/' ) ) . '">' . esc_html__( 'Editorial policy', 'animal-writes-core' ) . '</a><a href="' . esc_url( aw_report_url( $id ) ) . '">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a></p>';
 	$hid    = 'aw-sources-' . $id;
 	if ( 'listing' === $kind ) { // the listing's data sources with their "as on" dates, and when it was last updated
 		$list = function_exists( 'aw_listing_sources_html' ) ? aw_listing_sources_html( $id ) : '';

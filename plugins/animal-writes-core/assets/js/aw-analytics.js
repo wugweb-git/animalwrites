@@ -239,3 +239,66 @@
 		track('select_content', { content_type: 'entity_' + a.getAttribute('data-entity'), content_id: p.slice(0, 100), link_text: text(a) });
 	}, true);
 })();
+
+/* Forms (owner, 21 Oct 2026): what Fluent Forms cannot fill on a cached page goes into each form's hidden v_* fields
+   here, in the visitor's own browser: referrer and UTM (the browser session's landing page), screen size, language,
+   time zone, seconds to fill in, first visit and visit count (first-party cookie aw_fv), and the GA4 client ID and
+   Clarity ID (cookies _ga and _clck) only when analytics consent is granted. Page ID and title are Fluent Forms'
+   smartcodes; country and city are found by the server. window.awVisit gives the same to the campaign letter tool.
+   On the thank-you page: the GA4 event form_submit (form and reference, nothing personal) and the Clarity tag form_ref. */
+(function () {
+	'use strict';
+	var cfg = window.awVisitCfg || {};
+	function cookie(n) { var m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+	function store(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { /* private mode */ } return null; }
+
+	var fv = cookie('aw_fv').split('|'), first = /^\d{4}-\d{2}-\d{2}$/.test(fv[0]) ? fv[0] : new Date().toISOString().slice(0, 10), visits = parseInt(fv[1], 10) || 0;
+	if (!store('aw_vs')) {
+		visits += 1;
+		store('aw_vs', '1');
+		document.cookie = 'aw_fv=' + encodeURIComponent(first + '|' + visits) + '; max-age=34560000; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+	}
+	var land = {};
+	try { land = JSON.parse(store('aw_land') || '{}') || {}; } catch (e) { land = {}; }
+	var q = new URLSearchParams(location.search), utm = q.get('utm_source') || q.get('utm_medium') || q.get('utm_campaign');
+	if (!store('aw_land') || utm) {
+		var ref = land.referrer || '';
+		try { if (document.referrer && new URL(document.referrer).host !== location.host) ref = document.referrer; } catch (e) { /* no referrer */ }
+		land = utm ? { referrer: ref, utm_source: q.get('utm_source') || '', utm_medium: q.get('utm_medium') || '', utm_campaign: q.get('utm_campaign') || '' } : Object.assign(land, { referrer: ref });
+		store('aw_land', JSON.stringify(land));
+	}
+	function consent() { /* as the site's consent mode: granted outside the consent regions, else only after an update grants it */
+		var tz = '', ok, dl = window.dataLayer || [];
+		try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { tz = ''; }
+		ok = (cfg.zones || []).indexOf(tz) < 0;
+		for (var i = 0; i < dl.length; i++) { var a = dl[i]; if (a && a[0] === 'consent' && a[1] === 'update' && a[2] && a[2].analytics_storage) ok = a[2].analytics_storage === 'granted'; }
+		return ok;
+	}
+	var loaded = Date.now(), began = typeof WeakMap === 'function' ? new WeakMap() : null;
+	function data(form) {
+		var c = navigator.connection || {}, tz = '', ga = cookie('_ga').split('.'), t0 = (form && began && began.get(form)) || loaded, d;
+		try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { tz = ''; }
+		d = { referrer: land.referrer || '', utm_source: land.utm_source || '', utm_medium: land.utm_medium || '', utm_campaign: land.utm_campaign || '',
+			screen: window.screen ? screen.width + 'x' + screen.height : '', lang: navigator.language || '', tz: tz, secs: String(Math.round((Date.now() - t0) / 1000)),
+			first_visit: first, visits: String(visits), page: location.href.split('#')[0], net: c.type || c.effectiveType || '' };
+		if (consent()) { d.ga = ga.length >= 4 ? ga[ga.length - 2] + '.' + ga[ga.length - 1] : ''; d.clarity = cookie('_clck').split('|')[0]; }
+		return d;
+	}
+	function fill(form) {
+		if (!form || !form.querySelector('input[name^="v_"]')) return;
+		var d = data(form);
+		Object.keys(d).forEach(function (k) { var el = form.querySelector('input[type=hidden][name="v_' + k + '"]'); if (el) el.value = String(d[k] || '').slice(0, 500); });
+	}
+	document.addEventListener('focusin', function (e) { var f = e.target && e.target.form; if (f && began && !began.has(f)) began.set(f, Date.now()); if (f) fill(f); }, true);
+	document.addEventListener('submit', function (e) { fill(e.target); }, true); /* capture: before Fluent Forms reads the form */
+	document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('button[type=submit]'); if (b && b.form) fill(b.form); }, true);
+	window.awVisit = { data: data };
+
+	var thanks = document.querySelector('[data-kit-thanks][data-ref]');
+	if (thanks) {
+		var form = thanks.getAttribute('data-kit-thanks'), refNo = thanks.getAttribute('data-ref');
+		(window.dataLayer = window.dataLayer || []).push({ event: 'form_submit', form_name: form, form_ref: refNo });
+		window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+		window.clarity('set', 'form_ref', refNo);
+	}
+}());

@@ -76,7 +76,11 @@
 		var sel = f.querySelector('[name=about]'), msg = f.querySelector('[name=message]');
 		if (!sel || !msg) return;
 		var map = {}; try { map = JSON.parse(f.dataset.placeholders || '{}'); } catch (x) {} // the Fluent Forms version keeps them on its wrapper
-		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || map[sel.value] || ''; });
+		var go = {}; try { go = JSON.parse(f.dataset.go || '{}'); } catch (x) {} // Report a mistake and Remove my data have their own forms
+		sel.addEventListener('change', function () {
+			if (go[sel.value]) { window.location.href = go[sel.value]; return; }
+			msg.placeholder = sel.selectedOptions[0].dataset.placeholder || map[sel.value] || '';
+		});
 		// The rows on the page (List your organisation, Get featured …) choose their reason here and move to the form.
 		document.querySelectorAll('a.aw-contact-pick[data-about]').forEach(function (a) {
 			a.addEventListener('click', function (e) {
