@@ -167,6 +167,75 @@ function aw_volunteer_save( $v, $source ) {
 	return array( 'url' => kits_thanks_url( 'volunteer', array(), $title, $text ), 'title' => $title, 'text' => $text );
 }
 
+/* ---------- The update link's page: /update/?t=<token> (owner, 21 Oct 2026; the link: aw_update_link()) ---------- */
+
+/** [aw_volunteer_update]: the Volunteer form filled in from their FluentCRM contact, or why the link does not work. */
+add_shortcode(
+	'aw_volunteer_update',
+	function () {
+		$c = function_exists( 'aw_update_link_contact' ) ? aw_update_link_contact( sanitize_text_field( wp_unslash( $_GET['t'] ?? '' ) ) ) : 'invalid'; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! is_object( $c ) ) {
+			return '<p>' . esc_html( 'expired' === $c ? 'This link has expired. Ask us for a new one at contact@animalwrites.in.' : 'This link does not work. Check that it is complete, or ask us for a new one at contact@animalwrites.in.' ) . '</p>';
+		}
+		$html = apply_filters( 'aw_form_html', '', 'volunteer', array( 'vol_contact' => $c ) );
+		return '' !== $html ? '<p>Check your details and change what is different. Sending the form updates them.</p>' . $html : '<p>This form is not available right now.</p>';
+	}
+);
+
+/** The Volunteer form's fields, filled in from the update link's contact (forms-fluentforms.php calls this). */
+function aw_ff_update_values( $data, $form ) {
+	$c = function_exists( 'aw_ff_ctx' ) ? aw_ff_ctx( 'vol_contact' ) : null;
+	if ( ! $c || 'volunteer' !== aw_ff_key( $form ) ) {
+		return $data;
+	}
+	$f    = (array) $c->custom_fields();
+	$list = fn( $k ) => array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $f[ $k ] ?? '' ) ) ) ) );
+	$name = (string) ( $data['attributes']['name'] ?? '' );
+	$text = array( 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'email' => $c->email, 'phone' => (string) $c->phone, 'whatsapp' => $f['vol_whatsapp'] ?? '', 'travel_range' => $f['vol_travel_range'] ?? '', 'languages' => $f['vol_languages'] ?? '', 'org_name' => $f['vol_organisation'] ?? '' );
+	if ( isset( $text[ $name ] ) ) {
+		$data['attributes']['value'] = (string) $text[ $name ];
+	} elseif ( in_array( $name, array( 'availability', 'skills' ), true ) ) {
+		$data['attributes']['value'] = $list( 'vol_' . $name );
+	} elseif ( 'roles' === $name ) {
+		$data['attributes']['value'] = $list( 'vol_help' );
+	} elseif ( 'wa_optin' === $name ) {
+		$data['attributes']['value'] = '' !== (string) ( $f['vol_wa_optin'] ?? '' ) ? array( '1' ) : array();
+	} elseif ( 'org_assoc' === $name ) {
+		$data['attributes']['value'] = '' !== (string) ( $f['vol_organisation'] ?? '' ) ? array( '1' ) : array();
+	} elseif ( 'org_show' === $name ) {
+		$data['attributes']['value'] = '' !== (string) ( $f['vol_org_show'] ?? '' ) ? array( '1' ) : array();
+	}
+	return $data;
+}
+
+// /update/ is made once, never cached (it shows one person's details) and never indexed.
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_update_page' ) ) {
+			return;
+		}
+		if ( ! get_page_by_path( 'update' ) ) {
+			$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Update your volunteer details', 'post_name' => 'update', 'post_content' => '<!-- wp:shortcode -->[aw_volunteer_update]<!-- /wp:shortcode -->' ) );
+			if ( $id && ! is_wp_error( $id ) ) {
+				update_post_meta( $id, 'rank_math_robots', array( 'noindex', 'nofollow' ) );
+			}
+		}
+		update_option( 'aw_update_page', '1', false );
+	},
+	47
+);
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_page( 'update' ) ) {
+			nocache_headers();
+			do_action( 'litespeed_control_set_nocache', 'personal update link' );
+		}
+	}
+);
+add_filter( 'aw_cdn_excluded_slugs', fn( $s ) => array_merge( (array) $s, array( 'update' ) ) );
+
 /**
  * Handle a submission.
  */

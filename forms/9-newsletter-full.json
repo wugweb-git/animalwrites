@@ -19,7 +19,7 @@
                         "autocomplete": "email"
                     },
                     "settings": {
-                        "container_class": "",
+                        "container_class": "kit-field",
                         "label": "Email",
                         "label_placement": "",
                         "help_message": "",
@@ -59,7 +59,7 @@
                         "autocomplete": "name"
                     },
                     "settings": {
-                        "container_class": "",
+                        "container_class": "kit-field",
                         "label": "Your name <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Name",
@@ -472,7 +472,7 @@
             },
             {
                 "meta_key": "formSettings",
-                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">You're subscribed<\\/p><p>We've sent a confirmation to {inputs.email}.<\\/p>\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":true,\"message\":\"Enter your email address\"}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"with_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null,\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">Thank you.</p><p>Your topics are saved.</p>\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":true,\"message\":\"Enter your email address\"}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
             },
             {
                 "meta_key": "notifications",

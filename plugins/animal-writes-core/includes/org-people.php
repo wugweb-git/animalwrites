@@ -78,6 +78,16 @@ function aw_org_people_html( $lid ) {
 	return '<section class="aw-org-links-group aw-org-people"><h2>Volunteers</h2><ul>' . implode( '', array_map( fn( $n ) => '<li>' . esc_html( $n ) . '</li>', $names ) ) . '</ul></section>';
 }
 
+// [aw_org_people] on the listing template: the Volunteers part of [aw_org_links] (whose other parts the template already
+// shows as its own blocks): approved contacts who chose to show their name, nothing when there are none.
+add_shortcode(
+	'aw_org_people',
+	function () {
+		$html = 'aw_listing' === get_post_type() ? aw_org_people_html( get_the_ID() ) : '';
+		return '' !== $html ? '<div class="aw-org-links">' . $html . '</div>' : '';
+	}
+);
+
 /**
  * schema.org member for a listing: the shown volunteers.
  *

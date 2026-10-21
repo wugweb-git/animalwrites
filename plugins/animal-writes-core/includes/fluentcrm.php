@@ -326,6 +326,59 @@ const AW_CRM_FORM_FIELDS = array(
 	'nl_box_form'    => array( 'Newsletter box (last form): which form', 'text' ),
 	'nl_box_consent' => array( 'Newsletter box (last form): consent wording', 'text' ),
 	'campaign_ref'   => array( 'Campaign letter: reference', 'text' ),
+	'whatsapp'       => array( 'WhatsApp number (Contact form)', 'text' ),
+	'wa_optin'       => array( 'OK on WhatsApp (Contact form; 1 = yes, empty = no)', 'text' ),
+);
+
+/* ---------- The volunteer update link: /update/?t=<signed token> (owner, 21 Oct 2026) ---------- */
+
+/** Days an update link works. */
+const AW_UPDATE_LINK_DAYS = 30;
+
+/**
+ * A contact's update link: signed with the site's own secret (HMAC), for that one contact and their email, 30 days.
+ * No name or email in the address (GA4 and Clarity record addresses). In FluentCRM emails: {{aw.update_link}}.
+ *
+ * @param object $c FluentCRM contact.
+ */
+function aw_update_link( $c ) {
+	$exp = time() + AW_UPDATE_LINK_DAYS * DAY_IN_SECONDS;
+	$sig = substr( hash_hmac( 'sha256', (int) $c->id . '|' . $exp . '|' . strtolower( (string) $c->email ), wp_salt( 'auth' ) ), 0, 32 );
+	return add_query_arg( 't', (int) $c->id . '.' . $exp . '.' . $sig, home_url( '/update/' ) );
+}
+
+/**
+ * The contact an update link is for.
+ *
+ * @param string $token The t value.
+ * @return object|string FluentCRM contact, or 'expired' | 'invalid'.
+ */
+function aw_update_link_contact( $token ) {
+	if ( ! aw_crm_on() || ! preg_match( '/^(\d+)\.(\d+)\.([a-f0-9]{32})$/', (string) $token, $m ) ) {
+		return 'invalid';
+	}
+	$c   = \FluentCrm\App\Models\Subscriber::find( (int) $m[1] );
+	$sig = $c ? substr( hash_hmac( 'sha256', (int) $m[1] . '|' . (int) $m[2] . '|' . strtolower( (string) $c->email ), wp_salt( 'auth' ) ), 0, 32 ) : '';
+	if ( ! $c || ! hash_equals( $sig, $m[3] ) ) {
+		return 'invalid';
+	}
+	return (int) $m[2] < time() ? 'expired' : $c;
+}
+
+// {{aw.update_link}} in FluentCRM emails (a fresh 30-day link for each contact when the email is made).
+add_action(
+	'init',
+	function () {
+		if ( aw_crm_on() ) {
+			FluentCrmApi( 'extender' )->addSmartCode(
+				'aw',
+				'Animal Writes',
+				array( 'update_link' => 'Volunteer update link (30 days)' ),
+				fn( $code, $key, $default, $subscriber ) => 'update_link' === $key && $subscriber ? aw_update_link( $subscriber ) : $default,
+				array( 'level' => 'credential' ) // like the unsubscribe link: only in an email to that contact
+			);
+		}
+	}
 );
 
 /** Add the volunteer fields and their group to FluentCRM's custom fields (keeps any others). */

@@ -86,7 +86,13 @@ function aw_ff_key( $form ) {
 	return '';
 }
 
-/** What a form is shown for (listing, item, source), while it renders. */
+/** A form that gets the site's look: the site's forms and Newsletter (full) #9 (the footer box #3 keeps its own). */
+function aw_ff_styled( $form ) {
+	$id = (int) ( is_object( $form ) ? $form->id : $form );
+	return '' !== aw_ff_key( $form ) || ( $id && (int) get_option( 'aw_nl_ff_form_full' ) === $id );
+}
+
+/** What a form is shown for (listing, item, source, the update link's contact), while it renders. */
 function aw_ff_ctx( $k = null ) {
 	$c = (array) ( $GLOBALS['aw_ff_ctx'] ?? array() );
 	return null === $k ? $c : ( $c[ $k ] ?? null );
@@ -196,6 +202,8 @@ add_action(
  *  "required": "no" (the Newsletter form) makes the state optional. */
 function aw_ff_render_places( $element, $form ) {
 	$need = 'no' !== ( $element['settings']['required'] ?? 'yes' );
+	$who  = aw_ff_ctx( 'vol_contact' ); // the update link: their State and PIN code to start with
+	$cf   = $who ? (array) $who->custom_fields() : array();
 	$f    = 'ff' . (int) $form->id;
 	$dict = kits_field_dict();
 	$pin  = $dict['pincode'];
@@ -204,12 +212,12 @@ function aw_ff_render_places( $element, $form ) {
 	foreach ( array_merge( $pin['attrs'], array( 'placeholder' => $pin['placeholder'] ) ) as $k => $v ) {
 		$a .= ' ' . esc_attr( $k ) . '="' . esc_attr( (string) $v ) . '"';
 	}
-	$html  = aw_ff_group( $pid, 'PIN code', '<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>', array( 'icon' => $pin['icon'], 'class' => 'aw-form-ff-half' ) );
+	$html  = aw_ff_group( $pid, 'PIN code', '<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" value="' . esc_attr( (string) ( $cf['vol_pincode'] ?? '' ) ) . '" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>', array( 'icon' => $pin['icon'], 'class' => 'aw-form-ff-half' ) );
 	$sid   = $f . '-state';
 	$did   = $f . '-district';
 	$opts  = '<option value="">Choose a state</option>';
 	foreach ( aw_place_states() as $st ) {
-		$opts .= '<option value="' . esc_attr( $st->slug ) . '">' . esc_html( $st->name ) . '</option>';
+		$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( (string) ( $cf['vol_state'] ?? '' ), $st->name, false ) . '>' . esc_html( $st->name ) . '</option>';
 	}
 	$html .= aw_ff_group( $sid, 'State', '<select id="' . esc_attr( $sid ) . '" name="state" class="ff-el-form-control"' . ( $need ? ' required data-msg-required="Choose a state"' : '' ) . ' autocomplete="address-level1" data-district-select="' . esc_attr( $did ) . '">' . $opts . '</select>', array( 'required' => $need, 'class' => 'aw-form-ff-half' ) );
 	$opts  = '<option value="" data-none="Choose a state first" data-all="Choose a district">Choose a state first</option>';
@@ -258,7 +266,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_ff_el,
 		function ( $data, $form ) {
-			if ( ! aw_ff_key( $form ) ) {
+			if ( ! aw_ff_styled( $form ) ) {
 				return $data;
 			}
 			$rules = (array) ( $data['settings']['validation_rules'] ?? array() );
@@ -271,7 +279,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					$data['attributes']['data-msg-email'] = (string) $rules['email']['message'];
 				}
 			}
-			return $data;
+			return function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
 		},
 		10,
 		2
@@ -279,7 +287,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 	add_filter(
 		'fluentform/rendering_field_html_' . $aw_ff_el,
 		function ( $html, $data, $form ) {
-			if ( ! aw_ff_key( $form ) ) {
+			if ( ! aw_ff_styled( $form ) ) {
 				return $html;
 			}
 			if ( ! is_array( $data ) ) { // Fluent Forms passes the markup in place of the field for tick boxes
@@ -462,6 +470,10 @@ add_action(
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
+			$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
+			if ( '' !== $wa ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
+				$c->syncCustomFieldValues( array( 'whatsapp' => $wa, 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '' ), false );
+			}
 		}
 	},
 	20,
@@ -527,5 +539,5 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 // so the form near the top never shows unstyled (kits-core performance.php).
 add_filter(
 	'kits_page_has_form',
-	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
+	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
 );

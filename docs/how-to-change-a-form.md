@@ -8,8 +8,8 @@ Every site form is built in **Fluent Forms** (free) and reaches **FluentCRM** (f
 
 | Form | ID | File | Reference | FluentCRM |
 |---|---|---|---|---|
-| Newsletter (footer, inline) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, `newsletter` |
-| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` ticked → Newsletter, `contact-form`, `newsletter`; every sender a contact with `contact-form` and the message as a note (code) |
+| Newsletter (footer, inline) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, `newsletter`; then the thank-you page, which shows #9 for topics |
+| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` ticked → Newsletter, `contact-form`, `newsletter` (and the WhatsApp fields); every sender a contact with `contact-form`, the WhatsApp fields and the message as a note (code). Report a mistake and Remove my data are plain links above the form, not reasons. Entries also show in Mail → Website forms |
 | Volunteer sign-up | 5 | `forms/5-volunteer-sign-up.json` | AW-V-… | everyone → Newsletter, `volunteer`, volunteer fields; organisation ticked → `org-pending` |
 | Claim this listing | 6 | `forms/6-claim-this-listing.json` | AW-C-… | ticked → Newsletter, `newsletter`, `claimant`; every claimant a contact with `claimant` (code) |
 | Report a mistake | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none |
@@ -22,9 +22,13 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Hidden fields on every form:** `v_page_id`, `v_page_title` (smartcodes); `v_referrer`, `v_utm_*`, `v_screen`, `v_lang`, `v_tz`, `v_secs`, `v_first_visit`, `v_visits`, and `v_ga`, `v_clarity` only with analytics consent: filled in the browser by `aw-analytics.js`, because pages are cached (LiteSpeed keeps one copy per address and drops `utm_*`, so a smartcode would save another visitor's values); `consent_version` (fixed). Fluent Forms itself saves IP, browser, device and page with every entry.
 
-**Volunteer update link** (send from a FluentCRM email): `https://animalwrites.in/volunteer/?fullname={{contact.full_name}}&email={{contact.email}}&phone={{contact.phone}}` — the form opens filled in; FluentCRM updates the contact by email. (Not `?name=`: WordPress reserves it and the page would not be found.)
+**Volunteer update link:** put `{{aw.update_link}}` in a FluentCRM email. Each contact gets their own signed link, `/update/?t=…`, valid 30 days, with no name or email in it (GA4 and Clarity record addresses). It opens the Volunteer form filled in from their contact; sending it updates the contact (FluentCRM matches by email). An edited or expired link is refused.
 
 **Remove my data:** the form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
+
+**Mail → Website forms** lists the Contact form's entries (read/unread and trash are the entry's own) with the older contact messages.
+
+**Volunteers on a listing page** (`[aw_org_people]` in the listing template): contacts tagged `org-approved` whose organisation matches the listing and who ticked "Show my name".
 
 **Analytics:** GTM (`docs/gtm`) listens for Fluent Forms' success event: GA4 `form_submit` (form, ref) and Clarity's `form_ref`, with analytics consent only.
 

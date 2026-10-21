@@ -501,7 +501,19 @@ function aw_elsewhere_screen() {
 	echo '</form></div>';
 }
 
-// /remove-my-data/ is the Remove my data form again (owner, 21 Oct 2026); the Contact form's reason links to it.
+// Report a mistake and Remove my data have their own forms and are no longer Contact reasons (owner, 21 Oct 2026): the
+// Contact form shows plain links to them, and older links to those reasons open the forms.
+add_action(
+	'template_redirect',
+	function () {
+		$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$to    = array( 'correction' => '/report/', 'remove-data' => '/remove-my-data/' )[ $about ] ?? '';
+		if ( '' !== $to && is_page( 'contact' ) ) {
+			wp_safe_redirect( home_url( $to ), 301, 'Animal Writes' );
+			exit;
+		}
+	}
+);
 
 // Inbox → Contact messages: an incoming email's "Reply" opens Inbox → Reply for that email (mail-reply.php); a form
 // message's "Reply" opens your own mail app with the sender and subject filled in (WordPress sends nothing).
@@ -539,7 +551,7 @@ add_filter(
 		if ( ! $key || ! in_array( $key, array( 'listing', 'featured', 'opportunity', 'partnership', 'correction' ), true ) ) {
 			return $html;
 		}
-		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';
+		$url = 'correction' === $key ? home_url( '/report/' ) : add_query_arg( 'about', $key, get_permalink() ) . '#write';
 		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );
 	}
 );

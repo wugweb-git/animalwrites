@@ -83,7 +83,7 @@
                     "uniqElKey": "el_aw_name",
                     "attributes": {
                         "name": "name",
-                        "value": "{get.fullname}",
+                        "value": "",
                         "id": "",
                         "class": "",
                         "type": "text",
@@ -119,7 +119,7 @@
                     "uniqElKey": "el_aw_email",
                     "attributes": {
                         "name": "email",
-                        "value": "{get.email}",
+                        "value": "",
                         "id": "",
                         "class": "",
                         "type": "email",
@@ -162,7 +162,7 @@
                     "uniqElKey": "el_aw_phone",
                     "attributes": {
                         "name": "phone",
-                        "value": "{get.phone}",
+                        "value": "",
                         "id": "",
                         "class": "",
                         "type": "text",
@@ -200,7 +200,7 @@
                     "attributes": {
                         "type": "text",
                         "name": "whatsapp",
-                        "value": "{get.whatsapp}",
+                        "value": "",
                         "id": "",
                         "class": "",
                         "placeholder": "",

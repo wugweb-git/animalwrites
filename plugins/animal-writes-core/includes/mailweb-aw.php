@@ -4,7 +4,8 @@
  *
  * - The Mail API token stays in wp-config as AW_HOSTINGER_MAIL_TOKEN; Mailweb reads MAILWEB_API_TOKEN.
  * - The open campaign's strip under every signature (mail-campaign-strip.php, `mailweb_after_signature`).
- * - Mail → Website forms: the Contact form messages kept in WordPress (aw_message), through `mailweb_forms_source`.
+ * - Mail → Website forms: the Contact form's Fluent Forms entries and the older contact messages (aw_message), through
+ *   `mailweb_forms_source`.
  *   Inbox → Contact messages opens it.
  * - The old webhook address /wp-json/aw/v1/mail-in still answers (the hPanel webhooks point there).
  * - Tools → Check site: a line on email sending.
@@ -109,7 +110,12 @@ add_action(
 	0
 );
 
-/* ---------- Mail → Website forms: Contact form messages (aw_message) ---------- */
+/* ---------- Mail → Website forms: Contact form entries (Fluent Forms) and older contact messages (aw_message) ---------- */
+
+// Since 21 Oct 2026 (owner) a Contact form message is a Fluent Forms entry (form #4), not an aw_message; both show here,
+// newest first. An entry's ID in Mail is AW_MAIL_FF_ID + its entry ID (Mail passes whole numbers; post IDs stay far
+// below). Read/unread and trash are the entry's own Fluent Forms status, so both screens agree.
+const AW_MAIL_FF_ID = 1000000000;
 
 /** aw_message items that are form messages (not old copies of emails). */
 function aw_mail_forms_where() {
@@ -127,22 +133,54 @@ function aw_mail_forms_where() {
 	);
 }
 
+/** The Contact form's Fluent Forms ID, or 0. */
+function aw_mail_ff_form() {
+	return function_exists( 'aw_ff_id' ) ? aw_ff_id( 'contact' ) : 0;
+}
+
+/** A Contact entry (not trashed), or null. */
+function aw_mail_ff_entry( $id ) {
+	global $wpdb;
+	$form = aw_mail_ff_form();
+	if ( ! $form || $id <= AW_MAIL_FF_ID ) {
+		return null;
+	}
+	return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND form_id = %d AND status <> 'trashed'", $id - AW_MAIL_FF_ID, $form ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/** An entry's subject: its reason and reference ("List your organisation (AW-12)"). */
+function aw_mail_ff_subject( $e, $r ) {
+	$about = (string) ( $r['about'] ?? '' );
+	$label = defined( 'AW_CONTACT_ABOUT' ) ? ( AW_CONTACT_ABOUT[ $about ] ?? $about ) : $about;
+	return trim( $label . ' (AW-' . (int) $e->serial_number . ')' );
+}
+
 add_filter(
 	'mailweb_forms_source',
 	fn() => array(
 		'label'   => 'Website forms',
 		'list'    => function ( $page, $per ) {
-			$q     = new WP_Query(
-				array(
-					'post_type'      => 'aw_message',
-					'post_status'    => array( 'private', 'publish', 'pending', 'draft' ),
-					'posts_per_page' => $per,
-					'paged'          => $page,
-					'meta_query'     => aw_mail_forms_where(), // phpcs:ignore WordPress.DB.SlowDBQuery
-				)
-			);
+			global $wpdb;
+			$rows = array(); // [date, id, kind]
+			foreach ( get_posts( array( 'post_type' => 'aw_message', 'post_status' => array( 'private', 'publish', 'pending', 'draft' ), 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => aw_mail_forms_where() ) ) as $pid ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+				$rows[] = array( get_post_field( 'post_date', $pid ), (int) $pid );
+			}
+			$form = aw_mail_ff_form();
+			if ( $form ) {
+				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed'", $form ) ) as $e ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					$rows[] = array( get_date_from_gmt( $e->created_at ), AW_MAIL_FF_ID + (int) $e->id );
+				}
+			}
+			usort( $rows, fn( $a, $b ) => strcmp( $b[0], $a[0] ) );
 			$items = array();
-			foreach ( $q->posts as $p ) {
+			foreach ( array_slice( $rows, ( max( 1, (int) $page ) - 1 ) * $per, $per ) as $row ) {
+				$e = aw_mail_ff_entry( $row[1] );
+				if ( $e ) {
+					$r       = (array) json_decode( (string) $e->response, true );
+					$items[] = array( 'id' => $row[1], 'name' => (string) ( $r['name'] ?? '' ), 'email' => (string) ( $r['email'] ?? '' ), 'subject' => aw_mail_ff_subject( $e, $r ), 'date' => $row[0], 'unread' => 'unread' === $e->status );
+					continue;
+				}
+				$p       = get_post( $row[1] );
 				$items[] = array(
 					'id'      => $p->ID,
 					'name'    => trim( (string) get_post_meta( $p->ID, 'aw_m_name', true ) ),
@@ -154,14 +192,32 @@ add_filter(
 			}
 			return array(
 				'items' => $items,
-				'total' => (int) $q->found_posts,
+				'total' => count( $rows ),
 			);
 		},
 		'unread'  => function () {
 			global $wpdb;
-			return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_m_about' LEFT JOIN {$wpdb->postmeta} r ON r.post_id = p.ID AND r.meta_key = 'aw_read' WHERE p.post_type = 'aw_message' AND p.post_status NOT IN ('trash','auto-draft') AND ( a.meta_value IS NULL OR a.meta_value <> 'email' ) AND r.meta_id IS NULL" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$old = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_m_about' LEFT JOIN {$wpdb->postmeta} r ON r.post_id = p.ID AND r.meta_key = 'aw_read' WHERE p.post_type = 'aw_message' AND p.post_status NOT IN ('trash','auto-draft') AND ( a.meta_value IS NULL OR a.meta_value <> 'email' ) AND r.meta_id IS NULL" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$new = aw_mail_ff_form() ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status = 'unread'", aw_mail_ff_form() ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			return $old + $new;
 		},
 		'get'     => function ( $id ) {
+			$e = aw_mail_ff_entry( (int) $id );
+			if ( $e ) {
+				$r      = (array) json_decode( (string) $e->response, true );
+				$fields = array( 'From' => trim( ( $r['name'] ?? '' ) . ( ! empty( $r['email'] ) ? ' <' . $r['email'] . '>' : '' ) ), 'Reference' => 'AW-' . (int) $e->serial_number );
+				foreach ( array( 'org_name' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'whatsapp' => 'WhatsApp' ) as $k => $label ) {
+					$v = $r[ $k ] ?? '';
+					$v = is_array( $v ) ? implode( ', ', array_map( fn( $x ) => AW_SERVICES[ $x ] ?? (string) $x, $v ) ) : (string) $v;
+					if ( '' !== trim( $v ) ) {
+						$fields[ $label ] = 'opp_ongoing' === $k ? 'yes' : $v;
+					}
+				}
+				$fields['OK on WhatsApp'] = ! empty( $r['whatsapp'] ) ? ( empty( array_filter( (array) ( $r['wa_optin'] ?? array() ) ) ) ? '0' : '1' ) : '';
+				$fields['Page']           = (string) ( $r['v_page_title'] ?? $e->source_url );
+				$fields['Newsletter']     = empty( array_filter( (array) ( $r['nl_optin'] ?? array() ) ) ) ? '0' : '1';
+				return array( 'subject' => aw_mail_ff_subject( $e, $r ), 'email' => (string) ( $r['email'] ?? '' ), 'date' => get_date_from_gmt( $e->created_at ), 'text' => (string) ( $r['message'] ?? '' ), 'fields' => array_filter( $fields, fn( $v ) => '' !== (string) $v ) );
+			}
 			if ( 'aw_message' !== get_post_type( $id ) ) {
 				return null;
 			}
@@ -180,6 +236,12 @@ add_filter(
 			);
 		},
 		'mark'    => function ( $id, $what ) {
+			global $wpdb;
+			$e = aw_mail_ff_entry( (int) $id );
+			if ( $e ) { // Fluent Forms' own status: read, unread, trashed (restorable in Fluent Forms → Entries → Trash)
+				$to = array( 'read' => 'read', 'unread' => 'unread', 'trash' => 'trashed' )[ $what ] ?? '';
+				return $to ? false !== $wpdb->update( "{$wpdb->prefix}fluentform_submissions", array( 'status' => $to ), array( 'id' => (int) $e->id ) ) : false; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
 			if ( 'aw_message' !== get_post_type( $id ) ) {
 				return false;
 			}
@@ -192,7 +254,14 @@ add_filter(
 			}
 			return true;
 		},
-		'replied' => fn( $id ) => 'aw_message' === get_post_type( $id ) && update_post_meta( $id, 'aw_m_replied', current_time( 'mysql' ) ),
+		'replied' => function ( $id ) {
+			global $wpdb;
+			$e = aw_mail_ff_entry( (int) $id );
+			if ( $e ) { // a note on the entry, as Fluent Forms shows them
+				return (bool) $wpdb->insert( "{$wpdb->prefix}fluentform_submission_meta", array( 'response_id' => (int) $e->id, 'form_id' => (int) $e->form_id, 'meta_key' => '_notes', 'value' => 'Reply sent from Mail', 'status' => 'note', 'user_id' => get_current_user_id(), 'name' => 'Mail', 'created_at' => current_time( 'mysql' ), 'updated_at' => current_time( 'mysql' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			}
+			return 'aw_message' === get_post_type( $id ) && update_post_meta( $id, 'aw_m_replied', current_time( 'mysql' ) );
+		},
 	)
 );
 

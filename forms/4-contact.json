@@ -8,6 +8,22 @@
             "fields": [
                 {
                     "index": 1,
+                    "element": "custom_html",
+                    "uniqElKey": "el_aw_other_forms",
+                    "attributes": [],
+                    "settings": {
+                        "html_codes": "<p class=\"aw-form-handoff\">To report a mistake on a page, use <a href=\"/report/\">Report a mistake</a>. To have your details removed, use <a href=\"/remove-my-data/\">Remove my data</a>.</p>",
+                        "conditional_logics": [],
+                        "container_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Custom HTML",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                },
+                {
+                    "index": 2,
                     "element": "select",
                     "uniqElKey": "el_aw_about",
                     "attributes": {
@@ -61,18 +77,6 @@
                                 "value": "partnership",
                                 "calc_value": "",
                                 "image": ""
-                            },
-                            {
-                                "label": "Report a mistake",
-                                "value": "correction",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Remove my data",
-                                "value": "remove-data",
-                                "calc_value": "",
-                                "image": ""
                             }
                         ],
                         "calc_value_status": false,
@@ -92,59 +96,7 @@
                     }
                 },
                 {
-                    "index": 2,
-                    "element": "custom_html",
-                    "uniqElKey": "el_aw_handoff_report",
-                    "attributes": [],
-                    "settings": {
-                        "html_codes": "<p class=\"aw-form-handoff\">To report a mistake on a page, use <a href=\"/report/\">Report a mistake</a>.</p>",
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "="
-                                }
-                            ]
-                        },
-                        "container_class": ""
-                    },
-                    "editor_options": {
-                        "title": "Custom HTML",
-                        "icon_class": "ff-edit-html",
-                        "template": "customHTML"
-                    }
-                },
-                {
                     "index": 3,
-                    "element": "custom_html",
-                    "uniqElKey": "el_aw_handoff_remove",
-                    "attributes": [],
-                    "settings": {
-                        "html_codes": "<p class=\"aw-form-handoff\">To have your details removed, use <a href=\"/remove-my-data/\">Remove my data</a>.</p>",
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "="
-                                }
-                            ]
-                        },
-                        "container_class": ""
-                    },
-                    "editor_options": {
-                        "title": "Custom HTML",
-                        "icon_class": "ff-edit-html",
-                        "template": "customHTML"
-                    }
-                },
-                {
-                    "index": 4,
                     "element": "input_text",
                     "uniqElKey": "el_aw_name",
                     "attributes": {
@@ -171,22 +123,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        }
+                        "conditional_logics": []
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -195,7 +132,7 @@
                     }
                 },
                 {
-                    "index": 5,
+                    "index": 4,
                     "element": "input_email",
                     "uniqElKey": "el_aw_email",
                     "attributes": {
@@ -229,22 +166,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        }
+                        "conditional_logics": []
                     },
                     "editor_options": {
                         "title": "Email Address",
@@ -253,7 +175,7 @@
                     }
                 },
                 {
-                    "index": 6,
+                    "index": 5,
                     "element": "input_text",
                     "uniqElKey": "el_aw_org_name",
                     "attributes": {
@@ -307,7 +229,7 @@
                     }
                 },
                 {
-                    "index": 7,
+                    "index": 6,
                     "element": "input_text",
                     "uniqElKey": "el_aw_org_district",
                     "attributes": {
@@ -351,7 +273,7 @@
                     }
                 },
                 {
-                    "index": 8,
+                    "index": 7,
                     "element": "input_text",
                     "uniqElKey": "el_aw_org_phone",
                     "attributes": {
@@ -397,7 +319,7 @@
                     }
                 },
                 {
-                    "index": 9,
+                    "index": 8,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_org_services",
                     "attributes": {
@@ -538,7 +460,7 @@
                     }
                 },
                 {
-                    "index": 10,
+                    "index": 9,
                     "element": "input_url",
                     "uniqElKey": "el_aw_org_website",
                     "attributes": {
@@ -593,7 +515,7 @@
                     }
                 },
                 {
-                    "index": 11,
+                    "index": 10,
                     "element": "input_text",
                     "uniqElKey": "el_aw_opp_title",
                     "attributes": {
@@ -637,7 +559,7 @@
                     }
                 },
                 {
-                    "index": 12,
+                    "index": 11,
                     "element": "select",
                     "uniqElKey": "el_aw_opp_type",
                     "attributes": {
@@ -723,7 +645,7 @@
                     }
                 },
                 {
-                    "index": 13,
+                    "index": 12,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_opp_ongoing",
                     "attributes": {
@@ -780,7 +702,7 @@
                     }
                 },
                 {
-                    "index": 14,
+                    "index": 13,
                     "element": "input_date",
                     "uniqElKey": "el_aw_opp_start",
                     "attributes": {
@@ -832,7 +754,7 @@
                     }
                 },
                 {
-                    "index": 15,
+                    "index": 14,
                     "element": "input_date",
                     "uniqElKey": "el_aw_opp_end",
                     "attributes": {
@@ -884,7 +806,7 @@
                     }
                 },
                 {
-                    "index": 16,
+                    "index": 15,
                     "element": "input_url",
                     "uniqElKey": "el_aw_opp_link",
                     "attributes": {
@@ -934,7 +856,7 @@
                     }
                 },
                 {
-                    "index": 17,
+                    "index": 16,
                     "element": "textarea",
                     "uniqElKey": "el_aw_message",
                     "attributes": {
@@ -959,22 +881,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        }
+                        "conditional_logics": []
                     },
                     "editor_options": {
                         "title": "Text Area",
@@ -983,7 +890,7 @@
                     }
                 },
                 {
-                    "index": 18,
+                    "index": 17,
                     "element": "input_text",
                     "uniqElKey": "el_aw_whatsapp",
                     "attributes": {
@@ -1010,22 +917,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        }
+                        "conditional_logics": []
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1034,7 +926,7 @@
                     }
                 },
                 {
-                    "index": 19,
+                    "index": 18,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_wa_optin",
                     "attributes": {
@@ -1069,22 +961,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        },
+                        "conditional_logics": [],
                         "display_type": "",
                         "enable_other_option": "no",
                         "layout_class": ""
@@ -1096,7 +973,7 @@
                     }
                 },
                 {
-                    "index": 20,
+                    "index": 19,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_nl_optin",
                     "attributes": {
@@ -1120,22 +997,7 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "about",
-                                    "value": "correction",
-                                    "operator": "!="
-                                },
-                                {
-                                    "field": "about",
-                                    "value": "remove-data",
-                                    "operator": "!="
-                                }
-                            ]
-                        },
+                        "conditional_logics": [],
                         "advanced_options": [
                             {
                                 "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
@@ -1160,7 +1022,7 @@
                     }
                 },
                 {
-                    "index": 21,
+                    "index": 20,
                     "element": "aw_check",
                     "uniqElKey": "el_aw_check",
                     "attributes": {
@@ -1179,7 +1041,7 @@
                     }
                 },
                 {
-                    "index": 22,
+                    "index": 21,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_id",
                     "attributes": {
@@ -1197,7 +1059,7 @@
                     }
                 },
                 {
-                    "index": 23,
+                    "index": 22,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_title",
                     "attributes": {
@@ -1215,7 +1077,7 @@
                     }
                 },
                 {
-                    "index": 24,
+                    "index": 23,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_referrer",
                     "attributes": {
@@ -1233,7 +1095,7 @@
                     }
                 },
                 {
-                    "index": 25,
+                    "index": 24,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_source",
                     "attributes": {
@@ -1251,7 +1113,7 @@
                     }
                 },
                 {
-                    "index": 26,
+                    "index": 25,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_medium",
                     "attributes": {
@@ -1269,7 +1131,7 @@
                     }
                 },
                 {
-                    "index": 27,
+                    "index": 26,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_campaign",
                     "attributes": {
@@ -1287,7 +1149,7 @@
                     }
                 },
                 {
-                    "index": 28,
+                    "index": 27,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
@@ -1305,7 +1167,7 @@
                     }
                 },
                 {
-                    "index": 29,
+                    "index": 28,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -1323,7 +1185,7 @@
                     }
                 },
                 {
-                    "index": 30,
+                    "index": 29,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_screen",
                     "attributes": {
@@ -1341,7 +1203,7 @@
                     }
                 },
                 {
-                    "index": 31,
+                    "index": 30,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_lang",
                     "attributes": {
@@ -1359,7 +1221,7 @@
                     }
                 },
                 {
-                    "index": 32,
+                    "index": 31,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_tz",
                     "attributes": {
@@ -1377,7 +1239,7 @@
                     }
                 },
                 {
-                    "index": 33,
+                    "index": 32,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_secs",
                     "attributes": {
@@ -1395,7 +1257,7 @@
                     }
                 },
                 {
-                    "index": 34,
+                    "index": 33,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_first_visit",
                     "attributes": {
@@ -1413,7 +1275,7 @@
                     }
                 },
                 {
-                    "index": 35,
+                    "index": 34,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_visits",
                     "attributes": {
@@ -1431,7 +1293,7 @@
                     }
                 },
                 {
-                    "index": 36,
+                    "index": 35,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
@@ -1490,7 +1352,7 @@
             },
             {
                 "meta_key": "fluentcrm_feeds",
-                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Contact (newsletter box ticked) → FluentCRM\",\"tag_ids\":[\"contact-form\",\"newsletter\"]}"
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"label\":\"whatsapp\",\"item_value\":\"{inputs.whatsapp}\"},{\"label\":\"wa_optin\",\"item_value\":\"{inputs.wa_optin}\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Contact (newsletter box ticked) → FluentCRM\",\"tag_ids\":[\"contact-form\",\"newsletter\"]}"
             },
             {
                 "meta_key": "formSettings",

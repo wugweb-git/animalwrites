@@ -159,7 +159,7 @@ function aw_thanks_forms() {
 		'contact'     => array( 'contact', 'Message sent.', '' ),
 		'remove-data' => array( 'remove_data', 'Message sent.', '' ),
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
-		'newsletter'  => array( 'newsletter', 'Check your inbox', '' ),
+		'newsletter'  => array( 'newsletter', 'You\'re subscribed', 'Thank you for signing up for Animal Writes updates.' ),
 		'claim'       => array( 'claim', 'Request sent.', '' ),
 		'report'      => array( 'report', 'Thanks — we\'ll check it.', '' ),
 	);
@@ -188,9 +188,14 @@ add_shortcode(
 				$links .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( $from ) . '">' . esc_html( $pid ? 'Back to ' . get_the_title( $pid ) : 'Back' ) . '</a>';
 			}
 		}
+		// After the footer sign-up (Newsletter #3 sends people here): the full Newsletter form #9, to choose topics.
+		$full = (int) get_option( 'aw_nl_ff_form_full' );
+		$more = 'newsletter' === $form && $full && defined( 'FLUENTFORM' )
+			? '<section class="aw-thanks-more"><h2 class="has-large-font-size">Choose your topics (optional)</h2><div class="kit-form aw-form-ff aw-newsletter-full-form" data-kit-form="newsletter_full">' . do_shortcode( '[fluentform id="' . $full . '"]' ) . '</div></section>'
+			: '';
 		return '<div class="kit-form-done aw-thanks" role="status" tabindex="-1" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '"><p class="aw-form-done-title">' . esc_html( $title ) . '</p>'
 			. ( '' !== $text ? '<p>' . esc_html( $text ) . '</p>' : '' ) . '</div>'
-			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' );
+			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' ) . $more;
 	}
 );
 
