@@ -78,7 +78,7 @@ function aw_seo_breadcrumb_trail() {
 		$cat     = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
 		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
 			$n       = function_exists( 'aw_seo_filtered_count' ) ? aw_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
-			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : get_term_link( $cat ) );
+			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : kits_term_url( $cat ) );
 		} else {
 			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}
@@ -91,12 +91,12 @@ function aw_seo_breadcrumb_trail() {
 		}
 	} elseif ( aw_seo_is_category_page() ) {
 		$all   = aw_seo_categories_url();
-		$trail = array_merge( $all ? array( array( 'Categories', $all ) ) : array(), array( array( single_term_title( '', false ), get_term_link( get_queried_object() ) ) ) );
+		$trail = array_merge( $all ? array( array( 'Categories', $all ) ) : array(), array( array( single_term_title( '', false ), kits_term_url( get_queried_object() ) ) ) );
 	} elseif ( is_tag() ) { // Home › the tag's section › Tag
 		$term = get_queried_object();
 		$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
 		$obj  = $sec ? get_post_type_object( $sec ) : null;
-		$trail = array_merge( $obj ? array( array( $obj->labels->name, aw_hub_url( $sec ) ) ) : array(), array( array( single_term_title( '', false ), get_term_link( $term ) ) ) );
+		$trail = array_merge( $obj ? array( array( $obj->labels->name, aw_hub_url( $sec ) ) ) : array(), array( array( single_term_title( '', false ), kits_term_url( $term ) ) ) );
 	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
 		$obj   = get_queried_object();
 		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );

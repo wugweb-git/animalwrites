@@ -581,7 +581,7 @@ function aw_faq_context( $obj = null ) {
 		);
 	}
 	if ( $obj instanceof WP_Term && aw_faq_term_allowed( $obj ) ) {
-		$url = (string) get_term_link( $obj );
+		$url = (string) kits_term_url( $obj );
 		return array( 'kind' => 'term', 'id' => $obj->term_id, 'type' => $obj->taxonomy, 'entity' => aw_faq_plain( $obj->name ), 'url' => $url, 'page_id' => $url . '#page', 'about' => $url . '#page', 'head' => 'Questions about ' . aw_faq_plain( single_term_title( '', false ) ? single_term_title( '', false ) : $obj->name ) );
 	}
 	if ( $obj instanceof WP_Post && 'page' === $obj->post_type && in_array( (int) $obj->ID, aw_faq_hub_pages(), true ) ) {
@@ -954,7 +954,7 @@ function aw_faq_topic_pages() {
 	$out   = array();
 	$terms = get_terms( array( 'taxonomy' => array( 'post_tag', 'category' ), 'hide_empty' => false, 'meta_key' => 'aw_faq' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	foreach ( is_wp_error( $terms ) ? array() : $terms as $t ) {
-		$out[] = array( 'term', $t->term_id, ( 'category' === $t->taxonomy ? 'Category: ' : ( in_array( $t->slug, aw_listing_type_slugs(), true ) ? 'Type: ' : 'Service: ' ) ) . html_entity_decode( $t->name ), get_edit_term_link( $t ), get_term_link( $t ), aw_faq_items( 'term', $t->term_id ) );
+		$out[] = array( 'term', $t->term_id, ( 'category' === $t->taxonomy ? 'Category: ' : ( in_array( $t->slug, aw_listing_type_slugs(), true ) ? 'Type: ' : 'Service: ' ) ) . html_entity_decode( $t->name ), get_edit_term_link( $t ), kits_term_url( $t ), aw_faq_items( 'term', $t->term_id ) );
 	}
 	foreach ( aw_faq_hub_pages() as $slug => $pid ) {
 		$items = aw_faq_items( 'post', $pid );

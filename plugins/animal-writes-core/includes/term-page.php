@@ -64,7 +64,7 @@ function aw_block_term_share() {
 		return '';
 	}
 	$title = function_exists( 'aw_seo_plain' ) && function_exists( 'aw_seo_term_title' ) ? preg_replace( '/ – Animal Writes$/u', '', aw_seo_plain( aw_seo_term_title( $term ) ) ) : html_entity_decode( $term->name, ENT_QUOTES );
-	return '<div class="aw-item-share">' . kits_share_html( (string) get_term_link( $term ), $title ) . '</div>';
+	return '<div class="aw-item-share">' . kits_share_html( (string) kits_term_url( $term ), $title ) . '</div>';
 }
 
 /**
@@ -116,7 +116,7 @@ function aw_block_term_related() {
 	$out = '<ul class="kit-tags aw-term-chips">';
 	foreach ( $terms as $t ) {
 		$ico  = 'post_tag' === $t->taxonomy && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t->slug ) : '';
-		$out .= '<li><a class="kit-chip" href="' . esc_url( get_term_link( $t ) ) . '">' . $ico . esc_html( html_entity_decode( $t->name, ENT_QUOTES ) ) . '</a></li>';
+		$out .= '<li><a class="kit-chip" href="' . esc_url( kits_term_url( $t ) ) . '">' . $ico . esc_html( html_entity_decode( $t->name, ENT_QUOTES ) ) . '</a></li>';
 	}
 	return aw_term_section( 'related', $head, $out . '</ul>' );
 }

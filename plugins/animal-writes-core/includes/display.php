@@ -88,20 +88,8 @@ add_action(
 	}
 );
 
-// Homepage: start downloading the hero photo before the body is parsed (largest element on screen).
-add_action(
-	'wp_head',
-	function () {
-		if ( ! is_front_page() ) {
-			return;
-		}
-		$post = get_queried_object();
-		if ( $post && preg_match( '/<img[^>]+fetchpriority="high"[^>]*>/', (string) $post->post_content, $m ) && preg_match( '/src="([^"]+)"/', $m[0], $src ) ) {
-			printf( '<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n", esc_url( $src[1] ) );
-		}
-	},
-	1
-);
+// The front-page hero preload lives in the theme (functions.php) and in Optimization Detective; this plugin printed a third one
+// (and nothing once the hero became a pattern), so it was removed (audit 19, owner 21 Oct 2026).
 
 // The phone help bar was removed (owner, 8 Oct 2026).
 

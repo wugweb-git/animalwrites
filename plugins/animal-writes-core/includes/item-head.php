@@ -115,7 +115,7 @@ function aw_item_type_terms( $id ) {
 /** One chip for a term: its icon (if it has one), then its name, linked to its page. */
 function aw_item_chip( $t ) {
 	$icon = 'post_tag' === $t->taxonomy && function_exists( 'aw_tag_icon' ) ? aw_tag_icon( $t->slug ) : '';
-	return '<a class="kit-chip" href="' . esc_url( get_term_link( $t ) ) . '" rel="tag">' . $icon . esc_html( $t->name ) . '</a>';
+	return '<a class="kit-chip" href="' . esc_url( kits_term_url( $t ) ) . '" rel="tag">' . $icon . esc_html( $t->name ) . '</a>';
 }
 
 /** The item's date: the original's for sourced items, the day posted for opportunities, else the post date (0 for none). */

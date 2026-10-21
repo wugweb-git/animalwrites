@@ -110,12 +110,43 @@ add_filter(
 
 /* ---------- Menus ---------- */
 
-/** Unread messages (no aw_read flag yet) and claims waiting for a decision. */
+/**
+ * Unread messages (no aw_read flag yet) and claims waiting for a decision. Cached 5 minutes (audit 9, owner 21 Oct 2026:
+ * every admin page ran two unbounded queries, twice); a change to a message, claim or review item clears it.
+ */
 function aw_inbox_counts() {
+	static $now = null;
+	if ( null !== $now ) {
+		return $now;
+	}
+	$cached = get_transient( 'aw_inbox_counts' );
+	if ( is_array( $cached ) ) {
+		return $now = $cached;
+	}
 	$messages = count( get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => 'aw_read', 'compare' => 'NOT EXISTS' ) ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	$claims   = count( get_posts( array( 'post_type' => 'aw_claim', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => 'aw_c_status', 'value' => 'pending' ) ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	return array( $messages, $claims );
+	set_transient( 'aw_inbox_counts', array( $messages, $claims ), 5 * MINUTE_IN_SECONDS );
+	return $now = array( $messages, $claims );
 }
+
+/** Forget the cached Inbox and To-review counts (a message, claim or review item changed). */
+function aw_inbox_counts_flush() {
+	delete_transient( 'aw_inbox_counts' );
+	delete_transient( 'aw_review_count' );
+}
+add_action( 'transition_post_status', function ( $new, $old, $post ) {
+	if ( in_array( $post->post_type, array( 'aw_message', 'aw_claim', 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
+		aw_inbox_counts_flush();
+	}
+}, 10, 3 );
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_ia_hook ) {
+	add_action( $aw_ia_hook, function ( $mid, $id, $key ) {
+		if ( in_array( $key, array( 'aw_read', 'aw_c_status', 'aw_review' ), true ) ) {
+			aw_inbox_counts_flush();
+		}
+	}, 10, 3 );
+}
+unset( $aw_ia_hook );
 
 /** A count bubble like WordPress's own. */
 function aw_menu_count( $n ) {

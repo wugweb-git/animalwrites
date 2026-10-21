@@ -200,7 +200,7 @@ function aw_block_section_head( $a ) {
 function aw_head_below( $filters, $count, $type = '' ) {
 	$base = '';
 	if ( 'term' === $type ) { // a category or tag page: Sort in a sheet of its own on phones, kept to the page's address
-		$base    = (string) get_term_link( get_queried_object() );
+		$base    = (string) kits_term_url( get_queried_object() );
 		$group   = function_exists( 'aw_sort_group' ) ? aw_sort_group( 'term' ) : '';
 		$filters = '' !== $group && function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $group, array(), $base ) : $filters;
 	}

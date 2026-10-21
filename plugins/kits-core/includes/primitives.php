@@ -1,5 +1,20 @@
 <?php
 /**
+ * A term's address, or '' when WordPress cannot make one (get_term_link returns a WP_Error for a missing term or
+ * taxonomy; printed or put in schema it raised notices). Use this instead of get_term_link in templates and schema.
+ *
+ * @param WP_Term|int|string $term     Term.
+ * @param string             $taxonomy Taxonomy, when $term is not an object.
+ * @return string
+ */
+if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy for a site without Kits Core
+	function kits_term_url( $term, $taxonomy = '' ) {
+		$url = get_term_link( $term, $taxonomy );
+		return is_wp_error( $url ) ? '' : (string) $url;
+	}
+}
+
+/**
  * Kits primitives (Phase 11 B.2): markup helpers so every page uses the same component for the same job.
  * Styles: themes/kits-by-wugweb/assets/css/kit-primitives.css. Behaviour (sheet, show more): kit.js.
  *

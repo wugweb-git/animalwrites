@@ -183,7 +183,7 @@ function aw_seo_filtered_view() {
 		return $view;
 	}
 	if ( 'tag' === $key && $term && (int) $term->count >= AW_FILTERED_MIN_ITEMS ) {
-		$view['canonical'] = get_term_link( $term ); // the tag page lists the same items and is the indexed one
+		$view['canonical'] = kits_term_url( $term ); // the tag page lists the same items and is the indexed one
 		$view['index']     = true;
 		return $view;
 	}

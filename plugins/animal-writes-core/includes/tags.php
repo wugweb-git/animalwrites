@@ -198,7 +198,7 @@ function aw_service_type_note( $q ) {
 	if ( ! $type || (int) $type->count < 1 ) {
 		return '';
 	}
-	return '<p class="kit-note"><a href="' . esc_url( get_term_link( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
+	return '<p class="kit-note"><a href="' . esc_url( kits_term_url( $type ) ) . '">' . aw_tag_icon( $type->slug ) . esc_html( 'See all ' . html_entity_decode( $type->name, ENT_QUOTES ) ) . '</a> (' . esc_html( number_format_i18n( (int) $type->count ) ) . ')</p>';
 }
 
 // Settings: the Tags screen lists the tags still on the default icon.

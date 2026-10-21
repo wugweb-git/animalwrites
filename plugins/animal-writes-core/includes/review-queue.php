@@ -49,7 +49,12 @@ function aw_review_items( $type = '' ) {
 function aw_review_count() {
 	static $n = null;
 	if ( null === $n ) {
-		$n = count( aw_review_items() );
+		$cached = get_transient( 'aw_review_count' ); // cached 5 minutes; aw_inbox_counts_flush() (admin-ia.php) clears it (audit 9)
+		if ( false === $cached ) {
+			$cached = count( aw_review_items() );
+			set_transient( 'aw_review_count', $cached, 5 * MINUTE_IN_SECONDS );
+		}
+		$n = (int) $cached;
 	}
 	return $n;
 }

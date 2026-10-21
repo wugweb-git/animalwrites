@@ -43,7 +43,7 @@ add_shortcode(
 		$html = '<ul class="aw-categories-index">';
 		foreach ( $terms as $t ) {
 			$img  = function_exists( 'aw_category_image_id' ) ? aw_category_image_id( $t ) : 0;
-			$html .= '<li><a href="' . esc_url( get_term_link( $t ) ) . '">'
+			$html .= '<li><a href="' . esc_url( kits_term_url( $t ) ) . '">'
 				. ( $img ? wp_get_attachment_image( $img, 'medium', false, array( 'alt' => '', 'loading' => 'lazy' ) ) : '' )
 				. '<span class="aw-categories-name">' . esc_html( $t->name ) . '</span>'
 				. '<span class="aw-categories-n">' . (int) $t->count . '</span></a></li>';
@@ -252,9 +252,9 @@ add_shortcode(
 			return '';
 		}
 		if ( 'links' === ( $a['style'] ?? '' ) ) { // plain text links (footer)
-			return '<ul class="kit-footer-inline">' . implode( '', array_map( fn( $t ) => '<li><a href="' . esc_url( get_term_link( $t ) ) . '">' . esc_html( $t->name ) . '</a></li>', $terms ) ) . '</ul>';
+			return '<ul class="kit-footer-inline">' . implode( '', array_map( fn( $t ) => '<li><a href="' . esc_url( kits_term_url( $t ) ) . '">' . esc_html( $t->name ) . '</a></li>', $terms ) ) . '</ul>';
 		}
-		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li>' . kits_chip( $t->name, get_term_link( $t ), 'on-ink' ) . '</li>', $terms ) ) . '</ul>';
+		return '<ul class="aw-footer-list">' . implode( '', array_map( fn( $t ) => '<li>' . kits_chip( $t->name, kits_term_url( $t ), 'on-ink' ) . '</li>', $terms ) ) . '</ul>';
 	}
 );
 

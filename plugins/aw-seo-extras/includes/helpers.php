@@ -9,6 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! function_exists( 'kits_term_url' ) ) { // Kits Core's helper (a term's address, '' for a WP_Error); here in case Kits Core is not loaded
+	function kits_term_url( $term, $taxonomy = '' ) {
+		$url = get_term_link( $term, $taxonomy );
+		return is_wp_error( $url ) ? '' : (string) $url;
+	}
+}
+
 /** Longest search description, in characters (155: Google's desktop snippet fits about 151 of ours, so more would be cut). */
 const AW_SEO_DESC_MAX = 155;
 

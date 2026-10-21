@@ -119,6 +119,47 @@ add_action(
 	}
 );
 
+/**
+ * Daily visit rows older than 90 days become one row per month (aw_visits_YYYYMM), then the daily rows go (audit 11, owner
+ * 21 Oct 2026): the counter wrote a new option every day and never removed one. The total (aw_visits_total) is untouched.
+ * Safe to repeat: months are added to before any day is deleted.
+ *
+ * @return int Daily rows rolled up.
+ */
+function kits_visits_rollup() {
+	global $wpdb;
+	$cut  = 'aw_visits_' . gmdate( 'Ymd', time() - 90 * DAY_IN_SECONDS );
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name REGEXP '^aw_visits_[0-9]{8}$' AND option_name < %s", $cut ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	if ( ! $rows ) {
+		return 0;
+	}
+	$months = array();
+	foreach ( $rows as $r ) {
+		$m            = 'aw_visits_' . substr( $r->option_name, 10, 6 );
+		$months[ $m ] = ( $months[ $m ] ?? 0 ) + (int) $r->option_value;
+	}
+	foreach ( $months as $name => $n ) {
+		add_option( $name, 0, '', false );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + %d WHERE option_name = %s", $n, $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+	foreach ( $rows as $r ) {
+		delete_option( $r->option_name );
+	}
+	return count( $rows );
+}
+
+// Once a day, when someone opens the admin (never on a visitor's page view).
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'aw_visits_rolled' ) === gmdate( 'Y-m-d' ) ) {
+			return;
+		}
+		update_option( 'aw_visits_rolled', gmdate( 'Y-m-d' ) );
+		kits_visits_rollup();
+	}
+);
+
 /** Where the browser posts a visit: the REST route, or a lighter endpoint a site plugin offers. */
 function kits_visit_endpoint() {
 	return (string) apply_filters( 'kits_visit_endpoint', rest_url( 'aw/v1/visit' ) );
