@@ -12,8 +12,8 @@
  *   replace something already on the listing, and every medium or low one, waits in the queue.
  * - Google Places is a locator and a check only: the listing keeps its place ID and Maps link; Google's phone, hours,
  *   rating and status are never stored here (shown live, enrichment-front.php). A field whose only source is Google is
- *   flagged "Invite to claim". Google reporting the place permanently closed: noindex, a "Reported closed" note and a
- *   review row. Two listings with the same place ID or Darpan ID: "Possible duplicate" (never merged).
+ *   flagged "Invite to claim". Google reporting the place permanently closed: the listing stays in search and
+ *   carries a "Reported closed" note (owner, 21 Oct 2026); logged, nothing to review. Two listings with the same place ID or Darpan ID: "Possible duplicate" (never merged).
  *
  * REST (Editor's Application Password, like the ingest):
  *   GET  aw/v1/enrich/queue    the next listings to check (new or claimed first, then AWBI address-only, then the
@@ -979,12 +979,12 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	if ( ! empty( $flags['reported_closed'] ) ) {
 		$rc  = (array) $flags['reported_closed'];
 		$src = array( array( 'key' => 'google_places', 'name' => 'Google Maps', 'url' => esc_url_raw( (string) ( $rc['url'] ?? '' ) ), 'fetched_at' => sanitize_text_field( (string) ( $rc['at'] ?? '' ) ) ) );
-		update_post_meta( $lid, 'aw_reported_closed', wp_date( 'Y-m-d' ) ); // noindex and the note at once; the review decides
+		update_post_meta( $lid, 'aw_reported_closed', wp_date( 'Y-m-d' ) ); // the listing stays in search and shows the "Reported closed" note (owner, 21 Oct 2026)
 		aw_enrich_flag( $lid, 'reported_closed', wp_date( 'Y-m-d' ) );
 		global $wpdb;
-		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = 'closed' AND status = 'pending'", $lid ) ) ) { // phpcs:ignore WordPress.DB
-			aw_enrich_add_row( $lid, 'closed', 'Google Maps shows this place as permanently closed', '', $src, 'medium', 'pending', $run, 'Approve keeps the listing out of search with the note; reject clears both' );
-			$out['queued'][] = 'closed';
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = 'closed' AND status IN ('auto-applied','approved')", $lid ) ) ) { // phpcs:ignore WordPress.DB
+			aw_enrich_add_row( $lid, 'closed', 'Google Maps shows this place as permanently closed', '', $src, 'medium', 'auto-applied', $run, 'Shown on the listing as "Reported closed"; nothing to review' );
+			$out['applied'][] = 'closed';
 		}
 		aw_enrich_after_change( $lid );
 	}
