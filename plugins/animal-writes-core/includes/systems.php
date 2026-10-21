@@ -92,7 +92,7 @@ function aw_text( $id, $words = 28 ) {
  * Several filters can apply at once; every filtered list is canonical to the plain list (indexing.php).
  */
 const AW_LIST_FILTERS = array(
-	'aw_legal'       => array( array( 'tag', 'post_tag', 'Library type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'State' ) ),
+	'aw_legal'       => array( array( 'tag', 'post_tag', 'Document type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'State' ) ),
 	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
 	'post'           => array( array( 'tag', 'resource-kind', 'Resource type' ), array( 'category_name', 'category', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
 	'aw_opportunity' => array( array( 'tag', 'post_tag', 'Opportunity type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
@@ -301,7 +301,9 @@ function aw_list_filters( $type ) {
 	}
 	$groups .= aw_sort_group( $type ); // phones: Sort is the first choice in the Filters sheet; from 768 the toolbar's segment (aw_sort_segment) is the control
 	unset( $keep['sort'] ); // the Sort choice carries it
-	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, '', $keep ) : '';
+	// No chips (owner, 21 Oct 2026): each filter's button already shows what is chosen and changes it; one "Clear all" link remains.
+	$bar = function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, array(), $all, '', $keep ) : '';
+	return $bar . ( $chips && '' !== $bar ? '<a class="kit-filter-clear" href="' . esc_url( $all ) . '">Clear all</a>' : '' );
 }
 
 /** The sorts a list offers: key => label, none when it has one order or fewer than 2 items. */
