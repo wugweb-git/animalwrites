@@ -17,7 +17,7 @@ from places import Places
 
 SOURCE = {
     "source_name": "DAHD (Lok Sabha question 2854)",
-    "source_url": "https://dahd.gov.in/sites/default/files/2025-04/LS2854.pdf",
+    "source_url": "https://web.archive.org/web/20251222192516/https://dahd.gov.in/sites/default/files/2025-04/LS2854.pdf",  # DAHD removed the PDF; Wayback Machine copy of 22 Dec 2025
     "source_date": "2025-03-18",
 }
 
