@@ -1334,3 +1334,8 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.kit-section-desc { font-size: .875rem; }
 	.aw-dir-search .kit-field > label { font-size: .8125rem; }
 }
+
+/* The wide stacked card (picture left, text right; News, Library, Resources lists on narrow screens): padding halved (24 to 12px) and
+   the picture column 30% against 70% for the text, was 40 to 60 (owner, 21 Oct 2026). The smaller stacked cards are unchanged. */
+.kit-card--stacked-lg { padding: var(--kit-space-3) !important; }
+.kit-card--stacked-lg > .kit-card-media { width: 30% !important; max-width: 30%; }
