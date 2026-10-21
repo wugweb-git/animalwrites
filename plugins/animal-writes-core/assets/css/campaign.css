@@ -429,10 +429,9 @@
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
 /* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
 .aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
-.aw-camp-tint h2 { color: var(--camp-primary); }
-.aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; }
+.aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; align-items: start; }
 .aw-letter-share-box.is-in-section .aw-letter-share { margin-top: 0; }
 .aw-letter-share-box.is-in-section .aw-letter-share-pics { padding-top: var(--kit-space-5); }
-.aw-letter-next { margin: var(--kit-space-4) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
-.aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
-.aw-letter-next a:hover strong { text-decoration: underline; }
+.aw-letter-next { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
+.aw-letter .aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
+.aw-letter .aw-letter-next a:hover strong { text-decoration: underline; }

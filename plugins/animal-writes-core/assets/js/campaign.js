@@ -418,7 +418,7 @@
 			var nx = document.createElement('p');
 			nx.className = 'aw-letter-next';
 			nx.innerHTML = '<a href="#share"><strong>Sent? Now get three more letters in.</strong> Share this page ' + '<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>';
-			confirmBox.parentNode.insertBefore(nx, confirmBox);
+			thanks.parentNode.insertBefore(nx, thanks.nextSibling); // under the thank-you
 		}
 	}
 	showSendShare(false);
