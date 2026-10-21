@@ -11,7 +11,7 @@ Check this list against git and the live site before acting on it. Failing AI ke
 6. **AWO list: 89 held matches** (`Claude outputs/awo-held-matches-2026-10-21.csv`): 49 similar to an existing listing, 36 with the same name in the same place, 4 posts rather than organisations. Owner decides: merge into the existing listing or add as new.
 7. **One central table for volunteers.** Owner wants one central table. `wp_aw_volunteers` (357 rows) and FluentCRM (352 tagged Volunteer) both hold them. Open: which one is the central one. Nothing is deleted.
 8. **Plugin audit (19 Oct, 25 findings in `Claude outputs/plugin-audit-2026-10-19.md`).** Findings 8, 9, 11, 19, 24 made on 21 Oct 2026 in this repo (9: Inbox and To-review counts cached 5 min; 11: daily visit rows over 90 days roll into months; 19: plugin hero preload removed; 24: `kits_term_url` guards every term link). 21 is item 7.
-9. **Branch `home-revision-2026-10-18`** (5 commits, local only): superseded by live (page 57 has the same section order; live patterns are newer). Keep, do not merge (rule 1 in CLAUDE.md).
+9. ~~Branch `home-revision-2026-10-18`~~ deleted on 21 Oct 2026 (owner: use it or trash it): it was superseded by live, so nothing was lost. Its tip was `6adbba2`; `git branch home-revision-2026-10-18 6adbba2` brings it back while git keeps the commits.
 
 ## Dates
 These live in WordPress: **Tools → Dates** (month calendar, add and remove) and a Dashboard box; stored in the option `aw_team_dates` (animal-writes-core `includes/team-dates.php`). Keep both lists in step.
