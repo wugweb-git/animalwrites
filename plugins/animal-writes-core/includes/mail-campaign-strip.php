@@ -97,8 +97,15 @@ function aw_mail_campaign_strip_html() {
 		return '';
 	}
 	if ( false !== strpos( (string) $c[1], '/campaigns/lab-animals-rules-2026/' ) ) {
-		$day = $c[2] ? strtoupper( wp_date( 'j M', strtotime( $c[2] . ' 12:00:00' ) ) ) : '5 NOV'; // the one thing that changes: the closing date follows the campaign (aw_campaign_close)
-		return '<div style="margin-top:16px">' . str_replace( '>5 NOV<', '>' . esc_html( $day ) . '<', AW_MAIL_STRIP_LAB_RULES ) . '</div>';
+		// Only the date block changes, counting down each day (owner, 21 Oct 2026: "the date should change"); the owner's HTML is otherwise untouched.
+		$days = aw_mail_campaign_days_left( $c[2] );
+		$html = AW_MAIL_STRIP_LAB_RULES;
+		if ( null !== $days ) {
+			$html = str_replace( array( '>5 NOV<', '>DEADLINE<' ), 0 === $days ? array( '>LAST<', '>DAY<' ) : array( '>' . (int) $days . '<', 1 === $days ? '>DAY LEFT<' : '>DAYS LEFT<' ), $html );
+		}
+		// On a phone the three cells stack: the date block, the words, the button, each the full width (the markup is not edited; this sheet only restyles it).
+		$css = '<style>@media only screen and (max-width:480px){table[style*="max-width:560px"] td{display:block !important;width:auto !important;box-sizing:border-box !important;text-align:left !important;padding:12px 14px !important}table[style*="max-width:560px"] td[align="center"]:first-child{text-align:left !important}table[style*="max-width:560px"] td a[style*="inline-block"]{display:block !important;text-align:center !important;font-size:15px !important;padding:12px 14px !important}table[style*="max-width:560px"] td a div{font-size:16px !important;line-height:1.35 !important}table[style*="max-width:560px"] td a div+div{font-size:14px !important}table[style*="max-width:560px"] td:first-child div:first-child{font-size:26px !important}table[style*="max-width:560px"] td:first-child div+div{font-size:11px !important}}</style>';
+		return '<div style="margin-top:16px">' . $css . $html . '</div>';
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
 	$days  = aw_mail_campaign_days_left( $c[2] );
