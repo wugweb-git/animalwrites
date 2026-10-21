@@ -79,7 +79,8 @@ function aw_report_errors( $v ) {
 }
 
 /**
- * Save a checked report (Inbox > Reports, status New).
+ * Save a checked report (Inbox > Reports, status New). Never calls aw_crm_sync(): the form asks for no email, so there
+ * is no one to add to FluentCRM, and reporting a listing is not a reason to keep a record of the sender.
  *
  * @return array|false array{url, title, text}, or false when it could not be saved.
  */

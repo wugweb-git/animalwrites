@@ -143,9 +143,9 @@ add_action(
 					if ( function_exists( 'aw_vol_upsert' ) ) {
 						aw_vol_upsert( array( 'name' => $name, 'email' => $email, 'city_text' => $city, 'page_source' => 'campaign:' . $slug, 'source' => 'v2_form', 'consent_scope' => 'volunteering_and_updates', 'consent_text_version' => AW_CL_CONSENT ) );
 					}
-					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT, array( 'city' => $city ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
-					if ( function_exists( 'aw_crm_volunteer_sync' ) ) {
-						aw_crm_volunteer_sync( $email );
+					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT );
+					if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php)
+						aw_crm_sync( $email, $name, 'campaign-letter', array( 'subscribe' => true, 'box' => '1' === (string) $req['consent'], 'consent' => AW_CL_CONSENT, 'page' => (string) get_permalink( $id ), 'tags' => array( 'newsletter', 'volunteer', 'campaign-' . $slug ), 'extra' => array( 'city' => $city ), 'source' => 'site:campaign:' . $slug, 'volunteer' => true ) );
 					}
 					return array( 'ok' => true );
 				},

@@ -163,9 +163,6 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_m_source', $source ); // the page it was sent from (S5.8)
-	if ( function_exists( 'aw_crm_message_note' ) ) {
-		aw_crm_message_note( $id ); // a note on the sender's FluentCRM contact (fluentcrm.php); none for a removal request
-	}
 	if ( 'remove-data' === $v['about'] ) {
 		// DPDP: tagged for the Inbox, and WordPress's own confirmation email is sent. Nothing is deleted until the person
 		// opens that link (privacy-requests.php runs the erasers then, and the request record is the log).
@@ -177,8 +174,13 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 		}
 	}
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
-	if ( function_exists( 'aw_nl_optin' ) && 'remove-data' !== $v['about'] ) { // a removal request never subscribes anyone
-		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'contact', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $nl_consent );
+	// A removal request never subscribes anyone and never reaches FluentCRM: its whole point is that we hold less.
+	if ( 'remove-data' !== $v['about'] ) {
+		$consent = null === $nl_consent ? AW_NL_CONSENT : $nl_consent;
+		$sub     = function_exists( 'aw_nl_optin' ) && aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $consent );
+		if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): the contact, the message as a note, the Form fields
+			aw_crm_sync( $v['email'], $v['name'], 'contact', array( 'subscribe' => $sub, 'box' => (bool) $nl, 'consent' => $consent, 'page' => $source, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'contact-form', 'message' => $id ) );
+		}
 	}
 	$text = sprintf( 'We\'ll reply to %s.', $v['email'] );
 	return array( 'url' => kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text );

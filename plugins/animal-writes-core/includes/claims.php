@@ -212,8 +212,10 @@ function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) 
 	}
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
 	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
-	if ( function_exists( 'aw_nl_optin' ) ) {
-		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'claim', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'claim', $nl, $nl_consent );
+	$consent = null === $nl_consent ? AW_NL_CONSENT : $nl_consent;
+	$sub     = function_exists( 'aw_nl_optin' ) && aw_nl_optin( $v['email'], $v['name'], 'claim', $nl, $consent );
+	if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): on the Newsletter list only when the box was ticked
+		aw_crm_sync( $v['email'], $v['name'], 'claim', array( 'subscribe' => $sub, 'box' => (bool) $nl, 'consent' => $consent, 'page' => $source, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'site:claim' ) );
 	}
 	$text = sprintf( 'We\'ll check it and email you at %s.', $v['email'] );
 	return array( 'url' => kits_thanks_url( 'claim', array( 'listing' => (int) $listing->ID, 'from' => false ), 'Request sent.', $text ), 'title' => 'Request sent.', 'text' => $text );

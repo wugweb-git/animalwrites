@@ -59,6 +59,8 @@ function aw_send_removal_link( $request_id ) {
  * @return array array{url, title, text} for the thank-you page.
  */
 function aw_remove_data_save( $email ) {
+	// Never aw_crm_sync(): the person is asking us to delete what we hold, so this form must not add or update a
+	// FluentCRM contact. Once they confirm, the aw-fluentcrm eraser (fluentcrm.php) deletes the contact.
 	$id = wp_create_user_request( $email, 'remove_personal_data' );
 	if ( ! is_wp_error( $id ) ) {
 		aw_send_removal_link( $id );

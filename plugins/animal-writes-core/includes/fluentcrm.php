@@ -23,7 +23,14 @@
  *   row and screen. The reply goes out through wp_mail (the site's mailbox) under the daily cap, first in the queue
  *   (mail-cap.php), Reply-To the address that email was sent to, so the answer comes back through the mail webhook as
  *   a new note; the reply itself is logged as a note "Reply sent: <subject>". Form messages get no Reply.
- * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, volunteers, notes).
+ *
+ * Forms reach FluentCRM one way only (owner, 21 Oct 2026): aw_crm_sync(), called by each form's handler after its own
+ * record is saved (Contact, Newsletter, Volunteer sign-up, Claim this listing, Campaign letter). Every call writes the
+ * same "Form submission" custom fields: source form, newsletter box (yes/no), consent wording version, page URL, IP,
+ * city/region/country (from the IP), device, browser, OS and time. The Fluent Forms → FluentCRM integration feeds are
+ * off for the site's forms (filter below; `wp aw crm-feeds --off`), so nothing is written twice. Report a mistake and
+ * Remove my data never call it (comments in reports.php and privacy-requests.php).
+ * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, volunteers, notes), `wp aw crm-feeds`.
  *
  * @package animal-writes-core
  */
@@ -115,14 +122,223 @@ function aw_crm_volunteer_fields( $state_slug, $district_slug, $city, $pincode, 
 	);
 }
 
-/** One sign-up onto both lists: the site's (active) and FluentCRM's Newsletter (subscribed). */
-function aw_newsletter_join( $email, $name, $source, $consent, $extra = array(), $tags = array() ) {
-	$res = function_exists( 'aw_nl_activate' ) ? aw_nl_activate( $email, $name, $source, $consent ) : false;
-	if ( aw_crm_on() ) {
-		aw_crm_subscribe( $email, $name, $extra + array( 'source' => $source ), $tags );
-	}
-	return $res;
+/** One sign-up onto the site's own list (active). FluentCRM is written by the form's handler through aw_crm_sync(). */
+function aw_newsletter_join( $email, $name, $source, $consent ) {
+	return function_exists( 'aw_nl_activate' ) ? aw_nl_activate( $email, $name, $source, $consent ) : false;
 }
+
+/* ---------- Forms: one way into FluentCRM ---------- */
+
+/** The forms that reach FluentCRM: key => name written to "Form: source". Report and Remove my data never do. */
+const AW_CRM_FORMS = array(
+	'contact'         => 'Contact',
+	'newsletter'      => 'Newsletter',
+	'volunteer'       => 'Volunteer sign-up',
+	'claim'           => 'Claim this listing',
+	'campaign-letter' => 'Campaign letter',
+);
+
+/** Custom fields (group "Form submission"): what the latest form sent. Every aw_crm_sync() call writes all of them. */
+const AW_CRM_FORM_FIELDS = array(
+	'form_source'          => 'Form: source form',
+	'form_newsletter_box'  => 'Form: newsletter box',
+	'form_consent_version' => 'Form: consent wording',
+	'form_page_url'        => 'Form: page URL',
+	'form_ip'              => 'Form: IP address',
+	'form_city'            => 'Form: city',
+	'form_region'          => 'Form: region',
+	'form_country'         => 'Form: country',
+	'form_device'          => 'Form: device',
+	'form_browser'         => 'Form: browser',
+	'form_os'              => 'Form: operating system',
+	'form_time'            => 'Form: sent at',
+);
+
+/**
+ * The one way a form reaches FluentCRM (owner, 21 Oct 2026). Each form's handler calls it after its own record is
+ * saved; the Fluent Forms → FluentCRM integration feeds are off for these forms (aw_crm_feeds_off), so nothing is
+ * written twice. Who joins the Newsletter list is the caller's rule, unchanged: 'subscribe' true adds the contact to
+ * it as subscribed (someone who unsubscribed keeps that status); otherwise the person is a contact only (a new one is
+ * "transactional"). Every call writes the same Form fields. Sends nothing.
+ *
+ * @param string $email    Email.
+ * @param string $name     Full name (optional).
+ * @param string $form_key A key of AW_CRM_FORMS.
+ * @param array  $args {
+ *     @type bool   $subscribe Add to the Newsletter list (subscribed).
+ *     @type bool   $box       The newsletter box as sent (the newsletter form itself counts as ticked).
+ *     @type string $consent   Consent wording version shown on the form.
+ *     @type string $page      Page URL, or the site path the form was sent from.
+ *     @type array  $tags      Tag slugs.
+ *     @type array  $extra     FluentCRM contact fields (phone, address_line_1, city, state, postal_code, country).
+ *     @type string $source    FluentCRM source.
+ *     @type int    $message   Contact messages item: its note goes on the contact (aw_crm_message_note).
+ *     @type bool   $volunteer Copy the volunteers table row onto the contact (aw_crm_volunteer_sync).
+ * }
+ * @return int Contact ID, or 0.
+ */
+function aw_crm_sync( $email, $name, $form_key, $args = array() ) {
+	$email = strtolower( trim( (string) $email ) );
+	if ( ! aw_crm_on() || ! is_email( $email ) || ! isset( AW_CRM_FORMS[ $form_key ] ) ) {
+		return 0;
+	}
+	$a      = $args + array( 'subscribe' => false, 'box' => false, 'consent' => '', 'page' => '', 'tags' => array(), 'extra' => array(), 'source' => 'form:' . $form_key, 'message' => 0, 'volunteer' => false );
+	$extra  = array_filter( (array) $a['extra'] ) + array( 'source' => $a['source'] );
+	$client = aw_crm_client();
+	$extra += array( 'ip' => $client['ip'] );
+	if ( $a['subscribe'] ) {
+		$id = aw_crm_subscribe( $email, $name, $extra, $a['tags'] );
+	} else {
+		$c = aw_crm_contact_for( $email, $name, $a['tags'], $a['source'] );
+		if ( $c && $extra ) { // contact fields given (phone, address) are kept, as a subscriber's are
+			FluentCrmApi( 'contacts' )->createOrUpdate( array( 'email' => $email ) + array_diff_key( $extra, array( 'source' => 1 ) ) );
+		}
+		$id = $c ? (int) $c->id : 0;
+	}
+	$c = $id ? \FluentCrm\App\Models\Subscriber::find( $id ) : null;
+	if ( ! $c ) {
+		return 0;
+	}
+	aw_crm_form_fields_setup();
+	$vals = array(
+		'form_source'          => AW_CRM_FORMS[ $form_key ],
+		'form_newsletter_box'  => $a['box'] ? 'yes' : 'no',
+		'form_consent_version' => (string) $a['consent'],
+		'form_page_url'        => aw_crm_page_url( $a['page'] ),
+		'form_time'            => wp_date( 'Y-m-d H:i:s T' ),
+	) + array_combine( array_map( fn( $k ) => 'form_' . $k, array_keys( $client ) ), array_values( $client ) );
+	// FluentCRM keeps no empty value, so "unknown" stands in: every contact then has every Form field.
+	$c->syncCustomFieldValues( array_map( fn( $v ) => '' === (string) $v ? 'unknown' : (string) $v, $vals ), false );
+	if ( $a['message'] ) {
+		aw_crm_message_note( (int) $a['message'] );
+	}
+	if ( $a['volunteer'] ) {
+		aw_crm_volunteer_sync( $email );
+	}
+	return $id;
+}
+
+/** A page URL from a URL or a site path ("home" is the front page); the request's referrer on this site when none. */
+function aw_crm_page_url( $page ) {
+	$page = trim( (string) $page );
+	if ( '' === $page ) {
+		$ref  = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$page = wp_parse_url( $ref, PHP_URL_HOST ) === wp_parse_url( home_url(), PHP_URL_HOST ) ? $ref : '';
+		return strtok( $page, '?#' ) ?: '';
+	}
+	if ( preg_match( '#^https?://#', $page ) ) {
+		return esc_url_raw( $page );
+	}
+	return 'home' === $page ? home_url( '/' ) : home_url( '/' . trim( $page, '/' ) . '/' );
+}
+
+/**
+ * Who sent the form: IP, place (from the IP) and device, browser and operating system (from the user agent).
+ *
+ * @return array{ip:string, city:string, region:string, country:string, device:string, browser:string, os:string}
+ */
+function aw_crm_client() {
+	$ip  = trim( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- LiteSpeed puts the client's address here (kits-core preview.php)
+	$ip  = filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '';
+	$ua  = (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	return array( 'ip' => $ip ) + aw_crm_geo( $ip ) + aw_crm_user_agent( $ua );
+}
+
+/**
+ * City, region and country of an IP (ipapi.co, HTTPS, no key; 3 s at most). Kept 30 days per IP (hashed). Private
+ * and local addresses, and a failed lookup, give empty values.
+ *
+ * @param string $ip IP.
+ * @return array{city:string, region:string, country:string}
+ */
+function aw_crm_geo( $ip ) {
+	$none = array( 'city' => '', 'region' => '', 'country' => '' );
+	if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+		return $none;
+	}
+	$key = 'aw_geo_' . md5( ( defined( 'AUTH_SALT' ) ? AUTH_SALT : '' ) . $ip );
+	$hit = get_transient( $key );
+	if ( is_array( $hit ) ) {
+		return $hit + $none;
+	}
+	$resp = wp_remote_get( (string) apply_filters( 'aw_crm_geo_url', 'https://ipapi.co/' . rawurlencode( $ip ) . '/json/', $ip ), array( 'timeout' => 3, 'user-agent' => 'Animal Writes' ) );
+	$d    = is_wp_error( $resp ) || 200 !== wp_remote_retrieve_response_code( $resp ) ? array() : (array) json_decode( wp_remote_retrieve_body( $resp ), true );
+	if ( ! $d || ! empty( $d['error'] ) ) {
+		return $none; // not kept: the next form tries again
+	}
+	$geo = array( 'city' => (string) ( $d['city'] ?? '' ), 'region' => (string) ( $d['region'] ?? '' ), 'country' => (string) ( $d['country_name'] ?? ( $d['country'] ?? '' ) ) );
+	set_transient( $key, $geo, 30 * DAY_IN_SECONDS );
+	return $geo;
+}
+
+/**
+ * Device, browser and operating system from a user agent (names only, no versions).
+ *
+ * @param string $ua User agent.
+ * @return array{device:string, browser:string, os:string}
+ */
+function aw_crm_user_agent( $ua ) {
+	$pick = function ( $list ) use ( $ua ) {
+		foreach ( $list as $re => $name ) {
+			if ( preg_match( $re, $ua ) ) {
+				return $name;
+			}
+		}
+		return '' === $ua ? '' : 'Other';
+	};
+	$os      = $pick( array( '/Windows/i' => 'Windows', '/iPad/' => 'iPadOS', '/iPhone|iPod/' => 'iOS', '/Android/i' => 'Android', '/CrOS/' => 'ChromeOS', '/Mac OS X|Macintosh/' => 'macOS', '/Linux/i' => 'Linux' ) );
+	$browser = $pick( array( '/Edg(e|A|iOS)?\//' => 'Edge', '/OPR\/|Opera/' => 'Opera', '/SamsungBrowser/' => 'Samsung Internet', '/UCBrowser/' => 'UC Browser', '/FxiOS|Firefox\//' => 'Firefox', '/CriOS|Chrome\//' => 'Chrome', '/Safari\//' => 'Safari' ) );
+	$device  = '' === $ua ? '' : ( preg_match( '/iPad|Tablet|Android(?!.*Mobile)/i', $ua ) ? 'Tablet' : ( preg_match( '/Mobi|iPhone|iPod|Android/i', $ua ) ? 'Mobile' : 'Desktop' ) );
+	return array( 'device' => $device, 'browser' => $browser, 'os' => $os );
+}
+
+/** Add the Form fields and their group to FluentCRM's custom fields (keeps any others). Once per request. */
+function aw_crm_form_fields_setup() {
+	static $done = false;
+	if ( $done ) {
+		return 0;
+	}
+	$done   = true;
+	$fields = (array) fluentcrm_get_option( 'contact_custom_fields', array() );
+	$have   = wp_list_pluck( $fields, 'slug' );
+	$added  = 0;
+	foreach ( AW_CRM_FORM_FIELDS as $slug => $label ) {
+		if ( ! in_array( $slug, $have, true ) ) {
+			$fields[] = array( 'slug' => $slug, 'label' => $label, 'type' => 'text', 'group' => 'Form submission' );
+			++$added;
+		}
+	}
+	if ( $added ) {
+		fluentcrm_update_option( 'contact_custom_fields', array_values( $fields ) );
+	}
+	$groups = (array) ( fluentcrm_get_option( 'contact_field_groups' ) ? fluentcrm_get_option( 'contact_field_groups' ) : array( array( 'slug' => 'default', 'title' => 'Custom Profile Data' ) ) );
+	if ( ! in_array( 'Form submission', wp_list_pluck( $groups, 'title' ), true ) ) {
+		$groups[] = array( 'slug' => 'form_submission', 'title' => 'Form submission' );
+		fluentcrm_update_option( 'contact_field_groups', $groups );
+	}
+	return $added;
+}
+
+/** Fluent Forms form IDs that reach FluentCRM through aw_crm_sync() (the five site forms and the Newsletter form). */
+function aw_crm_ff_ids() {
+	$ids = array_map( 'intval', array_values( (array) get_option( 'aw_ff_forms', array() ) ) );
+	$ids[] = (int) get_option( 'aw_nl_ff_form' );
+	return array_values( array_filter( $ids ) );
+}
+
+// The Fluent Forms → FluentCRM integration never runs for these forms: aw_crm_sync() is their only way in, so a feed
+// switched back on in Fluent Forms by mistake writes nothing twice. (`wp aw crm-feeds --off` also marks the feeds off.)
+add_filter(
+	'fluentform/global_notification_active_types',
+	function ( $types, $form_id = 0 ) {
+		if ( in_array( (int) $form_id, aw_crm_ff_ids(), true ) ) {
+			unset( $types['fluentcrm_feeds'] );
+		}
+		return $types;
+	},
+	1000,
+	2
+);
 
 /* ---------- Messages: a note on the sender's contact ---------- */
 
@@ -457,6 +673,36 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			aw_crm_tag_ids( array_keys( AW_CRM_TAG_TITLES ) );
 			WP_CLI::success( 'List ' . aw_crm_list_id() . ', tag ' . implode( ',', aw_crm_tag_ids( array( 'volunteer-1.0' ) ) ) . ', volunteer fields added ' . aw_crm_fields_setup() );
+		}
+	);
+
+	// wp aw crm-feeds [--off]: the Fluent Forms → FluentCRM integration feeds on the site's forms (list, tags, on/off);
+	// --off switches them off (aw_crm_sync() is these forms' way into FluentCRM). Feeds are kept, never deleted.
+	WP_CLI::add_command(
+		'aw crm-feeds',
+		function ( $args, $assoc ) {
+			global $wpdb;
+			$ids = aw_crm_ff_ids();
+			if ( ! $ids ) {
+				WP_CLI::success( 'No site forms in Fluent Forms.' );
+				return;
+			}
+			$rows = (array) $wpdb->get_results( "SELECT m.id, m.form_id, f.title, m.value FROM {$wpdb->prefix}fluentform_form_meta m JOIN {$wpdb->prefix}fluentform_forms f ON f.id = m.form_id WHERE m.meta_key = 'fluentcrm_feeds' AND m.form_id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')' ); // phpcs:ignore
+			$out  = array();
+			foreach ( $rows as $r ) {
+				$v       = (array) json_decode( (string) $r->value, true );
+				$was     = ! empty( $v['enabled'] ) && 'false' !== $v['enabled'];
+				$list    = (int) ( $v['list_id'] ?? 0 );
+				$list    = $list && aw_crm_on() ? FluentCrmApi( 'lists' )->getInstance()->find( $list ) : null;
+				$tags    = array_filter( array_map( 'intval', (array) ( $v['tag_ids'] ?? array() ) ) );
+				$tags    = $tags && aw_crm_on() ? implode( ', ', FluentCrmApi( 'tags' )->getInstance()->whereIn( 'id', $tags )->pluck( 'slug' )->toArray() ) : '';
+				if ( $was && ! empty( $assoc['off'] ) ) {
+					$v['enabled'] = false;
+					$wpdb->update( "{$wpdb->prefix}fluentform_form_meta", array( 'value' => wp_json_encode( $v ) ), array( 'id' => (int) $r->id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				}
+				$out[] = array( 'form' => $r->form_id . ' ' . $r->title, 'feed' => $r->id . ' ' . ( $v['name'] ?? '' ), 'list' => $list ? $list->slug : '', 'tags' => $tags, 'double_optin' => empty( $v['double_opt_in'] ) ? 'no' : 'yes', 'was' => $was ? 'on' : 'off', 'now' => $was && empty( $assoc['off'] ) ? 'on' : 'off' );
+			}
+			$out ? WP_CLI\Utils\format_items( 'table', $out, array( 'form', 'feed', 'list', 'tags', 'double_optin', 'was', 'now' ) ) : WP_CLI::log( 'No FluentCRM feeds on the site forms.' );
 		}
 	);
 

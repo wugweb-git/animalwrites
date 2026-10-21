@@ -460,6 +460,8 @@ add_filter(
 );
 
 // Saved where the site's own form saves it, by the same code; emails as before. Runs before anything else on the entry.
+// FluentCRM: Contact, Volunteer and Claim reach it from their aw_*_save() through aw_crm_sync() (fluentcrm.php), never
+// through a Fluent Forms → FluentCRM integration feed (switched off for these forms there).
 add_action(
 	'fluentform/submission_inserted',
 	function ( $entry_id, $data, $form ) {
@@ -485,9 +487,13 @@ add_action(
 				$res = aw_claim_save( aw_claim_values( $data ), aw_ff_listing( $data ), $file, $src, aw_ff_ticked( $data, 'nl_optin' ), AW_FF_NL_CONSENT );
 				break;
 			case 'report':
+				// Never aw_crm_sync(): a report asks for no email, so there is no one to add to FluentCRM, and a report
+				// about a listing is not a reason to keep a record of the person who sent it.
 				$res = aw_report_save( aw_report_values( $data ), aw_ff_listing( $data ), $src );
 				break;
 			case 'remove_data':
+				// Never aw_crm_sync(): this person is asking us to delete what we hold. Adding or updating their FluentCRM
+				// contact would do the opposite; once they confirm, the aw-fluentcrm eraser (fluentcrm.php) deletes it.
 				$res = aw_remove_data_save( aw_clean_email( sanitize_text_field( (string) ( $data['email'] ?? '' ) ) ) );
 				break;
 		}
