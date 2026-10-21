@@ -122,7 +122,6 @@
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
 .kit-section-band--compact:not(:has(.kit-section-filters)) { padding-bottom: var(--kit-space-head) !important; } /* Directory place and type pages: head band only, its search sits under it (owner, 20 Oct 2026) */
 .kit-section-filters--below + .aw-system > .screen-reader-text:first-child + * { margin-top: 0; } /* list pages: no gap for a list's hidden heading */
-.kit-section-band:has(.aw-dir-search) .kit-section-desc { font-size: .875rem; } /* the line under the Directory title: 14px (was the lead size, 18px from 1200; owner, 21 Oct 2026) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; }
@@ -1300,8 +1299,6 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Directory search redesign (owner, 21 Oct 2026). Type: labels 13px, inputs, selects and Search 14px. From 768: the name box and
    Search on one row, then the filters in one even row (2 across from 768, 4 across from 1200, "Verified only" last). Phones: the
    filter icon sits inside the search bar and opens the filters; the fold itself is unchanged. */
-.aw-dir-search .kit-field > label { font-size: .8125rem; }
-.aw-dir-search.kit-section-search .kit-field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select), .aw-dir-search .aw-dir-submit .kit-btn { font-size: .875rem; } /* phones keep 16px (the kit rule): below that iOS zooms in on focus */
 .aw-dir-more > summary { display: none; }
 .aw-dir-filter-toggle { position: absolute; right: var(--kit-space-1); top: 50%; transform: translateY(-50%); width: var(--kit-size-target); height: var(--kit-size-target); display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--kit-color-ink); cursor: pointer; }
 .aw-dir-filter-toggle .kit-ico { --kit-ico-size: 1.25rem; }
@@ -1325,4 +1322,15 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-dir-search .aw-dir-more-body { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 	.aw-dir-search .aw-dir-more-body:has(.aw-dir-check) { grid-template-columns: repeat(4, minmax(0, 1fr)) auto; }
 	.aw-dir-search .aw-dir-more-body .aw-dir-check { grid-column: auto; align-self: end; display: flex; align-items: center; min-height: var(--kit-field-height); font-size: .8125rem; }
+}
+
+/* Type scale (owner, 21 Oct 2026), from 768 only: phones keep their sizes (inputs stay 16px there so iOS does not zoom in).
+   Buttons, inputs and selects 14px; labels and small text 11 to 13px (small 12 to 13, extra small 11 to 12, meta 13); the
+   line under every page title 14px. Preview numbers per page type are in docs/pending.md. */
+@media (min-width: 768px) {
+	:root { --kit-type-sm: clamp(.75rem, .7273rem + .0909vw, .8125rem); --kit-type-xs: clamp(.6875rem, .6591rem + .1136vw, .75rem); --kit-meta-size: .8125rem; }
+	.kit-btn, .wp-block-button__link { font-size: .875rem; }
+	:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: .875rem !important; }
+	.kit-section-desc { font-size: .875rem; }
+	.aw-dir-search .kit-field > label { font-size: .8125rem; }
 }
