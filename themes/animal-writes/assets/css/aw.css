@@ -1356,3 +1356,6 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Cards fill their grid cell: the layout sets the width, never a max-width on the card (a capped card leaves a hole beside it) */
 .kit-card[class*="kit-card--block"] .kit-card-media { max-height: var(--kit-card-media-max); }
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { grid-template-columns: repeat(auto-fit, minmax(max(var(--kit-card-min), calc((100% - 2 * var(--kit-space-grid)) / 3)), 1fr)); } }
+
+/* Toolbar lines up with its list: the Directory list is 720px wide (owner, 12 Oct 2026), so its count and controls end at the list's right edge, not at the page edge */
+.aw-hub-directory > .aw-toolbar { max-width: var(--kit-width-content); }
