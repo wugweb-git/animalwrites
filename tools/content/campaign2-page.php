@@ -427,11 +427,11 @@ HTML
 	'aw-camp-white'
 );
 
-/* In the press: Media & PR items with the campaign tag, in the Media & PR hub's cards; then the campaign's partners
+/* What's happening (owner, 21 Oct 2026; was In the press): people's own posts about the campaign from social media only (Instagram, Facebook, X, YouTube...; campaign-tools.php keeps articles out), from Media & PR items with the campaign link, in the Media & PR hub's cards; then the campaign's partners
    (none listed for now; the shortcode prints nothing until the owner names them). */
 $press = c2sec(
 	'',
-	c2html( '<header class="kit-ed-head"><div><h2>In the press</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">All coverage ' . c2i( 'arrow-right' ) . '</a></header>' )
+	c2html( '<header class="kit-ed-head"><div><h2>What\'s happening</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">See all ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. c2q( <<<'HTML'
 <!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->
 <div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->
@@ -495,7 +495,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'faq', $faq )
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
-	. c2slot( 'press', $press )
+	. c2slot( 'press', $press, 'aw-camp-if-items' ) // Animal Writes coverage only; hidden while there is none
 	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. c2slot( 'next-steps', $next, 'aw-camp-open' )
 	. c2slot( 'updates', $loop )

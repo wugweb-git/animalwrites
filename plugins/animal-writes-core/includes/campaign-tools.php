@@ -28,7 +28,7 @@
  *                                                                title, art="ID" art_phone="ID" the artwork behind it
  * Blocks with class aw-camp-open show only while the campaign is open (Active); aw-camp-closed only after it closes
  * (Post); aw-camp-pre only before it opens. aw-camp-if-count shows once the count reaches the threshold;
- * aw-camp-if-filled hides a section that has nothing in it (e.g. no partners).
+ * aw-camp-if-filled hides a section that has nothing in it (e.g. no partners); aw-camp-if-items hides a list section with no items.
  *
  * @package animal-writes-core
  */
@@ -184,6 +184,9 @@ add_filter(
 			}
 		}
 		if ( preg_match( '/\baw-camp-if-filled\b/', $cls ) && '' === trim( wp_strip_all_tags( do_shortcode( $html ) ) ) && false === strpos( $html, '<img' ) ) { // shortcodes run after blocks: test what they print
+			return '';
+		}
+		if ( preg_match( '/\baw-camp-if-items\b/', $cls ) && false === strpos( $html, 'wp-block-post ' ) ) { // a list section with no items yet (e.g. no press coverage)
 			return '';
 		}
 		if ( ! preg_match( '/\baw-camp-(open|closed|pre)\b/', $cls, $m ) ) {
@@ -704,3 +707,19 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 		. ( has_excerpt( $c ) ? '<p class="aw-side-camp-line">' . esc_html( wp_strip_all_tags( get_the_excerpt( $c ) ) ) . '</p>' : '' )
 		. '<a class="kit-btn aw-side-camp-btn" href="' . esc_url( $url ) . '" aria-describedby="' . esc_attr( $hid ) . '">' . esc_html__( 'Take part', 'animal-writes-core' ) . '</a></div></section>';
 }
+
+/*
+ * Campaign pages' Media & PR lists ("What's happening") show people's own social media posts only (owner, 21 Oct 2026):
+ * Instagram, Facebook, X, YouTube and the like (aw_press_group social or videos), never news articles.
+ */
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $q ) {
+		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== ( $q['post_type'] ?? '' ) ) {
+			return $q;
+		}
+		$q['meta_query']   = isset( $q['meta_query'] ) && is_array( $q['meta_query'] ) ? $q['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$q['meta_query'][] = array( 'key' => 'aw_press_group', 'value' => array( 'social', 'videos' ), 'compare' => 'IN' );
+		return $q;
+	}
+);
