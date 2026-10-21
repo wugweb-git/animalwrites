@@ -436,10 +436,19 @@ add_action(
  * One email per 12 hours for the same problems; a new kind of problem is emailed at once.
  */
 
-/** Unix time of the newest published News item, or 0. */
+/**
+ * Unix time of the newest News item published, or 0. A story carries its source's date (an item found at 5 am about
+ * yesterday's news is dated yesterday), so the date says nothing about when it went live: the five most recently added
+ * items are asked for the time they were last saved (owner, 21 Oct 2026; the notice and the e-mail said "no News for
+ * 16 hours" while the workers were publishing).
+ */
 function aw_newest_published_news() {
-	$ids = get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'publish', 'numberposts' => 1, 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids', 'suppress_filters' => true ) );
-	return $ids ? (int) get_post_time( 'U', true, $ids[0] ) : 0;
+	$ids  = get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'publish', 'numberposts' => 5, 'orderby' => 'ID', 'order' => 'DESC', 'fields' => 'ids', 'suppress_filters' => true ) );
+	$best = 0;
+	foreach ( $ids as $id ) {
+		$best = max( $best, (int) get_post_time( 'U', true, $id ), (int) get_post_modified_time( 'U', true, $id ) );
+	}
+	return $best;
 }
 
 /**
