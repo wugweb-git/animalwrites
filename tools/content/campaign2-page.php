@@ -459,7 +459,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'next-steps', $next, 'aw-camp-closed' )
 	. c2slot( 'context', $what )
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
-	. c2slot( 'how-to-help', $send . $how . $share, 'aw-camp-open' )
+	. c2slot( 'how-to-help', $send . $share, 'aw-camp-open' ) // Other ways to send removed (owner, 21 Oct 2026)
 	. c2slot( 'faq', $faq )
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
