@@ -68,6 +68,22 @@ add_action(
 	}
 );
 
+/** The visitor's sort on a category or tag page (?sort=old|az|za; newest first by default). */
+add_action(
+	'pre_get_posts',
+	function ( $q ) {
+		if ( is_admin() || ! $q->is_main_query() || ! ( $q->is_tag() || $q->is_category() ) || ! function_exists( 'aw_active_sort' ) ) {
+			return;
+		}
+		$sort  = aw_active_sort( 'term' );
+		$order = array( 'old' => array( 'date' => 'ASC' ), 'az' => array( 'title' => 'ASC' ), 'za' => array( 'title' => 'DESC' ) );
+		if ( isset( $order[ $sort ] ) ) {
+			$q->set( 'orderby', $order[ $sort ] );
+		}
+	},
+	20
+);
+
 /* ---------- Sections: which categories and tags each one uses (Sourcing) ---------- */
 
 /** Every section's lists: type => [ 'categories' => slugs, 'tags' => slugs ]. */

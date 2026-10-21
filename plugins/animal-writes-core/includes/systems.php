@@ -101,14 +101,15 @@ const AW_LIST_FILTERS = array(
 );
 /** Issuer values that are courts (shown darker on Library cards). */
 const AW_COURT_ISSUERS = array( 'supreme-court', 'high-court', 'national-green-tribunal' );
-/** Sort orders per list: key => label; the first is the default. */
+/** Sort orders per list: key => label; the first is the default. Every list: Newest · Oldest · A–Z · Z–A ("term": category and tag pages). */
 const AW_LIST_SORTS = array(
-	'aw_news'        => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
-	'aw_legal'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z' ),
-	'post'           => array( 'new' => 'Newest first', 'az' => 'A–Z' ),
-	'aw_opportunity' => array( 'closing' => 'Closing soon', 'new' => 'Newest first' ),
-	'aw_campaign'    => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
-	'aw_press'       => array( 'new' => 'Newest first', 'old' => 'Oldest first' ),
+	'aw_news'        => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'aw_legal'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'post'           => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'aw_opportunity' => array( 'closing' => 'Closing soon', 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'aw_campaign'    => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'aw_press'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
+	'term'           => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
 );
 const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'post' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
@@ -297,11 +298,12 @@ function aw_list_filters( $type ) {
 /** The sorts a list offers: key => label, none when it has one order or fewer than 2 items. */
 function aw_list_sorts( $type ) {
 	$sorts = AW_LIST_SORTS[ $type ] ?? array();
-	return count( $sorts ) < 2 || (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ? array() : $sorts;
+	return count( $sorts ) < 2 || ( 'term' !== $type && (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ) ? array() : $sorts;
 }
 
 /** Sort as a group of the Filters sheet (radio choices; the default sends nothing). Shown on phones only (aw.css). */
 function aw_sort_group( $type ) {
+	// the sort of a category or tag page keeps to its address (aw_head_below)
 	$sorts = aw_list_sorts( $type );
 	if ( ! $sorts || ! function_exists( 'kits_dd_open' ) ) {
 		return '';
@@ -320,7 +322,7 @@ function aw_sort_group( $type ) {
  * A list's sort as a segmented control for the toolbar: its section's orders (AW_LIST_SORTS), the filters kept.
  * Empty when the list has one order or fewer than 2 items (nothing to order).
  */
-function aw_sort_segment( $type ) {
+function aw_sort_segment( $type, $base = '' ) {
 	$sorts = aw_list_sorts( $type );
 	if ( ! $sorts ) {
 		return '';
@@ -329,7 +331,7 @@ function aw_sort_segment( $type ) {
 	$cur    = aw_active_sort( $type );
 	$html   = '';
 	foreach ( $sorts as $k => $l ) {
-		$url   = add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), aw_hub_url( $type ) );
+		$url   = add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), '' !== $base ? $base : aw_hub_url( $type ) );
 		$html .= '<a href="' . esc_url( $url ) . '"' . ( $k === $cur ? ' aria-current="true"' : '' ) . '>' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</a>';
 	}
 	return '<nav class="kit-segment aw-sort-seg" aria-label="Sort">' . $html . '</nav>';

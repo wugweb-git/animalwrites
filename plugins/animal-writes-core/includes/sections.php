@@ -148,7 +148,7 @@ function aw_section_head_archive() {
 				'filters' => $filters ? $filters : '',
 				'compact' => 'aw_listing' === $type && ! $term_page,
 				'below'   => aw_list_page( $type, $term_page ),
-				'type'    => $term_page ? '' : $type,
+				'type'    => $term_page ? ( is_tag() && in_array( (string) get_queried_object()->slug, aw_listing_type_slugs(), true ) ? '' : 'term' ) : $type, // an organisation type's page keeps the Directory's own order
 			)
 		);
 }
@@ -198,7 +198,13 @@ function aw_block_section_head( $a ) {
  * @return string
  */
 function aw_head_below( $filters, $count, $type = '' ) {
-	$sort = '' !== $type && function_exists( 'aw_sort_segment' ) ? aw_sort_segment( $type ) : '';
+	$base = '';
+	if ( 'term' === $type ) { // a category or tag page: Sort in a sheet of its own on phones, kept to the page's address
+		$base    = (string) get_term_link( get_queried_object() );
+		$group   = function_exists( 'aw_sort_group' ) ? aw_sort_group( 'term' ) : '';
+		$filters = '' !== $group && function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $group, array(), $base ) : $filters;
+	}
+	$sort = '' !== $type && function_exists( 'aw_sort_segment' ) ? aw_sort_segment( $type, $base ) : '';
 	$bar  = '' !== $count || '' !== $sort ? aw_toolbar( $count, $filters . $sort ) : $filters;
 	return '' !== $bar ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $bar . '</div>' : '';
 }

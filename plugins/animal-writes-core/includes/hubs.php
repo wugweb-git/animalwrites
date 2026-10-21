@@ -189,6 +189,8 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 		$v['orderby'] = array( 'date' => 'ASC' );
 	} elseif ( 'az' === $sort ) {
 		$v['orderby'] = array( 'title' => 'ASC' );
+	} elseif ( 'za' === $sort ) {
+		$v['orderby'] = array( 'title' => 'DESC' );
 	}
 	if ( 'aw_opportunity' === $type ) {
 		$v['meta_query']            = (array) ( $v['meta_query'] ?? array() );
@@ -217,7 +219,9 @@ function aw_hub_query_vars( $type, $page = 1 ) {
 				),
 			)
 		);
-		$v['orderby'] = array( 'has' => 'DESC', 'menu_order' => 'old' === $sort ? 'DESC' : 'ASC' );
+		if ( ! in_array( $sort, array( 'az', 'za' ), true ) ) { // by name: the title order above
+			$v['orderby'] = array( 'has' => 'DESC', 'menu_order' => 'old' === $sort ? 'DESC' : 'ASC' );
+		}
 	}
 	return $v;
 }
