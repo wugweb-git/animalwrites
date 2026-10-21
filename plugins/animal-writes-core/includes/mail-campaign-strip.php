@@ -57,6 +57,36 @@ function aw_mail_campaign_days_left( $close ) {
 }
 
 /**
+ * The Lab Animal Rules strip exactly as the owner wrote it (21 Oct 2026: "use the html as is"); not rebuilt or edited here.
+ * Other campaigns use the generated strip below.
+ */
+const AW_MAIL_STRIP_LAB_RULES = <<<'AWHTML'
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td width="76" align="center" valign="middle" style="width:76px;background:#6B0F22;color:#FFFFFF;padding:8px 6px;">
+      <div style="font-size:20px;font-weight:bold;line-height:1.1;">5 NOV</div>
+      <div style="font-size:9px;letter-spacing:1px;margin-top:4px;">DEADLINE</div>
+    </td>
+    <td valign="middle" style="background:#A3122F;padding:10px 12px;color:#FFFFFF;">
+      <a href="https://animalwrites.in/campaigns/lab-animals-rules-2026/" target="_blank" style="color:#FFFFFF;text-decoration:none;">
+        <div style="font-size:12px;font-weight:bold;line-height:1.35;">
+          Labs could soon approve their own animal experiments.
+        </div>
+        <div style="font-size:10px;line-height:1.4;margin-top:3px;">
+          Object to the Draft Lab Animal Rules 2026
+        </div>
+      </a>
+    </td>
+    <td valign="middle" align="center" style="background:#A3122F;padding:8px 10px 8px 0;white-space:nowrap;">
+      <a href="https://animalwrites.in/campaigns/lab-animals-rules-2026/" target="_blank" style="display:inline-block;background:#FFFFFF;color:#A3122F;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;padding:8px 10px;border-radius:3px;">
+        Object now &rarr;
+      </a>
+    </td>
+  </tr>
+</table>
+AWHTML;
+
+/**
  * The strip as email HTML ('' when no campaign is open). Built for a phone first (owner, 21 Oct 2026): the days left and
  * the campaign's words side by side on the full width, the button under them across the full width at 44px; plain
  * tables with bgcolor as well as background, so Gmail's dark mode keeps the colours and no media query is needed.
@@ -65,6 +95,9 @@ function aw_mail_campaign_strip_html() {
 	$c = aw_mail_open_campaign();
 	if ( ! $c ) {
 		return '';
+	}
+	if ( false !== strpos( (string) $c[1], '/campaigns/lab-animals-rules-2026/' ) ) {
+		return '<div style="margin-top:16px">' . AW_MAIL_STRIP_LAB_RULES . '</div>';
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
 	$days  = aw_mail_campaign_days_left( $c[2] );
