@@ -239,6 +239,24 @@ add_action(
 	46
 );
 
+// /report/'s Rank Math title and description cover every page it is opened from, not only Directory listings
+// (owner, 21 Oct 2026). Set once; editing them later in Rank Math is not overwritten.
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_report_seo_2026_10_21' ) ) {
+			return;
+		}
+		$page = get_page_by_path( 'report' );
+		if ( $page ) {
+			update_post_meta( $page->ID, 'rank_math_title', 'Report a Mistake or Out-of-Date Detail – Animal Writes' );
+			update_post_meta( $page->ID, 'rank_math_description', 'Report a mistake on Animal Writes: wrong or missing details in a Directory listing, an out-of-date news story, a broken link in the Library or Resources, or a closed organisation.' );
+		}
+		update_option( 'aw_report_seo_2026_10_21', '1', false );
+	},
+	48
+);
+
 /* ---------- Pages, placement and redirects (once) ---------- */
 
 add_action(

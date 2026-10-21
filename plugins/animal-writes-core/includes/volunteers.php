@@ -246,7 +246,20 @@ add_action(
 	},
 	0
 );
-// Microsoft Clarity: strict masking on /update/ (it shows one person's details); set before Clarity loads, which is
+// Microsoft Clarity is not loaded on /update/ at all (owner, 21 Oct 2026): neither the site's own loader (kits-core
+// analytics.php, kits_clarity_id) nor the Microsoft Clarity plugin's script (wp_head) or its server-side page view
+// (shutdown), which would send the address with its token.
+add_filter( 'kits_clarity_id', fn( $id ) => is_page( 'update' ) ? '' : $id, 20 );
+add_action(
+	'wp',
+	function () {
+		if ( is_page( 'update' ) ) {
+			remove_action( 'wp_head', 'clarity_add_script_to_header' );
+			remove_action( 'shutdown', 'clarity_collect_event' );
+		}
+	}
+);
+// Microsoft Clarity: strict masking on /update/ as well (kept in case a Clarity script is added another way) (it shows one person's details); set before Clarity loads, which is
 // only on the visitor's first scroll, tap or key (kits-core analytics.php).
 add_action(
 	'wp_body_open',
