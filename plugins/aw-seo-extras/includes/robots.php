@@ -6,7 +6,7 @@
  * archives; site search).
  *
  * - Closed opportunities (past their deadline or review date): noindex, links followed.
- * - Directory district × type pages with fewer listings than AW_THIN_DISTRICT_TYPE: noindex, unless on AW_DIRECTORY_KEEP_INDEXED.
+ * - Directory district × type pages with no listings (AW_THIN_DISTRICT_TYPE = 1): noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Owner, 20 Oct 2026 (was 1 since 10 Oct): a district × type page listing fewer than 3 organisations is noindex (links
- * followed) and out of the sitemap; it becomes indexable again by itself when it reaches 3 (stored counts).
+ * Owner, 21 Oct 2026: the 3-organisation rule of 20 Oct is withdrawn. A district × type page with at least 1 organisation is
+ * indexed and in the sitemap; only a page with none (nothing to show) stays noindex (stored counts).
  */
-const AW_THIN_DISTRICT_TYPE = 3;
+const AW_THIN_DISTRICT_TYPE = 1;
 
 /**
  * Thin district × type pages that stay indexed: every one with Search Console clicks or impressions in the 90 days to
