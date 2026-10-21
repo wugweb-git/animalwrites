@@ -22,17 +22,14 @@ function aw_nl_optin_box( $form, $ticked = false ) {
 	return aw_field( $form, array( 'name' => 'nl_optin', 'label' => AW_NL_OPTIN_LABEL, 'type' => 'checkbox', 'value' => $ticked ? '1' : '' ) );
 }
 
-/** After a form succeeds: only when the box was ticked, add to the site's newsletter list (active; owner, 16 Oct 2026:
- *  no double opt-in; the form's own email is the only one sent). The form's handler then passes the result to
- *  aw_crm_sync() as 'subscribe', which puts the person on FluentCRM's Newsletter list.
- *  @return bool Subscribed. */
+/** After a form succeeds: only when the box was ticked, add to the newsletter (site list active, FluentCRM subscribed;
+ *  owner, 16 Oct 2026: no double opt-in; the form's own email is the only one sent). */
 function aw_nl_optin( $email, $name, $source, $ticked = null, $consent = AW_NL_CONSENT ) {
 	$ticked = null === $ticked ? ! empty( $_POST['nl_optin'] ) : (bool) $ticked; // phpcs:ignore WordPress.Security.NonceVerification -- the site's own forms post it; Fluent Forms passes it
 	if ( ! $ticked || ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) {
-		return false;
+		return;
 	}
-	aw_newsletter_join( $email, $name, 'site:' . $source, $consent );
-	return true;
+	aw_newsletter_join( $email, $name, 'site:' . $source, $consent, array(), array( 'newsletter' ) ); // site list and FluentCRM
 }
 
 /** Everyone we hold an email for who is not on the newsletter (active or pending). */

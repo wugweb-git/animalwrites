@@ -88,10 +88,7 @@ add_action(
 		$src  = $post ? get_post_field( 'post_name', $post ) : '';
 		$name = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
 		$src  = 'site:' . ( $src ? $src : 'footer' );
-		aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT );
-		if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php); its Fluent Forms integration feed is off for this form
-			aw_crm_sync( (string) ( $data['email'] ?? '' ), $name, 'newsletter', array( 'subscribe' => true, 'box' => true, 'consent' => AW_NL_CONSENT, 'page' => '', 'tags' => array( 'newsletter' ), 'source' => $src ) ); // page: the referrer (the footer is on every page)
-		}
+		function_exists( 'aw_newsletter_join' ) ? aw_newsletter_join( $data['email'] ?? '', $name, $src, AW_NL_CONSENT, array(), array( 'newsletter' ) ) : aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT );
 	},
 	5,
 	3
