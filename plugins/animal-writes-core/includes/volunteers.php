@@ -155,15 +155,12 @@ function aw_volunteer_save( $v, $source ) {
 		)
 	);
 	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
-	list( $visit, $ticks ) = aw_form_record( 'volunteer', array( 'page' => $source, 'groups' => array( 'roles' => array_keys( AW_VOL_ROLES ) ) ) );
-	aw_record_row( aw_vol_table(), array( 'email' => strtolower( $v['email'] ) ), $visit, $ticks );
 	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
 	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers join the newsletter (owner, 20 Oct 2026); no email from this
 		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION );
-		aw_record_row( aw_nl_table(), array( 'email' => strtolower( $v['email'] ) ), $visit, $ticks );
 	}
 	if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): Newsletter list, tag Volunteer, volunteer details and the Form fields
-		aw_crm_sync( $v['email'], $v['name'], 'volunteer', array( 'subscribe' => true, 'ticks' => $ticks, 'visit' => $visit, 'tags' => array( 'volunteer' ), 'extra' => aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), 'source' => 'site:volunteer', 'volunteer' => true ) );
+		aw_crm_sync( $v['email'], $v['name'], 'volunteer', array( 'subscribe' => true, 'box' => $v['updates'], 'consent' => AW_VOL_CONSENT_VERSION, 'page' => $source, 'tags' => array( 'volunteer' ), 'extra' => aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), 'source' => 'site:volunteer', 'volunteer' => true ) );
 	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );

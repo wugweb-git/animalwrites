@@ -103,7 +103,7 @@ add_filter(
 		$GLOBALS['aw_ff_ctx'] = array();
 		$attrs                = '';
 		if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
-			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '" data-go="' . esc_attr( wp_json_encode( array_map( 'home_url', AW_CONTACT_ELSEWHERE ) ) ) . '"';
+			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
 		}
 		$listing = $ctx['listing'] ?? null;
 		if ( $listing ) {
@@ -803,54 +803,4 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 add_filter(
 	'kits_page_has_form',
 	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
-);
-
-/* ---------- What each form records: its boxes, and Visit details in WP Admin (kits-core forms.php) ---------- */
-
-/** Consent wording version of the volunteer form's updates box (ticked by default; owner, 20 Oct 2026). */
-const AW_VOL_NL_CONSENT = 'v3-volunteer-updates-preticked';
-
-/**
- * The boxes each form is known to have: name => array( label, version ). Versions here are the consent wording.
- *
- * @param string $form Form key.
- * @param array  $ctx  ff (bool): sent through Fluent Forms.
- */
-function aw_form_known_boxes( $boxes, $form, $ctx = array() ) {
-	$nl = array( AW_NL_OPTIN_LABEL, empty( $ctx['ff'] ) ? AW_NL_CONSENT : AW_FF_NL_CONSENT );
-	switch ( $form ) {
-		case 'contact':
-			return array( 'nl_optin' => $nl );
-		case 'claim':
-			return array( 'nl_optin' => $nl, 'feature' => array( 'Also feature this listing', '' ) );
-		case 'volunteer':
-			return array( 'consent' => array( AW_VOL_CONSENT_LABEL, AW_VOL_CONSENT_VERSION ), 'nl_optin' => array( AW_NL_OPTIN_LABEL, AW_VOL_NL_CONSENT ) );
-		case 'campaign-letter':
-			return array( 'nl_optin' => array( AW_CL_OPTIN, AW_CL_CONSENT ) );
-		case 'newsletter':
-			return empty( $ctx['ff'] ) ? array( 'consent' => array( 'Email me Animal Writes updates.', AW_NL_CONSENT ) ) : array();
-	}
-	return $boxes;
-}
-add_filter( 'aw_form_known_boxes', 'aw_form_known_boxes', 10, 3 );
-
-
-// The box on contact messages, claims and reports.
-add_action(
-	'add_meta_boxes',
-	function () {
-		foreach ( array( 'aw_message', 'aw_claim', 'aw_report' ) as $type ) {
-			add_meta_box(
-				'aw-visit-details',
-				'Visit details',
-				function ( $post ) {
-					list( $visit, $ticks ) = aw_record_get_post( $post->ID );
-					echo aw_visit_details_html( $visit, $ticks ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped where it is built
-				},
-				$type,
-				'normal',
-				'low'
-			);
-		}
-	}
 );

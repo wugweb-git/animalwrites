@@ -182,8 +182,7 @@ function aw_claim_logo_store( $tmp, $name = '' ) {
 }
 
 /**
- * Save a checked claim for review with its ticks and visit block (kits-core forms.php), email the team, add the claimant to
- * the newsletter when the box is ticked, and reach FluentCRM through aw_crm_sync().
+ * Save a checked claim for review, email the team, and add the claimant to the newsletter when the box is ticked.
  *
  * @param array   $v       Values.
  * @param WP_Post $listing Listing.
@@ -212,16 +211,11 @@ function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) 
 		}
 	}
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
-	list( $visit, $ticks ) = aw_form_record( 'claim', array( 'page' => $source ) );
-	aw_record_post( $id, $visit, $ticks );
 	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
 	$consent = null === $nl_consent ? AW_NL_CONSENT : $nl_consent;
 	$sub     = function_exists( 'aw_nl_optin' ) && aw_nl_optin( $v['email'], $v['name'], 'claim', $nl, $consent );
-	if ( $sub ) {
-		aw_record_row( aw_nl_table(), array( 'email' => strtolower( $v['email'] ) ), $visit, $ticks );
-	}
 	if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): on the Newsletter list only when the box was ticked
-		aw_crm_sync( $v['email'], $v['name'], 'claim', array( 'subscribe' => $sub, 'ticks' => $ticks, 'visit' => $visit, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'site:claim' ) );
+		aw_crm_sync( $v['email'], $v['name'], 'claim', array( 'subscribe' => $sub, 'box' => (bool) $nl, 'consent' => $consent, 'page' => $source, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'site:claim' ) );
 	}
 	$text = sprintf( 'We\'ll check it and email you at %s.', $v['email'] );
 	return array( 'url' => kits_thanks_url( 'claim', array( 'listing' => (int) $listing->ID, 'from' => false ), 'Request sent.', $text ), 'title' => 'Request sent.', 'text' => $text );

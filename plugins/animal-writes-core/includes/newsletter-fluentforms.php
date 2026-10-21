@@ -88,15 +88,10 @@ add_action(
 		$src  = $post ? get_post_field( 'post_name', $post ) : '';
 		$name = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
 		$src  = 'site:' . ( $src ? $src : 'footer' );
-		$GLOBALS['aw_ff_data'] = $data; // what kits-core forms.php reads (ticks, visit)
-		$GLOBALS['aw_ff_form'] = $form;
 		aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT );
-		list( $visit, $ticks ) = aw_form_record( 'newsletter' ); // page: the browser's (the footer is on every page)
-		aw_record_row( aw_nl_table(), array( 'email' => strtolower( trim( (string) ( $data['email'] ?? '' ) ) ) ), $visit, $ticks );
 		if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php); its Fluent Forms integration feed is off for this form
-			aw_crm_sync( (string) ( $data['email'] ?? '' ), $name, 'newsletter', array( 'subscribe' => true, 'ticks' => $ticks, 'visit' => $visit, 'tags' => array( 'newsletter' ), 'source' => $src ) );
+			aw_crm_sync( (string) ( $data['email'] ?? '' ), $name, 'newsletter', array( 'subscribe' => true, 'box' => true, 'consent' => AW_NL_CONSENT, 'page' => '', 'tags' => array( 'newsletter' ), 'source' => $src ) ); // page: the referrer (the footer is on every page)
 		}
-		unset( $GLOBALS['aw_ff_data'], $GLOBALS['aw_ff_form'] );
 	},
 	5,
 	3

@@ -64,11 +64,6 @@ const AW_CONTACT_ABOUT = array(
 	'correction'  => 'Report a mistake',
 	'remove-data' => 'Remove my data',
 );
-/** Reasons with a form of their own (owner, 21 Oct 2026): choosing one opens it; no contact message is made. */
-const AW_CONTACT_ELSEWHERE = array(
-	'correction'  => '/report/',
-	'remove-data' => '/remove-my-data/',
-);
 /** Message placeholder by reason (Phase 11 H4). */
 const AW_CONTACT_PLACEHOLDER = array(
 	'listing'    => 'Organisation name, district, services, phone or email',
@@ -112,7 +107,7 @@ function aw_contact_form() {
 	$about = isset( AW_CONTACT_ABOUT[ $about ] ) ? $about : '';
 	$state = aw_form_state( $form );
 	$pick  = (string) ( $state['values']['about'] ?? $about );
-	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'kit-form aw-contact-form', 'data-go' => wp_json_encode( array_map( 'home_url', AW_CONTACT_ELSEWHERE ) ) ) );
+	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'kit-form aw-contact-form' ) );
 	// Reason first; its options carry the message placeholder (aw.js swaps it when the reason changes).
 	$id    = aw_field_id( $form, 'about' );
 	$opts  = '';
@@ -153,16 +148,12 @@ function aw_contact_errors( $v ) {
 }
 
 /**
- * Save a checked contact message (Inbox > Messages) with its ticks and visit block (kits-core forms.php), email the team,
- * add the sender to the newsletter when the box is ticked, and reach FluentCRM through aw_crm_sync().
- * "Report a mistake" and "Remove my data" make no message: they open their own forms (AW_CONTACT_ELSEWHERE).
+ * Save a checked contact message (Inbox > Messages), start a data removal when asked, email the team, and add the
+ * sender to the newsletter when the box is ticked.
  *
- * @return array|false array{url, title, text} for the thank-you page (or the other form), or false when not saved.
+ * @return array|false array{url, title, text} for the thank-you page, or false when it could not be saved.
  */
 function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
-	if ( isset( AW_CONTACT_ELSEWHERE[ $v['about'] ] ) ) {
-		return array( 'url' => home_url( AW_CONTACT_ELSEWHERE[ $v['about'] ] ), 'title' => '', 'text' => '' );
-	}
 	$label = AW_CONTACT_ABOUT[ $v['about'] ];
 	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'], 'post_content' => $v['message'] ) );
 	if ( is_wp_error( $id ) || ! $id ) {
@@ -172,19 +163,27 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_m_source', $source ); // the page it was sent from (S5.8)
-	list( $visit, $ticks ) = aw_form_record( 'contact', array( 'page' => $source ) );
-	aw_record_post( $id, $visit, $ticks );
-	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
-	$consent = null === $nl_consent ? AW_NL_CONSENT : $nl_consent;
-	$sub     = function_exists( 'aw_nl_optin' ) && aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $consent );
-	if ( $sub ) {
-		aw_record_row( aw_nl_table(), array( 'email' => strtolower( $v['email'] ) ), $visit, $ticks );
+	if ( 'remove-data' === $v['about'] ) {
+		// DPDP: tagged for the Inbox, and WordPress's own confirmation email is sent. Nothing is deleted until the person
+		// opens that link (privacy-requests.php runs the erasers then, and the request record is the log).
+		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
+		$req = wp_create_user_request( $v['email'], 'remove_personal_data' );
+		if ( ! is_wp_error( $req ) ) {
+			function_exists( 'aw_send_removal_link' ) ? aw_send_removal_link( $req ) : wp_send_user_request( $req ); // sent even while form email is off
+			update_post_meta( $id, 'aw_m_request', (int) $req );
+		}
 	}
-	if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): the contact, the message as a note, the Form fields
-		aw_crm_sync( $v['email'], $v['name'], 'contact', array( 'subscribe' => $sub, 'ticks' => $ticks, 'visit' => $visit, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'contact-form', 'message' => $id ) );
+	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
+	// A removal request never subscribes anyone and never reaches FluentCRM: its whole point is that we hold less.
+	if ( 'remove-data' !== $v['about'] ) {
+		$consent = null === $nl_consent ? AW_NL_CONSENT : $nl_consent;
+		$sub     = function_exists( 'aw_nl_optin' ) && aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $consent );
+		if ( function_exists( 'aw_crm_sync' ) ) { // FluentCRM (fluentcrm.php): the contact, the message as a note, the Form fields
+			aw_crm_sync( $v['email'], $v['name'], 'contact', array( 'subscribe' => $sub, 'box' => (bool) $nl, 'consent' => $consent, 'page' => $source, 'tags' => $sub ? array( 'newsletter' ) : array(), 'source' => 'contact-form', 'message' => $id ) );
+		}
 	}
 	$text = sprintf( 'We\'ll reply to %s.', $v['email'] );
-	return array( 'url' => kits_thanks_url( 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text );
+	return array( 'url' => kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text );
 }
 
 function aw_contact_submit() {
@@ -510,14 +509,12 @@ function aw_elsewhere_screen() {
 	echo '</form></div>';
 }
 
-// /contact/?about=correction and ?about=remove-data (and the older ?type=) open those forms' own pages (owner, 21 Oct
-// 2026); /remove-my-data/ is the request form again (privacy-requests.php).
+// "Remove my data" is a Contact option now: the old page sends people there with the option chosen.
 add_action(
 	'template_redirect',
 	function () {
-		$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( is_page( 'contact' ) && isset( AW_CONTACT_ELSEWHERE[ $about ] ) ) {
-			wp_safe_redirect( home_url( AW_CONTACT_ELSEWHERE[ $about ] ), 302, 'Animal Writes' );
+		if ( is_page( 'remove-my-data' ) ) {
+			wp_safe_redirect( home_url( '/contact/?type=remove-data#write' ), 301, 'Animal Writes' );
 			exit;
 		}
 	}
@@ -558,9 +555,6 @@ add_filter(
 		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
 		if ( ! $key || ! in_array( $key, array( 'listing', 'featured', 'opportunity', 'partnership', 'correction' ), true ) ) {
 			return $html;
-		}
-		if ( isset( AW_CONTACT_ELSEWHERE[ $key ] ) ) { // its own form, on its own page
-			return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a href="' . esc_url( home_url( AW_CONTACT_ELSEWHERE[ $key ] ) ) . '">$2</a>$3', $html, 1 );
 		}
 		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';
 		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );

@@ -125,8 +125,6 @@ add_action(
 	function () {
 		$f = 'assets/js/aw-analytics.js';
 		wp_enqueue_script( 'aw-analytics', plugins_url( $f, AW_CORE_DIR . 'animal-writes-core.php' ), array(), (string) filemtime( AW_CORE_DIR . $f ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
-		// Forms' visit block (kits-core forms.php): the consent time zones, to read GA4 and Clarity IDs only with consent.
-		wp_localize_script( 'aw-analytics', 'awVisitCfg', array( 'zones' => function_exists( 'kits_consent_timezones' ) ? kits_consent_timezones() : array() ) );
 	}
 );
 

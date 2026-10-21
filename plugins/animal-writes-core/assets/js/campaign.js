@@ -139,7 +139,6 @@
 			row.className = 'aw-letter-ground';
 			var box = document.createElement('input');
 			box.type = 'checkbox';
-			box.name = 'grounds'; /* so every ground is recorded as ticked or not (aw-analytics.js, kits-core forms.php) */
 			box.id = id;
 			box.value = String(n);
 			box.checked = (cfg.ticked || []).indexOf(n) !== -1;
@@ -224,18 +223,16 @@
 	function chosen() { return grounds.filter(function (g) { return g.box.checked; }).map(function (g) { return g.box.value; }).join(','); }
 	function device() { return window.matchMedia('(max-width: 767px)').matches ? 'phone' : (window.matchMedia('(max-width: 1199px)').matches ? 'tablet' : 'desktop'); }
 	var counted = false, joined = false;
-	/* One row per letter (city, grounds, route, device, date, the ticks and the visit block; no name or email), and the
-	   sign-up. Both carry the box as nl_optin ('1'/'0') and the visit block (aw-analytics.js; owner, 21 Oct 2026). */
-	function visit() { return window.awVisit ? { visit: window.awVisit.data(form), boxes: window.awVisit.boxes(form) } : {}; }
+	/* One anonymous row per letter (city, grounds, route, device, date; no name, email or IP), and the sign-up if ticked. */
 	function recordSend(route) {
-		var join = wantsUpdates(), extra = visit();
 		if (!counted) {
 			counted = true;
-			post(cfg.letter, Object.assign({ city: val('city'), grounds: chosen(), route: route, device: device(), nl_optin: join ? '1' : '0' }, extra)).catch(function () {});
+			post(cfg.letter, { city: val('city'), grounds: chosen(), route: route, device: device() }).catch(function () {});
 		}
 		if (!joined) {
 			joined = true;
-			post(cfg.optin, Object.assign({ email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0' }, extra))
+			var join = wantsUpdates();
+			post(cfg.optin, { email: val('email'), name: val('name'), city: val('city'), grounds: chosen(), consent: join ? '1' : '0' })
 				.then(function () { track('newsletter_optin', { source: cfg.source || '' }); })
 				.catch(function () { joined = false; });
 		}
