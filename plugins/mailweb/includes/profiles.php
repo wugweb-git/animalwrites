@@ -88,7 +88,7 @@ function mailweb_add_after_signature( $html, $context ) {
  */
 function mailweb_layout( $inner, $sig ) {
 	$block = ( '' !== $sig ? '<div class="signature" style="margin-top:28px">' . wp_kses_post( $sig ) . '</div>' : '' ) . mailweb_after_signature( 'site' );
-	return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'
+	return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' . (string) apply_filters( 'mailweb_head_html', '' ) . '</head>'
 		. '<body style="margin:0;padding:24px 12px;background:#f4f4f4">'
 		. '<div style="max-width:600px;margin:0 auto;background:#ffffff;padding:28px 24px;font:15px/1.6 Arial,Helvetica,sans-serif;color:#1a1a1a">'
 		. $inner . $block . '</div></body></html>';
@@ -136,6 +136,10 @@ add_filter(
 			// A complete HTML email with its own design (a form plugin's): signature and block before </body>.
 			$block           = ( '' !== $sig ? '<div class="signature" style="margin:28px auto 0;max-width:600px;font:15px/1.6 Arial,Helvetica,sans-serif">' . wp_kses_post( $sig ) . '</div>' : '' ) . mailweb_after_signature( 'site' );
 			$atts['message'] = str_ireplace( '</body>', $block . '</body>', $msg );
+			$head            = (string) apply_filters( 'mailweb_head_html', '' ); // Gmail reads style rules from the head only
+			if ( '' !== $head && false !== stripos( $atts['message'], '</head>' ) ) {
+				$atts['message'] = str_ireplace( '</head>', $head . '</head>', $atts['message'] );
+			}
 			return $atts;
 		}
 		// A fragment or plain text: in the site's layout, sent as HTML.

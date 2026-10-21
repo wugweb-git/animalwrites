@@ -57,6 +57,20 @@ function aw_mail_campaign_days_left( $close ) {
 }
 
 /**
+ * The phone rules for the Lab Animal Rules strip (767px and under): the three cells stack full width. Gmail reads style
+ * rules from the head only, so the Mailweb layout prints this there (`mailweb_head_html`); the strip also carries a copy for
+ * clients that read the body.
+ */
+function aw_mail_strip_css() {
+	return '<style>@media only screen and (max-width:767px){table[style*="max-width:560px"] td{display:block !important;width:auto !important;box-sizing:border-box !important;text-align:left !important;padding:12px 14px !important}table[style*="max-width:560px"] td[align="center"]:first-child{text-align:left !important}table[style*="max-width:560px"] td a[style*="inline-block"]{display:block !important;text-align:center !important;font-size:15px !important;padding:12px 14px !important}table[style*="max-width:560px"] td a div{font-size:16px !important;line-height:1.35 !important}table[style*="max-width:560px"] td a div+div{font-size:14px !important}table[style*="max-width:560px"] td:first-child div:first-child{font-size:26px !important}table[style*="max-width:560px"] td:first-child div+div{font-size:11px !important}}</style>';
+}
+
+add_filter(
+	'mailweb_head_html',
+	fn( $html ) => $html . ( aw_mail_open_campaign() && false !== strpos( (string) aw_mail_open_campaign()[1], '/campaigns/lab-animals-rules-2026/' ) ? aw_mail_strip_css() : '' )
+);
+
+/**
  * The Lab Animal Rules strip exactly as the owner wrote it (21 Oct 2026: "use the html as is"); not rebuilt or edited here.
  * Other campaigns use the generated strip below.
  */
@@ -104,7 +118,7 @@ function aw_mail_campaign_strip_html() {
 			$html = str_replace( array( '>5 NOV<', '>DEADLINE<' ), 0 === $days ? array( '>LAST<', '>DAY<' ) : array( '>' . (int) $days . '<', 1 === $days ? '>DAY LEFT<' : '>DAYS LEFT<' ), $html );
 		}
 		// On a phone the three cells stack: the date block, the words, the button, each the full width (the markup is not edited; this sheet only restyles it).
-		$css = '<style>@media only screen and (max-width:767px){table[style*="max-width:560px"] td{display:block !important;width:auto !important;box-sizing:border-box !important;text-align:left !important;padding:12px 14px !important}table[style*="max-width:560px"] td[align="center"]:first-child{text-align:left !important}table[style*="max-width:560px"] td a[style*="inline-block"]{display:block !important;text-align:center !important;font-size:15px !important;padding:12px 14px !important}table[style*="max-width:560px"] td a div{font-size:16px !important;line-height:1.35 !important}table[style*="max-width:560px"] td a div+div{font-size:14px !important}table[style*="max-width:560px"] td:first-child div:first-child{font-size:26px !important}table[style*="max-width:560px"] td:first-child div+div{font-size:11px !important}}</style>';
+		$css = aw_mail_strip_css();
 		return '<div style="margin-top:16px">' . $css . $html . '</div>';
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
