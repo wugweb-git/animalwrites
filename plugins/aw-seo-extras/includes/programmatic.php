@@ -981,17 +981,7 @@ function aw_seo_tag_keyword( $term ) {
 	return $name;
 }
 
-// A tag page is indexed once it holds 3 or more items.
-add_filter(
-	'rank_math/frontend/robots',
-	function ( $robots ) {
-		if ( is_tag() && (int) get_queried_object()->count < 3 ) {
-			$robots['index'] = 'noindex';
-		}
-		return $robots;
-	},
-	25
-);
+// A tag page is indexed however few items it holds (owner, 21 Oct 2026: the minimum of 3 is withdrawn); the tag's own Rank Math robots setting decides.
 
 /**
  * Keep each tag's Rank Math title, description, focus keyword and robots equal to the ones built here (marked automatic
