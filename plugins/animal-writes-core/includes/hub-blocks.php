@@ -638,9 +638,10 @@ function aw_card_campaign( $id ) {
 	return array( '' !== $short ? $short : $t[0]->name, $look ? $look[0] : '#141414', '#ffffff' );
 }
 
-/** The campaign mark: a round icon in the campaign's colour, no text (owner, 21 Oct 2026); the name is its tooltip and label. */
+/** The campaign mark on cards: hidden for now (owner, 21 Oct 2026). When shown: a round icon in the campaign's colour, the name as tooltip and label. */
 function aw_card_campaign_label( $id ) {
-	$c = aw_card_campaign( $id );
+	return ''; // hidden for now (owner, 21 Oct 2026)
+	$c = aw_card_campaign( $id ); // phpcs:ignore Squiz.PHP.NonExecutableCode
 	return $c ? '<span class="kit-tag kit-card-label kit-card-label--icon" role="img" aria-label="' . esc_attr( 'Campaign: ' . $c[0] ) . '" title="' . esc_attr( $c[0] ) . '" style="' . esc_attr( '--kit-card-label-bg:' . $c[1] . ';--kit-card-label-fg:' . $c[2] ) . '">' . aw_i( 'megaphone' ) . '</span>' : '';
 }
 
