@@ -187,8 +187,8 @@ function kits_endbar( $id = 0 ) {
 	$tags  = get_the_term_list( $id, $tax, '<div class="kit-endbar-tags wp-block-post-terms taxonomy-' . esc_attr( $tax ) . '">', '', '</div>' );
 	$tags  = is_wp_error( $tags ) ? '' : (string) $tags;
 	$share = function_exists( 'aw_share_html' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? aw_share_html( $id ) : ''; // the Kits share bar (share.php): X, Facebook, LinkedIn, WhatsApp, Email, Copy link
-	$before = (string) apply_filters( 'kits_endbar_before', '' ); // e.g. the end-of-article ad
-	$after  = (string) apply_filters( 'kits_endbar_after', '' ); // or the ad after the share buttons (kits_ads_end_after_share_types)
+	$before = (string) apply_filters( 'kits_endbar_before', '' ); // anything a site prints before the end bar
+	$after  = (string) apply_filters( 'kits_endbar_after', '' ); // or after it
 	if ( '' === $tags . $share ) {
 		return $before . $after;
 	}

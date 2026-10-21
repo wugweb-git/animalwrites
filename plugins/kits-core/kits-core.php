@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Kits Core
- * Description: Site features shared by Kits sites: form engine with spam guard and per-field errors, share bar, Google Tag Manager, ad slots and ads.txt, an honest visit counter, source attribution (favicon + source + relative time) and sourcing controls (publisher allow/block, relevance keywords). Configured by the site through filters (kits_*).
+ * Description: Site features shared by Kits sites: form engine with spam guard and per-field errors, share bar, Google Tag Manager, an honest visit counter, source attribution (favicon + source + relative time) and sourcing controls (publisher allow/block, relevance keywords). Configured by the site through filters (kits_*).
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
@@ -31,7 +31,6 @@ require_once KITS_CORE_DIR . 'includes/share.php';
 require_once KITS_CORE_DIR . 'includes/image-context.php';
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
-require_once KITS_CORE_DIR . 'includes/ads.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/preview.php';
 require_once KITS_CORE_DIR . 'includes/visits.php';

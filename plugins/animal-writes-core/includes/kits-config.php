@@ -20,104 +20,10 @@ add_filter( 'kits_clarity_id', fn() => 'yy09ekj2dp' ); // Microsoft Clarity (own
 add_filter( 'kits_share_post_types', fn() => array() ); // sharing: the Scriptless Social Sharing plugin (owner, 8 Oct 2026)
 add_filter( 'kits_sourced_post_types', fn() => array( 'aw_news', 'aw_legal' ) ); // first one holds the Sourcing menu
 /*
- * Ads (owner, 9 Oct 2026). Articles: News, Library, Resources (in-content, end). Lists: News, Library, Resources (after
- * items 6 and 18), Directory state and district pages (after item 5). Profiles: above "Is this your organisation?".
- * None at all on forms, search, 404, crisis guides, sponsored Resources, government vets and MVUs, or Cruelty and
- * Prosecution items.
+ * Ads: Advanced Ads alone (owner, 21 Oct 2026). Its placements carry the old slot names and its ads carry the rules
+ * (where, and no ads on forms, search, crisis guides…): tools/advanced-ads/setup.php. Nothing here.
  */
-const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ); // help-now guides + the crisis guides
-add_filter(
-	'kits_ads_skip',
-	function ( $skip ) {
-		if ( $skip || is_search() || is_page( array( 'helplines', 'corrections', 'contact', 'volunteer', 'remove-my-data', 'search', 'claim', 'report', 'thank-you' ) ) ) {
-			return true;
-		}
-		if ( is_singular( 'aw_listing' ) && has_term( array( 'veterinary-office', 'mobile-veterinary-unit' ), 'post_tag', get_queried_object_id() ) ) {
-			return true;
-		}
-		if ( is_singular( 'post' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
-			return true;
-		}
-		if ( is_singular( 'post' ) && function_exists( 'aw_is_sponsored' ) && aw_is_sponsored( get_queried_object_id() ) ) {
-			return true; // sponsored Resources carry no ads
-		}
-		if ( is_singular() && function_exists( 'aw_has_sponsored_block' ) && aw_has_sponsored_block( get_queried_object_id() ) ) {
-			return true; // nor does a page with a sponsored block
-		}
-		if ( is_singular( 'aw_opportunity' ) && has_term( 'volunteer', 'post_tag', get_queried_object_id() ) ) {
-			return true; // no ads on volunteer roles (owner, 15 Oct 2026)
-		}
-		return is_singular() && has_term( 'cruelty-prosecution', 'category', get_queried_object_id() );
-	}
-);
-add_filter( 'kits_ads_article_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing' ) ); // up to 3 ads a page: Ad 1, Ad 2 and the sidebar (item-head.php)
-add_filter( 'kits_ads_end_after_content_types', fn() => array( 'post' ) ); // guides have no end bar: the end ad follows the text
-/*
- * Animal Writes slots (owner, 12 Oct 2026), on top of the Kits Core ones (home-top/mid/bottom, article-incontent-1/2,
- * article-end, list-feed-1/2, sidebar, footer-above, head). Blocks: opportunity-end (opportunity template),
- * resources-hub (Resources page). Counted: directory-feed (state and district pages, after result 5),
- * directory-district-end (district pages, after the list), profile (Directory profiles), media-feed (Media & PR, after
- * item 6). "directory" is an older name: the fallback of directory-feed.
- */
-add_filter(
-	'kits_ad_slots',
-	function ( $slots ) {
-		return array_merge(
-			$slots,
-			array(
-				'directory-feed'         => array( 'Directory – in results', 'Directory state and district pages: a card after result 5', 'directory', 'auto' ),
-				'directory-district-end' => array( 'Directory – end of district page', 'Directory district pages, after the list', '', 'auto' ),
-				'profile'                => array( 'Directory profile', 'Directory profiles: Ad 1, after the Organisation details (block)', 'article-end', 'block' ),
-				'opportunity-end'        => array( 'Opportunity – end', 'Opportunity pages, after the Apply button (block)', '', 'block' ),
-				'resources-hub'          => array( 'Resources page', 'The Resources page, after the list (block)', '', 'block' ),
-				'media-feed'             => array( 'Media & PR – in list', 'Media & PR: a card after item 6', '', 'auto' ),
-				'directory'              => array( 'Directory lists (older slot)', 'Used by "Directory – in results" while its own box is empty', 'archive', 'legacy' ),
-			)
-		);
-	}
-);
-// Counted list positions: News, Library, Resources (Kits default, after items 6 and 18); Directory state and district
-// pages (after item 5); Media & PR (after item 6). No list ads elsewhere.
-add_filter(
-	'kits_ads_list_slots',
-	function ( $slots ) {
-		$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
-		if ( 'aw_listing' === $hub ) {
-			// Directory (all of India, states, districts): after result 5, then after 11 and every 6 more as people scroll
-			// (owner, 12 Oct 2026). Each ad has listings on both sides, so two ads never touch.
-			$pos = array( 5 => 'directory-feed' );
-			for ( $n = 11; $n <= 200; $n += 6 ) {
-				$pos[ $n ] = 'directory-feed';
-			}
-			return $pos;
-		}
-		if ( 'aw_press' === $hub ) {
-			return array( 6 => 'media-feed' );
-		}
-		return in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ? $slots : array();
-	}
-);
-// Directory profiles: Ad 1 is the "profile" Ad slot block after the Organisation group, Ad 2 "article-end" after Share (single-aw_listing.html).
-// Directory district pages: after the list (and after the "Few listings" card).
-add_filter(
-	'render_block_core/query',
-	function ( $html, $block ) {
-		if ( 'aw_listing' !== ( $block['attrs']['query']['postType'] ?? '' ) || ! function_exists( 'aw_dir_place' ) || ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() ) {
-			return $html;
-		}
-		$d = aw_dir_place( (string) get_query_var( 'aw_place' ) );
-		if ( ! $d || 'district' !== $d->kind ) {
-			return $html;
-		}
-		// No end ad when the list's last card is already an ad or the last in-list ad is close to the end (never two together).
-		$tail = substr( $html, -4000 );
-		$last_ad = strrpos( $tail, 'kit-ad-item' );
-		$last_li = strrpos( $tail, 'wp-block-post ' );
-		return ( false !== $last_ad && ( false === $last_li || $last_ad > $last_li ) ) ? $html : $html . aw_ad( 'directory-district-end' );
-	},
-	20,
-	2
-);
+const AW_CRISIS_GUIDES = array( 126, 127, 9027, 9028, 9029, 9030, 9031, 9032, 9033 ); // help-now guides + the crisis guides (never cached: cdn-cache.php; no ads: Advanced Ads)
 // The sample listings (the Wugweb sample, and test samples listed in the option aw_sample_listing_ids): only the owner
 // sees them (preview), everyone else gets a 404 and no trace in lists, sitemaps, counts or related blocks.
 add_filter( 'kits_preview_only_ids', fn( $ids ) => array_merge( (array) $ids, array( 9003 ), array_map( 'intval', (array) get_option( 'aw_sample_listing_ids', array() ) ) ) );
@@ -225,9 +131,6 @@ add_action(
 // Mail (owner, 9 Oct 2026): sent as "Animal Writes <noreply@animalwrites.in>", replies to contact@ (vedanshu@'s alias).
 add_filter( 'mailweb_smtp_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
 add_filter( 'mailweb_smtp_reply_to', fn() => 'contact@animalwrites.in' );
-
-// The Directory carries as many in-list ads as its length allows (one every 6 results); other pages keep the Kits caps.
-add_filter( 'kits_ads_max', fn( $max ) => ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) ? 40 : $max );
 
 // Visits are posted to the plugin's lightweight endpoint (visit.php: WordPress in SHORTINIT mode), not the REST route.
 add_filter( 'kits_visit_endpoint', fn() => plugins_url( 'visit.php', AW_CORE_DIR . 'animal-writes-core.php' ) );

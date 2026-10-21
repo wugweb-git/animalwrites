@@ -459,42 +459,10 @@ html { overflow-x: clip; }
 .kit-share .kit-share-btn:focus-visible { background: var(--kit-chip-hover); border-color: var(--kit-chip-border-strong); outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .kit-share .kit-share-btn:active { background: var(--kit-chip-selected); }
 
-/* Ads */
-.kit-ad { margin: var(--kit-space-7) auto; max-width: var(--kit-width-content); text-align: center; border-block: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-3) 0; }
-.kit-ad-label { font-size: var(--kit-type-xs); color: var(--kit-color-muted); margin: 0 0 var(--kit-space-2); max-width: none; }
-.kit-ad-item { grid-column: 1 / -1; }
-/* Fixed space per ad size, kept from the first paint so nothing below jumps (phone 320×100, from 768px 728×90).
-   Ads are never clipped (no max-height). The box gives its space back only when the network says no ad will come. */
-.kit-ad-unit { min-height: 100px; display: flex; align-items: center; justify-content: center; }
-.kit-ad-unit > ins { flex: 1 1 100%; min-width: 0; } /* a flex item would shrink to 0 wide, and AdSense then has no width to size the ad for */
-/* While the network decides, a slot is 0 tall (it keeps its width, which is all the network measures): no empty box
-   that later collapses and moves the page. It takes its height when filled. */
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-height: 0 !important; overflow: hidden; }
-@media (min-width: 768px) { .kit-ad-unit { min-height: 90px; } }
-/* Every ad slot shows as one light tone, filled or not, so its place is visible (owner, 12 Oct 2026). */
-.kit-ad-unit { background: color-mix(in srgb, var(--kit-color-ink) 9%, var(--kit-color-bg)); border-radius: var(--kit-radius-card, 12px); }
-/* Preview only (kits-core preview.php): an empty slot, an AdSense unit reporting "unfilled", and preview-only items take
-   no space unless the page previews (html.kits-preview from the preview script, body.kits-preview for administrators).
-   The page HTML is the same for everyone, so the public cache never varies by visitor. */
-html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad--empty, .kit-ad-item--empty, .kits-preview-only) { display: none !important; }
-html:not(.kits-preview) body:not(.kits-preview) :is(.kit-ad, .kit-ad-item):has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
-/* Until the network fills it (e.g. while the account awaits approval) a slot shows nothing: no grey box, "Ad" label or
-   rules. It stays in the layout at full width because the network measures that width before it serves. */
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { border: 0; padding: 0; margin-block: 0; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) :is(.kit-ad-label) { display: none; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad:not([data-kit-lazy="wait"], [data-kit-lazy="pending"]):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) .kit-ad-unit { min-height: 0; background: none; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:not(:has(> .kit-ad:is([data-kit-lazy="wait"], [data-kit-lazy="pending"]))):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > .kit-ad { border: 0; padding: 0; background: none; }
-/* A list slot the network has not filled yet does not hold a grid cell (it left a card-sized hole beside the cards):
-   it moves to the end of the list at full width and no height, where the network can still measure it. Once filled
-   it takes its own cell again. */
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad-item:not(:has(> .kit-ad:is([data-kit-lazy="wait"], [data-kit-lazy="pending"]))):has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { order: 99; grid-column: 1 / -1 !important; grid-row: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; min-height: 0; }
-html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-adsbygoogle-status="done"]:not([data-ad-status]) { max-height: 0 !important; overflow: hidden !important; } /* the request has gone with its size; until AdSense answers (filled or unfilled) the unit takes no height, so no blank box */
-/* Lazy ads (kits-core ads.php, owner 18 Oct 2026): a slot keeps its space (phone 320×100, in a list 300×250, from 768px
-   728×90) and its "Ad" label while it waits to come near the screen and while the network answers; it gives the space back
-   only when the network says unfilled or does not answer in 6 s (data-kit-lazy="done" returns the rules above). A slot that
-   would start inside the first screen of a phone is never loaded and never shown (data-kit-lazy="fold"). */
-.kit-ad[data-kit-lazy="fold"], .kit-ad-item:has(> .kit-ad[data-kit-lazy="fold"]) { display: none !important; }
-.kit-ad-unit[data-slot-label]::after { content: attr(data-slot-label); font-size: var(--kit-type-xs); color: var(--kit-color-muted); }
+/* Preview only (kits-core preview.php): preview-only items take no space unless the page previews (html.kits-preview
+   from the preview script, body.kits-preview for administrators). The page HTML is the same for everyone, so the public
+   cache never varies by visitor. */
+html:not(.kits-preview) body:not(.kits-preview) .kits-preview-only { display: none !important; }
 
 /* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
    "Stripes" (core block style) shades every other row. Tokens only. */
@@ -580,7 +548,7 @@ html:not(.kits-preview) body:not(.kits-preview) .kit-ad ins.adsbygoogle[data-ads
 
 /* 8. Print ------------------------------------------------------------------- */
 @media print {
-	.kit-announce ,.kit-site-header ,.kit-site-footer ,.kit-print ,.kit-share-wrap ,.kit-sticky-help ,.kit-ad ,.wp-block-post-navigation-link ,.wp-block-post-terms ,.wp-block-post-date ,.wp-block-buttons ,.skip-link { display: none !important; }
+	.kit-announce ,.kit-site-header ,.kit-site-footer ,.kit-print ,.kit-share-wrap ,.kit-sticky-help ,.wp-block-post-navigation-link ,.wp-block-post-terms ,.wp-block-post-date ,.wp-block-buttons ,.skip-link { display: none !important; }
 	body { background: #fff; color: #000; padding: 0; }
 	.wp-block-post-title { font-size: 16pt; }
 	pre, .wp-block-preformatted { white-space: pre-wrap; font-family: Georgia, serif; font-size: 12pt; line-height: 1.5; border: 0; padding: 0; }
@@ -868,7 +836,6 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 
 /* Full-width bands follow each other with no gap (the page background showed through as a strip). */
 :where(.wp-block-post-content, main) > .alignfull + .alignfull { margin-block-start: 0 !important; }
-html:not(.kits-preview) :where(.wp-block-post-content, main) > .alignfull + :is(.kit-ad--empty, .kit-ad:has(ins.adsbygoogle[data-ad-status="unfilled"])) + .alignfull { margin-block-start: 0 !important; } /* a hidden ad slot between two sections adds no gap */
 
 /* Buttons on dark surfaces (primary takes the brand fill): kit-primitives.css section 10. */
 
@@ -1146,9 +1113,6 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 
 /* Ads in lists sit in a card of their own ("Ad" label); phones reserve 300×250 for it. A full row of space keeps every
    ad clear of buttons, contact actions and form fields. */
-.kit-ad-item > .kit-ad { margin: 0; height: 100%; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card, 12px); padding: var(--kit-space-3); background: var(--kit-surface-card, var(--kit-color-raised)); }
-@media (max-width: 767px) { .kit-ad-item .kit-ad-unit { min-height: 250px; } }
-.kit-ad { margin-block: var(--kit-space-7); }
 
 /* One card (owner, 9 Oct 2026): News, Resources, Library and Opportunities cards share one behaviour — the whole card
    is the link, the title underlines on hover, keyboard focus outlines the card, and the arrow (where shown) nudges. */
@@ -1250,15 +1214,15 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 
 /* Item page with a sidebar (owner, 16 Oct 2026): .kit-with-sidebar > .kit-main + .kit-sidebar (the "sidebar" template
    part). The text column is the reading width (--kit-width-content). Below lg the sidebar follows the text, at most the
-   same width; at lg it is a second column beside it. A sidebar with nothing to show (no blocks, or only an ad slot that
-   is empty, waiting or unfilled) takes no space, and the text column stays at the left edge. */
+   same width; at lg it is a second column beside it. A sidebar with nothing to show (no blocks print anything) takes no
+   space, and the text column stays at the left edge. */
 .kit-with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; } /* the text column starts at the page's left edge (owner, 20 Oct 2026) */
 .kit-with-sidebar > :is(.kit-main, .kit-sidebar) { width: 100%; max-width: var(--kit-width-content); margin-block: 0; }
-.kit-with-sidebar > .kit-sidebar:is(:has(> :not(.kit-ad)), :has(ins.adsbygoogle[data-ad-status="filled"])) { margin-top: var(--kit-space-7); }
-@media (max-width: 1199px) { .kit-with-sidebar > .kit-sidebar { display: none; } } /* no sidebar below lg (owner, 20 Oct 2026): it would only follow the article; its ad is never requested there */
+.kit-with-sidebar > .kit-sidebar:has(> *) { margin-top: var(--kit-space-7); }
+@media (max-width: 1199px) { .kit-with-sidebar > .kit-sidebar { display: none; } } /* no sidebar below lg (owner, 20 Oct 2026): it would only follow the article */
 @media (min-width: 1200px) {
-	.kit-with-sidebar:is(:has(> .kit-sidebar > :not(.kit-ad)), :has(> .kit-sidebar ins.adsbygoogle[data-ad-status="filled"])) { grid-template-columns: minmax(0, var(--kit-width-content)) minmax(0, 1fr); column-gap: var(--kit-space-7); justify-items: stretch; align-items: start; } /* :has() cannot be nested */
-	.kit-with-sidebar > .kit-sidebar:is(:has(> :not(.kit-ad)), :has(ins.adsbygoogle[data-ad-status="filled"])) { margin-top: 0; max-width: none; }
+	.kit-with-sidebar:has(> .kit-sidebar > *) { grid-template-columns: minmax(0, var(--kit-width-content)) minmax(0, 1fr); column-gap: var(--kit-space-7); justify-items: stretch; align-items: start; }
+	.kit-with-sidebar > .kit-sidebar:has(> *) { margin-top: 0; max-width: none; }
 	.kit-with-sidebar > .kit-sidebar.is-sticky { position: sticky; top: calc(var(--wp-admin--admin-bar--height, 0px) + var(--kit-header-height) + var(--kit-space-5)); } /* only when shorter than the screen (kit.js) */
 }
 

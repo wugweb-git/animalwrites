@@ -25,7 +25,7 @@ $content = <<<'HTML'
 
 <!-- wp:pattern {"slug":"animal-writes/whats-happening"} /-->
 
-<!-- wp:kits/ad-slot {"slot":"home-top"} /-->
+<!-- wp:advads/gblock {"itemID":"place_home-top"} /-->
 
 <!-- wp:pattern {"slug":"animal-writes/animal-law"} /-->
 
@@ -33,11 +33,11 @@ $content = <<<'HTML'
 
 <!-- wp:pattern {"slug":"animal-writes/find-help"} /-->
 
-<!-- wp:kits/ad-slot {"slot":"home-mid"} /-->
+<!-- wp:advads/gblock {"itemID":"place_home-mid"} /-->
 
 <!-- wp:pattern {"slug":"animal-writes/aw1-story"} /-->
 
-<!-- wp:kits/ad-slot {"slot":"home-bottom"} /-->
+<!-- wp:advads/gblock {"itemID":"place_home-bottom"} /-->
 
 <!-- wp:pattern {"slug":"animal-writes/take-action"} /-->
 HTML;

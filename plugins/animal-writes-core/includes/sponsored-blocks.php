@@ -1,7 +1,7 @@
 <?php
 /**
  * Sponsored blocks (inserter group "Sponsored", owner 12 Oct 2026). Both are always labelled "Sponsored", their links
- * carry rel="sponsored noopener", and a page that holds either one carries no ads (kits_ads_skip, kits-config.php).
+ * carry rel="sponsored noopener", and a page that holds either one carries no ads (Advanced Ads display conditions, tools/advanced-ads/setup.php).
  * - animal-writes/sponsored-item: a Resource with Sponsored ticked, as a card ("Sponsored by {name}" when named).
  * - animal-writes/sponsored-banner: picture, heading, text and link set by the editor.
  * The editor also gets the "System" pattern category (content repeated across pages: synced patterns).

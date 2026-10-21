@@ -192,7 +192,7 @@ button.kit-dd-btn { font: inherit; font-size: var(--fluid-body-sm); }
 .kit-badge--verified { background: var(--kit-color-success-soft); color: var(--kit-color-success); }
 .kit-badge--unconfirmed { background: var(--kit-color-warning-soft); color: var(--kit-color-warning); }
 .kit-badge--featured { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-.kit-badge--sponsored, .kit-badge--ad { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+.kit-badge--sponsored { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
 .kit-badge--closed { background: var(--kit-color-danger-soft); color: var(--kit-color-danger); }
 .kit-badge--new { background: var(--kit-color-info-soft); color: var(--kit-color-info); }
 /* Beta: a very small tag at the top right of a menu label (block style kits-beta on a Navigation Link, or the same span

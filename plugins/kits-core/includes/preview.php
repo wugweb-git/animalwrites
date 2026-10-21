@@ -1,8 +1,8 @@
 <?php
 /**
- * Preview: things only the site owner should see before they go public (empty ad slots, sample items).
+ * Preview: things only the site owner should see before they go public (sample items). Ads are Advanced Ads' alone.
  *
- * Who previews: logged-in administrators, requests from a preview IP address (Settings > Ads; IPv4 exact, IPv6 by its
+ * Who previews: logged-in administrators, requests from a preview IP address (Settings > Preview; IPv4 exact, IPv6 by its
  * /64 network), and registered preview devices (a long-lived HttpOnly cookie holding a random token; only its hash is
  * stored). Pages are served from a public cache, so the page HTML never varies by IP or device: it carries everything,
  * and CSS hides preview-only parts unless the page is marked html.kits-preview (set by a small script after asking the
@@ -173,7 +173,7 @@ add_action(
 		$url = wp_json_encode( esc_url_raw( rest_url( 'kits/v1/preview' ) ) );
 		echo '<script>(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
 			. 'if(v==="1"){h.classList.add("kits-preview");return;}if(v==="0"){return;}'
-			. 'function go(){if(!d.querySelector(".kit-ad,.kits-preview-only")||(!/(^|; )kits_pv=1/.test(d.cookie)&&!/[?&]kits-preview=1/.test(location.search))){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
+			. 'function go(){if(!d.querySelector(".kits-preview-only")||(!/(^|; )kits_pv=1/.test(d.cookie)&&!/[?&]kits-preview=1/.test(location.search))){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
 			. 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",go);}else{go();}})(document);</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput
 	},
 	2
@@ -228,53 +228,63 @@ add_action(
 	1
 );
 
-/* ---------- Settings > Ads: preview IP addresses and devices ---------- */
+/* ---------- Settings > Preview: preview IP addresses and devices (administrators only) ---------- */
 
 add_action(
-	'kits_ads_settings_fields',
+	'admin_menu',
 	function () {
-		echo '<h2 class="title" style="margin-top:2em">Preview IP addresses</h2><p class="description">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see empty ad slots and preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
-		echo '<textarea name="kits_preview_ips" rows="4" class="large-text code">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
-	}
-);
-add_action(
-	'kits_ads_settings_save',
-	function () {
-		$lines = array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['kits_preview_ips'] ?? '' ) ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Ads page
-		update_option( 'kits_preview_ips', implode( "\n", $lines ), false );
-	}
-);
-
-add_action(
-	'kits_ads_settings_after',
-	function () {
-		$post = esc_url( admin_url( 'admin-post.php' ) );
-		echo '<h2 class="title" style="margin-top:2em">Preview devices</h2><p class="description">A registered device sees empty ad slots and preview-only items on any network, without logging in.</p>';
-		$link = get_transient( 'kits_preview_link_' . get_current_user_id() );
-		if ( $link ) {
-			delete_transient( 'kits_preview_link_' . get_current_user_id() );
-			echo '<div class="notice notice-info inline"><p>Device link (one use, valid 24 hours): <input type="text" readonly class="large-text code" value="' . esc_attr( $link ) . '" onfocus="this.select()"></p></div>';
-		}
-		$all = kits_preview_devices();
-		if ( $all ) {
-			echo '<table class="widefat striped" style="max-width:720px"><thead><tr><th>Device</th><th>Added</th><th>Last seen</th><th></th></tr></thead><tbody>';
-			foreach ( $all as $h => $d ) {
-				echo '<tr><td>' . esc_html( $d['label'] ?? '' ) . '</td><td>' . esc_html( $d['added'] ?? '' ) . '</td><td>' . esc_html( $d['seen'] ?? '' ) . '</td><td><form method="post" action="' . $post . '">' // phpcs:ignore WordPress.Security.EscapeOutput
-					. '<input type="hidden" name="action" value="kits_preview_remove"><input type="hidden" name="device" value="' . esc_attr( $h ) . '">' . wp_nonce_field( 'kits_preview_remove', '_wpnonce', true, false )
-					. '<button type="submit" class="button-link-delete">Remove</button></form></td></tr>';
+		add_options_page(
+			'Preview',
+			'Preview',
+			'manage_options',
+			'kits-preview',
+			function () {
+				if ( isset( $_POST['kits_preview_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['kits_preview_nonce'] ) ), 'kits_preview_ips' ) ) {
+					$lines = array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['kits_preview_ips'] ?? '' ) ) ) ) );
+					update_option( 'kits_preview_ips', implode( "\n", $lines ), false );
+					echo '<div class="updated"><p>Saved.</p></div>';
+				}
+				echo '<div class="wrap"><h1>Preview</h1><form method="post">';
+				wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
+				echo '<h2 class="title">Preview IP addresses</h2><p class="description">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
+				echo '<textarea name="kits_preview_ips" rows="4" class="large-text code">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
+				submit_button();
+				echo '</form>';
+				kits_preview_devices_screen();
+				echo '</div>';
 			}
-			echo '</tbody></table>';
-		}
-		echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
-			. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></form>';
-		echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_link">' . wp_nonce_field( 'kits_preview_link', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
-			. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></form>';
+		);
 	}
 );
 
-/** Back to Settings > Ads. */
+/** The preview devices part of Settings > Preview. */
+function kits_preview_devices_screen() {
+	$post = esc_url( admin_url( 'admin-post.php' ) );
+	echo '<h2 class="title" style="margin-top:2em">Preview devices</h2><p class="description">A registered device sees preview-only items on any network, without logging in.</p>';
+	$link = get_transient( 'kits_preview_link_' . get_current_user_id() );
+	if ( $link ) {
+		delete_transient( 'kits_preview_link_' . get_current_user_id() );
+		echo '<div class="notice notice-info inline"><p>Device link (one use, valid 24 hours): <input type="text" readonly class="large-text code" value="' . esc_attr( $link ) . '" onfocus="this.select()"></p></div>';
+	}
+	$all = kits_preview_devices();
+	if ( $all ) {
+		echo '<table class="widefat striped" style="max-width:720px"><thead><tr><th>Device</th><th>Added</th><th>Last seen</th><th></th></tr></thead><tbody>';
+		foreach ( $all as $h => $d ) {
+			echo '<tr><td>' . esc_html( $d['label'] ?? '' ) . '</td><td>' . esc_html( $d['added'] ?? '' ) . '</td><td>' . esc_html( $d['seen'] ?? '' ) . '</td><td><form method="post" action="' . $post . '">' // phpcs:ignore WordPress.Security.EscapeOutput
+				. '<input type="hidden" name="action" value="kits_preview_remove"><input type="hidden" name="device" value="' . esc_attr( $h ) . '">' . wp_nonce_field( 'kits_preview_remove', '_wpnonce', true, false )
+				. '<button type="submit" class="button-link-delete">Remove</button></form></td></tr>';
+		}
+		echo '</tbody></table>';
+	}
+	echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
+		. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></form>';
+	echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_link">' . wp_nonce_field( 'kits_preview_link', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
+		. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></form>';
+}
+
+/** Back to Settings > Preview. */
 function kits_preview_back() {
-	wp_safe_redirect( admin_url( 'options-general.php?page=aw-ads' ) );
+	wp_safe_redirect( admin_url( 'options-general.php?page=kits-preview' ) );
 	exit;
 }
 

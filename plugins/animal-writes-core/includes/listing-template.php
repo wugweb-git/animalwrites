@@ -395,8 +395,6 @@ add_filter(
 	3
 );
 
-// The profile's ads are its two Ad slot blocks.
-add_filter( 'kits_ads_placed_types', fn( $t ) => array_merge( (array) $t, array( 'aw_listing' ) ) );
 
 /**
  * Listings whose gallery holds stock or CC images: [listing ID => stock attachment IDs]. They are never shown

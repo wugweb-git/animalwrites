@@ -601,7 +601,6 @@
     "aw-more",
     "aw-place-chip",
     "aw-block-preview",
-    "aw-ad1-mark",
     "aw-doc-toc",
     "kit-item-page",
     "aw-listing",
@@ -729,34 +728,6 @@
     "heading": "H2",
     "link": "source names (external)",
     "alt": "marks empty alt",
-    "schema": "none"
-   }
-  },
-  {
-   "name": "Ad slot (Animal Writes)",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "aw-ad"
-   ],
-   "states": [
-    "empty",
-    "filled"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "see Kits Ad slot",
-    "aria": "none",
-    "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
-    "motion": "none",
-    "sr": "visible text"
-   },
-   "seo": {
-    "heading": "none",
-    "link": "n/a",
-    "alt": "n/a",
     "schema": "none"
    }
   },

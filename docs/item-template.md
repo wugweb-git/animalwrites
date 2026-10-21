@@ -24,18 +24,17 @@ A row prints nothing when it has nothing.
 | 6 | Sources | `animal-writes/item-sources` | News: publisher chip, Read the original, summary note. Library: publisher chip, Read the original, "Issued by …" when different, summary note. Our own documents: "Created by Animal Writes". Research: "Study by {authors} in {journal}", Read the original (DOI), summary note. Guides: "By Animal Writes" and the guide's own Sources list (moved here from the text, unchanged). Opportunities: "Posted by {organisation}", the original when it is not the Apply link. Every variant: Editorial policy, Report a mistake (`/contact/?about=correction#write`). | all |
 | 7 | Tags | `animal-writes/item-tags` | Tag chips that are not the type shown in row 3. No categories. | all |
 | 8 | Share | `animal-writes/item-share` | `aw_share_html()` (kits-core `share.php`): X, Facebook, LinkedIn, WhatsApp, Email, Copy link. One row, 44px icon buttons, the same style for every network, aria-label + title; names only at 1200+ when the row still fits (kit.js). | all |
-| 9 | Ad 2 | `kits/ad-slot` slot `article-end` | The "Article – end" ad. | all |
+| 9 | (ad) | none: the end ad is in row 5 | Advanced Ads "After Content" placement `article-end`. | all |
 | 10 | More | `animal-writes/item-more` | At most two groups of three cards: a 4:3 picture (core Post Featured Image, cover; the item's picture, else its primary category's card picture), type and date, title, one line; no category chips. News: More in {category}, From the Library. Library: More in {category}, News about this. Resources: More {type}, From the Library. Opportunities: More opportunities. Picked by `aw_related_pick()` (related.php); cached 12 hours. | all |
 
 ## Ads (main column)
 
-- **Ad 1** (`article-incontent-1`): after about 150 words (summary included), at the first block boundary, before the
-  next H2 where the text has headings. Never above the first paragraph, never directly under the picture, never
-  inside a list, table, quote, FAQ or clause (only between top-level blocks, never after the FAQ starts). A shorter
-  text gets it after the Content row (at the top of the Sources block).
-- **Ad 2** (`article-end`): the Ad slot block after Share.
-- No other ads in the main column (`kits_ads_placed_types`: the automatic in-text, end-bar and after-content positions
-  are off for these types). The sidebar (1200+) is unchanged and is not shown below 1200.
+Advanced Ads alone (owner, 21 Oct 2026); with it off, nothing ad-related prints. Placements (`tools/advanced-ads/setup.php`):
+- **In text 1** (`article-incontent-1`): "Content" placement, after paragraph 3.
+- **In text 2** (`article-incontent-2`): "Content" placement, after paragraph 9.
+- **End** (`article-end`): "After Content" placement, at the end of the Content row (before Sources).
+- **Sidebar** (`sidebar`, 1200+): the Advanced Ads block in the sidebar template part; the sidebar is not shown below 1200.
+Where they may show and the pages with none are the display conditions of the placements' ads.
 
 ## Chips
 

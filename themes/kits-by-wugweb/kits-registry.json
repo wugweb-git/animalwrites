@@ -1258,21 +1258,17 @@
    }
   },
   {
-   "name": "Ad slot",
+   "name": "Ad placement (Advanced Ads)",
    "type": "component",
    "status": "live",
-   "classes": [
-    "kit-ad"
-   ],
+   "classes": [],
    "states": [
-    "filled (labelled \"Ad\")",
-    "empty (placeholder, preview only: html/body.kits-preview)",
-    "AdSense unfilled (no space unless preview)",
-    "in a list (kit-ad-item card)"
+    "Advanced Ads on: the placement's ad, labelled \"Advertisement\" (Advanced Ads → Settings → General)",
+    "Advanced Ads off: nothing (the block is not registered, so it prints no markup)"
    ],
    "tokens": [],
    "a11y": {
-    "element": "<aside aria-label=\"Advertisement\">; empty placeholder aria-hidden",
+    "element": "Advanced Ads wrapper <div>; label text \"Advertisement\"",
     "aria": "none",
     "keyboard": "not interactive",
     "focus": "n/a",
@@ -1286,7 +1282,7 @@
     "alt": "n/a",
     "schema": "none"
    },
-   "block": "kits/ad-slot"
+   "block": "advads/gblock"
   },
   {
    "name": "Claim panel",

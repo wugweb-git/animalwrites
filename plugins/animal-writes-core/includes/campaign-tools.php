@@ -645,9 +645,6 @@ add_action(
 	2
 );
 
-// No ads on a page with a letter tool (a form page with one job).
-add_filter( 'kits_ads_skip', fn( $skip ) => $skip || ( is_singular() && has_shortcode( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw_letter_tool' ) ) );
-
 /* ---------- animal-writes/current-campaign: the sidebar's campaign card (owner, 20 Oct 2026) ---------- */
 
 /** The open campaign closing soonest (0 when none is open). */

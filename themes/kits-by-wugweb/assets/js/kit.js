@@ -537,7 +537,7 @@
 (function () {
 	function mark(root) {
 		root.querySelectorAll('a[href^="http"]:not(.kit-link-ext)').forEach(function (a) {
-			if (a.host === location.host || !a.textContent.trim() || a.querySelector('.kit-ico--arrow-up-right') || a.closest('.wp-block-navigation, .kit-ad, .kit-share, .kit-socials') || a.matches('.kit-btn, .wp-block-button__link')) {
+			if (a.host === location.host || !a.textContent.trim() || a.querySelector('.kit-ico--arrow-up-right') || a.closest('.wp-block-navigation, .kit-share, .kit-socials') || a.matches('.kit-btn, .wp-block-button__link')) {
 				return;
 			}
 			a.classList.add('kit-link-ext');
@@ -778,9 +778,9 @@
 		if (/^mailto:/i.test(href)) { track('email_click', who); return; }
 		if (/\.pdf(\?|#|$)/i.test(href) || a.hasAttribute('download')) { track('pdf_download', { item: document.title.split(' – ')[0].slice(0, 100), issuer: page.issuer || '' }); }
 		var li = a.closest('.wp-block-post-template > li');
-		if (li && !li.classList.contains('kit-ad-item')) {
-			// position among the cards only (ad cards in the list are not counted); the card's post ID and title
-			var cards = Array.prototype.filter.call(li.parentNode.children, function (c) { return !c.classList.contains('kit-ad-item'); });
+		if (li) {
+			// position among the cards; the card's post ID and title
+			var cards = Array.prototype.slice.call(li.parentNode.children);
 			var title = li.querySelector('.wp-block-post-title, h2, h3');
 			track('card_click', { list: page.section || page.page_type || '', position: cards.indexOf(li) + 1, card_id: ((li.className.match(/\bpost-(\d+)\b/) || [])[1] || ''), card_name: title ? title.textContent.replace(/\s+/g, ' ').trim().slice(0, 100) : '' });
 		}
@@ -805,62 +805,6 @@
 			marks.forEach(function (m) { if (pct >= m && !hit[m]) { hit[m] = 1; track('scroll_depth', { percent: m }); } });
 		});
 	}, { passive: true });
-})();
-
-/* Ad slots (.kit-ad, kits-core ads.php), owner's analytics audit 17 Oct 2026. Per slot with code, once per page view:
-   ad_slot_status (ad_slot, ad_status, position): filled / unfilled as AdSense reports it on its <ins data-ad-status>;
-   not_loaded when the AdSense script never ran (blocked) and no_response when it ran but gave no answer within 15 s;
-   code for another network's code (fill unknown). ad_slot_view: a filled slot at least half on screen for 1 second.
-   Clicks on an ad cannot be counted: the ad is a frame from Google's domain. Empty placeholders are skipped. */
-(function () {
-	var slots = document.querySelectorAll('aside.kit-ad:not(.kit-ad--empty)');
-	if (!slots.length) return;
-	function track(name, params) { if (typeof window.kitsTrack === 'function') window.kitsTrack(name, params); }
-	Array.prototype.forEach.call(slots, function (el, i) {
-		var name = (el.className.match(/\baw-ad-([a-z0-9-]+)/) || [])[1] || 'unknown';
-		var ins = el.querySelector('ins.adsbygoogle');
-		var status = '', seen = false, viewed = false;
-		function view() {
-			if (viewed || !seen || (status !== 'filled' && status !== 'code')) return;
-			viewed = true;
-			track('ad_slot_view', { ad_slot: name, ad_status: status, position: i + 1 });
-		}
-		function report(s) {
-			if (status) return;
-			status = s;
-			track('ad_slot_status', { ad_slot: name, ad_status: s, position: i + 1 });
-			view();
-		}
-		if (!ins) {
-			report('code');
-		} else {
-			var check = function () { var s = ins.getAttribute('data-ad-status'); if (s) report(s); };
-			if (window.MutationObserver) new MutationObserver(check).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
-			check();
-			var wait = function () { setTimeout(function () { if (!status) report(window.adsbygoogle && window.adsbygoogle.loaded ? 'no_response' : 'not_loaded'); }, 15000); };
-			var lz = el.getAttribute('data-kit-lazy');
-			if (lz === 'fold') {
-				status = 'fold'; /* never requested on a phone: nothing to report */
-			} else if (lz === 'wait' && window.MutationObserver) {
-				/* lazy slot (kits-core): the 15 s clock starts when its request goes out, not at page load */
-				var lmo = new MutationObserver(function () {
-					var v = el.getAttribute('data-kit-lazy');
-					if (v === 'fold') { status = 'fold'; lmo.disconnect(); }
-					else if (v !== 'wait') { lmo.disconnect(); wait(); }
-				});
-				lmo.observe(el, { attributes: true, attributeFilter: ['data-kit-lazy'] });
-			} else if (document.readyState === 'complete') wait(); else window.addEventListener('load', wait, { once: true });
-		}
-		if ('IntersectionObserver' in window) {
-			var timer;
-			var io = new IntersectionObserver(function (en) {
-				if (en[0].intersectionRatio >= 0.5) {
-					if (!timer) timer = setTimeout(function () { seen = true; io.disconnect(); view(); }, 1000);
-				} else { clearTimeout(timer); timer = null; }
-			}, { threshold: [0, 0.5] });
-			io.observe(el);
-		}
-	});
 })();
 
 /* Item page sidebar: sticky under the header at lg only when it is shorter than the screen (a taller one scrolls

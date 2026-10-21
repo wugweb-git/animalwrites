@@ -73,7 +73,6 @@ Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-ca
 
 | File | What it does |
 |---|---|
-| `ads.php` | Ad slots. Admins paste network code (e.g. AdSense) in Settings > Ads; empty slots print nothing. Slots: homepage (between sections), article (after the story), archive (after the 6th card). Also serves /ads.txt from the same settings page. |
 | `altcha.php` | ALTCHA check for every aw_form_open() form: a free proof-of-work CAPTCHA, no third-party service, no cookies. |
 | `analytics.php` | Google Tag Manager. The container ID and production hosts come from the site (filters kits_gtm_id, kits_analytics_hosts). |
 | `attribution.php` | News attribution, Google News pattern. |

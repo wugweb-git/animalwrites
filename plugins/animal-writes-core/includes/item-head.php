@@ -8,12 +8,13 @@
  *   3 Meta row     animal-writes/item-meta    one date, Sponsored, type, place, deadline, status, categories
  *   4 Image        core/post-featured-image
  *   5 Content      core/post-excerpt (summary) + core/post-content (document, findings, guide, description) + Apply;
- *                  FAQ moved last; Ad 1 inside it after about 150 words, or after it when shorter
+ *                  FAQ moved last. Ads (Advanced Ads, nothing when it is off): "Content" placements after paragraphs
+ *                  3 and 9 (article-incontent-1/2) and the "After Content" placement at its end (article-end)
  *   6 Sources      animal-writes/item-sources publisher / issuer / study / "By Animal Writes", the original, notes,
  *                  Editorial policy and Report a mistake
  *   7 Tags         animal-writes/item-tags    labels that are not the type (no categories)
  *   8 Share        animal-writes/item-share   share.php's one-row bar
- *   9 Ad 2         kits/ad-slot "article-end"
+ *   9 (ad)         none of its own: the end ad is in row 5
  *  10 More         animal-writes/item-more    at most 2 groups of 3 cards (4:3 picture, type, date, title, one line)
  *
  * Rows print nothing when they have nothing. The blocks are registered with the others (hub-blocks.php), so the Site
@@ -28,9 +29,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Item types that use the one item template. */
 const AW_ITEM_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' );
-
-/** Words before Ad 1 (rule D). */
-const AW_ITEM_AD1_WORDS = 150;
 
 /**
  * An item's primary category: the one chosen in Rank Math, else its first category.
@@ -212,16 +210,11 @@ add_filter(
 
 /** Request state: the guide's reference list (moved to Sources) and where Ad 1 went ('' | inline | after). */
 function aw_item_state( $key, $value = null ) {
-	static $s = array( 'refs' => '', 'ad1' => '', 'in_content' => 0 );
+	static $s = array( 'refs' => '', 'in_content' => 0 );
 	if ( null !== $value ) {
 		$s[ $key ] = $value;
 	}
 	return $s[ $key ];
-}
-
-/** Plain words in a block (and its inner blocks). */
-function aw_item_block_words( $b ) {
-	return str_word_count( wp_strip_all_tags( serialize_block( $b ) ) );
 }
 
 // Only the item's own Content block is rearranged (not the_content run by search descriptions, feeds or excerpts).
@@ -277,48 +270,17 @@ add_filter(
 				}
 			}
 		}
-		$summary = aw_item_shows_summary( $id );
-		$words   = $summary ? str_word_count( wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $id ) ) ) : 0;
-		$at      = null;
-		foreach ( $body as $i => $b ) {
-			if ( $words >= AW_ITEM_AD1_WORDS && ( $i > 0 || $summary ) ) {
-				$at   = $i;
-				$more = 0;
-				foreach ( array_slice( $body, $i, null, true ) as $j => $c ) { // the next H2, when it comes within about 150 more words
-					if ( 'core/heading' === $c['blockName'] && 2 === (int) ( $c['attrs']['level'] ?? 2 ) ) {
-						$at = $j;
-						break;
-					}
-					$more += aw_item_block_words( $c );
-					if ( $more > AW_ITEM_AD1_WORDS ) {
-						break;
-					}
-				}
-				break;
-			}
-			$words += aw_item_block_words( $b );
-		}
-		if ( null !== $at ) {
-			$mark = '<div class="aw-ad1-mark"></div>';
-			array_splice( $body, $at, 0, array( array( 'blockName' => 'core/html', 'attrs' => array(), 'innerBlocks' => array(), 'innerHTML' => $mark, 'innerContent' => array( $mark ) ) ) );
-			aw_item_state( 'ad1', 'inline' );
-		} else {
-			aw_item_state( 'ad1', 'after' );
-		}
 		return serialize_blocks( array_merge( $body, $faq ) );
 	},
 	8
 );
 
-// Ad 1 in its marked place; an item with no text of its own prints no empty content box.
+// An item with no text of its own prints no empty content box.
 add_filter(
 	'render_block_core/post-content',
 	function ( $html, $block, $instance ) {
 		if ( ! aw_item_here( (int) ( $instance->context['postId'] ?? 0 ) ) || is_singular( 'aw_listing' ) ) {
 			return $html;
-		}
-		if ( false !== strpos( $html, 'aw-ad1-mark' ) ) {
-			$html = preg_replace( '#<div class="aw-ad1-mark"></div>#', function_exists( 'aw_ad' ) ? aw_ad( 'article-incontent-1' ) : '', $html, 1 );
 		}
 		return '' === trim( wp_strip_all_tags( $html ) ) && ! preg_match( '#<(img|iframe|object|form|video|table|aside)\b#i', $html ) ? '' : $html;
 	},
@@ -402,14 +364,12 @@ function aw_block_item_sources( $a, $id ) {
 			break;
 	}
 	$refs = 'guide' === $kind ? (string) aw_item_state( 'refs' ) : '';
-	$ad   = 'inline' !== aw_item_state( 'ad1' ) && function_exists( 'aw_ad' ) ? aw_ad( 'article-incontent-1' ) : ''; // Ad 1 after a short text
-	aw_item_state( 'ad1', 'inline' );
 	$out  = '<section class="aw-sources" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="aw-sources-head has-x-large-font-size" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Sources', 'animal-writes-core' ) . '</h2>';
 	$out .= '' !== $credit ? '<div class="aw-sources-credit">' . $credit . '</div>' : '';
 	$out .= '' !== $read . $note ? '<p class="aw-sources-note">' . $read . $note . '</p>' : '';
 	$out .= '' !== $refs ? '<div class="aw-sources-refs">' . do_blocks( $refs ) . '</div>' : '';
 	$out .= $links;
-	return $ad . $out . '</section>';
+	return $out . '</section>';
 }
 
 /* ---------- 7. Tags ---------- */
@@ -593,7 +553,3 @@ add_filter(
 	5
 );
 
-/* ---------- Ads: Ad 1 and Ad 2 only ---------- */
-
-// The item template places its own ads (Ad 1 above, Ad 2 as the Ad slot block after Share): no others in the column.
-add_filter( 'kits_ads_placed_types', fn( $t ) => array_merge( (array) $t, AW_ITEM_TYPES ) );

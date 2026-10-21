@@ -568,10 +568,6 @@ add_action(
 	99
 );
 
-/* ---------- Ads on list Pages (the hubs and search are Pages, not archives) ---------- */
-
-add_filter( 'kits_ads_is_list', fn( $is ) => $is || '' !== aw_hub_type() || is_page( 'search' ) );
-
 // The list's count opens its Collection block, under the filters (sections.php, owner 20 Oct 2026); no count above the pagination.
 
 

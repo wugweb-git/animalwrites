@@ -59,7 +59,7 @@ function aw_cdn_ttl() {
 	if ( is_page( aw_cdn_excluded_slugs() ) || ( is_singular() && false !== stripos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'fluentform' ) ) ) {
 		return 0;
 	}
-	if ( function_exists( 'kits_ads_excluded' ) && is_singular( 'post' ) && defined( 'AW_CRISIS_GUIDES' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
+	if ( is_singular( 'post' ) && defined( 'AW_CRISIS_GUIDES' ) && in_array( get_queried_object_id(), AW_CRISIS_GUIDES, true ) ) {
 		return 0;
 	}
 	if ( headers_sent() || preg_grep( '/^set-cookie:/i', headers_list() ) ) {

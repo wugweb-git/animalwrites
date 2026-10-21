@@ -121,6 +121,3 @@ function aw_block_term_related() {
 	return aw_term_section( 'related', $head, $out . '</ul>' );
 }
 
-/* ---------- Ads: List – card 2 sits after Share on term pages ---------- */
-
-add_filter( 'kits_ads_list_slots', fn( $slots ) => aw_term_page_term() ? array_slice( $slots, 0, 1, true ) : $slots );
