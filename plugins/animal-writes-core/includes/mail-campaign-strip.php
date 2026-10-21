@@ -97,7 +97,8 @@ function aw_mail_campaign_strip_html() {
 		return '';
 	}
 	if ( false !== strpos( (string) $c[1], '/campaigns/lab-animals-rules-2026/' ) ) {
-		return '<div style="margin-top:16px">' . AW_MAIL_STRIP_LAB_RULES . '</div>';
+		$day = $c[2] ? strtoupper( wp_date( 'j M', strtotime( $c[2] . ' 12:00:00' ) ) ) : '5 NOV'; // the one thing that changes: the closing date follows the campaign (aw_campaign_close)
+		return '<div style="margin-top:16px">' . str_replace( '>5 NOV<', '>' . esc_html( $day ) . '<', AW_MAIL_STRIP_LAB_RULES ) . '</div>';
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
 	$days  = aw_mail_campaign_days_left( $c[2] );
