@@ -475,6 +475,8 @@ add_action(
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
+		}
+		if ( in_array( $key, array( 'contact', 'claim' ), true ) ) { // Claim asks for WhatsApp too (found 21 Oct 2026: not copied)
 			$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );
 			if ( '' !== $wa ) { // as the link maps them, also for a sender who left the newsletter unticked (the link does not run)
 				$c->syncCustomFieldValues( array( 'whatsapp' => $wa, 'wa_optin' => aw_ff_ticked( $data, 'wa_optin' ) ? '1' : '0' ), false );
