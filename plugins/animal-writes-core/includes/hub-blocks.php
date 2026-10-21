@@ -208,7 +208,7 @@ function aw_block_list_filters( $a ) {
 	$out  = 'aw_listing' === $type ? aw_directory_filter() : ( function_exists( 'aw_list_filters' ) && isset( AW_LIST_FILTERS[ $type ] ) ? aw_list_filters( $type ) : '' );
 	if ( function_exists( 'aw_list_page' ) && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) && aw_list_page( $type, false ) ) { // list pages: filters › count under the band (owner, 20 Oct 2026); the Directory's count stays with its results
 		$count                    = 'aw_listing' !== $type ? aw_hub_count_label( $type ) : '';
-		$GLOBALS['aw_head_below'] = aw_head_below( $out, '' !== $count ? '<p class="kit-section-count" role="status">' . esc_html( $count ) . '</p>' : '' );
+		$GLOBALS['aw_head_below'] = aw_head_below( $out, $count, 'aw_listing' !== $type ? $type : '' );
 		return '';
 	}
 	return $out ? '<div class="kit-section-filters">' . $out . '</div>' : '';
@@ -353,9 +353,22 @@ function aw_block_org_actions( $a, $id ) {
 }
 
 /**
+ * The collection toolbar (owner, 21 Oct 2026), one component for every list: the count on the left, the controls on the
+ * right (filters, Sort, and on the Directory View and Near me). Under 768 the controls wrap under the count. Only
+ * controls that work in that list are passed in (aw_sort_segment() for the sorts a section has).
+ *
+ * @param string $count    Count text ("1,104 stories"), plain.
+ * @param string $controls Controls' HTML.
+ * @return string
+ */
+function aw_toolbar( $count, $controls = '' ) {
+	return '' === $count . $controls ? '' : '<div class="aw-toolbar">' . ( '' !== $count ? '<p class="aw-toolbar-count" role="status">' . esc_html( $count ) . '</p>' : '' ) . $controls . '</div>';
+}
+
+/**
  * Directory toolbar (owner, 21 Oct 2026): one row above the list, the count on the left ("976 results for Kerala") and
  * the controls on the right: Sort (A–Z / Most details first), View (List / Map) and Near me. Their panels (Near me,
- * the map) open under the row; the list follows. Under 768 the controls wrap under the count.
+ * the map) open under the row; the list follows.
  */
 function aw_block_result_head() {
 	if ( ! aw_is_directory_view() ) {
@@ -370,9 +383,8 @@ function aw_block_result_head() {
 	$line  = $where ? sprintf( _n( '%1$s result for %2$s', '%1$s results for %2$s', $n ), number_format_i18n( $n ), implode( ', ', $where ) ) : sprintf( _n( '%s organisation', '%s organisations', $n ), number_format_i18n( $n ) );
 	$sort  = 'details' === ( $_GET['sort'] ?? '' ) ? 'details' : ''; // phpcs:ignore WordPress.Security.NonceVerification
 	$here  = add_query_arg( array_map( 'rawurlencode', array_diff_key( wp_unslash( $_GET ), array( 'sort' => 1, 'paged' => 1, 'query-106-page' => 1 ) ) ), strtok( aw_hub_base_url(), '?' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	return '<div class="aw-dir-toolbar"><p class="aw-dir-count" role="status">' . esc_html( $line ) . '</p><div class="aw-dir-controls">'
-		. '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav>'
-		. ( function_exists( 'aw_dir_tools_html' ) ? aw_dir_tools_html() : '' ) . '</div></div>' // List / Map and Near me (directory-map.php)
+	$sortnav = '<nav class="kit-segment" aria-label="Sort"><a href="' . esc_url( $here ) . '"' . ( $sort ? '' : ' aria-current="true"' ) . '>A–Z</a><a href="' . esc_url( add_query_arg( 'sort', 'details', $here ) ) . '"' . ( $sort ? ' aria-current="true"' : '' ) . '>Most details first</a></nav>';
+	return aw_toolbar( $line, $sortnav . ( function_exists( 'aw_dir_tools_html' ) ? aw_dir_tools_html() : '' ) ) // List / Map and Near me (directory-map.php)
 		. ( function_exists( 'aw_dir_panels_html' ) ? aw_dir_panels_html() : '' );
 }
 

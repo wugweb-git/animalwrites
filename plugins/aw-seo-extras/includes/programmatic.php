@@ -515,7 +515,7 @@ function aw_seo_dir_facts() {
 add_filter(
 	'render_block_core/query',
 	function ( $html ) {
-		return false === strpos( (string) $html, 'aw-dir-toolbar' ) ? $html : $html . aw_seo_dir_facts();
+		return false === strpos( (string) $html, 'aw-toolbar' ) ? $html : $html . aw_seo_dir_facts();
 	},
 	11
 );

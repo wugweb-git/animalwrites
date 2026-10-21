@@ -256,9 +256,8 @@
     "aw-dir-q",
     "aw-dir-submit",
     "aw-dir-check",
-    "aw-dir-toolbar",
-    "aw-dir-count",
-    "aw-dir-controls",
+    "aw-toolbar",
+    "aw-toolbar-count",
     "aw-browse-states",
     "aw-state"
    ],

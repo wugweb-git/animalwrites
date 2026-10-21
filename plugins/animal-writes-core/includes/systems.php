@@ -289,15 +289,26 @@ function aw_list_filters( $type ) {
 		}
 		$groups .= kits_filter_dropdown( $label, $param, $options ); // every hub the same (owner, 14 Oct 2026): one button per filter, Sort beside them; a "Filters" sheet on phones
 	}
-	$sort_opts = array();
-	if ( (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ) {
-		$sorts = array(); // nothing to order with fewer than 2 items
+	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, '', $keep ) : ''; // Sort is in the toolbar (aw_sort_segment)
+}
+
+/**
+ * A list's sort as a segmented control for the toolbar: its section's orders (AW_LIST_SORTS), the filters kept.
+ * Empty when the list has one order or fewer than 2 items (nothing to order).
+ */
+function aw_sort_segment( $type ) {
+	$sorts = AW_LIST_SORTS[ $type ] ?? array();
+	if ( count( $sorts ) < 2 || (int) ( wp_count_posts( $type )->publish ?? 0 ) < 2 ) {
+		return '';
 	}
+	$active = aw_active_filters( $type );
+	$cur    = aw_active_sort( $type );
+	$html   = '';
 	foreach ( $sorts as $k => $l ) {
-		$sort_opts[] = array( $l, add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), $all ), $k === $sort );
+		$url   = add_query_arg( aw_filter_args( $active ) + ( array_key_first( $sorts ) === $k ? array() : array( 'sort' => $k ) ), aw_hub_url( $type ) );
+		$html .= '<a href="' . esc_url( $url ) . '"' . ( $k === $cur ? ' aria-current="true"' : '' ) . '>' . esc_html( preg_replace( '/ first$/', '', $l ) ) . '</a>';
 	}
-	$sort_html = function_exists( 'kits_sort_dropdown' ) ? kits_sort_dropdown( $sort_opts ) : '';
-	return function_exists( 'kits_filter_bar' ) ? kits_filter_bar( $groups, $chips, $all, $sort_html, $keep ) : '';
+	return '<nav class="kit-segment" aria-label="Sort">' . $html . '</nav>';
 }
 
 /** Keep the publisher key current when a news item's source changes. */

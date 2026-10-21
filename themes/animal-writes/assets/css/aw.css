@@ -130,14 +130,21 @@
 .aw-dir-search select { font-size: var(--fluid-body-sm); }
 @media (min-width: 1200px) { .aw-dir-search { grid-template-columns: minmax(9rem, 2fr) repeat(3, minmax(11.5rem, 1fr)) auto; } .aw-dir-q { grid-column: auto; } .aw-dir-submit .kit-btn { width: auto; } } /* "Choose a state first" fits whole */
 
-/* Directory results: count line and sort */
-/* Directory toolbar (hub-blocks.php aw_block_result_head): count left, Sort · View · Near me right; under 768 the controls wrap under the count */
-.aw-dir-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin: 0 0 var(--kit-space-collection); }
-.aw-dir-count { margin: 0; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
-.aw-dir-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); }
-.aw-dir-controls .aw-dir-tools { width: auto; margin: 0; }
-@media (min-width: 768px) { .aw-dir-controls { margin-left: auto; } } /* stays on the right when a long count wraps it */
-.aw-dir-toolbar ~ :is(.aw-near, .aw-dir-map):not([hidden]) { margin: 0 0 var(--kit-space-collection); }
+/* Collection toolbar (hub-blocks.php aw_toolbar): one row above every list, count left, controls (filters, Sort, and on the Directory
+   View and Near me) right; under 768 the controls wrap under the count at 44px. From 768 the controls are 36px (owner, 21 Oct 2026). */
+.aw-toolbar { --aw-toolbar-h: var(--kit-size-target); display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--kit-space-3); row-gap: var(--kit-space-2); margin: 0 0 var(--kit-space-collection); }
+.aw-toolbar-count { margin: 0; flex: 1 0 100%; font-weight: var(--kit-weight-strong); color: var(--kit-color-ink); }
+.aw-toolbar > .kit-filterbar { flex: 0 1 auto; }
+.aw-toolbar > .kit-filter-active { order: 9; flex: 1 1 100%; margin: 0; } /* chosen filters keep their own row */
+.aw-toolbar .aw-dir-tools { width: auto; margin: 0; }
+.kit-section-filters--below > .aw-toolbar { margin: 0; }
+.aw-toolbar ~ :is(.aw-near, .aw-dir-map):not([hidden]) { margin: 0 0 var(--kit-space-collection); }
+@media (min-width: 768px) {
+	.aw-toolbar { --aw-toolbar-h: 2.25rem; }
+	.aw-toolbar-count { flex: 1 1 12rem; }
+	.aw-toolbar :is(.kit-dd-btn, .kit-btn, .kit-filter-sheet > summary) { min-height: var(--aw-toolbar-h); }
+	.aw-toolbar .kit-segment :is(a, button) { min-height: calc(var(--aw-toolbar-h) - 2 * var(--kit-space-1)); }
+}
 .aw-org-contact { display: inline-flex; gap: var(--kit-space-2); color: var(--kit-color-muted); }
 
 /* Browse by state (Directory hub and home): every state/UT with listings, A–Z, with counts */

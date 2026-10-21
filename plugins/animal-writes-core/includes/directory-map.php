@@ -280,7 +280,7 @@ function aw_dir_tools_html() {
 	wp_enqueue_style( 'aw-dir-map' );
 	return '<div class="aw-dir-tools" data-filters="' . esc_attr( wp_json_encode( (object) aw_dir_view_filters() ) ) . '">'
 		. '<div class="kit-segment" role="group" aria-label="View"><button type="button" data-view="list" aria-pressed="true">List</button><button type="button" data-view="map" aria-pressed="false">Map</button></div>'
-		. '<button type="button" class="kit-btn kit-btn--ghost kit-btn--ico-map-pin aw-near-open" aria-expanded="false" aria-controls="aw-near">Near me</button>'
+		. '<button type="button" class="kit-btn kit-btn--sm kit-btn--ghost kit-btn--ico-map-pin aw-near-open" aria-expanded="false" aria-controls="aw-near">Near me</button>'
 		. '</div>';
 }
 

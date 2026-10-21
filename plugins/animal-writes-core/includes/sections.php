@@ -48,10 +48,10 @@ function aw_section_tile( $p ) {
  * @return string
  */
 function aw_head_band( $a ) {
-	$a     = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false, 'below' => false ) );
+	$a     = wp_parse_args( $a, array( 'crumbs' => '', 'title' => '', 'title_class' => 'wp-block-query-title', 'icon' => '', 'desc' => '', 'note' => '', 'count' => '', 'visual' => '', 'filters' => '', 'compact' => false, 'below' => false, 'type' => '' ) );
 	$count = '' !== $a['count'] ? '<p class="kit-section-count" role="status">' . esc_html( $a['count'] ) . '</p>' : '';
-	if ( $a['below'] ) { // list pages: the head is breadcrumb › H1 › description; filters › count open the list
-		$under = aw_head_below( $a['filters'], $count );
+	if ( $a['below'] ) { // list pages: the head is breadcrumb › H1 › description; the toolbar (count, filters, sort) opens the list
+		$under = aw_head_below( $a['filters'], $a['count'], $a['type'] );
 		return aw_head_band( array_merge( $a, array( 'count' => '', 'filters' => '', 'compact' => false, 'below' => false ) ) ) . $under;
 	}
 	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
@@ -148,6 +148,7 @@ function aw_section_head_archive() {
 				'filters' => $filters ? $filters : '',
 				'compact' => 'aw_listing' === $type && ! $term_page,
 				'below'   => aw_list_page( $type, $term_page ),
+				'type'    => $term_page ? '' : $type,
 			)
 		);
 }
@@ -182,19 +183,24 @@ function aw_block_section_head( $a ) {
 			'count'       => $hub && 'aw_listing' !== $type && aw_list_page( $type, false ) && function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '', // the Directory's count stays with its results
 			'compact'     => 'aw_listing' === $type,
 			'below'       => $hub && aw_list_page( $type, false ),
+			'type'        => $hub && 'aw_listing' !== $type ? $type : '',
 		)
 	);
 }
 
 /**
- * The filters and count of a list page, under its head band (existing .kit-section-filters, placed below).
+ * The toolbar of a list page, under its head band (existing .kit-section-filters, placed below): the count on the left,
+ * the filters and the section's sort on the right (aw_toolbar()).
  *
  * @param string $filters Filters HTML.
- * @param string $count   Count HTML (p.kit-section-count).
+ * @param string $count   Count text.
+ * @param string $type    Post type whose sorts are offered ('' for none: tag and category pages).
  * @return string
  */
-function aw_head_below( $filters, $count ) {
-	return '' !== ( $filters . $count ) ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $filters . $count . '</div>' : '';
+function aw_head_below( $filters, $count, $type = '' ) {
+	$sort = '' !== $type && function_exists( 'aw_sort_segment' ) ? aw_sort_segment( $type ) : '';
+	$bar  = '' !== $count || '' !== $sort ? aw_toolbar( $count, $filters . $sort ) : $filters;
+	return '' !== $bar ? '<div class="kit-section-filters kit-section-filters--below alignwide">' . $bar . '</div>' : '';
 }
 
 // Section Pages keep their band as saved blocks: list-filters (hub-blocks.php) holds the filters and count, and the
@@ -215,8 +221,8 @@ add_filter(
 
 /**
  * List pages, whose filters and count sit under the head band (owner, 20 Oct 2026): News, Library, Resources,
- * Opportunities, Press coverage, Directory place and type pages, tag and category pages. Not the campaigns (Campaign
- * Content Standard) or the Directory home page.
+ * Opportunities, Campaigns, Press coverage, Directory place and type pages, tag and category pages. Not the Directory home
+ * page.
  *
  * @param string $type      Post type of the page's list.
  * @param bool   $term_page A tag or category page.
@@ -229,7 +235,7 @@ function aw_list_page( $type, $term_page ) {
 	if ( 'aw_listing' === $type ) {
 		return (bool) ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) );
 	}
-	return '' !== $type && 'aw_campaign' !== $type;
+	return '' !== $type;
 }
 
 /**
