@@ -150,7 +150,8 @@ foreach ( $roles as $role => list( $slug, $title, $conds ) ) {
 		if ( $apply ) {
 			if ( $source ) {
 				$src = get_post( $source );
-				$id  = (int) wp_insert_post( array( 'post_type' => 'advanced_ads', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_content' => $src->post_content ) );
+				$id  = (int) wp_insert_post( array( 'post_type' => 'advanced_ads', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_author' => (int) $src->post_author ) );
+				$wpdb->update( $wpdb->posts, array( 'post_content' => $src->post_content ), array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB -- not through kses
 				foreach ( get_post_meta( $source ) as $k => $vals ) {
 					foreach ( $vals as $v ) {
 						add_post_meta( $id, $k, maybe_unserialize( $v ) );
@@ -167,6 +168,27 @@ foreach ( $roles as $role => list( $slug, $title, $conds ) ) {
 		}
 	}
 	if ( $id ) {
+		// AdSense code needs the network's loader (Site Kit printed it before; its snippet is off so nothing loads with
+		// Advanced Ads off), and Advanced Ads strips <script> from ads whose author may not use unfiltered HTML (2.0.27).
+		$post   = get_post( $id );
+		$code   = (string) $post->post_content;
+		$author = (int) $post->post_author;
+		$fix    = array();
+		if ( false !== strpos( $code, 'class="adsbygoogle"' ) && false === strpos( $code, 'adsbygoogle.js' ) && preg_match( '/data-ad-client="(ca-pub-\d+)"/', $code, $cm ) ) {
+			$fix['post_content'] = '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . $cm[1] . '" crossorigin="anonymous"></script>' . "\n" . $code;
+		}
+		if ( ! user_can( $author, 'unfiltered_html' ) ) {
+			$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'fields' => 'ID' ) );
+			$src_author         = $source ? (int) get_post_field( 'post_author', $source ) : 0;
+			$fix['post_author'] = user_can( $src_author, 'unfiltered_html' ) ? $src_author : (int) ( $admins[0] ?? 1 );
+		}
+		if ( $fix ) {
+			$log( "ad $slug (#$id): " . implode( ', ', array_keys( $fix ) ) . ' fixed (AdSense loader; an author who may use scripts)' );
+			if ( $apply ) {
+				$wpdb->update( $wpdb->posts, $fix, array( 'ID' => $id ) ); // phpcs:ignore WordPress.DB -- not through kses, which strips the ad's scripts
+				clean_post_cache( $id );
+			}
+		}
 		$ad = wp_advads_get_ad( $id );
 		if ( $ad && wp_json_encode( $ad->get_display_conditions() ) !== wp_json_encode( $conds ) ) {
 			$log( "ad $slug (#$id): display conditions set" );
