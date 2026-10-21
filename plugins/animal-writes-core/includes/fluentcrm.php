@@ -322,12 +322,17 @@ const AW_CRM_VOL_FIELDS = array(
 
 /** Custom fields (group "Forms"): the newsletter box on the last form a contact sent (owner, 21 Oct 2026). */
 const AW_CRM_FORM_FIELDS = array(
-	'nl_box_last'    => array( 'Newsletter box (last form): 1 or 0', 'text' ),
-	'nl_box_form'    => array( 'Newsletter box (last form): which form', 'text' ),
-	'nl_box_consent' => array( 'Newsletter box (last form): consent wording', 'text' ),
-	'campaign_ref'   => array( 'Campaign letter: reference', 'text' ),
-	'whatsapp'       => array( 'WhatsApp number (Contact form)', 'text' ),
-	'wa_optin'       => array( 'OK on WhatsApp (Contact form; 1 = yes, empty = no)', 'text' ),
+	'nl_box_last'      => array( 'Newsletter box (last form): 1 or 0', 'text' ),
+	'nl_box_form'      => array( 'Newsletter box (last form): which form', 'text' ),
+	'nl_box_consent'   => array( 'Newsletter box (last form): consent wording', 'text' ),
+	'campaign_ref'     => array( 'Campaign letter: reference', 'text' ),
+	'campaign_last'    => array( 'Campaign letter: last campaign', 'text' ),
+	'campaign_grounds' => array( 'Campaign letter: grounds chosen', 'text' ),
+	'campaign_route'   => array( 'Campaign letter: sent with (gmail, outlook, mailto, copy)', 'text' ),
+	'campaign_date'    => array( 'Campaign letter: date sent', 'text' ),
+	'campaign_line'    => array( 'Campaign letter: line in their own words', 'text' ),
+	'whatsapp'         => array( 'WhatsApp number (Contact form)', 'text' ),
+	'wa_optin'         => array( 'OK on WhatsApp (Contact form; 1 = yes, 0 = no)', 'text' ),
 );
 
 /* ---------- The volunteer update link: /update/?t=<signed token> (owner, 21 Oct 2026) ---------- */

@@ -273,14 +273,25 @@
 		return ok;
 	}
 	var began = typeof WeakMap === 'function' ? new WeakMap() : null, loaded = Date.now();
-	function fill(form) {
-		if (!form || !form.querySelector('input[name^="v_"]')) return;
+	function data(form) {
 		var tz = '', ga = cookie('_ga').split('.'), ok = consent();
 		try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { tz = ''; }
 		var d = { referrer: land.referrer || '', utm_source: land.utm_source || '', utm_medium: land.utm_medium || '', utm_campaign: land.utm_campaign || '',
 			screen: window.screen ? screen.width + 'x' + screen.height : '', lang: navigator.language || '', tz: tz,
 			secs: String(Math.round((Date.now() - ((began && began.get(form)) || loaded)) / 1000)), first_visit: first, visits: String(visits),
 			ga: ok && ga.length >= 4 ? ga[ga.length - 2] + '.' + ga[ga.length - 1] : '', clarity: ok ? cookie('_clck').split('|')[0] : '' };
+		return d;
+	}
+	/* the same fields for a send that is not a page form (the campaign letter tool, campaign.js): { v_referrer: ... } */
+	window.awVisitData = function (since) {
+		var d = data(null), out = {};
+		if (since) d.secs = String(Math.round((Date.now() - since) / 1000));
+		Object.keys(d).forEach(function (k) { out['v_' + k] = String(d[k]).slice(0, 500); });
+		return out;
+	};
+	function fill(form) {
+		if (!form || !form.querySelector('input[name^="v_"]')) return;
+		var d = data(form);
 		Object.keys(d).forEach(function (k) { var el = form.querySelector('input[type=hidden][name="v_' + k + '"]'); if (el) el.value = String(d[k]).slice(0, 500); });
 	}
 	document.addEventListener('focusin', function (e) { var f = e.target && e.target.form; if (f && began && !began.has(f)) began.set(f, Date.now()); if (f) fill(f); }, true);

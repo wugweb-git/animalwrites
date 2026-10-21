@@ -214,8 +214,8 @@
 
 	function render() { preview.textContent = letter(); }
 
-	var opened = false;
-	form.addEventListener('focusin', function () { if (!opened) { opened = true; track('letter_open'); } });
+	var opened = false, openedAt = 0;
+	form.addEventListener('focusin', function () { if (!opened) { opened = true; openedAt = Date.now(); track('letter_open'); } });
 	form.addEventListener('input', render);
 	form.addEventListener('submit', function (e) { e.preventDefault(); });
 	render();
@@ -252,14 +252,14 @@
 
 	/* keepalive: the browser finishes the call after the page leaves (Gmail or the mail app opening). One retry after
 	   2 s and one after 6 s when a call fails; the server keeps one row and one reference per send_id. */
-	function post(url, data, tries) {
+	function post(url, data, tries, asForm) {
 		if (!url || !window.fetch) return Promise.reject();
 		tries = tries === undefined ? 2 : tries;
-		return fetch(url, { method: 'POST', credentials: 'omit', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+		return fetch(url, { method: 'POST', credentials: 'omit', keepalive: true, headers: { 'Content-Type': asForm ? 'application/x-www-form-urlencoded' : 'application/json' }, body: asForm ? data.toString() : JSON.stringify(data) })
 			.then(function (r) { if (!r.ok && r.status >= 500) throw r; return r; })
 			.catch(function (err) {
 				if (tries <= 0) throw err;
-				return new Promise(function (ok) { setTimeout(ok, tries === 2 ? 2000 : 6000); }).then(function () { return post(url, data, tries - 1); });
+				return new Promise(function (ok) { setTimeout(ok, tries === 2 ? 2000 : 6000); }).then(function () { return post(url, data, tries - 1, asForm); });
 			})
 			.then(function (r) { if (!r.ok) throw r; return r; });
 	}
@@ -286,16 +286,37 @@
 		}
 		if (!joined) {
 			joined = true;
-			post(cfg.optin, Object.assign({ email: val('email'), name: val('name'), consent: join ? '1' : '0', whatsapp: val('whatsapp') }, row))
-				.then(function (r) {
-					r.json().then(function (d) {
-						var box = form.querySelector('.aw-letter-ref');
-						if (box && d && d.ref) { box.querySelector('strong').textContent = d.ref; box.hidden = false; }
-					}).catch(function () {});
+			signUp(row, join, waOn)
+				.then(function (ref) {
+					var box = form.querySelector('.aw-letter-ref');
+					if (box && ref) { box.querySelector('strong').textContent = ref; box.hidden = false; }
 					track('newsletter_optin', { source: cfg.source || '' });
 				})
 				.catch(function () { joined = false; });
 		}
+	}
+
+	/* The sign-up: the Fluent Forms Campaign form (campaign-form.php) when it is set up, else the older endpoint. The
+	   server copies every send as it arrives, before any check (wp_aw_form_raw). Resolves with the reference. */
+	function signUp(row, join, waOn) {
+		var person = { email: val('email'), name: val('name'), city: val('city'), own: val('own'), whatsapp: val('whatsapp') };
+		function older() { return post(cfg.optin, Object.assign({ consent: join ? '1' : '0' }, person, row)).then(function (r) { return r.json(); }).then(function (d) { return d && d.ref; }); }
+		if (!cfg.ff || !cfg.ajax) return older();
+		var f = new URLSearchParams();
+		Object.keys(person).forEach(function (k) { f.append(k, person[k]); });
+		if (join) f.append('nl_optin[]', '1');
+		if (waOn === '1') f.append('wa_optin[]', '1');
+		['grounds', 'route', 'device', 'send_id'].forEach(function (k) { f.append(k, row[k]); });
+		f.append('campaign_id', cfg.campaign_id);
+		f.append('consent_version', cfg.consent || '');
+		var v = typeof window.awVisitData === 'function' ? window.awVisitData(openedAt) : {};
+		Object.keys(v).forEach(function (k) { f.append(k, v[k]); });
+		var body = new URLSearchParams({ action: 'fluentform_submit', form_id: String(cfg.ff), data: f.toString() });
+		return post(cfg.ajax, body, undefined, true).then(function (r) { return r.json(); }).then(function (d) {
+			var res = d && (d.result || (d.data && d.data.result)), m = /data-aw-ref="([^"]+)"/.exec((res && res.message) || '');
+			if (!m) throw new Error('no reference');
+			return m[1];
+		}).catch(older); // Fluent Forms refused or failed: the older sign-up (same send_id, so one row and one reference)
 	}
 
 	/* On phones, Gmail opens in the installed app; Gmail on the web is the fallback when the app is not there. */

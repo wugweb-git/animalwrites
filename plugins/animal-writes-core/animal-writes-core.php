@@ -115,6 +115,7 @@ require_once AW_CORE_DIR . 'includes/cc0-images.php';
 require_once AW_CORE_DIR . 'includes/newsletter-optin.php';
 require_once AW_CORE_DIR . 'includes/newsletter-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/forms-fluentforms.php';
+require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Fluent Forms Campaign form; the raw copy of every form send
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';

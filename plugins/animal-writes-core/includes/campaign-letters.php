@@ -169,6 +169,7 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => '__return_true',
 				'callback'            => function ( WP_REST_Request $req ) use ( $open ) {
+					$raw = function_exists( 'aw_raw_save' ) ? aw_raw_save( 'campaign-old', (int) $req['id'], $req->get_params() ) : 0; // the raw copy, before any check (campaign-form.php)
 					$id    = $open( $req['id'] );
 					$email = sanitize_email( (string) $req['email'] );
 					if ( ! $id ) {
@@ -199,6 +200,9 @@ add_action(
 						set_transient( 'aw_cl_s_' . $send, $ref, DAY_IN_SECONDS );
 					}
 					aw_crm_campaign_signer( $email, $name, $city, $slug, 1 === aw_cl_tick( $req['consent'] ), $wa, 1 === aw_cl_tick( $req['wa_optin'] ), $ref, AW_CL_CONSENT );
+					if ( $raw ) {
+						aw_raw_mark( $raw, 'saved' );
+					}
 					return array( 'ok' => true, 'ref' => $ref );
 				},
 			)

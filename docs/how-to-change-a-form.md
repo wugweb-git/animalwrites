@@ -71,3 +71,10 @@ Where they appear: the volunteer banner is the theme pattern `themes/animal-writ
 - **Change a success message**: the `aw_form_success()` call at the end of that form's `…_submit()` function, and the matching text at the top of its form function (shown after a send without JavaScript).
 
 Every change goes through GitHub: push to `wordpress-dev`; the deploy check runs, and only if it passes does the site update.
+
+## Campaign form (#10) and the raw copy (21 Oct 2026)
+
+- "Sign it" in the campaign letter tool is the Fluent Forms form **Campaign form** (`forms/10-campaign-form.json`, option `aw_ff_campaign_form`). The letter tool keeps its own screen; when a letter is sent, `campaign.js` submits the signer to it. Entries: Fluent Forms → Campaign form. Its FluentCRM link: Newsletter list, tags newsletter and volunteer, fields vol_city, vol_page, vol_source, vol_whatsapp, campaign_ref, campaign_last, campaign_grounds, campaign_route, campaign_date, campaign_line. After the link (`campaign-form.php`): tag campaign-<slug>, the boxes as 1/0, the statistics row.
+- The labels on the page come from the letter tool (`campaign-tools.php`), not from the form: change both.
+- Unticked boxes (newsletter, WhatsApp, organisation, show my name, consent) are saved as 0 in every entry and contact.
+- **Raw copy:** every form send reaches `wp_aw_form_raw` whole, before any check. Status: saved (entry ID), received (refused or failed), duplicate (a retry). 180 days; erased by "Remove my data". To get it: `wp aw raw-export --since=2026-10-21 > raw.csv` (add `--status=received` for sends that did not become entries).

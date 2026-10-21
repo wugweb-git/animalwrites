@@ -303,18 +303,22 @@ add_shortcode(
 			return '';
 		}
 		$data = array(
-			'to'      => $to,
-			'subject' => $a['subject'],
-			'ticked'  => array_map( 'intval', array_filter( explode( ',', $a['ticked'] ) ) ),
-			'address' => $a['address'],
-			'salute'  => $a['salute'],
-			'intro'   => $a['intro'],
-			'closing' => $a['closing'],
-			'sign'    => $a['sign'],
-			'confirm' => $id ? rest_url( 'aw/v1/campaign/' . $id . '/sent' ) : '',
-			'letter'  => $id ? rest_url( 'aw/v1/campaign/' . $id . '/letter' ) : '', // anonymous statistics (campaign-letters.php)
-			'optin'   => $id ? rest_url( 'aw/v1/campaign/' . $id . '/optin' ) : '',
-			'source'  => $a['source'] ? $a['source'] : ( $id ? 'campaign:' . get_post_field( 'post_name', $id ) : '' ),
+			'to'          => $to,
+			'subject'     => $a['subject'],
+			'ticked'      => array_map( 'intval', array_filter( explode( ',', $a['ticked'] ) ) ),
+			'address'     => $a['address'],
+			'salute'      => $a['salute'],
+			'intro'       => $a['intro'],
+			'closing'     => $a['closing'],
+			'sign'        => $a['sign'],
+			'confirm'     => $id ? rest_url( 'aw/v1/campaign/' . $id . '/sent' ) : '',
+			'letter'      => $id ? rest_url( 'aw/v1/campaign/' . $id . '/letter' ) : '', // anonymous statistics (campaign-letters.php)
+			'optin'       => $id ? rest_url( 'aw/v1/campaign/' . $id . '/optin' ) : '', // the older sign-up, used when the Campaign form is not set up
+			'ff'          => $id && function_exists( 'aw_cf_id' ) ? aw_cf_id() : 0, // the Fluent Forms Campaign form (campaign-form.php)
+			'ajax'        => admin_url( 'admin-ajax.php' ),
+			'campaign_id' => $id,
+			'consent'     => defined( 'AW_CL_CONSENT' ) ? AW_CL_CONSENT : '',
+			'source'      => $a['source'] ? $a['source'] : ( $id ? 'campaign:' . get_post_field( 'post_name', $id ) : '' ),
 		);
 		ob_start();
 		?>
