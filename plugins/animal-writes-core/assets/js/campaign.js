@@ -240,13 +240,25 @@
 	function wantsUpdates() { return !!(optin && optin.checked); }
 	function emailOk() { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')); }
 
+	/* Error state: names what is missing, marks each field, and focuses the first one. */
 	function ready() {
-		var ok = val('name') && val('city') && emailOk();
-		errorEl.textContent = 'Add your name, city and email first.';
-		errorEl.hidden = !!ok;
-		if (!ok) (!val('name') ? form.elements.name : !val('city') ? form.elements.city : form.elements.email).focus();
+		var miss = [];
+		[['name', 'your name'], ['city', 'your city'], ['email', 'a working email']].forEach(function (f) {
+			var bad = f[0] === 'email' ? !emailOk() : !val(f[0]);
+			var el = form.elements[f[0]];
+			if (el) el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+			if (bad) miss.push(f);
+		});
+		var ok = !miss.length;
+		errorEl.textContent = ok ? '' : 'Add ' + miss.map(function (f) { return f[1]; }).join(miss.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1') + ' to send your objection.';
+		errorEl.hidden = ok;
+		if (!ok) form.elements[miss[0][0]].focus();
 		return ok;
 	}
+	['name', 'city', 'email'].forEach(function (n) { // the mark clears as soon as the field is filled
+		var el = form.elements[n];
+		if (el) el.addEventListener('input', function () { if (el.getAttribute('aria-invalid') === 'true' && (n === 'email' ? emailOk() : val(n))) el.setAttribute('aria-invalid', 'false'); });
+	});
 
 	/* keepalive: the browser finishes the call after the page leaves (Gmail or the mail app opening). One retry after
 	   2 s and one after 6 s when a call fails; the server keeps one row and one reference per send_id. */
@@ -360,12 +372,14 @@
 		if (!sh.url) return;
 		if (!sendShare) {
 			var og = sh.og || {};
-			sendShare = document.createElement('section');
-			sendShare.className = 'aw-letter-share-box';
-			sendShare.setAttribute('aria-labelledby', 'aw-letter-share-title');
+			/* The page's own Share section (owner, 21 Oct 2026) holds the heading and message; else the box carries them. */
+			var holder = document.querySelector('[data-aw-share]');
+			sendShare = document.createElement(holder ? 'div' : 'section');
+			sendShare.className = 'aw-letter-share-box' + (holder ? ' is-in-section' : '');
+			if (!holder) sendShare.setAttribute('aria-labelledby', 'aw-letter-share-title');
 			sendShare.innerHTML = '<div class="aw-letter-share-copy">'
-				+ '<h3 class="aw-letter-share-head" id="aw-letter-share-title"></h3>'
-				+ '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>'
+				+ (holder ? '' : '<h3 class="aw-letter-share-head" id="aw-letter-share-title"></h3>'
+				+ '<p class="aw-letter-share-lede">One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection' + (sh.close ? ' before ' + sh.close : '') + '.</p>')
 				+ '<p class="aw-letter-share"></p></div>'
 				+ (og.image ? '<figure class="aw-letter-share-preview" aria-label="What people will see">'
 					+ '<img src="' + esc(og.image) + '" alt="" width="1200" height="630" loading="lazy" decoding="async">'
@@ -373,7 +387,8 @@
 					+ '<strong>' + esc(og.title) + '</strong>'
 					+ '<span class="aw-letter-share-desc">' + esc(og.desc) + '</span></figcaption></figure>' : '');
 			shareHead = sendShare.querySelector('.aw-letter-share-head');
-			confirmBox.parentNode.insertBefore(sendShare, confirmBox);
+			if (holder) holder.appendChild(sendShare);
+			else confirmBox.parentNode.insertBefore(sendShare, confirmBox);
 			var row = sendShare.querySelector('.aw-letter-share');
 			shareKit(row);
 			/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer). */
@@ -398,7 +413,13 @@
 				sendShare.appendChild(wrap);
 			}
 		}
-		shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
+		if (shareHead) shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
+		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
+			var nx = document.createElement('p');
+			nx.className = 'aw-letter-next';
+			nx.innerHTML = '<a href="#share"><strong>Sent? Now get three more letters in.</strong> Share this page ' + '<span class="kit-ico kit-ico--arrow-right" aria-hidden="true"></span></a>';
+			confirmBox.parentNode.insertBefore(nx, confirmBox);
+		}
 	}
 	showSendShare(false);
 
@@ -444,17 +465,22 @@
 	try { sentAt = parseInt(localStorage.getItem(sentKey), 10) || 0; } catch (e) { /* private mode */ }
 	if (sentAt) {
 		showSendShare(true);
-		if (sendShare && !location.hash && Date.now() - sentAt < 30 * 60 * 1000) sendShare.scrollIntoView({ block: 'center' });
+		if (sendShare && !location.hash && Date.now() - sentAt < 30 * 60 * 1000) shareTarget().scrollIntoView({ block: 'start' });
 	}
 	document.addEventListener('visibilitychange', function () {
 		if (document.hidden || !justSent || !sendShare) return;
 		justSent = false;
-		sendShare.scrollIntoView({ block: 'center', behavior: 'smooth' });
+		shareTarget().scrollIntoView({ block: 'start', behavior: 'smooth' });
 	});
+	function shareTarget() { return document.getElementById('share') || sendShare; }
 
 	form.querySelectorAll('[data-confirm]').forEach(function (btn) {
 		btn.addEventListener('click', function () {
-			if (btn.dataset.confirm !== 'yes') { confirmBox.hidden = true; return; }
+			if (btn.dataset.confirm !== 'yes') { // not sent yet: say so, keep the letter
+				confirmBox.hidden = true;
+				copiedNote('No problem. Your letter is still here: send it when you are ready.');
+				return;
+			}
 			track('objection_confirmed');
 			confirmBox.hidden = true;
 			thanks.hidden = false;

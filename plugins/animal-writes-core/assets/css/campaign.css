@@ -325,7 +325,14 @@
 	background: var(--kit-color-bg); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); font-size: var(--kit-type-sm, 0.9375rem);
 }
 @media (max-width: 767px) { .aw-letter-preview { max-height: 14rem; } }
-.aw-letter-error { color: var(--kit-color-danger); }
+.aw-letter-error { margin: var(--kit-space-3) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-danger-soft); color: var(--kit-color-danger); font-weight: 600; }
+.aw-letter :is(input, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); box-shadow: 0 0 0 1px var(--kit-color-danger); }
+.aw-letter-confirm { align-items: center; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); }
+.aw-letter-thanks { margin-top: var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-success) 10%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kit-color-success) 35%, transparent); }
+.aw-letter-thanks p { margin: 0; }
+.aw-letter-thanks p + p { margin-top: var(--kit-space-2); }
+.aw-letter-thanks-head { display: flex; align-items: center; gap: var(--kit-space-2); }
+.aw-letter-thanks-head .kit-ico { color: var(--kit-color-success); }
 .aw-letter-optin { display: flex; align-items: flex-start; gap: var(--kit-space-2); margin: var(--kit-space-3) 0; font-size: var(--kit-type-sm); }
 .aw-letter-optin input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.1em 0 0; accent-color: var(--camp-mark, var(--kit-color-ink)); }
 .aw-letter-optin label { cursor: pointer; }
@@ -420,3 +427,12 @@
 .aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents !important; }
 .aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 clamp(15rem, 78vw, 18.5rem); margin: 0 !important; scroll-snap-align: start; list-style: none; }
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
+/* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
+.aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }
+.aw-camp-tint h2 { color: var(--camp-primary); }
+.aw-letter-share-box.is-in-section { margin-top: var(--kit-space-5); padding: 0; background: none; }
+.aw-letter-share-box.is-in-section .aw-letter-share { margin-top: 0; }
+.aw-letter-share-box.is-in-section .aw-letter-share-pics { padding-top: var(--kit-space-5); }
+.aw-letter-next { margin: var(--kit-space-4) 0 0; padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-primary) 7%, #fff); }
+.aw-letter-next a { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); color: var(--camp-primary); text-decoration: none; }
+.aw-letter-next a:hover strong { text-decoration: underline; }

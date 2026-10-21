@@ -359,12 +359,13 @@ add_shortcode(
 		</div>
 		<p class="aw-letter-copied" role="status"></p>
 		<div class="aw-letter-confirm" hidden>
-			<p><strong>Did you send it?</strong></p>
+			<p><strong>Did you send it?</strong> Check your sent folder. We count your objection once you say it went.</p>
 			<button type="button" class="wp-element-button" data-confirm="yes">Yes, I sent it</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-confirm="no">Not yet</button>
 		</div>
 		<div class="aw-letter-thanks" hidden tabindex="-1">
-			<p><strong>Thank you.</strong> Ask one more person to send theirs.</p>
+			<p class="aw-letter-thanks-head"><?php echo aw_i( 'check' ); ?><strong>Thank you. Your objection is on its way to CCSEA.</strong></p>
+			<p>Keep the sent email: it is your record. CCSEA may reply to the address you sent from.</p>
 			<p class="aw-letter-ref" hidden>Your reference: <strong></strong></p>
 		</div>
 	</div>

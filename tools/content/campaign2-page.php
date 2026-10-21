@@ -364,7 +364,7 @@ $next = c2sec( 'next', $next_inner ); // in the next-steps section: near the end
 /* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec( // one row that scrolls sideways: the newest News, then the newest guides; no summaries on campaign cards (owner, 21 Oct 2026)
 	'latest',
-	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
+	c2html( '<header class="kit-ed-head"><div><h2>In the news</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"aw-camp-row","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-row">'
 	. c2q( <<<'HTML'
 <!-- wp:query {"queryId":82,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
@@ -410,9 +410,9 @@ HTML
    (none listed for now; the shortcode prints nothing until the owner names them). */
 $press = c2sec(
 	'',
-	c2html( '<header class="kit-ed-head"><div><h2>What\'s happening</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">See all ' . c2i( 'arrow-right' ) . '</a></header>' )
+	c2html( '<header class="kit-ed-head"><div><h2>What\'s happening</h2><p class="aw-camp-lede">What people are posting about Animal Writes campaigns.</p></div><a class="kit-ed-more" href="/press-coverage/">See all ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row aw-camp-row-q"} -->
+<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false},"className":"aw-camp-row aw-camp-row-q"} -->
 <div class="wp-block-query aw-camp-row aw-camp-row-q"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":false,"className":"kit-card-media"} /-->
@@ -432,23 +432,15 @@ HTML
 	'aw-camp-white'
 );
 
-/* 12. Stay in the loop: share row with the theme's brand icons. */
-$share_url = rawurlencode( home_url( '/campaigns/lab-animals-rules-2026/' ) );
-$share_txt = rawurlencode( 'Object to India\'s draft lab animal rules before 5 November:' );
-$loop      = c2sec(
-	'',
-	c2h( 'Get updates on these rules' )
-	. c2p( 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.' ) // the footer has the form on every page
-	. c2html(
-		'<p class="aw-camp-share" data-source="campaign2"><span class="aw-camp-share-label">Share this page</span>'
-		. '<a data-kit-share="whatsapp" href="https://wa.me/?text=' . $share_txt . '%20' . $share_url . '">' . c2i( 'brand-whatsapp' ) . 'WhatsApp</a>'
-		. '<a data-kit-share="x" href="https://twitter.com/intent/tweet?text=' . $share_txt . '&amp;url=' . $share_url . '">' . c2i( 'x-brand' ) . 'X</a>'
-		. '<a data-kit-share="facebook" href="https://www.facebook.com/sharer/sharer.php?u=' . $share_url . '">' . c2i( 'facebook' ) . 'Facebook</a>'
-		. '<a data-kit-share="linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url=' . $share_url . '">' . c2i( 'link' ) . 'LinkedIn</a>'
-		. '<button type="button" class="kit-share-copy" data-kit-share="copy_link" data-url="' . esc_url( home_url( '/campaigns/lab-animals-rules-2026/' ) ) . '" data-done="Link copied">' . c2i( 'link' ) . 'Copy link</button>'
-		. '</p>'
-	),
-	'aw-camp-dark'
+/* Share (owner, 21 Oct 2026): its own section after Other ways to send, with the updates line folded in. campaign.js fills
+   [data-aw-share] with the share buttons, the link preview and the story and post pictures. */
+$share = c2sec(
+	'share',
+	c2h( 'Get three more letters in' )
+	. c2p( 'One letter is one voice. Send this page to three people who care about animals, so each of them can send their own objection before 5 Nov 2026.', 'aw-camp-lede' )
+	. c2html( '<div class="aw-camp-share-kit" data-aw-share></div>' )
+	. c2p( c2i( 'mail' ) . 'We\'ll email you when CCSEA responds and when the final rules are published. Sign up with the newsletter form at the end of this page.', 'aw-camp-note' ),
+	'aw-camp-tint aw-camp-open'
 );
 
 /* Impact: no count on the page (owner, 21 Oct 2026: the stored number is not real). */
@@ -468,14 +460,13 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'next-steps', $next, 'aw-camp-closed' )
 	. c2slot( 'context', $what )
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
-	. c2slot( 'how-to-help', $send . $how, 'aw-camp-open' )
+	. c2slot( 'how-to-help', $send . $how . $share, 'aw-camp-open' )
 	. c2slot( 'faq', $faq )
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
-	. c2slot( 'press', $press, 'aw-camp-if-items' ) // Animal Writes coverage only; hidden while there is none
+	. c2slot( 'press', $press ) // What's happening: people's social posts about Animal Writes campaigns
 	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. c2slot( 'next-steps', $next, 'aw-camp-open' )
-	. c2slot( 'updates', $loop )
 	. c2sc( '[aw_sticky_cta href="#how-to-help" label="Send your objection"]' )
 	. "</div>\n<!-- /wp:group -->";
 
