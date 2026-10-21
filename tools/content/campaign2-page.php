@@ -292,7 +292,7 @@ $how = c2sec(
 	. c2html(
 		'<ul class="aw-camp-ways">'
 		. $way( 'copy', 'Copy and paste', '<p>Copy the letter and the address, and paste them into any email app.</p>' )
-		. $way( 'mail', 'By post', '<address>Member Secretary (CCSEA)<br>Office of CCSEA, Near State Bank of India<br>Delhi Milk Scheme Complex, Shadipur<br>Delhi 110008</address><p class="aw-camp-way-date">' . c2i( 'calendar' ) . 'Post it by 30 Oct 2026 so it arrives in time.</p>' )
+		. $way( 'mail', 'By post', '<address>Member Secretary (CCSEA)<br>Office of CCSEA, Near State Bank of India<br>Delhi Milk Scheme Complex, Shadipur<br>Delhi 110008</address><p class="aw-camp-way-date">Post it by 30 Oct 2026 so it arrives in time.</p>' )
 		. $way( 'send', 'Write your own', '<p>Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.</p>' )
 		. '</ul>'
 	),
