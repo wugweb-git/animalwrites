@@ -362,40 +362,20 @@ $next_inner = c2h( 'What happens next' )
 $next = c2sec( 'next', $next_inner ); // in the next-steps section: near the end while open, under the hero once closed
 
 /* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
-$updates = c2sec(
+$updates = c2sec( // one row that scrolls sideways: the newest News, then the newest guides; no summaries on campaign cards (owner, 21 Oct 2026)
 	'latest',
-	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/resources/">All guides ' . c2i( 'arrow-right' ) . '</a></header>' )
-	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
+	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/news/">All news ' . c2i( 'arrow-right' ) . '</a></header>' )
+	. '<!-- wp:group {"className":"aw-camp-row","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-row">'
 	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-lead"} -->
-<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-lg","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-card--block-lg"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+<!-- wp:query {"queryId":82,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
+<div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
 
 <!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
 
-<!-- wp:animal-writes/badges {"state":"block-lg"} /-->
-
-<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":40,"className":"kit-card-sum"} /--></div>
-<!-- /wp:group --></article>
-<!-- /wp:group -->
-<!-- /wp:post-template --></div>
-<!-- /wp:query -->
-HTML
-, $tq ) . "\n"
-	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-list"} -->
-<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-md","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-card--stacked-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
-
-<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
-
-<!-- wp:animal-writes/badges {"state":"stacked-md"} /-->
+<!-- wp:animal-writes/badges {"state":"block-md"} /-->
 
 <!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
 <!-- /wp:group --></article>
@@ -404,18 +384,16 @@ HTML
 <!-- /wp:query -->
 HTML
 , $tq ) . "\n"
-	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
-	// the next three News items (owner, 21 Oct 2026: new coverage shows along with the rest)
 	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":86,"query":{"perPage":3,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-list aw-camp-more-news"} -->
-<div class="wp-block-query kit-ed-list aw-camp-more-news"><!-- wp:post-template -->
-<!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-md","layout":{"type":"default"}} -->
-<article class="wp-block-group kit-card kit-card--stacked-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row-q"} -->
+<div class="wp-block-query aw-camp-row-q"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
 
 <!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
 
-<!-- wp:animal-writes/badges {"state":"stacked-md"} /-->
+<!-- wp:animal-writes/badges {"state":"block-md"} /-->
 
 <!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
 <!-- /wp:group --></article>
@@ -423,7 +401,8 @@ HTML
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
 HTML
-, $tq ) . "\n",
+, $tq ) . "\n"
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
 	'aw-camp-white'
 );
 
@@ -433,8 +412,8 @@ $press = c2sec(
 	'',
 	c2html( '<header class="kit-ed-head"><div><h2>What\'s happening</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">See all ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->
-<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->
+<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row aw-camp-row-q"} -->
+<div class="wp-block-query aw-camp-row aw-camp-row-q"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":false,"className":"kit-card-media"} /-->
 
@@ -443,9 +422,7 @@ $press = c2sec(
 
 <!-- wp:animal-writes/badges {"state":"block-md"} /-->
 
-<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /-->
-
-<!-- wp:post-excerpt {"excerptLength":40,"className":"kit-card-sum"} /--></div>
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
 <!-- /wp:group --></article>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>

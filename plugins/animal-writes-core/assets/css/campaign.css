@@ -415,6 +415,8 @@
 .aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
-/* The next three campaign News items, under the News and guides grid */
-.aw-camp-more-news { margin-top: var(--kit-space-6, 2.5rem); }
-@media (min-width: 768px) { .aw-camp-more-news .wp-block-post-template { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-5); } }
+/* One row that scrolls sideways (News and guides, What's happening; owner, 21 Oct 2026): each card a fixed width, snapping */
+.aw-camp .aw-camp-row { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; padding-bottom: var(--kit-space-3); scrollbar-width: thin; }
+.aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents !important; }
+.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 clamp(15rem, 78vw, 18.5rem); margin: 0 !important; scroll-snap-align: start; list-style: none; }
+.aw-camp .aw-camp-row .kit-card { height: 100%; }
