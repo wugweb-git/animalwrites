@@ -386,7 +386,7 @@ function aw_enrich_write( $lid, $field, $value ) {
 
 /** A picture from a public page into the Media Library (alt = the organisation's name). */
 function aw_enrich_sideload( $url, $lid, $alt ) {
-	if ( ! preg_match( '#^https://#i', $url ) ) {
+	if ( ! preg_match( '#^https?://#i', $url ) ) { // http too: the picture is copied into Media, never linked
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/file.php';
