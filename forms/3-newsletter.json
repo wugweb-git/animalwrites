@@ -81,6 +81,97 @@
                 },
                 {
                     "index": 3,
+                    "element": "aw_places",
+                    "uniqElKey": "el_aw_places",
+                    "attributes": {
+                        "name": "aw_places"
+                    },
+                    "settings": {
+                        "label": "PIN code, State and District",
+                        "required": "no",
+                        "container_class": "",
+                        "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "PIN code, State and District",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                },
+                {
+                    "index": 4,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_topics",
+                    "attributes": {
+                        "name": "topics",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field kit-check-group",
+                        "label": "Topics",
+                        "label_placement": "",
+                        "admin_field_label": "Topics",
+                        "help_message": "Optional. Leave all unticked for everything.",
+                        "advanced_options": [
+                            {
+                                "label": "Campaigns",
+                                "value": "campaigns",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Laws and court cases",
+                                "value": "legal",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Rescue and adoption",
+                                "value": "rescue",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Volunteering near me",
+                                "value": "volunteering",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Research",
+                                "value": "research",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-radio",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 5,
                     "element": "custom_html",
                     "attributes": [],
                     "settings": {
@@ -94,6 +185,312 @@
                         "template": "customHTML"
                     },
                     "uniqElKey": "el_aw_nl_consent"
+                },
+                {
+                    "index": 6,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_page_id",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_page_id",
+                        "value": "{embed_post.ID}"
+                    },
+                    "settings": {
+                        "admin_field_label": "Page ID"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 7,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_page_title",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_page_title",
+                        "value": "{embed_post.post_title}"
+                    },
+                    "settings": {
+                        "admin_field_label": "Page title"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 8,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_referrer",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_referrer",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Referrer"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 9,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_utm_source",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_utm_source",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "UTM source"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 10,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_utm_medium",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_utm_medium",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "UTM medium"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 11,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_utm_campaign",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_utm_campaign",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "UTM campaign"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 12,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_screen",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_screen",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Screen size"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 13,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_lang",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_lang",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Language"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 14,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_tz",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_tz",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Time zone"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 15,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_secs",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_secs",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Seconds to fill in"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 16,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_first_visit",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_first_visit",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "First visit"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 17,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_visits",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_visits",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Visit count"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 18,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_ga",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_ga",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "GA4 client ID (with analytics consent)"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 19,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_clarity",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_clarity",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Clarity ID (with analytics consent)"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 20,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_country",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_country",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Country (from IP, on this server)"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 21,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_city",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_city",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "City (from IP, on this server)"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 22,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_consent_version",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "consent_version",
+                        "value": "newsletter=v2-newsletter-1"
+                    },
+                    "settings": {
+                        "admin_field_label": "Consent wording version"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
                 }
             ],
             "submitButton": {
