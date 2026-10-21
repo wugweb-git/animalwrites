@@ -107,12 +107,19 @@ function aw_is_ingested( $post_id ) {
 }
 
 /**
- * Placard fallback: the source name, set large on kraft.
+ * Placard fallback: the site's fallback picture (the logo in grey); the source name as a text tile only without it.
  *
  * @param int $post_id Post ID.
  * @return string
  */
 function aw_placard_html( $post_id ) {
+	// The site's fallback picture is always the Animal Writes logo in grey (owner, 21 Oct 2026): option
+	// aw_category_images['default'], attachment 17878. The text tile below is only for a site without it.
+	$def  = (array) ( get_option( 'aw_category_images', array() )['default'] ?? array() );
+	$logo = $def ? wp_get_attachment_image_src( (int) $def[0], 'medium_large' ) : false;
+	if ( $logo ) {
+		return '<div class="kit-placard kit-placard--logo" aria-hidden="true"><img src="' . esc_url( $logo[0] ) . '" width="' . (int) $logo[1] . '" height="' . (int) $logo[2] . '" alt="" loading="lazy" decoding="async"></div>';
+	}
 	$label = get_post_meta( $post_id, 'aw_source_name', true );
 	if ( ! $label ) {
 		$label = get_post_meta( $post_id, 'aw_org_name', true );

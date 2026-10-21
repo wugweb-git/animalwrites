@@ -141,6 +141,8 @@ p, li { max-width: var(--kit-measure); text-wrap: pretty; }
 	font-family: var(--kit-font-display); font-weight: var(--kit-weight-bold); letter-spacing: var(--kit-tracking-heading); font-size: var(--kit-type-placard); line-height: var(--kit-leading-heading);
 	color: var(--kit-color-ink);
 }
+.kit-placard--logo { padding: 0; background-image: none; } /* the site's fallback picture instead of a text tile */
+.kit-placard--logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .kit-placard span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; padding-bottom: var(--kit-space-1); }
 .kit-lead-media { margin-block: var(--kit-space-5); border-radius: var(--kit-radius-hero); }
 body.single-aw_research .kit-lead-media { display: none; }

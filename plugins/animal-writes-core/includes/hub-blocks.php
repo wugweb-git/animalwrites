@@ -696,7 +696,7 @@ add_filter(
 			$img  = ! empty( $block['attrs']['isLink'] ) && 'aw_press' !== get_post_type( $id ) ? '<a href="' . esc_url( get_permalink( $id ) ) . '" tabindex="-1" aria-hidden="true">' . $img . '</a>' : $img;
 			$html = '<figure class="wp-block-post-featured-image kit-card-media' . ( $logo ? ' is-logo' : '' ) . ' ' . esc_attr( (string) $block['attrs']['className'] ) . '">' . $img . '</figure>';
 		}
-		$html = preg_replace( '#<div class="kit-placard"[^>]*>.*?</div>#s', '', $html ); // no text tile behind the picture
+		$html = preg_replace( '#<div class="kit-placard[^"]*"[^>]*>.*?</div>#s', '', $html ); // no fallback tile behind the picture
 		if ( '' !== $fall ) { // a picture that fails: the category's picture
 			$html = preg_replace( '/onerror="[^"]*"/', 'onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=\'' . esc_url( $fall ) . '\'"', $html, 1 );
 			$html = false === strpos( $html, 'onerror=' ) ? preg_replace( '/<img /', '<img onerror="this.onerror=null;this.removeAttribute(\'srcset\');this.src=\'' . esc_url( $fall ) . '\'" ', $html, 1 ) : $html;
