@@ -150,16 +150,16 @@ function aw_block_listing_contact( $a, $id ) {
 	$btns   = '';
 	if ( '' !== $first && '' !== aw_tel_url( $first ) ) {
 		/* translators: %s: phone number. */
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_tel_url( $first ) ) . '" data-act="phone">' . aw_i( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'animal-writes-core' ), $first ) ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_tel_url( $first ) ) . '" data-act="phone">' . aw_i( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'animal-writes-core' ), $first ) ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $first ) : '' ) . '</a>';
 	}
 	if ( '' !== $wa && strlen( aw_normalise_phone( $wa ) ) > 5 ) {
 		$btns .= '<a class="kit-btn" href="' . esc_url( 'https://wa.me/' . aw_normalise_phone( $wa ) ) . '" rel="noopener" data-act="whatsapp">' . aw_i( 'brand-whatsapp' ) . esc_html__( 'WhatsApp', 'animal-writes-core' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_email' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . aw_i( 'mail' ) . esc_html__( 'Email', 'animal-writes-core' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . aw_i( 'mail' ) . esc_html__( 'Email', 'animal-writes-core' ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email' ) ) : '' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_website' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . aw_i( 'world' ) . esc_html__( 'Website', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'animal-writes-core' ) . '</span></a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . aw_i( 'world' ) . esc_html__( 'Website', 'animal-writes-core' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'animal-writes-core' ) . '</span>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website' ) ) : '' ) . '</a>';
 	}
 	$btns .= aw_lf( $id, 'aw_maps_url' )
 		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</a>'
@@ -175,9 +175,16 @@ function aw_block_listing_contact( $a, $id ) {
 		if ( '' === $tel ) {
 			continue;
 		}
-		$num    = '<a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>';
+		$num    = '<a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $p['number'] ) : '' );
 		$waa    = $p['whatsapp'] && strlen( aw_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . aw_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . '</a>' : '';
 		$more[] = array( '' !== $p['label'] ? $p['label'] : __( 'Phone', 'animal-writes-core' ), $num . $waa, $p['whatsapp'] ? 'brand-whatsapp' : 'phone' );
+	}
+	// A second email or website found by the enrichment worker is kept beside the first, both marked unverified.
+	if ( aw_lf( $id, 'aw_email_alt' ) ) {
+		$more[] = array( __( 'Email', 'animal-writes-core' ), '<a href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email_alt' ) ) . '" data-act="email">' . esc_html( aw_lf( $id, 'aw_email_alt' ) ) . '</a>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email_alt' ) ) : '' ), 'mail' );
+	}
+	if ( aw_lf( $id, 'aw_website_alt' ) ) {
+		$more[] = array( __( 'Website', 'animal-writes-core' ), '<a href="' . esc_url( aw_lf( $id, 'aw_website_alt' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . esc_html( preg_replace( '#^https?://(www\\.)?|/$#', '', aw_lf( $id, 'aw_website_alt' ) ) ) . '</a>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website_alt' ) ) : '' ), 'world' );
 	}
 	return aw_listing_group( 'contact', __( 'Contact', 'animal-writes-core' ), '<div class="aw-listing-actions">' . $btns . '</div>' . aw_listing_dl( $more, 'aw-facts--phones' ) );
 }
