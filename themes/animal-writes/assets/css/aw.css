@@ -122,6 +122,7 @@
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
 .kit-section-band--compact:not(:has(.kit-section-filters)) { padding-bottom: var(--kit-space-head) !important; } /* Directory place and type pages: head band only, its search sits under it (owner, 20 Oct 2026) */
 .kit-section-filters--below + .aw-system > .screen-reader-text:first-child + * { margin-top: 0; } /* list pages: no gap for a list's hidden heading */
+.kit-section-band:has(.aw-dir-search) .kit-section-desc { font-size: 1rem; } /* the line under the Directory title: 16px, the body size (was the lead size, 18px from 1200; owner, 21 Oct 2026) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; }
