@@ -58,21 +58,24 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 }
 unset( $aw_seo_net );
 
-/* On a campaign page, a share image typed in Rank Math that is AVIF goes out as its WebP copy too, with its type. */
+/* og:image and twitter:image are never AVIF (owner, 21 Oct 2026, site-wide): the original upload or a 1200x630 JPEG, with
+   its own type and size (aw_seo_share_safe_url). */
 foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $aw_seo_tag ) {
 	add_filter(
 		"rank_math/opengraph/{$aw_seo_tag}",
 		function ( $url ) {
-			$safe = aw_seo_share_safe_url( (string) $url )[0];
-			if ( $safe !== $url ) {
-				$GLOBALS['aw_seo_og_webp'] = true;
+			$safe = aw_seo_share_safe_url( (string) $url );
+			if ( $safe[0] !== $url ) {
+				$GLOBALS['aw_seo_og_swap'] = $safe;
 			}
-			return $safe;
+			return $safe[0];
 		}
 	);
 }
 unset( $aw_seo_tag );
-add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty( $GLOBALS['aw_seo_og_webp'] ) || 'image/avif' === $type ? 'image/webp' : $type );
+add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty( $GLOBALS['aw_seo_og_swap'][3] ) ? $GLOBALS['aw_seo_og_swap'][3] : $type );
+add_filter( 'rank_math/opengraph/facebook/og_image_width', fn( $w ) => ! empty( $GLOBALS['aw_seo_og_swap'][1] ) ? $GLOBALS['aw_seo_og_swap'][1] : $w );
+add_filter( 'rank_math/opengraph/facebook/og_image_height', fn( $h ) => ! empty( $GLOBALS['aw_seo_og_swap'][2] ) ? $GLOBALS['aw_seo_og_swap'][2] : $h );
 
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );

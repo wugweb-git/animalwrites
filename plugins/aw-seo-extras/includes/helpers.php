@@ -528,42 +528,51 @@ function aw_seo_attachment( $att, $size = 'large' ) {
 }
 
 /**
- * A share picture every app shows (owner, 19 Oct 2026: PNG or WebP, never AVIF; campaign pages only, News stays as it
- * is). Uploads are turned into AVIF (Modern Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so
- * on a campaign page an AVIF picture from our uploads is swapped for a WebP copy, made once and kept beside it
- * ({name}-og.webp). Everything else passes through unchanged.
+ * A share picture every app shows (owner, 19 + 21 Oct 2026: og:image and twitter:image are never AVIF, site-wide).
+ * Uploads are turned into AVIF (Modern Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so an
+ * AVIF picture from our uploads goes out as its original upload (the WebP, JPEG or PNG kept beside it); without one, a
+ * 1200x630 JPEG is made once and kept beside it ({name}-og.jpg). Anything that is not an AVIF upload passes through.
  *
  * @param string $url Picture address.
- * @return array [url, width, height]; width and height 0 when unchanged.
+ * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
  */
 function aw_seo_share_safe_url( $url ) {
 	$plain = strtok( (string) $url, '?' );
-	if ( ! is_singular( 'aw_campaign' ) || ! preg_match( '/\.avif$/i', (string) $plain ) ) {
-		return array( $url, 0, 0 );
+	if ( ! preg_match( '/\.avif$/i', (string) $plain ) ) {
+		return array( $url, 0, 0, '' );
 	}
 	$up   = wp_get_upload_dir();
 	$base = set_url_scheme( $up['baseurl'], 'https' );
 	$abs  = set_url_scheme( $plain, 'https' );
 	if ( 0 !== strpos( $abs, $base ) ) {
-		return array( $url, 0, 0 );
+		return array( $url, 0, 0, '' );
 	}
 	$path = $up['basedir'] . substr( $abs, strlen( $base ) );
-	$out  = preg_replace( '/\.avif$/i', '-og.webp', $path );
+	$stem = preg_replace( '/(-\d+x\d+)?\.avif$/i', '', $path ); // the upload's own name, without a size or format
+	$mime = array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'webp' => 'image/webp', 'png' => 'image/png' );
+	foreach ( $mime as $ext => $type ) {
+		if ( file_exists( $stem . '.' . $ext ) ) {
+			$size = wp_getimagesize( $stem . '.' . $ext );
+			return array( $base . substr( $stem, strlen( $up['basedir'] ) ) . '.' . $ext, (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ), $type );
+		}
+	}
+	$out = $stem . '-og.jpg';
 	if ( ! file_exists( $out ) ) {
 		$ed = file_exists( $path ) ? wp_get_image_editor( $path ) : null;
 		if ( ! $ed || is_wp_error( $ed ) ) {
-			return array( $url, 0, 0 );
+			return array( $url, 0, 0, '' );
 		}
-		$ed->set_quality( 82 );
+		$ed->resize( 1200, 630, true );
+		$ed->set_quality( 85 );
 		add_filter( 'image_editor_output_format', '__return_empty_array', 99 ); // or Modern Image Formats saves AVIF again
-		$saved = $ed->save( $out, 'image/webp' );
+		$saved = $ed->save( $out, 'image/jpeg' );
 		remove_filter( 'image_editor_output_format', '__return_empty_array', 99 );
 		if ( is_wp_error( $saved ) || ! file_exists( $out ) ) {
-			return array( $url, 0, 0 );
+			return array( $url, 0, 0, '' );
 		}
 	}
 	$size = wp_getimagesize( $out );
-	return array( preg_replace( '/\.avif$/i', '-og.webp', $abs ), (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ) );
+	return array( $base . substr( $out, strlen( $up['basedir'] ) ), (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ), 'image/jpeg' );
 }
 
 /** The site's default share image (Settings), as aw_seo_attachment(). */
@@ -656,9 +665,9 @@ function aw_seo_image() {
 		$img = aw_seo_attachment( (int) get_option( 'site_icon' ) );
 	}
 	if ( $img ) {
-		list( $url, $w, $h ) = aw_seo_share_safe_url( $img['url'] );
+		list( $url, $w, $h, $type ) = aw_seo_share_safe_url( $img['url'] );
 		if ( $url !== $img['url'] ) {
-			$img = array_merge( $img, array( 'url' => $url, 'type' => 'image/webp' ), $w ? array( 'width' => $w, 'height' => $h ) : array() );
+			$img = array_merge( $img, array( 'url' => $url, 'type' => $type ), $w ? array( 'width' => $w, 'height' => $h ) : array() );
 		}
 	}
 	return $img;
