@@ -345,7 +345,7 @@ $read = c2sec(
 <!-- /wp:query -->
 HTML
 , $tq ) . "\n\n",
-	'aw-camp-grey'
+	'aw-camp-white'
 );
 
 /* 11. What happens next: a real sequence, so numbered. */
@@ -358,7 +358,7 @@ $next_inner = c2h( 'What happens next' )
 		. '<li><strong>We report back</strong><span>Here and in our newsletter</span></li>'
 		. '</ol>'
 	);
-$next = c2sec( 'next', $next_inner ); // in the next-steps section: near the end while open, under the hero once closed
+$next = c2sec( 'next', $next_inner, 'aw-camp-white' ); // in the next-steps section: near the end while open, under the hero once closed
 
 /* News and guides: the newest campaign News item leads, the newest campaign guides (Resources) beside it; the home page's news grid. */
 $updates = c2sec( // one row that scrolls sideways: the newest News, then the newest guides; no summaries on campaign cards (owner, 21 Oct 2026)
@@ -402,7 +402,7 @@ HTML
 HTML
 , $tq ) . "\n"
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 
 /* What's happening (owner, 21 Oct 2026; was In the press): people's own posts about the campaign from social media only (Instagram, Facebook, X, YouTube...; campaign-tools.php keeps articles out), from Media & PR items with the campaign link, in the Media & PR hub's cards; then the campaign's partners
@@ -449,7 +449,8 @@ $share = c2sec(
    support: the site's "Help animals near you" banner stays where every campaign page has it, after the content. */
 
 /*
- * Sections in the Active order of the Campaign Content Standard (C2). campaign-goal is folded into the hero and context,
+ * Sections in the order the owner approved on 21 Oct 2026 (Claude may arrange them): the case, the letter, sharing, what people post, the news, the record, questions, what happens next.
+ * Earlier: the Active order of the Campaign Content Standard (C2). campaign-goal is folded into the hero and context,
  * support has no content yet and opportunities is reserved, so none of them is printed. aw-camp-open sections show until the close date, aw-camp-closed
  * after it (campaign-tools.php); after closing, next-steps comes straight after the hero.
  */
@@ -460,10 +461,10 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'context', $what )
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $share, 'aw-camp-open' ) // Other ways to send removed (owner, 21 Oct 2026)
-	. c2slot( 'faq', $faq )
+	. c2slot( 'press', $press ) // What's happening: people's social posts, straight after the share ask
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
-	. c2slot( 'press', $press ) // What's happening: people's social posts about Animal Writes campaigns
+	. c2slot( 'faq', $faq )
 	. c2slot( 'partners', c2sec( '', c2sc( '[aw_campaign_partners title="Partners"]' ), 'aw-camp-white' ), 'aw-camp-if-filled' )
 	. c2slot( 'next-steps', $next, 'aw-camp-open' )
 	. c2sc( '[aw_sticky_cta href="#how-to-help" label="Send your objection"]' )
