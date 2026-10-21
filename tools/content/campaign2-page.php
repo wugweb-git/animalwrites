@@ -282,18 +282,18 @@ $send = c2sec(
 	'aw-camp-grey aw-camp-open'
 );
 
-/* 7. Other ways to send: icon list. */
+/* 7. Other ways to send: three tiles, each with a round campaign-colour badge; the postal address is set as an address. */
 $way = function ( $icon, $title, $text ) {
-	return '<li>' . c2i( $icon ) . '<div><h4>' . $title . '</h4><p>' . $text . '</p></div></li>';
+	return '<li class="aw-camp-way"><span class="aw-camp-way-badge">' . c2i( $icon ) . '</span><h3>' . $title . '</h3>' . $text . '</li>';
 };
 $how = c2sec(
 	'how',
 	c2h( 'Other ways to send' )
 	. c2html(
 		'<ul class="aw-camp-ways">'
-		. $way( 'file', 'Copy and paste', 'Copy the letter and the address, and paste them into any email app.' )
-		. $way( 'mail', 'By post', 'Member Secretary (CCSEA), Office of CCSEA, Near State Bank of India, Delhi Milk Scheme Complex, Shadipur, Delhi 110008. Post it by 30 October so it arrives in time.' )
-		. $way( 'send', 'Write your own', 'Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.' )
+		. $way( 'copy', 'Copy and paste', '<p>Copy the letter and the address, and paste them into any email app.</p>' )
+		. $way( 'mail', 'By post', '<address>Member Secretary (CCSEA)<br>Office of CCSEA, Near State Bank of India<br>Delhi Milk Scheme Complex, Shadipur<br>Delhi 110008</address><p class="aw-camp-way-date">' . c2i( 'calendar' ) . 'Post it by 30 Oct 2026 so it arrives in time.</p>' )
+		. $way( 'send', 'Write your own', '<p>Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.</p>' )
 		. '</ul>'
 	),
 	'aw-camp-white aw-camp-open'
@@ -394,7 +394,12 @@ $loop      = c2sec(
 );
 
 /* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
-$impact = c2sec( '', c2h( 'Objections sent' ) . c2sc( '[aw_campaign_count min="100"]' ), 'aw-camp-white' );
+$impact = c2sec(
+	'',
+	c2h( 'Objections sent' )
+	. c2sc( '[aw_campaign_count min="100" label="objections sent from this page"]' ),
+	'aw-camp-brand aw-camp-tally'
+);
 
 /* Support (volunteers, local networks, help) has no content yet, so it is not printed. Volunteer registration is not
    support: the site's "Help animals near you" banner stays where every campaign page has it, after the content. */

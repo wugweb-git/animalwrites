@@ -189,11 +189,19 @@
 .aw-camp-compare tbody td:last-child { background: color-mix(in srgb, var(--camp-mark) 7%, transparent); }
 
 /* Other ways to send: icon list */
-.aw-camp-ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
-.aw-camp-ways li { display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); }
-.aw-camp-ways li > .kit-ico { --kit-ico-size: 1.5rem; color: var(--camp-mark); margin-top: 0.15em; }
-.aw-camp-ways h4 { margin: 0 0 var(--kit-space-1); font-size: var(--kit-type-h4, 1.125rem); }
-.aw-camp-ways p { margin: 0; }
+.aw-camp-ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-4); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.aw-camp-way { display: flex; flex-direction: column; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-bg)); }
+.aw-camp-way-badge { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp-way-badge .kit-ico { --kit-ico-size: 1.375rem; }
+.aw-camp-way h3 { margin: var(--kit-space-2) 0 0; font-size: var(--kit-type-h4, 1.25rem); }
+.aw-camp-way p, .aw-camp-way address { margin: 0; }
+.aw-camp-way address { font-style: normal; line-height: 1.6; }
+.aw-camp-way-date { display: flex; align-items: center; gap: var(--kit-space-2); margin-top: auto !important; color: var(--camp-mark); font-weight: 600; }
+/* Brand band: the objection tally, the number set large */
+.aw-camp-brand { background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp-brand :is(h2, p, strong, span) { color: var(--camp-primary-ink); }
+.aw-camp-tally .aw-camp-count { margin-top: var(--kit-space-4); font-size: var(--kit-type-lead); }
+.aw-camp-tally .aw-camp-count strong { display: block; font-size: clamp(4.5rem, 14vw, 8rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; }
 
 /* Questions: heading column sticks beside the answers */
 @media (min-width: 768px) { .aw-camp-faq-cols > :first-child { position: sticky; top: calc(var(--kit-header-height, 4rem) + var(--kit-space-4)); align-self: flex-start; } }

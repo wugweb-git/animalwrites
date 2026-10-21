@@ -279,18 +279,26 @@
 		copied.appendChild(b);
 	}
 
-	var sendShare = null;
-	function showSendShare() {
-		if (sendShare || !sh.url) return;
-		sendShare = document.createElement('div');
-		sendShare.className = 'aw-letter-share-box';
-		sendShare.innerHTML = '<p class="aw-letter-share-head"><strong>Now ask others to send theirs.</strong></p>';
-		var row = document.createElement('p');
-		row.className = 'aw-letter-share';
-		sendShare.appendChild(row);
-		confirmBox.parentNode.insertBefore(sendShare, confirmBox);
-		shareKit(row);
+	/* The share box sits under the send buttons all the time (owner, 21 Oct 2026: sharing matters); after a send its
+	   heading turns to "Now ask others to send theirs." */
+	var sendShare = null, shareHead = null;
+	function showSendShare(sent) {
+		if (!sh.url) return;
+		if (!sendShare) {
+			sendShare = document.createElement('div');
+			sendShare.className = 'aw-letter-share-box';
+			shareHead = document.createElement('p');
+			shareHead.className = 'aw-letter-share-head';
+			sendShare.appendChild(shareHead);
+			var row = document.createElement('p');
+			row.className = 'aw-letter-share';
+			sendShare.appendChild(row);
+			confirmBox.parentNode.insertBefore(sendShare, confirmBox);
+			shareKit(row);
+		}
+		shareHead.innerHTML = '<strong>' + (sent ? 'Now ask others to send theirs.' : 'Ask others to object too.') + '</strong>';
 	}
+	showSendShare(false);
 
 	form.querySelectorAll('[data-route]').forEach(function (btn) {
 		btn.addEventListener('click', function () {
@@ -321,7 +329,7 @@
 			track('objection_sent', { route: route });
 			recordSend(route);
 			confirmBox.hidden = false;
-			showSendShare();
+			showSendShare(true);
 			justSent = true;
 			try { localStorage.setItem(sentKey, String(Date.now())); } catch (e) { /* private mode */ }
 		});
@@ -333,7 +341,7 @@
 	var sentAt = 0;
 	try { sentAt = parseInt(localStorage.getItem(sentKey), 10) || 0; } catch (e) { /* private mode */ }
 	if (sentAt) {
-		showSendShare();
+		showSendShare(true);
 		if (sendShare && !location.hash && Date.now() - sentAt < 30 * 60 * 1000) sendShare.scrollIntoView({ block: 'center' });
 	}
 	document.addEventListener('visibilitychange', function () {
