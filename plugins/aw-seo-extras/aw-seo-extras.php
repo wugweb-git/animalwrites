@@ -39,7 +39,7 @@ add_action(
 			);
 			return;
 		}
-		foreach ( array( 'helpers', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand', 'llms', 'analysis' ) as $file ) {
+		foreach ( array( 'helpers', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand', 'llms', 'analysis' ) as $file ) {
 			require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 		}
 	},

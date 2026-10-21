@@ -1,6 +1,6 @@
 # FAQ system
 
-Owner-approved spec, 20 Oct 2026. Code: `plugins/animal-writes-core/includes/faq.php`; schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
+Owner-approved spec, 20 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php`; schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
 
 ## Rules
 

@@ -51,7 +51,7 @@ function aw_term_section( $slug, $head, $body ) {
 
 /** FAQ: the term's approved topic questions (faq.php; none on later pages, none with fewer than 3). */
 function aw_block_term_faq() {
-	return aw_term_page_term() ? aw_faq_html() : aw_term_block_preview( 'FAQ: the questions approved for the category or tag (3 to 6).' );
+	return aw_term_page_term() ? ( function_exists( 'aw_faq_html' ) ? aw_faq_html() : '' ) : aw_term_block_preview( 'FAQ: the questions approved for the category or tag (3 to 6).' );
 }
 
 /** Share: the page's address and its name. */

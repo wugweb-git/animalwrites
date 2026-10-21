@@ -25,7 +25,9 @@
  *
  * WP-CLI: wp aw-faq report | check | holdout | import <file>. docs/faq.md describes it all.
  *
- * @package animal-writes-core
+ * Lives in the AW SEO plugin (owner, 21 Oct 2026: the advanced layer on free Rank Math; nothing SEO stays in core or the theme).
+ *
+ * @package aw-seo-extras
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

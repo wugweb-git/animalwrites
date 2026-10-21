@@ -15,7 +15,7 @@
  * - Section hubs, Directory places and category pages: CollectionPage + ItemList of the page's items. Categories
  *   page: CollectionPage + ItemList of the categories. Media & PR: CollectionPage of press items. Contact: ContactPage. About: AboutPage.
  * - FAQPage (listings, Library documents, type/service/category pages, four hubs): parsed from the page's own FAQ
- *   accordion (animal-writes-core faq.php), so its text is the visible text; isPartOf the page, about its main entity.
+ *   accordion (faq.php, in this plugin), so its text is the visible text; isPartOf the page, about its main entity.
  * - Every page: the publisher (Organization, with publishing and corrections policies) and the site (WebSite with the
  *   site's own search address), replacing Rank Math's defaults (same @id). The BreadcrumbList is Rank Math's own
  *   (breadcrumbs.php gives it the trail people see).
