@@ -342,12 +342,14 @@ add_shortcode(
 		}
 		$groups = array( 'post' => 'Resources', 'aw_news' => 'News', 'aw_legal' => 'Library', 'aw_campaign' => 'Campaigns' );
 		$html   = '';
+		$sort   = function_exists( 'aw_active_sort' ) ? aw_active_sort( 'term' ) : 'new'; // the toolbar's Sort: each group's first six in that order
+		$by     = array( 'old' => array( 'date' => 'ASC' ), 'az' => array( 'title' => 'ASC' ), 'za' => array( 'title' => 'DESC' ) );
 		foreach ( $groups as $type => $label ) {
-			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'tax_query' => array( array( 'taxonomy' => 'category', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
+			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'orderby' => $by[ $sort ] ?? array( 'date' => 'DESC' ), 'tax_query' => array( array( 'taxonomy' => 'category', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
 			if ( ! $posts ) {
 				continue;
 			}
-			$all   = add_query_arg( 'category_name', $term->slug, aw_hub_url( $type ) );
+			$all   = add_query_arg( array( 'category_name' => $term->slug ) + ( isset( $by[ $sort ] ) ? array( 'sort' => $sort ) : array() ), aw_hub_url( $type ) );
 			$html .= '<section class="aw-hub-group"><h2>' . esc_html( $label ) . '</h2><ul' . ( 'aw_news' === $type ? ' class="aw-hub-news"' : '' ) . '>';
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . ( 'aw_news' === $type ? aw_news_meta_row( $p->ID ) : '' ) . ( 'aw_legal' === $type && ( $k = aw_legal_kind_tag( $p->ID ) ) ? '<p class="kit-tags">' . $k . '</p>' : '' ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>'; // news: the same source + date row as the News cards
