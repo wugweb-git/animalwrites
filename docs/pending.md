@@ -14,6 +14,8 @@ Check this list against git and the live site before acting on it. Failing AI ke
 9. **Branch `home-revision-2026-10-18`** (5 commits, local only): superseded by live (page 57 has the same section order; live patterns are newer). Keep, do not merge (rule 1 in CLAUDE.md).
 
 ## Dates
+These live in WordPress: **Tools → Dates** (month calendar, add and remove) and a Dashboard box; stored in the option `aw_team_dates` (animal-writes-core `includes/team-dates.php`). Keep both lists in step.
+
 - **5 Nov 2026**: lab rules objections close (campaign 13848).
 - **7 Nov 2026**: owner decides the lab rules Post phase. Until then no closed-state or Post content, and no FAQ visibility changes, on 13848.
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
