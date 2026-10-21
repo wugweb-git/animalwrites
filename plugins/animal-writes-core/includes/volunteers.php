@@ -231,6 +231,17 @@ add_action(
 		if ( is_page( 'update' ) ) {
 			nocache_headers();
 			do_action( 'litespeed_control_set_nocache', 'personal update link' );
+			header( 'Referrer-Policy: no-referrer' ); // the token never leaves in a referrer (GA4's copy is stripped in GTM)
+		}
+	}
+);
+// Microsoft Clarity: strict masking on /update/ (it shows one person's details); set before Clarity loads, which is
+// only on the visitor's first scroll, tap or key (kits-core analytics.php).
+add_action(
+	'wp_body_open',
+	function () {
+		if ( is_page( 'update' ) ) {
+			echo "<script>document.body.setAttribute('data-clarity-mask','True');</script>\n";
 		}
 	}
 );

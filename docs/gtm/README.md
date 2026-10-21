@@ -26,3 +26,7 @@ listens for Fluent Forms' own success event and pushes `form_submit` with `form`
 `form_ref` (its reference, AW-…, from the confirmation), and sets Clarity's `form_ref` tag. Tag "GA4 event - form_submit"
 sends it to GA4 with `form` and `ref`. Both need analytics consent (analytics_storage). No email, name or phone.
 Import with Merge → Overwrite, then publish.
+
+21 Oct 2026 (owner): the Google tag sets `page_location` and `page_referrer` from two variables ("JS - page_location
+(no update token)", "JS - page_referrer (no update token)") that remove the `t` parameter on /update/, so the volunteer
+update link's personal token never reaches GA4 (every event takes these from the Google tag).

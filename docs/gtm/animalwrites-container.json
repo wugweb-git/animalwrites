@@ -1,6 +1,6 @@
 {
  "exportFormatVersion": 2,
- "exportTime": "2026-10-21 12:00:00",
+ "exportTime": "2026-10-21 13:00:00",
  "containerVersion": {
   "path": "accounts/0/containers/0/versions/0",
   "accountId": "0",
@@ -150,6 +150,36 @@
           "type": "TEMPLATE",
           "key": "parameterValue",
           "value": "{{DLV - publisher}}"
+         }
+        ]
+       },
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "page_location"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{JS - page_location (no update token)}}"
+         }
+        ]
+       },
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "page_referrer"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{JS - page_referrer (no update token)}}"
          }
         ]
        }
@@ -2734,6 +2764,34 @@
       "type": "TEMPLATE",
       "key": "name",
       "value": "form_ref"
+     }
+    ]
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "variableId": "134",
+    "name": "JS - page_location (no update token)",
+    "type": "jsm",
+    "parameter": [
+     {
+      "type": "TEMPLATE",
+      "key": "javascript",
+      "value": "function () {\n  // The volunteer update link (/update/?t=…) carries a personal token: GA4 gets the address without it.\n  var u = new URL(location.href);\n  if (/^\\/update\\/?$/.test(u.pathname)) u.searchParams.delete('t');\n  return u.toString();\n}"
+     }
+    ]
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "variableId": "135",
+    "name": "JS - page_referrer (no update token)",
+    "type": "jsm",
+    "parameter": [
+     {
+      "type": "TEMPLATE",
+      "key": "javascript",
+      "value": "function () {\n  // A page opened from /update/?t=… : the referrer without the token.\n  var r = document.referrer;\n  try { var u = new URL(r); if (/^\\/update\\/?$/.test(u.pathname)) { u.searchParams.delete('t'); r = u.toString(); } } catch (e) {}\n  return r;\n}"
      }
     ]
    }

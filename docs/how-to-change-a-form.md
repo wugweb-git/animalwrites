@@ -26,6 +26,10 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Remove my data:** the form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
 
+**Exports:** the current volunteer and subscriber lists are exported from **FluentCRM** (Contacts → filter by tag `volunteer` or list Newsletter → Export). The site's old CSV exports (`admin-post.php?action=aw_vol_export`, `?action=aw_nl_export`) hold only the rows from before 21 Oct 2026, when the forms stopped writing those tables; the tables themselves are kept as they were.
+
+**The update link's token** stays private: GA4 gets `/update/` without `t` (GTM variables, `docs/gtm`), the page sends no referrer (`Referrer-Policy: no-referrer`), is never cached, and Microsoft Clarity masks the whole page.
+
 **Mail → Website forms** lists the Contact form's entries (read/unread and trash are the entry's own) with the older contact messages.
 
 **Volunteers on a listing page** (`[aw_org_people]` in the listing template): contacts tagged `org-approved` whose organisation matches the listing and who ticked "Show my name".
