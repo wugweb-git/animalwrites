@@ -463,6 +463,10 @@ html { overflow-x: clip; }
    from the preview script, body.kits-preview for administrators). The page HTML is the same for everyone, so the public
    cache never varies by visitor. */
 html:not(.kits-preview) body:not(.kits-preview) .kits-preview-only { display: none !important; }
+/* Ads (Advanced Ads, owner 21 Oct 2026): an AdSense unit that reports "unfilled" takes no space (Google's advice), nor
+   does its placement with the "Advertisement" label. A filled ad is untouched; with Advanced Ads off there is nothing. */
+ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+[class*="-entity-placement"]:has(ins.adsbygoogle[data-ad-status="unfilled"]):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { display: none !important; }
 
 /* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
    "Stripes" (core block style) shades every other row. Tokens only. */
