@@ -126,8 +126,6 @@
 				c.lastChild.nodeValue = 'Link copied';
 			});
 		}
-		if (sh.story) btn(canShare ? 'Share to story' : 'Story image', canShare ? 'instagram' : 'download', 'story_image', function () { shareImage('story', where); });
-		if (sh.post) btn(canShare ? 'Share as post' : 'Post image', canShare ? 'instagram' : 'download', 'post_image', function () { shareImage('post', where); });
 		if (canShare && 'IntersectionObserver' in window) { // fetch the pictures once the row is near, so the tap opens the sheet at once
 			var io = new IntersectionObserver(function (en) {
 				if (!en[0].isIntersecting) return;
@@ -376,7 +374,29 @@
 					+ '<span class="aw-letter-share-desc">' + esc(og.desc) + '</span></figcaption></figure>' : '');
 			shareHead = sendShare.querySelector('.aw-letter-share-head');
 			confirmBox.parentNode.insertBefore(sendShare, confirmBox);
-			shareKit(sendShare.querySelector('.aw-letter-share'));
+			var row = sendShare.querySelector('.aw-letter-share');
+			shareKit(row);
+			/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer). */
+			var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+			if (pics.length) {
+				var wrap = document.createElement('div');
+				wrap.className = 'aw-letter-share-pics';
+				wrap.innerHTML = '<p class="aw-letter-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
+				var list = document.createElement('div');
+				list.className = 'aw-letter-share-pics-list';
+				pics.forEach(function (k) {
+					var b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'aw-letter-share-pic aw-letter-share-pic--' + k[0];
+					b.dataset.kitShare = k[0] + '_image';
+					b.innerHTML = '<img src="' + esc(sh[k[0]]) + '" alt="" loading="lazy" decoding="async"><span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>';
+					b.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
+					b.addEventListener('click', function () { shareImage(k[0], row); });
+					list.appendChild(b);
+				});
+				wrap.appendChild(list);
+				sendShare.appendChild(wrap);
+			}
 		}
 		shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
 	}

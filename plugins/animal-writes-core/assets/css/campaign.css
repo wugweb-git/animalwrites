@@ -251,6 +251,17 @@
 .aw-letter-share-host { color: var(--camp-meta, var(--kit-color-muted)); }
 .aw-letter-share-preview strong { font-size: var(--kit-type-base, 1rem); line-height: 1.3; }
 .aw-letter-share-desc { color: var(--camp-meta, var(--kit-color-muted)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.aw-letter-share-pics { grid-column: 1 / -1; padding-top: var(--kit-space-4); border-top: 1px solid color-mix(in srgb, var(--camp-primary) 18%, transparent); }
+.aw-letter-share-pics-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm); }
+.aw-letter-share-pics-head strong { display: block; font-size: var(--kit-type-base, 1rem); }
+.aw-letter-share-pics-list { display: flex; gap: var(--kit-space-3); align-items: flex-end; }
+.aw-letter-share-pic { display: grid; gap: var(--kit-space-2); padding: 0; border: 0; background: none; font: inherit; color: var(--kit-color-text); cursor: pointer; text-align: start; }
+.aw-letter-share-pic img { display: block; height: clamp(11rem, 34vw, 15rem); width: auto; border-radius: var(--kit-radius-sm, 8px); box-shadow: 0 0 0 1px var(--kit-color-line), 0 8px 20px rgb(29 20 24 / 0.12); transition: transform 0.15s ease; }
+.aw-letter-share-pic--story img { aspect-ratio: 9 / 16; }
+.aw-letter-share-pic--post img { aspect-ratio: 4 / 5; }
+.aw-letter-share-pic:hover img, .aw-letter-share-pic:focus-visible img { transform: translateY(-2px); }
+.aw-letter-share-pic > span { display: inline-flex; align-items: center; gap: var(--kit-space-1); font-size: var(--kit-type-sm); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .aw-letter-share-pic img { transition: none; } }
 .aw-camp-share-note { margin-top: var(--kit-space-2); font-size: var(--kit-type-sm); }
 .aw-camp .aw-camp-share :is(a, button) { border: 0; background: transparent; font: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: 2.75rem; padding: 0 var(--kit-space-4); border-radius: var(--kit-radius-pill); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4); color: var(--kit-color-on-ink); text-decoration: none; }
 .aw-camp .aw-camp-share :is(a, button):hover { background: var(--camp-mark); box-shadow: none; }
