@@ -64,18 +64,6 @@ const AW_CONTACT_ABOUT = array(
 	'correction'  => 'Report a mistake',
 	'remove-data' => 'Remove my data',
 );
-/** Reasons with a form of their own (owner, 21 Oct 2026): choosing one opens it; no contact message is made. */
-const AW_CONTACT_ELSEWHERE = array(
-	'correction'  => '/report/',
-	'remove-data' => '/remove-my-data/',
-);
-/** The fields each reason adds in the Fluent Forms Contact form (its conditions), saved as aw_m_fields: name => label. */
-const AW_CONTACT_REASON_FIELDS = array(
-	'listing'     => array( 'org_name' => 'Organisation name', 'org_district' => 'District', 'org_phone' => 'Organisation phone', 'org_services' => 'Services' ),
-	'opportunity' => array( 'opp_title' => 'Opportunity title', 'opp_type' => 'Type', 'opp_when' => 'Dates', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link' ),
-	'featured'    => array( 'org_name' => 'Organisation', 'org_website' => 'Website' ),
-	'partnership' => array( 'org_name' => 'Organisation', 'org_website' => 'Website' ),
-);
 /** Message placeholder by reason (Phase 11 H4). */
 const AW_CONTACT_PLACEHOLDER = array(
 	'listing'    => 'Organisation name, district, services, phone or email',
@@ -119,7 +107,7 @@ function aw_contact_form() {
 	$about = isset( AW_CONTACT_ABOUT[ $about ] ) ? $about : '';
 	$state = aw_form_state( $form );
 	$pick  = (string) ( $state['values']['about'] ?? $about );
-	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'kit-form aw-contact-form', 'data-go' => wp_json_encode( array_map( 'home_url', AW_CONTACT_ELSEWHERE ) ) ) );
+	$html  = aw_form_open( $form, array( 'id' => 'write', 'class' => 'kit-form aw-contact-form' ) );
 	// Reason first; its options carry the message placeholder (aw.js swaps it when the reason changes).
 	$id    = aw_field_id( $form, 'about' );
 	$opts  = '';
@@ -159,35 +147,15 @@ function aw_contact_errors( $v ) {
 	return $errors;
 }
 
-/** A Contact entry's fields for its reason (AW_CONTACT_REASON_FIELDS): label => value, empty ones left out. */
-function aw_contact_reason_fields( $data ) {
-	$out = array();
-	foreach ( AW_CONTACT_REASON_FIELDS[ sanitize_key( (string) ( $data['about'] ?? '' ) ) ] ?? array() as $name => $label ) {
-		$v = $data[ $name ] ?? '';
-		$v = is_array( $v ) ? implode( ', ', array_map( fn( $x ) => AW_SERVICES[ $x ] ?? sanitize_text_field( (string) $x ), $v ) ) : sanitize_textarea_field( (string) $v );
-		if ( '' !== trim( $v ) ) {
-			$out[ $label ] = $v;
-		}
-	}
-	return $out;
-}
-
 /**
- * Save a checked contact message (Inbox > Messages), email the team, and add the sender to the newsletter when the box
- * is ticked. "Report a mistake" and "Remove my data" make no message: they have their own forms (AW_CONTACT_ELSEWHERE).
- * $extra (the Fluent Forms form): ref (AW-…), entry (its Fluent Forms entry), fields (the reason's own fields),
- * whatsapp and wa_optin (1/0). While a Fluent Forms form is handled, FluentCRM is its own link and the note is added
- * after it (forms-fluentforms.php).
+ * Save a checked contact message (Inbox > Messages), start a data removal when asked, email the team, and add the
+ * sender to the newsletter when the box is ticked.
  *
- * @return array|false array{url, title, text, id} for the thank-you page, or false when it could not be saved.
+ * @return array|false array{url, title, text} for the thank-you page, or false when it could not be saved.
  */
-function aw_contact_save( $v, $source, $nl, $nl_consent = null, $extra = array() ) {
-	if ( isset( AW_CONTACT_ELSEWHERE[ $v['about'] ] ) ) {
-		return array( 'url' => home_url( AW_CONTACT_ELSEWHERE[ $v['about'] ] ), 'title' => '', 'text' => '', 'id' => 0 );
-	}
+function aw_contact_save( $v, $source, $nl, $nl_consent = null ) {
 	$label = AW_CONTACT_ABOUT[ $v['about'] ];
-	$ref   = (string) ( $extra['ref'] ?? '' );
-	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'] . ( '' !== $ref ? ' (' . $ref . ')' : '' ), 'post_content' => $v['message'] ) );
+	$id    = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => $label . ': ' . $v['name'], 'post_content' => $v['message'] ) );
 	if ( is_wp_error( $id ) || ! $id ) {
 		return false;
 	}
@@ -195,23 +163,19 @@ function aw_contact_save( $v, $source, $nl, $nl_consent = null, $extra = array()
 		update_post_meta( $id, 'aw_m_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_m_source', $source ); // the page it was sent from (S5.8)
-	foreach ( array( 'ref' => $ref, 'entry' => (int) ( $extra['entry'] ?? 0 ), 'whatsapp' => (string) ( $extra['whatsapp'] ?? '' ), 'wa_optin' => isset( $extra['wa_optin'] ) ? (string) (int) $extra['wa_optin'] : '' ) as $k => $val ) {
-		if ( '' !== (string) $val && 0 !== $val ) {
-			update_post_meta( $id, 'aw_m_' . $k, $val );
-		}
+	if ( function_exists( 'aw_crm_message_note' ) ) {
+		aw_crm_message_note( $id ); // a note on the sender's FluentCRM contact (fluentcrm.php); none for a removal request
 	}
-	if ( ! empty( $extra['fields'] ) ) {
-		update_post_meta( $id, 'aw_m_fields', wp_slash( wp_json_encode( $extra['fields'] ) ) );
-	}
-	if ( empty( $GLOBALS['aw_ff_handling'] ) && function_exists( 'aw_crm_message_note' ) ) {
-		aw_crm_message_note( $id ); // a note on the sender's FluentCRM contact (fluentcrm.php)
+	if ( 'remove-data' === $v['about'] ) {
+		// DPDP (owner, 21 Oct 2026: collect only): tagged for the owner, who starts it in Tools → Erase Personal Data.
+		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
 	}
 	wp_mail( 'contact@animalwrites.in', 'Website message: ' . $label, "A message came in through the website.\nAbout: {$label}\nRead it in WP Admin > Inbox > Messages.", array( 'Reply-To: ' . $v['name'] . ' <' . $v['email'] . '>' ) );
-	if ( function_exists( 'aw_nl_optin' ) ) {
+	if ( function_exists( 'aw_nl_optin' ) && 'remove-data' !== $v['about'] ) { // a removal request never subscribes anyone
 		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'contact', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'contact', $nl, $nl_consent );
 	}
 	$text = sprintf( 'We\'ll reply to %s.', $v['email'] );
-	return array( 'url' => kits_thanks_url( 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text, 'id' => (int) $id );
+	return array( 'url' => kits_thanks_url( 'remove-data' === $v['about'] ? 'remove-data' : 'contact', array(), 'Message sent.', $text ), 'title' => 'Message sent.', 'text' => $text );
 }
 
 function aw_contact_submit() {
@@ -235,7 +199,7 @@ add_action( 'admin_post_nopriv_aw_contact', 'aw_contact_submit' );
 add_action( 'admin_post_aw_contact', 'aw_contact_submit' );
 
 // Contact messages list (owner, 9 Oct 2026): Name · Email · Organisation · Tag · Sent to · Sent from · Received.
-add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Name', 'aw_ref' => 'Reference', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_tag' => 'Tag', 'aw_m_to' => 'Sent to', 'aw_m_source' => 'Sent from', 'date' => 'Received' ), 30 );
+add_filter( 'manage_aw_message_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Name', 'aw_m_email' => 'Email', 'aw_m_org' => 'Organisation', 'aw_m_tag' => 'Tag', 'aw_m_to' => 'Sent to', 'aw_m_source' => 'Sent from', 'date' => 'Received' ), 30 );
 add_action(
 	'manage_aw_message_posts_custom_column',
 	function ( $col, $id ) {
@@ -537,67 +501,7 @@ function aw_elsewhere_screen() {
 	echo '</form></div>';
 }
 
-// /contact/?about=correction and ?about=remove-data (and the older ?type=) open those forms' own pages (owner, 21 Oct
-// 2026); /remove-my-data/ is the request form again (privacy-requests.php).
-add_action(
-	'template_redirect',
-	function () {
-		$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( is_page( 'contact' ) && isset( AW_CONTACT_ELSEWHERE[ $about ] ) ) {
-			wp_safe_redirect( home_url( AW_CONTACT_ELSEWHERE[ $about ] ), 302, 'Animal Writes' );
-			exit;
-		}
-	}
-);
-
-// Inbox → Messages: the reference (AW-…) column (listed with the others above), found by the list's search; the reason's
-// own fields as a table.
-add_action(
-	'manage_aw_message_posts_custom_column',
-	function ( $col, $id ) {
-		if ( 'aw_ref' === $col ) {
-			echo esc_html( (string) get_post_meta( $id, 'aw_m_ref', true ) );
-		}
-	},
-	10,
-	2
-);
-add_action(
-	'pre_get_posts',
-	function ( $q ) {
-		if ( ! is_admin() || ! $q->is_main_query() || 'aw_message' !== $q->get( 'post_type' ) || ! preg_match( '/^AW-\d+$/i', trim( (string) $q->get( 's' ) ) ) ) {
-			return;
-		}
-		$q->set( 'meta_query', array( array( 'key' => 'aw_m_ref', 'value' => strtoupper( trim( (string) $q->get( 's' ) ) ) ) ) );
-		$q->set( 's', '' );
-	}
-);
-add_action(
-	'add_meta_boxes_aw_message',
-	function () {
-		add_meta_box(
-			'aw-message-fields',
-			'Sent with the message',
-			function ( $post ) {
-				$m      = fn( $k ) => (string) get_post_meta( $post->ID, 'aw_m_' . $k, true );
-				$fields = (array) json_decode( $m( 'fields' ), true );
-				$rows   = array( 'Reference' => $m( 'ref' ), 'Phone or WhatsApp' => $m( 'whatsapp' ), 'OK to contact on WhatsApp (1/0)' => $m( 'wa_optin' ) ) + $fields;
-				echo '<table class="widefat striped"><tbody>';
-				foreach ( $rows as $k => $v ) {
-					echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . esc_html( '' !== (string) $v ? (string) $v : '—' ) . '</td></tr>';
-				}
-				echo '</tbody></table>';
-				$entry = (int) $m( 'entry' );
-				if ( $entry && function_exists( 'aw_ff_id' ) ) {
-					echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . aw_ff_id( 'contact' ) . '#/entries/' . $entry ) ) . '">The Fluent Forms entry</a> (IP, browser, device, page, referrer, UTM and the other visit details)</p>';
-				}
-			},
-			'aw_message',
-			'normal',
-			'high'
-		);
-	}
-);
+// /remove-my-data/ is the Remove my data form again (owner, 21 Oct 2026); the Contact form's reason links to it.
 
 // Inbox → Contact messages: an incoming email's "Reply" opens Inbox → Reply for that email (mail-reply.php); a form
 // message's "Reply" opens your own mail app with the sender and subject filled in (WordPress sends nothing).
@@ -634,9 +538,6 @@ add_filter(
 		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
 		if ( ! $key || ! in_array( $key, array( 'listing', 'featured', 'opportunity', 'partnership', 'correction' ), true ) ) {
 			return $html;
-		}
-		if ( isset( AW_CONTACT_ELSEWHERE[ $key ] ) ) { // its own form, on its own page
-			return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a href="' . esc_url( home_url( AW_CONTACT_ELSEWHERE[ $key ] ) ) . '">$2</a>$3', $html, 1 );
 		}
 		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';
 		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );

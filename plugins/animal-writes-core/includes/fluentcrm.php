@@ -51,7 +51,22 @@ function aw_crm_list_id() {
 }
 
 /** Tag titles shown in FluentCRM (slug => title); any other tag is titled by its slug. */
-const AW_CRM_TAG_TITLES = array( 'volunteer' => 'Volunteer', 'emailed-us' => 'Emailed us', 'contact-form' => 'Contact form' );
+const AW_CRM_TAG_TITLES = array(
+	'volunteer'           => 'Volunteer',
+	'emailed-us'          => 'Emailed us',
+	'contact-form'        => 'Contact form',
+	// Added 21 Oct 2026 (owner) next to the existing ones; newsletter ("Joined via site form"), volunteer-1.0 and
+	// campaign-<slug> are kept as they are. The owner sets org-approved, vol-active and vol-paused by hand.
+	'claimant'            => 'Claimant',
+	'org-pending'         => 'Organisation: pending',
+	'org-approved'        => 'Organisation: approved',
+	'vol-active'          => 'Volunteer: active',
+	'vol-paused'          => 'Volunteer: paused',
+	'topic-rescues'       => 'Topic: rescues and cruelty cases',
+	'topic-campaigns'     => 'Topic: campaigns',
+	'topic-laws'          => 'Topic: laws and court orders',
+	'topic-opportunities' => 'Topic: opportunities',
+);
 
 /** Tag IDs for slugs (created if missing). */
 function aw_crm_tag_ids( $slugs ) {
@@ -115,11 +130,10 @@ function aw_crm_volunteer_fields( $state_slug, $district_slug, $city, $pincode, 
 	);
 }
 
-/** One sign-up onto both lists: the site's (active) and FluentCRM's Newsletter (subscribed). While a Fluent Forms form
- *  is handled, FluentCRM is that form's own Fluent Forms → FluentCRM link (forms-fluentforms.php), so only the site's. */
+/** One sign-up onto both lists: the site's (active) and FluentCRM's Newsletter (subscribed). */
 function aw_newsletter_join( $email, $name, $source, $consent, $extra = array(), $tags = array() ) {
 	$res = function_exists( 'aw_nl_activate' ) ? aw_nl_activate( $email, $name, $source, $consent ) : false;
-	if ( aw_crm_on() && empty( $GLOBALS['aw_ff_handling'] ) ) {
+	if ( aw_crm_on() ) {
 		aw_crm_subscribe( $email, $name, $extra + array( 'source' => $source ), $tags );
 	}
 	return $res;
@@ -187,8 +201,8 @@ function aw_crm_message_note( $id ) {
 		$title = $post->post_title; // "Email: subject"
 		$head  = array( 'Sent to' => aw_crm_message_to( $id ), 'Mailbox' => $m( 'mailbox' ), 'Sent' => $when, 'Attachments' => str_replace( "\n", ', ', $m( 'attachments' ) ) );
 	} else {
-		$title = 'Contact form: ' . $about . ( '' !== $m( 'ref' ) ? ' (' . $m( 'ref' ) . ')' : '' );
-		$head  = array( 'Reference' => $m( 'ref' ), 'Form' => 'Contact (' . $about . ')', 'Organisation' => $m( 'org' ), 'Phone or WhatsApp' => $m( 'whatsapp' ), 'OK on WhatsApp' => '' !== $m( 'whatsapp' ) ? ( '1' === $m( 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '', 'Sent from' => $m( 'source' ), 'Sent' => $when );
+		$title = 'Contact form: ' . $about;
+		$head  = array( 'Form' => 'Contact (' . $about . ')', 'Organisation' => $m( 'org' ), 'Sent from' => $m( 'source' ), 'Sent' => $when );
 	}
 	$html = '';
 	foreach ( array_filter( $head ) as $k => $v ) {
@@ -300,8 +314,18 @@ const AW_CRM_VOL_FIELDS = array(
 	'vol_skills'          => array( 'Volunteer: skills', 'text' ),
 	'vol_languages'       => array( 'Volunteer: languages', 'text' ),
 	'vol_whatsapp'        => array( 'Volunteer: WhatsApp', 'text' ),
-	'vol_wa_optin'        => array( 'Volunteer: OK on WhatsApp (1/0)', 'text' ),
+	'vol_wa_optin'        => array( 'Volunteer: OK on WhatsApp (1 = yes, empty = no)', 'text' ),
 	'vol_organisation'    => array( 'Volunteer: organisation (as given)', 'text' ),
+	'vol_org_show'        => array( 'Volunteer: show my name on the organisation\'s page (1 = yes, empty = no)', 'text' ),
+	'vol_org_listing'     => array( 'Volunteer: organisation\'s listing ID (set by the owner when the name does not match)', 'text' ),
+);
+
+/** Custom fields (group "Forms"): the newsletter box on the last form a contact sent (owner, 21 Oct 2026). */
+const AW_CRM_FORM_FIELDS = array(
+	'nl_box_last'    => array( 'Newsletter box (last form): 1 or 0', 'text' ),
+	'nl_box_form'    => array( 'Newsletter box (last form): which form', 'text' ),
+	'nl_box_consent' => array( 'Newsletter box (last form): consent wording', 'text' ),
+	'campaign_ref'   => array( 'Campaign letter: reference', 'text' ),
 );
 
 /** Add the volunteer fields and their group to FluentCRM's custom fields (keeps any others). */
@@ -309,18 +333,25 @@ function aw_crm_fields_setup() {
 	$fields = (array) fluentcrm_get_option( 'contact_custom_fields', array() );
 	$have   = wp_list_pluck( $fields, 'slug' );
 	$added  = 0;
-	foreach ( AW_CRM_VOL_FIELDS as $slug => $f ) {
-		if ( ! in_array( $slug, $have, true ) ) {
-			$fields[] = array( 'slug' => $slug, 'label' => $f[0], 'type' => $f[1], 'group' => 'Volunteer' );
-			++$added;
+	foreach ( array( 'Volunteer' => AW_CRM_VOL_FIELDS, 'Forms' => AW_CRM_FORM_FIELDS ) as $group => $list ) {
+		foreach ( $list as $slug => $f ) {
+			if ( ! in_array( $slug, $have, true ) ) {
+				$fields[] = array( 'slug' => $slug, 'label' => $f[0], 'type' => $f[1], 'group' => $group );
+				++$added;
+			}
 		}
 	}
 	if ( $added ) {
 		fluentcrm_update_option( 'contact_custom_fields', array_values( $fields ) );
 	}
 	$groups = (array) ( fluentcrm_get_option( 'contact_field_groups' ) ? fluentcrm_get_option( 'contact_field_groups' ) : array( array( 'slug' => 'default', 'title' => 'Custom Profile Data' ) ) );
-	if ( ! in_array( 'Volunteer', wp_list_pluck( $groups, 'title' ), true ) ) {
-		$groups[] = array( 'slug' => 'volunteer', 'title' => 'Volunteer' );
+	$titles = wp_list_pluck( $groups, 'title' );
+	foreach ( array( 'volunteer' => 'Volunteer', 'forms' => 'Forms' ) as $gslug => $gtitle ) {
+		if ( ! in_array( $gtitle, $titles, true ) ) {
+			$groups[] = array( 'slug' => $gslug, 'title' => $gtitle );
+		}
+	}
+	if ( count( $groups ) !== count( $titles ) ) {
 		fluentcrm_update_option( 'contact_field_groups', $groups );
 	}
 	return $added;
@@ -389,6 +420,80 @@ function aw_crm_volunteer_sync( $email ) {
 		false
 	);
 	return $res;
+}
+
+/* ---------- Forms: what a Fluent Forms → FluentCRM link cannot do (owner, 21 Oct 2026) ---------- */
+
+/**
+ * Record the newsletter box of the form a person just sent on their contact: 1 or 0, the form, the consent wording.
+ * Fluent Forms saves nothing for an unticked box (the entry's empty value is the 0) and a link with a condition does
+ * not run at all when it is unticked, so this is the one place a 0 reaches FluentCRM.
+ *
+ * @param object $c       FluentCRM contact.
+ * @param bool   $ticked  The box.
+ * @param string $form    Form name.
+ * @param string $consent Consent wording version.
+ */
+function aw_crm_nl_box( $c, $ticked, $form, $consent ) {
+	if ( $c ) {
+		aw_crm_fields_setup();
+		$c->syncCustomFieldValues( array( 'nl_box_last' => $ticked ? '1' : '0', 'nl_box_form' => (string) $form, 'nl_box_consent' => '' !== (string) $consent ? (string) $consent : 'none' ), false );
+	}
+}
+
+/**
+ * A Contact form entry as a note on the sender's contact (title "Contact form: <reason> (AW-<serial>)"): the reason,
+ * the reason's own fields, the message, the WhatsApp number and tick, the page, and a link to the entry.
+ *
+ * @param object $c      FluentCRM contact.
+ * @param int    $entry  Fluent Forms entry ID.
+ * @param array  $data   The entry's values.
+ * @param int    $form   Form ID.
+ * @param string $ref    Reference (AW-<serial>).
+ */
+function aw_crm_entry_note( $c, $entry, $data, $form, $ref ) {
+	if ( ! $c ) {
+		return 0;
+	}
+	$about = defined( 'AW_CONTACT_ABOUT' ) ? ( AW_CONTACT_ABOUT[ (string) ( $data['about'] ?? '' ) ] ?? (string) ( $data['about'] ?? '' ) ) : (string) ( $data['about'] ?? '' );
+	$labels = array( 'org_name' => 'Organisation', 'org' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Organisation phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'whatsapp' => 'Phone or WhatsApp', 'wa_optin' => 'OK on WhatsApp', 'v_page_title' => 'Sent from' );
+	$html   = '<strong>Reference:</strong> ' . esc_html( $ref ) . '<br><strong>Reason:</strong> ' . esc_html( $about ) . '<br>';
+	foreach ( $labels as $k => $label ) {
+		$v = $data[ $k ] ?? '';
+		$v = is_array( $v ) ? implode( ', ', array_map( fn( $x ) => AW_SERVICES[ $x ] ?? (string) $x, $v ) ) : (string) $v;
+		if ( 'wa_optin' === $k && '' !== (string) ( $data['whatsapp'] ?? '' ) ) {
+			$v = '' !== $v ? '1 (yes)' : '0 (no)';
+		}
+		if ( '' !== trim( $v ) ) {
+			$html .= '<strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $v ) . '<br>';
+		}
+	}
+	$text  = trim( (string) ( $data['message'] ?? '' ) );
+	$html  = '<p>' . $html . '</p>' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '' )
+		. '<p><a href="' . esc_url( admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . (int) $form . '#/entries/' . (int) $entry ) ) . '">Open the entry in Fluent Forms</a></p>';
+	$row = \FluentCrm\App\Models\SubscriberNote::create( array( 'subscriber_id' => (int) $c->id, 'type' => 'note', 'title' => 'Contact form: ' . $about . ( '' !== $ref ? ' (' . $ref . ')' : '' ), 'description' => $html, 'created_at' => current_time( 'mysql' ) ) );
+	return $row ? (int) $row->id : 0;
+}
+
+/**
+ * A campaign letter's sender into FluentCRM with FluentCRM's own API (owner, 21 Oct 2026), as the Volunteer form's link
+ * would: Newsletter list (subscribed; someone who unsubscribed keeps that), tags newsletter, volunteer and
+ * campaign-<slug> whatever the box says, the WhatsApp number and its tick, the newsletter box and the reference.
+ *
+ * @return int Contact ID, or 0.
+ */
+function aw_crm_campaign_signer( $email, $name, $city, $slug, $box, $whatsapp, $wa_optin, $ref, $consent ) {
+	if ( ! aw_crm_on() ) {
+		return 0;
+	}
+	$id = aw_crm_subscribe( $email, $name, array( 'city' => $city, 'source' => 'site:campaign:' . $slug ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
+	$c  = $id ? \FluentCrm\App\Models\Subscriber::find( $id ) : null;
+	if ( ! $c ) {
+		return 0;
+	}
+	aw_crm_nl_box( $c, $box, 'Campaign letter', $consent );
+	$c->syncCustomFieldValues( array_filter( array( 'vol_city' => (string) $city, 'vol_page' => 'campaign:' . $slug, 'vol_source' => 'campaign letter', 'vol_whatsapp' => (string) $whatsapp, 'vol_wa_optin' => $wa_optin ? '1' : '', 'campaign_ref' => (string) $ref ) ), false );
+	return $id;
 }
 
 /* ---------- Unsubscribes stay in step ---------- */

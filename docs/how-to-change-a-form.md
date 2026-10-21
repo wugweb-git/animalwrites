@@ -4,23 +4,31 @@ Every form uses one shared form kit: the field dictionary, the messages, the loo
 
 ## The forms are Fluent Forms forms (owner, 21 Oct 2026)
 
-Every site form is built in **Fluent Forms** (free) and connected to **FluentCRM** by its own Fluent Forms → FluentCRM link. Labels, options, help text, conditions (the Contact form's fields per reason), the Yes/No ticks (saved as 1/0), hidden fields, the thank-you redirect with the reference number and the FluentCRM link are all Fluent Forms settings. Change them in WP Admin → Fluent Forms; nothing about a form's fields is in code.
+Every site form is built in **Fluent Forms** (free) and reaches **FluentCRM** (free) through its own Fluent Forms → FluentCRM link. Labels, options, help text, the Contact form's fields per reason (conditional logic), tick boxes, hidden fields, the confirmation with the reference (`{submission.serial_number}`) and the links are Fluent Forms settings: change them in WP Admin → Fluent Forms. **Requests are Fluent Forms entries** (unread count, favourite = needs action, notes = what was done); **people are FluentCRM contacts** (statuses and organisation approval are tags).
 
-| Form | ID | File | Reference | FluentCRM link |
+| Form | ID | File | Reference | FluentCRM |
 |---|---|---|---|---|
-| Newsletter (footer) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, tag newsletter |
-| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` = 1 → Newsletter, tags contact-form, newsletter |
-| Volunteer sign-up | 5 | `forms/5-volunteer-sign-up.json` | AW-V-… | everyone → Newsletter, tag volunteer; the new answers into Volunteer custom fields |
-| Claim this listing | 6 | `forms/6-claim-this-listing.json` | AW-C-… | `nl_optin` = 1 → Newsletter, tag newsletter |
-| Report a mistake | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none (never) |
-| Remove my data | 8 | `forms/8-remove-my-data.json` | AW-D-… | none (never) |
+| Newsletter (footer, inline) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, `newsletter` |
+| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` ticked → Newsletter, `contact-form`, `newsletter`; every sender a contact with `contact-form` and the message as a note (code) |
+| Volunteer sign-up | 5 | `forms/5-volunteer-sign-up.json` | AW-V-… | everyone → Newsletter, `volunteer`, volunteer fields; organisation ticked → `org-pending` |
+| Claim this listing | 6 | `forms/6-claim-this-listing.json` | AW-C-… | ticked → Newsletter, `newsletter`, `claimant`; every claimant a contact with `claimant` (code) |
+| Report a mistake | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none |
+| Remove my data | 8 | `forms/8-remove-my-data.json` | AW-D-… | none |
+| Newsletter (full) | 9 | `forms/9-newsletter-full.json` | – | everyone → Newsletter, `newsletter`; each topic ticked → `topic-…` |
 
-**Versioned:** after changing a form in Fluent Forms, export it into the repo and commit:
-`wp eval-file tools/forms/forms.php export`. To put the repo's version on a site (keeps the form's ID, entries and link; the form as it was goes to `~/backups/forms-before-…`): `wp eval-file tools/forms/forms.php dry`, then `… import` (or `… import 4` for one form).
+A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 0). Each contact also gets "Newsletter box (last form)" 1/0 with the form and its consent wording.
 
-**Hidden fields on every form:** `v_page_id`, `v_page_title` (Fluent Forms smartcodes); `v_referrer`, `v_utm_*`, `v_screen`, `v_lang`, `v_tz`, `v_secs`, `v_first_visit`, `v_visits`, and `v_ga`, `v_clarity` only with analytics consent (filled in the visitor's browser by `aw-analytics.js`, because the pages are cached); `v_country`, `v_city` (found on the server from the IP, DB-IP Lite, no outside service); `consent_version` (fixed: each tick's wording version). Fluent Forms itself saves the IP, browser, device and page with every entry.
+**Versioned:** after changing a form in Fluent Forms, `wp eval-file tools/forms/forms.php export` and commit. To put the repo's version on a site (keeps the form's ID, entries and links; the form as it was goes to `~/backups/forms-before-…`): `… dry`, then `… import` (or `… import 4`). Links name tags and lists by slug in the files; import turns them into the site's IDs.
 
-**What is still code** (`plugins/animal-writes-core/includes/forms-fluentforms.php`), because the plugins cannot do it: the spam check (ALTCHA), PIN code → State → District (LGD), the private upload (claim logo and proof), checks Fluent Forms cannot make (Indian mobile numbers, a real State and District, the claimed listing, an upload, a page on this site), the country and city lookup, and one small hook per form that also saves the entry where the rest of the site reads it (Inbox → Messages, the volunteers table, Listing claims, Reports, data requests). The campaign letter tool (`campaign-letters.php`, `campaign.js`) is not a Fluent Forms form and keeps its own code.
+**Hidden fields on every form:** `v_page_id`, `v_page_title` (smartcodes); `v_referrer`, `v_utm_*`, `v_screen`, `v_lang`, `v_tz`, `v_secs`, `v_first_visit`, `v_visits`, and `v_ga`, `v_clarity` only with analytics consent: filled in the browser by `aw-analytics.js`, because pages are cached (LiteSpeed keeps one copy per address and drops `utm_*`, so a smartcode would save another visitor's values); `consent_version` (fixed). Fluent Forms itself saves IP, browser, device and page with every entry.
+
+**Volunteer update link** (send from a FluentCRM email): `https://animalwrites.in/volunteer/?fullname={{contact.full_name}}&email={{contact.email}}&phone={{contact.phone}}` — the form opens filled in; FluentCRM updates the contact by email. (Not `?name=`: WordPress reserves it and the page would not be found.)
+
+**Remove my data:** the form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
+
+**Analytics:** GTM (`docs/gtm`) listens for Fluent Forms' success event: GA4 `form_submit` (form, ref) and Clarity's `form_ref`, with analytics consent only.
+
+**Custom code** (`plugins/animal-writes-core/includes/forms-fluentforms.php` unless named): ALTCHA, PIN code → State → District (LGD), the private upload (claim logo and proof), the FluentCRM steps a link cannot do (notes, transactional contacts, the 1/0 box), the campaign letter tool (`campaign-letters.php`, `campaign.js`), the listing's Volunteers from FluentCRM (`org-people.php`) and the hidden-field script (`aw-analytics.js`).
 
 The site's own forms below stay installed and show again if Fluent Forms is switched off (`wp aw ff-off <key>`).
 

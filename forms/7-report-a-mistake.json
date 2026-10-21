@@ -16,7 +16,7 @@
                         "value": "{get.item}"
                     },
                     "settings": {
-                        "admin_field_label": "Item ID"
+                        "admin_field_label": "Item ID (from the link)"
                     },
                     "editor_options": {
                         "title": "Hidden Field",
@@ -158,7 +158,7 @@
                     },
                     "editor_options": {
                         "title": "Dropdown",
-                        "icon_class": "ff-edit-radio",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "select"
                     }
                 },
@@ -368,114 +368,6 @@
                 {
                     "index": 13,
                     "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_screen",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_screen",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Screen size"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 14,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_lang",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_lang",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Language"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 15,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_tz",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_tz",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Time zone"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 16,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_secs",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_secs",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Seconds to fill in"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 17,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_first_visit",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_first_visit",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "First visit"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 18,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_visits",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_visits",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Visit count"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 19,
-                    "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
                         "type": "hidden",
@@ -492,7 +384,7 @@
                     }
                 },
                 {
-                    "index": 20,
+                    "index": 14,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -510,43 +402,115 @@
                     }
                 },
                 {
+                    "index": 15,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_screen",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_screen",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Screen size"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 16,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_lang",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_lang",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Language"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 17,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_tz",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_tz",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Time zone"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 18,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_secs",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_secs",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Seconds to fill in"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 19,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_first_visit",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_first_visit",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "First visit"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 20,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_visits",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_visits",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Visit count"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
                     "index": 21,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_country",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_country",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Country (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 22,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_city",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_city",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "City (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 23,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
@@ -601,7 +565,7 @@
             },
             {
                 "meta_key": "formSettings",
-                "value": "{\"confirmation\":{\"redirectTo\":\"customUrl\",\"messageToShow\":\"\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":\"{wp.site_url}/thank-you/?form=report&ref=AW-R-{submission.serial_number}&item={inputs.item}\",\"enable_query_string\":\"no\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null,\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">Thanks \\u2014 we'll check it.</p><p class=\\\"aw-form-ref\\\">Your reference: <strong data-aw-ref=\\\"AW-R-{submission.serial_number}\\\">AW-R-{submission.serial_number}</strong></p>\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
             },
             {
                 "meta_key": "step_data_persistency_status",

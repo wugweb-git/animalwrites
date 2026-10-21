@@ -81,97 +81,6 @@
                 },
                 {
                     "index": 3,
-                    "element": "aw_places",
-                    "uniqElKey": "el_aw_places",
-                    "attributes": {
-                        "name": "aw_places"
-                    },
-                    "settings": {
-                        "label": "PIN code, State and District",
-                        "required": "no",
-                        "container_class": "",
-                        "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "PIN code, State and District",
-                        "icon_class": "ff-edit-html",
-                        "template": "customHTML"
-                    }
-                },
-                {
-                    "index": 4,
-                    "element": "input_checkbox",
-                    "uniqElKey": "el_aw_topics",
-                    "attributes": {
-                        "name": "topics",
-                        "value": [],
-                        "type": "checkbox"
-                    },
-                    "settings": {
-                        "container_class": "kit-field kit-check-group",
-                        "label": "Topics",
-                        "label_placement": "",
-                        "admin_field_label": "Topics",
-                        "help_message": "Optional. Leave all unticked for everything.",
-                        "advanced_options": [
-                            {
-                                "label": "Campaigns",
-                                "value": "campaigns",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Laws and court cases",
-                                "value": "legal",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Rescue and adoption",
-                                "value": "rescue",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Volunteering near me",
-                                "value": "volunteering",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Research",
-                                "value": "research",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "dynamic_default_value": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": [],
-                        "display_type": "",
-                        "enable_other_option": "no",
-                        "layout_class": ""
-                    },
-                    "editor_options": {
-                        "title": "Checkbox",
-                        "icon_class": "ff-edit-radio",
-                        "template": "inputCheckable"
-                    }
-                },
-                {
-                    "index": 5,
                     "element": "custom_html",
                     "attributes": [],
                     "settings": {
@@ -187,7 +96,7 @@
                     "uniqElKey": "el_aw_nl_consent"
                 },
                 {
-                    "index": 6,
+                    "index": 4,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_id",
                     "attributes": {
@@ -205,7 +114,7 @@
                     }
                 },
                 {
-                    "index": 7,
+                    "index": 5,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_title",
                     "attributes": {
@@ -223,7 +132,7 @@
                     }
                 },
                 {
-                    "index": 8,
+                    "index": 6,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_referrer",
                     "attributes": {
@@ -241,7 +150,7 @@
                     }
                 },
                 {
-                    "index": 9,
+                    "index": 7,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_source",
                     "attributes": {
@@ -259,7 +168,7 @@
                     }
                 },
                 {
-                    "index": 10,
+                    "index": 8,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_medium",
                     "attributes": {
@@ -277,7 +186,7 @@
                     }
                 },
                 {
-                    "index": 11,
+                    "index": 9,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_campaign",
                     "attributes": {
@@ -287,6 +196,42 @@
                     },
                     "settings": {
                         "admin_field_label": "UTM campaign"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 10,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_ga",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_ga",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "GA4 client ID (with analytics consent)"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 11,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_clarity",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_clarity",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Clarity ID (with analytics consent)"
                     },
                     "editor_options": {
                         "title": "Hidden Field",
@@ -405,83 +350,11 @@
                 {
                     "index": 18,
                     "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_ga",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_ga",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "GA4 client ID (with analytics consent)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 19,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_clarity",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_clarity",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Clarity ID (with analytics consent)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 20,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_country",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_country",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Country (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 21,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_city",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_city",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "City (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 22,
-                    "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
                         "type": "hidden",
                         "name": "consent_version",
-                        "value": "newsletter=v2-newsletter-1"
+                        "value": "v2-newsletter-1"
                     },
                     "settings": {
                         "admin_field_label": "Consent wording version"
@@ -534,7 +407,7 @@
             },
             {
                 "meta_key": "fluentcrm_feeds",
-                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"1\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[],\"status\":false,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Newsletter \\u2192 FluentCRM\",\"tag_ids\":[\"2\"]}"
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[],\"status\":false,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Newsletter → FluentCRM\",\"tag_ids\":[\"newsletter\"]}"
             },
             {
                 "meta_key": "formSettings",

@@ -20,3 +20,9 @@ Contents: one Google tag (G-4P5YMJ04RL) carrying the page context (page_type, se
 listing_type, issuer, publisher), and one GA4 event tag + trigger per event pushed by the site: form_submit_success,
 form_error, search, pin_search, filter_apply, sort_change, outbound_click, call_click, whatsapp_click, email_click,
 pdf_download, share_click, claim_step, card_click, 404_view, scroll_depth, menu_click, button_click.
+
+21 Oct 2026 (owner): forms. Tag "Fluent Forms - form_submit and Clarity form_ref (listener)" (Custom HTML, DOM Ready)
+listens for Fluent Forms' own success event and pushes `form_submit` with `form` (the form's name on the page) and
+`form_ref` (its reference, AW-…, from the confirmation), and sets Clarity's `form_ref` tag. Tag "GA4 event - form_submit"
+sends it to GA4 with `form` and `ref`. Both need analytics consent (analytics_storage). No email, name or phone.
+Import with Merge → Overwrite, then publish.

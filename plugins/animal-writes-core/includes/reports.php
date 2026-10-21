@@ -4,10 +4,10 @@
  * item (/report/?listing=<ID> still works); opened on its own it asks for the page link.
  *
  * Fields: the item (hidden), what's wrong, details (up to 1,000 characters), an optional email (only to reply about the
- * report) and the spam check. The Fluent Forms form (#7, /forms/7-report-a-mistake.json) fills the item from the
- * link (?item=), the reason from ?reason=. Saved as a private aw_report with status New → Fixed / No change, its Type
- * (Listing, News, Library, Resource, or Page when only a link was given) and its reference (AW-R-…). Nothing on the
- * item changes automatically. Administrators only (Inbox → Reports).
+ * report) and the spam check. The form is the Fluent Forms form #7 (/forms/7-report-a-mistake.json): it reads the
+ * item from the link ({get.item}) and the reason ({get.reason}); each report is a Fluent Forms entry (favourite = needs
+ * action, notes = what was done). Nothing on the item changes automatically. The site's own form below (shown only if
+ * Fluent Forms is off) saves a private aw_report as before.
  *
  * @package animal-writes-core
  */
@@ -48,7 +48,7 @@ add_action(
 				'labels'          => array( 'name' => 'Reports', 'singular_name' => 'Report', 'menu_name' => 'Reports', 'all_items' => 'Reports' ),
 				'public'          => false,
 				'show_ui'         => true,
-				'show_in_menu'    => 'aw-inbox', // Inbox → Reports (S2.3)
+				'show_in_menu'    => false, // retired (owner, 21 Oct 2026): reports are Fluent Forms entries (#7)
 				'show_in_rest'    => false,
 				'supports'        => array( 'title' ),
 				'capability_type' => array( 'aw_volunteer', 'aw_volunteers' ), // administrators only, as for volunteers
@@ -130,7 +130,7 @@ function aw_report_errors( $v, $item = null ) {
 
 /**
  * Save a checked report (Inbox > Reports, status New) with its ticks and visit block. Nothing on the item changes.
- * Never calls aw_crm_sync(): the email is optional and only for replying about this report, so reporting a mistake is
+ * Never reaches FluentCRM: the email is optional and only for replying about this report, so reporting a mistake is
  * not a reason to add or update anyone in FluentCRM.
  *
  * @param array        $v      Values.

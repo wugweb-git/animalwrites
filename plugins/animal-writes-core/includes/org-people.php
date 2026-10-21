@@ -1,19 +1,16 @@
 <?php
 /**
- * Volunteers of an organisation (owner, 18 Oct 2026): people from the volunteers table (volunteers-db.php) linked to a
- * Directory listing. For now every person's role is "Volunteer".
+ * Volunteers of an organisation, from FluentCRM (owner, 21 Oct 2026; was the site's volunteers table).
  *
- * - WP Admin → a listing → "Volunteers" box (administrators only, like the volunteers table): search the volunteers by
- *   name or email to add one; a "Show on the page" tick per person (off by default); remove.
- * - An approved claim adds the claimant (claims.php): they are added to the volunteers table if not there yet, linked
- *   privately.
- * - The Volunteer form's "Organisation name" (owner, 21 Oct 2026): the link waits as Pending on the volunteer's row.
- *   The box lists pending volunteers whose organisation name matches this listing's; "Approve" links them (shown on
- *   the page only if they ticked "Show my name", 1), "Not this one" sets them back to unmatched.
- * - Shown people: their name on the organisation's page under "Volunteers", and in the schema as member (Person).
- *   Email and phone are never shown.
- * Stored on the listing: aw_people (JSON list of {vid, public, role, on, via}) and aw_people_vid (one row per person,
- * to find a person's organisations).
+ * - The Volunteer form asks "Are you associated with an animal welfare organisation?", the organisation's name and
+ *   "Show my name on the organisation's page". Its FluentCRM link tags the contact org-pending.
+ * - The owner checks it in FluentCRM and swaps org-pending for org-approved. The contact belongs to the listing whose
+ *   title matches the name they gave (ignoring case and punctuation, either containing the other), or to the listing
+ *   ID the owner puts in the custom field "Volunteer: organisation's listing ID" when the name does not match.
+ * - On the organisation's page, under "Volunteers": the names of approved contacts who ticked "Show my name"; and in
+ *   the schema as member (Person). Email and phone are never shown.
+ * - WP Admin → a listing → "Volunteers" box: who is approved for it and who is waiting (read-only, with links to
+ *   their FluentCRM contacts).
  *
  * @package animal-writes-core
  */
@@ -22,69 +19,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * A listing's people.
- *
- * @param int $lid Listing.
- * @return array list of {vid, public, role, on, via}
- */
-function aw_org_people( $lid ) {
-	$rows = json_decode( (string) get_post_meta( $lid, 'aw_people', true ), true );
-	return is_array( $rows ) ? array_values( array_filter( $rows, fn( $r ) => ! empty( $r['vid'] ) ) ) : array();
+/** A name for matching: lower case, letters and digits only. */
+function aw_org_people_norm( $s ) {
+	return trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( (string) $s ) ) );
 }
 
 /**
- * Store a listing's people.
+ * FluentCRM contacts tagged with $tag whose organisation is this listing.
  *
- * @param int   $lid  Listing.
- * @param array $rows People.
+ * @param int    $lid Listing.
+ * @param string $tag org-approved | org-pending.
+ * @return array list of array{id, name, show}
  */
-function aw_org_people_save( $lid, $rows ) {
-	$rows = array_values( array_reduce( $rows, function ( $c, $r ) { $c[ (int) $r['vid'] ] = $r; return $c; }, array() ) ); // one row per person
-	update_post_meta( $lid, 'aw_people', wp_slash( wp_json_encode( $rows ) ) );
-	delete_post_meta( $lid, 'aw_people_vid' );
-	foreach ( $rows as $r ) {
-		add_post_meta( $lid, 'aw_people_vid', (int) $r['vid'] );
+function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
+	static $cache = array();
+	$lid = (int) $lid;
+	if ( isset( $cache[ $tag ][ $lid ] ) ) {
+		return $cache[ $tag ][ $lid ];
 	}
-}
-
-/**
- * Add one volunteer to a listing (kept if already there).
- *
- * @param int    $lid    Listing.
- * @param int    $vid    Volunteer (volunteers table id).
- * @param bool   $public Shown on the page.
- * @param string $via    'admin' or 'claim'.
- */
-function aw_org_people_add( $lid, $vid, $public = false, $via = 'admin' ) {
-	$rows = aw_org_people( $lid );
-	foreach ( $rows as $r ) {
-		if ( (int) $r['vid'] === (int) $vid ) {
-			return;
+	$out = array();
+	$t   = function_exists( 'aw_crm_on' ) && aw_crm_on() ? FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $tag )->first() : null;
+	if ( $t ) {
+		$title = aw_org_people_norm( get_the_title( $lid ) );
+		foreach ( \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $t->id ) )->limit( 2000 )->get() as $c ) {
+			$f    = (array) $c->custom_fields();
+			$org  = aw_org_people_norm( $f['vol_organisation'] ?? '' );
+			$for  = (int) ( $f['vol_org_listing'] ?? 0 );
+			$hits = $for ? $for === $lid : ( strlen( $org ) >= 3 && strlen( $title ) >= 3 && ( false !== strpos( $title, $org ) || false !== strpos( $org, $title ) ) );
+			if ( $hits ) {
+				$out[] = array( 'id' => (int) $c->id, 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'show' => '' !== (string) ( $f['vol_org_show'] ?? '' ) && '0' !== (string) $f['vol_org_show'] );
+			}
 		}
 	}
-	$rows[] = array( 'vid' => (int) $vid, 'public' => $public ? 1 : 0, 'role' => 'volunteer', 'on' => wp_date( 'Y-m-d' ), 'via' => $via );
-	aw_org_people_save( $lid, $rows );
+	return $cache[ $tag ][ $lid ] = $out;
 }
-
-/**
- * Volunteer rows by id.
- *
- * @param int[] $ids Ids.
- * @return array id => row
- */
-function aw_org_people_volunteers( $ids ) {
-	global $wpdb;
-	$ids = array_values( array_filter( array_map( 'intval', $ids ) ) );
-	if ( ! $ids || ! function_exists( 'aw_vol_table' ) ) {
-		return array();
-	}
-	$t    = aw_vol_table();
-	$rows = $wpdb->get_results( "SELECT id, name, email, city_text, org_show FROM {$t} WHERE id IN (" . implode( ',', $ids ) . ')', OBJECT_K ); // phpcs:ignore WordPress.DB
-	return $rows ? $rows : array();
-}
-
-/* ---------- On the page and in the schema ---------- */
 
 /**
  * The shown volunteers' names.
@@ -93,15 +61,7 @@ function aw_org_people_volunteers( $ids ) {
  * @return string[]
  */
 function aw_org_people_public_names( $lid ) {
-	$rows = array_filter( aw_org_people( $lid ), fn( $r ) => ! empty( $r['public'] ) );
-	$vols = aw_org_people_volunteers( wp_list_pluck( $rows, 'vid' ) );
-	$out  = array();
-	foreach ( $rows as $r ) {
-		if ( isset( $vols[ $r['vid'] ] ) && '' !== trim( $vols[ $r['vid'] ]->name ) ) {
-			$out[] = trim( $vols[ $r['vid'] ]->name );
-		}
-	}
-	return $out;
+	return array_values( array_filter( wp_list_pluck( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] ), 'name' ) ) );
 }
 
 /**
@@ -128,7 +88,7 @@ function aw_org_people_schema( $lid ) {
 	return array_map( fn( $n ) => array( '@type' => 'OrganizationRole', 'roleName' => 'Volunteer', 'member' => array( '@type' => 'Person', 'name' => $n ) ), aw_org_people_public_names( $lid ) );
 }
 
-/* ---------- WP Admin: the Volunteers box on a listing ---------- */
+/* ---------- WP Admin: the Volunteers box on a listing (read-only) ---------- */
 
 add_action(
 	'add_meta_boxes_aw_listing',
@@ -140,158 +100,24 @@ add_action(
 );
 
 /**
- * The box.
+ * The box: approved and waiting contacts for this listing.
  *
  * @param WP_Post $post Listing.
  */
 function aw_org_people_box( $post ) {
-	wp_nonce_field( 'aw_org_people_' . $post->ID, '_aw_org_people' );
-	$rows = aw_org_people( $post->ID );
-	$vols = aw_org_people_volunteers( wp_list_pluck( $rows, 'vid' ) );
-	echo '<table class="widefat striped" style="margin-bottom:8px"><thead><tr><th>Volunteer</th><th>Email</th><th>Added</th><th>Show on the page</th><th>Remove</th></tr></thead><tbody>';
-	if ( ! $rows ) {
-		echo '<tr><td colspan="5">No volunteers linked yet.</td></tr>';
-	}
-	foreach ( $rows as $r ) {
-		$v = $vols[ $r['vid'] ] ?? null;
-		echo '<tr><td>' . esc_html( $v ? $v->name : '(no longer in the volunteers table)' ) . '<input type="hidden" name="aw_people_vid[]" value="' . (int) $r['vid'] . '"></td><td>' . esc_html( $v ? $v->email : '' ) . '</td><td>'
-			. esc_html( ( $r['on'] ?? '' ) . ( 'claim' === ( $r['via'] ?? '' ) ? ' (claim)' : '' ) ) . '</td><td><input type="checkbox" name="aw_people_public[]" value="' . (int) $r['vid'] . '"' . checked( ! empty( $r['public'] ), true, false ) . '></td>'
-			. '<td><input type="checkbox" name="aw_people_remove[]" value="' . (int) $r['vid'] . '"></td></tr>';
-	}
-	echo '</tbody></table>';
-	$pending = aw_org_people_pending( $post );
-	if ( $pending ) {
-		echo '<p><strong>Waiting: volunteers who named an organisation like this one</strong></p><table class="widefat striped" style="margin-bottom:8px"><thead><tr><th>Volunteer</th><th>Organisation as given</th><th>Show my name (1/0)</th><th>Approve</th><th>Not this one</th></tr></thead><tbody>';
-		foreach ( $pending as $p ) {
-			echo '<tr><td>' . esc_html( $p->name . ' · ' . $p->email ) . '</td><td>' . esc_html( $p->org_name ) . '</td><td>' . (int) $p->org_show . '</td><td><input type="checkbox" name="aw_people_approve[]" value="' . (int) $p->id . '"></td><td><input type="checkbox" name="aw_people_reject[]" value="' . (int) $p->id . '"></td></tr>';
+	$link = fn( $id ) => admin_url( 'admin.php?page=fluentcrm-admin#/subscribers/' . (int) $id );
+	foreach ( array( 'org-approved' => 'Approved (tag org-approved)', 'org-pending' => 'Waiting (tag org-pending): approve by swapping the tag for org-approved in FluentCRM' ) as $tag => $head ) {
+		$rows = aw_org_people_crm( $post->ID, $tag );
+		echo '<p><strong>' . esc_html( $head ) . '</strong></p>';
+		if ( ! $rows ) {
+			echo '<p class="description">None.</p>';
+			continue;
 		}
-		echo '</tbody></table>';
-	}
-	echo '<p><label for="aw-people-q">Add a volunteer</label><br><input type="search" id="aw-people-q" class="regular-text" placeholder="Name or email" autocomplete="off"> <span class="description">Role: Volunteer. Their name is shown only when "Show on the page" is ticked; email and phone never are.</span></p>'
-		. '<ul id="aw-people-hits"></ul><input type="hidden" name="aw_people_add" id="aw-people-add" value="">';
-	?>
-	<script>
-	( function () {
-		var q = document.getElementById( 'aw-people-q' ), hits = document.getElementById( 'aw-people-hits' ), add = document.getElementById( 'aw-people-add' ), t;
-		q.addEventListener( 'input', function () {
-			clearTimeout( t );
-			t = setTimeout( function () {
-				if ( q.value.length < 2 ) { hits.innerHTML = ''; return; }
-				fetch( ajaxurl + '?action=aw_people_search&_wpnonce=<?php echo esc_js( wp_create_nonce( 'aw_people_search' ) ); ?>&q=' + encodeURIComponent( q.value ) ).then( function ( r ) { return r.json(); } ).then( function ( d ) {
-					hits.innerHTML = '';
-					( d.data || [] ).forEach( function ( v ) {
-						var li = document.createElement( 'li' ), b = document.createElement( 'button' );
-						b.type = 'button'; b.className = 'button button-small'; b.textContent = 'Add';
-						b.onclick = function () { add.value = ( add.value ? add.value + ',' : '' ) + v.id; li.textContent = v.name + ' (' + v.email + ') — added when you update the listing'; };
-						li.textContent = v.name + ' · ' + v.email + ( v.city ? ' · ' + v.city : '' ) + ' '; li.appendChild( b ); hits.appendChild( li );
-					} );
-				} );
-			}, 250 );
-		} );
-	} )();
-	</script>
-	<?php
-}
-
-add_action(
-	'wp_ajax_aw_people_search',
-	function () {
-		check_ajax_referer( 'aw_people_search' );
-		if ( ! current_user_can( 'edit_aw_volunteers' ) ) {
-			wp_send_json_error( array(), 403 );
+		echo '<ul>';
+		foreach ( $rows as $r ) {
+			echo '<li><a href="' . esc_url( $link( $r['id'] ) ) . '">' . esc_html( '' !== $r['name'] ? $r['name'] : '(no name)' ) . '</a> · ' . esc_html( $r['show'] ? 'name shown on the page' : 'name not shown' ) . '</li>';
 		}
-		global $wpdb;
-		$q    = '%' . $wpdb->esc_like( sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ) ) . '%';
-		$t    = aw_vol_table();
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, name, email, city_text AS city FROM {$t} WHERE name LIKE %s OR email LIKE %s ORDER BY name LIMIT 15", $q, $q ) ); // phpcs:ignore WordPress.DB
-		wp_send_json_success( $rows );
+		echo '</ul>';
 	}
-);
-
-add_action(
-	'save_post_aw_listing',
-	function ( $lid ) {
-		if ( ! isset( $_POST['_aw_org_people'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_aw_org_people'] ) ), 'aw_org_people_' . $lid ) || ! current_user_can( 'edit_aw_volunteers' ) ) {
-			return;
-		}
-		$public = array_map( 'absint', (array) wp_unslash( $_POST['aw_people_public'] ?? array() ) );
-		$remove = array_map( 'absint', (array) wp_unslash( $_POST['aw_people_remove'] ?? array() ) );
-		$rows   = array();
-		foreach ( aw_org_people( $lid ) as $r ) {
-			if ( in_array( (int) $r['vid'], $remove, true ) ) {
-				continue;
-			}
-			$r['public'] = in_array( (int) $r['vid'], $public, true ) ? 1 : 0;
-			$rows[]      = $r;
-		}
-		aw_org_people_save( $lid, $rows );
-		global $wpdb;
-		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_people_approve'] ?? array() ) ) as $vid ) { // a pending organisation link, approved
-			$v = aw_org_people_volunteers( array( $vid ) )[ $vid ] ?? null;
-			if ( $v ) {
-				aw_org_people_add( $lid, $vid, ! empty( $v->org_show ), 'volunteer-form' );
-				$wpdb->update( aw_vol_table(), array( 'org_status' => 'approved:' . $lid ), array( 'id' => $vid ) ); // phpcs:ignore WordPress.DB
-			}
-		}
-		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_people_reject'] ?? array() ) ) as $vid ) {
-			$wpdb->update( aw_vol_table(), array( 'org_status' => 'unmatched' ), array( 'id' => $vid ) ); // phpcs:ignore WordPress.DB
-		}
-		foreach ( array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST['aw_people_add'] ?? '' ) ) ) ) ) as $vid ) {
-			if ( aw_org_people_volunteers( array( $vid ) ) ) {
-				aw_org_people_add( $lid, $vid );
-			}
-		}
-	}
-);
-
-/**
- * Volunteers whose organisation link is pending and whose organisation name matches this listing's title (either one
- * contains the other, ignoring case and punctuation).
- *
- * @param WP_Post $post Listing.
- * @return array rows (id, name, email, org_name, org_show)
- */
-function aw_org_people_pending( $post ) {
-	global $wpdb;
-	$norm  = fn( $x ) => trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( (string) $x ) ) );
-	$title = $norm( $post->post_title );
-	if ( strlen( $title ) < 3 ) {
-		return array();
-	}
-	$rows = (array) $wpdb->get_results( 'SELECT id, name, email, org_name, org_show FROM ' . aw_vol_table() . " WHERE org_status = 'pending' AND org_name <> '' LIMIT 500" ); // phpcs:ignore WordPress.DB
-	return array_values( array_filter( $rows, fn( $r ) => strlen( $norm( $r->org_name ) ) >= 3 && ( false !== strpos( $title, $norm( $r->org_name ) ) || false !== strpos( $norm( $r->org_name ), $title ) ) ) );
-}
-
-/* ---------- An approved claim adds the claimant ---------- */
-
-/**
- * Add an approved claim's person to the volunteers table (if new) and link them to the listing, not shown.
- *
- * @param int $claim Claim post.
- * @param int $lid   Listing.
- */
-function aw_org_people_from_claim( $claim, $lid ) {
-	global $wpdb;
-	$email = strtolower( trim( (string) get_post_meta( $claim, 'aw_c_email', true ) ) );
-	if ( ! is_email( $email ) || ! function_exists( 'aw_vol_upsert' ) ) {
-		return;
-	}
-	$t   = aw_vol_table();
-	$vid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t} WHERE email = %s", $email ) ); // phpcs:ignore WordPress.DB
-	if ( ! $vid ) {
-		aw_vol_upsert(
-			array(
-				'name'          => (string) get_post_meta( $claim, 'aw_c_name', true ),
-				'email'         => $email,
-				'phone'         => (string) get_post_meta( $claim, 'aw_c_phone', true ),
-				'source'        => 'claim',
-				'consent_scope' => 'listing_claim', // they claimed a listing; not a volunteering sign-up, no newsletter
-				'page_source'   => get_permalink( $lid ),
-			)
-		);
-		$vid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t} WHERE email = %s", $email ) ); // phpcs:ignore WordPress.DB
-	}
-	if ( $vid ) {
-		aw_org_people_add( $lid, $vid, false, 'claim' );
-	}
+	echo '<p class="description">From the Volunteer form: contacts whose organisation name matches this listing (or whose "organisation\'s listing ID" is ' . (int) $post->ID . '). Email and phone are never shown.</p>';
 }

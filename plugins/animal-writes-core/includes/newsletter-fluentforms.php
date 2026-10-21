@@ -4,9 +4,7 @@
  *
  * - [aw_newsletter] (footer, the "Newsletter box" pattern, campaign pages) shows the Fluent Forms form "Newsletter"
  *   when Fluent Forms is active; otherwise the site's own form in newsletter.php, which stays installed.
- * - Each sign-up is saved to the site's subscriber list ({prefix}aw_subscribers) as active (an email already there is
- *   updated, never added twice); FluentCRM's Newsletter list is the form's own Fluent Forms → FluentCRM link. State,
- *   district and topics (optional) stay on the Fluent Forms entry.
+ * - Each sign-up goes to FluentCRM's Newsletter list (subscribed, tag newsletter) by the form's own FluentCRM link.
  * - Fluent Forms sends one confirmation email per sign-up through wp_mail (the site's mailbox, kits-core), as it
  *   happens. newsletter.php sends nothing for these. The email carries the unsubscribe link.
  * - "Remove my data" also removes the person's Fluent Forms entries.
@@ -78,22 +76,9 @@ add_action(
 	20
 );
 
-// Each sign-up → the subscriber list, before Fluent Forms sends its email (priority 10), so the email has the link.
-add_action(
-	'fluentform/submission_inserted',
-	function ( $entry_id, $data, $form ) {
-		if ( (int) $form->id !== aw_nl_ff_id() ) {
-			return;
-		}
-		$post = (int) ( $data['__fluent_form_embded_post_id'] ?? 0 );
-		$src  = $post ? get_post_field( 'post_name', $post ) : '';
-		$name = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
-		$src  = 'site:' . ( $src ? $src : 'footer' );
-		aw_nl_activate( $data['email'] ?? '', $name, $src, AW_NL_CONSENT ); // FluentCRM: the form's own link (everyone → Newsletter, tag newsletter; /forms/3-newsletter.json)
-	},
-	5,
-	3
-);
+// Each sign-up is a FluentCRM contact through the form's own Fluent Forms → FluentCRM link (everyone → Newsletter list,
+// tag newsletter; /forms/3-newsletter.json). The site's subscriber table is no longer written by the form (owner, 21 Oct
+// 2026: FluentCRM keeps people); its rows stay as the backup.
 
 // The confirmation email: plain (no Fluent Forms template or credit) and with this person's unsubscribe link.
 add_filter( 'fluentform/send_plain_html_email', fn( $plain, $form ) => (int) $form->id === aw_nl_ff_id() ? true : $plain, 10, 2 );

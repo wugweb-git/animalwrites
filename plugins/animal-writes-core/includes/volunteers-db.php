@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_VOL_DB_VERSION = '3'; // 2: page_source and pincode columns (S5.8, S6.6); 3: the Volunteer form's new fields (21 Oct 2026)
+const AW_VOL_DB_VERSION = '2'; // 2: page_source and pincode columns (S5.8, S6.6)
 const AW_VOL_CAP        = 'edit_aw_volunteers';
 
 /** Table name. */
@@ -48,16 +48,6 @@ add_action(
 			consent_text_version varchar(40) NOT NULL DEFAULT '',
 			consent_at datetime NULL,
 			status varchar(20) NOT NULL DEFAULT 'active',
-			whatsapp varchar(32) NOT NULL DEFAULT '',
-			wa_optin tinyint(1) NULL,
-			availability varchar(255) NOT NULL DEFAULT '',
-			travel_range varchar(20) NOT NULL DEFAULT '',
-			skills varchar(255) NOT NULL DEFAULT '',
-			languages varchar(255) NOT NULL DEFAULT '',
-			org_name varchar(190) NOT NULL DEFAULT '',
-			org_show tinyint(1) NULL,
-			org_status varchar(20) NOT NULL DEFAULT '',
-			ff_entry bigint(20) unsigned NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY  (id),
@@ -180,46 +170,6 @@ function aw_vol_upsert( $v ) {
 	}
 	$wpdb->update( $t, $upd, array( 'id' => (int) $existing['id'] ) ); // phpcs:ignore
 	return 'updated';
-}
-
-/**
- * The Volunteer form's further answers on a volunteer's row (owner, 21 Oct 2026): WhatsApp and its 1/0 tick,
- * availability and skills (JSON lists), travel range, languages, the organisation they named with its 1/0 "show my
- * name" tick (a link that waits as "pending" until an administrator matches it to a listing, org-people.php) and the
- * Fluent Forms entry. Additive: what reads the table (Near me, the listing's people box) is unchanged.
- *
- * @param string $email Email.
- * @param array  $x     Values (aw_volunteer_extra()).
- */
-function aw_vol_set_extra( $email, $x ) {
-	global $wpdb;
-	$cols = array();
-	foreach ( array( 'whatsapp', 'travel_range', 'languages', 'org_name' ) as $k ) {
-		if ( isset( $x[ $k ] ) ) {
-			$cols[ $k ] = substr( sanitize_text_field( (string) $x[ $k ] ), 0, 'org_name' === $k ? 190 : 255 );
-		}
-	}
-	foreach ( array( 'availability', 'skills' ) as $k ) {
-		if ( isset( $x[ $k ] ) ) {
-			$cols[ $k ] = wp_json_encode( array_values( array_map( 'sanitize_key', (array) $x[ $k ] ) ) );
-		}
-	}
-	foreach ( array( 'wa_optin', 'org_show' ) as $k ) {
-		if ( isset( $x[ $k ] ) ) {
-			$cols[ $k ] = (int) (bool) $x[ $k ];
-		}
-	}
-	if ( ! empty( $x['entry'] ) ) {
-		$cols['ff_entry'] = (int) $x['entry'];
-	}
-	if ( isset( $x['org_name'] ) ) {
-		$row               = $wpdb->get_row( $wpdb->prepare( 'SELECT org_name, org_status FROM ' . aw_vol_table() . ' WHERE email = %s', strtolower( trim( (string) $email ) ) ), ARRAY_A ); // phpcs:ignore
-		$same              = $row && 0 === strcasecmp( (string) $row['org_name'], (string) $cols['org_name'] );
-		$cols['org_status'] = '' === $cols['org_name'] ? '' : ( $same && $row['org_status'] ? $row['org_status'] : 'pending' );
-	}
-	if ( $cols ) {
-		$wpdb->update( aw_vol_table(), $cols, array( 'email' => strtolower( trim( (string) $email ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	}
 }
 
 /* ---------- One-time: 2.0 sign-ups stored as aw_volunteer posts move into the table ---------- */
@@ -394,19 +344,16 @@ function aw_vol_admin_page() {
 	echo '</select> ';
 	submit_button( 'Filter', 'secondary', '', false );
 	$export = wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'aw_vol_export' ), array_filter( $f ) ), admin_url( 'admin-post.php' ) ), 'aw_vol_export' );
-	$links  = wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'aw_vol_links' ), array_filter( $f ) ), admin_url( 'admin-post.php' ) ), 'aw_vol_links' );
-	echo ' <a class="button" href="' . esc_url( $export ) . '">Export CSV (' . (int) $total . ')</a> <a class="button" href="' . esc_url( $links ) . '">Update links CSV</a> <span class="description">Name, email and a personal update link (' . (int) AW_VOL_LINK_DAYS . ' days) for your own email tool. Nothing is sent.</span></p></form>';
-	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>WhatsApp</th><th>Place</th><th>Role</th><th>Organisation</th><th>Source</th><th>Signed up on</th><th>Consent</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>';
+	echo ' <a class="button" href="' . esc_url( $export ) . '">Export CSV (' . (int) $total . ')</a></p></form>';
+	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Place</th><th>Role</th><th>Source</th><th>Signed up on</th><th>Consent</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
 		$place = trim( ( $r['district_id'] ? ( $names[ $r['district_id'] ] ?? '' ) . ', ' : '' ) . ( $r['state_id'] ? ( $names[ $r['state_id'] ] ?? '' ) : '' ), ', ' );
 		$del   = wp_nonce_url( add_query_arg( array( 'action' => 'aw_vol_delete', 'id' => (int) $r['id'] ), admin_url( 'admin-post.php' ) ), 'aw_vol_delete_' . (int) $r['id'] );
-		$wa    = (string) ( $r['whatsapp'] ?? '' );
-		$org   = (string) ( $r['org_name'] ?? '' );
-		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['phone'] ) . '</td><td>' . esc_html( $wa . ( '' !== $wa ? ' · OK on WhatsApp: ' . (int) ( $r['wa_optin'] ?? 0 ) : '' ) ) . '</td><td>' . esc_html( $place ? $place : $r['city_text'] ) . '</td><td>' . esc_html( $r['role'] ) . '</td><td>' . esc_html( '' !== $org ? $org . ' (' . ( $r['org_status'] ? $r['org_status'] : 'pending' ) . ', show name: ' . (int) ( $r['org_show'] ?? 0 ) . ')' : '' ) . '</td><td>' . esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ) . '</td><td>' . esc_html( (string) ( $r['page_source'] ?? '' ) ) . '</td><td>' . esc_html( $r['consent_scope'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td>'
-			. '<td><button type="button" class="button button-small" data-link="' . esc_attr( aw_vol_update_link( $r ) ) . '" onclick="navigator.clipboard.writeText(this.dataset.link);this.textContent=\'Copied\'">Update link</button> <a href="' . esc_url( $del ) . '" style="color:#b32d2e" onclick="return confirm(\'Delete this volunteer permanently?\')">Delete</a></td></tr>';
+		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['phone'] ) . '</td><td>' . esc_html( $place ? $place : $r['city_text'] ) . '</td><td>' . esc_html( $r['role'] ) . '</td><td>' . esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ) . '</td><td>' . esc_html( (string) ( $r['page_source'] ?? '' ) ) . '</td><td>' . esc_html( $r['consent_scope'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td>'
+			. '<td><a href="' . esc_url( $del ) . '" style="color:#b32d2e" onclick="return confirm(\'Delete this volunteer permanently?\')">Delete</a></td></tr>';
 	}
 	if ( ! $rows ) {
-		echo '<tr><td colspan="13">No volunteers match.</td></tr>';
+		echo '<tr><td colspan="10">No volunteers match.</td></tr>';
 	}
 	echo '</tbody></table>';
 	$pages = (int) ceil( $total / 50 );
@@ -415,29 +362,6 @@ function aw_vol_admin_page() {
 	}
 	echo '</div>';
 }
-
-// Update links CSV: name, email, link, for the owner's own email tool (sends nothing).
-add_action(
-	'admin_post_aw_vol_links',
-	function () {
-		if ( ! current_user_can( AW_VOL_CAP ) || ! check_admin_referer( 'aw_vol_links' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		list( $rows ) = aw_vol_query( aw_vol_filters(), 0, 0 );
-		nocache_headers();
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="volunteer-update-links-' . gmdate( 'Y-m-d' ) . '.csv"' );
-		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		fputcsv( $out, array( 'name', 'email', 'update_link', 'expires' ) );
-		foreach ( $rows as $r ) {
-			if ( 'deleted' !== $r['status'] ) {
-				fputcsv( $out, array( preg_match( '/^[=+\-@]/', (string) $r['name'] ) ? "'" . $r['name'] : $r['name'], $r['email'], aw_vol_update_link( $r ), gmdate( 'Y-m-d', time() + AW_VOL_LINK_DAYS * DAY_IN_SECONDS ) ) );
-			}
-		}
-		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		exit;
-	}
-);
 
 add_action(
 	'admin_post_aw_vol_export',

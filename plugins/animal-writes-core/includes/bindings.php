@@ -228,7 +228,7 @@ add_filter( 'render_block', 'aw_hide_empty_bound_blocks', 10, 3 );
 
 /**
  * Organisation contact row (Call, WhatsApp, Email, Website): when any is missing, the greyed buttons are followed by a
- * visible note naming them ("Not available yet: Call, Email") and the Report a mistake link (Details missing chosen) (owner's rule, 15 Oct
+ * visible note naming them ("Not available yet: Call, Email") and the Suggest an update link (owner's rule, 15 Oct
  * 2026: missing details show greyed, disabled buttons or a clear "not available" note).
  *
  * @param string $content Rendered core/buttons block.
@@ -242,6 +242,6 @@ function aw_profile_actions_note( $content ) {
 	$list  = implode( ', ', array_map( fn( $a ) => $names[ $a ] ?? $a, $m[1] ) );
 	$id    = (int) get_queried_object_id();
 	return $content . '<p class="aw-profile-actions-na"><span>' . esc_html( 'Not available yet: ' . $list ) . '</span>'
-		. ( function_exists( 'aw_report_url' ) ? ' <a href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Report a mistake</a>' : '' ) . '</p>';
+		. ( function_exists( 'aw_report_url' ) ? ' <a href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Suggest an update</a>' : '' ) . '</p>';
 }
 add_filter( 'render_block_core/buttons', 'aw_profile_actions_note', 15 );

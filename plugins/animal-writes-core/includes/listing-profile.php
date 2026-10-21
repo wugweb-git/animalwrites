@@ -4,7 +4,7 @@
  *
  * Admin: "Organisation details" on every listing, grouped as Contact, Online, About, Photos and Support. Every field is
  * optional; empty fields print nothing, except phone, email, website, address, opening hours and services, which say
- * they are not available yet (with a Report a mistake link, "Details missing" chosen), and Directions, which shows greyed out. The short bio is the listing's excerpt (WordPress's own field).
+ * they are not available yet (with a link to suggest an update), and Directions, which shows greyed out. The short bio is the listing's excerpt (WordPress's own field).
  * Front end: block animal-writes/org-details — links (map, social, donate, volunteer), up to four photos, and the facts.
  *
  * @package animal-writes-core
@@ -157,7 +157,7 @@ function aw_block_org_details( $a, $id ) {
 	$facts = '';
 	$svc   = aw_listing_service_names( $id ); // the fixed services list, as tags
 	// Contact details as rows (the number, address or link), and the details most people look for say when they are missing
-	// (owner, 15 Oct 2026): "… not available yet", with a Report a mistake link (the Report form, "Details missing" chosen).
+	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
 	$phones  = aw_listing_phones( $id ); // the Phone numbers list
 	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // the Opening hours by day list
@@ -167,7 +167,7 @@ function aw_block_org_details( $a, $id ) {
 		'aw_website' => array( 'link', 'Website', aw_org_two_values( $id, 'aw_website', 'website', $rel ) ),
 	);
 	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
-	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Report a mistake</a>' : '';
+	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Suggest an update</a>' : '';
 	$missing = fn( $k ) => '<span class="aw-org-fact-na">' . esc_html( $na[ $k ] ) . '</span>' . $suggest;
 	$facts   = '';
 	foreach ( $contact as $k => $c ) {

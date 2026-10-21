@@ -1,18 +1,22 @@
 <?php
 /**
- * The site's forms in Fluent Forms (owner, 21 Oct 2026: built in Fluent Forms and FluentCRM, not generated in code).
- * Contact #4, Volunteer sign-up #5, Claim this listing #6, Report a mistake #7, Remove my data #8 (and the Newsletter
- * form #3, newsletter-fluentforms.php). Each form's fields, conditions, hidden fields, confirmation and FluentCRM link
- * are Fluent Forms settings, versioned in /forms/<id>-<name>.json and imported with tools/forms/forms.php.
+ * The site's forms in Fluent Forms (free) and FluentCRM (free), built with their own features (owner, 21 Oct 2026).
+ * Newsletter #3, Contact #4, Volunteer sign-up #5, Claim this listing #6, Report a mistake #7, Remove my data #8,
+ * Newsletter (full) #9. Fields, conditions, hidden fields, confirmation (with the reference
+ * {submission.serial_number}) and each form's Fluent Forms → FluentCRM link are Fluent Forms settings, versioned in
+ * /forms/*.json and put on a site with tools/forms/forms.php. Requests are Fluent Forms entries (favourite = needs
+ * action, notes = what was done); people are FluentCRM contacts.
  *
- * What this file still does, because the plugins cannot:
- * - Three custom fields: the spam check (ALTCHA), PIN code → State → District (LGD) and the private upload (logo, proof).
- * - Checks Fluent Forms cannot make (an Indian mobile, a real State and District, the claimed listing, an upload, a page
- *   on this site), with the spam check, the per-connection limit and the honeypot.
- * - Country and city from the IP, found on this server (DB-IP Lite), into the hidden fields v_country and v_city.
- * - One small hook per form: the entry also goes where the rest of the site reads it (aw_*_save()).
- * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules kit.js checks steps with).
- * - aw_form_html shows the Fluent Forms form in the place of the site's own one (which stays, for Fluent Forms off).
+ * Custom code here, only where the plugins cannot do it:
+ * - Three custom fields: the spam check (ALTCHA, no third party), PIN code → State → District (the official LGD list;
+ *   District follows State) and the private upload (claim logo and proof: stored outside the web, opened by an
+ *   administrator from the entry's link).
+ * - After each form's FluentCRM link: what a link cannot do. A Contact sender who left the newsletter unticked still
+ *   becomes a contact (transactional, tag contact-form) with the message as a note; a claimant becomes a contact
+ *   (transactional, tag claimant); every contact gets the newsletter box as 1/0 ("Newsletter box (last form)"); a
+ *   volunteer's State, District and PIN code from the LGD picker go into their Volunteer fields.
+ * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules kit.js checks with).
+ * - aw_form_html shows the Fluent Forms form in the place of the site's own one (kept for Fluent Forms off).
  * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (aw_ff_mail_off).
  *
  * @package animal-writes-core
@@ -82,7 +86,7 @@ function aw_ff_key( $form ) {
 	return '';
 }
 
-/** What a form is shown for (listing, item, source, the volunteer row of an update link), while it renders. */
+/** What a form is shown for (listing, item, source), while it renders. */
 function aw_ff_ctx( $k = null ) {
 	$c = (array) ( $GLOBALS['aw_ff_ctx'] ?? array() );
 	return null === $k ? $c : ( $c[ $k ] ?? null );
@@ -103,7 +107,7 @@ add_filter(
 		$GLOBALS['aw_ff_ctx'] = array();
 		$attrs                = '';
 		if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
-			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '" data-go="' . esc_attr( wp_json_encode( array_map( 'home_url', AW_CONTACT_ELSEWHERE ) ) ) . '"';
+			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
 		}
 		$listing = $ctx['listing'] ?? null;
 		if ( $listing ) {
@@ -267,7 +271,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					$data['attributes']['data-msg-email'] = (string) $rules['email']['message'];
 				}
 			}
-			return aw_ff_update_values( $data, $form );
+			return $data;
 		},
 		10,
 		2
@@ -301,7 +305,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 /* ---------- Submitting ---------- */
 
 // The custom fields' inputs are kept with the entry.
-add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) || (int) $form_id === (int) get_option( 'aw_nl_ff_form' ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
+add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
 
 /** The listing a claim is about, when it is published. */
 function aw_ff_listing( $data ) {
@@ -309,19 +313,9 @@ function aw_ff_listing( $data ) {
 	return $listing && 'aw_listing' === $listing->post_type && 'publish' === $listing->post_status ? $listing : null;
 }
 
-/** Was a Fluent Forms tick ticked? A Yes/No tick is "1" or "0"; a tick box is a list. */
+/** Was a Fluent Forms tick box ticked? Fluent Forms saves nothing for an unticked box: empty is 0. */
 function aw_ff_ticked( $data, $name ) {
 	return (bool) array_filter( (array) ( $data[ $name ] ?? array() ), fn( $v ) => '' !== (string) $v && '0' !== (string) $v );
-}
-
-/** One tick's wording version from the form's hidden consent_version ("nl_optin=v3-…;wa_optin=v1-…"). */
-function aw_ff_consent( $data, $tick, $default = AW_FF_NL_CONSENT ) {
-	return preg_match( '/(?:^|;)' . preg_quote( $tick, '/' ) . '=([a-z0-9-]{1,40})/i', (string) ( $data['consent_version'] ?? '' ), $m ) ? $m[1] : $default;
-}
-
-/** A Yes/No tick as 1 or 0. */
-function aw_ff_tick( $data, $name ) {
-	return aw_ff_ticked( $data, $name ) ? 1 : 0;
 }
 
 /** An upload for this form (its token), as a file in the private folder, or ''. */
@@ -340,12 +334,6 @@ function aw_ff_keep_upload( $token ) {
 	return rename( aw_private_dir() . '/' . $file, aw_private_dir() . '/' . $final ) ? $final : '';
 }
 
-/** A WhatsApp number as given (the volunteer form's "Same as my phone" takes the phone). */
-function aw_ff_whatsapp( $data ) {
-	$how = (string) ( $data['wa_number'] ?? 'other' );
-	return 'none' === $how ? '' : trim( sanitize_text_field( (string) ( 'same' === $how ? ( $data['phone'] ?? '' ) : ( $data['whatsapp'] ?? '' ) ) ) );
-}
-
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
 function aw_ff_ref( $key, $entry_id ) {
 	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-', 'remove_data' => 'AW-D-' );
@@ -354,43 +342,18 @@ function aw_ff_ref( $key, $entry_id ) {
 }
 
 /**
- * What Fluent Forms cannot check itself: an Indian mobile number, a real State and District, the listing a claim is
- * about, an upload that arrived, and a page on this site. Required fields, emails and web addresses are Fluent Forms' own.
+ * The custom fields' own checks: a real State and District from the LGD picker (the Volunteer form needs a state) and
+ * an upload that arrived. Everything else (required, email, web address) is Fluent Forms' own validation.
  */
 function aw_ff_errors( $key, $data ) {
 	$errors = array();
-	$wa     = aw_ff_whatsapp( $data );
-	if ( '' !== $wa && '' === kits_clean_phone( $wa ) ) {
-		$errors['whatsapp'] = 'Enter a 10-digit mobile number, like 98765 43210';
+	if ( 'volunteer' === $key ) {
+		$errors = array_intersect_key( aw_volunteer_errors( aw_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
 	}
-	if ( '' !== trim( (string) ( $data['phone'] ?? '' ) ) && '' === kits_clean_phone( (string) $data['phone'] ) ) {
-		$errors['phone'] = 'Enter a 10-digit phone number, like 98765 43210';
-	}
-	switch ( $key ) {
-		case 'volunteer':
-			$v      = aw_volunteer_values( $data );
-			$errors = array_intersect_key( aw_volunteer_errors( $v ), array_flip( array( 'state', 'district', 'pincode' ) ) ) + $errors;
-			break;
-		case 'claim':
-			if ( ! aw_ff_listing( $data ) ) {
-				return array( 'aw_form' => 'This listing could not be found.' );
-			}
-			foreach ( array( 'logo_token', 'proof_token' ) as $up ) {
-				if ( '' !== (string) ( $data[ $up ] ?? '' ) && ! aw_ff_logo_file( $data[ $up ] ) ) {
-					$errors[ $up ] = 'Use a PNG, JPG or WebP under 2 MB.';
-				}
-			}
-			$errors = array_intersect_key( aw_claim_errors( aw_claim_values( $data ), '' !== (string) ( $data['logo_token'] ?? '' ) ), array_flip( array( 'aw_phone', 'aw_whatsapp', 'aw_website', 'notes' ) ) ) + $errors;
-			break;
-		case 'report':
-			$item = aw_report_item( (int) ( $data['item'] ?? 0 ) );
-			$page = trim( (string) ( $data['page'] ?? '' ) );
-			if ( ! $item && '' === $page ) {
-				$errors['page'] = 'Add the link to the page';
-			} elseif ( ! $item && wp_parse_url( $page, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
-				$errors['page'] = 'Use the link of a page on ' . wp_parse_url( home_url(), PHP_URL_HOST );
-			}
-			break;
+	foreach ( array( 'logo_token', 'proof_token' ) as $up ) {
+		if ( '' !== (string) ( $data[ $up ] ?? '' ) && ! aw_ff_logo_file( $data[ $up ] ) ) {
+			$errors[ $up ] = 'Use a PNG, JPG or WebP under 2 MB.';
+		}
 	}
 	return $errors;
 }
@@ -431,35 +394,47 @@ add_filter(
 	4
 );
 
-// Country and city from the IP, found on this server (DB-IP Lite; no IP leaves the server), into the hidden fields
-// v_country and v_city of every site form and the Newsletter form; "same as my phone" fills the WhatsApp number.
+// The private uploads (claim logo and proof): on submit the file moves from its temporary name to its own, and the entry
+// keeps a link only an administrator can open (aw_ff_file), in place of the upload's token.
 add_filter(
 	'fluentform/insert_response_data',
 	function ( $data, $form_id ) {
-		if ( ! aw_ff_key( $form_id ) && (int) $form_id !== (int) get_option( 'aw_nl_ff_form' ) ) {
+		if ( ! aw_ff_key( $form_id ) ) {
 			return $data;
 		}
-		$geo = aw_geoip( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- LiteSpeed puts the client address here
-		if ( array_key_exists( 'v_country', $data ) ) {
-			$data['v_country'] = $geo['country'];
-			$data['v_city']    = $geo['city'];
-		}
-		if ( isset( $data['wa_number'] ) ) {
-			$data['whatsapp'] = aw_ff_whatsapp( $data );
+		foreach ( array( 'logo_token', 'proof_token' ) as $up ) {
+			$file = '' !== (string) ( $data[ $up ] ?? '' ) ? aw_ff_keep_upload( $data[ $up ] ) : '';
+			if ( $file ) {
+				$data[ $up ] = add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $file ), admin_url( 'admin-post.php' ) );
+			}
 		}
 		return $data;
 	},
 	10,
 	2
 );
+add_action(
+	'admin_post_aw_ff_file',
+	function () {
+		$file = basename( sanitize_file_name( wp_unslash( $_GET['f'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- administrators only, read only
+		$path = aw_private_dir() . '/' . $file;
+		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', $file ) || ! is_file( $path ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		nocache_headers();
+		header( 'Content-Type: image/png' );
+		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		exit;
+	}
+);
 
 /*
- * One small hook per form: the entry is also saved where the rest of the site reads it (Inbox → Messages, the
- * volunteers table that Near me and the listing's people box read, Listing claims, Reports, data requests and their
- * Dashboard notice), by the site's own save functions. Priority 5: a record that cannot be saved stops the submission.
- * FluentCRM gets the person from each form's own Fluent Forms → FluentCRM link (lists, tags, conditions in /forms/*.json);
- * what a link cannot do runs after it, at priority 20: the message's note on the contact, the volunteer's details,
- * and a "transactional" contact for a claimant who left the newsletter unticked (owner, 21 Oct 2026).
+ * After each form's FluentCRM link (it runs at priority 10): what a link cannot do. A link only makes "subscribed"
+ * contacts, only when its condition holds, and cannot add a note, so: every Contact sender becomes a contact
+ * (transactional when new, tag contact-form) with the message as a note; every claimant a contact (transactional when
+ * new, tag claimant); and every Contact, Claim and Volunteer contact gets the newsletter box as 1/0. Report a mistake
+ * and Remove my data never reach FluentCRM: a report's email is only for replying about it, and a removal request asks
+ * us to hold less. Also counts the submission for the per-connection limit.
  */
 add_action(
 	'fluentform/submission_inserted',
@@ -468,58 +443,25 @@ add_action(
 		if ( ! $key ) {
 			return;
 		}
-		$GLOBALS['aw_ff_handling'] = true; // aw_newsletter_join(): FluentCRM is the form's own link
-		$src = substr( sanitize_text_field( (string) ( $data['aw_source'] ?? '' ) ), 0, 120 );
-		$ref = aw_ff_ref( $key, $entry_id );
-		$res = false;
-		switch ( $key ) {
-			case 'contact':
-				if ( isset( AW_CONTACT_ELSEWHERE[ sanitize_key( (string) ( $data['about'] ?? '' ) ) ] ) ) {
-					$res = array( 'skip' => true ); // Report a mistake, Remove my data: their own forms; no message
-					break;
-				}
-				$res = aw_contact_save( aw_contact_values( array( 'org' => (string) ( $data['org_name'] ?? '' ) ?: (string) ( $data['org'] ?? '' ) ) + $data ), $src, aw_ff_ticked( $data, 'nl_optin' ), aw_ff_consent( $data, 'nl_optin' ), array( 'ref' => $ref, 'entry' => $entry_id, 'fields' => aw_contact_reason_fields( $data ), 'whatsapp' => aw_ff_whatsapp( $data ), 'wa_optin' => aw_ff_tick( $data, 'wa_optin' ) ) );
-				break;
-			case 'volunteer':
-				$res = aw_volunteer_save( aw_volunteer_values( $data ), $src, aw_volunteer_extra( $data ) + array( 'entry' => $entry_id ) );
-				break;
-			case 'claim':
-				$res = aw_claim_save( aw_claim_values( $data ), aw_ff_listing( $data ), aw_ff_keep_upload( $data['logo_token'] ?? '' ), $src, aw_ff_ticked( $data, 'nl_optin' ), aw_ff_consent( $data, 'nl_optin' ), array( 'ref' => $ref, 'entry' => $entry_id, 'proof' => aw_ff_keep_upload( $data['proof_token'] ?? '' ), 'whatsapp' => aw_ff_whatsapp( $data ), 'wa_optin' => aw_ff_tick( $data, 'wa_optin' ) ) );
-				break;
-			case 'report':
-				// Never FluentCRM: the email is optional and only for replying about this report.
-				$res = aw_report_save( aw_report_values( $data ), aw_report_item( (int) ( $data['item'] ?? 0 ) ), $src, array( 'ref' => $ref, 'entry' => $entry_id ) );
-				break;
-			case 'remove_data':
-				// Never FluentCRM: this person asks us to hold less, so no contact is added or updated.
-				$res = aw_remove_data_save( aw_clean_email( sanitize_text_field( (string) ( $data['email'] ?? '' ) ) ), array( 'ref' => $ref, 'entry' => $entry_id, 'name' => sanitize_text_field( (string) ( $data['name'] ?? '' ) ), 'scope' => sanitize_key( (string) ( $data['scope'] ?? '' ) ), 'reason' => sanitize_textarea_field( (string) ( $data['reason'] ?? '' ) ) ) );
-				break;
-		}
-		unset( $GLOBALS['aw_ff_handling'] );
-		if ( ! $res ) {
-			wp_send_json( array( 'errors' => array( 'aw_form' => array( aw_form_generic_error( 'aw_' . $key ) ) ) ), 422 );
-		}
 		set_transient( aw_ff_rl( $key ), (int) get_transient( aw_ff_rl( $key ) ) + 1, HOUR_IN_SECONDS );
-		$GLOBALS['aw_ff_done'] = $res;
-	},
-	5,
-	3
-);
-add_action(
-	'fluentform/submission_inserted',
-	function ( $entry_id, $data, $form ) {
-		$key = aw_ff_key( $form );
-		$res = (array) ( $GLOBALS['aw_ff_done'] ?? array() );
-		if ( ! $key || ! aw_crm_on() || ! empty( $res['skip'] ) ) {
+		if ( ! in_array( $key, array( 'contact', 'claim', 'volunteer' ), true ) || ! aw_crm_on() ) {
 			return;
 		}
 		$email = strtolower( trim( (string) ( $data['email'] ?? '' ) ) );
-		if ( 'contact' === $key && ! empty( $res['id'] ) ) {
-			aw_crm_message_note( (int) $res['id'] ); // the contact (transactional when new), tag Contact form, the note
-		} elseif ( 'volunteer' === $key ) {
-			aw_crm_volunteer_sync( $email ); // the volunteer custom fields from the volunteers table
-		} elseif ( 'claim' === $key && ! aw_ff_ticked( $data, 'nl_optin' ) ) {
-			aw_crm_contact_for( $email, (string) ( $data['name'] ?? '' ), array(), 'claim' ); // a contact, not a subscriber
+		$name  = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
+		$tags  = array( 'contact' => array( 'contact-form' ), 'claim' => array( 'claimant' ), 'volunteer' => array() )[ $key ];
+		$c     = 'volunteer' === $key ? FluentCrmApi( 'contacts' )->getContact( $email ) : aw_crm_contact_for( $email, $name, $tags, 'contact' === $key ? 'contact-form' : 'claim' );
+		if ( ! $c ) {
+			return;
+		}
+		aw_crm_nl_box( $c, aw_ff_ticked( $data, 'nl_optin' ), AW_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
+		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
+			$st = ! empty( $data['state'] ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
+			$di = ! empty( $data['district'] ) ? aw_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
+			$c->syncCustomFieldValues( array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) ), false );
+		}
+		if ( 'contact' === $key ) {
+			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
 		}
 	},
 	20,
@@ -552,93 +494,6 @@ function aw_ff_upload() {
 add_action( 'wp_ajax_nopriv_aw_ff_upload', 'aw_ff_upload' );
 add_action( 'wp_ajax_aw_ff_upload', 'aw_ff_upload' );
 
-/* ---------- Country and city from an IP, on this server (DB-IP Lite; no IP leaves the server) ---------- */
-
-/** The DB-IP Lite city file (private uploads folder, not served). */
-function aw_geoip_file() {
-	return aw_private_dir() . '/geoip/dbip-city-lite.mmdb';
-}
-
-/**
- * Country and city of an IP: Cloudflare's CF-IPCountry / CF-IPCity headers when present, otherwise the DB-IP Lite
- * file read here. Private or local addresses, or no file yet, give empty values.
- *
- * @return array{country:string, city:string}
- */
-function aw_geoip( $ip ) {
-	static $reader = null;
-	$h = fn( $k ) => sanitize_text_field( wp_unslash( (string) ( $_SERVER[ $k ] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	if ( '' !== $h( 'HTTP_CF_IPCOUNTRY' ) && 'XX' !== $h( 'HTTP_CF_IPCOUNTRY' ) ) {
-		return array( 'country' => $h( 'HTTP_CF_IPCOUNTRY' ), 'city' => $h( 'HTTP_CF_IPCITY' ) );
-	}
-	$none = array( 'country' => '', 'city' => '' );
-	if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) || ! is_readable( aw_geoip_file() ) ) {
-		return $none;
-	}
-	try {
-		if ( null === $reader ) {
-			aw_geoip_load_reader();
-			$reader = new \MaxMind\Db\Reader( aw_geoip_file() );
-		}
-		$d = (array) $reader->get( $ip );
-		return array( 'country' => (string) ( $d['country']['names']['en'] ?? ( $d['country']['iso_code'] ?? '' ) ), 'city' => (string) ( $d['city']['names']['en'] ?? '' ) );
-	} catch ( \Throwable $e ) {
-		return $none;
-	}
-}
-
-/** The vendored reader (DB-IP files are in the MaxMind DB format; vendor/maxmind-db, Apache 2.0). */
-function aw_geoip_load_reader() {
-	if ( ! class_exists( '\MaxMind\Db\Reader' ) ) {
-		foreach ( array( 'Reader/InvalidDatabaseException', 'Reader/Util', 'Reader/Metadata', 'Reader/Decoder', 'Reader' ) as $f ) {
-			require_once AW_CORE_DIR . 'vendor/maxmind-db/src/MaxMind/Db/' . $f . '.php';
-		}
-	}
-}
-
-/** Download this month's DB-IP Lite city file (last month's early in a month); the old file stays on any failure. */
-function aw_geoip_update() {
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	aw_geoip_load_reader();
-	wp_mkdir_p( dirname( aw_geoip_file() ) );
-	foreach ( array( gmdate( 'Y-m' ), gmdate( 'Y-m', strtotime( 'first day of last month' ) ) ) as $month ) {
-		$gz = download_url( 'https://download.db-ip.com/free/dbip-city-lite-' . $month . '.mmdb.gz', 600 );
-		if ( is_wp_error( $gz ) ) {
-			continue;
-		}
-		$new = aw_geoip_file() . '.new';
-		$in  = gzopen( $gz, 'rb' );
-		$out = fopen( $new, 'wb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		while ( $in && $out && ! gzeof( $in ) ) {
-			fwrite( $out, (string) gzread( $in, 1048576 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		}
-		$in && gzclose( $in );
-		$out && fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		wp_delete_file( $gz );
-		try {
-			( new \MaxMind\Db\Reader( $new ) )->close(); // a broken file throws
-			rename( $new, aw_geoip_file() );
-			update_option( 'aw_geoip_updated', current_time( 'mysql' ) . ' ' . $month, false );
-			return $month;
-		} catch ( \Throwable $e ) {
-			wp_delete_file( $new );
-		}
-	}
-	return '';
-}
-
-// Monthly refresh (DB-IP publishes each month's file at its start).
-add_filter( 'cron_schedules', fn( $s ) => $s + array( 'aw_monthly' => array( 'interval' => 30 * DAY_IN_SECONDS, 'display' => 'Monthly' ) ) );
-add_action(
-	'init',
-	function () {
-		if ( ! wp_next_scheduled( 'aw_geoip_monthly' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'aw_monthly', 'aw_geoip_monthly' );
-		}
-	}
-);
-add_action( 'aw_geoip_monthly', 'aw_geoip_update' );
-
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	// wp aw ff-form <key> <id>: show the Fluent Forms form <id> in the place of the site's own <key> form. The forms
 	// themselves are built in Fluent Forms and versioned in /forms/*.json (tools/forms/forms.php).
@@ -666,14 +521,11 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::success( 'The site\'s own form shows again.' );
 		}
 	);
-	// wp aw geoip-update: this month's DB-IP Lite city file (also monthly by cron). wp aw geoip-test <ip>.
-	WP_CLI::add_command( 'aw geoip-update', fn() => ( $m = aw_geoip_update() ) ? WP_CLI::success( 'DB-IP Lite ' . $m . ', ' . size_format( (int) filesize( aw_geoip_file() ) ) ) : WP_CLI::error( 'Download failed; the old file (if any) stays.' ) );
-	WP_CLI::add_command( 'aw geoip-test', fn( $args ) => WP_CLI::log( wp_json_encode( aw_geoip( (string) ( $args[0] ?? '' ) ) ) ) );
 }
 
 // Pages whose own content shows a form (contact, volunteer, claim, report): Fluent Forms' stylesheets keep blocking there,
 // so the form near the top never shows unstyled (kits-core performance.php).
 add_filter(
 	'kits_page_has_form',
-	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
+	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
 );

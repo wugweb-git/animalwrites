@@ -1,15 +1,14 @@
 <?php
 /**
- * DPDP "Remove my data": [aw_remove_data] on /remove-my-data/ (the Fluent Forms form #8). Request-only (owner, 21 Oct 2026).
+ * DPDP "Remove my data": [aw_remove_data] on /remove-my-data/ (owner, 21 Oct 2026: collect only).
  *
- * 1. A visitor gives their email, optionally their name, what to remove (Everything, Newsletter only, Volunteer details,
- *    My messages) and a reason (ALTCHA, rate limited). Nothing is erased by the form.
- * 2. WordPress's own data request is made (New: "pending"), with the answers and its reference (AW-D-…), and its
- *    confirmation email is sent.
- * 3. The link in that email only marks the request "Email verified" (WordPress's "confirmed"). Nothing is erased.
- * 4. An administrator reviews it and erases by hand in Tools → Erase Personal Data ("Erase personal data" runs every
- *    eraser below plus WordPress's comments and media, then marks it completed: Done), or declines it from the Dashboard.
- * The Dashboard notice and the Inbox count show requests while New or Email verified (form-alerts.php).
+ * 1. The Fluent Forms form #8 collects the request (email, name, what to remove, reason; ALTCHA). It is a Fluent Forms
+ *    entry; nothing is created or erased by the form.
+ * 2. The owner opens Tools → Erase Personal Data, adds the email (WordPress sends its own confirmation email), and once
+ *    it is confirmed clicks "Erase personal data", which runs every eraser: WordPress's comments and media, Simple
+ *    History, and the site's own below. Neither FluentCRM nor Fluent Forms registers an eraser of its own, so the
+ *    site's cover them (aw-fluentcrm in fluentcrm.php, aw-fluentforms in newsletter-fluentforms.php).
+ * The request record (email, dates, items removed) stays in Tools → Erase Personal Data as the log.
  * Contact messages (Inbox › Messages) go too (owner, 16 Oct 2026); the log keeps only how many.
  * The FluentCRM contact goes too (fluentcrm.php), with its notes (the copies of their messages), volunteer fields and
  * the emails sent to them.
@@ -26,7 +25,7 @@ function aw_remove_data_form() {
 	$done = sanitize_key( wp_unslash( $_GET['aw_done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( 'rd_check' === $done ) {
 		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Check your inbox</p><p>' . esc_html( sprintf( 'We\'ve sent a link to %s. Open it to confirm the request; we then review it and remove your details.', $to ) ) . '</p></div>';
+		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request received</p><p>' . esc_html( sprintf( 'We\'ll email %s to confirm it before removing anything.', $to ) ) . '</p></div>';
 	}
 	$ff = apply_filters( 'aw_form_html', '', 'remove_data', array() ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
 	if ( '' !== $ff ) {
@@ -41,43 +40,20 @@ function aw_remove_data_form() {
 add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
 
 /**
- * WordPress's "Remove my data" confirmation email: the one email a form still sends (owner, 21 Oct 2026), even while form
- * submissions send nothing else (aw_ff_mail_off, forms-fluentforms.php). Used by this form and the Contact form's
- * "Remove my data" topic (pages.php).
- *
- * @param int $request_id user_request ID.
- */
-function aw_send_removal_link( $request_id ) {
-	$blocked = remove_filter( 'pre_wp_mail', '__return_true', 999 );
-	wp_send_user_request( $request_id );
-	if ( $blocked ) {
-		add_filter( 'pre_wp_mail', '__return_true', 999 );
-	}
-}
-
-/**
- * Start a removal for an email: WordPress's own request and its confirmation email. The same answer whether or not a
- * request was already open, so the form says nothing about who is on file.
+ * The site's own form (shown only when Fluent Forms is off): the request is kept as a contact message tagged "Data
+ * removal" for the owner, who then starts it in Tools → Erase Personal Data. Nothing is created or erased here.
  *
  * @return array array{url, title, text} for the thank-you page.
  */
-/** What a removal request may ask to remove. */
-const AW_REMOVAL_SCOPES = array( 'everything' => 'Everything', 'newsletter' => 'Newsletter only', 'volunteer' => 'Volunteer details', 'messages' => 'My messages' );
-
-function aw_remove_data_save( $email, $extra = array() ) {
-	// Never FluentCRM: this person asks us to hold less, so no contact is added or updated here.
-	$id = wp_create_user_request( $email, 'remove_personal_data' );
-	if ( ! is_wp_error( $id ) ) {
-		foreach ( array( 'name', 'reason', 'ref', 'entry' ) as $k ) {
-			if ( ! empty( $extra[ $k ] ) ) {
-				update_post_meta( $id, 'aw_dr_' . $k, $extra[ $k ] );
-			}
-		}
-		update_post_meta( $id, 'aw_dr_scope', isset( AW_REMOVAL_SCOPES[ $extra['scope'] ?? '' ] ) ? $extra['scope'] : 'everything' );
-		aw_send_removal_link( $id );
+function aw_remove_data_save( $email ) {
+	$id = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => 'Remove my data: ' . $email, 'post_content' => 'Remove my data (the site\'s own form). Start it in Tools → Erase Personal Data.' ) );
+	if ( $id && ! is_wp_error( $id ) ) {
+		update_post_meta( $id, 'aw_m_email', $email );
+		update_post_meta( $id, 'aw_m_about', 'remove-data' );
+		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
 	}
-	$text = sprintf( 'We\'ve sent a link to %s. Open it to confirm the request; we then review it and remove your details.', $email );
-	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Check your inbox', $text ), 'title' => 'Check your inbox', 'text' => $text );
+	$text = sprintf( 'We\'ll email %s to confirm it before removing anything.', $email );
+	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Request received', $text ), 'title' => 'Request received', 'text' => $text );
 }
 
 function aw_remove_data_submit() {
@@ -122,11 +98,7 @@ add_filter(
 			'callback'             => function ( $email ) {
 				$ids = get_posts( array( 'post_type' => 'aw_claim', 'post_status' => 'any', 'fields' => 'ids', 'posts_per_page' => -1, 'meta_key' => 'aw_c_email', 'meta_value' => $email ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 				foreach ( $ids as $cid ) { // the claim stays (the listing's history); the person's details go
-					$proof = (string) get_post_meta( $cid, 'aw_c_proof', true );
-					if ( '' !== $proof ) {
-						wp_delete_file( aw_private_dir() . '/' . basename( $proof ) );
-					}
-					foreach ( array( 'name', 'role', 'email', 'phone', 'notes', 'whatsapp', 'wa_optin', 'proof' ) as $k ) {
+					foreach ( array( 'name', 'role', 'email', 'phone', 'notes' ) as $k ) {
 						delete_post_meta( $cid, 'aw_c_' . $k );
 					}
 					$lid = (int) get_post_meta( $cid, 'aw_c_listing', true );
@@ -156,17 +128,4 @@ add_filter(
 		);
 		return $erasers;
 	}
-);
-
-// The link in the confirmation email only marks the request "Email verified" (WordPress does that itself: status
-// "request-confirmed"). Nothing is erased automatically; an administrator erases in Tools → Erase Personal Data.
-
-add_filter(
-	'user_request_action_confirmed_message',
-	function ( $message, $request_id ) {
-		$request = wp_get_user_request( $request_id );
-		return $request && 'remove_personal_data' === $request->action_name ? '<p class="message">Thanks, your request is confirmed. We’ll review it and remove your details.</p>' : $message;
-	},
-	10,
-	2
 );

@@ -244,29 +244,23 @@
                 },
                 {
                     "index": 7,
-                    "element": "input_radio",
+                    "element": "input_checkbox",
                     "uniqElKey": "el_aw_wa_optin",
                     "attributes": {
                         "name": "wa_optin",
-                        "value": "0",
-                        "type": "radio"
+                        "value": [],
+                        "type": "checkbox"
                     },
                     "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "OK to contact me on WhatsApp.",
+                        "container_class": "kit-field",
+                        "label": "",
                         "label_placement": "",
-                        "admin_field_label": "OK to contact me on WhatsApp.",
+                        "admin_field_label": "wa_optin",
                         "help_message": "",
                         "advanced_options": [
                             {
-                                "label": "Yes",
+                                "label": "OK to contact me on WhatsApp.",
                                 "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
                                 "calc_value": "",
                                 "image": ""
                             }
@@ -290,8 +284,8 @@
                         "layout_class": ""
                     },
                     "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
                     }
                 },
@@ -628,7 +622,7 @@
                     },
                     "editor_options": {
                         "title": "Checkbox",
-                        "icon_class": "ff-edit-radio",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
                     }
                 },
@@ -643,11 +637,11 @@
                         "label": "Logo",
                         "help_message": "PNG, JPG or WebP, up to 2 MB.",
                         "container_class": "",
-                        "html_codes": "<p>Logo (Animal Writes upload)</p>",
+                        "html_codes": "<p>Logo (Animal Writes private upload)</p>",
                         "conditional_logics": []
                     },
                     "editor_options": {
-                        "title": "Logo upload",
+                        "title": "Private upload",
                         "icon_class": "ff-edit-html",
                         "template": "customHTML"
                     }
@@ -663,11 +657,11 @@
                         "label": "Proof that you work there",
                         "help_message": "Optional. A photo of a registration, ID card or letterhead: PNG, JPG or WebP, up to 2 MB. Only our team sees it.",
                         "container_class": "",
-                        "html_codes": "<p>Proof that you work there (Animal Writes upload)</p>",
+                        "html_codes": "<p>Proof that you work there (Animal Writes private upload)</p>",
                         "conditional_logics": []
                     },
                     "editor_options": {
-                        "title": "Logo upload",
+                        "title": "Private upload",
                         "icon_class": "ff-edit-html",
                         "template": "customHTML"
                     }
@@ -708,38 +702,19 @@
                 },
                 {
                     "index": 18,
-                    "element": "input_radio",
+                    "element": "input_checkbox",
                     "uniqElKey": "el_aw_feature",
                     "attributes": {
+                        "type": "checkbox",
                         "name": "feature",
-                        "value": "0",
-                        "type": "radio"
+                        "value": []
                     },
                     "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "Also feature this listing.",
+                        "container_class": "kit-field",
+                        "label": "",
                         "label_placement": "",
-                        "admin_field_label": "Also feature this listing.",
+                        "admin_field_label": "",
                         "help_message": "",
-                        "advanced_options": [
-                            {
-                                "label": "Yes",
-                                "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "dynamic_default_value": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -749,50 +724,46 @@
                             }
                         },
                         "conditional_logics": [],
-                        "display_type": "",
+                        "advanced_options": [
+                            {
+                                "label": "Also feature this listing",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
                         "enable_other_option": "no",
-                        "layout_class": ""
+                        "dynamic_default_value": ""
                     },
                     "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
                         "template": "inputCheckable"
                     }
                 },
                 {
                     "index": 19,
-                    "element": "input_radio",
+                    "element": "input_checkbox",
                     "uniqElKey": "el_aw_nl_optin",
                     "attributes": {
+                        "type": "checkbox",
                         "name": "nl_optin",
-                        "value": "1",
-                        "type": "radio"
+                        "value": [
+                            "1"
+                        ]
                     },
                     "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                        "container_class": "kit-field",
+                        "label": "",
                         "label_placement": "",
-                        "admin_field_label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                        "admin_field_label": "",
                         "help_message": "",
-                        "advanced_options": [
-                            {
-                                "label": "Yes",
-                                "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "dynamic_default_value": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -802,13 +773,26 @@
                             }
                         },
                         "conditional_logics": [],
-                        "display_type": "",
+                        "advanced_options": [
+                            {
+                                "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
                         "enable_other_option": "no",
-                        "layout_class": ""
+                        "dynamic_default_value": ""
                     },
                     "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
                         "template": "inputCheckable"
                     }
                 },
@@ -942,114 +926,6 @@
                 {
                     "index": 27,
                     "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_screen",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_screen",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Screen size"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 28,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_lang",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_lang",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Language"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 29,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_tz",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_tz",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Time zone"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 30,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_secs",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_secs",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Seconds to fill in"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 31,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_first_visit",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_first_visit",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "First visit"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 32,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_visits",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_visits",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Visit count"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 33,
-                    "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
                         "type": "hidden",
@@ -1066,7 +942,7 @@
                     }
                 },
                 {
-                    "index": 34,
+                    "index": 28,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -1084,49 +960,121 @@
                     }
                 },
                 {
+                    "index": 29,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_screen",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_screen",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Screen size"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 30,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_lang",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_lang",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Language"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 31,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_tz",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_tz",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Time zone"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 32,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_secs",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_secs",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Seconds to fill in"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 33,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_first_visit",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_first_visit",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "First visit"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 34,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_visits",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_visits",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Visit count"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
                     "index": 35,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_country",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_country",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Country (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 36,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_city",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_city",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "City (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 37,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
                         "type": "hidden",
                         "name": "consent_version",
-                        "value": "nl_optin=v3-yesno-preticked;wa_optin=v1-whatsapp-contact;feature=v1-feature"
+                        "value": "v2-optin-preticked-1"
                     },
                     "settings": {
                         "admin_field_label": "Consent wording version"
@@ -1175,7 +1123,7 @@
             },
             {
                 "meta_key": "formSettings",
-                "value": "{\"confirmation\":{\"redirectTo\":\"customUrl\",\"messageToShow\":\"\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":\"{wp.site_url}/thank-you/?form=claim&ref=AW-C-{submission.serial_number}&listing={inputs.listing}\",\"enable_query_string\":\"no\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null,\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">Request sent.</p><p>We'll check it and email you. We change the listing by hand after checking.</p><p class=\\\"aw-form-ref\\\">Your reference: <strong data-aw-ref=\\\"AW-C-{submission.serial_number}\\\">AW-C-{submission.serial_number}</strong></p>\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
             },
             {
                 "meta_key": "step_data_persistency_status",
@@ -1183,7 +1131,7 @@
             },
             {
                 "meta_key": "fluentcrm_feeds",
-                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"1\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Claim (newsletter ticked) \\u2192 FluentCRM\",\"tag_ids\":[\"2\"]}"
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Claim (newsletter ticked) → FluentCRM: Newsletter, newsletter + claimant\",\"tag_ids\":[\"newsletter\",\"claimant\"]}"
             }
         ]
     }

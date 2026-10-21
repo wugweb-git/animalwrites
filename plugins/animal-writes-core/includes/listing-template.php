@@ -14,7 +14,7 @@
  *   animal-writes/listing-photos         the organisation's own photos (never stock or CC images)
  *
  * Rows are "Label: value" (definition lists). Critical details the listing lacks (phone, email, website, address, opening
- * hours, services, registration, AWBI number) are never hidden: "Data not yet available" with a Report a mistake link ("Details missing" chosen). Separators between parts of a value are CSS, never typed. Expiry is
+ * hours, services, registration, AWBI number) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
  * worked out at render time from today's date in India, not stored. docs/listing-template.md describes each block.
  *
  * @package animal-writes-core
@@ -75,12 +75,12 @@ function aw_listing_parts( $parts ) {
 
 /**
  * A critical detail the listing does not have yet (owner, 20 Oct 2026: never hide it): "Data not yet available" and a
- * Report a mistake link (the Report form, "Details missing" chosen). Used for phone, email, website, address, opening hours, services,
+ * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services,
  * registration and the AWBI number.
  */
 function aw_listing_na( $id ) {
 	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'animal-writes-core' ) . '</span>'
-		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">' . esc_html__( 'Report a mistake', 'animal-writes-core' ) . '</a>' : '' );
+		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'animal-writes-core' ) . '</a>' : '' );
 }
 
 /** "valid until <date>", or "expired <date>" in the warning colour once the date has passed (today, India). */

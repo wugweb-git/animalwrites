@@ -83,7 +83,7 @@
                     "uniqElKey": "el_aw_name",
                     "attributes": {
                         "name": "name",
-                        "value": "",
+                        "value": "{get.fullname}",
                         "id": "",
                         "class": "",
                         "type": "text",
@@ -119,7 +119,7 @@
                     "uniqElKey": "el_aw_email",
                     "attributes": {
                         "name": "email",
-                        "value": "",
+                        "value": "{get.email}",
                         "id": "",
                         "class": "",
                         "type": "email",
@@ -162,7 +162,7 @@
                     "uniqElKey": "el_aw_phone",
                     "attributes": {
                         "name": "phone",
-                        "value": "",
+                        "value": "{get.phone}",
                         "id": "",
                         "class": "",
                         "type": "text",
@@ -195,35 +195,58 @@
                 },
                 {
                     "index": 5,
-                    "element": "input_radio",
-                    "uniqElKey": "el_aw_wa_number",
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_whatsapp",
                     "attributes": {
-                        "name": "wa_number",
-                        "value": "none",
-                        "type": "radio"
+                        "type": "text",
+                        "name": "whatsapp",
+                        "value": "{get.whatsapp}",
+                        "id": "",
+                        "class": "",
+                        "placeholder": "",
+                        "inputmode": "tel"
                     },
                     "settings": {
                         "container_class": "kit-field",
-                        "label": "WhatsApp",
+                        "label": "WhatsApp number <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
-                        "admin_field_label": "WhatsApp",
+                        "admin_field_label": "WhatsApp number",
+                        "help_message": "10 digits, like 98765 43210.",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 6,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_wa_optin",
+                    "attributes": {
+                        "name": "wa_optin",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "wa_optin",
                         "help_message": "",
                         "advanced_options": [
                             {
-                                "label": "No WhatsApp",
-                                "value": "none",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "Same as my phone",
-                                "value": "same",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "A different number",
-                                "value": "other",
+                                "label": "OK to contact me on WhatsApp.",
+                                "value": "1",
                                 "calc_value": "",
                                 "image": ""
                             }
@@ -247,121 +270,13 @@
                         "layout_class": ""
                     },
                     "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
-                    }
-                },
-                {
-                    "index": 6,
-                    "element": "input_text",
-                    "uniqElKey": "el_aw_whatsapp",
-                    "attributes": {
-                        "type": "text",
-                        "name": "whatsapp",
-                        "value": "",
-                        "id": "",
-                        "class": "",
-                        "placeholder": "",
-                        "inputmode": "tel"
-                    },
-                    "settings": {
-                        "container_class": "kit-field",
-                        "label": "WhatsApp number",
-                        "label_placement": "",
-                        "admin_field_label": "WhatsApp number",
-                        "help_message": "10 digits, like 98765 43210.",
-                        "validation_rules": {
-                            "required": {
-                                "value": true,
-                                "message": "Enter the WhatsApp number",
-                                "global_message": "Enter the WhatsApp number",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "wa_number",
-                                    "value": "other",
-                                    "operator": "="
-                                }
-                            ]
-                        }
-                    },
-                    "editor_options": {
-                        "title": "Simple Text",
-                        "icon_class": "ff-edit-text",
-                        "template": "inputText"
                     }
                 },
                 {
                     "index": 7,
-                    "element": "input_radio",
-                    "uniqElKey": "el_aw_wa_optin",
-                    "attributes": {
-                        "name": "wa_optin",
-                        "value": "0",
-                        "type": "radio"
-                    },
-                    "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "OK to contact me on WhatsApp.",
-                        "label_placement": "",
-                        "admin_field_label": "OK to contact me on WhatsApp.",
-                        "help_message": "",
-                        "advanced_options": [
-                            {
-                                "label": "Yes",
-                                "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "dynamic_default_value": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "wa_number",
-                                    "value": "none",
-                                    "operator": "!="
-                                }
-                            ]
-                        },
-                        "display_type": "",
-                        "enable_other_option": "no",
-                        "layout_class": ""
-                    },
-                    "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
-                        "template": "inputCheckable"
-                    }
-                },
-                {
-                    "index": 8,
                     "element": "aw_places",
                     "uniqElKey": "el_aw_places",
                     "attributes": {
@@ -369,7 +284,6 @@
                     },
                     "settings": {
                         "label": "PIN code, State and District",
-                        "required": "yes",
                         "container_class": "",
                         "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
                         "conditional_logics": []
@@ -381,7 +295,7 @@
                     }
                 },
                 {
-                    "index": 9,
+                    "index": 8,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_availability",
                     "attributes": {
@@ -441,12 +355,12 @@
                     },
                     "editor_options": {
                         "title": "Checkbox",
-                        "icon_class": "ff-edit-radio",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
                     }
                 },
                 {
-                    "index": 10,
+                    "index": 9,
                     "element": "input_radio",
                     "uniqElKey": "el_aw_travel_range",
                     "attributes": {
@@ -506,12 +420,12 @@
                     },
                     "editor_options": {
                         "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
                     }
                 },
                 {
-                    "index": 11,
+                    "index": 10,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_skills",
                     "attributes": {
@@ -583,12 +497,12 @@
                     },
                     "editor_options": {
                         "title": "Checkbox",
-                        "icon_class": "ff-edit-radio",
+                        "icon_class": "ff-edit-checkbox-1",
                         "template": "inputCheckable"
                     }
                 },
                 {
-                    "index": 12,
+                    "index": 11,
                     "element": "input_text",
                     "uniqElKey": "el_aw_languages",
                     "attributes": {
@@ -632,160 +546,24 @@
                     }
                 },
                 {
-                    "index": 13,
-                    "element": "input_text",
-                    "uniqElKey": "el_aw_org_name",
+                    "index": 12,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_org_assoc",
                     "attributes": {
-                        "type": "text",
-                        "name": "org_name",
-                        "value": "",
-                        "id": "",
-                        "class": "",
-                        "placeholder": ""
+                        "name": "org_assoc",
+                        "value": [],
+                        "type": "checkbox"
                     },
                     "settings": {
                         "container_class": "kit-field",
-                        "label": "Organisation name (if you're associated with one) <span class=\"kit-optional\">(optional)</span>",
-                        "label_placement": "",
-                        "admin_field_label": "Organisation name (if you're associated with one)",
-                        "help_message": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "Simple Text",
-                        "icon_class": "ff-edit-text",
-                        "template": "inputText"
-                    }
-                },
-                {
-                    "index": 14,
-                    "element": "input_radio",
-                    "uniqElKey": "el_aw_org_show",
-                    "attributes": {
-                        "name": "org_show",
-                        "value": "0",
-                        "type": "radio"
-                    },
-                    "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "Show my name on the organisation's page.",
-                        "label_placement": "",
-                        "admin_field_label": "Show my name on the organisation's page.",
-                        "help_message": "",
-                        "advanced_options": [
-                            {
-                                "label": "Yes",
-                                "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "dynamic_default_value": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": {
-                            "type": "all",
-                            "status": true,
-                            "conditions": [
-                                {
-                                    "field": "org_name",
-                                    "value": "",
-                                    "operator": "!="
-                                }
-                            ]
-                        },
-                        "display_type": "",
-                        "enable_other_option": "no",
-                        "layout_class": ""
-                    },
-                    "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
-                        "template": "inputCheckable"
-                    }
-                },
-                {
-                    "index": 15,
-                    "element": "gdpr_agreement",
-                    "uniqElKey": "el_aw_consent",
-                    "attributes": {
-                        "type": "checkbox",
-                        "name": "consent",
-                        "value": false,
-                        "class": "ff_gdpr_field"
-                    },
-                    "settings": {
                         "label": "",
-                        "tnc_html": "I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.",
-                        "admin_field_label": "Agreement",
-                        "has_checkbox": true,
-                        "container_class": "kit-field",
-                        "validation_rules": {
-                            "required": {
-                                "value": true,
-                                "message": "Tick the box to agree",
-                                "global_message": "Tick the box to agree",
-                                "global": false
-                            }
-                        },
-                        "required_field_message": "",
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "GDPR Agreement",
-                        "icon_class": "ff-edit-gdpr",
-                        "template": "termsCheckbox"
-                    }
-                },
-                {
-                    "index": 16,
-                    "element": "input_radio",
-                    "uniqElKey": "el_aw_nl_optin",
-                    "attributes": {
-                        "name": "nl_optin",
-                        "value": "1",
-                        "type": "radio"
-                    },
-                    "settings": {
-                        "container_class": "kit-field aw-yesno",
-                        "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
                         "label_placement": "",
-                        "admin_field_label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                        "admin_field_label": "org_assoc",
                         "help_message": "",
                         "advanced_options": [
                             {
-                                "label": "Yes",
+                                "label": "I'm associated with an animal welfare organisation.",
                                 "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            },
-                            {
-                                "label": "No",
-                                "value": "0",
                                 "calc_value": "",
                                 "image": ""
                             }
@@ -809,8 +587,205 @@
                         "layout_class": ""
                     },
                     "editor_options": {
-                        "title": "Radio Field",
-                        "icon_class": "ff-edit-radio",
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 13,
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_org_name",
+                    "attributes": {
+                        "type": "text",
+                        "name": "org_name",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "placeholder": ""
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Organisation name <span class=\"kit-optional\">(optional)</span>",
+                        "label_placement": "",
+                        "admin_field_label": "Organisation name",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": {
+                            "type": "all",
+                            "status": true,
+                            "conditions": [
+                                {
+                                    "field": "org_assoc",
+                                    "value": "1",
+                                    "operator": "="
+                                }
+                            ]
+                        }
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 14,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_org_show",
+                    "attributes": {
+                        "name": "org_show",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "org_show",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "Show my name on the organisation's page.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": {
+                            "type": "all",
+                            "status": true,
+                            "conditions": [
+                                {
+                                    "field": "org_assoc",
+                                    "value": "1",
+                                    "operator": "="
+                                }
+                            ]
+                        },
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 15,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_consent",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "consent",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Tick the box to agree",
+                                "global_message": "Tick the box to agree",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 16,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_nl_optin",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "nl_optin",
+                        "value": [
+                            "1"
+                        ]
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
                         "template": "inputCheckable"
                     }
                 },
@@ -944,114 +919,6 @@
                 {
                     "index": 24,
                     "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_screen",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_screen",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Screen size"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 25,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_lang",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_lang",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Language"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 26,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_tz",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_tz",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Time zone"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 27,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_secs",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_secs",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Seconds to fill in"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 28,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_first_visit",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_first_visit",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "First visit"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 29,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_visits",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_visits",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Visit count"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 30,
-                    "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
                         "type": "hidden",
@@ -1068,7 +935,7 @@
                     }
                 },
                 {
-                    "index": 31,
+                    "index": 25,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -1086,49 +953,121 @@
                     }
                 },
                 {
+                    "index": 26,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_screen",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_screen",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Screen size"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 27,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_lang",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_lang",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Language"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 28,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_tz",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_tz",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Time zone"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 29,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_secs",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_secs",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Seconds to fill in"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 30,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_first_visit",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_first_visit",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "First visit"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 31,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_v_visits",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "v_visits",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Visit count"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
                     "index": 32,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_country",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_country",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "Country (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 33,
-                    "element": "input_hidden",
-                    "uniqElKey": "el_aw_v_city",
-                    "attributes": {
-                        "type": "hidden",
-                        "name": "v_city",
-                        "value": ""
-                    },
-                    "settings": {
-                        "admin_field_label": "City (from IP, on this server)"
-                    },
-                    "editor_options": {
-                        "title": "Hidden Field",
-                        "icon_class": "ff-edit-hidden-field",
-                        "template": "inputHidden"
-                    }
-                },
-                {
-                    "index": 34,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
                         "type": "hidden",
                         "name": "consent_version",
-                        "value": "consent=v3-form-consent-volunteering;nl_optin=v3-volunteer-updates-yesno;wa_optin=v1-whatsapp-contact;org_show=v1-org-show"
+                        "value": "v3-form-consent-volunteering"
                     },
                     "settings": {
                         "admin_field_label": "Consent wording version"
@@ -1181,7 +1120,7 @@
             },
             {
                 "meta_key": "formSettings",
-                "value": "{\"confirmation\":{\"redirectTo\":\"customUrl\",\"messageToShow\":\"\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":\"{wp.site_url}/thank-you/?form=volunteer&ref=AW-V-{submission.serial_number}\",\"enable_query_string\":\"no\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null,\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">Thank you for signing up.</p><p>We will contact you when there is work in your area. You can ask us to delete your details at any time.</p><p class=\\\"aw-form-ref\\\">Your reference: <strong data-aw-ref=\\\"AW-V-{submission.serial_number}\\\">AW-V-{submission.serial_number}</strong></p>\"},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
             },
             {
                 "meta_key": "step_data_persistency_status",
@@ -1189,7 +1128,11 @@
             },
             {
                 "meta_key": "fluentcrm_feeds",
-                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"label\":\"phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_availability\",\"item_value\":\"{inputs.availability}\"},{\"label\":\"vol_travel_range\",\"item_value\":\"{inputs.travel_range}\"},{\"label\":\"vol_skills\",\"item_value\":\"{inputs.skills}\"},{\"label\":\"vol_languages\",\"item_value\":\"{inputs.languages}\"},{\"label\":\"vol_whatsapp\",\"item_value\":\"{inputs.whatsapp}\"},{\"label\":\"vol_wa_optin\",\"item_value\":\"{inputs.wa_optin}\"},{\"label\":\"vol_organisation\",\"item_value\":\"{inputs.org_name}\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"1\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[],\"status\":false,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Volunteer sign-up \\u2192 FluentCRM (everyone: Newsletter, Volunteer)\",\"tag_ids\":[\"4\"]}"
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"label\":\"phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_help\",\"item_value\":\"{inputs.roles}\"},{\"label\":\"vol_phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_whatsapp\",\"item_value\":\"{inputs.whatsapp}\"},{\"label\":\"vol_wa_optin\",\"item_value\":\"{inputs.wa_optin}\"},{\"label\":\"vol_availability\",\"item_value\":\"{inputs.availability}\"},{\"label\":\"vol_travel_range\",\"item_value\":\"{inputs.travel_range}\"},{\"label\":\"vol_skills\",\"item_value\":\"{inputs.skills}\"},{\"label\":\"vol_languages\",\"item_value\":\"{inputs.languages}\"},{\"label\":\"vol_organisation\",\"item_value\":\"{inputs.org_name}\"},{\"label\":\"vol_org_show\",\"item_value\":\"{inputs.org_show}\"},{\"label\":\"vol_page\",\"item_value\":\"{inputs.v_page_title}\"},{\"label\":\"vol_source\",\"item_value\":\"2.0 form\"},{\"label\":\"vol_consent\",\"item_value\":\"volunteering\"},{\"label\":\"vol_consent_version\",\"item_value\":\"{inputs.consent_version}\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[],\"status\":false,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Volunteer sign-up → FluentCRM (everyone: Newsletter, volunteer, volunteer fields)\",\"tag_ids\":[\"volunteer\"]}"
+            },
+            {
+                "meta_key": "fluentcrm_feeds",
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"org_assoc\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Volunteer: organisation ticked → org-pending\",\"tag_ids\":[\"org-pending\"]}"
             }
         ]
     }

@@ -171,8 +171,9 @@ add_action(
 		list( $msg, $claims ) = aw_inbox_counts();
 		// The count is what the sections inside show: pending claims and To review. Contact messages moved to Mailweb
 		// (Mail → Website forms), so old filed email copies no longer count here (owner, 19 Oct 2026).
-		// Reports, volunteer sign-ups and data removal requests count too: the forms send no email (form-alerts.php, 21 Oct 2026).
-		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( $claims + ( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ) + ( function_exists( 'aw_alert_total' ) ? aw_alert_total() : 0 ) ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
+		// Form submissions (claims, reports, volunteer sign-ups, data requests) are Fluent Forms entries since 21 Oct 2026
+		// (owner): their unread counts are in Fluent Forms, so claims no longer count here.
+		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
@@ -201,9 +202,7 @@ add_action(
 			if ( 'edit.php?post_type=aw_message' === $item[2] ) {
 				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( $msg ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 			} elseif ( 'edit.php?post_type=aw_claim' === $item[2] ) {
-				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( $claims ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-			} elseif ( 'edit.php?post_type=aw_report' === $item[2] && function_exists( 'aw_alert_reports' ) ) {
-				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( aw_alert_reports() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+				unset( $submenu['aw-inbox'][ $i ] ); // retired: Fluent Forms entries (Claim #6) since 21 Oct 2026; the list keeps its URL
 			}
 		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );

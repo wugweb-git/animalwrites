@@ -1,6 +1,6 @@
 {
  "exportFormatVersion": 2,
- "exportTime": "2026-10-14 05:30:00",
+ "exportTime": "2026-10-21 12:00:00",
  "containerVersion": {
   "path": "accounts/0/containers/0/versions/0",
   "accountId": "0",
@@ -1342,6 +1342,117 @@
      "217"
     ],
     "tagFiringOption": "ONCE_PER_EVENT"
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "tagId": "318",
+    "name": "Fluent Forms - form_submit and Clarity form_ref (listener)",
+    "type": "html",
+    "parameter": [
+     {
+      "type": "TEMPLATE",
+      "key": "html",
+      "value": "<script>\n/* Fluent Forms (owner, 21 Oct 2026): on a sent form, GA4 form_submit with the form and its reference, and Clarity's\n   form_ref tag. Only with analytics consent (this tag needs analytics_storage). No email, name or phone. */\n(function () {\n  if (!window.jQuery) return;\n  jQuery(document.body).on('fluentform_submission_success', function (e, d) {\n    try {\n      var form = d && d.form ? jQuery(d.form) : jQuery(e.target);\n      var name = form.closest('[data-kit-form]').attr('data-kit-form') || 'form-' + (form.attr('data-form_id') || '');\n      var r = (d && d.response) || {}, msg = (r.data && r.data.result && r.data.result.message) || (r.result && r.result.message) || '';\n      var m = /data-aw-ref=\"([A-Z0-9-]+)\"/.exec(msg), ref = m ? m[1] : '';\n      window.dataLayer = window.dataLayer || [];\n      window.dataLayer.push({ event: 'form_submit', form: name, form_ref: ref });\n      if (ref && typeof window.clarity === 'function') window.clarity('set', 'form_ref', ref);\n    } catch (x) { /* never break the form */ }\n  });\n})();\n</script>"
+     },
+     {
+      "type": "BOOLEAN",
+      "key": "supportDocumentWrite",
+      "value": "false"
+     }
+    ],
+    "firingTriggerId": [
+     "218"
+    ],
+    "tagFiringOption": "ONCE_PER_LOAD",
+    "consentSettings": {
+     "consentStatus": "NEEDED",
+     "consentType": {
+      "type": "LIST",
+      "list": [
+       {
+        "type": "TEMPLATE",
+        "value": "analytics_storage"
+       }
+      ]
+     }
+    }
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "tagId": "319",
+    "name": "GA4 event - form_submit",
+    "type": "gaawe",
+    "parameter": [
+     {
+      "type": "BOOLEAN",
+      "key": "sendEcommerceData",
+      "value": "false"
+     },
+     {
+      "type": "TEMPLATE",
+      "key": "eventName",
+      "value": "form_submit"
+     },
+     {
+      "type": "TEMPLATE",
+      "key": "measurementIdOverride",
+      "value": "G-4P5YMJ04RL"
+     },
+     {
+      "type": "LIST",
+      "key": "eventSettingsTable",
+      "list": [
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "form"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{DLV - form}}"
+         }
+        ]
+       },
+       {
+        "type": "MAP",
+        "map": [
+         {
+          "type": "TEMPLATE",
+          "key": "parameter",
+          "value": "ref"
+         },
+         {
+          "type": "TEMPLATE",
+          "key": "parameterValue",
+          "value": "{{DLV - form_ref}}"
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "firingTriggerId": [
+     "219"
+    ],
+    "tagFiringOption": "ONCE_PER_EVENT",
+    "consentSettings": {
+     "consentStatus": "NEEDED",
+     "consentType": {
+      "type": "LIST",
+      "list": [
+       {
+        "type": "TEMPLATE",
+        "value": "analytics_storage"
+       }
+      ]
+     }
+    }
    }
   ],
   "trigger": [
@@ -1772,6 +1883,37 @@
         "type": "TEMPLATE",
         "key": "arg1",
         "value": "button_click"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "triggerId": "218",
+    "name": "DOM Ready - all pages",
+    "type": "DOM_READY"
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "triggerId": "219",
+    "name": "Event - form_submit",
+    "type": "CUSTOM_EVENT",
+    "customEventFilter": [
+     {
+      "type": "EQUALS",
+      "parameter": [
+       {
+        "type": "TEMPLATE",
+        "key": "arg0",
+        "value": "{{_event}}"
+       },
+       {
+        "type": "TEMPLATE",
+        "key": "arg1",
+        "value": "form_submit"
        }
       ]
      }
@@ -2568,6 +2710,30 @@
       "type": "TEMPLATE",
       "key": "name",
       "value": "filter"
+     }
+    ]
+   },
+   {
+    "accountId": "0",
+    "containerId": "0",
+    "variableId": "133",
+    "name": "DLV - form_ref",
+    "type": "v",
+    "parameter": [
+     {
+      "type": "INTEGER",
+      "key": "dataLayerVersion",
+      "value": "2"
+     },
+     {
+      "type": "BOOLEAN",
+      "key": "setDefaultValue",
+      "value": "false"
+     },
+     {
+      "type": "TEMPLATE",
+      "key": "name",
+      "value": "form_ref"
      }
     ]
    }

@@ -5,13 +5,13 @@
  *
  * - Anonymous statistics: each time a letter is sent from the letter tool ([aw_letter_tool], campaign.js), one row in
  *   {prefix}aw_camp_letters: campaign, the city as typed (trimmed, title case), the grounds ticked, the route (gmail,
- *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width) and the date; since 21 Oct
- *   2026 (owner) also the box as nl_optin 1/0, a reference (AW-L-<row>, shown after sending) and the visit details
- *   (page, referrer, UTM, browser, OS, screen, language, time zone, country and city found on this server). No name,
- *   email or IP address is read or kept. Kept to report on campaigns.
- * - At send: name, city and email are required. Every sender joins the volunteers (volunteers table, tag Volunteer)
- *   and the newsletter (aw_newsletter_join, tag campaign-<slug>), whatever the box says (owner, 18 Oct 2026). An
- *   optional WhatsApp number and its own tick "OK to contact me on WhatsApp" (1/0) go on the volunteer's row.
+ *   outlook, mailto, copy), the device type (phone, tablet, desktop, from the screen width), the date, and the
+ *   newsletter box and the WhatsApp tick as 1/0 (owner, 21 Oct 2026). No name, email or IP address is read or kept.
+ *   Kept to report on campaigns.
+ * - At send: name, city and email are required, WhatsApp is optional with its own tick. Every sender joins the
+ *   newsletter and the volunteers in FluentCRM (Newsletter list, tags newsletter, volunteer, campaign-<slug>), whatever
+ *   the box says (owner, 18 Oct 2026), through FluentCRM's own API (aw_crm_campaign_signer), with the box as 1/0, the
+ *   WhatsApp number and tick, and a reference (AW-L-<n>) shown to them after sending.
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
  *   of the anonymous rows.
  *
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CL_DB_VERSION = '2'; // 2: nl_optin, wa_optin and visit (owner, 21 Oct 2026)
+const AW_CL_DB_VERSION = '2'; // 2: nl_optin and wa_optin (owner, 21 Oct 2026)
 const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns, and add me as a volunteer. I can unsubscribe at any time.';
 const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
@@ -52,7 +52,6 @@ add_action(
 			sent_on date NOT NULL,
 			nl_optin tinyint(1) NULL,
 			wa_optin tinyint(1) NULL,
-			visit text NULL,
 			PRIMARY KEY  (id),
 			KEY campaign (campaign_id, sent_on)
 			) {$wpdb->get_charset_collate()};"
@@ -62,48 +61,18 @@ add_action(
 	5
 );
 
-/** Consent wording version of the letter tool's WhatsApp tick. */
-const AW_CL_WA_CONSENT = 'v1-whatsapp-contact';
-
-/** A box sent as '1'/'0' (or true/false) as 1 or 0. */
-function aw_cl_tick( $v ) {
-	return in_array( (string) $v, array( '1', 'true', 'on', 'yes' ), true ) ? 1 : 0;
+/** The next signer reference number (AW-L-<n>), one series for every campaign. */
+function aw_cl_next_ref() {
+	global $wpdb;
+	add_option( 'aw_cl_ref', 0, '', false );
+	$wpdb->query( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = 'aw_cl_ref'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	wp_cache_delete( 'aw_cl_ref', 'options' );
+	return (int) $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name = 'aw_cl_ref'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
-/**
- * A letter's visit details, without name, email or IP: what the browser sends (window.awVisit) and, found on this
- * server, the country and city of the IP (aw_geoip) and the browser and OS from the user agent.
- *
- * @param mixed $c The browser's part.
- */
-function aw_cl_visit( $c ) {
-	$c   = is_array( $c ) ? $c : array();
-	$s   = fn( $k, $n = 100 ) => substr( sanitize_text_field( (string) ( $c[ $k ] ?? '' ) ), 0, $n );
-	$ua  = (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$geo = function_exists( 'aw_geoip' ) ? aw_geoip( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ) : array( 'country' => '', 'city' => '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$pick = function ( $list ) use ( $ua ) {
-		foreach ( $list as $re => $name ) {
-			if ( preg_match( $re, $ua ) ) {
-				return $name;
-			}
-		}
-		return '';
-	};
-	return array(
-		'page'         => substr( esc_url_raw( (string) ( $c['page'] ?? '' ) ), 0, 300 ),
-		'referrer'     => substr( esc_url_raw( (string) ( $c['referrer'] ?? '' ) ), 0, 300 ),
-		'utm_source'   => $s( 'utm_source' ),
-		'utm_medium'   => $s( 'utm_medium' ),
-		'utm_campaign' => $s( 'utm_campaign' ),
-		'browser'      => $pick( array( '/Edg/' => 'Edge', '/OPR\//' => 'Opera', '/SamsungBrowser/' => 'Samsung Internet', '/Firefox|FxiOS/' => 'Firefox', '/Chrome|CriOS/' => 'Chrome', '/Safari/' => 'Safari' ) ),
-		'os'           => $pick( array( '/Windows/' => 'Windows', '/iPhone|iPad|iPod/' => 'iOS', '/Android/' => 'Android', '/Mac OS X/' => 'macOS', '/Linux/' => 'Linux' ) ),
-		'screen'       => preg_match( '/^\d{2,5}x\d{2,5}$/', (string) ( $c['screen'] ?? '' ) ) ? (string) $c['screen'] : '',
-		'language'     => $s( 'lang', 35 ),
-		'timezone'     => $s( 'tz', 60 ),
-		'seconds'      => is_numeric( $c['secs'] ?? null ) ? (int) $c['secs'] : null,
-		'country'      => $geo['country'],
-		'city'         => $geo['city'],
-	);
+/** A box sent by campaign.js ('1' / '0') as 1 or 0. */
+function aw_cl_tick( $v ) {
+	return '1' === (string) $v ? 1 : 0;
 }
 
 /** A city as typed, tidied: trimmed, single spaces, title case, at most 60 characters. */
@@ -166,10 +135,9 @@ add_action(
 							'sent_on'     => wp_date( 'Y-m-d', null, new DateTimeZone( 'Asia/Kolkata' ) ),
 							'nl_optin'    => aw_cl_tick( $req['nl_optin'] ),
 							'wa_optin'    => aw_cl_tick( $req['wa_optin'] ),
-							'visit'       => wp_json_encode( aw_cl_visit( $req['visit'] ) ),
 						)
 					);
-					return array( 'ok' => true, 'ref' => $wpdb->insert_id ? 'AW-L-' . (int) $wpdb->insert_id : '' );
+					return array( 'ok' => true );
 				},
 			)
 		);
@@ -185,26 +153,19 @@ add_action(
 					if ( ! $id ) {
 						return new WP_Error( 'aw_closed', 'Not open', array( 'status' => 404 ) );
 					}
-					if ( ! is_email( $email ) || ! function_exists( 'aw_newsletter_join' ) ) {
+					if ( ! is_email( $email ) || ! function_exists( 'aw_crm_campaign_signer' ) ) {
 						return new WP_Error( 'aw_optin', 'Check the email address.', array( 'status' => 400 ) );
 					}
 					$name    = mb_substr( sanitize_text_field( (string) $req['name'] ), 0, 80 );
 					$city    = aw_cl_city( $req['city'] );
 					$slug    = get_post_field( 'post_name', $id );
-					// Every sender joins the volunteers and the newsletter, box ticked or not (owner, 18 Oct 2026): a volunteer row
-					// with what the letter gives (name, email, city), then the newsletter with the Volunteer tag; no team email.
-					if ( function_exists( 'aw_vol_upsert' ) ) {
-						aw_vol_upsert( array( 'name' => $name, 'email' => $email, 'city_text' => $city, 'page_source' => 'campaign:' . $slug, 'source' => 'v2_form', 'consent_scope' => 'volunteering_and_updates', 'consent_text_version' => AW_CL_CONSENT ) );
-					}
-					$wa = trim( sanitize_text_field( (string) $req['whatsapp'] ) );
-					if ( '' !== $wa && function_exists( 'aw_vol_set_extra' ) ) { // optional, with its own 1/0 tick
-						aw_vol_set_extra( $email, array( 'whatsapp' => kits_clean_phone( $wa ) ? kits_clean_phone( $wa ) : $wa, 'wa_optin' => aw_cl_tick( $req['wa_optin'] ) ) );
-					}
-					aw_newsletter_join( $email, $name, 'site:campaign:' . $slug, AW_CL_CONSENT, array( 'city' => $city ), array( 'newsletter', 'volunteer', 'campaign-' . $slug ) );
-					if ( function_exists( 'aw_crm_volunteer_sync' ) ) {
-						aw_crm_volunteer_sync( $email );
-					}
-					return array( 'ok' => true );
+					// Every sender joins the newsletter and the volunteers, box ticked or not (owner, 18 Oct 2026); the box is
+					// recorded as 1/0 (it was dropped before 21 Oct 2026). FluentCRM's own API; no team email.
+					$wa  = trim( sanitize_text_field( (string) $req['whatsapp'] ) );
+					$wa  = '' !== $wa && kits_clean_phone( $wa ) ? kits_clean_phone( $wa ) : substr( $wa, 0, 20 );
+					$ref = 'AW-L-' . aw_cl_next_ref();
+					aw_crm_campaign_signer( $email, $name, $city, $slug, 1 === aw_cl_tick( $req['consent'] ), $wa, 1 === aw_cl_tick( $req['wa_optin'] ), $ref, AW_CL_CONSENT );
+					return array( 'ok' => true, 'ref' => $ref );
 				},
 			)
 		);
