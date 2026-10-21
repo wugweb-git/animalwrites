@@ -322,7 +322,24 @@
 			recordSend(route);
 			confirmBox.hidden = false;
 			showSendShare();
+			justSent = true;
+			try { localStorage.setItem(sentKey, String(Date.now())); } catch (e) { /* private mode */ }
 		});
+	});
+
+	// Phones often reload the page on the way back from the Gmail or mail app: bring the share box back, and into view.
+	var sentKey = 'aw-letter-routed-' + (sh.slug || '');
+	var justSent = false;
+	var sentAt = 0;
+	try { sentAt = parseInt(localStorage.getItem(sentKey), 10) || 0; } catch (e) { /* private mode */ }
+	if (sentAt) {
+		showSendShare();
+		if (sendShare && !location.hash && Date.now() - sentAt < 30 * 60 * 1000) sendShare.scrollIntoView({ block: 'center' });
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (document.hidden || !justSent || !sendShare) return;
+		justSent = false;
+		sendShare.scrollIntoView({ block: 'center', behavior: 'smooth' });
 	});
 
 	form.querySelectorAll('[data-confirm]').forEach(function (btn) {
