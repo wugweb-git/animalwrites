@@ -248,7 +248,7 @@ function aw_enrich_snapshot( $lid, $field ) {
 	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
-			return aw_listing_phones( $lid );
+			return array( 'rows' => aw_listing_phones( $lid ), 'unv' => aw_unverified_list( $lid ) );
 		case 'hours':
 			return aw_listing_hours( $lid );
 		case 'services':
@@ -260,6 +260,9 @@ function aw_enrich_snapshot( $lid, $field ) {
 		case 'photos':
 			return (string) get_post_meta( $lid, 'aw_gallery', true );
 		default:
+			if ( isset( AW_ENRICH_ALT[ $field ] ) ) {
+				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ), 'unv' => aw_unverified_list( $lid ) );
+			}
 			return (string) get_post_meta( $lid, $def[1], true );
 	}
 }
@@ -269,7 +272,11 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
-			aw_set_listing_list( $lid, 'aw_phones', (array) $snap );
+			$rows = isset( $snap['rows'] ) ? (array) $snap['rows'] : (array) $snap; // older rows kept the list alone
+			aw_set_listing_list( $lid, 'aw_phones', $rows );
+			if ( isset( $snap['unv'] ) ) {
+				$snap['unv'] ? update_post_meta( $lid, 'aw_unverified', array_values( (array) $snap['unv'] ) ) : delete_post_meta( $lid, 'aw_unverified' );
+			}
 			break;
 		case 'hours':
 			aw_set_listing_list( $lid, 'aw_opening_hours', (array) $snap );
@@ -287,6 +294,12 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 			'' === (string) $snap ? delete_post_meta( $lid, 'aw_gallery' ) : update_post_meta( $lid, 'aw_gallery', (string) $snap );
 			break;
 		default:
+			if ( is_array( $snap ) && isset( $snap['v'] ) ) { // a field that can hold a second value
+				'' === $snap['v'] ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap['v'] );
+				'' === $snap['alt'] ? delete_post_meta( $lid, AW_ENRICH_ALT[ $field ] ) : update_post_meta( $lid, AW_ENRICH_ALT[ $field ], $snap['alt'] );
+				$snap['unv'] ? update_post_meta( $lid, 'aw_unverified', array_values( (array) $snap['unv'] ) ) : delete_post_meta( $lid, 'aw_unverified' );
+				break;
+			}
 			'' === (string) $snap ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap );
 	}
 	aw_enrich_after_change( $lid );
@@ -300,7 +313,7 @@ function aw_enrich_restore( $lid, $field, $snap ) {
  * @param mixed  $value Value (string; list for hours, services, photos).
  * @return bool
  */
-function aw_enrich_write( $lid, $field, $value ) {
+function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 	$def = aw_enrich_fields()[ $field ] ?? null;
 	if ( ! $def ) {
 		return false;
@@ -321,6 +334,9 @@ function aw_enrich_write( $lid, $field, $value ) {
 				return false;
 			}
 			if ( null === $hit ) {
+				if ( 'both' === $mode && $rows ) { // another number is already there: both are shown as unverified
+					aw_unverified_add( $lid, array_merge( wp_list_pluck( $rows, 'number' ), array( $num ) ) );
+				}
 				$rows[] = array( 'number' => $num, 'label' => 'emergency' === $field ? 'Emergency' : '', 'whatsapp' => 'whatsapp' === $field );
 			} elseif ( 'whatsapp' === $field ) {
 				$rows[ $hit ]['whatsapp'] = true;
@@ -377,6 +393,12 @@ function aw_enrich_write( $lid, $field, $value ) {
 			$v = aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
 			if ( '' === $v ) {
 				return false;
+			}
+			if ( 'both' === $mode && isset( AW_ENRICH_ALT[ $field ] ) ) { // keep the value already there, add this one next to it
+				$now = (string) get_post_meta( $lid, $def[1], true );
+				update_post_meta( $lid, AW_ENRICH_ALT[ $field ], $v );
+				aw_unverified_add( $lid, array( $now, $v ) );
+				break;
 			}
 			update_post_meta( $lid, $def[1], $v );
 	}
@@ -487,6 +509,72 @@ function aw_enrich_is_protected( $lid ) {
 	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$wpdb->postmeta} a JOIN {$wpdb->postmeta} s ON s.post_id = a.post_id AND s.meta_key = 'aw_c_status' AND s.meta_value = 'approved' WHERE a.meta_key = 'aw_c_listing' AND a.meta_value = %d LIMIT 1", $lid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
+/* ---------- Owner's rule (21 Oct 2026): fill empty fields with sourced values; keep both when a value is already there ---------- */
+
+/** Fields that can hold a second value next to the one already on the listing: field => meta key of the second value. */
+const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
+
+/** A value in its comparable form (phones: last 10 digits; email: lower case; web address: no scheme, www or slash). */
+function aw_unverified_norm( $v ) {
+	$v = strtolower( trim( (string) $v ) );
+	if ( false !== strpos( $v, '@' ) ) {
+		return $v;
+	}
+	if ( '' !== $v && ! preg_match( '/[a-z]/', $v ) ) {
+		return substr( preg_replace( '/\D+/', '', $v ), -10 );
+	}
+	return rtrim( preg_replace( '#^https?://(www\.|m\.)?#', '', $v ), '/' );
+}
+
+/** The values of a listing that are shown as unverified (kept next to another one; cleared when the organisation claims it). */
+function aw_unverified_list( $lid ) {
+	$v = get_post_meta( $lid, 'aw_unverified', true );
+	return is_array( $v ) ? array_values( $v ) : array();
+}
+
+/** Mark values unverified. */
+function aw_unverified_add( $lid, array $values ) {
+	$list = array_merge( aw_unverified_list( $lid ), array_map( 'aw_unverified_norm', $values ) );
+	update_post_meta( $lid, 'aw_unverified', array_values( array_unique( array_filter( $list ) ) ) );
+}
+
+/** A reviewer approved a value: it is no longer unverified. */
+function aw_unverified_remove( $lid, $value ) {
+	$n = aw_unverified_norm( $value );
+	$l = array_values( array_diff( aw_unverified_list( $lid ), array( $n ) ) );
+	$l ? update_post_meta( $lid, 'aw_unverified', $l ) : delete_post_meta( $lid, 'aw_unverified' );
+}
+
+/** The small mark after a value that is not verified. */
+function aw_unverified_mark( $lid, $value ) {
+	if ( ! in_array( aw_unverified_norm( $value ), aw_unverified_list( $lid ), true ) ) {
+		return '';
+	}
+	$why = 'Unverified: this listing has another value for it. The organisation can confirm it by claiming the listing.';
+	return ' <span class="aw-unverified" title="' . esc_attr( $why ) . '">' . aw_i( 'alert' ) . '<span class="screen-reader-text">' . esc_html( $why ) . '</span></span>';
+}
+
+/**
+ * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website: keep it next to what
+ * is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified listings, and any
+ * other field that already has a value).
+ */
+function aw_enrich_mode( $lid, $field, $conf, $protected ) {
+	if ( $protected || 'low' === $conf || 'closed' === $field ) {
+		return 'queue';
+	}
+	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
+		return aw_listing_phones( $lid ) ? 'both' : 'apply';
+	}
+	if ( aw_enrich_is_empty( $lid, $field ) ) {
+		return 'apply';
+	}
+	if ( isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ) ) {
+		return 'both';
+	}
+	return 'queue';
+}
+
 /* ---------- Rows ---------- */
 
 /** Add a row. */
@@ -562,6 +650,9 @@ function aw_enrich_approve( $id ) {
 	$wpdb->update( aw_enrich_table(), array( 'old_value' => wp_json_encode( $snap ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	aw_enrich_set_status( $id, 'approved' );
 	aw_enrich_supersede( $lid, $r['field'], $id );
+	if ( is_scalar( $r['value'] ) ) {
+		aw_unverified_remove( $lid, $r['value'] ); // a person confirmed this value
+	}
 	return true;
 }
 
@@ -664,6 +755,9 @@ add_action(
 	function ( $lid, $proposed, $claim_id ) {
 		aw_enrich_install();
 		$map = array( 'aw_phone' => 'phone', 'aw_whatsapp' => 'whatsapp', 'aw_email' => 'email', 'aw_website' => 'website', 'aw_services' => 'services' );
+		delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more
+		delete_post_meta( $lid, 'aw_email_alt' );
+		delete_post_meta( $lid, 'aw_website_alt' );
 		$src = array( array( 'key' => 'claim', 'name' => 'The organisation (claim)', 'url' => '', 'fetched_at' => wp_date( 'c' ) ) );
 		foreach ( (array) $proposed as $k => $v ) {
 			if ( isset( $map[ $k ] ) && '' !== (string) $v ) {
@@ -851,11 +945,11 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // already waiting, or a reviewer said no
 			continue;
 		}
-		$auto = ! $protected && 'high' === $conf && aw_enrich_is_empty( $lid, $field );
-		if ( $auto ) {
+		$mode = aw_enrich_mode( $lid, $field, $conf, $protected );
+		if ( 'queue' !== $mode ) {
 			$snap = aw_enrich_snapshot( $lid, $field );
-			if ( aw_enrich_write( $lid, $field, $value ) ) {
-				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run );
+			if ( aw_enrich_write( $lid, $field, $value, $mode ) ) {
+				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, 'both' === $mode ? 'Kept next to the value already there; both shown as unverified' : '' );
 				aw_enrich_supersede( $lid, $field, $rid );
 				$out['applied'][] = $field;
 				continue;
@@ -863,7 +957,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$note = $protected ? 'Claimed or verified listing: never changed automatically' : ( 'high' === $conf ? 'Would replace a value already on the listing' : '' );
+		$note = $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' );
 		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, $note );
 		$out['queued'][] = $field;
 	}
@@ -925,3 +1019,43 @@ add_filter(
 		return $robots;
 	}
 );
+
+
+/**
+ * Apply the owner's rule (21 Oct 2026) to proposals already waiting: a sourced value fills an empty field; a second
+ * phone, email or website is kept next to the first, both unverified. Rows of claimed or verified listings and low
+ * confidence rows stay for review. wp eval 'echo aw_enrich_policy_pass();'
+ *
+ * @return string What was done.
+ */
+function aw_enrich_policy_pass() {
+	global $wpdb;
+	$t = aw_enrich_table();
+	$n = array( 'apply' => 0, 'both' => 0, 'queue' => 0, 'skip' => 0 );
+	foreach ( $wpdb->get_results( "SELECT id FROM {$t} WHERE status = 'pending' AND field <> 'closed' ORDER BY id ASC", ARRAY_A ) as $x ) { // phpcs:ignore WordPress.DB
+		$r = aw_enrich_row( (int) $x['id'] );
+		if ( ! $r || 'pending' !== $r['status'] ) {
+			continue;
+		}
+		$lid = (int) $r['listing_id'];
+		if ( aw_enrich_has_value( $lid, $r['field'], $r['value'] ) ) {
+			aw_enrich_set_status( (int) $r['id'], 'superseded', 'Already on the listing' );
+			$n['skip']++;
+			continue;
+		}
+		$mode = aw_enrich_mode( $lid, $r['field'], $r['confidence'], aw_enrich_is_protected( $lid ) );
+		if ( 'queue' === $mode ) {
+			$n['queue']++;
+			continue;
+		}
+		$snap = aw_enrich_snapshot( $lid, $r['field'] );
+		if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], $mode ) ) {
+			$n['queue']++;
+			continue;
+		}
+		$wpdb->update( $t, array( 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => 'both' === $mode ? 'Kept next to the value already there; both shown as unverified' : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
+		aw_enrich_supersede( $lid, $r['field'], (int) $r['id'] );
+		$n[ $mode ]++;
+	}
+	return wp_json_encode( $n );
+}

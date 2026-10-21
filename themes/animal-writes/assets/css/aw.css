@@ -1339,3 +1339,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    the picture column 30% against 70% for the text, was 40 to 60 (owner, 21 Oct 2026). The smaller stacked cards are unchanged. */
 .kit-card--stacked-lg { padding: var(--kit-space-3) !important; }
 .kit-card--stacked-lg > .kit-card-media { width: 30% !important; max-width: 30%; }
+
+/* A value kept next to another one on a listing (enrichment): small unverified mark. */
+.aw-unverified { display: inline-flex; vertical-align: middle; color: var(--kit-color-warning-text, var(--kit-color-muted)); }
+.aw-unverified .kit-ico { width: 1em; height: 1em; }

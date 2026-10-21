@@ -217,7 +217,8 @@
     "aw-org-services",
     "aw-org-phones",
     "aw-org-hours",
-    "aw-featured"
+    "aw-featured",
+    "aw-unverified"
    ],
    "states": [
     "links only",
@@ -227,7 +228,8 @@
     "missing phone, email, website, address, hours or services: \"… not available yet\" and a Suggest an update link (the Report form)",
     "no map link: Directions greyed out (aria-disabled, not a link)",
     "phones: one or more numbers from the Phone numbers list (Call link each, label, WhatsApp link when marked)",
-    "opening hours: a day-by-day table from Opening hours by day (Closed, Open 24 hours, split days); the hours fact spans both columns from md (aw-org-fact--wide)"
+    "opening hours: a day-by-day table from Opening hours by day (Closed, Open 24 hours, split days); the hours fact spans both columns from md (aw-org-fact--wide)",
+    "a phone, email or website kept next to another one: both carry a small unverified mark (aw-unverified) until the organisation claims the listing"
    ],
    "tokens": [],
    "a11y": {

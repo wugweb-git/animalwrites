@@ -162,9 +162,9 @@ function aw_block_org_details( $a, $id ) {
 	$phones  = aw_listing_phones( $id ); // the Phone numbers list
 	$hours   = aw_org_hours_html( aw_listing_hours( $id ) ); // the Opening hours by day list
 	$contact = array(
-		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones ) ),
-		'aw_email'   => array( 'mail', 'Email', $m( 'aw_email' ) ? '<a href="' . esc_url( 'mailto:' . $m( 'aw_email' ) ) . '" data-act="email">' . esc_html( $m( 'aw_email' ) ) . '</a>' : '' ),
-		'aw_website' => array( 'link', 'Website', $m( 'aw_website' ) ? '<a href="' . esc_url( $m( 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" data-act="website">' . esc_html( preg_replace( '#^https?://(www\.)?|/$#', '', $m( 'aw_website' ) ) ) . '</a>' : '' ),
+		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones, $id ) ),
+		'aw_email'   => array( 'mail', 'Email', aw_org_two_values( $id, 'aw_email', 'email', $rel ) ),
+		'aw_website' => array( 'link', 'Website', aw_org_two_values( $id, 'aw_website', 'website', $rel ) ),
 	);
 	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
 	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id ) ) . '" rel="nofollow">Suggest an update</a>' : '';
@@ -202,13 +202,38 @@ function aw_block_org_details( $a, $id ) {
 }
 
 /**
+ * An email or website: the value on the listing and, when the enrichment worker found a different one, that one beside
+ * it. Each carries the small "unverified" mark while the listing holds two (aw_unverified).
+ *
+ * @param int    $id   Listing ID.
+ * @param string $key  aw_email or aw_website.
+ * @param string $kind email or website.
+ * @param string $rel  Link rel.
+ * @return string
+ */
+function aw_org_two_values( $id, $key, $kind, $rel ) {
+	$out = array();
+	foreach ( array( $key, $key . '_alt' ) as $k ) {
+		$v = trim( (string) get_post_meta( $id, $k, true ) );
+		if ( '' === $v ) {
+			continue;
+		}
+		$mark  = function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $v ) : '';
+		$out[] = 'email' === $kind
+			? '<a href="' . esc_url( 'mailto:' . $v ) . '" data-act="email">' . esc_html( $v ) . '</a>' . $mark
+			: '<a href="' . esc_url( $v ) . '" rel="' . esc_attr( $rel ) . '" data-act="website">' . esc_html( preg_replace( '#^https?://(www\\.)?|/$#', '', $v ) ) . '</a>' . $mark;
+	}
+	return 1 < count( $out ) ? '<ul class="aw-org-phones"><li>' . implode( '</li><li>', $out ) . '</li></ul>' : ( $out ? $out[0] : '' );
+}
+
+/**
  * The phone numbers: each a Call link (tel:), with its label, and a WhatsApp link when the row is flagged. The links are
  * what the site's analytics count (call_click on tel:, whatsapp_click on wa.me; kit.js).
  *
  * @param array $phones aw_listing_phones().
  * @return string HTML, or '' when there is no number that can be dialled.
  */
-function aw_org_phones_html( $phones ) {
+function aw_org_phones_html( $phones, $lid = 0 ) {
 	$items = '';
 	foreach ( $phones as $p ) {
 		$tel = aw_tel_url( $p['number'] );
@@ -216,7 +241,7 @@ function aw_org_phones_html( $phones ) {
 			continue;
 		}
 		$wa     = $p['whatsapp'] ? aw_normalise_phone( $p['number'] ) : '';
-		$items .= '<li><a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>'
+		$items .= '<li><a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( $lid && function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $lid, $p['number'] ) : '' )
 			. ( '' !== $p['label'] ? ' <span class="aw-org-phones-label">' . esc_html( $p['label'] ) . '</span>' : '' )
 			. ( $wa && strlen( $wa ) > 5 ? ' <a class="aw-org-phones-wa" href="' . esc_url( 'https://wa.me/' . $wa ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . aw_i( 'brand-whatsapp' ) . 'WhatsApp</a>' : '' )
 			. '</li>';
