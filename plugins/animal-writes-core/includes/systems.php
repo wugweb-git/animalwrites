@@ -94,8 +94,8 @@ function aw_text( $id, $words = 28 ) {
 const AW_LIST_FILTERS = array(
 	'aw_legal'       => array( array( 'tag', 'post_tag', 'Document type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'State' ) ),
 	'aw_news'        => array( array( 'publisher', 'publisher', 'Publisher' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
-	'post'           => array( array( 'tag', 'resource-kind', 'Resource type' ), array( 'category_name', 'category', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
-	'aw_opportunity' => array( array( 'tag', 'post_tag', 'Opportunity type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
+	'post'           => array( array( 'tag', 'resource-kind', 'Type' ), array( 'category_name', 'category', 'Category' ) ), // resource-kind: the Resource type, plus "Sponsored" (a label) when an item has it
+	'aw_opportunity' => array( array( 'tag', 'post_tag', 'Type' ), array( 'category_name', 'category', 'Category' ), array( 'state', 'place', 'Location' ) ),
 	'aw_campaign'    => array( array( 'category_name', 'category', 'Category' ) ),
 	'aw_press'       => array( array( 'format', 'press-format', 'Format' ), array( 'campaign', 'aw_campaign_link', 'Campaign' ) ), // Articles · Videos · Social posts; Campaign: the item's campaign link (owner, 17 and 20 Oct 2026)
 );
