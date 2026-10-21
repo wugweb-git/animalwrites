@@ -285,7 +285,7 @@ $send = c2sec(
 	'aw-camp-grey aw-camp-open'
 );
 
-/* 7. Other ways to send: three tiles, each with a round campaign-colour badge; the postal address is set as an address. */
+/* 7. Other ways to send: two tiles, each with a round campaign-colour badge (By post removed, owner, 21 Oct 2026). */
 $way = function ( $icon, $title, $text ) {
 	return '<li class="aw-camp-way"><span class="aw-camp-way-badge">' . c2i( $icon ) . '</span><h3>' . $title . '</h3>' . $text . '</li>';
 };
@@ -295,7 +295,6 @@ $how = c2sec(
 	. c2html(
 		'<ul class="aw-camp-ways">'
 		. $way( 'copy', 'Copy and paste', '<p>Copy the letter and the address, and paste them into any email app.</p>' )
-		. $way( 'mail', 'By post', '<address>Member Secretary (CCSEA)<br>Office of CCSEA, Near State Bank of India<br>Delhi Milk Scheme Complex, Shadipur<br>Delhi 110008</address><p class="aw-camp-way-date">Post it by 30 Oct 2026 so it arrives in time.</p>' )
 		. $way( 'send', 'Write your own', '<p>Use your own words. Mention G.S.R. 864(E), the rule numbers, your name and city, and ask for an acknowledgment.</p>' )
 		. '</ul>'
 	),
