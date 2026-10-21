@@ -113,3 +113,18 @@ add_filter(
 	},
 	20
 );
+
+/* ---------- Directory listings reported closed (aw_reported_closed, set by enrichment): out of search ---------- */
+
+add_filter(
+	'wp_robots',
+	function ( $robots ) {
+		if ( is_singular( 'aw_listing' ) && get_post_meta( get_queried_object_id(), 'aw_reported_closed', true ) ) {
+			$robots['noindex'] = true;
+		}
+		return $robots;
+	}
+);
+
+// "?press=all" lists every item on the profile: the same page, kept out of the index.
+add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification

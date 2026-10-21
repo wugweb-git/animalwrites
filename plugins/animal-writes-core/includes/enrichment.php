@@ -1020,18 +1020,6 @@ function aw_enrich_duplicates( $lid ) {
 	aw_enrich_flag( $lid, 'duplicate', $dups );
 }
 
-/* ---------- Reported closed: out of search ---------- */
-
-add_filter(
-	'wp_robots',
-	function ( $robots ) {
-		if ( is_singular( 'aw_listing' ) && get_post_meta( get_queried_object_id(), 'aw_reported_closed', true ) ) {
-			$robots['noindex'] = true;
-		}
-		return $robots;
-	}
-);
-
 
 /**
  * Apply the owner's rule (21 Oct 2026) to proposals already waiting: a sourced value fills an empty field; a second

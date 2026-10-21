@@ -659,5 +659,3 @@ add_filter(
 	},
 	20
 );
-add_filter( 'rank_math/frontend/title', 'aw_heading_dates', 20 );
-add_filter( 'rank_math/frontend/description', 'aw_heading_dates', 20 );

@@ -490,8 +490,6 @@ function aw_block_listing_press( $a, $id ) {
 	return '<section class="aw-more-group aw-listing-press" aria-labelledby="aw-press-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-press-h">' . esc_html__( 'In the press', 'animal-writes-core' ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_listing_press_card', $show ) ) . '</ul>' . $more . '</section>';
 }
 
-// "?press=all" lists every item on the profile: the same page, kept out of the index.
-add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
 
 function aw_block_listing_opportunities( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
