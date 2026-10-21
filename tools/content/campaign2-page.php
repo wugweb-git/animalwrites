@@ -394,10 +394,18 @@ $loop      = c2sec(
 );
 
 /* Impact: the objection count; the whole section shows only once the count reaches the threshold (aw-camp-if-count). */
-$impact = c2sec(
+$impact = c2sec( // brand band: what the count is and a way in on the left, the count on a white tile on the right
 	'',
-	c2h( 'Objections sent' )
-	. c2sc( '[aw_campaign_count min="100" label="objections sent from this page"]' ),
+	'<!-- wp:columns {"verticalAlignment":"center","className":"aw-camp-tally-cols"} -->' . "\n" . '<div class="wp-block-columns are-vertically-aligned-center aw-camp-tally-cols">'
+	. '<!-- wp:column {"verticalAlignment":"center","width":"58%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:58%">'
+	. c2h( 'Objections sent' )
+	. c2p( 'Each one is a letter from a person to CCSEA, sent from this page. Add yours before 5 Nov 2026.' )
+	. c2buttons( array( array( 'Send your objection', '#how-to-help' ) ) )
+	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
+	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
+	. c2sc( '[aw_campaign_count min="100" label="objections sent"]' )
+	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n"
+	. '</div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
 	'aw-camp-brand aw-camp-tally'
 );
 

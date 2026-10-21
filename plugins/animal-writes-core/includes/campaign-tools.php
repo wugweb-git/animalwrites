@@ -551,7 +551,20 @@ add_action(
 		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)
 			$img = fn( $k ) => ( $a = (int) get_post_meta( $id, $k, true ) ) ? (string) wp_get_attachment_url( $a ) : '';
 			$txt = (string) get_post_meta( $id, 'aw_campaign_share_text', true );
-			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ) ) ) . ';', 'before' );
+			// The link preview in the letter share box shows what Facebook, WhatsApp and X show: Rank Math's social title, description and image
+			$rm   = function ( $k ) use ( $id ) {
+				$v = (string) get_post_meta( $id, $k, true );
+				if ( $v && class_exists( '\RankMath\Helper' ) ) {
+					$v = \RankMath\Helper::replace_vars( $v, get_post( $id ) );
+				}
+				return trim( wp_strip_all_tags( $v ) );
+			};
+			$og_t = $rm( 'rank_math_facebook_title' );
+			$og_t = $og_t ? $og_t : ( $rm( 'rank_math_title' ) ? $rm( 'rank_math_title' ) : get_the_title( $id ) );
+			$og_d = $rm( 'rank_math_facebook_description' );
+			$og_d = $og_d ? $og_d : ( $rm( 'rank_math_description' ) ? $rm( 'rank_math_description' ) : wp_strip_all_tags( get_the_excerpt( $id ) ) );
+			$og_i = $img( 'rank_math_facebook_image_id' );
+			wp_add_inline_script( 'aw-campaign', 'window.awCampShare=' . wp_json_encode( array( 'url' => get_permalink( $id ), 'title' => get_the_title( $id ), 'text' => $txt ? $txt : get_the_title( $id ), 'story' => $img( 'aw_campaign_share_story' ), 'post' => $img( 'aw_campaign_share_post' ), 'slug' => get_post_field( 'post_name', $id ), 'og' => array( 'title' => $og_t, 'desc' => $og_d, 'image' => $og_i ? $og_i : $img( 'aw_campaign_share_post' ), 'host' => wp_parse_url( home_url(), PHP_URL_HOST ) ), 'close' => aw_date( get_post_meta( $id, 'aw_campaign_close', true ) ) ) ) . ';', 'before' );
 		}
 	}
 );
