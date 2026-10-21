@@ -62,16 +62,8 @@ function aw_block_listing_help( $a, $id ) {
 		return '';
 	}
 	$verified = (bool) get_post_meta( $id, 'aw_verified', true );
-	$missing  = array(); // the finer details come from the organisation itself (owner, 21 Oct 2026)
-	foreach ( array( 'phone numbers' => ! aw_listing_phones( $id ), 'opening hours' => ! aw_listing_hours( $id ), 'email' => ! get_post_meta( $id, 'aw_email', true ), 'website' => ! get_post_meta( $id, 'aw_website', true ), 'photos' => ! get_post_meta( $id, 'aw_gallery', true ), 'services' => ! aw_listing_service_names( $id ) ) as $what => $gone ) {
-		if ( $gone ) {
-			$missing[] = $what;
-		}
-	}
-	$missing = array_slice( $missing, 0, 4 );
-	$add     = $missing && ! $verified ? ' Claim it to add ' . ( count( $missing ) > 1 ? implode( ', ', array_slice( $missing, 0, -1 ) ) . ' and ' . end( $missing ) : $missing[0] ) . '.' : '';
 	return '<section class="aw-listing-help" aria-labelledby="aw-listing-help-h"><h2 id="aw-listing-help-h" class="has-x-large-font-size">Is this your organisation?</h2>'
-		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.' . esc_html( $add ) . '</p>' )
+		. ( $verified ? '' : '<p>This listing comes from public records and hasn\'t been confirmed.</p>' )
 		. '<div class="aw-listing-help-actions">'
 		. '<a class="kit-btn aw-claim-link" href="' . esc_url( aw_claim_url( $id ) ) . '" rel="nofollow">Claim this listing</a>' // Report a mistake is in the Sources block
 		. '</div></section>';
