@@ -1,0 +1,380 @@
+[
+    {
+        "id": "5",
+        "title": "Volunteer sign-up",
+        "status": "published",
+        "appearance_settings": null,
+        "form_fields": {
+            "fields": [
+                {
+                    "index": 1,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_roles",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "roles",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field kit-check-group aw-vol-roles",
+                        "label": "How would you like to help?",
+                        "label_placement": "",
+                        "admin_field_label": "How would you like to help?",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Choose how you'd like to help",
+                                "global_message": "Choose how you'd like to help",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "Coordinate volunteers in my city",
+                                "value": "coordinate",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Write and post letters, and get others to",
+                                "value": "letters",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Rescue, foster or transport animals",
+                                "value": "rescue",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Design, writing, photos or social media",
+                                "value": "creative",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Legal or policy work",
+                                "value": "legal",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 2,
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_name",
+                    "attributes": {
+                        "name": "name",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "text",
+                        "autocomplete": "name",
+                        "maxlength": 80,
+                        "placeholder": "Asha"
+                    },
+                    "settings": {
+                        "container_class": "kit-field aw-form-ff-half",
+                        "label": "Your name",
+                        "label_placement": "",
+                        "admin_field_label": "Your name",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your name",
+                                "global_message": "Enter your name",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 3,
+                    "element": "input_email",
+                    "uniqElKey": "el_aw_email",
+                    "attributes": {
+                        "name": "email",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "email",
+                        "autocomplete": "email",
+                        "inputmode": "email",
+                        "maxlength": 254,
+                        "placeholder": "you@example.com"
+                    },
+                    "settings": {
+                        "container_class": "kit-field aw-form-ff-half",
+                        "label": "Email",
+                        "label_placement": "",
+                        "admin_field_label": "Email",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your email address",
+                                "global_message": "Enter your email address",
+                                "global": false
+                            },
+                            "email": {
+                                "value": true,
+                                "message": "Enter a full email address, like you@example.com",
+                                "global_message": "Enter a full email address, like you@example.com",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Email Address",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 4,
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_phone",
+                    "attributes": {
+                        "name": "phone",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "text",
+                        "autocomplete": "tel",
+                        "inputmode": "tel",
+                        "maxlength": 16,
+                        "placeholder": "98765 43210"
+                    },
+                    "settings": {
+                        "container_class": "kit-field aw-form-ff-half",
+                        "label": "Phone <span class=\"kit-optional\">(optional)</span>",
+                        "label_placement": "",
+                        "admin_field_label": "Phone",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 5,
+                    "element": "aw_places",
+                    "uniqElKey": "el_aw_places",
+                    "attributes": {
+                        "name": "aw_places"
+                    },
+                    "settings": {
+                        "label": "PIN code, State and District",
+                        "container_class": "",
+                        "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "PIN code, State and District",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                },
+                {
+                    "index": 6,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_consent",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "consent",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Tick the box to agree",
+                                "global_message": "Tick the box to agree",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 7,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_nl_optin",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "nl_optin",
+                        "value": [
+                            "1"
+                        ]
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 8,
+                    "element": "aw_check",
+                    "uniqElKey": "el_aw_check",
+                    "attributes": {
+                        "name": "aw_check"
+                    },
+                    "settings": {
+                        "label": "Spam check (ALTCHA)",
+                        "container_class": "",
+                        "html_codes": "<p>Spam check (ALTCHA) (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Spam check (ALTCHA)",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                }
+            ],
+            "submitButton": {
+                "uniqElKey": "el_aw_submit",
+                "element": "button",
+                "attributes": {
+                    "type": "submit",
+                    "class": "kit-btn"
+                },
+                "settings": {
+                    "align": "left",
+                    "button_style": "",
+                    "container_class": "",
+                    "help_message": "",
+                    "background_color": "",
+                    "button_size": "md",
+                    "color": "",
+                    "button_ui": {
+                        "type": "default",
+                        "text": "Sign up to volunteer",
+                        "img_url": ""
+                    }
+                },
+                "editor_options": {
+                    "title": "Submit Button"
+                }
+            }
+        },
+        "has_payment": "0",
+        "type": "form",
+        "conditions": null,
+        "created_by": "1",
+        "metas": [
+            {
+                "meta_key": "_ff_selected_style",
+                "value": "ffs_inherit_theme"
+            },
+            {
+                "meta_key": "_primary_email_field",
+                "value": "email"
+            },
+            {
+                "meta_key": "formSettings",
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"messageToShow\":\"<p>Sent.<\\/p>\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+            },
+            {
+                "meta_key": "step_data_persistency_status",
+                "value": "no"
+            }
+        ]
+    }
+]

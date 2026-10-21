@@ -1,0 +1,365 @@
+[
+    {
+        "id": "4",
+        "title": "Contact",
+        "status": "published",
+        "appearance_settings": null,
+        "form_fields": {
+            "fields": [
+                {
+                    "index": 1,
+                    "element": "select",
+                    "uniqElKey": "el_aw_about",
+                    "attributes": {
+                        "name": "about",
+                        "value": "",
+                        "id": "",
+                        "class": ""
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "What's this about?",
+                        "label_placement": "",
+                        "admin_field_label": "What's this about?",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Choose what this is about",
+                                "global_message": "Choose what this is about",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "General question",
+                                "value": "general",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "List your organisation",
+                                "value": "listing",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Get featured",
+                                "value": "featured",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Post an opportunity",
+                                "value": "opportunity",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Partner with us",
+                                "value": "partnership",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Report a mistake",
+                                "value": "correction",
+                                "calc_value": "",
+                                "image": ""
+                            },
+                            {
+                                "label": "Remove my data",
+                                "value": "remove-data",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": "",
+                        "placeholder": "Choose a reason"
+                    },
+                    "editor_options": {
+                        "title": "Dropdown",
+                        "icon_class": "ff-edit-text",
+                        "template": "select"
+                    }
+                },
+                {
+                    "index": 2,
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_name",
+                    "attributes": {
+                        "name": "name",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "text",
+                        "autocomplete": "name",
+                        "maxlength": 80,
+                        "placeholder": "Asha"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Your name",
+                        "label_placement": "",
+                        "admin_field_label": "Your name",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your name",
+                                "global_message": "Enter your name",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 3,
+                    "element": "input_email",
+                    "uniqElKey": "el_aw_email",
+                    "attributes": {
+                        "name": "email",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "email",
+                        "autocomplete": "email",
+                        "inputmode": "email",
+                        "maxlength": 254,
+                        "placeholder": "you@example.com"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Email",
+                        "label_placement": "",
+                        "admin_field_label": "Email",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your email address",
+                                "global_message": "Enter your email address",
+                                "global": false
+                            },
+                            "email": {
+                                "value": true,
+                                "message": "Enter a full email address, like you@example.com",
+                                "global_message": "Enter a full email address, like you@example.com",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Email Address",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 4,
+                    "element": "input_text",
+                    "uniqElKey": "el_aw_org",
+                    "attributes": {
+                        "name": "org",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "text",
+                        "autocomplete": "organization",
+                        "maxlength": 120,
+                        "placeholder": "Example Animal Trust"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Organisation <span class=\"kit-optional\">(optional)</span>",
+                        "label_placement": "",
+                        "admin_field_label": "Organisation",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 5,
+                    "element": "textarea",
+                    "uniqElKey": "el_aw_message",
+                    "attributes": {
+                        "name": "message",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "maxlength": 3000,
+                        "rows": 5
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Message",
+                        "label_placement": "",
+                        "admin_field_label": "Message",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your message",
+                                "global_message": "Enter your message",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Text Area",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputTextarea"
+                    }
+                },
+                {
+                    "index": 6,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_nl_optin",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "nl_optin",
+                        "value": [
+                            "1"
+                        ]
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "Email me Animal Writes updates. I can unsubscribe at any time.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 7,
+                    "element": "aw_check",
+                    "uniqElKey": "el_aw_check",
+                    "attributes": {
+                        "name": "aw_check"
+                    },
+                    "settings": {
+                        "label": "Spam check (ALTCHA)",
+                        "container_class": "",
+                        "html_codes": "<p>Spam check (ALTCHA) (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Spam check (ALTCHA)",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                }
+            ],
+            "submitButton": {
+                "uniqElKey": "el_aw_submit",
+                "element": "button",
+                "attributes": {
+                    "type": "submit",
+                    "class": "kit-btn"
+                },
+                "settings": {
+                    "align": "left",
+                    "button_style": "",
+                    "container_class": "",
+                    "help_message": "",
+                    "background_color": "",
+                    "button_size": "md",
+                    "color": "",
+                    "button_ui": {
+                        "type": "default",
+                        "text": "Send message",
+                        "img_url": ""
+                    }
+                },
+                "editor_options": {
+                    "title": "Submit Button"
+                }
+            }
+        },
+        "has_payment": "0",
+        "type": "form",
+        "conditions": null,
+        "created_by": "1",
+        "metas": [
+            {
+                "meta_key": "_ff_selected_style",
+                "value": "ffs_inherit_theme"
+            },
+            {
+                "meta_key": "_primary_email_field",
+                "value": "email"
+            },
+            {
+                "meta_key": "fluentcrm_feeds",
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"1\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Contact (newsletter box ticked) \\u2192 FluentCRM\",\"tag_ids\":[\"6\",\"2\"]}"
+            },
+            {
+                "meta_key": "formSettings",
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"messageToShow\":\"<p>Sent.<\\/p>\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+            },
+            {
+                "meta_key": "step_data_persistency_status",
+                "value": "no"
+            }
+        ]
+    }
+]

@@ -1,0 +1,121 @@
+[
+    {
+        "id": "8",
+        "title": "Remove my data",
+        "status": "published",
+        "appearance_settings": null,
+        "form_fields": {
+            "fields": [
+                {
+                    "index": 1,
+                    "element": "input_email",
+                    "uniqElKey": "el_aw_email",
+                    "attributes": {
+                        "name": "email",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "type": "email",
+                        "autocomplete": "email",
+                        "inputmode": "email",
+                        "maxlength": 254,
+                        "placeholder": "you@example.com"
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "Email",
+                        "label_placement": "",
+                        "admin_field_label": "Email",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your email address",
+                                "global_message": "Enter your email address",
+                                "global": false
+                            },
+                            "email": {
+                                "value": true,
+                                "message": "Enter a full email address, like you@example.com",
+                                "global_message": "Enter a full email address, like you@example.com",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Email Address",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    }
+                },
+                {
+                    "index": 2,
+                    "element": "aw_check",
+                    "uniqElKey": "el_aw_check",
+                    "attributes": {
+                        "name": "aw_check"
+                    },
+                    "settings": {
+                        "label": "Spam check (ALTCHA)",
+                        "container_class": "",
+                        "html_codes": "<p>Spam check (ALTCHA) (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Spam check (ALTCHA)",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                }
+            ],
+            "submitButton": {
+                "uniqElKey": "el_aw_submit",
+                "element": "button",
+                "attributes": {
+                    "type": "submit",
+                    "class": "kit-btn"
+                },
+                "settings": {
+                    "align": "left",
+                    "button_style": "",
+                    "container_class": "",
+                    "help_message": "",
+                    "background_color": "",
+                    "button_size": "md",
+                    "color": "",
+                    "button_ui": {
+                        "type": "default",
+                        "text": "Send confirmation link",
+                        "img_url": ""
+                    }
+                },
+                "editor_options": {
+                    "title": "Submit Button"
+                }
+            }
+        },
+        "has_payment": "0",
+        "type": "form",
+        "conditions": null,
+        "created_by": "1",
+        "metas": [
+            {
+                "meta_key": "_ff_selected_style",
+                "value": "ffs_inherit_theme"
+            },
+            {
+                "meta_key": "_primary_email_field",
+                "value": "email"
+            },
+            {
+                "meta_key": "formSettings",
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"messageToShow\":\"<p>Sent.<\\/p>\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":false}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"after_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+            },
+            {
+                "meta_key": "step_data_persistency_status",
+                "value": "no"
+            }
+        ]
+    }
+]

@@ -1,0 +1,156 @@
+[
+    {
+        "id": "3",
+        "title": "Newsletter",
+        "status": "published",
+        "appearance_settings": null,
+        "form_fields": {
+            "fields": [
+                {
+                    "index": 1,
+                    "element": "input_email",
+                    "attributes": {
+                        "type": "email",
+                        "name": "email",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "placeholder": "you@example.com",
+                        "autocomplete": "email"
+                    },
+                    "settings": {
+                        "container_class": "",
+                        "label": "Email",
+                        "label_placement": "",
+                        "help_message": "",
+                        "admin_field_label": "Email",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Enter your email address"
+                            },
+                            "email": {
+                                "value": true,
+                                "message": "Enter a full email address, like you@example.com"
+                            }
+                        },
+                        "conditional_logics": [],
+                        "is_unique": "no",
+                        "unique_validation_message": ""
+                    },
+                    "editor_options": {
+                        "title": "Email Address",
+                        "icon_class": "ff-edit-email",
+                        "template": "inputText"
+                    },
+                    "uniqElKey": "el_aw_nl_email"
+                },
+                {
+                    "index": 2,
+                    "element": "input_text",
+                    "attributes": {
+                        "type": "text",
+                        "name": "name",
+                        "value": "",
+                        "id": "",
+                        "class": "",
+                        "placeholder": "Asha",
+                        "maxlength": 80,
+                        "autocomplete": "name"
+                    },
+                    "settings": {
+                        "container_class": "",
+                        "label": "Your name <span class=\"kit-optional\">(optional)</span>",
+                        "label_placement": "",
+                        "admin_field_label": "Name",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": ""
+                            }
+                        },
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "Simple Text",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputText"
+                    },
+                    "uniqElKey": "el_aw_nl_name"
+                },
+                {
+                    "index": 3,
+                    "element": "custom_html",
+                    "attributes": [],
+                    "settings": {
+                        "html_codes": "<p>Email me Animal Writes updates. I can unsubscribe at any time.</p>",
+                        "conditional_logics": [],
+                        "container_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Custom HTML",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    },
+                    "uniqElKey": "el_aw_nl_consent"
+                }
+            ],
+            "submitButton": {
+                "uniqElKey": "el_aw_nl_submit",
+                "element": "button",
+                "attributes": {
+                    "type": "submit",
+                    "class": "kit-btn"
+                },
+                "settings": {
+                    "align": "left",
+                    "button_style": "",
+                    "container_class": "",
+                    "help_message": "",
+                    "background_color": "",
+                    "button_size": "md",
+                    "color": "",
+                    "button_ui": {
+                        "type": "default",
+                        "text": "Subscribe",
+                        "img_url": ""
+                    }
+                },
+                "editor_options": {
+                    "title": "Submit Button"
+                }
+            }
+        },
+        "has_payment": "0",
+        "type": "form",
+        "conditions": null,
+        "created_by": "1",
+        "metas": [
+            {
+                "meta_key": "_ff_selected_style",
+                "value": "ffs_inherit_theme"
+            },
+            {
+                "meta_key": "_primary_email_field",
+                "value": "email"
+            },
+            {
+                "meta_key": "fluentcrm_feeds",
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"1\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[],\"status\":false,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Newsletter \\u2192 FluentCRM\",\"tag_ids\":[\"2\"]}"
+            },
+            {
+                "meta_key": "formSettings",
+                "value": "{\"confirmation\":{\"redirectTo\":\"samePage\",\"messageToShow\":\"<p class=\\\"aw-form-done-title\\\">You're subscribed<\\/p><p>We've sent a confirmation to {inputs.email}.<\\/p>\",\"customPage\":null,\"samePageFormBehavior\":\"hide_form\",\"customUrl\":null},\"restrictions\":{\"denyEmptySubmission\":{\"enabled\":true,\"message\":\"Enter your email address\"}},\"layout\":{\"labelPlacement\":\"top\",\"helpMessagePlacement\":\"with_label\",\"errorMessagePlacement\":\"inline\",\"asteriskPlacement\":\"none\"}}"
+            },
+            {
+                "meta_key": "notifications",
+                "value": "{\"name\":\"Confirmation to the subscriber\",\"sendTo\":{\"type\":\"field\",\"email\":\"\",\"field\":\"email\",\"routing\":[]},\"fromName\":\"\",\"fromEmail\":\"\",\"replyTo\":\"\",\"bcc\":\"\",\"subject\":\"Your subscription to Animal Writes\",\"message\":\"<p>Thank you for signing up. You will get Animal Writes updates at this address.<\\/p><p>If you did not ask for this, use the link below and you will not hear from us.<\\/p><p>--<br>To stop these emails: %%aw_unsubscribe%%<\\/p>\",\"conditionals\":{\"status\":false,\"type\":\"all\",\"conditions\":[]},\"enabled\":false,\"email_template\":\"\"}"
+            },
+            {
+                "meta_key": "step_data_persistency_status",
+                "value": "no"
+            }
+        ]
+    }
+]
