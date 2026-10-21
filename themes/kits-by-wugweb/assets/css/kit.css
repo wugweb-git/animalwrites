@@ -846,7 +846,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer-cats .kit-chip:is(:hover, :focus-visible) { --kit-chip-fg: var(--kit-color-on-ink); }
 @media (max-width: 767px) { /* phones: rows 16 apart so each 28px chip owns a full 44px tap area, half of each gap above and below, with no overlap between rows (owner, 21 Oct 2026) */
 	.kit-footer-cats .aw-footer-list { row-gap: var(--kit-space-4); }
-	.kit-footer-cats .kit-chip::after { inset: calc(var(--kit-space-4) / -2) 0; }
+	.kit-footer-cats .kit-chip::after { inset: calc(var(--kit-space-4) / -2 - var(--kit-border-width)) 0; } /* measured from inside the chip border */
 }
 .kit-footer-inline { display: flex; flex-wrap: wrap; gap: var(--kit-space-1) var(--kit-space-5); }
 .kit-footer-inline a { display: inline-flex; align-items: center; min-height: 2rem; color: var(--kit-footer-muted); text-decoration: none; font-size: var(--kit-type-xs); }
