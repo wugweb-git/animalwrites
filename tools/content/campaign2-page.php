@@ -108,6 +108,10 @@ function c2html( $h ) {
 	return "<!-- wp:html -->\n$h\n<!-- /wp:html -->\n\n";
 }
 /** Theme icon (aw.css 4.7), same markup as aw_i(). */
+/** A query list as the card patterns write it (Kits cards, 20 Oct 2026); %TQ% is the campaign's taxQuery. */
+function c2q( $markup, $tq ) {
+	return str_replace( '%TQ%', $tq, $markup );
+}
 function c2i( $n ) {
 	return '<span class="kit-ico kit-ico--' . $n . '" aria-hidden="true"></span>';
 }
@@ -328,8 +332,20 @@ $tq  = '"taxQuery":{"aw_campaign_link":[' . (int) $tag->term_id . ']}';
 $read = c2sec(
 	'read',
 	c2split( c2h( 'Read the law and the record' ) . c2p( 'The draft, the law it would replace, and the circulars and court orders behind this campaign, in full in our Library.', 'aw-camp-lede' ), 16856, '100% 50%' )
-	. '<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-camp-docs-q kit-ico--file"} -->' . "\n"
-	. '<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":84,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-docs-q kit-ico--file"} -->
+<div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-sm","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--stacked-sm"><!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/badges {"state":"stacked-sm"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n\n",
 	'aw-camp-grey'
 );
 
@@ -350,14 +366,64 @@ $updates = c2sec(
 	'latest',
 	c2html( '<header class="kit-ed-head"><div><h2>News and guides</h2></div><a class="kit-ed-more" href="/resources/">All guides ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:group {"className":"kit-ed-news-grid","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group kit-ed-news-grid">'
-	. '<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-lead"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":82,"query":{"perPage":1,"pages":0,"offset":0,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-lead"} -->
+<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-lg","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-lg"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
+
+<!-- wp:animal-writes/badges {"state":"block-lg"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":40,"className":"kit-card-sum"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n"
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-list"} -->
+<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--stacked-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
+
+<!-- wp:animal-writes/badges {"state":"stacked-md"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n"
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
 	// the next three News items (owner, 21 Oct 2026: new coverage shows along with the rest)
-	. '<!-- wp:query {"queryId":86,"query":{"perPage":3,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list aw-camp-more-news"} -->' . "\n"
-	. '<div class="wp-block-query kit-ed-list aw-camp-more-news"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n",
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":86,"query":{"perPage":3,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"kit-ed-list aw-camp-more-news"} -->
+<div class="wp-block-query kit-ed-list aw-camp-more-news"><!-- wp:post-template -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--stacked-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--stacked-md"><!-- wp:post-featured-image {"isLink":true,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
+
+<!-- wp:animal-writes/badges {"state":"stacked-md"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n",
 	'aw-camp-white'
 );
 
@@ -366,13 +432,26 @@ $updates = c2sec(
 $press = c2sec(
 	'',
 	c2html( '<header class="kit-ed-head"><div><h2>In the press</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">All coverage ' . c2i( 'arrow-right' ) . '</a></header>' )
-	. '<!-- wp:query {"queryId":85,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->' . "\n"
-	. '<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->' . "\n"
-	. '<!-- wp:group {"tagName":"article","className":"aw-story aw-story\\u002d\\u002dcard aw-story\\u002d\\u002dexternal","layout":{"type":"default"}} -->' . "\n"
-	. '<article class="wp-block-group aw-story aw-story--card aw-story--external"><!-- wp:animal-writes/press-media /-->' . "\n\n"
-	. '<!-- wp:group {"className":"aw-story-body","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-story-body"><!-- wp:animal-writes/publisher /-->' . "\n\n"
-	. '<!-- wp:post-title {"level":3,"isLink":true,"className":"aw-story-title"} /-->' . "\n\n" . '<!-- wp:animal-writes/press-meta /--></div>' . "\n" . '<!-- /wp:group --></article>' . "\n" . '<!-- /wp:group -->' . "\n"
-	. '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n\n",
+	. c2q( <<<'HTML'
+<!-- wp:query {"queryId":85,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->
+<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->
+<!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
+<article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":false,"className":"kit-card-media"} /-->
+
+<!-- wp:group {"className":"kit-card-body","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-card-body"><!-- wp:animal-writes/read-meta /-->
+
+<!-- wp:animal-writes/badges {"state":"block-md"} /-->
+
+<!-- wp:post-title {"level":3,"isLink":true,"className":"kit-card-title"} /-->
+
+<!-- wp:post-excerpt {"excerptLength":40,"className":"kit-card-sum"} /--></div>
+<!-- /wp:group --></article>
+<!-- /wp:group -->
+<!-- /wp:post-template --></div>
+<!-- /wp:query -->
+HTML
+, $tq ) . "\n\n",
 	'aw-camp-white'
 );
 
