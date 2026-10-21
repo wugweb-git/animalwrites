@@ -56,7 +56,11 @@ function aw_mail_campaign_days_left( $close ) {
 	return max( 0, (int) $today->diff( $end )->format( '%r%a' ) );
 }
 
-/** The strip as email HTML ('' when no campaign is open). */
+/**
+ * The strip as email HTML ('' when no campaign is open). Built for a phone first (owner, 21 Oct 2026): the days left and
+ * the campaign's words side by side on the full width, the button under them across the full width at 44px; plain
+ * tables with bgcolor as well as background, so Gmail's dark mode keeps the colours and no media query is needed.
+ */
 function aw_mail_campaign_strip_html() {
 	$c = aw_mail_open_campaign();
 	if ( ! $c ) {
@@ -64,13 +68,16 @@ function aw_mail_campaign_strip_html() {
 	}
 	$close = $c[2] ? wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '';
 	$days  = aw_mail_campaign_days_left( $c[2] );
-	$tab   = null === $days ? '' : ( 0 === $days ? '<span style="font-size:13px;font-weight:bold;line-height:1.1">Last</span><br><span style="font-size:9px;letter-spacing:.06em">DAY</span>' : '<span style="font-size:18px;font-weight:bold;line-height:1">' . (int) $days . '</span><br><span style="font-size:9px;letter-spacing:.06em">' . ( 1 === $days ? 'DAY LEFT' : 'DAYS LEFT' ) . '</span>' );
 	$font  = 'font-family:Arial,Helvetica,sans-serif;';
-	return '<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-top:12px;width:460px;max-width:100%"><tr>'
-		. ( '' !== $tab ? '<td style="background:' . esc_attr( $c[4] ) . ';border-radius:4px 0 0 4px;padding:6px 12px;text-align:center;vertical-align:middle;' . $font . 'color:#ffffff;white-space:nowrap">' . $tab . '</td>' : '' )
-		. '<td style="background:' . esc_attr( $c[3] ) . ';' . ( '' === $tab ? 'border-radius:4px 0 0 4px;' : '' ) . 'padding:7px 12px;' . $font . 'font-size:12px;line-height:1.35;color:#ffffff;vertical-align:middle"><a href="' . esc_url( $c[1] ) . '" style="color:#ffffff;text-decoration:none"><strong>' . esc_html( $c[0] ) . '</strong></a>' . ( '' !== $c[7] ? '<br><span style="font-size:11px">' . esc_html( $c[7] ) . '</span>' : ( $close ? '<br><span style="font-size:11px">' . esc_html( $c[6] . ' ' . $close ) . '</span>' : '' ) ) . '</td>'
-		. '<td style="background:' . esc_attr( $c[3] ) . ';border-radius:0 4px 4px 0;padding:7px 10px 7px 0;text-align:right;vertical-align:middle;white-space:nowrap"><a href="' . esc_url( $c[1] ) . '" style="display:inline-block;background:#ffffff;color:' . esc_attr( $c[3] ) . ';text-decoration:none;' . $font . 'font-size:11px;font-weight:bold;padding:6px 10px;border-radius:3px">' . esc_html( $c[5] ) . ' &rarr;</a></td>'
-		. '</tr></table>';
+	$tab   = null === $days ? '' : ( 0 === $days ? '<span style="font-size:20px;font-weight:bold;line-height:1.1">Last</span><br><span style="font-size:11px;letter-spacing:.08em">DAY</span>' : '<span style="font-size:30px;font-weight:bold;line-height:1">' . (int) $days . '</span><br><span style="font-size:11px;letter-spacing:.08em">' . ( 1 === $days ? 'DAY LEFT' : 'DAYS LEFT' ) . '</span>' );
+	$words = '<a href="' . esc_url( $c[1] ) . '" style="color:#ffffff;text-decoration:none"><strong style="font-size:17px;line-height:1.3">' . esc_html( $c[0] ) . '</strong></a>'
+		. ( '' !== $c[7] ? '<br><span style="font-size:14px;line-height:1.45">' . esc_html( $c[7] ) . '</span>' : '' )
+		. ( $close ? '<br><span style="font-size:13px;line-height:1.6">' . esc_html( $c[6] . ' ' . $close ) . '</span>' : '' );
+	$cols  = '' !== $tab ? 2 : 1;
+	return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="' . esc_attr( $c[3] ) . '" style="border-collapse:separate;margin-top:16px;max-width:480px;background:' . esc_attr( $c[3] ) . ';border-radius:8px">'
+		. '<tr>' . ( '' !== $tab ? '<td width="88" bgcolor="' . esc_attr( $c[4] ) . '" style="width:88px;background:' . esc_attr( $c[4] ) . ';border-radius:8px 0 0 0;padding:16px 8px;text-align:center;vertical-align:middle;' . $font . 'color:#ffffff">' . $tab . '</td>' : '' )
+		. '<td bgcolor="' . esc_attr( $c[3] ) . '" style="background:' . esc_attr( $c[3] ) . ';' . ( '' === $tab ? 'border-radius:8px 8px 0 0;' : 'border-radius:0 8px 0 0;' ) . 'padding:16px;vertical-align:middle;' . $font . 'color:#ffffff">' . $words . '</td></tr>'
+		. '<tr><td colspan="' . (int) $cols . '" bgcolor="' . esc_attr( $c[3] ) . '" style="background:' . esc_attr( $c[3] ) . ';border-radius:0 0 8px 8px;padding:0 16px 16px"><a href="' . esc_url( $c[1] ) . '" style="display:block;background:#141414;color:#ffffff;border:2px solid #ffffff;border-radius:6px;text-decoration:none;text-align:center;' . $font . 'font-size:16px;font-weight:bold;line-height:20px;padding:12px 16px">' . esc_html( $c[5] ) . ' &rarr;</a></td></tr></table>';
 }
 
 /** The strip as one plain-text line ('' when none). */
