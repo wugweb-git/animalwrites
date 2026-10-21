@@ -122,7 +122,7 @@
 .kit-section-band--compact { padding-bottom: var(--kit-space-6) !important; } /* Directory: height = content (E1) */
 .kit-section-band--compact:not(:has(.kit-section-filters)) { padding-bottom: var(--kit-space-head) !important; } /* Directory place and type pages: head band only, its search sits under it (owner, 20 Oct 2026) */
 .kit-section-filters--below + .aw-system > .screen-reader-text:first-child + * { margin-top: 0; } /* list pages: no gap for a list's hidden heading */
-.kit-section-band:has(.aw-dir-search) .kit-section-desc { font-size: 1rem; } /* the line under the Directory title: 16px, the body size (was the lead size, 18px from 1200; owner, 21 Oct 2026) */
+.kit-section-band:has(.aw-dir-search) .kit-section-desc { font-size: .875rem; } /* the line under the Directory title: 14px (was the lead size, 18px from 1200; owner, 21 Oct 2026) */
 .aw-dir-search select { text-overflow: ellipsis; }
 .aw-dir-search select:disabled { opacity: var(--opacity-60); cursor: not-allowed; }
 .aw-dir-submit .kit-btn { width: 100%; }
@@ -1296,3 +1296,33 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-camp-docs-q li:has(> .kit-card) { display: block; padding: 0; border: 0; background: none; box-shadow: none; }
 .aw-camp-docs-q li:has(> .kit-card)::before { content: none; }
 .aw-camp .kit-card--stacked-sm { --kit-card-icon-color: var(--camp-mark, var(--kit-color-ink)); }
+
+/* Directory search redesign (owner, 21 Oct 2026). Type: labels 13px, inputs, selects and Search 14px. From 768: the name box and
+   Search on one row, then the filters in one even row (2 across from 768, 4 across from 1200, "Verified only" last). Phones: the
+   filter icon sits inside the search bar and opens the filters; the fold itself is unchanged. */
+.aw-dir-search .kit-field > label { font-size: .8125rem; }
+.aw-dir-search :is(input, select), .aw-dir-search select, .aw-dir-search .aw-dir-submit .kit-btn { font-size: .875rem; }
+.aw-dir-more > summary { display: none; }
+.aw-dir-filter-toggle { position: absolute; right: var(--kit-space-1); top: 50%; transform: translateY(-50%); width: var(--kit-size-target); height: var(--kit-size-target); display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--kit-color-ink); cursor: pointer; }
+.aw-dir-filter-toggle .kit-ico { --kit-ico-size: 1.25rem; }
+.aw-dir-filter-toggle:hover { background: var(--kit-chip-hover); }
+.aw-dir-filter-toggle:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-dir-filter-toggle[aria-expanded="true"] { background: var(--kit-color-surface); }
+.aw-dir-filter-toggle.has-filters::after { content: ""; position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--kit-color-accent); }
+.aw-dir-q .kit-field-control:has(.aw-dir-filter-toggle) input[type=search] { padding-right: calc(var(--kit-size-target) + var(--kit-space-1)); }
+@media (max-width: 767px) { .aw-dir-more:not([open]) { height: 0; margin-top: calc(-1 * var(--kit-space-3)); } }
+@media (min-width: 768px) {
+	.aw-dir-search.kit-section-search { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+	.aw-dir-search.kit-section-search .aw-dir-q { grid-column: 1; grid-row: 1; }
+	.aw-dir-search.kit-section-search .aw-dir-submit { grid-column: 2; grid-row: 1; margin-top: 0; }
+	.aw-dir-search.kit-section-search .aw-dir-submit .kit-btn { width: auto; }
+	.aw-dir-search.kit-section-search .aw-dir-more { grid-column: 1 / -1; grid-row: 2; }
+	.aw-dir-search .aw-dir-more-body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.aw-dir-filter-toggle { display: none; }
+	.aw-dir-q .kit-field-control:has(.aw-dir-filter-toggle) input[type=search] { padding-right: var(--kit-space-3); }
+}
+@media (min-width: 1200px) {
+	.aw-dir-search .aw-dir-more-body { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.aw-dir-search .aw-dir-more-body:has(.aw-dir-check) { grid-template-columns: repeat(4, minmax(0, 1fr)) auto; }
+	.aw-dir-search .aw-dir-more-body .aw-dir-check { grid-column: auto; align-self: end; display: flex; align-items: center; min-height: var(--kit-field-height); font-size: .8125rem; }
+}

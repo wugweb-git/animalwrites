@@ -452,8 +452,8 @@ function aw_directory_filter( $type = '' ) {
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
-		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off">', 'q' )
-		. '<details class="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="kit-btn kit-btn--secondary kit-btn--sm">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
+		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off"><button type="button" class="aw-dir-filter-toggle' . ( $state || $cur_type || $verified ? ' has-filters' : '' ) . '" aria-label="Filters" aria-controls="aw-dir-more" aria-expanded="' . ( $state || $cur_type || $verified ? 'true' : 'false' ) . '"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></button>', 'q' )
+		. '<details class="aw-dir-more" id="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="screen-reader-text">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )

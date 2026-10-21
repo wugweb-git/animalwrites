@@ -122,3 +122,15 @@
 		})
 		.catch(function () {});
 })();
+
+/* Directory search on phones: the filter icon inside the search bar opens and closes the filters (21 Oct 2026). */
+(function () {
+	var f = document.querySelector('form.aw-dir-search');
+	if (!f) return;
+	var b = f.querySelector('.aw-dir-filter-toggle'), d = f.querySelector('details.aw-dir-more');
+	if (!b || !d) return;
+	function sync() { b.setAttribute('aria-expanded', d.open ? 'true' : 'false'); }
+	b.addEventListener('click', function () { d.open = !d.open; });
+	d.addEventListener('toggle', sync);
+	sync();
+})();
