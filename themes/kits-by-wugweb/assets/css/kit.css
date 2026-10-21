@@ -467,6 +467,10 @@ html:not(.kits-preview) body:not(.kits-preview) .kits-preview-only { display: no
    does its placement with the "Advertisement" label. A filled ad is untouched; with Advanced Ads off there is nothing. */
 ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
 [class*="-entity-placement"]:has(ins.adsbygoogle[data-ad-status="unfilled"]):not(:has(ins.adsbygoogle[data-ad-status="filled"])) { display: none !important; }
+/* Until AdSense answers, a unit is 0 tall and its label hidden (it keeps its width, which is all AdSense measures), so
+   nothing below jumps when an empty one closes. It takes its height when filled. */
+ins.adsbygoogle:not([data-ad-status="filled"]) { height: 0 !important; min-height: 0 !important; overflow: hidden; }
+[class*="-entity-placement"]:has(ins.adsbygoogle):not(:has(ins.adsbygoogle[data-ad-status="filled"])) > [class$="-adlabel"] { display: none; }
 
 /* Tables (core/table): header row, cell padding, line borders; scroll sideways on small screens instead of squeezing.
    "Stripes" (core block style) shades every other row. Tokens only. */
