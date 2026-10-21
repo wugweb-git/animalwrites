@@ -354,7 +354,10 @@ $updates = c2sec(
 	. '<div class="wp-block-query kit-ed-lead"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- wp:post-excerpt {"excerptLength":36} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
 	. '<!-- wp:query {"queryId":83,"query":{"perPage":4,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list"} -->' . "\n"
 	. '<div class="wp-block-query kit-ed-list"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n"
-	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
+	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n"
+	// the next three News items (owner, 21 Oct 2026: new coverage shows along with the rest)
+	. '<!-- wp:query {"queryId":86,"query":{"perPage":3,"pages":0,"offset":1,"postType":"aw_news","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"kit-ed-list aw-camp-more-news"} -->' . "\n"
+	. '<div class="wp-block-query kit-ed-list aw-camp-more-news"><!-- wp:post-template -->' . "\n" . '<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /-->' . "\n" . '<!-- wp:animal-writes/publisher /-->' . "\n" . '<!-- wp:post-title {"level":3,"isLink":true} /-->' . "\n" . '<!-- /wp:post-template --></div>' . "\n" . '<!-- /wp:query -->' . "\n",
 	'aw-camp-white'
 );
 
@@ -362,7 +365,7 @@ $updates = c2sec(
    (none listed for now; the shortcode prints nothing until the owner names them). */
 $press = c2sec(
 	'',
-	c2html( '<header class="kit-ed-head"><div><h2>In the press</h2></div><a class="kit-ed-more" href="/media/?tag=campaign-lab-animals-2026">All coverage ' . c2i( 'arrow-right' ) . '</a></header>' )
+	c2html( '<header class="kit-ed-head"><div><h2>In the press</h2></div><a class="kit-ed-more" href="/press-coverage/?campaign=campaign-lab-animals-2026">All coverage ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. '<!-- wp:query {"queryId":85,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,' . $tq . '},"className":"aw-hub-list aw-hub-media aw-camp-press","layout":{"type":"default"}} -->' . "\n"
 	. '<div class="wp-block-query aw-hub-list aw-hub-media aw-camp-press"><!-- wp:post-template {"className":"aw-news-grid","layout":{"type":"default"}} -->' . "\n"
 	. '<!-- wp:group {"tagName":"article","className":"aw-story aw-story\\u002d\\u002dcard aw-story\\u002d\\u002dexternal","layout":{"type":"default"}} -->' . "\n"

@@ -415,3 +415,6 @@
 .aw-camp-band--closed { background: var(--camp-surface); color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed :is(h2, p, .aw-camp-band-kicker) { color: var(--camp-dark); }
 .aw-camp-band.aw-camp-band--closed .aw-camp-band-kicker { margin: 0 0 var(--kit-space-1); color: var(--camp-mark); font-weight: var(--kit-weight-strong); }
+/* The next three campaign News items, under the News and guides grid */
+.aw-camp-more-news { margin-top: var(--kit-space-6, 2.5rem); }
+@media (min-width: 768px) { .aw-camp-more-news .wp-block-post-template { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-5); } }
