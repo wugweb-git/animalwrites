@@ -178,8 +178,8 @@ function aw_tag_icon( $slug ) {
 
 /**
  * A service and the organisation type that does it (owner, 20 Oct 2026: "See all <type>" on the service's tag page).
- * Animal welfare and Bird treatment mirror their types too (owner, 20 Oct 2026); like the other mirrored services they
- * stay noindex,follow and out of the sitemap.
+ * Animal welfare and Bird treatment mirror their types too (owner, 20 Oct 2026). Owner, 21 Oct 2026: the mirrored services
+ * are indexed like every other tag page.
  */
 const AW_SERVICE_TYPE = array( 'rescue' => 'rescue-group', 'treatment' => 'veterinary-hospital', 'shelter' => 'animal-shelter', 'adoption' => 'adoption-network', 'feeding' => 'feeder-network', 'sterilisation' => 'abc-centre', 'ambulance' => 'animal-ambulance', 'legal-help' => 'legal-aid', 'cattle-care' => 'gaushala', 'animal-welfare' => 'animal-welfare-organisation', 'bird-treatment' => 'bird-hospital' );
 
