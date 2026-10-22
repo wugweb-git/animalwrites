@@ -85,6 +85,20 @@ function aw_ai_tier_label( string $provider ): string {
 	return '' === $t ? '—' : AW_AI_TIERS[ $t ][0];
 }
 
+/** The provider's own site icon (owner, 22 Oct 2026: "use AI icons"). */
+const AW_AI_ICON_DOMAINS = array(
+	'nvidia' => 'build.nvidia.com', 'groq' => 'groq.com', 'cerebras' => 'cerebras.ai', 'requesty' => 'requesty.ai', 'cline' => 'cline.bot',
+	'openrouter' => 'openrouter.ai', 'gemini' => 'gemini.google.com', 'mistral' => 'mistral.ai', 'vercel' => 'vercel.com',
+	'commandcode' => 'commandcode.ai', 'anthropic' => 'anthropic.com', 'haiku' => 'anthropic.com', 'openai' => 'openai.com',
+	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai',
+	'firecrawl' => 'firecrawl.dev', 'tinyfish' => 'tinyfish.ai',
+);
+
+function aw_ai_icon( string $provider ): string {
+	$d = AW_AI_ICON_DOMAINS[ $provider ] ?? '';
+	return $d ? '<img src="' . esc_url( 'https://www.google.com/s2/favicons?sz=32&domain=' . $d ) . '" width="16" height="16" alt="" loading="lazy" style="vertical-align:-3px;margin-right:6px;border-radius:3px">' : '';
+}
+
 const AW_AI_STATUS = array(
 	'card'       => 'Needs a card on file (free models)',
 	'works'      => 'Works',
@@ -609,7 +623,7 @@ function aw_ai_keys_screen() {
 	wp_nonce_field( 'aw_ai_keys' );
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
 	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
-	echo '<p>The news workers try the working keys from the top down, then the keys in their GitHub secrets. Every key is tested again twice a day.</p>';
+	echo '<p>All keys in one list: the ones saved here, then the ones in the workers\' GitHub secrets (marked; those are changed in GitHub). The workers try them from the top down. Every key is tested again twice a day.</p>';
 	aw_ai_tier_summary( $rows );
 	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Group</th><th>Good for</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Work in the last run</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
 	if ( ! $rows ) {
@@ -622,7 +636,7 @@ function aw_ai_keys_screen() {
 		$shown[] = $uid;
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
-			. '<td>' . esc_html( $label ) . '</td><td>' . esc_html( aw_ai_tier_label( (string) $r['provider'] ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $r['provider'] ][1] ?? '—' ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
+			. '<td>' . aw_ai_icon( (string) $r['provider'] ) . esc_html( $label ) . '</td><td>' . esc_html( aw_ai_tier_label( (string) $r['provider'] ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $r['provider'] ][1] ?? '—' ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
@@ -630,18 +644,22 @@ function aw_ai_keys_screen() {
 			. '<td>' . esc_html( $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—' ) . '</td>'
 			. '<td><button type="button" class="button" data-aw-up aria-label="Move up">↑</button> <button type="button" class="button" data-aw-down aria-label="Move down">↓</button> <button type="submit" form="aw-ai-remove" name="aw_ai_remove" value="' . esc_attr( aw_ai_key_id( $r['key'] ) ) . '" class="button-link button-link-delete" data-aw-remove="…' . esc_attr( substr( $r['key'], -4 ) ) . '">Remove</button></td></tr>';
 	}
-	echo '</tbody></table>';
-	// Keys the workers also use from their GitHub secrets (not saved here).
+	// The keys in the workers' GitHub secrets, in the same table (owner, 22 Oct 2026: one table for all). GitHub keeps them
+	// write-only, so they are shown from the workers' own reports and changed in GitHub, not here.
 	$other = array_diff_key( $usage, array_flip( $shown ) );
-	if ( $other ) {
-		echo '<h2>Keys in the workers\' GitHub secrets</h2><p>GitHub keeps these write-only, so they cannot be shown or moved here; they are listed from the workers\' own reports. Paid ones are no longer used (22 Oct 2026). Any free key here can simply be pasted above as well.</p><table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Group</th><th>Work in the last run</th></tr></thead><tbody>';
-		uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
-		foreach ( $other as $u ) {
-			$prov = (string) ( $u['provider'] ?? '' );
-			echo '<tr><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code></td><td>' . esc_html( AW_AI_PROVIDERS[ $prov ][0] ?? $prov ) . '</td><td>' . esc_html( aw_ai_tier_label( $prov ) . ( 'paid' === aw_ai_tier( $prov ) ? ' (not used)' : '' ) ) . '</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td></tr>';
-		}
-		echo '</tbody></table>';
+	uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
+	foreach ( $other as $u ) {
+		$prov = (string) ( $u['provider'] ?? '' );
+		$paid = 'paid' === aw_ai_tier( $prov );
+		$last = (array) ( $u['last'] ?? array() );
+		$state = $paid ? 'Not used (paid)' : ( ! empty( $last['ok'] ) ? 'Works' : ( ! empty( $last['limited'] ) ? 'Rate-limited for now' : 'Failed in the last run' ) );
+		echo '<tr style="opacity:' . ( $paid ? '.6' : '1' ) . '"><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code><br><small>GitHub secret</small></td>'
+			. '<td>' . aw_ai_icon( $prov ) . esc_html( AW_AI_PROVIDERS[ $prov ][0] ?? $prov ) . '</td><td>' . esc_html( aw_ai_tier_label( $prov ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $prov ][1] ?? '—' ) . '</td>'
+			. '<td><code>' . esc_html( implode( ', ', array_keys( (array) ( $last['models'] ?? array() ) ) ) ?: '—' ) . '</code></td><td>' . esc_html( $state ) . '</td>'
+			. '<td>—</td><td>—</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td><td>' . esc_html( ! empty( $last['at'] ) ? wp_date( 'j M, H:i', (int) $last['at'] ) : '—' ) . '</td>'
+			. '<td><small>Change in GitHub</small></td></tr>';
 	}
+	echo '</tbody></table>';
 	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check every key again (runs in the background; reload in a few minutes)</label></p>';
 	submit_button( 'Save and check' );
 	echo '</form>';
