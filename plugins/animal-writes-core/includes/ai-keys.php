@@ -33,8 +33,15 @@ const AW_AI_PROVIDERS = array(
 	'cerebras'   => array( 'Cerebras', array( 'csk-' ), 'https://api.cerebras.ai/v1', array( 'gpt-oss-120b', 'llama-3.3-70b' ) ),
 );
 
+/** Keys for tools the workers use that are not AI models (owner, 22 Oct 2026): recognised by prefix, never tested as a model. */
+const AW_AI_TOOLS = array(
+	'firecrawl' => array( 'Firecrawl (article text)', array( 'fc-' ) ),
+	'tinyfish'  => array( 'TinyFish (web agent)', array( 'sk-tinyfish-' ) ),
+);
+
 const AW_AI_STATUS = array(
 	'works'      => 'Works',
+	'tool'       => 'Tool key, not an AI model',
 	'no-credit'  => 'No credit',
 	'limited'    => 'Rate-limited for now',
 	'invalid'    => 'Key refused',
@@ -49,7 +56,7 @@ const AW_AI_STATUS = array(
  * red = broken (safe to remove). Colours are WordPress admin's own success, warning and error colours.
  */
 function aw_ai_status_badge( $status ) {
-	$tone = 'works' === $status ? 'ok' : ( in_array( $status, array( 'limited', 'unchecked' ), true ) ? 'wait' : 'bad' );
+	$tone = in_array( $status, array( 'works', 'tool' ), true ) ? 'ok' : ( in_array( $status, array( 'limited', 'unchecked' ), true ) ? 'wait' : 'bad' );
 	$icon = array( 'ok' => 'yes-alt', 'wait' => 'clock', 'bad' => 'dismiss' )[ $tone ];
 	return '<span class="aw-ai-status aw-ai-status--' . $tone . '"><span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span>'
 		. esc_html( AW_AI_STATUS[ $status ] ?? $status ) . '</span>';
@@ -182,6 +189,13 @@ function aw_ai_check( array $row ): array {
 		}
 		$order = array_unique( array_merge( $order, array_keys( AW_AI_PROVIDERS ) ) );
 	}
+	foreach ( AW_AI_TOOLS as $id => $t ) {
+		foreach ( $t[1] as $prefix ) {
+			if ( str_starts_with( $key, $prefix ) ) {
+				return array_merge( $row, array( 'provider' => $id, 'model' => '', 'url' => '', 'status' => 'tool', 'checked' => time() ) );
+			}
+		}
+	}
 	$row['checked'] = time();
 	$was            = array( $row['provider'] ?? '', $row['model'] ?? '' ); // the model saved on the row is tried first, so a check keeps the owner's choice (22 Oct 2026)
 	foreach ( $order as $id ) {
@@ -271,14 +285,19 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login,
 				'callback'            => function () {
-					$out = array();
+					$out   = array();
+					$tools = array(); // Firecrawl and the like: the workers pick them out by provider
 					foreach ( aw_ai_rows() as $r ) {
+						if ( 'tool' === $r['status'] && isset( AW_AI_TOOLS[ $r['provider'] ] ) ) {
+							$tools[] = array( 'provider' => $r['provider'], 'key' => $r['key'] );
+							continue;
+						}
 						if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
 							continue;
 						}
 						$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
 					}
-					return new WP_REST_Response( array( 'rows' => $out ) );
+					return new WP_REST_Response( array( 'rows' => $out, 'tools' => $tools ) );
 				},
 			)
 		);
@@ -414,7 +433,7 @@ add_action(
 		foreach ( $rows as $i => $r ) {
 			if ( '' !== $id && aw_ai_key_id( $r['key'] ) === $id ) {
 				$removed = substr( $r['key'], -4 );
-				$label   = $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider';
+				$label   = $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider';
 				unset( $rows[ $i ] );
 				update_option( 'aw_ai_models', array_values( $rows ), false );
 				if ( function_exists( 'kits_sourcing_log' ) ) {
@@ -454,7 +473,7 @@ function aw_ai_keys_screen() {
 	foreach ( $rows as $i => $r ) {
 		$uid     = aw_ai_key_id( $r['key'] );
 		$shown[] = $uid;
-		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? $r['provider'] : '—';
+		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
 			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
