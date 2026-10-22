@@ -5,7 +5,7 @@ Check this list against git and the live site before acting on it. Failing AI ke
 ## Open
 1. **Summary rewrite.** Of 1,376 published items: 830 done, 327 ok, 57 failed, 146 still short, 6 our own. Re-run the failed IDs with the workflow's `ids` input ("Summaries: rewrite those that break the current rules") and report the short and failed list.
 2. **Media & PR (page 8811, /press-coverage/).** Title stays "Press Coverage of Animal Writes Campaigns – Animal Writes" (57 characters). Editor score 78. No title reaches 80; only body copy would (the focus keyword "press coverage" appears twice in about 1,000 words, the featured image alt lacks it, no table of contents). Waiting for the owner's yes to change the copy.
-3. **Search Console (22 Oct 2026, `docs/seo/pagespeed-2026-10-21.md` §2).** No new errors. Validation started 22 Oct for the 2 sitemap redirects, the 1 sitemap canonical and Events (schema live in `96f463b`). The other "failed" reasons (redirect 15, canonical 14, noindex 37, 404 2) are intended; do not re-validate. Job Postings warnings: the 11 Wildlife SOS roles have no deadline or salary at the source; decide fuller summaries or no JobPosting.
+3. **Search Console (22 Oct 2026, `docs/seo/pagespeed-2026-10-21.md` §2).** No new errors. Validation started 22 Oct for the 2 sitemap redirects, the 1 sitemap canonical and Events (schema live in `96f463b`). The other "failed" reasons (redirect 15, canonical 14, noindex 37, 404 2) are intended; do not re-validate. Job Postings warnings: **leave as they are (owner, 22 Oct 2026: never rewrite the Wildlife SOS summaries or drop their JobPosting).** The source has no deadline or salary; never invent them.
 4. **GA4 key events.** Starred 22 Oct: contact_sent, newsletter_signup, newsletter_optin, objection_sent, objection_confirmed. GTM v10 (22 Oct) fires contact_sent / newsletter_signup / volunteer_signup / claim_sent from the Fluent Forms listener's `form_submit`, matching `form` by name or Fluent Forms ID (contact|form-4, newsletter|form-3|form-9, volunteer|form-5, claim|form-6), with the gtag guard. The four triggers were moved off form_submit_success, so nothing counts twice. Tested on live with dataLayer pushes (form_ref TEST-CLAUDE-1…10, internal traffic): all four fired; `report` fired only form_submit. **Star volunteer_signup and claim_sent once GA4 lists them (by 23 Oct).** Generic form_submit is not starred (GA4's enhanced measurement also sends a form_submit).
 5. **Yandex Webmaster.** Checked 21 Oct 2026: the Sitemap tool is read-only (Yandex outage), so nothing can be added now. A sitemap is already in its queue: https://animalwrites.in/wp-sitemap.xml (added 9 Oct), which 301s to https://animalwrites.in/sitemap_index.xml, the real one; processing takes 1 to 2 weeks. Add sitemap_index.xml itself when the tool is back.
 6. **AWO list: 89 held matches** (`Claude outputs/awo-held-matches-2026-10-21.csv`): 49 similar to an existing listing, 36 with the same name in the same place, 4 posts rather than organisations. Owner decides: merge into the existing listing or add as new.
@@ -25,13 +25,16 @@ Check this list against git and the live site before acting on it. Failing AI ke
 
     Open:
     - Render-blocking CSS merge; Inter preload on phones.
-    - Outreach for a credit and link: TOI Mangaluru, India TV Hindi, and 7 articles without a credit.
     - Next runs: a PageSpeed API key; split the 130 Google checks over two days (CAPTCHA at 51).
 13. **GA4 test events on 22 Oct 2026 (cannot be deleted; exclude when reading 22 Oct).** Claude pushed `form_submit` into the live dataLayer to check GTM v10, which broke the owner's rule. **Rule (owner, 22 Oct): never send test or simulated events to live GA4; verify GTM only in Preview / Tag Assistant or by reading the config.**
     - When and where: 22 Oct 2026, about 18:20–18:30 IST, page /contact/?gtmtest=1, one browser (hits marked traffic_type internal; the internal-traffic filter's state was not checked or changed).
     - The 10 pushes: form_ref TEST-CLAUDE-1 to TEST-CLAUDE-10. Two runs of five: contact, newsletter, volunteer, form-6 (claim), report.
     - Events GA4 received: contact_sent 2, newsletter_signup 2, volunteer_signup 2, claim_sent 2 (all key events or meant to be); form_submit 10 (parameter `ref` = TEST-CLAUDE-n, `form` = contact / newsletter / volunteer / form-6 / report).
     - To exclude them: filter on event parameter `ref` begins with TEST-CLAUDE (form_submit), or subtract 2 from each of the four key events for 22 Oct. The first real volunteer_signup and claim_sent hits are therefore still to come.
+
+## Decided: never (owner, 22 Oct 2026)
+- Rewriting the 11 Wildlife SOS job summaries, or dropping their JobPosting markup.
+- Press outreach asking for an Animal Writes credit or link (TOI Mangaluru, India TV Hindi, and the articles without a credit).
 
 ## Dates
 These live in WordPress: **Tools → Dates** (month calendar, add and remove) and a Dashboard box; stored in the option `aw_team_dates` (animal-writes-core `includes/team-dates.php`). Keep both lists in step.
