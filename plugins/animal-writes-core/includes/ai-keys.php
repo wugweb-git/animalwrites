@@ -656,6 +656,21 @@ function aw_ai_free_caps_table() {
 	echo '</tbody></table>';
 }
 
+/** The worker workflows that use the AI keys (animal-writes-workers, 22 Oct 2026), by their GitHub names, and when they run. */
+const AW_AI_WORKERS = array(
+	'Sourcing workers'                                     => 'news, every 3 hours',
+	'Summaries: rewrite those that break the current rules' => 'every 30 minutes, when there is something to rewrite',
+	'Focus keywords (Rank Math)'                           => 'daily',
+	'Directory enrichment'                                 => 'after imports',
+	'Research (India, Europe PMC and Crossref)'            => 'Mondays',
+	'Relevance check of existing items'                    => 'by hand',
+	'Same story: fold duplicates into the first story'     => 'by hand',
+	'News and press titles: sentence case (dry run)'       => 'by hand',
+	'Press search (one-off, Google News and Google Search)' => 'by hand',
+	'Backfill (News + Library from 1 Nov 2025)'            => 'by hand',
+	'Submit URLs (News found by hand)'                     => 'by hand',
+);
+
 /** Total keys, what they can do in a day, what was used, by which workers (owner, 22 Oct 2026: "keep it simple"). */
 function aw_ai_overview( array $rows ) {
 	$working = 0;
@@ -682,25 +697,36 @@ function aw_ai_overview( array $rows ) {
 	}
 	$calls = 0;
 	$ok    = 0;
+	$miss  = 0;
 	$wf    = array();
 	foreach ( aw_ai_usage() as $u ) {
 		foreach ( (array) ( $u['runs'] ?? array() ) as $run ) {
 			if ( time() - (int) $run['at'] < DAY_IN_SECONDS ) {
 				$calls += (int) ( $run['calls'] ?? 0 );
 				$ok    += (int) ( $run['ok'] ?? 0 );
+				$miss  += (int) ( $run['limited'] ?? 0 ) + (int) ( $run['failed'] ?? 0 );
 				if ( ! empty( $run['workflow'] ) ) {
 					$wf[ $run['workflow'] ] = true;
 				}
 			}
 		}
 	}
-	$tile = fn( $big, $small ) => '<div style="background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:170px"><div style="font-size:22px;font-weight:600;line-height:1.2">' . esc_html( $big ) . '</div><div style="color:#50575e">' . esc_html( $small ) . '</div></div>';
-	echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:16px 0">'
+	$tile = fn( $big, $small ) => '<div style="background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:170px;flex:1"><div style="font-size:22px;font-weight:600;line-height:1.2">' . esc_html( $big ) . '</div><div style="color:#50575e">' . esc_html( $small ) . '</div></div>';
+	$pct  = $daily ? min( 100, (int) round( 100 * $ok / $daily ) ) : 0;
+	echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:16px 0 8px">'
 		. $tile( count( $rows ) . ' keys', $working . ' working now' )
-		. $tile( 'About ' . number_format_i18n( $daily ) . ' a day', 'free requests with a daily cap' . ( $nocap ? ', plus ' . $nocap . ' keys with no daily cap' : '' ) )
-		. $tile( number_format_i18n( $ok ) . ' answers', 'in the last 24 h, from ' . number_format_i18n( $calls ) . ' calls' . ( $daily ? ' (' . round( 100 * $calls / $daily ) . '% of the daily cap)' : '' ) )
-		. $tile( count( $wf ) . ' workers', $wf ? implode( ', ', array_keys( $wf ) ) : 'none in the last 24 h' )
+		. $tile( 'Supply: about ' . number_format_i18n( $daily ) . ' a day', 'free requests with a daily cap' . ( $nocap ? ', plus ' . $nocap . ' keys with no daily cap' : '' ) )
+		. $tile( 'Demand: ' . number_format_i18n( $ok ) . ' a day', 'answers the workers needed in the last 24 h' . ( $miss ? ' (+' . number_format_i18n( $miss ) . ' tries that hit a limit or failed)' : '' ) )
+		. $tile( count( $wf ) . ' of ' . count( AW_AI_WORKERS ) . ' AI workers', $wf ? 'used AI today: ' . implode( ', ', array_keys( $wf ) ) : 'none used AI in the last 24 h' )
 		. '</div>';
+	// Demand against supply, as one line.
+	echo '<div style="max-width:1100px;margin:0 0 4px"><div style="height:12px;background:#e0e0e0;border-radius:6px;overflow:hidden"><div style="height:12px;width:' . esc_attr( (string) max( 1, $pct ) ) . '%;background:' . ( $pct > 80 ? '#d63638' : ( $pct > 50 ? '#dba617' : '#00a32a' ) ) . '"></div></div>'
+		. '<p style="margin:4px 0 16px;color:#50575e">Demand is ' . esc_html( (string) $pct ) . '% of the daily supply with caps (' . esc_html( number_format_i18n( $ok ) ) . ' of about ' . esc_html( number_format_i18n( $daily ) ) . '). Supply uses the providers\' published free limits, so it is an estimate.</p></div>';
+	echo '<details style="max-width:1100px;margin:0 0 16px"><summary>The ' . count( AW_AI_WORKERS ) . ' workers that use AI</summary><ul style="list-style:disc;margin-left:20px">';
+	foreach ( AW_AI_WORKERS as $name => $when ) {
+		echo '<li>' . esc_html( $name ) . ' <span style="color:#50575e">(' . esc_html( $when ) . ')</span>' . ( isset( $wf[ $name ] ) ? ' · used AI today' : '' ) . '</li>';
+	}
+	echo '</ul></details>';
 }
 
 /** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
