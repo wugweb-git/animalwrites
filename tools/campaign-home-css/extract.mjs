@@ -8,6 +8,8 @@ import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 
 const URL = process.argv[2] || 'https://animalwrites.in/';
+const SHEET_ARG = process.argv[3] || '/campaign.css';
+const OUT = process.argv[4] || 'used';
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: 'new' });
 const used = new Set();
 const cov = {};
@@ -22,9 +24,10 @@ for (const w of [375, 768, 1200]) {
   await page.goto(URL + '?cssx=' + w + '-' + Date.now(), { waitUntil: 'networkidle0', timeout: 90000 });
   await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } window.scrollTo(0, 0); });
   await new Promise(r => setTimeout(r, 1500));
-  const res = await page.evaluate(() => {
-    const sheet = [...document.styleSheets].find(s => s.href && s.href.includes('/campaign.css'));
-    if (!sheet) return { error: 'campaign.css not on page' };
+  const res = await page.evaluate((SHEET) => {
+    const sheet = [...document.styleSheets].find(s => s.href && s.href.includes(SHEET));
+    if (!sheet) return { error: 'sheet not on page' };
+    const STATE = SHEET.includes('record') ? /aw-camp-record|aw-record/ : /aw-camp-band|countdown/;
     const STRIP = /::?(before|after|marker|placeholder|selection|backdrop|file-selector-button|-webkit-[a-z-]+|-moz-[a-z-]+)|:(hover|focus-visible|focus-within|focus|active|visited|link|target)(?![a-z-])/g;
     const out = [];
     let idx = 0;
@@ -38,7 +41,7 @@ for (const w of [375, 768, 1200]) {
             const t = s.replace(STRIP, '').replace(/\s+>?\s*$/, '').trim() || '*';
             try { if (document.querySelector(t)) { hit = true; break; } } catch (e) { hit = true; break; }
           }
-          if (!hit && /aw-camp-band|countdown/.test(r.selectorText)) hit = 'state';
+          if (!hit && STATE.test(r.selectorText)) hit = 'state';
           out.push({ i, wrap, text: r.cssText, hit, sel: r.selectorText });
         } else if (r.cssRules && (r.type === CSSRule.MEDIA_RULE || r.type === CSSRule.SUPPORTS_RULE || r.type === 12 /* container */ || r.type === 18 /* layer block */)) {
           const head = r.cssText.slice(0, r.cssText.indexOf('{')).trim();
@@ -51,9 +54,9 @@ for (const w of [375, 768, 1200]) {
     };
     walk(sheet.cssRules, []);
     return { out };
-  });
+  }, SHEET_ARG);
   if (res.error) { console.error(w, res.error); process.exit(1); }
-  const c = (await page.coverage.stopCSSCoverage()).find(e => e.url.includes('/campaign.css'));
+  const c = (await page.coverage.stopCSSCoverage()).find(e => e.url.includes(SHEET_ARG));
   cov[w] = c ? { bytes: c.text.length, usedBytes: c.ranges.reduce((s, r) => s + r.end - r.start, 0) } : null;
   ruleTexts = res.out;
   res.out.forEach(r => { if (r.hit) used.add(r.i); });
@@ -77,7 +80,7 @@ for (const r of ruleTexts) {
   css += r.wrap.reduce((acc, w) => acc + w + ' { ', '') + r.text + ' }'.repeat(r.wrap.length) + '\n';
 }
 const total = ruleTexts.filter(r => r.text).length;
-fs.writeFileSync('used.css', css);
-fs.writeFileSync('report.json', JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov, state_rules: ruleTexts.filter(r => r.hit === 'state').map(r => r.sel) }, null, 1));
+fs.writeFileSync(OUT + '.css', css);
+fs.writeFileSync(OUT + '.json', JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov, state_rules: ruleTexts.filter(r => r.hit === 'state').map(r => r.sel) }, null, 1));
 console.log(JSON.stringify({ total_rules: total, used_rules: used.size, used_bytes: css.length, coverage: cov }));
 await browser.close();

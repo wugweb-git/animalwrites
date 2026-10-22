@@ -197,6 +197,15 @@ add_action(
 			return;
 		}
 		$deps = wp_style_is( 'aw-campaign', 'registered' ) ? array( 'aw-campaign' ) : array(); // after campaign.css, so a campaign's colours win
+		$home = 'assets/css/campaign-record-home.css';
+		if ( is_front_page() && false !== strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), '"slug":"animal-writes/aw1-story"' ) && is_readable( AW_CORE_DIR . $home ) ) {
+			// Home: only the story's rules, inline in campaign-record.css's place, so nothing blocks the first paint (owner,
+			// 22 Oct 2026; tools/campaign-home-css). Without the aw1-story pattern on Home, the full file as before.
+			wp_register_style( 'aw-campaign-record', false, $deps, (string) filemtime( AW_CORE_DIR . $home ) );
+			wp_enqueue_style( 'aw-campaign-record' );
+			wp_add_inline_style( 'aw-campaign-record', (string) file_get_contents( AW_CORE_DIR . $home ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			return;
+		}
 		wp_enqueue_style( 'aw-campaign-record', plugins_url( 'assets/css/campaign-record.css', AW_CORE_DIR . 'animal-writes-core.php' ), $deps, (string) filemtime( AW_CORE_DIR . 'assets/css/campaign-record.css' ) );
 	},
 	30
