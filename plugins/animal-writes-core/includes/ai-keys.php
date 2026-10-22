@@ -22,6 +22,7 @@ const AW_AI_PROVIDERS = array(
 	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ), // the free model first (owner, 22 Oct 2026)
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'nvidia/nemotron-3-ultra-550b-a55b:free' ) ), // free models (22 Oct 2026)
+	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -29,7 +30,7 @@ const AW_AI_PROVIDERS = array(
 	'deepseek'   => array( 'DeepSeek', array( 'sk-' ), 'https://api.deepseek.com', array( 'deepseek-chat' ) ),
 	'moonshot'   => array( 'Moonshot', array( 'sk-' ), 'https://api.moonshot.ai/v1', array( 'moonshot-v1-8k', 'kimi-k2-turbo-preview' ) ),
 	'minimax'    => array( 'MiniMax', array( 'sk-api-', 'eyJ' ), 'https://api.minimax.io/v1', array( 'MiniMax-M2' ) ),
-	'mistral'    => array( 'Mistral', array(), 'https://api.mistral.ai/v1', array( 'mistral-small-latest' ) ),
+	'mistral'    => array( 'Mistral', array( 'mstr' ), 'https://api.mistral.ai/v1', array( 'mistral-small-latest' ) ),
 	'together'   => array( 'Together', array( 'tgp_' ), 'https://api.together.xyz/v1', array( 'meta-llama/Llama-3.3-70B-Instruct-Turbo' ) ),
 	'cerebras'   => array( 'Cerebras', array( 'csk-' ), 'https://api.cerebras.ai/v1', array( 'gpt-oss-120b', 'llama-3.3-70b' ) ),
 );
@@ -200,7 +201,11 @@ function aw_ai_check( array $row ): array {
 				}
 			}
 		}
-		$order = array_unique( array_merge( $order, array_keys( AW_AI_PROVIDERS ) ) );
+		// Then only providers whose keys have no prefix of their own (or a plain sk-): a provider with a distinctive
+		// prefix (Cline sk_, Requesty rqst ...) cannot own a key without it, and some list their models to anyone,
+		// which made unrelated keys look like theirs (22 Oct 2026).
+		$open  = array_keys( array_filter( AW_AI_PROVIDERS, fn( $p, $id ) => ! $p[1] || in_array( 'sk-', $p[1], true ) || 'mistral' === $id, ARRAY_FILTER_USE_BOTH ) ); // older Mistral keys have no prefix
+		$order = array_unique( array_merge( $order, $open ) );
 	}
 	foreach ( AW_AI_TOOLS as $id => $t ) {
 		foreach ( $t[1] as $prefix ) {
