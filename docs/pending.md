@@ -21,7 +21,7 @@ Check this list against git and the live site before acting on it. Failing AI ke
     - World Animal Day keyword split and the notice → guide link.
     - IndexNow checked: it works (the History tab is wrong). Microsoft IndexNow plugin deactivated 22 Oct; Rank Math alone logged the next publish 200 OK (18:14).
     - Leftover Clarity plugin options deleted 22 Oct (9: clarity_wordpress_site_id, clarity_project_id, brandagent_secret_key_animalwrites-in, brandagent_connected_store_url, brandagent_hmac_platform and 4 transients).
-    - Google rankings: second sweep 22 Oct, 92 of 130 now live in rankings-2026-10-21.csv; 38 left (mostly city helpline, gaushala and ambulance variants) for another day.
+    - Google rankings: all 130 queries checked live on 22 Oct (three sweeps; one CAPTCHA at query 51 in the first, none after with 5 s pauses). Next run: same list, monthly, add a date column value.
 
     Open:
     - Render-blocking CSS merge; Inter preload on phones.
