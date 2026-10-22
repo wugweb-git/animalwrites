@@ -607,6 +607,8 @@ function aw_campaign_schema( $id ) {
 				array(
 					'location'  => $place ? array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ) : null,
 					'organizer' => $by,
+					'performer' => $by, // the organiser runs the day (Search Console asks for a performer)
+					'offers'    => array( '@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR', 'availability' => 'https://schema.org/InStock', 'url' => get_permalink( $id ) ), // free to take part
 				)
 			)
 		);
@@ -1079,9 +1081,6 @@ function aw_schema_nodes() {
 	return array_values( array_filter( $nodes ) );
 }
 
-/** The schema.org type of an item in a category or tag page's list. */
-const AW_LIST_ITEM_TYPES = array( 'aw_news' => 'NewsArticle', 'aw_legal' => 'Article', 'post' => 'Article', 'aw_listing' => 'Organization', 'aw_opportunity' => 'CreativeWork', 'aw_campaign' => 'CreativeWork' );
-
 /**
  * A category page: CollectionPage + ItemList of the items on the current page (indexed items only).
  *
@@ -1101,7 +1100,8 @@ function aw_category_schema_nodes() {
 		$items[] = array(
 			'@type'    => 'ListItem',
 			'position' => $start + $i + 1,
-			'item'     => array( '@type' => AW_LIST_ITEM_TYPES[ $p->post_type ] ?? 'CreativeWork', '@id' => get_permalink( $p ), 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) ), // each item as what it is
+			'url'      => get_permalink( $p ),
+			'name'     => aw_seo_plain( get_the_title( $p ) ), // a plain summary list (as the hubs): a typed stub with only a name and url reads as an incomplete Article
 		);
 	}
 	$desc  = aw_seo_plain( aw_seo_description() );
@@ -1164,7 +1164,8 @@ function aw_page_lists_schema_nodes( $page_id ) {
 			$items[]        = array(
 				'@type'    => 'ListItem',
 				'position' => count( $items ) + 1,
-				'item'     => array( '@type' => AW_LIST_ITEM_TYPES[ $p->post_type ] ?? 'CreativeWork', '@id' => get_permalink( $p ), 'url' => get_permalink( $p ), 'name' => aw_seo_plain( get_the_title( $p ) ) ),
+				'url'      => get_permalink( $p ),
+				'name'     => aw_seo_plain( get_the_title( $p ) ), // plain summary list, as the hubs
 			);
 		}
 	}
