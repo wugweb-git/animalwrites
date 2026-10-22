@@ -25,6 +25,7 @@ const AW_AI_PROVIDERS = array(
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
 	'nvidia'     => array( 'NVIDIA', array( 'nvapi-' ), 'https://integrate.api.nvidia.com/v1', array( 'nvidia/nemotron-3.5-lightning-30b-a3b', 'nvidia/nemotron-3-ultra-550b-a55b', 'meta/muse-glimmer-30b' ) ), // free developer access; about 20 s a call (22 Oct 2026)
 	'vercel'     => array( 'Vercel AI Gateway', array( 'vck_' ), 'https://ai-gateway.vercel.sh/v1', array( 'poolside/laguna-s-2.1-free', 'reflection/beam-free', 'convaiinnovations/laya-free' ) ), // free models, but only once the team has a card on file (22 Oct 2026)
+	'huggingface' => array( 'Hugging Face', array( 'hf_' ), 'https://router.huggingface.co/v1', array( 'openai/gpt-oss-120b', 'meta-llama/Llama-3.3-70B-Instruct', 'Qwen/Qwen3-32B' ) ), // small free credit each month (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -61,6 +62,7 @@ const AW_AI_INFO = array(
 	'cline'       => array( 'free', 'Backup: 2 free models' ),
 	'openrouter'  => array( 'quota', 'News summaries: 50 free requests a day per account' ),
 	'gemini'      => array( 'quota', 'Summaries and relevance: daily limit per Google project' ),
+	'huggingface' => array( 'quota', 'Backup: a small free credit each month, then nothing until it renews' ),
 	'mistral'     => array( 'quota', 'Summaries: free Experiment plan, low per-minute limit' ),
 	'vercel'      => array( 'card', 'Backup once a card is on file: 3 free models' ),
 	'commandcode' => array( 'card', 'Backup once the Provider plan has credit' ),
@@ -90,7 +92,7 @@ const AW_AI_ICON_DOMAINS = array(
 	'nvidia' => 'build.nvidia.com', 'groq' => 'groq.com', 'cerebras' => 'cerebras.ai', 'requesty' => 'requesty.ai', 'cline' => 'cline.bot',
 	'openrouter' => 'openrouter.ai', 'gemini' => 'gemini.google.com', 'mistral' => 'mistral.ai', 'vercel' => 'vercel.com',
 	'commandcode' => 'commandcode.ai', 'anthropic' => 'anthropic.com', 'haiku' => 'anthropic.com', 'openai' => 'openai.com',
-	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai',
+	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai', 'huggingface' => 'huggingface.co',
 	'firecrawl' => 'firecrawl.dev', 'tinyfish' => 'tinyfish.ai',
 );
 
