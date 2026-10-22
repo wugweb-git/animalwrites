@@ -130,6 +130,23 @@ function kits_sort_dropdown( $options ) {
 }
 
 /**
+ * Inline script placed right after a <details> that phones show folded: folds it while the page is still being parsed,
+ * so the first paint already has the phone layout and nothing moves when kit.js runs (it was a 0.16–0.21 layout shift
+ * on the hubs, 22 Oct 2026). $kind 'sheet' = the filter sheet (kit.js: below 768px, class is-sheet, closed);
+ * 'fold' = details[data-kit-fold] (closed at or below its width unless data-kit-keep-open). Without JavaScript the
+ * element stays open, as before.
+ *
+ * @param string $kind 'sheet' or 'fold'.
+ * @return string
+ */
+function kits_fold_now( $kind ) {
+	$js = 'sheet' === $kind
+		? 'if(matchMedia("(max-width: 767px)").matches){d.classList.add("is-sheet");d.removeAttribute("open");}'
+		: 'if(matchMedia("(max-width: "+(parseInt(d.getAttribute("data-kit-fold"),10)||1199)+"px)").matches&&!d.hasAttribute("data-kit-keep-open")){d.open=false;}';
+	return '<script>(function(d){if(d&&window.matchMedia){' . $js . '}})(document.currentScript&&document.currentScript.previousElementSibling);</script>';
+}
+
+/**
  * Filter bar: the filters in one row (pills from kits_filter_group, or dropdowns from kits_filter_dropdown), Sort on the
  * right, folded into a "Filters" sheet on phones by kit.js, and the active filters as removable chips with "Clear all".
  *
@@ -157,7 +174,7 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 			. '<div class="kit-filters" role="toolbar" aria-label="Filters">' . $groups
 			. '<noscript><button type="submit" class="kit-btn kit-btn--sm">Apply</button></noscript>'
 			. '<div class="kit-filter-sheet-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $clear ) . '">Reset</a><button type="submit" class="kit-btn" data-kit-sheet-close>Apply</button></div>'
-			. '</div></details>';
+			. '</div></details>' . kits_fold_now( 'sheet' );
 	}
 	$html .= $sort . '</form><p class="screen-reader-text" role="status" aria-live="polite" data-kit-filter-status></p>';
 	if ( $active ) {

@@ -423,6 +423,7 @@ function aw_item_more_groups( $id ) {
 		case 'aw_legal':
 			$groups[] = array( $more ?: __( 'More from the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, array(), $in ) );
 			$groups[] = array( __( 'News about this', 'animal-writes-core' ), aw_related_pick( $id, 'aw_news', 3, aw_related_back( $id, 'aw_rel_legal', 'aw_news' ) ) );
+			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( aw_related_back( $id, 'aw_rel_resource', 'post' ), 0, 3 ) ); // only guides linked by hand (e.g. the World Animal Day notice → its guide, 22 Oct 2026)
 			break;
 		case 'post':
 			$t        = aw_item_type_terms( $id );
@@ -444,7 +445,7 @@ function aw_item_more_groups( $id ) {
 			}
 			break;
 	}
-	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, 2 );
+	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, 'aw_legal' === get_post_type( $id ) ? 3 : 2 ); // a Library item: a third group only for hand-linked guides
 	set_transient( $key, $groups, 12 * HOUR_IN_SECONDS );
 	return $groups;
 }
@@ -485,7 +486,7 @@ function aw_item_more_card( $pid ) {
 
 function aw_block_item_more( $a, $id ) {
 	if ( ! aw_item_here( $id ) || 'publish' !== get_post_status( $id ) ) {
-		return aw_item_editor_preview( 'More: up to two groups of three items (listings: one group of up to six organisations)' );
+		return aw_item_editor_preview( 'More: up to two groups of three items (Library: a third, "Guides on this", for hand-linked guides; listings: one group of up to six organisations)' );
 	}
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {
