@@ -24,6 +24,7 @@ const AW_AI_PROVIDERS = array(
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'nvidia/nemotron-3-ultra-550b-a55b:free' ) ), // free models (22 Oct 2026)
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
 	'nvidia'     => array( 'NVIDIA', array( 'nvapi-' ), 'https://integrate.api.nvidia.com/v1', array( 'nvidia/nemotron-3.5-lightning-30b-a3b', 'nvidia/nemotron-3-ultra-550b-a55b', 'meta/muse-glimmer-30b' ) ), // free developer access; about 20 s a call (22 Oct 2026)
+	'vercel'     => array( 'Vercel AI Gateway', array( 'vck_' ), 'https://ai-gateway.vercel.sh/v1', array( 'poolside/laguna-s-2.1-free', 'reflection/beam-free', 'convaiinnovations/laya-free' ) ), // free models, but only once the team has a card on file (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -42,7 +43,50 @@ const AW_AI_TOOLS = array(
 	'tinyfish'  => array( 'TinyFish (web agent)', array( 'sk-tinyfish-' ) ),
 );
 
+/** Groups (owner, 22 Oct 2026): free and daily-quota keys only; paid providers are not used by the workers. */
+const AW_AI_TIERS = array(
+	'free'  => array( 'Free', 'No cost; only per-minute limits.' ),
+	'quota' => array( 'Free daily quota', 'No cost up to a daily allowance per account; the workers spread it over the day.' ),
+	'card'  => array( 'Free, needs a card or credit', 'Free models, but the provider asks for a card on file or a small credit first.' ),
+	'paid'  => array( 'Paid', 'Costs money per call: not used by the workers.' ),
+	'tool'  => array( 'Tool', 'Not an AI model.' ),
+);
+
+/** Each provider's group and what it is good for. Every AI worker uses the same list, top down. */
+const AW_AI_INFO = array(
+	'nvidia'      => array( 'free', 'Background jobs (summary rewrites, focus keywords, research): good models, about 20 s a call' ),
+	'groq'        => array( 'free', 'Quick checks (relevance, categories, titles): very fast' ),
+	'cerebras'    => array( 'free', 'Quick checks and summaries: very fast' ),
+	'requesty'    => array( 'free', 'Summaries and backup: 6 free models' ),
+	'cline'       => array( 'free', 'Backup: 2 free models' ),
+	'openrouter'  => array( 'quota', 'News summaries: 50 free requests a day per account' ),
+	'gemini'      => array( 'quota', 'Summaries and relevance: daily limit per Google project' ),
+	'mistral'     => array( 'quota', 'Summaries: free Experiment plan, low per-minute limit' ),
+	'vercel'      => array( 'card', 'Backup once a card is on file: 3 free models' ),
+	'commandcode' => array( 'card', 'Backup once the Provider plan has credit' ),
+	'anthropic'   => array( 'paid', '—' ),
+	'openai'      => array( 'paid', '—' ),
+	'deepseek'    => array( 'paid', '—' ),
+	'xai'         => array( 'paid', '—' ),
+	'moonshot'    => array( 'paid', '—' ),
+	'minimax'     => array( 'paid', '—' ),
+	'together'    => array( 'paid', '—' ),
+	'haiku'       => array( 'paid', '—' ),
+	'firecrawl'   => array( 'tool', 'Full article text when a news page hides it (Sourcing; 1,000 credits a month)' ),
+	'tinyfish'    => array( 'tool', 'Web agent: not used yet' ),
+);
+
+function aw_ai_tier( string $provider ): string {
+	return AW_AI_INFO[ $provider ][0] ?? ( '' === $provider ? '' : 'paid' );
+}
+
+function aw_ai_tier_label( string $provider ): string {
+	$t = aw_ai_tier( $provider );
+	return '' === $t ? '—' : AW_AI_TIERS[ $t ][0];
+}
+
 const AW_AI_STATUS = array(
+	'card'       => 'Needs a card on file (free models)',
 	'works'      => 'Works',
 	'tool'       => 'Tool key, not an AI model',
 	'no-credit'  => 'No credit',
@@ -59,7 +103,7 @@ const AW_AI_STATUS = array(
  * red = broken (safe to remove). Colours are WordPress admin's own success, warning and error colours.
  */
 function aw_ai_status_badge( $status ) {
-	$tone = in_array( $status, array( 'works', 'tool' ), true ) ? 'ok' : ( in_array( $status, array( 'limited', 'unchecked' ), true ) ? 'wait' : 'bad' );
+	$tone = in_array( $status, array( 'works', 'tool' ), true ) ? 'ok' : ( in_array( $status, array( 'limited', 'unchecked', 'card' ), true ) ? 'wait' : 'bad' );
 	$icon = array( 'ok' => 'yes-alt', 'wait' => 'clock', 'bad' => 'dismiss' )[ $tone ];
 	return '<span class="aw-ai-status aw-ai-status--' . $tone . '"><span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span>'
 		. esc_html( AW_AI_STATUS[ $status ] ?? $status ) . '</span>';
@@ -238,6 +282,10 @@ function aw_ai_check( array $row ): array {
 				$row['last_ok'] = time();
 				return $row;
 			}
+			if ( str_contains( $body, 'credit card' ) || str_contains( $body, 'card on file' ) ) {
+				$row['status'] = 'card';
+				return $row;
+			}
 			if ( str_contains( $body, 'not scoped to a workspace' ) ) {
 				$row['status'] = 'workspace';
 				return $row;
@@ -315,7 +363,7 @@ add_action(
 							$tools[] = array( 'provider' => $r['provider'], 'key' => $r['key'] );
 							continue;
 						}
-						if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
+						if ( empty( $r['provider'] ) || 'paid' === aw_ai_tier( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
 							continue;
 						}
 						$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
@@ -520,6 +568,30 @@ function aw_ai_free_caps_table() {
 	echo '</tbody></table>';
 }
 
+/** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
+function aw_ai_tier_summary( array $rows ) {
+	$g = array();
+	foreach ( $rows as $r ) {
+		$t = aw_ai_tier( (string) $r['provider'] );
+		$t = '' === $t ? 'unknown' : $t;
+		$n = AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? 'Not recognised';
+		$g[ $t ][ $n ]['all']   = ( $g[ $t ][ $n ]['all'] ?? 0 ) + 1;
+		$g[ $t ][ $n ]['works'] = ( $g[ $t ][ $n ]['works'] ?? 0 ) + ( in_array( $r['status'], array( 'works', 'tool' ), true ) ? 1 : 0 );
+	}
+	echo '<h2>Keys by group</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th>Group</th><th>What it means</th><th>Providers (working / saved)</th></tr></thead><tbody>';
+	foreach ( array_merge( array_keys( AW_AI_TIERS ), array( 'unknown' ) ) as $t ) {
+		if ( empty( $g[ $t ] ) ) {
+			continue;
+		}
+		$parts = array();
+		foreach ( $g[ $t ] as $n => $c ) {
+			$parts[] = $n . ' ' . $c['works'] . ' / ' . $c['all'];
+		}
+		echo '<tr><td><strong>' . esc_html( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ) . '</strong></td><td>' . esc_html( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ) . '</td><td>' . esc_html( implode( ' · ', $parts ) ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+}
+
 function aw_ai_keys_screen() {
 	$rows = aw_ai_rows();
 	echo '<div class="wrap"><h1>AI models</h1>';
@@ -538,9 +610,10 @@ function aw_ai_keys_screen() {
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
 	echo '<p><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
 	echo '<p>The news workers try the working keys from the top down, then the keys in their GitHub secrets. Every key is tested again twice a day.</p>';
-	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Work in the last run</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
+	aw_ai_tier_summary( $rows );
+	echo '<table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Group</th><th>Good for</th><th>Model</th><th>Status</th><th>Last worked</th><th>Limit / cooldown</th><th>Work in the last run</th><th>Checked</th><th></th></tr></thead><tbody data-aw-rows>';
 	if ( ! $rows ) {
-		echo '<tr><td colspan="9">No keys yet.</td></tr>';
+		echo '<tr><td colspan="11">No keys yet.</td></tr>';
 	}
 	$usage = aw_ai_usage();
 	$shown = array();
@@ -549,7 +622,7 @@ function aw_ai_keys_screen() {
 		$shown[] = $uid;
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
-			. '<td>' . esc_html( $label ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
+			. '<td>' . esc_html( $label ) . '</td><td>' . esc_html( aw_ai_tier_label( (string) $r['provider'] ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $r['provider'] ][1] ?? '—' ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
@@ -561,10 +634,11 @@ function aw_ai_keys_screen() {
 	// Keys the workers also use from their GitHub secrets (not saved here).
 	$other = array_diff_key( $usage, array_flip( $shown ) );
 	if ( $other ) {
-		echo '<h2>Keys in the workers\' GitHub secrets</h2><table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Work in the last run</th></tr></thead><tbody>';
+		echo '<h2>Keys in the workers\' GitHub secrets</h2><p>GitHub keeps these write-only, so they cannot be shown or moved here; they are listed from the workers\' own reports. Paid ones are no longer used (22 Oct 2026). Any free key here can simply be pasted above as well.</p><table class="widefat striped"><thead><tr><th>Key</th><th>Provider</th><th>Group</th><th>Work in the last run</th></tr></thead><tbody>';
 		uasort( $other, fn( $a, $b ) => (int) ( $b['last']['at'] ?? 0 ) <=> (int) ( $a['last']['at'] ?? 0 ) );
 		foreach ( $other as $u ) {
-			echo '<tr><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code></td><td>' . esc_html( AW_AI_PROVIDERS[ $u['provider'] ?? '' ][0] ?? (string) ( $u['provider'] ?? '' ) ) . '</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td></tr>';
+			$prov = (string) ( $u['provider'] ?? '' );
+			echo '<tr><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code></td><td>' . esc_html( AW_AI_PROVIDERS[ $prov ][0] ?? $prov ) . '</td><td>' . esc_html( aw_ai_tier_label( $prov ) . ( 'paid' === aw_ai_tier( $prov ) ? ' (not used)' : '' ) ) . '</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 	}
