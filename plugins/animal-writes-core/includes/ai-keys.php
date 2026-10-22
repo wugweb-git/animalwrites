@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_AI_PROVIDERS = array(
 	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
-	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ),
+	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ), // the free model first (owner, 22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -182,6 +182,7 @@ function aw_ai_check( array $row ): array {
 		$order = array_unique( array_merge( $order, array_keys( AW_AI_PROVIDERS ) ) );
 	}
 	$row['checked'] = time();
+	$was            = array( $row['provider'] ?? '', $row['model'] ?? '' ); // the model saved on the row is tried first, so a check keeps the owner's choice (22 Oct 2026)
 	foreach ( $order as $id ) {
 		list( $code ) = aw_ai_call( $id, $key, '', false );
 		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) && ! in_array( $id, $strong, true ) ) {
@@ -190,7 +191,11 @@ function aw_ai_check( array $row ): array {
 		$row['provider'] = $id;
 		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
 		$row['status']   = 'no-model';
-		foreach ( AW_AI_PROVIDERS[ $id ][3] as $model ) {
+		$models          = AW_AI_PROVIDERS[ $id ][3];
+		if ( $id === $was[0] && '' !== $was[1] ) {
+			array_unshift( $models, $was[1] );
+		}
+		foreach ( array_unique( $models ) as $model ) {
 			list( $code, $body, $headers ) = aw_ai_call( $id, $key, $model );
 			$row['model'] = $model;
 			$row          = array_merge( $row, aw_ai_limits( $headers, $body, $code ) );
