@@ -23,6 +23,7 @@ const AW_AI_PROVIDERS = array(
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'nvidia/nemotron-3-ultra-550b-a55b:free' ) ), // free models (22 Oct 2026)
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
+	'nvidia'     => array( 'NVIDIA', array( 'nvapi-' ), 'https://integrate.api.nvidia.com/v1', array( 'nvidia/nemotron-3.5-lightning-30b-a3b', 'nvidia/nemotron-3-ultra-550b-a55b', 'meta/muse-glimmer-30b' ) ), // free developer access; about 20 s a call (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -132,7 +133,7 @@ function aw_ai_prefix_known( string $key ): bool {
 /** HTTP status of a short test request ($chat = false: list models only). */
 function aw_ai_call( string $provider, string $key, string $model = '', bool $chat = true ): array {
 	$p   = AW_AI_PROVIDERS[ $provider ];
-	$arg = array( 'timeout' => 12 );
+	$arg = array( 'timeout' => $chat ? 45 : 15 ); // some free models take 20 s or more to answer
 	if ( 'anthropic' === $provider ) {
 		$arg['headers'] = array( 'x-api-key' => $key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json' );
 		$url            = 'https://api.anthropic.com/v1/' . ( $chat ? 'messages' : 'models' );
@@ -267,11 +268,13 @@ function aw_ai_check( array $row ): array {
 }
 
 /** Test every saved key (owner, 12 Oct 2026): twice a day by WP-Cron, so the list and the workers only use keys that answer. */
-function aw_ai_check_all(): void {
-	@set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+function aw_ai_check_all( bool $new_only = false ): void {
+	@set_time_limit( 1200 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	$checked = array();
 	foreach ( aw_ai_rows() as $r ) {
-		$checked[ $r['key'] ] = aw_ai_check( $r );
+		if ( ! $new_only || 'unchecked' === $r['status'] ) {
+			$checked[ $r['key'] ] = aw_ai_check( $r );
+		}
 	}
 	// The checks take a while: write the results into the list as it is now, so a key removed meanwhile stays removed.
 	$rows = aw_ai_rows_fresh();
@@ -285,6 +288,7 @@ function aw_ai_check_all(): void {
 }
 add_action( 'aw_ai_check_all', 'aw_ai_check_all' );
 add_action( 'aw_ai_check_all_now', 'aw_ai_check_all' );
+add_action( 'aw_ai_check_new', fn() => aw_ai_check_all( true ) );
 add_action(
 	'init',
 	function () {
@@ -445,19 +449,16 @@ add_action(
 		// Only the keys just added are checked here, and only when their prefix names the provider: re-testing every key
 		// that is not working took minutes and the save ended in a 503 (owner, 22 Oct 2026). The rest are checked twice a
 		// day (aw_ai_check_all), or all at once with "Check again".
-		foreach ( $rows as &$r ) {
-			if ( 'unchecked' === $r['status'] && aw_ai_prefix_known( $r['key'] ) ) {
-				$r = aw_ai_check( $r );
-			}
-		}
-		unset( $r );
+		// New keys are checked in the background, never during the save: one slow provider (NVIDIA, 18 s a call) times ten
+		// keys was enough for a 503 (owner, 22 Oct 2026).
 		// Keys removed while this save was checking stay removed.
 		$now  = wp_list_pluck( aw_ai_rows_fresh(), 'key' );
 		$was  = wp_list_pluck( $saved, 'key' );
 		$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
 		update_option( 'aw_ai_models', $rows, false );
-		if ( ! empty( $_POST['aw_ai_recheck'] ) && ! wp_next_scheduled( 'aw_ai_check_all_now' ) ) { // every key: in the background
-			wp_schedule_single_event( time(), 'aw_ai_check_all_now' );
+		$hook = ! empty( $_POST['aw_ai_recheck'] ) ? 'aw_ai_check_all_now' : 'aw_ai_check_new'; // every key, or the new ones
+		if ( ( 'aw_ai_check_all_now' === $hook || in_array( 'unchecked', wp_list_pluck( $rows, 'status' ), true ) ) && ! wp_next_scheduled( $hook ) ) {
+			wp_schedule_single_event( time(), $hook );
 			spawn_cron();
 		}
 		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&saved=1' ) );
@@ -523,7 +524,7 @@ function aw_ai_keys_screen() {
 	$rows = aw_ai_rows();
 	echo '<div class="wrap"><h1>AI models</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success"><p>Saved and checked.</p></div>';
+		echo '<div class="notice notice-success"><p>Saved. New keys are being checked in the background: reload in a few minutes to see their status.</p></div>';
 	}
 	if ( isset( $_GET['removed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Key …' . esc_html( substr( sanitize_text_field( wp_unslash( $_GET['removed'] ) ), 0, 4 ) ) . ' removed. The news workers stop using it from their next run. It is noted in Settings → Sourcing → Change log.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
