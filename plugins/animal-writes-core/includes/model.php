@@ -37,6 +37,7 @@ function aw_relations() {
 		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0 ),
 		'aw_organisation' => array( array( 'aw_opportunity' ), 'aw_listing', 'Organisation', 'Opportunities', 1 ),
 		'aw_rel_resource' => array( array( 'post' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
+		'aw_rel_guide'    => array( array( 'post' ), 'post', 'Guides on this (shown at the end of the page)', 'Linked from (research)', 0 ), // e.g. dog-bite studies → the dog-bite guide (owner, 22 Oct 2026)
 	);
 }
 

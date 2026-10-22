@@ -430,6 +430,7 @@ function aw_item_more_groups( $id ) {
 			$plural   = $t ? ( 'research' === $t[0]->slug ? __( 'More research', 'animal-writes-core' ) : sprintf( /* translators: %s: Resource type. */ __( 'More %s', 'animal-writes-core' ), mb_strtolower( $t[0]->name ) . 's' ) ) : __( 'More resources', 'animal-writes-core' );
 			$groups[] = array( $plural, aw_related_pick( $id, 'post', 3, array(), $t ? array( 'tag__in' => array( (int) $t[0]->term_id ) ) : array() ) );
 			$groups[] = array( __( 'From the Library', 'animal-writes-core' ), aw_related_pick( $id, 'aw_legal', 3, aw_related_set( $id, 'aw_rel_resource' ) ) );
+			$groups[] = array( __( 'Guides on this', 'animal-writes-core' ), array_slice( array_values( array_filter( aw_related_set( $id, 'aw_rel_guide' ), fn( $g ) => 'publish' === get_post_status( $g ) ) ), 0, 3 ) ); // only guides linked by hand (aw_rel_guide)
 			break;
 		case 'aw_opportunity':
 			$open     = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => aw_open_opportunities_meta_query() ) : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -445,7 +446,7 @@ function aw_item_more_groups( $id ) {
 			}
 			break;
 	}
-	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, 'aw_legal' === get_post_type( $id ) ? 3 : 2 ); // a Library item: a third group only for hand-linked guides
+	$groups = array_slice( array_values( array_filter( $groups, fn( $g ) => ! empty( $g[1] ) ) ), 0, in_array( get_post_type( $id ), array( 'aw_legal', 'post' ), true ) ? 3 : 2 ); // Library items and Resources: a third group only for hand-linked guides
 	set_transient( $key, $groups, 12 * HOUR_IN_SECONDS );
 	return $groups;
 }

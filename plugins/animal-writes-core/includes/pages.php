@@ -339,7 +339,9 @@ add_shortcode(
 		$sort   = function_exists( 'aw_active_sort' ) ? aw_active_sort( 'term' ) : 'new'; // the toolbar's Sort: each group's first six in that order
 		$by     = array( 'old' => array( 'date' => 'ASC' ), 'az' => array( 'title' => 'ASC' ), 'za' => array( 'title' => 'DESC' ) );
 		foreach ( $groups as $type => $label ) {
-			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6, 'orderby' => $by[ $sort ] ?? array( 'date' => 'DESC' ), 'tax_query' => array( array( 'taxonomy' => 'category', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
+			$pin   = 'post' === $type ? array_values( array_filter( array_map( 'intval', (array) get_term_meta( $term->term_id, 'aw_pinned', false ) ), fn( $p ) => 'publish' === get_post_status( $p ) && 'post' === get_post_type( $p ) ) ) : array(); // Resources pinned to the category (term meta aw_pinned), first and always shown (owner, 22 Oct 2026)
+			$posts = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 6 - count( $pin ), 'post__not_in' => $pin, 'orderby' => $by[ $sort ] ?? array( 'date' => 'DESC' ), 'tax_query' => array( array( 'taxonomy' => 'category', 'terms' => $term->term_id ) ) ) ); // phpcs:ignore
+			$posts = array_merge( array_map( 'get_post', array_slice( $pin, 0, 6 ) ), count( $pin ) < 6 ? $posts : array() );
 			if ( ! $posts ) {
 				continue;
 			}

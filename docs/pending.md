@@ -27,6 +27,11 @@ Check this list against git and the live site before acting on it. Failing AI ke
     - Render-blocking CSS merge; Inter preload on phones.
     - Outreach for a credit and link: TOI Mangaluru, India TV Hindi, and 7 articles without a credit.
     - Next runs: a PageSpeed API key; split the 130 Google checks over two days (CAPTCHA at 51).
+13. **GA4 test events on 22 Oct 2026 (cannot be deleted; exclude when reading 22 Oct).** Claude pushed `form_submit` into the live dataLayer to check GTM v10, which broke the owner's rule. **Rule (owner, 22 Oct): never send test or simulated events to live GA4; verify GTM only in Preview / Tag Assistant or by reading the config.**
+    - When and where: 22 Oct 2026, about 18:20–18:30 IST, page /contact/?gtmtest=1, one browser (hits marked traffic_type internal; the internal-traffic filter's state was not checked or changed).
+    - The 10 pushes: form_ref TEST-CLAUDE-1 to TEST-CLAUDE-10. Two runs of five: contact, newsletter, volunteer, form-6 (claim), report.
+    - Events GA4 received: contact_sent 2, newsletter_signup 2, volunteer_signup 2, claim_sent 2 (all key events or meant to be); form_submit 10 (parameter `ref` = TEST-CLAUDE-n, `form` = contact / newsletter / volunteer / form-6 / report).
+    - To exclude them: filter on event parameter `ref` begins with TEST-CLAUDE (form_submit), or subtract 2 from each of the four key events for 22 Oct. The first real volunteer_signup and claim_sent hits are therefore still to come.
 
 ## Dates
 These live in WordPress: **Tools → Dates** (month calendar, add and remove) and a Dashboard box; stored in the option `aw_team_dates` (animal-writes-core `includes/team-dates.php`). Keep both lists in step.
