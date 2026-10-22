@@ -26,6 +26,7 @@ const AW_AI_PROVIDERS = array(
 	'nvidia'     => array( 'NVIDIA', array( 'nvapi-' ), 'https://integrate.api.nvidia.com/v1', array( 'nvidia/nemotron-3.5-lightning-30b-a3b', 'nvidia/nemotron-3-ultra-550b-a55b', 'meta/muse-glimmer-30b' ) ), // free developer access; about 20 s a call (22 Oct 2026)
 	'vercel'     => array( 'Vercel AI Gateway', array( 'vck_' ), 'https://ai-gateway.vercel.sh/v1', array( 'poolside/laguna-s-2.1-free', 'reflection/beam-free', 'convaiinnovations/laya-free' ) ), // free models, but only once the team has a card on file (22 Oct 2026)
 	'huggingface' => array( 'Hugging Face', array( 'hf_' ), 'https://router.huggingface.co/v1', array( 'openai/gpt-oss-120b', 'meta-llama/Llama-3.3-70B-Instruct', 'Qwen/Qwen3-32B' ) ), // small free credit each month (22 Oct 2026)
+	'sambanova'  => array( 'SambaNova', array(), 'https://api.sambanova.ai/v1', array( 'Meta-Llama-3.3-70B-Instruct', 'DeepSeek-V3.1', 'gpt-oss-120b' ) ), // UUID keys; needs a payment method on file (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
 	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
@@ -62,6 +63,7 @@ const AW_AI_INFO = array(
 	'cline'       => array( 'free', 'Backup: 2 free models' ),
 	'openrouter'  => array( 'quota', 'News summaries: 50 free requests a day per account' ),
 	'gemini'      => array( 'quota', 'Summaries and relevance: daily limit per Google project' ),
+	'sambanova'   => array( 'card', 'Fast large models once a payment method is on file' ),
 	'huggingface' => array( 'quota', 'Backup: a small free credit each month, then nothing until it renews' ),
 	'mistral'     => array( 'quota', 'Summaries: free Experiment plan, low per-minute limit' ),
 	'vercel'      => array( 'card', 'Backup once a card is on file: 3 free models' ),
@@ -78,6 +80,64 @@ const AW_AI_INFO = array(
 	'tinyfish'    => array( 'tool', 'Web agent: not used yet' ),
 );
 
+/** What each key can do, as icons (owner, 22 Oct 2026: "label like directories do"). dashicon, label. */
+const AW_AI_CAP_ICONS = array(
+	'text'      => array( 'editor-paragraph', 'Text' ),
+	'fast'      => array( 'performance', 'Fast' ),
+	'reasoning' => array( 'lightbulb', 'Reasoning' ),
+	'code'      => array( 'editor-code', 'Code' ),
+	'vision'    => array( 'format-image', 'Images' ),
+	'long'      => array( 'media-document', 'Long text' ),
+	'slow'      => array( 'clock', 'Slow' ),
+	'scrape'    => array( 'admin-site-alt3', 'Reads web pages' ),
+	'search'    => array( 'search', 'Web search' ),
+	'agent'     => array( 'admin-users', 'Web agent' ),
+);
+const AW_AI_CAPS = array(
+	'nvidia'      => array( 'text', 'reasoning', 'slow' ),
+	'groq'        => array( 'text', 'fast', 'code' ),
+	'cerebras'    => array( 'text', 'fast', 'code' ),
+	'requesty'    => array( 'text' ),
+	'cline'       => array( 'text', 'code' ),
+	'openrouter'  => array( 'text', 'reasoning', 'long' ),
+	'gemini'      => array( 'text', 'vision', 'long' ),
+	'mistral'     => array( 'text', 'code' ),
+	'huggingface' => array( 'text' ),
+	'sambanova'   => array( 'text', 'fast' ),
+	'vercel'      => array( 'text' ),
+	'commandcode' => array( 'text', 'code' ),
+	'firecrawl'   => array( 'scrape', 'search' ),
+	'tinyfish'    => array( 'agent' ),
+);
+
+/**
+ * Free requests a day, per key ('key') or per account ('account'), from the providers' published free limits (about;
+ * they change). null: no daily cap, only per-minute limits. 0: nothing until a card or credit is added.
+ */
+const AW_AI_DAILY = array(
+	'openrouter'  => array( 50, 'account' ),
+	'groq'        => array( 1000, 'key' ),
+	'cerebras'    => array( 14400, 'key' ),
+	'gemini'      => array( 250, 'key' ),
+	'nvidia'      => array( null, 'key' ),
+	'mistral'     => array( null, 'key' ),
+	'requesty'    => array( null, 'key' ),
+	'cline'       => array( null, 'key' ),
+	'huggingface' => array( 0, 'key' ),
+	'sambanova'   => array( 0, 'key' ),
+	'vercel'      => array( 0, 'key' ),
+	'commandcode' => array( 0, 'key' ),
+);
+
+function aw_ai_caps_html( string $provider ): string {
+	$out = '';
+	foreach ( AW_AI_CAPS[ $provider ] ?? array() as $c ) {
+		$i    = AW_AI_CAP_ICONS[ $c ];
+		$out .= '<span title="' . esc_attr( $i[1] ) . '" style="display:inline-flex;align-items:center;gap:2px;margin:0 8px 2px 0;white-space:nowrap"><span class="dashicons dashicons-' . esc_attr( $i[0] ) . '" style="font-size:16px;width:16px;height:16px" aria-hidden="true"></span>' . esc_html( $i[1] ) . '</span>';
+	}
+	return $out ? $out : '—';
+}
+
 function aw_ai_tier( string $provider ): string {
 	return AW_AI_INFO[ $provider ][0] ?? ( '' === $provider ? '' : 'paid' );
 }
@@ -92,7 +152,7 @@ const AW_AI_ICON_DOMAINS = array(
 	'nvidia' => 'build.nvidia.com', 'groq' => 'groq.com', 'cerebras' => 'cerebras.ai', 'requesty' => 'requesty.ai', 'cline' => 'cline.bot',
 	'openrouter' => 'openrouter.ai', 'gemini' => 'gemini.google.com', 'mistral' => 'mistral.ai', 'vercel' => 'vercel.com',
 	'commandcode' => 'commandcode.ai', 'anthropic' => 'anthropic.com', 'haiku' => 'anthropic.com', 'openai' => 'openai.com',
-	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai', 'huggingface' => 'huggingface.co',
+	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai', 'huggingface' => 'huggingface.co', 'sambanova' => 'sambanova.ai',
 	'firecrawl' => 'firecrawl.dev', 'tinyfish' => 'tinyfish.ai',
 );
 
@@ -179,7 +239,14 @@ function aw_ai_blank_row( string $key ): array {
 }
 
 /** The key's prefix names a provider or tool (a quick check); other keys are tried against every provider (slow). */
+function aw_ai_is_uuid( string $key ): bool {
+	return (bool) preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $key );
+}
+
 function aw_ai_prefix_known( string $key ): bool {
+	if ( aw_ai_is_uuid( $key ) ) {
+		return true;
+	}
 	foreach ( array_merge( array_values( AW_AI_PROVIDERS ), array_values( AW_AI_TOOLS ) ) as $p ) {
 		foreach ( $p[1] as $prefix ) {
 			if ( str_starts_with( $key, $prefix ) ) {
@@ -265,8 +332,13 @@ function aw_ai_check( array $row ): array {
 		// Then only providers whose keys have no prefix of their own (or a plain sk-): a provider with a distinctive
 		// prefix (Cline sk_, Requesty rqst ...) cannot own a key without it, and some list their models to anyone,
 		// which made unrelated keys look like theirs (22 Oct 2026).
-		$open  = array_keys( array_filter( AW_AI_PROVIDERS, fn( $p, $id ) => ! $p[1] || in_array( 'sk-', $p[1], true ) || 'mistral' === $id, ARRAY_FILTER_USE_BOTH ) ); // older Mistral keys have no prefix
+		$open  = array_keys( array_filter( AW_AI_PROVIDERS, fn( $p, $id ) => ( ! $p[1] || in_array( 'sk-', $p[1], true ) || 'mistral' === $id ) && 'sambanova' !== $id, ARRAY_FILTER_USE_BOTH ) ); // older Mistral keys have no prefix
 		$order = array_unique( array_merge( $order, $open ) );
+		if ( aw_ai_is_uuid( $key ) ) { // SambaNova keys are plain UUIDs
+			array_unshift( $order, 'sambanova' );
+			$strong[] = 'sambanova';
+		}
+		$order = array_values( array_unique( $order ) );
 	}
 	foreach ( AW_AI_TOOLS as $id => $t ) {
 		foreach ( $t[1] as $prefix ) {
@@ -298,7 +370,7 @@ function aw_ai_check( array $row ): array {
 				$row['last_ok'] = time();
 				return $row;
 			}
-			if ( str_contains( $body, 'credit card' ) || str_contains( $body, 'card on file' ) ) {
+			if ( str_contains( $body, 'credit card' ) || str_contains( $body, 'card on file' ) || str_contains( $body, 'payment_method_required' ) ) {
 				$row['status'] = 'card';
 				return $row;
 			}
@@ -584,6 +656,53 @@ function aw_ai_free_caps_table() {
 	echo '</tbody></table>';
 }
 
+/** Total keys, what they can do in a day, what was used, by which workers (owner, 22 Oct 2026: "keep it simple"). */
+function aw_ai_overview( array $rows ) {
+	$working = 0;
+	$daily   = 0;
+	$nocap   = 0;
+	$seen    = array();
+	$caps    = (array) get_option( 'aw_ai_free_caps', array() );
+	foreach ( $rows as $r ) {
+		$p = (string) $r['provider'];
+		if ( ! in_array( $r['status'], array( 'works', 'limited' ), true ) || 'paid' === aw_ai_tier( $p ) ) {
+			continue;
+		}
+		++$working;
+		$d = AW_AI_DAILY[ $p ] ?? array( null, 'key' );
+		if ( null === $d[0] ) {
+			++$nocap;
+		} elseif ( 'key' === $d[1] ) {
+			$daily += $d[0];
+		} elseif ( empty( $seen[ $p ] ) ) { // per account: OpenRouter's accounts as the workers reported them
+			$seen[ $p ] = true;
+			$n          = count( array_filter( $caps, fn( $c ) => ( $c['provider'] ?? '' ) === $p ) );
+			$daily     += $d[0] * max( 1, $n );
+		}
+	}
+	$calls = 0;
+	$ok    = 0;
+	$wf    = array();
+	foreach ( aw_ai_usage() as $u ) {
+		foreach ( (array) ( $u['runs'] ?? array() ) as $run ) {
+			if ( time() - (int) $run['at'] < DAY_IN_SECONDS ) {
+				$calls += (int) ( $run['calls'] ?? 0 );
+				$ok    += (int) ( $run['ok'] ?? 0 );
+				if ( ! empty( $run['workflow'] ) ) {
+					$wf[ $run['workflow'] ] = true;
+				}
+			}
+		}
+	}
+	$tile = fn( $big, $small ) => '<div style="background:#fff;border:1px solid #dcdcde;border-radius:6px;padding:12px 16px;min-width:170px"><div style="font-size:22px;font-weight:600;line-height:1.2">' . esc_html( $big ) . '</div><div style="color:#50575e">' . esc_html( $small ) . '</div></div>';
+	echo '<div style="display:flex;flex-wrap:wrap;gap:12px;margin:16px 0">'
+		. $tile( count( $rows ) . ' keys', $working . ' working now' )
+		. $tile( 'About ' . number_format_i18n( $daily ) . ' a day', 'free requests with a daily cap' . ( $nocap ? ', plus ' . $nocap . ' keys with no daily cap' : '' ) )
+		. $tile( number_format_i18n( $ok ) . ' answers', 'in the last 24 h, from ' . number_format_i18n( $calls ) . ' calls' . ( $daily ? ' (' . round( 100 * $calls / $daily ) . '% of the daily cap)' : '' ) )
+		. $tile( count( $wf ) . ' workers', $wf ? implode( ', ', array_keys( $wf ) ) : 'none in the last 24 h' )
+		. '</div>';
+}
+
 /** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
 function aw_ai_tier_summary( array $rows ) {
 	$g = array();
@@ -620,6 +739,7 @@ function aw_ai_keys_screen() {
 	if ( isset( $_GET['notfound'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-warning"><p>That key was already gone; nothing changed.</p></div>';
 	}
+	aw_ai_overview( $rows );
 	aw_ai_free_caps_table();
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
 	wp_nonce_field( 'aw_ai_keys' );
@@ -638,7 +758,7 @@ function aw_ai_keys_screen() {
 		$shown[] = $uid;
 		$label = $r['provider'] ? AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] : '—';
 		echo '<tr data-aw-row><td><input type="hidden" name="aw_ai_order[]" value="' . esc_attr( (string) $i ) . '"><code>…' . esc_html( substr( $r['key'], -4 ) ) . '</code></td>'
-			. '<td>' . aw_ai_icon( (string) $r['provider'] ) . esc_html( $label ) . '</td><td>' . esc_html( aw_ai_tier_label( (string) $r['provider'] ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $r['provider'] ][1] ?? '—' ) . '</td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
+			. '<td>' . aw_ai_icon( (string) $r['provider'] ) . esc_html( $label ) . '</td><td>' . esc_html( aw_ai_tier_label( (string) $r['provider'] ) ) . '</td><td>' . aw_ai_caps_html( (string) $r['provider'] ) . '<br><small>' . esc_html( AW_AI_INFO[ $r['provider'] ][1] ?? '' ) . '</small></td><td><code>' . esc_html( $r['model'] ? $r['model'] : '—' ) . '</code></td>'
 			. '<td>' . aw_ai_status_badge( $r['status'] ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['last_ok'] ) ? wp_date( 'j M, H:i', $r['last_ok'] ) : 'Never' ) . '</td>'
 			. '<td>' . esc_html( ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( $r['limits'] ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ) ) . '</td>'
@@ -656,7 +776,7 @@ function aw_ai_keys_screen() {
 		$last = (array) ( $u['last'] ?? array() );
 		$state = $paid ? 'Not used (paid)' : ( ! empty( $last['ok'] ) ? 'Works' : ( ! empty( $last['limited'] ) ? 'Rate-limited for now' : 'Failed in the last run' ) );
 		echo '<tr style="opacity:' . ( $paid ? '.6' : '1' ) . '"><td><code>…' . esc_html( (string) ( $u['last4'] ?? '' ) ) . '</code><br><small>GitHub secret</small></td>'
-			. '<td>' . aw_ai_icon( $prov ) . esc_html( AW_AI_PROVIDERS[ $prov ][0] ?? $prov ) . '</td><td>' . esc_html( aw_ai_tier_label( $prov ) ) . '</td><td>' . esc_html( AW_AI_INFO[ $prov ][1] ?? '—' ) . '</td>'
+			. '<td>' . aw_ai_icon( $prov ) . esc_html( AW_AI_PROVIDERS[ $prov ][0] ?? $prov ) . '</td><td>' . esc_html( aw_ai_tier_label( $prov ) ) . '</td><td>' . aw_ai_caps_html( $prov ) . '</td>'
 			. '<td><code>' . esc_html( implode( ', ', array_keys( (array) ( $last['models'] ?? array() ) ) ) ?: '—' ) . '</code></td><td>' . esc_html( $state ) . '</td>'
 			. '<td>—</td><td>—</td><td>' . esc_html( aw_ai_usage_line( $u ) ) . '</td><td>' . esc_html( ! empty( $last['at'] ) ? wp_date( 'j M, H:i', (int) $last['at'] ) : '—' ) . '</td>'
 			. '<td><small>Change in GitHub</small></td></tr>';
