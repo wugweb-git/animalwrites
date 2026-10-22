@@ -395,6 +395,25 @@ add_action(
 						);
 					}
 					update_option( 'aw_ai_usage', $usage, false );
+					// Free-model daily caps per account (owner, 22 Oct 2026), as the workers saw them at the start of this run.
+					$caps = (array) get_option( 'aw_ai_free_caps', array() );
+					foreach ( (array) $req->get_param( 'accounts' ) as $a ) {
+						$acct = substr( preg_replace( '/[^A-Za-z0-9_-]/', '', (string) ( $a['account'] ?? '' ) ), -4 );
+						if ( '' === $acct ) {
+							continue;
+						}
+						$caps[ $acct ] = array(
+							'provider'  => sanitize_key( (string) ( $a['provider'] ?? '' ) ),
+							'limit'     => max( 0, (int) ( $a['limit'] ?? 0 ) ),
+							'remaining' => max( 0, (int) ( $a['remaining'] ?? 0 ) ),
+							'share'     => max( 0, (int) ( $a['share'] ?? 0 ) ),
+							'used'      => max( 0, (int) ( $a['used'] ?? 0 ) ),
+							'keys'      => array_values( array_unique( array_merge( (array) ( $caps[ $acct ]['keys'] ?? array() ), array_map( fn( $k ) => substr( preg_replace( '/[^A-Za-z0-9_=-]/', '', (string) $k ), -4 ), (array) ( $a['keys'] ?? array() ) ) ) ) ),
+							'at'        => $now,
+							'workflow'  => $wf,
+						);
+					}
+					update_option( 'aw_ai_free_caps', $caps, false );
 					return new WP_REST_Response( array( 'keys' => count( (array) $req->get_param( 'keys' ) ) ) );
 				},
 			)
@@ -473,6 +492,33 @@ add_action(
 	}
 );
 
+/**
+ * Free-model daily caps per account (owner, 22 Oct 2026). OpenRouter gives each account 50 free requests a day (1,000
+ * with credit), however many keys it has; the workers spread what is left over the day's remaining runs.
+ */
+function aw_ai_free_caps_table() {
+	$caps = (array) get_option( 'aw_ai_free_caps', array() );
+	echo '<h2>Daily caps on free models</h2>';
+	echo '<p>Free models have a daily limit per <strong>account</strong>, not per key: OpenRouter allows 50 free requests a day per account (1,000 once the account has 10 credits), however many keys it has. So the news workers share each account\'s requests out over the day: every run uses only its part of what is left, and stops calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC).</p>';
+	if ( ! $caps ) {
+		echo '<p><em>No worker run has reported yet.</em></p>';
+		return;
+	}
+	echo '<table class="widefat striped" style="max-width:1100px"><thead><tr><th>Account</th><th>Daily limit</th><th>Left today</th><th>Last run could use</th><th>Last run used</th><th>Keys</th><th>Last run</th></tr></thead><tbody>';
+	foreach ( $caps as $acct => $c ) {
+		$label = AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'];
+		$fresh = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
+		echo '<tr><td>' . esc_html( $label ) . ' <code>…' . esc_html( $acct ) . '</code></td>'
+			. '<td>' . esc_html( (string) $c['limit'] ) . '</td>'
+			. '<td>' . esc_html( $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)' ) . '</td>'
+			. '<td>' . esc_html( (string) $c['share'] ) . '</td>'
+			. '<td>' . esc_html( (string) $c['used'] ) . '</td>'
+			. '<td><code>' . esc_html( implode( ' ', array_map( fn( $k ) => '…' . $k, (array) $c['keys'] ) ) ) . '</code> (' . count( (array) $c['keys'] ) . ')</td>'
+			. '<td>' . esc_html( wp_date( 'j M, H:i', (int) $c['at'] ) . ( $c['workflow'] ? ' · ' . $c['workflow'] : '' ) ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+}
+
 function aw_ai_keys_screen() {
 	$rows = aw_ai_rows();
 	echo '<div class="wrap"><h1>AI models</h1>';
@@ -485,6 +531,7 @@ function aw_ai_keys_screen() {
 	if ( isset( $_GET['notfound'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-warning"><p>That key was already gone; nothing changed.</p></div>';
 	}
+	aw_ai_free_caps_table();
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
 	wp_nonce_field( 'aw_ai_keys' );
 	echo '<p><label for="aw-ai-new"><strong>Add keys</strong></label><br>Paste one or more keys, one per line. The provider and model are worked out when you save.</p>';
