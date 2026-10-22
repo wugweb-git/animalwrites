@@ -544,6 +544,9 @@ add_shortcode(
 	}
 );
 
+/** The home band's campaign that campaign-home.css was generated for (tools/campaign-home-css). */
+const AW_CAMP_HOME_CSS_FOR = 'lab-animals-rules-2026';
+
 /* ---------- Assets, ads ---------- */
 add_action(
 	'wp_enqueue_scripts',
@@ -553,8 +556,17 @@ add_action(
 		if ( ! ( is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true ) ) && ! $band ) {
 			return;
 		}
-		$v = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
-		wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/campaign.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/campaign.css' ) );
+		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
+		$slug = $band && preg_match( '/\[aw_campaign_band[^\]]*\bcampaign="([^"]+)"/', (string) get_post_field( 'post_content', get_queried_object_id() ), $m ) ? sanitize_title( $m[1] ) : '';
+		if ( $band && ! is_singular( 'aw_campaign' ) && AW_CAMP_HOME_CSS_FOR === $slug && is_readable( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ) {
+			// Home: only the band's rules (campaign-home.css), inline in campaign.css's place, so nothing blocks the first paint
+			// and the cascade order stays the same (owner, 22 Oct 2026). Any other campaign in the band: the full file.
+			wp_register_style( 'aw-campaign', false, array(), $v( 'assets/css/campaign-home.css' ) );
+			wp_enqueue_style( 'aw-campaign' );
+			wp_add_inline_style( 'aw-campaign', (string) file_get_contents( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		} else {
+			wp_enqueue_style( 'aw-campaign', plugins_url( 'assets/css/campaign.css', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/css/campaign.css' ) );
+		}
 		wp_enqueue_script( 'aw-campaign', plugins_url( 'assets/js/campaign.js', AW_CORE_DIR . 'animal-writes-core.php' ), array(), $v( 'assets/js/campaign.js' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		if ( is_singular( 'aw_campaign' ) ) { // the Share button and the story/post images (campaign.js)
 			$img = fn( $k ) => ( $a = (int) get_post_meta( $id, $k, true ) ) ? (string) wp_get_attachment_url( $a ) : '';
