@@ -116,6 +116,18 @@ function aw_ai_blank_row( string $key ): array {
 	return array( 'key' => $key, 'provider' => '', 'model' => '', 'url' => '', 'status' => 'unchecked', 'checked' => 0 );
 }
 
+/** The key's prefix names a provider or tool (a quick check); other keys are tried against every provider (slow). */
+function aw_ai_prefix_known( string $key ): bool {
+	foreach ( array_merge( array_values( AW_AI_PROVIDERS ), array_values( AW_AI_TOOLS ) ) as $p ) {
+		foreach ( $p[1] as $prefix ) {
+			if ( str_starts_with( $key, $prefix ) ) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 /** HTTP status of a short test request ($chat = false: list models only). */
 function aw_ai_call( string $provider, string $key, string $model = '', bool $chat = true ): array {
 	$p   = AW_AI_PROVIDERS[ $provider ];
@@ -267,6 +279,7 @@ function aw_ai_check_all(): void {
 	update_option( 'aw_ai_models', $rows, false );
 }
 add_action( 'aw_ai_check_all', 'aw_ai_check_all' );
+add_action( 'aw_ai_check_all_now', 'aw_ai_check_all' );
 add_action(
 	'init',
 	function () {
@@ -405,8 +418,11 @@ add_action(
 				$have[] = $k;
 			}
 		}
-		foreach ( $rows as &$r ) { // New keys, and any key not working, are (re)checked; working ones are left alone.
-			if ( 'works' !== $r['status'] || ! empty( $_POST['aw_ai_recheck'] ) ) {
+		// Only the keys just added are checked here, and only when their prefix names the provider: re-testing every key
+		// that is not working took minutes and the save ended in a 503 (owner, 22 Oct 2026). The rest are checked twice a
+		// day (aw_ai_check_all), or all at once with "Check again".
+		foreach ( $rows as &$r ) {
+			if ( 'unchecked' === $r['status'] && aw_ai_prefix_known( $r['key'] ) ) {
 				$r = aw_ai_check( $r );
 			}
 		}
@@ -416,6 +432,10 @@ add_action(
 		$was  = wp_list_pluck( $saved, 'key' );
 		$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
 		update_option( 'aw_ai_models', $rows, false );
+		if ( ! empty( $_POST['aw_ai_recheck'] ) && ! wp_next_scheduled( 'aw_ai_check_all_now' ) ) { // every key: in the background
+			wp_schedule_single_event( time(), 'aw_ai_check_all_now' );
+			spawn_cron();
+		}
 		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&saved=1' ) );
 		exit;
 	}
@@ -495,7 +515,7 @@ function aw_ai_keys_screen() {
 		}
 		echo '</tbody></table>';
 	}
-	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check the working keys again too</label></p>';
+	echo '<p><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check every key again (runs in the background; reload in a few minutes)</label></p>';
 	submit_button( 'Save and check' );
 	echo '</form>';
 	echo '<form id="aw-ai-remove" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_key_remove">';
