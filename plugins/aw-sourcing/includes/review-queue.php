@@ -120,7 +120,11 @@ add_action(
 		}
 		$n      = $action ? aw_review_apply( $ids, $action ) : 0;
 		$back   = admin_url( 'admin.php?page=aw-review' . ( ! empty( $_REQUEST['type'] ) ? '&type=' . sanitize_key( $_REQUEST['type'] ) : '' ) );
-		wp_safe_redirect( add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) );
+		// Back to the same view, search, sort and page (the page-number box posts paged).
+		$back = remove_query_arg( array( 'done', 'n', 'paged' ), wp_get_referer() && false !== strpos( wp_get_referer(), 'page=aw-review' ) ? wp_get_referer() : $back );
+		$page = absint( wp_unslash( $_REQUEST['paged'] ?? 0 ) );
+		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
+		wp_safe_redirect( $action || ! $page ? add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) : $back );
 		exit;
 	}
 );
@@ -154,7 +158,8 @@ function aw_review_page() {
 	echo '</form></div>';
 }
 
-add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'done', 'n' ) ) ); // the result notice stays off the list's own links
+// The result notice stays off the list's own links; only on this screen (other screens use done and n too).
+add_filter( 'removable_query_args', fn( $args ) => 'aw-review' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'done', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification
 add_filter( 'set_screen_option_aw_review_per_page', fn( $keep, $option, $value ) => max( 1, min( 300, (int) $value ) ), 10, 3 );
 
 /* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
