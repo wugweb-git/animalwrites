@@ -3,7 +3,8 @@
  * Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
  * Sources (publishers and press sites), Keywords (the one word list) and the Change log; this adds Feeds (one list of the
  * News feeds: RSS and Google News queries, Library sources: AWBI, PIB, Gazette, courts, and Opportunity sources),
- * Press-discovery queries and Categories (keyword → category).
+ * Press-discovery queries (Settings API), and registers the Categories and Sections tabs, whose core list-table screens
+ * live in sourcing-terms-admin.php.
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
  * sources, categories, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
