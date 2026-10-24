@@ -16,8 +16,11 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	/** @var array From aw_sourcing_keyword_stats(). */
 	private $stats;
 
-	/** @var array path => figures, from Search Insights (empty when it has none yet). */
+	/** @var array path => figures over 28 days, from Search Insights (empty when it has none yet). */
 	private $pages = array();
+
+	/** @var array path => figures over 3 months: 90 days, as long as Search Insights keeps daily rows (rollup.php) (owner, 24 Oct 2026). */
+	private $pages3 = array();
 
 	/**
 	 * @param array $stats aw_sourcing_keyword_stats() result.
@@ -53,6 +56,8 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 			'legal_p' => 'Published: Library',
 			'impr'    => 'Impressions (28 days)',
 			'clicks'  => 'Clicks (28 days)',
+			'impr3'   => 'Impressions (3 months)',
+			'clicks3' => 'Clicks (3 months)',
 		);
 	}
 
@@ -98,16 +103,24 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 			foreach ( $ids as $id ) {
 				$paths[ $id ] = $this->path( $id );
 			}
-			$this->pages = aw_si_page_metrics( array_values( array_filter( array_unique( $paths ) ) ), 28 );
+			$list         = array_values( array_filter( array_unique( $paths ) ) );
+			$this->pages  = aw_si_page_metrics( $list, 28 );
+			$this->pages3 = aw_si_page_metrics( $list, 90 );
 		}
 		$items = array();
 		foreach ( $rows as $r ) {
-			$c = 0;
-			$i = 0;
+			$c  = 0;
+			$i  = 0;
+			$c3 = 0;
+			$i3 = 0;
 			foreach ( array_unique( array_merge( $r['news']['published'], $r['legal']['published'] ) ) as $id ) {
-				$m  = $this->pages[ $paths[ (int) $id ] ?? '' ] ?? null;
-				$c += $m ? (int) $m['clicks'] : 0;
-				$i += $m ? (int) $m['impr'] : 0;
+				$key = $paths[ (int) $id ] ?? '';
+				$m   = $this->pages[ $key ] ?? null;
+				$m3  = $this->pages3[ $key ] ?? null;
+				$c  += $m ? (int) $m['clicks'] : 0;
+				$i  += $m ? (int) $m['impr'] : 0;
+				$c3 += $m3 ? (int) $m3['clicks'] : 0;
+				$i3 += $m3 ? (int) $m3['impr'] : 0;
 			}
 			$items[] = array(
 				'term'      => $r['term'],
@@ -120,6 +133,8 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 				'legal_p'   => count( $r['legal']['published'] ),
 				'impr'      => $this->has_data ? $i : null,
 				'clicks'    => $this->has_data ? $c : null,
+				'impr3'     => $this->has_data ? $i3 : null,
+				'clicks3'   => $this->has_data ? $c3 : null,
 			);
 		}
 		$by  = sanitize_key( wp_unslash( $_GET['orderby'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
