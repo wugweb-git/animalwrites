@@ -152,10 +152,11 @@ function aw_si_kw_ids( array $labels, int $role, array $extra = array() ): array
  * @param string $path     Site path, Directory pattern or page label.
  * @param string $role     owner, secondary or live.
  * @param string $src      Where the link comes from: seed or focus.
+ * @return bool Whether the link was written.
  */
-function aw_si_link_page( int $kw_id, string $obj_type, int $obj_id, string $path, string $role, string $src ): void {
+function aw_si_link_page( int $kw_id, string $obj_type, int $obj_id, string $path, string $role, string $src ): bool {
 	global $wpdb;
-	$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return false !== $wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		aw_si_table( 'kw_pages' ),
 		array(
 			'kw_id'    => $kw_id,
@@ -285,7 +286,8 @@ function aw_si_seed_data(): array {
 
 /**
  * Seed the keyword table once from the keyword map (plan §2). After this the table is the source of truth; the seed
- * never runs again unless the owner deletes the data.
+ * never runs again unless the owner deletes the data. It is marked done only when every write succeeded, so a seed
+ * cut short or hit by a database error runs again with the next daily run (each write replaces, so a repeat is safe).
  *
  * @return array Counts, or an empty array when already seeded.
  */
@@ -307,10 +309,13 @@ function aw_si_seed(): array {
 		'gaps'     => 0,
 		'rankings' => 0,
 		'pages'    => 0,
+		'failed'   => 0,
 	);
+	$fail  = 0; // Writes that did not succeed, and phrases that got no record: the seed then runs again next time.
 	foreach ( $seed['map'] as $row ) {
 		$id = (int) ( $ids[ aw_si_norm( $row['keyword'] ) ] ?? 0 );
 		if ( ! $id ) {
+			++$fail;
 			continue;
 		}
 		++$count['map'];
@@ -325,16 +330,16 @@ function aw_si_seed(): array {
 		if ( 'topic' === $row['page_type'] ) {
 			$set['topic'] = mb_substr( (string) $row['page']['label'], 0, 100 );
 		}
-		$wpdb->update( $k, $set, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$fail                     += false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ? 1 : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		list( $type, $obj, $path ) = aw_si_resolve_page( (array) $row['page'], (string) $row['page_type'] );
-		aw_si_link_page( $id, $type, $obj, $path, 'primary' === $row['kind'] ? 'owner' : 'secondary', 'seed' );
+		$fail                     += aw_si_link_page( $id, $type, $obj, $path, 'primary' === $row['kind'] ? 'owner' : 'secondary', 'seed' ) ? 0 : 1;
 		++$count['pages'];
 		if ( null !== $row['trends'] ) {
-			aw_si_obs_put( $id, '', 'trends', 'index', '12m', '2026-10-15', array( 'value' => (float) $row['trends'] ) );
+			$fail += aw_si_obs_put( $id, '', 'trends', 'index', '12m', '2026-10-15', array( 'value' => (float) $row['trends'] ) ) ? 0 : 1;
 		}
 		if ( null !== $row['rank'] ) {
-			$num = is_int( $row['rank'] ) ? (float) $row['rank'] : null;
-			aw_si_obs_put(
+			$num   = is_int( $row['rank'] ) ? (float) $row['rank'] : null;
+			$fail += aw_si_obs_put(
 				$id,
 				'',
 				'live',
@@ -345,23 +350,26 @@ function aw_si_seed(): array {
 					'value' => $num,
 					'txt'   => (string) $row['rank'],
 				)
-			);
+			) ? 0 : 1;
 		}
 	}
 	foreach ( (array) ( $seed['gaps'] ?? array() ) as $g ) {
 		$id = (int) ( $ids[ aw_si_norm( $g['keyword'] ) ] ?? 0 );
-		if ( $id ) {
-			$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET note = %s WHERE id = %d AND note = ''", mb_substr( 'Gap (15 Oct): ' . $g['gap'], 0, 255 ), $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( ! $id ) {
+			++$fail;
+		} else {
+			$fail += false === $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET note = %s WHERE id = %d AND note = ''", mb_substr( 'Gap (15 Oct): ' . $g['gap'], 0, 255 ), $id ) ) ? 1 : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			++$count['gaps'];
 		}
 	}
 	foreach ( (array) ( $seed['rankings'] ?? array() ) as $r ) {
 		$id = (int) ( $ids[ aw_si_norm( $r['keyword'] ) ] ?? 0 );
 		if ( ! $id ) {
+			++$fail;
 			continue;
 		}
 		++$count['rankings'];
-		aw_si_obs_put(
+		$fail += aw_si_obs_put(
 			$id,
 			'',
 			'live',
@@ -372,18 +380,21 @@ function aw_si_seed(): array {
 				'value' => null === $r['position'] ? null : (float) $r['position'],
 				'txt'   => (string) $r['position_text'],
 			)
-		);
+		) ? 0 : 1;
 		if ( '' !== (string) $r['top3'] ) {
-			aw_si_obs_put( $id, '', 'live', 'top3', 'month', $r['date'], array( 'txt' => (string) $r['top3'] ) );
+			$fail += aw_si_obs_put( $id, '', 'live', 'top3', 'month', $r['date'], array( 'txt' => (string) $r['top3'] ) ) ? 0 : 1;
 		}
 		if ( '' !== (string) $r['paa'] ) {
-			aw_si_obs_put( $id, '', 'live', 'paa', 'month', $r['date'], array( 'txt' => (string) $r['paa'] ) );
+			$fail += aw_si_obs_put( $id, '', 'live', 'paa', 'month', $r['date'], array( 'txt' => (string) $r['paa'] ) ) ? 0 : 1;
 		}
 		if ( '' !== (string) $r['url'] ) {
-			aw_si_link_page( $id, 'path', 0, aw_si_path( (string) $r['url'] ), 'live', 'seed' );
+			$fail += aw_si_link_page( $id, 'path', 0, aw_si_path( (string) $r['url'] ), 'live', 'seed' ) ? 0 : 1;
 		}
 	}
-	update_option( 'aw_si_seeded', time(), false );
+	$count['failed'] = $fail;
+	if ( ! $fail ) {
+		update_option( 'aw_si_seeded', time(), false ); // Only a complete seed is marked; every write replaces, so a repeat is safe.
+	}
 	return $count;
 }
 
