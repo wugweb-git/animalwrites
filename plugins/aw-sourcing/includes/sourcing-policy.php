@@ -276,11 +276,10 @@ add_filter( 'set_screen_option_aw_publishers_per_page', fn( $keep, $option, $val
 add_action(
 	'admin_post_aw_sourcing',
 	function () {
-		$tab = sanitize_key( $_POST['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification -- checked next
-		// The Publishers list table prints its own nonce (bulk-publishers) in the form, after the screen's.
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'publishers' === $tab ? 'bulk-publishers' : 'aw_sourcing' ) ) {
+		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_sourcing' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
+		$tab = sanitize_key( $_POST['tab'] ?? 'publishers' );
 		if ( ! in_array( $tab, array( 'publishers', 'keywords' ), true ) ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
 		} elseif ( 'keywords' === $tab ) {

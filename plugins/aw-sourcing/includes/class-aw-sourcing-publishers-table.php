@@ -3,7 +3,7 @@
  * Settings → Sourcing → Publishers as a core list table (owner, 24 Oct 2026): views by status, search, sortable
  * columns, pagination with a screen option, row actions (Allow, Neutral, Block) and bulk actions. The short name is
  * edited in place and saved with "Save short names". Everything posts to admin-post.php (action aw_sourcing, tab
- * publishers) with the list table's nonce. Loaded only when the tab is shown.
+ * publishers) with the screen's aw_sourcing nonce (the table prints none of its own). Loaded only when the tab is shown.
  *
  * @package aw-sourcing
  */
@@ -84,6 +84,19 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		}
 		echo '</select>';
 		submit_button( 'Apply', 'action', '', false, array( 'id' => 'aw-pub-apply-' . $which ) );
+	}
+
+	/** As core, without the table's own nonce: the screen's form already carries aw_sourcing, which the handler checks. */
+	protected function display_tablenav( $which ) {
+		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
+		if ( $this->has_items() ) {
+			echo '<div class="alignleft actions bulkactions">';
+			$this->bulk_actions( $which );
+			echo '</div>';
+		}
+		$this->extra_tablenav( $which );
+		$this->pagination( $which );
+		echo '<br class="clear"></div>';
 	}
 
 	protected function extra_tablenav( $which ) {
