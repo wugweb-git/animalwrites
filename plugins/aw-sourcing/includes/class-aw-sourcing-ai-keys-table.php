@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → AI models: every key in one core list table (owner, 24 Oct 2026). The keys saved here (in the order the
+ * Settings → Sourcing → AI models: every key in one core list table (owner, 24 Oct 2026). The keys saved here (in the order the
  * workers try them), then the keys in the workers' GitHub secrets (from their own reports; changed in GitHub).
  * Views by state, search, row actions (Move up, Move down, Remove) and bulk actions (Remove, Check again), all posting
  * to admin-post.php (action aw_ai_keys_list) with the table's nonce. A broken key gets the plugins-list problem row.
@@ -20,7 +20,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 	private $all = array();
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'key', 'plural' => 'keys', 'ajax' => false, 'screen' => 'settings_page_aw-ai-keys' ) );
+		parent::__construct( array( 'singular' => 'key', 'plural' => 'keys', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
 		$usage = aw_ai_usage();
 		$shown = array();
 		foreach ( aw_ai_rows() as $i => $r ) {
@@ -82,7 +82,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 	}
 
 	protected function get_views() {
-		$base = admin_url( 'options-general.php?page=aw-ai-keys' );
+		$base = aw_ai_keys_url();
 		$out  = array();
 		foreach ( array( '' => 'All', 'ok' => 'Working', 'wait' => 'Waiting', 'bad' => 'Broken', 'secret' => 'GitHub secrets' ) as $k => $l ) {
 			$n = count( array_filter( $this->all, fn( $r ) => $this->in_view( $r, $k ) ) );
