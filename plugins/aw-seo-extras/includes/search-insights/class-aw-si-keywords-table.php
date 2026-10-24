@@ -336,7 +336,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		if ( $agg && 1 === $paged ) {
 			array_unshift( $this->items, $agg );
 		}
-		$total += $shift;
+		$total                += $shift;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'label' );
 		$this->set_pagination_args(
 			array(
