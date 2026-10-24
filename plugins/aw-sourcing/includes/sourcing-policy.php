@@ -515,7 +515,7 @@ function aw_sourcing_page() {
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
 	}
 	// Tabs: Publishers, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback, own form?]), Change log.
-	// A tab with its own form (third value true) prints its Settings API form; the others share the aw_sourcing form.
+	// A tab whose third value is true is drawn outside the shared aw_sourcing form (a Settings API form, or nothing to save).
 	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
 	$tabs  = array( 'publishers' => 'Publishers', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
 	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'publishers';
@@ -526,11 +526,24 @@ function aw_sourcing_page() {
 	}
 	echo '</nav>';
 	if ( 'log' === $tab ) {
-		echo '<table class="widefat striped" style="margin-top:12px"><thead><tr><th>When</th><th>Who</th><th>Tab</th><th>What changed</th></tr></thead><tbody>';
+		$rows = array();
 		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
-			echo '<tr><td>' . esc_html( $e['at'] ) . '</td><td>' . esc_html( $e['user'] ) . '</td><td>' . esc_html( $tabs[ $e['tab'] ] ?? $e['tab'] ) . '</td><td>' . esc_html( $e['what'] ) . '</td></tr>';
+			$tl     = (string) ( $tabs[ $e['tab'] ] ?? $e['tab'] );
+			$rows[] = array(
+				'at'    => esc_html( $e['at'] ),
+				'user'  => esc_html( $e['user'] ),
+				'tab'   => esc_html( $tl ),
+				'what'  => esc_html( $e['what'] ),
+				'_find' => $e['user'] . ' ' . $tl . ' ' . $e['what'],
+			);
 		}
-		echo '</tbody></table></div>';
+		aw_sourcing_simple_table(
+			'changes',
+			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed' ),
+			$rows,
+			array( 'per_page' => 50, 'sortable' => array( 'at', 'user', 'tab' ), 'empty' => 'No changes yet.', 'search' => 'Search changes', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'log' ) )
+		);
+		echo '</div>';
 		return;
 	}
 	if ( 'keywords' === $tab ) { // its own forms: the switches, add words, the word list
@@ -629,6 +642,32 @@ function aw_sourcing_keywords_tab() {
 	}
 	echo '</form>';
 	do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
+}
+
+/**
+ * Show plain rows as a core list table.
+ *
+ * @param string $plural Table name.
+ * @param array  $cols   Column => label.
+ * @param array  $rows   Rows (cells as escaped HTML).
+ * @param array  $opts   AW_Sourcing_Simple_Table options; search: the search button's text; hidden: query args the search keeps.
+ */
+function aw_sourcing_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	}
+	require_once __DIR__ . '/class-aw-sourcing-simple-table.php';
+	$t = new AW_Sourcing_Simple_Table( $plural, $cols, $rows, $opts );
+	$t->prepare_items();
+	if ( ! empty( $opts['search'] ) ) { // a GET form with the screen's own query args (opts hidden)
+		echo '<form method="get">';
+		foreach ( (array) ( $opts['hidden'] ?? array() ) as $k => $v ) {
+			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
+		}
+		$t->search_box( (string) $opts['search'], 'aw-' . sanitize_key( $plural ) );
+		echo '</form>';
+	}
+	$t->display();
 }
 
 /* ---------- Settings API (owner, 24 Oct 2026): the Sourcing settings forms post to options.php ---------- */

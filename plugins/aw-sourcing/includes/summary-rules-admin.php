@@ -159,16 +159,18 @@ add_action(
 function aw_summary_rules_length_table() {
 	$r     = aw_summary_rules();
 	$below = aw_summary_below_counts();
-	echo '<table class="widefat striped"><thead><tr><th>Section</th><th>Minimum words</th><th>Maximum words</th><th>Minimum sentences</th><th>Maximum sentences</th><th>Published summaries below the minimum</th></tr></thead><tbody>';
+	$cols  = array( 'label' => 'Section', 'min_words' => 'Minimum words', 'max_words' => 'Maximum words', 'min_sentences' => 'Minimum sentences', 'max_sentences' => 'Maximum sentences', 'below' => 'Published summaries below the minimum' );
+	$rows  = array();
 	foreach ( $r['sections'] as $name => $sec ) {
-		echo '<tr><td>' . esc_html( $sec['label'] ) . '</td>';
+		$row = array( 'label' => esc_html( $sec['label'] ) );
 		foreach ( array( 'min_words', 'max_words', 'min_sentences', 'max_sentences' ) as $f ) {
-			echo '<td><input type="number" min="1" max="400" class="small-text" name="' . esc_attr( AW_SUMMARY_RULES_OPTION . '[sections][' . $name . '][' . $f . ']' ) . '" value="' . (int) $sec[ $f ] . '" aria-label="' . esc_attr( $sec['label'] . ' ' . str_replace( '_', ' ', $f ) ) . '"></td>';
+			$row[ $f ] = '<input type="number" min="1" max="400" class="small-text" name="' . esc_attr( AW_SUMMARY_RULES_OPTION . '[sections][' . $name . '][' . $f . ']' ) . '" value="' . (int) $sec[ $f ] . '" aria-label="' . esc_attr( $sec['label'] . ' ' . str_replace( '_', ' ', $f ) ) . '">';
 		}
-		$b = $below[ $name ] ?? array( 0, 0 );
-		echo '<td>' . (int) $b[0] . ' of ' . (int) $b[1] . '</td></tr>';
+		$b            = $below[ $name ] ?? array( 0, 0 );
+		$row['below'] = (int) $b[0] . ' of ' . (int) $b[1];
+		$rows[]       = $row;
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'lengths', $cols, $rows ); // inside the settings form: the table prints no nonce of its own
 }
 
 /** The tab. */

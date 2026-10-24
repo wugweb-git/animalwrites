@@ -245,15 +245,20 @@ function aw_relay_tab() {
 	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-relay' );
 	$log = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
 	echo '<h2>Requests (last 200)</h2>';
-	if ( ! $log ) {
-		echo '<p>None yet.</p>';
-		return;
-	}
-	echo '<table class="widefat striped"><thead><tr><th>Time</th><th>Host</th><th>Path</th><th>Result</th><th>Size</th><th>Time taken</th><th>Note</th></tr></thead><tbody>';
+	$rows = array();
 	foreach ( array_slice( $log, 0, 200 ) as $r ) {
-		echo '<tr><td>' . esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ) . '</td><td>' . esc_html( $r['host'] ) . '</td><td>' . esc_html( $r['path'] ) . '</td><td>' . esc_html( (string) $r['status'] ) . '</td><td>' . esc_html( size_format( (int) $r['bytes'] ) ) . '</td><td>' . (int) $r['ms'] . ' ms</td><td>' . esc_html( $r['note'] ) . '</td></tr>';
+		$rows[] = array(
+			'at'     => esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ),
+			'host'   => esc_html( $r['host'] ),
+			'path'   => esc_html( $r['path'] ),
+			'status' => esc_html( (string) $r['status'] ),
+			'bytes'  => esc_html( size_format( (int) $r['bytes'] ) ),
+			'ms'     => (int) $r['ms'] . ' ms',
+			'note'   => esc_html( $r['note'] ),
+			'_sort'  => array( 'at' => (int) $r['at'], 'bytes' => (int) $r['bytes'], 'ms' => (int) $r['ms'] ),
+		);
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'requests', array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ), $rows, array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.' ) );
 }
 
 add_filter(
