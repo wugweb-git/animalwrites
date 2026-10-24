@@ -68,7 +68,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/enrichment.php` | Directory enrichment: the queue and results endpoints, table {prefix}aw_enrich, apply rules, spend. |
 | `includes/enrichment-admin.php` | Directory → Enrichment review and the Enrichment tab. |
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
-| `includes/review-queue.php` | Inbox → To review. |
+| `includes/review-queue.php`, `includes/class-aw-sourcing-review-table.php` | Inbox → To review as a core list table: views by type, search, sortable, pagination (screen option, 50), row actions Edit / Source / Publish / Reject, bulk Publish / Reject and "Publish all N". |
 | `includes/keyword-suggestions.php`, `includes/class-aw-sourcing-suggestions-table.php` | Settings → Sourcing → Keywords → Suggestions from Search Insights: searches with at least 20 impressions in 28 days that no Include or Exclude word covers (not brand, English only), as a core list table with Add to Include, Add to Exclude and Dismiss (option aw_sourcing_dismissed). Needs aw-seo-extras for the searches; shows nothing without it. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
 | `includes/site-health.php` | Tools → Site Health → "Sourcing ran on time": the ingest heartbeat as a Site Health test, same rules as the watchdog (critical: no run for 8 hours; recommended: no News for 12 hours, none ever 12 hours after the workers' first report, or half the sources failing). |
