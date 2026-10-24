@@ -435,7 +435,7 @@ add_action(
  * each per call. Matches DOI first (case-insensitive, from the item's doi.org source link), then the normalised URL,
  * across research items (Resources tagged research) that are published, draft or pending.
  * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent. With "index": true it
- * also returns "studies": [{id, title, first_author, year}] for the same items, so the worker can spot the same study
+ * also returns "studies": [{id, title, first_author, year, url}] for the same items, so the worker can spot the same study
  * under another DOI or URL (preprint and journal versions) before any AI step.
  */
 function aw_exists_norm_url( $url ) {
@@ -513,6 +513,7 @@ function aw_exists( WP_REST_Request $req ) {
 				'title'        => '' !== $study ? $study : get_the_title( $id ),
 				'first_author' => (string) ( $authors[0] ?? '' ),
 				'year'         => substr( (string) get_post_meta( $id, 'aw_source_date', true ), 0, 4 ),
+				'url'          => get_permalink( $id ), // the link in a "possible duplicate" hold (To review)
 			);
 		}
 	}
