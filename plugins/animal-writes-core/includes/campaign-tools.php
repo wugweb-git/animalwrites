@@ -756,6 +756,7 @@ add_filter(
 			return $q;
 		}
 		$q['post_type']    = array( 'aw_news', 'aw_press' );
+		$q['post__not_in'] = array_merge( (array) ( $q['post__not_in'] ?? array() ), aw_camp_press_dupes( $q['tax_query'] ) );
 		$q['meta_query']   = isset( $q['meta_query'] ) && is_array( $q['meta_query'] ) ? $q['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$q['meta_query'][] = array(
 			'relation' => 'OR',
@@ -766,6 +767,51 @@ add_filter(
 	},
 	20
 );
+
+/**
+ * Media & PR articles that are the same story as a News item of the campaign (same link or same title): left out of
+ * "In the news" so a story is listed once, as News.
+ */
+function aw_camp_press_dupes( $tax_query ) {
+	$base  = array( 'post_status' => 'publish', 'numberposts' => 300, 'fields' => 'ids', 'tax_query' => $tax_query, 'suppress_filters' => true ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	$norm  = fn( $t ) => trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( html_entity_decode( (string) $t, ENT_QUOTES ) ) ) );
+	$news  = get_posts( array( 'post_type' => 'aw_news' ) + $base );
+	$urls  = array();
+	$names = array();
+	foreach ( $news as $id ) {
+		$urls[ untrailingslashit( (string) get_post_meta( $id, 'aw_source_url', true ) ) ] = true;
+		$names[ $norm( get_the_title( $id ) ) ]                                           = true;
+	}
+	$out = array();
+	foreach ( get_posts( array( 'post_type' => 'aw_press' ) + $base ) as $id ) {
+		if ( isset( $urls[ untrailingslashit( (string) get_post_meta( $id, 'aw_press_url', true ) ) ] ) || isset( $names[ $norm( get_the_title( $id ) ) ] ) ) {
+			$out[] = $id;
+		}
+	}
+	return $out ? $out : array();
+}
+
+/** A press card's title and image link to the coverage, in a new tab (the item has no page of its own). */
+foreach ( array( 'core/post-title', 'core/post-featured-image' ) as $aw_blk ) {
+	add_filter(
+		'render_block_' . $aw_blk,
+		function ( $html, $block, $instance ) {
+			$id = (int) ( $instance->context['postId'] ?? 0 );
+			if ( ! $id || 'aw_press' !== get_post_type( $id ) || str_contains( $html, '<a ' ) || empty( $block['attrs']['isLink'] ) ) {
+				return $html;
+			}
+			$url = (string) get_post_meta( $id, 'aw_press_url', true );
+			if ( ! $url ) {
+				return $html;
+			}
+			$a = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">';
+			// Title: link the heading's text. Image: link the figure's image.
+			return preg_replace( array( '#(<h[1-6][^>]*>)(.*?)(</h[1-6]>)#s', '#(<figure[^>]*>)(.*?)(</figure>)#s' ), '$1' . $a . '$2</a>$3', $html, 1 );
+		},
+		10,
+		3
+	);
+}
 
 /** A Media & PR item has no page of its own: its link is the coverage itself (cards in "In the news"). */
 add_filter(
