@@ -42,6 +42,34 @@ function aw_si_runs(): array {
 }
 
 /**
+ * Mark a run as started. A run that started over an hour ago and never logged a result was cut short (time limit).
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_start( string $src ): void {
+	$r                    = aw_si_runs();
+	$r[ $src ]            = $r[ $src ] ?? array( 'ok' => 0 );
+	$r[ $src ]['started'] = time();
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
+ * The problem with a source's last run in plain words, or ''.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_problem( string $src ): string {
+	$r   = aw_si_runs()[ $src ] ?? array();
+	$err = $r['error'] ?? null;
+	$end = max( (int) ( $r['ok'] ?? 0 ), (int) ( $err['time'] ?? 0 ) );
+	if ( ! empty( $r['started'] ) && (int) $r['started'] > $end && time() - (int) $r['started'] > HOUR_IN_SECONDS ) {
+		/* translators: %s: date and time. */
+		return sprintf( __( 'The run started on %s did not finish (probably a time limit).', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $r['started'] ) );
+	}
+	return $err ? (string) $err['message'] : '';
+}
+
+/**
  * Record a good run.
  *
  * @param string $src  Source key.
@@ -50,9 +78,10 @@ function aw_si_runs(): array {
 function aw_si_run_ok( string $src, array $info = array() ): void {
 	$r         = aw_si_runs();
 	$r[ $src ] = array(
-		'ok'    => time(),
-		'error' => null,
-		'info'  => $info,
+		'ok'      => time(),
+		'error'   => null,
+		'info'    => $info,
+		'started' => (int) ( $r[ $src ]['started'] ?? 0 ),
 	);
 	update_option( AW_SI_RUNS, $r, false );
 }
@@ -74,12 +103,14 @@ function aw_si_run_fail( string $src, string $message ): void {
 }
 
 /**
- * True when a source never ran or its last good run is older than twice its schedule.
+ * True when a source's last good run is older than twice its schedule. A source that has not run yet counts as late
+ * only once twice its schedule has passed since Search Insights was installed (no warning on the day of a deploy).
  *
  * @param string $src Source key.
  */
 function aw_si_stale( string $src ): bool {
 	$every = (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS );
 	$ok    = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
-	return ! $ok || ( time() - $ok ) > 2 * $every;
+	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
+	return ( time() - $since ) > 2 * $every;
 }

@@ -21,9 +21,10 @@ const AW_SI_GSC_LIMIT    = 5000;
 const AW_SI_GSC_REFETCH  = 4;
 const AW_SI_GSC_BACKFILL = 90;
 const AW_SI_GSC_PER_RUN  = 15;
+const AW_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit, so the run is always logged.
 
 /**
- * One searchanalytics request for one day.
+ * One searchanalytics request for one day: aw_sd_query() of search-demand.php, for a single date.
  *
  * @param object $module Site Kit's Search Console module.
  * @param array  $dims   Dimensions, e.g. date + query.
@@ -31,31 +32,7 @@ const AW_SI_GSC_PER_RUN  = 15;
  * @return array|WP_Error Rows as [keys, clicks, impressions, position].
  */
 function aw_si_gsc_rows( $module, array $dims, string $day ) {
-	try {
-		$r = $module->get_data(
-			'searchanalytics',
-			array(
-				'dimensions' => $dims,
-				'startDate'  => $day,
-				'endDate'    => $day,
-				'limit'      => AW_SI_GSC_LIMIT,
-			)
-		);
-	} catch ( Throwable $e ) {
-		return new WP_Error( 'aw_si_gsc', wp_strip_all_tags( $e->getMessage() ) );
-	}
-	if ( is_wp_error( $r ) ) {
-		return $r;
-	}
-	$rows = array();
-	foreach ( (array) $r as $row ) {
-		if ( is_object( $row ) && method_exists( $row, 'getKeys' ) ) {
-			$rows[] = array( (array) $row->getKeys(), (int) $row->getClicks(), (int) $row->getImpressions(), (float) $row->getPosition() );
-		} elseif ( is_array( $row ) ) {
-			$rows[] = array( (array) ( $row['keys'] ?? array() ), (int) ( $row['clicks'] ?? 0 ), (int) ( $row['impressions'] ?? 0 ), (float) ( $row['position'] ?? 0 ) );
-		}
-	}
-	return $rows;
+	return aw_sd_query( $module, $dims, $day, $day );
 }
 
 /**
@@ -182,13 +159,18 @@ function aw_si_gsc_run( array $args = array() ): array {
 	$report = aw_si_with_module(
 		'search-console',
 		function ( $module ) use ( $days, $dry ) {
-			$rep = array(
+			$rep   = array(
 				'days'      => array(),
 				'rows'      => 0,
 				'truncated' => array(),
 				'error'     => '',
 			);
-			foreach ( $days as $day ) {
+			$start = microtime( true );
+			foreach ( $days as $i => $day ) {
+				if ( $i >= AW_SI_GSC_REFETCH && microtime( true ) - $start > AW_SI_GSC_BUDGET ) {
+					$rep['stopped'] = $day; // The backfill goes on from here next run.
+					break;
+				}
 				$data = aw_si_gsc_fetch_day( $module, $day );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
@@ -206,6 +188,10 @@ function aw_si_gsc_run( array $args = array() ): array {
 					'named' => (int) array_sum( array_column( $data['q'], 2 ) ),
 				);
 				$rep['rows']        += $n;
+				if ( ! $dry && $i >= AW_SI_GSC_REFETCH ) {
+					// Save the backfill position after each older day, so a run cut short still moves on.
+					update_option( 'aw_si_backfill', ( new DateTimeImmutable( $day, wp_timezone() ) )->modify( '-1 day' )->format( 'Y-m-d' ), false );
+				}
 				if ( $dry ) {
 					$rep['sample'][ $day ] = array_slice( $data['q'], 0, 5 );
 				}
@@ -220,11 +206,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 		return array( 'error' => $report->get_error_message() );
 	}
 	if ( ! $dry ) {
-		$done  = array_keys( $report['days'] );
-		$older = array_slice( $done, AW_SI_GSC_REFETCH );
-		if ( $older ) {
-			update_option( 'aw_si_backfill', ( new DateTimeImmutable( (string) min( $older ), wp_timezone() ) )->modify( '-1 day' )->format( 'Y-m-d' ), false );
-		}
+		$done = array_keys( $report['days'] );
 		if ( $report['error'] ) {
 			aw_si_run_fail( 'gsc', $report['error'] );
 		} else {

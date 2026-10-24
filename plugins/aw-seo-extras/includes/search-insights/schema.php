@@ -136,10 +136,10 @@ function aw_si_install(): void {
 		KEY status (status)
 		) {$c};"
 	);
-	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, false );
+	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
+	add_option( 'aw_si_installed', time(), '', false );
 }
-add_action( 'admin_init', 'aw_si_install', 1 );
-add_action( 'rest_api_init', 'aw_si_install', 1 );
+add_action( 'admin_init', 'aw_si_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
 
 /** Whether the tables exist (the install may not have run yet, e.g. on a fresh install before any admin visit). */
 function aw_si_ready(): bool {
@@ -147,17 +147,21 @@ function aw_si_ready(): bool {
 }
 
 /**
- * Drop every Search Insights table and option. Only from the owner's typed confirmation (admin.php) or
- * `wp aw-si delete-data --yes`.
+ * Drop every Search Insights table and option, and switch Search Insights off so the daily run does not rebuild them.
+ * Only from the owner's typed confirmation (admin.php) or `wp aw-si delete-data --yes`. "Run the daily update" (or
+ * `wp aw-si run`) switches it on again.
  */
 function aw_si_drop_all(): void {
 	global $wpdb;
 	foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising' ) as $t ) {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill' ) as $opt ) {
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed' ) as $opt ) {
 		delete_option( $opt );
 	}
+	update_option( 'aw_si_off', time(), false );
+	wp_clear_scheduled_hook( 'aw_si_daily' );
+	wp_clear_scheduled_hook( 'aw_si_rollup' );
 }
 
 /** Current time in MySQL format, site time zone (IST). */

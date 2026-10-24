@@ -132,6 +132,10 @@ function aw_si_handle_overrides(): void {
 		wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['kw'] ?? array() ) ) );
+	if ( ! $ids ) {
+		wp_safe_redirect( add_query_arg( 'none', 1, aw_si_url( 'keywords' ) ) );
+		exit;
+	}
 	$set = array(
 		'override_p1'    => 'P1',
 		'override_p2'    => 'P2',
@@ -151,17 +155,23 @@ function aw_si_handle_overrides(): void {
 
 /** Notices per source: an info line with every source's last update, then a warning or error per problem. */
 function aw_si_source_notices(): void {
+	$off = (int) get_option( 'aw_si_off' );
+	if ( $off ) {
+		/* translators: %s: date and time. */
+		echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Search Insights is off: its data was deleted on %s and nothing runs on schedule. Settings → Run the daily update starts it again.', 'aw-seo-extras' ), wp_date( 'j M Y, H:i', $off ) ) ) . '</p></div>';
+		return;
+	}
 	$runs  = aw_si_runs();
 	$parts = array();
 	foreach ( aw_si_sources() as $src => $s ) {
 		$r   = $runs[ $src ] ?? array();
 		$ok  = (int) ( $r['ok'] ?? 0 );
-		$err = $r['error'] ?? null;
+		$err = aw_si_run_problem( $src );
 		/* translators: 1: source, 2: date and time. */
 		$parts[] = $ok ? sprintf( __( '%1$s: %2$s', 'aw-seo-extras' ), $s['label'], wp_date( 'j M, H:i', $ok ) ) : sprintf( __( '%s: not run yet', 'aw-seo-extras' ), $s['label'] );
 		if ( $err ) {
-			/* translators: 1: source, 2: time of the failure, 3: error, 4: date of the data still shown. */
-			$msg = sprintf( __( '%1$s failed on %2$s: %3$s The figures shown are from %4$s.', 'aw-seo-extras' ), $s['label'], wp_date( 'j M, H:i', (int) $err['time'] ), $err['message'], $ok ? wp_date( 'j M, H:i', $ok ) : __( 'no earlier run', 'aw-seo-extras' ) );
+			/* translators: 1: source, 2: the problem, 3: date of the data still shown. */
+			$msg = sprintf( __( '%1$s: %2$s The figures shown are from %3$s.', 'aw-seo-extras' ), $s['label'], $err, $ok ? wp_date( 'j M, H:i', $ok ) : __( 'no earlier run', 'aw-seo-extras' ) );
 			echo '<div class="notice notice-error inline"><p><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $msg ) . '</p></div>';
 		} elseif ( $ok && aw_si_stale( $src ) ) {
 			/* translators: %s: source. */
@@ -196,6 +206,9 @@ function aw_si_screen(): void {
 	aw_si_source_notices();
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
+	}
+	if ( isset( $_GET['none'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'No keyword was selected, so nothing changed.', 'aw-seo-extras' ) . '</p></div>';
 	}
 	if ( isset( $_GET['ran'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Run finished. See the notices above for each source.', 'aw-seo-extras' ) . '</p></div>';
@@ -282,7 +295,7 @@ function aw_si_box_sources(): void {
 	foreach ( aw_si_sources() as $src => $s ) {
 		$r    = $runs[ $src ] ?? array();
 		$ok   = (int) ( $r['ok'] ?? 0 );
-		$err  = $r['error'] ?? null;
+		$err  = aw_si_run_problem( $src );
 		$icon = $err ? 'dismiss' : ( ! $ok ? 'minus' : ( aw_si_stale( $src ) ? 'clock' : 'yes-alt' ) );
 		$word = $err ? __( 'Failed', 'aw-seo-extras' ) : ( ! $ok ? __( 'Not run yet', 'aw-seo-extras' ) : ( aw_si_stale( $src ) ? __( 'Late', 'aw-seo-extras' ) : __( 'OK', 'aw-seo-extras' ) ) );
 		$info = (array) ( $r['info'] ?? array() );
@@ -296,7 +309,7 @@ function aw_si_box_sources(): void {
 			$det[] = sprintf( __( '%s rows', 'aw-seo-extras' ), number_format_i18n( (int) $info['rows'] ) );
 		}
 		if ( $err ) {
-			$det[] = $err['message'];
+			$det[] = $err;
 		}
 		echo '<tr><td>' . esc_html( $s['label'] ) . '</td><td>' . esc_html( $ok ? wp_date( 'j M Y, H:i', $ok ) : __( 'Never', 'aw-seo-extras' ) ) . '</td><td><span class="dashicons dashicons-' . esc_attr( $icon ) . '" aria-hidden="true"></span> ' . esc_html( $word ) . '</td><td>' . esc_html( implode( '; ', $det ) ) . '</td></tr>';
 	}
@@ -406,7 +419,7 @@ add_action(
 		if ( 'rollup' === $what ) {
 			aw_si_rollup_cron();
 		} else {
-			aw_si_daily();
+			aw_si_daily( true );
 		}
 		wp_safe_redirect( add_query_arg( 'ran', 1, aw_si_url( 'settings' ) ) );
 		exit;

@@ -12,13 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The test result in Site Health's format. */
 function aw_si_health_test(): array {
-	$runs  = aw_si_runs();
 	$late  = array();
 	$fails = array();
 	foreach ( aw_si_sources() as $src => $s ) {
-		$err = $runs[ $src ]['error'] ?? null;
+		$err = aw_si_run_problem( $src );
 		if ( $err ) {
-			$fails[] = $s['label'] . ': ' . $err['message'];
+			$fails[] = $s['label'] . ': ' . $err;
 		} elseif ( aw_si_stale( $src ) ) {
 			$late[] = $s['label'];
 		}

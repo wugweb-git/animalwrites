@@ -16,6 +16,9 @@ const AW_SI_ROLE_TRACKED  = 4;  // Keyword map target, demand gap or the monthly
 const AW_SI_ROLE_BRAND    = 8;  // Matches AW_SD_BRAND.
 const AW_SI_ROLE_SEARCHED = 16; // Seen in Search Console.
 
+// Words ending in s that are not plurals: never folded ("news" must not become "new").
+const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
+
 /** Role bits with their labels. */
 function aw_si_roles(): array {
 	return array(
@@ -50,7 +53,7 @@ function aw_si_norm( string $s ): string {
 	$s = (string) preg_replace( '/[^\p{L}\p{M}\p{N}{}]+/u', ' ', $s );
 	$w = preg_split( '/\s+/u', trim( $s ) );
 	foreach ( (array) $w as $i => $word ) {
-		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) ) {
+		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, AW_SI_NOT_PLURAL, true ) ) {
 			$w[ $i ] = substr( $word, 0, -1 );
 		}
 	}
@@ -67,7 +70,7 @@ function aw_si_lang( string $s ): string {
 	if ( preg_match( '/\p{Devanagari}/u', $s ) ) {
 		return 'hi';
 	}
-	static $strong = array( 'kutta', 'kutte', 'kutton', 'billi', 'gaay', 'gai', 'gau', 'janwar', 'jaanwar', 'janwaron', 'pashu', 'pashuon', 'chikitsa', 'aspatal', 'kaatna', 'kaata', 'kaat', 'kaise', 'kare', 'karein', 'kya', 'kahan', 'kab', 'manaya', 'jata', 'hota', 'hoti', 'nahi', 'nahin', 'sarkari', 'niyam', 'kanoon', 'kanun', 'shikayat', 'bachao', 'suchna', 'hindi', 'mein', 'liye' );
+	static $strong = array( 'kutta', 'kutte', 'kutton', 'billi', 'gaay', 'gai', 'gau', 'janwar', 'jaanwar', 'janwaron', 'pashu', 'pashuon', 'chikitsa', 'aspatal', 'kaatna', 'kaata', 'kaat', 'kaise', 'kare', 'karein', 'kya', 'kahan', 'kab', 'manaya', 'jata', 'hota', 'hoti', 'nahi', 'nahin', 'sarkari', 'niyam', 'kanoon', 'kanun', 'shikayat', 'bachao', 'suchna', 'mein', 'liye' );
 	static $weak   = array( 'ke', 'ki', 'ka', 'se', 'hai', 'ko', 'aur', 'par' );
 	$words         = preg_split( '/\s+/', mb_strtolower( $s ) );
 	$weak_hits     = 0;
@@ -128,15 +131,15 @@ function aw_si_kw_ids( array $labels, int $role, array $extra = array() ): array
 	}
 	if ( $new ) {
 		$map = aw_si_kw_map();
+		// Variants and plural forms share one record already (same norm); group_id points a new record at itself until
+		// the owner groups Hindi / Hinglish forms under an English parent.
+		$wpdb->query( "UPDATE {$t} SET group_id = id WHERE group_id = 0" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 	$ids = array_intersect_key( $map, $want );
 	foreach ( array_chunk( array_values( $ids ), 500 ) as $chunk ) {
 		$in = implode( ',', array_map( 'intval', $chunk ) );
 		$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET roles = roles | %d WHERE id IN ({$in}) AND roles & %d = 0", $role, $role ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
-	// Variants and plural forms share one record already (same norm); group_id points a record at itself until the
-	// owner groups Hindi / Hinglish forms under an English parent.
-	$wpdb->query( "UPDATE {$t} SET group_id = id WHERE group_id = 0" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	return $ids;
 }
 
@@ -166,6 +169,27 @@ function aw_si_link_page( int $kw_id, string $obj_type, int $obj_id, string $pat
 		),
 		array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
 	);
+}
+
+/**
+ * Store many page links at once (insert or refresh).
+ *
+ * @param array $links Each [kw_id, obj_type, obj_id, path, role, src].
+ */
+function aw_si_link_pages( array $links ): void {
+	global $wpdb;
+	$t   = aw_si_table( 'kw_pages' );
+	$now = aw_si_now();
+	foreach ( array_chunk( $links, 300 ) as $chunk ) {
+		$place = array();
+		$args  = array();
+		foreach ( $chunk as $l ) {
+			$place[] = '(%d, %s, %d, %s, %s, %s, %s, %s)';
+			array_push( $args, (int) $l[0], (string) $l[1], (int) $l[2], mb_substr( (string) $l[3], 0, 255 ), md5( $l[1] . ':' . $l[2] . ':' . $l[3] ), (string) $l[4], (string) $l[5], $now );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
+		$wpdb->query( $wpdb->prepare( "REPLACE INTO {$t} (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES " . implode( ', ', $place ), $args ) );
+	}
 }
 
 /**
@@ -274,7 +298,10 @@ function aw_si_seed(): array {
 	if ( empty( $seed['map'] ) ) {
 		return array( 'error' => 'seed file missing' );
 	}
-	$k     = aw_si_table( 'keywords' );
+	$k = aw_si_table( 'keywords' );
+	// One lookup for every seeded phrase (creating the records), instead of one per row.
+	$all   = array_merge( array_column( $seed['map'], 'keyword' ), array_column( (array) ( $seed['gaps'] ?? array() ), 'keyword' ), array_column( (array) ( $seed['rankings'] ?? array() ), 'keyword' ) );
+	$ids   = aw_si_kw_ids( $all, AW_SI_ROLE_TRACKED );
 	$count = array(
 		'map'      => 0,
 		'gaps'     => 0,
@@ -282,21 +309,16 @@ function aw_si_seed(): array {
 		'pages'    => 0,
 	);
 	foreach ( $seed['map'] as $row ) {
-		$ids = aw_si_kw_ids(
-			array( $row['keyword'] ),
-			AW_SI_ROLE_TRACKED,
-			array(
-				'page_type' => $row['page_type'],
-				'intent'    => $row['intent'],
-				'entity'    => '{organisation name}' === $row['keyword'] ? 1 : 0,
-			)
-		);
-		$id  = (int) reset( $ids );
+		$id = (int) ( $ids[ aw_si_norm( $row['keyword'] ) ] ?? 0 );
 		if ( ! $id ) {
 			continue;
 		}
 		++$count['map'];
-		$set = array( 'page_type' => $row['page_type'] );
+		$set = array(
+			'page_type' => $row['page_type'],
+			'intent'    => mb_substr( (string) $row['intent'], 0, 16 ),
+			'entity'    => '{organisation name}' === $row['keyword'] ? 1 : 0,
+		);
 		if ( 'primary' === $row['kind'] && $row['priority'] ) {
 			$set['priority'] = $row['priority']; // The 21 Oct priority until aw_si_compute() recalculates it.
 		}
@@ -327,16 +349,14 @@ function aw_si_seed(): array {
 		}
 	}
 	foreach ( (array) ( $seed['gaps'] ?? array() ) as $g ) {
-		$ids = aw_si_kw_ids( array( $g['keyword'] ), AW_SI_ROLE_TRACKED );
-		$id  = (int) reset( $ids );
+		$id = (int) ( $ids[ aw_si_norm( $g['keyword'] ) ] ?? 0 );
 		if ( $id ) {
 			$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET note = %s WHERE id = %d AND note = ''", mb_substr( 'Gap (15 Oct): ' . $g['gap'], 0, 255 ), $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			++$count['gaps'];
 		}
 	}
 	foreach ( (array) ( $seed['rankings'] ?? array() ) as $r ) {
-		$ids = aw_si_kw_ids( array( $r['keyword'] ), AW_SI_ROLE_TRACKED );
-		$id  = (int) reset( $ids );
+		$id = (int) ( $ids[ aw_si_norm( $r['keyword'] ) ] ?? 0 );
 		if ( ! $id ) {
 			continue;
 		}
@@ -450,13 +470,17 @@ function aw_si_sync_roles(): array {
 	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->query( "DELETE FROM {$p} WHERE src = 'focus'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$ids = aw_si_kw_ids( $labels, AW_SI_ROLE_FOCUS );
+	// Load every linked post and term in a few queries before building their links.
+	_prime_post_caches( array_map( 'intval', wp_list_pluck( (array) $rows, 'ID' ) ), false, false );
+	_prime_term_caches( array_map( 'intval', wp_list_pluck( (array) $terms, 'ID' ) ), false );
+	$rows_out = array();
 	foreach ( $links as $l ) {
 		$id = $ids[ aw_si_norm( $l[0] ) ] ?? 0;
-		if ( ! $id ) {
-			continue;
+		if ( $id ) {
+			$rows_out[] = array( $id, $l[1], $l[2], aw_si_object_path( $l[1], $l[2] ), $l[3], 'focus' );
 		}
-		aw_si_link_page( $id, $l[1], $l[2], aw_si_object_path( $l[1], $l[2] ), $l[3], 'focus' );
 	}
+	aw_si_link_pages( $rows_out );
 
 	// Listings: mark existing records (from Search Console or the map) whose phrase is a listing's name.
 	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
