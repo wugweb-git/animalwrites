@@ -171,7 +171,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		global $wpdb;
 		$t = aw_si_table( 'keywords' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos28 IS NULL, NULL, pos_prev) * impr28) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) pp FROM {$t} WHERE entity = 1" );
+		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM {$t} WHERE entity = 1" );
 		if ( ! $a || ! (int) $a->n ) {
 			return null;
 		}
@@ -191,7 +191,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'impr28'            => (int) $a->i,
 			'clicks28'          => (int) $a->c,
 			'pos28'             => null === $a->p ? null : round( (float) $a->p, 1 ),
-			'pos_prev'          => null === $a->pp ? null : round( (float) $a->pp, 1 ),
+			// Change: each listing name's own change, weighted by its impressions now (last period's are not kept).
+			'pos_prev'          => null === $a->p || null === $a->d ? null : round( (float) $a->p + (float) $a->d, 1 ),
 			'live_pos'          => null,
 			'live_txt'          => '',
 			'live_date'         => null,
