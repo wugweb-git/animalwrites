@@ -127,6 +127,27 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 
 			/**
+			 * The monthly snapshot to standard output: the CSV, or the rebuilt keyword map.
+			 *
+			 * <what>
+			 * : csv or map.
+			 *
+			 * ## EXAMPLES
+			 *
+			 *     wp aw-si snapshot csv > docs/seo/search-insights-2026-11.csv
+			 *     wp aw-si snapshot map > docs/seo/keyword-map.md
+			 *
+			 * @param array $args Positional arguments.
+			 */
+			public function snapshot( $args ) {
+				$what = (string) ( $args[0] ?? '' );
+				if ( ! in_array( $what, array( 'csv', 'map' ), true ) ) {
+					WP_CLI::error( 'Say csv or map.' );
+				}
+				echo 'csv' === $what ? aw_si_snapshot_csv() : aw_si_keyword_map_md(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- command-line output.
+			}
+
+			/**
 			 * The 90-day rollup now.
 			 *
 			 * [--dry]
