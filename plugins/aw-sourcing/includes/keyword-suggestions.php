@@ -146,7 +146,7 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'a
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && has_filter( 'aw_search_demand_terms' ) ) { // only when there can be suggestions // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && has_filter( 'aw_search_demand_terms' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
 			add_screen_option( 'per_page', array( 'label' => 'Suggestions per page', 'default' => 20, 'option' => 'aw_suggestions_per_page' ) );
 		}
 	}
@@ -172,11 +172,14 @@ add_action(
 		$done = sanitize_key( $_GET['aw_suggested'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $done ) {
 			$n   = absint( wp_unslash( $_GET['aw_n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			/* translators: %d: number of searches or suggestions. */
 			$msg = array(
+				/* translators: %d: number of searches or suggestions. */
 				'include' => _n( '%d search added to Include. The workers search it from their next run.', '%d searches added to Include. The workers search them from their next run.', $n ),
+				/* translators: %d: number of searches or suggestions. */
 				'exclude' => _n( '%d search added to Exclude.', '%d searches added to Exclude.', $n ),
+				/* translators: %d: number of searches or suggestions. */
 				'dismiss' => _n( '%d suggestion dismissed.', '%d suggestions dismissed.', $n ),
+				/* translators: %d: number of searches or suggestions. */
 				'restore' => _n( '%d suggestion shown again.', '%d suggestions shown again.', $n ),
 			);
 			if ( isset( $msg[ $done ] ) && $n ) {
