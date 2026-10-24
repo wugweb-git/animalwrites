@@ -203,3 +203,47 @@ Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?
 | `search-demand.php` | Tools → Search demand (15 Oct 2026): what people search and how Animal Writes shows up for it. |
 | `sitemap.php` | Rank Math sitemap (/sitemap_index.xml) additions: - a "directory" sitemap (directory-sitemap.xml) of the Directory place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings, and district × list |
 | `titles.php` | Search titles and meta descriptions. |
+
+## Every plugin on live (`wp plugin list`, 24 Oct 2026)
+
+Kits Core and AW Sourcing are not in the list: animal-writes-core loads them from their folders. Check again with `wp plugin list` before relying on this table.
+
+| Plugin (folder) | What it does here | Status |
+|---|---|---|
+| Animal Writes Core (`animal-writes-core`) | Content types, Directory, ingest; loads Kits Core and AW Sourcing (sections above). | active |
+| Animal Writes – SEO extras for Rank Math (`aw-seo-extras`) | What Rank Math free cannot do: list-page titles and canonicals, JSON-LD nodes, the Directory sitemap, noindex rules, Search Insights (section above). | active |
+| Mailweb (`mailweb`) | Hostinger Mail inside WordPress: read, reply, send from support@; SMTP with a daily limit (section above). | active |
+| Rank Math SEO (`seo-by-rank-math`) | The SEO system: titles, schema graph, sitemaps (`/sitemap_index.xml`), redirects, IndexNow. | active |
+| Site Kit by Google (`google-site-kit`) | Search Console and GA4 connection; Search Insights reads Search Console through it. | active |
+| Fluent Forms (`fluentform`) | Form entries store (free); the site's forms are code (`how-to-change-a-form.md`). | active |
+| FluentCRM (`fluent-crm`) | The one volunteer and newsletter table (list "Newsletter"), free. | active |
+| LiteSpeed Cache (`litespeed-cache`) | Page cache; purged after every deploy (`deploy-purge.php`). | active |
+| UpdraftPlus (`updraftplus`) | Backup and restore plugin (the daily server backups are in `rollback.md`). | active |
+| Simple History (`simple-history`) | Log of admin actions and changes. | active |
+| Link Whisper Free (`link-whisper`) | Internal-link suggestions and reports in the editor. | active |
+| Scriptless Social Sharing (`scriptless-social-sharing`) | Share buttons without JavaScript. | active |
+| Secure Custom Fields (`secure-custom-fields`) | Custom fields framework (ACF fork). | active |
+| Performance Lab (`performance-lab`) | WordPress Performance Team features; its modules are the next eight rows. | active |
+| Embed Optimizer (`embed-optimizer`) | Lazy-loads embeds and reserves their space. | active |
+| Enhanced Responsive Images (`auto-sizes`) | Better `sizes` for lazy-loaded images. | active |
+| Image Placeholders (`dominant-color-images`) | Dominant-colour placeholder while an image loads. | active |
+| Image Prioritizer (`image-prioritizer`) | `fetchpriority` and lazy-loading from real-visitor data. | active |
+| Modern Image Formats (`webp-uploads`) | WebP/AVIF copies on upload (share images are never AVIF). | active |
+| Optimization Detective (`optimization-detective`) | Real-visitor metrics used by Image Prioritizer and Embed Optimizer. | active |
+| Speculative Loading (`speculation-rules`) | Prefetch or prerender on hover. | active |
+| View Transitions (`view-transitions`) | Smooth transitions between pages. | active |
+| Performant Translations (`performant-translations`) | Faster translation file loading. | active |
+| Instant Back/Forward (`nocache-bfcache`) | Back/forward cache even with nocache headers (logged-in users). | active |
+| Plugin Check (`plugin-check`) | WordPress.org plugin checks (development tool). | active |
+| Theme Check (`theme-check`) | WordPress.org theme checks (development tool). | active |
+| Hostinger Smart Auto Updates (`hostinger-auto-updates`) | Hostinger's managed updates. | must-use |
+| Advanced Ads (`advanced-ads`) | Ad placements; switched off on live (owner), settings kept. | inactive |
+| Advanced Ads – Google AdSense In-feed Placement (`advanced-ads-adsense-in-feed`) | In-feed AdSense placement for Advanced Ads. | inactive |
+| Accessibility Checker (`accessibility-checker`) | In-editor accessibility scan. | inactive |
+| Advanced Custom Fields (`advanced-custom-fields`) | Custom fields (replaced by Secure Custom Fields). | inactive |
+| Create Block Theme (`create-block-theme`) | Theme export tool. | inactive |
+| Dark Mode (`wp-dark-mode`) | Dark theme switcher. | inactive |
+| IndexNow (`indexnow`) | URL submission; Rank Math sends IndexNow instead. | inactive |
+| reSmush.it Image Optimizer (`resmushit-image-optimizer`) | Image compression. | inactive |
+| Web Stories (`web-stories`) | Web Stories editor. | inactive |
+| Widgets for Google Reviews (`wp-reviews-plugin-for-google`) | Google reviews widget. | inactive |

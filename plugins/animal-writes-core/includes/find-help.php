@@ -73,6 +73,24 @@ const AW_PLACE_DETECT_CITIES = array(
 	'saltlake'     => 'North 24 Parganas',
 	'hinjewadi'    => 'Pune',
 	'kothrud'      => 'Pune',
+	// Big cities whose name is not a district's (owner, 24 Oct 2026). Not Imphal: it is in two districts.
+	'guwahati'     => 'Kamrup Metro',
+	'hubballi'     => 'Dharwad',
+	'siliguri'     => 'Darjeeling',
+	'durgapur'     => 'Paschim Bardhaman',
+	'asansol'      => 'Paschim Bardhaman',
+	'shillong'     => 'East Khasi Hills',
+	'itanagar'     => 'Papum Pare',
+	'panaji'       => 'North Goa',
+	'panjim'       => 'North Goa',
+	'margao'       => 'South Goa',
+	'portblair'    => 'South Andamans',
+	'leh'          => 'Leh Ladakh',
+	'dharamshala'  => 'Kangra',
+	'rishikesh'    => 'Dehradun',
+	'rourkela'     => 'Sundaragada',
+	'jamshedpur'   => 'East Singhbum',
+	'bhilai'       => 'Durg',
 );
 
 /** Delhi's districts named for directions (keys): shown and detected as "South Delhi" etc. */

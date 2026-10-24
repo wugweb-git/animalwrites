@@ -55,18 +55,14 @@ Status checked on 24 Oct against the live site, WP-CLI (read only) and git; the 
 28. **Home sections taller than one screen** (phone): at 375×812, 6 of 9 home sections are taller than the screen (news 1686px, law 1800, learn 1572, find 816, story 1008, last 1013). Fixed on 9 Oct (32f3f4c), back since the 18 Oct rebuild (8406aef).
 29. **Footer on phone ≤ one screen:** `.kit-site-footer` is 1871px tall at 375×812 (the 9 Oct fix 402bf45 has been outgrown).
 30. **Directory Search button yellow:** live it is `kit-btn` (primary, ink); the home "Find" button uses `kit-btn--brand`.
-31. **"About: sender" column label** (Mailweb list): columns are From | About (the subject) | Date (`list-table.php:32`); the owner to say which change was wanted.
-32. **Staging:** staging.animalwrites.in exists (login-only, noindex) but its checkout is the deleted `ux-audit` branch at 9628efd and its database is from 15 Oct; not part of the deploy chain.
-33. **UptimeRobot monitor:** no monitor found (only its user agent is recognised in code, d0c6de6).
-34. **Performance regression check:** CLS re-measured and fixed on 24 Oct; a full PageSpeed re-run waits for a PageSpeed API key.
-35. **Lost form submissions before fab4e94 (8 Oct):** no recovery recorded; pre-8 Oct server access logs would settle it if Hostinger still keeps them.
-36. **Opportunities workers:** still paused (workers `run.py:435`, owner 9 Oct); last opportunity published 7 Oct.
-37. **Press discovery:** Google News press searches run (press-gnews.yml); the Brave search stays off (no key; no paid plan, owner).
-38. **High Court judgments as documents:** the Supreme Court is a source (`judgments-supreme-court`); no High Court source, HC reports arrive only as court News.
-39. **Mail:** Hostinger webhooks last arrived 21 Oct 06:04 (the 5-minute `mailweb_crm_sync` covers gaps); FluentCRM free prints "Powered by FluentCRM" in emails; support@ and noreply@ have Mailweb pictures but no Gravatar or BIMI, so recipients do not see them.
-40. **Google News Publisher Center; Semrush keyword run** (no API units on the account): not done.
-41. **Revenue:** affiliate plumbing (/go/ is 404), Amazon Associates and Cuelinks, sponsors (/sponsor/ and /advertise/ are 404), paid opportunity posts, the first newsletter with a sponsor slot (0 FluentCRM campaigns): none started.
-42. **Directory data clean-up:** of 6,794 published listings, 557 have a state but no district (298 on 8 Oct; includes state-wide 1962 MVUs), 14 no place, 227 no state; duplicate names: 55 groups (133 listings) within the same district. The 11 duplicate groups kept as separate organisations are not recorded anywhere: owner's list needed. Project Nayna (52) has no type; Healing Saathi (53) has a second listing "Healing Saathi, Dehradun" (18321); Tabassum (44) is Animal Shelter: confirm.
+31. **Performance regression check:** CLS re-measured and fixed on 24 Oct; a full PageSpeed re-run waits for a PageSpeed API key.
+32. **Opportunities workers:** still paused (workers `run.py:435`, owner 9 Oct); last opportunity published 7 Oct.
+33. **Press discovery:** Google News press searches run (press-gnews.yml); the Brave search stays off (no key; no paid plan, owner).
+34. **High Court judgments as documents:** the Supreme Court is a source (`judgments-supreme-court`); no High Court source, HC reports arrive only as court News.
+35. **Mail:** Hostinger webhooks last arrived 21 Oct 06:04 (the 5-minute `mailweb_crm_sync` covers gaps); FluentCRM free prints "Powered by FluentCRM" in emails; support@ and noreply@ have Mailweb pictures but no Gravatar or BIMI, so recipients do not see them.
+36. **Google News Publisher Center; Semrush keyword run** (no API units on the account): not done.
+37. **Revenue:** affiliate plumbing (/go/ is 404), Amazon Associates and Cuelinks, sponsors (/sponsor/ and /advertise/ are 404), paid opportunity posts, the first newsletter with a sponsor slot (0 FluentCRM campaigns): none started.
+38. **Directory data clean-up:** of 6,794 published listings, 557 have a state but no district (298 on 8 Oct; includes state-wide 1962 MVUs), 14 no place, 227 no state; duplicate names: 55 groups (133 listings) within the same district. The 11 duplicate groups kept as separate organisations are not recorded anywhere: owner's list needed. Project Nayna (52) has no type; Healing Saathi (53) has a second listing "Healing Saathi, Dehradun" (18321); Tabassum (44) is Animal Shelter: confirm.
 
 ## Decided: never / dropped (owner, 24 Oct 2026)
 - Removing the Volunteer tag from the 184 campaign senders who unticked the box (and the matching campaign-code change).
@@ -77,6 +73,7 @@ Status checked on 24 Oct against the live site, WP-CLI (read only) and git; the 
 - "Index or noindex News": settled, all News is indexed.
 - The Emergency help photo: kept as it is.
 - Restoring the Fluent Forms demo forms 1 and 2 (backup stays in `~/backups/fluentforms-2026-10-16.sql.gz`).
+- The carried-over Backend items: the "About: sender" column label (Mailweb list), staging on the deleted `ux-audit` branch, an UptimeRobot monitor, the double redirect, and sends lost before fab4e94 (8 Oct).
 - The carried-over Content items (fact-checking the 7 crisis guides, per-state guides, legal review of Privacy and Terms, the 1.0 invitation to 88 volunteers, AWBI items 142, 144, 145).
 
 ## Decided: never (owner, 22 Oct 2026)
