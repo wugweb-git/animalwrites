@@ -37,8 +37,14 @@ foreach ( array_unique( array_merge( array_keys( $want ), array_keys( $have ) ) 
 		continue;
 	}
 	foreach ( array_unique( array_merge( array_keys( $want[ $file ] ), array_keys( $have[ $file ] ) ) ) as $k ) {
-		$a = $want[ $file ][ $k ] ?? null;
-		$b = $have[ $file ][ $k ] ?? null;
+		$in_a = array_key_exists( $k, $want[ $file ] );
+		$in_b = array_key_exists( $k, $have[ $file ] );
+		if ( $in_a !== $in_b ) { // a key present on one side only, even with a null value, is a difference
+			$diff[] = sprintf( '%s %s: %s', $file, $k, $in_a ? 'in docs/workers.json, missing from AW_WORKERS' : 'in AW_WORKERS, missing from docs/workers.json' );
+			continue;
+		}
+		$a = $want[ $file ][ $k ];
+		$b = $have[ $file ][ $k ];
 		if ( $a !== $b ) {
 			$diff[] = sprintf( '%s %s: workers repo %s, site %s', $file, $k, json_encode( $a, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ), json_encode( $b, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 		}
