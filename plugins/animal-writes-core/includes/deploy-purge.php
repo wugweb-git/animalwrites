@@ -10,8 +10,12 @@
  * whose response carries LiteSpeed's purge header) every 30 s for 5 minutes. Those responses are never cached. Any other
  * uncached request (a cache miss, wp-admin) also counts.
  *
- * WP-CLI requests are skipped: a purge from the CLI does not reach the web server through this hook, and aw-ship.sh
- * purges by itself. A purge after aw-ship.sh's own is harmless.
+ * Only a web request may store the deployed commit, because only its response can carry LiteSpeed's purge header.
+ * Skipped: any command-line PHP (WP-CLI, and Hostinger's cron running `php wp-cron.php`; 'cli' === PHP_SAPI), and a
+ * request whose headers are already sent. Storing the commit there would mark it done without purging anything.
+ * aw-ship.sh is no exception: its `wp litespeed-purge all` is LiteSpeed's own WP-CLI purge, not this hook, and it runs
+ * only when someone ships with that script. Merged PRs deployed by the deploy check rely on this hook and the nudge. A
+ * second purge after aw-ship.sh's is harmless.
  *
  * @package animal-writes-core
  */
@@ -38,8 +42,8 @@ function aw_deployed_head() {
 add_action(
 	'init',
 	function () {
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return;
+		if ( 'cli' === PHP_SAPI || ( defined( 'WP_CLI' ) && WP_CLI ) || headers_sent() ) {
+			return; // no response to carry the purge header: leave the commit for a web request
 		}
 		if ( isset( $_GET['aw_deploy_nudge'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // one-off URLs: keep them out of the cache
