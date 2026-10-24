@@ -53,6 +53,7 @@ def main(awo_dir, held_csv, listings_file):
             by_phone.setdefault(digits(p), set()).add(l["id"])
     remainder = []
     decisions = []
+    new_names = set()  # names of listings this run adds, so two new rows never get the same title
     held = list(csv.DictReader(open(held_csv, encoding="utf-8")))
     for h in held:
         o = orgs[h["awo_id"]]
@@ -122,8 +123,9 @@ def main(awo_dir, held_csv, listings_file):
         dcode, dname = (dist["code"], dist["name"]) if dist else (0, "")
         where = f"{dname}, {st['name']}" if dist else st["name"]
         name = re.sub(r"\s+", " ", o["name"]).strip()
-        if norm(name) == norm(l.get("title", "")) or any(norm(x["title"]) == norm(name) for x in L.values()):
+        if norm(name) in new_names or norm(name) == norm(l.get("title", "")) or any(norm(x["title"]) == norm(name) for x in L.values()):
             name = f"{name}, {where.split(',')[0].strip()}"
+        new_names.add(norm(name))
         said = [s for k, s in (("rescue_yn", "rescues animals"), ("animal_shelter_yn", "runs an animal shelter"), ("treatment_yn", "treats animals")) if o.get(k) == "yes"]
         joined = said[0] if len(said) == 1 else ", ".join(said[:-1]) + " and " + said[-1] if said else ""
         told = f" It told the AWO List compilers that it {joined}." if said else ""
@@ -140,6 +142,8 @@ def main(awo_dir, held_csv, listings_file):
             w = csv.DictWriter(f, fieldnames=list(remainder[0].keys()))
             w.writeheader()
             w.writerows(remainder)
+    elif os.path.exists(out):
+        os.remove(out)  # nothing left for the owner: no stale list from an earlier run
     with open(os.path.join(os.path.dirname(out), "awol-held.decisions.csv"), "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(decisions[0].keys()))
         w.writeheader()
