@@ -270,6 +270,7 @@ add_action(
 				$rel[ $k ] = $list( $k );
 			}
 			update_option( AW_REL_OPTION, $rel, false );
+			delete_transient( 'aw_sourcing_kw_stats_30' ); // Search Insights' per-keyword rows follow the new lists at once
 			$what = array();
 			foreach ( array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' ) as $k => $l ) {
 				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] );
