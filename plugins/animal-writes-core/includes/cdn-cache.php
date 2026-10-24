@@ -102,6 +102,7 @@ add_action(
  * purges, the gate does not. So the site checks the commit its plugins were deployed from (the git checkout the plugin
  * folders link into) on every web request PHP serves (cron, REST, admin, uncached pages) and purges the whole cache once when it
  * changes, whatever path the code came by. Reads one 41-byte file and an autoloaded option; no remote call, no secret.
+ * The Hostinger CDN copy (aw_cdn_ttl, above) has no purge we can call: when it is on, a deploy shows there within its TTL.
  */
 
 /** The deployed commit (40 hex characters), or '' when the plugins are not in a git checkout. */
@@ -132,7 +133,7 @@ add_action(
 	function () {
 		// A web request only: LiteSpeed purges through a header on this response, which WP-CLI never sends. The next
 		// request PHP serves (cron over HTTP, a worker's REST call, an admin page) does it.
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( ( defined( 'WP_CLI' ) && WP_CLI ) || headers_sent() ) { // Headers already out: the next request purges.
 			return;
 		}
 		$now = aw_deployed_commit();
@@ -144,9 +145,7 @@ add_action(
 			return;
 		}
 		update_option( 'aw_deployed_commit', $now, true ); // Autoloaded: the check costs no query.
-		if ( '' !== $was ) { // Not on the very first check: there is no earlier commit to compare with.
-			do_action( 'litespeed_purge_all' );
-		}
+		do_action( 'litespeed_purge_all' ); // The first check too: the deploy that ships this code purges as well.
 	},
 	99
 );
