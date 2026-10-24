@@ -453,7 +453,9 @@ function aw_sourcing_page() {
 			$v = aw_relevance_verdict( $try );
 			echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
 		}
-		echo '</form></div>';
+		echo '</form>';
+		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
+		echo '</div>';
 		return;
 	}
 
