@@ -26,7 +26,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 	}
 
 	private function url( array $args = array() ) {
-		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) );
+		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&kw=suggestions' ) );
 	}
 
 	protected function get_views() {

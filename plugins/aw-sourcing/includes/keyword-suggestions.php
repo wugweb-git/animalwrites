@@ -127,7 +127,7 @@ add_action(
 			$op = '-1' === $op || '' === $op ? sanitize_key( wp_unslash( $_POST['aw_bulk2'] ?? '' ) ) : $op;
 			$qs = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['q'] ?? array() ) );
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&kw=suggestions' );
 		$back = remove_query_arg( array( 'aw_suggested', 'aw_n', 'updated' ), $back );
 		if ( ! in_array( $op, $ops, true ) && isset( $_POST['paged'] ) ) { // Enter in the page number box: go to that page
 			wp_safe_redirect( add_query_arg( 'paged', max( 1, (int) $_POST['paged'] ), $back ) . '#aw-suggestions' );
@@ -146,14 +146,14 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'a
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
+		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ) && function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
 			add_screen_option( 'per_page', array( 'label' => 'Suggestions per page', 'default' => 20, 'option' => 'aw_suggestions_per_page' ) );
 		}
 	}
 );
 add_filter( 'set_screen_option_aw_suggestions_per_page', fn( $keep, $option, $value ) => max( 1, min( 200, (int) $value ) ), 10, 3 );
 
-/** Settings → Sourcing → Keywords: the suggestions, under the lists. */
+/** Settings → Sourcing → Keywords → Suggestions (the tab's second view, &kw=suggestions, so its paging and sorting are its own). */
 add_action(
 	'aw_sourcing_keywords_tab_end',
 	function () {
@@ -190,7 +190,7 @@ add_action(
 		}
 		echo '<p>Searches people make (Search Console) with at least 20 impressions in the last 28 days that no Include or Exclude word covers. Brand and non-English searches are not listed. Nothing is added unless you add it.</p>';
 		$table->views();
-		echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">';
+		echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="hidden" name="kw" value="suggestions">';
 		if ( $table->is_dismissed_view() ) {
 			echo '<input type="hidden" name="suggestions" value="dismissed">';
 		}

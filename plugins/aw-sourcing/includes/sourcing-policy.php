@@ -268,7 +268,7 @@ add_action(
 		$tab = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( in_array( $tab, array( '', 'publishers' ), true ) ) {
 			add_screen_option( 'per_page', array( 'label' => 'Publishers per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
-		} elseif ( 'keywords' === $tab ) {
+		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 		}
 	}
@@ -574,8 +574,22 @@ function aw_sourcing_page() {
 	echo '</form></div>';
 }
 
-/** The Keywords tab: the two switches, add words, the word lists as a list table, the headline test, suggestions. */
+/**
+ * The Keywords tab, two views so each list table has its own paging, sorting, search and screen option: Words (the two
+ * switches, add words, the word lists, the headline test) and Suggestions from Search Insights (&kw=suggestions).
+ */
 function aw_sourcing_keywords_tab() {
+	$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+	$sugg = 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>Words</a> | </li>'
+		. '<li><a href="' . esc_url( $base . '&kw=suggestions' ) . '"' . ( $sugg ? ' class="current" aria-current="page"' : '' ) . '>Suggestions from Search Insights</a></li></ul><br class="clear">';
+	if ( $sugg ) {
+		if ( ! has_action( 'aw_sourcing_keywords_tab_end' ) || ( function_exists( 'aw_sourcing_si_available' ) && ! aw_sourcing_si_available() ) ) {
+			echo '<div class="notice notice-info inline"><p>Suggestions need Search Insights (aw-seo-extras), which is off.</p></div>';
+		}
+		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
+		return;
+	}
 	$post = admin_url( 'admin-post.php' );
 	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( 'none' === $done ) {
@@ -634,7 +648,6 @@ function aw_sourcing_keywords_tab() {
 		echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
 	}
 	echo '</form>';
-	do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
 }
 
 /**
