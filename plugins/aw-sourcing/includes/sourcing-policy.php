@@ -1,6 +1,6 @@
 <?php
 /**
- * Sourcing policy managed in WP Admin (Settings → Sourcing): publishers and relevance keywords. Moved from Kits Core
+ * Sourcing policy managed in WP Admin (Settings → Sourcing): sources (publishers) and relevance keywords. Moved from Kits Core
  * (24 Oct 2026); the sourced post types, aw_host(), aw_publishers() and the option constants stay there.
  *
  * - Publishers: every host the workers send is recorded automatically. Each is Allowed, Neutral or Blocked.
@@ -261,13 +261,13 @@ add_action(
 	}
 );
 
-// Screen options: publishers per page.
+// Screen options: sources per page on the Sources tab (the publishers' option, as before).
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		$tab = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, array( '', 'publishers' ), true ) ) {
-			add_screen_option( 'per_page', array( 'label' => 'Publishers per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
+		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
 		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 		}
@@ -283,23 +283,36 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_sourcing' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$tab = sanitize_key( $_POST['tab'] ?? 'publishers' );
-		if ( 'publishers' !== $tab ) {
+		$tab = sanitize_key( $_POST['tab'] ?? 'sources' );
+		$tab = array( 'publishers' => 'sources', 'library' => 'feeds', 'opportunities' => 'feeds' )[ $tab ] ?? $tab; // a form from before the tabs were merged
+		$err = '';
+		if ( 'sources' !== $tab ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
+		} elseif ( ! empty( $_POST['src_edit'] ) ) { // the Add New / Edit Source form (source-sites.php)
+			list( $changed, $err ) = aw_sourcing_source_save();
 		} else {
 			$pubs   = aw_publishers();
 			$before = $pubs;
 			$row    = sanitize_text_field( wp_unslash( $_POST['row_status'] ?? '' ) ); // a row action: "status:host"
+			$prow   = sanitize_text_field( wp_unslash( $_POST['row_press'] ?? '' ) ); // a row action: "add|remove:host"
 			if ( false !== strpos( $row, ':' ) ) {
 				list( $status, $one ) = explode( ':', $row, 2 );
 				$status               = sanitize_key( $status );
+				$hosts                = array( $one );
+			} elseif ( false !== strpos( $prow, ':' ) ) {
+				list( $status, $one ) = explode( ':', $prow, 2 );
+				$status               = 'press_' . sanitize_key( $status );
 				$hosts                = array( $one );
 			} else { // bulk action, from the top or the bottom of the list
 				$status = sanitize_key( $_POST['bulk_status'] ?? '' );
 				$status = '' !== $status ? $status : sanitize_key( $_POST['bulk_status2'] ?? '' );
 				$hosts  = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['hosts'] ?? array() ) );
 			}
-			if ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
+			$press = false;
+			if ( in_array( $status, array( 'press_add', 'press_remove' ), true ) ) { // Search here for coverage / Stop searching here
+				$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', $hosts ) ) );
+				$press = aw_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
+			} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 				foreach ( $hosts as $h ) {
 					if ( isset( $pubs[ $h ] ) ) {
 						$pubs[ $h ]['status'] = $status;
@@ -323,15 +336,17 @@ add_action(
 				}
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
-			$changed = $pubs !== $before; // a search or a page change alone saves nothing
+			$changed = $pubs !== $before || $press; // a page change alone saves nothing
 		}
 		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) );
-		if ( 'publishers' === $tab ) { // back to the same view, sort and page of the list, with its search
-			$back = remove_query_arg( array( 'updated', 's', 'paged' ), wp_get_referer() ? wp_get_referer() : $back );
+		if ( 'sources' === $tab && ! empty( $_POST['src_edit'] ) ) { // the edit form: back to the list, or to the form with what was wrong
+			$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources' ), admin_url( 'options-general.php' ) );
+			$back = $err ? add_query_arg( 'src_err', $err, wp_get_referer() ? wp_get_referer() : $back ) : ( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
+		} elseif ( 'sources' === $tab ) { // back to the same view, sort and page of the list, with its search
+			$back = remove_query_arg( array( 'updated', 'paged', 'src_err' ), wp_get_referer() ? wp_get_referer() : $back );
 			$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 			$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-			$find = sanitize_text_field( wp_unslash( $_POST['s'] ?? '' ) );
-			$back = add_query_arg( array_filter( array( 'updated' => empty( $changed ) ? '' : 1, 's' => '' !== $find ? rawurlencode( $find ) : '' ) ), $back );
+			$back = empty( $changed ) ? $back : add_query_arg( 'updated', 1, $back );
 		}
 		wp_safe_redirect( $back );
 		exit;
@@ -491,7 +506,7 @@ add_action(
 	'admin_notices',
 	function () {
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=sources&status=block' ) ) . '">Manage sources</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
 	}
 );
@@ -501,27 +516,35 @@ function aw_sourcing_page() {
 	if ( ! current_user_can( AW_SRC_CAP ) ) {
 		return;
 	}
-	$tab  = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$tab  = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$base = admin_url( 'options-general.php?page=aw-sourcing' );
-	echo '<div class="wrap"><h1>Sourcing</h1>';
+	// Tabs: Sources, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback, own form?]), Change log.
+	// A tab whose third value is true is drawn outside the shared aw_sourcing form (a Settings API form, its own forms, or nothing to save).
+	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
+	$tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
+	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'sources';
+	// Core's "Add New" button beside the heading, on the lists that have one (kits_sourcing_title_action: tab => [label, url]).
+	$add = (array) apply_filters( 'kits_sourcing_title_action', array( 'sources' => array( 'Add New Source', $base . '&tab=sources&edit=new' ) ) );
+	echo '<div class="wrap"><h1 class="wp-heading-inline">Sourcing</h1>';
+	if ( isset( $add[ $tab ] ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		echo ' <a href="' . esc_url( $add[ $tab ][1] ) . '" class="page-title-action">' . esc_html( $add[ $tab ][0] ) . '</a>';
+	}
+	echo '<hr class="wp-header-end">';
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
 	}
-	// Tabs: Publishers, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback, own form?]), Change log.
-	// A tab whose third value is true is drawn outside the shared aw_sourcing form (a Settings API form, or nothing to save).
-	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
-	$tabs  = array( 'publishers' => 'Publishers', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
-	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'publishers';
 	do_action( 'kits_sourcing_page_top' );
 	echo '<nav class="nav-tab-wrapper">';
 	foreach ( $tabs as $k => $l ) {
-		echo '<a class="nav-tab' . ( $tab === $k ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base . ( 'publishers' === $k ? '' : '&tab=' . $k ) ) . '">' . esc_html( $l ) . '</a>';
+		echo '<a class="nav-tab' . ( $tab === $k ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base . ( 'sources' === $k ? '' : '&tab=' . $k ) ) . '">' . esc_html( $l ) . '</a>';
 	}
 	echo '</nav>';
 	if ( 'log' === $tab ) {
+		// Entries keep the tab they were made on; tabs since merged are named after their new home.
+		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Feeds (News)', 'library' => 'Feeds (Library)', 'opportunities' => 'Feeds (Opportunity)' );
 		$rows = array();
 		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
-			$tl     = (string) ( $tabs[ $e['tab'] ] ?? $e['tab'] );
+			$tl     = (string) ( $old[ $e['tab'] ] ?? ( $tabs[ $e['tab'] ] ?? $e['tab'] ) );
 			$rows[] = array(
 				'at'    => esc_html( $e['at'] ),
 				'user'  => esc_html( $e['user'] ),
@@ -539,12 +562,17 @@ function aw_sourcing_page() {
 		echo '</div>';
 		return;
 	}
+	if ( 'sources' === $tab ) { // its own forms: the search (GET), the list or the edit form (source-sites.php)
+		aw_sourcing_sources_tab();
+		echo '</div>';
+		return;
+	}
 	if ( 'keywords' === $tab ) { // its own forms: the switches, add words, the word list
 		aw_sourcing_keywords_tab();
 		echo '</div>';
 		return;
 	}
-	if ( ! empty( $extra[ $tab ][2] ) ) { // a Settings API tab: its own form to options.php
+	if ( ! empty( $extra[ $tab ][2] ) ) { // a tab with its own forms (a Settings API form to options.php, or a list)
 		call_user_func( $extra[ $tab ][1] );
 		echo '</div>';
 		return;
@@ -553,24 +581,7 @@ function aw_sourcing_page() {
 	wp_nonce_field( 'aw_sourcing' );
 	if ( isset( $extra[ $tab ] ) ) {
 		call_user_func( $extra[ $tab ][1] );
-		echo '</form></div>';
-		return;
 	}
-
-	// Add first, as everywhere in WordPress.
-	echo '<p><label for="aw-new-host"><strong>Add a publisher</strong></label> <input type="text" id="aw-new-host" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status" aria-label="Status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
-	submit_button( 'Add', 'secondary', 'add_publisher', false );
-	echo '</p>';
-	echo '<p>Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check. Short name: what cards show on the source chip (e.g. TOI, PIB, Sentinel); the full name stays on the item page.</p>';
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-	require_once __DIR__ . '/class-aw-sourcing-publishers-table.php';
-	$table = new AW_Sourcing_Publishers_Table();
-	$table->prepare_items();
-	$table->views();
-	$table->search_box( 'Search publishers', 'aw-publisher' );
-	$table->display();
 	echo '</form></div>';
 }
 
