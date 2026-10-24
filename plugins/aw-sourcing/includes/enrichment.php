@@ -777,6 +777,9 @@ function aw_enrich_union( $lid, $field, $value ) {
 	$out  = aw_enrich_list_items( aw_enrich_current( $lid, $field ) );
 	$seen = array_map( 'strtolower', $out );
 	foreach ( aw_enrich_list_items( $value ) as $item ) {
+		if ( 'services' === $field && ! in_array( sanitize_title( $item ), aw_service_slugs(), true ) ) {
+			continue; // Only known services are stored (aw_enrich_write), so an unknown one adds nothing.
+		}
 		if ( ! in_array( strtolower( $item ), $seen, true ) ) {
 			$out[]  = $item;
 			$seen[] = strtolower( $item );
