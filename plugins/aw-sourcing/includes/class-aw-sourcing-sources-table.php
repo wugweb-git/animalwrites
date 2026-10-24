@@ -113,7 +113,7 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 				}
 			);
 		}
-		$per = 50;
+		$per = $this->get_items_per_page( 'aw_sources_per_page', 50 );
 		$this->set_pagination_args( array( 'total_items' => count( $rows ), 'per_page' => $per ) );
 		$this->items           = array_slice( $rows, ( $this->get_pagenum() - 1 ) * $per, $per );
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'name' );

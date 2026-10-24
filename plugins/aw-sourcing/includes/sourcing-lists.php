@@ -150,13 +150,26 @@ function aw_sources_edit_form( $slug, $id ) {
 	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a>';
 }
 
+// Screen options: sources per page (News feeds, Library sources, Opportunity sources).
+add_action(
+	'load-settings_page_aw-sourcing',
+	function () {
+		if ( isset( AW_SOURCE_TABS[ sanitize_key( $_GET['tab'] ?? '' ) ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_sources_per_page' ) );
+		}
+	}
+);
+add_filter( 'set_screen_option_aw_sources_per_page', fn( $keep, $option, $value ) => max( 1, min( 200, (int) $value ) ), 10, 3 );
+
 // The sources search form, outside the screen's POST form (the search fields in the tab point at it with form=).
 add_action(
 	'kits_sourcing_page_top',
 	function () {
 		$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( isset( AW_SOURCE_TABS[ $tab ] ) ) {
-			echo '<form id="aw-src-search" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '"></form>';
+			$state = sanitize_key( $_GET['state'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<form id="aw-src-search" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">'
+				. ( in_array( $state, array( 'on', 'off' ), true ) ? '<input type="hidden" name="state" value="' . esc_attr( $state ) . '">' : '' ) . '</form>';
 		}
 	}
 );
@@ -177,7 +190,10 @@ function aw_sources_list_action( $type, $tab ) {
 	}
 	$op = sanitize_key( $op );
 	if ( ! in_array( $op, array( 'on', 'off', 'filter_on', 'filter_off' ), true ) ) {
-		return isset( $_POST['src_bulk'] ) && ! isset( $_POST['src'] ); // phpcs:ignore WordPress.Security.NonceVerification -- the list without a chosen action: nothing to do
+		if ( isset( $_POST['src_bulk'] ) && ! isset( $_POST['src'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the list without a chosen action (or the page box): nothing saved
+			aw_sources_list_back( false );
+		}
+		return false;
 	}
 	$c    = aw_sources_config();
 	$what = array();
@@ -198,7 +214,17 @@ function aw_sources_list_action( $type, $tab ) {
 	unset( $s );
 	update_option( 'aw_sources', $c, false );
 	kits_sourcing_log( $tab, implode( ' · ', $what ) );
+	aw_sources_list_back( (bool) $what );
 	return true;
+}
+
+/** After a list action: back to the same view, search and page; "Saved" only when something changed. */
+function aw_sources_list_back( $changed ) {
+	$back = remove_query_arg( array( 'updated', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing' ) );
+	$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+	$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
+	wp_safe_redirect( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
+	exit;
 }
 
 foreach ( array_keys( AW_SOURCE_TABS ) as $aw_tab ) {
