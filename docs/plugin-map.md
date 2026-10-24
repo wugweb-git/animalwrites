@@ -69,6 +69,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/review-queue.php` | Inbox → To review. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
+| `includes/keyword-stats.php` | Which search brought each item in (meta aw_feed, aw_ingested_at, saved at ingest since 24 Oct 2026) and per keyword the items fetched and published in 30 days, News and Library apart (older items: by the word in title or summary, estimated). Offered to aw-seo-extras through the filter aw_sourcing_keyword_items. |
 
 ## mailweb (Mailweb)
 

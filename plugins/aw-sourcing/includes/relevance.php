@@ -313,6 +313,7 @@ add_action(
 							'reason' => sanitize_text_field( (string) ( $e['reason'] ?? '' ) ),
 							'type'   => sanitize_key( (string) ( $e['type'] ?? '' ) ),
 							'feed'   => sanitize_text_field( (string) ( $e['feed'] ?? '' ) ),
+							'kw'     => function_exists( 'aw_sourcing_feed_keyword' ) ? aw_sourcing_feed_keyword( (string) ( $e['feed'] ?? '' ) ) : '',
 							'model'  => sanitize_text_field( (string) ( $e['model'] ?? '' ) ),
 							'at'     => current_time( 'Y-m-d H:i' ),
 						);
@@ -356,7 +357,7 @@ function aw_not_news_reason( $title, $url, $type ) {
 }
 
 /** Add one entry to the Rejected log (Settings → Sourcing → Rejected), as the relevance-rejected endpoint does. */
-function aw_relevance_log_one( $title, $url, $reason, $type ) {
+function aw_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 	$url = esc_url_raw( (string) $url );
 	$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
 	array_unshift(
@@ -366,7 +367,8 @@ function aw_relevance_log_one( $title, $url, $reason, $type ) {
 			'url'    => $url,
 			'reason' => sanitize_text_field( (string) $reason ),
 			'type'   => sanitize_key( (string) $type ),
-			'feed'   => '',
+			'feed'   => sanitize_text_field( (string) $feed ),
+			'kw'     => function_exists( 'aw_sourcing_feed_keyword' ) ? aw_sourcing_feed_keyword( (string) $feed ) : '',
 			'model'  => 'site rule',
 			'at'     => current_time( 'Y-m-d H:i' ),
 		)
@@ -406,11 +408,11 @@ function aw_relevance_rejected_tab() {
 	if ( ! $log ) {
 		return;
 	}
-	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><th>Item</th><th style="width:9%">Type</th><th style="width:34%">Reason</th><th style="width:12%">Date</th></tr></thead><tbody>';
+	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><th>Item</th><th style="width:9%">Type</th><th style="width:16%">Found by</th><th style="width:30%">Reason</th><th style="width:12%">Date</th></tr></thead><tbody>';
 	foreach ( $log as $e ) {
 		$host = (string) wp_parse_url( (string) ( $e['url'] ?? '' ), PHP_URL_HOST );
 		echo '<tr><td><a href="' . esc_url( (string) ( $e['url'] ?? '' ) ) . '" target="_blank" rel="noopener">' . esc_html( (string) ( $e['title'] ?? '' ) ?: $host ) . '</a><br><span style="color:#50575e">' . esc_html( $host ) . '</span></td>'
-			. '<td>' . esc_html( (string) ( $e['type'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['reason'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['at'] ?? '' ) ) . '</td></tr>';
+			. '<td>' . esc_html( (string) ( $e['type'] ?? '' ) ) . '</td><td>' . esc_html( '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['reason'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['at'] ?? '' ) ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 }

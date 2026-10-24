@@ -176,7 +176,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( 'aw_listing' !== $type && function_exists( 'aw_not_news_reason' ) ) {
 		$why = aw_not_news_reason( $title, $source_url, $type );
 		if ( $why ) {
-			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ) );
+			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ), (string) $req->get_param( 'feed' ) );
 			return new WP_REST_Response( array( 'status' => 'filtered', 'reason' => $why ), 200 );
 		}
 	}
@@ -213,6 +213,13 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	update_post_meta( $post_id, 'aw_source_url', $source_url );
+	// Which source or search brought it in, and when (owner, 24 Oct 2026: per-keyword figures in Search Insights).
+	// post_date becomes the source's date on publish, so the arrival time is kept apart.
+	$feed = sanitize_text_field( (string) $req->get_param( 'feed' ) );
+	if ( '' !== $feed ) {
+		update_post_meta( $post_id, 'aw_feed', $feed );
+	}
+	update_post_meta( $post_id, 'aw_ingested_at', time() );
 	if ( function_exists( 'aw_relevance_store' ) ) {
 		aw_relevance_store( $post_id, $req->get_param( 'relevance' ) ); // the workers' relevance verdict
 	}
