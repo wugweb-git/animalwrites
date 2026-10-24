@@ -72,7 +72,7 @@ add_action(
 	'kits_sourcing_page_top',
 	function () {
 		$c = aw_sources_config();
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin:8px 0 12px">';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'aw_sourcing' );
 		echo '<input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="live">'
 			. '<p><strong>Workers use these lists:</strong> ' . ( empty( $c['live'] ) ? 'off (they use sources.yaml in the workers repository)' : 'on (read at the start of every run)' ) . ' '
@@ -89,40 +89,125 @@ add_action(
 	}
 );
 
-/** One list of sources (News feeds, Library sources or Opportunity sources). */
+/** One list of sources (News feeds, Library sources or Opportunity sources): the list, or one source to edit or add. */
 function aw_sources_tab( $slug ) {
-	$c    = aw_sources_config();
 	$type = AW_SOURCE_TABS[ $slug ][1];
-	echo '<p>' . ( 'news' === $type ? 'RSS feeds and Google News searches. For a Google News search, write only the search words.' : ( 'legal' === $type ? 'Where Library documents and legal news come from. Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here.' : 'Where opportunities come from. Only their name and on/off can change here; new kinds of site need code.' ) )
-		. ' "Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word).</p>';
-	echo '<table class="widefat striped"><thead><tr><th style="width:60px">On</th><th>Name</th><th>Feed URL or Google News search</th><th style="width:120px">Keyword check</th></tr></thead><tbody>';
-	$i = 0;
-	if ( 'opportunity' !== $type ) {
-		for ( $k = 0; $k < 1; $k++, $i++ ) { // an empty row to add a source, first
-			echo '<tr><td><input type="hidden" name="src[' . $i . '][id]" value=""><input type="checkbox" name="src[' . $i . '][on]" value="1" checked aria-label="On"></td><td><input type="text" class="regular-text" name="src[' . $i . '][name]" placeholder="New source name"></td><td><input type="text" class="large-text" name="src[' . $i . '][url]" placeholder="https://… feed, or Google News search words"></td><td><input type="checkbox" name="src[' . $i . '][filter]" value="1" checked aria-label="Keyword check"></td></tr>';
+	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( '' !== $edit ) {
+		aw_sources_edit_form( $slug, $edit );
+		return;
+	}
+	$intro = 'news' === $type ? 'RSS feeds and Google News searches.' : ( 'legal' === $type ? 'Where Library documents and legal news come from. Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here.' : 'Where opportunities come from. Only their name and on/off can change here; new kinds of site need code.' );
+	echo '<p>' . esc_html( $intro ) . ' "Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word).'
+		. ( 'opportunity' !== $type ? ' <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=' . $slug . '&edit=new' ) ) . '" class="page-title-action">Add a source</a>' : '' ) . '</p>';
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	}
+	require_once __DIR__ . '/class-aw-sourcing-sources-table.php';
+	$table = new AW_Sourcing_Sources_Table( $slug );
+	$table->prepare_items();
+	$table->views();
+	// Search: a GET form outside this POST form (printed at the top of the screen); the fields point at it.
+	$find = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<p class="search-box"><label class="screen-reader-text" for="aw-src-s">Search sources:</label><input type="search" id="aw-src-s" name="s" value="' . esc_attr( $find ) . '" form="aw-src-search"> <input type="submit" class="button" value="Search sources" form="aw-src-search"></p>';
+	$table->display();
+}
+
+/** Edit one source, or add one (edit=new), in the core form-table layout. Saves through the tab's own save hook. */
+function aw_sources_edit_form( $slug, $id ) {
+	$type = AW_SOURCE_TABS[ $slug ][1];
+	$src  = null;
+	foreach ( (array) aw_sources_config()['sources'] as $s ) {
+		if ( ( $s['id'] ?? '' ) === $id && ( $s['type'] ?? '' ) === $type ) {
+			$src = $s;
 		}
 	}
-
-	foreach ( (array) $c['sources'] as $s ) {
-		if ( ( $s['type'] ?? '' ) !== $type ) {
-			continue;
-		}
-		$q        = aw_gnews_query( $s['url'] ?? '' );
-		$editable = 'rss' === ( $s['kind'] ?? '' );
-		echo '<tr><td><input type="hidden" name="src[' . $i . '][id]" value="' . esc_attr( $s['id'] ) . '"><input type="checkbox" name="src[' . $i . '][on]" value="1"' . checked( ! empty( $s['on'] ), true, false ) . ' aria-label="On"></td>'
-			. '<td><input type="text" class="regular-text" name="src[' . $i . '][name]" value="' . esc_attr( $s['name'] ) . '"></td>'
-			. '<td>' . ( $editable ? '<input type="text" class="large-text" name="src[' . $i . '][url]" value="' . esc_attr( $q ? $q : $s['url'] ) . '">' . ( $q ? '<span class="description">Google News search</span>' : '' ) : '<code>' . esc_html( $s['url'] ) . '</code> <span class="description">(' . esc_html( $s['kind'] ) . ')</span>' ) . '</td>'
-			. '<td>' . ( $editable ? '<input type="checkbox" name="src[' . $i . '][filter]" value="1"' . checked( ! empty( $s['filter'] ), true, false ) . ' aria-label="Keyword check">' : '—' ) . '</td></tr>';
-		$i++;
+	$new = 'new' === $id;
+	if ( ! $new && ! $src ) {
+		echo '<div class="notice notice-error inline"><p>No such source.</p></div>';
+		return;
+	}
+	if ( $new && 'opportunity' === $type ) {
+		echo '<div class="notice notice-warning inline"><p>New kinds of opportunity site need code.</p></div>';
+		return;
+	}
+	$src  = $src ? $src : array( 'id' => '', 'name' => '', 'kind' => 'rss', 'url' => '', 'on' => true, 'filter' => true );
+	$rss  = 'rss' === $src['kind'];
+	$q    = aw_gnews_query( $src['url'] );
+	$back = admin_url( 'options-general.php?page=aw-sourcing&tab=' . $slug );
+	echo '<h2>' . esc_html( $new ? 'Add a source' : 'Edit ' . $src['name'] ) . '</h2>';
+	echo '<input type="hidden" name="src[0][id]" value="' . esc_attr( $src['id'] ) . '"><table class="form-table" role="presentation"><tbody>';
+	echo '<tr><th scope="row"><label for="aw-src-name">Name</label></th><td><input type="text" id="aw-src-name" class="regular-text" name="src[0][name]" value="' . esc_attr( $src['name'] ) . '" required></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-src-url">Feed URL or Google News search</label></th><td>'
+		. ( $rss ? '<input type="text" id="aw-src-url" class="large-text" name="src[0][url]" value="' . esc_attr( $q ? $q : $src['url'] ) . '" placeholder="https://… feed, or Google News search words"' . ( $new ? ' required' : '' ) . '><p class="description">For a Google News search, write only the search words.</p>' : '<code>' . esc_html( $src['url'] ) . '</code><p class="description">' . esc_html( $src['kind'] ) . ': needs code to change.</p>' )
+		. '</td></tr>';
+	echo '<tr><th scope="row">Status</th><td><label><input type="checkbox" name="src[0][on]" value="1"' . checked( ! empty( $src['on'] ), true, false ) . '> On</label></td></tr>';
+	if ( $rss ) {
+		echo '<tr><th scope="row">Keyword check</th><td><label><input type="checkbox" name="src[0][filter]" value="1"' . checked( ! empty( $src['filter'] ), true, false ) . '> Keep only items with a word from the Keywords tab</label></td></tr>';
 	}
 	echo '</tbody></table>';
-	submit_button( 'Save' );
+	submit_button( $new ? 'Add source' : 'Save source', 'primary', 'submit', false );
+	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a>';
+}
+
+// The sources search form, outside the screen's POST form (the search fields in the tab point at it with form=).
+add_action(
+	'kits_sourcing_page_top',
+	function () {
+		$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( AW_SOURCE_TABS[ $tab ] ) ) {
+			echo '<form id="aw-src-search" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '"></form>';
+		}
+	}
+);
+
+/**
+ * Row and bulk actions of a sources list: on / off and keyword check on / off. Returns true when it handled the
+ * request (the edit form's rows are then not read).
+ */
+function aw_sources_list_action( $type, $tab ) {
+	$row = sanitize_text_field( wp_unslash( $_POST['src_row'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+	if ( false !== strpos( $row, ':' ) ) {
+		list( $op, $one ) = explode( ':', $row, 2 );
+		$ids              = array( sanitize_key( $one ) );
+	} else {
+		$op  = sanitize_key( $_POST['src_bulk'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$op  = '' !== $op ? $op : sanitize_key( $_POST['src_bulk2'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$ids = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	$op = sanitize_key( $op );
+	if ( ! in_array( $op, array( 'on', 'off', 'filter_on', 'filter_off' ), true ) ) {
+		return isset( $_POST['src_bulk'] ) && ! isset( $_POST['src'] ); // phpcs:ignore WordPress.Security.NonceVerification -- the list without a chosen action: nothing to do
+	}
+	$c    = aw_sources_config();
+	$what = array();
+	foreach ( $c['sources'] as &$s ) {
+		if ( ( $s['type'] ?? '' ) !== $type || ! in_array( $s['id'], $ids, true ) ) {
+			continue;
+		}
+		if ( 'on' === $op || 'off' === $op ) {
+			if ( (bool) $s['on'] !== ( 'on' === $op ) ) {
+				$s['on'] = 'on' === $op;
+				$what[]  = $s['name'] . ' ' . $op;
+			}
+		} elseif ( 'rss' === ( $s['kind'] ?? '' ) && (bool) $s['filter'] !== ( 'filter_on' === $op ) ) {
+			$s['filter'] = 'filter_on' === $op;
+			$what[]      = $s['name'] . ' keyword check ' . ( $s['filter'] ? 'on' : 'off' );
+		}
+	}
+	unset( $s );
+	update_option( 'aw_sources', $c, false );
+	kits_sourcing_log( $tab, implode( ' · ', $what ) );
+	return true;
 }
 
 foreach ( array_keys( AW_SOURCE_TABS ) as $aw_tab ) {
 	add_action(
 		'kits_sourcing_save_' . $aw_tab,
 		function () use ( $aw_tab ) {
+			if ( aw_sources_list_action( AW_SOURCE_TABS[ $aw_tab ][1], $aw_tab ) ) {
+				return; // a row or bulk action of the list
+			}
 			$c     = aw_sources_config();
 			$type  = AW_SOURCE_TABS[ $aw_tab ][1];
 			$rows  = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
