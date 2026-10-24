@@ -2,8 +2,10 @@
 /**
  * Settings → Sourcing → AI models (owner, 10 + 12 Oct 2026; a tab since 24 Oct 2026): paste a key; the site works out the provider and a model that
  * answers, and shows whether the key works. One row per key, tried top to bottom, each kept separately.
- * Option aw_ai_models = list of {key, provider, model, url, status, checked} (not autoloaded).
- * The workers read the usable rows (GET /aw/v1/ai-keys) and try them before their GitHub Actions secrets.
+ * Option aw_ai_models = list of {key, provider, model, url, status, checked, label, workers} (not autoloaded).
+ * label: the owner's note. workers: the worker IDs (workers-meta.php) the key is for; empty or missing = every worker.
+ * The workers read the usable rows (GET /aw/v1/ai-keys; with ?worker=<id>, only the keys for that worker or for all)
+ * and try them before their GitHub Actions secrets.
  * Administrators and the ingest user only.
  *
  * @package aw-sourcing
@@ -251,6 +253,58 @@ function aw_ai_blank_row( string $key ): array {
 	return array( 'key' => $key, 'provider' => '', 'model' => '', 'url' => '', 'status' => 'unchecked', 'checked' => 0 );
 }
 
+/** The worker IDs a saved key is for; empty = every worker (owner, 24 Oct 2026; keys saved before have none). */
+function aw_ai_row_workers( array $row ): array {
+	return array_values( array_filter( array_map( 'sanitize_key', (array) ( $row['workers'] ?? array() ) ) ) );
+}
+
+/** The key may be used by this worker: it is for every worker, or for this one. */
+function aw_ai_key_for_worker( array $row, string $worker ): bool {
+	$ws = aw_ai_row_workers( $row );
+	return ! $ws || in_array( $worker, $ws, true );
+}
+
+/**
+ * What GET aw/v1/ai-keys serves: the usable AI rows and the tool keys. Without a worker, every one (as before 24 Oct
+ * 2026); with one, only the keys for that worker or for every worker.
+ *
+ * @param string $worker Worker ID ('' = all).
+ * @return array{rows: array, tools: array}
+ */
+function aw_ai_served( string $worker = '' ): array {
+	$out   = array();
+	$tools = array(); // Firecrawl and the like: the workers pick them out by provider
+	foreach ( aw_ai_rows() as $r ) {
+		if ( '' !== $worker && ! aw_ai_key_for_worker( $r, $worker ) ) {
+			continue;
+		}
+		if ( 'tool' === $r['status'] && isset( AW_AI_TOOLS[ $r['provider'] ] ) ) {
+			$tools[] = array( 'provider' => $r['provider'], 'key' => $r['key'] );
+			continue;
+		}
+		if ( empty( $r['provider'] ) || 'paid' === aw_ai_tier( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
+			continue;
+		}
+		$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
+	}
+	return array( 'rows' => $out, 'tools' => $tools );
+}
+
+/** "…abcd (Groq, label)" for notices and the change log: never more of the key than its last 4. */
+function aw_ai_key_short( array $row ): string {
+	$p = (string) ( $row['provider'] ?? '' );
+	$n = $p ? ( AW_AI_PROVIDERS[ $p ][0] ?? AW_AI_TOOLS[ $p ][0] ?? $p ) : 'provider not known yet';
+	return '…' . substr( (string) $row['key'], -4 ) . ' (' . $n . ( ! empty( $row['label'] ) ? ', ' . $row['label'] : '' ) . ')';
+}
+
+/** "all workers" or the workers' names, for the change log. */
+function aw_ai_workers_words( array $ids ): string {
+	if ( ! $ids ) {
+		return 'all workers';
+	}
+	return implode( ', ', array_map( fn( $id ) => function_exists( 'aw_worker' ) && aw_worker( $id ) ? aw_worker( $id )['name'] . ' (' . $id . ')' : $id, $ids ) );
+}
+
 /** The key's prefix names a provider or tool (a quick check); other keys are tried against every provider (slow). */
 function aw_ai_is_uuid( string $key ): bool {
 	return (bool) preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $key );
@@ -430,7 +484,8 @@ function aw_ai_check_all( bool $new_only = false ): void {
 	$rows = aw_ai_rows_fresh();
 	foreach ( $rows as &$r ) {
 		if ( isset( $checked[ $r['key'] ] ) ) {
-			$r = $checked[ $r['key'] ];
+			// The check's results; the label and workers as they are now (edited while the check ran).
+			$r = array_merge( $checked[ $r['key'] ], array_intersect_key( $r, array_flip( array( 'label', 'workers' ) ) ) );
 		}
 	}
 	unset( $r );
@@ -457,20 +512,16 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login,
-				'callback'            => function () {
-					$out   = array();
-					$tools = array(); // Firecrawl and the like: the workers pick them out by provider
-					foreach ( aw_ai_rows() as $r ) {
-						if ( 'tool' === $r['status'] && isset( AW_AI_TOOLS[ $r['provider'] ] ) ) {
-							$tools[] = array( 'provider' => $r['provider'], 'key' => $r['key'] );
-							continue;
-						}
-						if ( empty( $r['provider'] ) || 'paid' === aw_ai_tier( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
-							continue;
-						}
-						$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
-					}
-					return new WP_REST_Response( array( 'rows' => $out, 'tools' => $tools ) );
+				// Optional ?worker=<id> (the workflow file without .yml; "sourcing.yml" works too): only that worker's keys.
+				'args'                => array(
+					'worker' => array(
+						'type'     => 'string',
+						'required' => false,
+					),
+				),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$worker = preg_replace( '/\.ya?ml$/i', '', (string) $req->get_param( 'worker' ) );
+					return new WP_REST_Response( aw_ai_served( sanitize_key( $worker ) ) );
 				},
 			)
 		);
@@ -590,11 +641,29 @@ add_action(
 			}
 		}
 		$have = wp_list_pluck( $rows, 'key' );
-		foreach ( preg_split( '/[\s,]+/', sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new'] ?? '' ) ) ) as $k ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			if ( '' !== $k && ! in_array( $k, $have, true ) ) {
-				$rows[] = aw_ai_blank_row( $k );
-				$have[] = $k;
+		// Add New Key (owner, 24 Oct 2026): one key in the password field and / or several, one per line; the same label
+		// and workers (none ticked = every worker) for each.
+		$label   = mb_substr( sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ), 0, 80 );
+		$workers = function_exists( 'aw_workers_posted_ids' ) ? aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) ) : array();
+		$pasted  = sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new'] ?? '' ) ) . "\n" . sanitize_textarea_field( wp_unslash( $_POST['aw_ai_new_many'] ?? '' ) );
+		$added   = array();
+		$dupes   = 0;
+		foreach ( preg_split( '/[\s,]+/', $pasted ) as $k ) {
+			if ( '' === $k ) {
+				continue;
 			}
+			if ( in_array( $k, $have, true ) ) {
+				++$dupes;
+				continue;
+			}
+			$row     = aw_ai_blank_row( $k ) + array( 'label' => $label, 'workers' => $workers );
+			$rows[]  = $row;
+			$have[]  = $k;
+			$added[] = aw_ai_key_short( $row );
+		}
+		if ( ! $added && ! isset( $_POST['aw_ai_order'] ) && empty( $_POST['aw_ai_recheck'] ) ) {
+			wp_safe_redirect( aw_ai_keys_url( array( 'edit' => 'new', 'nokey' => $dupes ? 'dupe' : 'empty' ) ) );
+			exit;
 		}
 		// Only the keys just added are checked here, and only when their prefix names the provider: re-testing every key
 		// that is not working took minutes and the save ended in a 503 (owner, 22 Oct 2026). The rest are checked twice a
@@ -606,12 +675,58 @@ add_action(
 		$was  = wp_list_pluck( $saved, 'key' );
 		$rows = array_values( array_filter( $rows, fn( $r ) => in_array( $r['key'], $now, true ) || ! in_array( $r['key'], $was, true ) ) );
 		update_option( 'aw_ai_models', $rows, false );
+		if ( $added ) {
+			kits_sourcing_log( 'ai', 'added key ' . implode( ', ', $added ) . ' for ' . aw_ai_workers_words( $workers ) );
+		}
 		$hook = ! empty( $_POST['aw_ai_recheck'] ) ? 'aw_ai_check_all_now' : 'aw_ai_check_new'; // every key, or the new ones
 		if ( ( 'aw_ai_check_all_now' === $hook || in_array( 'unchecked', wp_list_pluck( $rows, 'status' ), true ) ) && ! wp_next_scheduled( $hook ) ) {
 			wp_schedule_single_event( time(), $hook );
 			spawn_cron();
 		}
-		wp_safe_redirect( aw_ai_keys_url( array( 'saved' => 1 ) ) );
+		wp_safe_redirect( aw_ai_keys_url( array( 'saved' => count( $added ), 'dupes' => $dupes ) ) );
+		exit;
+	}
+);
+
+// Edit a saved key (owner, 24 Oct 2026): its label and the workers it is for. The key itself is never edited (remove it
+// and add the new one); keys in the workers' GitHub secrets are not on this list and cannot be attached.
+add_action(
+	'admin_post_aw_ai_key_edit',
+	function () {
+		$id = sanitize_key( wp_unslash( $_POST['aw_ai_id'] ?? '' ) );
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_ai_key_edit_' . $id ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$rows = aw_ai_rows_fresh();
+		$n    = 0;
+		foreach ( $rows as $i => $r ) {
+			if ( aw_ai_key_id( $r['key'] ) !== $id ) {
+				continue;
+			}
+			$label   = mb_substr( sanitize_text_field( wp_unslash( $_POST['aw_ai_label'] ?? '' ) ), 0, 80 );
+			$workers = aw_workers_posted_ids( array_map( 'sanitize_key', (array) wp_unslash( $_POST['aw_ai_workers'] ?? array() ) ) );
+			$was     = aw_ai_row_workers( $r );
+			$what    = array();
+			if ( (string) ( $r['label'] ?? '' ) !== $label ) {
+				$what[] = 'label "' . ( $r['label'] ?? '' ) . '" → "' . $label . '"';
+			}
+			$a = $was;
+			$b = $workers;
+			sort( $a );
+			sort( $b );
+			if ( $a !== $b ) {
+				$what[] = 'used by ' . aw_ai_workers_words( $was ) . ' → ' . aw_ai_workers_words( $workers );
+			}
+			$rows[ $i ]['label']   = $label;
+			$rows[ $i ]['workers'] = $workers;
+			if ( $what ) {
+				update_option( 'aw_ai_models', $rows, false );
+				kits_sourcing_log( 'ai', 'key ' . aw_ai_key_short( $r ) . ': ' . implode( '; ', $what ) );
+				$n = 1;
+			}
+			break;
+		}
+		wp_safe_redirect( aw_ai_keys_url( array( 'listed' => 'edited', 'n' => $n ) ) );
 		exit;
 	}
 );
@@ -628,20 +743,49 @@ add_action(
 			list( $op, $id ) = explode( ':', $one, 2 );
 			$ids             = array( $id );
 		} else {
-			$op  = sanitize_key( $_POST['ai_bulk'] ?? '' );
-			$op  = '' !== $op ? $op : sanitize_key( $_POST['ai_bulk2'] ?? '' );
-			$ids = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) );
+			$top    = sanitize_key( $_POST['ai_bulk'] ?? '' );
+			$op     = '' !== $top ? $top : sanitize_key( $_POST['ai_bulk2'] ?? '' );
+			$worker = sanitize_key( wp_unslash( '' !== $top ? ( $_POST['ai_worker'] ?? '' ) : ( $_POST['ai_worker2'] ?? '' ) ) ); // Attach to / Detach from: the worker select beside the menu used
+			$ids    = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) );
+		}
+		$worker = isset( $worker ) && function_exists( 'aw_worker' ) && aw_worker( $worker ) ? $worker : '';
+		if ( in_array( $op, array( 'attach', 'detach' ), true ) && '' === $worker ) {
+			$op = 'noworker';
 		}
 		$op   = sanitize_key( $op );
 		$ids  = array_map( 'sanitize_key', $ids );
 		$rows = aw_ai_rows_fresh();
 		$n    = 0;
+		$skip = 0;
 		$gone = array();
+		$did  = array();
 		foreach ( $rows as $i => $r ) {
 			if ( ! in_array( aw_ai_key_id( $r['key'] ), $ids, true ) ) {
 				continue;
 			}
-			if ( 'remove' === $op ) {
+			if ( 'attach' === $op || 'detach' === $op ) {
+				// Attach: the key is for this worker (a key for every worker becomes this worker's only). Detach: no longer
+				// for this worker (a key for every worker becomes every other worker's). A key keeps at least one worker:
+				// detaching its last one is refused (remove the key instead).
+				$ws = aw_ai_row_workers( $r );
+				if ( 'attach' === $op ) {
+					if ( in_array( $worker, $ws, true ) ) {
+						continue;
+					}
+					$new = array_merge( $ws, array( $worker ) );
+				} else {
+					if ( $ws && ! in_array( $worker, $ws, true ) ) {
+						continue;
+					}
+					$new = array_values( array_diff( $ws ? $ws : array_keys( aw_workers_all() ), array( $worker ) ) );
+					if ( ! $new ) {
+						++$skip;
+						continue;
+					}
+				}
+				$rows[ $i ]['workers'] = $new;
+				$did[]                 = aw_ai_key_short( $r );
+			} elseif ( 'remove' === $op ) {
 				$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider' ) . ')';
 				unset( $rows[ $i ] );
 			} elseif ( 'recheck' === $op ) {
@@ -651,6 +795,7 @@ add_action(
 				$tmp        = $rows[ $j ];
 				$rows[ $j ] = $r;
 				$rows[ $i ] = $tmp;
+				$did[]      = aw_ai_key_short( $r );
 				++$n;
 				break;
 			} else {
@@ -662,25 +807,37 @@ add_action(
 		if ( $gone && function_exists( 'kits_sourcing_log' ) ) {
 			kits_sourcing_log( 'AI models', 'removed key ' . implode( ', ', $gone ) );
 		}
+		if ( $did ) {
+			$words = array(
+				'attach' => 'attached to ' . aw_ai_workers_words( array( $worker ) ),
+				'detach' => 'detached from ' . aw_ai_workers_words( array( $worker ) ),
+				'up'     => 'moved up',
+				'down'   => 'moved down',
+			);
+			kits_sourcing_log( 'ai', 'key ' . implode( ', ', $did ) . ': ' . ( $words[ $op ] ?? $op ) );
+		}
 		if ( 'recheck' === $op && $n && ! wp_next_scheduled( 'aw_ai_check_new' ) ) {
 			wp_schedule_single_event( time(), 'aw_ai_check_new' );
 			spawn_cron();
 		}
-		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'paged' ), wp_get_referer() ? wp_get_referer() : aw_ai_keys_url() );
+		$back = remove_query_arg( array( 'listed', 'n', 'skip', 'saved', 'dupes', 'paged' ), wp_get_referer() ? wp_get_referer() : aw_ai_keys_url() );
 		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
 		parse_str( (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY ), $ref );
-		$known = in_array( $op, array( 'remove', 'recheck', 'up', 'down' ), true );
-		if ( ! $known && $page && absint( $ref['paged'] ?? 1 ) !== $page ) {
+		$known = in_array( $op, array( 'remove', 'recheck', 'up', 'down', 'attach', 'detach' ), true );
+		if ( ! $known && 'noworker' !== $op && $page && absint( $ref['paged'] ?? 1 ) !== $page ) {
 			wp_safe_redirect( $back );
 			exit;
 		}
-		wp_safe_redirect( add_query_arg( array( 'listed' => $known ? $op : 'none', 'n' => $n ), $back ) );
+		if ( in_array( $op, array( 'attach', 'detach' ), true ) ) {
+			$n = count( $did );
+		}
+		wp_safe_redirect( add_query_arg( array( 'listed' => $known || 'noworker' === $op ? $op : 'none', 'n' => $n, 'skip' => $skip ), $back ) );
 		exit;
 	}
 );
-add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) && 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ? array_merge( $args, array( 'listed', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
+add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) && 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ? array_merge( $args, array( 'listed', 'n', 'skip', 'saved', 'dupes', 'nokey' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
 
 /**
  * Free-model daily caps per account (owner, 22 Oct 2026). OpenRouter gives each account 50 free requests a day (1,000
@@ -711,23 +868,9 @@ function aw_ai_free_caps_table() {
 	aw_sourcing_simple_table( 'caps', array( 'acct' => 'Account', 'limit' => 'Daily limit', 'left' => 'Left today', 'share' => 'Last run could use', 'used' => 'Last run used', 'keys' => 'Keys', 'at' => 'Last run' ), $rows );
 }
 
-/** The worker workflows that use the AI keys (animal-writes-workers, 22 Oct 2026), by their GitHub names, and when they run. */
-const AW_AI_WORKERS = array(
-	'Sourcing workers'                                     => 'news, every 3 hours',
-	'Summaries: rewrite those that break the current rules' => 'every 30 minutes, when there is something to rewrite',
-	'Focus keywords (Rank Math)'                           => 'daily',
-	'Directory enrichment'                                 => 'after imports',
-	'Research (India, Europe PMC and Crossref)'            => 'Mondays',
-	'Relevance check of existing items'                    => 'by hand',
-	'Same story: fold duplicates into the first story'     => 'by hand',
-	'News and press titles: sentence case (dry run)'       => 'by hand',
-	'Press search (one-off, Google News and Google Search)' => 'by hand',
-	'Backfill (News + Library from 1 Nov 2025)'            => 'by hand',
-	'Submit URLs (News found by hand)'                     => 'by hand',
-);
-
 /** Total keys, what they can do in a day, what was used, by which workers (owner, 22 Oct 2026: "keep it simple"). */
 function aw_ai_overview( array $rows ) {
+	$workers = aw_workers_all();
 	$working = 0;
 	$daily   = 0;
 	$nocap   = 0;
@@ -753,7 +896,7 @@ function aw_ai_overview( array $rows ) {
 	$calls = 0;
 	$ok    = 0;
 	$miss  = 0;
-	$wf    = array();
+	$wf    = array(); // worker ID (or the reported name of a workflow not in the registry) => true
 	foreach ( aw_ai_usage() as $u ) {
 		foreach ( (array) ( $u['runs'] ?? array() ) as $run ) {
 			if ( time() - (int) $run['at'] < DAY_IN_SECONDS ) {
@@ -761,7 +904,7 @@ function aw_ai_overview( array $rows ) {
 				$ok    += (int) ( $run['ok'] ?? 0 );
 				$miss  += (int) ( $run['limited'] ?? 0 ) + (int) ( $run['failed'] ?? 0 );
 				if ( ! empty( $run['workflow'] ) ) {
-					$wf[ $run['workflow'] ] = true;
+					$wf[ aw_ai_usage_worker( (string) $run['workflow'] ) ] = true;
 				}
 			}
 		}
@@ -773,13 +916,35 @@ function aw_ai_overview( array $rows ) {
 		. '<tr><th scope="row">Demand</th><td>' . esc_html( number_format_i18n( $ok ) . ' answers the workers needed in the last 24 h' . ( $miss ? ' (+' . number_format_i18n( $miss ) . ' tries that hit a limit or failed)' : '' ) ) . '</td></tr>'
 		. '<tr><th scope="row">Demand against supply</th><td><meter min="0" max="100" low="50" high="80" optimum="0" value="' . esc_attr( (string) $pct ) . '">' . esc_html( $pct . '%' ) . '</meter> '
 		. esc_html( $pct . '% of the daily supply with caps (' . number_format_i18n( $ok ) . ' of about ' . number_format_i18n( $daily ) . '). Supply uses the providers\' published free limits, so it is an estimate.' ) . '</td></tr>'
-		. '<tr><th scope="row">AI workers</th><td>' . esc_html( count( $wf ) . ' of ' . count( AW_AI_WORKERS ) . ( $wf ? ' used AI today: ' . implode( ', ', array_keys( $wf ) ) : ': none used AI in the last 24 h' ) ) . '</td></tr>'
+		. '<tr><th scope="row">AI workers</th><td>' . esc_html( count( $wf ) . ' of ' . count( $workers ) . ' workers' . ( $wf ? ' used AI in the last 24 h: ' . implode( ', ', array_map( fn( $id ) => $workers[ $id ]['name'] ?? $id, array_keys( $wf ) ) ) : ': none used AI in the last 24 h' ) ) . '</td></tr>'
 		. '</tbody></table>';
-	echo '<details><summary>The ' . count( AW_AI_WORKERS ) . ' workers that use AI</summary><ul class="ul-disc">';
-	foreach ( AW_AI_WORKERS as $name => $when ) {
-		echo '<li>' . esc_html( $name . ' (' . $when . ')' . ( isset( $wf[ $name ] ) ? ' · used AI today' : '' ) ) . '</li>';
+	// The real workers (Settings → Sourcing → Workers), with how many of the keys served now each one may use.
+	$all_rows = count( aw_ai_served()['rows'] );
+	$list     = array();
+	foreach ( $workers as $id => $w ) {
+		$can    = count( aw_ai_served( $id )['rows'] );
+		$list[] = array(
+			'worker' => aw_worker_label_html( $id ) . ' <code>' . esc_html( $id ) . '</code>' . ( $w['planned'] ? ' (planned)' : '' ),
+			'keys'   => esc_html( $can === $all_rows ? $can . ' (all working keys)' : $can . ' of ' . $all_rows . ' working keys' ),
+			'today'  => isset( $wf[ $id ] ) ? '<span class="dashicons dashicons-yes" aria-hidden="true"></span> Yes' : '—',
+		);
 	}
-	echo '</ul></details>';
+	echo '<details><summary>' . esc_html( 'The ' . count( $workers ) . ' workers and the keys each can use' ) . '</summary>';
+	aw_sourcing_simple_table( 'ai-workers', array( 'worker' => 'Worker', 'keys' => 'Keys it can use', 'today' => 'Used AI in the last 24 h' ), $list );
+	echo '</details>';
+}
+
+/**
+ * The worker ID of a usage report: the workers report their GitHub workflow name (Sourcing workers …), which is the
+ * registry's name; a name not in the registry stays as it is.
+ */
+function aw_ai_usage_worker( string $name ): string {
+	foreach ( AW_WORKERS as $file => $w ) {
+		if ( $w['name'] === $name ) {
+			return aw_worker_id( $file );
+		}
+	}
+	return $name;
 }
 
 /** Keys per group and provider, at a glance (owner, 22 Oct 2026). */
@@ -813,40 +978,61 @@ function aw_ai_tier_summary( array $rows ) {
 
 /** Settings → Sourcing → AI models (the Sourcing screen prints the wrap, title and tabs). */
 function aw_ai_keys_screen() {
+	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
+	if ( 'new' === $edit ) {
+		aw_ai_key_add_screen();
+		return;
+	}
+	if ( '' !== $edit ) {
+		aw_ai_key_edit_screen( $edit );
+		return;
+	}
 	$rows = aw_ai_rows();
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>Saved. New keys are being checked in the background: reload in a few minutes to see their status.</p></div>';
+		$added = absint( $_GET['saved'] ); // phpcs:ignore WordPress.Security.NonceVerification
+		$dupes = absint( $_GET['dupes'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+		/* translators: %d: number of keys. */
+		$msg = sprintf( _n( '%d key added.', '%d keys added.', $added ), $added );
+		if ( $dupes ) {
+			/* translators: %d: number of keys. */
+			$msg .= ' ' . sprintf( _n( '%d was already saved and was skipped.', '%d were already saved and were skipped.', $dupes ), $dupes );
+		}
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $msg . ' New keys are being checked in the background: reload in a few minutes to see their status.' ) . '</p></div>';
 	}
 	$listed = sanitize_key( $_GET['listed'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $listed ) {
-		$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$msg = array(
+		$n    = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$skip = absint( wp_unslash( $_GET['skip'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$msg  = array(
 			/* translators: %d: number of keys. */
 			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Settings → Sourcing → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Settings → Sourcing → Change log.', $n ),
 			/* translators: %d: number of keys. */
 			'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n ),
 			'up'      => 'Moved up. The workers try the keys from the top down.',
 			'down'    => 'Moved down. The workers try the keys from the top down.',
+			/* translators: %d: number of keys. */
+			'attach'  => _n( '%d key attached. A key that was for every worker is now for the workers it is attached to only.', '%d keys attached. A key that was for every worker is now for the workers it is attached to only.', $n ),
+			/* translators: %d: number of keys. */
+			'detach'  => _n( '%d key detached. A key that was for every worker is now for every other worker (not for workers added later).', '%d keys detached. A key that was for every worker is now for every other worker (not for workers added later).', $n ),
+			'edited'  => 'Key saved. The workers use the change from their next run.',
 		);
-		echo ( isset( $msg[ $listed ] ) && $n
-			? '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>'
-			: '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one key.</p></div>' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'noworker' === $listed ) {
+			echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose the worker to attach to or detach from, next to the bulk action.</p></div>';
+		} elseif ( isset( $msg[ $listed ] ) && $n ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>';
+		} else {
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( 'edited' === $listed ? 'Nothing changed.' : 'Nothing changed: choose an action and at least one key.' ) . '</p></div>';
+		}
+		if ( $skip ) {
+			/* translators: %d: number of keys. */
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $skip ), $skip ) ) . '</p></div>';
+		}
 	}
+	echo '<p>Keys the workers use, tried from the top down. Each key is for every worker unless it is attached to some (Edit, or the bulk actions Attach to worker / Detach from worker). <a href="' . esc_url( aw_ai_keys_url( array( 'edit' => 'new' ) ) ) . '" class="page-title-action">Add New Key</a></p>';
 	aw_ai_overview( $rows );
 	aw_ai_free_caps_table();
-
-	// Add keys (Settings form layout).
-	echo '<h2>Add keys</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
-	wp_nonce_field( 'aw_ai_keys' );
-	echo '<table class="form-table" role="presentation"><tbody>'
-		. '<tr><th scope="row"><label for="aw-ai-new">New keys</label></th><td><textarea id="aw-ai-new" name="aw_ai_new" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea><p class="description">One or more keys, one per line. The provider and model are worked out in the background after you save.</p></td></tr>'
-		. '<tr><th scope="row">Check</th><td><label><input type="checkbox" name="aw_ai_recheck" value="1"> Check every key again (runs in the background; reload in a few minutes)</label></td></tr>'
-		. '</tbody></table>';
-	submit_button( 'Save and check' );
-	echo '</form>';
-
 	aw_ai_tier_summary( $rows );
-	echo '<h2>Keys</h2><p>All keys in one list: the ones saved here, in the order the workers try them (top first), then the ones in the workers\' GitHub secrets (changed in GitHub). Every key is tested again twice a day.</p>';
+	echo '<h2>Keys</h2><p>All keys in one list: the ones saved here, in the order the workers try them (top first), then the ones in the workers\' GitHub secrets (changed in GitHub; they cannot be attached to workers). Every key is tested again twice a day.</p>';
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
@@ -861,4 +1047,56 @@ function aw_ai_keys_screen() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys_list">';
 	$table->display();
 	echo '</form>';
+}
+
+/** Add New Key (&tab=ai&edit=new): core form-table, posts to the existing save (admin_post_aw_ai_keys). */
+function aw_ai_key_add_screen() {
+	$nokey = sanitize_key( $_GET['nokey'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( $nokey ) {
+		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( 'dupe' === $nokey ? 'Nothing added: that key is already saved.' : 'Nothing added: paste a key.' ) . '</p></div>';
+	}
+	echo '<h2>Add New Key</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys">';
+	wp_nonce_field( 'aw_ai_keys' );
+	echo '<table class="form-table" role="presentation"><tbody>'
+		. '<tr><th scope="row"><label for="aw-ai-new">Key</label></th><td><input type="password" id="aw-ai-new" name="aw_ai_new" class="regular-text code" autocomplete="new-password" spellcheck="false"><p class="description">The provider and a model that answers are worked out in the background after you save. The key is never shown again: only its last 4 characters.</p></td></tr>'
+		. '<tr><th scope="row"><label for="aw-ai-new-many">Or several keys</label></th><td><textarea id="aw-ai-new-many" name="aw_ai_new_many" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea><p class="description">One per line. They get the same label and workers.</p></td></tr>'
+		. '<tr><th scope="row"><label for="aw-ai-label">Label</label></th><td><input type="text" id="aw-ai-label" name="aw_ai_label" class="regular-text" maxlength="80"><p class="description">Optional: a note for you, e.g. which account the key is from.</p></td></tr>'
+		. '<tr><th scope="row">Used by</th><td>';
+	aw_workers_checkboxes( 'aw_ai_workers', array(), 'Used by' );
+	echo '<p class="description">None ticked: every worker, also workers added later (as before).</p></td></tr></tbody></table>';
+	echo '<p class="submit">';
+	submit_button( 'Add key', 'primary', 'submit', false );
+	echo ' <a href="' . esc_url( aw_ai_keys_url() ) . '" class="button">Cancel</a></p></form>';
+}
+
+/** Edit a saved key (&tab=ai&edit=<key id>): label and workers; provider, model and status are read-only. */
+function aw_ai_key_edit_screen( $id ) {
+	$row = null;
+	foreach ( aw_ai_rows() as $r ) {
+		if ( aw_ai_key_id( $r['key'] ) === $id ) {
+			$row = $r;
+		}
+	}
+	if ( ! $row ) {
+		$secret = isset( aw_ai_usage()[ $id ] );
+		echo '<div class="notice notice-error inline"><p>' . esc_html( $secret ? 'This key is in the workers\' GitHub secrets: it is changed in GitHub and cannot be attached to workers.' : 'No such key.' ) . ' <a href="' . esc_url( aw_ai_keys_url() ) . '">Back to the keys</a></p></div>';
+		return;
+	}
+	$prov = (string) $row['provider'];
+	echo '<h2>' . esc_html( 'Edit key …' . substr( $row['key'], -4 ) ) . '</h2>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_key_edit"><input type="hidden" name="aw_ai_id" value="' . esc_attr( $id ) . '">';
+	wp_nonce_field( 'aw_ai_key_edit_' . $id );
+	echo '<table class="form-table" role="presentation"><tbody>'
+		. '<tr><th scope="row">Key</th><td><code>…' . esc_html( substr( $row['key'], -4 ) ) . '</code><p class="description">To change the key itself, remove it and add the new one.</p></td></tr>'
+		. '<tr><th scope="row">Provider</th><td>' . aw_ai_provider_html( $prov ) . ' <span class="description">(' . esc_html( aw_ai_tier_label( $prov ) ) . ')</span></td></tr>' // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_ai_provider_html
+		. '<tr><th scope="row">Model</th><td><code>' . esc_html( '' !== (string) $row['model'] ? $row['model'] : '—' ) . '</code></td></tr>'
+		. '<tr><th scope="row">Status</th><td>' . aw_ai_status_badge( (string) $row['status'] ) . '</td></tr>' // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_ai_status_badge
+		. '<tr><th scope="row">Last check</th><td>' . esc_html( ! empty( $row['checked'] ) ? wp_date( 'j M Y, H:i', (int) $row['checked'] ) : 'Not checked yet' ) . '</td></tr>'
+		. '<tr><th scope="row"><label for="aw-ai-label">Label</label></th><td><input type="text" id="aw-ai-label" name="aw_ai_label" class="regular-text" maxlength="80" value="' . esc_attr( (string) ( $row['label'] ?? '' ) ) . '"></td></tr>'
+		. '<tr><th scope="row">Used by</th><td>';
+	aw_workers_checkboxes( 'aw_ai_workers', aw_ai_row_workers( $row ), 'Used by' );
+	echo '<p class="description">None ticked: every worker, also workers added later.</p></td></tr></tbody></table>';
+	echo '<p class="submit">';
+	submit_button( 'Save changes', 'primary', 'submit', false );
+	echo ' <a href="' . esc_url( aw_ai_keys_url() ) . '" class="button">Cancel</a></p></form>';
 }
