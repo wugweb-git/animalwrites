@@ -131,5 +131,7 @@ Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?
 | `includes/search-insights/health.php` | Site Health test "Search Insights sources fresh". |
 | `includes/search-insights/admin.php` | The screen: Overview (postboxes), Keywords, Searches (`aw_sd_screen( true )`; the old `aw-search-demand` address 301s to this tab), tabs from other plugins (filter `aw_si_tabs`, actions `aw_si_load_tab_{key}` and `aw_si_tab_{key}`), Settings (run now, delete data). |
 | `includes/search-insights/class-aw-si-keywords-table.php` | Keywords list table: views, filters, search, sorting, priority overrides. |
+| `includes/search-insights/searches.php` | What the Searches tab (the Search demand screen) reads from the keyword table: its targets ("Our target?") and Gaps. The hard-coded 15 Oct map (`aw_sd_static()`) is gone. |
+| `includes/search-insights/dryrun.php` | `aw_si_dry_report()`: builds the keyword table in memory (seed, Rank Math, Sourcing, Search Console for one day and 28 days) with the daily rule (`aw_si_decide()`), and reports rows per table and source and what each tab would show. Writes nothing. |
 | `includes/search-insights/cli.php` | `wp aw-si status | dry-run | run | rollup | delete-data`. `dry-run` writes nothing. |
 | `data/search-insights-seed.json` | The seed, built once by `tools/search-insights/build_seed.py` from `docs/seo/keyword-map.md` and `docs/seo/rankings-2026-10-21.csv`. |

@@ -61,6 +61,37 @@ function aw_si_quick_win( ?float $pos, int $impr ): bool {
 }
 
 /**
+ * Priority, status and suggested action of one keyword (used by the daily calculation and by the dry run).
+ *
+ * @param int|null   $trends   Trends index.
+ * @param int        $impr     Search Console impressions, 28 days.
+ * @param float|null $pos28    Search Console position, 28 days.
+ * @param float|null $live     Latest live-check position.
+ * @param string[]   $owners   Paths of the pages that own the keyword.
+ * @param bool       $has_page Some page owns or carries it.
+ * @param array      $top      [path, impressions] of the page Google showed most.
+ * @return array{priority: string, status: string, action: string, conflict: bool, pos: float|null, owners: string[], shown: string}
+ */
+function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, array $owners, bool $has_page, array $top ): array {
+	// Position: the live check, or Search Console when it has figures newer than the check (plan §7).
+	$pos      = null !== $pos28 ? $pos28 : $live;
+	$shown    = (string) ( $top[0] ?? '' );
+	$conflict = count( $owners ) > 1
+		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) );
+	$priority = aw_si_priority( $trends, $impr, $pos, $has_page );
+	$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
+	$action   = '';
+	if ( $conflict ) {
+		$action = 'fix-conflict';
+	} elseif ( 'P2' === $priority ) {
+		$action = 'new-page';
+	} elseif ( aw_si_quick_win( $pos, $impr ) ) {
+		$action = $has_page ? 'guide-update' : 'add-secondary';
+	}
+	return compact( 'priority', 'status', 'action', 'conflict', 'pos', 'owners', 'shown' );
+}
+
+/**
  * Recalculate every keyword record.
  *
  * @return array Counts by priority and status.
@@ -107,32 +138,21 @@ function aw_si_compute(): array {
 
 	$count = array();
 	foreach ( (array) $rows as $r ) {
-		$id      = (int) $r->id;
-		$impr    = (int) ( $now28[ $id ]->i ?? 0 );
-		$clicks  = (int) ( $now28[ $id ]->c ?? 0 );
-		$pos28   = isset( $now28[ $id ] ) && null !== $now28[ $id ]->p ? round( (float) $now28[ $id ]->p, 1 ) : null;
-		$posprev = isset( $prev[ $id ] ) && null !== $prev[ $id ]->p ? round( (float) $prev[ $id ]->p, 1 ) : null;
-		$lv      = $live[ $id ] ?? null;
-		$trends  = isset( $trend[ $id ] ) ? (int) $trend[ $id ]->value : null;
-		// Position: the live check, or Search Console when it has figures newer than the check (plan §7).
-		$pos      = null !== $pos28 ? $pos28 : ( $lv && null !== $lv->value ? (float) $lv->value : null );
-		$own      = array_keys( $owners[ $id ] ?? array() );
-		$has_page = ! empty( $fits[ $id ] );
-		$shown    = $top_page[ $id ][0] ?? '';
-		$conflict = count( $own ) > 1
-			|| ( $own && '' !== $shown && ( $top_page[ $id ][1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $own, true ) );
-		$priority = aw_si_priority( $trends, $impr, $pos, $has_page );
-		$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
-		$action   = '';
-		if ( $conflict ) {
-			$action = 'fix-conflict';
-		} elseif ( 'P2' === $priority ) {
-			$action = 'new-page';
-		} elseif ( aw_si_quick_win( $pos, $impr ) ) {
-			$action = $has_page ? 'guide-update' : 'add-secondary';
-		}
-		$page    = $own ? $own[0] : $shown;
-		$set     = array(
+		$id       = (int) $r->id;
+		$impr     = (int) ( $now28[ $id ]->i ?? 0 );
+		$clicks   = (int) ( $now28[ $id ]->c ?? 0 );
+		$pos28    = isset( $now28[ $id ] ) && null !== $now28[ $id ]->p ? round( (float) $now28[ $id ]->p, 1 ) : null;
+		$posprev  = isset( $prev[ $id ] ) && null !== $prev[ $id ]->p ? round( (float) $prev[ $id ]->p, 1 ) : null;
+		$lv       = $live[ $id ] ?? null;
+		$trends   = isset( $trend[ $id ] ) ? (int) $trend[ $id ]->value : null;
+		$d        = aw_si_decide( $trends, $impr, $pos28, $lv && null !== $lv->value ? (float) $lv->value : null, array_keys( $owners[ $id ] ?? array() ), ! empty( $fits[ $id ] ), $top_page[ $id ] ?? array( '', 0 ) );
+		$priority = $d['priority'];
+		$status   = $d['status'];
+		$action   = $d['action'];
+		$own      = $d['owners'];
+		$shown    = $d['shown'];
+		$page     = $own ? $own[0] : $shown;
+		$set      = array(
 			'priority'  => $priority,
 			'status'    => $status,
 			'action'    => $action,
@@ -146,7 +166,7 @@ function aw_si_compute(): array {
 			'live_date' => $lv ? $lv->d : null,
 			'trends'    => $trends,
 		);
-		$changed = false;
+		$changed  = false;
 		foreach ( $set as $col => $val ) {
 			$old = $r->$col;
 			if ( null === $val ? null !== $old : ( null === $old || (string) $old !== (string) $val ) ) {

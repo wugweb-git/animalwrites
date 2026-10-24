@@ -6,7 +6,8 @@
  *
  * Phase 1: tables, the one-time seed from the keyword map, Search Console through Site Kit (each module as its own
  * owner, one call per calendar day), keyword roles, priority, the 90-day rollup, Overview and Keywords tabs, a Site
- * Health test and the `wp aw-si` commands. The Search demand screen (search-demand.php) stays as the Searches tab.
+ * Health test and the `wp aw-si` commands. The Search demand screen (search-demand.php) is the Searches tab; its targets
+ * and gaps come from the keyword table (searches.php).
  *
  * @package aw-seo-extras
  */
@@ -15,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'admin', 'cli' ) as $aw_si_file ) {
+foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'admin', 'cli' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
