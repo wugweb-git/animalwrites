@@ -202,9 +202,6 @@ foreach ( $rows as $r ) {
 	if ( ! metadata_exists( 'post', $id, 'aw_verified' ) ) {
 		update_post_meta( $id, 'aw_verified', false );
 	}
-	if ( ! metadata_exists( 'post', $id, 'aw_featured' ) ) {
-		update_post_meta( $id, 'aw_featured', 0 );
-	}
 }
 wp_suspend_cache_invalidation( false );
 wp_defer_term_counting( false );

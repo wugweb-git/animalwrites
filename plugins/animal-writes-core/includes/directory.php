@@ -1,6 +1,6 @@
 <?php
 /**
- * Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/, featured first.
+ * Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/.
  *
  * Every one of these is the Directory Page (hubs.php) with the place and type as query vars (aw_place, aw_dir_type);
  * its list is the hub Query Loop. Singles live at /directory/org/{slug}/.
@@ -154,8 +154,8 @@ add_filter(
 );
 
 /**
- * The Directory list query: place, type, name search, verified only, and the order (featured first, then verified,
- * then A–Z; or "Most details first"). Used by the hub Query Loop (hubs.php).
+ * The Directory list query: place, type, name search, verified only, and the order (verified first, then A–Z; or
+ * "Most details first"). No featured listings (owner, 24 Oct 2026). Used by the hub Query Loop (hubs.php).
  *
  * @param array $v Base query vars.
  * @return array
@@ -163,10 +163,9 @@ add_filter(
 function aw_directory_query_vars( $v ) {
 	$mq = (array) ( $v['meta_query'] ?? array() );
 	$v['aw_digits_last'] = 1; // A–Z means letters first: names that start with a number (e.g. "1962 …") come after Z
-	// Every listing carries aw_featured; aw_verified may be missing.
-	$mq['feat'] = array( 'key' => 'aw_featured', 'type' => 'NUMERIC' );
-	$order      = array( 'feat' => 'DESC', 'title' => 'ASC' );
-	// Verified next, once any listing is verified. Until then the step changes nothing and its OR join (aw_verified is
+
+	$order = array( 'title' => 'ASC' );
+	// Verified first, once any listing is verified. Until then the step changes nothing and its OR join (aw_verified is
 	// missing on most listings) made every Directory query about 300 ms slower.
 	if ( aw_verified_count() ) {
 		$mq['ver'] = array(
@@ -174,11 +173,11 @@ function aw_directory_query_vars( $v ) {
 			'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
 			array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ),
 		);
-		$order = array( 'feat' => 'DESC', 'ver_yes' => 'DESC', 'title' => 'ASC' );
+		$order = array( 'ver_yes' => 'DESC', 'title' => 'ASC' );
 	}
 	if ( 'details' === ( $_GET['sort'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
-		$order       = array( 'feat' => 'DESC', 'score' => 'DESC', 'title' => 'ASC' );
+		$order       = array( 'score' => 'DESC', 'title' => 'ASC' );
 	}
 	$place = aw_current_place();
 	if ( $place ) {

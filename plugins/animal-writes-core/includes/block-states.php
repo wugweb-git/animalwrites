@@ -48,7 +48,6 @@ add_filter(
 			),
 			'Badges and labels (animal-writes/badges)' => array(
 				array( 'Verified', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'NOT IN' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
-				array( 'Featured', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( array( 'key' => 'aw_featured', 'value' => 0, 'compare' => '>', 'type' => 'NUMERIC' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
 				array( 'Not confirmed (types and source only)', aw_state_item( array( 'post_type' => 'aw_listing', 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_verified', 'compare' => 'NOT EXISTS' ), array( 'key' => 'aw_verified', 'value' => array( '', '0' ), 'compare' => 'IN' ) ) ) ), fn( $id ) => aw_block_badges( array(), $id ) ),
 			),
 			'Contact icons (animal-writes/contact)' => array(

@@ -6,7 +6,7 @@
  *
  * Band: breadcrumb · hub-count · hub-visual · list-filters (Kits filter bar or the Directory search bar).
  * Lists: publisher · doc-date · issuer ("Issued by …" label) · doc-link (PDF) · task-icon · read-meta · place ·
- * deadline (validThrough) · opp-actions · org-mark · badges (Verified/Featured/Sponsored + sources + types) ·
+ * deadline (validThrough) · opp-actions · org-mark · badges (Verified/Sponsored + sources + types) ·
  * contact (icons only when the contact exists) · org-actions · result-head (count + sort) · browse-states ·
  * press-media · press-meta (date + format tag).
  *
@@ -441,19 +441,6 @@ add_filter(
 		$html = $p->get_updated_html();
 		$end  = strpos( $html, '</a>' );
 		return false === $end ? $html : substr_replace( $html, ' ' . aw_i( 'arrow-up-right' ), $end, 0 );
-	},
-	10,
-	3
-);
-
-// A featured Directory listing is marked on its row.
-add_filter(
-	'post_class',
-	function ( $classes, $cls, $id ) {
-		if ( 'aw_listing' === get_post_type( $id ) && (int) get_post_meta( $id, 'aw_featured', true ) ) {
-			$classes[] = 'is-featured';
-		}
-		return $classes;
 	},
 	10,
 	3

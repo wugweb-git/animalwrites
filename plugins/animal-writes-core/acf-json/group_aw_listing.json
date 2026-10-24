@@ -1444,52 +1444,6 @@
             "ui_off_text": "No"
         },
         {
-            "key": "field_aw_listing_featured",
-            "label": "Featured",
-            "name": "aw_featured",
-            "aria-label": "",
-            "type": "true_false",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "50",
-                "class": "",
-                "id": ""
-            },
-            "message": "",
-            "default_value": 0,
-            "ui": 1,
-            "ui_on_text": "Yes",
-            "ui_off_text": "No"
-        },
-        {
-            "key": "field_aw_listing_featured_until",
-            "label": "Featured until",
-            "name": "aw_featured_until",
-            "aria-label": "",
-            "type": "date_picker",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": [
-                [
-                    {
-                        "field": "field_aw_listing_featured",
-                        "operator": "==",
-                        "value": "1"
-                    }
-                ]
-            ],
-            "wrapper": {
-                "width": "50",
-                "class": "",
-                "id": ""
-            },
-            "display_format": "j F Y",
-            "return_format": "Y-m-d",
-            "first_day": 1
-        },
-        {
             "key": "field_aw_listing_tab_sources",
             "label": "Sources",
             "name": "",

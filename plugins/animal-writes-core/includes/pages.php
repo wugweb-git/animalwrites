@@ -5,7 +5,7 @@
  *
  * - [aw_copy_needed what="…"]: a marker for text still to be written, shown to editors only.
  * - [aw_categories_index]: every category with its photo and item count (/categories/).
- * - [aw_contact_form]: the contact form; /contact/?about=featured (listing, opportunity, partner, correction …)
+ * - [aw_contact_form]: the contact form; /contact/?about=listing (opportunity, partner, correction …)
  *   preselects the subject. Messages are private posts (WP Admin > Messages) and are emailed to the team.
  * - /search/ is not indexed.
  *
@@ -58,7 +58,6 @@ const AW_CONTACT_ABOUT = array(
 	''            => 'Choose a reason',
 	'general'     => 'General question',
 	'listing'     => 'List your organisation',
-	'featured'    => 'Get featured',
 	'opportunity' => 'Post an opportunity',
 	'partnership' => 'Partner with us',
 	'correction'  => 'Report a mistake',
@@ -205,7 +204,8 @@ add_action(
 	function ( $col, $id ) {
 		$v = (string) get_post_meta( $id, $col, true );
 		if ( 'aw_m_tag' === $col && '' === $v ) { // contact form messages: the reason they chose
-			$v = AW_CONTACT_ABOUT[ (string) get_post_meta( $id, 'aw_m_about', true ) ] ?? '';
+			$about = (string) get_post_meta( $id, 'aw_m_about', true );
+			$v     = AW_CONTACT_ABOUT[ $about ] ?? ( 'featured' === $about ? 'Get featured' : $about ); // a reason since removed keeps its label
 		}
 		if ( 'aw_m_source' === $col && 0 === strpos( $v, 'email:' ) ) {
 			$v = ''; // emails come from the mailbox, not a page
@@ -550,7 +550,7 @@ add_filter(
 		}
 		$text = trim( html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES ) );
 		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
-		if ( ! $key || ! in_array( $key, array( 'listing', 'featured', 'opportunity', 'partnership', 'correction' ), true ) ) {
+		if ( ! $key || ! in_array( $key, array( 'listing', 'opportunity', 'partnership', 'correction' ), true ) ) {
 			return $html;
 		}
 		$url = 'correction' === $key ? home_url( '/report/' ) : add_query_arg( 'about', $key, get_permalink() ) . '#write';

@@ -187,10 +187,6 @@ function aw_block_item_meta( $a, $id ) {
 				/* translators: %s: date. */
 				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Verified on %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Verified', 'animal-writes-core' ) ) . '</span>';
 		}
-		$until = (string) get_post_meta( $id, 'aw_featured_until', true );
-		if ( get_post_meta( $id, 'aw_featured', true ) && ( '' === $until || wp_date( 'Y-m-d' ) <= $until ) ) {
-			$row .= '<span class="kit-tag kit-tag--featured">' . esc_html__( 'Featured', 'animal-writes-core' ) . '</span>';
-		}
 	} else {
 		$cats = get_the_terms( $id, 'category' );
 		foreach ( ( $cats && ! is_wp_error( $cats ) ) ? $cats : array() as $t ) {

@@ -38,8 +38,6 @@ function aw_meta_schema() {
 		'aw_awbi_dropped'    => array( 'string', array( 'aw_listing' ), 'Date of the current AWBI list the code is missing from (Y-m-d): recognition may have lapsed' ),
 		'aw_awbi_list_on'    => array( 'string', array( 'aw_listing' ), 'Date of the AWBI list the code comes from (Y-m-d; empty = 31 May 2026 list)' ),
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
-		'aw_featured'        => array( 'integer', array( 'aw_listing' ), 'Featured (1) or not (0)' ),
-		'aw_featured_until'  => array( 'string', array( 'aw_listing' ), 'Featured until (Y-m-d)' ),
 		'aw_email'           => array( 'string', array( 'aw_listing' ), 'Email' ),
 		'aw_website'         => array( 'string', array( 'aw_listing', 'aw_opportunity' ), 'Website' ),
 		'aw_area'            => array( 'string', array( 'aw_listing' ), 'Area / locality (no full address)' ),
@@ -126,7 +124,7 @@ function aw_meta_schema() {
  */
 function aw_sanitize_meta( $value, $key ) {
 	$url_keys  = array( 'aw_source_url', 'aw_website', 'aw_apply_url', 'aw_file_url', 'aw_maps_url', 'aw_g_profile', 'aw_instagram', 'aw_facebook', 'aw_x', 'aw_youtube', 'aw_donate_url', 'aw_volunteer_url', 'aw_ngobase_url' );
-	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_featured_until', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
+	$date_keys = array( 'aw_source_date', 'aw_verified_on', 'aw_deadline', 'aw_review_until', 'aw_awbi_recognised', 'aw_awbi_renewed', 'aw_awbi_valid', 'aw_services_on', 'aw_event_date', 'aw_campaign_close', 'aw_campaign_open', 'aw_campaign_outcome_asof', 'kits_last_reviewed' );
 
 	if ( in_array( $key, $url_keys, true ) ) {
 		return esc_url_raw( (string) $value );
@@ -183,60 +181,18 @@ function aw_register_meta() {
 					return aw_sanitize_meta( $value, $key );
 				};
 			}
-			if ( 'aw_featured' === $key ) {
-				$args['default'] = 0;
-			}
 			register_post_meta( $post_type, $key, $args );
 		}
 	}
 }
 add_action( 'init', 'aw_register_meta' );
 
-/**
- * Listings always carry aw_featured so directory ordering never drops a listing.
- *
- * @param int $post_id Post ID.
- */
-function aw_ensure_featured_flag( $post_id ) {
-	if ( wp_is_post_revision( $post_id ) ) {
-		return;
-	}
-	if ( ! metadata_exists( 'post', $post_id, 'aw_featured' ) ) {
-		update_post_meta( $post_id, 'aw_featured', 0 );
-	}
-}
-add_action( 'save_post_aw_listing', 'aw_ensure_featured_flag' );
-
-/**
- * Add aw_featured = 0 to any listing missing it (imports, manual DB edits).
- * Runs on activation, daily, and once per plugin version in admin.
- */
-function aw_backfill_featured_flag() {
-	$ids = get_posts(
-		array(
-			'post_type'      => 'aw_listing',
-			'post_status'    => 'any',
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-			'meta_query'     => array(
-				array(
-					'key'     => 'aw_featured',
-					'compare' => 'NOT EXISTS',
-				),
-			),
-		)
-	);
-	foreach ( $ids as $id ) {
-		update_post_meta( $id, 'aw_featured', 0 );
-	}
-}
-
+// The featured-flag backfill is gone (owner, 24 Oct 2026); remove the option it kept.
 add_action(
 	'admin_init',
 	function () {
-		if ( get_option( 'aw_core_backfill_version' ) !== AW_CORE_VERSION ) {
-			aw_backfill_featured_flag();
-			update_option( 'aw_core_backfill_version', AW_CORE_VERSION );
+		if ( false !== get_option( 'aw_core_backfill_version' ) ) {
+			delete_option( 'aw_core_backfill_version' );
 		}
 	}
 );

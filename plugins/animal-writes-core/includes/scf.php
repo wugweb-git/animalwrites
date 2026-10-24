@@ -6,7 +6,7 @@
  *   saved back to the same files, so they can be committed.
  * - Every field's name is an existing meta key: SCF shows and saves the value that is already there; there is no second
  *   copy. Saving keeps each key's stored format (aw_value_guard below): dates stay Y-m-d, photos stay "1,2,3", flags
- *   stay '1' (aw_featured '0'), empty fields are removed as before, and values pass meta.php's sanitising.
+ *   stay '1', empty fields are removed as before, and values pass meta.php's sanitising.
  * - Fields marked read only are shown and never saved.
  * - Without SCF the former boxes come back (listing-profile.php, pages.php), so editing never depends on the plugin.
  *
@@ -77,11 +77,7 @@ function aw_value_guard( $check, $value, $post_id, $field ) {
 				}
 				return true;
 			}
-			if ( 'aw_featured' === $name ) { // every listing carries aw_featured (meta.php)
-				if ( '0' !== (string) $cur ) {
-					update_post_meta( $id, $name, 0 );
-				}
-			} elseif ( 'aw_verified' === $name ) { // unverified listings store '' (imports)
+			if ( 'aw_verified' === $name ) { // unverified listings store '' (imports)
 				if ( $exists && '' !== (string) $cur ) {
 					update_post_meta( $id, $name, '' );
 				}

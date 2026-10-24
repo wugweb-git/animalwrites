@@ -31,7 +31,7 @@
 | Databases | One MySQL database. Volunteers live in FluentCRM (contacts tagged Volunteer) since 24 Oct 2026; the old `aw_volunteers` table is a read-only backup. |
 | Email list | Our own database (self-hosted), not Brevo. Sent through the site's own mailbox (`noreply@animalwrites.in`, WP Admin → Settings → Mail). |
 | CAPTCHA | ALTCHA: self-hosted proof-of-work, no keys, on every form. |
-| Featured listings | Free for now, through the claim form; 90 days, then off automatically. |
+| Featured listings | Dropped (owner, 24 Oct 2026): no featured ordering, badge or claim option. |
 | Listing verification | The claim form plus the admin's Approve. |
 | 1.0 receipts | Personal data and photos dropped; the total count (16,754) is kept. |
 | Retention | **Archive, never delete** (section 5). |
