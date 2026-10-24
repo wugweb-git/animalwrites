@@ -68,7 +68,10 @@ function aw_review_count() {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'aw-inbox', 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), 'edit_others_posts', 'aw-review', 'aw_review_page' );
+		$hook = add_submenu_page( 'aw-inbox', 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), 'edit_others_posts', 'aw-review', 'aw_review_page' );
+		if ( $hook ) { // Screen options: items per page.
+			add_action( 'load-' . $hook, fn() => add_screen_option( 'per_page', array( 'label' => 'Items per page', 'default' => 50, 'option' => 'aw_review_per_page' ) ) );
+		}
 		remove_submenu_page( 'aw-inbox', 'edit.php?post_type=aw_press&post_status=pending' ); // now part of To review
 	},
 	21
@@ -123,60 +126,50 @@ add_action(
 		}
 		$n      = $action ? aw_review_apply( $ids, $action ) : 0;
 		$back   = admin_url( 'admin.php?page=aw-review' . ( ! empty( $_REQUEST['type'] ) ? '&type=' . sanitize_key( $_REQUEST['type'] ) : '' ) );
-		wp_safe_redirect( add_query_arg( array( 'done' => $action, 'n' => $n ), $back ) );
+		// Back to the same view, search, sort and page (the page-number box posts paged).
+		$back = remove_query_arg( array( 'done', 'n', 'paged' ), wp_get_referer() && false !== strpos( wp_get_referer(), 'page=aw-review' ) ? wp_get_referer() : $back );
+		$page = absint( wp_unslash( $_REQUEST['paged'] ?? 0 ) );
+		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
+		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
+		parse_str( (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY ), $ref );
+		$moved = $page && absint( $ref['paged'] ?? 1 ) !== $page;
+		wp_safe_redirect( $action || ! $moved ? add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) : $back );
 		exit;
 	}
 );
 
 function aw_review_page() {
-	$type  = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$items = aw_review_items( $type );
-	$base  = admin_url( 'admin.php?page=aw-review' );
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	}
+	require_once __DIR__ . '/class-aw-sourcing-review-table.php';
+	$table = new AW_Sourcing_Review_Table();
+	$table->prepare_items();
+	$type = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<div class="wrap"><h1 class="wp-heading-inline">To review</h1><hr class="wp-header-end">';
 	echo '<p>Items that came in automatically and need a person: why each was held is shown beside it. Publish puts it live; Reject moves it to Drafts (nothing is deleted).</p>';
 	if ( isset( $_GET['done'], $_GET['n'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$n = (int) $_GET['n']; // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
-	}
-	// Views: All · News · Library · Opportunity · Press, with counts.
-	$views = array( '<a href="' . esc_url( $base ) . '"' . ( '' === $type ? ' class="current" aria-current="page"' : '' ) . '>All <span class="count">(' . count( aw_review_items() ) . ')</span></a>' );
-	foreach ( AW_REVIEW_TYPES as $t => $label ) {
-		$c = count( aw_review_items( $t ) );
-		if ( $c ) {
-			$views[] = '<a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $t === $type ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $label ) . ' <span class="count">(' . $c . ')</span></a>';
+		if ( in_array( $_GET['done'], array( 'publish', 'reject' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( 'publish' === $_GET['done'] ? _n( '%d item published.', '%d items published.', $n ) : _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n ), $n ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+		} else {
+			echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose Publish or Reject and tick at least one item.</p></div>';
 		}
 	}
-	echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $views ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	if ( ! $items ) {
-		echo '<p style="clear:both;padding-top:1em">Nothing is waiting. New items that pass the checks go live on their own.</p></div>';
-		return;
-	}
-	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="clear:both">';
+	$table->views();
+	echo '<form method="get"><input type="hidden" name="page" value="aw-review">' . ( $type ? '<input type="hidden" name="type" value="' . esc_attr( $type ) . '">' : '' );
+	$table->search_box( 'Search items', 'aw-review' );
+	echo '</form>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'aw_review' );
 	echo '<input type="hidden" name="action" value="aw_review"><input type="hidden" name="type" value="' . esc_attr( $type ) . '">';
-	$all  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review&do=publish&all=1&type=' . $type ), 'aw_review' );
-	$bulk = fn( $n ) => '<div class="tablenav"><div class="alignleft actions bulkactions"><label class="screen-reader-text" for="aw-review-' . $n . '">Action for the ticked items</label><select name="' . $n . '" id="aw-review-' . $n . '"><option value="">With the ticked items…</option><option value="publish">Publish</option><option value="reject">Reject (move to Drafts)</option></select> <button class="button action">Apply</button></div>'
-		. '<div class="alignleft actions"><a class="button" href="' . esc_url( $all ) . '" onclick="return confirm(' . esc_attr( wp_json_encode( sprintf( 'Publish all %d items in this view?', count( $items ) ) ) ) . ')">' . esc_html( sprintf( 'Publish all %d', count( $items ) ) ) . '</a></div></div>';
-	echo $bulk( 'do' ); // phpcs:ignore WordPress.Security.EscapeOutput
-	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><td class="manage-column column-cb check-column"><input type="checkbox" aria-label="Tick all"></td><th style="width:9%">Type</th><th>Item</th><th style="width:16%">Source</th><th style="width:22%">Why it is waiting</th><th style="width:10%">Received</th><th style="width:15%">Decide</th></tr></thead><tbody>';
-	foreach ( $items as $p ) {
-		$url    = (string) get_post_meta( $p->ID, 'aw_source_url', true );
-		$url    = $url ? $url : (string) get_post_meta( $p->ID, 'aw_press_url', true );
-		$host   = $url ? (string) wp_parse_url( $url, PHP_URL_HOST ) : '';
-		$why    = (string) get_post_meta( $p->ID, 'aw_review', true );
-		$why    = $why ? preg_replace( '/^held:\s*/', '', $why ) : ( 'pending' === $p->post_status ? 'waiting for a first review' : '' );
-		$act    = fn( $do, $label, $cls ) => '<a class="button ' . $cls . '" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_review&do=' . $do . '&ids[]=' . $p->ID . '&type=' . $type ), 'aw_review' ) ) . '">' . esc_html( $label ) . '</a>';
-		$excerpt = wp_trim_words( wp_strip_all_tags( $p->post_excerpt ? $p->post_excerpt : $p->post_content ), 24 );
-		echo '<tr><th scope="row" class="check-column"><input type="checkbox" name="ids[]" value="' . (int) $p->ID . '" aria-label="' . esc_attr( 'Tick ' . get_the_title( $p ) ) . '"></th>'
-			. '<td>' . esc_html( AW_REVIEW_TYPES[ $p->post_type ] ) . '</td>'
-			. '<td><strong><a href="' . esc_url( get_edit_post_link( $p->ID ) ) . '">' . esc_html( get_the_title( $p ) ? get_the_title( $p ) : '(no title)' ) . '</a></strong>' . ( $excerpt ? '<br><span style="color:#50575e">' . esc_html( $excerpt ) . '</span>' : '' ) . '</td>'
-			. '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $host ) . '</a>' : '—' ) . '</td>'
-			. '<td>' . esc_html( $why ) . '</td>'
-			. '<td>' . esc_html( get_the_date( 'j M Y', $p ) ) . '</td>'
-			. '<td>' . $act( 'publish', 'Publish', 'button-primary' ) . ' ' . $act( 'reject', 'Reject', '' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	}
-	echo '</tbody><tfoot><tr><td class="manage-column column-cb check-column"><input type="checkbox" aria-label="Tick all"></td><th colspan="6"></th></tr></tfoot></table>' . $bulk( 'do2' ) . '</form></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
+	$table->display();
+	echo '</form></div>';
 }
+
+// The result notice stays off the list's own links; only on this screen (other screens use done and n too).
+add_filter( 'removable_query_args', fn( $args ) => 'aw-review' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'done', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification
+add_filter( 'set_screen_option_aw_review_per_page', fn( $keep, $option, $value ) => max( 1, min( 300, (int) $value ) ), 10, 3 );
 
 /* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
 
