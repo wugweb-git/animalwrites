@@ -443,7 +443,11 @@ add_action(
  * 16 hours" while the workers were publishing).
  */
 function aw_newest_published_news() {
-	$ids  = get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'publish', 'numberposts' => 5, 'orderby' => 'ID', 'order' => 'DESC', 'fields' => 'ids', 'suppress_filters' => true ) );
+	global $wpdb;
+	// Straight from the table: the News lists' pre_get_posts (display.php) re-sorts every front-end aw_news query by
+	// source date, so get_posts() returned yesterday-dated items added last night after older ones, and the watchdog
+	// e-mailed "no News for 12 hours" while 13 items had gone live overnight (24 Oct 2026).
+	$ids  = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_news' AND post_status = 'publish' ORDER BY ID DESC LIMIT 5" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$best = 0;
 	foreach ( $ids as $id ) {
 		$best = max( $best, (int) get_post_time( 'U', true, $id ), (int) get_post_modified_time( 'U', true, $id ) );
