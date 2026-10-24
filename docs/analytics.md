@@ -1,19 +1,10 @@
 # Analytics and ads (Animal Writes 2.0)
 
-Site Kit is the only tag source. Kits Core prints no tags of its own (`kits_gtm_id` returns '').
+**Current setup: see [analytics/ga4-setup.md](analytics/ga4-setup.md).** In short (24 Oct 2026): GA4 (G-4P5YMJ04RL) counts only through Tag Manager GTM-TB3FCFQB (Site Kit loads the container; Site Kit's own GA4 snippet is off, `kits_ga4_via_gtm` = 1). Ads: Advanced Ads only, switched off on live; ads.txt is a static file in public_html (option `aw_ads_txt` deleted). Clarity: one copy, from Kits Core. The old 1.0 container GTM-W9D28GKV is not used.
 
-| What | ID | Loaded by |
-|---|---|---|
-| Google tag → GA4 | GT-TXZHFR39 → G-4P5YMJ04RL | Site Kit Analytics |
-| AdSense | ca-pub-5562717269522486 | Site Kit AdSense (`/ads.txt` from option `aw_ads_txt`) |
-| Tag Manager | GTM-TB3FCFQB | Site Kit Tag Manager |
+**Rules (owner, 22 Oct 2026):** never send test events to live GA4 (verify GTM in Preview / Tag Assistant only); no GA4 or GTM changes without the owner's OK; never full-import the GTM exports in this repo (they are stale): add new items by hand.
 
-The old 1.0 container GTM-W9D28GKV is not used.
-
-**Rule:** no GA4 configuration or Google tag inside GTM-TB3FCFQB, or page views count twice.
-The container only adds events, through the `gtag()` that Site Kit already loaded.
-
-GA4 enhanced measurement already records page views, scrolls, outbound clicks, PDF downloads and site search.
+The sections below are the 8 Oct container plan, kept as history.
 
 ## Container content (GTM-TB3FCFQB)
 

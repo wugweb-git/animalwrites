@@ -70,7 +70,7 @@ Where they appear: the volunteer banner is the theme pattern `themes/animal-writ
 - **Make a field required in one form**: in that form's function, pass `'required' => true` to `kits_dict_field()`, and add the field to the required list in its `…_submit()` function (the second argument of `kits_dict_rules()`).
 - **Change a success message**: the `aw_form_success()` call at the end of that form's `…_submit()` function, and the matching text at the top of its form function (shown after a send without JavaScript).
 
-Every change goes through GitHub: push to `wordpress-dev`; the deploy check runs, and only if it passes does the site update.
+Every change goes through GitHub: its own branch and worktree → a pull request into `wordpress-dev` → the review gate and the Deploy check → the owner merges → `aw-ship.sh` ships it (see CLAUDE.md). Function line numbers above drift; search for the function name.
 
 ## Campaign form (#10) and the raw copy (21 Oct 2026)
 

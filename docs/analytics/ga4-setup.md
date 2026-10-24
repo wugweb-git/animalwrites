@@ -129,8 +129,8 @@ views, list views, list clicks and the item list names. No revenue is involved; 
 
 | Event | When | Parameters |
 |---|---|---|
-| `ad_slot_status` | once per ad slot with code, per page view | ad_slot (e.g. directory-feed, profile, article-incontent-1), ad_status (filled, unfilled, not_loaded = AdSense script never ran, usually an ad blocker; no_response = no answer in 15 s; code = another network's code), position (nth slot on the page) |
-| `ad_slot_view` | a filled slot at least half on screen for 1 second | ad_slot, ad_status, position |
+| `ad_slot_status` (retired 21 Oct 2026 with Kits Core's ads; no code sends it) | once per ad slot with code, per page view | ad_slot (e.g. directory-feed, profile, article-incontent-1), ad_status (filled, unfilled, not_loaded = AdSense script never ran, usually an ad blocker; no_response = no answer in 15 s; code = another network's code), position (nth slot on the page) |
+| `ad_slot_view` (retired 21 Oct 2026) | a filled slot at least half on screen for 1 second | ad_slot, ad_status, position |
 | `sponsored_view` | a sponsored block half on screen for 1 second; a sponsored Resource or listing page opened | sponsor, sponsored_type (resource, banner, page, listing), item |
 | `sponsored_click` | a link in a sponsored block | sponsor, sponsored_type, item, domain |
 | `donate_click` | a donate link (a listing's Donate button, or any link to a donation page) | domain, link_text, listing_id, listing_name |

@@ -1,4 +1,4 @@
-# Launch prep: animalwrites.in → 2.0 (prepared, NOT applied)
+# Launch prep: animalwrites.in → 2.0 (applied; kept as a record — today GTM-TB3FCFQB carries GA4, see analytics/ga4-setup.md)
 
 ## 1. Redirects
 1.0 was a single page: every section was a `#anchor` on `/`, so anchors need no redirects

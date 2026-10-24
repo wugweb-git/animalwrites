@@ -1,6 +1,6 @@
 # Search Insights — plan (owner review)
 
-24 October 2026. Plan only: nothing is built until the owner approves this document (draft PR "Search Insights — plan (owner review)"). It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
+24 October 2026. Approved (PR #1). Phase 1 is built and live (aw-seo-extras `includes/search-insights/`, PR #17), and the Sourcing keywords tab too (PR #32). It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
 
 Related files:
 - `docs/seo/keyword-map.md` (Rank and Priority columns, 21 Oct)
@@ -384,7 +384,7 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
 | 2 | Site Kit GA4 + PageSpeed; Clarity + Clarity notes; WordPress and Directory site search; Pages tab | 1 day of each source |
 | 3 | Workers `search-insights` job (Trends RSS, Wikipedia, GDELT, autocomplete, Trends related/interest) + REST route; Rising tab | last 7 days; top 10 rising terms |
 | 4 | Check list, bookmarklet live check, imports and paste forms | 5 keywords |
-| 5 | Sourcing tab (after the AW Sourcing work ships); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |
+| 5 | Sourcing tab (shipped 24 Oct, PR #32); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |
 
 **Workflow.**
 - This plan stays a draft PR until the owner approves it.
