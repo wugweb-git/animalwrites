@@ -843,11 +843,16 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 	$limit = max( 1, min( 200, (int) ( $req['limit'] ?? 50 ) ) );
 	$ids   = array_filter( array_map( 'absint', explode( ',', (string) ( $req['ids'] ?? '' ) ) ) );
 	$group = sanitize_key( (string) ( $req['group'] ?? '' ) );
+	$google = ! empty( $req['google'] ); // the worker has Google on this run
 	if ( ! $ids ) {
 		$p      = $wpdb->posts;
 		$m      = $wpdb->postmeta;
 		$base   = "FROM {$p} p LEFT JOIN {$m} c ON c.post_id = p.ID AND c.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'";
 		$bare   = "EXISTS (SELECT 1 FROM {$m} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_awbi_code' AND a.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key IN ('aw_email','aw_website') AND x.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key = 'aw_phones' AND x.meta_value > 0)";
+		// No way to reach them at all (no phone, email, website or Facebook): these go first after new and claimed listings
+		// (SEO, 24 Oct 2026: such profiles are not indexed until a contact is added).
+		$none   = "NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key IN ('aw_email','aw_website','aw_facebook') AND x.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key = 'aw_phones' AND x.meta_value > 0)";
+		$gpend  = "c.meta_value IS NOT NULL AND p.ID IN (SELECT post_id FROM {$m} WHERE meta_key = 'aw_enrich_google_pending' AND meta_value = '1')"; // checked while Google was off
 		$since  = wp_date( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
 		$claims = "SELECT a.meta_value FROM {$m} a JOIN {$m} s ON s.post_id = a.post_id AND s.meta_key = 'aw_c_status' AND s.meta_value = 'approved' JOIN {$p} cp ON cp.ID = a.post_id AND cp.post_modified >= '{$since}' WHERE a.meta_key = 'aw_c_listing'";
 		$steps  = 'awbi-bare' === $group
@@ -855,7 +860,9 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 			: array(
 				"c.meta_value IS NULL AND p.post_date >= '{$since}'",
 				"p.ID IN ({$claims}) AND (c.meta_value IS NULL OR c.meta_value < '{$since}')",
+				"c.meta_value IS NULL AND {$none}",
 				"c.meta_value IS NULL AND {$bare}",
+				...( $google ? array( $gpend ) : array() ),
 				'c.meta_value IS NULL',
 				"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - AW_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
 			);
@@ -992,6 +999,12 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	$used = array_values( array_unique( array_map( 'sanitize_key', (array) ( $b['sources_used'] ?? array() ) ) ) );
 	update_post_meta( $lid, 'aw_enrich_checked', wp_date( 'Y-m-d H:i:s' ) );
 	update_post_meta( $lid, 'aw_enrich_tried', $used );
+	// Checked while Google was off (monthly quota used): it comes back first when Google is on, unless it already has its place.
+	if ( ! empty( $b['google_skipped'] ) && '' === (string) get_post_meta( $lid, 'aw_place_id', true ) ) {
+		update_post_meta( $lid, 'aw_enrich_google_pending', '1' );
+	} else {
+		delete_post_meta( $lid, 'aw_enrich_google_pending' );
+	}
 	return $out + array( 'protected' => $protected );
 }
 
