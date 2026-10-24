@@ -344,6 +344,9 @@ function aw_si_box_sources(): void {
 			/* translators: %s: number of rows. */
 			$det[] = sprintf( __( '%s rows', 'aw-seo-extras' ), number_format_i18n( (int) $info['rows'] ) );
 		}
+		if ( ! empty( $info['via'] ) ) {
+			$det[] = (string) $info['via']; // The source used instead, e.g. Rank Math Analytics when Site Kit failed.
+		}
 		if ( $err ) {
 			$det[] = $err;
 		}

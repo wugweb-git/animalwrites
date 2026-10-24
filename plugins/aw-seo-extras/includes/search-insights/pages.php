@@ -98,6 +98,12 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'note_d', $r->d );
 	}
 	// phpcs:enable
+	// Rank Math SEO score of the item at that address (rankmath.php).
+	foreach ( aw_si_rankmath_scores() as $path => $score ) {
+		if ( isset( $out[ $path ] ) ) {
+			$out[ $path ]['rm_score'] = $score;
+		}
+	}
 	foreach ( $out as $path => $f ) {
 		$out[ $path ]['path']    = $path;
 		$out[ $path ]['flagged'] = ! empty( $f['c_flag'] ) || ! empty( $f['psi_flag'] );

@@ -292,6 +292,11 @@ function aw_si_gsc_run( array $args = array() ): array {
 		}
 	);
 	if ( is_wp_error( $report ) ) {
+		// Site Kit can't be used: read the same days from Rank Math Analytics when it has them (rankmath.php).
+		$backup = aw_si_rankmath_gsc_run( $days, $dry, $report->get_error_message() );
+		if ( null !== $backup ) {
+			return $backup;
+		}
 		if ( ! $dry ) {
 			aw_si_run_fail( 'gsc', $report->get_error_message() );
 		}

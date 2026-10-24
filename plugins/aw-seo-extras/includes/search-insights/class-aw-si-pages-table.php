@@ -66,6 +66,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ai'       => __( 'AI referrals', 'aw-seo-extras' ),
 			'clarity'  => __( 'Clarity (28 days)', 'aw-seo-extras' ),
 			'psi'      => __( 'PageSpeed (mobile / desktop)', 'aw-seo-extras' ),
+			'rm_score' => __( 'SEO score (Rank Math)', 'aw-seo-extras' ),
 			'note'     => __( 'Clarity note', 'aw-seo-extras' ),
 		);
 	}
@@ -82,6 +83,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ai'       => array( 'ai', true ),
 			'clarity'  => array( 'c_sessions', true ),
 			'psi'      => array( 'psi_score-mobile', false ),
+			'rm_score' => array( 'rm_score', false ),
 		);
 	}
 
@@ -98,6 +100,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ai'        => fn( $r ) => ! empty( $r['ai'] ),
 			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
 			'noted'     => fn( $r ) => ! empty( $r['note'] ),
+			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
 		);
 	}
 
@@ -109,6 +112,8 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'ai'        => __( 'AI referrals', 'aw-seo-extras' ),
 			'conflicts' => __( 'With conflicts', 'aw-seo-extras' ),
 			'noted'     => __( 'With Clarity notes', 'aw-seo-extras' ),
+			/* translators: %d: score limit, e.g. 50. */
+			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'aw-seo-extras' ), AW_SI_RM_LOW ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
