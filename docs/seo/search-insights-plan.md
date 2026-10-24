@@ -12,6 +12,7 @@ Related files:
 - **Free sources only.** No paid plans, APIs or budgets.
 - **Listings are "entity" keywords.** They are shown as one aggregate plus the top 20 movers, not one row each in the main lists.
 - **Hindi and Hinglish keywords are shown, never suggested to Sourcing.**
+- **No Hindi or Hinglish work until phase 5** (owner, 24 Oct). Phase 1 tags `lang` only; grouping under English parents and Hindi autocomplete wait for phase 5.
 - **No automatic changes.** No automatic edits to Rank Math keyphrases or to the Sourcing lists. Everything is a suggestion, and the owner decides.
 - **No GA4 test events and no GA4 or GTM changes.** GA4 is read through Site Kit only.
 - **Bing only after the owner signs in** to Bing Webmaster Tools.
@@ -62,7 +63,7 @@ One row per normalised keyword.
 |---|---|
 | `id`, `norm`, `label` | `norm` is lower case, punctuation and extra spaces removed, plural/singular folded; `label` is the display form |
 | `lang` | `en`, `hi` (Devanagari) or `hinglish` (Latin-script Hindi, e.g. "kutta kaatna", "gau shala") |
-| `group_id` | the parent keyword: variants, Hindi and Hinglish forms are grouped under one English record |
+| `group_id` | the parent keyword: variants, Hindi and Hinglish forms are grouped under one English record (Hindi and Hinglish grouping in phase 5) |
 | `roles` | any of: `sourcing`, `focus`, `tracked`, `brand` (below) |
 | `topic`, `page_type` | from the keyword map / owning page |
 | `priority`, `priority_override` | P1/P2/P3 computed (section 7); the owner can override |
@@ -137,7 +138,7 @@ There is no drop in `uninstall.php`.
 | Owning page(s) and conflict flag | Rank Math + GSC | `kw_pages` |
 | GSC position, impressions, clicks, CTR | Site Kit (Search Console) | 28 days, daily |
 | Live Google position (monthly) | Bookmarklet | top 20, top 3 domains, People also ask |
-| Demand | Trends index ("animal welfare" = 100), Bing volume, Keyword Planner import, autocomplete (en + hi) | dated |
+| Demand | Trends index ("animal welfare" = 100), Bing volume, Keyword Planner import, autocomplete (en; hi in phase 5) | dated |
 | Trending flags | Trends RSS, rising related queries, autocomplete diff, new GSC queries, News/GDELT spikes, Wikipedia spikes | `rising` |
 | Sourcing performance | AW Sourcing (items fetched / published) → those items' GSC | **needs the AW Sourcing work, section 11** |
 | On-site demand | GA4 site search (Site Kit), WordPress `?s=` and Directory searches | aggregated only (section 9) |
@@ -210,7 +211,7 @@ These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: sw
 | Google Trends "Trending now" RSS, geo=IN | daily 08:10 | 1 request; kept only if the term matches the keyword map, topics or species list | none needed |
 | Wikipedia pageviews API, watchlist (Rabies, Stray dogs in India, Animal Welfare Board of India, Prevention of Cruelty to Animals Act, Gaushala, …) | daily 08:15 | user-agent header with a contact; ≤ 1 request a second | — |
 | GDELT 2.0 DOC API, mention timeline (India sources) for the topic watchlist | daily 08:20 | ≥ 5 s between requests | skip the day, keep the last data |
-| Google autocomplete (en + hi, gl=in), seed list; the diff against the last snapshot = rising | weekly, Monday 08:30 | 2–4 s between requests, cached | the bookmarklet runs the same seeds |
+| Google autocomplete (en, gl=in; hi in phase 5), seed list; the diff against the last snapshot = rising | weekly, Monday 08:30 | 2–4 s between requests, cached | the bookmarklet runs the same seeds |
 | Trends rising related queries, seed topics (unofficial free access) | weekly, Monday 08:45 | one attempt, paced; GitHub IPs are often refused (429) | manual paste form |
 | Trends interest, India, 12 months, anchored "animal welfare" = 100 | monthly, 1st, 09:00 | as above | manual paste form (owner pastes Trends averages) |
 | YouTube Data API (free key `YOUTUBE_API_KEY`): top videos + suggest terms for seed topics | monthly, 2nd | 10,000 units a day; a monthly run uses about 1,000 | skip, keep last |
@@ -381,10 +382,10 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
 | Phase | Builds | Dry run |
 |---|---|---|
 | 1 | Rename and old-slug redirect; tables; one-time seed from keyword-map.md + rankings CSV; Keywords tab; Search Console via the existing Site Kit path; Overview; Site Health test; retention rollup | today's data; row counts; what each tab shows |
-| 2 | Site Kit GA4 + PageSpeed; Clarity + Clarity notes; WordPress and Directory site search; Pages tab | 1 day of each source |
+| 2 | Site Kit GA4 + PageSpeed; Clarity + Clarity notes; WordPress and Directory site search; Pages tab; redirected URLs counted as their target. Phase 1 leftovers: rename in the three docs, entities as one row + top 20 movers, topic filter, the other 4 suggested actions, suggested page type for gaps, Search Console paging past 5,000 rows | 1 day of each source |
 | 3 | Workers `search-insights` job (Trends RSS, Wikipedia, GDELT, autocomplete, Trends related/interest) + REST route; Rising tab | last 7 days; top 10 rising terms |
 | 4 | Check list, bookmarklet live check, imports and paste forms | 5 keywords |
-| 5 | Sourcing tab (shipped 24 Oct, PR #32); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |
+| 5 | Sourcing tab (shipped 24 Oct, PR #32); Hindi and Hinglish (grouping under English parents, Hindi autocomplete); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |
 
 **Workflow.**
 - This plan stays a draft PR until the owner approves it.
