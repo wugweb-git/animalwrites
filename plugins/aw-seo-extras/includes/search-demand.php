@@ -385,7 +385,7 @@ function aw_sd_refresh(): string {
 			'brand'    => aw_sd_sum( $brand ),
 			'nonbrand' => aw_sd_sum( $nonbrand ),
 			'queries'  => $queries, // Query, clicks, impressions, position, page, brand.
-			'pages'    => aw_sd_pages( is_wp_error( $pg ) ? array() : $pg, $home ), // Path => [clicks, impressions, position].
+			'pages'    => is_wp_error( $pg ) ? (array) ( $data['gsc']['periods'][ $key ]['pages'] ?? array() ) : aw_sd_pages( $pg, $home ), // Path => [clicks, impressions, position]; a failed page request keeps the last good figures.
 		);
 	}
 	wp_set_current_user( $was );
