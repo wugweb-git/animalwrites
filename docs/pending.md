@@ -51,6 +51,15 @@ Check this list against git and the live site before acting on it. Failing AI ke
     - **Next small PR:** Sources sync dispatched from the site when the lists are saved, plus one daily backup run, instead of hourly.
     - **Decided (owner, 24 Oct 2026):** late limits per workflow (`late_after_h`): WordPress cron and Tests never late; Sources sync, Summaries and Sourcing 12 h (Sourcing 6 h once Hostinger dispatch is on); Focus keywords, SEO scores, Site backup and Directory enrichment 36 h; Research 9 days; Keepalive 35 days; by-hand workflows never. Failed, cancelled, skipped and stuck runs alert at once.
 
+16. **Directory enrichment (owner rules 18 to 24 Oct 2026; code in `plugins/aw-sourcing/includes/enrichment*.php`, worker `animal-writes-workers/aw_workers/directory`).** Live: the worker runs after the SEO scores (1,500 listings a run, about 28 minutes); on 24 Oct 3,396 of 6,792 listings were checked, about 1,000 values applied, 7 proposals in Directory → Enrichment review (3 descriptions that would replace existing text, 4 low-confidence values). Every applied value keeps its source URL and date (audit 24 Oct: all 989 contacts). No-contact profiles (4,092 on 24 Oct) are queued first.
+    - **Rules:** a sourced value fills an empty field (medium confidence too); a different phone, email or website is kept beside the first, both with an unverified mark until the organisation claims the listing; conflicts, claimed or verified listings and other fields with a value go to review. AWBI address and PIN fill automatically. Google Places runs on its free quota only (950 requests a month, no paid plan); when it is used up the run goes on without Google. "Reported closed" listings stay indexed and show the label. NGO Darpan's own site is never read (CAPTCHA).
+    - **Open:**
+      1. Owner downloads NGO Darpan CSVs (animal-welfare category). No-contact profiles by state: Rajasthan 1,049, Uttar Pradesh 544, Madhya Pradesh 460, Haryana 343, Gujarat 271, Maharashtra 235, Tamil Nadu 218, Punjab 107, Andhra Pradesh 97, Karnataka 94 (the first seven are 71%). Put each file in `data/darpan/` in the workers repo and run the workflow "NGO Darpan import" (dry run first); proposals go to the review queue with source, file and date. Wait for workers PR `darpan-review-1024` (two review fixes) to merge. Tested only on a sample file, so a real header may need one small mapping change.
+      2. From 1 Nov Google's free quota returns: no-contact profiles checked while Google was off (289 so far, more each run) are queued first.
+      3. Browser lookups for AWBI-register trusts are paused (about 1 website in 40 names); city batches earlier gave 14 contacts from 25 leads. Further batches only when the owner asks, in small groups.
+      4. The 7 proposals in the review queue.
+      5. Claim invitations are unchanged; they are the route for the rest.
+
 ## Decided: never (owner, 22 Oct 2026)
 - Rewriting the 11 Wildlife SOS job summaries, or dropping their JobPosting markup.
 - Press outreach asking for an Animal Writes credit or link (TOI Mangaluru, India TV Hindi, and the articles without a credit).
