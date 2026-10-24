@@ -148,19 +148,6 @@ function aw_ai_tier_label( string $provider ): string {
 }
 
 /** The provider's own site icon (owner, 22 Oct 2026: "use AI icons"). */
-const AW_AI_ICON_DOMAINS = array(
-	'nvidia' => 'build.nvidia.com', 'groq' => 'groq.com', 'cerebras' => 'cerebras.ai', 'requesty' => 'requesty.ai', 'cline' => 'cline.bot',
-	'openrouter' => 'openrouter.ai', 'gemini' => 'gemini.google.com', 'mistral' => 'mistral.ai', 'vercel' => 'vercel.com',
-	'commandcode' => 'commandcode.ai', 'anthropic' => 'anthropic.com', 'haiku' => 'anthropic.com', 'openai' => 'openai.com',
-	'deepseek' => 'deepseek.com', 'xai' => 'x.ai', 'moonshot' => 'moonshot.ai', 'minimax' => 'minimax.io', 'together' => 'together.ai', 'huggingface' => 'huggingface.co', 'sambanova' => 'sambanova.ai',
-	'firecrawl' => 'firecrawl.dev', 'tinyfish' => 'tinyfish.ai',
-);
-
-function aw_ai_icon( string $provider ): string {
-	$d = AW_AI_ICON_DOMAINS[ $provider ] ?? '';
-	return $d ? '<img src="' . esc_url( 'https://www.google.com/s2/favicons?sz=32&domain=' . $d ) . '" width="16" height="16" alt="" loading="lazy"> ' : '';
-}
-
 const AW_AI_STATUS = array(
 	'card'       => 'Needs a card on file (free models)',
 	'works'      => 'Works',
@@ -399,8 +386,9 @@ function aw_ai_check_all( bool $new_only = false ): void {
 	@set_time_limit( 1200 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	$checked = array();
 	foreach ( aw_ai_rows() as $r ) {
-		if ( ! $new_only || 'unchecked' === $r['status'] ) {
+		if ( ! $new_only || 'unchecked' === $r['status'] || ! empty( $r['recheck'] ) ) { // recheck: "Check again" on the list
 			$checked[ $r['key'] ] = aw_ai_check( $r );
+			unset( $checked[ $r['key'] ]['recheck'] );
 		}
 	}
 	// The checks take a while: write the results into the list as it is now, so a key removed meanwhile stays removed.
@@ -593,33 +581,6 @@ add_action(
 	}
 );
 
-// Remove one key straight away (owner, 15 Oct 2026): no Save, no re-checking of the other keys.
-add_action(
-	'admin_post_aw_ai_key_remove',
-	function () {
-		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_ai_key_remove' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$id      = sanitize_key( wp_unslash( $_POST['aw_ai_remove'] ?? '' ) );
-		$rows    = aw_ai_rows_fresh();
-		$removed = '';
-		foreach ( $rows as $i => $r ) {
-			if ( '' !== $id && aw_ai_key_id( $r['key'] ) === $id ) {
-				$removed = substr( $r['key'], -4 );
-				$label   = $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider';
-				unset( $rows[ $i ] );
-				update_option( 'aw_ai_models', array_values( $rows ), false );
-				if ( function_exists( 'kits_sourcing_log' ) ) {
-					kits_sourcing_log( 'AI models', 'removed key …' . $removed . ' (' . $label . ')' );
-				}
-				break;
-			}
-		}
-		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&' . ( $removed ? 'removed=' . rawurlencode( $removed ) : 'notfound=1' ) ) );
-		exit;
-	}
-);
-
 // The keys list (owner, 24 Oct 2026): Move up / down, Remove and Check again, one key or ticked ones, straight away.
 add_action(
 	'admin_post_aw_ai_keys_list',
@@ -649,7 +610,7 @@ add_action(
 				$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider' ) . ')';
 				unset( $rows[ $i ] );
 			} elseif ( 'recheck' === $op ) {
-				$rows[ $i ]['status'] = 'unchecked'; // checked in the background by aw_ai_check_new
+				$rows[ $i ]['recheck'] = 1; // checked in the background by aw_ai_check_new; the key keeps its status (and stays in use) meanwhile
 			} elseif ( ( 'up' === $op && $i > 0 ) || ( 'down' === $op && $i < count( $rows ) - 1 ) ) {
 				$j          = 'up' === $op ? $i - 1 : $i + 1;
 				$tmp        = $rows[ $j ];
@@ -670,12 +631,14 @@ add_action(
 			wp_schedule_single_event( time(), 'aw_ai_check_new' );
 			spawn_cron();
 		}
-		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'removed', 'notfound' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-ai-keys' ) );
+		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-ai-keys' ) );
+		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
+		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 		wp_safe_redirect( add_query_arg( array( 'listed' => in_array( $op, array( 'remove', 'recheck', 'up', 'down' ), true ) ? $op : 'none', 'n' => $n ), $back ) );
 		exit;
 	}
 );
-add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'listed' ) ) );
+add_filter( 'removable_query_args', fn( $args ) => 'aw-ai-keys' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'listed', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
 
 /**
  * Free-model daily caps per account (owner, 22 Oct 2026). OpenRouter gives each account 50 free requests a day (1,000
@@ -805,12 +768,6 @@ function aw_ai_keys_screen() {
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. New keys are being checked in the background: reload in a few minutes to see their status.</p></div>';
 	}
-	if ( isset( $_GET['removed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>Key …' . esc_html( substr( sanitize_text_field( wp_unslash( $_GET['removed'] ) ), 0, 4 ) ) . ' removed. The news workers stop using it from their next run. It is noted in Settings → Sourcing → Change log.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
-	}
-	if ( isset( $_GET['notfound'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-warning is-dismissible"><p>That key was already gone; nothing changed.</p></div>';
-	}
 	$listed = sanitize_key( $_GET['listed'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $listed ) {
 		$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -821,9 +778,9 @@ function aw_ai_keys_screen() {
 			'up'      => 'Moved up. The workers try the keys from the top down.',
 			'down'    => 'Moved down. The workers try the keys from the top down.',
 		);
-		echo isset( $msg[ $listed ] ) && $n
+		echo 'none' === $listed && isset( $_GET['paged'] ) ? '' : ( isset( $msg[ $listed ] ) && $n
 			? '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>'
-			: '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one key.</p></div>';
+			: '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one key.</p></div>' ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 	aw_ai_overview( $rows );
 	aw_ai_free_caps_table();
@@ -847,7 +804,8 @@ function aw_ai_keys_screen() {
 	$table = new AW_Sourcing_AI_Keys_Table();
 	$table->prepare_items();
 	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="aw-ai-keys">';
+	$view = sanitize_key( $_GET['keys'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<form method="get"><input type="hidden" name="page" value="aw-ai-keys">' . ( in_array( $view, array( 'ok', 'wait', 'bad', 'secret' ), true ) ? '<input type="hidden" name="keys" value="' . esc_attr( $view ) . '">' : '' );
 	$table->search_box( 'Search keys', 'aw-ai' );
 	echo '</form>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys_list">';

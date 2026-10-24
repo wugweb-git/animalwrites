@@ -37,6 +37,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 				'limits'   => ! empty( $r['cooldown'] ) && $r['cooldown'] > time() ? 'Cooldown until ' . wp_date( 'j M, H:i', $r['cooldown'] ) . ( ! empty( $r['limits'] ) ? ' · ' . $r['limits'] : '' ) : ( ! empty( $r['limits'] ) ? $r['limits'] : 'Not reported' ),
 				'usage'    => aw_ai_usage_line( (array) ( $usage[ $uid ] ?? array() ) ),
 				'checked'  => (int) $r['checked'],
+				'recheck'  => ! empty( $r['recheck'] ),
 				'secret'   => false,
 			);
 		}
@@ -57,6 +58,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 				'limits'   => '',
 				'usage'    => aw_ai_usage_line( $u ),
 				'checked'  => (int) ( $last['at'] ?? 0 ),
+				'recheck'  => false,
 				'secret'   => true,
 			);
 		}
@@ -224,7 +226,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 		if ( 'failed' === $item['status'] ) {
 			return '<span class="dashicons dashicons-dismiss" aria-hidden="true"></span> Failed in the last run';
 		}
-		return aw_ai_status_badge( $item['status'] );
+		return aw_ai_status_badge( $item['status'] ) . ( $item['recheck'] ? '<p class="description">Being checked again</p>' : '' );
 	}
 
 	protected function column_default( $item, $col ) {
