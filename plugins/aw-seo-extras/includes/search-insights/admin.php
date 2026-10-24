@@ -415,7 +415,21 @@ function aw_si_box_brand(): void {
 			'live_txt' => __( 'Live check', 'aw-seo-extras' ),
 		)
 	);
-	echo '<p class="description">' . esc_html__( 'AI referrals have their own box. Sitelinks (live check) and unlinked mentions come in later phases.', 'aw-seo-extras' ) . '</p>';
+	// Sitelinks: brand searches where the live check found two or more of our links in the top 20.
+	global $wpdb;
+	$o     = aw_si_table( 'obs' );
+	$k     = aw_si_table( 'keywords' );
+	$links = aw_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM {$o} o JOIN {$k} k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM {$o} WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", AW_SI_ROLE_BRAND ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+	if ( $links ) {
+		$parts = array();
+		foreach ( $links as $l ) {
+			/* translators: 1: brand search, 2: number of our links. */
+			$parts[] = sprintf( __( '%1$s (%2$d links)', 'aw-seo-extras' ), $l->label, (int) $l->value );
+		}
+		/* translators: %s: brand searches with their link counts. */
+		echo '<p>' . esc_html( sprintf( __( 'Sitelinks in the last live check: %s.', 'aw-seo-extras' ), implode( ', ', $parts ) ) ) . '</p>';
+	}
+	echo '<p class="description">' . esc_html__( 'AI referrals have their own box. Sitelinks come from the monthly live check (Check list tab); unlinked mentions come in a later phase.', 'aw-seo-extras' ) . '</p>';
 }
 
 /** Overview box: sessions from AI assistants, by source and by landing page. */
@@ -472,6 +486,7 @@ function aw_si_box_site_search(): void {
 /** Settings tab: schedule, seed, run now, delete data. */
 function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
+	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
@@ -503,6 +518,7 @@ function aw_si_settings_tab(): void {
 	echo '</p>';
 	echo '</form>';
 	echo '<p class="description">' . esc_html__( 'The daily update can take a minute on the first run (it fetches up to 19 days of Search Console).', 'aw-seo-extras' ) . '</p></td></tr>';
+	do_action( 'aw_si_settings_rows' ); // More rows: imports and paste forms (imports.php).
 	echo '<tr><th scope="row"><label for="aw-si-confirm">' . esc_html__( 'Delete Search Insights data', 'aw-seo-extras' ) . '</label></th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_delete">';
 	wp_nonce_field( 'aw_si_delete' );

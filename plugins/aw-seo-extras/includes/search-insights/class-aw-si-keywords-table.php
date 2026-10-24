@@ -80,6 +80,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'change'   => __( 'Change', 'aw-seo-extras' ),
 			'live'     => __( 'Live check', 'aw-seo-extras' ),
 			'trends'   => __( 'Trends', 'aw-seo-extras' ),
+			'volume'   => __( 'Volume (imports)', 'aw-seo-extras' ),
 			'action'   => __( 'Suggested action', 'aw-seo-extras' ),
 		);
 	}
@@ -334,6 +335,21 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$query       = "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
 		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
 		// phpcs:enable
+		// Monthly search volume from the latest Keyword Planner or Ahrefs import, for the keywords on this page.
+		$page_ids = array_filter( array_map( 'intval', wp_list_pluck( (array) $this->items, 'id' ) ) );
+		if ( $page_ids ) {
+			$o  = aw_si_table( 'obs' );
+			$in = implode( ',', $page_ids );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
+			$vols = (array) $wpdb->get_results( "SELECT kw_id, src, value, txt FROM {$o} WHERE src IN ('kp', 'ahrefs') AND metric = 'volume' AND kw_id IN ({$in}) ORDER BY d" );
+			$by   = array();
+			foreach ( $vols as $v ) {
+				$by[ (int) $v->kw_id ] = $v; // Ordered by date: the latest wins.
+			}
+			foreach ( $this->items as $item ) {
+				$item->volume = $by[ (int) $item->id ] ?? null;
+			}
+		}
 		if ( $agg && 1 === $paged ) {
 			array_unshift( $this->items, $agg );
 		}
@@ -514,6 +530,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
 			case 'trends':
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
+			case 'volume':
+				$v = $item->volume ?? null;
+				return $v ? esc_html( ( '' !== $v->txt ? $v->txt : number_format_i18n( (float) $v->value ) ) . ' (' . ( 'kp' === $v->src ? 'KP' : 'Ahrefs' ) . ')' ) : '–';
 			case 'topic':
 				return '' === $item->topic ? '–' : esc_html( $item->topic );
 		}
