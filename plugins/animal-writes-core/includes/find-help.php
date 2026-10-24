@@ -5,11 +5,15 @@
  * pages, which Search Console showed as "Discovered – currently not indexed".
  *
  * - Place detection: a News, Library or guide item without a place gets one from the state and district names in its
- *   title and summary (LGD names and the spellings in lgd.json, a few city names). Stored like a place set by hand
+ *   title and summary (LGD names and the spellings in lgd.json, a few city and neighbourhood names). A name counts only
+ *   in the title or the summary's first sentence, or when it is written 2 or more times (owner, 24 Oct 2026: a national
+ *   story that mentions a state in passing gets no place). Stored like a place set by hand
  *   (aw_state_code, aw_district_code) with aw_place_auto = 1, on publish and by `wp aw-places detect` for older items.
  *   An editor changes it in the Place box; an item left with no place gets one again on its next save.
  *   Not stored: names that are also ordinary words or people's names, a district name two states share unless its
  *   state is named too, and items that name more than 3 states (national stories).
+ * - Delhi's districts named for directions read "South Delhi", "North East Delhi" in the links, and are detected
+ *   when written that way.
  * - In More (cross-navigation), for an item with a place: its state and that state's districts with listings, at
  *   most 12, nearest first. Without a place: one line, "Find help near you → All states and districts" and Near me.
  * - Campaign pages: a band of 12 states before the Library band, a window that moves with the campaign's ID.
@@ -33,7 +37,8 @@ const AW_PLACE_DETECT_MAX_STATES = 3;
  * named for directions ("Central", "North East"); the state is still found from "Delhi". */
 const AW_PLACE_DETECT_SKIP = array( 'east', 'west', 'north', 'south', 'central', 'northeast', 'northwest', 'southeast', 'southwest', 'centralnorth', 'anand', 'mon', 'una', 'korea', 'sagar', 'mau', 'dhar', 'guna', 'banda', 'hassan', 'salem', 'pali', 'mandi', 'tapi', 'gomati', 'saran', 'mansa', 'nadia', 'ntr', 'sakti', 'kota', 'siang', 'lohit', 'panna', 'erode', 'noney', 'kamle', 'krishna', 'narmada', 'mahisagar', 'vaishali', 'vidisha', 'kheda' );
 
-/** City names people write for a district (keys as aw_place_key() makes them) → the LGD district name. */
+/** City and big-city neighbourhood names people write for a district (keys as aw_place_key() makes them) → the LGD
+ * district name. Only names no other district shares (not Dwarka: Devbhumi Dwarka is in Gujarat). */
 const AW_PLACE_DETECT_CITIES = array(
 	'bengaluru'    => 'Bengaluru Urban',
 	'noida'        => 'Gautam Buddha Nagar',
@@ -45,7 +50,41 @@ const AW_PLACE_DETECT_CITIES = array(
 	'banaras'      => 'Varanasi',
 	'benares'      => 'Varanasi',
 	'secunderabad' => 'Hyderabad',
+	// Neighbourhoods (owner, 24 Oct 2026).
+	'kakkanad'     => 'Ernakulam',
+	'edappally'    => 'Ernakulam',
+	'aluva'        => 'Ernakulam',
+	'andheri'      => 'Mumbai Suburban',
+	'bandra'       => 'Mumbai Suburban',
+	'borivali'     => 'Mumbai Suburban',
+	'goregaon'     => 'Mumbai Suburban',
+	'powai'        => 'Mumbai Suburban',
+	'colaba'       => 'Mumbai',
+	'whitefield'   => 'Bengaluru Urban',
+	'koramangala'  => 'Bengaluru Urban',
+	'indiranagar'  => 'Bengaluru Urban',
+	'jayanagar'    => 'Bengaluru Urban',
+	'gachibowli'   => 'Ranga Reddy',
+	'banjarahills' => 'Hyderabad',
+	'jubileehills' => 'Hyderabad',
+	'velachery'    => 'Chennai',
+	'adyar'        => 'Chennai',
+	'annanagar'    => 'Chennai',
+	'saltlake'     => 'North 24 Parganas',
+	'hinjewadi'    => 'Pune',
+	'kothrud'      => 'Pune',
 );
+
+/** Delhi's districts named for directions (keys): shown and detected as "South Delhi" etc. */
+const AW_PLACE_DELHI_DIRECTIONS = array( 'central', 'centralnorth', 'east', 'north', 'northeast', 'northwest', 'outernorth', 'south', 'southeast', 'southwest', 'west' );
+
+/** A place's name in the links: "South Delhi" for Delhi's direction districts, else its own name. */
+function aw_findhelp_place_name( $p ) {
+	if ( 'district' === $p->kind && in_array( aw_place_key( $p->name ), AW_PLACE_DELHI_DIRECTIONS, true ) && 'delhi' === aw_place_key( aw_place_state( $p->state )->name, 'state' ) ) {
+		return $p->name . ' Delhi';
+	}
+	return $p->name;
+}
 
 /** Whether an item gets the block: News, Library, guides (not research) and campaigns. */
 function aw_findhelp_applies( $id ) {
@@ -81,24 +120,30 @@ function aw_place_detect_index() {
 			$ix[1][ $k ] = array( $d->code => $d );
 		}
 	}
+	$delhi = aw_place_state_by_name( 'Delhi' );
+	foreach ( $delhi ? aw_place_districts( $delhi->code ) : array() as $d ) {
+		if ( in_array( aw_place_key( $d->name ), AW_PLACE_DELHI_DIRECTIONS, true ) ) {
+			$ix[1][ aw_place_key( $d->name ) . 'delhi' ] = array( $d->code => $d );
+		}
+	}
 	return $ix;
 }
 
 /**
- * Places named in a text: [state code, district code or 0] pairs, at most AW_PLACE_DETECT_MAX_STATES, or [] when it
- * names none or more states than that. Names count only when written with a capital letter; the longest name wins
- * ("West Bengal", not "West").
+ * Names in a text: states (code => times named) and districts (name key => [candidates], name key => times named).
+ * Names count only when written with a capital letter; the longest name wins ("West Bengal", not "West").
  *
- * @param string $text Title and summary.
- * @return array
+ * @param string $text Text.
+ * @return array [states, district candidates, district counts]
  */
-function aw_places_in_text( $text ) {
+function aw_place_mentions( $text ) {
 	list( $states, $districts ) = aw_place_detect_index();
 	preg_match_all( '/\p{L}+|&/u', wp_strip_all_tags( (string) $text ), $m );
 	$words = $m[0];
 	$n     = count( $words );
-	$st    = array(); // state code => state
-	$ds    = array(); // candidate lists of districts
+	$st    = array();
+	$ds    = array();
+	$dn    = array();
 	for ( $i = 0; $i < $n; $i++ ) {
 		if ( ! preg_match( '/^\p{Lu}/u', $words[ $i ] ) ) {
 			continue;
@@ -111,9 +156,11 @@ function aw_places_in_text( $text ) {
 				continue;
 			}
 			if ( isset( $districts[ $kd ] ) ) { // a district first: Chandigarh and Puducherry are both
-				$ds[] = $districts[ $kd ];
+				$ds[ $kd ] = $districts[ $kd ];
+				$dn[ $kd ] = ( $dn[ $kd ] ?? 0 ) + 1;
 			} elseif ( isset( $states[ $ks ] ) ) {
-				$st[ $states[ $ks ]->code ] = $states[ $ks ];
+				$c        = $states[ $ks ]->code;
+				$st[ $c ] = ( $st[ $c ] ?? 0 ) + 1;
 			} else {
 				continue;
 			}
@@ -121,23 +168,49 @@ function aw_places_in_text( $text ) {
 			break;
 		}
 	}
-	$out = array();
-	foreach ( $ds as $cands ) {
+	return array( $st, $ds, $dn );
+}
+
+/**
+ * Places named in an item: [state code, district code or 0] pairs, at most AW_PLACE_DETECT_MAX_STATES, or [] when it
+ * names none or more states than that. A name counts when it is in the title or the summary's first sentence, or
+ * named 2 or more times in all ($strict false: every name counts, the rule before 24 Oct 2026).
+ *
+ * @param string $title   Title.
+ * @param string $summary Summary.
+ * @param bool   $strict  Apply the title / first sentence / 2 times rule.
+ * @return array
+ */
+function aw_places_in_text( $title, $summary = '', $strict = true ) {
+	$summary              = trim( wp_strip_all_tags( (string) $summary ) );
+	$first                = preg_split( '/(?<=[.!?])\s+(?=\p{Lu})/u', $summary, 2 )[0];
+	list( $lst, , $ldn )  = aw_place_mentions( $title . ' ' . $first );
+	list( $st, $ds, $dn ) = aw_place_mentions( $title . ' ' . $summary );
+	$counts               = fn( $lead, $all ) => ! $strict || $lead || $all >= 2;
+	$found                = array();
+	$named                = array_keys( $st ); // every state named, for the national-story limit
+	foreach ( $ds as $k => $cands ) {
 		if ( count( $cands ) > 1 ) { // a name two states share: only with its state named too
 			$cands = array_filter( $cands, fn( $d ) => isset( $st[ $d->state ] ) );
 		}
-		if ( 1 === count( $cands ) ) {
-			$d                     = reset( $cands );
-			$out[ 'd' . $d->code ] = array( $d->state, $d->code );
+		if ( 1 !== count( $cands ) ) {
+			continue;
+		}
+		$d       = reset( $cands );
+		$named[] = (int) $d->state;
+		if ( $counts( isset( $ldn[ $k ] ), $dn[ $k ] ) ) {
+			$found[ 'd' . $d->code ] = array( $d->state, $d->code );
 		}
 	}
-	foreach ( $st as $code => $s ) {
-		if ( ! array_filter( $out, fn( $p ) => (int) $p[0] === (int) $code ) ) {
-			$out[ 's' . $code ] = array( $code, 0 );
+	if ( count( array_unique( array_map( 'intval', $named ) ) ) > AW_PLACE_DETECT_MAX_STATES ) {
+		return array();
+	}
+	foreach ( $st as $code => $times ) {
+		if ( $counts( isset( $lst[ $code ] ), $times ) && ! array_filter( $found, fn( $p ) => (int) $p[0] === (int) $code ) ) {
+			$found[ 's' . $code ] = array( $code, 0 );
 		}
 	}
-	$named = array_unique( array_map( fn( $p ) => (int) $p[0], $out ) );
-	return count( $named ) > AW_PLACE_DETECT_MAX_STATES ? array() : array_values( $out );
+	return array_values( $found );
 }
 
 /** Whether an item should get a detected place: a News, Library or guide item with no place. */
@@ -158,7 +231,7 @@ function aw_place_detect_wanted( $id ) {
  * @return array
  */
 function aw_place_detect( $id, $write = true ) {
-	$places = aw_places_in_text( get_the_title( $id ) . ' ' . get_post_field( 'post_excerpt', $id ) );
+	$places = aw_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) );
 	if ( $places && $write && aw_set_item_places( $id, $places ) ) {
 		update_post_meta( $id, 'aw_place_auto', '1' );
 	}
@@ -243,7 +316,7 @@ function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
-		$label  = 'district' === $p->kind || ! $all_of ? $p->name : sprintf( /* translators: %s: state. */ __( 'All of %s', 'animal-writes-core' ), $p->name );
+		$label  = 'district' === $p->kind || ! $all_of ? aw_findhelp_place_name( $p ) : sprintf( /* translators: %s: state. */ __( 'All of %s', 'animal-writes-core' ), $p->name );
 		$items .= '<li><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . kits_count( $n ) . '</a></li>';
 	}
 	return '<nav class="aw-browse-states aw-findhelp" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="' . esc_attr( $head ) . '" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</h2>'
@@ -295,6 +368,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
 	 * Detect places for published News, Library and guides that have none: `wp aw-places detect [--dry-run]
 	 * [--type=aw_news] [--samples=10]`. Prints counts per type and samples.
+	 *
+	 * --redo-auto: also re-detect items whose place was detected (aw_place_auto) and still matches what the old rule
+	 * finds (so not changed by an editor), and store the new result where it differs (none: the place is removed).
+	 * Prints the changed IDs, for purging.
 	 */
 	WP_CLI::add_command(
 		'aw-places detect',
@@ -303,13 +380,49 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$types   = ! empty( $assoc['type'] ) ? explode( ',', $assoc['type'] ) : array( 'aw_news', 'aw_legal', 'post' );
 			$samples = array();
 			$want    = (int) ( $assoc['samples'] ?? 10 );
+			$redo    = ! empty( $assoc['redo-auto'] );
+			$changed = array();
+			$key     = function ( $places ) {
+				$k = array_map( fn( $p ) => (int) $p[0] . ':' . (int) $p[1], $places );
+				sort( $k );
+				return implode( ',', $k );
+			};
 			foreach ( $types as $t ) {
-				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'states' => array() );
+				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'edited' => 0, 'states' => array() );
 				foreach ( get_posts( array( 'post_type' => $t, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'DESC' ) ) as $id ) {
 					if ( 'post' === $t && 'guide' !== aw_item_kind( $id ) ) {
 						continue;
 					}
 					++$c['items'];
+					if ( $redo && get_post_meta( $id, 'aw_place_auto', true ) ) {
+						list( $ss, $dd ) = aw_item_codes( $id );
+						$stored          = array_map( fn( $d ) => array( aw_place_district( $d )->state, $d ), array_filter( $dd, 'aw_place_district' ) );
+						foreach ( $ss as $s ) {
+							if ( ! array_filter( $stored, fn( $p ) => (int) $p[0] === $s ) ) {
+								$stored[] = array( $s, 0 );
+							}
+						}
+						$title = get_the_title( $id );
+						$sum   = get_post_field( 'post_excerpt', $id );
+						$new   = aw_places_in_text( $title, $sum );
+						if ( $key( $stored ) !== $key( aw_places_in_text( $title, $sum, false ) ) ) {
+							++$c['edited'];
+						} elseif ( $key( $stored ) !== $key( $new ) ) {
+							$changed[] = $id;
+							WP_CLI::log( sprintf( '  redo %s %d  %s  %s  →  %s', $t, $id, mb_substr( $title, 0, 80 ), $key( $stored ), $new ? $key( $new ) : 'none' ) );
+							if ( ! $dry ) {
+								if ( $new ) {
+									aw_set_item_places( $id, $new );
+								} else {
+									delete_post_meta( $id, 'aw_state_code' );
+									delete_post_meta( $id, 'aw_district_code' );
+									delete_post_meta( $id, 'aw_place_auto' );
+								}
+							}
+						}
+						++$c['had'];
+						continue;
+					}
 					if ( ! aw_place_detect_wanted( $id ) ) {
 						++$c['had'];
 						continue;
@@ -319,6 +432,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						continue;
 					}
 					++$c['found'];
+					$changed[] = $id;
 					$c['district'] += array_filter( $found, fn( $p ) => $p[1] ) ? 1 : 0;
 					foreach ( $found as $p ) {
 						$c['states'][ $p[0] ] = 1;
@@ -326,12 +440,18 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$samples[ $t ][] = $id;
 				}
 				WP_CLI::log( sprintf( '%s: %d items, %d already had a place, %d %s a place (%d with a district), %d states', $t, $c['items'], $c['had'], $c['found'], $dry ? 'would get' : 'got', $c['district'], count( $c['states'] ) ) );
+				if ( $redo ) {
+					WP_CLI::log( sprintf( '  %d detected places left alone (changed by an editor or by the new names)', $c['edited'] ) );
+				}
 			}
 			foreach ( $samples as $t => $ids ) {
 				foreach ( array_slice( $ids, 0, $want ) as $id ) {
-					$names = array_map( fn( $p ) => $p[1] ? aw_place_district( $p[1] )->name . ', ' . aw_place_state( $p[0] )->name : aw_place_state( $p[0] )->name, aw_places_in_text( get_the_title( $id ) . ' ' . get_post_field( 'post_excerpt', $id ) ) );
+					$names = array_map( fn( $p ) => $p[1] ? aw_findhelp_place_name( aw_place_district( $p[1] ) ) . ', ' . aw_place_state( $p[0] )->name : aw_place_state( $p[0] )->name, aw_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) ) );
 					WP_CLI::log( sprintf( '  %s %d  %s  →  %s', $t, $id, mb_substr( get_the_title( $id ), 0, 90 ), implode( '; ', $names ) ) );
 				}
+			}
+			if ( $changed ) {
+				WP_CLI::log( 'Changed IDs: ' . implode( ' ', $changed ) );
 			}
 			WP_CLI::success( $dry ? 'Dry run: nothing stored.' : 'Stored.' );
 		}
