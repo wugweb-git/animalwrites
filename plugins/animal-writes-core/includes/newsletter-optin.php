@@ -74,11 +74,12 @@ function aw_nl_not_subscribed_page() {
 	$csv  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_not_subscribed_csv' ), 'aw_not_subscribed_csv' );
 	echo '<div class="wrap"><h1>Not subscribed</h1><p>People we have an email for who have not joined the newsletter. They are never added automatically; send them a one-time invite from your own mail if you wish.</p>';
 	echo '<p><a class="button button-primary" href="' . esc_url( $csv ) . '">Download CSV (' . (int) count( $rows ) . ')</a></p>';
-	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Source</th><th>Date</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( array_slice( $rows, 0, 500 ) as $r ) {
-		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['source'] ) . '</td><td>' . esc_html( $r['date'] ) . '</td></tr>';
+		$cells[] = array( 'name' => esc_html( $r['name'] ), 'email' => esc_html( $r['email'] ), 'source' => esc_html( $r['source'] ), 'date' => esc_html( $r['date'] ) );
 	}
-	echo '</tbody></table></div>';
+	aw_core_simple_table( 'not-subscribed', array( 'name' => 'Name', 'email' => 'Email', 'source' => 'Source', 'date' => 'Date' ), $cells, array( 'empty' => 'Nobody.' ) );
+	echo '</div>';
 }
 
 add_action(

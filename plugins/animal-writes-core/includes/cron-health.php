@@ -109,14 +109,19 @@ add_action(
 				$now   = time();
 				$runs  = aw_cron_runs();
 				$names = array( 'hostinger' => 'Hostinger server cron', 'github' => 'GitHub Actions', 'uptimerobot' => 'UptimeRobot', 'cron-job.org' => 'cron-job.org', 'other' => 'Other' );
-				echo '<table class="widefat striped"><thead><tr><th>Trigger</th><th>Last run</th><th>Runs, 24 h</th><th>Longest gap, 24 h</th></tr></thead><tbody>';
+				$cells = array();
 				foreach ( array_unique( array_merge( array( 'hostinger', 'github', 'uptimerobot' ), array_keys( $runs ) ) ) as $k ) {
-					$t    = (array) ( $runs[ $k ] ?? array() );
-					$last = $t ? (int) max( $t ) : 0;
-					$st   = aw_cron_stats( $t, $now - DAY_IN_SECONDS, $now );
-					echo '<tr><td>' . esc_html( $names[ $k ] ?? $k ) . '</td><td>' . ( $last ? esc_html( wp_date( 'j M Y, g:i a', $last ) ) : 'never' ) . '</td><td>' . (int) $st['runs'] . '</td><td>' . ( $st['runs'] ? esc_html( aw_cron_span( $st['gap'] ) ) : '—' ) . '</td></tr>';
+					$t       = (array) ( $runs[ $k ] ?? array() );
+					$last    = $t ? (int) max( $t ) : 0;
+					$st      = aw_cron_stats( $t, $now - DAY_IN_SECONDS, $now );
+					$cells[] = array(
+						'trigger' => esc_html( $names[ $k ] ?? $k ),
+						'last'    => $last ? esc_html( wp_date( 'j M Y, g:i a', $last ) ) : 'never',
+						'runs'    => (int) $st['runs'],
+						'gap'     => $st['runs'] ? esc_html( aw_cron_span( $st['gap'] ) ) : '—',
+					);
 				}
-				echo '</tbody></table>';
+				aw_core_simple_table( 'cron-triggers', array( 'trigger' => 'Trigger', 'last' => 'Last run', 'runs' => 'Runs, 24 h', 'gap' => 'Longest gap, 24 h' ), $cells );
 				$last = aw_cron_last();
 				do_action( 'aw_cron_health_after' );
 				echo '<p>' . ( $last && $now - $last < AW_CRON_STALE ? 'Running: last run ' . esc_html( aw_cron_span( $now - $last ) ) . ' ago.' : '<strong>No run for 30 minutes or more.</strong> The owner is emailed.' ) . '</p>';

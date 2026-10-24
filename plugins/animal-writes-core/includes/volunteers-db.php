@@ -160,19 +160,28 @@ function aw_vol_admin_page() {
 	submit_button( 'Filter', 'secondary', '', false );
 	$export = wp_nonce_url( add_query_arg( array_merge( array( 'action' => 'aw_vol_export' ), array_filter( $f ) ), admin_url( 'admin-post.php' ) ), 'aw_vol_export' );
 	echo ' <a class="button" href="' . esc_url( $export ) . '">Export CSV (' . (int) $total . ')</a></p></form>';
-	echo '<table class="widefat striped"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Place</th><th>Role</th><th>Source</th><th>Signed up on</th><th>Consent</th><th>Status</th><th>Joined</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $rows as $r ) {
-		$place = trim( ( $r['district_id'] ? ( $names[ $r['district_id'] ] ?? '' ) . ', ' : '' ) . ( $r['state_id'] ? ( $names[ $r['state_id'] ] ?? '' ) : '' ), ', ' );
-		echo '<tr><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['phone'] ) . '</td><td>' . esc_html( $place ? $place : $r['city_text'] ) . '</td><td>' . esc_html( $r['role'] ) . '</td><td>' . esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ) . '</td><td>' . esc_html( (string) ( $r['page_source'] ?? '' ) ) . '</td><td>' . esc_html( $r['consent_scope'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td></tr>';
+		$place   = trim( ( $r['district_id'] ? ( $names[ $r['district_id'] ] ?? '' ) . ', ' : '' ) . ( $r['state_id'] ? ( $names[ $r['state_id'] ] ?? '' ) : '' ), ', ' );
+		$cells[] = array(
+			'name'    => esc_html( $r['name'] ),
+			'email'   => esc_html( $r['email'] ),
+			'phone'   => esc_html( $r['phone'] ),
+			'place'   => esc_html( $place ? $place : $r['city_text'] ),
+			'role'    => esc_html( $r['role'] ),
+			'source'  => esc_html( 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form' ),
+			'page'    => esc_html( (string) ( $r['page_source'] ?? '' ) ),
+			'consent' => esc_html( $r['consent_scope'] ),
+			'status'  => esc_html( $r['status'] ),
+			'joined'  => esc_html( substr( (string) $r['created_at'], 0, 10 ) ),
+		);
 	}
-	if ( ! $rows ) {
-		echo '<tr><td colspan="10">No volunteers match.</td></tr>';
-	}
-	echo '</tbody></table>';
-	$pages = (int) ceil( $total / 50 );
-	if ( $pages > 1 ) {
-		echo '<div class="tablenav"><div class="tablenav-pages">' . paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => $pages ) ) . '</div></div>'; // phpcs:ignore
-	}
+	aw_core_simple_table(
+		'volunteers',
+		array( 'name' => 'Name', 'email' => 'Email', 'phone' => 'Phone', 'place' => 'Place', 'role' => 'Role', 'source' => 'Source', 'page' => 'Signed up on', 'consent' => 'Consent', 'status' => 'Status', 'joined' => 'Joined' ),
+		$cells,
+		array( 'per_page' => 50, 'total' => $total, 'empty' => 'No volunteers match.' )
+	);
 	echo '</div>';
 }
 
