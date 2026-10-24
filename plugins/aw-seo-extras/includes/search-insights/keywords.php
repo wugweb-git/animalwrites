@@ -13,8 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_ROLE_SOURCING = 1;  // A Google News search in AW Sourcing's Include list.
 const AW_SI_ROLE_FOCUS    = 2;  // A Rank Math focus keyphrase (primary or secondary) on a post or term.
 const AW_SI_ROLE_TRACKED  = 4;  // Keyword map target, demand gap or the monthly check list.
-const AW_SI_ROLE_BRAND    = 8;  // Matches AW_SD_BRAND.
+const AW_SI_ROLE_BRAND    = 8;  // Matches AW_SI_BRAND.
 const AW_SI_ROLE_SEARCHED = 16; // Seen in Search Console.
+
+// Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
+const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
 
 // Words ending in s that are not plurals: never folded ("news" must not become "new").
 const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
@@ -31,13 +34,12 @@ function aw_si_roles(): array {
 }
 
 /**
- * Whether a phrase is a brand search: the pattern of search-demand.php, or the same rule if that file is not loaded.
+ * Whether a phrase is a brand search (AW_SI_BRAND).
  *
  * @param string $s Phrase.
  */
 function aw_si_is_brand( string $s ): bool {
-	$re = defined( 'AW_SD_BRAND' ) ? AW_SD_BRAND : '/animal\s*-?\s*writ|animalwrit|india\s*writes/i';
-	return (bool) preg_match( $re, $s );
+	return (bool) preg_match( AW_SI_BRAND, $s );
 }
 
 /**
@@ -277,7 +279,7 @@ function aw_si_resolve_page( array $page, string $page_type ): array {
 	return array( 'label', 0, $label );
 }
 
-/** The seed file shipped with the plugin (built by tools/search-insights/build_seed.py). */
+/** The seed file shipped with the plugin (its build tool, tools/search-insights/build_seed.py, is in git history). */
 function aw_si_seed_data(): array {
 	$file = (string) apply_filters( 'aw_si_seed_file', AW_SEO_EXTRAS_DIR . 'data/search-insights-seed.json' );
 	$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file.
@@ -447,7 +449,7 @@ function aw_si_focus_parts( string $field ): array {
  * - focus: Rank Math keyphrases of published items (AW_SEO_ITEM_TYPES without listings) and of terms; listings only mark
  *   matching records as entities (their names are not added one by one: plan, fixed decisions);
  * - sourcing: AW Sourcing's Google News searches (aw_relevance()['strong']), when AW Sourcing is active;
- * - brand: AW_SD_BRAND.
+ * - brand: AW_SI_BRAND.
  *
  * @return array Counts.
  */

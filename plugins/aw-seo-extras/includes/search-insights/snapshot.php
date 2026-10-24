@@ -1,6 +1,6 @@
 <?php
 /**
- * Monthly snapshot (plan §10): search-insights-YYYY-MM.csv in the columns of docs/seo/rankings-2026-10-21.csv plus
+ * Monthly snapshot (plan §10): search-insights-YYYY-MM.csv in the columns of the 21 Oct rankings CSV (docs/seo/rankings-2026-10-21.csv, now in git history) plus
  * demand, priority, status and action, and keyword-map.md rebuilt from the keyword table. Both are downloads (Settings)
  * and `wp aw-si snapshot csv|map`; a session commits them to docs/seo/ each month. Nothing is committed from the site.
  *

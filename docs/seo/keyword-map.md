@@ -10,12 +10,12 @@
   - the 10 Oct 2026 keyword audit (not kept in this repo);
   - how the queries are phrased.
 - Re-check against Search Console queries once there are 3 months of 2.0 data.
-- **Demand column (added 15 Oct 2026).** The data and method are in `docs/seo/keyword-demand-2026-10-15.md`.
+- **Demand column (added 15 Oct 2026).** The data and method are in `docs/seo/keyword-demand-2026-10-15.md` (removed 25 Oct 2026; in git history).
   - **T** is the Google Trends index, India, past 12 months, with "animal welfare" = 100. It shows relative interest, not search counts.
   - **AC** is Google autocomplete (India): **Y** exact phrase suggested, **ext** only longer forms suggested, **–** not suggested.
   - **GSC** is Search Console impressions for 17 Nov 2025 – 14 Oct 2026.
   - Still no absolute volumes: Keyword Planner or an Ahrefs plan would add them.
-- **Rank and Priority columns (added 21 Oct 2026).** The data is in `docs/seo/rankings-2026-10-21.csv`, and the demand is in `docs/seo/keyword-demand-2026-10-21.md`.
+- **Rank and Priority columns (added 21 Oct 2026).** The data was in `docs/seo/rankings-2026-10-21.csv` and `docs/seo/keyword-demand-2026-10-21.md` (removed 25 Oct 2026; in git history); Search Insights holds it now.
   - **Rank** is the position in real Google, India (`gl=in&hl=en&pws=0`), checked 22 Oct 2026 for the first 50 queries. Positions count organic results on page 1 only. "not top 10" means animalwrites.in was not on page 1.
   - Google showed a CAPTCHA on query 51, so the sweep stopped there. For the other queries, Rank gives the Search Console 28-day average position ("GSC …") or says "not checked". Re-run the same list monthly; the CSV has a date column.
   - **Priority:**
@@ -176,7 +176,7 @@ Read from the live database with `wp db query` on 22 Oct. The rule stays: one pr
 
 ## 8. Demand gaps (15 Oct 2026)
 
-Details and figures are in `docs/seo/keyword-demand-2026-10-15.md`. These are suggestions only; nothing on the site was changed.
+Details and figures are in `docs/seo/keyword-demand-2026-10-15.md` (removed 25 Oct 2026; in git history). These are suggestions only; nothing on the site was changed.
 
 1. **District helpline and rescue numbers.**
    - "animal helpline number {district}" and "animal rescue {district} contact number": about 240 impressions, positions 7–11, 0 clicks.
@@ -206,7 +206,7 @@ Details and figures are in `docs/seo/keyword-demand-2026-10-15.md`. These are su
 
 ## 9. New rows (20–21 Oct 2026 work) and the 21 Oct priorities
 
-Demand and figures: `docs/seo/keyword-demand-2026-10-21.md`. Rank: `docs/seo/rankings-2026-10-21.csv`. GSC is the 28 days to 21 Oct.
+Demand and figures: `docs/seo/keyword-demand-2026-10-21.md`; rank: `docs/seo/rankings-2026-10-21.csv` (removed 25 Oct 2026; in git history). GSC is the 28 days to 21 Oct.
 
 | Page | Primary keyword | Secondary keywords | Intent | Demand (21 Oct 2026) | Rank (21 Oct) | Priority |
 |---|---|---|---|---|---|---|

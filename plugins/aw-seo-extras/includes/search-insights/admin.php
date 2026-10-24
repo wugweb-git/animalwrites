@@ -1,7 +1,9 @@
 <?php
 /**
  * Tools → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
- * Keywords (list table), Searches (the Search demand screen) and Settings (form-table: run now, delete data).
+ * Keywords (list table), tabs added by other files (Pages, Check list, Rising, Sourcing keywords) and Settings
+ * (form-table: keys, run now, imports, snapshot, delete data). The old Search demand screen was removed on 25 Oct 2026;
+ * its address opens the Keywords tab, and its content gaps are an Overview box.
  * Each tab starts with a notice per source: last updated, or the error with the date of the data still shown.
  *
  * @package aw-seo-extras
@@ -15,7 +17,7 @@ const AW_SI_SLUG = 'aw-search-insights';
 
 /** Same people as Sourcing and Search demand. */
 function aw_si_cap(): string {
-	return function_exists( 'aw_sd_cap' ) ? aw_sd_cap() : 'manage_options';
+	return defined( 'AW_SRC_CAP' ) ? AW_SRC_CAP : 'manage_options'; // The same people as the Sourcing screens.
 }
 
 /**
@@ -60,7 +62,7 @@ function aw_si_extra_tabs(): array {
 	$out = array();
 	foreach ( (array) apply_filters( 'aw_si_tabs', array() ) as $key => $label ) {
 		$key = sanitize_key( (string) $key );
-		if ( '' !== $key && ! in_array( $key, array( 'overview', 'keywords', 'searches', 'settings' ), true ) ) {
+		if ( '' !== $key && ! in_array( $key, array( 'overview', 'keywords', 'settings' ), true ) ) {
 			$out[ $key ] = (string) $label;
 		}
 	}
@@ -70,7 +72,7 @@ function aw_si_extra_tabs(): array {
 /** The current tab. */
 function aw_si_tab(): string {
 	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'overview'; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
-	return in_array( $tab, array_merge( array( 'overview', 'keywords', 'searches', 'settings' ), array_keys( aw_si_extra_tabs() ) ), true ) ? $tab : 'overview';
+	return in_array( $tab, array_merge( array( 'overview', 'keywords', 'settings' ), array_keys( aw_si_extra_tabs() ) ), true ) ? $tab : 'overview';
 }
 
 add_action(
@@ -80,19 +82,21 @@ add_action(
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
-		// The Search demand screen is the Searches tab now: one menu item, and the old address opens that tab.
+		// The old Search demand address (bookmarks, links in docs) opens the Keywords tab: a hidden page that redirects.
+		add_management_page( __( 'Search Insights', 'aw-seo-extras' ), '', aw_si_cap(), 'aw-search-demand', '__return_null' );
 		remove_submenu_page( 'tools.php', 'aw-search-demand' );
 		add_action(
 			'load-tools_page_aw-search-demand',
 			function () {
-				$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'refreshed', 'refresh_failed' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message flags only.
-				wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', array_map( 'strval', $keep ) ), aw_si_url( 'searches' ) ), 301 );
+				wp_safe_redirect( aw_si_url( 'keywords' ), 301 );
 				exit;
 			}
 		);
 	},
 	100
 );
+
+add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-search-demand' => 'tools.php' ) ); // Its older Settings address → Tools (admin-ia.php).
 
 add_filter(
 	'set_screen_option_aw_si_keywords_per_page',
@@ -130,6 +134,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
+		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
 		wp_enqueue_script( 'postbox' );
 		wp_add_inline_script( 'postbox', 'jQuery( function () { postboxes.add_postbox_toggles( pagenow ); } );' );
 	}
@@ -223,7 +228,6 @@ function aw_si_screen(): void {
 		array(
 			'overview' => __( 'Overview', 'aw-seo-extras' ),
 			'keywords' => __( 'Keywords', 'aw-seo-extras' ),
-			'searches' => __( 'Searches', 'aw-seo-extras' ),
 		),
 		aw_si_extra_tabs(),
 		array( 'settings' => __( 'Settings', 'aw-seo-extras' ) )
@@ -232,11 +236,6 @@ function aw_si_screen(): void {
 		echo '<a class="nav-tab' . ( $key === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_si_url( $key ) ) . '"' . ( $key === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
 	echo '</nav>';
-	if ( 'searches' === $tab ) {
-		aw_sd_screen( true ); // The Search demand screen, inside Search Insights; it shows its own refresh notices.
-		echo '</div>';
-		return;
-	}
 	aw_si_source_notices();
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
@@ -460,6 +459,20 @@ function aw_si_box_ai(): void {
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Landing page', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
 	foreach ( $by_page as $r ) {
 		echo '<tr><td><a href="' . esc_url( home_url( $r->page ) ) . '" target="_blank" rel="noopener">' . esc_html( $r->page ) . '</a></td><td>' . esc_html( number_format_i18n( (int) $r->n ) ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+}
+
+/** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
+function aw_si_box_gaps(): void {
+	$gaps = aw_si_searches_gaps();
+	if ( ! $gaps ) {
+		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Gap', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Searches', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $gaps as $g ) {
+		echo '<tr><td>' . esc_html( $g[0] ) . '</td><td>' . esc_html( $g[1] ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 }

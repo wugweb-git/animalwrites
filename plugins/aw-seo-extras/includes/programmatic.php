@@ -904,7 +904,7 @@ function aw_seo_tag_description( $term ) {
 
 /**
  * A tag's Rank Math focus keyword: the primary search phrase first, then secondaries, comma-separated (as the
- * categories are stored; docs/seo/keyword-map.md). Searched wording where it is known (keyword-demand-2026-10-15.md:
+ * categories are stored; docs/seo/keyword-map.md). Searched wording where it is known (keyword-demand-2026-10-15.md, in git history:
  * "gaushala", "veterinary hospital", "1962", "ngo jobs"), else built from the tag's name and section.
  *
  * @param WP_Term $term Tag.

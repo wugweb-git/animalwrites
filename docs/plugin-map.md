@@ -193,7 +193,7 @@ Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?
 | `includes/search-insights/snapshot.php` | Phase 5. Monthly snapshot: `search-insights-YYYY-MM.csv` (the check list and tracked P1/P2 keywords, in the 21 Oct rankings columns plus demand, priority, status, action) and `keyword-map.md` rebuilt from the keyword table (one table per section; primary, secondary, intent, demand, rank, priority, action). Settings → Monthly snapshot downloads, and `wp aw-si snapshot csv|map`. A session commits both to `docs/seo/` monthly. |
 | `includes/search-insights/imports.php` | Phase 4. Settings → Imports (action `aw_si_settings_rows`): Keyword Planner CSV (UTF-16 TSV read), Ahrefs Webmaster Tools keywords and backlinks, Trends averages paste (feeds priority), data.gov.in / IDSP figures paste. Files through `wp_handle_upload`, read once and deleted. Stored in obs (src kp, ahrefs, trends, gov); the Keywords tab shows the latest volume. |
 | `includes/search-insights/pages.php`, `class-aw-si-pages-table.php` | Phase 2. Pages tab (filter `aw_si_tabs`): per page over 28 days, Search Console, keywords and conflicts, GA4 organic sessions and AI referrals, Clarity, the latest PageSpeed, the page-quality flag and the latest Clarity note (row action "Add Clarity note"). Overview gets "AI referrals" and "Searches on our site" boxes; Settings shows whether the keys are set (never their values) and Run buttons per source. |
-| `data/search-insights-seed.json` | The seed, built once by `tools/search-insights/build_seed.py` from `docs/seo/keyword-map.md` and `docs/seo/rankings-2026-10-21.csv`. |
+| `data/search-insights-seed.json` | The one-time seed (keyword map and the 21 Oct rankings). Remove it once the live site is seeded (`aw_si_seeded` set); its build tool was removed 25 Oct 2026 (git history). |
 
 ## aw-seo-extras (all SEO code, with Rank Math; FAQ system; Search Insights)
 
@@ -213,7 +213,6 @@ Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?
 | `redirects.php` | Redirects. |
 | `robots.php` | Robots rules that depend on an item's state or a list's contents, which Rank Math's per-type and per-item settings cannot express. |
 | `schema.php` | The site's own JSON-LD nodes, put into Rank Math's one graph (Rank Math's schema templates cannot build these from the site's fields): - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOffice (by listing type, |
-| `search-demand.php` | Tools → Search demand (15 Oct 2026): what people search and how Animal Writes shows up for it. |
 | `sitemap.php` | Rank Math sitemap (/sitemap_index.xml) additions: - a "directory" sitemap (directory-sitemap.xml) of the Directory place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings, and district × list |
 | `titles.php` | Search titles and meta descriptions. |
 

@@ -6,8 +6,8 @@
  *
  * Phase 1: tables, the one-time seed from the keyword map, Search Console through Site Kit (each module as its own
  * owner, one call per calendar day), keyword roles, priority, the 90-day rollup, Overview and Keywords tabs, a Site
- * Health test and the `wp aw-si` commands. The Search demand screen (search-demand.php) is the Searches tab; its targets
- * and gaps come from the keyword table (searches.php).
+ * Health test and the `wp aw-si` commands. The old Search demand screen (search-demand.php) was removed on 25 Oct 2026:
+ * its Search Console call is aw_si_gsc_query() and its gaps are an Overview box (searches.php).
  *
  * @package aw-seo-extras
  */
