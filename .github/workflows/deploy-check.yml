@@ -2,10 +2,15 @@
 # themes and plugins, adds one item of each kind, and loads one URL per page type. Any PHP fatal, 500 or
 # "critical error" fails the job. Only when it passes is the wordpress branch (which Hostinger deploys) moved to
 # the tested commit.
+# On a pull request into wordpress-dev (owner, 24 Oct 2026) the same checks run and nothing else: no tag, no push, no
+# deploy. The live-site picture check is skipped there (it reads the live site, not the PR). Make this job's "check"
+# status required in the branch rules so a PR cannot merge until it passes.
 name: Deploy check
 
 on:
   push:
+    branches: [wordpress-dev]
+  pull_request:
     branches: [wordpress-dev]
   workflow_dispatch:
 
@@ -13,8 +18,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: deploy-check
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('deploy-check-pr-{0}', github.event.pull_request.number) || 'deploy-check' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -53,11 +58,12 @@ jobs:
       - name: Colour contrast (text 4.5:1, non-text 3:1; every campaign palette)
         run: python3 tools/ci/contrast_check.py
       - name: No picture used twice on the live site
+        if: github.event_name != 'pull_request'
         run: python3 tools/ci/thumb_check.py
       - name: Boot WordPress and load every page type
         run: bash tools/ci/smoke.sh
       - name: Move the deploy branch to this commit, and mark it as a release
-        if: github.ref == 'refs/heads/wordpress-dev'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev'
         run: |
           # Each deploy is a release tag; the last 5 are kept for one-command rollback (rollback.yml).
           # Branch and tag go in one push: a separate tag push straight after the branch was sometimes rejected
