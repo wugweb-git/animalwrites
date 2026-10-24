@@ -392,6 +392,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		$review = '';
 	} else {
 		$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+		if ( '' === $review && '' !== $hold && 'publish' !== get_post_status( $post_id ) ) {
+			// Auto-review skips some types (research is a post): the hold is still the reason a person sees in To review.
+			$review = 'held: ' . $hold;
+			update_post_meta( $post_id, 'aw_review', $review );
+		}
 	}
 
 	return new WP_REST_Response(
