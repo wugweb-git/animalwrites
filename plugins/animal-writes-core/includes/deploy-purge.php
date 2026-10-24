@@ -2,7 +2,7 @@
 /**
  * Purge the page cache after a deploy (owner, 24 Oct 2026).
  *
- * aw-ship.sh purges LiteSpeed after it deploys, but Hostinger's auto-deploy (a git pull into aw_deploy) does not, so a
+ * Hostinger's auto-deploy (a git pull into aw_deploy) does not purge LiteSpeed, so a
  * code change could stay invisible behind cached pages for up to the cache lifetime (7 days): PR #16 did, on 24 Oct.
  * The first uncached request after the deployed commit changes purges the whole cache once and remembers the commit
  * (option aw_deployed_head). Cached pages never reach PHP, so that request is made on purpose: after each deploy the
@@ -13,9 +13,8 @@
  * Only a web request may store the deployed commit, because only its response can carry LiteSpeed's purge header.
  * Skipped: any command-line PHP (WP-CLI, and Hostinger's cron running `php wp-cron.php`; 'cli' === PHP_SAPI), and a
  * request whose headers are already sent. Storing the commit there would mark it done without purging anything.
- * aw-ship.sh is no exception: its `wp litespeed-purge all` is LiteSpeed's own WP-CLI purge, not this hook, and it runs
- * only when someone ships with that script. Merged PRs deployed by the deploy check rely on this hook and the nudge. A
- * second purge after aw-ship.sh's is harmless.
+ * tools/aw-ship.sh purges the same way: its last step requests ?aw_deploy_nudge=ship-<sha>-<time> (WP-CLI's
+ * `wp litespeed-purge all` cannot notify the web server on this host, 24 Oct 2026). A second nudge is harmless.
  *
  * @package animal-writes-core
  */
