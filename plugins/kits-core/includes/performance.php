@@ -127,8 +127,13 @@ add_filter(
 		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || apply_filters( 'kits_page_has_form', kits_content_has( 'fluentform' ) ) ) {
 			return $tag;
 		}
-		$late = preg_replace( "/\smedia=(['\"])[^'\"]*\\1/", " media='print' onload=\"this.media='all'\"", $tag, 1 );
-		return $late === $tag ? $tag : $late . '<noscript>' . trim( $tag ) . "</noscript>\n";
+		// Added after the page has loaded, in the same place in the cascade (the link goes right after this script): nothing
+		// blocks or competes with the first paint, and no <link rel=stylesheet> is left in the HTML for a tag counter to
+		// count (owner, 24 Oct 2026). Without JavaScript the original link sits in <noscript>.
+		if ( ! preg_match( "/\shref=(['\"])([^'\"]+)\\1/", $tag, $m ) ) {
+			return $tag;
+		}
+		return '<script>(function(s){addEventListener("load",function(){var l=document.createElement("link");l.rel="stylesheet";l.id=' . wp_json_encode( $handle . '-css' ) . ';l.href=' . wp_json_encode( html_entity_decode( $m[2] ) ) . ';s.after(l)})})(document.currentScript)</script><noscript>' . trim( $tag ) . "</noscript>\n";
 	},
 	10,
 	2
