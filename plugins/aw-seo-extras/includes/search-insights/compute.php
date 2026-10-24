@@ -260,11 +260,16 @@ function aw_si_compute(): array {
 	$rows  = $wpdb->get_results( "SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends FROM {$k}" );
 	// phpcs:enable
 
-	$top_page = array();
+	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.
+	$by_page = array(); // kw_id => final path => impressions.
 	foreach ( (array) $top as $t ) {
-		if ( ! isset( $top_page[ $t->kw_id ] ) ) {
-			$top_page[ $t->kw_id ] = array( (string) $t->page, (int) $t->i );
-		}
+		$final                          = aw_si_final_path( (string) $t->page );
+		$by_page[ $t->kw_id ][ $final ] = ( $by_page[ $t->kw_id ][ $final ] ?? 0 ) + (int) $t->i;
+	}
+	$top_page = array();
+	foreach ( $by_page as $kw => $pages ) {
+		arsort( $pages );
+		$top_page[ $kw ] = array( (string) key( $pages ), (int) current( $pages ) );
 	}
 	$owners = array(); // kw_id => owning paths (focus primaries and keyword-map pages).
 	$fits   = array(); // kw_id => true when some page owns or carries it.
@@ -273,7 +278,7 @@ function aw_si_compute(): array {
 			$fits[ $l->kw_id ] = true;
 		}
 		if ( 'owner' === $l->role && 0 === strpos( $l->path, '/' ) && false === strpos( $l->path, '{' ) ) { // Real paths only: map labels and patterns are not compared.
-			$owners[ $l->kw_id ][ $l->path ] = true;
+			$owners[ $l->kw_id ][ aw_si_final_path( $l->path ) ] = true;
 		}
 	}
 
