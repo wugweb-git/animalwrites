@@ -1,8 +1,9 @@
 <?php
 /**
  * Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to
- * help, consent. Entries go to the volunteers table (the backup) with the page they came from, and to FluentCRM: a
- * contact tagged Volunteer with the details in custom fields (fluentcrm.php).
+ * help, consent. Entries go to FluentCRM only (owner, 24 Oct 2026: it is the one volunteers table): a contact tagged
+ * Volunteer with the details and the page they came from in custom fields (fluentcrm.php). The site's volunteers table
+ * is a read-only backup (volunteers-db.php).
  *
  * @package animal-writes-core
  */
@@ -129,39 +130,41 @@ function aw_volunteer_errors( $v ) {
 }
 
 /**
- * Save a checked sign-up to the volunteers table (one row per email; signing up again updates it), email the team, add
- * the volunteer to FluentCRM (tag Volunteer) and to the newsletter (owner, 20 Oct 2026: they join whether or not the
- * updates box stays ticked).
+ * Save a checked sign-up to FluentCRM (one contact per email; signing up again updates it), email the team, and add
+ * the volunteer to the newsletter (owner, 20 Oct 2026: they join whether or not the updates box stays ticked). Nothing
+ * is written to the volunteers table (owner, 24 Oct 2026).
  *
- * @return array array{url, title, text} for the thank-you page.
+ * @return array|null array{url, title, text} for the thank-you page; null when FluentCRM could not take it.
  */
 function aw_volunteer_save( $v, $source ) {
+	if ( ! function_exists( 'aw_crm_on' ) || ! aw_crm_on() ) {
+		return null;
+	}
 	$term  = aw_place_by_slug( $v['state'] );
 	$dist  = $v['district'] ? aw_place_by_slug( $v['district'] ) : null;
-	$saved = aw_vol_upsert(
+	$phone = kits_clean_phone( $v['phone'] );
+	$had   = FluentCrmApi( 'contacts' )->getContact( $v['email'] );
+	$again = $had && aw_crm_has_tag( $had, 'volunteer' ); // already registered (same email): their details are updated, no second record
+	aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], $phone ), array( 'volunteer' ) ); // makes or updates the contact; no email from this
+	$saved = aw_crm_volunteer_signup(
+		$v['email'],
 		array(
-			'name'                 => $v['name'],
-			'email'                => $v['email'],
-			'phone'                => kits_clean_phone( $v['phone'] ),
-			'pincode'              => $v['pincode'],
-			'state_slug'           => $term->slug,
-			'district_slug'        => $dist ? $dist->slug : '',
-			'city_text'            => $dist ? $dist->name : '',
-			'page_source'          => $source,
-			'role'                 => implode( ', ', $v['roles'] ),
-			'source'               => 'v2_form',
-			'consent_scope'        => 'volunteering',
-			'consent_text_version' => AW_VOL_CONSENT_VERSION,
+			'vol_help'            => implode( '; ', array_map( fn( $k ) => AW_VOL_ROLES[ $k ] ?? $k, $v['roles'] ) ),
+			'vol_state'           => $term->name,
+			'vol_district'        => $dist ? $dist->name : '',
+			'vol_city'            => $dist ? $dist->name : '',
+			'vol_pincode'         => $v['pincode'],
+			'vol_phone'           => preg_replace( '/[^0-9+ ]/', '', (string) $phone ),
+			'vol_page'            => sanitize_text_field( (string) $source ),
+			'vol_source'          => '2.0 form',
+			'vol_consent'         => 'volunteering',
+			'vol_consent_version' => AW_VOL_CONSENT_VERSION,
 		)
 	);
-	$again = 'updated' === $saved; // already registered (same email): their details were updated, no second record
+	if ( ! $saved ) {
+		return null;
+	}
 	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
-	if ( function_exists( 'aw_newsletter_join' ) ) { // volunteers join the newsletter (owner, 20 Oct 2026); no email from this
-		aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], kits_clean_phone( $v['phone'] ) ), array( 'volunteer' ) );
-	}
-	if ( function_exists( 'aw_crm_volunteer_sync' ) ) { // their volunteer details on the FluentCRM contact (custom fields); not subscribed unless ticked
-		aw_crm_volunteer_sync( $v['email'] );
-	}
 	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
 	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
 	return array( 'url' => kits_thanks_url( 'volunteer', array(), $title, $text ), 'title' => $title, 'text' => $text );
@@ -285,6 +288,9 @@ function aw_volunteer_submit() {
 		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
 	}
 	$res = aw_volunteer_save( $v, kits_submitted_source() );
+	if ( ! $res ) { // FluentCRM is off or refused it: say so, keep what they typed (nothing is saved anywhere else)
+		aw_form_fail( $form, array(), $v, $back, 'volunteer', aw_form_generic_error( $form ) );
+	}
 	aw_form_count( $rl );
 	aw_form_success( $res['url'], $res['title'], $res['text'] );
 }

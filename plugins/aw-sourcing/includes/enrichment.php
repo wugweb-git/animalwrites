@@ -770,6 +770,7 @@ add_action(
 		register_rest_route( 'aw/v1', '/enrich/config', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_config' ) );
 		register_rest_route( 'aw/v1', '/enrich/queue', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_queue' ) );
 		register_rest_route( 'aw/v1', '/enrich/results', array( 'methods' => 'POST', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_results' ) );
+		register_rest_route( 'aw/v1', '/enrich/index', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_index' ) );
 	}
 );
 
@@ -791,6 +792,39 @@ function aw_enrich_progress() {
 	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
 	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_enrich_table() . " WHERE status = 'pending'" ) : 0; // phpcs:ignore WordPress.DB
 	return array( 'total' => $total, 'checked' => $checked, 'pending' => $pending );
+}
+
+/**
+ * GET enrich/index?state=Haryana&page=1: the published listings of one state (id, name, district, whether they have any
+ * contact), for matching an outside list (NGO Darpan CSV) to listings. 1,000 a page.
+ */
+function aw_enrich_rest_index( WP_REST_Request $req ) {
+	global $wpdb;
+	$want = strtolower( trim( (string) $req['state'] ) );
+	$page = max( 1, (int) ( $req['page'] ?? 1 ) );
+	$out  = array();
+	$code = 0;
+	foreach ( aw_place_states() as $st ) {
+		if ( strtolower( $st->name ) === $want ) {
+			$code = (int) $st->code;
+		}
+	}
+	if ( ! $code ) {
+		return array( 'items' => array(), 'state' => (string) $req['state'] );
+	}
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
+	foreach ( $ids as $id ) {
+		$pl    = aw_listing_place( (int) $id );
+		$out[] = array(
+			'id'        => (int) $id,
+			'name'      => html_entity_decode( get_the_title( (int) $id ), ENT_QUOTES ),
+			'district'  => (string) $pl[1],
+			'state'     => (string) $pl[0],
+			'contact'   => (bool) ( aw_listing_phones( (int) $id ) || get_post_meta( $id, 'aw_email', true ) || get_post_meta( $id, 'aw_website', true ) || get_post_meta( $id, 'aw_facebook', true ) ),
+			'darpan_id' => (string) get_post_meta( $id, 'aw_darpan_id', true ),
+		);
+	}
+	return array( 'items' => $out, 'state' => (string) $req['state'], 'page' => $page );
 }
 
 /**
@@ -822,7 +856,7 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 				"p.ID IN ({$claims}) AND (c.meta_value IS NULL OR c.meta_value < '{$since}')",
 				"c.meta_value IS NULL AND {$none}",
 				"c.meta_value IS NULL AND {$bare}",
-				...( $google ? array( $gpend ) : array() ),
+				...( $google ? array( "{$gpend} AND {$none}", $gpend ) : array() ),
 				'c.meta_value IS NULL',
 				"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - AW_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
 			);
@@ -924,7 +958,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // already waiting, or a reviewer said no
 			continue;
 		}
-		$mode = aw_enrich_mode( $lid, $field, $conf, $protected );
+		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected ); // an outside list (Darpan CSV) always goes to review
 		if ( 'queue' !== $mode ) {
 			$snap = aw_enrich_snapshot( $lid, $field );
 			if ( aw_enrich_write( $lid, $field, $value, $mode ) ) {
@@ -936,11 +970,14 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$note = $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' );
+		$note = ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) );
 		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, $note );
 		$out['queued'][] = $field;
 	}
 
+	if ( ! empty( $b['import'] ) ) { // an import neither marks the listing checked nor changes its flags
+		return $out + array( 'protected' => $protected );
+	}
 	$flags = (array) ( $b['flags'] ?? array() );
 	aw_enrich_flag( $lid, 'invite_claim', array_values( array_intersect( array_map( 'sanitize_key', (array) ( $flags['invite_claim'] ?? array() ) ), array_keys( $fields ) ) ) );
 	if ( ! empty( $flags['reported_closed'] ) ) {

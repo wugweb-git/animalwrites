@@ -176,7 +176,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( 'aw_listing' !== $type && function_exists( 'aw_not_news_reason' ) ) {
 		$why = aw_not_news_reason( $title, $source_url, $type );
 		if ( $why ) {
-			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ) );
+			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ), (string) $req->get_param( 'feed' ) );
 			return new WP_REST_Response( array( 'status' => 'filtered', 'reason' => $why ), 200 );
 		}
 	}
@@ -213,14 +213,30 @@ function aw_ingest( WP_REST_Request $req ) {
 	}
 
 	update_post_meta( $post_id, 'aw_source_url', $source_url );
+	// Which source or search brought it in, and when (owner, 24 Oct 2026: per-keyword figures in Search Insights).
+	// post_date becomes the source's date on publish, so the arrival time is kept apart.
+	$feed = sanitize_text_field( (string) $req->get_param( 'feed' ) );
+	if ( '' !== $feed ) {
+		update_post_meta( $post_id, 'aw_feed', $feed );
+	}
+	update_post_meta( $post_id, 'aw_ingested_at', time() );
 	if ( function_exists( 'aw_relevance_store' ) ) {
 		aw_relevance_store( $post_id, $req->get_param( 'relevance' ) ); // the workers' relevance verdict
 	}
 	if ( $legal_flag ) {
 		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
 	}
-	if ( $req->get_param( 'hold' ) ) { // the workers' topic rule asks for a person (e.g. final rules of a campaign's draft)
-		update_post_meta( $post_id, 'aw_hold', sanitize_text_field( (string) $req->get_param( 'hold' ) ) );
+	$hold = sanitize_text_field( (string) $req->get_param( 'hold' ) );
+	// A research item needs its own headline (three-field model: study title in Sources, headline, SEO title; owner
+	// 24 Oct 2026): without one the paper's raw title would be published as the headline, so a person picks one.
+	$is_research = 'research' === $req->get_param( 'type' );
+	$raw_title   = $is_research && ( '' === trim( (string) $req->get_param( 'slug' ) ) || '' === trim( (string) $req->get_param( 'seo_title' ) )
+		|| aw_exists_norm_title( $title ) === aw_exists_norm_title( (string) $req->get_param( 'study_title' ) ) );
+	if ( $raw_title ) {
+		$hold = trim( $hold . '; no headline (the paper\'s own title would be published as the headline)', '; ' );
+	}
+	if ( '' !== $hold ) { // the workers' topic rule, a research doubt or a missing headline: a person decides
+		update_post_meta( $post_id, 'aw_hold', $hold );
 	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
@@ -324,11 +340,14 @@ function aw_ingest( WP_REST_Request $req ) {
 		aw_set_campaign_links( $post_id, $camp );
 	}
 	$tags = array_values( array_diff( $tags, $camp ) );
-	foreach ( array_diff( $tags, $allowed ) as $bad ) {
+	foreach ( array_diff( $tags, $allowed, array( 'research' ) ) as $bad ) {
 		$ignored[] = 'tag: ' . $bad;
 	}
 	if ( array_intersect( $tags, $allowed ) ) {
 		aw_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
+	}
+	if ( 'research' === $req->get_param( 'type' ) ) { // always, whatever the section's allowed tags: aw/v1/exists finds papers by it
+		wp_set_object_terms( $post_id, 'research', 'post_tag', true );
 	}
 	// A summary below its section's minimum after the workers' fallback (source re-read, other coverage merged) is
 	// published like any other (owner, 15 Oct 2026); it is marked so a later rewrite pass can find it.
@@ -366,7 +385,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		}
 		update_post_meta( $post_id, 'aw_legal_force', 'NotInForce' );
 	}
-	if ( $backfill ) {
+	if ( $backfill && '' !== $hold ) { // held: waits in To review like any other item (24 Oct 2026: backfill used to publish it)
+		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		$review = 'held: ' . $hold;
+		update_post_meta( $post_id, 'aw_review', $review );
+	} elseif ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
 		// Owner, 9 Oct 2026: backfilled items go live at once, with their own publication date (never the day fetched).
@@ -376,6 +399,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		$review = '';
 	} else {
 		$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+		if ( '' === $review && '' !== $hold && 'publish' !== get_post_status( $post_id ) ) {
+			// Auto-review skips some types (research is a post): the hold is still the reason a person sees in To review.
+			$review = 'held: ' . $hold;
+			update_post_meta( $post_id, 'aw_review', $review );
+		}
 	}
 
 	return new WP_REST_Response(
@@ -402,6 +430,115 @@ add_action(
 				'callback'            => 'aw_ingest',
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
+	}
+);
+
+/**
+ * Which research papers the site already has (owner, 24 Oct 2026: the Research worker summarised a year of papers with AI
+ * before the ingest answered "duplicate"). POST aw/v1/exists {dois: [], urls: []} with the workers' login (edit_others_posts); up to 500 of
+ * each per call. Matches DOI first (case-insensitive, from the item's doi.org source link), then the normalised URL,
+ * across research items (Resources tagged research) that are published, draft or pending.
+ * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent. With "index": true it
+ * also returns "studies": [{id, title, first_author, year, url}] for the same items, so the worker can spot the same study
+ * under another DOI or URL (preprint and journal versions) before any AI step.
+ */
+function aw_exists_norm_url( $url ) {
+	// Scheme, www. and host ignore case; the path and query keep theirs (two papers can differ only by case there).
+	$u = preg_replace( '~#.*$~', '', trim( (string) $url ) );
+	if ( preg_match( '~^(?:https?://)?(?:www\.)?([^/?]+)(.*)$~i', $u, $m ) ) {
+		$u = strtolower( $m[1] ) . $m[2];
+	}
+	return rtrim( $u, '/' );
+}
+
+function aw_exists_norm_doi( $doi ) {
+	$d = strtolower( trim( rawurldecode( (string) $doi ) ) );
+	return rtrim( preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d ), '/' );
+}
+
+/** The DOI of a doi.org link, normalised ('' when the URL is not one); the same pattern as aw_research_doi(). */
+function aw_exists_doi_of( $url ) {
+	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $url, $m ) ? aw_exists_norm_doi( $m[1] ) : '';
+}
+
+/** A title compared for "is this the paper's own title": letters and digits only, lower case. */
+function aw_exists_norm_title( $t ) {
+	return trim( preg_replace( '~[^a-z0-9]+~', ' ', strtolower( html_entity_decode( (string) $t, ENT_QUOTES ) ) ) );
+}
+
+function aw_exists( WP_REST_Request $req ) {
+	global $wpdb;
+	$list = fn( $v ) => array_slice( array_values( array_filter( array_map( 'strval', array_filter( (array) $v, 'is_scalar' ) ) ) ), 0, 500 );
+	$dois = $list( $req->get_param( 'dois' ) );
+	$urls = $list( $req->get_param( 'urls' ) );
+	$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		"SELECT p.ID, MAX(pm.meta_value) AS meta_value FROM {$wpdb->postmeta} pm
+		 JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
+		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
+		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug = 'research'
+		 WHERE pm.meta_key = 'aw_source_url' AND p.post_type = 'post' AND p.post_status IN ('publish', 'draft', 'pending')
+		 GROUP BY p.ID"
+	);
+	$held     = wp_list_pluck( $rows, 'meta_value' );
+	$have_doi = array();
+	$have_url = array();
+	foreach ( $held as $src ) {
+		$doi = aw_exists_doi_of( $src );
+		if ( '' !== $doi ) {
+			$have_doi[ $doi ] = true;
+		}
+		$have_url[ aw_exists_norm_url( $src ) ] = true;
+	}
+	$found_dois = array_values( array_filter( $dois, fn( $d ) => isset( $have_doi[ aw_exists_norm_doi( $d ) ] ) ) );
+	$found_urls = array_values(
+		array_filter(
+			$urls,
+			function ( $u ) use ( $have_url, $have_doi ) {
+				$doi = aw_exists_doi_of( $u );
+				if ( '' !== $doi && isset( $have_doi[ $doi ] ) ) {
+					return true; // a doi.org link: its DOI decides
+				}
+				return isset( $have_url[ aw_exists_norm_url( $u ) ] );
+			}
+		)
+	);
+	$out = array( 'dois' => $found_dois, 'urls' => $found_urls );
+	if ( $req->get_param( 'index' ) ) {
+		$out['studies'] = array();
+		$ids            = array_map( 'intval', wp_list_pluck( $rows, 'ID' ) );
+		_prime_post_caches( $ids, false, true ); // posts and their meta in two queries, not four per item
+		foreach ( $rows as $r ) {
+			$id      = (int) $r->ID;
+			$authors = array_values( (array) get_post_meta( $id, 'aw_authors', true ) );
+			$study   = function_exists( 'aw_research_study_title' ) ? aw_research_study_title( $id ) : '';
+			$out['studies'][] = array(
+				'id'           => $id,
+				'title'        => '' !== $study ? $study : get_the_title( $id ),
+				'first_author' => (string) ( $authors[0] ?? '' ),
+				'year'         => substr( (string) get_post_meta( $id, 'aw_source_date', true ), 0, 4 ),
+				'url'          => get_permalink( $id ), // the link in a "possible duplicate" hold (To review)
+			);
+		}
+	}
+	return new WP_REST_Response( $out, 200 );
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/exists',
+			array(
+				'methods'             => 'POST',
+				'callback'            => 'aw_exists',
+				'permission_callback' => function () {
+					// Reviewers only, like To review: the index lists draft and pending research (the workers' login is an Editor).
+					return current_user_can( 'edit_others_posts' );
 				},
 			)
 		);

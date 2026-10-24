@@ -211,15 +211,19 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	);
 
-	// wp aw nl-import-volunteers: the 1.0 volunteers onto the subscriber list as active (owner, 16 Oct 2026). Sends nothing.
+	// wp aw nl-import-volunteers: the volunteers onto the subscriber list as active (owner, 16 Oct 2026). Sends nothing.
+	// Reads FluentCRM, the volunteers table since 24 Oct 2026: active volunteers (a Fluent Forms sign-up has no status
+	// field yet: active) whose contact has not left the newsletter.
 	WP_CLI::add_command(
 		'aw nl-import-volunteers',
 		function () {
-			global $wpdb;
 			add_filter( 'pre_wp_mail', '__return_false', 999 );
 			$n = array( 'added' => 0, 'updated' => 0, 'failed' => 0 );
-			foreach ( (array) $wpdb->get_results( 'SELECT name, email, source FROM ' . aw_vol_table() . " WHERE status = 'active'", ARRAY_A ) as $r ) { // phpcs:ignore
-				$res = aw_nl_activate( $r['email'], $r['name'], $r['source'], 'owner-2026-10-16-volunteers' );
+			foreach ( aw_crm_volunteers() as $r ) {
+				if ( ! in_array( $r['vol_status'], array( '', 'active' ), true ) || in_array( $r['status'], array( 'unsubscribed', 'bounced', 'complained' ), true ) ) {
+					continue;
+				}
+				$res = aw_nl_activate( $r['email'], $r['name'], '1.0 campaign' === $r['vol_source'] ? 'v1_campaign' : 'v2_form', 'owner-2026-10-16-volunteers' );
 				$n[ $res ? $res : 'failed' ]++;
 			}
 			WP_CLI::success( wp_json_encode( $n ) );
