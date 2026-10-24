@@ -56,3 +56,7 @@ require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';
+// Workers you can organise and AI keys attached to workers (owner, 24 Oct 2026).
+require_once AW_SOURCING_DIR . 'includes/workers-meta.php';
+require_once AW_SOURCING_DIR . 'includes/workers-admin.php';
+require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';

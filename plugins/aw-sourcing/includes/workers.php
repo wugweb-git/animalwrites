@@ -1,7 +1,8 @@
 <?php
 /**
  * Settings → Sourcing → Workers (owner, 24 Oct 2026): every workflow of the workers repository, its last run, counts,
- * problems and Run now. Read-only otherwise: schedules are changed in the workflows, never here.
+ * problems and Run now. Schedules are changed in the workflows, never here; names, groups, descriptions and late limits
+ * can be overridden, and Planned workers added (workers-meta.php; the screens are in workers-admin.php).
  *
  * Data: each workflow reports its start and end (POST aw/v1/worker-run, the workers' application password) from
  * .github/actions/report in wugweb-git/animal-writes-workers. Nothing polls GitHub.
@@ -165,6 +166,7 @@ function aw_workers_problems( $now = null ) {
 		if ( ! $last ) {
 			continue;
 		}
+		$w = aw_worker_def( $file, $w ); // the owner's name and late limit (Planned workers are not here: they never alert)
 		$seen = max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) );
 		if ( ! empty( $w['late_after_h'] ) && $now - $seen > (int) $w['late_after_h'] * HOUR_IN_SECONDS ) {
 			$out[ $file . ':late' ] = sprintf( '%s has not reported for %s (late after %d h; last: %s).', $w['name'], aw_cron_span( $now - $seen ), (int) $w['late_after_h'], wp_date( 'j M, g:i a', $seen ) );
@@ -240,7 +242,8 @@ add_action(
 				'callback'            => function ( WP_REST_Request $req ) {
 					$file = sanitize_file_name( (string) $req->get_param( 'workflow' ) );
 					$run  = preg_replace( '/\D/', '', (string) $req->get_param( 'run_id' ) );
-					if ( ! isset( AW_WORKERS[ $file ] ) || '' === $run ) {
+					// A Planned worker's new workflow may report before the registry has it: its runs are kept (no alerts).
+					if ( ( ! isset( AW_WORKERS[ $file ] ) && ! ( preg_match( '/\.ya?ml$/', $file ) && aw_worker_is_planned( aw_worker_id( $file ) ) ) ) || '' === $run ) {
 						return new WP_Error( 'aw_worker_unknown', 'Unknown workflow or run.', array( 'status' => 400 ) );
 					}
 					$now    = time();
@@ -337,213 +340,32 @@ function aw_workers_badge( $last, $problem, $note = '' ) {
 		. esc_html( $label . $step ) . ( ! empty( $last['dry_run'] ) ? ' (dry run)' : '' ) . ( $note ? '<br>' . esc_html( $note ) : '' ) . '</p></div>';
 }
 
-if ( is_admin() ) {
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
-	}
-
-	/** The 17 workflows, one row each. */
-	class AW_Workers_List_Table extends WP_List_Table {
-		/** @var array<string,string> file => problem sentences */
-		private $problems = array();
-
-		/** @var array<string,bool> files with any problem */
-		private $flagged = array();
-
-		public function __construct() {
-			parent::__construct(
-				array(
-					'singular' => 'workflow',
-					'plural'   => 'workflows',
-					'ajax'     => false,
-					'screen'   => 'settings_page_aw-sourcing',
-				)
-			);
-		}
-
-		public function get_columns() {
-			return aw_workers_columns();
-		}
-
-		protected function get_sortable_columns() {
-			return array(
-				'name'     => array( 'name', false ),
-				'last_run' => array( 'last_run', true ),
-				'result'   => array( 'result', false ),
-				'next_due' => array( 'next_due', false ),
-			);
-		}
-
-		protected function get_default_primary_column_name() {
-			return 'name';
-		}
-
-		/** Table classes: "plugins" so problem rows take the core plugins-list highlight. */
-		protected function get_table_classes() {
-			return array( 'widefat', 'striped', 'plugins', $this->_args['plural'] );
-		}
-
-		public function prepare_items() {
-			$now = time();
-			foreach ( aw_workers_problems( $now ) as $k => $msg ) {
-				$f                    = strstr( $k, ':', true );
-				$this->problems[ $f ] = trim( ( $this->problems[ $f ] ?? '' ) . ( preg_match( '/:(late|stuck)$/', $k ) ? ' ' . $msg : '' ) );
-				$this->flagged[ $f ]  = true;
-			}
-			$rows = array();
-			foreach ( AW_WORKERS as $file => $w ) {
-				$last   = aw_workers_last( $file );
-				$rows[] = $w + array(
-					'file'     => $file,
-					'last'     => $last,
-					'next'     => $w['crons'] ? aw_workers_next( $w['crons'], $now ) : 0,
-					'problem'  => ! empty( $this->flagged[ $file ] ),
-					'note'     => $this->problems[ $file ] ?? '',
-					'sort_run' => $last ? (int) $last['started'] : 0,
-				);
-			}
-			$by    = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-			$desc  = 'desc' === sanitize_key( wp_unslash( $_GET['order'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a sort order in a link
-			$keyfn = array(
-				'name'     => fn( $r ) => strtolower( $r['name'] ),
-				'last_run' => fn( $r ) => $r['sort_run'],
-				'result'   => fn( $r ) => ( $r['problem'] ? '0' : '1' ) . ( $r['last']['result'] ?? 'z' ),
-				'next_due' => fn( $r ) => $r['next'] ? $r['next'] : PHP_INT_MAX,
-			);
-			if ( isset( $keyfn[ $by ] ) ) {
-				usort( $rows, fn( $a, $b ) => ( $desc ? -1 : 1 ) * ( $keyfn[ $by ]( $a ) <=> $keyfn[ $by ]( $b ) ) );
-			} else {
-				usort( $rows, fn( $a, $b ) => ( (int) ! $a['problem'] <=> (int) ! $b['problem'] ) ); // problems first, then the registry order
-			}
-			$per                   = $this->get_items_per_page( 'aw_workers_per_page', 20 );
-			$this->_column_headers = array( $this->get_columns(), get_hidden_columns( $this->screen ), $this->get_sortable_columns(), 'name' );
-			$this->set_pagination_args(
-				array(
-					'total_items' => count( $rows ),
-					'per_page'    => $per,
-				)
-			);
-			$this->items = array_slice( $rows, ( $this->get_pagenum() - 1 ) * $per, $per );
-		}
-
-		/** The core nav without its bulk-action nonce: the table sits in the Sourcing form, whose own nonce must win. */
-		protected function display_tablenav( $which ) {
-			echo '<div class="tablenav ' . esc_attr( $which ) . '">';
-			$this->pagination( $which );
-			echo '<br class="clear"></div>';
-		}
-
-		public function single_row( $item ) {
-			echo '<tr' . ( $item['problem'] ? ' class="active update"' : '' ) . '>';
-			$this->single_row_columns( $item );
-			echo '</tr>';
-		}
-
-		protected function column_name( $r ) {
-			$gh = 'https://github.com/wugweb-git/animal-writes-workers';
-			return '<strong>' . esc_html( $r['name'] ) . '</strong>'
-				. $this->row_actions(
-					array(
-						'runs' => '<a href="' . esc_url( $gh . '/actions/workflows/' . $r['file'] ) . '" target="_blank" rel="noopener">Runs on GitHub</a>',
-						'file' => '<a href="' . esc_url( $gh . '/blob/main/.github/workflows/' . $r['file'] ) . '" target="_blank" rel="noopener">' . esc_html( $r['file'] ) . '</a>',
-					)
-				);
-		}
-
-		protected function column_what( $r ) {
-			return esc_html( $r['what'] );
-		}
-
-		protected function column_schedule( $r ) {
-			$late = empty( $r['late_after_h'] ) ? ( $r['crons'] || ! empty( $r['after'] ) ? 'Never late (no alert)' : '' ) : 'Late after ' . ( $r['late_after_h'] >= 48 ? round( $r['late_after_h'] / 24 ) . ' days' : $r['late_after_h'] . ' h' );
-			return esc_html( aw_workers_schedule( $r ) ) . ( $late ? '<br><span class="description">' . esc_html( $late ) . '</span>' : '' );
-		}
-
-		protected function column_last_run( $r ) {
-			$l = $r['last'];
-			if ( ! $l ) {
-				return '—';
-			}
-			$dur = ! empty( $l['ended'] ) && ! empty( $l['started'] ) && $l['ended'] >= $l['started'] ? aw_workers_duration( $l['ended'] - $l['started'] ) : '';
-			$ev  = array(
-				'schedule'          => 'scheduled',
-				'workflow_dispatch' => 'started by hand or from the site',
-				'workflow_run'      => 'after another workflow',
-				'push'              => 'push',
-			);
-			return esc_html( wp_date( 'j M, g:i a', (int) $l['started'] ) ) . ( $dur ? '<br>' . esc_html( $dur ) : '' )
-				. '<br><span class="description">' . esc_html( $ev[ $l['event'] ] ?? $l['event'] ) . '</span>';
-		}
-
-		protected function column_result( $r ) {
-			return aw_workers_badge( $r['last'], $r['problem'], $r['note'] );
-		}
-
-		protected function column_counts( $r ) {
-			$c = (array) ( $r['last']['counts'] ?? array() );
-			if ( ! $c ) {
-				return '—';
-			}
-			return implode( '<br>', array_map( fn( $k, $v ) => esc_html( str_replace( '_', ' ', $k ) . ': ' . $v ), array_keys( $c ), $c ) );
-		}
-
-		protected function column_commit( $r ) {
-			$l = $r['last'];
-			if ( ! $l || empty( $l['sha'] ) ) {
-				return '—';
-			}
-			return '<a href="' . esc_url( 'https://github.com/wugweb-git/animal-writes-workers/commit/' . $l['sha'] ) . '" target="_blank" rel="noopener"><code>' . esc_html( $l['sha'] ) . '</code></a>'
-				. ( ! empty( $l['link'] ) ? '<br><a href="' . esc_url( $l['link'] ) . '" target="_blank" rel="noopener">Run log</a>' : '' );
-		}
-
-		protected function column_next_due( $r ) {
-			if ( ! empty( $r['after'] ) ) {
-				return esc_html( 'After "' . $r['after'] . '"' );
-			}
-			return $r['next'] ? esc_html( wp_date( 'j M, g:i a', $r['next'] ) ) : 'By hand';
-		}
-
-		protected function column_run_now( $r ) {
-			if ( ! empty( $r['needs_input'] ) ) {
-				return '<button type="button" class="button button-secondary" disabled>Run now</button><p class="description">Needs input: run it from GitHub.</p>';
-			}
-			if ( ! defined( 'AW_GITHUB_DISPATCH_TOKEN' ) || '' === (string) AW_GITHUB_DISPATCH_TOKEN ) {
-				return '<button type="button" class="button button-secondary" disabled>Run now</button><p class="description">Needs AW_GITHUB_DISPATCH_TOKEN.</p>';
-			}
-			$in = (array) ( $r['runnow'] ?? array() );
-			return '<button type="submit" class="button button-secondary" name="aw_run" value="' . esc_attr( $r['file'] ) . '">Run now</button>'
-				. ( $in ? '<p class="description">' . esc_html( implode( ', ', array_map( fn( $k, $v ) => $k . '=' . $v, array_keys( $in ), $in ) ) ) . '</p>' : '' );
-		}
-	}
-}
-
 /** Column slug => label (also the Screen Options checkboxes). */
 function aw_workers_columns() {
 	return array(
-		'name'     => 'Workflow',
-		'what'     => 'What it does',
+		'icon'     => '<span class="screen-reader-text">Icon</span>',
+		'name'     => 'Worker',
+		'group'    => 'Group',
+		'file'     => 'Workflow file',
 		'schedule' => 'Schedule (IST)',
 		'last_run' => 'Last run',
-		'result'   => 'Result',
-		'counts'   => 'Counts',
-		'commit'   => 'Commit',
-		'next_due' => 'Next due',
-		'run_now'  => 'Run now',
+		'status'   => 'Status',
+		'keys'     => 'Keys',
 	);
 }
 
-// Screen Options (columns, rows per page) on the Workers tab only.
+// Screen Options (columns, rows per page) on the Workers list only (not a worker's form or runs).
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'workers' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'workers' !== sanitize_key( $_GET['tab'] ?? '' ) || isset( $_GET['edit'] ) || isset( $_GET['runs'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
 		add_filter( 'manage_settings_page_aw-sourcing_columns', 'aw_workers_columns' );
 		add_screen_option(
 			'per_page',
 			array(
-				'label'   => 'Workflows per page',
+				'label'   => 'Workers per page',
 				'default' => 20,
 				'option'  => 'aw_workers_per_page',
 			)
@@ -555,92 +377,34 @@ add_filter( 'set_screen_option_aw_workers_per_page', fn( $keep, $option, $value 
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['workers'] = array( 'Workers', 'aw_workers_tab' );
+		$tabs['workers'] = array( 'Workers', 'aw_workers_tab', true ); // its own forms (workers-admin.php)
 		return $tabs;
 	}
 );
 
-/** Workers tab (inside the Sourcing page's form: Run now posts to admin-post.php through it). */
-function aw_workers_tab() {
-	if ( isset( $_GET['aw_ran'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		$ok = ! empty( $_GET['aw_ok'] ); // phpcs:ignore WordPress.Security.NonceVerification
-		$f  = sanitize_file_name( wp_unslash( $_GET['aw_ran'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$l  = (array) ( get_option( 'aw_worker_dispatch_log', array() )[0] ?? array() );
-		echo '<div class="notice notice-' . ( $ok ? 'success' : 'error' ) . ' is-dismissible"><p>' . esc_html( ( AW_WORKERS[ $f ]['name'] ?? $f ) . ': ' . ( $ok ? 'started on GitHub. Its start report appears here within a minute or two.' : 'not started — ' . ( $l['msg'] ?? '' ) ) ) . '</p></div>';
-	}
-	echo '<h2>AI models</h2>';
-	if ( function_exists( 'aw_ai_overview' ) && function_exists( 'aw_ai_rows' ) ) {
-		aw_ai_overview( aw_ai_rows() );
-	}
-	echo '<h2>Workflows</h2><p>Each workflow of <a href="https://github.com/wugweb-git/animal-writes-workers/actions" target="_blank" rel="noopener">wugweb-git/animal-writes-workers</a> reports its start and end here. Schedules are changed in the workflows, not here. A problem (a failed, cancelled, skipped or stuck run, or no report within a workflow\'s late limit) is emailed to the owner once.</p>';
-	if ( ! defined( 'AW_GITHUB_DISPATCH_TOKEN' ) || '' === (string) AW_GITHUB_DISPATCH_TOKEN ) {
-		echo '<div class="notice notice-warning inline"><p>Run now is off: set <code>AW_GITHUB_DISPATCH_TOKEN</code> in wp-config.php (a fine-grained GitHub token for wugweb-git/animal-writes-workers only, Actions read and write).</p></div>';
-	}
-	$table = new AW_Workers_List_Table();
-	$table->prepare_items();
-	$table->display();
+/**
+ * Run now: start a workflow on GitHub and note it in the Run now log (aw_worker_dispatch_log) and the change log.
+ *
+ * @param string $file Workflow file.
+ * @return true|WP_Error
+ */
+function aw_workers_run_now( $file ) {
+	$res = aw_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) );
 	$log = (array) get_option( 'aw_worker_dispatch_log', array() );
-	echo '<h2>Run now log</h2>';
-	if ( ! $log ) {
-		echo '<p>None yet.</p>';
-		return;
-	}
-	echo '<table class="widefat striped"><thead><tr><th>When</th><th>Who</th><th>Workflow</th><th>Result</th></tr></thead><tbody>';
-	foreach ( $log as $e ) {
-		echo '<tr><td>' . esc_html( wp_date( 'j M Y, g:i a', (int) $e['at'] ) ) . '</td><td>' . esc_html( $e['user'] ) . '</td><td>' . esc_html( AW_WORKERS[ $e['file'] ]['name'] ?? $e['file'] ) . '</td><td>' . esc_html( $e['ok'] ? 'started' : $e['msg'] ) . '</td></tr>';
-	}
-	echo '</tbody></table>';
+	array_unshift(
+		$log,
+		array(
+			'at'   => time(),
+			'user' => wp_get_current_user()->user_login,
+			'file' => $file,
+			'ok'   => true === $res,
+			'msg'  => true === $res ? 'started' : $res->get_error_message(),
+		)
+	);
+	update_option( 'aw_worker_dispatch_log', array_slice( $log, 0, 50 ), false );
+	kits_sourcing_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
+	return $res;
 }
-
-// Run now: the Sourcing page's save handler (nonce and capability checked there) passes the Workers tab here.
-add_action(
-	'kits_sourcing_save_workers',
-	function () {
-		$file = sanitize_file_name( wp_unslash( $_POST['aw_run'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-		if ( '' === $file ) { // Enter in the table's page box submits the Sourcing form: go to that page
-			wp_safe_redirect(
-				add_query_arg(
-					array(
-						'page'  => 'aw-sourcing',
-						'tab'   => 'workers',
-						'paged' => max( 1, absint( $_POST['paged'] ?? 1 ) ), // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-					),
-					admin_url( 'options-general.php' )
-				)
-			); // phpcs:ignore WordPress.Security.NonceVerification
-			exit;
-		}
-		if ( ! current_user_can( 'manage_options' ) || ! isset( AW_WORKERS[ $file ] ) || ! empty( AW_WORKERS[ $file ]['needs_input'] ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		$res = aw_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) );
-		$log = (array) get_option( 'aw_worker_dispatch_log', array() );
-		array_unshift(
-			$log,
-			array(
-				'at'   => time(),
-				'user' => wp_get_current_user()->user_login,
-				'file' => $file,
-				'ok'   => true === $res,
-				'msg'  => true === $res ? 'started' : $res->get_error_message(),
-			)
-		);
-		update_option( 'aw_worker_dispatch_log', array_slice( $log, 0, 50 ), false );
-		kits_sourcing_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'page'   => 'aw-sourcing',
-					'tab'    => 'workers',
-					'aw_ran' => $file,
-					'aw_ok'  => true === $res ? 1 : 0,
-				),
-				admin_url( 'options-general.php' )
-			)
-		);
-		exit;
-	}
-);
 
 // Notice on the dashboard and Settings → Sourcing.
 add_action(
