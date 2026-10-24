@@ -416,9 +416,11 @@ add_action(
  * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent.
  */
 function aw_exists_norm_url( $url ) {
-	$u = strtolower( trim( (string) $url ) );
-	$u = preg_replace( '~^https?://(www\.)?~', '', $u );
-	$u = preg_replace( '~#.*$~', '', $u );
+	// Scheme, www. and host ignore case; the path and query keep theirs (two papers can differ only by case there).
+	$u = preg_replace( '~#.*$~', '', trim( (string) $url ) );
+	if ( preg_match( '~^(?:https?://)?(?:www\.)?([^/?]+)(.*)$~i', $u, $m ) ) {
+		$u = strtolower( $m[1] ) . $m[2];
+	}
 	return rtrim( $u, '/' );
 }
 
