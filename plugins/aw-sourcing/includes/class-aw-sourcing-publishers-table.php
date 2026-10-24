@@ -1,9 +1,14 @@
 <?php
 /**
- * Settings → Sourcing → Publishers as a core list table (owner, 24 Oct 2026): views by status, search, sortable
- * columns, pagination with a screen option, row actions (Allow, Neutral, Block) and bulk actions. The short name is
+ * Settings → Sourcing → Sources as a core list table (owner, 24 Oct 2026; was the Publishers tab): one row per host,
+ * every publisher (aw_publishers records without kind) and every press-coverage site. Views by status and Press sites,
+ * search, sortable columns, pagination with a screen option (aw_publishers_per_page), row actions (Edit, Allow,
+ * Neutral, Block, Search here for coverage / Stop searching here) and the same as bulk actions. The short name is
  * edited in place and saved with "Save short names". Everything posts to admin-post.php (action aw_sourcing, tab
- * publishers) with the screen's aw_sourcing nonce (the table prints none of its own). Loaded only when the tab is shown.
+ * sources) with the screen's aw_sourcing nonce (the table prints none of its own). Loaded only when the tab is shown.
+ *
+ * A press site that is not a publisher shows "—" for status and gets no Allow / Neutral / Block: giving it a status
+ * would create a publisher record, which only the Add New / Edit form does, on purpose.
  *
  * @package aw-sourcing
  */
@@ -12,31 +17,76 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Publishers the workers have sent, with their status. */
+/** Publishers and press sites, one row per host. */
 class AW_Sourcing_Publishers_Table extends WP_List_Table {
 
-	/** @var array host => record */
-	private $all;
+	/** @var array host => row */
+	private $all = array();
+
+	/** @var bool Search Console figures are there (a run within 28 days). */
+	private $si = false;
+
+	/** @var bool Search Console ran once, but not within 28 days. */
+	private $stale = false;
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'publisher', 'plural' => 'publishers', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
-		// A host kept only for its icon (kind, e.g. a directory source) is not a publisher.
-		$this->all = array_filter( aw_publishers(), fn( $p ) => empty( $p['kind'] ) );
+		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		$stats       = aw_sourcing_host_stats();
+		$this->si    = ! empty( $stats['si'] );
+		$this->stale = ! empty( $stats['stale'] );
+		$meta        = get_option( AW_SOURCING_SITE_META, array() );
+		$meta        = is_array( $meta ) ? $meta : array();
+		$press       = array_flip( aw_sourcing_press_hosts() );
+		$pubs        = aw_publishers();
+		$hosts       = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) ) ); // a host kept only for its icon (kind) is not a publisher
+		foreach ( array_unique( array_merge( $hosts, array_keys( $press ) ) ) as $h ) {
+			$p   = $pubs[ $h ] ?? array();
+			$pub = isset( $pubs[ $h ] ) && empty( $p['kind'] );
+			$s   = $stats['hosts'][ $h ] ?? array();
+			$m   = $meta[ $h ] ?? array();
+			$this->all[ $h ] = array(
+				'host'    => $h,
+				'pub'     => $pub,
+				'press'   => isset( $press[ $h ] ),
+				'name'    => $pub ? (string) ( $p['name'] ?? '' ) : '',
+				'short'   => $pub ? (string) ( $p['short'] ?? '' ) : '',
+				'status'  => $pub ? (string) ( $p['status'] ?? 'neutral' ) : '',
+				'rec'     => $pub ? $p : array(),
+				'dr'      => $pub && isset( $p['dr'] ) && is_numeric( $p['dr'] ) ? (int) $p['dr'] : null,
+				'dr_at'   => $pub ? (string) ( $p['dr_at'] ?? '' ) : '',
+				'f30'     => (int) ( $s['f30'] ?? 0 ),
+				'pub_n'   => (int) ( $s['pub'] ?? 0 ),
+				'impr'    => (int) ( $s['impr'] ?? 0 ),
+				'clicks'  => (int) ( $s['clicks'] ?? 0 ),
+				'impr3'   => (int) ( $s['impr3'] ?? 0 ),
+				'clicks3' => (int) ( $s['clicks3'] ?? 0 ),
+				'title'   => (string) ( $m['title'] ?? '' ),
+				'desc'    => (string) ( $m['desc'] ?? '' ),
+				'code'    => (string) ( $m['code'] ?? '' ),
+				'at'      => (string) ( $m['at'] ?? '' ),
+				'last'    => $pub ? (string) ( $p['last'] ?? '' ) : '',
+			);
+		}
 	}
 
-	private function status() {
+	/** Search Console ran, but not within 28 days (the screen says so once). */
+	public function search_stale() {
+		return $this->stale;
+	}
+
+	private function view() {
 		$s = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		return in_array( $s, array( 'allow', 'neutral', 'block' ), true ) ? $s : '';
+		return in_array( $s, array( 'allow', 'neutral', 'block', 'press' ), true ) ? $s : '';
 	}
 
 	protected function get_views() {
-		$base   = admin_url( 'options-general.php?page=aw-sourcing' );
-		$counts = array_count_values( array_map( fn( $p ) => (string) ( $p['status'] ?? 'neutral' ), $this->all ) );
+		$base   = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
+		$counts = array_count_values( array_filter( array_column( $this->all, 'status' ) ) );
+		$press  = count( array_filter( array_column( $this->all, 'press' ) ) );
 		$out    = array();
-		foreach ( array( '' => 'All', 'neutral' => 'Neutral (new finds)', 'allow' => 'Allowed', 'block' => 'Blocked' ) as $k => $l ) {
-			$n         = '' === $k ? count( $this->all ) : (int) ( $counts[ $k ] ?? 0 );
-			$cur       = $this->status() === $k;
-			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+		foreach ( array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites' ) as $k => $l ) {
+			$n                             = '' === $k ? count( $this->all ) : ( 'press' === $k ? $press : (int) ( $counts[ $k ] ?? 0 ) );
+			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $this->view() === $k ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -44,13 +94,14 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	public function get_columns() {
 		return array(
 			'cb'     => '<input type="checkbox" />',
-			'host'   => 'Host',
-			'name'   => 'Name',
+			'host'   => 'Site',
 			'short'  => 'Short name',
 			'status' => 'Status',
 			'rating' => 'Rating',
-			'count'  => 'Items',
-			'first'  => 'First seen',
+			'dr'     => 'Domain Rating',
+			'items'  => 'Items (30 days / published)',
+			'search' => 'Search value',
+			'seo'    => 'SEO',
 			'last'   => 'Last seen',
 		);
 	}
@@ -58,10 +109,10 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	protected function get_sortable_columns() {
 		return array(
 			'host'   => array( 'host', false ),
-			'name'   => array( 'name', false ),
 			'status' => array( 'status', false ),
-			'count'  => array( 'count', true ),
-			'first'  => array( 'first', true ),
+			'dr'     => array( 'dr', true ),
+			'items'  => array( 'items', true ),
+			'search' => array( 'search', true ),
 			'last'   => array( 'last', true ),
 		);
 	}
@@ -71,7 +122,13 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	}
 
 	protected function get_bulk_actions() {
-		return array( 'allow' => 'Change to Allowed', 'neutral' => 'Change to Neutral', 'block' => 'Change to Blocked' );
+		return array(
+			'allow'        => 'Change to Allowed',
+			'neutral'      => 'Change to Neutral',
+			'block'        => 'Change to Blocked',
+			'press_add'    => 'Search here for coverage',
+			'press_remove' => 'Stop searching here',
+		);
 	}
 
 	/** The core bulk menu is named "action", which admin-post.php reads as its own; this one is bulk_status. */
@@ -100,7 +157,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	}
 
 	protected function extra_tablenav( $which ) {
-		if ( 'top' === $which ) {
+		if ( 'top' === $which && $this->has_items() ) {
 			echo '<div class="alignleft actions">';
 			submit_button( 'Save short names', 'secondary', 'save_short', false );
 			echo '</div>';
@@ -108,14 +165,17 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	}
 
 	public function prepare_items() {
-		$st   = $this->status();
+		$v    = $this->view();
 		$s    = mb_strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$rows = array();
-		foreach ( $this->all as $h => $p ) {
-			if ( ( $st && ( $p['status'] ?? 'neutral' ) !== $st ) || ( '' !== $s && false === strpos( $h . ' ' . mb_strtolower( (string) ( $p['name'] ?? '' ) . ' ' . (string) ( $p['short'] ?? '' ) ), $s ) ) ) {
+		foreach ( $this->all as $r ) {
+			if ( ( 'press' === $v && ! $r['press'] ) || ( $v && 'press' !== $v && $r['status'] !== $v ) ) {
 				continue;
 			}
-			$rows[] = array( 'host' => $h ) + $p;
+			if ( '' !== $s && false === strpos( mb_strtolower( $r['host'] . ' ' . $r['name'] . ' ' . $r['short'] . ' ' . $r['title'] ), $s ) ) {
+				continue;
+			}
+			$rows[] = $r;
 		}
 		$by  = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		$by  = isset( $this->get_sortable_columns()[ $by ] ) ? $by : '';
@@ -123,10 +183,22 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		usort(
 			$rows,
 			function ( $a, $b ) use ( $by, $asc ) {
-				if ( '' === $by ) { // as before: most items first, then the latest seen
-					return ( (int) $b['count'] <=> (int) $a['count'] ) ?: strcmp( (string) $b['last'], (string) $a['last'] );
+				if ( '' === $by ) { // most items first (fetched, then published), then the latest seen
+					return ( $b['f30'] <=> $a['f30'] ) ?: ( $b['pub_n'] <=> $a['pub_n'] ) ?: strcmp( $b['last'], $a['last'] ) ?: strcmp( $a['host'], $b['host'] );
 				}
-				$c = 'count' === $by ? ( (int) $a['count'] <=> (int) $b['count'] ) : strcasecmp( (string) ( $a[ $by ] ?? '' ), (string) ( $b[ $by ] ?? '' ) );
+				switch ( $by ) {
+					case 'dr':
+						$c = ( $a['dr'] ?? -1 ) <=> ( $b['dr'] ?? -1 );
+						break;
+					case 'items':
+						$c = ( $a['f30'] <=> $b['f30'] ) ?: ( $a['pub_n'] <=> $b['pub_n'] );
+						break;
+					case 'search':
+						$c = ( $a['impr'] <=> $b['impr'] ) ?: ( $a['impr3'] <=> $b['impr3'] );
+						break;
+					default:
+						$c = strcasecmp( (string) $a[ $by ], (string) $b[ $by ] );
+				}
 				$c = $c ? $c : strcmp( $a['host'], $b['host'] );
 				return $asc ? $c : -$c;
 			}
@@ -140,7 +212,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	/** A blocked publisher gets the plugins list's problem row under it. */
 	public function single_row( $item ) {
 		parent::single_row( $item );
-		if ( 'block' === ( $item['status'] ?? '' ) ) {
+		if ( 'block' === $item['status'] ) {
 			aw_sourcing_problem_row( $this, 'Blocked: new items from ' . $item['host'] . ' are refused when the workers send them. Items already on the site are unchanged.', 'error' );
 		}
 	}
@@ -150,41 +222,90 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		return '<input type="checkbox" name="hosts[]" value="' . esc_attr( $item['host'] ) . '" id="' . esc_attr( $id ) . '"><label for="' . esc_attr( $id ) . '" class="screen-reader-text">' . esc_html( 'Select ' . $item['host'] ) . '</label>';
 	}
 
-	/** A row action is a submit button of the form: row_status = "status:host". */
-	private function status_button( $st, $label, $host ) {
-		return '<button type="submit" class="button-link" name="row_status" value="' . esc_attr( $st . ':' . $host ) . '">' . esc_html( $label ) . '</button>';
+	/** A row action is a submit button of the form: row_status = "status:host", row_press = "add|remove:host". */
+	private function button( $name, $value, $label ) {
+		return '<button type="submit" class="button-link" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</button>';
 	}
 
 	protected function column_host( $item ) {
-		$acts = array();
-		foreach ( array( 'allow' => 'Allow', 'neutral' => 'Neutral', 'block' => 'Block' ) as $st => $l ) {
-			if ( ( $item['status'] ?? 'neutral' ) !== $st ) {
-				$acts[ 'block' === $st ? 'trash' : $st ] = $this->status_button( $st, $l, $item['host'] );
+		$h    = $item['host'];
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'options-general.php' ) );
+		$acts = array( 'edit' => '<a href="' . esc_url( $edit ) . '" aria-label="' . esc_attr( 'Edit ' . $h ) . '">Edit</a>' );
+		if ( $item['pub'] ) {
+			foreach ( array( 'allow' => 'Allow', 'neutral' => 'Neutral', 'block' => 'Block' ) as $st => $l ) {
+				if ( $item['status'] !== $st ) {
+					$acts[ 'block' === $st ? 'trash' : $st ] = $this->button( 'row_status', $st . ':' . $h, $l );
+				}
 			}
 		}
-		return '<strong>' . esc_html( $item['host'] ) . '</strong>' . $this->row_actions( $acts );
+		$acts['press'] = $item['press'] ? $this->button( 'row_press', 'remove:' . $h, 'Stop searching here' ) : $this->button( 'row_press', 'add:' . $h, 'Search here for coverage' );
+		$icon          = function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $h ) : '';
+		$mark          = $icon ? '<img src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async"> ' : '<span class="dashicons dashicons-admin-site-alt3" aria-hidden="true"></span> ';
+		return $mark . '<strong><a class="row-title" href="' . esc_url( $edit ) . '">' . esc_html( $h ) . '</a></strong>'
+			. ( '' !== $item['name'] ? '<br>' . esc_html( $item['name'] ) : '' )
+			. $this->row_actions( $acts );
 	}
 
 	protected function column_short( $item ) {
-		return '<input type="text" name="short[' . esc_attr( $item['host'] ) . ']" value="' . esc_attr( (string) ( $item['short'] ?? '' ) ) . '" maxlength="24" size="12" aria-label="' . esc_attr( 'Short name for ' . $item['host'] ) . '">';
+		if ( ! $item['pub'] ) {
+			return '<span aria-label="Not a publisher">—</span>';
+		}
+		return '<input type="text" name="short[' . esc_attr( $item['host'] ) . ']" value="' . esc_attr( $item['short'] ) . '" maxlength="24" size="12" aria-label="' . esc_attr( 'Short name for ' . $item['host'] ) . '">';
 	}
 
 	protected function column_status( $item ) {
-		return aw_publisher_status_html( (string) ( $item['status'] ?? 'neutral' ) );
+		$out = $item['pub'] ? aw_publisher_status_html( $item['status'] ) : '<span aria-label="Not a publisher">—</span>';
+		return $out . ( $item['press'] ? '<br><span class="dashicons dashicons-search" aria-hidden="true"></span> Searched for coverage' : '' );
 	}
 
 	protected function column_rating( $item ) {
-		return aw_publisher_rating_html( $item );
+		return $item['pub'] ? aw_publisher_rating_html( $item['rec'] ) : '<span aria-label="Not rated">–</span>';
 	}
 
-	protected function column_default( $item, $col ) {
-		if ( 'count' === $col ) {
-			return esc_html( number_format_i18n( (int) $item['count'] ) );
+	protected function column_dr( $item ) {
+		if ( null === $item['dr'] ) {
+			return '<span aria-label="Not looked up">—</span>';
 		}
-		return esc_html( (string) ( $item[ $col ] ?? '' ) );
+		return esc_html( (string) $item['dr'] ) . ( '' !== $item['dr_at'] ? '<br><span class="description">' . esc_html( $item['dr_at'] ) . '</span>' : '' );
+	}
+
+	protected function column_items( $item ) {
+		return esc_html( number_format_i18n( $item['f30'] ) . ' / ' . number_format_i18n( $item['pub_n'] ) );
+	}
+
+	protected function column_search( $item ) {
+		if ( ! $this->si ) {
+			return '<span aria-label="No Search Console figures">—</span>';
+		}
+		$n = 'number_format_i18n';
+		return esc_html( '28 days: ' . $n( $item['impr'] ) . ' impr. · ' . $n( $item['clicks'] ) . ' clicks' ) . '<br>'
+			. esc_html( '3 months: ' . $n( $item['impr3'] ) . ' impr. · ' . $n( $item['clicks3'] ) . ' clicks' );
+	}
+
+	protected function column_seo( $item ) {
+		if ( '' === $item['at'] ) {
+			return '<span class="description">Not checked yet</span>';
+		}
+		$ok  = (int) $item['code'] >= 200 && (int) $item['code'] < 300;
+		$out = '';
+		if ( '' !== $item['title'] ) {
+			$out .= esc_html( $item['title'] ) . '<br>';
+		}
+		if ( '' !== $item['desc'] ) {
+			$out .= '<span class="description">' . esc_html( $item['desc'] ) . '</span><br>';
+		}
+		if ( $ok && '' === $item['title'] && '' === $item['desc'] ) {
+			$out .= '<span class="description">No title or description found.</span><br>';
+		}
+		$res = ctype_digit( $item['code'] ) ? 'HTTP ' . $item['code'] : $item['code'];
+		return $out . '<span class="description">' . esc_html( 'Checked ' . substr( $item['at'], 0, 10 ) . ' · ' . $res ) . '</span>';
+	}
+
+	protected function column_last( $item ) {
+		return '' !== $item['last'] ? esc_html( $item['last'] ) : '—';
 	}
 
 	public function no_items() {
-		echo 'No publishers.';
+		echo 'No sources.';
 	}
 }

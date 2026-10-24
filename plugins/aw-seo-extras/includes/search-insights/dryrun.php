@@ -156,8 +156,8 @@ function aw_si_dry_report( string $day ): array {
 			if ( is_wp_error( $one ) ) {
 				return $one;
 			}
-			$q  = aw_sd_query( $module, array( 'query' ), $s28, $e28 );
-			$qp = is_wp_error( $q ) ? $q : aw_sd_query( $module, array( 'query', 'page' ), $s28, $e28 );
+			$q  = aw_si_gsc_query( $module, array( 'query' ), $s28, $e28 );
+			$qp = is_wp_error( $q ) ? $q : aw_si_gsc_query( $module, array( 'query', 'page' ), $s28, $e28 );
 			return is_wp_error( $qp ) ? $qp : array( $one, $q, $qp );
 		}
 	);

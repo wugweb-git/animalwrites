@@ -4,8 +4,8 @@
 
 Related files:
 - `docs/seo/keyword-map.md` (Rank and Priority columns, 21 Oct)
-- `docs/seo/keyword-demand-2026-10-21.md`
-- `docs/seo/rankings-2026-10-21.csv` (130 queries)
+- `docs/seo/keyword-demand-2026-10-21.md` (removed 25 Oct 2026; in git history)
+- `docs/seo/rankings-2026-10-21.csv` (130 queries) (removed 25 Oct 2026; in git history)
 
 ## Fixed decisions (owner)
 
@@ -31,7 +31,7 @@ It holds read-only data and suggested actions.
 
 ## 2. Rename: "Search demand" becomes "Search Insights"
 
-**Where today's screen lives.** It is Tools → Search demand, from `plugins/aw-seo-extras/includes/search-demand.php`:
+**Where the old screen lived.** It was Tools → Search demand, from `plugins/aw-seo-extras/includes/search-demand.php` (removed 25 Oct 2026: its Search Console call is `aw_si_gsc_query()`, its gaps an Overview box, its address opens the Keywords tab):
 - address `tools.php?page=aw-search-demand`, capability `aw_sd_cap()`;
 - option `aw_search_demand`;
 - cron `aw_search_demand_refresh`, daily at 07:00 IST.

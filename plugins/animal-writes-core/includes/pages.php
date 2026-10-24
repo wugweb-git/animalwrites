@@ -494,11 +494,14 @@ function aw_elsewhere_screen() {
 	$rows = array_merge( aw_elsewhere_links(), array_fill( 0, 4, array() ) );
 	echo '<div class="wrap"><h1>Contact links</h1><p>Shown under "Elsewhere" on the <a href="' . esc_url( home_url( '/contact/' ) ) . '" target="_blank">Contact</a> page; the section stays hidden while this list is empty. Use the platform name as the label (for example Instagram).</p><form method="post">';
 	wp_nonce_field( 'aw_elsewhere' );
-	echo '<table class="widefat striped"><thead><tr><th>Label</th><th>Link</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $rows as $i => $r ) {
-		echo '<tr><td><input type="text" name="aw_elsewhere[' . (int) $i . '][label]" value="' . esc_attr( (string) ( $r['label'] ?? '' ) ) . '"></td><td><input type="url" class="large-text" name="aw_elsewhere[' . (int) $i . '][url]" value="' . esc_attr( (string) ( $r['url'] ?? '' ) ) . '"></td></tr>';
+		$cells[] = array(
+			'label' => '<input type="text" name="aw_elsewhere[' . (int) $i . '][label]" value="' . esc_attr( (string) ( $r['label'] ?? '' ) ) . '">',
+			'url'   => '<input type="url" class="large-text" name="aw_elsewhere[' . (int) $i . '][url]" value="' . esc_attr( (string) ( $r['url'] ?? '' ) ) . '">',
+		);
 	}
-	echo '</tbody></table>';
+	aw_core_simple_table( 'contact-links', array( 'label' => 'Label', 'url' => 'Link' ), $cells ); // inside the form: the table prints no nonce of its own
 	submit_button();
 	echo '</form></div>';
 }

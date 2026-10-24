@@ -2,7 +2,7 @@
 /**
  * Site Kit modules, each read as its own owner (plan §5.1). Site Kit lets Search Console, Analytics 4 and PageSpeed be
  * connected by different users; a module is built and called with the user in its own settings' ownerID, never another
- * module's owner. Same module layer as aw_sd_sitekit() (search-demand.php); Site Kit's tokens are never read here.
+ * module's owner. Site Kit's own module layer; its tokens are never read here.
  *
  * @package aw-seo-extras
  */

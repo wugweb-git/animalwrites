@@ -30,7 +30,48 @@ const AW_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit
 const AW_SI_GSC_SPLIT    = 50; // Pages fetched one by one on a day whose query + page rows hit the limit.
 
 /**
- * One searchanalytics request for one day: aw_sd_query() of search-demand.php, for a single date.
+ * Rows of one searchanalytics request through Site Kit's module, as plain arrays: keys, clicks, impressions, position.
+ * $url limits the rows to one page (Site Kit's only filter; it does not pass startRow, so this is how a day over the
+ * 5,000-row limit is split).
+ *
+ * @param object $module Site Kit's Search Console module.
+ * @param array  $dims   Dimensions.
+ * @param string $start  First date (Y-m-d).
+ * @param string $end    Last date (Y-m-d).
+ * @param string $url    Only this page (full URL), or '' for the whole site.
+ * @return array|WP_Error
+ */
+function aw_si_gsc_query( $module, array $dims, string $start, string $end, string $url = '' ) {
+	$args = array(
+		'dimensions' => $dims,
+		'startDate'  => $start,
+		'endDate'    => $end,
+		'limit'      => AW_SI_GSC_LIMIT,
+	);
+	if ( '' !== $url ) {
+		$args['url'] = $url;
+	}
+	try {
+		$r = $module->get_data( 'searchanalytics', $args );
+	} catch ( Throwable $e ) {
+		return new WP_Error( 'aw_si_gsc', $e->getMessage() );
+	}
+	if ( is_wp_error( $r ) ) {
+		return $r;
+	}
+	$rows = array();
+	foreach ( (array) $r as $row ) {
+		if ( is_object( $row ) && method_exists( $row, 'getKeys' ) ) {
+			$rows[] = array( (array) $row->getKeys(), (int) $row->getClicks(), (int) $row->getImpressions(), (float) $row->getPosition() );
+		} elseif ( is_array( $row ) ) {
+			$rows[] = array( (array) ( $row['keys'] ?? array() ), (int) ( $row['clicks'] ?? 0 ), (int) ( $row['impressions'] ?? 0 ), (float) ( $row['position'] ?? 0 ) );
+		}
+	}
+	return $rows;
+}
+
+/**
+ * One searchanalytics request for one day.
  *
  * @param object $module Site Kit's Search Console module.
  * @param array  $dims   Dimensions, e.g. date + query.
@@ -39,7 +80,7 @@ const AW_SI_GSC_SPLIT    = 50; // Pages fetched one by one on a day whose query 
  * @return array|WP_Error Rows as [keys, clicks, impressions, position].
  */
 function aw_si_gsc_rows( $module, array $dims, string $day, string $url = '' ) {
-	return aw_sd_query( $module, $dims, $day, $day, $url );
+	return aw_si_gsc_query( $module, $dims, $day, $day, $url );
 }
 
 /**

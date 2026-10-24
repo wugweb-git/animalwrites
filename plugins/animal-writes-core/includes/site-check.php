@@ -94,11 +94,17 @@ function aw_site_check_page() {
 	}
 	$bad = array_filter( $last['rows'], fn( $r ) => '' !== $r[4] );
 	echo '<div class="notice ' . ( $bad ? 'notice-error' : 'notice-success' ) . ' inline"><p><strong>' . esc_html( $bad ? count( $bad ) . ' of ' . count( $last['rows'] ) . ' pages have a problem.' : 'All ' . count( $last['rows'] ) . ' pages open cleanly.' ) . '</strong> Checked ' . esc_html( $last['at'] ) . '.</p></div>';
-	echo '<table class="widefat striped" style="max-width:900px"><thead><tr><th>Page</th><th>Address</th><th>Status</th><th>Time</th><th>Problem</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $last['rows'] as $r ) {
-		echo '<tr><td>' . esc_html( $r[0] ) . '</td><td><a href="' . esc_url( home_url( $r[1] ) ) . '" target="_blank">' . esc_html( $r[1] ) . '</a></td><td>' . ( '' === $r[4] ? '✓ ' : '✗ ' ) . (int) $r[2] . '</td><td>' . (int) $r[3] . ' ms</td><td>' . esc_html( $r[4] ) . '</td></tr>';
+		$cells[] = array(
+			'page'    => esc_html( $r[0] ),
+			'address' => '<a href="' . esc_url( home_url( $r[1] ) ) . '" target="_blank">' . esc_html( $r[1] ) . '</a>',
+			'status'  => ( '' === $r[4] ? '✓ ' : '✗ ' ) . (int) $r[2],
+			'time'    => (int) $r[3] . ' ms',
+			'problem' => esc_html( $r[4] ),
+		);
 	}
-	echo '</tbody></table>';
+	aw_core_simple_table( 'site-check', array( 'page' => 'Page', 'address' => 'Address', 'status' => 'Status', 'time' => 'Time', 'problem' => 'Problem' ), $cells );
 	do_action( 'aw_site_check_after' ); // e.g. the daily backup line
 	echo '</div>';
 }

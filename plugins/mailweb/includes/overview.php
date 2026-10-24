@@ -112,13 +112,22 @@ function mailweb_overview_render( $max, $compact = false ) {
 			echo '<p>' . esc_html__( 'No messages in the Inbox.', 'mailweb' ) . '</p>';
 			continue;
 		}
-		echo '<table class="widefat striped" style="table-layout:fixed;overflow-wrap:anywhere"><thead><tr><th scope="col"' . ( $compact ? ' style="width:30%"' : '' ) . '>' . esc_html__( 'From', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Subject', 'mailweb' ) . '</th><th scope="col" style="width:' . ( $compact ? '7.5em' : '8.5em' ) . '">' . esc_html__( 'Date', 'mailweb' ) . '</th>' . ( $compact ? '' : '<th scope="col" style="width:8em"><span class="screen-reader-text">' . esc_html__( 'Webmail', 'mailweb' ) . '</span></th>' ) . '</tr></thead><tbody>';
-		foreach ( $msgs as $m ) {
-			$b    = $m['unseen'] ? array( '<strong>', '</strong>' ) : array( '', '' );
-			$from = $compact ? (string) ( $m['name'] ?? $m['from'] ) : $m['from'];
-			echo '<tr><td>' . $b[0] . esc_html( $from ) . $b[1] . '</td><td>' . $b[0] . esc_html( '' !== $m['subject'] ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . $b[1] . ( $m['unseen'] ? ' <span class="screen-reader-text">' . esc_html__( '(unread)', 'mailweb' ) . '</span>' : '' ) . '</td><td>' . mailweb_overview_date( $m['date'] ) . '</td>' . ( $compact ? '' : '<td>' . $link . '</td>' ) . '</tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
+		$cols = array( 'from' => esc_html__( 'From', 'mailweb' ), 'subject' => esc_html__( 'Subject', 'mailweb' ), 'date' => esc_html__( 'Date', 'mailweb' ) );
+		if ( ! $compact ) {
+			$cols['webmail'] = '<span class="screen-reader-text">' . esc_html__( 'Webmail', 'mailweb' ) . '</span>';
 		}
-		echo '</tbody></table>';
+		$rows = array();
+		foreach ( $msgs as $m ) {
+			$b      = $m['unseen'] ? array( '<strong>', '</strong>' ) : array( '', '' );
+			$from   = $compact ? (string) ( $m['name'] ?? $m['from'] ) : $m['from'];
+			$rows[] = array(
+				'from'    => $b[0] . esc_html( $from ) . $b[1],
+				'subject' => $b[0] . esc_html( '' !== $m['subject'] ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . $b[1] . ( $m['unseen'] ? ' <span class="screen-reader-text">' . esc_html__( '(unread)', 'mailweb' ) . '</span>' : '' ),
+				'date'    => mailweb_overview_date( $m['date'] ),
+				'webmail' => $link,
+			);
+		}
+		mailweb_simple_table( 'mail-' . sanitize_key( $key ), $cols, $rows, array( 'fixed' => true ) ); // fixed: long addresses wrap in the narrow dashboard box
 		if ( $compact ) {
 			echo '<p>' . $link . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- built from escaped parts
 		}

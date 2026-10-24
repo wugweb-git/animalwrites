@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: AW Sourcing
- * Description: What the workers fetch and how it arrives: Settings → Sourcing (publishers, keywords, feeds, Library, opportunity and press sources, categories, summary rules, rejected items, enrichment, relay, AI models), the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment), auto-review and Inbox → To review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives: Settings → Sourcing (sources, keywords, feeds, press queries, categories, summary rules, rejected items, enrichment, relay, AI models), the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment), auto-review and Inbox → To review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
@@ -34,8 +34,9 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
-// Order matters for the Settings → Sourcing tabs (Publishers, Keywords, then these in this order).
+// Order matters for the Settings → Sourcing tabs (Sources, Keywords, then these in this order).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
+require_once AW_SOURCING_DIR . 'includes/source-sites.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-lists.php';
 require_once AW_SOURCING_DIR . 'includes/summary-rules-admin.php';
 require_once AW_SOURCING_DIR . 'includes/relevance.php';
@@ -56,6 +57,7 @@ require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';
+require_once AW_SOURCING_DIR . 'includes/sourcing-terms-admin.php';
 // Workers you can organise and AI keys attached to workers (owner, 24 Oct 2026).
 require_once AW_SOURCING_DIR . 'includes/workers-meta.php';
 require_once AW_SOURCING_DIR . 'includes/workers-admin.php';

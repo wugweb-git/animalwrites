@@ -130,3 +130,16 @@ function aw_si_final_path( string $path ): string {
 	}
 	return $path;
 }
+
+// The old Search demand screen (removed 25 Oct 2026): its daily job and stored figures go, once, on the next admin load.
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'aw_si_sd_removed' ) ) {
+			return;
+		}
+		wp_clear_scheduled_hook( 'aw_search_demand_refresh' );
+		delete_option( 'aw_search_demand' );
+		update_option( 'aw_si_sd_removed', time(), false );
+	}
+);

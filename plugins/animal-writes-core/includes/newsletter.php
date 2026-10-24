@@ -218,15 +218,11 @@ function aw_nl_admin_page() {
 	echo '<p class="description">Newsletters are sent from the external mailing service, not from WordPress.</p>';
 	$export = wp_nonce_url( admin_url( 'admin-post.php?action=aw_nl_export' ), 'aw_nl_export' );
 	echo '<p><a class="button" href="' . esc_url( $export ) . '">Export sign-ups (CSV)</a></p>';
-	echo '<table class="widefat striped"><thead><tr><th>Email</th><th>Name</th><th>Source</th><th>Status</th><th>Signed up</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( $rows as $r ) {
-		echo '<tr><td>' . esc_html( $r['email'] ) . '</td><td>' . esc_html( $r['name'] ) . '</td><td>' . esc_html( $r['source'] ) . '</td><td>' . esc_html( $r['status'] ) . '</td><td>' . esc_html( substr( (string) $r['created_at'], 0, 10 ) ) . '</td></tr>';
+		$cells[] = array( 'email' => esc_html( $r['email'] ), 'name' => esc_html( $r['name'] ), 'source' => esc_html( $r['source'] ), 'status' => esc_html( $r['status'] ), 'created' => esc_html( substr( (string) $r['created_at'], 0, 10 ) ) );
 	}
-	echo '</tbody></table>';
-	$pages = (int) ceil( $total / 50 );
-	if ( $pages > 1 ) {
-		echo '<p>' . paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => $pages ) ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	}
+	aw_core_simple_table( 'sign-ups', array( 'email' => 'Email', 'name' => 'Name', 'source' => 'Source', 'status' => 'Status', 'created' => 'Signed up' ), $cells, array( 'per_page' => 50, 'total' => $total, 'empty' => 'No sign-ups yet.' ) );
 	echo '</div>';
 }
 

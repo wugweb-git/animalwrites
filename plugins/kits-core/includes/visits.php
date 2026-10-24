@@ -201,12 +201,14 @@ add_action(
 			'aw_visits',
 			get_bloginfo( 'name' ) . ' visits',
 			function () {
-				echo '<p><strong>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_total', 0 ) ) ) . '</strong> visits since ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . '</p><table class="widefat striped"><tbody>';
+				echo '<p><strong>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_total', 0 ) ) ) . '</strong> visits since ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . '</p>';
+				$cells = array();
 				for ( $i = 0; $i < 14; $i++ ) {
-					$d = gmdate( 'Ymd', time() - $i * DAY_IN_SECONDS );
-					echo '<tr><td>' . esc_html( wp_date( 'j M', strtotime( $d ) ) ) . '</td><td>' . esc_html( number_format_i18n( (int) get_option( 'aw_visits_' . $d, 0 ) ) ) . '</td></tr>';
+					$d       = gmdate( 'Ymd', time() - $i * DAY_IN_SECONDS );
+					$cells[] = array( 'day' => esc_html( wp_date( 'j M', strtotime( $d ) ) ), 'n' => esc_html( number_format_i18n( (int) get_option( 'aw_visits_' . $d, 0 ) ) ) );
 				}
-				echo '</tbody></table><p class="description">One count per browser session; bots and logged-in editors excluded. Google Analytics remains the detailed source.</p>';
+				kits_simple_table( 'visits', array( 'day' => 'Day', 'n' => 'Visits' ), $cells );
+				echo '<p class="description">One count per browser session; bots and logged-in editors excluded. Google Analytics remains the detailed source.</p>';
 				if ( current_user_can( 'manage_options' ) ) { // the count from day 0: add the visits before this counter started
 					echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_visits_baseline">' . wp_nonce_field( 'aw_visits_baseline', '_wpnonce', true, false )
 						. '<p><label>Visits before ' . esc_html( (string) get_option( 'aw_visits_since' ) ) . ' (from Google Analytics or the 1.0 site)<br><input type="number" min="0" name="base" value="' . (int) get_option( 'aw_visits_baseline', 0 ) . '"></label> '

@@ -105,12 +105,18 @@ function aw_team_dates_screen() {
 	}
 	echo '</tr></tbody></table>';
 
-	echo '<h2 style="margin-top:28px">All dates</h2><table class="widefat striped" style="max-width:1100px"><thead><tr><th style="width:120px">Date</th><th style="width:110px">When</th><th>What</th><th style="width:90px"></th></tr></thead><tbody>';
+	echo '<h2 style="margin-top:28px">All dates</h2>';
+	$cells = array();
 	foreach ( $dates as $i => $d ) {
-		$del = wp_nonce_url( admin_url( 'admin-post.php?action=aw_dates_delete&i=' . (int) $i . '&d=' . rawurlencode( $d['date'] ) ), 'aw_dates_delete_' . $i );
-		echo '<tr><td>' . esc_html( aw_team_date_label( $d['date'] ) ) . '</td><td>' . esc_html( aw_team_date_when( $d['date'] ) ) . '</td><td><strong>' . esc_html( $d['title'] ) . '</strong>' . ( '' !== $d['note'] ? '<br><span class="description">' . esc_html( $d['note'] ) . '</span>' : '' ) . '</td><td><a href="' . esc_url( $del ) . '" onclick="return confirm(\'Remove this date?\')">Remove</a></td></tr>';
+		$del     = wp_nonce_url( admin_url( 'admin-post.php?action=aw_dates_delete&i=' . (int) $i . '&d=' . rawurlencode( $d['date'] ) ), 'aw_dates_delete_' . $i );
+		$cells[] = array(
+			'date'   => esc_html( aw_team_date_label( $d['date'] ) ),
+			'when'   => esc_html( aw_team_date_when( $d['date'] ) ),
+			'what'   => '<strong>' . esc_html( $d['title'] ) . '</strong>' . ( '' !== $d['note'] ? '<br><span class="description">' . esc_html( $d['note'] ) . '</span>' : '' ),
+			'remove' => '<a href="' . esc_url( $del ) . '" onclick="return confirm(\'Remove this date?\')">Remove</a>',
+		);
 	}
-	echo '</tbody></table>';
+	aw_core_simple_table( 'dates', array( 'date' => 'Date', 'when' => 'When', 'what' => 'What', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells, array( 'empty' => 'No dates yet.' ) );
 
 	echo '<h2 style="margin-top:28px">Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false );
 	echo '<p><label>Date <input type="date" name="date" required></label> <label>What <input type="text" name="title" class="regular-text" required></label></p><p><label>Note<br><textarea name="note" rows="3" class="large-text" style="max-width:640px"></textarea></label></p><p><button class="button button-primary">Add</button></p></form></div>';

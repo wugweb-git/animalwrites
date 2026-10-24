@@ -938,7 +938,7 @@ add_action(
 	'aw_site_check_after',
 	function () {
 		$c = aw_cc0_counts();
-		echo '<h2>Pictures on News, Library and research items</h2><table class="widefat striped" style="max-width:600px"><tbody>';
+		echo '<h2>Pictures on News, Library and research items</h2><table class="form-table" role="presentation"><tbody>';
 		foreach (
 			array(
 				'Items (published, without a document page)'          => $c['total'] ?? 0,
@@ -951,7 +951,7 @@ add_action(
 				'No suitable CC0 photo after ' . AW_CC0_MAX_ATTEMPTS . ' tries' => $c['gave_up'] ?? 0,
 			) as $k => $v
 		) {
-			echo '<tr><td>' . esc_html( $k ) . '</td><td>' . (int) $v . '</td></tr>';
+			echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . (int) $v . '</td></tr>';
 		}
 		$q = (array) get_option( 'aw_ov_quota', array() );
 		echo '</tbody></table><p>Openverse requests today: ' . (int) ( ( $q['d'] ?? '' ) === gmdate( 'Y-m-d' ) ? $q['n'] : 0 ) . ' of ' . (int) AW_CC0_DAILY_REQUESTS . '. Next run: ' . esc_html( wp_next_scheduled( 'aw_cc0_run' ) ? wp_date( 'j M H:i', wp_next_scheduled( 'aw_cc0_run' ) ) : 'not scheduled' ) . '.</p>';

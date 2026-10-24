@@ -1,8 +1,9 @@
 <?php
 /**
  * Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
- * Publishers (whose articles are accepted), Keywords (the one word list) and the Change log; this adds News feeds (RSS and Google News queries), Library sources
- * (AWBI, PIB, Gazette, courts), Opportunity sources, Press-discovery queries and Categories (keyword → category).
+ * Sources (publishers and press sites), Keywords (the one word list) and the Change log; this adds Feeds (one list of the
+ * News feeds: RSS and Google News queries, Library sources: AWBI, PIB, Gazette, courts, and Opportunity sources),
+ * Press-discovery queries and Categories (keyword → category).
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
  * sources, categories, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
@@ -47,23 +48,31 @@ function aw_gnews_query( $url ) {
 	return (string) ( $q['q'] ?? '' );
 }
 
-/** Tab → source type in the lists. */
-const AW_SOURCE_TABS = array(
-	'feeds'         => array( 'News feeds', 'news' ),
-	'library'       => array( 'Library sources', 'legal' ),
-	'opportunities' => array( 'Opportunity sources', 'opportunity' ),
+/**
+ * Source types on the Feeds tab: type => [label, the tab their changes are logged under]. The log keeps the tab names
+ * of before 24 Oct 2026 (feeds, library, opportunities), when each type had its own tab.
+ */
+const AW_SOURCE_TYPES = array(
+	'news'        => array( 'News', 'feeds' ),
+	'legal'       => array( 'Library', 'library' ),
+	'opportunity' => array( 'Opportunity', 'opportunities' ),
 );
 
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		foreach ( AW_SOURCE_TABS as $slug => $t ) {
-			$tabs[ $slug ] = array( $t[0], fn() => aw_sources_tab( $slug ) );
-		}
+		$tabs['feeds']      = array( 'Feeds', 'aw_sources_tab', true ); // its own forms: the search (GET) and the list or edit form (POST)
 		$tabs['press']      = array( 'Press queries', 'aw_sources_press_tab', true ); // Settings API forms (options.php)
 		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );
 		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab', true );
 		return $tabs;
+	}
+);
+add_filter(
+	'kits_sourcing_title_action',
+	function ( $add ) {
+		$add['feeds'] = array( 'Add New Feed', admin_url( 'options-general.php?page=aw-sourcing&tab=feeds&edit=new' ) );
+		return $add;
 	}
 );
 
@@ -89,54 +98,74 @@ add_action(
 	}
 );
 
-/** One list of sources (News feeds, Library sources or Opportunity sources): the list, or one source to edit or add. */
-function aw_sources_tab( $slug ) {
-	$type = AW_SOURCE_TABS[ $slug ][1];
+/** The Feeds tab: every source (News, Library, Opportunity) in one list, or one source to edit or add. */
+function aw_sources_tab() {
 	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $edit ) {
-		aw_sources_edit_form( $slug, $edit );
+		aw_sources_edit_form( $edit, sanitize_key( $_GET['type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		return;
 	}
-	$intro = 'news' === $type ? 'RSS feeds and Google News searches.' : ( 'legal' === $type ? 'Where Library documents and legal news come from. Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here.' : 'Where opportunities come from. Only their name and on/off can change here; new kinds of site need code.' );
-	echo '<p>' . esc_html( $intro ) . ' "Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word).'
-		. ( 'opportunity' !== $type ? ' <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=' . $slug . '&edit=new' ) ) . '" class="page-title-action">Add a source</a>' : '' ) . '</p>';
+	echo '<p>News: RSS feeds and Google News searches. Library: where Library documents and legal news come from (Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here). Opportunity: where opportunities come from (only name and on/off; new kinds of site need code). "Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word).</p>';
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
 	require_once __DIR__ . '/class-aw-sourcing-sources-table.php';
-	$table = new AW_Sourcing_Sources_Table( $slug );
+	$table = new AW_Sourcing_Sources_Table();
 	$table->prepare_items();
 	$table->views();
-	// Search: a GET form outside this POST form (printed at the top of the screen); the fields point at it.
-	$find = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<p class="search-box"><label class="screen-reader-text" for="aw-src-s">Search sources:</label><input type="search" id="aw-src-s" name="s" value="' . esc_attr( $find ) . '" form="aw-src-search"> <input type="submit" class="button" value="Search sources" form="aw-src-search"></p>';
+	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="feeds">';
+	foreach ( array( 'type' => array_keys( AW_SOURCE_TYPES ), 'state' => array( 'on', 'off' ) ) as $k => $ok ) {
+		$v = sanitize_key( $_GET[ $k ] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $v, $ok, true ) ) {
+			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
+		}
+	}
+	$table->search_box( 'Search feeds', 'aw-src' );
+	echo '</form>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="feeds">';
+	wp_nonce_field( 'aw_sourcing' );
 	$table->display();
+	echo '</form>';
 }
 
-/** Edit one source, or add one (edit=new), in the core form-table layout. Saves through the tab's own save hook. */
-function aw_sources_edit_form( $slug, $id ) {
-	$type = AW_SOURCE_TABS[ $slug ][1];
-	$src  = null;
+/**
+ * Edit one source, or add one (edit=new; the type is chosen on the form), in the core form-table layout. Saves
+ * through the Feeds tab's save hook.
+ *
+ * @param string $id   Source id, or 'new'.
+ * @param string $type Source type from the address ('' for the first source with that id).
+ */
+function aw_sources_edit_form( $id, $type ) {
+	$src = null;
 	foreach ( (array) aw_sources_config()['sources'] as $s ) {
-		if ( ( $s['id'] ?? '' ) === $id && ( $s['type'] ?? '' ) === $type ) {
+		if ( ! $src && ( $s['id'] ?? '' ) === $id && ( '' === $type || ( $s['type'] ?? '' ) === $type ) ) {
 			$src = $s;
 		}
 	}
-	$new = 'new' === $id;
+	$new  = 'new' === $id;
+	$back = admin_url( 'options-general.php?page=aw-sourcing&tab=feeds' );
 	if ( ! $new && ! $src ) {
-		echo '<div class="notice notice-error inline"><p>No such source.</p></div>';
+		echo '<div class="notice notice-error inline"><p>No such feed.</p></div><p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
 		return;
 	}
 	if ( $new && 'opportunity' === $type ) {
-		echo '<div class="notice notice-warning inline"><p>New kinds of opportunity site need code.</p></div>';
+		echo '<div class="notice notice-warning inline"><p>New kinds of opportunity site need code.</p></div><p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
 		return;
 	}
-	$src  = $src ? $src : array( 'id' => '', 'name' => '', 'kind' => 'rss', 'url' => '', 'on' => true, 'filter' => true );
-	$rss  = 'rss' === $src['kind'];
-	$q    = aw_gnews_query( $src['url'] );
-	$back = admin_url( 'options-general.php?page=aw-sourcing&tab=' . $slug );
-	echo '<h2>' . esc_html( $new ? 'Add a source' : 'Edit ' . $src['name'] ) . '</h2>';
+	$src = $src ? $src : array( 'id' => '', 'name' => '', 'kind' => 'rss', 'type' => in_array( $type, array( 'news', 'legal' ), true ) ? $type : 'news', 'url' => '', 'on' => true, 'filter' => true );
+	$rss = 'rss' === $src['kind'];
+	$q   = aw_gnews_query( $src['url'] );
+	echo '<h2>' . esc_html( $new ? 'Add New Feed' : 'Edit Feed' ) . '</h2>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="feeds">';
+	wp_nonce_field( 'aw_sourcing' );
 	echo '<input type="hidden" name="src[0][id]" value="' . esc_attr( $src['id'] ) . '"><table class="form-table" role="presentation"><tbody>';
+	echo '<tr><th scope="row"><label for="aw-src-type">Type</label></th><td>';
+	if ( $new ) {
+		echo '<select id="aw-src-type" name="src[0][type]"><option value="news"' . selected( $src['type'], 'news', false ) . '>News</option><option value="legal"' . selected( $src['type'], 'legal', false ) . '>Library</option></select><p class="description">News: news items. Library: Library documents and legal news. New kinds of opportunity site need code.</p>';
+	} else {
+		echo '<input type="hidden" name="src[0][type]" value="' . esc_attr( (string) $src['type'] ) . '">' . esc_html( AW_SOURCE_TYPES[ $src['type'] ][0] ?? (string) $src['type'] );
+	}
+	echo '</td></tr>';
 	echo '<tr><th scope="row"><label for="aw-src-name">Name</label></th><td><input type="text" id="aw-src-name" class="regular-text" name="src[0][name]" value="' . esc_attr( $src['name'] ) . '" required></td></tr>';
 	echo '<tr><th scope="row"><label for="aw-src-url">Feed URL or Google News search</label></th><td>'
 		. ( $rss ? '<input type="text" id="aw-src-url" class="large-text" name="src[0][url]" value="' . esc_attr( $q ? $q : $src['url'] ) . '" placeholder="https://… feed, or Google News search words"' . ( $new ? ' required' : '' ) . '><p class="description">For a Google News search, write only the search words.</p>' : '<code>' . esc_html( $src['url'] ) . '</code><p class="description">' . esc_html( $src['kind'] ) . ': needs code to change.</p>' )
@@ -146,47 +175,35 @@ function aw_sources_edit_form( $slug, $id ) {
 		echo '<tr><th scope="row">Keyword check</th><td><label><input type="checkbox" name="src[0][filter]" value="1"' . checked( ! empty( $src['filter'] ), true, false ) . '> Keep only items with a word from the Keywords tab</label></td></tr>';
 	}
 	echo '</tbody></table>';
-	submit_button( $new ? 'Add source' : 'Save source', 'primary', 'submit', false );
-	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a>';
+	submit_button( $new ? 'Add Feed' : 'Update', 'primary', 'submit', false );
+	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a></form>';
 }
 
-// Screen options: sources per page (News feeds, Library sources, Opportunity sources).
+// Screen options: sources per page (Feeds tab).
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( isset( AW_SOURCE_TABS[ sanitize_key( $_GET['tab'] ?? '' ) ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'feeds' === sanitize_key( $_GET['tab'] ?? '' ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_sources_per_page' ) );
 		}
 	}
 );
 add_filter( 'set_screen_option_aw_sources_per_page', fn( $keep, $option, $value ) => max( 1, min( 200, (int) $value ) ), 10, 3 );
 
-// The sources search form, outside the screen's POST form (the search fields in the tab point at it with form=).
-add_action(
-	'kits_sourcing_page_top',
-	function () {
-		$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( isset( AW_SOURCE_TABS[ $tab ] ) ) {
-			$state = sanitize_key( $_GET['state'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<form id="aw-src-search" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">'
-				. ( in_array( $state, array( 'on', 'off' ), true ) ? '<input type="hidden" name="state" value="' . esc_attr( $state ) . '">' : '' ) . '</form>';
-		}
-	}
-);
-
 /**
- * Row and bulk actions of a sources list: on / off and keyword check on / off. Returns true when it handled the
- * request (the edit form's rows are then not read).
+ * Row and bulk actions of the Feeds list: on / off and keyword check on / off. A row is "type|id" (an id alone, from a
+ * form of before the merge, matches any type). Logged per type under the tab of before (feeds, library,
+ * opportunities). Returns true when it handled the request (the edit form's rows are then not read).
  */
-function aw_sources_list_action( $type, $tab ) {
+function aw_sources_list_action() {
 	$row = sanitize_text_field( wp_unslash( $_POST['src_row'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
 	if ( false !== strpos( $row, ':' ) ) {
 		list( $op, $one ) = explode( ':', $row, 2 );
-		$ids              = array( sanitize_key( $one ) );
+		$ids              = array( $one );
 	} else {
 		$op  = sanitize_key( $_POST['src_bulk'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		$op  = '' !== $op ? $op : sanitize_key( $_POST['src_bulk2'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		$ids = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['ids'] ?? array() ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 	$op = sanitize_key( $op );
 	if ( ! in_array( $op, array( 'on', 'off', 'filter_on', 'filter_off' ), true ) ) {
@@ -195,25 +212,37 @@ function aw_sources_list_action( $type, $tab ) {
 		}
 		return false;
 	}
+	$want = array();
+	foreach ( $ids as $one ) {
+		$parts  = explode( '|', (string) $one, 2 );
+		$want[] = 2 === count( $parts ) ? array( sanitize_key( $parts[0] ), sanitize_key( $parts[1] ) ) : array( '', sanitize_key( $parts[0] ) );
+	}
 	$c    = aw_sources_config();
 	$what = array();
 	foreach ( $c['sources'] as &$s ) {
-		if ( ( $s['type'] ?? '' ) !== $type || ! in_array( $s['id'], $ids, true ) ) {
+		$t   = (string) ( $s['type'] ?? '' );
+		$hit = false;
+		foreach ( $want as $w ) {
+			$hit = $hit || ( $w[1] === $s['id'] && ( '' === $w[0] || $w[0] === $t ) );
+		}
+		if ( ! $hit ) {
 			continue;
 		}
 		if ( 'on' === $op || 'off' === $op ) {
 			if ( ( 'on' === $op ) !== (bool) $s['on'] ) {
-				$s['on'] = 'on' === $op;
-				$what[]  = $s['name'] . ' ' . $op;
+				$s['on']      = 'on' === $op;
+				$what[ $t ][] = $s['name'] . ' ' . $op;
 			}
 		} elseif ( 'rss' === ( $s['kind'] ?? '' ) && ( 'filter_on' === $op ) !== (bool) $s['filter'] ) {
-			$s['filter'] = 'filter_on' === $op;
-			$what[]      = $s['name'] . ' keyword check ' . ( $s['filter'] ? 'on' : 'off' );
+			$s['filter']  = 'filter_on' === $op;
+			$what[ $t ][] = $s['name'] . ' keyword check ' . ( $s['filter'] ? 'on' : 'off' );
 		}
 	}
 	unset( $s );
 	update_option( 'aw_sources', $c, false );
-	kits_sourcing_log( $tab, implode( ' · ', $what ) );
+	foreach ( $what as $t => $w ) {
+		kits_sourcing_log( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', implode( ' · ', $w ) );
+	}
 	aw_sources_list_back( (bool) $what );
 	return true;
 }
@@ -227,70 +256,75 @@ function aw_sources_list_back( $changed ) {
 	exit;
 }
 
-foreach ( array_keys( AW_SOURCE_TABS ) as $aw_tab ) {
-	add_action(
-		'kits_sourcing_save_' . $aw_tab,
-		function () use ( $aw_tab ) {
-			if ( aw_sources_list_action( AW_SOURCE_TABS[ $aw_tab ][1], $aw_tab ) ) {
-				return; // a row or bulk action of the list
-			}
-			$c     = aw_sources_config();
-			$type  = AW_SOURCE_TABS[ $aw_tab ][1];
-			$rows  = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
-			$byid  = array();
-			$what  = array();
-			foreach ( $c['sources'] as $n => $s ) {
-				$byid[ $s['id'] ] = $n;
-			}
-			foreach ( $rows as $r ) {
-				$id   = sanitize_key( $r['id'] ?? '' );
-				$name = sanitize_text_field( $r['name'] ?? '' );
-				$url  = trim( sanitize_text_field( $r['url'] ?? '' ) );
-				$on   = ! empty( $r['on'] );
-				$flt  = ! empty( $r['filter'] );
-				if ( '' === $id ) { // a new row
-					if ( '' === $name || '' === $url ) {
-						continue;
-					}
-					$url = preg_match( '#^https?://#', $url ) ? esc_url_raw( $url ) : aw_gnews_url( $url );
-					$new = array( 'id' => sanitize_title( ( false !== strpos( $url, 'news.google.com' ) ? 'gnews-' : '' ) . $name ), 'name' => $name, 'kind' => 'rss', 'type' => $type, 'url' => $url, 'on' => $on, 'filter' => $flt );
-					if ( 'legal' === $type ) {
-						$new['source_type'] = 'auto-court';
-					}
-					$c['sources'][] = $new;
-					$what[]         = 'added ' . $name;
-					continue;
-				}
-				if ( ! isset( $byid[ $id ] ) ) {
-					continue;
-				}
-				$s = &$c['sources'][ $byid[ $id ] ];
-				if ( $s['on'] !== $on ) {
-					$what[] = $s['name'] . ( $on ? ' on' : ' off' );
-				}
-				$s['on'] = $on;
-				if ( '' !== $name && $name !== $s['name'] ) {
-					$what[]    = $s['name'] . ' renamed ' . $name;
-					$s['name'] = $name;
-				}
-				if ( 'rss' === $s['kind'] && '' !== $url ) {
-					$url = preg_match( '#^https?://#', $url ) ? esc_url_raw( $url ) : aw_gnews_url( $url );
-					if ( $url !== $s['url'] ) {
-						$what[]   = $s['name'] . ' address changed';
-						$s['url'] = $url;
-					}
-					if ( (bool) $s['filter'] !== $flt ) {
-						$what[]      = $s['name'] . ' keyword check ' . ( $flt ? 'on' : 'off' );
-						$s['filter'] = $flt;
-					}
-				}
-				unset( $s );
-			}
-			update_option( 'aw_sources', $c, false );
-			kits_sourcing_log( $aw_tab, implode( ' · ', $what ) );
+// Feeds tab: the list's row and bulk actions, or the Add New / Edit Feed form.
+add_action(
+	'kits_sourcing_save_feeds',
+	function () {
+		if ( aw_sources_list_action() ) {
+			return; // a row or bulk action of the list
 		}
-	);
-}
+		$c    = aw_sources_config();
+		$rows = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+		$what = array();
+		foreach ( $rows as $r ) {
+			$id   = sanitize_key( $r['id'] ?? '' );
+			$type = sanitize_key( $r['type'] ?? '' );
+			$name = sanitize_text_field( $r['name'] ?? '' );
+			$url  = trim( sanitize_text_field( $r['url'] ?? '' ) );
+			$on   = ! empty( $r['on'] );
+			$flt  = ! empty( $r['filter'] );
+			if ( '' === $id ) { // a new feed: News or Library (new kinds of opportunity site need code)
+				$type = in_array( $type, array( 'news', 'legal' ), true ) ? $type : 'news';
+				if ( '' === $name || '' === $url ) {
+					continue;
+				}
+				$url = preg_match( '#^https?://#', $url ) ? esc_url_raw( $url ) : aw_gnews_url( $url );
+				$new = array( 'id' => sanitize_title( ( false !== strpos( $url, 'news.google.com' ) ? 'gnews-' : '' ) . $name ), 'name' => $name, 'kind' => 'rss', 'type' => $type, 'url' => $url, 'on' => $on, 'filter' => $flt );
+				if ( 'legal' === $type ) {
+					$new['source_type'] = 'auto-court';
+				}
+				$c['sources'][]  = $new;
+				$what[ $type ][] = 'added ' . $name;
+				continue;
+			}
+			$at = null;
+			foreach ( $c['sources'] as $n => $s ) {
+				if ( null === $at && $s['id'] === $id && ( '' === $type || ( $s['type'] ?? '' ) === $type ) ) {
+					$at = $n;
+				}
+			}
+			if ( null === $at ) {
+				continue;
+			}
+			$s = &$c['sources'][ $at ];
+			$t = (string) ( $s['type'] ?? '' );
+			if ( $s['on'] !== $on ) {
+				$what[ $t ][] = $s['name'] . ( $on ? ' on' : ' off' );
+			}
+			$s['on'] = $on;
+			if ( '' !== $name && $name !== $s['name'] ) {
+				$what[ $t ][] = $s['name'] . ' renamed ' . $name;
+				$s['name']    = $name;
+			}
+			if ( 'rss' === $s['kind'] && '' !== $url ) {
+				$url = preg_match( '#^https?://#', $url ) ? esc_url_raw( $url ) : aw_gnews_url( $url );
+				if ( $url !== $s['url'] ) {
+					$what[ $t ][] = $s['name'] . ' address changed';
+					$s['url']     = $url;
+				}
+				if ( (bool) $s['filter'] !== $flt ) {
+					$what[ $t ][] = $s['name'] . ' keyword check ' . ( $flt ? 'on' : 'off' );
+					$s['filter']  = $flt;
+				}
+			}
+			unset( $s );
+		}
+		update_option( 'aw_sources', $c, false );
+		foreach ( $what as $t => $w ) {
+			kits_sourcing_log( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', implode( ' · ', $w ) );
+		}
+	}
+);
 
 /*
  * Press queries, Categories and Sections (and Relay, relay.php) save through the Settings API: one option, aw_sources,
@@ -310,13 +344,12 @@ add_action(
 			'',
 			function () {
 				aw_sourcing_settings_marker( 'aw_sources', 'press' );
-				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each site below and on the open web. Results wait in Inbox → Press to review.</p>';
+				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Inbox → Press to review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
 			},
 			'aw-sourcing-press'
 		);
 		$press = fn( $k ) => (array) ( aw_sources_config()['press'][ $k ] ?? array() );
 		add_settings_field( 'aw_press_queries', 'Queries', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'queries' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-pq', 'name' => 'aw_sources[queries]', 'rows' => 10, 'help' => 'One per line.' ) );
-		add_settings_field( 'aw_press_sites', 'Sites', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'sites' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-ps', 'name' => 'aw_sources[sites]', 'rows' => 10, 'help' => 'One per line.' ) );
 		add_settings_field(
 			'aw_press_floor',
 			'Coverage from',
@@ -327,54 +360,6 @@ add_action(
 			'aw_press',
 			array( 'label_for' => 'aw-pf' )
 		);
-
-		// Categories.
-		add_settings_section(
-			'aw_categories',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'categories' );
-				echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
-			},
-			'aw-sourcing-categories'
-		);
-		add_settings_field(
-			'aw_categories_list',
-			'Categories',
-			function ( $a ) {
-				$lines = array();
-				foreach ( (array) aw_sources_config()['categories'] as $slug => $words ) {
-					$lines[] = $slug . ': ' . implode( ', ', (array) $words );
-				}
-				aw_sourcing_textarea_field( $a + array( 'value' => $lines ) );
-			},
-			'aw-sourcing-categories',
-			'aw_categories',
-			array( 'label_for' => 'aw-cats', 'name' => 'aw_sources[categories]', 'rows' => 22 )
-		);
-
-		// Sections: two lists per content type.
-		add_settings_section(
-			'aw_sections',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'sections' );
-				echo '<p>Which categories and tags each section uses. One slug per line. The workers pick only from these lists, and each list\'s filters show only these. An empty Categories list means every category.</p>';
-			},
-			'aw-sourcing-sections'
-		);
-		foreach ( aw_post_types() as $type => $def ) {
-			foreach ( array( 'categories' => 'allowed categories', 'tags' => 'allowed tags' ) as $k => $label ) {
-				add_settings_field(
-					'aw_sections_' . $type . '_' . $k,
-					$def[1] . ': ' . $label,
-					fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => (array) ( aw_sources_config()['sections'][ $type ][ $k ] ?? array() ) ) ),
-					'aw-sourcing-sections',
-					'aw_sections',
-					array( 'label_for' => 'aw-sec-' . $type . '-' . $k, 'name' => 'aw_sources[sections][' . $type . '][' . $k . ']', 'rows' => 6 )
-				);
-			}
-		}
 	}
 );
 
@@ -404,66 +389,14 @@ add_filter(
 	function ( $c, $in ) {
 		$old                   = $c['press'];
 		$c['press']['queries'] = aw_sourcing_lines( $in['queries'] ?? '' );
-		$c['press']['sites']   = aw_sourcing_lines( $in['sites'] ?? '' );
+		if ( array_key_exists( 'sites', (array) $in ) ) { // the Sites field moved to the Sources tab: kept as stored unless posted
+			$c['press']['sites'] = aw_sourcing_lines( $in['sites'] );
+		}
 		$d                     = sanitize_text_field( (string) ( $in['date_floor'] ?? '' ) );
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) {
 			$c['press']['date_floor'] = $d;
 		}
 		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'], $c['press']['sites'] ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
-		return $c;
-	},
-	10,
-	2
-);
-
-/** Categories: words that file an item under a category. */
-function aw_sources_categories_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-categories' );
-}
-add_filter(
-	'aw_sources_save_categories',
-	function ( $c, $in ) {
-		$old  = $c['categories'];
-		$cats = array();
-		foreach ( explode( "\n", sanitize_textarea_field( (string) ( $in['categories'] ?? '' ) ) ) as $line ) {
-			if ( preg_match( '/^\s*([a-z0-9-]+)\s*:\s*(.+)$/u', $line, $m ) ) {
-				$cats[ $m[1] ] = array_values( array_filter( array_map( 'trim', explode( ',', $m[2] ) ) ) );
-			}
-		}
-		$what = array();
-		foreach ( array_unique( array_merge( array_keys( $old ), array_keys( $cats ) ) ) as $slug ) {
-			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $cats[ $slug ] ?? array() );
-		}
-		$c['categories'] = $cats;
-		kits_sourcing_log( 'categories', implode( ' · ', array_filter( $what ) ) );
-		return $c;
-	},
-	10,
-	2
-);
-
-/** Sections: the categories and tags each section may use (the workers classify only within these; hub filters show only these). */
-function aw_sources_sections_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-sections' );
-}
-add_filter(
-	'aw_sources_save_sections',
-	function ( $c, $in ) {
-		$old  = $c['sections'];
-		$in   = (array) ( $in['sections'] ?? array() );
-		$new  = array();
-		$what = array();
-		foreach ( array_keys( aw_post_types() ) as $type ) {
-			foreach ( array( 'categories', 'tags' ) as $k ) {
-				$new[ $type ][ $k ] = array_values( array_unique( array_filter( array_map( 'sanitize_title', preg_split( '/[\s,]+/', (string) ( $in[ $type ][ $k ] ?? '' ) ) ) ) ) );
-				$what[]             = kits_sourcing_diff( $type . ' ' . $k, (array) ( $old[ $type ][ $k ] ?? array() ), $new[ $type ][ $k ] );
-			}
-		}
-		if ( ! array_filter( $what ) ) {
-			return $c; // unchanged: the stored lists keep their order
-		}
-		$c['sections'] = $new;
-		kits_sourcing_log( 'sections', implode( ' · ', array_filter( $what ) ) );
 		return $c;
 	},
 	10,
