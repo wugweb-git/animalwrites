@@ -670,7 +670,7 @@ function aw_sd_sourcing_section( array $data ): void {
 	}
 	$table = new AW_SD_Sourcing_Table( $stats, $data );
 	$table->prepare_items();
-	echo '<h2 id="aw-sd-sourcing">Sourcing keywords <span class="count">(' . aw_sd_num( count( $stats['rows'] ) ) . ')</span></h2>';
+	echo '<h2 id="aw-sd-sourcing">Sourcing keywords <span class="count">(' . aw_sd_num( count( $stats['rows'] ) ) . ')</span></h2>'; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_num escapes.
 	echo '<p class="description">Each English Include word in <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) ) . '">Settings → Sourcing → Keywords</a> is a Google News search in every run. Fetched: the items it brought in since ' . aw_sd_date( (int) $stats['since'] ) . ' (30 days), whatever happened to them since (held, merged, backfilled). Published: those live now. Impressions and clicks: Search Console, last 28 days, for those items\' own pages. Items from before 24 Oct 2026 did not record their search; they are counted by the word in their title or summary and marked estimated, and an item with more than one of the words counts under each. Hindi Include words are not searches and are not listed.</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
 	if ( empty( $data['gsc']['periods']['28d']['pages'] ) ) {
 		echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> Impressions and clicks per item come with the next Search Console refresh (daily at 07:00 IST, or Refresh now).</p></div>';
@@ -743,7 +743,7 @@ if ( is_admin() ) {
 					}
 					$by    = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 					$by    = isset( $this->get_columns()[ $by ] ) ? $by : 'news_f';
-					$asc   = 'asc' === strtolower( (string) ( $_GET['order'] ?? ( 'term' === $by ? 'asc' : 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+					$asc   = 'asc' === sanitize_key( wp_unslash( $_GET['order'] ?? ( 'term' === $by ? 'asc' : 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 					usort(
 						$items,
 						function ( $a, $b ) use ( $by, $asc ) {
