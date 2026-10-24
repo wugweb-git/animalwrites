@@ -284,22 +284,8 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? 'publishers' );
-		if ( ! in_array( $tab, array( 'publishers', 'keywords' ), true ) ) {
+		if ( 'publishers' !== $tab ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
-		} elseif ( 'keywords' === $tab ) {
-			$rel                     = aw_relevance(); // the two switches; the word lists save from their list table (aw_sourcing_keywords)
-			$old                     = $rel;
-			$rel['enabled']          = ! empty( $_POST['enabled'] );
-			$rel['gnews_allow_only'] = ! empty( $_POST['gnews_allow_only'] );
-			update_option( AW_REL_OPTION, $rel, false );
-			$what = array();
-			if ( ! empty( $old['enabled'] ) !== $rel['enabled'] ) {
-				$what[] = 'keyword check ' . ( $rel['enabled'] ? 'on' : 'off' );
-			}
-			if ( ! empty( $old['gnews_allow_only'] ) !== $rel['gnews_allow_only'] ) {
-				$what[] = 'aggregators allowed-only ' . ( $rel['gnews_allow_only'] ? 'on' : 'off' );
-			}
-			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
 		} else {
 			$pubs   = aw_publishers();
 			$before = $pubs;
@@ -528,7 +514,8 @@ function aw_sourcing_page() {
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
 	}
-	// Tabs: Publishers, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback]), Change log.
+	// Tabs: Publishers, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback, own form?]), Change log.
+	// A tab with its own form (third value true) prints its Settings API form; the others share the aw_sourcing form.
 	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
 	$tabs  = array( 'publishers' => 'Publishers', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
 	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'publishers';
@@ -548,6 +535,11 @@ function aw_sourcing_page() {
 	}
 	if ( 'keywords' === $tab ) { // its own forms: the switches, add words, the word list
 		aw_sourcing_keywords_tab();
+		echo '</div>';
+		return;
+	}
+	if ( ! empty( $extra[ $tab ][2] ) ) { // a Settings API tab: its own form to options.php
+		call_user_func( $extra[ $tab ][1] );
 		echo '</div>';
 		return;
 	}
@@ -578,7 +570,6 @@ function aw_sourcing_page() {
 
 /** The Keywords tab: the two switches, add words, the word lists as a list table, the headline test, suggestions. */
 function aw_sourcing_keywords_tab() {
-	$r    = aw_relevance();
 	$post = admin_url( 'admin-post.php' );
 	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( 'none' === $done ) {
@@ -599,14 +590,7 @@ function aw_sourcing_keywords_tab() {
 	}
 	echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. Hindi works.</p>';
 
-	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="keywords">';
-	wp_nonce_field( 'aw_sourcing' );
-	echo '<table class="form-table" role="presentation"><tbody>'
-		. '<tr><th scope="row">Relevance filter</th><td><label><input type="checkbox" name="enabled" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> On</label><p class="description">Off: every item from a non-blocked publisher is kept.</p></td></tr>'
-		. '<tr><th scope="row">Aggregator feeds</th><td><label><input type="checkbox" name="gnews_allow_only" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> Only allowed publishers</label><p class="description">Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.</p></td></tr>'
-		. '</tbody></table>';
-	submit_button( 'Save' );
-	echo '</form>';
+	aw_sourcing_settings_form( 'aw_sourcing_switches', 'aw-sourcing-switches' );
 
 	echo '<h2>Add words</h2><form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords"><input type="hidden" name="kw_add" value="1">';
 	wp_nonce_field( 'aw_sourcing_keywords_add' );
@@ -645,4 +629,119 @@ function aw_sourcing_keywords_tab() {
 	}
 	echo '</form>';
 	do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
+}
+
+/* ---------- Settings API (owner, 24 Oct 2026): the Sourcing settings forms post to options.php ---------- */
+
+/**
+ * A Settings API form: the group's hidden fields and nonce, its sections and fields, Save.
+ *
+ * @param string $group  Option group (register_setting).
+ * @param string $page   Settings page slug the sections are added to.
+ * @param string $button Button text.
+ */
+function aw_sourcing_settings_form( $group, $page, $button = 'Save' ) {
+	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+	settings_fields( $group );
+	do_settings_sections( $page );
+	submit_button( $button );
+	echo '</form>';
+}
+
+/**
+ * Was this value posted by one of the Sourcing forms? Each form sends a hidden _aw_tab with its option. A sanitize
+ * callback runs on every update_option() of its option, also the site's own saves (list tables, suggestions, the
+ * workers' seed), so those pass through unchanged.
+ *
+ * @param mixed  $value Value being saved.
+ * @param string $tab   Tab that posts it ('' for any).
+ * @return string The tab, or ''.
+ */
+function aw_sourcing_settings_tab( $value, $tab = '' ) {
+	$t = is_array( $value ) ? sanitize_key( $value['_aw_tab'] ?? '' ) : '';
+	return ( '' === $tab || $t === $tab ) ? $t : '';
+}
+
+/** The marker field of a Sourcing form (see aw_sourcing_settings_tab). */
+function aw_sourcing_settings_marker( $option, $tab ) {
+	echo '<input type="hidden" name="' . esc_attr( $option ) . '[_aw_tab]" value="' . esc_attr( $tab ) . '">';
+}
+
+/** After a Sourcing form saved: one notice in place of core's "Settings saved." */
+function aw_sourcing_settings_saved() {
+	add_settings_error( 'aw_sourcing', 'saved', 'Saved. The workers use this from their next run.', 'success' );
+}
+
+/** A textarea list (one per line) as a clean array. */
+function aw_sourcing_lines( $text ) {
+	return array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( (string) $text ) ) ) ) ) );
+}
+
+/** A field's textarea (Settings API callback): args name, value (list or text), rows, help, class. */
+function aw_sourcing_textarea_field( $args ) {
+	$v = is_array( $args['value'] ) ? implode( "\n", $args['value'] ) : (string) $args['value'];
+	echo '<textarea id="' . esc_attr( $args['label_for'] ) . '" name="' . esc_attr( $args['name'] ) . '" rows="' . (int) ( $args['rows'] ?? 6 ) . '" class="' . esc_attr( $args['class_attr'] ?? 'large-text code' ) . '">' . esc_textarea( $v ) . '</textarea>';
+	if ( ! empty( $args['help'] ) ) {
+		echo '<p class="description">' . esc_html( $args['help'] ) . '</p>';
+	}
+}
+
+// Options.php checks the group's capability: the Sourcing screen's own.
+foreach ( array( 'aw_sourcing_switches', 'aw_sourcing_sources', 'aw_sourcing_summary', 'aw_sourcing_enrich' ) as $aw_group ) {
+	add_filter( 'option_page_capability_' . $aw_group, fn() => AW_SRC_CAP );
+}
+
+// Keywords tab: the two switches (option aw_relevance; the word lists save from their list table).
+add_action(
+	'admin_init',
+	function () {
+		register_setting( 'aw_sourcing_switches', AW_REL_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_relevance_switches_sanitize', 'show_in_rest' => false ) );
+		add_settings_section(
+			'aw_switches',
+			'',
+			fn() => aw_sourcing_settings_marker( AW_REL_OPTION, 'keywords' ),
+			'aw-sourcing-switches'
+		);
+		add_settings_field(
+			'aw_rel_enabled',
+			'Relevance filter',
+			function () {
+				$r = aw_relevance();
+				echo '<label><input type="checkbox" id="aw-rel-enabled" name="' . esc_attr( AW_REL_OPTION ) . '[enabled]" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> On</label><p class="description">Off: every item from a non-blocked publisher is kept.</p>';
+			},
+			'aw-sourcing-switches',
+			'aw_switches'
+		);
+		add_settings_field(
+			'aw_rel_gnews',
+			'Aggregator feeds',
+			function () {
+				$r = aw_relevance();
+				echo '<label><input type="checkbox" id="aw-rel-gnews" name="' . esc_attr( AW_REL_OPTION ) . '[gnews_allow_only]" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> Only allowed publishers</label><p class="description">Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.</p>';
+			},
+			'aw-sourcing-switches',
+			'aw_switches'
+		);
+	}
+);
+
+/** The two switches from the Keywords tab; any other save of aw_relevance passes through. */
+function aw_relevance_switches_sanitize( $value ) {
+	if ( ! aw_sourcing_settings_tab( $value, 'keywords' ) ) {
+		return $value;
+	}
+	$rel                     = aw_relevance();
+	$old                     = $rel;
+	$rel['enabled']          = ! empty( $value['enabled'] );
+	$rel['gnews_allow_only'] = ! empty( $value['gnews_allow_only'] );
+	$what                    = array();
+	if ( ! empty( $old['enabled'] ) !== $rel['enabled'] ) {
+		$what[] = 'keyword check ' . ( $rel['enabled'] ? 'on' : 'off' );
+	}
+	if ( ! empty( $old['gnews_allow_only'] ) !== $rel['gnews_allow_only'] ) {
+		$what[] = 'aggregators allowed-only ' . ( $rel['gnews_allow_only'] ? 'on' : 'off' );
+	}
+	kits_sourcing_log( 'keywords', implode( ' · ', $what ) );
+	aw_sourcing_settings_saved();
+	return $rel;
 }

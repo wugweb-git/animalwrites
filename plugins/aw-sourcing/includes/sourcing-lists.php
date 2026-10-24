@@ -60,9 +60,9 @@ add_filter(
 		foreach ( AW_SOURCE_TABS as $slug => $t ) {
 			$tabs[ $slug ] = array( $t[0], fn() => aw_sources_tab( $slug ) );
 		}
-		$tabs['press']  = array( 'Press queries', 'aw_sources_press_tab' );
-		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab' );
-		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab' );
+		$tabs['press']      = array( 'Press queries', 'aw_sources_press_tab', true ); // Settings API forms (options.php)
+		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );
+		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab', true );
 		return $tabs;
 	}
 );
@@ -292,50 +292,139 @@ foreach ( array_keys( AW_SOURCE_TABS ) as $aw_tab ) {
 	);
 }
 
+/*
+ * Press queries, Categories and Sections (and Relay, relay.php) save through the Settings API: one option, aw_sources,
+ * in the group aw_sourcing_sources. Each form sends its tab in aw_sources[_aw_tab]; aw_sources_sanitize() hands the
+ * posted part to that tab's filter (aw_sources_save_<tab>) and keeps the rest of the option as it is. The list tables'
+ * own saves (sources on / off, edit, "Workers use these lists") pass through unchanged.
+ */
+
+add_action(
+	'admin_init',
+	function () {
+		register_setting( 'aw_sourcing_sources', 'aw_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_sources_sanitize', 'show_in_rest' => false ) );
+
+		// Press queries.
+		add_settings_section(
+			'aw_press',
+			'',
+			function () {
+				aw_sourcing_settings_marker( 'aw_sources', 'press' );
+				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each site below and on the open web. Results wait in Inbox → Press to review.</p>';
+			},
+			'aw-sourcing-press'
+		);
+		$press = fn( $k ) => (array) ( aw_sources_config()['press'][ $k ] ?? array() );
+		add_settings_field( 'aw_press_queries', 'Queries', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'queries' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-pq', 'name' => 'aw_sources[queries]', 'rows' => 10, 'help' => 'One per line.' ) );
+		add_settings_field( 'aw_press_sites', 'Sites', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'sites' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-ps', 'name' => 'aw_sources[sites]', 'rows' => 10, 'help' => 'One per line.' ) );
+		add_settings_field(
+			'aw_press_floor',
+			'Coverage from',
+			function () {
+				echo '<input type="date" id="aw-pf" name="aw_sources[date_floor]" value="' . esc_attr( (string) ( aw_sources_config()['press']['date_floor'] ?? '' ) ) . '">';
+			},
+			'aw-sourcing-press',
+			'aw_press',
+			array( 'label_for' => 'aw-pf' )
+		);
+
+		// Categories.
+		add_settings_section(
+			'aw_categories',
+			'',
+			function () {
+				aw_sourcing_settings_marker( 'aw_sources', 'categories' );
+				echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
+			},
+			'aw-sourcing-categories'
+		);
+		add_settings_field(
+			'aw_categories_list',
+			'Categories',
+			function ( $a ) {
+				$lines = array();
+				foreach ( (array) aw_sources_config()['categories'] as $slug => $words ) {
+					$lines[] = $slug . ': ' . implode( ', ', (array) $words );
+				}
+				aw_sourcing_textarea_field( $a + array( 'value' => $lines ) );
+			},
+			'aw-sourcing-categories',
+			'aw_categories',
+			array( 'label_for' => 'aw-cats', 'name' => 'aw_sources[categories]', 'rows' => 22 )
+		);
+
+		// Sections: two lists per content type.
+		add_settings_section(
+			'aw_sections',
+			'',
+			function () {
+				aw_sourcing_settings_marker( 'aw_sources', 'sections' );
+				echo '<p>Which categories and tags each section uses. One slug per line. The workers pick only from these lists, and each list\'s filters show only these. An empty Categories list means every category.</p>';
+			},
+			'aw-sourcing-sections'
+		);
+		foreach ( aw_post_types() as $type => $def ) {
+			foreach ( array( 'categories' => 'allowed categories', 'tags' => 'allowed tags' ) as $k => $label ) {
+				add_settings_field(
+					'aw_sections_' . $type . '_' . $k,
+					$def[1] . ': ' . $label,
+					fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => (array) ( aw_sources_config()['sections'][ $type ][ $k ] ?? array() ) ) ),
+					'aw-sourcing-sections',
+					'aw_sections',
+					array( 'label_for' => 'aw-sec-' . $type . '-' . $k, 'name' => 'aw_sources[sections][' . $type . '][' . $k . ']', 'rows' => 6 )
+				);
+			}
+		}
+	}
+);
+
+/**
+ * Sanitize aw_sources: a Sourcing form's part through its tab's filter; any other save passes through.
+ *
+ * @param mixed $value Posted part (with _aw_tab) or the whole option.
+ * @return mixed
+ */
+function aw_sources_sanitize( $value ) {
+	$tab = aw_sourcing_settings_tab( $value );
+	if ( '' === $tab || ! has_filter( 'aw_sources_save_' . $tab ) ) {
+		return $value;
+	}
+	$c = apply_filters( 'aw_sources_save_' . $tab, aw_sources_config(), $value );
+	aw_sourcing_settings_saved();
+	return $c;
+}
+
 /** Press-discovery queries (Media & PR). */
 function aw_sources_press_tab() {
-	$p = aw_sources_config()['press'];
-	echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each site below and on the open web. Results wait in Inbox → Press to review.</p>';
-	echo '<div class="aw-src-lists"><p><label for="aw-pq"><strong>Queries</strong> (one per line)</label><br><textarea id="aw-pq" name="queries">' . esc_textarea( implode( "\n", (array) $p['queries'] ) ) . '</textarea></p>'
-		. '<p><label for="aw-ps"><strong>Sites</strong> (one per line)</label><br><textarea id="aw-ps" name="sites">' . esc_textarea( implode( "\n", (array) $p['sites'] ) ) . '</textarea></p></div>';
-	echo '<p><label>Coverage from <input type="date" name="date_floor" value="' . esc_attr( $p['date_floor'] ) . '"></label></p>';
-	submit_button( 'Save' );
+	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-press' );
 }
-add_action(
-	'kits_sourcing_save_press',
-	function () {
-		$c    = aw_sources_config();
-		$old  = $c['press'];
-		$list = fn( $k ) => array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( wp_unslash( $_POST[ $k ] ?? '' ) ) ) ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$c['press']['queries'] = $list( 'queries' );
-		$c['press']['sites']   = $list( 'sites' );
-		$d                     = sanitize_text_field( wp_unslash( $_POST['date_floor'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+add_filter(
+	'aw_sources_save_press',
+	function ( $c, $in ) {
+		$old                   = $c['press'];
+		$c['press']['queries'] = aw_sourcing_lines( $in['queries'] ?? '' );
+		$c['press']['sites']   = aw_sourcing_lines( $in['sites'] ?? '' );
+		$d                     = sanitize_text_field( (string) ( $in['date_floor'] ?? '' ) );
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) {
 			$c['press']['date_floor'] = $d;
 		}
-		update_option( 'aw_sources', $c, false );
 		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'], $c['press']['sites'] ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
-	}
+		return $c;
+	},
+	10,
+	2
 );
 
 /** Categories: words that file an item under a category. */
 function aw_sources_categories_tab() {
-	$c = aw_sources_config();
-	echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
-	$lines = array();
-	foreach ( (array) $c['categories'] as $slug => $words ) {
-		$lines[] = $slug . ': ' . implode( ', ', (array) $words );
-	}
-	echo '<textarea name="categories" class="large-text code" rows="22">' . esc_textarea( implode( "\n", $lines ) ) . '</textarea>';
-	submit_button( 'Save' );
+	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-categories' );
 }
-add_action(
-	'kits_sourcing_save_categories',
-	function () {
-		$c      = aw_sources_config();
+add_filter(
+	'aw_sources_save_categories',
+	function ( $c, $in ) {
 		$old  = $c['categories'];
 		$cats = array();
-		foreach ( explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['categories'] ?? '' ) ) ) as $line ) { // phpcs:ignore WordPress.Security.NonceVerification
+		foreach ( explode( "\n", sanitize_textarea_field( (string) ( $in['categories'] ?? '' ) ) ) as $line ) {
 			if ( preg_match( '/^\s*([a-z0-9-]+)\s*:\s*(.+)$/u', $line, $m ) ) {
 				$cats[ $m[1] ] = array_values( array_filter( array_map( 'trim', explode( ',', $m[2] ) ) ) );
 			}
@@ -345,33 +434,22 @@ add_action(
 			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $cats[ $slug ] ?? array() );
 		}
 		$c['categories'] = $cats;
-		update_option( 'aw_sources', $c, false );
 		kits_sourcing_log( 'categories', implode( ' · ', array_filter( $what ) ) );
-	}
+		return $c;
+	},
+	10,
+	2
 );
 
 /** Sections: the categories and tags each section may use (the workers classify only within these; hub filters show only these). */
 function aw_sources_sections_tab() {
-	$c = aw_sources_config();
-	echo '<p>Which categories and tags each section uses. One slug per line. The workers pick only from these lists, and each list\'s filters show only these. An empty Categories list means every category.</p>';
-	echo '<table class="form-table">';
-	foreach ( aw_post_types() as $type => $def ) {
-		$l = (array) ( $c['sections'][ $type ] ?? array() );
-		echo '<tr><th scope="row">' . esc_html( $def[1] ) . '</th><td style="display:flex;gap:1em;flex-wrap:wrap">';
-		foreach ( array( 'categories' => 'Allowed categories', 'tags' => 'Allowed tags' ) as $k => $label ) {
-			echo '<label style="flex:1;min-width:16em">' . esc_html( $label ) . '<textarea name="sections[' . esc_attr( $type ) . '][' . esc_attr( $k ) . ']" class="large-text code" rows="8">' . esc_textarea( implode( "\n", (array) ( $l[ $k ] ?? array() ) ) ) . '</textarea></label>';
-		}
-		echo '</td></tr>';
-	}
-	echo '</table>';
-	submit_button( 'Save' );
+	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-sections' );
 }
-add_action(
-	'kits_sourcing_save_sections',
-	function () {
-		$c    = aw_sources_config();
+add_filter(
+	'aw_sources_save_sections',
+	function ( $c, $in ) {
 		$old  = $c['sections'];
-		$in   = (array) wp_unslash( $_POST['sections'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification
+		$in   = (array) ( $in['sections'] ?? array() );
 		$new  = array();
 		$what = array();
 		foreach ( array_keys( aw_post_types() ) as $type ) {
@@ -381,9 +459,11 @@ add_action(
 			}
 		}
 		$c['sections'] = $new;
-		update_option( 'aw_sources', $c, false );
 		kits_sourcing_log( 'sections', implode( ' · ', array_filter( $what ) ) );
-	}
+		return $c;
+	},
+	10,
+	2
 );
 
 /**

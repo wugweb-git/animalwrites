@@ -215,22 +215,36 @@ add_filter(
 	}
 );
 
-// Settings → Sourcing → Relay: the allow list and the log.
+// Settings → Sourcing → Relay: the allow list (Settings API, option aw_sources; see sourcing-lists.php) and the log.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['relay'] = array( 'Relay', 'aw_relay_tab' );
+		$tabs['relay'] = array( 'Relay', 'aw_relay_tab', true );
 		return $tabs;
+	}
+);
+
+add_action(
+	'admin_init',
+	function () {
+		add_settings_section(
+			'aw_relay',
+			'',
+			function () {
+				aw_sourcing_settings_marker( 'aw_sources', 'relay' );
+				echo '<p>Publishers that refuse GitHub\'s servers but answer this site. When one answers the workers with 403, they ask this site to fetch the feed or page for them.</p>';
+			},
+			'aw-sourcing-relay'
+		);
+		add_settings_field( 'aw_relay_hosts', 'Hosts', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => aw_relay_hosts() ) ), 'aw-sourcing-relay', 'aw_relay', array( 'label_for' => 'aw-relay-hosts', 'name' => 'aw_sources[relay_hosts]', 'help' => 'One host per line; its subdomains are included.' ) );
 	}
 );
 
 /** Relay tab. */
 function aw_relay_tab() {
-	echo '<p>Publishers that refuse GitHub\'s servers but answer this site. When one answers the workers with 403, they ask this site to fetch the feed or page for them. One host per line; its subdomains are included.</p>';
-	echo '<textarea name="relay_hosts" class="large-text code" rows="6">' . esc_textarea( implode( "\n", aw_relay_hosts() ) ) . '</textarea>';
-	submit_button( 'Save' );
+	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-relay' );
 	$log = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
-	echo '<h3>Requests (last 200)</h3>';
+	echo '<h2>Requests (last 200)</h2>';
 	if ( ! $log ) {
 		echo '<p>None yet.</p>';
 		return;
@@ -242,13 +256,12 @@ function aw_relay_tab() {
 	echo '</tbody></table>';
 }
 
-add_action(
-	'kits_sourcing_save_relay',
-	function () {
-		$c   = aw_sources_config();
+add_filter(
+	'aw_sources_save_relay',
+	function ( $c, $in ) {
 		$old = aw_relay_hosts();
 		$new = array();
-		foreach ( preg_split( '/[\s,]+/', strtolower( sanitize_textarea_field( wp_unslash( $_POST['relay_hosts'] ?? '' ) ) ) ) as $h ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+		foreach ( preg_split( '/[\s,]+/', strtolower( sanitize_textarea_field( (string) ( $in['relay_hosts'] ?? '' ) ) ) ) as $h ) {
 			$h = preg_replace( '#^https?://#', '', trim( $h ) );
 			$h = trim( explode( '/', $h )[0], '.' );
 			if ( preg_match( '/^[a-z0-9-]+(\.[a-z0-9-]+)+$/', $h ) ) {
@@ -256,7 +269,9 @@ add_action(
 			}
 		}
 		$c['relay_hosts'] = array_values( array_unique( $new ) );
-		update_option( 'aw_sources', $c, false );
 		kits_sourcing_log( 'relay', kits_sourcing_diff( 'relay hosts', $old, $c['relay_hosts'] ) );
-	}
+		return $c;
+	},
+	10,
+	2
 );
