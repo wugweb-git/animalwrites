@@ -219,8 +219,14 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( $legal_flag ) {
 		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
 	}
-	if ( $req->get_param( 'hold' ) ) { // the workers' topic rule asks for a person (e.g. final rules of a campaign's draft)
-		update_post_meta( $post_id, 'aw_hold', sanitize_text_field( (string) $req->get_param( 'hold' ) ) );
+	$hold = sanitize_text_field( (string) $req->get_param( 'hold' ) );
+	// A research item needs its own headline (three-field model: study title in Sources, headline, SEO title; owner
+	// 24 Oct 2026): without one the paper's raw title would be published as the headline, so a person picks one.
+	if ( 'research' === $req->get_param( 'type' ) && '' === trim( (string) $req->get_param( 'slug' ) ) ) {
+		$hold = trim( $hold . '; no headline (the paper\'s own title would be published as the headline)', '; ' );
+	}
+	if ( '' !== $hold ) { // the workers' topic rule, a research doubt or a missing headline: a person decides
+		update_post_meta( $post_id, 'aw_hold', $hold );
 	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
 	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
@@ -366,7 +372,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		}
 		update_post_meta( $post_id, 'aw_legal_force', 'NotInForce' );
 	}
-	if ( $backfill ) {
+	if ( $backfill && '' !== $hold ) { // held: waits in To review like any other item (24 Oct 2026: backfill used to publish it)
+		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		$review = 'held: ' . $hold;
+		update_post_meta( $post_id, 'aw_review', $review );
+	} elseif ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
 		// Owner, 9 Oct 2026: backfilled items go live at once, with their own publication date (never the day fetched).
@@ -413,7 +423,9 @@ add_action(
  * before the ingest answered "duplicate"). POST aw/v1/exists {dois: [], urls: []} with the workers' login; up to 500 of
  * each per call. Matches DOI first (case-insensitive, from the item's doi.org source link), then the normalised URL,
  * across research items (Resources tagged research) that are published, draft or pending.
- * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent.
+ * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent. With "index": true it
+ * also returns "studies": [{id, title, first_author, year}] for the same items, so the worker can spot the same study
+ * under another DOI or URL (preprint and journal versions) before any AI step.
  */
 function aw_exists_norm_url( $url ) {
 	// Scheme, www. and host ignore case; the path and query keep theirs (two papers can differ only by case there).
@@ -433,14 +445,15 @@ function aw_exists( WP_REST_Request $req ) {
 	global $wpdb;
 	$dois = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'dois' ) ) ) ), 0, 500 );
 	$urls = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'urls' ) ) ) ), 0, 500 );
-	$held = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		"SELECT pm.meta_value FROM {$wpdb->postmeta} pm
+	$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		"SELECT p.ID, pm.meta_value FROM {$wpdb->postmeta} pm
 		 JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug = 'research'
 		 WHERE pm.meta_key = 'aw_source_url' AND p.post_type = 'post' AND p.post_status IN ('publish', 'draft', 'pending')"
 	);
+	$held     = wp_list_pluck( $rows, 'meta_value' );
 	$have_doi = array();
 	$have_url = array();
 	foreach ( $held as $src ) {
@@ -461,7 +474,22 @@ function aw_exists( WP_REST_Request $req ) {
 			}
 		)
 	);
-	return new WP_REST_Response( array( 'dois' => $found_dois, 'urls' => $found_urls ), 200 );
+	$out = array( 'dois' => $found_dois, 'urls' => $found_urls );
+	if ( $req->get_param( 'index' ) ) {
+		$out['studies'] = array();
+		foreach ( $rows as $r ) {
+			$id      = (int) $r->ID;
+			$authors = array_values( (array) get_post_meta( $id, 'aw_authors', true ) );
+			$study   = function_exists( 'aw_research_study_title' ) ? aw_research_study_title( $id ) : '';
+			$out['studies'][] = array(
+				'id'           => $id,
+				'title'        => '' !== $study ? $study : get_the_title( $id ),
+				'first_author' => (string) ( $authors[0] ?? '' ),
+				'year'         => substr( (string) get_post_meta( $id, 'aw_source_date', true ), 0, 4 ),
+			);
+		}
+	}
+	return new WP_REST_Response( $out, 200 );
 }
 
 add_action(
