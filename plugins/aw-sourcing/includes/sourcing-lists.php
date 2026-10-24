@@ -327,54 +327,6 @@ add_action(
 			'aw_press',
 			array( 'label_for' => 'aw-pf' )
 		);
-
-		// Categories.
-		add_settings_section(
-			'aw_categories',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'categories' );
-				echo '<p>An item gets every category whose words appear in its title or summary. One category per line: <code>category-slug: word, word, word</code>. Hindi works.</p>';
-			},
-			'aw-sourcing-categories'
-		);
-		add_settings_field(
-			'aw_categories_list',
-			'Categories',
-			function ( $a ) {
-				$lines = array();
-				foreach ( (array) aw_sources_config()['categories'] as $slug => $words ) {
-					$lines[] = $slug . ': ' . implode( ', ', (array) $words );
-				}
-				aw_sourcing_textarea_field( $a + array( 'value' => $lines ) );
-			},
-			'aw-sourcing-categories',
-			'aw_categories',
-			array( 'label_for' => 'aw-cats', 'name' => 'aw_sources[categories]', 'rows' => 22 )
-		);
-
-		// Sections: two lists per content type.
-		add_settings_section(
-			'aw_sections',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'sections' );
-				echo '<p>Which categories and tags each section uses. One slug per line. The workers pick only from these lists, and each list\'s filters show only these. An empty Categories list means every category.</p>';
-			},
-			'aw-sourcing-sections'
-		);
-		foreach ( aw_post_types() as $type => $def ) {
-			foreach ( array( 'categories' => 'allowed categories', 'tags' => 'allowed tags' ) as $k => $label ) {
-				add_settings_field(
-					'aw_sections_' . $type . '_' . $k,
-					$def[1] . ': ' . $label,
-					fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => (array) ( aw_sources_config()['sections'][ $type ][ $k ] ?? array() ) ) ),
-					'aw-sourcing-sections',
-					'aw_sections',
-					array( 'label_for' => 'aw-sec-' . $type . '-' . $k, 'name' => 'aw_sources[sections][' . $type . '][' . $k . ']', 'rows' => 6 )
-				);
-			}
-		}
 	}
 );
 
@@ -410,60 +362,6 @@ add_filter(
 			$c['press']['date_floor'] = $d;
 		}
 		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'], $c['press']['sites'] ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
-		return $c;
-	},
-	10,
-	2
-);
-
-/** Categories: words that file an item under a category. */
-function aw_sources_categories_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-categories' );
-}
-add_filter(
-	'aw_sources_save_categories',
-	function ( $c, $in ) {
-		$old  = $c['categories'];
-		$cats = array();
-		foreach ( explode( "\n", sanitize_textarea_field( (string) ( $in['categories'] ?? '' ) ) ) as $line ) {
-			if ( preg_match( '/^\s*([a-z0-9-]+)\s*:\s*(.+)$/u', $line, $m ) ) {
-				$cats[ $m[1] ] = array_values( array_filter( array_map( 'trim', explode( ',', $m[2] ) ) ) );
-			}
-		}
-		$what = array();
-		foreach ( array_unique( array_merge( array_keys( $old ), array_keys( $cats ) ) ) as $slug ) {
-			$what[] = kits_sourcing_diff( $slug, $old[ $slug ] ?? array(), $cats[ $slug ] ?? array() );
-		}
-		$c['categories'] = $cats;
-		kits_sourcing_log( 'categories', implode( ' · ', array_filter( $what ) ) );
-		return $c;
-	},
-	10,
-	2
-);
-
-/** Sections: the categories and tags each section may use (the workers classify only within these; hub filters show only these). */
-function aw_sources_sections_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-sections' );
-}
-add_filter(
-	'aw_sources_save_sections',
-	function ( $c, $in ) {
-		$old  = $c['sections'];
-		$in   = (array) ( $in['sections'] ?? array() );
-		$new  = array();
-		$what = array();
-		foreach ( array_keys( aw_post_types() ) as $type ) {
-			foreach ( array( 'categories', 'tags' ) as $k ) {
-				$new[ $type ][ $k ] = array_values( array_unique( array_filter( array_map( 'sanitize_title', preg_split( '/[\s,]+/', (string) ( $in[ $type ][ $k ] ?? '' ) ) ) ) ) );
-				$what[]             = kits_sourcing_diff( $type . ' ' . $k, (array) ( $old[ $type ][ $k ] ?? array() ), $new[ $type ][ $k ] );
-			}
-		}
-		if ( ! array_filter( $what ) ) {
-			return $c; // unchanged: the stored lists keep their order
-		}
-		$c['sections'] = $new;
-		kits_sourcing_log( 'sections', implode( ' · ', array_filter( $what ) ) );
 		return $c;
 	},
 	10,

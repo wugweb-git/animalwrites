@@ -612,33 +612,36 @@ function aw_sourcing_keywords_tab() {
 
 	aw_sourcing_settings_form( 'aw_sourcing_switches', 'aw-sourcing-switches' );
 
-	echo '<h2>Add words</h2><form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords"><input type="hidden" name="kw_add" value="1">';
-	wp_nonce_field( 'aw_sourcing_keywords_add' );
-	echo '<table class="form-table" role="presentation"><tbody>'
-		. '<tr><th scope="row"><label for="aw-kw-new">Words</label></th><td><textarea id="aw-kw-new" name="kw_new" rows="3" class="large-text code"></textarea><p class="description">One per line.</p></td></tr>'
-		. '<tr><th scope="row"><label for="aw-kw-list">Add to</label></th><td><select id="aw-kw-list" name="kw_list">';
-	foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $l ) {
-		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
-	}
-	echo '</select></td></tr></tbody></table>';
-	submit_button( 'Add words', 'secondary' );
-	echo '</form>';
-
-	echo '<h2>Words</h2>';
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
 	require_once __DIR__ . '/class-aw-sourcing-keywords-table.php';
 	$table = new AW_Sourcing_Keywords_Table();
 	$table->prepare_items();
-	$table->views();
+
+	// As on Posts → Tags: the search above, the add form on the left, the list on the right.
 	$list = sanitize_key( $_GET['list'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( isset( AW_Sourcing_Keywords_Table::LISTS[ $list ] ) ? '<input type="hidden" name="list" value="' . esc_attr( $list ) . '">' : '' );
+	echo '<form class="search-form wp-clearfix" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( isset( AW_Sourcing_Keywords_Table::LISTS[ $list ] ) ? '<input type="hidden" name="list" value="' . esc_attr( $list ) . '">' : '' );
 	$table->search_box( 'Search words', 'aw-kw' );
 	echo '</form>';
+
+	echo '<div id="col-container" class="wp-clearfix"><div id="col-left"><div class="col-wrap"><div class="form-wrap">';
+	echo '<h2>Add words</h2><form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords"><input type="hidden" name="kw_add" value="1">';
+	wp_nonce_field( 'aw_sourcing_keywords_add' );
+	echo '<div class="form-field form-required"><label for="aw-kw-new">Words</label><textarea id="aw-kw-new" name="kw_new" rows="5" cols="40" aria-describedby="aw-kw-new-description"></textarea><p id="aw-kw-new-description">One per line. Hindi works. A word already in the list is not added again.</p></div>';
+	echo '<div class="form-field"><label for="aw-kw-list">Add to</label><select id="aw-kw-list" name="kw_list" aria-describedby="aw-kw-list-description">';
+	foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $l ) {
+		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
+	}
+	echo '</select><p id="aw-kw-list-description">Include: keeps an item on its own (an English one is also a Google News search). Animal and Context: keep an item together. Exclude: always drops it.</p></div>';
+	submit_button( 'Add words', 'primary' );
+	echo '</form></div></div></div>';
+
+	echo '<div id="col-right"><div class="col-wrap"><h2 class="screen-reader-text">Words</h2>';
+	$table->views();
 	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords">';
 	$table->display();
-	echo '</form>';
+	echo '</form></div></div></div>';
 
 	$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline" aria-label="Headline">';
