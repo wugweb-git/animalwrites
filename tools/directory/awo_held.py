@@ -86,6 +86,7 @@ def main(awo_dir, held_csv, listings_file):
             l = L[target]
             if l.get("protected"):
                 rep.skip("verified or claimed", dict(sample, listing=target))
+                decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "left alone", "listing": target, "listing_title": L[target]["title"], "reason": "matches a verified or claimed listing: nothing changed"})
                 continue
             fields = {"post_id": target, "types": types, "data_source": "awol", "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE}
             if phone and not l["phones"]:
@@ -101,6 +102,7 @@ def main(awo_dir, held_csv, listings_file):
             if lid in L and dist and dist["code"] in (L[lid].get("districts") or []) and best and best[0][1] == lid and best[0][0] >= 0.9 and (len(best) < 2 or best[1][0] < best[0][0]):
                 if L[lid].get("protected"):
                     rep.skip("verified or claimed", dict(sample, listing=lid))
+                    decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "left alone", "listing": lid, "listing_title": L[lid]["title"], "reason": "matches a verified or claimed listing: nothing changed"})
                     continue
                 fields = {"post_id": lid, "types": types, "data_source": "awol", "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE}
                 if phone and not L[lid]["phones"]:
