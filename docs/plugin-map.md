@@ -68,6 +68,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
 | `includes/review-queue.php` | Inbox → To review. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
+| `includes/class-aw-sourcing-ai-keys-table.php` | Settings → AI models → Keys as a core list table: saved keys in the workers' order, then the GitHub-secret keys; views Working / Waiting / Broken / GitHub secrets, search, row actions Move up / Move down / Remove and bulk Check again / Remove (admin_post_aw_ai_keys_list), the plugins-list problem row under a broken key. |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
 
 ## mailweb (Mailweb)
