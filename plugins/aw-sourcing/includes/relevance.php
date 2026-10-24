@@ -19,7 +19,7 @@
  * Inbox → To review shows only items the check passed (or has not checked): an item whose stored verdict is "not
  * relevant" is left out of the list and its counts.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

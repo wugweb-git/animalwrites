@@ -9,24 +9,11 @@
  * run from the private, authenticated policy endpoint (aw/v1/sourcing-policy) once "Workers use these lists" is on;
  * until then, and whenever the site cannot be reached, they use sources.yaml. API keys stay in GitHub secrets.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-/** The lists (seeded once from data/sources-seed.json). */
-function aw_sources_config() {
-	$c = get_option( 'aw_sources' );
-	if ( ! is_array( $c ) ) {
-		$c         = json_decode( (string) file_get_contents( AW_CORE_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		$c['live'] = false; // the owner switches the workers over after checking
-		update_option( 'aw_sources', $c, false );
-	}
-	$c['categories'] = (array) ( $c['categories'] ?? array() );
-	$c['sections']   = (array) ( $c['sections'] ?? array() );
-	return $c;
 }
 
 /** Seed (once): blocked publishers from the owner's list (S3.5). */

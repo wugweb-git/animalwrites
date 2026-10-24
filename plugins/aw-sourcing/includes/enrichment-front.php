@@ -8,7 +8,7 @@
  *   Not in the schema (no aggregateRating from Google).
  * - Signals: activity on Instagram (followers, posts, latest post) and the News items that name the organisation.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

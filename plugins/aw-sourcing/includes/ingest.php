@@ -17,7 +17,7 @@
  *   "listing": { "phone": "", "whatsapp": "", "email": "", "website": "", "area": "", "services": "" }
  * }
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

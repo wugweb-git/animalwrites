@@ -8,7 +8,7 @@
  * site's own; the checked address is the one connected to, and every redirect (at most 3) is checked the same way.
  * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, on the Relay tab).
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

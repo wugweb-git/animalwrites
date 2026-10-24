@@ -6,7 +6,7 @@
  * The workers read the usable rows (GET /aw/v1/ai-keys) and try them before their GitHub Actions secrets.
  * Administrators and the ingest user only.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

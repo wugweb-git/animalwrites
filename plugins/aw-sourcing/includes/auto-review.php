@@ -9,7 +9,7 @@
  * its publisher is added to that story as "also reported by" (the workers add the facts it adds: same-story.php) and the
  * item is kept private. Nothing is deleted.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -12,7 +12,7 @@
  * URL never change. With --lead-ins, a row whose without_lead_in the owner approved (non-empty, not "needs rewording")
  * gets that title instead (words removed: only with this flag). Library titles are never touched.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -6,7 +6,7 @@
  * Same rules as the worker (animal-writes-workers, sources.yaml): factual listing only (title, organisation,
  * place, link), published directly, duplicates skipped by source URL. Items go through aw_ingest().
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

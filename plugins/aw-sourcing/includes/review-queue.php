@@ -4,7 +4,7 @@
  * items, opportunities and press — with why each was held (aw_review). Publish puts an item live; Reject moves it to
  * Drafts with a note (nothing is deleted). One at a time or several together. Replaces "Press to review".
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

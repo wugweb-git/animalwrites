@@ -17,7 +17,7 @@
  * State lives in the meta aw_summary_rw = {state: ok|done|short|failed, md5, at, tries, model, reason}. A state counts
  * only while the summary still has the md5 it was settled with. Nothing is deleted.
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

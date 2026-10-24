@@ -1,13 +1,13 @@
 # Plugin map
 
-Each file in the plugins and what it does. animal-writes-core and Kits Core load from `animal-writes-core/animal-writes-core.php` (Kits Core is required from there); Mailweb (`mailweb`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
+Each file in the plugins and what it does. animal-writes-core, Kits Core and AW Sourcing load from `animal-writes-core/animal-writes-core.php` (Kits Core is required first, AW Sourcing last; either may also be active on its own and is then not loaded twice); Mailweb (`mailweb`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
 ## animal-writes-core
 
 | File | What it does |
 |---|---|
 | `admin-ia.php` | WP Admin information architecture (Phase 11 J). Nothing is deleted: menus move, labels match the site. |
-| `auto-review.php` | Automatic review of ingested news and Legal Watch items (owner's decision, 7 Oct 2026: routine items that pass the checks go live; only doubtful ones wait for a person). |
+| `also-reported.php` | "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold in aw-sourcing). |
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
 | `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title and given to search engines as BreadcrumbList (schema.php). |
 | `campaigns.php` | Campaign kit: countdown, and the private upload folder used by listing claims. (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.) |
@@ -21,14 +21,12 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 | `hub-blocks.php` | Small blocks for what core blocks cannot show (Phase 12 Part D, D4). Each is a registered, server-rendered block (no shortcodes), editable in the block editor (preview via ServerSideRender), used in the hub Pages and their list patterns. Inside a Query Loop they read the item from the block context (postId). |
 | `hubs.php` | Hub Pages (Phase 12 Part D): each section hub is a Page that the owner edits (breadcrumb, H1, intro, banner, body) with its list as a synced pattern of core blocks (Query Loop + Post Template + pagination + empty state). |
 | `indexing.php` | What search engines index (restructure Phase 4). |
-| `ingest.php` | Ingest endpoint for the sourcing workers. |
 | `issuers.php` | Issuer: who issued a Library document ("Issued by Supreme Court"). A label on the item, not a list, filter or page (S1.1, 8 Oct 2026). Stored on the item as meta aw_issuer (a slug from the issuer names below). The former list (taxonomy aw_source_type, with courts merged in) was copied into the meta once and is no longer registered; a backup of its links is in uploads/aw-private/issuers-backup-2026-10-08.json. Old /source/{slug}/ URLs 301 to the Library (places.php). |
 | `kits-config.php` | Animal Writes settings for Kits Core (kits_* filters). |
 | `media.php` | Card images: the article's own preview image (linked, not copied) or a placard-style fallback. |
 | `meta.php` | Post meta. Registered natively (no ACF) and exposed to the block editor + REST. |
 | `model.php` | Content model, restructure Phase 2: legal sub-type, court, primary topic, topic → listing types for "Find help", and relations between items (each one shown on both sides in WP Admin). |
 | `newsletter.php` | Newsletter: sign-up with email confirmation and the sign-up list (WP Admin > Audience > Newsletter, CSV export). Sending happens in an external mailing service, not in WordPress (S2.4). |
-| `opportunities-site.php` | Opportunity sources the site fetches itself, once a day. Used where a source blocks the GitHub worker's servers (Wildlife SOS sits behind Cloudflare, which refuses GitHub Actions but answers this host). |
 | `pages.php` | Restructure Phase 6: the parts the new pages are built from. The pages themselves hold structure only; the owner writes their text (tools/restructure/phase6.php creates them). |
 | `places-admin.php` | Place box on each item that can have a place (places.php): PIN code → State and District filled from India Post, matched to the LGD file; State → District dropdowns built from the file when there is no PIN or India Post is down. There is no place list in WP Admin and no way to type a place that is not in LGD. Codes that are not in the file are not saved (a notice says so) and the item keeps its previous place. |
 | `places.php` | Places from the Local Government Directory (LGD), not from a WordPress list (8 Oct 2026). |
@@ -40,11 +38,37 @@ Each file in the plugins and what it does. animal-writes-core and Kits Core load
 | `sections.php` | Section header for archives: [aw_section_head]. Title, one-line description, live count and a three-image visual built from real content in that section. |
 | `site-check.php` | "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page. Results show on Tools → Check site. Nothing is changed. |
 | `sitemap.php` | Sitemap (WordPress core /wp-sitemap.xml), tuned for Animal Writes: - no users list and no default blog posts or categories (unused); - a "directory" sitemap lists the place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings,   and district × listing-type pages with at least 3 listings (indexing.php). Places come from the LGD file (places.php). Retention rules (news age, closed opportunities) live in retention.php. |
-| `sourcing-lists.php` | Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with Publishers (whose articles are accepted), Keywords (the one word list) and the Change log; this adds News feeds (RSS and Google News queries), Library sources (AWBI, PIB, Gazette, courts), Opportunity sources, Press-discovery queries and Topics (keyword → topic). |
+| `sources-config.php` | The sourcing lists (option aw_sources, seeded from data/sources-seed.json). Stays in core because the front end reads the section categories and tags from them; Settings → Sourcing edits them (aw-sourcing). |
+| `summary-rules.php` | The summary rules (option aw_summary_rules over data/summary-rules-default.json), the helpers the site uses (auto-review limits, search description, entities stored per item as aw_entities) and the whole summary on an item's own page. The workers' endpoint and the Settings tab are in aw-sourcing. |
 | `systems.php` | Shared list helpers, the list filters and the trust panel. |
 | `topic-images.php` | Category photos, set in WP Admin on each category screen (Topics, Listing types, Opportunity types): add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). Topic photos are also used on news and Legal Watch items in that topic. News and Legal Watch items show their topic's photo (see aw_item_image() in media.php). Stored as term meta `aw_topic_image` (attachment ID). The general photos for items without a topic stay in the option aw_topic_images['default']. |
+| `unverified.php` | Unverified values on a listing (meta aw_unverified) and the small mark the listing template shows after them. |
 | `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
 | `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from. |
+
+## aw-sourcing (AW Sourcing)
+
+Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in behaviour: same option keys, REST routes (`aw/v1`), cron hooks, admin pages, actions and filters. Core loads it from this folder (guard `AW_SOURCING_LOADED`); it can also be active on its own. Without Core it loads nothing and shows a notice. Its data files stay in core (`data/certs`, `data/sources-seed.json`, `data/summary-rules-default.json`).
+
+| File | What it does |
+|---|---|
+| `aw-sourcing.php` | Loader only (no functions): the include order sets the Settings → Sourcing tab order. |
+| `includes/sourcing-policy.php` | Settings → Sourcing (`options-general.php?page=aw-sourcing`): Publishers (allow / neutral / block, short names), Keywords (Include, Animal, Context, Exclude in option aw_relevance), Change log; the gate (aw_sourcing_gate), aw_has_term, GET sourcing-policy for the workers, the Publisher column and "Block host" row action. From Kits Core. |
+| `includes/sourcing-lists.php` | Tabs News feeds, Library sources, Opportunity sources, Press, Categories, Sections and the "Workers use these lists" switch (option aw_sources). |
+| `includes/summary-rules-admin.php` | GET summary-rules for the workers and the Summary rules tab. |
+| `includes/relevance.php` | AI relevance verdicts, the Rejected tab (aw_relevance_rejected), the ingest heartbeat and hourly watchdog (aw_ingest_watchdog). |
+| `includes/ingest.php` | POST ingest: the workers' items arrive here (News, Library, research, opportunities, listings, press drafts). |
+| `includes/opportunities-site.php` | Opportunity sources the site fetches itself (not scheduled at present). |
+| `includes/auto-review.php` | Automatic review of ingested News and Library items: routine ones go live, doubtful ones wait in Inbox → To review. |
+| `includes/same-story.php` | Same event, one story: GET/POST same-story for the workers' folds and merges. |
+| `includes/summary-rewrite.php` | The workers' summary rewrite pass (summary-rewrite endpoint). |
+| `includes/news-titles.php` | `wp aw news-titles`: sentence-case news titles. |
+| `includes/enrichment.php` | Directory enrichment: the queue and results endpoints, table {prefix}aw_enrich, apply rules, spend. |
+| `includes/enrichment-admin.php` | Directory → Enrichment review and the Enrichment tab. |
+| `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
+| `includes/review-queue.php` | Inbox → To review. |
+| `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
+| `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
 
 ## mailweb (Mailweb)
 
@@ -83,7 +107,7 @@ Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-ca
 | `seo-fields.php` | Editable SEO fields, no SEO plugin needed. |
 | `seo.php` | Meta description, Open Graph and Twitter card tags. Skipped automatically if a dedicated SEO plugin (Yoast, Rank Math, SEOPress, AIOSEO) is active. |
 | `share.php` | Share buttons: plain links (no third-party scripts, no tracking) plus copy-link. |
-| `sourcing.php` | Sourcing policy managed in WP Admin (News → Sourcing): publishers and relevance keywords. |
+| `sourcing.php` | Sourcing basics: the sourced post types, aw_host(), aw_publishers() and the option constants (AW_PUB_OPTION, AW_REL_OPTION, AW_SRC_CAP). The policy and its screen moved to aw-sourcing on 24 Oct 2026. |
 | `visits.php` | Honest visitor counter: one count per browser session, bots excluded, nothing personal stored. Counting runs in the browser (so cached pages still count). Shown in the footer. |
 
 Removed on 8 Oct 2026 (dead): `testimonials.php` (1.0 testimonials, 0 items, exported), `launch.php` (one-time server setup and media restore, both finished), `media-pr.php` (retired settings screens). Their two shortcodes still in old Home content print nothing (`admin-ia.php`).

@@ -48,18 +48,13 @@ require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/scf.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
-require_once AW_CORE_DIR . 'includes/sourcing-lists.php';
+require_once AW_CORE_DIR . 'includes/sources-config.php';
 require_once AW_CORE_DIR . 'includes/summary-rules.php';
 require_once AW_CORE_DIR . 'includes/places-admin.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/data-sources.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
-require_once AW_CORE_DIR . 'includes/relevance.php';
-require_once AW_CORE_DIR . 'includes/ingest.php';
-require_once AW_CORE_DIR . 'includes/opportunities-site.php';
-require_once AW_CORE_DIR . 'includes/auto-review.php';
-require_once AW_CORE_DIR . 'includes/same-story.php';
-require_once AW_CORE_DIR . 'includes/summary-rewrite.php';
+require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/category-images.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
@@ -74,7 +69,6 @@ require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/term-page.php';
-require_once AW_CORE_DIR . 'includes/news-titles.php';
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';
@@ -84,9 +78,7 @@ require_once AW_CORE_DIR . 'includes/directory-map.php';
 require_once AW_CORE_DIR . 'includes/backups.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
-require_once AW_CORE_DIR . 'includes/enrichment.php';
-require_once AW_CORE_DIR . 'includes/enrichment-admin.php';
-require_once AW_CORE_DIR . 'includes/enrichment-front.php';
+require_once AW_CORE_DIR . 'includes/unverified.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';
 require_once AW_CORE_DIR . 'includes/retention.php';
@@ -100,7 +92,6 @@ require_once AW_CORE_DIR . 'includes/research-citation.php';
 require_once AW_CORE_DIR . 'includes/listing-template.php';
 require_once AW_CORE_DIR . 'includes/pages.php';
 require_once AW_CORE_DIR . 'includes/press.php';
-require_once AW_CORE_DIR . 'includes/review-queue.php';
 require_once AW_CORE_DIR . 'includes/block-states.php';
 require_once AW_CORE_DIR . 'includes/listing-profile.php';
 require_once AW_CORE_DIR . 'includes/map-picker.php';
@@ -119,9 +110,13 @@ require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Flu
 require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
-require_once AW_CORE_DIR . 'includes/ai-keys.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
-require_once AW_CORE_DIR . 'includes/relay.php';
+
+// AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
+// plugin folder when it is not active on its own; after Core's includes, which it uses.
+if ( ! defined( 'AW_SOURCING_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/aw-sourcing/aw-sourcing.php' ) ) {
+	require_once dirname( AW_CORE_DIR ) . '/aw-sourcing/aw-sourcing.php';
+}
 
 register_activation_hook(
 	__FILE__,

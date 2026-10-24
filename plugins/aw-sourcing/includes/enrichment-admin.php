@@ -8,7 +8,7 @@
  *   progress.
  * - On each listing: the source icon and name beside every field the worker set (hover: the page and the date).
  *
- * @package animal-writes-core
+ * @package aw-sourcing
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

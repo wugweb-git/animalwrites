@@ -58,5 +58,8 @@ for u in "${URLS[@]}"; do
     echo "ok   $code $u"
   fi
 done
+# AW Sourcing is loaded by Core: its private worker endpoint must exist and refuse a visitor (401, not 404).
+code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/?rest_route=/aw/v1/sourcing-policy")
+if [ "$code" != "401" ]; then echo "FAIL $code /aw/v1/sourcing-policy (want 401)"; FAIL=1; else echo "ok   $code /aw/v1/sourcing-policy"; fi
 if [ -f /tmp/wp-debug.log ] && grep -E 'PHP (Fatal|Parse) error' /tmp/wp-debug.log; then FAIL=1; fi
 exit $FAIL
