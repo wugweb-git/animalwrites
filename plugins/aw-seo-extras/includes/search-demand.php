@@ -234,7 +234,13 @@ function aw_sd_sum( array $rows ): array {
 function aw_sd_pages( array $rows, string $home ): array {
 	$out = array();
 	foreach ( $rows as $r ) {
-		$out[ aw_sd_path( (string) ( $r[0][0] ?? '' ), $home ) ] = array( $r[1], $r[2], round( $r[3], 1 ) );
+		$path = aw_sd_path( (string) ( $r[0][0] ?? '' ), $home );
+		if ( isset( $out[ $path ] ) ) { // www. and bare domain reduce to the same path: add them up (position weighted)
+			$i            = $out[ $path ][1] + $r[2];
+			$out[ $path ] = array( $out[ $path ][0] + $r[1], $i, $i ? round( ( $out[ $path ][2] * $out[ $path ][1] + $r[3] * $r[2] ) / $i, 1 ) : 0 );
+			continue;
+		}
+		$out[ $path ] = array( $r[1], $r[2], round( $r[3], 1 ) );
 	}
 	return $out;
 }
@@ -299,7 +305,9 @@ function aw_sd_items_metrics( array $ids, string $period = '28d', ?array $data =
 	$data  = $data ?? aw_sd_get();
 	$pages = (array) ( $data['gsc']['periods'][ $period ]['pages'] ?? array() );
 	$out   = array( 'clicks' => 0, 'impr' => 0, 'pages' => 0 );
-	foreach ( array_unique( array_map( 'intval', $ids ) ) as $id ) {
+	$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
+	_prime_post_caches( $ids, false, false ); // one query for every item, not one per permalink
+	foreach ( $ids as $id ) {
 		$url = get_permalink( $id );
 		$m   = $url ? ( $pages[ aw_sd_path( $url ) ] ?? null ) : null;
 		if ( $m ) {
