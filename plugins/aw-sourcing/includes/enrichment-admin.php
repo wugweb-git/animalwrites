@@ -344,7 +344,7 @@ function aw_enrich_review_page() {
 			$act[] = '<a class="button button-small' . ( 'approve' === $do ? ' button-primary' : '' ) . '" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_enrich_decide&do=' . $do . '&row[]=' . (int) $r['id'] ), 'aw_enrich_decide' ) ) . '">' . esc_html( $l ) . '</a>';
 		}
 		echo '<tr><th class="check-column"><input class="aw-er" type="checkbox" name="row[]" value="' . (int) $r['id'] . '"></th>'
-			. '<td><a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . $fl . '</td>'
+			. '<td><a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . wp_kses_post( $fl ) . '</td>'
 			. '<td>' . esc_html( $labels[ $r['field'] ][0] ?? $r['field'] ) . '</td>'
 			. '<td class="aw-enrich-val">' . aw_enrich_show( $r['field'], $cur ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
 			. '<td class="aw-enrich-val"><strong>' . aw_enrich_show( $r['field'], $r['value'] ) . '</strong>' . ( $r['note'] ? '<br><small>' . esc_html( $r['note'] ) . '</small>' : '' ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput

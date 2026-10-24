@@ -549,7 +549,7 @@ add_action(
 		@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- several test calls per key.
 		$saved = aw_ai_rows();
 		$rows  = isset( $_POST['aw_ai_order'] ) ? array() : $saved; // the list's order and removals are saved straight away (aw_ai_keys_list)
-		foreach ( (array) ( $_POST['aw_ai_order'] ?? array() ) as $i ) { // Kept rows, in the order shown.
+		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_ai_order'] ?? array() ) ) as $i ) { // Kept rows, in the order shown.
 			if ( isset( $saved[ (int) $i ] ) ) {
 				$rows[] = $saved[ (int) $i ];
 			}
