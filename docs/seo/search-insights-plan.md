@@ -163,12 +163,14 @@ These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: sw
 
 **Search Console is stored by day.**
 - The daily job asks for `date` + `query` and `date` + `query` + `page`. It covers the last 4 days, because Google finalises data 2–3 days late; rows already stored are replaced, not added.
+- **One request per calendar day** per dimension set: 4 days × 2 sets = 8 calls a day. That keeps each call under the 5,000-row limit (about 2,500 rows a day).
+- If a call still returns exactly 5,000 rows, the day is marked "truncated" in `aw_si_runs` and on the screen. The job then pages on with `startRow` if Site Kit passes it through (checked in the phase 1 dry run), and otherwise keeps the warning so totals are never silently short.
 - Each row is one calendar day (`period` = day), so the monthly rollup can sum them safely.
 - 28-day and 3-month figures on the screens are sums of those daily rows. The rolling-window totals Google returns, as today's `aw_sd_refresh()` stores them, are kept only as a check (`period` = 28d / 3m) and are never summed.
 
 | Data | Module call | Schedule (IST) | Limits |
 |---|---|---|---|
-| Search Console: date + query and date + query + page, last 4 days, stored per day (28 days and 3 months are sums of daily rows); position, impressions, clicks, CTR | `search-console` → `searchanalytics` | daily 07:00 (the existing cron) | Google quota through Site Kit; ≤ 5,000 rows a call; anonymised queries are not returned |
+| Search Console: date + query and date + query + page, last 4 days, stored per day (28 days and 3 months are sums of daily rows); position, impressions, clicks, CTR | `search-console` → `searchanalytics` | daily 07:00 (the existing cron) | Google quota through Site Kit; ≤ 5,000 rows a call, so one call per day and dimension set (8 a day); anonymised queries are not returned |
 | GA4: `view_search_results` by `search_term` | `analytics-4` → `report` | daily 07:20 | Site Kit quota; read only |
 | GA4: sessions by session source (chatgpt.com, perplexity.ai, gemini.google.com, copilot) × landing page | `analytics-4` → `report` | daily 07:20 | read only; no events sent |
 | GA4: landing pages by organic sessions | `analytics-4` → `report` | daily 07:20 | read only |
