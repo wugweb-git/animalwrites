@@ -30,6 +30,14 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	/** @var bool Search Insights has stored a Search Console run (page rows exist), so a missing page means 0. */
 	private $has_data = false;
 
+	/** @var bool Search Console has run before, but not within 28 days. */
+	private $stale = false;
+
+	/** Search Console ran once but not within the 28-day window. */
+	public function page_data_stale() {
+		return $this->stale;
+	}
+
 	/** Search Insights has page data at all (not only for these items). */
 	public function has_page_data() {
 		return $this->has_data;
@@ -81,7 +89,10 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 		}
 		$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
 		$paths = array();
-		$this->has_data = function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() && function_exists( 'aw_si_runs' ) && ! empty( aw_si_runs()['gsc']['ok'] );
+		// Page data only counts when Search Console last ran within the 28-day window; an older run means the window is empty.
+		$ok             = function_exists( 'aw_si_runs' ) ? (int) ( aw_si_runs()['gsc']['ok'] ?? 0 ) : 0;
+		$this->has_data = function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() && $ok > time() - 28 * DAY_IN_SECONDS;
+		$this->stale    = $ok && ! $this->has_data;
 		if ( $ids && $this->has_data && function_exists( 'aw_si_page_metrics' ) ) {
 			_prime_post_caches( $ids, false, false ); // one query for every item, not one per permalink
 			foreach ( $ids as $id ) {

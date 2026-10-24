@@ -36,7 +36,7 @@ add_action(
 		if ( ! $table->has_page_data() ) { // Search Insights has not stored a Search Console run yet, or is switched off
 			$off = function_exists( 'aw_si_ready' ) && ! aw_si_ready();
 			echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> '
-				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs.' ) . '</p></div>';
+				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : ( $table->page_data_stale() ? 'Search Insights has not had a successful Search Console run in the last 28 days, so there are no current page figures. Check Search Insights → Settings.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs.' ) ) . '</p></div>';
 		}
 		$table->display();
 	}
