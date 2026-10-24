@@ -3,7 +3,8 @@
  * Tools → Site Health → "Sourcing ran on time" (owner, 24 Oct 2026): the ingest heartbeat as a core Site Health test.
  * Same rules as the hourly watchdog and its dashboard notice (aw_ingest_problems, relevance.php):
  * - critical: no worker run has reported for 8 hours;
- * - recommended: no News published for 12 hours, or half the sources failed in the last run;
+ * - recommended: no News published for 12 hours (or none ever, 12 hours after the first report), or half the
+ *   sources failed in the last run;
  * - good: otherwise, with the last run's figures.
  * Read-only: it reads the heartbeat option and sends nothing.
  *
@@ -18,6 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_sourcing_health_test() {
 	$hb    = (array) get_option( 'aw_ingest_heartbeat', array() );
 	$probs = array_intersect_key( aw_ingest_problems(), array_flip( array( 'no_run', 'quiet', 'sources' ) ) ); // scheduled tasks have their own test
+	// No News published yet at all: the watchdog's 12-hour rule needs a first published item, so the heartbeat's last
+	// run that published (or its first report) is the baseline here (Codex review, 24 Oct 2026).
+	$new_at = (int) ( $hb['last_new'] ?? 0 );
+	if ( ! isset( $probs['quiet'] ) && ! aw_newest_published_news() && $new_at && time() - $new_at >= 12 * HOUR_IN_SECONDS ) {
+		$probs['quiet'] = sprintf( 'No News has been published yet; the workers have reported runs since %s.', wp_date( 'j M Y, g:i a', $new_at ) );
+	}
 	$last  = (int) ( $hb['last_run'] ?? 0 );
 	$run   = $last ? sprintf(
 		'Last run: %1$s. %2$d new, %3$d published, %4$d sources, %5$d failed.',
