@@ -168,29 +168,31 @@ function kits_system_page() {
 		return;
 	}
 	if ( 'menus' === $tab ) {
-		echo '<table class="widefat striped" style="margin-top:1em"><thead><tr><th>Menu type</th><th>On this site</th><th>Where</th><th>Accessibility</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $reg['nav'] as $n ) {
-			$st = $reg['nav_status'][ $n['slug'] ] ?? $n['status'];
-			echo '<tr><td><strong>' . esc_html( $n['name'] ) . '</strong></td><td>' . esc_html( $st ) . '</td><td>' . esc_html( $n['where'] ) . '</td><td>' . esc_html( $n['a11y'] ) . '</td></tr>';
+			$st      = $reg['nav_status'][ $n['slug'] ] ?? $n['status'];
+			$cells[] = array( 'name' => '<strong>' . esc_html( $n['name'] ) . '</strong>', 'status' => esc_html( $st ), 'where' => esc_html( $n['where'] ), 'a11y' => esc_html( $n['a11y'] ) );
 		}
-		echo '</tbody></table></div>';
+		kits_simple_table( 'menu-types', array( 'name' => 'Menu type', 'status' => 'On this site', 'where' => 'Where', 'a11y' => 'Accessibility' ), $cells );
+		echo '</div>';
 		return;
 	}
 	if ( 'tokens' === $tab ) {
-		echo '<table class="widefat striped" style="margin-top:1em;max-width:900px"><thead><tr><th>Token</th><th>Value</th><th>Resolves to</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $vals as $k => $v ) {
 			if ( 0 !== strpos( $k, 'kit-' ) ) {
 				continue;
 			}
 			$r  = kits_token_resolve( $k, $vals );
 			$sw = preg_match( '/^#[0-9a-f]{3,8}$/', $r ) ? '<span style="display:inline-block;width:14px;height:14px;border:1px solid #ccc;vertical-align:middle;margin-right:6px;background:' . esc_attr( $r ) . '"></span>' : '';
-			echo '<tr><td><code>--' . esc_html( $k ) . '</code></td><td><code>' . esc_html( $v ) . '</code></td><td>' . $sw . '<code>' . esc_html( $r ) . '</code></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			$cells[] = array( 'token' => '<code>--' . esc_html( $k ) . '</code>', 'value' => '<code>' . esc_html( $v ) . '</code>', 'resolves' => $sw . '<code>' . esc_html( $r ) . '</code>' );
 		}
-		echo '</tbody></table><p>Base values (phones). Sizes that change at 768px and 1200px are fluid (clamp) or set in the token file.</p></div>';
+		kits_simple_table( 'tokens', array( 'token' => 'Token', 'value' => 'Value', 'resolves' => 'Resolves to' ), $cells );
+		echo '<p>Base values (phones). Sizes that change at 768px and 1200px are fluid (clamp) or set in the token file.</p></div>';
 		return;
 	}
 	if ( 'contrast' === $tab ) {
-		echo '<table class="widefat striped" style="margin-top:1em;max-width:900px"><thead><tr><th>Component</th><th>Text</th><th>On</th><th>Ratio</th><th>AA (4.5:1 text)</th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $reg['items'] as $it ) {
 			$pair = $it['a11y']['contrast'] ?? null;
 			if ( ! $pair ) {
@@ -199,9 +201,16 @@ function kits_system_page() {
 			$fg = kits_token_resolve( $pair[0], $vals );
 			$bg = kits_token_resolve( $pair[1], $vals );
 			$r  = kits_contrast( $fg, $bg );
-			echo '<tr><td>' . esc_html( $it['name'] ) . '</td><td><code>' . esc_html( $pair[0] ) . '</code> ' . esc_html( $fg ) . '</td><td><code>' . esc_html( $pair[1] ) . '</code> ' . esc_html( $bg ) . '</td><td>' . ( $r ? esc_html( number_format( $r, 2 ) ) . ':1' : '—' ) . '</td><td>' . ( $r ? ( $r >= 4.5 ? '✓ pass' : '<strong style="color:#b32d2e">✗ fail</strong>' ) : 'not a plain colour' ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			$cells[] = array(
+				'name'  => esc_html( $it['name'] ),
+				'text'  => '<code>' . esc_html( $pair[0] ) . '</code> ' . esc_html( $fg ),
+				'on'    => '<code>' . esc_html( $pair[1] ) . '</code> ' . esc_html( $bg ),
+				'ratio' => $r ? esc_html( number_format( $r, 2 ) ) . ':1' : '—',
+				'aa'    => $r ? ( $r >= 4.5 ? '✓ pass' : '<strong style="color:#b32d2e">✗ fail</strong>' ) : 'not a plain colour',
+			);
 		}
-		echo '</tbody></table></div>';
+		kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
+		echo '</div>';
 		return;
 	}
 	// Components, blocks and patterns.
@@ -211,7 +220,8 @@ function kits_system_page() {
 		$n = count( array_filter( $reg['items'], fn( $i ) => $i['type'] === $t ) );
 		echo '<li> | <a href="' . esc_url( add_query_arg( 'type', $t, $base ) ) . '"' . ( $t === $type ? ' class="current"' : '' ) . '>' . esc_html( ucfirst( $t ) ) . ' (' . (int) $n . ')</a></li>';
 	}
-	echo '</ul><table class="widefat striped"><thead><tr><th style="width:15%">Name</th><th style="width:8%">From</th><th style="width:14%">Classes or block</th><th style="width:13%">States</th><th>Accessibility</th><th style="width:16%">SEO</th><th style="width:9%">Used in</th></tr></thead><tbody>';
+	echo '</ul>';
+	$cells = array();
 	foreach ( $reg['items'] as $it ) {
 		if ( $type && $it['type'] !== $type ) {
 			continue;
@@ -240,13 +250,24 @@ function kits_system_page() {
 			}
 		}
 		$what = ! empty( $it['block'] ) ? '<code>' . esc_html( $it['block'] ) . '</code>' : implode( ' ', array_map( fn( $c ) => '<code>' . esc_html( $c ) . '</code>', (array) $it['classes'] ) );
-		echo '<tr><td><strong>' . esc_html( $it['name'] ) . '</strong><br><span style="color:#646970">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ) . '</td>'
-			. '<td>' . esc_html( $it['owner'] ) . '</td><td>' . $what . '</td><td>' . esc_html( implode( ' · ', (array) $it['states'] ) ) . '</td>'
-			. '<td>' . implode( '<br>', $acc ) . '</td><td>' . ( $seo ? implode( '<br>', $seo ) : '—' ) . '</td>'
-			. '<td>' . ( ! empty( $it['block'] ) ? '—' : ( $files ? '<details><summary>' . count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ) . '</summary>' . implode( '<br>', array_map( 'esc_html', $files ) ) . '</details>' : '<span style="color:#b32d2e">not used</span>' ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
-		echo kits_system_visual_row( $it, $vals, $demo ); // phpcs:ignore WordPress.Security.EscapeOutput
+		$cells[] = array(
+			'name'   => '<strong>' . esc_html( $it['name'] ) . '</strong><br><span style="color:#646970">' . esc_html( $it['type'] . ( 'live' !== $it['status'] ? ' · ' . $it['status'] : '' ) ) . '</span>' . ( ! empty( $it['note'] ) ? '<br><em>' . esc_html( $it['note'] ) . '</em>' : '' ),
+			'owner'  => esc_html( $it['owner'] ),
+			'what'   => $what,
+			'states' => esc_html( implode( ' · ', (array) $it['states'] ) ),
+			'a11y'   => implode( '<br>', $acc ),
+			'seo'    => $seo ? implode( '<br>', $seo ) : '—',
+			'used'   => ! empty( $it['block'] ) ? '—' : ( $files ? '<details><summary>' . count( $files ) . ' file' . ( 1 === count( $files ) ? '' : 's' ) . '</summary>' . implode( '<br>', array_map( 'esc_html', $files ) ) . '</details>' : '<span style="color:#b32d2e">not used</span>' ),
+			'_after' => kits_system_visual_row( $it, $vals, $demo ),
+		);
 	}
-	echo '</tbody></table></div>';
+	kits_simple_table(
+		'kits-entries',
+		array( 'name' => 'Name', 'owner' => 'From', 'what' => 'Classes or block', 'states' => 'States', 'a11y' => 'Accessibility', 'seo' => 'SEO', 'used' => 'Used in' ),
+		$cells,
+		array( 'empty' => 'No entries.' )
+	);
+	echo '</div>';
 }
 
 /**
