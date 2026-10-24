@@ -409,6 +409,77 @@ add_action(
 );
 
 /**
+ * Which research papers the site already has (owner, 24 Oct 2026: the Research worker summarised a year of papers with AI
+ * before the ingest answered "duplicate"). POST aw/v1/exists {dois: [], urls: []} with the workers' login; up to 500 of
+ * each per call. Matches DOI first (case-insensitive, from the item's doi.org source link), then the normalised URL,
+ * across research items (Resources tagged research) that are published, draft or pending.
+ * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent.
+ */
+function aw_exists_norm_url( $url ) {
+	$u = strtolower( trim( (string) $url ) );
+	$u = preg_replace( '~^https?://(www\.)?~', '', $u );
+	$u = preg_replace( '~#.*$~', '', $u );
+	return rtrim( $u, '/' );
+}
+
+function aw_exists_norm_doi( $doi ) {
+	$d = strtolower( trim( rawurldecode( (string) $doi ) ) );
+	return preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d );
+}
+
+function aw_exists( WP_REST_Request $req ) {
+	global $wpdb;
+	$dois = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'dois' ) ) ) ), 0, 500 );
+	$urls = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'urls' ) ) ) ), 0, 500 );
+	$held = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		"SELECT pm.meta_value FROM {$wpdb->postmeta} pm
+		 JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
+		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
+		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug = 'research'
+		 WHERE pm.meta_key = 'aw_source_url' AND p.post_type = 'post' AND p.post_status IN ('publish', 'draft', 'pending')"
+	);
+	$have_doi = array();
+	$have_url = array();
+	foreach ( $held as $src ) {
+		if ( preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $src, $m ) ) {
+			$have_doi[ aw_exists_norm_doi( $m[1] ) ] = true;
+		}
+		$have_url[ aw_exists_norm_url( $src ) ] = true;
+	}
+	$found_dois = array_values( array_filter( $dois, fn( $d ) => isset( $have_doi[ aw_exists_norm_doi( $d ) ] ) ) );
+	$found_urls = array_values(
+		array_filter(
+			$urls,
+			function ( $u ) use ( $have_url, $have_doi ) {
+				if ( preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', $u, $m ) && isset( $have_doi[ aw_exists_norm_doi( $m[1] ) ] ) ) {
+					return true; // a doi.org link: its DOI decides
+				}
+				return isset( $have_url[ aw_exists_norm_url( $u ) ] );
+			}
+		)
+	);
+	return new WP_REST_Response( array( 'dois' => $found_dois, 'urls' => $found_urls ), 200 );
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'aw/v1',
+			'/exists',
+			array(
+				'methods'             => 'POST',
+				'callback'            => 'aw_exists',
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' ); // the workers' login, as for /ingest
+				},
+			)
+		);
+	}
+);
+
+/**
  * Link an opportunity to its organisation's directory listing (exact name match), so the organisation's profile
  * lists it. Leaves it unlinked when there is no listing of that name, or more than one.
  *
