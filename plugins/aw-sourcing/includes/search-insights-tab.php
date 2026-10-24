@@ -3,7 +3,7 @@
  * AW Sourcing in Tools → Search Insights (owner, 24 Oct 2026; rebuilt on Search Insights phase 1).
  *
  * - "Sourcing keywords" tab (filter aw_si_tabs): per Google News search of the workers, the items it brought in over
- *   30 days, News and Library apart (aw_sourcing_keyword_stats), with the 28-day clicks and impressions of the
+ *   30 days, News and Library apart (aw_sourcing_keyword_stats), with the 28-day and 3-month clicks and impressions of the
  *   published items' pages from Search Insights (aw_si_page_metrics: the daily page rows, which include searches Google hides).
  * - The searches behind Settings → Sourcing → Keywords → Suggestions (filter aw_search_demand_terms): Search
  *   Insights' keywords with their 28-day figures, English only (owner: no Hindi or Hinglish suggestions).
@@ -31,12 +31,12 @@ add_action(
 		$table->prepare_items();
 		echo '<p>Each English Include word in <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) ) . '">Settings → Sourcing → Keywords</a> is a Google News search in every run. '
 			. '<strong>Fetched</strong>: the items it brought in over the last 30 days, whatever happened to them since (held, merged, backfilled). <strong>Published</strong>: those live now. '
-			. '<strong>Impressions and clicks</strong>: Search Console over the last 28 days for the published items\' own pages, searches Google hides included. '
+			. '<strong>Impressions and clicks</strong>: Search Console over the last 28 days and the last 3 months for the published items\' own pages, searches Google hides included. '
 			. 'Items from before 24 Oct 2026 did not record their search: they are counted by the word in their title or summary and marked estimated, and one with several of the words counts under each. Hindi Include words are not searches and are not listed.</p>';
 		if ( ! $table->has_page_data() ) { // Search Insights has not stored a Search Console run yet, or is switched off
 			$off = function_exists( 'aw_si_ready' ) && ! aw_si_ready();
 			echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> '
-				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : ( $table->page_data_stale() ? 'Search Insights has not had a successful Search Console run in the last 28 days, so there are no current page figures. Check Search Insights → Settings.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs.' ) ) . '</p></div>';
+				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : ( $table->page_data_stale() ? 'Search Insights has not had a successful Search Console run in the last 28 days, so there are no current page figures. Check Search Insights → Settings.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs, the 3 months over about a week.' ) ) . '</p></div>';
 		}
 		$table->display();
 	}
