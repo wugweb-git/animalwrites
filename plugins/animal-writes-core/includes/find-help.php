@@ -152,7 +152,9 @@ function aw_place_mentions( $text ) {
 			$phrase = implode( ' ', array_slice( $words, $i, $len ) );
 			$ks     = aw_place_key( $phrase, 'state' );
 			$kd     = aw_place_key( $phrase );
-			if ( in_array( $kd, AW_PLACE_DETECT_SKIP, true ) ) {
+			if ( $len > 1 && 'Delhi' === $words[ $i + $len - 1 ] && isset( $districts[ $kd . 'delhi' ] ) ) {
+				$kd = $kd . 'delhi'; // "South Delhi": lgd.json reads it as "South", a skipped word
+			} elseif ( in_array( $kd, AW_PLACE_DETECT_SKIP, true ) ) {
 				continue;
 			}
 			if ( isset( $districts[ $kd ] ) ) { // a district first: Chandigarh and Puducherry are both
