@@ -17,8 +17,9 @@
  * lists). English only until phase 5. The Search Console part of Rising (new queries) stays off until 8 weeks of
  * history (owner, 24 Oct 2026).
  *
- * Figures that belong to a term rather than a keyword record are stored in obs with kw_id 0 and page "#<source>:<norm>"
- * (never a site path, which always starts with "/"), so they stay one row per term, day and metric.
+ * Figures that belong to a term rather than a keyword record are stored in obs with page "#<source>:<norm>" (never a site
+ * path, which always starts with "/") and the matching keyword's ID (0 when none), so they stay one row per term, day
+ * and metric; nothing reads them by keyword ID (Search Console and Trends T rows have their own sources).
  *
  * @package aw-seo-extras
  */
@@ -80,11 +81,22 @@ function aw_si_rising_sources(): array {
 	);
 }
 
-// Each rising source has its own entry in the run log, the notices and Site Health ("rising_" keeps them apart).
+// Each rising source has its own entry in the run log, the notices and Site Health ("rising_" keeps them apart). A source
+// that has not reported yet joins once twice its schedule has passed since this code first loaded, so a deploy does not
+// show seven sources "late" against the date phase 1 was installed.
 add_filter(
 	'aw_si_sources',
 	function ( $sources ) {
+		$since = (int) get_option( 'aw_si_rising_since' );
+		if ( ! $since ) {
+			$since = time();
+			add_option( 'aw_si_rising_since', $since, '', false );
+		}
+		$runs = aw_si_runs();
 		foreach ( aw_si_rising_sources() as $key => $s ) {
+			if ( empty( $runs[ 'rising_' . $key ] ) && time() - $since <= 2 * $s['every'] ) {
+				continue;
+			}
 			$sources[ 'rising_' . $key ] = array(
 				'label' => $s['label'],
 				'every' => $s['every'],
@@ -94,9 +106,10 @@ add_filter(
 	}
 );
 
-/** Animal names counted in the Sourcing spikes and sent to the worker's Trends filter (singular; plurals fold). */
+/** Animal names counted in the Sourcing spikes and sent to the worker's Trends filter (singular; plurals fold). Words that are
+ * mostly something else (bat, python, kite, bull, shark) are left out. */
 function aw_si_species(): array {
-	$list = array( 'dog', 'puppy', 'cat', 'kitten', 'cow', 'cattle', 'bull', 'buffalo', 'calf', 'goat', 'sheep', 'pig', 'horse', 'donkey', 'mule', 'camel', 'monkey', 'macaque', 'langur', 'elephant', 'tiger', 'leopard', 'lion', 'cheetah', 'bear', 'deer', 'blackbuck', 'peacock', 'peafowl', 'pigeon', 'parrot', 'bird', 'vulture', 'eagle', 'owl', 'crow', 'snake', 'cobra', 'python', 'crocodile', 'turtle', 'tortoise', 'dolphin', 'whale', 'shark', 'pangolin', 'rhino', 'rhinoceros', 'wolf', 'jackal', 'hyena', 'boar', 'bat', 'squirrel', 'rabbit', 'chicken', 'hen', 'poultry' );
+	$list = array( 'dog', 'puppy', 'cat', 'kitten', 'cow', 'cattle', 'buffalo', 'calf', 'goat', 'sheep', 'pig', 'horse', 'donkey', 'mule', 'camel', 'monkey', 'macaque', 'langur', 'elephant', 'tiger', 'leopard', 'lion', 'cheetah', 'bear', 'deer', 'blackbuck', 'peacock', 'peafowl', 'pigeon', 'parrot', 'bird', 'vulture', 'eagle', 'owl', 'crow', 'snake', 'cobra', 'crocodile', 'turtle', 'tortoise', 'dolphin', 'whale', 'shark', 'pangolin', 'rhino', 'rhinoceros', 'wolf', 'jackal', 'hyena', 'boar', 'squirrel', 'rabbit', 'chicken', 'hen', 'poultry' );
 	return array_values( array_unique( array_map( 'strval', (array) apply_filters( 'aw_si_species', $list ) ) ) );
 }
 
@@ -132,7 +145,7 @@ function aw_si_rising_lists(): array {
 		'anchor'         => 'animal welfare',
 		// Terms with these words are dropped by the worker: an anime called Bungo Stray Dogs fills the "stray dogs"
 		// related searches (dry run, 24 Oct 2026), films and songs the trending list.
-		'exclude'        => array( 'anime', 'manga', 'bungo', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'ott', 'box office', 'game', 'meme', 'wallpaper', 'cartoon', 'meaning in' ),
+		'exclude'        => array( 'anime', 'manga', 'bungo', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'ott', 'box office', 'game', 'meme', 'wallpaper', 'cartoon', 'meaning in', 'cricket', 'ipl', 'vs', 'odi', 't20', 'match', 'score', 'shroff' ),
 	);
 	return (array) apply_filters( 'aw_si_rising_lists', $lists );
 }
@@ -141,11 +154,12 @@ function aw_si_rising_lists(): array {
  * The keyword record a term matches, and its page: the same record (same normal form), else the longest keyword of two
  * or more words the term contains; the page is that keyword's page, else a published page whose title contains the term.
  *
- * @param string $norm Normalised term.
- * @param string $term Term as written.
+ * @param string $norm          Normalised term.
+ * @param string $term          Term as written.
+ * @param bool   $look_up_posts Also search published titles when no keyword has a page (new terms only).
  * @return array{0: int, 1: string} Keyword ID (0: none) and site path or page label ('' when none).
  */
-function aw_si_rising_match( string $norm, string $term ): array {
+function aw_si_rising_match( string $norm, string $term, bool $look_up_posts = true ): array {
 	global $wpdb;
 	static $kw = null;
 	$k         = aw_si_table( 'keywords' );
@@ -169,8 +183,9 @@ function aw_si_rising_match( string $norm, string $term ): array {
 	}
 	$id   = $hit ? $hit[0] : 0;
 	$page = $hit ? $hit[1] : '';
-	if ( '' === $page && mb_strlen( $term ) >= 4 ) {
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one indexed lookup per new term.
+	if ( '' === $page && $look_up_posts && mb_strlen( $term ) >= 4 ) {
+		// A title search (a scan of published posts' titles): only for a term seen for the first time.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('page', 'post', 'aw_legal', 'aw_campaign', 'aw_news') AND post_title LIKE %s ORDER BY post_type = 'aw_news', post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) );
 		if ( $post ) {
 			$page = aw_si_path( (string) get_permalink( (int) $post ) );
@@ -239,8 +254,11 @@ function aw_si_rising_put( string $term, string $source, ?float $growth, string 
 		$first = $d;
 		$last  = $d;
 	}
-	list( $kw_id, $page ) = aw_si_rising_match( $norm, $term );
-	$row                  = array(
+	list( $kw_id, $page ) = aw_si_rising_match( $norm, $term, ! $old );
+	if ( $old && '' === $page ) {
+		$page = (string) $old->page; // The title search ran when the term was new.
+	}
+	$row = array(
 		'norm'       => $norm,
 		'term'       => $old ? (string) $old->term : $term,
 		'sources'    => implode( ',', $srcs ),
@@ -321,24 +339,28 @@ function aw_si_rising_receive( array $body ): array {
 		$out['figures'] = count( $obs );
 		return $out; // A dry run is only counted.
 	}
-	aw_si_install(); // The REST request may come before any admin visit has built the tables.
 	if ( get_option( 'aw_si_off' ) ) {
 		return array( 'error' => 'Search Insights is switched off (its data was deleted); nothing stored' );
 	}
+	aw_si_install(); // The REST request may come before any admin visit has built the tables.
 	$key = 'rising_' . $source;
 	aw_si_run_start( $key );
 	foreach ( $rising as $r ) {
-		$d = aw_si_rising_date( (string) ( $r['d'] ?? '' ) );
-		if ( ! $d ) {
+		$d = is_scalar( $r['d'] ?? '' ) ? aw_si_rising_date( (string) ( $r['d'] ?? '' ) ) : '';
+		if ( ! $d || ! is_scalar( $r['term'] ?? '' ) || ! is_scalar( $r['note'] ?? '' ) ) {
 			++$out['skipped'];
 			continue;
 		}
 		$g                        = isset( $r['growth'] ) && is_numeric( $r['growth'] ) ? (float) $r['growth'] : null;
-		$result                   = aw_si_rising_put( (string) ( $r['term'] ?? '' ), $source, $g, $d, sanitize_text_field( (string) ( $r['note'] ?? '' ) ) );
+		$result                   = aw_si_rising_put( sanitize_text_field( (string) ( $r['term'] ?? '' ) ), $source, $g, $d, sanitize_text_field( (string) ( $r['note'] ?? '' ) ) );
 		$out['rising'][ $result ] = ( $out['rising'][ $result ] ?? 0 ) + 1;
 	}
 	$map = aw_si_kw_map();
 	foreach ( $obs as $o ) {
+		if ( ! is_scalar( $o['metric'] ?? '' ) || ! is_scalar( $o['d'] ?? '' ) || ! is_scalar( $o['term'] ?? '' ) || ! is_scalar( $o['txt'] ?? '' ) ) {
+			++$out['skipped'];
+			continue;
+		}
 		$target = aw_si_rising_obs_target( $source, sanitize_key( (string) ( $o['metric'] ?? '' ) ) );
 		$d      = aw_si_rising_date( (string) ( $o['d'] ?? '' ) );
 		$period = in_array( $o['period'] ?? '', array( 'day', '12m' ), true ) ? (string) $o['period'] : '';
@@ -363,14 +385,14 @@ function aw_si_rising_receive( array $body ): array {
 			$d,
 			array(
 				'value' => (float) $o['value'],
-				'txt'   => $target[2] ? (string) ( $o['txt'] ?? '' ) : $term,
+				'txt'   => $target[2] ? sanitize_text_field( (string) ( $o['txt'] ?? '' ) ) : $term,
 			)
 		);
 		$out['figures'] += $ok ? 1 : 0;
 		$out['skipped'] += $ok ? 0 : 1;
 	}
 	$info = array(
-		'rows'    => array_sum( $out['rising'] ) + $out['figures'],
+		'rows'    => (int) ( $out['rising']['created'] ?? 0 ) + (int) ( $out['rising']['updated'] ?? 0 ) + $out['figures'],
 		'rising'  => count( $rising ),
 		'figures' => $out['figures'],
 		'worker'  => array_map( 'sanitize_text_field', array_filter( (array) ( $body['info'] ?? array() ), 'is_scalar' ) ),
@@ -633,6 +655,20 @@ add_action(
 
 add_filter( 'aw_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'aw-seo-extras' ) ) + (array) $tabs );
 
+// A month of rising sightings keeps its last growth, never a sum of ratios (rollup.php).
+add_filter(
+	'aw_si_last_value_metrics',
+	function ( $metrics ) {
+		foreach ( array_keys( aw_si_rising_sources() ) as $key ) {
+			$metrics[] = 'rising:' . $key;
+		}
+		return $metrics;
+	}
+);
+
+// Deactivating the plugin removes the spikes event, as it does Search Insights' own (aw-seo-extras.php).
+register_deactivation_hook( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php', fn() => wp_clear_scheduled_hook( AW_SI_RISING_CRON ) );
+
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped' ) ) );
 
@@ -731,7 +767,9 @@ function aw_si_rising_paste_form(): void {
 }
 
 /**
- * Parse pasted lines into [term, figure text]. A line without a comma is skipped.
+ * Parse pasted lines into [term, figure text]: the search, then a comma or tab, then the figure at the end of the line
+ * (+1,250%, 140, Breakout). The first separator before a whole figure wins, so a thousands comma stays in the figure
+ * and a comma inside the search stays in the search. Other lines are skipped.
  *
  * @param string $text Pasted text.
  * @return array<int, array{0: string, 1: string}>
@@ -739,17 +777,8 @@ function aw_si_rising_paste_form(): void {
 function aw_si_rising_paste_lines( string $text ): array {
 	$out = array();
 	foreach ( preg_split( '/\R/u', $text ) as $line ) {
-		$pos = strrpos( $line, ',' );
-		if ( false === $pos ) {
-			$pos = strrpos( $line, "\t" ); // A copy from a Trends table is tab-separated.
-		}
-		if ( false === $pos ) {
-			continue;
-		}
-		$term = trim( substr( $line, 0, $pos ) );
-		$fig  = trim( substr( $line, $pos + 1 ) );
-		if ( '' !== $term && '' !== $fig ) {
-			$out[] = array( $term, $fig );
+		if ( preg_match( '/^(.*?)(?:\t+|\s*,\s*)([+\-]?\d[\d,.]*\s*%?|breakout)\s*$/iu', trim( $line ), $m ) && '' !== trim( $m[1] ) ) {
+			$out[] = array( trim( $m[1] ), trim( $m[2] ) );
 		}
 	}
 	return array_slice( $out, 0, 500 );
@@ -760,6 +789,16 @@ add_action(
 	function () {
 		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_rising_paste' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		}
+		if ( get_option( 'aw_si_off' ) ) {
+			wp_die(
+				esc_html__( 'Search Insights is off (its data was deleted), so nothing was stored. Settings → Run the daily update starts it again.', 'aw-seo-extras' ),
+				'',
+				array(
+					'back_link' => true,
+					'response'  => 409,
+				)
+			);
 		}
 		aw_si_install();
 		$kind  = isset( $_POST['kind'] ) && 'interest' === $_POST['kind'] ? 'interest' : 'related';
