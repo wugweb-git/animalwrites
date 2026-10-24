@@ -33,6 +33,9 @@ Check this list against git and the live site before acting on it. Failing AI ke
     - The 10 pushes: form_ref TEST-CLAUDE-1 to TEST-CLAUDE-10. Two runs of five: contact, newsletter, volunteer, form-6 (claim), report.
     - Events GA4 received: contact_sent 2, newsletter_signup 2, volunteer_signup 2, claim_sent 2 (all key events or meant to be); form_submit 10 (parameter `ref` = TEST-CLAUDE-n, `form` = contact / newsletter / volunteer / form-6 / report).
     - To exclude them: filter on event parameter `ref` begins with TEST-CLAUDE (form_submit), or subtract 2 from each of the four key events for 22 Oct. The first real volunteer_signup and claim_sent hits are therefore still to come.
+14. **Find help near you (crawl plan step 4, owner 24 Oct 2026).** Commit `8c983ff` (branch `find-help-near-you-1024`), not shipped: waiting for the owner's "ship it". News, Library and guides get a place from the state and district names in their title and summary (find-help.php; `wp aw-places detect`, `--dry-run` first); More then links that state and its districts with listings (up to 12, nearest first), else one line (All states and districts, Near me); the lab rules campaign gets a band of 12 states before "Read the law and the record". Dry run on live, 24 Oct: News 842 of 1,201 would get a place (542 with a district), Library 37 of 96, guides 1 of 34.
+    - After shipping: run `wp aw-places detect`, check the four page types on phone and desktop, links 200 and index,follow.
+    - Owner to decide: `?state=` filtered lists with 3+ items are indexed and in filtered-sitemap.xml (filtered-views.php); after the backfill that is 30 News and 6 Library lists (0 today). Keep them indexed, or have the SEO session noindex `?state=` first.
 
 ## Decided: never (owner, 22 Oct 2026)
 - Rewriting the 11 Wildlife SOS job summaries, or dropping their JobPosting markup.
