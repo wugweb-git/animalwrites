@@ -68,9 +68,11 @@ function aw_si_gsc_fetch_day( $module, string $day ) {
  *
  * @param string $day  Date (Y-m-d).
  * @param array  $data What aw_si_gsc_fetch_day() returned.
- * @return int Rows written.
+ * The delete and the inserts run in one transaction: if any write fails, the day's earlier rows stay.
+ *
+ * @return int|WP_Error Rows written, or why the day was not replaced.
  */
-function aw_si_gsc_store_day( string $day, array $data ): int {
+function aw_si_gsc_store_day( string $day, array $data ) {
 	global $wpdb;
 	$o      = aw_si_table( 'obs' );
 	$labels = array();
@@ -113,7 +115,8 @@ function aw_si_gsc_store_day( string $day, array $data ): int {
 		$impr           = $m[4] + $v[4];
 		$merged[ $key ] = array( $m[0], $m[1], $m[2], $m[3] + $v[3], $impr, $impr ? ( $m[5] * $m[4] + $v[5] * $v[4] ) / $impr : 0 );
 	}
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND period = 'day' AND d = %s", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'gsc' AND period = 'day' AND d = %s", $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	foreach ( array_chunk( array_values( $merged ), 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
@@ -122,8 +125,18 @@ function aw_si_gsc_store_day( string $day, array $data ): int {
 			array_push( $args, $v[0], mb_substr( $v[1], 0, 255 ), '' === $v[1] ? '' : md5( $v[1] ), $v[2], $day, $v[3], $v[4], round( $v[5], 2 ), $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
-		$wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, clicks, impr, pos, fetched) VALUES " . implode( ', ', $place ), $args ) );
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, clicks, impr, pos, fetched) VALUES " . implode( ', ', $place ), $args ) );
+		if ( ! $ok ) {
+			break;
+		}
 	}
+	if ( ! $ok ) {
+		$error = $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* translators: 1: date, 2: database error. */
+		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'aw-seo-extras' ), $day, $error ) );
+	}
+	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return count( $merged );
 }
 
@@ -188,7 +201,11 @@ function aw_si_gsc_run( array $args = array() ): array {
 				if ( $data['truncated'] ) {
 					$rep['truncated'][ $day ] = $data['truncated'];
 				}
-				$n                   = $dry ? count( $data['q'] ) + count( $data['qp'] ) + count( $data['total'] ) : aw_si_gsc_store_day( $day, $data );
+				$n = $dry ? count( $data['q'] ) + count( $data['qp'] ) + count( $data['total'] ) : aw_si_gsc_store_day( $day, $data );
+				if ( is_wp_error( $n ) ) {
+					$rep['error'] = $n->get_error_message();
+					break;
+				}
 				$rep['days'][ $day ] = array(
 					'q'     => count( $data['q'] ),
 					'qp'    => count( $data['qp'] ),
