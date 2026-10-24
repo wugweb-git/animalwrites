@@ -112,7 +112,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$s    = mb_strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$rows = array();
 		foreach ( $this->all as $h => $p ) {
-			if ( ( $st && $st !== ( $p['status'] ?? 'neutral' ) ) || ( '' !== $s && false === strpos( $h . ' ' . mb_strtolower( (string) ( $p['name'] ?? '' ) . ' ' . (string) ( $p['short'] ?? '' ) ), $s ) ) ) {
+			if ( ( $st && ( $p['status'] ?? 'neutral' ) !== $st ) || ( '' !== $s && false === strpos( $h . ' ' . mb_strtolower( (string) ( $p['name'] ?? '' ) . ' ' . (string) ( $p['short'] ?? '' ) ), $s ) ) ) {
 				continue;
 			}
 			$rows[] = array( 'host' => $h ) + $p;
@@ -150,7 +150,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	protected function column_host( $item ) {
 		$acts = array();
 		foreach ( array( 'allow' => 'Allow', 'neutral' => 'Neutral', 'block' => 'Block' ) as $st => $l ) {
-			if ( $st !== ( $item['status'] ?? 'neutral' ) ) {
+			if ( ( $item['status'] ?? 'neutral' ) !== $st ) {
 				$acts[ 'block' === $st ? 'trash' : $st ] = $this->status_button( $st, $l, $item['host'] );
 			}
 		}
