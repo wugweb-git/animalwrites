@@ -68,6 +68,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
 | `includes/review-queue.php` | Inbox → To review. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
+| `includes/site-health.php` | Tools → Site Health → "Sourcing ran on time": the ingest heartbeat as a Site Health test, same rules as the watchdog (critical: no run for 8 hours; recommended: no News for 12 hours or half the sources failing). |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
 
 ## mailweb (Mailweb)
