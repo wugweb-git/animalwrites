@@ -16,14 +16,15 @@
  *   is "transactional" (never sent the newsletter); an existing contact keeps its status. Tags "Emailed us" and
  *   "Contact form". The Inbox item (Contact messages) is still made, for spotting new mail. Notes are kept as long as
  *   the contact messages are (retention.php: nothing is deleted on a timer); "Remove my data" removes both.
- * - Volunteers are contacts tagged "Volunteer", with their volunteer details in custom fields (group "Volunteer",
- *   mirroring the volunteers table, which stays as the backup).
+ * - Volunteers are contacts tagged "Volunteer", with their volunteer details in custom fields (group "Volunteer").
+ *   FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write here only; the site's volunteers table
+ *   ({prefix}aw_volunteers) is a read-only backup, copied in once with `wp aw vol-to-crm` (dry run first).
  * - Replies (owner, 17 Oct 2026): only to incoming emails, one email at a time. FluentCRM free has no "Send Email" on
  *   the profile, so each email's note carries a Reply link to Inbox → Reply (mail-reply.php), as do the email's Inbox
  *   row and screen. The reply goes out through wp_mail (the site's mailbox) under the daily cap, first in the queue
  *   (mail-cap.php), Reply-To the address that email was sent to, so the answer comes back through the mail webhook as
  *   a new note; the reply itself is logged as a note "Reply sent: <subject>". Form messages get no Reply.
- * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, volunteers, notes).
+ * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, notes), `wp aw vol-to-crm`.
  *
  * @package animal-writes-core
  */
@@ -415,69 +416,217 @@ function aw_crm_fields_setup() {
 	return $added;
 }
 
+/** Volunteer consent, narrowest first: a later sign-up only ever widens it. */
+const AW_CRM_VOL_CONSENT_RANK = array( 'campaign_1_0' => 1, 'volunteering' => 2, 'volunteering_and_updates' => 3 );
+
 /**
- * Copy one volunteer (by email) from the volunteers table onto their FluentCRM contact: tag Volunteer and the custom
- * fields. An active volunteer with no contact yet is added as on sign-up (Newsletter list, subscribed). Sends nothing.
+ * A tag's ID, or 0 when there is no such tag (unlike aw_crm_tag_ids(), creates nothing: dry runs use it).
  *
- * @param string $email Email.
- * @return string 'updated' | 'created' | 'skipped'
+ * @param string $slug Tag slug.
+ * @return int
  */
-function aw_crm_volunteer_sync( $email ) {
+function aw_crm_tag_id( $slug ) {
+	$tag = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $slug )->first();
+	return $tag ? (int) $tag->id : 0;
+}
+
+/**
+ * True when the contact has the tag.
+ *
+ * @param object $c    FluentCRM contact.
+ * @param string $slug Tag slug.
+ * @return bool
+ */
+function aw_crm_has_tag( $c, $slug ) {
+	$id = aw_crm_tag_id( $slug );
+	foreach ( $c->tags as $t ) {
+		if ( (int) $t->id === $id ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * A volunteer sign-up (the site's own form) onto their FluentCRM contact, the one place volunteers are kept (owner,
+ * 24 Oct 2026). The contact must exist (aw_newsletter_join makes it); it gets the Volunteer tag and the fields. What
+ * the person sent replaces what was there, as the table did for a 2.0 sign-up; consent only widens; the join date is
+ * kept. Sends nothing.
+ *
+ * @param string $email  Email.
+ * @param array  $fields vol_* custom fields (empty values are left out).
+ * @return bool False when there is no contact.
+ */
+function aw_crm_volunteer_signup( $email, $fields ) {
+	$c = aw_crm_on() ? FluentCrmApi( 'contacts' )->getContact( strtolower( trim( (string) $email ) ) ) : null;
+	if ( ! $c ) {
+		return false;
+	}
+	aw_crm_fields_setup();
+	$have = (array) $c->custom_fields();
+	$now  = current_time( 'mysql', true );
+	if ( ( AW_CRM_VOL_CONSENT_RANK[ $fields['vol_consent'] ?? '' ] ?? 0 ) <= ( AW_CRM_VOL_CONSENT_RANK[ $have['vol_consent'] ?? '' ] ?? 0 ) ) {
+		unset( $fields['vol_consent'], $fields['vol_consent_version'] ); // their earlier, wider consent stays
+	} else {
+		$fields['vol_consent_at'] = $now;
+	}
+	if ( '' === (string) ( $have['vol_joined'] ?? '' ) ) {
+		$fields['vol_joined'] = substr( $now, 0, 10 );
+	}
+	$c->attachTags( aw_crm_tag_ids( array( 'volunteer' ) ) );
+	$c->syncCustomFieldValues( array_filter( $fields, fn( $v ) => '' !== (string) $v ) + array( 'vol_status' => 'active' ), false );
+	return true;
+}
+
+/**
+ * Volunteers as FluentCRM keeps them: contacts tagged Volunteer, except those whose Volunteer status is "deleted".
+ * One query; the readers that used the volunteers table use this (owner, 24 Oct 2026).
+ *
+ * @return array[] email, name, status (the contact's), vol_status, vol_source, joined (Y-m-d), created_at.
+ */
+function aw_crm_volunteers() {
 	global $wpdb;
-	static $places = null, $fields_ok = false;
-	if ( ! aw_crm_on() || ! function_exists( 'aw_vol_table' ) ) {
-		return 'skipped';
+	if ( ! aw_crm_on() ) {
+		return array();
 	}
-	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . aw_vol_table() . ' WHERE email = %s', strtolower( trim( (string) $email ) ) ), ARRAY_A ); // phpcs:ignore
-	if ( ! $r ) {
-		return 'skipped';
+	$p   = $wpdb->prefix;
+	$tag = aw_crm_tag_id( 'volunteer' );
+	$sql = "SELECT s.email, TRIM(CONCAT(s.first_name, ' ', s.last_name)) AS name, s.status, s.created_at,
+		COALESCE(st.value, '') AS vol_status, COALESCE(so.value, '') AS vol_source, COALESCE(jo.value, '') AS joined
+		FROM {$p}fc_subscribers s
+		JOIN {$p}fc_subscriber_pivot t ON t.subscriber_id = s.id AND t.object_id = %d AND t.object_type = %s
+		LEFT JOIN {$p}fc_subscriber_meta st ON st.subscriber_id = s.id AND st.object_type = 'custom_field' AND st.`key` = 'vol_status'
+		LEFT JOIN {$p}fc_subscriber_meta so ON so.subscriber_id = s.id AND so.object_type = 'custom_field' AND so.`key` = 'vol_source'
+		LEFT JOIN {$p}fc_subscriber_meta jo ON jo.subscriber_id = s.id AND jo.object_type = 'custom_field' AND jo.`key` = 'vol_joined'
+		WHERE COALESCE(st.value, '') <> 'deleted' ORDER BY s.created_at DESC";
+	$out = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( $sql, $tag, 'FluentCrm\App\Models\Tag' ), ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery
+		$out[ strtolower( $r['email'] ) ] ??= $r; // one row per contact, whatever extra meta rows join in
 	}
-	if ( ! $fields_ok ) {
-		aw_crm_fields_setup();
-		$fields_ok = true;
-	}
+	return array_values( $out );
+}
+
+/* ---------- The volunteers table → FluentCRM, once (owner, 24 Oct 2026): fill gaps, never overwrite ---------- */
+
+/**
+ * A volunteers-table row as the Volunteer custom fields.
+ *
+ * @param array $r Table row.
+ * @return array vol_* => value.
+ */
+function aw_crm_vol_row_fields( $r ) {
+	static $places = null;
 	if ( null === $places ) {
 		$places = array();
 		foreach ( aw_lgd()['ids'] as $t ) {
 			$places[ $t->term_id ] = $t;
 		}
 	}
-	$st  = $places[ (int) $r['state_id'] ] ?? null;
-	$di  = $places[ (int) $r['district_id'] ] ?? null;
-	$c   = FluentCrmApi( 'contacts' )->getContact( $r['email'] );
-	$res = 'updated';
+	$st    = $places[ (int) $r['state_id'] ] ?? null;
+	$di    = $places[ (int) $r['district_id'] ] ?? null;
+	$roles = array_map( 'trim', explode( ',', (string) $r['role'] ) );
+	return array(
+		'vol_help'            => 'v2_form' === $r['source'] && defined( 'AW_VOL_ROLES' ) ? implode( '; ', array_map( fn( $k ) => AW_VOL_ROLES[ $k ] ?? $k, array_filter( $roles ) ) ) : (string) $r['role'],
+		'vol_state'           => $st ? $st->name : '',
+		'vol_district'        => $di ? $di->name : '',
+		'vol_city'            => (string) $r['city_text'],
+		'vol_pincode'         => (string) $r['pincode'],
+		'vol_phone'           => (string) $r['phone'],
+		'vol_page'            => (string) $r['page_source'],
+		'vol_source'          => 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form',
+		'vol_consent'         => (string) $r['consent_scope'],
+		'vol_consent_version' => (string) $r['consent_text_version'],
+		'vol_consent_at'      => (string) $r['consent_at'],
+		'vol_status'          => (string) $r['status'],
+		'vol_joined'          => substr( (string) $r['created_at'], 0, 10 ),
+	);
+}
+
+/**
+ * Copy one volunteers-table row into FluentCRM without overwriting anything. A person with no contact gets one,
+ * tagged Volunteer, with the status their row allows (active: transactional, so no newsletter; unsubscribed:
+ * unsubscribed); a row marked deleted gets none. On an existing contact only empty fields are filled, the tag is
+ * added when missing and the status is never changed. Sends nothing.
+ *
+ * @param array $r     Table row.
+ * @param bool  $apply False: only work out what would change.
+ * @return array action (create | fill | none | skip), contact, status (an existing contact's), tag (bool), fields
+ *               (filled), differ (set on both sides and different: kept as FluentCRM has it).
+ */
+function aw_crm_volunteer_copy( $r, $apply ) {
+	$email = strtolower( trim( (string) $r['email'] ) );
+	$plan  = array( 'action' => 'none', 'contact' => 0, 'tag' => false, 'fields' => array(), 'differ' => array() );
+	if ( ! is_email( $email ) ) {
+		$plan['action'] = 'skip';
+		return $plan;
+	}
+	$want  = array_filter( aw_crm_vol_row_fields( $r ), fn( $v ) => '' !== trim( (string) $v ) );
+	$parts = preg_split( '/\s+/', trim( (string) $r['name'] ), 2 );
+	$core  = array_filter( array( 'first_name' => (string) ( $parts[0] ?? '' ), 'last_name' => (string) ( $parts[1] ?? '' ), 'phone' => (string) $r['phone'] ), fn( $v ) => '' !== trim( $v ) );
+	$c     = FluentCrmApi( 'contacts' )->getContact( $email );
 	if ( ! $c ) {
-		if ( 'active' !== $r['status'] ) {
-			return 'skipped';
+		if ( 'deleted' === $r['status'] ) {
+			$plan['action'] = 'skip';
+			return $plan;
 		}
-		$c   = aw_crm_contact_for( $r['email'], $r['name'], array( 'volunteer' ), (string) $r['source'] ); // a contact, not a subscriber: the newsletter needs its own tick (owner, 20 Oct 2026)
-		$res = 'created';
-		if ( ! $c ) {
-			return 'skipped';
+		$plan = array( 'action' => 'create', 'contact' => 0, 'tag' => true, 'fields' => array_keys( $core + $want ), 'differ' => array() );
+		if ( $apply ) {
+			$c = FluentCrmApi( 'contacts' )->createOrUpdate( $core + array( 'email' => $email, 'status' => 'unsubscribed' === $r['status'] ? 'unsubscribed' : 'transactional', 'source' => (string) $r['source'] ) );
+			if ( ! $c ) {
+				$plan['action'] = 'skip';
+				return $plan;
+			}
+			$plan['contact'] = (int) $c->id;
+			$c->attachTags( aw_crm_tag_ids( array( 'volunteer' ) ) );
+			$c->syncCustomFieldValues( $want, false );
+		}
+		return $plan;
+	}
+	$plan['contact'] = (int) $c->id;
+	$plan['status']  = (string) $c->status;
+	$plan['tag']     = ! aw_crm_has_tag( $c, 'volunteer' );
+	$have            = (array) $c->custom_fields();
+	$same            = fn( $a, $b ) => 0 === strcasecmp( trim( (string) $a ), trim( (string) $b ) );
+	$fill_core       = array();
+	if ( isset( $core['first_name'] ) && '' === trim( (string) $c->first_name ) && '' === trim( (string) $c->last_name ) ) {
+		$fill_core = array_intersect_key( $core, array_flip( array( 'first_name', 'last_name' ) ) ); // the name only as a whole
+	} elseif ( isset( $core['first_name'] ) && ! $same( trim( $c->first_name . ' ' . $c->last_name ), $r['name'] ) ) {
+		$plan['differ'][] = 'name';
+	}
+	if ( isset( $core['phone'] ) ) {
+		if ( '' === trim( (string) $c->phone ) ) {
+			$fill_core['phone'] = $core['phone'];
+		} elseif ( ! $same( $c->phone, $core['phone'] ) ) {
+			$plan['differ'][] = 'phone';
 		}
 	}
-	$roles = array_map( 'trim', explode( ',', (string) $r['role'] ) );
-	$help  = 'v2_form' === $r['source'] && defined( 'AW_VOL_ROLES' ) ? implode( '; ', array_map( fn( $k ) => AW_VOL_ROLES[ $k ] ?? $k, array_filter( $roles ) ) ) : (string) $r['role'];
-	$c->attachTags( aw_crm_tag_ids( array( 'volunteer' ) ) );
-	$c->syncCustomFieldValues(
-		array(
-			'vol_help'            => $help,
-			'vol_state'           => $st ? $st->name : '',
-			'vol_district'        => $di ? $di->name : '',
-			'vol_city'            => (string) $r['city_text'],
-			'vol_pincode'         => (string) $r['pincode'],
-			'vol_phone'           => (string) $r['phone'],
-			'vol_page'            => (string) $r['page_source'],
-			'vol_source'          => 'v1_campaign' === $r['source'] ? '1.0 campaign' : '2.0 form',
-			'vol_consent'         => (string) $r['consent_scope'],
-			'vol_consent_version' => (string) $r['consent_text_version'],
-			'vol_consent_at'      => (string) $r['consent_at'],
-			'vol_status'          => (string) $r['status'],
-			'vol_joined'          => substr( (string) $r['created_at'], 0, 10 ),
-		),
-		false
-	);
-	return $res;
+	$fill = array();
+	foreach ( $want as $k => $v ) {
+		if ( '' === trim( (string) ( $have[ $k ] ?? '' ) ) ) {
+			$fill[ $k ] = $v;
+		} elseif ( ! $same( $have[ $k ], $v ) ) {
+			$plan['differ'][] = $k;
+		}
+	}
+	$plan['fields'] = array_keys( $fill_core + $fill );
+	if ( $plan['tag'] || $plan['fields'] ) {
+		$plan['action'] = 'fill';
+	}
+	if ( $apply && 'fill' === $plan['action'] ) {
+		if ( $plan['tag'] ) {
+			$c->attachTags( aw_crm_tag_ids( array( 'volunteer' ) ) );
+		}
+		if ( $fill ) {
+			$c->syncCustomFieldValues( $fill, false );
+		}
+		if ( $fill_core ) {
+			foreach ( $fill_core as $k => $v ) {
+				$c->{$k} = $v;
+			}
+			$c->save();
+		}
+	}
+	return $plan;
 }
 
 /* ---------- Forms: what a Fluent Forms → FluentCRM link cannot do (owner, 21 Oct 2026) ---------- */
@@ -633,24 +782,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	);
 
-	// wp aw crm-import: the volunteers and the site's sign-ups onto both lists as subscribed / active.
+	// wp aw crm-import: the site's sign-ups onto both lists as subscribed / active.
 	WP_CLI::add_command(
 		'aw crm-import',
 		function () {
 			global $wpdb;
 			add_filter( 'pre_wp_mail', '__return_false', 1 ); // no email of any kind during the import
-			$n     = array( 'volunteers' => 0, 'signups' => 0, 'failed' => 0 );
-			$names = array();
-			foreach ( aw_lgd()['ids'] as $t ) {
-				$names[ $t->term_id ] = $t;
-			}
-			foreach ( (array) $wpdb->get_results( 'SELECT * FROM ' . aw_vol_table() . " WHERE status = 'active'", ARRAY_A ) as $r ) { // phpcs:ignore
-				$st = $names[ (int) $r['state_id'] ] ?? null;
-				$di = $names[ (int) $r['district_id'] ] ?? null;
-				$f  = aw_crm_volunteer_fields( $st ? $st->slug : '', $di ? $di->slug : '', $r['city_text'], $r['pincode'], $r['phone'] );
-				$id = aw_crm_subscribe( $r['email'], $r['name'], $f + array( 'source' => $r['source'] ), array( 'v1_campaign' === $r['source'] ? 'volunteer-1.0' : 'volunteer' ) );
-				$id ? $n['volunteers']++ : $n['failed']++;
-			}
+			$n = array( 'signups' => 0, 'failed' => 0 );
+			// Volunteers: no longer from here (owner, 24 Oct 2026). FluentCRM is the volunteers table; the table's rows go in
+			// once with `wp aw vol-to-crm`, which never subscribes anyone.
 			foreach ( (array) $wpdb->get_results( 'SELECT email, name, source, status FROM ' . aw_nl_table() . " WHERE status IN ('pending','invited','active')", ARRAY_A ) as $r ) { // phpcs:ignore
 				if ( 'active' !== $r['status'] ) { // owner, 16 Oct 2026: the earlier sign-ups count as subscribed
 					aw_nl_activate( $r['email'], $r['name'], $r['source'], 'owner-2026-10-16-signups' );
@@ -664,8 +804,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::success( wp_json_encode( $n ) );
 		}
 	);
-	// wp aw crm-move (owner, 17 Oct 2026): volunteers onto their contacts (tag + fields), and every contact message and
-	// incoming email as a note on its sender's contact. Safe to run again (no second notes). Sends nothing; counts only.
+	// wp aw crm-move (owner, 17 Oct 2026): every contact message and incoming email as a note on its sender's contact.
+	// Safe to run again (no second notes). Sends nothing; counts only.
 	WP_CLI::add_command(
 		'aw crm-move',
 		function () {
@@ -675,11 +815,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			add_filter( 'pre_wp_mail', '__return_false', 1 ); // no email of any kind
 			$before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}fc_subscribers" ); // phpcs:ignore
-			$n      = array( 'fields_added' => aw_crm_fields_setup(), 'volunteers' => array(), 'notes_new' => 0, 'notes_updated' => 0, 'messages_skipped' => 0 );
-			foreach ( (array) $wpdb->get_col( 'SELECT email FROM ' . aw_vol_table() ) as $email ) { // phpcs:ignore
-				$r                     = aw_crm_volunteer_sync( $email );
-				$n['volunteers'][ $r ] = ( $n['volunteers'][ $r ] ?? 0 ) + 1;
-			}
+			$n      = array( 'fields_added' => aw_crm_fields_setup(), 'notes_new' => 0, 'notes_updated' => 0, 'messages_skipped' => 0 ); // volunteers: wp aw vol-to-crm
 			foreach ( get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'ASC' ) ) as $id ) {
 				$had  = (int) get_post_meta( $id, 'aw_m_crm_note', true );
 				$note = aw_crm_message_note( $id );
@@ -691,6 +827,78 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			$n['contacts_created'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}fc_subscribers" ) - $before; // phpcs:ignore
 			WP_CLI::success( wp_json_encode( $n ) );
+		}
+	);
+
+	// wp aw vol-to-crm [--apply] [--ignore-automations] (owner, 24 Oct 2026): the volunteers table's people and fields
+	// into FluentCRM, filling gaps only (aw_crm_volunteer_copy). Without --apply nothing changes: it prints the diff
+	// (matched by lowercased email) and the plan. Counts only, never a person's details. --apply sends nothing and logs
+	// every change (row and contact IDs, what was added, no values) to aw-private/vol-to-crm-<time>.jsonl.
+	WP_CLI::add_command(
+		'aw vol-to-crm',
+		function ( $args, $assoc ) {
+			global $wpdb;
+			if ( ! aw_crm_on() ) {
+				WP_CLI::error( 'FluentCRM is not active.' );
+			}
+			$apply   = ! empty( $assoc['apply'] );
+			$p       = $wpdb->prefix;
+			$funnels = (array) $wpdb->get_col( "SELECT trigger_name FROM {$p}fc_funnels WHERE status = 'published'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table prefix only
+			if ( $apply && $funnels && empty( $assoc['ignore-automations'] ) ) {
+				WP_CLI::error( count( $funnels ) . ' published FluentCRM automation(s) (' . implode( ', ', array_unique( $funnels ) ) . ') could email someone on a new tag or contact. Pause them first, or pass --ignore-automations.' );
+			}
+			$log = '';
+			if ( $apply ) {
+				add_filter( 'pre_wp_mail', '__return_false', 1 ); // no email of any kind
+				aw_crm_fields_setup();
+				$log = aw_private_dir() . '/vol-to-crm-' . gmdate( 'Ymd-His' ) . '.jsonl';
+			}
+			$tagged = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT LOWER(TRIM(s.email)) FROM {$p}fc_subscribers s JOIN {$p}fc_subscriber_pivot t ON t.subscriber_id = s.id AND t.object_type = %s AND t.object_id = %d", 'FluentCrm\App\Models\Tag', aw_crm_tag_id( 'volunteer' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table prefix only
+			$rows   = (array) $wpdb->get_results( 'SELECT * FROM ' . aw_vol_table() . ' ORDER BY id', ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- no input
+			$add    = function ( &$a, $k ) {
+				$a[ $k ] = ( $a[ $k ] ?? 0 ) + 1;
+			};
+			$n      = array(
+				'table_rows'             => count( $rows ),
+				'table_status'           => array(),
+				'fluentcrm_tagged'       => count( $tagged ),
+				'in_both'                => 0,
+				'in_both_not_tagged'     => 0,
+				'only_table'             => array(),
+				'only_fluentcrm'         => 0,
+				'matched_contact_status' => array(),
+				'fields_differ_kept'     => array(),
+				'plan'                   => array(),
+				'tag_to_add'             => 0,
+				'fields_to_fill'         => array(),
+				'automations_published'  => count( $funnels ),
+			);
+			$emails = array();
+			foreach ( $rows as $r ) {
+				$emails[ strtolower( trim( (string) $r['email'] ) ) ] = true;
+				$add( $n['table_status'], (string) $r['status'] );
+				$plan = aw_crm_volunteer_copy( $r, $apply );
+				$add( $n['plan'], $plan['action'] );
+				if ( 'create' === $plan['action'] || ( 'skip' === $plan['action'] && ! $plan['contact'] ) ) {
+					$add( $n['only_table'], (string) $r['status'] );
+				} else {
+					++$n[ $plan['tag'] ? 'in_both_not_tagged' : 'in_both' ];
+					$add( $n['matched_contact_status'], $plan['status'] );
+				}
+				$n['tag_to_add'] += (int) $plan['tag'];
+				foreach ( $plan['fields'] as $k ) {
+					$add( $n['fields_to_fill'], $k );
+				}
+				foreach ( $plan['differ'] as $k ) {
+					$add( $n['fields_differ_kept'], $k );
+				}
+				if ( $apply && in_array( $plan['action'], array( 'create', 'fill' ), true ) ) {
+					file_put_contents( $log, wp_json_encode( array( 'at' => gmdate( 'c' ), 'row' => (int) $r['id'], 'contact' => $plan['contact'], 'action' => $plan['action'], 'tag_added' => $plan['tag'], 'fields_filled' => $plan['fields'] ) ) . "\n", FILE_APPEND ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+				}
+			}
+			$n['only_fluentcrm'] = count( array_diff_key( array_flip( $tagged ), $emails ) );
+			WP_CLI::log( wp_json_encode( $n, JSON_PRETTY_PRINT ) );
+			WP_CLI::success( $apply ? 'Applied. Log: ' . $log : 'Dry run: nothing changed. Run again with --apply to copy.' );
 		}
 	);
 }

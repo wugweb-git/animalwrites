@@ -22,7 +22,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Theme | Master/child. Generic parts live in Kits (master) and Kits Core; the child holds the brand and Animal Writes templates; features live in plugins. |
 | News attribution | Google News pattern: favicon + source on cards (plain text); the source is linked on the detail page. |
 | Ingestion | Metadata + our 2–3 line summary only, never full articles. Government PDFs are the exception and are hosted. Items are reviewed by a person before publishing. |
-| Databases | One MySQL database. Volunteers live in their own table (`aw_volunteers`). |
+| Databases | One MySQL database. Volunteers live in FluentCRM (contacts tagged Volunteer) since 24 Oct 2026; the old `aw_volunteers` table is a read-only backup. |
 | Email list | Our own database (self-hosted), not Brevo. Sent through the site's own mailbox (`noreply@animalwrites.in`, WP Admin → Settings → Mail). |
 | CAPTCHA | ALTCHA: self-hosted proof-of-work, no keys, on every form. |
 | Featured listings | Free for now, through the claim form; 90 days, then off automatically. |
@@ -127,7 +127,7 @@ Last checked on the live site: **7 Oct 2026**. One file, kept current: newer num
 | Data | Where | Status |
 |---|---|---|
 | Live site | Hostinger MySQL | live |
-| Volunteers | `aw_volunteers` (admin list, export, delete) | **88** 1.0 volunteers recovered (from the session log and campaign screenshots); the 2.0 form writes here |
+| Volunteers | FluentCRM, tag Volunteer (`aw_volunteers` kept read-only as the backup: view and export only) | **88** 1.0 volunteers recovered (from the session log and campaign screenshots); the 2.0 form writes to FluentCRM only (24 Oct 2026) |
 | 1.0 Supabase export (18,222 rows: volunteers + receipts) | — | **lost.** Exported and checksum-verified on 5 Oct, then the project was deleted and every local copy was gone by 7 Oct. Two whole-disk scans found nothing; Supabase can't restore it |
 | Consent | volunteer and newsletter forms | consent tick box on both (DPDP). 1.0 volunteers must opt in before any newsletter: the invitation in WP Admin → Newsletter carries a confirm link |
 | Newsletter subscribers | `aw_subscribers` (WP Admin → Newsletter: counts, CSV export, send) | sign-up on Get involved with email confirmation; 0 so far |
