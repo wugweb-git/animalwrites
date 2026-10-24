@@ -1,5 +1,7 @@
 # Accessibility audit: Animal Writes 2.0
 
+**History (snapshot of 5 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 **Standard:** WCAG 2.1 AA, plus axe best-practice rules. **Date:** 5 October 2026. **Site:** temporary domain (same code as launch).
 **Method:** axe-core 4.10 run in the browser on every page type at 1280px and 375px, plus scripted checks for horizontal overflow and target size, plus manual keyboard, focus and form checks.
 

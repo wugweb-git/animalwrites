@@ -388,7 +388,7 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
 | 5 | Sourcing tab (shipped 24 Oct, PR #32); Hindi and Hinglish (grouping under English parents, Hindi autocomplete); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |
 
 **Workflow.**
-- This plan stays a draft PR until the owner approves it.
+- This plan was approved by the owner (PR #1); phases follow below.
 - Each phase gets its own branch: WordPress parts from `origin/wordpress-dev`, workers parts from `origin/main` in animal-writes-workers.
 - Each phase gets its own PR: what changed, the dry-run results, screenshots.
 - No direct pushes and no auto-merge. Merge only after the owner approves.

@@ -1,6 +1,8 @@
 # Promotion plan: Animal Writes child → Kits master (`kits-by-wugweb`)
 
-Status: **approved 2026-10-07; steps 1, 2, 3 and 5 done** (step 4, attribution into Kits Core, remains optional; sourcing moved to the AW Sourcing plugin, and Kits Core holds no site-specific code. SEO is Rank Math + AW SEO extras and ads are Advanced Ads, so the `seo.php` and `ads.php` steps below are history).
+**History (snapshot of 7 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
+Status: **approved 2026-10-07; steps 1 to 5 done** (step 4 on 7 Oct: attribution and sourcing into Kits Core; on 24 Oct 2026 the sourcing policy moved on to the AW Sourcing plugin, and Kits Core keeps only the sourcing basics and holds no site-specific code. SEO is Rank Math + AW SEO extras and ads are Advanced Ads, so the `seo.php` and `ads.php` steps below are history).
 Every step was checked against a baseline of computed styles and boxes for every visible element on 18 pages at 1280px and 375px:
 identical except the live visit counter. SEO/GTM head output byte-identical after step 3.
 
@@ -8,7 +10,7 @@ Where things are now:
 - Kits theme: `tools/build-tokens.py` (engine), `tokens/tokens.json` (neutral defaults) → `assets/css/kit-tokens.css` (`--kit-*`);
   `assets/css/kit.css` (components, chrome, motion, print, editorial building blocks; every rule answers to `.kit-*` and `.aw-*`);
   `assets/js/kit.js` (interactions); header/footer parts and patterns `three-big-actions`, `lead-list` with placeholder text.
-- Kits Core plugin (`plugins/kits-core`): forms, share, SEO, GTM, ads + ads.txt, visit counter, configured by `kits_*` filters.
+- Kits Core plugin (`plugins/kits-core`): forms and ALTCHA, share, GTM and Clarity, visit counter, news attribution, sourcing basics, primitives, configured by `kits_*` filters. No SEO (aw-seo-extras with Rank Math) and no ads (Advanced Ads, switched off on live; ads.txt is a static file).
 - Animal Writes: brand token values, domain CSS (`aw.css`, 1081 → about 480 lines), district filter JS, `includes/kits-config.php`.
 
 ## Principle

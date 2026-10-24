@@ -1,9 +1,10 @@
 # Animal Writes design system
 
-The single reference for how the 2.0 site looks and behaves. Every rule in
-`themes/animal-writes/assets/css/aw.css` reads from the tokens below; no component hardcodes a colour, size, radius or duration.
+How the 2.0 site looks and behaves. No component hardcodes a colour, size, radius or duration.
 
-**Source of truth:** `themes/animal-writes/tokens/tokens.json` → `python3 tools/build-tokens.py` → `tokens.compiled.json` + `assets/css/tokens.css` (`--aw-*`).
+**Current and history (24 Oct 2026).** The colour rule and the breakpoints below are current. The Product systems, Scales, States vocabulary and Components sections are the first version (5 to 7 Oct 2026: `--aw-*` tokens, `aw-*` classes, the old section names Legal Watch, Knowledge Centre, Research Library and Campaign Hub), kept as history; several values have changed since. Current components: [component-map.md](component-map.md) (generated), [buttons.md](buttons.md), [card-sizes.md](card-sizes.md), [item-template.md](item-template.md), [listing-template.md](listing-template.md) and the states sheet (/kits-demo/).
+
+**Source of truth:** the Kits master's `themes/kits-by-wugweb/tokens/tokens.json` → `python3 tools/build-tokens.py` → `assets/css/kit-tokens.css` (`--kit-*`); Animal Writes overrides a few brand values in `themes/animal-writes/tokens/tokens.json` → `assets/css/tokens.css`. Components: Kits `kit.css` and `kit-primitives.css`, and Animal Writes `aw.css`.
 Tokens follow the responsive token contract: every token is an `{sm, md, lg}` triple, `sm` is the mobile base, `md`/`lg` are `min-width` overrides at 768px and 1200px. `=` below means "same as sm".
 
 To change the look, change a token and rebuild. Example: rounder cards = edit `radius-card`, run the build, deploy.

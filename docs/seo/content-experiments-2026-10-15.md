@@ -1,5 +1,7 @@
 # Title and description experiments: plan, 15 October 2026
 
+**History (snapshot of 15 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 A plan only. Nothing live has been changed for it. It follows the experiment-design rules in `sanity:content-experimentation-best-practices` (hypothesis, one primary metric, fixed duration, no peeking), adapted to a site with no A/B tool: WordPress, Rank Math, and Search Console.
 
 ## 1. What we can and can't test

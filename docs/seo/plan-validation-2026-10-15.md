@@ -1,5 +1,7 @@
 # SEO plan validation: 15 Oct 2026
 
+**History (snapshot of 15 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 **Plan checked:** `~/.claude/plans/the-7-hub-pages-federated-shore.md` (10 phases, Ground rules, Verification).
 
 **Method:** this was a read-only check. Each row below comes from a live check made on 15 Oct 2026, between about 14:30 and 15:30 IST. Commit messages were not taken as proof. The sources were:

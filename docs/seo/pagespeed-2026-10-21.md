@@ -1,5 +1,7 @@
 # Tech SEO, tracking, brand and PageSpeed: 21 October 2026 refresh
 
+**History (snapshot of 21–22 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Checked on 22 Oct 2026 for the 21 Oct SEO refresh. It follows `pagespeed-2026-10-20.md`, `indexing-2026-10-20.md` and `site-health-2026-10-15.md`. Keywords and demand are in `keyword-map.md`, `keyword-demand-2026-10-21.md` and `rankings-2026-10-21.csv`.
 
 **What changed on the site in this pass** (the owner asked on 22 Oct to fix the Search Console items from our side):

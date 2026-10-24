@@ -25,6 +25,8 @@ After any import, check that Triggers lists "DLV - gtag does not equal true".
 
 ## Import the container
 
+**Do not import this file (owner, 22 Oct 2026).** This export and `docs/gtm/animalwrites-container.json` are both stale: add new tags, triggers and variables by hand in GTM, verify in Preview / Tag Assistant only (never send test events to live GA4), and make no GA4 or GTM change without the owner's OK. The steps below are history.
+
 File: `docs/analytics/gtm-container-animalwrites.json` (replaces `docs/gtm/animalwrites-container.json`; same tag,
 trigger and variable names, plus `DLV - gtag` and the guard).
 
@@ -136,7 +138,7 @@ views, list views, list clicks and the item list names. No revenue is involved; 
 | `donate_click` | a donate link (a listing's Donate button, or any link to a donation page) | domain, link_text, listing_id, listing_name |
 | `select_content` | a named law, organisation or place linked in a summary | content_type (entity_law, entity_organisation, entity_place), content_id (the page path) |
 
-Clicks on AdSense ads cannot be counted by the site: the ad is a frame from Google's domain. Ad clicks, impressions and
+History (17 Oct 2026; Kits Core's ad slots were removed on 21 Oct and Advanced Ads, the only ad system, is switched off on live): clicks on AdSense ads cannot be counted by the site: the ad is a frame from Google's domain. Ad clicks, impressions and
 revenue per page come from linking AdSense to GA4 (owner: GA4 → Admin → Product links → AdSense links → Link, choose the
 AdSense account; needs admin on both). GA4 then adds `publisher_ad_impression` / `publisher_ad_click` with ad unit and
 revenue. Give each slot its own AdSense ad unit (today "AW list" and "AW article" serve several slots) to see revenue
@@ -213,13 +215,9 @@ itself. Keep Page views on.
 | Link to GA4 | Clarity → Settings → Setup → Google Analytics integration → connect G-4P5YMJ04RL |
 | Masking | Clarity → Settings → Masking: keep "Balanced" (form fields masked) |
 
-## Consent (state on 17 Oct 2026; nothing changed)
+## Consent (kits-core analytics.php, since 17 Oct 2026)
 
-- No consent banner and no Consent Mode default: Site Kit's Consent Mode setting is off, the container sets no
-  `consent default`, so GA4, GTM, Clarity and AdSense run for every visitor without asking.
-- India (DPDP Act 2023, Rules notified Nov 2025): consent duties for personal data phase in through 2027; analytics
-  cookies are not singled out, but notice and consent for personal data are. Owner decision whether to add a banner.
-- EEA/UK/Switzerland visitors: Google requires Consent Mode v2 signals for measurement and ads personalisation there,
-  and AdSense requires a Google-certified consent message (AdSense → Privacy & messaging → European regulations) to
-  serve personalised ads in those countries. Turning on Site Kit's Consent Mode (regions already listed: EEA, UK, CH)
-  sets "denied" defaults there only; it needs a banner that updates consent, or GA4 loses those visitors' data.
+- Consent mode v2 (basic), set before every Google tag: in the EEA, the UK and Switzerland (`kits_consent_regions`) ad and analytics storage are denied by default until a consent update arrives; everywhere else they are granted. Ad data redaction and URL passthrough are on while denied.
+- Clarity: outside those regions it loads without waiting for consent (its script is fetched after the first scroll, tap or key press); inside them (judged by the browser's time zone) only once analytics storage is granted, then it gets `consentv2`.
+- There is no consent banner of the site's own. The code expects Google's CMP, loaded by AdSense, to send the update; with Advanced Ads switched off on live nothing loads it, so visitors in those regions stay denied.
+- India (DPDP Act 2023, Rules notified Nov 2025): consent duties for personal data phase in through 2027; analytics cookies are not singled out, but notice and consent for personal data are. Owner decision whether to add a banner.

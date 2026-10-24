@@ -1,5 +1,7 @@
 # PageSpeed audit: 16 key pages, mobile and desktop (20 October 2026)
 
+**History (snapshot of 20 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Nothing has been changed. Every item below waits for the owner's decision.
 
 ## How it was measured

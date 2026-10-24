@@ -9,7 +9,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `admin-ia.php` | WP Admin information architecture (Phase 11 J). Nothing is deleted: menus move, labels match the site. |
 | `also-reported.php` | "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold in aw-sourcing). |
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
-| `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title and given to search engines as BreadcrumbList (schema.php). |
+| `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title. The trail is Rank Math's, built in aw-seo-extras `breadcrumbs.php`, which also gives it to search engines as the one BreadcrumbList. |
 | `campaigns.php` | Campaign kit: countdown, and the private upload folder used by listing claims. (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.) |
 | `cdn-cache.php` | Hostinger CDN (hcdn) lifetime for anonymous public pages: `Cache-Control: public, s-maxage=N` only on anonymous 200 GETs of public pages, never on forms, nonce or personal pages. Option aw_cdn_ttl (0 = off, 60 to 900 s). |
 | `claims.php` | Claim or update a directory listing: [aw_claim_box] on each listing. |
@@ -26,22 +26,22 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `kits-config.php` | Animal Writes settings for Kits Core (kits_* filters). |
 | `media.php` | Card images: the article's own preview image (linked, not copied) or a placard-style fallback. |
 | `meta.php` | Post meta. Registered natively (no ACF) and exposed to the block editor + REST. |
-| `model.php` | Content model, restructure Phase 2: legal sub-type, court, primary topic, topic → listing types for "Find help", and relations between items (each one shown on both sides in WP Admin). |
+| `model.php` | Content model, restructure Phase 2: legal sub-type, court, category → listing types for "Find help", and relations between items (each one shown on both sides in WP Admin). |
 | `newsletter.php` | Newsletter: the old sign-up list (sign-ups now go through Fluent Forms, `newsletter-fluentforms.php`, into the FluentCRM list "Newsletter"); sign-up with email confirmation and the sign-up list (WP Admin > Audience > Newsletter, CSV export). Sending happens in an external mailing service, not in WordPress (S2.4). |
 | `pages.php` | Restructure Phase 6: the parts the new pages are built from. The pages themselves hold structure only; the owner writes their text (tools/restructure/phase6.php creates them). |
 | `places-admin.php` | Place box on each item that can have a place (places.php): PIN code → State and District filled from India Post, matched to the LGD file; State → District dropdowns built from the file when there is no PIN or India Post is down. There is no place list in WP Admin and no way to type a place that is not in LGD. Codes that are not in the file are not saved (a notice says so) and the item keeps its previous place. |
 | `places.php` | Places from the Local Government Directory (LGD), not from a WordPress list (8 Oct 2026). |
 | `press.php` | Media & PR (Phase 11 I): coverage of Animal Writes as admin-editable items (aw_press), shown on /media/ as cards. |
-| `reports.php` | "Report an error" on every directory listing: [aw_report_box]. |
+| `reports.php` | "Report a mistake" for every page (owner, 21 Oct 2026): /report/?item=<ID> from any listing, News, Library or Resource item (/report/?listing=<ID> still works); opened on its own it asks for the page link. |
 | `retention.php` | Retention: nothing is ever deleted. Old items are archived instead, and stay reachable at their URL. |
 | `sections.php` | Section header for archives: [aw_section_head]. Title, one-line description, live count and a three-image visual built from real content in that section. |
 | `site-check.php` | "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page. Results show on Tools → Check site. Nothing is changed. |
 | `sources-config.php` | The sourcing lists (option aw_sources, seeded from data/sources-seed.json). Stays in core because the front end reads the section categories and tags from them; Settings → Sourcing edits them (aw-sourcing). |
 | `summary-rules.php` | The summary rules (option aw_summary_rules over data/summary-rules-default.json), the helpers the site uses (auto-review limits, search description, entities stored per item as aw_entities) and the whole summary on an item's own page. The workers' endpoint and the Settings tab are in aw-sourcing. |
 | `systems.php` | Shared list helpers, the list filters and the trust panel. |
-| `category-images.php` | Category photos, set in WP Admin on each category screen (Topics, Listing types, Opportunity types): add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). Topic photos are also used on news and Legal Watch items in that topic. News and Legal Watch items show their topic's photo (see aw_item_image() in media.php). Stored as term meta `aw_topic_image` (attachment ID). The general photos for items without a topic stay in the option aw_topic_images['default']. |
+| `category-images.php` | Category and tag photos, set in WP Admin on the Categories and Tags screens: add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). News and Library items show their category's photo (see aw_item_image() in media.php). Stored as term meta `aw_category_image` (attachment ID). The general photos for items without a category stay in the option aw_category_images['default']. |
 | `unverified.php` | Unverified values on a listing (meta aw_unverified) and the small mark the listing template shows after them. |
-| `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
+| `volunteers-db.php` | The old volunteers table (`{prefix}aw_volunteers`: 1.0 campaign volunteers and 2.0 sign-ups up to 24 Oct 2026), kept as a read-only backup. FluentCRM is the one volunteers table; nothing writes here any more except "Remove my data", which deletes a person's row. Administrators can view and export it at WP Admin → Volunteers (backup). |
 | `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to FluentCRM only (contact tagged Volunteer, details and the page they came from in the Volunteer fields); since 24 Oct 2026 FluentCRM is the one volunteers table. |
 | `backups.php` | Daily backup (S0): the database and the deployed code, once a day, into ~/backups on the server (outside the web root), kept 14 days. |
 | `block-states.php` | Animal Writes blocks in their states, on the states sheet (/kits-demo/, administrators only): each block rendered from a real item that is in that state, so the sheet shows what visitors see. |
@@ -141,7 +141,7 @@ Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-ca
 | File | What it does |
 |---|---|
 | `altcha.php` | ALTCHA check for every aw_form_open() form: a free proof-of-work CAPTCHA, no third-party service, no cookies. |
-| `analytics.php` | Google Tag Manager. The container ID and production hosts come from the site (filters kits_gtm_id, kits_analytics_hosts). |
+| `analytics.php` | Google Tag Manager. The container ID and production hosts come from the site (filters kits_gtm_id, kits_analytics_hosts). Also consent mode v2 (basic: denied by default in the EEA, UK and Switzerland), Microsoft Clarity (the site's one Clarity copy, `kits_clarity_id`) and the page context for analytics (window.kitsPage). |
 | `attribution.php` | News attribution, Google News pattern. |
 | `demo.php` | [kits_demo]: every Kits primitive in every state, on the master palette and on the site's own palette side by side (Phase 11 B.3). Used on the private, noindex page /kits-demo/ (administrators only). |
 | `form-kit.php` | Form kit (S5): the field dictionary (one definition per field, used by every form), clean-up helpers, the source tag on every entry, a fresh form key for cached pages, and two patterns: the expandable form (S5.6) and the multi-step form (S5.7). Field markup, the spam guard and messages live in forms.php; behaviour in kit.js. |

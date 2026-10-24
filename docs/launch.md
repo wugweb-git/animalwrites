@@ -1,5 +1,7 @@
 # Launch prep: animalwrites.in → 2.0 (applied; kept as a record — today GTM-TB3FCFQB carries GA4, see analytics/ga4-setup.md)
 
+**History (snapshot of 5 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 ## 1. Redirects
 1.0 was a single page: every section was a `#anchor` on `/`, so anchors need no redirects
 (browsers never send them to the server). The only real 1.0 URL was `/`.

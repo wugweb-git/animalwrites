@@ -1,5 +1,7 @@
 # Content strategy: Animal Writes, 15 October 2026
 
+**History (snapshot of 15 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Phase 8 of the SEO programme. This report is built from `docs/seo/keyword-map.md`, `docs/seo/keyword-demand-2026-10-15.md` and the Notion page "Search demand: gaps and signals (15 Oct 2026)". It lists the content gaps for each category and keyword, and the pieces to create, in priority order.
 
 **Created as drafts:** every new article the report calls for has been written as a WordPress draft, using only facts from the sources listed at the end of each one. Nothing was published. Each draft opens with the line "DRAFT for owner approval: sources checked 15 Oct 2026". Remove that line before publishing.

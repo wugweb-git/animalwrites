@@ -1,5 +1,7 @@
 # Phase 11 report (8 Oct 2026)
 
+**History (snapshot of 8 Oct 2026); current state: docs/pending.md, docs/plugin-map.md and docs/component-map.md.**
+
 Deploys: 3fcf886 (Phase 11), then fixes a79e85d, 8845575, ac9e33b, 4be0c87. Backups before: `~/backups/db-2026-10-08-pre-phase11.sql.gz`, `~/backups/code-2026-10-08-pre-phase11.tgz`.
 Screenshots (not in git): `docs/phase11/screens/before|after/{page}-{375,640,1024,1200}.png`, `docs/phase11/kits-demo-1440.png`.
 

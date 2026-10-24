@@ -1,5 +1,7 @@
 # B.1 Inventory: tags, chips, pills, labels, badges, buttons (before Phase 11)
 
+**History (snapshot of 8 Oct 2026, before Phase 11); current state: docs/pending.md, docs/plugin-map.md and docs/component-map.md.**
+
 K = themes/kits-by-wugweb/assets/css/kit.css · A = themes/animal-writes/assets/css/aw.css · S = plugins/animal-writes-core/includes/systems.php
 
 | Old class | Defined | Emitted by | Renders on | Role | New primitive |

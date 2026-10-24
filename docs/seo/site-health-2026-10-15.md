@@ -1,5 +1,7 @@
 # Site health: Animal Writes, 15 October 2026
 
+**History (snapshot of 15 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Phase 9 of the SEO programme. It covers Core Web Vitals and Lighthouse, ads and image layout shift, caching, mobile, HTTPS and www, robots.txt, the Rank Math 404 monitor and redirect chains. The fixes were deployed the same day: commits 254dd8a, 8c7ffab and 75f5c74, plus the server settings listed below.
 
 ## How it was measured

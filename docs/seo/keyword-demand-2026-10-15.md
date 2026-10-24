@@ -1,5 +1,7 @@
 # Keyword demand — Animal Writes, 15 October 2026
 
+**History (snapshot of 15 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Data pulled 15 Oct 2026, 09:00–10:00 IST. It puts real demand figures behind `docs/seo/keyword-map.md` (the map now has a Demand column that uses the codes below). Nothing on the site was changed.
 
 ## Sources

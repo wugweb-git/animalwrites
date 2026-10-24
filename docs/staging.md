@@ -3,6 +3,8 @@
 `staging.animalwrites.in`: the same code and a copy of the live database without personal data. Never indexed, only
 signed-in users can see it, and it sends no email (`plugins/animal-writes-core/includes/staging.php`).
 
+**Status (24 Oct 2026):** the staging site exists (signed-in users only, noindex) but is not part of the deploy chain: its checkout is the deleted `ux-audit` branch and its database is from 15 Oct (item "Staging" in `docs/pending.md`). Deploys go `wordpress-dev` → Deploy check → `wordpress` (live). The steps below are the original plan.
+
 ## One-time setup in hPanel (owner)
 1. **Subdomain:** Websites → animalwrites.in → Domains → Subdomains → create `staging` (folder `public_html/staging`).
 2. **WordPress files:** install WordPress in that folder (Auto Installer), with its own new database. Note nothing.

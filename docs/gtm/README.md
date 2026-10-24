@@ -1,6 +1,6 @@
 # GTM container import (Animal Writes)
 
-**Do not full-import this export (owner, 22 Oct 2026): it is stale. Add new tags, triggers and variables by hand; verify in Preview only.**
+**Do not full-import this export (owner, 22 Oct 2026): it is stale. Add new tags, triggers and variables by hand; verify in Preview only.** The status and import steps below are history (14 to 21 Oct 2026). Current setup: `docs/analytics/ga4-setup.md`.
 
 File: `animalwrites-container.json` — for container GTM-TB3FCFQB.
 

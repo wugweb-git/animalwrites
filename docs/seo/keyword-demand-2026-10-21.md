@@ -1,5 +1,7 @@
 # Keyword demand — Animal Writes, 21 October 2026
 
+**History (snapshot of 21–22 Oct 2026); current state: docs/pending.md and docs/plugin-map.md.**
+
 Data pulled 22 Oct 2026, mostly 14:00–17:00 IST, for the 21 Oct refresh. It follows `docs/seo/keyword-demand-2026-10-15.md` and uses the same codes (T, AC, GSC). The results feed the Rank and Priority columns in `docs/seo/keyword-map.md`. The rankings baseline is `docs/seo/rankings-2026-10-21.csv`. Nothing on the site was changed.
 
 ## Sources
