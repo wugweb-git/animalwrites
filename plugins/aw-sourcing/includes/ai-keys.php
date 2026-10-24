@@ -634,7 +634,14 @@ add_action(
 		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-ai-keys' ) );
 		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-		wp_safe_redirect( add_query_arg( array( 'listed' => in_array( $op, array( 'remove', 'recheck', 'up', 'down' ), true ) ? $op : 'none', 'n' => $n ), $back ) );
+		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
+		parse_str( (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY ), $ref );
+		$known = in_array( $op, array( 'remove', 'recheck', 'up', 'down' ), true );
+		if ( ! $known && $page && absint( $ref['paged'] ?? 1 ) !== $page ) {
+			wp_safe_redirect( $back );
+			exit;
+		}
+		wp_safe_redirect( add_query_arg( array( 'listed' => $known ? $op : 'none', 'n' => $n ), $back ) );
 		exit;
 	}
 );
@@ -779,7 +786,7 @@ function aw_ai_keys_screen() {
 			'up'      => 'Moved up. The workers try the keys from the top down.',
 			'down'    => 'Moved down. The workers try the keys from the top down.',
 		);
-		echo 'none' === $listed && isset( $_GET['paged'] ) ? '' : ( isset( $msg[ $listed ] ) && $n // phpcs:ignore WordPress.Security.NonceVerification -- display only
+		echo ( isset( $msg[ $listed ] ) && $n
 			? '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>'
 			: '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one key.</p></div>' ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
