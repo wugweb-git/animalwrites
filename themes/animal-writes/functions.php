@@ -129,3 +129,17 @@ add_filter(
 	10,
 	2
 );
+
+/**
+ * tokens.css is five custom properties (283 bytes): printed inline in its link's place on every page, so it is no
+ * request of its own (owner, 24 Oct 2026). Same position in the cascade.
+ */
+add_filter(
+	'style_loader_tag',
+	function ( $tag, $handle ) {
+		$file = get_theme_file_path( 'assets/css/tokens.css' );
+		return 'aw-tokens' === $handle && ! is_admin() && is_readable( $file ) ? '<style id="aw-tokens-css">' . file_get_contents( $file ) . "</style>\n" : $tag; // phpcs:ignore WordPress.WP.AlternativeFunctions
+	},
+	10,
+	2
+);
