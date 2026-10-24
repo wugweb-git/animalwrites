@@ -4,8 +4,10 @@
  *
  * aw-ship.sh purges LiteSpeed after it deploys, but Hostinger's auto-deploy (a git pull into aw_deploy) does not, so a
  * code change could stay invisible behind cached pages for up to the cache lifetime (7 days): PR #16 did, on 24 Oct.
- * The first uncached request after the deployed commit changes (a cache miss, wp-admin, WP-Cron or the LiteSpeed
- * crawler) purges the whole cache once and remembers the commit (option aw_deployed_head).
+ * The first uncached request after the deployed commit changes purges the whole cache once and remembers the commit
+ * (option aw_deployed_head). Cached pages never reach PHP, so that request is made on purpose: after each deploy the
+ * deploy-check workflow requests wp-cron.php (never cached) every 30 s for 5 minutes. Any other uncached request (a cache
+ * miss, wp-admin) also counts.
  *
  * WP-CLI requests are skipped: a purge from the CLI does not reach the web server through this hook, and aw-ship.sh
  * purges by itself. A purge after aw-ship.sh's own is harmless.
