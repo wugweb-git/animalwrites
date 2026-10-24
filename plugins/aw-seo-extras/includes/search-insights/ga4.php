@@ -1,0 +1,256 @@
+<?php
+/**
+ * GA4 through Site Kit (plan §5.1), read only, daily at 07:20 IST, as the analytics-4 module's own owner. Nothing is sent
+ * to GA4 and nothing in GA4 or GTM changes. Three reports per day, for the last 3 days (GA4 finishes processing late;
+ * stored days are replaced):
+ * - search: view_search_results events by search term (terms that look like personal data are dropped);
+ * - ai: sessions from AI assistants (chatgpt.com, perplexity.ai, gemini.google.com, copilot …) by landing page;
+ * - organic: sessions from Organic Search by landing page.
+ *
+ * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
+ * txt = source), organic (page = landing path). value = events or sessions.
+ *
+ * @package aw-seo-extras
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_SI_GA4_DAYS = 3;
+const AW_SI_GA4_CRON = 'aw_si_ga4';
+
+/** Session sources counted as AI referrals. Filter aw_si_ai_sources adds more. */
+function aw_si_ai_sources(): array {
+	return (array) apply_filters( 'aw_si_ai_sources', array( 'chatgpt.com', 'chat.openai.com', 'perplexity.ai', 'www.perplexity.ai', 'gemini.google.com', 'copilot.microsoft.com', 'copilot.com', 'claude.ai' ) );
+}
+
+/**
+ * Rows of a GA4 report response as [dimension values, metric values]. Accepts Site Kit's response object or an array.
+ *
+ * @param mixed $resp Report response.
+ * @return array<int, array{0: string[], 1: float[]}>
+ */
+function aw_si_ga4_rows( $resp ): array {
+	if ( is_object( $resp ) && method_exists( $resp, 'toSimpleObject' ) ) {
+		$resp = json_decode( (string) wp_json_encode( $resp->toSimpleObject() ), true );
+	} elseif ( is_object( $resp ) ) {
+		$resp = json_decode( (string) wp_json_encode( $resp ), true );
+	}
+	$out = array();
+	foreach ( (array) ( $resp['rows'] ?? array() ) as $row ) {
+		$dims  = array_map( fn( $v ) => (string) ( $v['value'] ?? '' ), (array) ( $row['dimensionValues'] ?? array() ) );
+		$mets  = array_map( fn( $v ) => (float) ( $v['value'] ?? 0 ), (array) ( $row['metricValues'] ?? array() ) );
+		$out[] = array( $dims, $mets );
+	}
+	return $out;
+}
+
+/**
+ * One report.
+ *
+ * @param object $module Site Kit's analytics-4 module.
+ * @param array  $args   Report arguments (Site Kit's report datapoint).
+ * @return array|WP_Error Rows, as aw_si_ga4_rows().
+ */
+function aw_si_ga4_report( $module, array $args ) {
+	try {
+		$resp = $module->get_data( 'report', $args + array( 'limit' => 1000 ) );
+	} catch ( Throwable $e ) {
+		return new WP_Error( 'aw_si_ga4', $e->getMessage() );
+	}
+	return is_wp_error( $resp ) ? $resp : aw_si_ga4_rows( $resp );
+}
+
+/**
+ * The three reports for one day.
+ *
+ * @param object $module Site Kit's analytics-4 module.
+ * @param string $day    Date (Y-m-d).
+ * @return array|WP_Error array{search: array, ai: array, organic: array}
+ */
+function aw_si_ga4_fetch_day( $module, string $day ) {
+	$base = array(
+		'startDate' => $day,
+		'endDate'   => $day,
+	);
+	$reqs = array(
+		'search'  => array(
+			'dimensions'       => array( 'searchTerm' ),
+			'metrics'          => array( 'eventCount' ),
+			'dimensionFilters' => array( 'eventName' => 'view_search_results' ),
+		),
+		'ai'      => array(
+			'dimensions'       => array( 'sessionSource', 'landingPage' ),
+			'metrics'          => array( 'sessions' ),
+			'dimensionFilters' => array( 'sessionSource' => array_values( aw_si_ai_sources() ) ),
+		),
+		'organic' => array(
+			'dimensions'       => array( 'landingPage' ),
+			'metrics'          => array( 'sessions' ),
+			'dimensionFilters' => array( 'sessionDefaultChannelGroup' => 'Organic Search' ),
+		),
+	);
+	$out  = array();
+	foreach ( $reqs as $key => $args ) {
+		$rows = aw_si_ga4_report( $module, $base + $args );
+		if ( is_wp_error( $rows ) ) {
+			return $rows;
+		}
+		$out[ $key ] = $rows;
+	}
+	return $out;
+}
+
+/**
+ * GA4 rows of one day as obs rows: [kw_id 0, page, page_key, metric, value, txt]. Merges duplicates (two landing
+ * pages with different query strings are one path).
+ *
+ * @param array $data What aw_si_ga4_fetch_day() returned.
+ */
+function aw_si_ga4_obs_rows( array $data ): array {
+	$out = array();
+	$add = function ( string $metric, string $page, string $txt, float $value ) use ( &$out ) {
+		$key = $metric . '|' . $page . '|' . $txt;
+		if ( isset( $out[ $key ] ) ) {
+			$out[ $key ][4] += $value;
+			return;
+		}
+		$pk          = 'search' === $metric ? md5( 'term:' . $txt ) : md5( $page . ( 'ai' === $metric ? '|' . $txt : '' ) );
+		$out[ $key ] = array( 0, $page, $pk, $metric, $value, $txt );
+	};
+	foreach ( (array) ( $data['search'] ?? array() ) as $r ) {
+		$term = aw_si_term_ok( (string) ( $r[0][0] ?? '' ) );
+		if ( '' !== $term ) {
+			$add( 'search', '', $term, (float) ( $r[1][0] ?? 0 ) );
+		}
+	}
+	foreach ( (array) ( $data['ai'] ?? array() ) as $r ) {
+		$path = aw_si_landing_path( (string) ( $r[0][1] ?? '' ) );
+		if ( '' !== $path ) {
+			$add( 'ai', $path, mb_substr( (string) ( $r[0][0] ?? '' ), 0, 100 ), (float) ( $r[1][0] ?? 0 ) );
+		}
+	}
+	foreach ( (array) ( $data['organic'] ?? array() ) as $r ) {
+		$path = aw_si_landing_path( (string) ( $r[0][0] ?? '' ) );
+		if ( '' !== $path ) {
+			$add( 'organic', $path, '', (float) ( $r[1][0] ?? 0 ) );
+		}
+	}
+	return array_values( $out );
+}
+
+/**
+ * Site path of a GA4 landing page ('/news/x/?utm…' → '/news/x/'), or '' for "(not set)".
+ *
+ * @param string $lp Landing page as GA4 reports it.
+ */
+function aw_si_landing_path( string $lp ): string {
+	if ( '' === $lp || '(' === $lp[0] ) {
+		return '';
+	}
+	return aw_si_path( 0 === strpos( $lp, '/' ) ? home_url( $lp ) : $lp );
+}
+
+/**
+ * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows).
+ *
+ * @param string $src  Source key in obs.
+ * @param string $day  Date (Y-m-d).
+ * @param array  $rows Each [kw_id, page, page_key, metric, value, txt].
+ * @return int|WP_Error Rows written.
+ */
+function aw_si_obs_replace_day( string $src, string $day, array $rows ) {
+	global $wpdb;
+	$o   = aw_si_table( 'obs' );
+	$now = aw_si_now();
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = 'day' AND d = %s", $src, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
+		$place = array();
+		$args  = array();
+		foreach ( $chunk as $v ) {
+			$place[] = "(%d, %s, %s, %s, %s, 'day', %s, %f, %s, %s)";
+			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $day, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES " . implode( ', ', $place ), $args ) );
+		if ( ! $ok ) {
+			break;
+		}
+	}
+	if ( ! $ok ) {
+		$error = $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* translators: 1: source, 2: date, 3: database error. */
+		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'aw-seo-extras' ), $src, $day, $error ) );
+	}
+	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return count( $rows );
+}
+
+/**
+ * The daily GA4 run. Never throws; failures go to the run log and the stored data stays.
+ *
+ * @param array $args days (override), dry (fetch only).
+ * @return array Report: days, rows, error.
+ */
+function aw_si_ga4_run( array $args = array() ): array {
+	$dry  = ! empty( $args['dry'] );
+	$days = $args['days'] ?? array_map( fn( $i ) => ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$i} days" )->format( 'Y-m-d' ), range( 1, AW_SI_GA4_DAYS ) );
+	if ( ! $dry ) {
+		aw_si_run_start( 'ga4' );
+	}
+	$rep = aw_si_with_module(
+		'analytics-4',
+		function ( $module ) use ( $days, $dry ) {
+			$rep = array(
+				'days'  => array(),
+				'rows'  => 0,
+				'error' => '',
+			);
+			foreach ( $days as $day ) {
+				$data = aw_si_ga4_fetch_day( $module, $day );
+				if ( is_wp_error( $data ) ) {
+					/* translators: 1: date, 2: error message. */
+					$rep['error'] = sprintf( __( 'GA4 could not be read for %1$s: %2$s', 'aw-seo-extras' ), $day, $data->get_error_message() );
+					break;
+				}
+				$rows = aw_si_ga4_obs_rows( $data );
+				$n    = $dry ? count( $rows ) : aw_si_obs_replace_day( 'ga4', $day, $rows );
+				if ( is_wp_error( $n ) ) {
+					$rep['error'] = $n->get_error_message();
+					break;
+				}
+				$rep['days'][ $day ] = array(
+					'search'  => count( $data['search'] ),
+					'ai'      => count( $data['ai'] ),
+					'organic' => count( $data['organic'] ),
+				);
+				$rep['rows']        += $n;
+				if ( $dry ) {
+					$rep['sample'][ $day ] = array_slice( $rows, 0, 5 );
+				}
+			}
+			return $rep;
+		}
+	);
+	if ( is_wp_error( $rep ) ) {
+		$rep = array( 'error' => $rep->get_error_message() );
+	}
+	if ( ! $dry ) {
+		if ( ! empty( $rep['error'] ) ) {
+			aw_si_run_fail( 'ga4', $rep['error'] );
+		} else {
+			aw_si_run_ok(
+				'ga4',
+				array(
+					'rows'  => $rep['rows'],
+					'up_to' => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
+				)
+			);
+		}
+	}
+	return $rep;
+}
+add_action( AW_SI_GA4_CRON, fn() => get_option( 'aw_si_off' ) ? null : aw_si_ga4_run() );

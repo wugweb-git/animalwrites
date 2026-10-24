@@ -156,12 +156,14 @@ function aw_si_drop_all(): void {
 	foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising' ) as $t ) {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed' ) as $opt ) {
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls' ) as $opt ) {
 		delete_option( $opt );
 	}
+	delete_transient( 'aw_si_redirects' );
 	update_option( 'aw_si_off', time(), false );
-	wp_clear_scheduled_hook( 'aw_si_daily' );
-	wp_clear_scheduled_hook( 'aw_si_rollup' );
+	foreach ( aw_si_cron_hooks() as $hook ) {
+		wp_clear_scheduled_hook( $hook );
+	}
 }
 
 /** Current time in MySQL format, site time zone (IST). */
