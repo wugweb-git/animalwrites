@@ -4,6 +4,8 @@
  * and Directory "near me" / PIN lookups (the aw/v1/dir-near route, counted by the district it found). Stored only as
  * daily counts per term in obs (src site-search; metric wp, dir-q, dir-pin or dir-near; txt = the term). No IP
  * address, user agent, user ID, cookie or request line is stored, and terms that look like personal data are dropped.
+ * A page served from the full-page cache never reaches WordPress, so its searches are not counted: the figures are a
+ * floor, not a total (WordPress ?s= results are normally not cached; Directory ?q= pages may be).
  *
  * @package aw-seo-extras
  */
@@ -26,12 +28,11 @@ function aw_si_term_ok( string $term ): string {
 	if ( preg_match( '/[^\s@]+@[^\s@]+\.[a-z]{2,}/i', $term ) ) {
 		return ''; // An email address.
 	}
-	$digits = preg_replace( '/\D/', '', $term );
 	if ( preg_match( '/^[1-9][0-9]{5}$/', $term ) ) {
 		return $term; // A PIN code: an area, kept as a count only.
 	}
-	if ( strlen( $digits ) >= 7 || preg_match( '/\d{7,}/', $term ) ) {
-		return ''; // A phone number or another long number.
+	if ( preg_match( '/\d(?:[\s.\-]?\d){6,}/', $term ) ) {
+		return ''; // A phone number or another long number (7+ digits, spaces or dashes allowed between them).
 	}
 	return $term;
 }

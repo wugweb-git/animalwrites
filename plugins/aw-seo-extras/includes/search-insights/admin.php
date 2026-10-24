@@ -199,8 +199,13 @@ function aw_si_source_notices(): void {
 			echo '<div class="notice notice-warning inline"><p><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html( sprintf( __( '%s has not updated on schedule.', 'aw-seo-extras' ), $s['label'] ) ) . '</p></div>';
 		}
 		if ( ! empty( $r['info']['truncated'] ) ) {
-			/* translators: %s: dates. */
-			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Search Console hit the 5,000-row maximum on %s even after fetching the busiest pages one by one, so the rarest searches of those days may be missing.', 'aw-seo-extras' ), implode( ', ', array_keys( (array) $r['info']['truncated'] ) ) ) ) . '</p></div>';
+			$days = implode( ', ', array_keys( (array) $r['info']['truncated'] ) );
+			$msg  = 'gsc' === $src
+				/* translators: %s: dates. */
+				? __( 'Search Console hit the 5,000-row maximum on %s even after fetching the busiest pages one by one, so the rarest searches of those days may be missing.', 'aw-seo-extras' )
+				/* translators: %s: dates. */
+				: __( 'GA4 returned its row maximum on %s, so the smallest pages or terms of those days may be missing.', 'aw-seo-extras' );
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( $msg, $days ) ) . '</p></div>';
 		}
 	}
 	echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Last updated', 'aw-seo-extras' ) . ' — ' . esc_html( implode( ' · ', $parts ) ) . '</p></div>';

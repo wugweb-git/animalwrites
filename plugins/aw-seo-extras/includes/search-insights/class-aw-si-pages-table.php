@@ -61,7 +61,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'impr'     => __( 'Impressions (28 days)', 'aw-seo-extras' ),
 			'clicks'   => __( 'Clicks', 'aw-seo-extras' ),
 			'pos'      => __( 'Position', 'aw-seo-extras' ),
-			'keywords' => __( 'Keywords', 'aw-seo-extras' ),
+			'keywords' => __( 'Keywords owned', 'aw-seo-extras' ),
 			'organic'  => __( 'Organic sessions (GA4)', 'aw-seo-extras' ),
 			'ai'       => __( 'AI referrals', 'aw-seo-extras' ),
 			'clarity'  => __( 'Clarity (28 days)', 'aw-seo-extras' ),

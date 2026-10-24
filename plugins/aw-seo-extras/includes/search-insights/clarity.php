@@ -125,7 +125,8 @@ function aw_si_clarity_totals( array $resp, string $dimension ): array {
 		foreach ( (array) ( $block['information'] ?? array() ) as $info ) {
 			$k = $keyof( (array) $info );
 			if ( '' !== $k ) {
-				$sess[ $k ] = ( $sess[ $k ] ?? 0 ) + max( 0, (float) ( $info['totalSessionCount'] ?? 0 ) - (float) ( $info['totalBotSessionCount'] ?? 0 ) );
+				// totalSessionCount is the dashboard's session count (bots excluded); totalBotSessionCount is reported beside it.
+				$sess[ $k ] = ( $sess[ $k ] ?? 0 ) + (float) ( $info['totalSessionCount'] ?? 0 );
 			}
 		}
 	}

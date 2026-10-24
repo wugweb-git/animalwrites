@@ -71,7 +71,9 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'impr', (int) $r->i );
 		$set( $r->page, 'pos', null === $r->p ? null : round( (float) $r->p, 1 ) );
 	}
-	foreach ( (array) $wpdb->get_results( "SELECT page, COUNT(*) n, SUM(status = 'conflict') c FROM {$k} WHERE page LIKE '/%' GROUP BY page" ) as $r ) {
+	// Keywords the page owns (keyword map or Rank Math focus), and how many of them are in conflict.
+	$p = aw_si_table( 'kw_pages' );
+	foreach ( (array) $wpdb->get_results( "SELECT l.path page, COUNT(DISTINCT l.kw_id) n, COUNT(DISTINCT IF(k.status = 'conflict', k.id, NULL)) c FROM {$p} l JOIN {$k} k ON k.id = l.kw_id WHERE l.role = 'owner' AND l.path LIKE '/%' GROUP BY l.path" ) as $r ) {
 		$set( $r->page, 'keywords', (int) $r->n );
 		$set( $r->page, 'conflicts', (int) $r->c );
 	}

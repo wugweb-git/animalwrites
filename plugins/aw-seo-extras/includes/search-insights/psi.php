@@ -1,8 +1,8 @@
 <?php
 /**
  * PageSpeed (plan §5.1): mobile and desktop for the 16 key pages, weekly on Sunday 06:00 IST, through Site Kit's
- * pagespeed-insights module as its owner; with a free PSI key (AW_PSI_KEY in wp-config.php) when the module can't be
- * used. One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
+ * pagespeed-insights module as its owner; when the module can't be used (no owner, not connected), the public PageSpeed
+ * API directly, with the free AW_PSI_KEY from wp-config.php when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
  * five minutes later, until the queue is empty.
  *
  * Rows in obs: src psi, period day (the week's run date), page = path; metrics score-mobile, lcp-mobile, tbt-mobile,
@@ -100,15 +100,18 @@ function aw_si_psi_call( string $path, string $strategy ) {
 			}
 		}
 	);
-	if ( is_wp_error( $resp ) && defined( 'AW_PSI_KEY' ) && AW_PSI_KEY ) {
+	if ( is_wp_error( $resp ) ) {
+		$query = array(
+			'url'      => rawurlencode( $url ),
+			'strategy' => $strategy,
+			'category' => 'performance',
+		);
+		if ( defined( 'AW_PSI_KEY' ) && AW_PSI_KEY ) {
+			$query['key'] = AW_PSI_KEY;
+		}
 		$http = wp_remote_get(
 			add_query_arg(
-				array(
-					'url'      => rawurlencode( $url ),
-					'strategy' => $strategy,
-					'category' => 'performance',
-					'key'      => AW_PSI_KEY,
-				),
+				$query,
 				'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 			),
 			array( 'timeout' => 60 )
@@ -117,8 +120,8 @@ function aw_si_psi_call( string $path, string $strategy ) {
 			return $http;
 		}
 		if ( 200 !== (int) wp_remote_retrieve_response_code( $http ) ) {
-			/* translators: %d: HTTP status. */
-			return new WP_Error( 'aw_si_psi', sprintf( __( 'The PageSpeed API answered %d.', 'aw-seo-extras' ), (int) wp_remote_retrieve_response_code( $http ) ) );
+			/* translators: 1: Site Kit's problem, 2: HTTP status. */
+			return new WP_Error( 'aw_si_psi', sprintf( __( '%1$s The PageSpeed API answered %2$d.', 'aw-seo-extras' ), $resp->get_error_message(), (int) wp_remote_retrieve_response_code( $http ) ) );
 		}
 		$resp = json_decode( (string) wp_remote_retrieve_body( $http ), true );
 	}
@@ -132,6 +135,11 @@ function aw_si_psi_call( string $path, string $strategy ) {
 /** Start this week's queue: every key page, mobile and desktop. */
 function aw_si_psi_start(): void {
 	if ( get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
+		return;
+	}
+	$q = get_option( AW_SI_PSI_QUEUE );
+	if ( is_array( $q ) && ! empty( $q['todo'] ) && ( $q['d'] ?? '' ) >= wp_date( 'Y-m-d', time() - DAY_IN_SECONDS ) ) {
+		aw_si_psi_step(); // A run is still in progress: carry on with it instead of starting over.
 		return;
 	}
 	$todo = array();
@@ -160,7 +168,7 @@ function aw_si_psi_start(): void {
  */
 function aw_si_psi_step(): array {
 	$q = get_option( AW_SI_PSI_QUEUE );
-	if ( ! is_array( $q ) || empty( $q['todo'] ) ) {
+	if ( ! is_array( $q ) || empty( $q['todo'] ) || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return is_array( $q ) ? $q : array();
 	}
 	$start = microtime( true );

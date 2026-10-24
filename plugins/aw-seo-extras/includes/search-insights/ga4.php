@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SI_GA4_DAYS = 3;
 const AW_SI_GA4_CRON = 'aw_si_ga4';
+const AW_SI_GA4_ROWS = 10000; // Rows per report; a report that returns this many is marked truncated.
 
 /** Session sources counted as AI referrals. Filter aw_si_ai_sources adds more. */
 function aw_si_ai_sources(): array {
@@ -55,7 +56,7 @@ function aw_si_ga4_rows( $resp ): array {
  */
 function aw_si_ga4_report( $module, array $args ) {
 	try {
-		$resp = $module->get_data( 'report', $args + array( 'limit' => 1000 ) );
+		$resp = $module->get_data( 'report', $args + array( 'limit' => AW_SI_GA4_ROWS ) );
 	} catch ( Throwable $e ) {
 		return new WP_Error( 'aw_si_ga4', $e->getMessage() );
 	}
@@ -222,6 +223,11 @@ function aw_si_ga4_run( array $args = array() ): array {
 					$rep['error'] = $n->get_error_message();
 					break;
 				}
+				foreach ( array( 'search', 'ai', 'organic' ) as $key ) {
+					if ( count( $data[ $key ] ) >= AW_SI_GA4_ROWS ) {
+						$rep['truncated'][ $day ][] = $key;
+					}
+				}
 				$rep['days'][ $day ] = array(
 					'search'  => count( $data['search'] ),
 					'ai'      => count( $data['ai'] ),
@@ -245,8 +251,9 @@ function aw_si_ga4_run( array $args = array() ): array {
 			aw_si_run_ok(
 				'ga4',
 				array(
-					'rows'  => $rep['rows'],
-					'up_to' => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
+					'rows'      => $rep['rows'],
+					'truncated' => $rep['truncated'] ?? array(),
+					'up_to'     => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
 				)
 			);
 		}
