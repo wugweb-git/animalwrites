@@ -634,7 +634,7 @@ add_action(
 		} else {
 			$op  = sanitize_key( $_POST['ai_bulk'] ?? '' );
 			$op  = '' !== $op ? $op : sanitize_key( $_POST['ai_bulk2'] ?? '' );
-			$ids = (array) wp_unslash( $_POST['ids'] ?? array() );
+			$ids = array_map( 'sanitize_key', (array) wp_unslash( $_POST['ids'] ?? array() ) );
 		}
 		$op   = sanitize_key( $op );
 		$ids  = array_map( 'sanitize_key', $ids );
@@ -813,7 +813,8 @@ function aw_ai_keys_screen() {
 	}
 	$listed = sanitize_key( $_GET['listed'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $listed ) {
-		$n   = (int) ( $_GET['n'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+		$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		/* translators: %d: number of keys. */
 		$msg = array(
 			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Settings → Sourcing → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Settings → Sourcing → Change log.', $n ),
 			'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n ),
