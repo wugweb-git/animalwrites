@@ -309,7 +309,7 @@ function aw_claim_review_box( $post ) {
 		echo '<p><strong>Notes:</strong><br>' . nl2br( esc_html( $notes ) ) . '</p>';
 	}
 	if ( 'pending' === $status ) {
-		foreach ( array( 'approve' => 'Approve: apply changes and mark verified' . ( $feature ? ', and feature it' : '' ), 'reject' => 'Reject' ) as $do => $label ) {
+		foreach ( array( 'approve' => 'Approve: apply changes and mark verified', 'reject' => 'Reject' ) as $do => $label ) {
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'aw_claim_decide', 'claim' => $post->ID, 'do' => $do ), admin_url( 'admin-post.php' ) ), 'aw_claim_decide_' . $post->ID );
 			echo '<a class="button ' . ( 'approve' === $do ? 'button-primary' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a> ';
 		}
