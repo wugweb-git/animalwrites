@@ -52,9 +52,9 @@ Check this list against git and the live site before acting on it. Refer to item
       - #5: suggestions in Settings → Sourcing → Keywords, at least 20 impressions in 28 days; Add to Include / Exclude, Dismiss.
       - #7: Site Health "Sourcing ran on time".
       - #10, #11, #12, #13: Publishers, the source lists, Inbox → To review and Settings → AI models as core list tables, no custom CSS.
+      - #25: a To review row action comes back to the page it was clicked on.
+      - #32 (rebuild of #4, which is closed): Tools → Search Insights → Sourcing keywords tab, and the searches for Sourcing's suggestions from Search Insights' keywords table (English only, at least 20 impressions in 28 days).
     - Open:
-      - **#32** (rebuild of #4, which is closed): the Search Insights "Sourcing keywords" tab and the searches for Sourcing's suggestions, built on phase 1 (#17, merged); in review. The rename stays with phase 1 and Rising with Search Insights phase 3 (plan §12); GSC Rising is off until 8 weeks of history (owner, 24 Oct). The sourcing-keywords tab will use aw_si_page_metrics() and aw_si_tabs; aw_search_demand_terms will read wp_aw_si_keywords (English only).
-      - **#25:** a To review row action comes back to its page; waiting for the owner.
       - **Keywords lists as a list table, and the Settings API for the Sourcing settings forms** (press, categories, sections, summary rules, relay, enrichment, the keyword switches): not started, now that the overlapping PRs have merged.
       - **Migration check of step 1:** compare the next worker run with the baseline before the move (4 new, 4 published, 38 sources, 0 failed), and check that /ingest and /relay do not 404.
 16. **Search Insights (owner, 24 Oct 2026).** Plan approved and merged (PR #1, `docs/seo/search-insights-plan.md`). **Phase 1 merged 24 Oct (PR #17, `e6fa41e`)** and passed the deploy gate:
