@@ -478,8 +478,8 @@ add_filter(
 		}
 		$host = aw_host( get_post_meta( $post->ID, 'aw_source_url', true ) );
 		if ( $host && 'block' !== ( aw_publishers()[ $host ]['status'] ?? '' ) ) {
-			$url                     = wp_nonce_url( add_query_arg( array( 'action' => 'aw_block_publisher', 'host' => $host ), admin_url( 'admin-post.php' ) ), 'aw_block_' . $host );
-			$actions['aw_block_pub'] = '<a href="' . esc_url( $url ) . '" style="color:#b32d2e">Block ' . esc_html( $host ) . '</a>';
+			$url             = wp_nonce_url( add_query_arg( array( 'action' => 'aw_block_publisher', 'host' => $host ), admin_url( 'admin-post.php' ) ), 'aw_block_' . $host );
+			$actions['spam'] = '<a href="' . esc_url( $url ) . '">Block ' . esc_html( $host ) . '</a>'; // core colours the "spam" row action red (as for comments); posts have no spam action
 		}
 		return $actions;
 	},
@@ -493,13 +493,6 @@ add_action(
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing' ) ) . '">Manage publishers</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
-	}
-);
-
-add_action(
-	'admin_head',
-	function () {
-		echo '<style>.aw-src-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.aw-src-lists textarea{width:100%;min-height:220px;font-family:monospace}</style>';
 	}
 );
 
