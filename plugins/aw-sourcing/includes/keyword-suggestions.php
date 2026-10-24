@@ -146,7 +146,7 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'a
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && has_filter( 'aw_search_demand_terms' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
+		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
 			add_screen_option( 'per_page', array( 'label' => 'Suggestions per page', 'default' => 20, 'option' => 'aw_suggestions_per_page' ) );
 		}
 	}

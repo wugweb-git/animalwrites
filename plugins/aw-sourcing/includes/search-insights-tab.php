@@ -33,8 +33,10 @@ add_action(
 			. '<strong>Fetched</strong>: the items it brought in over the last 30 days, whatever happened to them since (held, merged, backfilled). <strong>Published</strong>: those live now. '
 			. '<strong>Impressions and clicks</strong>: Search Console over the last 28 days for the published items\' own pages, searches Google hides included. '
 			. 'Items from before 24 Oct 2026 did not record their search: they are counted by the word in their title or summary and marked estimated, and one with several of the words counts under each. Hindi Include words are not searches and are not listed.</p>';
-		if ( ! $table->has_page_figures() ) {
-			echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> Page figures appear after Search Insights\' next daily Search Console run (07:00 IST); the first 30 days fill in over about two runs.</p></div>';
+		if ( ! $table->has_page_data() ) { // Search Insights has not stored a Search Console run yet, or is switched off
+			$off = function_exists( 'aw_si_ready' ) && ! aw_si_ready();
+			echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> '
+				. esc_html( $off ? 'Search Insights is off, so there are no page figures. Settings → Run the daily update starts it again.' : 'Page figures appear after Search Insights\' next daily Search Console run (07:10 IST); the first 30 days fill in over about two runs.' ) . '</p></div>';
 		}
 		$table->display();
 	}
@@ -47,14 +49,14 @@ add_action(
  * @return array|null
  */
 function aw_sourcing_si_terms( $terms ) {
-	if ( is_array( $terms ) || ! function_exists( 'aw_si_ready' ) || ! function_exists( 'aw_si_table' ) || ! aw_si_ready() ) {
+	if ( ! aw_sourcing_si_available() ) {
 		return $terms;
 	}
 	global $wpdb;
 	$k     = aw_si_table( 'keywords' );
 	$brand = defined( 'AW_SI_ROLE_BRAND' ) ? (int) AW_SI_ROLE_BRAND : 8;
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the table name comes from Search Insights.
-	$rows = $wpdb->get_results( "SELECT norm, label, impr28, clicks28, pos28, roles FROM {$k} WHERE lang = 'en' AND impr28 > 0 ORDER BY impr28 DESC LIMIT 5000" );
+	$rows = $wpdb->get_results( "SELECT norm, label, impr28, clicks28, pos28, roles FROM {$k} WHERE lang = 'en' AND impr28 >= 20 ORDER BY impr28 DESC LIMIT 5000" ); // the suggestions' own floor (keyword-suggestions.php)
 	$out  = array();
 	foreach ( (array) $rows as $r ) {
 		$out[] = array(
@@ -66,6 +68,11 @@ function aw_sourcing_si_terms( $terms ) {
 			'rising' => false, // Search Console Rising is off until 8 weeks of history (owner, 24 Oct 2026)
 		);
 	}
-	return $out;
+	return array_merge( is_array( $terms ) ? $terms : array(), $out ); // another provider's searches are kept
 }
 add_filter( 'aw_search_demand_terms', 'aw_sourcing_si_terms' );
+
+/** Search Insights is installed and switched on (aw-seo-extras active). */
+function aw_sourcing_si_available() {
+	return function_exists( 'aw_si_ready' ) && function_exists( 'aw_si_table' ) && aw_si_ready();
+}

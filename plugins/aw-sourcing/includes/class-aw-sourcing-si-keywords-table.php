@@ -27,9 +27,12 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 		$this->stats = $stats;
 	}
 
-	/** Search Insights has page figures for this period. */
-	public function has_page_figures() {
-		return (bool) $this->pages;
+	/** @var bool Search Insights has stored a Search Console run (page rows exist), so a missing page means 0. */
+	private $has_data = false;
+
+	/** Search Insights has page data at all (not only for these items). */
+	public function has_page_data() {
+		return $this->has_data;
 	}
 
 	/** Columns. */
@@ -78,7 +81,8 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 		}
 		$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
 		$paths = array();
-		if ( $ids && function_exists( 'aw_si_page_metrics' ) ) {
+		$this->has_data = function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() && function_exists( 'aw_si_runs' ) && ! empty( aw_si_runs()['gsc']['ok'] );
+		if ( $ids && $this->has_data && function_exists( 'aw_si_page_metrics' ) ) {
 			_prime_post_caches( $ids, false, false ); // one query for every item, not one per permalink
 			foreach ( $ids as $id ) {
 				$paths[ $id ] = $this->path( $id );
@@ -103,8 +107,8 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 				'legal_f'   => count( $r['legal']['fetched'] ),
 				'news_p'    => count( $r['news']['published'] ),
 				'legal_p'   => count( $r['legal']['published'] ),
-				'impr'      => $this->pages ? $i : null,
-				'clicks'    => $this->pages ? $c : null,
+				'impr'      => $this->has_data ? $i : null,
+				'clicks'    => $this->has_data ? $c : null,
 			);
 		}
 		$by  = sanitize_key( wp_unslash( $_GET['orderby'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
