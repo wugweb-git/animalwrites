@@ -11,7 +11,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
 | `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title and given to search engines as BreadcrumbList (schema.php). |
 | `campaigns.php` | Campaign kit: countdown, and the private upload folder used by listing claims. (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.) |
-| `cdn-cache.php` | Caching. (1) Hostinger CDN lifetime for anonymous public pages (option aw_cdn_ttl, off by default). (2) After every deploy, whatever the path (Deploy check, aw-ship.sh, a manual pull), the first web request PHP serves sees the new commit the plugins were deployed from and purges LiteSpeed once (option aw_deployed_commit). The CDN copy has no purge: it follows within its lifetime. |
+| `cdn-cache.php` | Caching. (1) Hostinger CDN lifetime for anonymous public pages (option aw_cdn_ttl, off by default). (2) After every deploy, whatever the path (Deploy check, aw-ship.sh, a manual pull), the first web request PHP serves (not a command-line cron or WP-CLI run) sees the new commit the plugins were deployed from and purges LiteSpeed once (option aw_deployed_commit). The CDN copy has no purge: it follows within its lifetime. |
 | `claims.php` | Claim or update a directory listing: [aw_claim_box] on each listing. |
 | `content-types.php` | Post types and taxonomies. Each pillar keeps its own URL space for SEO. |
 | `cron.php` | Daily housekeeping: expire featured listings, flag listings due for re-verification. |

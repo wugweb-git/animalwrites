@@ -131,9 +131,10 @@ function aw_deployed_commit() {
 add_action(
 	'init',
 	function () {
-		// A web request only: LiteSpeed purges through a header on this response, which WP-CLI never sends. The next
-		// request PHP serves (cron over HTTP, a worker's REST call, an admin page) does it.
-		if ( ( defined( 'WP_CLI' ) && WP_CLI ) || headers_sent() ) { // Headers already out: the next request purges.
+		// A web request only: LiteSpeed purges through a header on this response, which a command-line run never sends
+		// (WP-CLI, or Hostinger's cron running php wp-cron.php; cron-health.php). The next web request PHP serves (a
+		// worker's REST call, an admin page, an uncached visit) does it. Same when headers are already out.
+		if ( 'cli' === PHP_SAPI || ( defined( 'WP_CLI' ) && WP_CLI ) || headers_sent() ) {
 			return;
 		}
 		$now = aw_deployed_commit();
