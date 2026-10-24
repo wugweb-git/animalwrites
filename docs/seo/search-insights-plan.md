@@ -92,9 +92,9 @@ Every source writes here, so history and "change against last month" need no ext
 
 **Retention.**
 - Daily rows are kept 90 days, then rolled up into monthly rows:
-  - counts are summed;
+  - counts are summed, but **only rows for a single day** (`period` = day, one row per keyword or page per calendar date);
   - position is the mean weighted by impressions;
-  - indexes keep the last value.
+  - indexes and rolling-window figures (`period` = 28d, 3m, week) are never summed: the rollup keeps the last value of the month.
 - Monthly rows are kept indefinitely.
 - The rollup is a daily WP-cron job.
 
@@ -102,7 +102,7 @@ Every source writes here, so history and "change against last month" need no ext
 
 | Source | Rows a day |
 |---|---|
-| GSC query + page | about 2,500 |
+| GSC date + query + page (one day) | about 2,500 |
 | Clarity URL × device | about 300 |
 | GA4 | about 300 |
 | Workers / rising | about 400 |
@@ -152,13 +152,23 @@ Every source follows the same failure rule:
 - never fail silently;
 - never retry in a tight loop: one attempt, then the next scheduled run (or the manual fallback).
 
-### 5.1 Site Kit, from WP-cron as the Site Kit owner (no new Google sign-in)
+### 5.1 Site Kit, from WP-cron as each module's owner (no new Google sign-in)
 
-These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: switch to the Site Kit owner, then `Modules->get_module(…)->get_data(…)`. That is Site Kit's own module layer. It does not read tokens.
+These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: switch user, then `Modules->get_module(…)->get_data(…)`. That is Site Kit's own module layer. It does not read tokens.
+
+**Each module runs as its own owner.**
+- Site Kit lets each module have its own owner. Today `aw_sd_sitekit()` reads only `googlesitekit_search-console_settings['ownerID']`.
+- Phase 1 generalises it to `aw_si_sitekit( $slug )`. It reads `ownerID` from that module's own settings (`googlesitekit_search-console_settings`, `googlesitekit_analytics-4_settings`, `googlesitekit_pagespeed-insights_settings`) and switches to that user for that call only.
+- If a module has no owner, or the owner can't be loaded, that source fails with a clear error under the failure rule. It never borrows another module's owner.
+
+**Search Console is stored by day.**
+- The daily job asks for `date` + `query` and `date` + `query` + `page`. It covers the last 4 days, because Google finalises data 2–3 days late; rows already stored are replaced, not added.
+- Each row is one calendar day (`period` = day), so the monthly rollup can sum them safely.
+- 28-day and 3-month figures on the screens are sums of those daily rows. The rolling-window totals Google returns, as today's `aw_sd_refresh()` stores them, are kept only as a check (`period` = 28d / 3m) and are never summed.
 
 | Data | Module call | Schedule (IST) | Limits |
 |---|---|---|---|
-| Search Console: query, page, query + page, date; 28 days; position, impressions, clicks, CTR | `search-console` → `searchanalytics` | daily 07:00 (the existing cron) | Google quota through Site Kit; ≤ 5,000 rows a call; anonymised queries are not returned |
+| Search Console: date + query and date + query + page, last 4 days, stored per day (28 days and 3 months are sums of daily rows); position, impressions, clicks, CTR | `search-console` → `searchanalytics` | daily 07:00 (the existing cron) | Google quota through Site Kit; ≤ 5,000 rows a call; anonymised queries are not returned |
 | GA4: `view_search_results` by `search_term` | `analytics-4` → `report` | daily 07:20 | Site Kit quota; read only |
 | GA4: sessions by session source (chatgpt.com, perplexity.ai, gemini.google.com, copilot) × landing page | `analytics-4` → `report` | daily 07:20 | read only; no events sent |
 | GA4: landing pages by organic sessions | `analytics-4` → `report` | daily 07:20 | read only |
