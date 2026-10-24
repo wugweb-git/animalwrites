@@ -124,7 +124,10 @@ add_action(
 		$back = remove_query_arg( array( 'done', 'n', 'paged' ), wp_get_referer() && false !== strpos( wp_get_referer(), 'page=aw-review' ) ? wp_get_referer() : $back );
 		$page = absint( wp_unslash( $_REQUEST['paged'] ?? 0 ) );
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
-		wp_safe_redirect( $action || ! $page ? add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) : $back );
+		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
+		parse_str( (string) wp_parse_url( (string) wp_get_referer(), PHP_URL_QUERY ), $ref );
+		$moved = $page && absint( $ref['paged'] ?? 1 ) !== $page;
+		wp_safe_redirect( $action || ! $moved ? add_query_arg( array( 'done' => $action ? $action : 'none', 'n' => $n ), $back ) : $back );
 		exit;
 	}
 );
