@@ -195,8 +195,10 @@ add_filter(
 );
 
 // The old Settings → AI models address (bookmarks, links in notices and e-mails) opens the tab, with its query args.
+// The page is no longer registered, so WordPress refuses it in wp-admin/menu.php before admin_init runs; the
+// redirect hooks the refusal itself (admin_page_access_denied fires just before the "not allowed" screen).
 add_action(
-	'admin_init',
+	'admin_page_access_denied',
 	function () {
 		global $pagenow;
 		if ( 'options-general.php' === $pagenow && 'aw-ai-keys' === sanitize_key( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a redirect only
