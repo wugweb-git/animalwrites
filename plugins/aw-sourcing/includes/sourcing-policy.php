@@ -663,6 +663,18 @@ function aw_sourcing_simple_table( $plural, array $cols, array $rows, array $opt
 	$t->display();
 }
 
+/**
+ * The plugins list's problem row (core notice classes) under a list-table row: a blocked publisher, a source that is
+ * off, a rejected item from an allowed publisher. As on the plugins list for a plugin with a problem.
+ *
+ * @param WP_List_Table $table The table (for the column count).
+ * @param string        $msg   Plain text.
+ * @param string        $tone  error, warning or info.
+ */
+function aw_sourcing_problem_row( $table, $msg, $tone = 'warning' ) {
+	echo '<tr class="plugin-update-tr"><td colspan="' . (int) $table->get_column_count() . '" class="plugin-update colspanchange"><div class="update-message notice inline notice-' . esc_attr( $tone ) . ' notice-alt"><p>' . esc_html( $msg ) . '</p></div></td></tr>';
+}
+
 /* ---------- Settings API (owner, 24 Oct 2026): the Sourcing settings forms post to options.php ---------- */
 
 /**

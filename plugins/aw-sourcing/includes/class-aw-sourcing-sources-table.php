@@ -119,6 +119,14 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'name' );
 	}
 
+	/** A source that is off gets the plugins list's problem row under it. */
+	public function single_row( $item ) {
+		parent::single_row( $item );
+		if ( empty( $item['on'] ) ) {
+			aw_sourcing_problem_row( $this, 'Off: the workers skip ' . $item['name'] . ' until it is turned on.', 'warning' );
+		}
+	}
+
 	protected function column_cb( $item ) {
 		$id = 'aw-src-' . $item['id'];
 		return '<input type="checkbox" name="ids[]" value="' . esc_attr( $item['id'] ) . '" id="' . esc_attr( $id ) . '"><label for="' . esc_attr( $id ) . '" class="screen-reader-text">' . esc_html( 'Select ' . $item['name'] ) . '</label>';

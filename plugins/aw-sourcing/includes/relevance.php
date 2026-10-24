@@ -406,6 +406,7 @@ function aw_relevance_rejected_tab() {
 	$log = (array) get_option( AW_RELEVANCE_LOG, array() );
 	echo '<p>' . esc_html( sprintf( 'Rejected: %d', count( $log ) ) ) . '</p>';
 	$rows = array();
+	$pubs = aw_publishers();
 	foreach ( $log as $e ) {
 		$url    = (string) ( $e['url'] ?? '' );
 		$host   = (string) wp_parse_url( $url, PHP_URL_HOST );
@@ -418,6 +419,8 @@ function aw_relevance_rejected_tab() {
 			'reason' => esc_html( (string) ( $e['reason'] ?? '' ) ),
 			'at'     => esc_html( (string) ( $e['at'] ?? '' ) ),
 			'_find'  => $title . ' ' . $host . ' ' . $found . ' ' . ( $e['reason'] ?? '' ),
+			// An allowed publisher's item is rarely refused: worth a look (problem row).
+			'_problem' => 'allow' === ( $pubs[ aw_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . aw_host( $url ) . '): check whether it should have been kept.' : '',
 		);
 	}
 	aw_sourcing_simple_table(

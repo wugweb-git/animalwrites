@@ -2,8 +2,8 @@
 /**
  * A read-only core list table for the Sourcing screens' plain tables (owner, 24 Oct 2026: WP_List_Table, no
  * hand-built tables): the Change log, the Rejected tab, AI models "Daily caps on free models" and "Keys by group",
- * Summary rules "Length per section". Rows come ready as cells of escaped HTML; optional search, sorting and pages.
- * It prints no nonce and no bulk actions (nothing to post); it may sit inside a settings form.
+ * Summary rules "Length per section", Relay requests. Rows come ready as cells of escaped HTML (_problem: plain text
+ * for the plugins-list problem row under it); optional search, sorting and pages. It prints no nonce and no bulk actions (nothing to post); it may sit inside a settings form.
  *
  * @package aw-sourcing
  */
@@ -96,6 +96,14 @@ class AW_Sourcing_Simple_Table extends WP_List_Table {
 		}
 		$this->items           = $rows;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), $this->opts['primary'] );
+	}
+
+	/** A row with a _problem text gets the plugins list's problem row under it. */
+	public function single_row( $item ) {
+		parent::single_row( $item );
+		if ( ! empty( $item['_problem'] ) ) {
+			aw_sourcing_problem_row( $this, (string) $item['_problem'] );
+		}
 	}
 
 	protected function column_default( $item, $col ) {
