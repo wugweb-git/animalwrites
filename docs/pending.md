@@ -44,7 +44,17 @@ Check this list against git and the live site before acting on it. Failing AI ke
     - Open: campaign band shows plain state names ("Mizoram", not "All of Mizoram"; item pages keep "All of {state}"), in review.
 
 14. **AW Sourcing plugin (owner, 24 Oct 2026).** Step 1 done: sourcing moved out of core and Kits Core into `plugins/aw-sourcing`, loaded by core, no behaviour change (before/after inventory of routes, functions, cron, menus, tabs and hooks identical on a test install; smoke test checks `/aw/v1/sourcing-policy` answers 401). **Migration check on the next worker run:** ingested and published counts as usual, heartbeat fresh, no 404 on `/ingest` or `/relay`. Next, steps 2–6: save `aw_feed` and `aw_ingested_at` at ingest (older items: title/summary match, shown "estimated"); the reject log records feed/keyword; per-page Search Console data in the daily refresh (28 days, 3 months); per-keyword Fetched / Published (News and Library apart) with impressions and clicks in Search Insights (renamed from Search demand in labels only); suggestions in Settings → Sourcing (≥20 impressions in 28 days or Rising, no Hindi), Add to Include / Add to Exclude, dismiss with a show-dismissed toggle, Include count and Google News searches per run beside the buttons. aw-seo-extras stays optional.
-15. **Search Insights: plan approved by the owner 24 Oct (PR #1). Phase 1 (tables, keyword-map seed, Search Console by day, priorities, Overview and Keywords tabs) in review on branch `search-insights-phase1`; its live dry run (`wp aw-si dry-run`, read-only) still to run. The Searches tab becomes the Search demand screen once PR #4 is merged.** (`docs/seo/search-insights-plan.md`).
+15. **Search Insights (owner, 24 Oct 2026).** Plan approved and merged (PR #1, `docs/seo/search-insights-plan.md`). **Phase 1 merged 24 Oct (PR #17, `e6fa41e`)** and passed the deploy gate:
+    - Tools → Search Insights: Overview, Keywords, Searches (the old Search demand screen; its address redirects there), Settings.
+    - Keyword table seeded once from the keyword map and the 21 Oct rankings; `aw_sd_static()` retired.
+    - Search Console by day through Site Kit, each module as its own owner; 90-day backfill; monthly rollup.
+    - Priorities by the keyword-map rule; Site Health test; `wp aw-si`.
+    - Live dry run (read only, 24 Oct): 4,297 keywords, 2,675 Search Console rows a day; P1 43, P2 3, conflicts 112, quick wins 119.
+
+    Open:
+    - Check on live after the first 07:10 IST run (or Settings → Run now): the seed is marked done, Search Console is "OK", the Movers box fills after about 4 runs.
+    - Phase 2: Site Kit GA4 and PageSpeed, Clarity, site search. Count a redirected address as its target page, so the 112 conflicts are not inflated by old URLs.
+    - AW Sourcing rebuilds PR #4 on phase 1: a "Sourcing keywords" tab through `aw_si_tabs`, and `aw_search_demand_terms` from the keyword table.
 
 15. **Workers tab (owner, 24 Oct 2026).** Settings → Sourcing → Workers (`plugins/aw-sourcing/includes/workers.php`), with reports from every workflow (workers PR "Report every workflow to the site"). Order: ship this, then merge the workers PR. Then: 
     - **Owner:** set `AW_GITHUB_DISPATCH_TOKEN` in wp-config.php (Run now stays off until then); then the Hostinger cron lines for focus-keywords 04:00, seo-scores 05:15 and research Mon 09:10 IST (sourcing already), each `wp eval 'aw_dispatch_workflow("<file>.yml");'`, with their GitHub schedules moved about 2 hours later in a small workers PR. backup-offsite stays on its GitHub schedule and is not dispatched.
