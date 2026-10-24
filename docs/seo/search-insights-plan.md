@@ -356,7 +356,7 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
   - plus demand, priority, status and action;
   - offered as a Download button.
 - It also builds the regenerated `keyword-map.md` from the keywords table.
-- **A session commits both** to `docs/seo/` each month, on its own branch and PR. Nothing commits automatically.
+- **A session commits both** to `docs/seo/` each month, straight onto `wordpress-dev` (docs: no PR, owner 24 Oct 2026). Nothing commits automatically.
 
 ## 11. Dependencies
 

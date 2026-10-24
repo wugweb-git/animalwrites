@@ -11,7 +11,7 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 - `plugins/mailweb/` — Mailweb 3.0: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
 
 ## Docs
-- [CLAUDE.md](CLAUDE.md) — working rules (branch + PR + review gate, shipping).
+- [CLAUDE.md](CLAUDE.md) — working rules (branch + PR + review gate for bigger work, small changes straight onto `wordpress-dev`, shipping).
 - [docs/pending.md](docs/pending.md) — open work (mirrored in Notion "8. Status & Pending").
 - [docs/plugin-map.md](docs/plugin-map.md) — every plugin file and what it does.
 - [docs/design-system.md](docs/design-system.md) — breakpoints (768 / 1200), tokens, components.
