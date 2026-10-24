@@ -542,9 +542,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 }
 
-// Pages whose own content shows a form (contact, volunteer, claim, report): Fluent Forms' stylesheets keep blocking there,
-// so the form near the top never shows unstyled (kits-core performance.php).
+// Pages whose own content shows a form (contact, volunteer, claim, report, and the thank-you page, which shows the full
+// newsletter form after a footer sign-up): Fluent Forms' stylesheets keep blocking there, so the form near the top never
+// shows unstyled (kits-core performance.php).
 add_filter(
 	'kits_page_has_form',
-	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
+	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update|thank_you)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
 );
