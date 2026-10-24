@@ -273,7 +273,6 @@ body { background: var(--kit-color-canvas); }
 /* HELP — Directory rows */
 .aw-orgs { border-top: var(--kit-border-width) solid var(--kit-color-line); }
 .aw-org { position: relative; display: grid; grid-template-columns: var(--kit-thumb-sm) 1fr auto; gap: var(--kit-space-4); align-items: center; padding: var(--kit-space-4) 0; border-bottom: var(--kit-border-width) solid var(--kit-color-line); }
-.aw-org.is-featured { background: linear-gradient(90deg, color-mix(in srgb, var(--color-yellow) 14%, transparent), transparent 60%); }
 .aw-org-mark { width: var(--kit-thumb-sm); height: var(--kit-thumb-sm); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--kit-color-surface); border: var(--kit-border-width) solid var(--kit-color-line); font-weight: var(--kit-weight-bold); color: var(--kit-color-ink); }
 .aw-org-mark img { width: 100%; height: 100%; object-fit: contain; background: var(--kit-color-raised); padding: var(--kit-space-1); }
 .aw-org-name { font-size: var(--kit-type-h4) !important; line-height: 1.3 !important; margin: 0; }
@@ -650,7 +649,6 @@ body { background: var(--kit-color-canvas); }
 .aw-hub-list .aw-opp-actions { position: relative; z-index: 1; margin-top: auto; }
 
 /* Directory rows */
-.aw-orgs > li.is-featured > .aw-org { background: linear-gradient(90deg, color-mix(in srgb, var(--color-yellow) 14%, transparent), transparent 60%); }
 .aw-hub-list .aw-org-name { margin: 0; }
 .aw-hub-list .aw-org-meta { margin: var(--kit-space-1) 0; }
 .aw-org-meta.kit-ico--directory::before { content: ""; flex: none; width: 1em; height: 1em; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
@@ -736,7 +734,6 @@ body { background: var(--kit-color-canvas); }
 .aw-closed-mark, .aw-blacklisted-mark { vertical-align: middle; font-size: var(--fluid-label); font-weight: 600; white-space: nowrap; }
 
 .aw-profile-badge::before { content: ""; flex: none; width: 1em; height: 1em; margin-right: var(--kit-space-1); background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
-.aw-profile-badge--featured { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M11.525%202.295a.53.53%200%200%201%20.95%200l2.31%204.679a2.123%202.123%200%200%200%201.595%201.16l5.166.756a.53.53%200%200%201%20.294.904l-3.736%203.638a2.123%202.123%200%200%200-.611%201.878l.882%205.14a.53.53%200%200%201-.771.56l-4.618-2.428a2.122%202.122%200%200%200-1.973%200L6.396%2021.01a.53.53%200%200%201-.77-.56l.881-5.139a2.122%202.122%200%200%200-.611-1.879L2.16%209.795a.53.53%200%200%201%20.294-.906l5.165-.755a2.122%202.122%200%200%200%201.597-1.16z%22/%3E%3C/svg%3E"); background: color-mix(in srgb, var(--color-yellow) 22%, transparent); color: var(--kit-color-warning); }
 .aw-profile-badge--verified { --i: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%206%209%2017l-5-5%22/%3E%3C/svg%3E"); }
 
 /* Organisation details: links, up to four photos, facts */

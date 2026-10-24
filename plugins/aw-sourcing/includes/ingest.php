@@ -319,7 +319,6 @@ function aw_ingest( WP_REST_Request $req ) {
 		// Phone and WhatsApp go into the Phone numbers list (one row, marked WhatsApp, when they are the same number).
 		aw_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
-		update_post_meta( $post_id, 'aw_featured', 0 );
 	}
 
 	if ( 'aw_legal' === $type && function_exists( 'aw_mirror_gov_pdf' ) ) {

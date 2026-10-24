@@ -126,7 +126,6 @@ register_activation_hook(
 		aw_register_content_types();
 		aw_directory_rewrites();
 		aw_register_meta();
-		aw_backfill_featured_flag();
 		flush_rewrite_rules();
 		aw_cron_schedule();
 	}

@@ -32,6 +32,6 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 
 ## Guardrails
 - Sponsored items show "Sponsored by …" automatically.
-- Imported listings are never verified. A daily job expires Featured and flags listings verified more than 180 days ago (`aw_needs_reverify`).
+- Imported listings are never verified. A daily job flags listings verified more than 180 days ago (`aw_needs_reverify`).
 - Site forms (Fluent Forms + FluentCRM) send no email except WordPress's Remove-my-data confirmation.
 - Ads: Advanced Ads only, switched off on live.

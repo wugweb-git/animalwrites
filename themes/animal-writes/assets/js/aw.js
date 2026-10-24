@@ -77,7 +77,7 @@
 		if (!sel || !msg) return;
 		var map = {}; try { map = JSON.parse(f.dataset.placeholders || '{}'); } catch (x) {} // the Fluent Forms version keeps them on its wrapper
 		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || map[sel.value] || ''; });
-		// The rows on the page (List your organisation, Get featured …) choose their reason here and move to the form.
+		// The rows on the page (List your organisation, Post an opportunity …) choose their reason here and move to the form.
 		document.querySelectorAll('a.aw-contact-pick[data-about]').forEach(function (a) {
 			a.addEventListener('click', function (e) {
 				if (!sel.querySelector('option[value="' + a.dataset.about + '"]')) return;

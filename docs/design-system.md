@@ -33,7 +33,7 @@ One generic archive template is replaced by four systems, each built for what pe
 | Archive | Campaign Hub | The 1.0 documentary, other campaigns, an invitation to bring a campaign |
 | Trust | Every news, legal, research, opportunity and listing page | `[aw_trust]`: issuer, source link, published and added dates, document flag, editorial note; for listings, verification state and AWBI recognition |
 
-Directory order: featured, verified, then A–Z. No organisation is ranked above others for any other reason.
+Directory order: verified, then A–Z. No featured listings (owner, 24 Oct 2026): no organisation is ranked above others for any other reason.
 
 ## Scales
 

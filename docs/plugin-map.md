@@ -14,10 +14,10 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `cdn-cache.php` | Hostinger CDN (hcdn) lifetime for anonymous public pages: `Cache-Control: public, s-maxage=N` only on anonymous 200 GETs of public pages, never on forms, nonce or personal pages. Option aw_cdn_ttl (0 = off, 60 to 900 s). |
 | `claims.php` | Claim or update a directory listing: [aw_claim_box] on each listing. |
 | `content-types.php` | Post types and taxonomies. Each pillar keeps its own URL space for SEO. |
-| `cron.php` | Daily housekeeping: expire featured listings, flag listings due for re-verification. |
+| `cron.php` | Daily housekeeping: flag listings due for re-verification. |
 | `data-sources.php` | Where an organisation's details come from: one small label per data source on every listing. |
 | `deploy-purge.php` | Purges LiteSpeed once after each deploy: the first uncached web request that sees a new deployed commit purges and stores it (option aw_deployed_head); the Deploy check requests the home page with ?aw_deploy_nudge= for 5 minutes after each deploy so that request happens. Skips command-line PHP and requests whose headers are already sent. |
-| `directory.php` | Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/, featured first. |
+| `directory.php` | Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/; verified first, then A–Z (no featured listings). |
 | `display.php` | Small front-end display tweaks. |
 | `form-blocks.php` | Form blocks and pages (S6, S7, 8 Oct 2026). |
 | `hub-blocks.php` | Small blocks for what core blocks cannot show (Phase 12 Part D, D4). Each is a registered, server-rendered block (no shortcodes), editable in the block editor (preview via ServerSideRender), used in the hub Pages and their list patterns. Inside a Query Loop they read the item from the block context (postId). |

@@ -38,9 +38,6 @@ const AW_CLAIM_FIELDS = array(
 
 const AW_CLAIM_LOGO_BYTES = 2 * MB_IN_BYTES;
 
-/** Featured listings are free for now: an approved claim that asks for it is featured for this many days. */
-const AW_FEATURE_DAYS = 90;
-
 add_action(
 	'init',
 	function () {
@@ -108,7 +105,6 @@ function aw_claim_form( $listing ) {
 		. aw_claim_services_field( $form, $listing )
 		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
 		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
-		. ( get_post_meta( $listing->ID, 'aw_featured', true ) ? '' : aw_field( $form, array( 'name' => 'feature', 'label' => 'Also feature this listing', 'type' => 'checkbox' ) ) )
 		. ( function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : '' );
 	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim', 'data-key' => (string) $listing->ID, 'data-source' => trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' ) ) )
 		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
@@ -127,7 +123,6 @@ function aw_claim_values( $in ) {
 		'email'   => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
 		'phone'   => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
 		'notes'   => sanitize_textarea_field( (string) ( $in['notes'] ?? '' ) ),
-		'feature' => empty( $in['feature'] ) ? '' : '1',
 	);
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		$raw       = 'aw_services' === $key ? implode( ',', array_intersect( array_map( 'sanitize_title', (array) ( $in['aw_services'] ?? array() ) ), array_keys( AW_SERVICES ) ) ) : (string) ( $in[ $key ] ?? '' );
@@ -151,7 +146,7 @@ function aw_claim_errors( $v, $has_logo = false ) {
 	if ( $v['role'] && ! isset( AW_CLAIM_ROLES[ $v['role'] ] ) ) {
 		$errors['role'] = 'Choose your role';
 	}
-	if ( ! $errors && ! aw_claim_proposed( $v ) && ! $has_logo && '' === $v['notes'] && '' === $v['feature'] ) {
+	if ( ! $errors && ! aw_claim_proposed( $v ) && ! $has_logo && '' === $v['notes'] ) {
 		$errors['notes'] = 'Anything else: tell us at least one detail to confirm or change.';
 	}
 	return $errors;
@@ -200,7 +195,7 @@ function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) 
 	}
 	update_post_meta( $id, 'aw_c_listing', $listing->ID );
 	update_post_meta( $id, 'aw_c_status', 'pending' );
-	foreach ( array( 'name', 'role', 'email', 'phone', 'notes', 'feature' ) as $k ) {
+	foreach ( array( 'name', 'role', 'email', 'phone', 'notes' ) as $k ) {
 		update_post_meta( $id, 'aw_c_' . $k, $v[ $k ] );
 	}
 	update_post_meta( $id, 'aw_c_logo', $file );
@@ -211,7 +206,7 @@ function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) 
 		}
 	}
 	update_post_meta( $id, 'aw_c_proposed', $proposed );
-	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing" . ( $v['feature'] ? ' and to feature it' : '' ) . ".\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
+	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing.\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
 	if ( function_exists( 'aw_nl_optin' ) ) {
 		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'claim', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'claim', $nl, $nl_consent );
 	}
@@ -267,9 +262,6 @@ add_action(
 			if ( get_post_meta( $id, 'aw_c_logo', true ) ) {
 				$n[] = 'Logo';
 			}
-			if ( get_post_meta( $id, 'aw_c_feature', true ) ) {
-				$n[] = 'Featured';
-			}
 			echo esc_html( $n ? implode( ', ', $n ) : 'Notes only' );
 		}
 	},
@@ -307,10 +299,6 @@ function aw_claim_review_box( $post ) {
 	if ( $logo ) {
 		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
 		echo '<tr><td>Logo</td><td>' . get_the_post_thumbnail( $lid, 'thumbnail' ) . '</td><td><img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto"></td></tr>';
-	}
-	$feature = (bool) get_post_meta( $post->ID, 'aw_c_feature', true );
-	if ( $feature ) {
-		echo '<tr><td>Featured</td><td>' . esc_html( get_post_meta( $lid, 'aw_featured', true ) ? 'Yes, until ' . get_post_meta( $lid, 'aw_featured_until', true ) : 'No' ) . '</td><td><strong>Yes, for ' . (int) AW_FEATURE_DAYS . ' days (free)</strong></td></tr>';
 	}
 	echo '</tbody></table>';
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
@@ -389,10 +377,6 @@ add_action(
 			update_post_meta( $lid, 'aw_verified', true );
 			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 			update_post_meta( $lid, 'aw_needs_reverify', false );
-			if ( get_post_meta( $id, 'aw_c_feature', true ) ) {
-				update_post_meta( $lid, 'aw_featured', 1 );
-				update_post_meta( $lid, 'aw_featured_until', wp_date( 'Y-m-d', time() + AW_FEATURE_DAYS * DAY_IN_SECONDS ) );
-			}
 			if ( function_exists( 'aw_org_people_from_claim' ) ) {
 				aw_org_people_from_claim( $id, $lid ); // the claimant becomes one of its people, not shown (org-people.php)
 			}
