@@ -51,7 +51,7 @@ Check this list against git and the live site before acting on it. Failing AI ke
       - #7: Site Health "Sourcing ran on time".
       - #10, #11, #12, #13: Publishers, the source lists, Inbox → To review and Settings → AI models as core list tables, no custom CSS.
     - Open:
-      - **#4** (Search Insights side): to be trimmed and rebuilt on Search Insights phase 1 (#17) once that merges. The rename and Rising stay with phase 1; GSC Rising is off until 8 weeks of history (owner, 24 Oct). The sourcing-keywords tab will use aw_si_page_metrics() and aw_si_tabs; aw_search_demand_terms will read wp_aw_si_keywords (English only).
+      - **#4** (Search Insights side): to be trimmed and rebuilt on Search Insights phase 1 (#17) once that merges. The rename stays with phase 1 and Rising with Search Insights phase 3 (plan §12); GSC Rising is off until 8 weeks of history (owner, 24 Oct). The sourcing-keywords tab will use aw_si_page_metrics() and aw_si_tabs; aw_search_demand_terms will read wp_aw_si_keywords (English only).
       - **#25:** a To review row action comes back to its page; waiting for the owner.
       - **Keywords lists as a list table, and the Settings API for the Sourcing settings forms** (press, categories, sections, summary rules, relay, enrichment, the keyword switches): not started, now that the overlapping PRs have merged.
       - **Migration check of step 1:** compare the next worker run with the baseline before the move (4 new, 4 published, 38 sources, 0 failed), and check that /ingest and /relay do not 404.
