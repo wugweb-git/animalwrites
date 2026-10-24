@@ -20,7 +20,8 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 // Phase 2: GA4, PageSpeed, Clarity, searches on the site, the Pages tab, redirects counted as their target.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'sources', 'pages' ) as $aw_si_file ) {
+// Phase 4: the Check list tab with the bookmarklet live check, and the imports on the Settings tab.
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'sources', 'pages', 'checklist', 'imports' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
