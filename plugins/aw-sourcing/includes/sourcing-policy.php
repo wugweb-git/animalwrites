@@ -344,7 +344,9 @@ add_action(
 		}
 		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) );
 		if ( 'publishers' === $tab ) { // back to the same view, sort and page of the list, with its search
-			$back = remove_query_arg( array( 'updated', 's' ), wp_get_referer() ? wp_get_referer() : $back );
+			$back = remove_query_arg( array( 'updated', 's', 'paged' ), wp_get_referer() ? wp_get_referer() : $back );
+			$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
+			$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 			$find = sanitize_text_field( wp_unslash( $_POST['s'] ?? '' ) );
 			$back = add_query_arg( array_filter( array( 'updated' => empty( $changed ) ? '' : 1, 's' => '' !== $find ? rawurlencode( $find ) : '' ) ), $back );
 		}
