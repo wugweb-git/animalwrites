@@ -115,16 +115,16 @@ Removed on 8 Oct 2026 (dead): `testimonials.php` (1.0 testimonials, 0 items, exp
 
 ## aw-seo-extras: Search Insights (phase 1, 24 Oct 2026)
 
-Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?page=aw-search-insights`). Read-only data and suggestions: nothing here writes to Rank Math keyphrases or the Sourcing lists. Tables `wp_aw_si_keywords`, `wp_aw_si_kw_pages`, `wp_aw_si_obs`, `wp_aw_si_rising` (kept on deactivate and delete; only Settings → Delete data or `wp aw-si delete-data --yes` drops them).
+Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?page=aw-search-insights`). Read-only data and suggestions: nothing here writes to Rank Math keyphrases or the Sourcing lists. Tables `wp_aw_si_keywords`, `wp_aw_si_kw_pages`, `wp_aw_si_obs`, `wp_aw_si_rising` (kept on deactivate and delete; only Settings → Delete data or `wp aw-si delete-data --yes` drops them, and that also switches Search Insights off until the owner runs the daily update by hand).
 
 | File | What it does |
 |---|---|
 | `includes/search-insights.php` | Loads the files below. |
 | `includes/search-insights/schema.php` | The four tables (dbDelta, version option `aw_si_db`) and the owner-only drop. |
-| `includes/search-insights/runs.php` | Run log per source (`aw_si_runs`): last good run, last error, rows; "late" = more than twice its schedule. |
+| `includes/search-insights/runs.php` | Run log per source (`aw_si_runs`): started, last good run, last error, rows; "late" = more than twice its schedule (counted from install for a source not run yet); a run started over an hour ago with no result "did not finish". |
 | `includes/search-insights/sitekit.php` | Runs a Site Kit module as that module's own owner (`ownerID` in its settings), never another module's. |
 | `includes/search-insights/keywords.php` | Normalising (plurals, dots, punctuation), language (en / hi / hinglish), roles, the one-time seed from `data/search-insights-seed.json`, and the daily role sync from Rank Math (items, terms; listings only mark entities) and AW Sourcing (Include list). |
-| `includes/search-insights/gsc.php` | Search Console by calendar day: one call per day and dimension set (total, query, query + page), the last 4 days again each morning, a 15-day-per-run backfill to 90 days, a "truncated" flag at 5,000 rows. |
+| `includes/search-insights/gsc.php` | Search Console by calendar day: one call per day and dimension set (total, query, query + page; through `aw_sd_query()`), the last 4 days again each morning, a backfill to 90 days of up to 15 days per run within a 50-second budget (its position saved after each day), a "truncated" flag at 5,000 rows. |
 | `includes/search-insights/compute.php` | 28-day figures from daily rows, previous 28 days, latest live check, owning page, conflicts, priority (keyword-map rule), status and suggested action. |
 | `includes/search-insights/rollup.php` | Daily rows older than 90 days become monthly rows (sums, impression-weighted position, last value for indexes). |
 | `includes/search-insights/cron.php` | `aw_si_daily` 07:10 IST and `aw_si_rollup` 23:30 IST. |
