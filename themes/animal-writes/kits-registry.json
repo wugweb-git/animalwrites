@@ -290,6 +290,29 @@
    }
   },
   {
+   "name": "Find help near you",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-findhelp"
+   ],
+   "states": [
+    "item with a place: its state and that state's districts with listings, nearest first (last part of More)",
+    "item without a place: one line, All states and districts and Near me",
+    "campaign band: 12 states (aw-camp-tint)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav> labelled by its H2; <ul> of links",
+    "aria": "aria-labelledby the heading",
+    "keyboard": "Tab",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "min-height --kit-size-target",
+    "motion": "none",
+    "sr": "visible text; place name, state, count"
+   }
+  },
+  {
    "name": "Press item",
    "type": "component",
    "status": "live",
