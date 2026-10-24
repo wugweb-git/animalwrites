@@ -457,7 +457,13 @@ function aw_sd_num( $n ): string {
 	return esc_html( number_format_i18n( (float) $n ) );
 }
 
-function aw_sd_screen() {
+/**
+ * The Search demand screen. Since 24 Oct 2026 it is the Searches tab of Tools → Search Insights, which calls it with
+ * $embedded = true (no wrap or heading of its own); the old address redirects to that tab (search-insights/admin.php).
+ *
+ * @param bool $embedded Inside the Search Insights screen.
+ */
+function aw_sd_screen( bool $embedded = false ) {
 	if ( ! current_user_can( aw_sd_cap() ) ) {
 		return;
 	}
@@ -466,7 +472,9 @@ function aw_sd_screen() {
 	list( , $problem ) = aw_sd_sitekit();
 	$rows              = aw_sd_table( $data );
 
-	echo '<div class="wrap"><h1>Search demand</h1>';
+	if ( ! $embedded ) {
+		echo '<div class="wrap"><h1>Search demand</h1>';
+	}
 	if ( isset( $_GET['refreshed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$up_to = $gsc['periods']['28d']['end'] ?? '';
 		$count = count( $gsc['periods']['3m']['queries'] ?? array() );
@@ -560,5 +568,7 @@ function aw_sd_screen() {
 		echo '<tr><td>' . (int) ( $i + 1 ) . '</td><td><strong>' . esc_html( $g[0] ) . '</strong></td><td>' . esc_html( $g[1] ) . '</td></tr>';
 	}
 	echo '</tbody></table></details>';
-	echo '</div>';
+	if ( ! $embedded ) {
+		echo '</div>';
+	}
 }

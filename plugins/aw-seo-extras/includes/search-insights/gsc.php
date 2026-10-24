@@ -8,7 +8,8 @@
  * - A backfill walks back to 90 days, 15 days per run, so 28-day comparisons work from the first week.
  * - Fetch first, then replace: a failed day keeps its stored rows.
  *
- * Rows in obs: src gsc, period day; metric total (kw 0), q (query, page ''), qp (query + page).
+ * Rows in obs: src gsc, period day; metric total (kw 0), q (query, page ''), qp (query + page), p (page, kw 0: the
+ * page's full figures, including the searches Google hides, which qp rows leave out).
  *
  * @package aw-seo-extras
  */
@@ -48,6 +49,7 @@ function aw_si_gsc_fetch_day( $module, string $day ) {
 		'total' => array( 'date' ),
 		'q'     => array( 'date', 'query' ),
 		'qp'    => array( 'date', 'query', 'page' ),
+		'p'     => array( 'date', 'page' ),
 	) as $key => $dims ) {
 		$rows = aw_si_gsc_rows( $module, $dims, $day );
 		if ( is_wp_error( $rows ) ) {
@@ -82,6 +84,12 @@ function aw_si_gsc_store_day( string $day, array $data ): int {
 	$vals = array();
 	foreach ( $data['total'] as $r ) {
 		$vals[] = array( 0, '', 'total', $r[1], $r[2], $r[3] );
+	}
+	foreach ( (array) ( $data['p'] ?? array() ) as $r ) {
+		$page = aw_si_path( (string) ( $r[0][1] ?? '' ) );
+		if ( '' !== $page ) {
+			$vals[] = array( 0, $page, 'p', $r[1], $r[2], $r[3] );
+		}
 	}
 	foreach ( array( 'q', 'qp' ) as $key ) {
 		foreach ( $data[ $key ] as $r ) {
@@ -184,6 +192,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 				$rep['days'][ $day ] = array(
 					'q'     => count( $data['q'] ),
 					'qp'    => count( $data['qp'] ),
+					'p'     => count( $data['p'] ),
 					'impr'  => (int) array_sum( array_column( $data['total'], 2 ) ),
 					'named' => (int) array_sum( array_column( $data['q'], 2 ) ),
 				);
@@ -222,4 +231,39 @@ function aw_si_gsc_run( array $args = array() ): array {
 		}
 	}
 	return $report;
+}
+
+/**
+ * Search Console figures per page path over the last $days days (ending yesterday), summed from the daily page rows
+ * (metric p, so searches Google hides are included). For other plugins, e.g. AW Sourcing's per-keyword view.
+ *
+ * @param string[] $paths Site paths such as /news/x/; empty for every page.
+ * @param int      $days  Window length.
+ * @return array<string, array{clicks: int, impr: int, pos: float|null}> path => figures.
+ */
+function aw_si_page_metrics( array $paths = array(), int $days = 28 ): array {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		return array();
+	}
+	$o    = aw_si_table( 'obs' );
+	$end  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-1 day' );
+	$args = array( $end->modify( '-' . ( max( 1, $days ) - 1 ) . ' days' )->format( 'Y-m-d' ), $end->format( 'Y-m-d' ) );
+	$in   = '';
+	if ( $paths ) {
+		$keys = array_map( 'md5', array_values( array_unique( array_map( 'strval', $paths ) ) ) );
+		$in   = ' AND page_key IN (' . implode( ',', array_fill( 0, count( $keys ), '%s' ) ) . ')';
+		$args = array_merge( $args, $keys );
+	}
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per path.
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM {$o} WHERE src = 'gsc' AND metric = 'p' AND period = 'day' AND d BETWEEN %s AND %s{$in} GROUP BY page", $args ) );
+	$out  = array();
+	foreach ( (array) $rows as $r ) {
+		$out[ (string) $r->page ] = array(
+			'clicks' => (int) $r->c,
+			'impr'   => (int) $r->i,
+			'pos'    => null === $r->p ? null : round( (float) $r->p, 1 ),
+		);
+	}
+	return $out;
 }

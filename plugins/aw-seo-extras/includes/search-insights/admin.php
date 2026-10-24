@@ -52,10 +52,25 @@ function aw_si_kw_action_url( string $action, int $id ): string {
 	);
 }
 
+/**
+ * Tabs other plugins add with the aw_si_tabs filter (key => label), e.g. AW Sourcing's per-keyword view. Each renders
+ * on the action aw_si_tab_{key}; the action aw_si_load_tab_{key} runs before output (screen options, redirects).
+ */
+function aw_si_extra_tabs(): array {
+	$out = array();
+	foreach ( (array) apply_filters( 'aw_si_tabs', array() ) as $key => $label ) {
+		$key = sanitize_key( (string) $key );
+		if ( '' !== $key && ! in_array( $key, array( 'overview', 'keywords', 'searches', 'settings' ), true ) ) {
+			$out[ $key ] = (string) $label;
+		}
+	}
+	return $out;
+}
+
 /** The current tab. */
 function aw_si_tab(): string {
 	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'overview'; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
-	return in_array( $tab, array( 'overview', 'keywords', 'settings' ), true ) ? $tab : 'overview';
+	return in_array( $tab, array_merge( array( 'overview', 'keywords', 'searches', 'settings' ), array_keys( aw_si_extra_tabs() ) ), true ) ? $tab : 'overview';
 }
 
 add_action(
@@ -65,13 +80,14 @@ add_action(
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
-		// The Search demand screen is the Searches tab now: one menu item, its address still works and keeps a title.
+		// The Search demand screen is the Searches tab now: one menu item, and the old address opens that tab.
 		remove_submenu_page( 'tools.php', 'aw-search-demand' );
 		add_action(
 			'load-tools_page_aw-search-demand',
 			function () {
-				global $title;
-				$title = __( 'Search Insights: Searches', 'aw-seo-extras' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the admin page title of a screen without a menu item.
+				$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'refreshed', 'refresh_failed' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message flags only.
+				wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', array_map( 'strval', $keep ) ), aw_si_url( 'searches' ) ), 301 );
+				exit;
 			}
 		);
 	},
@@ -91,6 +107,9 @@ add_filter(
 function aw_si_load(): void {
 	aw_si_install();
 	$tab = aw_si_tab();
+	if ( isset( aw_si_extra_tabs()[ $tab ] ) ) {
+		do_action( 'aw_si_load_tab_' . $tab );
+	}
 	if ( 'keywords' === $tab ) {
 		add_screen_option(
 			'per_page',
@@ -193,16 +212,24 @@ function aw_si_screen(): void {
 	$tab = aw_si_tab();
 	echo '<div class="wrap"><h1 class="wp-heading-inline">' . esc_html__( 'Search Insights', 'aw-seo-extras' ) . '</h1><hr class="wp-header-end">';
 	echo '<nav class="nav-tab-wrapper" aria-label="' . esc_attr__( 'Search Insights sections', 'aw-seo-extras' ) . '">';
-	$tabs = array(
-		'overview' => __( 'Overview', 'aw-seo-extras' ),
-		'keywords' => __( 'Keywords', 'aw-seo-extras' ),
+	$tabs = array_merge(
+		array(
+			'overview' => __( 'Overview', 'aw-seo-extras' ),
+			'keywords' => __( 'Keywords', 'aw-seo-extras' ),
+			'searches' => __( 'Searches', 'aw-seo-extras' ),
+		),
+		aw_si_extra_tabs(),
+		array( 'settings' => __( 'Settings', 'aw-seo-extras' ) )
 	);
 	foreach ( $tabs as $key => $label ) {
 		echo '<a class="nav-tab' . ( $key === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_si_url( $key ) ) . '"' . ( $key === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
-	echo '<a class="nav-tab" href="' . esc_url( admin_url( 'tools.php?page=aw-search-demand' ) ) . '">' . esc_html__( 'Searches', 'aw-seo-extras' ) . '</a>';
-	echo '<a class="nav-tab' . ( 'settings' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( aw_si_url( 'settings' ) ) . '">' . esc_html__( 'Settings', 'aw-seo-extras' ) . '</a>';
 	echo '</nav>';
+	if ( 'searches' === $tab ) {
+		aw_sd_screen( true ); // The Search demand screen, inside Search Insights; it shows its own refresh notices.
+		echo '</div>';
+		return;
+	}
 	aw_si_source_notices();
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		echo '<div class="notice notice-success inline"><p>' . esc_html__( 'Priority saved.', 'aw-seo-extras' ) . '</p></div>';
@@ -227,6 +254,8 @@ function aw_si_screen(): void {
 		echo '</form>';
 	} elseif ( 'settings' === $tab ) {
 		aw_si_settings_tab();
+	} elseif ( isset( aw_si_extra_tabs()[ $tab ] ) ) {
+		do_action( 'aw_si_tab_' . $tab );
 	} else {
 		wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false );
 		wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false );
