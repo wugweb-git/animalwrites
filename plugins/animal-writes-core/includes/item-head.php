@@ -128,6 +128,12 @@ function aw_item_date_ts( $id ) {
 	return $d ? 0 : (int) get_post_time( 'U', true, $id ); // 0001-01-01: a template with no date of its own
 }
 
+/** "Dated" date of a Library item, shown after its publication date in the meta row (Y-m-d; empty for none). */
+add_action(
+	'init',
+	fn() => register_post_meta( 'aw_legal', 'aw_legal_dated', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Dated (the document\'s own date, when it differs from the publication date): Y-m-d', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => fn() => current_user_can( 'edit_posts' ) ) )
+);
+
 /* ---------- 3. Meta row ---------- */
 
 function aw_block_item_meta( $a, $id ) {
@@ -140,6 +146,13 @@ function aw_block_item_meta( $a, $id ) {
 		$ts = aw_item_date_ts( $id );
 		if ( $ts ) {
 			$row .= '<span class="aw-item-date">' . aw_date( $ts ) . '</span>';
+		}
+		// A Library item whose own date differs from its publication date (the Gazette's) keeps the publication date
+		// first and adds "Dated {date}" (owner, 24 Oct 2026: the draft lab animal rules, dated 30 Sep, published 6 Oct).
+		$dated = 'aw_legal' === get_post_type( $id ) ? (string) get_post_meta( $id, 'aw_legal_dated', true ) : '';
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $dated ) ) {
+			/* translators: %s: date. */
+			$row .= '<span class="aw-item-dated">' . sprintf( esc_html__( 'Dated %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $dated . ' 12:00:00' ) ) ) ) . '</span>';
 		}
 		// One date (owner, 20 Oct 2026): News, Library and research the original's publication date, Opportunities the
 		// day posted (their deadline follows), guides the day published. Never "Updated"; dateModified stays in the schema.

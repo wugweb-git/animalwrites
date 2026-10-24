@@ -15,9 +15,9 @@
  *   duplicated it.
  * - A view kept out of the index has the section page (without filters) as its canonical URL (owner, 17 Oct 2026).
  *   Rank Math prints no canonical tag on a noindex page, so the value shows in its data (og:url), not as a tag.
- * - ?state= on the News and Library hubs is noindex, follow, with the unfiltered hub as canonical, and is out of the
+ * - ?state= on the News, Library and Opportunities hubs is noindex, follow, with the unfiltered hub as canonical, and is out of the
  *   filtered sitemap, whatever its count (owner, 24 Oct 2026: places stored on News and Library items would otherwise
- *   make some 36 such lists indexable). ?state= on Opportunities keeps the 16 Oct rule.
+ *   make some 36 such lists indexable). Opportunities too (owner, 24 Oct 2026).
  * - ?q= (a name or word search inside a list, the Directory's included) is a site search result: noindex, links
  *   followed (Google's guidance on internal search result pages).
  * - Any other single filter keeps the earlier rule (indexed, canonical with the filter).
@@ -47,8 +47,8 @@ const AW_FILTERED_TITLE_WORDS = array(
 	'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
 );
 
-/** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026). */
-const AW_FILTERED_STATE_NOINDEX = array( 'aw_news', 'aw_legal' );
+/** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026: News, Library, Opportunities). */
+const AW_FILTERED_STATE_NOINDEX = array( 'aw_news', 'aw_legal', 'aw_opportunity' );
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
 const AW_FILTERED_PLACE_TITLE_WORDS = array(

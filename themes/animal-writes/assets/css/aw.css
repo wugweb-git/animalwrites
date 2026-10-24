@@ -325,7 +325,7 @@ body { background: var(--kit-color-canvas); }
 /* 3 Meta row: date, Updated, Sponsored, type, place, deadline, status, categories; one font, size, weight and colour;
    spaced by the gap only, so a wrap never leaves a separator behind */
 .aw-item-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2); margin: var(--kit-space-head-meta) 0 var(--kit-space-head); font-size: var(--fluid-label); font-weight: var(--kit-weight-regular); color: var(--kit-color-text); }
-.aw-item-meta > :is(.aw-item-date, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
+.aw-item-meta > :is(.aw-item-date, .aw-item-dated, .aw-item-deadline, .aw-item-verified-on) { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
 .aw-item-meta .aw-date { color: inherit; font: inherit; }
 .aw-item-place { display: inline-flex; align-items: center; gap: var(--kit-meta-icon-gap, var(--kit-space-1)); color: inherit; text-decoration: none; } /* the place reads like the date: icon and text, no chip (owner, 20 Oct 2026) */
 .aw-item-place .kit-ico { --kit-ico-size: var(--kit-meta-icon, 1em); }
