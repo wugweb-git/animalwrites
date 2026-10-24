@@ -11,10 +11,12 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
 | `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title and given to search engines as BreadcrumbList (schema.php). |
 | `campaigns.php` | Campaign kit: countdown, and the private upload folder used by listing claims. (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.) |
+| `cdn-cache.php` | Hostinger CDN (hcdn) lifetime for anonymous public pages: `Cache-Control: public, s-maxage=N` only on anonymous 200 GETs of public pages, never on forms, nonce or personal pages. Option aw_cdn_ttl (0 = off, 60 to 900 s). |
 | `claims.php` | Claim or update a directory listing: [aw_claim_box] on each listing. |
 | `content-types.php` | Post types and taxonomies. Each pillar keeps its own URL space for SEO. |
 | `cron.php` | Daily housekeeping: expire featured listings, flag listings due for re-verification. |
 | `data-sources.php` | Where an organisation's details come from: one small label per data source on every listing. |
+| `deploy-purge.php` | Purges LiteSpeed once after each deploy: the first uncached web request that sees a new deployed commit purges and stores it (option aw_deployed_head); the Deploy check requests the home page with ?aw_deploy_nudge= for 5 minutes after each deploy so that request happens. Skips command-line PHP and requests whose headers are already sent. |
 | `directory.php` | Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/, featured first. |
 | `display.php` | Small front-end display tweaks. |
 | `form-blocks.php` | Form blocks and pages (S6, S7, 8 Oct 2026). |
