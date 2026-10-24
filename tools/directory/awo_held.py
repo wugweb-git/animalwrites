@@ -8,6 +8,8 @@
   has the AWO phone, and the names share no distinctive word (generic words such as trust, society, animal, welfare,
   shri are left out; "Seva Charitable Trust" vs "Jivdaya Charitable Trust"). Names that share one ("Pet Force" and
   "Pets Force"), are spelled almost alike (85% or more), or have no distinctive word at all, are most likely the same organisation with another number: the owner decides.
+- No phone on one side (owner, 24 Oct 2026, second rule): merge when the names are at least 90% alike, the district is
+  the same, and no other listing in that district is as close or closer.
 - Everything else goes to the remainder for the owner: no phone on one side (nothing to tell them apart), a phone
   matching a different listing from the name match, a post rather than an organisation, a place not matched.
 Usage: python3 awo_held.py <awo dir> <held.csv> data/listings.json   (dry run: data/out/awol-held.* and remainder CSV)
@@ -92,6 +94,20 @@ def main(awo_dir, held_csv, listings_file):
             continue
         l = L.get(lid) or {}
         if not phone or not l.get("phones"):
+            sim = lambda x: difflib.SequenceMatcher(None, norm(o["name"]), norm(x)).ratio()
+            same_d = [x for x in L.values() if dist and dist["code"] in (x.get("districts") or [])]
+            best = sorted(((sim(x["title"]), x["id"]) for x in same_d), reverse=True)
+            if lid in L and dist and dist["code"] in (L[lid].get("districts") or []) and best and best[0][1] == lid and best[0][0] >= 0.9 and (len(best) < 2 or best[1][0] < best[0][0]):
+                if L[lid].get("protected"):
+                    rep.skip("verified or claimed", dict(sample, listing=lid))
+                    continue
+                fields = {"post_id": lid, "types": types, "data_source": "awol", "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE}
+                if phone and not L[lid]["phones"]:
+                    fields["phone"] = phone
+                why2 = f"no phone on one side; names {best[0][0]:.0%} alike, same district, closest listing"
+                rep.match(fields, dict(sample, listing=lid, listing_title=L[lid]["title"], why=why2))
+                decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "merge", "listing": lid, "listing_title": L[lid]["title"], "reason": why2})
+                continue
             park("no phone on one side: cannot tell them apart", lid)
             continue
         if not st:
