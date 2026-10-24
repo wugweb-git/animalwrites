@@ -24,10 +24,10 @@ for (const w of [375, 768, 1200]) {
   await page.goto(URL + '?cssx=' + w + '-' + Date.now(), { waitUntil: 'networkidle0', timeout: 90000 });
   await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); } window.scrollTo(0, 0); });
   await new Promise(r => setTimeout(r, 1500));
-  const res = await page.evaluate((SHEET) => {
+  const res = await page.evaluate(([SHEET, STATE_SRC]) => {
     const sheet = [...document.styleSheets].find(s => s.href && s.href.includes(SHEET));
     if (!sheet) return { error: 'sheet not on page' };
-    const STATE = SHEET.includes('record') ? /aw-camp-record|aw-record/ : /aw-camp-band|countdown/;
+    const STATE = new RegExp(STATE_SRC);
     const STRIP = /::?(before|after|marker|placeholder|selection|backdrop|file-selector-button|-webkit-[a-z-]+|-moz-[a-z-]+)|:(hover|focus-visible|focus-within|focus|active|visited|link|target)(?![a-z-])/g;
     const out = [];
     let idx = 0;
@@ -54,7 +54,7 @@ for (const w of [375, 768, 1200]) {
     };
     walk(sheet.cssRules, []);
     return { out };
-  }, SHEET_ARG);
+  }, [SHEET_ARG, process.env.STATE || 'aw-camp-band|countdown']);
   if (res.error) { console.error(w, res.error); process.exit(1); }
   const c = (await page.coverage.stopCSSCoverage()).find(e => e.url.includes(SHEET_ARG));
   cov[w] = c ? { bytes: c.text.length, usedBytes: c.ranges.reduce((s, r) => s + r.end - r.start, 0) } : null;

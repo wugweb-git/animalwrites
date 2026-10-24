@@ -109,3 +109,23 @@ add_action(
 		);
 	}
 );
+
+/**
+ * Home page: WordPress's navigation and cover block stylesheets no longer block the first paint (owner, 24 Oct 2026).
+ * The rules the home page uses (assets/vendor/wp-core/home-*.css, made by tools/campaign-home-css/extract.mjs) are printed
+ * inline in each link's place, same position in the cascade. Only while WordPress is the version they were made from.
+ */
+const AW_HOME_CORE_CSS_WP = '7.1.3';
+add_filter(
+	'style_loader_tag',
+	function ( $tag, $handle ) {
+		$files = array( 'wp-block-navigation' => 'home-navigation.css', 'wp-block-cover' => 'home-cover.css' );
+		if ( ! is_front_page() || is_admin() || ! isset( $files[ $handle ] ) || get_bloginfo( 'version' ) !== AW_HOME_CORE_CSS_WP ) {
+			return $tag;
+		}
+		$file = get_theme_file_path( 'assets/vendor/wp-core/' . $files[ $handle ] );
+		return is_readable( $file ) ? '<style id="' . esc_attr( $handle ) . '-home-css">' . file_get_contents( $file ) . "</style>\n" : $tag; // phpcs:ignore WordPress.WP.AlternativeFunctions
+	},
+	10,
+	2
+);
