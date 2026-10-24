@@ -222,7 +222,10 @@ function aw_ingest( WP_REST_Request $req ) {
 	$hold = sanitize_text_field( (string) $req->get_param( 'hold' ) );
 	// A research item needs its own headline (three-field model: study title in Sources, headline, SEO title; owner
 	// 24 Oct 2026): without one the paper's raw title would be published as the headline, so a person picks one.
-	if ( 'research' === $req->get_param( 'type' ) && '' === trim( (string) $req->get_param( 'slug' ) ) ) {
+	$is_research = 'research' === $req->get_param( 'type' );
+	$raw_title   = $is_research && ( '' === trim( (string) $req->get_param( 'slug' ) ) || '' === trim( (string) $req->get_param( 'seo_title' ) )
+		|| aw_exists_norm_title( $title ) === aw_exists_norm_title( (string) $req->get_param( 'study_title' ) ) );
+	if ( $raw_title ) {
 		$hold = trim( $hold . '; no headline (the paper\'s own title would be published as the headline)', '; ' );
 	}
 	if ( '' !== $hold ) { // the workers' topic rule, a research doubt or a missing headline: a person decides
@@ -330,11 +333,14 @@ function aw_ingest( WP_REST_Request $req ) {
 		aw_set_campaign_links( $post_id, $camp );
 	}
 	$tags = array_values( array_diff( $tags, $camp ) );
-	foreach ( array_diff( $tags, $allowed ) as $bad ) {
+	foreach ( array_diff( $tags, $allowed, array( 'research' ) ) as $bad ) {
 		$ignored[] = 'tag: ' . $bad;
 	}
 	if ( array_intersect( $tags, $allowed ) ) {
 		aw_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
+	}
+	if ( 'research' === $req->get_param( 'type' ) ) { // always, whatever the section's allowed tags: aw/v1/exists finds papers by it
+		wp_set_object_terms( $post_id, 'research', 'post_tag', true );
 	}
 	// A summary below its section's minimum after the workers' fallback (source re-read, other coverage merged) is
 	// published like any other (owner, 15 Oct 2026); it is marked so a later rewrite pass can find it.
@@ -438,27 +444,40 @@ function aw_exists_norm_url( $url ) {
 
 function aw_exists_norm_doi( $doi ) {
 	$d = strtolower( trim( rawurldecode( (string) $doi ) ) );
-	return preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d );
+	return rtrim( preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d ), '/' );
+}
+
+/** The DOI of a doi.org link, normalised ('' when the URL is not one); the same pattern as aw_research_doi(). */
+function aw_exists_doi_of( $url ) {
+	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $url, $m ) ? aw_exists_norm_doi( $m[1] ) : '';
+}
+
+/** A title compared for "is this the paper's own title": letters and digits only, lower case. */
+function aw_exists_norm_title( $t ) {
+	return trim( preg_replace( '~[^a-z0-9]+~', ' ', strtolower( html_entity_decode( (string) $t, ENT_QUOTES ) ) ) );
 }
 
 function aw_exists( WP_REST_Request $req ) {
 	global $wpdb;
-	$dois = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'dois' ) ) ) ), 0, 500 );
-	$urls = array_slice( array_values( array_filter( array_map( 'strval', (array) $req->get_param( 'urls' ) ) ) ), 0, 500 );
+	$list = fn( $v ) => array_slice( array_values( array_filter( array_map( 'strval', array_filter( (array) $v, 'is_scalar' ) ) ) ), 0, 500 );
+	$dois = $list( $req->get_param( 'dois' ) );
+	$urls = $list( $req->get_param( 'urls' ) );
 	$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		"SELECT p.ID, pm.meta_value FROM {$wpdb->postmeta} pm
+		"SELECT p.ID, MAX(pm.meta_value) AS meta_value FROM {$wpdb->postmeta} pm
 		 JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug = 'research'
-		 WHERE pm.meta_key = 'aw_source_url' AND p.post_type = 'post' AND p.post_status IN ('publish', 'draft', 'pending')"
+		 WHERE pm.meta_key = 'aw_source_url' AND p.post_type = 'post' AND p.post_status IN ('publish', 'draft', 'pending')
+		 GROUP BY p.ID"
 	);
 	$held     = wp_list_pluck( $rows, 'meta_value' );
 	$have_doi = array();
 	$have_url = array();
 	foreach ( $held as $src ) {
-		if ( preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $src, $m ) ) {
-			$have_doi[ aw_exists_norm_doi( $m[1] ) ] = true;
+		$doi = aw_exists_doi_of( $src );
+		if ( '' !== $doi ) {
+			$have_doi[ $doi ] = true;
 		}
 		$have_url[ aw_exists_norm_url( $src ) ] = true;
 	}
@@ -467,7 +486,8 @@ function aw_exists( WP_REST_Request $req ) {
 		array_filter(
 			$urls,
 			function ( $u ) use ( $have_url, $have_doi ) {
-				if ( preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', $u, $m ) && isset( $have_doi[ aw_exists_norm_doi( $m[1] ) ] ) ) {
+				$doi = aw_exists_doi_of( $u );
+				if ( '' !== $doi && isset( $have_doi[ $doi ] ) ) {
 					return true; // a doi.org link: its DOI decides
 				}
 				return isset( $have_url[ aw_exists_norm_url( $u ) ] );
@@ -477,6 +497,8 @@ function aw_exists( WP_REST_Request $req ) {
 	$out = array( 'dois' => $found_dois, 'urls' => $found_urls );
 	if ( $req->get_param( 'index' ) ) {
 		$out['studies'] = array();
+		$ids            = array_map( 'intval', wp_list_pluck( $rows, 'ID' ) );
+		_prime_post_caches( $ids, false, true ); // posts and their meta in two queries, not four per item
 		foreach ( $rows as $r ) {
 			$id      = (int) $r->ID;
 			$authors = array_values( (array) get_post_meta( $id, 'aw_authors', true ) );
