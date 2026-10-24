@@ -34,6 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for Tools → FAQ
+
 const AW_FAQ_MIN   = 3;
 const AW_FAQ_MAX   = 6;
 const AW_FAQ_WORDS = 50;
@@ -1074,14 +1076,28 @@ function aw_faq_admin_page() {
 	if ( isset( $_GET['done'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success"><p>' . (int) $_GET['done'] . ' questions updated.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
-	echo '<h2>Pages with an FAQ</h2><table class="widefat striped" style="max-width:780px"><thead><tr><th>Type</th><th>Published</th><th>With FAQ</th><th>Holdout (no FAQ)</th><th>Fewer than 3 questions (no FAQ)</th><th>Questions per FAQ</th></tr></thead><tbody>';
+	echo '<h2>Pages with an FAQ</h2>';
+	$cells = array();
 	foreach ( array( 'listing' => 'Directory listings', 'legal' => 'Library documents' ) as $k => $label ) {
-		$s = implode( ', ', array_map( fn( $n, $v ) => $n . ': ' . number_format_i18n( $v ), array_keys( $c[ $k ]['sizes'] ), $c[ $k ]['sizes'] ) );
-		echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( number_format_i18n( $c[ $k ]['total'] ) ) . '</td><td>' . esc_html( number_format_i18n( $c[ $k ]['faq'] ) ) . '</td><td>' . esc_html( number_format_i18n( $c[ $k ]['holdout'] ) ) . '</td><td>' . esc_html( number_format_i18n( $c[ $k ]['none'] ) ) . '</td><td>' . esc_html( $s ) . '</td></tr>';
+		$s       = implode( ', ', array_map( fn( $n, $v ) => $n . ': ' . number_format_i18n( $v ), array_keys( $c[ $k ]['sizes'] ), $c[ $k ]['sizes'] ) );
+		$cells[] = array(
+			'type'    => esc_html( $label ),
+			'total'   => esc_html( number_format_i18n( $c[ $k ]['total'] ) ),
+			'faq'     => esc_html( number_format_i18n( $c[ $k ]['faq'] ) ),
+			'holdout' => esc_html( number_format_i18n( $c[ $k ]['holdout'] ) ),
+			'none'    => esc_html( number_format_i18n( $c[ $k ]['none'] ) ),
+			'sizes'   => esc_html( $s ),
+		);
 	}
-	echo '<tr><td>Types, services, categories</td><td colspan="5">' . (int) $c['term']['shown'] . ' shown; ' . (int) $c['term']['drafts'] . ' draft questions waiting</td></tr>';
-	echo '<tr><td>Directory, Volunteer, Claim, Opportunities</td><td colspan="5">' . (int) $c['hub']['shown'] . ' shown; ' . (int) $c['hub']['drafts'] . ' draft questions waiting</td></tr>';
-	echo '</tbody></table><p><a href="' . esc_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'tools.php' ) ) ) . '">Count again</a></p>';
+	// No colspan in a list table: the topic and hub lines carry their text in the second column.
+	$cells[] = array( 'type' => 'Types, services, categories', 'total' => (int) $c['term']['shown'] . ' shown; ' . (int) $c['term']['drafts'] . ' draft questions waiting' );
+	$cells[] = array( 'type' => 'Directory, Volunteer, Claim, Opportunities', 'total' => (int) $c['hub']['shown'] . ' shown; ' . (int) $c['hub']['drafts'] . ' draft questions waiting' );
+	aw_seo_extras_simple_table(
+		'faq-pages',
+		array( 'type' => 'Type', 'total' => 'Published', 'faq' => 'With FAQ', 'holdout' => 'Holdout (no FAQ)', 'none' => 'Fewer than 3 questions (no FAQ)', 'sizes' => 'Questions per FAQ' ),
+		$cells
+	);
+	echo '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'tools.php' ) ) ) . '">Count again</a></p>';
 
 	echo '<h2>Experiment</h2><p>' . ( ! empty( $e['on'] ) ? 'Running' : 'Rolled out: every eligible page shows its FAQ' ) . '. ' . (int) $e['pct'] . '% of eligible listings and Library documents (random, stable by ID) show no FAQ, from ' . aw_date( $e['start'] ) . ' for ' . (int) $e['weeks'] . ' weeks (to ' . aw_date( $end ) . '). Compare in Search Console (queries with "contact number", "pdf", "in hindi", "address") and GA4 (sessions from chatgpt.com, perplexity.ai, gemini.google.com) by page: the page lists are <code>wp aw-faq holdout</code>; GA4 also gets <code>faq_group</code> (faq, holdout, none) in the page context.</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_faq_rollout">' . wp_nonce_field( 'aw_faq_rollout', '_wpnonce', true, false ) . ( ! empty( $e['on'] ) ? '<button class="button">Roll out to 100% (end the holdout)</button>' : '<input type="hidden" name="on" value="1"><button class="button">Restart the holdout</button>' ) . '</form>';
@@ -1090,13 +1106,17 @@ function aw_faq_admin_page() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_faq_approve">' . wp_nonce_field( 'aw_faq_approve', '_wpnonce', true, false );
 	foreach ( aw_faq_topic_pages() as $p ) {
 		$ap = count( array_filter( $p[5], fn( $i ) => 'approved' === $i['status'] ) );
-		echo '<h3 style="margin-top:2em">' . esc_html( $p[2] ) . ' <small>(' . (int) $ap . ' of ' . count( $p[5] ) . ' approved' . ( $ap >= AW_FAQ_MIN ? ', shown' : ', not shown' ) . ') — <a href="' . esc_url( $p[3] ) . '">edit</a> · <a href="' . esc_url( $p[4] ) . '">view</a></small></h3><table class="widefat striped"><tbody>';
+		echo '<h3 style="margin-top:2em">' . esc_html( $p[2] ) . ' <small>(' . (int) $ap . ' of ' . count( $p[5] ) . ' approved' . ( $ap >= AW_FAQ_MIN ? ', shown' : ', not shown' ) . ') — <a href="' . esc_url( $p[3] ) . '">edit</a> · <a href="' . esc_url( $p[4] ) . '">view</a></small></h3>';
+		$cells = array();
 		foreach ( $p[5] as $i => $it ) {
-			$wc  = aw_faq_word_count( $it['a'] );
-			$src = implode( '<br>', array_map( fn( $s ) => $s['url'] ? '<a href="' . esc_url( $s['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $s['name'] ? $s['name'] : $s['url'] ) . '</a>' : esc_html( $s['name'] ), $it['sources'] ) );
-			echo '<tr><td style="width:2em"><input type="checkbox" name="pick[]" value="' . esc_attr( $p[0] . ':' . $p[1] . ':' . $i ) . '" aria-label="' . esc_attr( $it['q'] ) . '"></td><td><strong>' . esc_html( $it['q'] ) . '</strong> <span class="description">' . esc_html( $it['status'] ) . ( $it['reviewed'] ? ' ' . esc_html( $it['reviewed'] ) : '' ) . ' · keyword: ' . esc_html( $it['keyword'] ) . ' · ' . (int) $wc . ' words' . ( $wc > AW_FAQ_WORDS ? ' (over 50)' : '' ) . '</span><br>' . wp_kses( $it['a'], AW_FAQ_ANSWER_HTML ) . '<br><small>Sources: ' . ( $src ? $src : '<em>none</em>' ) . '</small></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			$wc      = aw_faq_word_count( $it['a'] );
+			$src     = implode( '<br>', array_map( fn( $s ) => $s['url'] ? '<a href="' . esc_url( $s['url'] ) . '" target="_blank" rel="noopener">' . esc_html( $s['name'] ? $s['name'] : $s['url'] ) . '</a>' : esc_html( $s['name'] ), $it['sources'] ) );
+			$cells[] = array(
+				'cb' => '<input type="checkbox" name="pick[]" value="' . esc_attr( $p[0] . ':' . $p[1] . ':' . $i ) . '" aria-label="' . esc_attr( $it['q'] ) . '">',
+				'q'  => '<strong>' . esc_html( $it['q'] ) . '</strong> <span class="description">' . esc_html( $it['status'] ) . ( $it['reviewed'] ? ' ' . esc_html( $it['reviewed'] ) : '' ) . ' · keyword: ' . esc_html( $it['keyword'] ) . ' · ' . (int) $wc . ' words' . ( $wc > AW_FAQ_WORDS ? ' (over 50)' : '' ) . '</span><br>' . wp_kses( $it['a'], AW_FAQ_ANSWER_HTML ) . '<br><small>Sources: ' . ( $src ? $src : '<em>none</em>' ) . '</small>',
+			);
 		}
-		echo '</tbody></table>';
+		aw_seo_extras_simple_table( 'faq-questions', array( 'cb' => '<input type="checkbox">', 'q' => 'Question' ), $cells, array( 'primary' => 'q', 'empty' => 'No questions.' ) ); // inside the approve form: no nonce of its own
 	}
 	echo '<p><button class="button button-primary" name="do" value="approve">Approve ticked</button> <button class="button" name="do" value="draft">Back to draft</button></p></form></div>';
 }
