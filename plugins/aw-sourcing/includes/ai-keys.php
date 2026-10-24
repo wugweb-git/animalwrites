@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_AI_PROVIDERS = array(
 	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
-	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ), // the free model first (owner, 22 Oct 2026)
+	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'poolside/laguna-s-2.1:free', 'openai/gpt-4o-mini', 'google/gemini-2.5-flash' ) ), // free models first (owner, 22 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter (25 Oct 2026)
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'minimax/minimax-m3.1-flash:free', 'nvidia/nemotron-3-ultra-550b-a55b:free' ) ), // free models (22 Oct 2026)
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
@@ -427,9 +427,10 @@ function aw_ai_check( array $row ): array {
 		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
 		$row['status']   = 'no-model';
 		$models          = AW_AI_PROVIDERS[ $id ][3];
-		if ( $id === $was[0] && '' !== $was[1] ) {
+		if ( $id === $was[0] && '' !== $was[1] && ! in_array( $was[1], $models, true ) ) { // a model from the list keeps the list's order, so free models stay first
 			array_unshift( $models, $was[1] );
 		}
+		$no_credit = false;
 		foreach ( array_unique( $models ) as $model ) {
 			list( $code, $body, $headers ) = aw_ai_call( $id, $key, $model );
 			$row['model'] = $model;
@@ -452,8 +453,8 @@ function aw_ai_check( array $row ): array {
 				return $row;
 			}
 			if ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
-				$row['status'] = 'no-credit';
-				return $row;
+				$no_credit = true; // This model needs credit; a later (free) model may still work.
+				continue;
 			}
 			if ( 429 === $code ) {
 				$row['status'] = 'limited';
@@ -463,6 +464,9 @@ function aw_ai_check( array $row ): array {
 				$row['status'] = 'invalid';
 				return $row;
 			}
+		}
+		if ( $no_credit ) {
+			$row['status'] = 'no-credit';
 		}
 		return $row;
 	}
