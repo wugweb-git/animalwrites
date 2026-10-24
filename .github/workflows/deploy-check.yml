@@ -77,10 +77,11 @@ jobs:
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/wordpress-dev'
         run: |
           # Cached pages never run PHP, so the deploy-purge hook (animal-writes-core deploy-purge.php) needs one uncached
-          # request after the pull. wp-cron.php is never cached and loads WordPress; the hook purges once per new commit.
+          # request after the pull: the home page with a query string nobody else uses is a cache miss and a full page
+          # render, whose response carries LiteSpeed's purge header (the hook marks it not cacheable). It purges once.
           # Hostinger usually pulls within 2 minutes: ask every 30 s for 5 minutes (a request does nothing once purged).
           for i in $(seq 1 10); do
             sleep 30
-            curl -s -o /dev/null -m 20 -w "%{http_code} " "https://animalwrites.in/wp-cron.php?aw_deploy_nudge=$(git rev-parse --short HEAD)" || true
+            curl -s -o /dev/null -m 20 -w "%{http_code} " "https://animalwrites.in/?aw_deploy_nudge=$(git rev-parse --short HEAD)-$i" || true
           done
           echo
