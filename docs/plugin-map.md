@@ -44,7 +44,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `topic-images.php` | Category photos, set in WP Admin on each category screen (Topics, Listing types, Opportunity types): add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). Topic photos are also used on news and Legal Watch items in that topic. News and Legal Watch items show their topic's photo (see aw_item_image() in media.php). Stored as term meta `aw_topic_image` (attachment ID). The general photos for items without a topic stay in the option aw_topic_images['default']. |
 | `unverified.php` | Unverified values on a listing (meta aw_unverified) and the small mark the listing template shows after them. |
 | `volunteers-db.php` | Volunteers database: one table for 1.0 campaign volunteers and 2.0 sign-ups. |
-| `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to the volunteers table (Inbox → Volunteer sign-ups) with the page they came from. |
+| `volunteers.php` | Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to help, consent. Entries go to FluentCRM only (contact tagged Volunteer, details and the page they came from in the Volunteer fields); since 24 Oct 2026 FluentCRM is the one volunteers table. |
 
 ## aw-sourcing (AW Sourcing)
 
@@ -67,8 +67,11 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/enrichment-admin.php` | Directory → Enrichment review and the Enrichment tab. |
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
 | `includes/review-queue.php`, `includes/class-aw-sourcing-review-table.php` | Inbox → To review as a core list table: views by type, search, sortable, pagination (screen option, 50), row actions Edit / Source / Publish / Reject, bulk Publish / Reject and "Publish all N". |
+| `includes/keyword-suggestions.php`, `includes/class-aw-sourcing-suggestions-table.php` | Settings → Sourcing → Keywords → Suggestions from Search Insights: searches with at least 20 impressions in 28 days that no Include or Exclude word covers (not brand, English only), as a core list table with Add to Include, Add to Exclude and Dismiss (option aw_sourcing_dismissed). Needs aw-seo-extras for the searches; shows nothing without it. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
+| `includes/site-health.php` | Tools → Site Health → "Sourcing ran on time": the ingest heartbeat as a Site Health test, same rules as the watchdog (critical: no run for 8 hours; recommended: no News for 12 hours, none ever 12 hours after the workers' first report, or half the sources failing). |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
+| `includes/keyword-stats.php` | Which search brought each item in (meta aw_feed, aw_ingested_at, saved at ingest since 24 Oct 2026) and per keyword the items fetched and published in 30 days, News and Library apart (older items: by the word in title or summary, estimated). Offered to aw-seo-extras through the filter aw_sourcing_keyword_items. |
 | `includes/workers.php` | Settings → Sourcing → Workers (24 Oct 2026): the 17 workflows of the workers repository (AW_WORKERS, a copy of `docs/workers.json` there; change both together), POST worker-run (start and end reports), problems (late = no report for twice the interval; failed, cancelled, skipped, stuck), the hourly watchdog email (aw_workers_watchdog, once per new set), the notice, the rows in the dashboard box Scheduled tasks, the Site Health test and Run now (aw_dispatch_workflow, logged in aw_worker_dispatch_log). Also shows the AI models tiles. |
 
 ## mailweb (Mailweb)

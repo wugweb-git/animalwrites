@@ -270,6 +270,7 @@ add_action(
 				$rel[ $k ] = $list( $k );
 			}
 			update_option( AW_REL_OPTION, $rel, false );
+			delete_transient( 'aw_sourcing_kw_stats_30' ); // Search Insights' per-keyword rows follow the new lists at once
 			$what = array();
 			foreach ( array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' ) as $k => $l ) {
 				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] );
@@ -452,7 +453,9 @@ function aw_sourcing_page() {
 			$v = aw_relevance_verdict( $try );
 			echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
 		}
-		echo '</form></div>';
+		echo '</form>';
+		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
+		echo '</div>';
 		return;
 	}
 
