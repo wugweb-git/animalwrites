@@ -1,0 +1,164 @@
+<?php
+/**
+ * Tools → Search Insights → Sourcing keywords: a core list table, sortable and read-only (owner, 24 Oct 2026).
+ * Loaded only when the tab is shown.
+ *
+ * @package aw-sourcing
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/** Per Google News search: items fetched and published (News, Library) and their pages' Search Console figures. */
+class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
+
+	/** @var array From aw_sourcing_keyword_stats(). */
+	private $stats;
+
+	/** @var array path => figures, from Search Insights (empty when it has none yet). */
+	private $pages = array();
+
+	/**
+	 * @param array $stats aw_sourcing_keyword_stats() result.
+	 */
+	public function __construct( array $stats ) {
+		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false, 'screen' => 'tools_page_aw-search-insights' ) );
+		$this->stats = $stats;
+	}
+
+	/** Search Insights has page figures for this period. */
+	public function has_page_figures() {
+		return (bool) $this->pages;
+	}
+
+	/** Columns. */
+	public function get_columns() {
+		return array(
+			'term'    => 'Keyword',
+			'news_f'  => 'Fetched: News',
+			'legal_f' => 'Fetched: Library',
+			'news_p'  => 'Published: News',
+			'legal_p' => 'Published: Library',
+			'impr'    => 'Impressions (28 days)',
+			'clicks'  => 'Clicks (28 days)',
+		);
+	}
+
+	/** Every column sorts; numbers start high. */
+	protected function get_sortable_columns() {
+		$out = array();
+		foreach ( array_keys( $this->get_columns() ) as $c ) {
+			$out[ $c ] = array( $c, 'term' !== $c );
+		}
+		return $out;
+	}
+
+	/** The keyword column carries the notes. */
+	protected function get_primary_column_name() {
+		return 'term';
+	}
+
+	/** The site path Search Insights keys a page by. */
+	private function path( $id ) {
+		$url = (string) get_permalink( $id );
+		if ( function_exists( 'aw_si_path' ) ) {
+			return aw_si_path( $url );
+		}
+		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+		return '' === $path ? '/' : $path;
+	}
+
+	/** Rows with their figures, sorted. */
+	public function prepare_items() {
+		$rows = (array) ( $this->stats['rows'] ?? array() );
+		$ids  = array();
+		foreach ( $rows as $r ) {
+			$ids = array_merge( $ids, $r['news']['published'], $r['legal']['published'] ); // only published items have a page (a draft's link is ?p=, which would read as the home page)
+		}
+		$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
+		$paths = array();
+		if ( $ids && function_exists( 'aw_si_page_metrics' ) ) {
+			_prime_post_caches( $ids, false, false ); // one query for every item, not one per permalink
+			foreach ( $ids as $id ) {
+				$paths[ $id ] = $this->path( $id );
+			}
+			$this->pages = aw_si_page_metrics( array_values( array_filter( array_unique( $paths ) ) ), 28 );
+		}
+		$items = array();
+		foreach ( $rows as $r ) {
+			$c = 0;
+			$i = 0;
+			foreach ( array_unique( array_merge( $r['news']['published'], $r['legal']['published'] ) ) as $id ) {
+				$m  = $this->pages[ $paths[ (int) $id ] ?? '' ] ?? null;
+				$c += $m ? (int) $m['clicks'] : 0;
+				$i += $m ? (int) $m['impr'] : 0;
+			}
+			$items[] = array(
+				'term'      => $r['term'],
+				'fixed'     => ! empty( $r['fixed'] ),
+				'listed'    => ! empty( $r['listed'] ),
+				'estimated' => ! empty( $r['estimated'] ),
+				'news_f'    => count( $r['news']['fetched'] ),
+				'legal_f'   => count( $r['legal']['fetched'] ),
+				'news_p'    => count( $r['news']['published'] ),
+				'legal_p'   => count( $r['legal']['published'] ),
+				'impr'      => $this->pages ? $i : null,
+				'clicks'    => $this->pages ? $c : null,
+			);
+		}
+		$by  = sanitize_key( wp_unslash( $_GET['orderby'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
+		$by  = isset( $this->get_columns()[ $by ] ) ? $by : 'news_f';
+		$asc = 'asc' === sanitize_key( wp_unslash( $_GET['order'] ?? ( 'term' === $by ? 'asc' : 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- sorting a read-only list
+		usort(
+			$items,
+			function ( $a, $b ) use ( $by, $asc ) {
+				$c = 'term' === $by ? strcasecmp( $a['term'], $b['term'] ) : ( (int) $a[ $by ] <=> (int) $b[ $by ] );
+				$c = $c ? $c : strcasecmp( $a['term'], $b['term'] );
+				return $asc ? $c : -$c;
+			}
+		);
+		$this->items           = $items;
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'term' );
+	}
+
+	/**
+	 * The keyword and its notes.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_term( $item ) {
+		$notes = array();
+		if ( $item['fixed'] ) {
+			$notes[] = 'Fixed search in the workers';
+		} elseif ( ! $item['listed'] ) {
+			$notes[] = 'No longer in the Include list';
+		}
+		if ( $item['estimated'] ) {
+			$notes[] = 'Estimated';
+		}
+		return '<strong>' . esc_html( $item['term'] ) . '</strong>' . ( $notes ? ' — <span class="post-state">' . esc_html( implode( ', ', $notes ) ) . '</span>' : '' );
+	}
+
+	/**
+	 * Numbers; a dash when Search Insights has no page figures yet.
+	 *
+	 * @param array  $item Row.
+	 * @param string $col  Column.
+	 */
+	protected function column_default( $item, $col ) {
+		return null === $item[ $col ] ? '—' : esc_html( number_format_i18n( (int) $item[ $col ] ) );
+	}
+
+	/** Empty list. */
+	public function no_items() {
+		echo 'No searches yet.';
+	}
+
+	/**
+	 * Read-only: no bulk actions or pagination.
+	 *
+	 * @param string $which Top or bottom.
+	 */
+	protected function display_tablenav( $which ) {}
+}
