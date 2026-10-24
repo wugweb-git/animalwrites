@@ -736,3 +736,47 @@ add_filter(
 		return $q;
 	}
 );
+
+/*
+ * Campaign pages' "In the news" lists the campaign's News and its Media & PR news articles together (owner, 24 Oct
+ * 2026), newest first; social posts and videos stay in "What's happening". After systems.php (10) has applied the
+ * Campaign link filter.
+ */
+add_filter(
+	'query_loop_block_query_vars',
+	function ( $q ) {
+		if ( ! is_singular( 'aw_campaign' ) || 'aw_news' !== ( $q['post_type'] ?? '' ) || empty( $q['tax_query'] ) ) {
+			return $q;
+		}
+		$linked = false;
+		foreach ( (array) $q['tax_query'] as $t ) {
+			$linked = $linked || ( is_array( $t ) && AW_CAMPAIGN_LINK === ( $t['taxonomy'] ?? '' ) );
+		}
+		if ( ! $linked ) {
+			return $q;
+		}
+		$q['post_type']    = array( 'aw_news', 'aw_press' );
+		$q['meta_query']   = isset( $q['meta_query'] ) && is_array( $q['meta_query'] ) ? $q['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$q['meta_query'][] = array(
+			'relation' => 'OR',
+			array( 'key' => 'aw_press_group', 'compare' => 'NOT EXISTS' ), // News
+			array( 'key' => 'aw_press_group', 'value' => 'articles' ),
+		);
+		return $q;
+	},
+	20
+);
+
+/** A Media & PR item has no page of its own: its link is the coverage itself (cards in "In the news"). */
+add_filter(
+	'post_type_link',
+	function ( $link, $post ) {
+		if ( 'aw_press' === $post->post_type ) {
+			$url = (string) get_post_meta( $post->ID, 'aw_press_url', true );
+			return $url ? $url : $link;
+		}
+		return $link;
+	},
+	10,
+	2
+);
