@@ -32,7 +32,7 @@ function aw_si_metric_kind( string $src, string $metric ): string {
  *
  * @param bool $dry   Count only.
  * @param int  $limit Daily rows per run.
- * @return array Counts: daily rows rolled up, monthly rows written.
+ * @return array Counts: daily rows rolled up, monthly rows written; or error when nothing was changed.
  */
 function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	global $wpdb;
@@ -83,8 +83,14 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		}
 		$groups[ $key ] = $g;
 	}
+	// The monthly writes and the delete of the daily rows succeed or fail together: daily rows are only removed once
+	// every monthly row they feed is stored.
 	$written = 0;
+	$ok      = false !== $wpdb->query( 'START TRANSACTION' );
 	foreach ( $groups as $g ) {
+		if ( ! $ok ) {
+			break;
+		}
 		// Merge with a monthly row written by an earlier run for the same month.
 		$old    = $wpdb->get_row( $wpdb->prepare( "SELECT clicks, impr, pos, value FROM {$o} WHERE src = %s AND metric = %s AND period = 'month' AND d = %s AND kw_id = %d AND page_key = %s", $g['src'], $g['metric'], $g['d'], $g['kw_id'], $g['page_key'] ) );
 		$impr   = $g['impr'];
@@ -103,7 +109,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 				$value = null === $old->value ? null : (float) $old->value;
 			}
 		}
-		aw_si_obs_put(
+		$ok = aw_si_obs_put(
 			$g['kw_id'],
 			$g['page'],
 			$g['src'],
@@ -121,8 +127,15 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 		++$written;
 	}
 	foreach ( array_chunk( array_map( 'intval', wp_list_pluck( $rows, 'id' ) ), 1000 ) as $chunk ) {
-		$wpdb->query( "DELETE FROM {$o} WHERE id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- integers.
+		$ok = $ok && false !== $wpdb->query( "DELETE FROM {$o} WHERE id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- integers.
 	}
+	if ( ! $ok ) {
+		$error = $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' );
+		/* translators: %s: database error. */
+		return array( 'error' => sprintf( __( 'The rollup could not save the monthly rows, so the daily rows were kept: %s', 'aw-seo-extras' ), $error ) );
+	}
+	$wpdb->query( 'COMMIT' );
 	// phpcs:enable
 	return array(
 		'daily'   => count( $rows ),

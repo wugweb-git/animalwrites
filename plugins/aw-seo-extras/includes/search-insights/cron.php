@@ -50,7 +50,12 @@ function aw_si_rollup_cron(): void {
 	}
 	aw_si_run_start( 'rollup' );
 	try {
-		aw_si_run_ok( 'rollup', aw_si_rollup() );
+		$result = aw_si_rollup();
+		if ( ! empty( $result['error'] ) ) {
+			aw_si_run_fail( 'rollup', $result['error'] );
+		} else {
+			aw_si_run_ok( 'rollup', $result );
+		}
 	} catch ( Throwable $e ) {
 		aw_si_run_fail( 'rollup', $e->getMessage() );
 	}

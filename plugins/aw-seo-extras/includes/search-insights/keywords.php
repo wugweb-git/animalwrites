@@ -397,10 +397,11 @@ function aw_si_seed(): array {
  * @param string $period day, month, or a rolling window such as 12m.
  * @param string $d      Date (Y-m-d).
  * @param array  $m      Any of clicks, impr, pos, value, txt.
+ * @return bool Whether the row was written.
  */
-function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, string $period, string $d, array $m ): void {
+function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, string $period, string $d, array $m ): bool {
 	global $wpdb;
-	$wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return false !== $wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		aw_si_table( 'obs' ),
 		array(
 			'kw_id'    => $kw_id,
