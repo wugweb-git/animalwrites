@@ -1,7 +1,7 @@
 <?php
 /**
  * Robots rules that depend on an item's state or a list's contents, which Rank Math's per-type and per-item settings
- * cannot express. Fixed rules live in Rank Math: per item (Advanced → Robots: the search, report and thank-you pages,
+ * cannot express. Fixed rules live in Rank Math: per item (Advanced → Robots: the search, report, claim (owner, 24 Oct 2026) and thank-you pages,
  * hidden items) and per type or taxonomy (Titles & Meta: listing-type, opportunity-type, Library-kind and service
  * archives; site search).
  *

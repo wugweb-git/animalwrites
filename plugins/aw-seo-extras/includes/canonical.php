@@ -5,7 +5,8 @@
  * - filtered or sorted lists (?tag=, ?state=, ?category_name= …): the list with its filters in a fixed order, so each
  *   filtered list is its own indexed page (owner, 10 Oct 2026); the sort order is left out. A hub's ?category_name= and
  *   ?tag= views follow filtered-views.php (15 Oct 2026: ?tag= points at the tag page);
- * - /claim/?listing=ID: one indexed page per listing.
+ * - /claim/?listing=ID: its own URL as canonical (the claim page is noindex, follow in Rank Math, like /report/: owner,
+ *   24 Oct 2026; it was one indexed page per listing).
  * A canonical typed in Rank Math always wins. Items keep Rank Math's own canonical.
  *
  * @package aw-seo-extras

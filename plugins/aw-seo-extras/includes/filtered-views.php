@@ -15,6 +15,9 @@
  *   duplicated it.
  * - A view kept out of the index has the section page (without filters) as its canonical URL (owner, 17 Oct 2026).
  *   Rank Math prints no canonical tag on a noindex page, so the value shows in its data (og:url), not as a tag.
+ * - ?state= on the News and Library hubs is noindex, follow, with the unfiltered hub as canonical, and is out of the
+ *   filtered sitemap, whatever its count (owner, 24 Oct 2026: places stored on News and Library items would otherwise
+ *   make some 36 such lists indexable). ?state= on Opportunities keeps the 16 Oct rule.
  * - ?q= (a name or word search inside a list, the Directory's included) is a site search result: noindex, links
  *   followed (Google's guidance on internal search result pages).
  * - Any other single filter keeps the earlier rule (indexed, canonical with the filter).
@@ -43,6 +46,9 @@ const AW_FILTERED_TITLE_WORDS = array(
 	'aw_opportunity' => array( '%s Volunteer Roles and Jobs', '%s Opportunities' ),
 	'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
 );
+
+/** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026). */
+const AW_FILTERED_STATE_NOINDEX = array( 'aw_news', 'aw_legal' );
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
 const AW_FILTERED_PLACE_TITLE_WORDS = array(
@@ -158,7 +164,7 @@ function aw_seo_filtered_view() {
 			return $view; // names nothing: noindex
 		}
 		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => aw_seo_plain( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
-		if ( $n >= AW_FILTERED_MIN_ITEMS ) {
+		if ( $n >= AW_FILTERED_MIN_ITEMS && ! ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) ) {
 			$view['index']     = true;
 			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), aw_hub_canonical() );
 		}
@@ -321,6 +327,9 @@ function aw_sitemap_filtered_urls() {
 	}
 	foreach ( AW_FILTERED_PLACE_TITLE_WORDS as $key => $types ) { // ?state= and ?publisher= views from 3 items (17 Oct 2026)
 		foreach ( array_keys( $types ) as $type ) {
+			if ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) {
+				continue; // noindex (owner, 24 Oct 2026)
+			}
 			foreach ( aw_sitemap_filtered_values( $type, $key ) as $slug ) {
 				if ( aw_seo_filtered_place( $type, $key, $slug )[1] >= AW_FILTERED_MIN_ITEMS ) {
 					$urls[] = array( 'loc' => add_query_arg( $key, rawurlencode( $slug ), aw_hub_url( $type ) ) );
