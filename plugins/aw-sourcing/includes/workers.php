@@ -585,11 +585,11 @@ function aw_workers_tab() {
 		echo '<p>None yet.</p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th>When</th><th>Who</th><th>Workflow</th><th>Result</th></tr></thead><tbody>';
+	$rows = array();
 	foreach ( $log as $e ) {
-		echo '<tr><td>' . esc_html( wp_date( 'j M Y, g:i a', (int) $e['at'] ) ) . '</td><td>' . esc_html( $e['user'] ) . '</td><td>' . esc_html( AW_WORKERS[ $e['file'] ]['name'] ?? $e['file'] ) . '</td><td>' . esc_html( $e['ok'] ? 'started' : $e['msg'] ) . '</td></tr>';
+		$rows[] = array( 'at' => esc_html( wp_date( 'j M Y, g:i a', (int) $e['at'] ) ), 'user' => esc_html( $e['user'] ), 'wf' => esc_html( AW_WORKERS[ $e['file'] ]['name'] ?? $e['file'] ), 'result' => esc_html( $e['ok'] ? 'started' : $e['msg'] ) );
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'run-log', array( 'at' => 'When', 'user' => 'Who', 'wf' => 'Workflow', 'result' => 'Result' ), $rows ); // inside the Sourcing form: no sorting or pages, so nothing shares the workflows table's query args
 }
 
 // Run now: the Sourcing page's save handler (nonce and capability checked there) passes the Workers tab here.

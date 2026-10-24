@@ -380,7 +380,7 @@ add_action(
 			echo '<input type="hidden" name="action" value="mailweb_cap"><p><button class="button button-primary" name="do" value="resume">' . esc_html__( 'Resume sending', 'mailweb' ) . '</button></p></form></div>';
 		}
 		echo '<p>' . esc_html__( 'Mail plans limit how many emails a mailbox may send in any 24 hours. The site keeps under the limit below; anything over it waits in the queue and is sent as the limit frees: replies typed in FluentCRM first, then notices, then sign-up confirmations, then newsletter campaigns.', 'mailweb' ) . '</p>';
-		echo '<table class="widefat striped" style="max-width:40rem"><tbody>';
+		echo '<table class="form-table" role="presentation"><tbody>';
 		$rows = array(
 			__( 'Sent in the last 24 hours', 'mailweb' )                 => sprintf(
 				/* translators: 1: emails sent in the last 24 hours, 2: the daily limit */
