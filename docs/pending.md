@@ -13,12 +13,12 @@ Check this list against git and the live site before acting on it. Refer to item
 6. **GA4:** star volunteer_signup and claim_sent once GA4 lists them. (Starred already: contact_sent, newsletter_signup, newsletter_optin, objection_sent, objection_confirmed.)
 7. **hPanel Git auto-deploy:** check it pulls reliably (unreliable since 20 Oct; `aw-ship.sh` checks out the gated commit itself when Hostinger has not pulled within 2 minutes).
 8. **Vercel key:** only if that AI provider is wanted.
-9. **Check on a real phone:** test emails (light and dark), the Gmail app button and share buttons on the lab rules page, the Beta badge in the phone menu.
+9. **Check on a real phone:** the Gmail app button (test emails approved 24 Oct) and share buttons on the lab rules page, the Beta badge in the phone menu.
 10. **Hostinger Mail API token:** rotate.
 
 ### Decisions waiting on the owner (recommendation in brackets)
 11. **Volunteer tag on 184 campaign senders** who unticked the box: remove it, keep the Newsletter and campaign tags; tag a campaign sender Volunteer only when the box is ticked [yes]. Background: 1,424 of the 1,426 FluentCRM-only Volunteer contacts are lab rules letter senders, tagged by `aw_crm_campaign_signer()` (fluentcrm.php, since 21 Oct) per the owner rule of 18 Oct; 1,240 left the box ticked.
-12. **Stale redirect #705** (post 20139's old address → a 404 page) [delete].
+12. **Stale redirect #705:** done 24 Oct (deleted at the owner's word; the old address returns 404). Remove from this list at the next tidy.
 13. **AWO list: 45 rows for the owner** (`Claude outputs/awo-held-decisions-2026-10-24.csv`: 33 no phone on one side, 6 similar names with different phones, 4 posts, 2 phone matching another listing).
 14. **Swapna Foundation (#46):** which organisation it is (blocks its enrichment).
 15. **Lab rules Post phase:** decide by 7 Nov. Until then no closed-state or Post content, and no FAQ visibility changes, on 13848.
