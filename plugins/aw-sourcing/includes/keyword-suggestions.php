@@ -5,7 +5,7 @@
  *
  * - The searches come from aw-seo-extras (filter aw_search_demand_terms). Without it there are no suggestions and
  *   sourcing works as before.
- * - Shown: at least 20 impressions in the last 28 days, or Rising. Left out: brand searches, searches not in English
+ * - Shown: at least 20 impressions in the last 28 days (owner, 24 Oct 2026; Rising is not used for suggestions). Left out: brand searches, searches not in English
  *   (they never become Google News searches; Search Insights shows them), and searches an Include or Exclude word
  *   already matches, as the keyword check matches a headline.
  * - A core list table: views All / Dismissed, search, sortable columns, pagination with a screen option, row and bulk
@@ -64,7 +64,7 @@ function aw_sourcing_suggestions() {
 		if ( '' === $q || ! empty( $t['brand'] ) || ! preg_match( '/^[\x20-\x7e]+$/', $q ) ) {
 			continue;
 		}
-		if ( (int) ( $t['impr'] ?? 0 ) < 20 && empty( $t['rising'] ) ) {
+		if ( (int) ( $t['impr'] ?? 0 ) < 20 ) { // owner, 24 Oct 2026: 20 impressions in 28 days; Rising does not count until Search Insights has 8 weeks of history
 			continue;
 		}
 		foreach ( $words as $w ) {
@@ -188,7 +188,7 @@ add_action(
 				echo '<div class="notice notice-warning is-dismissible inline"><p>Nothing changed: choose an action and at least one search.</p></div>';
 			}
 		}
-		echo '<p>Searches people make (Search Console) with at least 20 impressions in the last 28 days, or Rising, that no Include or Exclude word covers. Brand and non-English searches are not listed. Nothing is added unless you add it.</p>';
+		echo '<p>Searches people make (Search Console) with at least 20 impressions in the last 28 days that no Include or Exclude word covers. Brand and non-English searches are not listed. Nothing is added unless you add it.</p>';
 		$table->views();
 		echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">';
 		if ( $table->is_dismissed_view() ) {
