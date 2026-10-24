@@ -401,6 +401,10 @@ add_action(
 					$runs   = (array) get_option( aw_workers_option( $file ), array() );
 					$r      = (array) ( $runs[ $run ] ?? array() );
 					$try    = max( 1, (int) $req->get_param( 'attempt' ) );
+					if ( $try < (int) ( $r['attempt'] ?? 0 ) ) { // a late report from an attempt a re-run has replaced
+						$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- releases the lock above
+						return new WP_REST_Response( array( 'ok' => true, 'ignored' => 'older attempt' ) );
+					}
 					if ( 'start' === $phase && $try > (int) ( $r['attempt'] ?? 0 ) ) {
 						// A re-run reuses the run id with the next attempt: it starts afresh.
 						$r = array_diff_key( $r, array_flip( array( 'ended', 'result', 'failed_step', 'skipped_steps', 'counts', 'started' ) ) );
