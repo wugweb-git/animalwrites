@@ -6,6 +6,7 @@
    - report the result to the owner and wait for a yes. Never push a stale branch over newer live work. (21 Oct 2026: `home-revision-2026-10-18` was audited, found superseded by live and deleted at the owner's word.)
 2. **Validate on git and on the live site, not on notes.** Claims such as "it is done" are checked with `git log`, `git merge-base --is-ancestor <commit> origin/wordpress` and the live page or database before they are repeated.
 3. **Ship only through `~/Documents/GitHub/aw-ship.sh`** (push to `wordpress-dev`, wait for the Deploy check). Never push to `wordpress`. One session deploys at a time.
+   Pull requests into `wordpress-dev` run the same Deploy check (no deploy steps); it must pass before merge. The code-review skill and wp-plugin-audit stay the required review; Codex comments are an extra reviewer only (owner, 24 Oct 2026).
 4. **Every session works in its own git worktree**; stage explicit paths (never `git add -A`); commit trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 5. **Never delete user data, listings or posts without asking.** Unpublish to draft instead.
 6. **The Animal Writes 1.0 repo (`main`, old.animalwrites.in) is read-only.**
