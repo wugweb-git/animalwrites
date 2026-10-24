@@ -49,16 +49,20 @@ function aw_si_gsc_rows( $module, array $dims, string $day, string $url = '' ) {
  * @param string $day    Date (Y-m-d).
  * @param array  $qp     The truncated query + page rows.
  * @param array  $pages  The day's page rows (date + page), for the page list and its order.
+ * @param float  $until  Stop starting new page calls after this time (microtime), 0 for no limit.
  * @return array|WP_Error array{rows: array, pages: int, left: int, full: bool} rows replaces $qp; left counts pages with
  *                        impressions not fetched one by one; full is true when a single page also hit the limit.
  */
-function aw_si_gsc_split_qp( $module, string $day, array $qp, array $pages ) {
+function aw_si_gsc_split_qp( $module, string $day, array $qp, array $pages, float $until = 0 ) {
 	usort( $pages, fn( $a, $b ) => $b[2] <=> $a[2] );
 	$pages = array_values( array_filter( $pages, fn( $r ) => $r[2] > 0 && '' !== (string) ( $r[0][1] ?? '' ) ) );
 	$split = array();
 	$rows  = array();
 	$full  = false;
 	foreach ( array_slice( $pages, 0, AW_SI_GSC_SPLIT ) as $p ) {
+		if ( $until && microtime( true ) > $until ) {
+			break; // Out of time: the pages left keep the first request's rows, and the day stays marked truncated.
+		}
 		$url = (string) $p[0][1];
 		$got = aw_si_gsc_rows( $module, array( 'date', 'query' ), $day, $url );
 		if ( is_wp_error( $got ) ) {
@@ -88,9 +92,10 @@ function aw_si_gsc_split_qp( $module, string $day, array $qp, array $pages ) {
  *
  * @param object $module Site Kit's Search Console module.
  * @param string $day    Date (Y-m-d).
+ * @param float  $until  Time (microtime) after which no more per-page calls start; 0 for no limit.
  * @return array|WP_Error array{total: array, q: array, qp: array, truncated: string[]}
  */
-function aw_si_gsc_fetch_day( $module, string $day ) {
+function aw_si_gsc_fetch_day( $module, string $day, float $until = 0 ) {
 	$out = array( 'truncated' => array() );
 	foreach ( array(
 		'total' => array( 'date' ),
@@ -108,7 +113,7 @@ function aw_si_gsc_fetch_day( $module, string $day ) {
 		$out[ $key ] = $rows;
 	}
 	if ( in_array( 'qp', $out['truncated'], true ) ) {
-		$split = aw_si_gsc_split_qp( $module, $day, $out['qp'], $out['p'] );
+		$split = aw_si_gsc_split_qp( $module, $day, $out['qp'], $out['p'], $until );
 		if ( is_wp_error( $split ) ) {
 			return $split;
 		}
@@ -250,7 +255,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 					$rep['stopped'] = $day; // The backfill goes on from here next run.
 					break;
 				}
-				$data = aw_si_gsc_fetch_day( $module, $day );
+				$data = aw_si_gsc_fetch_day( $module, $day, $start + AW_SI_GSC_BUDGET );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
 					$rep['error'] = sprintf( __( 'Search Console could not be read for %1$s: %2$s', 'aw-seo-extras' ), $day, $data->get_error_message() );

@@ -59,7 +59,11 @@ function aw_si_priority( ?int $trends, int $impr, ?float $pos, bool $has_page ):
  * @param string $label Search phrase.
  */
 function aw_si_is_question( string $label ): bool {
-	return false !== strpos( $label, '?' ) || (bool) preg_match( '/^(how|what|why|when|where|which|who|whom|whose|can|could|is|are|was|were|does|do|did|should|will|would)\b/i', trim( $label ) );
+	$label = trim( $label );
+	if ( preg_match( '/^who\b.*\b(rabies|guidelines?|report|recommend\w*|vaccin\w*)\b/i', $label ) ) {
+		return false; // WHO, the World Health Organization, not "who".
+	}
+	return false !== strpos( $label, '?' ) || (bool) preg_match( '/^(how|what|why|when|where|which|who|whom|whose|can|could|is|are|was|were|does|do|did|should|will|would)\b/i', $label );
 }
 
 /**
@@ -68,7 +72,11 @@ function aw_si_is_question( string $label ): bool {
  * @param string $label Search phrase.
  */
 function aw_si_is_news( string $label ): bool {
-	return (bool) preg_match( '/\b(news|latest|today|yesterday|case|court|verdict|judgement|judgment|ruling|ban|banned|arrest|arrested|fir|attack|attacked|mauled|killed|viral|incident|protest|20[0-9]{2})\b/i', $label );
+	if ( preg_match( '/\b(news|latest|today|yesterday|case|court|verdict|judgement|judgment|ruling|ban|banned|arrest|arrested|fir|attack|attacked|mauled|killed|viral|incident|protest)\b/i', $label ) ) {
+		return true;
+	}
+	// A year alone is news, but not in the name of a law (the ABC Rules 2023, an Act or Bill of a year).
+	return (bool) preg_match( '/\b20[0-9]{2}\b/', $label ) && ! preg_match( '/\b(act|acts|rules?|bill|amendment|law|laws|guidelines?|regulations?|order)\b/i', $label );
 }
 
 /**
@@ -142,6 +150,16 @@ function aw_si_entity_movers(): array {
 	$k = aw_si_table( 'keywords' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d", AW_SI_MOVERS ) ) );
+}
+
+/**
+ * SQL condition that keeps listing names out of a list or count, except the ones that moved most (plan §8).
+ *
+ * @param int[]|null $movers aw_si_entity_movers(), when the caller already has it.
+ */
+function aw_si_entity_sql( ?array $movers = null ): string {
+	$movers = null === $movers ? aw_si_entity_movers() : $movers;
+	return $movers ? '(entity = 0 OR id IN (' . implode( ',', array_map( 'intval', $movers ) ) . '))' : 'entity = 0';
 }
 
 /**

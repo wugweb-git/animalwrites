@@ -153,8 +153,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		if ( 'entity' === $view ) {
 			return '1=1';
 		}
-		$movers = $this->movers();
-		return $movers ? '(entity = 0 OR id IN (' . implode( ',', array_map( 'intval', $movers ) ) . '))' : 'entity = 0';
+		return aw_si_entity_sql( $this->movers() );
 	}
 
 	/** Whether the list is the plain All view: no filter, no search. The combined listing-names row shows only there. */
@@ -172,7 +171,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		global $wpdb;
 		$t = aw_si_table( 'keywords' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(pos_prev * impr28) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) pp FROM {$t} WHERE entity = 1" );
+		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos28 IS NULL, NULL, pos_prev) * impr28) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) pp FROM {$t} WHERE entity = 1" );
 		if ( ! $a || ! (int) $a->n ) {
 			return null;
 		}
@@ -327,15 +326,17 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$per   = $this->get_items_per_page( 'aw_si_keywords_per_page', 50 );
 		$paged = max( 1, $this->get_pagenum() );
 		$sql   = implode( ' AND ', $where );
+		$agg   = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
+		$shift = $agg ? 1 : 0;
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- conditions built from fixed parts with placeholders.
 		$total       = (int) $wpdb->get_var( $args ? $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE {$sql}", $args ) : "SELECT COUNT(*) FROM {$t} WHERE {$sql}" );
 		$query       = "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
-		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
+		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
 		// phpcs:enable
-		$agg = 1 === $paged && $this->plain_all() ? $this->entity_row() : null;
-		if ( $agg ) {
+		if ( $agg && 1 === $paged ) {
 			array_unshift( $this->items, $agg );
 		}
+		$total += $shift;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'label' );
 		$this->set_pagination_args(
 			array(

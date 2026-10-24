@@ -362,9 +362,10 @@ function aw_si_box_priorities(): void {
 		'notranked' => array( __( 'Tracked, not ranking', 'aw-seo-extras' ), 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0' ),
 		'all'       => array( __( 'All keywords', 'aw-seo-extras' ), '1=1' ),
 	);
+	$ent = aw_si_entity_sql(); // Listing names count as in the Keywords views: the 20 that moved most, not all.
 	echo '<ul>';
 	foreach ( $sql as $view => $v ) {
-		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$v[1]}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
+		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$v[1]} AND {$ent}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
 		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, aw_si_url( 'keywords' ) ) ) . '">' . esc_html( $v[0] ) . '</a>: ' . esc_html( number_format_i18n( $n ) ) . '</li>';
 	}
 	echo '</ul>';

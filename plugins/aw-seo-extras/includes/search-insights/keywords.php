@@ -549,13 +549,13 @@ function aw_si_post_topic( int $post_id ): string {
 	if ( $primary ) {
 		$term = get_term( $primary, 'category' );
 		if ( $term && ! is_wp_error( $term ) ) {
-			return (string) $term->name;
+			return wp_specialchars_decode( (string) $term->name, ENT_QUOTES ); // Stored as &amp;; kept as plain text.
 		}
 	}
 	$default = (int) get_option( 'default_category' );
 	foreach ( (array) get_the_terms( $post_id, 'category' ) as $term ) {
 		if ( $term instanceof WP_Term && (int) $term->term_id !== $default ) {
-			return (string) $term->name;
+			return wp_specialchars_decode( (string) $term->name, ENT_QUOTES );
 		}
 	}
 	return '';
@@ -565,7 +565,8 @@ function aw_si_post_topic( int $post_id ): string {
  * Topic of each keyword (plan §8, the Keywords topic filter): the site category it belongs to, from
  * 1. a category page that owns or carries it;
  * 2. else the category of the post that owns it, then of a post that carries it;
- * 3. else the category of the post Google shows most for it (up to 1,500 different pages a run).
+ * 3. else, for a keyword with no topic yet, the category of the post Google shows most for it (up to 1,500
+ *    different pages a run; a topic found this way is kept, so later runs only look up new keywords).
  * A keyword with none of these keeps the topic it has (the keyword map's). Writes only the keyword table.
  *
  * @return array{set: int, from_links: int, from_search: int} Records changed, and how many topics came from where.
@@ -586,7 +587,7 @@ function aw_si_sync_topics(): array {
 		if ( ! isset( $names[ $key ] ) ) {
 			$term          = 'term' === $l->obj_type ? get_term( (int) $l->obj_id ) : null;
 			$names[ $key ] = 'term' === $l->obj_type
-				? ( $term && ! is_wp_error( $term ) && 'category' === $term->taxonomy ? (string) $term->name : '' )
+				? ( $term && ! is_wp_error( $term ) && 'category' === $term->taxonomy ? wp_specialchars_decode( (string) $term->name, ENT_QUOTES ) : '' )
 				: aw_si_post_topic( (int) $l->obj_id );
 		}
 		$id = (int) $l->kw_id;
@@ -598,7 +599,7 @@ function aw_si_sync_topics(): array {
 
 	// Keywords with no linked category: the post Google shows most (the page column the daily calculation fills).
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$shown = (array) $wpdb->get_results( "SELECT id, page FROM {$k} WHERE page LIKE '/%' AND page NOT LIKE '%{%'" );
+	$shown = (array) $wpdb->get_results( "SELECT id, page FROM {$k} WHERE topic = '' AND page LIKE '/%' AND page NOT LIKE '%{%'" );
 	$paths = array();
 	foreach ( $shown as $r ) {
 		if ( ! isset( $topic[ (int) $r->id ] ) ) {
@@ -611,7 +612,7 @@ function aw_si_sync_topics(): array {
 		$name = $post ? aw_si_post_topic( $post ) : '';
 		if ( '' === $name ) {
 			$term = get_term_by( 'slug', basename( untrailingslashit( (string) $path ) ), 'category' );
-			$name = $term && 0 === strpos( (string) $path, '/category/' ) ? (string) $term->name : '';
+			$name = $term && 0 === strpos( (string) $path, '/category/' ) ? wp_specialchars_decode( (string) $term->name, ENT_QUOTES ) : '';
 		}
 		if ( '' !== $name ) {
 			foreach ( $ids as $id ) {
