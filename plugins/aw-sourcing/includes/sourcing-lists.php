@@ -186,11 +186,11 @@ function aw_sources_list_action( $type, $tab ) {
 			continue;
 		}
 		if ( 'on' === $op || 'off' === $op ) {
-			if ( (bool) $s['on'] !== ( 'on' === $op ) ) {
+			if ( ( 'on' === $op ) !== (bool) $s['on'] ) {
 				$s['on'] = 'on' === $op;
 				$what[]  = $s['name'] . ' ' . $op;
 			}
-		} elseif ( 'rss' === ( $s['kind'] ?? '' ) && (bool) $s['filter'] !== ( 'filter_on' === $op ) ) {
+		} elseif ( 'rss' === ( $s['kind'] ?? '' ) && ( 'filter_on' === $op ) !== (bool) $s['filter'] ) {
 			$s['filter'] = 'filter_on' === $op;
 			$what[]      = $s['name'] . ' keyword check ' . ( $s['filter'] ? 'on' : 'off' );
 		}
