@@ -252,8 +252,8 @@ function aw_auto_review( $id ) {
 	return $reason;
 }
 
-// Admin list: why an item is waiting.
-foreach ( array( 'aw_news', 'aw_legal' ) as $aw_rt ) {
+// Admin list: why an item is waiting (Resources too: a held research paper shows its reason; 24 Oct 2026).
+foreach ( array( 'aw_news', 'aw_legal', 'post' ) as $aw_rt ) {
 	add_filter( "manage_{$aw_rt}_posts_columns", fn( $c ) => $c + array( 'aw_review' => 'Review' ) );
 	add_action(
 		"manage_{$aw_rt}_posts_custom_column",
