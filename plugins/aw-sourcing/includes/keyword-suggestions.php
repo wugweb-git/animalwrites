@@ -128,25 +128,25 @@ add_action(
 			$qs = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['q'] ?? array() ) );
 		}
 		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
-		$back = remove_query_arg( array( 'suggested', 'n', 'updated' ), $back );
+		$back = remove_query_arg( array( 'aw_suggested', 'aw_n', 'updated' ), $back );
 		if ( ! in_array( $op, $ops, true ) && isset( $_POST['paged'] ) ) { // Enter in the page number box: go to that page
 			wp_safe_redirect( add_query_arg( 'paged', max( 1, (int) $_POST['paged'] ), $back ) . '#aw-suggestions' );
 			exit;
 		}
 		$n = in_array( $op, $ops, true ) ? aw_sourcing_suggest_apply( $op, $qs ) : 0;
-		wp_safe_redirect( add_query_arg( array( 'suggested' => in_array( $op, $ops, true ) ? $op : 'none', 'n' => $n ), $back ) . '#aw-suggestions' );
+		wp_safe_redirect( add_query_arg( array( 'aw_suggested' => in_array( $op, $ops, true ) ? $op : 'none', 'aw_n' => $n ), $back ) . '#aw-suggestions' );
 		exit;
 	}
 );
 
 // The result notice's arguments are dropped from the list's own links (sorting, paging, views), as core does.
-add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'suggested', 'n' ) ) );
+add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'aw_suggested', 'aw_n' ) ) );
 
 // Screen options: suggestions per page.
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && has_filter( 'aw_search_demand_terms' ) ) { // only when there can be suggestions // phpcs:ignore WordPress.Security.NonceVerification
 			add_screen_option( 'per_page', array( 'label' => 'Suggestions per page', 'default' => 20, 'option' => 'aw_suggestions_per_page' ) );
 		}
 	}
@@ -169,9 +169,9 @@ add_action(
 		$table->prepare_items();
 
 		echo '<h2 id="aw-suggestions">Suggestions from Search Insights</h2>';
-		$done = sanitize_key( $_GET['suggested'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+		$done = sanitize_key( $_GET['aw_suggested'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $done ) {
-			$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$n   = absint( wp_unslash( $_GET['aw_n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			/* translators: %d: number of searches or suggestions. */
 			$msg = array(
 				'include' => _n( '%d search added to Include. The workers search it from their next run.', '%d searches added to Include. The workers search them from their next run.', $n ),
