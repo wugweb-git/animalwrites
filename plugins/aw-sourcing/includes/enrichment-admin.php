@@ -146,10 +146,28 @@ function aw_enrich_prov_box( $post ) {
 		echo '<p>' . esc_html( implode( ' · ', array_map( fn( $k ) => aw_enrich_flag_label( $k ), array_keys( $flags ) ) ) ) . '</p>';
 	}
 	echo '<p class="description">' . ( $chk ? 'Last checked ' . esc_html( wp_date( 'j M Y', strtotime( $chk ) ) ) . '. ' : '' ) . '<a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review&listing=' . $post->ID . '&status=all' ) ) . '">Changes and proposals</a></p>';
+	wp_nonce_field( 'aw_enrich_identity', 'aw_enrich_identity_nonce' );
+	echo '<p><label><input type="checkbox" name="aw_enrich_identity" value="1"' . checked( ! empty( $flags['identity'] ), true, false ) . '> Identity unresolved</label></p>';
+	echo '<p class="description">Tick when it is not known which organisation this listing is: enrichment then proposes nothing for it.</p>';
 }
 
+// Save the Identity unresolved box (the date it was ticked is kept as its detail).
+add_action(
+	'save_post_aw_listing',
+	function ( $id ) {
+		if ( ! isset( $_POST['aw_enrich_identity_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_enrich_identity_nonce'] ), 'aw_enrich_identity' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
+			return;
+		}
+		$on  = ! empty( $_POST['aw_enrich_identity'] );
+		$was = aw_enrich_identity_unresolved( $id );
+		if ( $on !== $was ) {
+			aw_enrich_flag( $id, 'identity', $on ? wp_date( 'Y-m-d' ) : false );
+		}
+	}
+);
+
 function aw_enrich_flag_label( $k ) {
-	return array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate' )[ $k ] ?? $k;
+	return array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' )[ $k ] ?? $k;
 }
 
 /* ---------- Directory → Enrichment review ---------- */
@@ -304,7 +322,7 @@ function aw_enrich_review_page() {
 		$sel( 'state', $states, 'All states' );
 	}
 	$sel( 'field', array_map( fn( $f ) => $f[0], aw_enrich_fields() ), 'All fields' );
-	$sel( 'flag', array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate' ), 'Any flag' );
+	$sel( 'flag', array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' ), 'Any flag' );
 	submit_button( 'Filter', 'secondary', '', false );
 	echo '</form>';
 
