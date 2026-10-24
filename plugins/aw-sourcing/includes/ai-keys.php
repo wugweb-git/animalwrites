@@ -549,7 +549,7 @@ add_action(
 		@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- several test calls per key.
 		$saved = aw_ai_rows();
 		$rows  = isset( $_POST['aw_ai_order'] ) ? array() : $saved; // the list's order and removals are saved straight away (aw_ai_keys_list)
-		foreach ( (array) ( $_POST['aw_ai_order'] ?? array() ) as $i ) { // Kept rows, in the order shown.
+		foreach ( array_map( 'absint', (array) wp_unslash( $_POST['aw_ai_order'] ?? array() ) ) as $i ) { // Kept rows, in the order shown.
 			if ( isset( $saved[ (int) $i ] ) ) {
 				$rows[] = $saved[ (int) $i ];
 			}
@@ -659,19 +659,21 @@ function aw_ai_free_caps_table() {
 		echo '<p><em>No worker run has reported yet.</em></p>';
 		return;
 	}
-	echo '<table class="widefat striped"><thead><tr><th>Account</th><th>Daily limit</th><th>Left today</th><th>Last run could use</th><th>Last run used</th><th>Keys</th><th>Last run</th></tr></thead><tbody>';
+	$rows = array();
 	foreach ( $caps as $acct => $c ) {
-		$label = AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'];
-		$fresh = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
-		echo '<tr><td>' . esc_html( $label ) . ' <code>…' . esc_html( $acct ) . '</code></td>'
-			. '<td>' . esc_html( (string) $c['limit'] ) . '</td>'
-			. '<td>' . esc_html( $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)' ) . '</td>'
-			. '<td>' . esc_html( (string) $c['share'] ) . '</td>'
-			. '<td>' . esc_html( (string) $c['used'] ) . '</td>'
-			. '<td><code>' . esc_html( implode( ' ', array_map( fn( $k ) => '…' . $k, (array) $c['keys'] ) ) ) . '</code> (' . count( (array) $c['keys'] ) . ')</td>'
-			. '<td>' . esc_html( wp_date( 'j M, H:i', (int) $c['at'] ) . ( $c['workflow'] ? ' · ' . $c['workflow'] : '' ) ) . '</td></tr>';
+		$label  = AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'];
+		$fresh  = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
+		$rows[] = array(
+			'acct'  => esc_html( $label ) . ' <code>…' . esc_html( $acct ) . '</code>',
+			'limit' => esc_html( (string) $c['limit'] ),
+			'left'  => esc_html( $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)' ),
+			'share' => esc_html( (string) $c['share'] ),
+			'used'  => esc_html( (string) $c['used'] ),
+			'keys'  => '<code>' . esc_html( implode( ' ', array_map( fn( $k ) => '…' . $k, (array) $c['keys'] ) ) ) . '</code> (' . count( (array) $c['keys'] ) . ')',
+			'at'    => esc_html( wp_date( 'j M, H:i', (int) $c['at'] ) . ( $c['workflow'] ? ' · ' . $c['workflow'] : '' ) ),
+		);
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'caps', array( 'acct' => 'Account', 'limit' => 'Daily limit', 'left' => 'Left today', 'share' => 'Last run could use', 'used' => 'Last run used', 'keys' => 'Keys', 'at' => 'Last run' ), $rows );
 }
 
 /** The worker workflows that use the AI keys (animal-writes-workers, 22 Oct 2026), by their GitHub names, and when they run. */
@@ -755,7 +757,8 @@ function aw_ai_tier_summary( array $rows ) {
 		$g[ $t ][ $n ]['all']   = ( $g[ $t ][ $n ]['all'] ?? 0 ) + 1;
 		$g[ $t ][ $n ]['works'] = ( $g[ $t ][ $n ]['works'] ?? 0 ) + ( in_array( $r['status'], array( 'works', 'tool' ), true ) ? 1 : 0 );
 	}
-	echo '<h2>Keys by group</h2><table class="widefat striped"><thead><tr><th>Group</th><th>What it means</th><th>Providers (working / saved)</th></tr></thead><tbody>';
+	echo '<h2>Keys by group</h2>';
+	$rows = array();
 	foreach ( array_merge( array_keys( AW_AI_TIERS ), array( 'unknown' ) ) as $t ) {
 		if ( empty( $g[ $t ] ) ) {
 			continue;
@@ -764,9 +767,13 @@ function aw_ai_tier_summary( array $rows ) {
 		foreach ( $g[ $t ] as $n => $c ) {
 			$parts[] = $n . ' ' . $c['works'] . ' / ' . $c['all'];
 		}
-		echo '<tr><td><strong>' . esc_html( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ) . '</strong></td><td>' . esc_html( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ) . '</td><td>' . esc_html( implode( ' · ', $parts ) ) . '</td></tr>';
+		$rows[] = array(
+			'group' => '<strong>' . esc_html( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ) . '</strong>',
+			'means' => esc_html( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ),
+			'provs' => esc_html( implode( ' · ', $parts ) ),
+		);
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'groups', array( 'group' => 'Group', 'means' => 'What it means', 'provs' => 'Providers (working / saved)' ), $rows, array( 'empty' => 'No keys yet.' ) );
 }
 
 function aw_ai_keys_screen() {

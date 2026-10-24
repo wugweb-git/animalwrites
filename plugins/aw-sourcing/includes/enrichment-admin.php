@@ -344,7 +344,7 @@ function aw_enrich_review_page() {
 			$act[] = '<a class="button button-small' . ( 'approve' === $do ? ' button-primary' : '' ) . '" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_enrich_decide&do=' . $do . '&row[]=' . (int) $r['id'] ), 'aw_enrich_decide' ) ) . '">' . esc_html( $l ) . '</a>';
 		}
 		echo '<tr><th class="check-column"><input class="aw-er" type="checkbox" name="row[]" value="' . (int) $r['id'] . '"></th>'
-			. '<td><a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . $fl . '</td>'
+			. '<td><a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . wp_kses_post( $fl ) . '</td>'
 			. '<td>' . esc_html( $labels[ $r['field'] ][0] ?? $r['field'] ) . '</td>'
 			. '<td class="aw-enrich-val">' . aw_enrich_show( $r['field'], $cur ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
 			. '<td class="aw-enrich-val"><strong>' . aw_enrich_show( $r['field'], $r['value'] ) . '</strong>' . ( $r['note'] ? '<br><small>' . esc_html( $r['note'] ) . '</small>' : '' ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
@@ -364,53 +364,96 @@ function aw_enrich_review_page() {
 	echo '</div>';
 }
 
-/* ---------- Settings → Sourcing → Directory enrichment ---------- */
+/* ---------- Settings → Sourcing → Directory enrichment (Settings API) ---------- */
 
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['enrich'] = array( 'Directory enrichment', 'aw_enrich_settings_tab' );
+		$tabs['enrich'] = array( 'Directory enrichment', 'aw_enrich_settings_tab', true );
 		return $tabs;
 	}
 );
 
-function aw_enrich_settings_tab() {
-	$on   = aw_enrich_sources_on();
-	$prog = aw_enrich_progress();
-	echo '<h2>Directory enrichment</h2><p>The enrichment worker (GitHub, after the SEO scores at 05:15 IST) fills empty listing details from these sources. ' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked; ' . (int) $prog['pending'] . ' proposals in <a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review' ) ) . '">Enrichment review</a>.</p>';
-	echo '<table class="form-table" role="presentation"><tbody>';
-	foreach ( aw_enrich_sources() as $k => $s ) {
-		echo '<tr><th scope="row">' . esc_html( $s[0] ) . '</th><td><label><input type="checkbox" name="aw_enrich_src[' . esc_attr( $k ) . ']" value="1"' . checked( $on[ $k ], true, false ) . '> On</label><p class="description">' . esc_html( $s[3] ) . '</p></td></tr>';
-	}
-	$key = (string) get_option( 'aw_enrich_google_key', '' );
-	echo '<tr><th scope="row"><label for="aw-eg-key">Google Places key (live block)</label></th><td><input type="password" class="regular-text" id="aw-eg-key" name="aw_enrich_google_key" value="" placeholder="' . esc_attr( $key ? 'Saved (' . substr( $key, -4 ) . '). Type a new one to replace it' : 'Not set: the live Google block is hidden' ) . '" autocomplete="off"><p class="description">For the live Google rating, hours and open or closed on listing pages (cached 24 hours, never stored on the listing). Restrict the key to the Places API.</p></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-eg-cap">Live block: monthly cap (USD)</label></th><td><input type="number" min="0" step="1" id="aw-eg-cap" name="aw_enrich_live_cap" value="' . esc_attr( (string) get_option( 'aw_enrich_live_cap', '20' ) ) . '" style="width:6em"> <span class="description">Spent this month: $' . esc_html( number_format( aw_enrich_spent( 'live' ), 2 ) ) . ' live, $' . esc_html( number_format( aw_enrich_spent( 'worker' ), 2 ) ) . ' by the worker (its cap is the GitHub variable GOOGLE_PLACES_MONTHLY_BUDGET_USD).</span></td></tr>';
-	echo '</tbody></table>';
-}
-
 add_action(
-	'kits_sourcing_save_enrich',
+	'admin_init',
 	function () {
-		$in  = (array) wp_unslash( $_POST['aw_enrich_src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput
-		$new = array();
-		foreach ( array_keys( aw_enrich_sources() ) as $k ) {
-			$new[ $k ] = ! empty( $in[ $k ] );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_enrich_sources_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_google_key', array( 'type' => 'string', 'sanitize_callback' => 'aw_enrich_google_key_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_live_cap', array( 'type' => 'string', 'sanitize_callback' => fn( $v ) => (string) max( 0, (int) $v ) === (string) get_option( 'aw_enrich_live_cap', '20' ) ? get_option( 'aw_enrich_live_cap', '20' ) : (string) max( 0, (int) $v ), 'show_in_rest' => false ) );
+		add_settings_section(
+			'aw_enrich',
+			'',
+			function () {
+				$prog = aw_enrich_progress();
+				aw_sourcing_settings_marker( 'aw_enrich_sources', 'enrich' );
+				echo '<p>The enrichment worker (GitHub, after the SEO scores at 05:15 IST) fills empty listing details from these sources. ' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked; ' . (int) $prog['pending'] . ' proposals in <a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review' ) ) . '">Enrichment review</a>.</p>';
+			},
+			'aw-sourcing-enrich'
+		);
+		foreach ( aw_enrich_sources() as $k => $src ) {
+			add_settings_field(
+				'aw_enrich_src_' . $k,
+				$src[0],
+				function () use ( $k, $src ) {
+					echo '<label><input type="checkbox" id="aw-es-' . esc_attr( $k ) . '" name="aw_enrich_sources[' . esc_attr( $k ) . ']" value="1"' . checked( aw_enrich_sources_on()[ $k ], true, false ) . '> On</label><p class="description">' . esc_html( $src[3] ) . '</p>';
+				},
+				'aw-sourcing-enrich',
+				'aw_enrich'
+			);
 		}
-		$old = aw_enrich_sources_on();
-		update_option( 'aw_enrich_sources', $new, false );
-		$key = trim( sanitize_text_field( wp_unslash( $_POST['aw_enrich_google_key'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( '' !== $key ) {
-			update_option( 'aw_enrich_google_key', $key, false );
-		}
-		update_option( 'aw_enrich_live_cap', (string) max( 0, (int) ( $_POST['aw_enrich_live_cap'] ?? 20 ) ), false ); // phpcs:ignore WordPress.Security.NonceVerification
-		$changed = array();
-		foreach ( $new as $k => $v ) {
-			if ( $v !== $old[ $k ] ) {
-				$changed[] = aw_enrich_sources()[ $k ][0] . ( $v ? ' on' : ' off' );
-			}
-		}
-		if ( function_exists( 'kits_sourcing_log' ) ) {
-			kits_sourcing_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
-		}
+		add_settings_field(
+			'aw_enrich_google_key',
+			'Google Places key (live block)',
+			function () {
+				$key = (string) get_option( 'aw_enrich_google_key', '' );
+				echo '<input type="password" class="regular-text" id="aw-eg-key" name="aw_enrich_google_key" value="" placeholder="' . esc_attr( $key ? 'Saved (' . substr( $key, -4 ) . '). Type a new one to replace it' : 'Not set: the live Google block is hidden' ) . '" autocomplete="off"><p class="description">For the live Google rating, hours and open or closed on listing pages (cached 24 hours, never stored on the listing). Restrict the key to the Places API.</p>';
+			},
+			'aw-sourcing-enrich',
+			'aw_enrich',
+			array( 'label_for' => 'aw-eg-key' )
+		);
+		add_settings_field(
+			'aw_enrich_live_cap',
+			'Live block: monthly cap (USD)',
+			function () {
+				echo '<input type="number" min="0" step="1" class="small-text" id="aw-eg-cap" name="aw_enrich_live_cap" value="' . esc_attr( (string) get_option( 'aw_enrich_live_cap', '20' ) ) . '"> <span class="description">Spent this month: $' . esc_html( number_format( aw_enrich_spent( 'live' ), 2 ) ) . ' live, $' . esc_html( number_format( aw_enrich_spent( 'worker' ), 2 ) ) . ' by the worker (its cap is the GitHub variable GOOGLE_PLACES_MONTHLY_BUDGET_USD).</span>';
+			},
+			'aw-sourcing-enrich',
+			'aw_enrich',
+			array( 'label_for' => 'aw-eg-cap' )
+		);
 	}
 );
+
+function aw_enrich_settings_tab() {
+	echo '<h2>Directory enrichment</h2>';
+	aw_sourcing_settings_form( 'aw_sourcing_enrich', 'aw-sourcing-enrich' );
+}
+
+/** The sources' switches from the Directory enrichment tab (logged); any other save passes through. */
+function aw_enrich_sources_sanitize( $value ) {
+	if ( ! aw_sourcing_settings_tab( $value, 'enrich' ) ) {
+		return $value;
+	}
+	$old = aw_enrich_sources_on();
+	$new = array();
+	foreach ( array_keys( aw_enrich_sources() ) as $k ) {
+		$new[ $k ] = ! empty( $value[ $k ] );
+	}
+	$changed = array();
+	foreach ( $new as $k => $v ) {
+		if ( $v !== $old[ $k ] ) {
+			$changed[] = aw_enrich_sources()[ $k ][0] . ( $v ? ' on' : ' off' );
+		}
+	}
+	$key = trim( sanitize_text_field( wp_unslash( $_POST['aw_enrich_google_key'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- options.php checked the group's nonce
+	kits_sourcing_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
+	aw_sourcing_settings_saved();
+	return $changed ? $new : get_option( 'aw_enrich_sources' ); // no change: stored as it is
+}
+
+/** An empty key field keeps the saved key (the field never shows it). */
+function aw_enrich_google_key_sanitize( $value ) {
+	$value = trim( sanitize_text_field( (string) $value ) );
+	return '' === $value ? get_option( 'aw_enrich_google_key' ) : $value; // as stored (false when there is none: nothing is written)
+}

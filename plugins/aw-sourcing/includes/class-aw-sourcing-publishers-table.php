@@ -137,6 +137,14 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'host' );
 	}
 
+	/** A blocked publisher gets the plugins list's problem row under it. */
+	public function single_row( $item ) {
+		parent::single_row( $item );
+		if ( 'block' === ( $item['status'] ?? '' ) ) {
+			aw_sourcing_problem_row( $this, 'Blocked: new items from ' . $item['host'] . ' are refused when the workers send them. Items already on the site are unchanged.', 'error' );
+		}
+	}
+
 	protected function column_cb( $item ) {
 		$id = 'aw-h-' . md5( $item['host'] );
 		return '<input type="checkbox" name="hosts[]" value="' . esc_attr( $item['host'] ) . '" id="' . esc_attr( $id ) . '"><label for="' . esc_attr( $id ) . '" class="screen-reader-text">' . esc_html( 'Select ' . $item['host'] ) . '</label>';

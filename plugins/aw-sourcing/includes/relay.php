@@ -215,48 +215,72 @@ add_filter(
 	}
 );
 
-// Settings → Sourcing → Relay: the allow list and the log.
+// Settings → Sourcing → Relay: the allow list (Settings API, option aw_sources; see sourcing-lists.php) and the log.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs['relay'] = array( 'Relay', 'aw_relay_tab' );
+		$tabs['relay'] = array( 'Relay', 'aw_relay_tab', true );
 		return $tabs;
+	}
+);
+
+add_action(
+	'admin_init',
+	function () {
+		add_settings_section(
+			'aw_relay',
+			'',
+			function () {
+				aw_sourcing_settings_marker( 'aw_sources', 'relay' );
+				echo '<p>Publishers that refuse GitHub\'s servers but answer this site. When one answers the workers with 403, they ask this site to fetch the feed or page for them.</p>';
+			},
+			'aw-sourcing-relay'
+		);
+		add_settings_field( 'aw_relay_hosts', 'Hosts', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => aw_relay_hosts() ) ), 'aw-sourcing-relay', 'aw_relay', array( 'label_for' => 'aw-relay-hosts', 'name' => 'aw_sources[relay_hosts]', 'help' => 'One host per line; its subdomains are included.' ) );
 	}
 );
 
 /** Relay tab. */
 function aw_relay_tab() {
-	echo '<p>Publishers that refuse GitHub\'s servers but answer this site. When one answers the workers with 403, they ask this site to fetch the feed or page for them. One host per line; its subdomains are included.</p>';
-	echo '<textarea name="relay_hosts" class="large-text code" rows="6">' . esc_textarea( implode( "\n", aw_relay_hosts() ) ) . '</textarea>';
-	submit_button( 'Save' );
+	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-relay' );
 	$log = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
-	echo '<h3>Requests (last 200)</h3>';
-	if ( ! $log ) {
-		echo '<p>None yet.</p>';
-		return;
-	}
-	echo '<table class="widefat striped"><thead><tr><th>Time</th><th>Host</th><th>Path</th><th>Result</th><th>Size</th><th>Time taken</th><th>Note</th></tr></thead><tbody>';
+	echo '<h2>Requests (last 200)</h2>';
+	$rows = array();
 	foreach ( array_slice( $log, 0, 200 ) as $r ) {
-		echo '<tr><td>' . esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ) . '</td><td>' . esc_html( $r['host'] ) . '</td><td>' . esc_html( $r['path'] ) . '</td><td>' . esc_html( (string) $r['status'] ) . '</td><td>' . esc_html( size_format( (int) $r['bytes'] ) ) . '</td><td>' . (int) $r['ms'] . ' ms</td><td>' . esc_html( $r['note'] ) . '</td></tr>';
+		$rows[] = array(
+			'at'     => esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ),
+			'host'   => esc_html( $r['host'] ),
+			'path'   => esc_html( $r['path'] ),
+			'status' => esc_html( (string) $r['status'] ),
+			'bytes'  => esc_html( size_format( (int) $r['bytes'] ) ),
+			'ms'     => (int) $r['ms'] . ' ms',
+			'note'   => esc_html( $r['note'] ),
+			'_sort'  => array( 'at' => (int) $r['at'], 'bytes' => (int) $r['bytes'], 'ms' => (int) $r['ms'] ),
+		);
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table( 'requests', array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ), $rows, array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.' ) );
 }
 
-add_action(
-	'kits_sourcing_save_relay',
-	function () {
-		$c   = aw_sources_config();
+add_filter(
+	'aw_sources_save_relay',
+	function ( $c, $in ) {
 		$old = aw_relay_hosts();
 		$new = array();
-		foreach ( preg_split( '/[\s,]+/', strtolower( sanitize_textarea_field( wp_unslash( $_POST['relay_hosts'] ?? '' ) ) ) ) as $h ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
+		foreach ( preg_split( '/[\s,]+/', strtolower( sanitize_textarea_field( (string) ( $in['relay_hosts'] ?? '' ) ) ) ) as $h ) {
 			$h = preg_replace( '#^https?://#', '', trim( $h ) );
 			$h = trim( explode( '/', $h )[0], '.' );
 			if ( preg_match( '/^[a-z0-9-]+(\.[a-z0-9-]+)+$/', $h ) ) {
 				$new[] = $h;
 			}
 		}
-		$c['relay_hosts'] = array_values( array_unique( $new ) );
-		update_option( 'aw_sources', $c, false );
+		$new = array_values( array_unique( $new ) );
+		if ( $new === $old ) {
+			return $c; // unchanged: the built-in list stays built in (no relay_hosts key written)
+		}
+		$c['relay_hosts'] = $new;
 		kits_sourcing_log( 'relay', kits_sourcing_diff( 'relay hosts', $old, $c['relay_hosts'] ) );
-	}
+		return $c;
+	},
+	10,
+	2
 );

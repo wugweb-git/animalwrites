@@ -391,7 +391,7 @@ add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
 		if ( current_user_can( 'manage_options' ) ) {
-			$tabs['rejected'] = array( 'Rejected', 'aw_relevance_rejected_tab' );
+			$tabs['rejected'] = array( 'Rejected', 'aw_relevance_rejected_tab', true ); // nothing to save: not in the screen's form (its search is a GET form)
 		}
 		return $tabs;
 	},
@@ -405,16 +405,30 @@ function aw_relevance_rejected_tab() {
 	}
 	$log = (array) get_option( AW_RELEVANCE_LOG, array() );
 	echo '<p>' . esc_html( sprintf( 'Rejected: %d', count( $log ) ) ) . '</p>';
-	if ( ! $log ) {
-		return;
-	}
-	echo '<table class="wp-list-table widefat fixed striped"><thead><tr><th>Item</th><th style="width:9%">Type</th><th style="width:16%">Found by</th><th style="width:30%">Reason</th><th style="width:12%">Date</th></tr></thead><tbody>';
+	$rows = array();
+	$pubs = aw_publishers();
 	foreach ( $log as $e ) {
-		$host = (string) wp_parse_url( (string) ( $e['url'] ?? '' ), PHP_URL_HOST );
-		echo '<tr><td><a href="' . esc_url( (string) ( $e['url'] ?? '' ) ) . '" target="_blank" rel="noopener">' . esc_html( (string) ( $e['title'] ?? '' ) ?: $host ) . '</a><br><span style="color:#50575e">' . esc_html( $host ) . '</span></td>'
-			. '<td>' . esc_html( (string) ( $e['type'] ?? '' ) ) . '</td><td>' . esc_html( '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['reason'] ?? '' ) ) . '</td><td>' . esc_html( (string) ( $e['at'] ?? '' ) ) . '</td></tr>';
+		$url    = (string) ( $e['url'] ?? '' );
+		$host   = (string) wp_parse_url( $url, PHP_URL_HOST );
+		$title  = (string) ( $e['title'] ?? '' );
+		$found  = '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' );
+		$rows[] = array(
+			'item'   => '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $title ? $title : $host ) . '</a><br><span class="description">' . esc_html( $host ) . '</span>',
+			'type'   => esc_html( (string) ( $e['type'] ?? '' ) ),
+			'found'  => esc_html( $found ),
+			'reason' => esc_html( (string) ( $e['reason'] ?? '' ) ),
+			'at'     => esc_html( (string) ( $e['at'] ?? '' ) ),
+			'_find'  => $title . ' ' . $host . ' ' . $found . ' ' . ( $e['reason'] ?? '' ),
+			// An allowed publisher's item is rarely refused: worth a look (problem row).
+			'_problem' => 'allow' === ( $pubs[ aw_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . aw_host( $url ) . '): check whether it should have been kept.' : '',
+		);
 	}
-	echo '</tbody></table>';
+	aw_sourcing_simple_table(
+		'rejected',
+		array( 'item' => 'Item', 'type' => 'Type', 'found' => 'Found by', 'reason' => 'Reason', 'at' => 'Date' ),
+		$rows,
+		array( 'per_page' => 50, 'sortable' => array( 'type', 'found', 'at' ), 'empty' => 'Nothing rejected.', 'search' => 'Search rejected items', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'rejected' ) )
+	);
 }
 
 // Dashboard: the same alert while items are held (owner, 12 Oct 2026); it clears after a run where the check works.
