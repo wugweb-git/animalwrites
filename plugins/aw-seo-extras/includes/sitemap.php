@@ -95,6 +95,33 @@ add_filter(
 
 add_filter( 'rank_math/sitemap/post_type_archive_link', '__return_false' );
 
+/**
+ * Published profiles with no contact (aw_listing_unreachable() in robots.php), as an ID-keyed set: one query per
+ * sitemap request instead of a meta lookup per listing. Listings with no stored score count as candidates and are
+ * checked one by one (that also stores their score).
+ */
+function aw_sitemap_unreachable_listings() {
+	static $set = null;
+	if ( null !== $set ) {
+		return $set;
+	}
+	global $wpdb;
+	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		"SELECT p.ID FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score'
+		WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
+		AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' ) AND TRIM( m.meta_value ) <> '' )"
+	);
+	$set = array();
+	_prime_post_caches( array_map( 'intval', $ids ), false, true );
+	foreach ( $ids as $id ) {
+		if ( aw_listing_unreachable( (int) $id ) ) {
+			$set[ (int) $id ] = true;
+		}
+	}
+	return $set;
+}
+
 add_filter(
 	'rank_math/sitemap/entry',
 	function ( $url, $type, $obj ) {
@@ -104,7 +131,8 @@ add_filter(
 		}
 		$closed = 'aw_opportunity' === $obj->post_type && function_exists( 'aw_retention_state' ) && aw_retention_state( $obj );
 		$merged = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
-		if ( '' === (string) $obj->post_name || $closed || $merged || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $obj->ID, kits_preview_only_ids(), true ) ) ) {
+		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (robots.php)
+		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || ( function_exists( 'kits_preview_only_ids' ) && in_array( (int) $obj->ID, kits_preview_only_ids(), true ) ) ) {
 			return false;
 		}
 		return $url;

@@ -7,6 +7,7 @@
  *
  * - Closed opportunities (past their deadline or review date): noindex, links followed.
  * - Directory district × type pages with no listings (AW_THIN_DISTRICT_TYPE = 1): noindex.
+ * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
@@ -71,6 +72,34 @@ function aw_is_thin_directory_page() {
 	return true; // no listings of this type here
 }
 
+/**
+ * Owner, 24 Oct 2026: a Directory profile with no way to reach the organisation (no phone, WhatsApp, email, website or
+ * social profile) is noindex (links followed) and out of the sitemap, so Google spends its crawl on profiles worth
+ * indexing. It becomes indexable again by itself once a contact is added (enrichment, claim or edit). Profiles with
+ * Search Console impressions stay indexed: their IDs are in the option aw_seo_keep_listings (set with WP-CLI from the
+ * Search Console export of 24 Oct 2026, 901 profiles).
+ */
+function aw_listing_unreachable( $id ) {
+	$id = (int) $id;
+	if ( 'aw_listing' !== get_post_type( $id ) || in_array( $id, array_map( 'intval', (array) get_option( 'aw_seo_keep_listings', array() ) ), true ) ) {
+		return false;
+	}
+	$score = get_post_meta( $id, 'aw_contact_score', true );
+	if ( '' === $score && function_exists( 'aw_contact_score' ) ) {
+		$score = aw_contact_score( $id ); // listings imported without a contact never got the stored score
+		update_post_meta( $id, 'aw_contact_score', $score );
+	}
+	if ( (int) $score > 0 ) {
+		return false;
+	}
+	foreach ( array( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' ) as $k ) {
+		if ( '' !== trim( (string) get_post_meta( $id, $k, true ) ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /** Whether the current view is an item or list kept out of search engines by a rule of its state. */
 function aw_seo_noindex_rule() {
 	if ( is_singular( 'aw_opportunity' ) && function_exists( 'aw_retention_state' ) && aw_retention_state( get_queried_object() ) ) {
@@ -78,6 +107,9 @@ function aw_seo_noindex_rule() {
 	}
 	if ( is_post_type_archive( 'web-story' ) && ! (int) ( wp_count_posts( 'web-story' )->publish ?? 0 ) ) {
 		return true; // the Web Stories archive while it has no published story (it is also out of the sitemap: Rank Math)
+	}
+	if ( is_singular( 'aw_listing' ) && aw_listing_unreachable( get_queried_object_id() ) ) {
+		return true; // a profile with no contact (also out of the sitemap: sitemap.php)
 	}
 	return aw_is_thin_directory_page();
 }
