@@ -1,6 +1,6 @@
 # Promotion plan: Animal Writes child → Kits master (`kits-by-wugweb`)
 
-Status: **approved 2026-10-07; steps 1, 2, 3 and 5 done** (step 4, attribution + sourcing into Kits Core, remains optional).
+Status: **approved 2026-10-07; steps 1, 2, 3 and 5 done** (step 4, attribution into Kits Core, remains optional; sourcing moved to the AW Sourcing plugin, and Kits Core holds no site-specific code. SEO is Rank Math + AW SEO extras and ads are Advanced Ads, so the `seo.php` and `ads.php` steps below are history).
 Every step was checked against a baseline of computed styles and boxes for every visible element on 18 pages at 1280px and 375px:
 identical except the live visit counter. SEO/GTM head output byte-identical after step 3.
 

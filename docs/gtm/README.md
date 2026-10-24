@@ -1,5 +1,7 @@
 # GTM container import (Animal Writes)
 
+**Do not full-import this export (owner, 22 Oct 2026): it is stale. Add new tags, triggers and variables by hand; verify in Preview only.**
+
 File: `animalwrites-container.json` — for container GTM-TB3FCFQB.
 
 Status (14 Oct 2026): published in GTM; Site Kit's own GA4 tag is off and `kits_ga4_via_gtm` = 1, so GA4 counts
@@ -9,7 +11,7 @@ only through GTM (no double counting). To update a published container with a ne
 
 First import:
 
-1. GTM → Admin → Import container → choose the file → workspace "Default" → **Merge** → "Rename conflicting tags".
+1. GTM → Admin → Import container → choose the file → workspace "Default" → **Merge** → "Overwrite conflicting tags, triggers and variables" (never Rename).
 2. Preview on animalwrites.in, click around (search, a phone link, a PDF), check the events arrive in GA4 DebugView.
 3. Submit / Publish the container.
 4. Tell Claude Code it is published: it then switches off Site Kit's direct GA4 tag (option `kits_ga4_via_gtm` = 1),

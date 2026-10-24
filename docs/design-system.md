@@ -187,7 +187,7 @@ Hierarchy: controls (inputs, buttons) are tightest, cards and media softer, the 
 ### Breakpoints
 Breakpoints (Kits tokens.json): mobile designed and tested at 375px · md 768px · lg 1200px. Fluid type scales from 375 to 1200. No other breakpoints.
 
-A component that must change layout at another width uses a container query (or an auto-fill/minmax grid) inside the component, never a new global media query. QA widths: 375, then either side of each breakpoint: 767 / 768 / 769 and 1199 / 1200 / 1201; also check 640 and 1024 as extra widths.
+A component that must change layout at another width uses a container query (or an auto-fill/minmax grid) inside the component, never a new global media query. QA widths: 375, then either side of each breakpoint: 767 / 768 / 769 and 1199 / 1200 / 1201; also check 1024 as an extra width.
 
 `sm` 0, `md` 768, `lg` 1200 are declared once in `tokens.json` → `$breakpoints`. Width media queries (CSS, inline PHP styles) and `matchMedia` in JS use only `min-width: 768px` / `max-width: 767px` and `min-width: 1200px` / `max-width: 1199px`; the deploy check `tools/ci/breakpoint_check.py` fails on any other width.
 
@@ -230,7 +230,7 @@ Each entry: anatomy, variants, tokens, behaviour, where it is used.
 ### Media
 - **Anatomy:** one of: remote publisher image (`aw_source_image`), WordPress featured image, PDF first page (`aw_file_id` preview), logo (contain, circle), placard fallback.
 - **Resolution order:** remote image → PDF first page → featured image → placard. Same order for cards, section visuals and the share (og:image) image.
-- **Code:** `includes/media.php` (`aw_placard_html`, featured-image filter), `includes/sections.php` (`aw_section_tile`), `includes/seo.php`.
+- **Code:** `includes/media.php` (`aw_placard_html`, featured-image filter), `includes/sections.php` (`aw_section_tile`); share images in aw-seo-extras `includes/opengraph.php` and `includes/helpers.php`.
 
 ### Section header
 - **Anatomy:** h1 → one-line description → count ("12 documents") → three-tile visual (photos, covers or placards; real assets only).
@@ -239,7 +239,7 @@ Each entry: anatomy, variants, tokens, behaviour, where it is used.
 
 ### Form field (shared by volunteer, receipt and claim forms)
 - **Anatomy:** label (+ "(optional)") → hint → control → error slot.
-- **Code:** `aw_field()` in `plugins/animal-writes-core/includes/forms.php`; client behaviour in `aw.js` section 4.
+- **Code:** `aw_field()` in `plugins/kits-core/includes/forms.php` (the site's own forms are Fluent Forms); client behaviour in `aw.js` section 4.
 - **Tokens:** `size-control`, `radius-control`, `border-control`, `color-danger(-soft)`, `color-success`, `color-focus`.
 - **Behaviour:** validates when a field loses focus, then live while it is invalid; on submit, an error summary is focused with links to each field. The server applies the same rules and returns per-field errors with what the person typed (`?aw_err=` token, 10 minutes), so the form works the same without JavaScript.
 - **Rules:** required, email, phone (8–15 digits, optional +), https link, max length, file type and size.
@@ -285,7 +285,7 @@ Lucide line icons (ISC licence) as CSS masks, so each is one `<span>` that takes
 Brand column (wordmark, one line, email with icon, social icon buttons), Explore (two columns), Animal Writes links; bottom bar with copyright, visit count, Terms, Privacy, Disclaimer and **Powered by Wugweb** (pill, links to wugweb.com).
 
 ### Other components
-PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, testimonials (shown only with consent), ad slots, details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
+PDF viewer (inline document + download + official source), helplines grid, data table, countdown and live counts, steps, ad placements (Advanced Ads block), details/FAQ (+ rotates to ×), pagination, search, print button. All use the same tokens and states.
 
 ## One orchestrated moment
 Only the homepage hero animates on entry (`aw-rise`, once per session). Everything else is still until someone interacts.

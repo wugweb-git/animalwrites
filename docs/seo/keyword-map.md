@@ -7,7 +7,7 @@
 - Rank Math free scores up to 5 keywords. Secondary keywords are set only where they add something: the hubs, the topics and the 16 guides.
 - No keyword tool with Indian volumes was available (the Ahrefs plan does not include Keywords Explorer). Intent and priority below come from:
   - reading the pages and their own copy;
-  - the 10 Oct 2026 keyword audit (`docs/seo-2026-10-10/02-keyword.md`);
+  - the 10 Oct 2026 keyword audit (not kept in this repo);
   - how the queries are phrased.
 - Re-check against Search Console queries once there are 3 months of 2.0 data.
 - **Demand column (added 15 Oct 2026).** The data and method are in `docs/seo/keyword-demand-2026-10-15.md`.
@@ -59,7 +59,7 @@ Type vocabulary that people search for, and the listing type behind each:
 - wildlife rescue → Wildlife Rescue (60)
 - animal ngo → Animal Welfare Organisation (3,891)
 
-The thin-page rules from Phase 1 still apply: thin district × type pages stay out of the index.
+The thin-page rules from Phase 1 still apply: district × type pages with no listings stay out of the index; a page with 1 or more listings is indexed (threshold 1, 21 Oct 2026).
 
 ## 3. Topics (18 topic archives plus /topics/)
 
