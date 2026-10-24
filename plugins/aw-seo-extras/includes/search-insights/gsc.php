@@ -7,6 +7,10 @@
  * - The last 4 days are fetched again every morning (Google finalises data 2–3 days late) and replace what was stored.
  * - A backfill walks back to 90 days, 15 days per run, so 28-day comparisons work from the first week.
  * - Fetch first, then replace: a failed day keeps its stored rows.
+ * - Over 5,000 rows: Site Kit does not pass Google's startRow, so query + page rows of such a day are fetched again
+ *   page by page (its only filter), for up to 50 pages with the most impressions. The day stays marked truncated only
+ *   while pages with impressions are left over, or a single page still returns 5,000 rows. The query-only list (q)
+ *   cannot be split this way; its missing tail is the rarest searches, and their records still come from the split.
  *
  * Rows in obs: src gsc, period day; metric total (kw 0), q (query, page ''), qp (query + page), p (page, kw 0: the
  * page's full figures, including the searches Google hides, which qp rows leave out).
@@ -23,6 +27,7 @@ const AW_SI_GSC_REFETCH  = 4;
 const AW_SI_GSC_BACKFILL = 90;
 const AW_SI_GSC_PER_RUN  = 15;
 const AW_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit, so the run is always logged.
+const AW_SI_GSC_SPLIT    = 50; // Pages fetched one by one on a day whose query + page rows hit the limit.
 
 /**
  * One searchanalytics request for one day: aw_sd_query() of search-demand.php, for a single date.
@@ -30,10 +35,56 @@ const AW_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit
  * @param object $module Site Kit's Search Console module.
  * @param array  $dims   Dimensions, e.g. date + query.
  * @param string $day    Date (Y-m-d).
+ * @param string $url    Only this page (full URL), or '' for the whole site.
  * @return array|WP_Error Rows as [keys, clicks, impressions, position].
  */
-function aw_si_gsc_rows( $module, array $dims, string $day ) {
-	return aw_sd_query( $module, $dims, $day, $day );
+function aw_si_gsc_rows( $module, array $dims, string $day, string $url = '' ) {
+	return aw_sd_query( $module, $dims, $day, $day, $url );
+}
+
+/**
+ * Query + page rows of a day over the row limit, fetched again page by page for the pages with the most impressions.
+ *
+ * @param object $module Site Kit's Search Console module.
+ * @param string $day    Date (Y-m-d).
+ * @param array  $qp     The truncated query + page rows.
+ * @param array  $pages  The day's page rows (date + page), for the page list and its order.
+ * @param float  $until  Stop starting new page calls after this time (microtime), 0 for no limit.
+ * @return array|WP_Error array{rows: array, pages: int, left: int, full: bool} rows replaces $qp; left counts pages with
+ *                        impressions not fetched one by one; full is true when a single page also hit the limit.
+ */
+function aw_si_gsc_split_qp( $module, string $day, array $qp, array $pages, float $until = 0 ) {
+	usort( $pages, fn( $a, $b ) => $b[2] <=> $a[2] );
+	$pages = array_values( array_filter( $pages, fn( $r ) => $r[2] > 0 && '' !== (string) ( $r[0][1] ?? '' ) ) );
+	$split = array();
+	$rows  = array();
+	$full  = false;
+	foreach ( array_slice( $pages, 0, AW_SI_GSC_SPLIT ) as $p ) {
+		if ( $until && microtime( true ) > $until ) {
+			break; // Out of time: the pages left keep the first request's rows, and the day stays marked truncated.
+		}
+		$url = (string) $p[0][1];
+		$got = aw_si_gsc_rows( $module, array( 'date', 'query' ), $day, $url );
+		if ( is_wp_error( $got ) ) {
+			return $got;
+		}
+		$full          = $full || count( $got ) >= AW_SI_GSC_LIMIT;
+		$split[ $url ] = true;
+		foreach ( $got as $r ) {
+			$rows[] = array( array( $r[0][0] ?? $day, (string) ( $r[0][1] ?? '' ), $url ), $r[1], $r[2], $r[3] );
+		}
+	}
+	foreach ( $qp as $r ) {
+		if ( ! isset( $split[ (string) ( $r[0][2] ?? '' ) ] ) ) {
+			$rows[] = $r; // Pages not fetched one by one keep the rows of the first request.
+		}
+	}
+	return array(
+		'rows'  => $rows,
+		'pages' => count( $split ),
+		'left'  => max( 0, count( $pages ) - count( $split ) ),
+		'full'  => $full,
+	);
 }
 
 /**
@@ -41,9 +92,10 @@ function aw_si_gsc_rows( $module, array $dims, string $day ) {
  *
  * @param object $module Site Kit's Search Console module.
  * @param string $day    Date (Y-m-d).
+ * @param float  $until  Time (microtime) after which no more per-page calls start; 0 for no limit.
  * @return array|WP_Error array{total: array, q: array, qp: array, truncated: string[]}
  */
-function aw_si_gsc_fetch_day( $module, string $day ) {
+function aw_si_gsc_fetch_day( $module, string $day, float $until = 0 ) {
 	$out = array( 'truncated' => array() );
 	foreach ( array(
 		'total' => array( 'date' ),
@@ -59,6 +111,17 @@ function aw_si_gsc_fetch_day( $module, string $day ) {
 			$out['truncated'][] = $key;
 		}
 		$out[ $key ] = $rows;
+	}
+	if ( in_array( 'qp', $out['truncated'], true ) ) {
+		$split = aw_si_gsc_split_qp( $module, $day, $out['qp'], $out['p'], $until );
+		if ( is_wp_error( $split ) ) {
+			return $split;
+		}
+		$out['qp']    = $split['rows'];
+		$out['split'] = $split['pages'];
+		if ( ! $split['left'] && ! $split['full'] ) {
+			$out['truncated'] = array_values( array_diff( $out['truncated'], array( 'qp' ) ) );
+		}
 	}
 	return $out;
 }
@@ -192,7 +255,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 					$rep['stopped'] = $day; // The backfill goes on from here next run.
 					break;
 				}
-				$data = aw_si_gsc_fetch_day( $module, $day );
+				$data = aw_si_gsc_fetch_day( $module, $day, $start + AW_SI_GSC_BUDGET );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
 					$rep['error'] = sprintf( __( 'Search Console could not be read for %1$s: %2$s', 'aw-seo-extras' ), $day, $data->get_error_message() );
@@ -200,6 +263,9 @@ function aw_si_gsc_run( array $args = array() ): array {
 				}
 				if ( $data['truncated'] ) {
 					$rep['truncated'][ $day ] = $data['truncated'];
+				}
+				if ( ! empty( $data['split'] ) ) {
+					$rep['split'][ $day ] = $data['split'];
 				}
 				$n = $dry ? count( $data['q'] ) + count( $data['qp'] ) + count( $data['total'] ) : aw_si_gsc_store_day( $day, $data );
 				if ( is_wp_error( $n ) ) {
@@ -242,6 +308,7 @@ function aw_si_gsc_run( array $args = array() ): array {
 					'days'      => count( $done ),
 					'rows'      => $report['rows'],
 					'truncated' => $report['truncated'],
+					'split'     => $report['split'] ?? array(),
 					'up_to'     => $done ? max( $done ) : '',
 				)
 			);

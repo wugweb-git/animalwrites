@@ -228,7 +228,7 @@ function aw_si_dry_report( string $day ): array {
 	$brand = array();
 	$acts  = array();
 	foreach ( $rec as $r ) {
-		$d = aw_si_decide( $r['trends'], $r['impr'], $r['pos'], $r['live'], array_keys( $r['owners'] ), $r['has_page'], $r['top'] );
+		$d = aw_si_decide( $r['trends'], $r['impr'], $r['pos'], $r['live'], array_keys( $r['owners'] ), $r['has_page'], $r['top'], aw_si_ctx( $r, array() ) );
 		++$views['all'];
 		++$views[ $d['priority'] ];
 		$views['gap']       += 'gap' === $d['status'] ? 1 : 0;

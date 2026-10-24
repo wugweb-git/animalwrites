@@ -4,7 +4,7 @@
  *
  * Two kinds of question:
  * - Data-driven (Directory listings, Library documents): a registry in code, aw_faq_registry(). Each entry is a question
- *   template, the fields it needs, an answer built from those fields, a priority (search-demand order) and the search
+ *   template, the fields it needs, an answer built from those fields, a priority (Search Insights demand order) and the search
  *   pattern it targets. Nothing is stored per page; the answers are the page's own fields.
  * - Topic (organisation types, distinct services, categories; the Directory, Volunteer, Claim and Opportunities pages):
  *   FAQ items stored on the term or page (meta aw_faq, JSON): question, answer, sources, target keyword, status

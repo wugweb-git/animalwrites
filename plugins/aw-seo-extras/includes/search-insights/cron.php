@@ -39,6 +39,11 @@ function aw_si_daily( bool $by_hand = false ): array {
 		aw_si_run_fail( 'roles', $e->getMessage() );
 	}
 	$out['compute'] = aw_si_compute();
+	try {
+		$out['topics'] = aw_si_sync_topics(); // After the calculation: it reads the page Google shows most.
+	} catch ( Throwable $e ) {
+		aw_si_run_fail( 'roles', $e->getMessage() );
+	}
 	return $out;
 }
 add_action( AW_SI_CRON_DAILY, fn() => aw_si_daily() );

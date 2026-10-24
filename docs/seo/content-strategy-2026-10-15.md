@@ -69,7 +69,7 @@ Item counts are published items on 15 Oct 2026, by type (News, Library, Resource
 - **Week 1:** the owner reviews drafts 13797, 13800 and 13798. Publish the AWBI and 1962 guides when approved; keep World Animal Day ready for September.
 - **Weeks 2–3:** adjust the secondaries on the two emergency guides (item 3 above). Change the Adoption guide's secondary to "dog adoption".
 - **Weeks 3–6:** Library "PDF" descriptions (owner's call). Start the phone enrichment worker on the districts with impressions: Gwalior, Bareilly, Azamgarh, Hardoi, Unnao, Bilaspur, Shimla, Jammu, Alappuzha, Ludhiana and Haridwar.
-- **Weeks 6–12:** re-run search demand (Search Console 2.0 data). Decide on P3 items 6 and 7.
+- **Weeks 6–12:** re-run Search Insights (Tools → Search Insights; Search Console 2.0 data). Decide on P3 items 6 and 7.
 - **Every September:** re-check World Animal Day facts (the year's theme on worldanimalday.org) and update the draft's theme table.
 
 ## 5. Internal linking plan

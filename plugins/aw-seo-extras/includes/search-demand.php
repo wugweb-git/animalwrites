@@ -88,10 +88,24 @@ function aw_sd_sitekit(): array {
 	return array( $module, '', $owner );
 }
 
-/** Rows of one searchanalytics request as plain arrays: keys, clicks, impressions, position. */
-function aw_sd_query( $module, array $dims, string $start, string $end ) {
+/**
+ * Rows of one searchanalytics request as plain arrays: keys, clicks, impressions, position.
+ * $url limits the rows to one page (Site Kit's only filter; it does not pass startRow, so this is how a day over the
+ * 5,000-row limit is split).
+ *
+ * @param object $module Site Kit's Search Console module.
+ * @param array  $dims   Dimensions.
+ * @param string $start  First date (Y-m-d).
+ * @param string $end    Last date (Y-m-d).
+ * @param string $url    Only this page (full URL), or '' for the whole site.
+ */
+function aw_sd_query( $module, array $dims, string $start, string $end, string $url = '' ) {
+	$args = array( 'dimensions' => $dims, 'startDate' => $start, 'endDate' => $end, 'limit' => 5000 );
+	if ( '' !== $url ) {
+		$args['url'] = $url;
+	}
 	try {
-		$r = $module->get_data( 'searchanalytics', array( 'dimensions' => $dims, 'startDate' => $start, 'endDate' => $end, 'limit' => 5000 ) );
+		$r = $module->get_data( 'searchanalytics', $args );
 	} catch ( Throwable $e ) {
 		return new WP_Error( 'aw_sd', $e->getMessage() );
 	}
