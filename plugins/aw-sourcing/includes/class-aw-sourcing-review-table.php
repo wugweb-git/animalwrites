@@ -99,7 +99,7 @@ class AW_Sourcing_Review_Table extends WP_List_Table {
 		$items = aw_review_items( $this->type );
 		$s     = mb_strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( '' !== $s ) {
-			$items = array_values( array_filter( $items, fn( $p ) => false !== strpos( mb_strtolower( $p->post_title . ' ' . $p->post_excerpt . ' ' . get_post_meta( $p->ID, 'aw_source_url', true ) ), $s ) ) );
+			$items = array_values( array_filter( $items, fn( $p ) => false !== strpos( mb_strtolower( $p->post_title . ' ' . $p->post_excerpt . ' ' . $this->source_url( $p ) ), $s ) ) ); // the source address, or a Press item's coverage address
 		}
 		$by = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( in_array( $by, array( 'title', 'type' ), true ) || ( 'received' === $by && 'asc' === sanitize_key( $_GET['order'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
