@@ -1,6 +1,7 @@
 <?php
 /**
- * Tools → Search demand (15 Oct 2026): what people search and how Animal Writes shows up for it.
+ * Tools → Search Insights (15 Oct 2026; called Search demand until 24 Oct 2026, the address and option keep that name):
+ * what people search and how Animal Writes shows up for it.
  *
  * - One table (owner, 15 Oct 2026): every Search Console query of the latest 3 months merged with the keyword map's
  *   target phrases, ranked by Importance; Gaps sit collapsed under it. No filters, no CSV.
@@ -10,7 +11,12 @@
  *   connection; this file never reads its tokens.
  * - The keyword map, gaps, Google Trends, autocomplete and Wikipedia figures are a fixed snapshot of
  *   docs/seo/keyword-map.md and docs/seo/keyword-demand-2026-10-15.md (bump AW_SD_STATIC_VERSION when they change).
- * - Everything sits in one option, aw_search_demand (not autoloaded).
+ * - Everything sits in one option, aw_search_demand (not autoloaded). Since 24 Oct 2026 it also keeps each page's
+ *   clicks and impressions per period (pages), for the per-keyword sourcing figures.
+ * - Rising (24 Oct 2026): a search with at least 5 impressions in the last 28 days whose 28 days hold at least twice
+ *   its 3-month average for 28 days (new searches qualify).
+ * - With AW Sourcing (soft link, either may be off): the sourcing keywords table here (filter aw_sourcing_keyword_items),
+ *   and the searches with demand offered to Settings → Sourcing as suggestions (filter aw_search_demand_terms).
  *
  * @package aw-seo-extras
  */
@@ -224,6 +230,87 @@ function aw_sd_sum( array $rows ): array {
 	return array( 'clicks' => $c, 'impr' => $i, 'pos' => $i ? round( $p / $i, 1 ) : 0 );
 }
 
+/** Page rows as path => [clicks, impressions, position]. */
+function aw_sd_pages( array $rows, string $home ): array {
+	$out = array();
+	foreach ( $rows as $r ) {
+		$out[ aw_sd_path( (string) ( $r[0][0] ?? '' ), $home ) ] = array( $r[1], $r[2], round( $r[3], 1 ) );
+	}
+	return $out;
+}
+
+/** A URL as the path Search Console rows are kept under. */
+function aw_sd_path( string $url, string $home = '' ): string {
+	$path = str_replace( array( '' !== $home ? $home : untrailingslashit( home_url() ), 'https://www.animalwrites.in', 'https://animalwrites.in' ), '', $url );
+	return '' === $path ? '/' : $path;
+}
+
+/** Rising: at least 5 impressions in the last 28 days and at least twice the 3-month average for 28 days. */
+function aw_sd_rising( int $impr28, int $impr3m, array $data ): bool {
+	$p    = $data['gsc']['periods']['3m'] ?? array();
+	$days = ! empty( $p['start'] ) ? max( 28, (int) round( ( strtotime( $p['end'] ) - strtotime( $p['start'] ) ) / DAY_IN_SECONDS ) + 1 ) : 91;
+	return $impr28 >= 5 && $impr28 >= 2 * max( $impr3m, $impr28 ) * 28 / $days;
+}
+
+/** The last 28 days' searches: normalised query => [clicks, impressions, position]. */
+function aw_sd_28d( array $data ): array {
+	$out = array();
+	foreach ( (array) ( $data['gsc']['periods']['28d']['queries'] ?? array() ) as $r ) {
+		$out[ aw_sd_norm( (string) $r[0] ) ] = array( (int) $r[1], (int) $r[2], (float) $r[3] );
+	}
+	return $out;
+}
+
+/**
+ * Searches for AW Sourcing's suggestions: every search of the last 3 months (and any newer one), with its figures for
+ * the last 28 days.
+ *
+ * @return array<int, array{q:string, impr:int, clicks:int, pos:float, impr3m:int, brand:bool, rising:bool}>
+ */
+function aw_sd_demand_terms(): array {
+	$data = aw_sd_get();
+	$d28  = aw_sd_28d( $data );
+	$out  = array();
+	$seen = array();
+	foreach ( (array) ( $data['gsc']['periods']['3m']['queries'] ?? array() ) as $r ) {
+		$q          = aw_sd_norm( (string) $r[0] );
+		$m          = $d28[ $q ] ?? array( 0, 0, 0 );
+		$seen[ $q ] = true;
+		$out[]      = array( 'q' => $q, 'impr' => $m[1], 'clicks' => $m[0], 'pos' => $m[2], 'impr3m' => (int) $r[2], 'brand' => (bool) $r[5], 'rising' => aw_sd_rising( $m[1], (int) $r[2], $data ) );
+	}
+	foreach ( $d28 as $q => $m ) { // A search of the last 28 days that the 3-month list (5,000 rows) did not reach.
+		if ( empty( $seen[ $q ] ) ) {
+			$out[] = array( 'q' => $q, 'impr' => $m[1], 'clicks' => $m[0], 'pos' => $m[2], 'impr3m' => $m[1], 'brand' => (bool) preg_match( AW_SD_BRAND, $q ), 'rising' => aw_sd_rising( $m[1], $m[1], $data ) );
+		}
+	}
+	return $out;
+}
+add_filter( 'aw_search_demand_terms', fn() => aw_sd_demand_terms() );
+
+/**
+ * Search Console figures of a set of items, added up over a period ('28d' or '3m').
+ *
+ * @param int[]      $ids    Post IDs.
+ * @param string     $period Period key.
+ * @param array|null $data   The stored snapshot (read when not given).
+ * @return array{clicks:int, impr:int, pages:int}
+ */
+function aw_sd_items_metrics( array $ids, string $period = '28d', ?array $data = null ): array {
+	$data  = $data ?? aw_sd_get();
+	$pages = (array) ( $data['gsc']['periods'][ $period ]['pages'] ?? array() );
+	$out   = array( 'clicks' => 0, 'impr' => 0, 'pages' => 0 );
+	foreach ( array_unique( array_map( 'intval', $ids ) ) as $id ) {
+		$url = get_permalink( $id );
+		$m   = $url ? ( $pages[ aw_sd_path( $url ) ] ?? null ) : null;
+		if ( $m ) {
+			$out['clicks'] += (int) $m[0];
+			$out['impr']   += (int) $m[1];
+			++$out['pages'];
+		}
+	}
+	return $out;
+}
+
 /**
  * Fetch the Search Console part through Site Kit and store it. Runs as the Site Kit owner of Search Console.
  *
@@ -255,6 +342,7 @@ function aw_sd_refresh(): string {
 		$dates = aw_sd_query( $module, array( 'date' ), $s, $e );
 		$qs    = is_wp_error( $dates ) ? $dates : aw_sd_query( $module, array( 'query' ), $s, $e );
 		$qp    = is_wp_error( $qs ) ? $qs : aw_sd_query( $module, array( 'query', 'page' ), $s, $e );
+		$pg    = is_wp_error( $qp ) ? array() : aw_sd_query( $module, array( 'page' ), $s, $e ); // per page, for sourcing keywords
 		if ( is_wp_error( $qp ) ) {
 			$error = 'Site Kit could not read Search Console: ' . wp_strip_all_tags( $qp->get_error_message() );
 			break;
@@ -289,6 +377,7 @@ function aw_sd_refresh(): string {
 			'brand'    => aw_sd_sum( $brand ),
 			'nonbrand' => aw_sd_sum( $nonbrand ),
 			'queries'  => $queries, // Query, clicks, impressions, position, page, brand.
+			'pages'    => aw_sd_pages( is_wp_error( $pg ) ? array() : $pg, $home ), // Path => [clicks, impressions, position].
 		);
 	}
 	wp_set_current_user( $was );
@@ -323,13 +412,13 @@ function aw_sd_cap(): string {
 }
 
 /*
- * Tools → Search demand (owner, 15 Oct 2026: Settings holds configuration, Tools holds reports and jobs). It was under
+ * Tools → Search Insights (owner, 15 Oct 2026: Settings holds configuration, Tools holds reports and jobs). It was under
  * Settings next to Sourcing; the old address redirects here.
  */
 add_action(
 	'admin_menu',
 	function () {
-		add_management_page( 'Search demand', 'Search demand', aw_sd_cap(), 'aw-search-demand', 'aw_sd_screen' );
+		add_management_page( 'Search Insights', 'Search Insights', aw_sd_cap(), 'aw-search-demand', 'aw_sd_screen' );
 	},
 	99
 );
@@ -395,6 +484,7 @@ function aw_sd_targets( array $map ): array {
  */
 function aw_sd_table( array $data ): array {
 	$targets = aw_sd_targets( $data['static']['map'] ?? array() );
+	$d28     = aw_sd_28d( $data );
 	$rows    = array();
 	$seen    = array();
 	foreach ( (array) ( $data['gsc']['periods']['3m']['queries'] ?? array() ) as $r ) {
@@ -419,13 +509,14 @@ function aw_sd_table( array $data ): array {
 			'pos'     => (float) $r[3],
 			'page'    => (string) $r[4],
 			'brand'   => $brand,
+			'rising'  => ! $brand && aw_sd_rising( (int) ( $d28[ $nq ][1] ?? 0 ), (int) $r[2], $data ),
 			'targets' => $hits,
 			'w'       => $brand ? 0 : (int) $r[2] * ( $opp ? 2 : 1 ),
 		);
 	}
 	foreach ( $targets as $t ) {
 		if ( empty( $seen[ $t['phrase'] ] ) ) { // No query is exactly this phrase: it still gets its own row.
-			$rows[] = array( 'q' => $t['phrase'], 'clicks' => null, 'impr' => null, 'pos' => null, 'page' => '', 'brand' => false, 'targets' => array( $t ), 'w' => 0 );
+			$rows[] = array( 'q' => $t['phrase'], 'clicks' => null, 'impr' => null, 'pos' => null, 'page' => '', 'brand' => false, 'rising' => false, 'targets' => array( $t ), 'w' => 0 );
 		}
 	}
 	// Largest remainder, in hundredths of a per cent.
@@ -466,7 +557,7 @@ function aw_sd_screen() {
 	list( , $problem ) = aw_sd_sitekit();
 	$rows              = aw_sd_table( $data );
 
-	echo '<div class="wrap"><h1>Search demand</h1>';
+	echo '<div class="wrap"><h1>Search Insights</h1>';
 	if ( isset( $_GET['refreshed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$up_to = $gsc['periods']['28d']['end'] ?? '';
 		$count = count( $gsc['periods']['3m']['queries'] ?? array() );
@@ -487,7 +578,7 @@ function aw_sd_screen() {
 	echo '</p></form>';
 
 	echo '<h2>Searches and targets <span class="count">(' . aw_sd_num( count( $rows ) ) . ')</span></h2>';
-	echo '<p class="description">Importance: each non-brand search\'s share of all non-brand impressions over the last 3 months, counted double when Google shows us at position 5–20 and nobody clicks; the column adds up to 100%.</p>';
+	echo '<p class="description">Importance: each non-brand search\'s share of all non-brand impressions over the last 3 months, counted double when Google shows us at position 5–20 and nobody clicks; the column adds up to 100%. Rising: at least 5 impressions in the last 28 days and at least twice its 3-month average for 28 days.</p>';
 	$cols = array( 'Query', 'Importance (%)', 'Clicks', 'Impressions', 'Avg. position', 'Page Google shows', 'Our target?' );
 	echo '<table id="aw-sd-table" class="wp-list-table widefat striped"><thead><tr>';
 	foreach ( $cols as $n => $label ) {
@@ -509,7 +600,7 @@ function aw_sd_screen() {
 		}
 		$none = null === $r['impr'];
 		echo '<tr>'
-			. '<td data-v="' . esc_attr( $r['q'] ) . '">' . esc_html( $r['q'] ) . ( $r['brand'] ? ' — <span class="post-state">Brand</span>' : '' ) . '</td>'
+			. '<td data-v="' . esc_attr( $r['q'] ) . '">' . esc_html( $r['q'] ) . ( $r['brand'] ? ' — <span class="post-state">Brand</span>' : '' ) . ( ! empty( $r['rising'] ) ? ' — <span class="post-state">Rising</span>' : '' ) . '</td>'
 			. '<td data-v="' . esc_attr( (string) $r['imp'] ) . '">' . esc_html( number_format_i18n( $r['imp'], 2 ) ) . '</td>'
 			. '<td data-v="' . ( $none ? -1 : (int) $r['clicks'] ) . '">' . ( $none ? $dash : aw_sd_num( $r['clicks'] ) ) . '</td>'
 			. '<td data-v="' . ( $none ? -1 : (int) $r['impr'] ) . '">' . ( $none ? $dash : aw_sd_num( $r['impr'] ) ) . '</td>'
@@ -553,6 +644,8 @@ function aw_sd_screen() {
 </script>
 	<?php
 
+	aw_sd_sourcing_section( $data );
+
 	$gaps = $data['static']['gaps'] ?? array();
 	echo '<details style="margin-top:1.5em"><summary><strong>Gaps (' . aw_sd_num( count( $gaps ) ) . ')</strong>: searches with demand that no page targets yet. Suggestions only.</summary>';
 	echo '<table class="widefat striped" style="margin-top:.5em"><thead><tr><th>#</th><th>Gap</th><th>Detail</th></tr></thead><tbody>';
@@ -561,4 +654,130 @@ function aw_sd_screen() {
 	}
 	echo '</tbody></table></details>';
 	echo '</div>';
+}
+
+/**
+ * Sourcing keywords (owner, 24 Oct 2026; read-only): per Google News search of the workers, the items it brought in over
+ * the last 30 days and how they do in search. Shown only when AW Sourcing is on (filter aw_sourcing_keyword_items).
+ */
+function aw_sd_sourcing_section( array $data ): void {
+	$stats = apply_filters( 'aw_sourcing_keyword_items', null, 30 );
+	if ( ! is_array( $stats ) || empty( $stats['rows'] ) ) {
+		return;
+	}
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	}
+	$table = new AW_SD_Sourcing_Table( $stats, $data );
+	$table->prepare_items();
+	echo '<h2 id="aw-sd-sourcing">Sourcing keywords <span class="count">(' . aw_sd_num( count( $stats['rows'] ) ) . ')</span></h2>';
+	echo '<p class="description">Each English Include word in <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) ) . '">Settings → Sourcing → Keywords</a> is a Google News search in every run. Fetched: the items it brought in since ' . aw_sd_date( (int) $stats['since'] ) . ' (30 days), whatever happened to them since (held, merged, backfilled). Published: those live now. Impressions and clicks: Search Console, last 28 days, for those items\' own pages. Items from before 24 Oct 2026 did not record their search; they are counted by the word in their title or summary and marked estimated, and an item with more than one of the words counts under each. Hindi Include words are not searches and are not listed.</p>'; // phpcs:ignore WordPress.Security.EscapeOutput -- aw_sd_date escapes.
+	if ( empty( $data['gsc']['periods']['28d']['pages'] ) ) {
+		echo '<div class="notice notice-info inline"><p><span class="dashicons dashicons-info" aria-hidden="true"></span> Impressions and clicks per item come with the next Search Console refresh (daily at 07:00 IST, or Refresh now).</p></div>';
+	}
+	$table->display();
+}
+
+if ( is_admin() ) {
+	add_action(
+		'admin_init',
+		function () {
+			if ( ! class_exists( 'WP_List_Table' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+			}
+
+			/** Tools → Search Insights → Sourcing keywords: a core list table, sortable, read-only. */
+			class AW_SD_Sourcing_Table extends WP_List_Table {
+				/** @var array */
+				private $stats;
+				/** @var array */
+				private $data;
+
+				public function __construct( array $stats, array $data ) {
+					parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false, 'screen' => 'tools_page_aw-search-demand' ) );
+					$this->stats = $stats;
+					$this->data  = $data;
+				}
+
+				public function get_columns() {
+					return array(
+						'term'       => 'Keyword',
+						'news_f'     => 'Fetched: News',
+						'legal_f'    => 'Fetched: Library',
+						'news_p'     => 'Published: News',
+						'legal_p'    => 'Published: Library',
+						'impr'       => 'Impressions (28 days)',
+						'clicks'     => 'Clicks (28 days)',
+					);
+				}
+
+				protected function get_sortable_columns() {
+					$out = array();
+					foreach ( array_keys( $this->get_columns() ) as $c ) {
+						$out[ $c ] = array( $c, 'term' !== $c );
+					}
+					return $out;
+				}
+
+				protected function get_primary_column_name() {
+					return 'term';
+				}
+
+				public function prepare_items() {
+					$has   = ! empty( $this->data['gsc']['periods']['28d']['pages'] );
+					$items = array();
+					foreach ( $this->stats['rows'] as $r ) {
+						$m       = $has ? aw_sd_items_metrics( array_merge( $r['news']['fetched'], $r['legal']['fetched'] ), '28d', $this->data ) : null;
+						$items[] = array(
+							'term'      => $r['term'],
+							'fixed'     => ! empty( $r['fixed'] ),
+							'listed'    => ! empty( $r['listed'] ),
+							'estimated' => ! empty( $r['estimated'] ),
+							'news_f'    => count( $r['news']['fetched'] ),
+							'legal_f'   => count( $r['legal']['fetched'] ),
+							'news_p'    => count( $r['news']['published'] ),
+							'legal_p'   => count( $r['legal']['published'] ),
+							'impr'      => $m ? $m['impr'] : null,
+							'clicks'    => $m ? $m['clicks'] : null,
+						);
+					}
+					$by    = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+					$by    = isset( $this->get_columns()[ $by ] ) ? $by : 'news_f';
+					$asc   = 'asc' === strtolower( (string) ( $_GET['order'] ?? ( 'term' === $by ? 'asc' : 'desc' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+					usort(
+						$items,
+						function ( $a, $b ) use ( $by, $asc ) {
+							$c = 'term' === $by ? strcasecmp( $a['term'], $b['term'] ) : ( (int) $a[ $by ] <=> (int) $b[ $by ] );
+							return $asc ? $c : -$c;
+						}
+					);
+					$this->items           = $items;
+					$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'term' );
+				}
+
+				protected function column_term( $item ) {
+					$notes = array();
+					if ( $item['fixed'] ) {
+						$notes[] = 'Fixed search in the workers';
+					} elseif ( ! $item['listed'] ) {
+						$notes[] = 'No longer in the Include list';
+					}
+					if ( $item['estimated'] ) {
+						$notes[] = 'Estimated';
+					}
+					return '<strong>' . esc_html( $item['term'] ) . '</strong>' . ( $notes ? ' — <span class="post-state">' . esc_html( implode( ', ', $notes ) ) . '</span>' : '' );
+				}
+
+				protected function column_default( $item, $col ) {
+					return null === $item[ $col ] ? '—' : aw_sd_num( $item[ $col ] );
+				}
+
+				public function no_items() {
+					echo 'No searches.';
+				}
+
+				protected function display_tablenav( $which ) {} // read-only: no bulk actions or pagination
+			}
+		}
+	);
 }
