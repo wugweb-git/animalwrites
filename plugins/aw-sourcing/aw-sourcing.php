@@ -56,3 +56,4 @@ require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';
+require_once AW_SOURCING_DIR . 'includes/sourcing-terms-admin.php';
