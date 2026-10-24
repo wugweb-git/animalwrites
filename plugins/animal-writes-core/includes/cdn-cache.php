@@ -95,3 +95,58 @@ add_action(
 	10,
 	3
 );
+
+/*
+ * Page cache purged after every deploy (owner, 24 Oct 2026). A merge that reaches the server through the Deploy check
+ * (it moves the live branch, Hostinger pulls it) left LiteSpeed serving pages built by the old code; aw-ship.sh
+ * purges, the gate does not. So the site checks the commit its plugins were deployed from (the git checkout the plugin
+ * folders link into) on every web request PHP serves (cron, REST, admin, uncached pages) and purges the whole cache once when it
+ * changes, whatever path the code came by. Reads one 41-byte file and an autoloaded option; no remote call, no secret.
+ */
+
+/** The deployed commit (40 hex characters), or '' when the plugins are not in a git checkout. */
+function aw_deployed_commit() {
+	static $commit = null;
+	if ( null !== $commit ) {
+		return $commit;
+	}
+	$commit = '';
+	$dir    = realpath( AW_CORE_DIR );
+	for ( $i = 0; $dir && $i < 4; $i++, $dir = dirname( $dir ) ) { // The plugin, plugins/, then the checkout.
+		$head = $dir . '/.git/HEAD';
+		if ( is_readable( $head ) ) {
+			$ref = trim( (string) file_get_contents( $head ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			if ( 0 === strpos( $ref, 'ref: ' ) ) { // A branch checkout: the commit is in the ref file.
+				$file = $dir . '/.git/' . substr( $ref, 5 );
+				$ref  = is_readable( $file ) ? trim( (string) file_get_contents( $file ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
+			}
+			$commit = preg_match( '/^[0-9a-f]{40}$/', $ref ) ? $ref : '';
+			break;
+		}
+	}
+	return $commit;
+}
+
+add_action(
+	'init',
+	function () {
+		// A web request only: LiteSpeed purges through a header on this response, which WP-CLI never sends. The next
+		// request PHP serves (cron over HTTP, a worker's REST call, an admin page) does it.
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return;
+		}
+		$now = aw_deployed_commit();
+		if ( '' === $now ) {
+			return;
+		}
+		$was = (string) get_option( 'aw_deployed_commit', '' );
+		if ( $now === $was ) {
+			return;
+		}
+		update_option( 'aw_deployed_commit', $now, true ); // Autoloaded: the check costs no query.
+		if ( '' !== $was ) { // Not on the very first check: there is no earlier commit to compare with.
+			do_action( 'litespeed_purge_all' );
+		}
+	},
+	99
+);
