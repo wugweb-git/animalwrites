@@ -230,9 +230,11 @@ function aw_findhelp_states_window( $id ) {
  * @param int    $id     Item.
  * @param array  $places [place, count] pairs.
  * @param string $head   Heading classes.
+ * @param bool   $all_of A state reads "All of {state}" (item pages, beside its districts); false: its name alone (the
+ *                       campaign band, which lists states only; owner, 24 Oct 2026).
  * @return string
  */
-function aw_findhelp_html( $id, $places, $head ) {
+function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
 	$hid = 'aw-findhelp-' . (int) $id;
 	if ( ! $places ) {
 		return '<p class="aw-findhelp-line"><strong>' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</strong>'
@@ -241,7 +243,7 @@ function aw_findhelp_html( $id, $places, $head ) {
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
-		$label  = 'district' === $p->kind ? $p->name : sprintf( /* translators: %s: state. */ __( 'All of %s', 'animal-writes-core' ), $p->name );
+		$label  = 'district' === $p->kind || ! $all_of ? $p->name : sprintf( /* translators: %s: state. */ __( 'All of %s', 'animal-writes-core' ), $p->name );
 		$items .= '<li><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . kits_count( $n ) . '</a></li>';
 	}
 	return '<nav class="aw-browse-states aw-findhelp" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="' . esc_attr( $head ) . '" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Find help near you', 'animal-writes-core' ) . '</h2>'
@@ -281,7 +283,7 @@ add_filter(
 		}
 		$done   = true;
 		$states = aw_findhelp_states_window( $id );
-		return $states ? '<section class="wp-block-group alignfull aw-camp-section aw-camp-tint aw-findhelp-band has-global-padding is-layout-constrained" id="find-help" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head' ) . '</section>' . $html : $html;
+		return $states ? '<section class="wp-block-group alignfull aw-camp-section aw-camp-tint aw-findhelp-band has-global-padding is-layout-constrained" id="find-help" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>' . $html : $html;
 	},
 	10,
 	2
