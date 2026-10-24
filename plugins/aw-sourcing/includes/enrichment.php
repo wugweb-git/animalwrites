@@ -14,6 +14,11 @@
  *   rating and status are never stored here (shown live, enrichment-front.php). A field whose only source is Google is
  *   flagged "Invite to claim". Google reporting the place permanently closed: the listing stays in search and
  *   carries a "Reported closed" note (owner, 21 Oct 2026); logged, nothing to review. Two listings with the same place ID or Darpan ID: "Possible duplicate" (never merged).
+ * - List fields (services, animals helped, areas served; owner, 24 Oct 2026): a proposal is the union of what the
+ *   listing has and what was found, so a value is never dropped; when it adds something it is applied like a second
+ *   phone (claimed, verified and low-confidence still wait for review).
+ * - Identity unresolved (owner, 24 Oct 2026): while an editor has ticked it on the listing (it is not known which
+ *   organisation the listing is), the queue leaves the listing out and its proposals are dropped.
  *
  * REST (Editor's Application Password, like the ingest):
  *   GET  aw/v1/enrich/queue    the next listings to check (new or claimed first, then AWBI address-only, then the
@@ -523,6 +528,16 @@ function aw_enrich_is_protected( $lid ) {
 
 /* ---------- Owner's rule (21 Oct 2026): fill empty fields with sourced values; keep both when a value is already there ---------- */
 
+/**
+ * The change-log note of a value kept next to what was there.
+ *
+ * @param string $field Field key.
+ * @return string
+ */
+function aw_enrich_both_note( $field ) {
+	return in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ? 'Added to what was there; nothing removed' : 'Kept next to the value already there; both shown as unverified';
+}
+
 /** Fields that can hold a second value next to the one already on the listing: field => meta key of the second value. */
 const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
 
@@ -540,6 +555,9 @@ function aw_enrich_mode( $lid, $field, $conf, $protected ) {
 	}
 	if ( aw_enrich_is_empty( $lid, $field ) ) {
 		return 'apply';
+	}
+	if ( in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ) {
+		return 'both'; // The value is the union (aw_enrich_union): it only adds.
 	}
 	if ( isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ) ) {
 		return 'both';
@@ -719,6 +737,57 @@ function aw_enrich_flag( $lid, $flag, $detail ) {
 	$f ? update_post_meta( $lid, 'aw_enrich_flags', $f ) : delete_post_meta( $lid, 'aw_enrich_flags' );
 }
 
+/**
+ * Whether an editor marked the listing's identity unresolved: then nothing is proposed for it.
+ *
+ * @param int $lid Listing ID.
+ * @return bool
+ */
+function aw_enrich_identity_unresolved( $lid ) {
+	return ! empty( aw_enrich_flags( $lid )['identity'] );
+}
+
+/** List fields: a proposal adds to what is there and never drops a value. */
+const AW_ENRICH_LIST_FIELDS = array( 'services', 'animals', 'areas_served' );
+
+/**
+ * The items of a list field's value: an array (services) or comma-separated text.
+ *
+ * @param mixed $v Value.
+ * @return array
+ */
+function aw_enrich_list_items( $v ) {
+	$items = is_array( $v ) ? $v : explode( ',', (string) $v );
+	return array_values( array_filter( array_map( fn( $s ) => trim( (string) $s ), $items ), 'strlen' ) );
+}
+
+/**
+ * A list field's proposal as the union of what the listing holds and what was found (current order first, matched
+ * case-insensitively), in the field's own shape. Returns the proposal unchanged for other fields or an empty listing.
+ *
+ * @param int    $lid   Listing ID.
+ * @param string $field Field key.
+ * @param mixed  $value Proposed value.
+ * @return mixed
+ */
+function aw_enrich_union( $lid, $field, $value ) {
+	if ( ! in_array( $field, AW_ENRICH_LIST_FIELDS, true ) || aw_enrich_is_empty( $lid, $field ) ) {
+		return $value;
+	}
+	$out  = aw_enrich_list_items( aw_enrich_current( $lid, $field ) );
+	$seen = array_map( 'strtolower', $out );
+	foreach ( aw_enrich_list_items( $value ) as $item ) {
+		if ( 'services' === $field && ! in_array( sanitize_title( $item ), aw_service_slugs(), true ) ) {
+			continue; // Only known services are stored (aw_enrich_write), so an unknown one adds nothing.
+		}
+		if ( ! in_array( strtolower( $item ), $seen, true ) ) {
+			$out[]  = $item;
+			$seen[] = strtolower( $item );
+		}
+	}
+	return is_array( $value ) ? $out : implode( ', ', $out );
+}
+
 /* ---------- Claims are a source too ---------- */
 
 // An approved claim's values are logged as approved rows from the organisation (provenance "claim"), before they apply.
@@ -841,7 +910,8 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 	if ( ! $ids ) {
 		$p      = $wpdb->posts;
 		$m      = $wpdb->postmeta;
-		$base   = "FROM {$p} p LEFT JOIN {$m} c ON c.post_id = p.ID AND c.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'";
+		$base   = "FROM {$p} p LEFT JOIN {$m} c ON c.post_id = p.ID AND c.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'"
+			. " AND NOT EXISTS (SELECT 1 FROM {$m} f WHERE f.post_id = p.ID AND f.meta_key = 'aw_enrich_flags' AND f.meta_value LIKE '%\"identity\"%')"; // Identity unresolved: left out.
 		$bare   = "EXISTS (SELECT 1 FROM {$m} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_awbi_code' AND a.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key IN ('aw_email','aw_website') AND x.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key = 'aw_phones' AND x.meta_value > 0)";
 		// No way to reach them at all (no phone, email, website or Facebook): these go first after new and claimed listings
 		// (SEO, 24 Oct 2026: such profiles are not indexed until a contact is added).
@@ -927,6 +997,13 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	if ( ! empty( $b['google_cost'] ) ) {
 		aw_enrich_spend( (float) $b['google_cost'], 'worker' );
 	}
+	if ( aw_enrich_identity_unresolved( $lid ) ) { // Which organisation this is is not known: nothing is proposed.
+		$out['skipped'] = array_values( array_filter( array_map( fn( $p ) => sanitize_key( (string) ( $p['field'] ?? '' ) ), (array) ( $b['proposals'] ?? array() ) ) ) );
+		return $out + array(
+			'protected'           => $protected,
+			'identity_unresolved' => true,
+		);
+	}
 	foreach ( (array) ( $b['proposals'] ?? array() ) as $p ) {
 		$field = sanitize_key( (string) ( $p['field'] ?? '' ) );
 		$conf  = in_array( $p['confidence'] ?? '', array( 'high', 'medium', 'low' ), true ) ? $p['confidence'] : 'low';
@@ -948,6 +1025,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // Google alone never stores a fact
 			continue;
 		}
+		$value = aw_enrich_union( $lid, $field, $value ); // List fields: what is there plus what was found.
 		if ( aw_enrich_has_value( $lid, $field, $value ) ) {
 			$out['skipped'][] = $field;
 			continue;
@@ -962,7 +1040,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		if ( 'queue' !== $mode ) {
 			$snap = aw_enrich_snapshot( $lid, $field );
 			if ( aw_enrich_write( $lid, $field, $value, $mode ) ) {
-				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, 'both' === $mode ? 'Kept next to the value already there; both shown as unverified' : '' );
+				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, 'both' === $mode ? aw_enrich_both_note( $field ) : '' );
 				aw_enrich_supersede( $lid, $field, $rid );
 				$out['applied'][] = $field;
 				continue;
@@ -1048,6 +1126,11 @@ function aw_enrich_policy_pass() {
 			continue;
 		}
 		$lid = (int) $r['listing_id'];
+		if ( aw_enrich_identity_unresolved( $lid ) ) {
+			++$n['queue'];
+			continue;
+		}
+		$r['value'] = aw_enrich_union( $lid, $r['field'], $r['value'] );
 		if ( aw_enrich_has_value( $lid, $r['field'], $r['value'] ) ) {
 			aw_enrich_set_status( (int) $r['id'], 'superseded', 'Already on the listing' );
 			$n['skip']++;
@@ -1063,7 +1146,7 @@ function aw_enrich_policy_pass() {
 			$n['queue']++;
 			continue;
 		}
-		$wpdb->update( $t, array( 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => 'both' === $mode ? 'Kept next to the value already there; both shown as unverified' : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
+		$wpdb->update( $t, array( 'value' => wp_json_encode( $r['value'] ), 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => 'both' === $mode ? aw_enrich_both_note( $r['field'] ) : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
 		aw_enrich_supersede( $lid, $r['field'], (int) $r['id'] );
 		$n[ $mode ]++;
 	}
