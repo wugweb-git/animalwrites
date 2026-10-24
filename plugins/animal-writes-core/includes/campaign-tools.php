@@ -808,7 +808,7 @@ foreach ( array( 'core/post-title', 'core/post-featured-image' ) as $aw_blk ) {
 			// Title: link the heading's text. Image: link the figure's image.
 			return preg_replace( array( '#(<h[1-6][^>]*>)(.*?)(</h[1-6]>)#s', '#(<figure[^>]*>)(.*?)(</figure>)#s' ), '$1' . $a . '$2</a>$3', $html, 1 );
 		},
-		10,
+		99, // after the fallback image (stock-photo and logo rules) is filled in
 		3
 	);
 }
