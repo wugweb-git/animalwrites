@@ -553,6 +553,9 @@ add_action(
 					$hb['sources_failed'] = max( 0, (int) $req->get_param( 'sources_failed' ) );
 					$hb['lists']          = sanitize_key( (string) $req->get_param( 'lists' ) ); // site or yaml: which lists the run used
 					$hb['errors']         = array_map( 'sanitize_text_field', array_slice( array_filter( (array) $req->get_param( 'errors' ), 'is_scalar' ), 0, 10 ) );
+					if ( empty( $hb['first_run'] ) ) { // the first report, kept for good (Site Health's never-published-News rule)
+						$hb['first_run'] = $now;
+					}
 					if ( $published > 0 || empty( $hb['last_new'] ) ) {
 						$hb['last_new'] = $now;
 					}
