@@ -46,7 +46,7 @@ Check this list against git and the live site before acting on it. Failing AI ke
 15. **Workers tab (owner, 24 Oct 2026).** Settings → Sourcing → Workers (`plugins/aw-sourcing/includes/workers.php`), with reports from every workflow (workers PR "Report every workflow to the site"). Order: ship this, then merge the workers PR. Then: 
     - **Owner:** set `AW_GITHUB_DISPATCH_TOKEN` in wp-config.php (Run now stays off until then); then the Hostinger cron lines for focus-keywords 04:00, seo-scores 05:15 and research Mon 09:10 IST (sourcing already), each `wp eval 'aw_dispatch_workflow("<file>.yml");'`, with their GitHub schedules moved about 2 hours later in a small workers PR. backup-offsite stays on its GitHub schedule and is not dispatched.
     - **Next small PR:** Sources sync dispatched from the site when the lists are saved, plus one daily backup run, instead of hourly.
-    - **Owner decides:** GitHub ran "every 15 min" WordPress cron about every 4.5 hours and hourly Sources sync about every 5 hours (5–24 Oct), so the twice-the-interval rule will flag them most of the time.
+    - **Decided (owner, 24 Oct 2026):** late limits per workflow (`late_after_h`): WordPress cron and Tests never late; Sources sync, Summaries and Sourcing 12 h (Sourcing 6 h once Hostinger dispatch is on); Focus keywords, SEO scores, Site backup and Directory enrichment 36 h; Research 9 days; Keepalive 35 days; by-hand workflows never. Failed, cancelled, skipped and stuck runs alert at once.
 
 ## Decided: never (owner, 22 Oct 2026)
 - Rewriting the 11 Wildlife SOS job summaries, or dropping their JobPosting markup.
