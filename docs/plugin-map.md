@@ -69,6 +69,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/review-queue.php`, `includes/class-aw-sourcing-review-table.php` | Inbox → To review as a core list table: views by type, search, sortable, pagination (screen option, 50), row actions Edit / Source / Publish / Reject, bulk Publish / Reject and "Publish all N". |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
+| `includes/workers.php` | Settings → Sourcing → Workers (24 Oct 2026): the 17 workflows of the workers repository (AW_WORKERS, a copy of `docs/workers.json` there; change both together), POST worker-run (start and end reports), problems (late = no report for twice the interval; failed, cancelled, skipped, stuck), the hourly watchdog email (aw_workers_watchdog, once per new set), the notice, the rows in the dashboard box Scheduled tasks, the Site Health test and Run now (aw_dispatch_workflow, logged in aw_worker_dispatch_log). Also shows the AI models tiles. |
 
 ## mailweb (Mailweb)
 
