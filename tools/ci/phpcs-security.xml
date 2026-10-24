@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+	Security and database sniffs only, used by tools/ci/phpcs_delta.sh in the Deploy check.
+	Style and doc-comment sniffs are left out on purpose: the codebase has many existing findings of that kind and
+	the CI check must only fail on new security-relevant findings. DirectDatabaseQuery is left out as too noisy.
+-->
+<ruleset name="AW security">
+	<description>WordPress security and prepared-SQL sniffs for the Animal Writes plugins.</description>
+
+	<arg name="extensions" value="php"/>
+	<arg value="s"/>
+
+	<rule ref="WordPress.Security.EscapeOutput"/>
+	<rule ref="WordPress.Security.NonceVerification"/>
+	<rule ref="WordPress.Security.ValidatedSanitizedInput"/>
+	<rule ref="WordPress.Security.SafeRedirect"/>
+	<rule ref="WordPress.DB.PreparedSQL"/>
+	<rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
+</ruleset>
