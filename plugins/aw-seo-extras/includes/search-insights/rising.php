@@ -633,6 +633,9 @@ add_action(
 
 add_filter( 'aw_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'aw-seo-extras' ) ) + (array) $tabs );
 
+// The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
+add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped' ) ) );
+
 add_filter(
 	'set_screen_option_aw_si_rising_per_page',
 	function ( $keep, $option, $value ) {
