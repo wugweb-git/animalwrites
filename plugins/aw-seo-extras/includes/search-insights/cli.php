@@ -66,7 +66,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			public function run() {
 				$out = aw_si_daily( true );
 				WP_CLI::log( wp_json_encode( array_diff_key( $out, array( 'gsc' => 1 ) ) ) );
-				WP_CLI::log( 'gsc: ' . wp_json_encode( array_intersect_key( (array) $out['gsc'], array_flip( array( 'rows', 'truncated', 'error' ) ) ) ) . ' days ' . implode( ', ', array_keys( (array) ( $out['gsc']['days'] ?? array() ) ) ) );
+				WP_CLI::log( 'gsc: ' . wp_json_encode( array_intersect_key( (array) $out['gsc'], array_flip( array( 'rows', 'truncated', 'split', 'error' ) ) ) ) . ' days ' . implode( ', ', array_keys( (array) ( $out['gsc']['days'] ?? array() ) ) ) );
 				$this->status();
 			}
 

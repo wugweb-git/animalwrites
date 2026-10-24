@@ -69,12 +69,17 @@ function aw_si_searches_gaps(): array {
 	}
 	$k = aw_si_table( 'keywords' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$rows   = $wpdb->get_results( "SELECT label, note, status, impr28, pos28 FROM {$k} WHERE note LIKE 'Gap%' OR status = 'gap' ORDER BY impr28 DESC, label" );
+	$rows   = $wpdb->get_results( "SELECT label, note, status, action, impr28, pos28 FROM {$k} WHERE note LIKE 'Gap%' OR status = 'gap' ORDER BY impr28 DESC, label" );
 	$groups = array();
 	foreach ( (array) $rows as $r ) {
 		$title = 0 === strpos( (string) $r->note, 'Gap' ) ? trim( (string) preg_replace( '/^Gap \([^)]*\):\s*/', '', (string) $r->note ) ) : __( 'High demand, no page yet (P2)', 'aw-seo-extras' );
 		/* translators: 1: search phrase, 2: impressions in 28 days, 3: average position. */
-		$groups[ $title ][] = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
+		$line = null === $r->pos28 ? sprintf( __( '"%1$s": %2$s impressions (28 days)', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ) ) : sprintf( __( '"%1$s": %2$s impressions (28 days), position %3$s', 'aw-seo-extras' ), $r->label, number_format_i18n( (int) $r->impr28 ), number_format_i18n( (float) $r->pos28, 1 ) );
+		if ( 'gap' === $r->status && isset( aw_si_actions()[ $r->action ] ) ) {
+			/* translators: 1: gap line, 2: suggested page type such as "New page: guide". */
+			$line = sprintf( __( '%1$s (suggested: %2$s)', 'aw-seo-extras' ), $line, aw_si_actions()[ $r->action ] );
+		}
+		$groups[ $title ][] = $line;
 	}
 	$out = array();
 	foreach ( $groups as $title => $lines ) {

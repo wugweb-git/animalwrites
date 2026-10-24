@@ -198,7 +198,7 @@ function aw_si_source_notices(): void {
 		}
 		if ( ! empty( $r['info']['truncated'] ) ) {
 			/* translators: %s: dates. */
-			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Search Console returned the 5,000-row maximum on %s, so those days may be short.', 'aw-seo-extras' ), implode( ', ', array_keys( (array) $r['info']['truncated'] ) ) ) ) . '</p></div>';
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( __( 'Search Console hit the 5,000-row maximum on %s even after fetching the busiest pages one by one, so the rarest searches of those days may be missing.', 'aw-seo-extras' ), implode( ', ', array_keys( (array) $r['info']['truncated'] ) ) ) ) . '</p></div>';
 		}
 	}
 	echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Last updated', 'aw-seo-extras' ) . ' — ' . esc_html( implode( ' · ', $parts ) ) . '</p></div>';

@@ -1,6 +1,6 @@
 # Search Insights — plan (owner review)
 
-24 October 2026. Approved (PR #1). Phase 1 is built and live (aw-seo-extras `includes/search-insights/`, PR #17), and the Sourcing keywords tab too (PR #32). It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
+24 October 2026. Approved (PR #1). Phase 1 is built and live (aw-seo-extras `includes/search-insights/`, PR #17), and the Sourcing keywords tab too (PR #32). The phase 1 leftovers (topic filter, listing names as one row, all 8 actions, gap page types, the 5,000-row split) were built on 25 Oct, ahead of phase 2. It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
 
 Related files:
 - `docs/seo/keyword-map.md` (Rank and Priority columns, 21 Oct)
@@ -165,7 +165,7 @@ These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: sw
 **Search Console is stored by day.**
 - The daily job asks for `date` + `query` and `date` + `query` + `page`. It covers the last 4 days, because Google finalises data 2–3 days late; rows already stored are replaced, not added.
 - **One request per calendar day** per dimension set: 4 days × 2 sets = 8 calls a day. That keeps each call under the 5,000-row limit (about 2,500 rows a day).
-- If a call still returns exactly 5,000 rows, the day is marked "truncated" in `aw_si_runs` and on the screen. The job then pages on with `startRow` if Site Kit passes it through (checked in the phase 1 dry run), and otherwise keeps the warning so totals are never silently short.
+- If a call still returns exactly 5,000 rows, the day is marked "truncated" in `aw_si_runs` and on the screen. Site Kit does not pass `startRow` (checked in its source, 25 Oct), so the job fetches that day's query + page rows again page by page (Site Kit's page filter), for the 50 pages with the most impressions. The warning stays when pages are left over or one page alone returns 5,000 rows, so totals are never silently short.
 - Each row is one calendar day (`period` = day), so the monthly rollup can sum them safely.
 - 28-day and 3-month figures on the screens are sums of those daily rows. The rolling-window totals Google returns, as today's `aw_sd_refresh()` stores them, are kept only as a check (`period` = 28d / 3m) and are never summed.
 
@@ -382,7 +382,7 @@ Everything sits at Tools → Search Insights, with tabs (`nav-tab-wrapper`, `?ta
 | Phase | Builds | Dry run |
 |---|---|---|
 | 1 | Rename and old-slug redirect; tables; one-time seed from keyword-map.md + rankings CSV; Keywords tab; Search Console via the existing Site Kit path; Overview; Site Health test; retention rollup | today's data; row counts; what each tab shows |
-| 2 | Site Kit GA4 + PageSpeed; Clarity + Clarity notes; WordPress and Directory site search; Pages tab; redirected URLs counted as their target. Phase 1 leftovers: rename in the three docs, entities as one row + top 20 movers, topic filter, the other 4 suggested actions, suggested page type for gaps, Search Console paging past 5,000 rows | 1 day of each source |
+| 2 | Site Kit GA4 + PageSpeed; Clarity + Clarity notes; WordPress and Directory site search; Pages tab; redirected URLs counted as their target. (The phase 1 leftovers were built separately, ahead of this phase.) | 1 day of each source |
 | 3 | Workers `search-insights` job (Trends RSS, Wikipedia, GDELT, autocomplete, Trends related/interest) + REST route; Rising tab | last 7 days; top 10 rising terms |
 | 4 | Check list, bookmarklet live check, imports and paste forms | 5 keywords |
 | 5 | Sourcing tab (shipped 24 Oct, PR #32); Hindi and Hinglish (grouping under English parents, Hindi autocomplete); YouTube, Reddit, Bing (after sign-in); monthly snapshot + keyword-map regeneration | 1 month |

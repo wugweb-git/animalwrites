@@ -2,6 +2,8 @@
 /**
  * Keywords tab: the keyword records as a core list table (views, filters, search, sorting, bulk and row actions,
  * screen options, pagination). Priority overrides are the only change it makes, and only to Search Insights' own table.
+ * Listing names (entity records) stay out of every view but Entities: the All view shows them as one combined row,
+ * and the 20 that moved most one by one (plan §8).
  *
  * @package aw-seo-extras
  */
@@ -18,6 +20,21 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  * The Keywords tab list table.
  */
 class AW_SI_Keywords_Table extends WP_List_Table {
+
+	/**
+	 * IDs of the listing names that moved most, read once per screen.
+	 *
+	 * @var int[]|null
+	 */
+	private $movers = null;
+
+	/** The listing names that moved most (aw_si_entity_movers()), cached. */
+	private function movers(): array {
+		if ( null === $this->movers ) {
+			$this->movers = aw_si_entity_movers();
+		}
+		return $this->movers;
+	}
 
 	/** Set up the list: one row per keyword record. */
 	public function __construct() {
@@ -39,6 +56,15 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		return isset( $_REQUEST[ $name ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $name ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only filters.
 	}
 
+	/**
+	 * Request value, sanitised as text (topic names keep their spaces and capitals).
+	 *
+	 * @param string $name Request field.
+	 */
+	private function text_arg( string $name ): string {
+		return isset( $_REQUEST[ $name ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ $name ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only filters.
+	}
+
 	/** Columns. */
 	public function get_columns() {
 		return array(
@@ -46,6 +72,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'label'    => __( 'Keyword', 'aw-seo-extras' ),
 			'priority' => __( 'Priority', 'aw-seo-extras' ),
 			'status'   => __( 'Status', 'aw-seo-extras' ),
+			'topic'    => __( 'Topic', 'aw-seo-extras' ),
 			'page'     => __( 'Page', 'aw-seo-extras' ),
 			'impr28'   => __( 'Impressions (28 days)', 'aw-seo-extras' ),
 			'clicks28' => __( 'Clicks', 'aw-seo-extras' ),
@@ -62,6 +89,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		return array(
 			'label'    => array( 'label', false ),
 			'priority' => array( 'priority', false ),
+			'topic'    => array( 'topic', false ),
 			'impr28'   => array( 'impr28', true ),
 			'clicks28' => array( 'clicks28', true ),
 			'pos28'    => array( 'pos28', false ),
@@ -116,6 +144,63 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Condition that keeps listing names out of a view, except the ones that moved most.
+	 *
+	 * @param string $view View key.
+	 */
+	private function entity_sql( string $view ): string {
+		if ( 'entity' === $view ) {
+			return '1=1';
+		}
+		$movers = $this->movers();
+		return $movers ? '(entity = 0 OR id IN (' . implode( ',', array_map( 'intval', $movers ) ) . '))' : 'entity = 0';
+	}
+
+	/** Whether the list is the plain All view: no filter, no search. The combined listing-names row shows only there. */
+	private function plain_all(): bool {
+		foreach ( array( 'role', 'page_type', 'lang', 'topic' ) as $f ) {
+			if ( '' !== $this->arg( $f ) ) {
+				return false;
+			}
+		}
+		return in_array( $this->arg( 'view' ), array( '', 'all' ), true ) && empty( $_REQUEST['s'] ); // phpcs:ignore WordPress.Security.NonceVerification -- read-only.
+	}
+
+	/** The combined row for every listing name: count and summed Search Console figures, linking to the Entities view. */
+	private function entity_row(): ?object {
+		global $wpdb;
+		$t = aw_si_table( 'keywords' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$a = $wpdb->get_row( "SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(pos_prev * impr28) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) pp FROM {$t} WHERE entity = 1" );
+		if ( ! $a || ! (int) $a->n ) {
+			return null;
+		}
+		return (object) array(
+			'aggregate'         => (int) $a->n,
+			'id'                => 0,
+			'label'             => '',
+			'roles'             => 0,
+			'lang'              => 'en',
+			'entity'            => 1,
+			'note'              => '',
+			'topic'             => '',
+			'priority'          => '',
+			'priority_override' => '',
+			'status'            => '',
+			'page'              => '',
+			'impr28'            => (int) $a->i,
+			'clicks28'          => (int) $a->c,
+			'pos28'             => null === $a->p ? null : round( (float) $a->p, 1 ),
+			'pos_prev'          => null === $a->pp ? null : round( (float) $a->pp, 1 ),
+			'live_pos'          => null,
+			'live_txt'          => '',
+			'live_date'         => null,
+			'trends'            => null,
+			'action'            => '',
+		);
+	}
+
 	/** Views with their counts. */
 	protected function get_views() {
 		global $wpdb;
@@ -123,6 +208,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
 		foreach ( $this->view_sql() as $key => $sql ) {
+			$sql        .= ' AND ' . $this->entity_sql( $key );
 			$n           = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$t} WHERE {$sql}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- fixed conditions.
 			$url         = add_query_arg( array( 'view' => $key ), aw_si_url( 'keywords' ) );
 			$out[ $key ] = '<a href="' . esc_url( $url ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $this->view_labels()[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
@@ -131,7 +217,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Role, page type and language filters above the list.
+	 * Role, topic, page type and language filters above the list.
 	 *
 	 * @param string $which top or bottom.
 	 */
@@ -141,6 +227,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		}
 		echo '<div class="alignleft actions">';
 		$this->dropdown( 'role', __( 'All roles', 'aw-seo-extras' ), array_map( 'strval', aw_si_roles() ) );
+		global $wpdb;
+		$topics = (array) $wpdb->get_col( 'SELECT DISTINCT topic FROM ' . aw_si_table( 'keywords' ) . " WHERE topic <> '' ORDER BY topic" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only.
+		$this->dropdown( 'topic', __( 'All topics', 'aw-seo-extras' ), array_combine( $topics, $topics ), true );
 		$this->dropdown(
 			'page_type',
 			__( 'All page types', 'aw-seo-extras' ),
@@ -172,9 +261,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 * @param string $name    Request field.
 	 * @param string $all     Label of the empty choice.
 	 * @param array  $options value => label.
+	 * @param bool   $text    Values are text (topic names), not keys.
 	 */
-	private function dropdown( string $name, string $all, array $options ): void {
-		$cur = $this->arg( $name );
+	private function dropdown( string $name, string $all, array $options, bool $text = false ): void {
+		$cur = $text ? $this->text_arg( $name ) : $this->arg( $name );
 		echo '<label class="screen-reader-text" for="aw-si-' . esc_attr( $name ) . '">' . esc_html( $all ) . '</label>';
 		echo '<select name="' . esc_attr( $name ) . '" id="aw-si-' . esc_attr( $name ) . '"><option value="">' . esc_html( $all ) . '</option>';
 		foreach ( $options as $value => $label ) {
@@ -192,6 +282,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$view    = $this->arg( 'view' );
 		$views   = $this->view_sql();
 		$where[] = $views[ $view ] ?? '1=1';
+		$where[] = $this->entity_sql( $view );
 		$role    = (int) $this->arg( 'role' );
 		if ( $role && isset( aw_si_roles()[ $role ] ) ) {
 			$where[] = 'roles & %d';
@@ -203,6 +294,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				$args[]  = $this->arg( $col );
 			}
 		}
+		if ( '' !== $this->text_arg( 'topic' ) ) {
+			$where[] = 'topic = %s';
+			$args[]  = $this->text_arg( 'topic' );
+		}
 		$search = isset( $_REQUEST['s'] ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only search.
 		if ( '' !== $search ) {
 			$where[] = 'label LIKE %s';
@@ -212,6 +307,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$cols    = array(
 			'label'    => 'label',
 			'priority' => "IF(priority_override <> '', priority_override, priority)",
+			'topic'    => "topic = '', topic",
 			'impr28'   => 'impr28',
 			'clicks28' => 'clicks28',
 			'pos28'    => 'pos28 IS NULL, pos28',
@@ -236,6 +332,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$query       = "SELECT * FROM {$t} WHERE {$sql} ORDER BY {$by}, label ASC LIMIT %d OFFSET %d";
 		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $args, array( $per, ( $paged - 1 ) * $per ) ) ) );
 		// phpcs:enable
+		$agg = 1 === $paged && $this->plain_all() ? $this->entity_row() : null;
+		if ( $agg ) {
+			array_unshift( $this->items, $agg );
+		}
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'label' );
 		$this->set_pagination_args(
 			array(
@@ -260,6 +360,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 * @param object $item Keyword record.
 	 */
 	protected function column_cb( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			return '';
+		}
 		return '<input type="checkbox" name="kw[]" value="' . (int) $item->id . '">';
 	}
 
@@ -269,6 +372,13 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 * @param object $item Keyword record.
 	 */
 	protected function column_label( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			/* translators: %s: number of listing names. */
+			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', aw_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'aw-seo-extras' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
+			/* translators: %d: number of listing names listed one by one. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'aw-seo-extras' ), AW_SI_MOVERS ) ) . '</span>';
+			return $out;
+		}
 		$out   = '<strong>' . esc_html( $item->label ) . '</strong>';
 		$roles = array();
 		foreach ( aw_si_roles() as $bit => $name ) {
@@ -280,7 +390,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			$roles[] = 'hi' === $item->lang ? __( 'Hindi', 'aw-seo-extras' ) : __( 'Hinglish', 'aw-seo-extras' );
 		}
 		if ( (int) $item->entity ) {
-			$roles[] = __( 'Entity', 'aw-seo-extras' );
+			$roles[] = in_array( (int) $item->id, $this->movers(), true ) && 'entity' !== $this->arg( 'view' ) ? __( 'Entity, top mover', 'aw-seo-extras' ) : __( 'Entity', 'aw-seo-extras' );
 		}
 		if ( $roles ) {
 			$out .= ' — <span class="post-state">' . esc_html( implode( ', ', $roles ) ) . '</span>';
@@ -402,6 +512,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
 			case 'trends':
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
+			case 'topic':
+				return '' === $item->topic ? '–' : esc_html( $item->topic );
 		}
 		return '';
 	}

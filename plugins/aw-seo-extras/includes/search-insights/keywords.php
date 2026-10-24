@@ -327,7 +327,7 @@ function aw_si_seed(): array {
 		if ( 'primary' === $row['kind'] && $row['priority'] ) {
 			$set['priority'] = $row['priority']; // The 21 Oct priority until aw_si_compute() recalculates it.
 		}
-		if ( 'topic' === $row['page_type'] ) {
+		if ( 'topic' === $row['page_type'] && 0 !== strpos( (string) $row['page']['label'], '/' ) ) { // A path (/categories/) is a page, not a topic.
 			$set['topic'] = mb_substr( (string) $row['page']['label'], 0, 100 );
 		}
 		$fail                     += false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ? 1 : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -535,5 +535,106 @@ function aw_si_sync_roles(): array {
 		'entities'    => count( $ent ),
 		'sourcing'    => count( $sourcing ),
 		'brand'       => count( $brand ),
+	);
+}
+
+/**
+ * Category of a post: its Rank Math primary category, else its first category other than the default one.
+ *
+ * @param int $post_id Post ID.
+ * @return string Category name, or ''.
+ */
+function aw_si_post_topic( int $post_id ): string {
+	$primary = (int) get_post_meta( $post_id, 'rank_math_primary_category', true );
+	if ( $primary ) {
+		$term = get_term( $primary, 'category' );
+		if ( $term && ! is_wp_error( $term ) ) {
+			return (string) $term->name;
+		}
+	}
+	$default = (int) get_option( 'default_category' );
+	foreach ( (array) get_the_terms( $post_id, 'category' ) as $term ) {
+		if ( $term instanceof WP_Term && (int) $term->term_id !== $default ) {
+			return (string) $term->name;
+		}
+	}
+	return '';
+}
+
+/**
+ * Topic of each keyword (plan §8, the Keywords topic filter): the site category it belongs to, from
+ * 1. a category page that owns or carries it;
+ * 2. else the category of the post that owns it, then of a post that carries it;
+ * 3. else the category of the post Google shows most for it (up to 1,500 different pages a run).
+ * A keyword with none of these keeps the topic it has (the keyword map's). Writes only the keyword table.
+ *
+ * @return array{set: int, from_links: int, from_search: int} Records changed, and how many topics came from where.
+ */
+function aw_si_sync_topics(): array {
+	global $wpdb;
+	$k     = aw_si_table( 'keywords' );
+	$p     = aw_si_table( 'kw_pages' );
+	$topic = array(); // kw_id => [rank, name]; the lowest rank wins.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$links = (array) $wpdb->get_results( "SELECT kw_id, obj_type, obj_id, role FROM {$p} WHERE role IN ('owner', 'secondary') AND obj_type IN ('post', 'term') AND obj_id > 0" );
+	$posts = array_unique( array_map( 'intval', wp_list_pluck( wp_list_filter( $links, array( 'obj_type' => 'post' ) ), 'obj_id' ) ) );
+	_prime_post_caches( $posts, true, true );
+	$names = array();
+	foreach ( $links as $l ) {
+		$rank = 'term' === $l->obj_type ? 0 : ( 'owner' === $l->role ? 1 : 2 );
+		$key  = $l->obj_type . ':' . $l->obj_id;
+		if ( ! isset( $names[ $key ] ) ) {
+			$term          = 'term' === $l->obj_type ? get_term( (int) $l->obj_id ) : null;
+			$names[ $key ] = 'term' === $l->obj_type
+				? ( $term && ! is_wp_error( $term ) && 'category' === $term->taxonomy ? (string) $term->name : '' )
+				: aw_si_post_topic( (int) $l->obj_id );
+		}
+		$id = (int) $l->kw_id;
+		if ( '' !== $names[ $key ] && ( ! isset( $topic[ $id ] ) || $rank < $topic[ $id ][0] ) ) {
+			$topic[ $id ] = array( $rank, $names[ $key ] );
+		}
+	}
+	$linked = count( $topic );
+
+	// Keywords with no linked category: the post Google shows most (the page column the daily calculation fills).
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$shown = (array) $wpdb->get_results( "SELECT id, page FROM {$k} WHERE page LIKE '/%' AND page NOT LIKE '%{%'" );
+	$paths = array();
+	foreach ( $shown as $r ) {
+		if ( ! isset( $topic[ (int) $r->id ] ) ) {
+			$paths[ (string) $r->page ][] = (int) $r->id;
+		}
+	}
+	uasort( $paths, fn( $a, $b ) => count( $b ) <=> count( $a ) );
+	foreach ( array_slice( $paths, 0, 1500, true ) as $path => $ids ) {
+		$post = url_to_postid( home_url( (string) $path ) );
+		$name = $post ? aw_si_post_topic( $post ) : '';
+		if ( '' === $name ) {
+			$term = get_term_by( 'slug', basename( untrailingslashit( (string) $path ) ), 'category' );
+			$name = $term && 0 === strpos( (string) $path, '/category/' ) ? (string) $term->name : '';
+		}
+		if ( '' !== $name ) {
+			foreach ( $ids as $id ) {
+				$topic[ $id ] = array( 3, $name );
+			}
+		}
+	}
+
+	$by_name = array();
+	foreach ( $topic as $id => $t ) {
+		$by_name[ mb_substr( $t[1], 0, 100 ) ][] = (int) $id;
+	}
+	// A path stored as a topic by the first seed (the /categories/ hub) is not a topic.
+	$set = (int) $wpdb->query( "UPDATE {$k} SET topic = '' WHERE topic LIKE '/%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	foreach ( $by_name as $name => $ids ) {
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			$in   = implode( ',', array_map( 'intval', $chunk ) );
+			$set += (int) $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET topic = %s WHERE id IN ({$in}) AND topic <> %s", $name, $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		}
+	}
+	return array(
+		'set'         => $set,
+		'from_links'  => $linked,
+		'from_search' => count( $topic ) - $linked,
 	);
 }
