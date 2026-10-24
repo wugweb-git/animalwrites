@@ -300,6 +300,9 @@ function aw_claim_review_box( $post ) {
 		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
 		echo '<tr><td>Logo</td><td>' . get_the_post_thumbnail( $lid, 'thumbnail' ) . '</td><td><img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto"></td></tr>';
 	}
+	if ( get_post_meta( $post->ID, 'aw_c_feature', true ) ) { // asked before featured listings were dropped (owner, 24 Oct 2026)
+		echo '<tr><td>Featured</td><td colspan="2">Asked to be featured; featured listings are no longer offered, so tell them when you reply.</td></tr>';
+	}
 	echo '</tbody></table>';
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
 	if ( $notes ) {

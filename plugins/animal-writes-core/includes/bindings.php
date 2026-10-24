@@ -104,8 +104,6 @@ function aw_binding_value( $key, $post_id ) {
 			return $on ? sprintf( __( 'Verified on %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );
 		case 'blacklisted_label':
 			return get_post_meta( $post_id, 'aw_darpan_blacklisted_on', true ) ? __( 'Blacklisted on NGO Darpan', 'animal-writes-core' ) : ''; // the trust panel says by whom and from when
-		case 'featured_label':
-			return ''; // no featured listings (owner, 24 Oct 2026); kept so an old template binding prints nothing
 		case 'area':
 			// Cards show the town, district and state only, never the street address (owner, 12 Oct 2026); the full
 			// address is on the profile.

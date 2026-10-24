@@ -187,6 +187,16 @@ function aw_register_meta() {
 }
 add_action( 'init', 'aw_register_meta' );
 
+// The featured-flag backfill is gone (owner, 24 Oct 2026); remove the option it kept.
+add_action(
+	'admin_init',
+	function () {
+		if ( false !== get_option( 'aw_core_backfill_version' ) ) {
+			delete_option( 'aw_core_backfill_version' );
+		}
+	}
+);
+
 /*
  * Phone numbers and opening hours: the only source is the two lists (SCF repeaters aw_phones and aw_opening_hours),
  * stored the way SCF stores a repeater: the row count under the key, each sub-field under "{key}_{row}_{name}", and the
