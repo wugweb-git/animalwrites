@@ -426,7 +426,7 @@ add_action(
 
 /**
  * Which research papers the site already has (owner, 24 Oct 2026: the Research worker summarised a year of papers with AI
- * before the ingest answered "duplicate"). POST aw/v1/exists {dois: [], urls: []} with the workers' login; up to 500 of
+ * before the ingest answered "duplicate"). POST aw/v1/exists {dois: [], urls: []} with the workers' login (edit_others_posts); up to 500 of
  * each per call. Matches DOI first (case-insensitive, from the item's doi.org source link), then the normalised URL,
  * across research items (Resources tagged research) that are published, draft or pending.
  * Returns {dois: [the asked DOIs that exist], urls: [the asked URLs that exist]}, each as sent. With "index": true it
@@ -524,7 +524,8 @@ add_action(
 				'methods'             => 'POST',
 				'callback'            => 'aw_exists',
 				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' ); // the workers' login, as for /ingest
+					// Reviewers only, like To review: the index lists draft and pending research (the workers' login is an Editor).
+					return current_user_can( 'edit_others_posts' );
 				},
 			)
 		);
