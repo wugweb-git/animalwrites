@@ -161,6 +161,15 @@
 @media (min-width: 1200px) { .aw-browse-states ul { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .aw-browse-states a { display: flex; justify-content: space-between; gap: var(--kit-space-2); align-items: center; min-height: var(--kit-size-target); border-bottom: var(--kit-border-width) solid var(--kit-color-line); color: var(--kit-color-ink); text-decoration: none; }
 @media (hover: hover) { .aw-browse-states a:hover { color: var(--kit-color-link); } }
+/* Find help near you (find-help.php): the last part of More on item pages (a list, or one line), a band on campaign pages */
+.aw-findhelp-group .aw-findhelp, .aw-findhelp-band .aw-findhelp { margin: 0; }
+.aw-findhelp-head { margin: 0 0 var(--kit-space-2); }
+.aw-findhelp-group .aw-more-head { margin-bottom: var(--kit-space-2); }
+.aw-findhelp-lede { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-findhelp .kit-more { margin-top: var(--kit-space-4); }
+.aw-findhelp-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--kit-space-2) var(--kit-space-4); margin: 0; padding-top: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); }
+.aw-findhelp-line strong::after { content: " \2192"; font-weight: var(--kit-weight-medium); color: var(--kit-color-muted); }
+.aw-findhelp-line a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); color: var(--kit-color-link); font-weight: var(--kit-weight-medium); }
 
 /* ====================================================================   9. Editorial sections (Kits lead lists; the home page itself is core blocks and the section pages' cards since 18 Oct 2026)
    Warm off-white page, black type, one accent (Wugweb yellow #ffbe1a, fills only; links and text accents in blue #0062b8), thin rules, large numbers,
