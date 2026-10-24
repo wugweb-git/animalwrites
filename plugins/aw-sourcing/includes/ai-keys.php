@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → AI models (owner, 10 + 12 Oct 2026): paste a key; the site works out the provider and a model that
+ * Settings → Sourcing → AI models (owner, 10 + 12 Oct 2026; a tab since 24 Oct 2026): paste a key; the site works out the provider and a model that
  * answers, and shows whether the key works. One row per key, tried top to bottom, each kept separately.
  * Option aw_ai_models = list of {key, provider, model, url, status, checked} (not autoloaded).
  * The workers read the usable rows (GET /aw/v1/ai-keys) and try them before their GitHub Actions secrets.
@@ -171,12 +171,47 @@ function aw_ai_status_badge( $status ) {
 	return '<span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span> ' . esc_html( AW_AI_STATUS[ $status ] ?? $status );
 }
 
+/**
+ * The AI models screen: a tab of Settings → Sourcing (owner, 24 Oct 2026; it was its own Settings page until then).
+ *
+ * @param array $args Extra query args.
+ * @return string
+ */
+function aw_ai_keys_url( array $args = array() ) {
+	return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=ai' ) );
+}
+
+// Settings → Sourcing → AI models. Its own forms (keys, the list), so it is drawn outside the shared Sourcing form.
+add_filter(
+	'kits_sourcing_tabs',
+	function ( $tabs ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			$tabs['ai'] = array( 'AI models', 'aw_ai_keys_screen', true );
+		}
+		return $tabs;
+	}
+);
+
+// The old Settings → AI models address (bookmarks, links in notices and e-mails) opens the tab, with its query args.
 add_action(
-	'admin_menu',
+	'admin_init',
 	function () {
-		$hook = add_options_page( 'AI models', 'AI models', 'manage_options', 'aw-ai-keys', 'aw_ai_keys_screen' );
-		if ( $hook ) { // Screen options: keys per page.
-			add_action( 'load-' . $hook, fn() => add_screen_option( 'per_page', array( 'label' => 'Keys per page', 'default' => 100, 'option' => 'aw_ai_keys_per_page' ) ) );
+		global $pagenow;
+		if ( 'options-general.php' === $pagenow && 'aw-ai-keys' === sanitize_key( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a redirect only
+			$args = array_map( 'sanitize_text_field', (array) wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			unset( $args['page'] );
+			wp_safe_redirect( aw_ai_keys_url( array_map( 'rawurlencode', $args ) ), 301 );
+			exit;
+		}
+	}
+);
+
+// Screen options on the tab: keys per page.
+add_action(
+	'load-settings_page_aw-sourcing',
+	function () {
+		if ( 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown
+			add_screen_option( 'per_page', array( 'label' => 'Keys per page', 'default' => 100, 'option' => 'aw_ai_keys_per_page' ) );
 		}
 	}
 );
@@ -576,7 +611,7 @@ add_action(
 			wp_schedule_single_event( time(), $hook );
 			spawn_cron();
 		}
-		wp_safe_redirect( admin_url( 'options-general.php?page=aw-ai-keys&saved=1' ) );
+		wp_safe_redirect( aw_ai_keys_url( array( 'saved' => 1 ) ) );
 		exit;
 	}
 );
@@ -631,7 +666,7 @@ add_action(
 			wp_schedule_single_event( time(), 'aw_ai_check_new' );
 			spawn_cron();
 		}
-		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-ai-keys' ) );
+		$back = remove_query_arg( array( 'listed', 'n', 'saved', 'paged' ), wp_get_referer() ? wp_get_referer() : aw_ai_keys_url() );
 		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 		// A different page number is the page box (navigation); the same page with no action is an empty Apply.
@@ -645,7 +680,7 @@ add_action(
 		exit;
 	}
 );
-add_filter( 'removable_query_args', fn( $args ) => 'aw-ai-keys' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'listed', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
+add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) && 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ? array_merge( $args, array( 'listed', 'n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
 
 /**
  * Free-model daily caps per account (owner, 22 Oct 2026). OpenRouter gives each account 50 free requests a day (1,000
@@ -732,7 +767,7 @@ function aw_ai_overview( array $rows ) {
 		}
 	}
 	$pct = $daily ? min( 100, (int) round( 100 * $ok / $daily ) ) : 0;
-	echo '<h2>At a glance</h2><table class="widefat striped"><tbody>'
+	echo '<h2>At a glance</h2><table class="form-table" role="presentation"><tbody>'
 		. '<tr><th scope="row">Keys</th><td>' . esc_html( count( $rows ) . ' saved, ' . $working . ' working now' ) . '</td></tr>'
 		. '<tr><th scope="row">Supply</th><td>' . esc_html( 'About ' . number_format_i18n( $daily ) . ' free requests a day with a daily cap' . ( $nocap ? ', plus ' . $nocap . ' keys with no daily cap' : '' ) ) . '</td></tr>'
 		. '<tr><th scope="row">Demand</th><td>' . esc_html( number_format_i18n( $ok ) . ' answers the workers needed in the last 24 h' . ( $miss ? ' (+' . number_format_i18n( $miss ) . ' tries that hit a limit or failed)' : '' ) ) . '</td></tr>'
@@ -776,9 +811,9 @@ function aw_ai_tier_summary( array $rows ) {
 	aw_sourcing_simple_table( 'groups', array( 'group' => 'Group', 'means' => 'What it means', 'provs' => 'Providers (working / saved)' ), $rows, array( 'empty' => 'No keys yet.' ) );
 }
 
+/** Settings → Sourcing → AI models (the Sourcing screen prints the wrap, title and tabs). */
 function aw_ai_keys_screen() {
 	$rows = aw_ai_rows();
-	echo '<div class="wrap"><h1>AI models</h1>';
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. New keys are being checked in the background: reload in a few minutes to see their status.</p></div>';
 	}
@@ -820,10 +855,10 @@ function aw_ai_keys_screen() {
 	$table->prepare_items();
 	$table->views();
 	$view = sanitize_key( $_GET['keys'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<form method="get"><input type="hidden" name="page" value="aw-ai-keys">' . ( in_array( $view, array( 'ok', 'wait', 'bad', 'secret' ), true ) ? '<input type="hidden" name="keys" value="' . esc_attr( $view ) . '">' : '' );
+	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="ai">' . ( in_array( $view, array( 'ok', 'wait', 'bad', 'secret' ), true ) ? '<input type="hidden" name="keys" value="' . esc_attr( $view ) . '">' : '' );
 	$table->search_box( 'Search keys', 'aw-ai' );
 	echo '</form>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys_list">';
 	$table->display();
-	echo '</form></div>';
+	echo '</form>';
 }

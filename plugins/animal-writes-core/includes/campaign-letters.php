@@ -245,12 +245,12 @@ function aw_cl_report_page() {
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE campaign_id = %d", $cid ) ); // phpcs:ignore
 	echo '<h2>' . esc_html( sprintf( _n( '%s letter sent', '%s letters sent', $total, 'animal-writes-core' ), number_format_i18n( $total ) ) ) . '</h2>';
 	$table = function ( $title, $rows, $head ) {
-		echo '<h2>' . esc_html( $title ) . '</h2><table class="widefat striped" style="max-width:48rem"><thead><tr><th>' . esc_html( $head ) . '</th><th style="width:8rem">Letters</th></tr></thead><tbody>';
+		echo '<h2>' . esc_html( $title ) . '</h2>';
+		$cells = array();
 		foreach ( $rows as $label => $n ) {
-			echo '<tr><td>' . esc_html( '' === (string) $label ? '(not given)' : $label ) . '</td><td>' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
+			$cells[] = array( 'label' => esc_html( '' === (string) $label ? '(not given)' : $label ), 'n' => esc_html( number_format_i18n( $n ) ) );
 		}
-		echo $rows ? '' : '<tr><td colspan="2">None yet.</td></tr>';
-		echo '</tbody></table>';
+		aw_core_simple_table( 'letters', array( 'label' => esc_html( $head ), 'n' => 'Letters' ), $cells, array( 'empty' => 'None yet.' ) );
 	};
 	$pairs = fn( $sql ) => wp_list_pluck( (array) $wpdb->get_results( $wpdb->prepare( $sql, $cid ) ), 'n', 'k' ); // phpcs:ignore
 	$day   = $pairs( "SELECT sent_on AS k, COUNT(*) AS n FROM {$t} WHERE campaign_id = %d GROUP BY sent_on ORDER BY sent_on DESC" );
@@ -341,11 +341,11 @@ function aw_cl_widget() {
 			echo '<p class="description">None yet.</p>';
 			return;
 		}
-		echo '<table class="widefat striped"><tbody>';
+		$cells = array();
 		foreach ( $rows as $label => $n ) {
-			echo '<tr><td>' . esc_html( $label ) . '</td><td style="width:4rem;text-align:right">' . esc_html( number_format_i18n( $n ) ) . '</td></tr>';
+			$cells[] = array( 'label' => esc_html( $label ), 'n' => esc_html( number_format_i18n( $n ) ) );
 		}
-		echo '</tbody></table>';
+		aw_core_simple_table( 'letters-top', array( 'label' => '<span class="screen-reader-text">' . esc_html( $title ) . '</span>', 'n' => 'Letters' ), $cells );
 	};
 	$top = array();
 	foreach ( array_slice( $ground, 0, 3, true ) as $n => $c ) {

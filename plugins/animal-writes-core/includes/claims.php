@@ -290,26 +290,26 @@ function aw_claim_review_box( $post ) {
 	echo '<p><strong>Listing:</strong> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank">' . esc_html( get_the_title( $lid ) ) . '</a> · <strong>Status:</strong> ' . esc_html( ucfirst( $status ) ) . '</p>';
 	echo '<p><strong>From:</strong> ' . esc_html( get_post_meta( $post->ID, 'aw_c_name', true ) ) . ' (' . esc_html( $roles[ get_post_meta( $post->ID, 'aw_c_role', true ) ] ?? '' ) . '), '
 		. esc_html( get_post_meta( $post->ID, 'aw_c_email', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, 'aw_c_phone', true ) ) . '</p>';
-	echo '<table class="widefat striped"><thead><tr><th>Field</th><th>Now</th><th>Proposed</th></tr></thead><tbody>';
+	$cells = array();
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
-			echo '<tr><td>' . esc_html( $def[0] ) . '</td><td>' . esc_html( aw_claim_current( $lid, $key ) ) . '</td><td><strong>' . esc_html( $proposed[ $key ] ) . '</strong></td></tr>';
+			$cells[] = array( 'field' => esc_html( $def[0] ), 'now' => esc_html( aw_claim_current( $lid, $key ) ), 'proposed' => '<strong>' . esc_html( $proposed[ $key ] ) . '</strong>' );
 		}
 	}
 	if ( $logo ) {
-		$src = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
-		echo '<tr><td>Logo</td><td>' . get_the_post_thumbnail( $lid, 'thumbnail' ) . '</td><td><img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto"></td></tr>';
+		$src     = add_query_arg( array( 'action' => 'aw_claim_logo', 'claim' => $post->ID, '_wpnonce' => wp_create_nonce( 'aw_claim_logo' ) ), admin_url( 'admin-post.php' ) );
+		$cells[] = array( 'field' => 'Logo', 'now' => get_the_post_thumbnail( $lid, 'thumbnail' ), 'proposed' => '<img src="' . esc_url( $src ) . '" alt="Proposed logo" style="max-width:150px;height:auto">' );
 	}
 	if ( get_post_meta( $post->ID, 'aw_c_feature', true ) ) { // asked before featured listings were dropped (owner, 24 Oct 2026)
-		echo '<tr><td>Featured</td><td colspan="2">Asked to be featured; featured listings are no longer offered, so tell them when you reply.</td></tr>';
+		$cells[] = array( 'field' => 'Featured', 'now' => 'Asked to be featured; featured listings are no longer offered, so tell them when you reply.' );
 	}
-	echo '</tbody></table>';
+	aw_core_simple_table( 'claim-fields', array( 'field' => 'Field', 'now' => 'Now', 'proposed' => 'Proposed' ), $cells, array( 'empty' => 'No changes proposed.' ) );
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
 	if ( $notes ) {
 		echo '<p><strong>Notes:</strong><br>' . nl2br( esc_html( $notes ) ) . '</p>';
 	}
 	if ( 'pending' === $status ) {
-		foreach ( array( 'approve' => 'Approve: apply changes and mark verified' . ( $feature ? ', and feature it' : '' ), 'reject' => 'Reject' ) as $do => $label ) {
+		foreach ( array( 'approve' => 'Approve: apply changes and mark verified', 'reject' => 'Reject' ) as $do => $label ) {
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'aw_claim_decide', 'claim' => $post->ID, 'do' => $do ), admin_url( 'admin-post.php' ) ), 'aw_claim_decide_' . $post->ID );
 			echo '<a class="button ' . ( 'approve' === $do ? 'button-primary' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a> ';
 		}

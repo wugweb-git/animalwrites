@@ -19,6 +19,7 @@ if ( defined( 'KITS_CORE_LOADED' ) ) {
 define( 'KITS_CORE_LOADED', '0.1.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
+require_once KITS_CORE_DIR . 'includes/admin-table.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';

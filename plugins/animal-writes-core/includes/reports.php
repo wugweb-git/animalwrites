@@ -264,9 +264,9 @@ add_action(
 					'Status'        => AW_REPORT_STATUSES[ aw_report_status( $post->ID ) ],
 					'Reference'     => (string) get_post_meta( $post->ID, 'aw_r_ref', true ),
 				);
-				echo '<table class="widefat striped"><tbody>';
+				echo '<table class="form-table" role="presentation"><tbody>';
 				foreach ( $rows as $k => $v ) {
-					echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td style="white-space:pre-wrap">' . esc_html( '' !== $v ? $v : '—' ) . '</td></tr>';
+					echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . nl2br( esc_html( '' !== $v ? $v : '—' ) ) . '</td></tr>';
 				}
 				echo '</tbody></table>';
 			},

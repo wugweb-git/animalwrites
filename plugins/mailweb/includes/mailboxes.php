@@ -91,17 +91,20 @@ add_action(
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( 'mailweb_alias' );
 		echo '<input type="hidden" name="action" value="mailweb_alias">';
-		echo '<table class="widefat striped" style="max-width:48rem"><thead><tr><th scope="col">' . esc_html__( 'Mailbox', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Aliases', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Send from it', 'mailweb' ) . '</th><th scope="col">' . esc_html__( 'Default From', 'mailweb' ) . '</th></tr></thead><tbody>';
+		$rows = array();
 		foreach ( $boxes as $key => $addr ) {
-			$alias = mailweb_aliases_of( $addr );
-			$send  = ! isset( $set[ $key ]['send'] ) || $set[ $key ]['send'];
-			echo '<tr><td>' . esc_html( $addr ) . '</td><td>' . esc_html( $alias ? implode( ', ', $alias ) : '–' ) . '</td>';
-			/* translators: %s: mailbox address. */
-			echo '<td><label><input type="checkbox" name="send[' . esc_attr( $key ) . ']" value="1"' . checked( $send, true, false ) . '> <span class="screen-reader-text">' . esc_html( sprintf( __( 'Send from %s', 'mailweb' ), $addr ) ) . '</span></label></td>';
-			/* translators: %s: mailbox address. */
-			echo '<td><label><input type="radio" name="default_from" value="' . esc_attr( $key ) . '"' . checked( $def, $key, false ) . '> <span class="screen-reader-text">' . esc_html( sprintf( __( 'Default From: %s', 'mailweb' ), $addr ) ) . '</span></label></td></tr>';
+			$alias  = mailweb_aliases_of( $addr );
+			$send   = ! isset( $set[ $key ]['send'] ) || $set[ $key ]['send'];
+			$rows[] = array(
+				'box'     => esc_html( $addr ),
+				'aliases' => esc_html( $alias ? implode( ', ', $alias ) : '–' ),
+				/* translators: %s: mailbox address. */
+				'send'    => '<label><input type="checkbox" name="send[' . esc_attr( $key ) . ']" value="1"' . checked( $send, true, false ) . '> <span class="screen-reader-text">' . esc_html( sprintf( __( 'Send from %s', 'mailweb' ), $addr ) ) . '</span></label>',
+				/* translators: %s: mailbox address. */
+				'from'    => '<label><input type="radio" name="default_from" value="' . esc_attr( $key ) . '"' . checked( $def, $key, false ) . '> <span class="screen-reader-text">' . esc_html( sprintf( __( 'Default From: %s', 'mailweb' ), $addr ) ) . '</span></label>',
+			);
 		}
-		echo '</tbody></table>';
+		mailweb_simple_table( 'mailboxes', array( 'box' => esc_html__( 'Mailbox', 'mailweb' ), 'aliases' => esc_html__( 'Aliases', 'mailweb' ), 'send' => esc_html__( 'Send from it', 'mailweb' ), 'from' => esc_html__( 'Default From', 'mailweb' ) ), $rows ); // inside the form: the table prints no nonce of its own
 		$lines = array();
 		foreach ( mailweb_aliases() as $a => $m ) {
 			$lines[] = $a . ' = ' . $m;

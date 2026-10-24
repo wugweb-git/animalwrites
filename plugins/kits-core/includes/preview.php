@@ -268,13 +268,18 @@ function kits_preview_devices_screen() {
 	}
 	$all = kits_preview_devices();
 	if ( $all ) {
-		echo '<table class="widefat striped" style="max-width:720px"><thead><tr><th>Device</th><th>Added</th><th>Last seen</th><th></th></tr></thead><tbody>';
+		$cells = array();
 		foreach ( $all as $h => $d ) {
-			echo '<tr><td>' . esc_html( $d['label'] ?? '' ) . '</td><td>' . esc_html( $d['added'] ?? '' ) . '</td><td>' . esc_html( $d['seen'] ?? '' ) . '</td><td><form method="post" action="' . $post . '">' // phpcs:ignore WordPress.Security.EscapeOutput
-				. '<input type="hidden" name="action" value="kits_preview_remove"><input type="hidden" name="device" value="' . esc_attr( $h ) . '">' . wp_nonce_field( 'kits_preview_remove', '_wpnonce', true, false )
-				. '<button type="submit" class="button-link-delete">Remove</button></form></td></tr>';
+			$cells[] = array(
+				'device' => esc_html( $d['label'] ?? '' ),
+				'added'  => esc_html( $d['added'] ?? '' ),
+				'seen'   => esc_html( $d['seen'] ?? '' ),
+				'remove' => '<form method="post" action="' . $post . '">'
+					. '<input type="hidden" name="action" value="kits_preview_remove"><input type="hidden" name="device" value="' . esc_attr( $h ) . '">' . wp_nonce_field( 'kits_preview_remove', '_wpnonce', true, false )
+					. '<button type="submit" class="button-link-delete">Remove</button></form>',
+			);
 		}
-		echo '</tbody></table>';
+		kits_simple_table( 'preview-devices', array( 'device' => 'Device', 'added' => 'Added', 'seen' => 'Last seen', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells );
 	}
 	echo '<form method="post" action="' . $post . '" style="margin-top:1em"><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
 		. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></form>';

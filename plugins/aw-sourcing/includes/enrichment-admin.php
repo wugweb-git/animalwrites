@@ -315,17 +315,8 @@ function aw_enrich_review_page() {
 			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $q[ $k ] ) . '">';
 		}
 	}
-	echo '<div class="tablenav top"><select name="bulk"><option value="">Bulk actions</option>';
-	if ( 'pending' === $st ) {
-		echo '<option value="approve">Approve</option><option value="reject">Reject</option><option value="approve_high">Approve all high (this filter)</option>';
-	} else {
-		echo '<option value="undo">Undo</option>';
-	}
-	echo '</select> ';
-	submit_button( 'Apply', 'action', '', false );
-	echo ' <span class="displaying-num">' . (int) $total . ' items</span></div>';
-
-	echo '<table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-er\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Listing</th><th>Field</th><th>Current</th><th>Proposed</th><th>Source</th><th>Confidence</th><th>Status</th><th></th></tr></thead><tbody>';
+	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : array( 'undo' => 'Undo' );
+	$cells  = array();
 	$labels = aw_enrich_fields();
 	foreach ( $rows as $r ) {
 		$r     = aw_enrich_decode( $r );
@@ -343,25 +334,24 @@ function aw_enrich_review_page() {
 		foreach ( 'pending' === $r['status'] ? array( 'approve' => 'Approve', 'reject' => 'Reject' ) : ( in_array( $r['status'], array( 'auto-applied', 'approved' ), true ) ? array( 'undo' => 'Undo' ) : array() ) as $do => $l ) {
 			$act[] = '<a class="button button-small' . ( 'approve' === $do ? ' button-primary' : '' ) . '" href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_enrich_decide&do=' . $do . '&row[]=' . (int) $r['id'] ), 'aw_enrich_decide' ) ) . '">' . esc_html( $l ) . '</a>';
 		}
-		echo '<tr><th class="check-column"><input class="aw-er" type="checkbox" name="row[]" value="' . (int) $r['id'] . '"></th>'
-			. '<td><a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . wp_kses_post( $fl ) . '</td>'
-			. '<td>' . esc_html( $labels[ $r['field'] ][0] ?? $r['field'] ) . '</td>'
-			. '<td class="aw-enrich-val">' . aw_enrich_show( $r['field'], $cur ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
-			. '<td class="aw-enrich-val"><strong>' . aw_enrich_show( $r['field'], $r['value'] ) . '</strong>' . ( $r['note'] ? '<br><small>' . esc_html( $r['note'] ) . '</small>' : '' ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
-			. '<td>' . aw_enrich_sources_html( $r['sources'], $lid ) . '</td>' // phpcs:ignore WordPress.Security.EscapeOutput
-			. '<td><span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $r['confidence'] ) . '">' . esc_html( ucfirst( $r['confidence'] ) ) . '</span></td>'
-			. '<td>' . esc_html( ucfirst( $r['status'] ) ) . '<br><small>' . esc_html( wp_date( 'j M Y', strtotime( $r['created'] ) ) ) . '</small></td>'
-			. '<td>' . implode( ' ', $act ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		$cells[] = array(
+			'cb'         => '<input class="aw-er" type="checkbox" name="row[]" value="' . (int) $r['id'] . '">',
+			'listing'    => '<a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '"><strong>' . esc_html( get_the_title( $lid ) ) . '</strong></a> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank" aria-label="View">↗</a>' . wp_kses_post( $fl ),
+			'field'      => esc_html( $labels[ $r['field'] ][0] ?? $r['field'] ),
+			'current'    => '<div class="aw-enrich-val">' . aw_enrich_show( $r['field'], $cur ) . '</div>',
+			'proposed'   => '<div class="aw-enrich-val"><strong>' . aw_enrich_show( $r['field'], $r['value'] ) . '</strong>' . ( $r['note'] ? '<br><small>' . esc_html( $r['note'] ) . '</small>' : '' ) . '</div>',
+			'source'     => aw_enrich_sources_html( $r['sources'], $lid ),
+			'confidence' => '<span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $r['confidence'] ) . '">' . esc_html( ucfirst( $r['confidence'] ) ) . '</span>',
+			'status'     => esc_html( ucfirst( $r['status'] ) ) . '<br><small>' . esc_html( wp_date( 'j M Y', strtotime( $r['created'] ) ) ) . '</small>',
+			'act'        => implode( ' ', $act ),
+		);
 	}
-	if ( ! $rows ) {
-		echo '<tr><td colspan="9">Nothing here.</td></tr>';
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
-	echo '</tbody></table></form>';
-	$pages = (int) ceil( $total / $per );
-	if ( $pages > 1 ) {
-		echo '<div class="tablenav"><div class="tablenav-pages">' . paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => $pages ) ) . '</div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
-	}
-	echo '</div>';
+	require_once __DIR__ . '/class-aw-sourcing-enrichment-table.php';
+	( new AW_Sourcing_Enrichment_Table( $cells, $total, $per, $bulk ) )->display();
+	echo '</form></div>';
 }
 
 /* ---------- Settings → Sourcing → Directory enrichment (Settings API) ---------- */
