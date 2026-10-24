@@ -379,7 +379,7 @@ add_action(
 	function () {
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_enrich_sources_sanitize', 'show_in_rest' => false ) );
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_google_key', array( 'type' => 'string', 'sanitize_callback' => 'aw_enrich_google_key_sanitize', 'show_in_rest' => false ) );
-		register_setting( 'aw_sourcing_enrich', 'aw_enrich_live_cap', array( 'type' => 'string', 'sanitize_callback' => fn( $v ) => (string) max( 0, (int) $v ), 'show_in_rest' => false ) );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_live_cap', array( 'type' => 'string', 'sanitize_callback' => fn( $v ) => (string) max( 0, (int) $v ) === (string) get_option( 'aw_enrich_live_cap', '20' ) ? get_option( 'aw_enrich_live_cap', '20' ) : (string) max( 0, (int) $v ), 'show_in_rest' => false ) );
 		add_settings_section(
 			'aw_enrich',
 			'',
@@ -449,11 +449,11 @@ function aw_enrich_sources_sanitize( $value ) {
 	$key = trim( sanitize_text_field( wp_unslash( $_POST['aw_enrich_google_key'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- options.php checked the group's nonce
 	kits_sourcing_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
 	aw_sourcing_settings_saved();
-	return $new;
+	return $changed ? $new : get_option( 'aw_enrich_sources' ); // no change: stored as it is
 }
 
 /** An empty key field keeps the saved key (the field never shows it). */
 function aw_enrich_google_key_sanitize( $value ) {
 	$value = trim( sanitize_text_field( (string) $value ) );
-	return '' === $value ? (string) get_option( 'aw_enrich_google_key', '' ) : $value;
+	return '' === $value ? get_option( 'aw_enrich_google_key' ) : $value; // as stored (false when there is none: nothing is written)
 }

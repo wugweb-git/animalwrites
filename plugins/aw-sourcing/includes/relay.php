@@ -273,7 +273,11 @@ add_filter(
 				$new[] = $h;
 			}
 		}
-		$c['relay_hosts'] = array_values( array_unique( $new ) );
+		$new = array_values( array_unique( $new ) );
+		if ( $new === $old ) {
+			return $c; // unchanged: the built-in list stays built in (no relay_hosts key written)
+		}
+		$c['relay_hosts'] = $new;
 		kits_sourcing_log( 'relay', kits_sourcing_diff( 'relay hosts', $old, $c['relay_hosts'] ) );
 		return $c;
 	},

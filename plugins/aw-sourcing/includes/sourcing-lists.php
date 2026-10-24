@@ -389,9 +389,10 @@ function aw_sources_sanitize( $value ) {
 	if ( '' === $tab || ! has_filter( 'aw_sources_save_' . $tab ) ) {
 		return $value;
 	}
-	$c = apply_filters( 'aw_sources_save_' . $tab, aw_sources_config(), $value );
+	$was = aw_sources_config();
+	$c   = apply_filters( 'aw_sources_save_' . $tab, $was, $value );
 	aw_sourcing_settings_saved();
-	return $c;
+	return $c === $was ? get_option( 'aw_sources' ) : $c; // Save with no change writes nothing (same keys, values and types)
 }
 
 /** Press-discovery queries (Media & PR). */
@@ -457,6 +458,9 @@ add_filter(
 				$new[ $type ][ $k ] = array_values( array_unique( array_filter( array_map( 'sanitize_title', preg_split( '/[\s,]+/', (string) ( $in[ $type ][ $k ] ?? '' ) ) ) ) ) );
 				$what[]             = kits_sourcing_diff( $type . ' ' . $k, (array) ( $old[ $type ][ $k ] ?? array() ), $new[ $type ][ $k ] );
 			}
+		}
+		if ( ! array_filter( $what ) ) {
+			return $c; // unchanged: the stored lists keep their order
 		}
 		$c['sections'] = $new;
 		kits_sourcing_log( 'sections', implode( ' · ', array_filter( $what ) ) );

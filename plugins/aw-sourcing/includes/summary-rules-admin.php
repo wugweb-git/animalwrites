@@ -257,5 +257,5 @@ function aw_summary_rules_sanitize( $in ) {
 		}
 	}
 	kits_sourcing_log( 'summary', $what ? implode( ' · ', $what ) : 'summary rules saved (no change)' );
-	return $new;
+	return $what ? $new : get_option( AW_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
 }

@@ -798,7 +798,10 @@ function aw_relevance_switches_sanitize( $value ) {
 	if ( ! empty( $old['gnews_allow_only'] ) !== $rel['gnews_allow_only'] ) {
 		$what[] = 'aggregators allowed-only ' . ( $rel['gnews_allow_only'] ? 'on' : 'off' );
 	}
-	kits_sourcing_log( 'keywords', implode( ' · ', $what ) );
 	aw_sourcing_settings_saved();
+	if ( ! $what ) {
+		return get_option( AW_REL_OPTION ); // Save with no change writes nothing
+	}
+	kits_sourcing_log( 'keywords', implode( ' · ', $what ) );
 	return $rel;
 }
