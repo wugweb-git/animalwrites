@@ -147,7 +147,16 @@ const AW_WORKERS_KEEP = 20; // runs kept per workflow
 
 /** Workflow file => array of runs (run_id => record), newest last. */
 function aw_workers_runs() {
-	return (array) get_option( 'aw_worker_runs', array() );
+	$all = array();
+	foreach ( array_keys( AW_WORKERS ) as $file ) {
+		$all[ $file ] = (array) get_option( aw_workers_option( $file ), array() );
+	}
+	return $all;
+}
+
+/** One option per workflow (aw_worker_runs_sourcing_yml), so reports from different workflows never overwrite each other. */
+function aw_workers_option( $file ) {
+	return 'aw_worker_runs_' . preg_replace( '/[^a-z0-9]+/', '_', strtolower( $file ) );
 }
 
 /** The newest run of a workflow (highest run id), or null. */
@@ -353,9 +362,20 @@ add_action(
 					$now    = time();
 					$phase  = 'start' === $req->get_param( 'phase' ) ? 'start' : 'end';
 					$result = sanitize_key( (string) $req->get_param( 'result' ) );
-					$all    = aw_workers_runs();
-					$runs   = (array) ( $all[ $file ] ?? array() );
+					// Reports for the same workflow can overlap (a run's end and the next run's start): read-modify-write under
+					// a MySQL lock, released at the end of the request at the latest.
+					global $wpdb;
+					$lock   = 'aw_worker_runs_' . md5( $file );
+					$locked = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 10)', $lock ) );
+					wp_cache_delete( aw_workers_option( $file ), 'options' );
+					wp_cache_delete( 'notoptions', 'options' );
+					$runs   = (array) get_option( aw_workers_option( $file ), array() );
 					$r      = (array) ( $runs[ $run ] ?? array() );
+					$try    = max( 1, (int) $req->get_param( 'attempt' ) );
+					if ( 'start' === $phase && $try > (int) ( $r['attempt'] ?? 0 ) ) {
+						// A re-run reuses the run id with the next attempt: it starts afresh.
+						$r = array_diff_key( $r, array_flip( array( 'ended', 'result', 'failed_step', 'skipped_steps', 'counts', 'started' ) ) );
+					}
 					$counts = array();
 					foreach ( array_slice( (array) $req->get_param( 'counts' ), 0, 20, true ) as $k => $v ) {
 						if ( is_scalar( $v ) ) {
@@ -367,7 +387,7 @@ add_action(
 						$r,
 						array(
 							'run_id'  => $run,
-							'attempt' => max( 1, (int) $req->get_param( 'attempt' ) ),
+							'attempt' => max( $try, (int) ( $r['attempt'] ?? 0 ) ),
 							'event'   => sanitize_key( (string) $req->get_param( 'event' ) ),
 							'sha'     => preg_replace( '/[^a-f0-9]/', '', strtolower( (string) $req->get_param( 'sha' ) ) ),
 							'link'    => esc_url_raw( (string) $req->get_param( 'link' ) ),
@@ -386,8 +406,10 @@ add_action(
 					}
 					$runs[ $run ] = $r;
 					ksort( $runs, SORT_NUMERIC );
-					$all[ $file ] = array_slice( $runs, -AW_WORKERS_KEEP, null, true );
-					update_option( 'aw_worker_runs', $all, false );
+					update_option( aw_workers_option( $file ), array_slice( $runs, -AW_WORKERS_KEEP, null, true ), false );
+					if ( $locked ) {
+						$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );
+					}
 					if ( 'end' === $phase ) {
 						aw_workers_watchdog();
 					}
