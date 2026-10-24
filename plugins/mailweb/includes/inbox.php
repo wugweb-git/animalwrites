@@ -299,7 +299,7 @@ function mailweb_inbox_page() {
 	}
 	$s   = mailweb_state();
 	$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-meta th{text-align:left;padding:2px 12px 2px 0;color:#50575e;font-weight:400;vertical-align:top;width:4em}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
+	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
 	echo '<div class="wrap" id="mailweb">';
 	if ( 'settings' === $tab && current_user_can( 'manage_options' ) ) {
 		echo '<h1>' . esc_html__( 'Mail settings', 'mailweb' ) . '</h1>';
@@ -421,7 +421,7 @@ function mailweb_message_screen( $s ) {
 	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
 	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) $m['subject'] ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
-	echo '<div class="postbox"><div class="inside"><table class="awm-meta"><tbody>';
+	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'From', 'mailweb' ) . '</th><td><strong>' . esc_html( mailweb_who( $m['from'] ?? array() ) ) . '</strong></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'To', 'mailweb' ) . '</th><td>' . esc_html( implode( ', ', array_map( 'mailweb_who', (array) ( $m['to'] ?? array() ) ) ) ) . '</td></tr>';
 	if ( ! empty( $m['cc'] ) ) {
@@ -577,7 +577,7 @@ function mailweb_form_item_screen( $s ) {
 	call_user_func( $src['mark'], $id, 'read' );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
 	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( (string) ( $f['subject'] ?? '' ) ) . '</h2>';
-	echo '<div class="postbox"><div class="inside"><table class="awm-meta"><tbody>';
+	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
 	foreach ( (array) ( $f['fields'] ?? array() ) as $k => $v ) {
 		if ( '' !== trim( (string) $v ) ) {
 			echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . esc_html( $v ) . '</td></tr>';

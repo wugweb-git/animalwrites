@@ -50,6 +50,7 @@ add_action(
 	}
 );
 
+require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/crypto.php';
 require_once MAILWEB_DIR . 'includes/mail-in.php';
 require_once MAILWEB_DIR . 'includes/smtp.php';
