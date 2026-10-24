@@ -51,4 +51,5 @@ require_once AW_SOURCING_DIR . 'includes/enrichment-front.php';
 require_once AW_SOURCING_DIR . 'includes/review-queue.php';
 require_once AW_SOURCING_DIR . 'includes/ai-keys.php';
 require_once AW_SOURCING_DIR . 'includes/relay.php';
+require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';
