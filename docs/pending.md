@@ -20,8 +20,8 @@ Check this list against git and the live site before acting on it. Refer to item
 ### Claude Code: next work (bigger work: own branch + PR + review gate; small fixes straight onto wordpress-dev)
 10. **After the token:** Hostinger cron line for sourcing every 3 h (`wp eval 'aw_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'`) and Sourcing `late_after_h` to 6 in both registries; then focus keywords 04:00, SEO scores 05:15 and research Mon 09:10 IST, with their GitHub schedules moved about 2 h later in a small workers PR (registries updated together); test Run now with news-title-case (a dry run). backup-offsite is not dispatched.
 11. **Workers repo:** ruleset on `main` (PR + `test` check; bypass for admins and the deploy key); Sources sync and Keepalive push with the key.
-12. **Workers tab fixes:** count names keep their spaces (`already sentence case` shows as `alreadysentencecase`); news-title-case runs labelled as dry runs; Sources sync started from the site when the lists are saved, plus one daily run, instead of hourly.
-13. **aw-ship.sh:** move it into the repo (`tools/aw-ship.sh`); last step `?aw_deploy_nudge=ship-<sha>` instead of the command-line purge.
+12. **Workers tab fixes:** done 25 Oct (own PR): count names keep their spaces (new runs; older runs stay as stored); news-title-case runs report as dry runs; Sources sync once a day plus a start from the site 2 minutes after the lists or keywords are saved (that start needs AW_GITHUB_DISPATCH_TOKEN, see above).
+13. **aw-ship.sh:** done 25 Oct (own PR): now `tools/aw-ship.sh` in the repo (purges with `?aw_deploy_nudge=ship-<sha>`); `~/Documents/GitHub/aw-ship.sh` only calls it.
 14. **AW Sourcing:** what is left after PR #40 (24 Oct):
     - Per-item Search Console figures over 3 months as well as 28 days: the Sourcing keywords tab shows 28 days only (owner: keep pending).
     - Check the Sourcing keywords tab and the keyword Suggestions on live data after Search Insights' first Search Console run (25 Oct, 07:10 IST); until then the tab shows a notice and the suggestions list is empty.

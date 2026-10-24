@@ -272,7 +272,7 @@ add_action(
 					$counts = array();
 					foreach ( array_slice( (array) $req->get_param( 'counts' ), 0, 20, true ) as $k => $v ) {
 						if ( is_scalar( $v ) ) {
-							$counts[ sanitize_key( (string) $k ) ] = is_bool( $v ) ? (int) $v : ( is_numeric( $v ) ? $v + 0 : mb_substr( sanitize_text_field( (string) $v ), 0, 40 ) );
+							$counts[ sanitize_key( str_replace( ' ', '_', (string) $k ) ) ] = is_bool( $v ) ? (int) $v : ( is_numeric( $v ) ? $v + 0 : mb_substr( sanitize_text_field( (string) $v ), 0, 40 ) );
 						}
 					}
 					$started = (int) $req->get_param( 'started_at' );
