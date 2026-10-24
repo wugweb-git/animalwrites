@@ -70,6 +70,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
 | `includes/class-aw-sourcing-ai-keys-table.php` | Settings → AI models → Keys as a core list table: saved keys in the workers' order, then the GitHub-secret keys; views Working / Waiting / Broken / GitHub secrets, search, row actions Move up / Move down / Remove and bulk Check again / Remove (admin_post_aw_ai_keys_list), the plugins-list problem row under a broken key. |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
+| `includes/workers.php` | Settings → Sourcing → Workers (24 Oct 2026): the 17 workflows of the workers repository (AW_WORKERS, a copy of `docs/workers.json` there; change both together), POST worker-run (start and end reports), problems (late = no report for twice the interval; failed, cancelled, skipped, stuck), the hourly watchdog email (aw_workers_watchdog, once per new set), the notice, the rows in the dashboard box Scheduled tasks, the Site Health test and Run now (aw_dispatch_workflow, logged in aw_worker_dispatch_log). Also shows the AI models tiles. |
 
 ## mailweb (Mailweb)
 
