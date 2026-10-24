@@ -47,7 +47,9 @@ function aw_si_checklist(): array {
 	$ids = get_option( 'aw_si_checklist', null );
 	if ( ! is_array( $ids ) ) {
 		$ids = aw_si_checklist_defaults();
-		update_option( 'aw_si_checklist', $ids, false );
+		if ( $ids ) { // Not stored while the keyword table is still empty, so the list fills once it is seeded.
+			update_option( 'aw_si_checklist', $ids, false );
+		}
 	}
 	return array_values( array_unique( array_map( 'intval', $ids ) ) );
 }
@@ -281,7 +283,7 @@ function aw_si_checklist_handle(): void {
 		$list = aw_si_checklist_defaults();
 		$msg  = 'rebuilt';
 	} elseif ( 'start' === $action ) {
-		set_transient( 'aw_si_live_new_' . get_current_user_id(), aw_si_live_token_new(), 10 * MINUTE_IN_SECONDS );
+		set_transient( 'aw_si_live_new_' . get_current_user_id(), aw_si_live_token_new(), AW_SI_LIVE_TTL );
 		$msg = 'started';
 	}
 	update_option( 'aw_si_checklist', array_slice( $list, 0, 500 ), false );
@@ -316,6 +318,7 @@ function aw_si_live_window(): void {
 			'stopped' => __( 'Stopped. Click the bookmarklet again to carry on.', 'aw-seo-extras' ),
 			'nopos'   => __( 'not in the top 20', 'aw-seo-extras' ),
 			'failed'  => __( 'not saved', 'aw-seo-extras' ),
+			'noread'  => __( 'could not be read in the Google tab, not saved (it stays on the list)', 'aw-seo-extras' ),
 		),
 	);
 	wp_print_inline_script_tag(
@@ -330,6 +333,7 @@ function aw_si_live_window(): void {
 		. 'if(d.type==="aw-si-captcha"){say(c.text.captcha);return;}'
 		. 'if(d.type==="aw-si-done"){say(c.text.done);return;}'
 		. 'if(d.type!=="aw-si-result"||!names[d.id])return;var r=d.r||{};'
+		. 'if(r.error){line(names[d.id]+": "+c.text.noread);return;}'
 		. 'var b=new URLSearchParams();b.append("action","aw_si_live_save");b.append("nonce",c.nonce);b.append("token",c.token);b.append("id",d.id);'
 		. 'b.append("pos",r.pos||"");b.append("ours",r.ours||0);b.append("url",r.url||"");'
 		. '(r.top3||[]).forEach(function(x){b.append("top3[]",x);});(r.paa||[]).forEach(function(x){b.append("paa[]",x);});'

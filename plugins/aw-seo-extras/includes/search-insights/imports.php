@@ -129,8 +129,21 @@ function aw_si_import( string $kind, string $raw ): array {
 					++$out['skipped'];
 					continue;
 				}
-				$id = (int) current( aw_si_kw_ids( array( $cells[0] ), 0 ) );
-				$put( $id && aw_si_obs_put( $id, '', 'trends', 'index', '12m', wp_date( 'Y-m-d' ), array( 'value' => $v ) ) );
+				$id = (int) current( aw_si_kw_ids( array( sanitize_text_field( $cells[0] ) ), 0 ) );
+				$put(
+					$id && aw_si_obs_put(
+						$id,
+						'',
+						'trends',
+						'index',
+						'12m',
+						wp_date( 'Y-m-d' ),
+						array(
+							'value' => $v,
+							'txt'   => 'import', // Marks pasted rows apart from the workers job's.
+						)
+					)
+				);
 				continue;
 			}
 			$v = isset( $cells[2] ) ? aw_si_import_number( $cells[2] ) : null;
@@ -206,10 +219,10 @@ function aw_si_import( string $kind, string $raw ): array {
 		$out['error'] = __( 'The file needs a keyword column and a volume column.', 'aw-seo-extras' );
 		return $out;
 	}
-	$labels = array_filter( array_map( fn( $r ) => (string) $r[ $kcol ], $rows ) );
+	$labels = array_filter( array_map( fn( $r ) => sanitize_text_field( (string) $r[ $kcol ] ), $rows ) );
 	$ids    = aw_si_kw_ids( $labels, 0 );
 	foreach ( $rows as $r ) {
-		$id  = (int) ( $ids[ aw_si_norm( (string) $r[ $kcol ] ) ] ?? 0 );
+		$id  = (int) ( $ids[ aw_si_norm( sanitize_text_field( (string) $r[ $kcol ] ) ) ] ?? 0 );
 		$vol = aw_si_import_number( (string) $r[ $vcol ] );
 		if ( ! $id || null === $vol ) {
 			++$out['skipped'];
@@ -265,7 +278,7 @@ function aw_si_import_rows(): void {
 	global $wpdb;
 	if ( aw_si_ready() ) {
 		$o    = aw_si_table( 'obs' );
-		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'ahrefs', 'gov') OR (src = 'trends' AND kw_id > 0 AND period = '12m' AND d > '2026-10-15') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'ahrefs', 'gov') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 		if ( $last ) {
 			echo '<ul>';
 			foreach ( $last as $l ) {
@@ -292,15 +305,17 @@ add_action(
 		$raw = isset( $_POST['paste'] ) ? (string) wp_unslash( $_POST['paste'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed as CSV; each value is sanitised where it is stored.
 		if ( ! empty( $_FILES['file']['name'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
+			// The extension is checked here; WordPress's content sniffing is skipped because Keyword Planner's UTF-16
+			// exports are often detected as binary and refused. The file is only read as text and deleted at once.
+			$name = sanitize_file_name( wp_unslash( $_FILES['file']['name'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised here.
+			if ( ! in_array( strtolower( pathinfo( $name, PATHINFO_EXTENSION ) ), array( 'csv', 'tsv', 'txt' ), true ) ) {
+				wp_die( esc_html__( 'Upload a .csv, .tsv or .txt file.', 'aw-seo-extras' ), '', array( 'back_link' => true ) );
+			}
 			$up = wp_handle_upload(
 				$_FILES['file'], // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- core upload handling checks it.
 				array(
 					'test_form' => false,
-					'mimes'     => array(
-						'csv' => 'text/csv',
-						'tsv' => 'text/tab-separated-values',
-						'txt' => 'text/plain',
-					),
+					'test_type' => false,
 				)
 			);
 			if ( ! empty( $up['error'] ) ) {
