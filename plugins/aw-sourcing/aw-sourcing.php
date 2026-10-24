@@ -49,5 +49,6 @@ require_once AW_SOURCING_DIR . 'includes/enrichment.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-admin.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-front.php';
 require_once AW_SOURCING_DIR . 'includes/review-queue.php';
+require_once AW_SOURCING_DIR . 'includes/keyword-suggestions.php';
 require_once AW_SOURCING_DIR . 'includes/ai-keys.php';
 require_once AW_SOURCING_DIR . 'includes/relay.php';
