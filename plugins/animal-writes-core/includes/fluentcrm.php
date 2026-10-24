@@ -426,8 +426,12 @@ const AW_CRM_VOL_CONSENT_RANK = array( 'campaign_1_0' => 1, 'volunteering' => 2,
  * @return int
  */
 function aw_crm_tag_id( $slug ) {
-	$tag = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $slug )->first();
-	return $tag ? (int) $tag->id : 0;
+	static $ids = array();
+	if ( empty( $ids[ $slug ] ) ) { // a missing tag (0) is looked up again: it may be created later in the request
+		$tag          = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $slug )->first();
+		$ids[ $slug ] = $tag ? (int) $tag->id : 0;
+	}
+	return $ids[ $slug ];
 }
 
 /**
@@ -545,8 +549,8 @@ function aw_crm_vol_row_fields( $r ) {
 /**
  * Copy one volunteers-table row into FluentCRM without overwriting anything. A person with no contact gets one,
  * tagged Volunteer, with the status their row allows (active: transactional, so no newsletter; unsubscribed:
- * unsubscribed); a row marked deleted gets none. On an existing contact only empty fields are filled, the tag is
- * added when missing and the status is never changed. Sends nothing.
+ * unsubscribed). A row marked deleted is skipped, contact or not. On an existing contact only empty fields are filled,
+ * the tag is added when missing and the status is never changed. Sends nothing.
  *
  * @param array $r     Table row.
  * @param bool  $apply False: only work out what would change.
@@ -556,7 +560,7 @@ function aw_crm_vol_row_fields( $r ) {
 function aw_crm_volunteer_copy( $r, $apply ) {
 	$email = strtolower( trim( (string) $r['email'] ) );
 	$plan  = array( 'action' => 'none', 'contact' => 0, 'tag' => false, 'fields' => array(), 'differ' => array() );
-	if ( ! is_email( $email ) ) {
+	if ( ! is_email( $email ) || 'deleted' === $r['status'] ) { // a deleted row gives FluentCRM nothing, contact or not
 		$plan['action'] = 'skip';
 		return $plan;
 	}
@@ -565,10 +569,6 @@ function aw_crm_volunteer_copy( $r, $apply ) {
 	$core  = array_filter( array( 'first_name' => (string) ( $parts[0] ?? '' ), 'last_name' => (string) ( $parts[1] ?? '' ), 'phone' => (string) $r['phone'] ), fn( $v ) => '' !== trim( $v ) );
 	$c     = FluentCrmApi( 'contacts' )->getContact( $email );
 	if ( ! $c ) {
-		if ( 'deleted' === $r['status'] ) {
-			$plan['action'] = 'skip';
-			return $plan;
-		}
 		$plan = array( 'action' => 'create', 'contact' => 0, 'tag' => true, 'fields' => array_keys( $core + $want ), 'differ' => array() );
 		if ( $apply ) {
 			$c = FluentCrmApi( 'contacts' )->createOrUpdate( $core + array( 'email' => $email, 'status' => 'unsubscribed' === $r['status'] ? 'unsubscribed' : 'transactional', 'source' => (string) $r['source'] ) );
@@ -865,6 +865,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				'in_both'                => 0,
 				'in_both_not_tagged'     => 0,
 				'only_table'             => array(),
+				'skipped'                => array(),
 				'only_fluentcrm'         => 0,
 				'matched_contact_status' => array(),
 				'fields_differ_kept'     => array(),
@@ -879,7 +880,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$add( $n['table_status'], (string) $r['status'] );
 				$plan = aw_crm_volunteer_copy( $r, $apply );
 				$add( $n['plan'], $plan['action'] );
-				if ( 'create' === $plan['action'] || ( 'skip' === $plan['action'] && ! $plan['contact'] ) ) {
+				if ( 'skip' === $plan['action'] ) { // marked deleted, or no valid email: not copied, not matched
+					$add( $n['skipped'], (string) $r['status'] );
+				} elseif ( 'create' === $plan['action'] ) {
 					$add( $n['only_table'], (string) $r['status'] );
 				} else {
 					++$n[ $plan['tag'] ? 'in_both_not_tagged' : 'in_both' ];
