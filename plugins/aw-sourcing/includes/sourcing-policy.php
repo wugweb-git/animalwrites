@@ -265,12 +265,16 @@ add_action(
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( in_array( sanitize_key( $_GET['tab'] ?? 'publishers' ), array( '', 'publishers' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$tab = sanitize_key( $_GET['tab'] ?? 'publishers' ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $tab, array( '', 'publishers' ), true ) ) {
 			add_screen_option( 'per_page', array( 'label' => 'Publishers per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
+		} elseif ( 'keywords' === $tab ) {
+			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 		}
 	}
 );
 add_filter( 'set_screen_option_aw_publishers_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
+add_filter( 'set_screen_option_aw_keywords_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
 
 /** Save handlers. */
 add_action(
@@ -283,20 +287,12 @@ add_action(
 		if ( ! in_array( $tab, array( 'publishers', 'keywords' ), true ) ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
 		} elseif ( 'keywords' === $tab ) {
-			$rel  = aw_relevance();
-			$old  = $rel;
-			$list = fn( $k ) => array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( wp_unslash( $_POST[ $k ] ?? '' ) ) ) ) ) ) );
+			$rel                     = aw_relevance(); // the two switches; the word lists save from their list table (aw_sourcing_keywords)
+			$old                     = $rel;
 			$rel['enabled']          = ! empty( $_POST['enabled'] );
 			$rel['gnews_allow_only'] = ! empty( $_POST['gnews_allow_only'] );
-			foreach ( array( 'strong', 'animal', 'context', 'exclude' ) as $k ) {
-				$rel[ $k ] = $list( $k );
-			}
 			update_option( AW_REL_OPTION, $rel, false );
-			delete_transient( 'aw_sourcing_kw_stats_30' ); // Search Insights' per-keyword rows follow the new lists at once
 			$what = array();
-			foreach ( array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' ) as $k => $l ) {
-				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] );
-			}
 			if ( ! empty( $old['enabled'] ) !== $rel['enabled'] ) {
 				$what[] = 'keyword check ' . ( $rel['enabled'] ? 'on' : 'off' );
 			}
@@ -355,6 +351,90 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * The Keywords tab's word lists: add words (the form above the list) and the list table's row and bulk actions
+ * (remove, move to another list). Logged in the Change log like every Sourcing change.
+ */
+add_action(
+	'admin_post_aw_sourcing_keywords',
+	function () {
+		$adding = isset( $_POST['kw_add'] ); // phpcs:ignore WordPress.Security.NonceVerification -- picks which nonce is checked next
+		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( $adding ? 'aw_sourcing_keywords_add' : 'bulk-keywords' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$lists = array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' );
+		$rel   = aw_relevance();
+		$old   = $rel;
+		$n     = 0;
+		$op    = 'add';
+		$has   = function ( $k, $t ) use ( &$rel ) {
+			return in_array( mb_strtolower( $t ), array_map( 'mb_strtolower', (array) ( $rel[ $k ] ?? array() ) ), true );
+		};
+		if ( $adding ) {
+			$to = sanitize_key( $_POST['kw_list'] ?? '' );
+			$to = isset( $lists[ $to ] ) ? $to : 'strong';
+			foreach ( explode( "\n", sanitize_textarea_field( wp_unslash( $_POST['kw_new'] ?? '' ) ) ) as $t ) {
+				$t = trim( $t );
+				if ( '' !== $t && ! $has( $to, $t ) ) {
+					$rel[ $to ][] = $t;
+					++$n;
+				}
+			}
+		} else {
+			$row = sanitize_text_field( wp_unslash( $_POST['kw_row'] ?? '' ) ); // a row action: "op:list|word"
+			if ( false !== strpos( $row, ':' ) ) {
+				list( $op, $one ) = explode( ':', $row, 2 );
+				$ids              = array( $one );
+			} else { // bulk action, from the top or the bottom of the list
+				$op  = sanitize_key( $_POST['kw_bulk'] ?? '' );
+				$op  = '' !== $op ? $op : sanitize_key( $_POST['kw_bulk2'] ?? '' );
+				$ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['kw'] ?? array() ) );
+			}
+			$op = sanitize_key( $op );
+			$to = 0 === strpos( $op, 'to_' ) ? substr( $op, 3 ) : '';
+			if ( 'remove' === $op || isset( $lists[ $to ] ) ) {
+				foreach ( $ids as $id ) {
+					list( $from, $t ) = array_pad( explode( '|', (string) $id, 2 ), 2, '' );
+					if ( ! isset( $lists[ $from ] ) || $from === $to ) {
+						continue;
+					}
+					$at = array_search( $t, (array) ( $rel[ $from ] ?? array() ), true );
+					if ( false === $at ) {
+						continue;
+					}
+					unset( $rel[ $from ][ $at ] );
+					$rel[ $from ] = array_values( $rel[ $from ] );
+					if ( $to && ! $has( $to, $t ) ) {
+						$rel[ $to ][] = $t;
+					}
+					++$n;
+				}
+			}
+		}
+		if ( $n ) {
+			update_option( AW_REL_OPTION, $rel, false );
+			delete_transient( 'aw_sourcing_kw_stats_30' ); // Search Insights' per-keyword rows follow the new lists at once
+			$what = array();
+			foreach ( $lists as $k => $l ) {
+				$what[] = kits_sourcing_diff( $l, $old[ $k ] ?? array(), $rel[ $k ] ?? array() );
+			}
+			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
+		}
+		$ref  = wp_get_referer();
+		$back = remove_query_arg( array( 'updated', 'kw_done', 'kw_n', 'paged' ), $ref ? $ref : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) );
+		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
+		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
+		parse_str( (string) wp_parse_url( (string) $ref, PHP_URL_QUERY ), $was );
+		if ( ! $n && ! $adding && '' === $op && $page && absint( $was['paged'] ?? 1 ) !== $page ) { // the page box alone: navigation
+			wp_safe_redirect( $back );
+			exit;
+		}
+		wp_safe_redirect( add_query_arg( array( 'kw_done' => $n ? ( $adding ? 'add' : ( 'remove' === $op ? 'remove' : 'move' ) ) : 'none', 'kw_n' => $n ), $back ) );
+		exit;
+	}
+);
+add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_key( $_GET['page'] ?? '' ) ? array_merge( $args, array( 'kw_done', 'kw_n' ) ) : $args ); // phpcs:ignore WordPress.Security.NonceVerification -- only on this screen
 
 /** One-click block from the News / Legal Watch lists. */
 add_action(
@@ -466,35 +546,16 @@ function aw_sourcing_page() {
 		echo '</tbody></table></div>';
 		return;
 	}
+	if ( 'keywords' === $tab ) { // its own forms: the switches, add words, the word list
+		aw_sourcing_keywords_tab();
+		echo '</div>';
+		return;
+	}
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="' . esc_attr( $tab ) . '">';
 	wp_nonce_field( 'aw_sourcing' );
 	if ( isset( $extra[ $tab ] ) ) {
 		call_user_func( $extra[ $tab ][1] );
 		echo '</form></div>';
-		return;
-	}
-
-	if ( 'keywords' === $tab ) {
-		$r = aw_relevance();
-		echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. One term per line; Hindi works.</p>';
-		echo '<p><label><input type="checkbox" name="enabled" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> <strong>Relevance filter on</strong> (off: every item from a non-blocked publisher is kept)</label></p>';
-		echo '<p><label><input type="checkbox" name="gnews_allow_only" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> <strong>Only allowed publishers from aggregator feeds</strong> (Google News, Apple News and similar: items from Neutral publishers are refused). Keep off unless the allow list is complete.</label></p>';
-		echo '<div class="aw-src-lists">';
-		foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $label ) {
-			echo '<p><label for="aw-' . esc_attr( $k ) . '"><strong>' . esc_html( $label ) . '</strong></label><br><textarea id="aw-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '">' . esc_textarea( implode( "\n", (array) $r[ $k ] ) ) . '</textarea></p>';
-		}
-		echo '</div>';
-		$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		submit_button( 'Save keywords' );
-		echo '</form><h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline">';
-		submit_button( 'Test', 'secondary', '', false );
-		if ( $try ) {
-			$v = aw_relevance_verdict( $try );
-			echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
-		}
-		echo '</form>';
-		do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
-		echo '</div>';
 		return;
 	}
 
@@ -513,4 +574,75 @@ function aw_sourcing_page() {
 	$table->search_box( 'Search publishers', 'aw-publisher' );
 	$table->display();
 	echo '</form></div>';
+}
+
+/** The Keywords tab: the two switches, add words, the word lists as a list table, the headline test, suggestions. */
+function aw_sourcing_keywords_tab() {
+	$r    = aw_relevance();
+	$post = admin_url( 'admin-post.php' );
+	$done = sanitize_key( $_GET['kw_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( 'none' === $done ) {
+		echo '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one word (a word already in a list is not added to it again).</p></div>';
+	} elseif ( $done ) {
+		$n   = absint( wp_unslash( $_GET['kw_n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$msg = array(
+			/* translators: %d: number of words. */
+			'add'    => _n( '%d word added.', '%d words added.', $n ),
+			/* translators: %d: number of words. */
+			'remove' => _n( '%d word removed.', '%d words removed.', $n ),
+			/* translators: %d: number of words. */
+			'move'   => _n( '%d word moved.', '%d words moved.', $n ),
+		);
+		if ( isset( $msg[ $done ] ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $done ], $n ) . ' The workers use the lists from their next run.' ) . '</p></div>';
+		}
+	}
+	echo '<p>An item from an <strong>allowed</strong> publisher goes live when it has an <strong>include</strong> word (or an animal word with a context word) and no <strong>exclude</strong> word; otherwise it waits in review. Blocked publishers are refused. Hindi works.</p>';
+
+	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="keywords">';
+	wp_nonce_field( 'aw_sourcing' );
+	echo '<table class="form-table" role="presentation"><tbody>'
+		. '<tr><th scope="row">Relevance filter</th><td><label><input type="checkbox" name="enabled" value="1"' . checked( ! empty( $r['enabled'] ), true, false ) . '> On</label><p class="description">Off: every item from a non-blocked publisher is kept.</p></td></tr>'
+		. '<tr><th scope="row">Aggregator feeds</th><td><label><input type="checkbox" name="gnews_allow_only" value="1"' . checked( ! empty( $r['gnews_allow_only'] ), true, false ) . '> Only allowed publishers</label><p class="description">Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.</p></td></tr>'
+		. '</tbody></table>';
+	submit_button( 'Save' );
+	echo '</form>';
+
+	echo '<h2>Add words</h2><form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords"><input type="hidden" name="kw_add" value="1">';
+	wp_nonce_field( 'aw_sourcing_keywords_add' );
+	echo '<table class="form-table" role="presentation"><tbody>'
+		. '<tr><th scope="row"><label for="aw-kw-new">Words</label></th><td><textarea id="aw-kw-new" name="kw_new" rows="3" class="large-text code"></textarea><p class="description">One per line.</p></td></tr>'
+		. '<tr><th scope="row"><label for="aw-kw-list">Add to</label></th><td><select id="aw-kw-list" name="kw_list">';
+	foreach ( array( 'strong' => 'Include (one is enough)', 'animal' => 'Animal words', 'context' => 'Context words (an animal word with one of these also counts)', 'exclude' => 'Exclude (always drop)' ) as $k => $l ) {
+		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
+	}
+	echo '</select></td></tr></tbody></table>';
+	submit_button( 'Add words', 'secondary' );
+	echo '</form>';
+
+	echo '<h2>Words</h2>';
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	}
+	require_once __DIR__ . '/class-aw-sourcing-keywords-table.php';
+	$table = new AW_Sourcing_Keywords_Table();
+	$table->prepare_items();
+	$table->views();
+	$list = sanitize_key( $_GET['list'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( isset( AW_Sourcing_Keywords_Table::LISTS[ $list ] ) ? '<input type="hidden" name="list" value="' . esc_attr( $list ) . '">' : '' );
+	$table->search_box( 'Search words', 'aw-kw' );
+	echo '</form>';
+	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_sourcing_keywords">';
+	$table->display();
+	echo '</form>';
+
+	$try = sanitize_text_field( wp_unslash( $_GET['try'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	echo '<h2>Test a headline</h2><form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords"><input type="text" name="try" class="large-text" value="' . esc_attr( $try ) . '" placeholder="Paste a headline" aria-label="Headline">';
+	submit_button( 'Test', 'secondary', '', false );
+	if ( $try ) {
+		$v = aw_relevance_verdict( $try );
+		echo '<p><strong>' . ( $v[0] ? 'Kept' : 'Dropped' ) . '</strong> (' . esc_html( $v[1] ) . ')</p>';
+	}
+	echo '</form>';
+	do_action( 'aw_sourcing_keywords_tab_end' ); // suggestions from Search Insights (keyword-suggestions.php)
 }
