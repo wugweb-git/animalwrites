@@ -90,9 +90,15 @@ add_action(
 				$places[] = array( $parts[0], $parts[1] ?? 0 );
 			}
 		}
-		$pin  = preg_replace( '/\D/', '', (string) wp_unslash( $_POST['aw_pincode'] ?? '' ) );
-		$city = sanitize_text_field( wp_unslash( $_POST['aw_place_city'] ?? '' ) );
-		if ( ! aw_set_item_places( $id, $places, $pin, $city ) ) {
+		$pin    = preg_replace( '/\D/', '', (string) wp_unslash( $_POST['aw_pincode'] ?? '' ) );
+		$city   = sanitize_text_field( wp_unslash( $_POST['aw_place_city'] ?? '' ) );
+		$before = aw_item_codes( $id );
+		if ( aw_set_item_places( $id, $places, $pin, $city ) ) {
+			if ( aw_item_codes( $id ) !== $before ) { // The box posts the place it loaded with: only a change is an editor's choice.
+				update_post_meta( $id, 'aw_place_source', 'editor' );
+				delete_post_meta( $id, 'aw_place_auto' );
+			}
+		} else {
 			set_transient( 'aw_place_error_' . get_current_user_id(), 'Place not saved: choose the state and district from the lists, and give a 6-digit PIN code (or leave it empty). The previous place is kept.', 60 );
 		}
 	},

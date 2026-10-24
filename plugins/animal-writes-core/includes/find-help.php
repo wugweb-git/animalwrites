@@ -9,7 +9,8 @@
  *   in the title or the summary's first sentence, or when it is written 2 or more times (owner, 24 Oct 2026: a national
  *   story that mentions a state in passing gets no place). Stored like a place set by hand
  *   (aw_state_code, aw_district_code) with aw_place_auto = 1, on publish and by `wp aw-places detect` for older items.
- *   An editor changes it in the Place box; an item left with no place gets one again on its next save.
+ *   aw_place_source records who set it: "auto" (detected) or "editor" (changed in the Place box; only a real change
+ *   counts, as the box posts the place it loaded with). An item left with no place gets one again on its next save.
  *   Not stored: names that are also ordinary words or people's names, a district name two states share unless its
  *   state is named too, and items that name more than 3 states (national stories).
  * - Delhi's districts named for directions read "South Delhi", "North East Delhi" in the links, and are detected
@@ -254,6 +255,7 @@ function aw_place_detect( $id, $write = true ) {
 	$places = aw_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) );
 	if ( $places && $write && aw_set_item_places( $id, $places ) ) {
 		update_post_meta( $id, 'aw_place_auto', '1' );
+		update_post_meta( $id, 'aw_place_source', 'auto' );
 	}
 	return $places;
 }
@@ -389,9 +391,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	 * Detect places for published News, Library and guides that have none: `wp aw-places detect [--dry-run]
 	 * [--type=aw_news] [--samples=10]`. Prints counts per type and samples.
 	 *
-	 * --redo-auto: also re-detect items whose place was detected (aw_place_auto) and still matches what the old rule
-	 * finds (so not changed by an editor), and store the new result where it differs (none: the place is removed).
+	 * --redo-auto: also re-detect items whose place was detected (aw_place_source = auto) and store the new result
+	 * where it differs (none: the place is removed). A place an editor changed in the Place box (aw_place_source =
+	 * editor) is never touched; an older detected place with no source recorded is left alone and counted.
 	 * Prints the changed IDs, for purging.
+	 *
+	 * `wp aw-places mark-auto <id>...`: record items as detected (aw_place_source = auto), unless an editor set them.
 	 */
 	WP_CLI::add_command(
 		'aw-places detect',
@@ -408,13 +413,19 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				return implode( ',', $k );
 			};
 			foreach ( $types as $t ) {
-				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'edited' => 0, 'states' => array() );
+				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'edited' => 0, 'nosource' => 0, 'states' => array() );
 				foreach ( get_posts( array( 'post_type' => $t, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'DESC' ) ) as $id ) {
 					if ( 'post' === $t && 'guide' !== aw_item_kind( $id ) ) {
 						continue;
 					}
 					++$c['items'];
-					if ( $redo && get_post_meta( $id, 'aw_place_auto', true ) ) {
+					$source = (string) get_post_meta( $id, 'aw_place_source', true );
+					if ( $redo && ( 'editor' === $source || ( '' === $source && get_post_meta( $id, 'aw_place_auto', true ) ) ) ) {
+						++$c[ 'editor' === $source ? 'edited' : 'nosource' ];
+						++$c['had'];
+						continue;
+					}
+					if ( $redo && 'auto' === $source ) {
 						list( $ss, $dd ) = aw_item_codes( $id );
 						$stored          = array_map( fn( $d ) => array( aw_place_district( $d )->state, $d ), array_filter( $dd, 'aw_place_district' ) );
 						foreach ( $ss as $s ) {
@@ -423,16 +434,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 							}
 						}
 						$title = get_the_title( $id );
-						$sum   = get_post_field( 'post_excerpt', $id );
-						$new   = aw_places_in_text( $title, $sum );
-						if ( $key( $stored ) !== $key( aw_places_in_text( $title, $sum, false ) ) ) {
-							++$c['edited'];
-						} elseif ( $key( $stored ) !== $key( $new ) ) {
+						$new   = aw_places_in_text( $title, get_post_field( 'post_excerpt', $id ) );
+						if ( $key( $stored ) !== $key( $new ) ) {
 							$changed[] = $id;
-							WP_CLI::log( sprintf( '  redo %s %d  %s  %s  →  %s', $t, $id, mb_substr( $title, 0, 80 ), $key( $stored ), $new ? $key( $new ) : 'none' ) );
+							WP_CLI::log( sprintf( '  redo %s %d  %s  %s  →  %s', $t, $id, mb_substr( $title, 0, 80 ), $stored ? $key( $stored ) : 'none', $new ? $key( $new ) : 'none' ) );
 							if ( ! $dry ) {
 								if ( $new ) {
 									aw_set_item_places( $id, $new );
+									update_post_meta( $id, 'aw_place_auto', '1' );
 								} else {
 									delete_post_meta( $id, 'aw_state_code' );
 									delete_post_meta( $id, 'aw_district_code' );
@@ -461,7 +470,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 				WP_CLI::log( sprintf( '%s: %d items, %d already had a place, %d %s a place (%d with a district), %d states', $t, $c['items'], $c['had'], $c['found'], $dry ? 'would get' : 'got', $c['district'], count( $c['states'] ) ) );
 				if ( $redo ) {
-					WP_CLI::log( sprintf( '  %d detected places left alone (changed by an editor or by the new names)', $c['edited'] ) );
+					WP_CLI::log( sprintf( '  left alone: %d set by an editor, %d detected before 24 Oct with no source recorded', $c['edited'], $c['nosource'] ) );
 				}
 			}
 			foreach ( $samples as $t => $ids ) {
@@ -474,6 +483,20 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::log( 'Changed IDs: ' . implode( ' ', $changed ) );
 			}
 			WP_CLI::success( $dry ? 'Dry run: nothing stored.' : 'Stored.' );
+		}
+	);
+
+	WP_CLI::add_command(
+		'aw-places mark-auto',
+		function ( $args ) {
+			$n = 0;
+			foreach ( array_map( 'absint', $args ) as $id ) {
+				if ( $id && get_post( $id ) && 'editor' !== get_post_meta( $id, 'aw_place_source', true ) ) {
+					update_post_meta( $id, 'aw_place_source', 'auto' );
+					++$n;
+				}
+			}
+			WP_CLI::success( sprintf( '%d of %d items recorded as detected (aw_place_source = auto).', $n, count( $args ) ) );
 		}
 	);
 }
