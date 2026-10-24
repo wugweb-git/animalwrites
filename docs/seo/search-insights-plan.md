@@ -1,6 +1,6 @@
 # Search Insights — plan (owner review)
 
-24 October 2026. Approved (PR #1). Phase 1 is built and live (aw-seo-extras `includes/search-insights/`, PR #17), and the Sourcing keywords tab too (PR #32). The phase 1 leftovers (topic filter, listing names as one row, all 8 actions, gap page types, the 5,000-row split) were built on 25 Oct (PR #39), and phase 2 (GA4, PageSpeed, Clarity, searches on the site, Pages tab, redirects; PR #42) and phase 4 (check list, bookmarklet live check, imports) on 25 Oct too. It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
+24 October 2026. Approved (PR #1). Phase 1 is built and live (aw-seo-extras `includes/search-insights/`, PR #17), and the Sourcing keywords tab too (PR #32). The phase 1 leftovers (topic filter, listing names as one row, all 8 actions, gap page types, the 5,000-row split) were built on 25 Oct (PR #39), and phase 2 (GA4, PageSpeed, Clarity, searches on the site, Pages tab, redirects; PR #42) phase 4 (check list, bookmarklet live check, imports; PR #45) and the phase 5 snapshot on 25 Oct too. Phase 3 (workers job, Rising tab) is PR #44 and workers PR #7. Hindi and Hinglish stay out (owner, 25 Oct); YouTube, Reddit and Bing wait for the owner's keys and sign-in. It joins the seven Search Insights briefs of 24 Oct into one plan. Where the briefs differ, the latest brief wins, and section 13 lists each override.
 
 Related files:
 - `docs/seo/keyword-map.md` (Rank and Priority columns, 21 Oct)
