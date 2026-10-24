@@ -163,6 +163,7 @@ add_filter(
 function aw_directory_query_vars( $v ) {
 	$mq = (array) ( $v['meta_query'] ?? array() );
 	$v['aw_digits_last'] = 1; // A–Z means letters first: names that start with a number (e.g. "1962 …") come after Z
+
 	$order = array( 'title' => 'ASC' );
 	// Verified first, once any listing is verified. Until then the step changes nothing and its OR join (aw_verified is
 	// missing on most listings) made every Directory query about 300 ms slower.

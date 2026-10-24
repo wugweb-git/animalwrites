@@ -118,11 +118,11 @@ add_shortcode( 'aw_claim_box', fn() => get_post() ? aw_claim_form( get_post() ) 
 /** A claim's values from submitted data (already unslashed): the site's form and Fluent Forms use this. */
 function aw_claim_values( $in ) {
 	$v = array(
-		'name'    => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
-		'role'    => sanitize_key( (string) ( $in['role'] ?? '' ) ),
-		'email'   => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
-		'phone'   => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
-		'notes'   => sanitize_textarea_field( (string) ( $in['notes'] ?? '' ) ),
+		'name'  => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
+		'role'  => sanitize_key( (string) ( $in['role'] ?? '' ) ),
+		'email' => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
+		'phone' => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
+		'notes' => sanitize_textarea_field( (string) ( $in['notes'] ?? '' ) ),
 	);
 	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
 		$raw       = 'aw_services' === $key ? implode( ',', array_intersect( array_map( 'sanitize_title', (array) ( $in['aw_services'] ?? array() ) ), array_keys( AW_SERVICES ) ) ) : (string) ( $in[ $key ] ?? '' );
