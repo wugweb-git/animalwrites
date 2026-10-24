@@ -57,7 +57,10 @@ function aw_si_dry_report( string $day ): array {
 	// Seed (keyword map, gaps, 21 Oct rankings).
 	$seed = aw_si_seed_data();
 	foreach ( (array) ( $seed['map'] ?? array() ) as $row ) {
-		$n                     = $add( $row['keyword'], AW_SI_ROLE_TRACKED );
+		$n = $add( $row['keyword'], AW_SI_ROLE_TRACKED );
+		if ( '' === $n ) {
+			continue;
+		}
 		$rec[ $n ]['has_page'] = true;
 		$rec[ $n ]['entity']   = '{organisation name}' === $row['keyword'] ? 1 : $rec[ $n ]['entity'];
 		list( , , $path )      = aw_si_resolve_page( (array) $row['page'], (string) $row['page_type'] );
@@ -79,6 +82,9 @@ function aw_si_dry_report( string $day ): array {
 	}
 	foreach ( (array) ( $seed['rankings'] ?? array() ) as $r ) {
 		$n = $add( $r['keyword'], AW_SI_ROLE_TRACKED );
+		if ( '' === $n ) {
+			continue;
+		}
 		if ( null !== $r['position'] ) {
 			$rec[ $n ]['live'] = (float) $r['position'];
 		}
@@ -171,7 +177,10 @@ function aw_si_dry_report( string $day ): array {
 	}
 	list( $one, $q28, $qp28 ) = $gsc;
 	foreach ( $q28 as $r ) {
-		$n                    = $add( (string) ( $r[0][0] ?? '' ), AW_SI_ROLE_SEARCHED );
+		$n = $add( (string) ( $r[0][0] ?? '' ), AW_SI_ROLE_SEARCHED );
+		if ( '' === $n ) {
+			continue; // A query of symbols only: the daily run skips it too.
+		}
 		$old                  = $rec[ $n ]['impr'];
 		$rec[ $n ]['impr']   += $r[2];
 		$rec[ $n ]['clicks'] += $r[1];
