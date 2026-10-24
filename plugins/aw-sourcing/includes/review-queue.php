@@ -17,7 +17,13 @@ const AW_REVIEW_TYPES = array(
 	'aw_legal'       => 'Library',
 	'aw_opportunity' => 'Opportunity',
 	'aw_press'       => 'Press',
+	'post'           => 'Research', // research papers only (Resources tagged research): a held one shows why (24 Oct 2026)
 );
+
+/** A review item: any of the types above, but of Resources only research papers (guides are never reviewed here). */
+function aw_review_is_item( $p ) {
+	return $p && isset( AW_REVIEW_TYPES[ $p->post_type ] ) && ( 'post' !== $p->post_type || has_term( 'research', 'post_tag', $p ) );
+}
 
 /**
  * Items waiting: Pending, plus drafts the automatic review held back.
@@ -36,7 +42,7 @@ function aw_review_items( $type = '' ) {
 			'meta_query'  => array( array( 'key' => 'aw_review', 'value' => 'held:', 'compare' => 'LIKE' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 		)
 	);
-	$all = array_merge( $pending, $held );
+	$all = array_values( array_filter( array_merge( $pending, $held ), 'aw_review_is_item' ) );
 	// Only items the relevance check passed (or has not checked): "not relevant" never reaches a person (owner, 10 Oct 2026).
 	if ( function_exists( 'aw_relevance_failed' ) ) {
 		$all = array_values( array_filter( $all, fn( $p ) => ! aw_relevance_failed( $p->ID ) ) );
@@ -81,7 +87,7 @@ function aw_review_apply( $ids, $action ) {
 	$when = current_time( 'Y-m-d H:i' );
 	foreach ( array_map( 'intval', $ids ) as $id ) {
 		$p = get_post( $id );
-		if ( ! $p || ! isset( AW_REVIEW_TYPES[ $p->post_type ] ) || ! in_array( $p->post_status, array( 'pending', 'draft' ), true ) || ! current_user_can( 'edit_post', $id ) ) {
+		if ( ! aw_review_is_item( $p ) || ! in_array( $p->post_status, array( 'pending', 'draft' ), true ) || ! current_user_can( 'edit_post', $id ) ) {
 			continue;
 		}
 		if ( 'publish' === $action ) {
@@ -174,7 +180,7 @@ function aw_review_page() {
 
 /* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
 
-foreach ( array_keys( AW_REVIEW_TYPES ) as $aw_rt ) {
+foreach ( array_diff( array_keys( AW_REVIEW_TYPES ), array( 'post' ) ) as $aw_rt ) { // not on the Resources list (guides)
 	add_filter( 'bulk_actions-edit-' . $aw_rt, fn( $a ) => array( 'aw_publish' => 'Publish (approve)' ) + $a );
 	add_filter(
 		'handle_bulk_actions-edit-' . $aw_rt,
@@ -194,7 +200,7 @@ add_action(
 	'restrict_manage_posts',
 	function ( $type, $which ) {
 		$status = sanitize_key( $_GET['post_status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( 'top' !== $which || ! isset( AW_REVIEW_TYPES[ $type ] ) || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( 'top' !== $which || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			return;
 		}
 		$n = (int) ( wp_count_posts( $type )->$status ?? 0 );
@@ -211,7 +217,7 @@ add_action(
 	function () {
 		$type   = sanitize_key( $_GET['post_type'] ?? '' );
 		$status = sanitize_key( $_GET['status'] ?? '' );
-		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$ids = get_posts( array( 'post_type' => $type, 'post_status' => $status, 'fields' => 'ids', 'numberposts' => -1 ) );

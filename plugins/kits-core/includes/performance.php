@@ -14,9 +14,10 @@
  *   - the footer scripts jQuery, jQuery Migrate, Fluent Forms' submit script, wp-hooks, wp-i18n and Accessibility
  *     Checker's front-end fixes are deferred. WordPress's own strategy check keeps any of them blocking when an inline
  *     script after it, or a blocking script that needs it, would break;
- *   - Fluent Forms' two stylesheets load without blocking the first paint, except on a page whose own content has a
- *     form (there the form may be near the top; a site marks its own form shortcodes and blocks with the
- *     kits_page_has_form filter). Elsewhere the only form is the footer sign-up, far below the fold;
+ *   - Fluent Forms' two stylesheets are added by a small script when the page has loaded (or on the first scroll), with
+ *     the link in <noscript>, except on a page whose own content has a form (there the form may be near the top; a site
+ *     marks its own form shortcodes and blocks with the kits_page_has_form filter). Elsewhere the only form is the
+ *     footer sign-up, far below the fold;
  *   - Accessibility Checker's sr-only stylesheet loads only on a page whose content uses its sr-only text format;
  *   - no emoji script or styles (the site shows emoji as text).
  *   Ads scripts (Advanced Ads, AdSense) are left as they are.
@@ -127,8 +128,15 @@ add_filter(
 		if ( is_admin() || ! in_array( $handle, array( 'fluent-form-styles', 'fluentform-public-default' ), true ) || apply_filters( 'kits_page_has_form', kits_content_has( 'fluentform' ) ) ) {
 			return $tag;
 		}
-		$late = preg_replace( "/\smedia=(['\"])[^'\"]*\\1/", " media='print' onload=\"this.media='all'\"", $tag, 1 );
-		return $late === $tag ? $tag : $late . '<noscript>' . trim( $tag ) . "</noscript>\n";
+		// Added when the page has loaded or on the first scroll, whichever comes first (at once if load has already fired),
+		// in the same place in the cascade (right after this script): nothing blocks or competes with the first paint, and
+		// no <link rel=stylesheet> is left in the HTML for a tag counter to count (owner, 24 Oct 2026). Without JavaScript
+		// the original link sits in <noscript>.
+		if ( ! preg_match( "/\shref=(['\"])([^'\"]+)\\1/", $tag, $m ) ) {
+			return $tag;
+		}
+		$j = JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES;
+		return '<script>(function(s){var d=0,a=function(){if(d)return;d=1;var l=document.createElement("link");l.rel="stylesheet";l.id=' . wp_json_encode( $handle . '-css', $j ) . ';l.href=' . wp_json_encode( html_entity_decode( $m[2] ), $j ) . ';s&&s.parentNode?s.after(l):document.head.appendChild(l)};"complete"===document.readyState?a():(addEventListener("load",a),addEventListener("scroll",a,{once:!0,passive:!0}))})(document.currentScript)</script><noscript>' . trim( $tag ) . "</noscript>\n";
 	},
 	10,
 	2
