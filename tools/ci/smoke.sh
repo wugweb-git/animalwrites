@@ -38,7 +38,7 @@ wp post create --post_type=post --post_title="CI guide" --post_status=publish --
 wp post create --post_type=aw_opportunity --post_title="CI opportunity" --post_status=publish --quiet
 wp post create --post_type=aw_campaign --post_title="CI campaign" --post_status=publish --quiet
 L=$(wp post create --post_type=aw_listing --post_title="CI listing Ernakulam" --post_status=publish --porcelain)
-wp eval "aw_set_item_places( $L, array( array( 32, 555 ) ) ); update_post_meta( $L, 'aw_featured', 0 );"
+wp eval "aw_set_item_places( $L, array( array( 32, 555 ) ) );"
 wp rewrite flush --quiet
 php -S 127.0.0.1:8080 -t "$WP" >/tmp/php-server.log 2>&1 &
 SERVER=$!

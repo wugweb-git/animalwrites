@@ -204,7 +204,8 @@ add_action(
 	function ( $col, $id ) {
 		$v = (string) get_post_meta( $id, $col, true );
 		if ( 'aw_m_tag' === $col && '' === $v ) { // contact form messages: the reason they chose
-			$v = AW_CONTACT_ABOUT[ (string) get_post_meta( $id, 'aw_m_about', true ) ] ?? '';
+			$about = (string) get_post_meta( $id, 'aw_m_about', true );
+			$v     = AW_CONTACT_ABOUT[ $about ] ?? ( 'featured' === $about ? 'Get featured' : $about ); // a reason since removed keeps its label
 		}
 		if ( 'aw_m_source' === $col && 0 === strpos( $v, 'email:' ) ) {
 			$v = ''; // emails come from the mailbox, not a page
