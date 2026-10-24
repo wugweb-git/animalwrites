@@ -23,6 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Move the deploy branch back
+        id: move
         run: |
           git fetch --tags --force
           target="${{ github.event.inputs.release }}"
@@ -30,4 +31,19 @@ jobs:
           [ -n "$target" ] || { echo "No earlier release to go back to"; exit 1; }
           echo "Rolling back to $target ($(git rev-parse --short "$target"))"
           git push --force origin "$target^{commit}:refs/heads/wordpress"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
           # Keep work in progress from going live again by accident: wordpress-dev is left as it is; the next good push redeploys.
+      - name: Nudge the site so it purges its page cache once Hostinger has pulled the release
+        run: |
+          # As in deploy-check.yml: one-off home URLs are cache misses, so the release's deploy-purge hook runs and purges.
+          # A release made before that hook existed (24 Oct 2026) cannot purge itself: then purge by hand.
+          target="${{ steps.move.outputs.target }}"
+          if ! git cat-file -e "$target:plugins/animal-writes-core/includes/deploy-purge.php" 2>/dev/null; then
+            echo "::warning::$target has no deploy-purge hook: run 'wp litespeed-purge all' on the server after Hostinger pulls it"
+            exit 0
+          fi
+          for i in $(seq 1 10); do
+            sleep 30
+            curl -s -o /dev/null -m 20 -w "%{http_code} " "https://animalwrites.in/?aw_deploy_nudge=rollback-$(git rev-parse --short "$target^{commit}")-$i" || true
+          done
+          echo
