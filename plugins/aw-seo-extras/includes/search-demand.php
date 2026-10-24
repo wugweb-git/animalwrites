@@ -8,9 +8,9 @@
  *   call the 15 Oct research used. It refreshes daily by WP-Cron (19 Oct 2026; weekly before, so a reload showed
  *   week-old figures) and on "Refresh now". Site Kit keeps the Google
  *   connection; this file never reads its tokens.
- * - The keyword map, gaps, Google Trends, autocomplete and Wikipedia figures are a fixed snapshot of
- *   docs/seo/keyword-map.md and docs/seo/keyword-demand-2026-10-15.md (bump AW_SD_STATIC_VERSION when they change).
- * - Everything sits in one option, aw_search_demand (not autoloaded).
+ * - Targets ("Our target?") and Gaps come from Search Insights' keyword table (search-insights/searches.php), seeded
+ *   once from docs/seo/keyword-map.md and the 21 Oct rankings (24 Oct 2026; the hard-coded 15 Oct snapshot is gone).
+ * - The Search Console snapshot sits in one option, aw_search_demand (not autoloaded).
  *
  * @package aw-seo-extras
  */
@@ -19,123 +19,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SD_OPTION         = 'aw_search_demand';
-const AW_SD_CRON           = 'aw_search_demand_refresh';
-const AW_SD_STATIC_VERSION = 1;
+const AW_SD_OPTION = 'aw_search_demand';
+const AW_SD_CRON   = 'aw_search_demand_refresh';
 
 /** Brand searches: the site's own names and addresses (not the generic "animal rights"). */
 const AW_SD_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
 
-/** The fixed part of the snapshot, from the two 15 Oct 2026 documents. */
-function aw_sd_static(): array {
-	return array(
-		'version'     => AW_SD_STATIC_VERSION,
-		'pulled'      => '2026-10-15',
-		'sources'     => array(
-			'trends'       => array( 'Google Trends (India, past 12 months, "animal welfare" = 100)', '2026-10-15', 'Snapshot. Re-run by hand each October and when the Supreme Court hears the stray dogs case.' ),
-			'autocomplete' => array( 'Google autocomplete (India, English), checked against Bing', '2026-10-15', 'Snapshot: 48 seed phrases and 130 map keywords.' ),
-			'wikipedia'    => array( 'Wikipedia pageviews (English, Oct 2025 – Sep 2026)', '2026-10-15', 'Snapshot. A rough guide to subject interest.' ),
-			'map'          => array( 'Keyword map (docs/seo/keyword-map.md)', '2026-10-15', 'Snapshot of the Demand column and section 8.' ),
-		),
-		// Search Console figures in the research report: 17 Nov 2025 – 14 Oct 2026 (named queries only for brand split).
-		'gsc_snapshot' => array(
-			'label'    => '17 Nov 2025 – 14 Oct 2026 (research, 15 Oct 2026)',
-			'clicks'   => 20589,
-			'impr'     => 46447,
-			'brand'    => array( 16880, 22108 ),
-			'nonbrand' => array( 78, 4600 ),
-		),
-		// Section, page, target phrase, Trends, autocomplete, Search Console.
-		'map'         => array(
-			array( 'Home', 'Home', 'animal welfare in india', 'T 4 ("animal welfare india" T 14, mostly the Animal Welfare Board)', 'Y', 'No or nearly no impressions' ),
-			array( 'Hub', '/news/', 'animal welfare news', 'T 5, rising +1,500% ("animal news" T 136)', 'Y', 'Hub 30 impr' ),
-			array( 'Hub', '/library/', 'animal laws in india', 'T 2; "supreme court stray dogs" T 16', 'Y (top: "pdf")', 'Hub 48 impr, pos 4.3; rules by name about 70' ),
-			array( 'Hub', '/resources/', 'animal welfare guides', 'T 0', '– (secondaries Y: "how to report animal cruelty in india" is top)', 'Hub 20 impr' ),
-			array( 'Hub', '/directory/', 'animal welfare ngos in india', '"animal ngo" T 28 ("near me" leads); "gaushala" T 383', 'Y', 'Hub 17; place pages 2,540 impr, pos about 8' ),
-			array( 'Hub', '/opportunities/', 'animal welfare volunteer', 'T 0; "ngo jobs" T 67', 'Y ("volunteering near me"); "animal welfare jobs india" Y', 'Hub 0' ),
-			array( 'Hub', '/campaigns/', 'animal welfare campaigns', 'T 0', 'Y', 'Hub 18; "petition campaign" 113, "letter petition" 48, "stray dog petition india" 14 (all on Home)' ),
-			array( 'Hub', '/press-coverage/', 'animal writes in the news', 'T 0', '–', 'Brand only ("nodogsnovote" 605 on Home)' ),
-			array( 'Directory', 'State (/directory/{state}/)', 'animal welfare ngos in {state}', '', 'Mostly – for states (Google suggests cities)', 'State pages about 1,400 impr, pos 8–10' ),
-			array( 'Directory', 'District (/directory/{state}/{district}/)', 'animal ngo in {district}', '"animal helpline" T 59, "animal rescue" T 100', 'Y for big cities (Delhi, Noida, Dehradun, Pune, Bangalore)', '"animal helpline number {district}" / "animal rescue {district} contact number" about 240 impr, 0 clicks' ),
-			array( 'Directory', 'Type in a place (/directory/{state}/{district}/{type}/)', '{type} in {district}', '"gaushala" T 383; "veterinary hospital" T 315', 'Y ("gaushala in jaipur", "government veterinary hospital {city}")', '"jhajjar gaushala" 22' ),
-			array( 'Directory', 'Filtered list (?state=&type=)', '{type} in {state}', '', 'n/a (canonicalised)', 'n/a' ),
-			array( 'Directory', 'Listing (/directory/org/{slug}/)', '{organisation name}', '', '"{name} contact number" and "{name} reviews" appear', '2,144 impr over 367 listings' ),
-			array( 'Category', '/categories/', 'animal welfare topics', '', 'Y (school-essay intent); "issues in india" –', '' ),
-			array( 'Category', 'Community Dogs', 'stray dogs in india', '"stray dogs" T 171 (part anime), "street dogs" T 96, "community dogs" T 11', 'Y', 'Category page 3' ),
-			array( 'Category', 'Animal Birth Control', 'animal birth control', 'T about 0', 'Y ("rules 2023" top)', '41 impr, pos 5 (guide)' ),
-			array( 'Category', 'Courts and Judgments', 'animal welfare court judgments', '"supreme court stray dogs" T 16', '– ("supreme court stray dogs" Y)', '' ),
-			array( 'Category', 'Cruelty and Prosecution', 'animal cruelty cases', '"animal cruelty" T 25', 'Y ("cases in india")', 'Cruelty queries 41 impr' ),
-			array( 'Category', 'Laws and Rules', 'animal protection rules india', '"animal laws" T 14', '– ("animal protection laws india" is suggested)', 'Rules by name about 70' ),
-			array( 'Category', 'Policy and Government', 'animal welfare policy india', 'T 0; "animal husbandry department" T 304 (broad)', '– ("animal husbandry department" Y)', '' ),
-			array( 'Category', 'Wildlife', 'wildlife rescue india', 'T 0; "human wildlife conflict" T 6', 'ext (mostly Indiana); "human wildlife conflict" Y', '' ),
-			array( 'Category', 'Cattle and Gaushalas', 'gaushalas in india', '"gaushala" T 383', 'Y', '' ),
-			array( 'Category', 'Campaigns and Civic Action', 'animal welfare civic action', '', '– ("animal rights campaigns" Y)', '' ),
-			array( 'Category', 'Pets, Breeding and Pet Shops', 'pet shops and breeders', '', '– ("pet shop rules" Y)', '"pet shop rules 2018" 17' ),
-			array( 'Category', 'Veterinary Care', 'veterinary care india', '"veterinary care" T 40; "veterinary hospital" T 315', '– ("animal hospital" Y)', '' ),
-			array( 'Category', 'Feeders and Caregivers', 'stray animal feeders', 'T 0', 'Y (exact only)', '' ),
-			array( 'Category', 'Performing and Captive Animals', 'captive animals india', '', '– ("performing animals rules" ext: 1973/2001)', '4' ),
-			array( 'Category', 'Animal Transport and Slaughter', 'animal transport rules', '"cattle transport" T 2', 'Y ("1978")', '"transport of animals rules 1978" about 26' ),
-			array( 'Category', 'Rabies and Public Health', 'rabies in india', '"rabies" T 1,375 (health intent)', 'Y', '' ),
-			array( 'Category', 'Disaster and Emergency Rescue', 'animal disaster rescue', 'T 4', 'Y (exact only)', '' ),
-			array( 'Category', 'Adoption', 'animal adoption india', '"dog adoption" T 67, "adopt a dog" T 7', 'Y (Indiana noise)', '' ),
-			array( 'Category', 'Birds', 'bird rescue india', '"bird rescue" T 25', 'Y; "injured bird helpline" Y', '' ),
-			array( 'Guide', 'How to file a police complaint (FIR) for animal cruelty', 'file a police complaint', '', 'Y (generic); "fir for animal cruelty" Y', '' ),
-			array( 'Guide', 'Feeding community dogs: what the law says', 'feeding community dogs', '', 'Y (weak); "is feeding stray dogs illegal in india" Y', '1' ),
-			array( 'Guide', 'RWA or society stopping you from feeding dogs', 'society stopping feeding dogs', '', '– ("feeding stray dogs in housing society" Y)', 'Page 7' ),
-			array( 'Guide', 'Injured animal emergency: who to call first', 'injured animal emergency', '', 'Y; "injured animal helpline number" Y', '121 (old URL)' ),
-			array( 'Guide', 'Who to call for an animal emergency in India', 'animal emergency in india', '"animal helpline" T 59', '– ("1962 helpline" Y)', '' ),
-			array( 'Guide', 'ABC Rules 2023 explained', 'abc rules 2023', '', 'Y (+"pdf")', '"abc rules 2023 pdf" 6' ),
-			array( 'Guide', 'Reporting illegal pet shops and breeders', 'illegal pet shops', '', '– ("pet shop rules 2018" Y)', '"pet shop rules 2018" 17' ),
-			array( 'Guide', 'Animal welfare: frequently asked questions', 'animal welfare faq', '', '–', '' ),
-			array( 'Guide', 'Living alongside animals', 'living alongside animals', '', '– ("dog bite first aid" Y)', '' ),
-			array( 'Guide', 'Feeding community animals: good practice', 'feeding community animals', '', '– ("what to feed stray dogs (in india)" Y)', 'Page 13' ),
-			array( 'Guide', 'Adopting a dog or cat', 'adopting a dog', '', 'Y', '' ),
-			array( 'Guide', 'Animal welfare laws in India, in plain words', 'animal welfare laws', '', 'Y ("in india" top); "pca act 1960" Y', '' ),
-			array( 'Guide', 'Helping an injured animal', 'helping an injured animal', '', '– ("injured animal rescue" Y)', '' ),
-			array( 'Guide', 'How to report animal cruelty', 'report animal cruelty', '', 'Y', 'Page 336 impr, pos about 5' ),
-			array( 'Guide', 'What is Animal Birth Control (ABC)?', 'animal birth control', '', 'Y', 'Page 323 impr, pos about 5' ),
-			array( 'Guide', 'Caring for community dogs in your area', 'caring for community dogs', '', '– ("stray dog vaccination" Y)', 'Page 6' ),
-		),
-		'gaps'        => array(
-			array( 'District helpline and rescue numbers', '"animal helpline number {district}" and "animal rescue {district} contact number": about 240 impressions, positions 7–11, 0 clicks. Consider them as secondaries on district Directory pages.' ),
-			array( 'Campaign petition searches', '"petition campaign" 113, "letter petition" 48, "stray dog petition india" 14, "letter petition supreme court" 12. They land on Home. "animal welfare campaigns" (the /campaigns/ primary) has no Trends demand. Consider "stray dog petition" as the Campaigns primary.' ),
-			array( 'World Animal Day (about 1,060 impressions on a Library notification)', 'There is no lasting page for the day. It is seasonal, every October.' ),
-			array( '1962 questions', 'People also ask: "Is 1962 free?", "Why is the animal ambulance number 1962?" Mobile veterinary unit by state: 14 + 9 + 6 impressions. Add them to the "Who to call" guide\'s FAQ.' ),
-			array( 'Rules searched with "pdf"', '"pet shop rules 2018 pdf", "transport of animals rules 1978 pdf", "abc rules 2023 pdf", "pca act 1960 pdf". The Library items should link the official PDF and say "PDF".' ),
-			array( '"street dogs"', '"street dogs" has T 96, against "community dogs" 11; "street dogs in india" is the top related query. Consider it as a Community Dogs secondary.' ),
-			array( '"gaushala": T 383, the largest term in the field', 'Rajasthan, Haryana, Punjab and Delhi lead, and we hold 2,047 listings. Gaushala state and type-in-place pages are the biggest local opportunity.' ),
-			array( '"government veterinary hospital {city}" and "veterinary hospital" (T 315)', 'These outrank "veterinary care india" (T 0, no autocomplete) for the Veterinary Care category.' ),
-			array( 'Feeding legality phrased as "stray dogs"', '"is feeding stray dogs illegal in india", "awbi guidelines for feeding stray dogs", "feeding stray dogs in housing society", "supreme court stray dogs order/judgement". Our feeding guides say "community dogs", and Search Console shows 1 impression.' ),
-			array( 'Animal Welfare Board of India', 'Signals: T 9, the top autocomplete for "animal welfare", a recruitment breakout, Wikipedia 664 views a month. No page targets it.' ),
-		),
-		// Home phrase: Google Trends, India, past 12 months, same chart.
-		'trends'      => array(
-			array( 'animal welfare', 51 ),
-			array( 'animal rights', 17 ),
-			array( 'animal welfare india', 14 ),
-			array( 'animal welfare in india', 4 ),
-			array( 'animal rights india', 3 ),
-		),
-		'wikipedia'   => array(
-			array( 'Indian pariah dog', 13390 ),
-			array( 'Cattle slaughter in India', 8626 ),
-			array( 'Free-ranging dog', 6729 ),
-			array( 'Animal rights', 6597 ),
-			array( 'Animal welfare', 4246 ),
-			array( 'Animal Welfare Board of India', 664 ),
-			array( 'Animal welfare and rights in India', 405 ),
-			array( 'PCA Act 1960', 374 ),
-			array( 'Gaushala', 37 ),
-		),
-	);
-}
-
-/** The stored snapshot; seeds (or re-seeds) the fixed part when it is missing or older than this file. */
+/**
+ * The stored Search Console snapshot. The hard-coded 15 Oct keyword map that used to sit here ('static') was retired on
+ * 24 Oct 2026: targets and gaps come from Search Insights' keyword table. An old copy is dropped on first read.
+ */
 function aw_sd_get(): array {
 	$data = get_option( AW_SD_OPTION, array() );
 	$data = is_array( $data ) ? $data : array();
-	if ( ( $data['static']['version'] ?? 0 ) < AW_SD_STATIC_VERSION ) {
-		$data['static'] = aw_sd_static();
+	if ( isset( $data['static'] ) ) {
+		unset( $data['static'] );
 		update_option( AW_SD_OPTION, $data, false );
 	}
 	return $data;
@@ -394,7 +292,7 @@ function aw_sd_targets( array $map ): array {
  * @return array<int, array{q:string, clicks:?int, impr:?int, pos:?float, page:string, brand:bool, targets:array, imp:float}>
  */
 function aw_sd_table( array $data ): array {
-	$targets = aw_sd_targets( $data['static']['map'] ?? array() );
+	$targets = aw_sd_targets( function_exists( 'aw_si_searches_targets' ) ? aw_si_searches_targets() : array() );
 	$rows    = array();
 	$seen    = array();
 	foreach ( (array) ( $data['gsc']['periods']['3m']['queries'] ?? array() ) as $r ) {
@@ -457,7 +355,13 @@ function aw_sd_num( $n ): string {
 	return esc_html( number_format_i18n( (float) $n ) );
 }
 
-function aw_sd_screen() {
+/**
+ * The Search demand screen. Since 24 Oct 2026 it is the Searches tab of Tools → Search Insights, which calls it with
+ * $embedded = true (no wrap or heading of its own); the old address redirects to that tab (search-insights/admin.php).
+ *
+ * @param bool $embedded Inside the Search Insights screen.
+ */
+function aw_sd_screen( bool $embedded = false ) {
 	if ( ! current_user_can( aw_sd_cap() ) ) {
 		return;
 	}
@@ -466,7 +370,9 @@ function aw_sd_screen() {
 	list( , $problem ) = aw_sd_sitekit();
 	$rows              = aw_sd_table( $data );
 
-	echo '<div class="wrap"><h1>Search demand</h1>';
+	if ( ! $embedded ) {
+		echo '<div class="wrap"><h1>Search demand</h1>';
+	}
 	if ( isset( $_GET['refreshed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$up_to = $gsc['periods']['28d']['end'] ?? '';
 		$count = count( $gsc['periods']['3m']['queries'] ?? array() );
@@ -553,12 +459,14 @@ function aw_sd_screen() {
 </script>
 	<?php
 
-	$gaps = $data['static']['gaps'] ?? array();
+	$gaps = function_exists( 'aw_si_searches_gaps' ) ? aw_si_searches_gaps() : array();
 	echo '<details style="margin-top:1.5em"><summary><strong>Gaps (' . aw_sd_num( count( $gaps ) ) . ')</strong>: searches with demand that no page targets yet. Suggestions only.</summary>';
 	echo '<table class="widefat striped" style="margin-top:.5em"><thead><tr><th>#</th><th>Gap</th><th>Detail</th></tr></thead><tbody>';
 	foreach ( $gaps as $i => $g ) {
 		echo '<tr><td>' . (int) ( $i + 1 ) . '</td><td><strong>' . esc_html( $g[0] ) . '</strong></td><td>' . esc_html( $g[1] ) . '</td></tr>';
 	}
 	echo '</tbody></table></details>';
-	echo '</div>';
+	if ( ! $embedded ) {
+		echo '</div>';
+	}
 }

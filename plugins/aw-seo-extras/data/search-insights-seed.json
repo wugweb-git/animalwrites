@@ -1,0 +1,4704 @@
+{
+ "gaps": [
+  {
+   "gap": "District helpline and rescue numbers",
+   "keyword": "animal helpline number {district}"
+  },
+  {
+   "gap": "District helpline and rescue numbers",
+   "keyword": "animal rescue {district} contact number"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "petition campaign"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "letter petition"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "stray dog petition india"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "letter petition supreme court"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "animal welfare campaigns"
+  },
+  {
+   "gap": "Campaign petition searches",
+   "keyword": "stray dog petition"
+  },
+  {
+   "gap": "Rules searched with \"pdf\"",
+   "keyword": "pet shop rules 2018 pdf"
+  },
+  {
+   "gap": "Rules searched with \"pdf\"",
+   "keyword": "transport of animals rules 1978 pdf"
+  },
+  {
+   "gap": "Rules searched with \"pdf\"",
+   "keyword": "abc rules 2023 pdf"
+  },
+  {
+   "gap": "Rules searched with \"pdf\"",
+   "keyword": "pca act 1960 pdf"
+  },
+  {
+   "gap": "\"street dogs\"",
+   "keyword": "street dogs"
+  },
+  {
+   "gap": "\"street dogs\"",
+   "keyword": "community dogs"
+  },
+  {
+   "gap": "\"street dogs\"",
+   "keyword": "street dogs in india"
+  },
+  {
+   "gap": "\"gaushala\": T 383, the largest term in the field",
+   "keyword": "gaushala"
+  },
+  {
+   "gap": "\"government veterinary hospital {city}\" and \"veterinary hospital\" (T 315)",
+   "keyword": "government veterinary hospital {city}"
+  },
+  {
+   "gap": "\"government veterinary hospital {city}\" and \"veterinary hospital\" (T 315)",
+   "keyword": "veterinary hospital"
+  },
+  {
+   "gap": "\"government veterinary hospital {city}\" and \"veterinary hospital\" (T 315)",
+   "keyword": "veterinary care india"
+  },
+  {
+   "gap": "Feeding legality phrased as \"stray dogs\"",
+   "keyword": "stray dogs"
+  },
+  {
+   "gap": "Feeding legality phrased as \"stray dogs\"",
+   "keyword": "is feeding stray dogs illegal in india"
+  },
+  {
+   "gap": "Feeding legality phrased as \"stray dogs\"",
+   "keyword": "awbi guidelines for feeding stray dogs"
+  },
+  {
+   "gap": "Feeding legality phrased as \"stray dogs\"",
+   "keyword": "feeding stray dogs in housing society"
+  },
+  {
+   "gap": "Feeding legality phrased as \"stray dogs\"",
+   "keyword": "supreme court stray dogs order/judgement"
+  }
+ ],
+ "map": [
+  {
+   "demand_text": "T 5, rising +1,500% (\"animal news\" T 136); AC Y; GSC hub 30 impr",
+   "intent": "I",
+   "keyword": "animal welfare news",
+   "kind": "primary",
+   "page": {
+    "label": "/news/",
+    "path": "/news/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": 5,
+   "rank_text": "#5 (with a filtered URL, /news/?publisher=…)",
+   "section": "1",
+   "trends": 5
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal welfare news india",
+   "kind": "secondary",
+   "page": {
+    "label": "/news/",
+    "path": "/news/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "stray dogs news",
+   "kind": "secondary",
+   "page": {
+    "label": "/news/",
+    "path": "/news/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal cruelty news",
+   "kind": "secondary",
+   "page": {
+    "label": "/news/",
+    "path": "/news/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "T 2 (AC Y, top \"pdf\"); \"supreme court stray dogs\" T 16; GSC hub 48 impr, pos 4.3; rules by name about 70",
+   "intent": "I",
+   "keyword": "animal laws in india",
+   "kind": "primary",
+   "page": {
+    "label": "/library/",
+    "path": "/library/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "1",
+   "trends": 2
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal welfare court orders",
+   "kind": "secondary",
+   "page": {
+    "label": "/library/",
+    "path": "/library/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal welfare rules",
+   "kind": "secondary",
+   "page": {
+    "label": "/library/",
+    "path": "/library/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "supreme court stray dogs judgment",
+   "kind": "secondary",
+   "page": {
+    "label": "/library/",
+    "path": "/library/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "T 0, AC – (secondaries AC Y: \"how to report animal cruelty in india\" is top); GSC hub 20 impr",
+   "intent": "I",
+   "keyword": "animal welfare guides",
+   "kind": "primary",
+   "page": {
+    "label": "/resources/",
+    "path": "/resources/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": 2,
+   "rank_text": "#2 (with /resources/?tag=guide)",
+   "section": "1",
+   "trends": 0
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "how to report animal cruelty",
+   "kind": "secondary",
+   "page": {
+    "label": "/resources/",
+    "path": "/resources/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "injured animal help",
+   "kind": "secondary",
+   "page": {
+    "label": "/resources/",
+    "path": "/resources/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "feeding community dogs law",
+   "kind": "secondary",
+   "page": {
+    "label": "/resources/",
+    "path": "/resources/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; \"animal ngo\" T 28 (\"near me\" leads); \"gaushala\" T 383; GSC hub 17, place pages 2,540 impr, pos about 8",
+   "intent": "C/T",
+   "keyword": "animal welfare ngos in india",
+   "kind": "primary",
+   "page": {
+    "label": "/directory/",
+    "path": "/directory/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P1",
+   "rank": 4,
+   "rank_text": "#4",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "animal ngo near me",
+   "kind": "secondary",
+   "page": {
+    "label": "/directory/",
+    "path": "/directory/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "animal shelter",
+   "kind": "secondary",
+   "page": {
+    "label": "/directory/",
+    "path": "/directory/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "gaushala",
+   "kind": "secondary",
+   "page": {
+    "label": "/directory/",
+    "path": "/directory/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": 383
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "government veterinary hospital",
+   "kind": "secondary",
+   "page": {
+    "label": "/directory/",
+    "path": "/directory/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "T 0, AC Y (\"volunteering near me\"); \"ngo jobs\" T 67; \"animal welfare jobs india\" AC Y; GSC hub 0",
+   "intent": "T",
+   "keyword": "animal welfare volunteer",
+   "kind": "primary",
+   "page": {
+    "label": "/opportunities/",
+    "path": "/opportunities/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "1",
+   "trends": 0
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "animal welfare jobs india",
+   "kind": "secondary",
+   "page": {
+    "label": "/opportunities/",
+    "path": "/opportunities/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "animal welfare internship",
+   "kind": "secondary",
+   "page": {
+    "label": "/opportunities/",
+    "path": "/opportunities/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "foster animals",
+   "kind": "secondary",
+   "page": {
+    "label": "/opportunities/",
+    "path": "/opportunities/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "T 0, AC Y; GSC: \"petition campaign\" 113, \"letter petition\" 48, \"stray dog petition india\" 14 (all on Home); hub 18",
+   "intent": "I/N",
+   "keyword": "stray dog petition",
+   "kind": "primary",
+   "page": {
+    "label": "/campaigns/",
+    "path": "/campaigns/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10 (change.org, sci.gov.in, thehindu)",
+   "section": "1",
+   "trends": 0
+  },
+  {
+   "demand_text": "",
+   "intent": "I/N",
+   "keyword": "letter petition supreme court",
+   "kind": "secondary",
+   "page": {
+    "label": "/campaigns/",
+    "path": "/campaigns/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –, T 0; brand-only (GSC \"nodogsnovote\" 605 on Home)",
+   "intent": "N",
+   "keyword": "letter petition campaign",
+   "kind": "primary",
+   "page": {
+    "label": "/media/",
+    "path": "/media/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "P3",
+   "rank": 1,
+   "rank_text": "#1 (with /campaigns/animal-writes-1-0/); /media/ now 301s to /press-coverage/",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N",
+   "keyword": "animal writes in the news",
+   "kind": "secondary",
+   "page": {
+    "label": "/media/",
+    "path": "/media/",
+    "post_id": null
+   },
+   "page_type": "hub",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "1",
+   "trends": null
+  },
+  {
+   "demand_text": "AC mostly – for states (Google suggests cities); GSC state pages about 1,400 impr, pos 8–10",
+   "intent": "C/T",
+   "keyword": "animal welfare ngos in {state}",
+   "kind": "primary",
+   "page": {
+    "label": "State (/directory/{state}/)",
+    "path": "/directory/{state}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "P3",
+   "rank": 1,
+   "rank_text": "#1 Kerala, Maharashtra, UP, Karnataka; #2 Rajasthan",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "animal shelters in {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "State (/directory/{state}/)",
+    "path": "/directory/{state}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "gaushalas in {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "State (/directory/{state}/)",
+    "path": "/directory/{state}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "C/T",
+   "keyword": "animal rescue {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "State (/directory/{state}/)",
+    "path": "/directory/{state}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y for big cities (Delhi, Noida, Dehradun, Pune, Bangalore); GSC strongest pattern is \"animal helpline number {district}\" / \"animal rescue {district} contact number\", about 240 impr, 0 clicks",
+   "intent": "T (local)",
+   "keyword": "animal ngo in {district}",
+   "kind": "primary",
+   "page": {
+    "label": "District (/directory/{state}/{district}/)",
+    "path": "/directory/{state}/{district}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "P1",
+   "rank": ">10",
+   "rank_text": "not top 10 in any of the 10 cities (\"animal ngo in {city}\": Justdial, Petofy and the NGOs' own sites lead)",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "animal rescue {district}",
+   "kind": "secondary",
+   "page": {
+    "label": "District (/directory/{state}/{district}/)",
+    "path": "/directory/{state}/{district}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "animal shelter {district}",
+   "kind": "secondary",
+   "page": {
+    "label": "District (/directory/{state}/{district}/)",
+    "path": "/directory/{state}/{district}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "vet in {district}",
+   "kind": "secondary",
+   "page": {
+    "label": "District (/directory/{state}/{district}/)",
+    "path": "/directory/{state}/{district}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (\"gaushala in jaipur\", \"government veterinary hospital {city}\"); GSC \"jhajjar gaushala\" 22",
+   "intent": "T (local)",
+   "keyword": "{type} in {district}",
+   "kind": "primary",
+   "page": {
+    "label": "Type in a place (/directory/{state}/{district}/{type}/)",
+    "path": "/directory/{state}/{district}/{type}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "\"veterinary hospital in pune\" and \"government veterinary hospital delhi\": not top 10; gaushala-in-city checks blocked",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "{type} near me",
+   "kind": "secondary",
+   "page": {
+    "label": "Type in a place (/directory/{state}/{district}/{type}/)",
+    "path": "/directory/{state}/{district}/{type}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "{type} {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "Type in a place (/directory/{state}/{district}/{type}/)",
+    "path": "/directory/{state}/{district}/{type}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "n/a (canonicalised)",
+   "intent": "T",
+   "keyword": "{type} in {state}",
+   "kind": "primary",
+   "page": {
+    "label": "Filtered list (?state=&type=)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "n/a (but /directory/?type=gaushala and ?type=veterinary-hospital collect about 50 impressions each)",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC 2,144 impr over 367 listings; \"{name} contact number\" and \"{name} reviews\" appear",
+   "intent": "N/T",
+   "keyword": "{organisation name}",
+   "kind": "primary",
+   "page": {
+    "label": "Listing (/directory/org/{slug}/)",
+    "path": "/directory/org/{slug}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC positions 8–12 for named quick wins (Blue Cross Pondicherry 10.1, SANS 11.3, Animotel 10.0, Daya 11.9)",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N/T",
+   "keyword": "{organisation name} contact",
+   "kind": "secondary",
+   "page": {
+    "label": "Listing (/directory/org/{slug}/)",
+    "path": "/directory/org/{slug}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N/T",
+   "keyword": "{organisation name} {district}",
+   "kind": "secondary",
+   "page": {
+    "label": "Listing (/directory/org/{slug}/)",
+    "path": "/directory/org/{slug}/",
+    "post_id": null
+   },
+   "page_type": "directory",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "2",
+   "trends": null
+  },
+  {
+   "demand_text": "Google India autocomplete suggests \"animal welfare categories\" itself, and \"types of animal welfare\" (15 Oct 2026); replaces the earlier keyword with the banned word",
+   "intent": "I",
+   "keyword": "animal welfare categories",
+   "kind": "primary",
+   "page": {
+    "label": "/categories/",
+    "path": "/categories/",
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "types of animal welfare",
+   "kind": "secondary",
+   "page": {
+    "label": "/categories/",
+    "path": "/categories/",
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "\"stray dogs\" T 171 (part anime), \"street dogs\" T 96, \"community dogs\" T 11; AC Y; GSC topic 3",
+   "intent": "I",
+   "keyword": "stray dogs in india",
+   "kind": "primary",
+   "page": {
+    "label": "Community Dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "community dogs",
+   "kind": "secondary",
+   "page": {
+    "label": "Community Dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": 11
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "street dogs law",
+   "kind": "secondary",
+   "page": {
+    "label": "Community Dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (\"rules 2023\" top); T about 0; GSC 41 impr pos 5 (guide)",
+   "intent": "I",
+   "keyword": "animal birth control",
+   "kind": "primary",
+   "page": {
+    "label": "Animal Birth Control",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": 4,
+   "rank_text": "#4 (the guide)",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "abc programme",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal Birth Control",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "dog sterilisation",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal Birth Control",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"supreme court stray dogs\" T 16, AC Y",
+   "intent": "I",
+   "keyword": "animal welfare court judgments",
+   "kind": "primary",
+   "page": {
+    "label": "Courts and Judgments",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": 2,
+   "rank_text": "#2",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "supreme court stray dogs",
+   "kind": "secondary",
+   "page": {
+    "label": "Courts and Judgments",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": 16
+  },
+  {
+   "demand_text": "AC Y (\"cases in india\"); \"animal cruelty\" T 25; GSC cruelty queries 41 impr",
+   "intent": "I",
+   "keyword": "animal cruelty cases",
+   "kind": "primary",
+   "page": {
+    "label": "Cruelty and Prosecution",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal cruelty law india",
+   "kind": "secondary",
+   "page": {
+    "label": "Cruelty and Prosecution",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC – (\"animal protection laws india\" is suggested); \"animal laws\" T 14; GSC rules by name about 70",
+   "intent": "I",
+   "keyword": "animal protection rules india",
+   "kind": "primary",
+   "page": {
+    "label": "Laws and Rules",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "pca act rules",
+   "kind": "secondary",
+   "page": {
+    "label": "Laws and Rules",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –, T 0; \"animal husbandry department\" AC Y, T 304 (broad)",
+   "intent": "I",
+   "keyword": "animal welfare policy india",
+   "kind": "primary",
+   "page": {
+    "label": "Policy and Government",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal husbandry department",
+   "kind": "secondary",
+   "page": {
+    "label": "Policy and Government",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC ext (mostly Indiana); T 0; \"human wildlife conflict\" AC Y, T 6",
+   "intent": "I",
+   "keyword": "wildlife rescue india",
+   "kind": "primary",
+   "page": {
+    "label": "Wildlife",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "human wildlife conflict",
+   "kind": "secondary",
+   "page": {
+    "label": "Wildlife",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; \"gaushala\" T 383",
+   "intent": "I/C",
+   "keyword": "gaushalas in india",
+   "kind": "primary",
+   "page": {
+    "label": "Cattle and Gaushalas",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/C",
+   "keyword": "cattle welfare",
+   "kind": "secondary",
+   "page": {
+    "label": "Cattle and Gaushalas",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"animal rights campaigns\" AC Y",
+   "intent": "I",
+   "keyword": "animal welfare civic action",
+   "kind": "primary",
+   "page": {
+    "label": "Campaigns and Civic Action",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": 1,
+   "rank_text": "#1",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "animal rights campaigns",
+   "kind": "secondary",
+   "page": {
+    "label": "Campaigns and Civic Action",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"pet shop rules\" AC Y; GSC \"pet shop rules 2018\" 17",
+   "intent": "I",
+   "keyword": "pet shops and breeders",
+   "kind": "primary",
+   "page": {
+    "label": "Pets, Breeding and Pet Shops",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "pet shop rules",
+   "kind": "secondary",
+   "page": {
+    "label": "Pets, Breeding and Pet Shops",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –, \"veterinary care\" T 40; \"veterinary hospital\" T 315; \"animal hospital\" AC Y",
+   "intent": "I/T",
+   "keyword": "veterinary care india",
+   "kind": "primary",
+   "page": {
+    "label": "Veterinary Care",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "animal hospital",
+   "kind": "secondary",
+   "page": {
+    "label": "Veterinary Care",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (exact only); T 0",
+   "intent": "I",
+   "keyword": "stray animal feeders",
+   "kind": "primary",
+   "page": {
+    "label": "Feeders and Caregivers",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "community dog caregivers",
+   "kind": "secondary",
+   "page": {
+    "label": "Feeders and Caregivers",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"performing animals rules\" AC ext (1973/2001); GSC 4",
+   "intent": "I",
+   "keyword": "captive animals india",
+   "kind": "primary",
+   "page": {
+    "label": "Performing and Captive Animals",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": 3,
+   "rank_text": "#3",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "performing animals rules",
+   "kind": "secondary",
+   "page": {
+    "label": "Performing and Captive Animals",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (\"1978\"); GSC \"transport of animals rules 1978\" about 26; \"cattle transport\" T 2",
+   "intent": "I",
+   "keyword": "animal transport rules",
+   "kind": "primary",
+   "page": {
+    "label": "Animal Transport and Slaughter",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "cattle transport law",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal Transport and Slaughter",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; \"rabies\" T 1,375 (health intent)",
+   "intent": "I",
+   "keyword": "rabies in india",
+   "kind": "primary",
+   "page": {
+    "label": "Rabies and Public Health",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "dog bite rabies",
+   "kind": "secondary",
+   "page": {
+    "label": "Rabies and Public Health",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (exact only); T 4",
+   "intent": "I",
+   "keyword": "animal disaster rescue",
+   "kind": "primary",
+   "page": {
+    "label": "Disaster and Emergency Rescue",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P3",
+   "rank": 3,
+   "rank_text": "#3",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "flood animal rescue",
+   "kind": "secondary",
+   "page": {
+    "label": "Disaster and Emergency Rescue",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (Indiana noise); \"dog adoption\" T 67, \"adopt a dog\" T 7",
+   "intent": "T",
+   "keyword": "animal adoption india",
+   "kind": "primary",
+   "page": {
+    "label": "Adoption",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "not checked (CAPTCHA)",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "adopt indie dog",
+   "kind": "secondary",
+   "page": {
+    "label": "Adoption",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; \"bird rescue\" T 25; \"injured bird helpline\" AC Y",
+   "intent": "I/T",
+   "keyword": "bird rescue india",
+   "kind": "primary",
+   "page": {
+    "label": "Birds",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "not checked (CAPTCHA)",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "injured bird help",
+   "kind": "secondary",
+   "page": {
+    "label": "Birds",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "topic",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "3",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (generic); \"fir for animal cruelty\" AC Y",
+   "intent": "",
+   "keyword": "file a police complaint",
+   "kind": "primary",
+   "page": {
+    "label": "How to file a police complaint (FIR) for animal cruelty",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC page 4.3 (213 impressions)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "fir for animal cruelty",
+   "kind": "secondary",
+   "page": {
+    "label": "How to file a police complaint (FIR) for animal cruelty",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "animal cruelty complaint",
+   "kind": "secondary",
+   "page": {
+    "label": "How to file a police complaint (FIR) for animal cruelty",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (weak); \"is feeding stray dogs illegal in india\" AC Y; GSC 1",
+   "intent": "",
+   "keyword": "feeding community dogs",
+   "kind": "primary",
+   "page": {
+    "label": "Feeding community dogs: what the law says",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "is feeding stray dogs legal",
+   "kind": "secondary",
+   "page": {
+    "label": "Feeding community dogs: what the law says",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "feeding stray dogs law",
+   "kind": "secondary",
+   "page": {
+    "label": "Feeding community dogs: what the law says",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"feeding stray dogs in housing society\" AC Y; GSC page 7",
+   "intent": "",
+   "keyword": "society stopping feeding dogs",
+   "kind": "primary",
+   "page": {
+    "label": "RWA or society stopping you from feeding dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "rwa stray dog feeding",
+   "kind": "secondary",
+   "page": {
+    "label": "RWA or society stopping you from feeding dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "feeding spot abc rules",
+   "kind": "secondary",
+   "page": {
+    "label": "RWA or society stopping you from feeding dogs",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; \"injured animal helpline number\" AC Y; GSC 121 (old URL)",
+   "intent": "",
+   "keyword": "injured animal emergency",
+   "kind": "primary",
+   "page": {
+    "label": "Injured animal emergency: who to call first",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC page 6.2 (244 impressions, old /knowledge/ URL)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "1962 helpline",
+   "kind": "secondary",
+   "page": {
+    "label": "Injured animal emergency: who to call first",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "injured dog help",
+   "kind": "secondary",
+   "page": {
+    "label": "Injured animal emergency: who to call first",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"animal helpline\" T 59, \"1962 helpline\" AC Y",
+   "intent": "",
+   "keyword": "animal emergency in india",
+   "kind": "primary",
+   "page": {
+    "label": "Who to call for an animal emergency in India",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC page 3.5 (395 impressions)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "animal rescue helpline",
+   "kind": "secondary",
+   "page": {
+    "label": "Who to call for an animal emergency in India",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "1962 mobile veterinary unit",
+   "kind": "secondary",
+   "page": {
+    "label": "Who to call for an animal emergency in India",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (+\"pdf\"); GSC \"abc rules 2023 pdf\" 6",
+   "intent": "",
+   "keyword": "abc rules 2023",
+   "kind": "primary",
+   "page": {
+    "label": "ABC Rules 2023 explained",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "not checked; Library item GSC 9.3 (55)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "animal birth control rules 2023",
+   "kind": "secondary",
+   "page": {
+    "label": "ABC Rules 2023 explained",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "community dogs relocation",
+   "kind": "secondary",
+   "page": {
+    "label": "ABC Rules 2023 explained",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"pet shop rules 2018\" AC Y, GSC 17",
+   "intent": "",
+   "keyword": "illegal pet shops",
+   "kind": "primary",
+   "page": {
+    "label": "Reporting illegal pet shops and breeders",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "pet shop rules 2018",
+   "kind": "secondary",
+   "page": {
+    "label": "Reporting illegal pet shops and breeders",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "dog breeding rules 2017",
+   "kind": "secondary",
+   "page": {
+    "label": "Reporting illegal pet shops and breeders",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –",
+   "intent": "",
+   "keyword": "animal welfare faq",
+   "kind": "primary",
+   "page": {
+    "label": "Animal welfare: frequently asked questions",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "can community dogs be removed",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal welfare: frequently asked questions",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "is feeding stray dogs legal",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal welfare: frequently asked questions",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"dog bite first aid\" AC Y",
+   "intent": "",
+   "keyword": "living alongside animals",
+   "kind": "primary",
+   "page": {
+    "label": "Living alongside animals",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "dog bite first aid",
+   "kind": "secondary",
+   "page": {
+    "label": "Living alongside animals",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "human animal conflict",
+   "kind": "secondary",
+   "page": {
+    "label": "Living alongside animals",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"what to feed stray dogs (in india)\" AC Y; GSC page 13",
+   "intent": "",
+   "keyword": "feeding community animals",
+   "kind": "primary",
+   "page": {
+    "label": "Feeding community animals: good practice",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "what to feed stray dogs",
+   "kind": "secondary",
+   "page": {
+    "label": "Feeding community animals: good practice",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "feeding stray cats",
+   "kind": "secondary",
+   "page": {
+    "label": "Feeding community animals: good practice",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y",
+   "intent": "",
+   "keyword": "adopting a dog",
+   "kind": "primary",
+   "page": {
+    "label": "Adopting a dog or cat",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "adopt a cat",
+   "kind": "secondary",
+   "page": {
+    "label": "Adopting a dog or cat",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "indie dog adoption",
+   "kind": "secondary",
+   "page": {
+    "label": "Adopting a dog or cat",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (\"in india\" top); \"pca act 1960\" AC Y",
+   "intent": "",
+   "keyword": "animal welfare laws",
+   "kind": "primary",
+   "page": {
+    "label": "Animal welfare laws in India, in plain words",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "pca act 1960",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal welfare laws in India, in plain words",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "section 325 bns animals",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal welfare laws in India, in plain words",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"injured animal rescue\" AC Y",
+   "intent": "",
+   "keyword": "helping an injured animal",
+   "kind": "primary",
+   "page": {
+    "label": "Helping an injured animal",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "injured dog first aid",
+   "kind": "secondary",
+   "page": {
+    "label": "Helping an injured animal",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "injured animal rescue",
+   "kind": "secondary",
+   "page": {
+    "label": "Helping an injured animal",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; GSC page 336 impr, pos about 5",
+   "intent": "",
+   "keyword": "report animal cruelty",
+   "kind": "primary",
+   "page": {
+    "label": "How to report animal cruelty",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC page 4.8–5.5 (585 impressions, two URLs)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "animal cruelty complaint india",
+   "kind": "secondary",
+   "page": {
+    "label": "How to report animal cruelty",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y; GSC page 323 impr, pos about 5",
+   "intent": "",
+   "keyword": "animal birth control",
+   "kind": "primary",
+   "page": {
+    "label": "What is Animal Birth Control (ABC)?",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "GSC page 5.8–6.9 (615 impressions, two URLs)",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "abc programme",
+   "kind": "secondary",
+   "page": {
+    "label": "What is Animal Birth Control (ABC)?",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "dog sterilisation india",
+   "kind": "secondary",
+   "page": {
+    "label": "What is Animal Birth Control (ABC)?",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "AC –; \"stray dog vaccination\" AC Y; GSC page 6",
+   "intent": "",
+   "keyword": "caring for community dogs",
+   "kind": "primary",
+   "page": {
+    "label": "Caring for community dogs in your area",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "community dog caregiver",
+   "kind": "secondary",
+   "page": {
+    "label": "Caring for community dogs in your area",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "",
+   "keyword": "stray dog vaccination",
+   "kind": "secondary",
+   "page": {
+    "label": "Caring for community dogs in your area",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "guide",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "5",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N/I",
+   "keyword": "animal welfare in india",
+   "kind": "primary",
+   "page": {
+    "label": "Home",
+    "path": "/",
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "P3",
+   "rank": ">10",
+   "rank_text": "not top 10",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N",
+   "keyword": "animal writes",
+   "kind": "primary",
+   "page": {
+    "label": "About",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "P3",
+   "rank": 1,
+   "rank_text": "#1",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N",
+   "keyword": "citizen letter campaign",
+   "kind": "secondary",
+   "page": {
+    "label": "About",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "N/T",
+   "keyword": "contact us",
+   "kind": "primary",
+   "page": {
+    "label": "Contact",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "",
+   "rank": null,
+   "rank_text": "–",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "register as a volunteer",
+   "kind": "primary",
+   "page": {
+    "label": "Volunteer",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "",
+   "rank": null,
+   "rank_text": "–",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "claim this listing",
+   "kind": "primary",
+   "page": {
+    "label": "Claim / Report",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "",
+   "rank": null,
+   "rank_text": "–",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "report a mistake",
+   "kind": "primary",
+   "page": {
+    "label": "Claim / Report",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "key-page",
+   "priority": "",
+   "rank": null,
+   "rank_text": "–",
+   "section": "6",
+   "trends": null
+  },
+  {
+   "demand_text": "\"dog bite\" T 430, \"rabies vaccine\" T 426; AC Y for schedule, injection price, category 1/2/3, \"no blood\" and food myths, with a full Hindi set; Bing confirms",
+   "intent": "I/T",
+   "keyword": "dog bite",
+   "kind": "primary",
+   "page": {
+    "label": "What to do after a dog bite in India (#17307, /resources/dog-bite-rabies-vaccine/)",
+    "path": "/resources/dog-bite-rabies-vaccine/",
+    "post_id": 17307
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page live 21 Oct: 62 impressions, position 6.4; \"dog bite\" page 1 has Wikipedia, MNT, WebMD, NIH, WHO and a hospital, not us",
+   "section": "9",
+   "trends": 430
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "what to do after dog bite",
+   "kind": "secondary",
+   "page": {
+    "label": "What to do after a dog bite in India (#17307, /resources/dog-bite-rabies-vaccine/)",
+    "path": "/resources/dog-bite-rabies-vaccine/",
+    "post_id": 17307
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "rabies vaccine schedule",
+   "kind": "secondary",
+   "page": {
+    "label": "What to do after a dog bite in India (#17307, /resources/dog-bite-rabies-vaccine/)",
+    "path": "/resources/dog-bite-rabies-vaccine/",
+    "post_id": 17307
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "dog bite injection",
+   "kind": "secondary",
+   "page": {
+    "label": "What to do after a dog bite in India (#17307, /resources/dog-bite-rabies-vaccine/)",
+    "path": "/resources/dog-bite-rabies-vaccine/",
+    "post_id": 17307
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "T 87; AC Y (online, fees, documents, certificate, Hinglish \"kaise kare\"); Bing confirms",
+   "intent": "I/T",
+   "keyword": "ngo darpan registration",
+   "kind": "primary",
+   "page": {
+    "label": "NGO Darpan registration (#17308, /resources/ngo-darpan-registration/)",
+    "path": "/resources/ngo-darpan-registration/",
+    "post_id": 17308
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page 70 impressions, position 5.4 (\"darpan id search\" forms)",
+   "section": "9",
+   "trends": 87
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "ngo darpan",
+   "kind": "secondary",
+   "page": {
+    "label": "NGO Darpan registration (#17308, /resources/ngo-darpan-registration/)",
+    "path": "/resources/ngo-darpan-registration/",
+    "post_id": 17308
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "darpan id search",
+   "kind": "secondary",
+   "page": {
+    "label": "NGO Darpan registration (#17308, /resources/ngo-darpan-registration/)",
+    "path": "/resources/ngo-darpan-registration/",
+    "post_id": 17308
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/T",
+   "keyword": "ngo darpan certificate",
+   "kind": "secondary",
+   "page": {
+    "label": "NGO Darpan registration (#17308, /resources/ngo-darpan-registration/)",
+    "path": "/resources/ngo-darpan-registration/",
+    "post_id": 17308
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (mp, up, rajasthan, gujarat, timing, \"is free or not\", \"kya hai\"); GSC about 200 impressions on 1962 queries",
+   "intent": "T",
+   "keyword": "1962 helpline number",
+   "kind": "primary",
+   "page": {
+    "label": "1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/)",
+    "path": "/resources/1962-helpline-mobile-veterinary-units/",
+    "post_id": 13798
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page 974 impressions, position 6.9; queries 8.8–11.6",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "mobile veterinary unit",
+   "kind": "secondary",
+   "page": {
+    "label": "1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/)",
+    "path": "/resources/1962-helpline-mobile-veterinary-units/",
+    "post_id": 13798
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "animal ambulance number",
+   "kind": "secondary",
+   "page": {
+    "label": "1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/)",
+    "path": "/resources/1962-helpline-mobile-veterinary-units/",
+    "post_id": 13798
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "1962 helpline number {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "1962 helpline (#13798, /resources/1962-helpline-mobile-veterinary-units/)",
+    "path": "/resources/1962-helpline-mobile-veterinary-units/",
+    "post_id": 13798
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC \"cpcsea full form\" 206, \"cpcsea-mef@gov.in\" 228, \"ccsea\" 498",
+   "intent": "I",
+   "keyword": "cpcsea full form",
+   "kind": "primary",
+   "page": {
+    "label": "CPCSEA full form (#13868)",
+    "path": null,
+    "post_id": 13868
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page 1,041 impressions, position 6.2; query 8.5",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "ccsea full form",
+   "kind": "secondary",
+   "page": {
+    "label": "CPCSEA full form (#13868)",
+    "path": null,
+    "post_id": 13868
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "cpcsea",
+   "kind": "secondary",
+   "page": {
+    "label": "CPCSEA full form (#13868)",
+    "path": null,
+    "post_id": 13868
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "\"awbi\" 129 + \"animal welfare board of india\" 71 in GSC; AC Y (recruitment, chairman, email id, upsc)",
+   "intent": "I/N",
+   "keyword": "animal welfare board of india",
+   "kind": "primary",
+   "page": {
+    "label": "AWBI explained (#13800)",
+    "path": null,
+    "post_id": 13800
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page 408 impressions, position 6.6",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/N",
+   "keyword": "awbi",
+   "kind": "secondary",
+   "page": {
+    "label": "AWBI explained (#13800)",
+    "path": null,
+    "post_id": 13800
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/N",
+   "keyword": "awbi circular",
+   "kind": "secondary",
+   "page": {
+    "label": "AWBI explained (#13800)",
+    "path": null,
+    "post_id": 13800
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC cluster 3,795 impressions, 212 clicks",
+   "intent": "I/N",
+   "keyword": "g.s.r. 864(e)",
+   "kind": "primary",
+   "page": {
+    "label": "Draft lab animal rules (campaign + Library + 7 resources)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": 1,
+   "rank_text": "#1 for \"lab animal rules 2026\"; \"gsr 864 e\" position 4.3",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/N",
+   "keyword": "draft lab animal rules 2026",
+   "kind": "secondary",
+   "page": {
+    "label": "Draft lab animal rules (campaign + Library + 7 resources)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I/N",
+   "keyword": "animal experimentation rules 2026",
+   "kind": "secondary",
+   "page": {
+    "label": "Draft lab animal rules (campaign + Library + 7 resources)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "T 25 (peaks in October); GSC about 1,160 impressions on the cluster",
+   "intent": "I",
+   "keyword": "world animal day",
+   "kind": "primary",
+   "page": {
+    "label": "World Animal Day (#13797, /resources/world-animal-day-4-october/)",
+    "path": "/resources/world-animal-day-4-october/",
+    "post_id": 13797
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "the Library notice ranks instead (position 8–8.4); see the conflict table in section 7",
+   "section": "9",
+   "trends": 25
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "world animal day 2026",
+   "kind": "secondary",
+   "page": {
+    "label": "World Animal Day (#13797, /resources/world-animal-day-4-october/)",
+    "path": "/resources/world-animal-day-4-october/",
+    "post_id": 13797
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "4 october day",
+   "kind": "secondary",
+   "page": {
+    "label": "World Animal Day (#13797, /resources/world-animal-day-4-october/)",
+    "path": "/resources/world-animal-day-4-october/",
+    "post_id": 13797
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (near me, number, ahmedabad, jaipur, mumbai, delhi, vadodara); \"bird rescue\" T 25",
+   "intent": "T",
+   "keyword": "injured bird helpline",
+   "kind": "primary",
+   "page": {
+    "label": "Injured bird helplines by city (#13843)",
+    "path": null,
+    "post_id": 13843
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "page 338 impressions, position 7.2; \"bird rescue helpline number mumbai\" 10.0",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "bird rescue helpline number {city}",
+   "kind": "secondary",
+   "page": {
+    "label": "Injured bird helplines by city (#13843)",
+    "path": null,
+    "post_id": 13843
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "\"supreme court stray dogs\" 53 within \"stray dogs\" related queries (Trends 15 Oct: T 16); AC Y for judgement, order, next hearing, \"today\"",
+   "intent": "I",
+   "keyword": "supreme court stray dogs judgment",
+   "kind": "primary",
+   "page": {
+    "label": "Supreme Court stray dog orders explained (#13842)",
+    "path": null,
+    "post_id": 13842
+   },
+   "page_type": "new-row",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "page 84 impressions, position 4.9; head query not checked (CAPTCHA)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "stray dogs supreme court order",
+   "kind": "secondary",
+   "page": {
+    "label": "Supreme Court stray dog orders explained (#13842)",
+    "path": null,
+    "post_id": 13842
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "next hearing",
+   "kind": "secondary",
+   "page": {
+    "label": "Supreme Court stray dog orders explained (#13842)",
+    "path": null,
+    "post_id": 13842
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC: Bareilly 27, Gwalior 25, Jammu 30, Dehradun 19, Alappuzha 19, Azamgarh 18 (positions 7.7–13); AC Y for Ahmedabad, Rajkot, Delhi, Surat, Bhubaneswar, Bhavnagar, Jamnagar",
+   "intent": "T",
+   "keyword": "animal helpline number {district}",
+   "kind": "primary",
+   "page": {
+    "label": "District pages, helpline pattern",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "live check of 10 big cities stopped by CAPTCHA",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "animal rescue {district} contact number",
+   "kind": "secondary",
+   "page": {
+    "label": "District pages, helpline pattern",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "1962 {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "District pages, helpline pattern",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (delhi, up, odisha, assam, mp, jaipur, bihar)",
+   "intent": "T",
+   "keyword": "animal ambulance number {state}",
+   "kind": "primary",
+   "page": {
+    "label": "Animal ambulance number {state}",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P2",
+   "rank": null,
+   "rank_text": "GSC: Karnataka 10 (1 impression)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T",
+   "keyword": "1962 {state}",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal ambulance number {state}",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "T 382; Rajasthan, Haryana, Punjab, Delhi, Chandigarh lead; \"gaushala near me\" 100 in related queries",
+   "intent": "T (local)",
+   "keyword": "gaushala in {district}",
+   "kind": "primary",
+   "page": {
+    "label": "Gaushala type pages",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "\"gaushalas in india\" not top 10; /directory-type/gaushala/ (170 impressions) now 301s to /tag/gaushala/",
+   "section": "9",
+   "trends": 382
+  },
+  {
+   "demand_text": "T 382; Rajasthan, Haryana, Punjab, Delhi, Chandigarh lead; \"gaushala near me\" 100 in related queries",
+   "intent": "T (local)",
+   "keyword": "gaushalas in {state}",
+   "kind": "primary",
+   "page": {
+    "label": "Gaushala type pages",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "\"gaushalas in india\" not top 10; /directory-type/gaushala/ (170 impressions) now 301s to /tag/gaushala/",
+   "section": "9",
+   "trends": 382
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "gaushala near me",
+   "kind": "secondary",
+   "page": {
+    "label": "Gaushala type pages",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "gaushala {city} contact number",
+   "kind": "secondary",
+   "page": {
+    "label": "Gaushala type pages",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "\"veterinary hospital\" T 318 vs \"vet hospital\" 58 (raw 84.7 vs 15.5); \"veterinary clinic\" 119 vs \"vet clinic\" 91. Keep \"Veterinary hospital\" as the type label and in titles. Related: \"government veterinary hospital\" 95",
+   "intent": "T (local)",
+   "keyword": "veterinary hospital in {district}",
+   "kind": "primary",
+   "page": {
+    "label": "Veterinary type naming",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "\"veterinary hospital in pune\" and \"government veterinary hospital delhi\": not top 10 (Justdial, Practo, delhi.gov.in)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "\"veterinary hospital\" T 318 vs \"vet hospital\" 58 (raw 84.7 vs 15.5); \"veterinary clinic\" 119 vs \"vet clinic\" 91. Keep \"Veterinary hospital\" as the type label and in titles. Related: \"government veterinary hospital\" 95",
+   "intent": "T (local)",
+   "keyword": "government veterinary hospital {city}",
+   "kind": "primary",
+   "page": {
+    "label": "Veterinary type naming",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "\"veterinary hospital in pune\" and \"government veterinary hospital delhi\": not top 10 (Justdial, Practo, delhi.gov.in)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "vet hospital",
+   "kind": "secondary",
+   "page": {
+    "label": "Veterinary type naming",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "T (local)",
+   "keyword": "veterinary clinic",
+   "kind": "secondary",
+   "page": {
+    "label": "Veterinary type naming",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "World Animal Day T 25; World Rabies Day T 4; AC Y for \"{day} 2026\", theme, poster, \"kab manaya jata hai\"; \"world animal days list 2026\" AC Y",
+   "intent": "I",
+   "keyword": "{day}",
+   "kind": "primary",
+   "page": {
+    "label": "Animal days in India + 10 observance pages (Claude outputs/pending.md)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P2",
+   "rank": null,
+   "rank_text": "no pages yet (World Animal Day exists)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "{day} {year}",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal days in India + 10 observance pages (Claude outputs/pending.md)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "{day} theme",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal days in India + 10 observance pages (Claude outputs/pending.md)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "kab manaya jata hai",
+   "kind": "secondary",
+   "page": {
+    "label": "Animal days in India + 10 observance pages (Claude outputs/pending.md)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (pdf, in hindi, bare act, section 11, punishment)",
+   "intent": "I",
+   "keyword": "pca act 1960",
+   "kind": "primary",
+   "page": {
+    "label": "Library: PCA Act 1960",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "not checked (CAPTCHA)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "pca act 1960 pdf",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: PCA Act 1960",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "section 11 punishment",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: PCA Act 1960",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (pdf english / hindi, gazette, rule 20, upsc)",
+   "intent": "I",
+   "keyword": "abc rules 2023",
+   "kind": "primary",
+   "page": {
+    "label": "Library: ABC Rules 2023",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P1",
+   "rank": null,
+   "rank_text": "Library item GSC 9.3 (55 impressions, /research/ URL)",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "abc rules 2023 pdf",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: ABC Rules 2023",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "rule 20",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: ABC Rules 2023",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC 24 impressions, position 6.8",
+   "intent": "I",
+   "keyword": "pet shop rules 2018",
+   "kind": "primary",
+   "page": {
+    "label": "Library: Pet Shop Rules 2018",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "GSC 6.8",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "pet shop rules 2018 pdf",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: Pet Shop Rules 2018",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC 13, position 7.9",
+   "intent": "I",
+   "keyword": "dog breeding rules 2017",
+   "kind": "primary",
+   "page": {
+    "label": "Library: Dog Breeding and Marketing Rules 2017",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "GSC 7.9",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "GSC 6, position 5.3",
+   "intent": "I",
+   "keyword": "transport of animals rules 1978",
+   "kind": "primary",
+   "page": {
+    "label": "Library: Transport of Animals Rules 1978",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "GSC 5.3",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "transport of animals rules 1978 pdf",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: Transport of Animals Rules 1978",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "AC Y (circulars, 2015, pet dog, stray dog, guidelines)",
+   "intent": "I",
+   "keyword": "awbi circular",
+   "kind": "primary",
+   "page": {
+    "label": "Library: AWBI circulars (hub filter)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "P3",
+   "rank": null,
+   "rank_text": "not checked",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "awbi circulars and advisories",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: AWBI circulars (hub filter)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  },
+  {
+   "demand_text": "",
+   "intent": "I",
+   "keyword": "awbi stray dog circular",
+   "kind": "secondary",
+   "page": {
+    "label": "Library: AWBI circulars (hub filter)",
+    "path": null,
+    "post_id": null
+   },
+   "page_type": "new-row",
+   "priority": "",
+   "rank": null,
+   "rank_text": "",
+   "section": "9",
+   "trends": null
+  }
+ ],
+ "rankings": [
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "animal writes",
+   "paa": "",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; instagram.com ; podcasts.apple.com",
+   "url": "/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "animalwrites",
+   "paa": "",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; instagram.com ; facebook.com",
+   "url": "/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "animal writes india",
+   "paa": "Is vantara legal in India? | Which animal charity is the best? | What are ABC rules? | Does article 21 apply to animals?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; animalwrites.in ; instagram.com",
+   "url": "/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "animal writes directory",
+   "paa": "",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; animalwrites.in ; animalwrites.in",
+   "url": "/directory/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "animal writes news",
+   "paa": "What is the latest news on Vantara? | What are the latest headlines about animals? | What is the latest Supreme Court order on stray dogs? | Who has 800 dogs in India?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; animalwrites.in ; animalwrites.in",
+   "url": "/news/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "india writes for its community dogs",
+   "paa": "What is the latest Supreme Court order on stray dogs? | What does the Bhagavad Gita say about dogs? | Do dogs share 99.9% DNA with wolves? | Who has 800 dogs in India?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; animalwrites.in ; instagram.com",
+   "url": "/campaigns/india-writes-for-its-community-dogs/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "brand",
+   "keyword": "lab animal rules 2026",
+   "paa": "Is there still animal testing in 2026? | What are the new rules for dog owners in India? | Can we make animals in a lab? | How many animals are in 2026?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; rapid-response.in ; animalwrites.in",
+   "url": "/campaigns/lab-animals-rules-2026/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "animal welfare news",
+   "paa": "What are the latest headlines about animals? | What are some recent animal rights news? | What is the latest Supreme Court order on stray dogs? | What are the latest news on animal husbandry in India?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "worldanimalprotection.org ; bbc.com ; thehindubusinessline.com",
+   "url": "/news/?publisher=timesofindia-indiatimes-com"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "animal laws in india",
+   "paa": "What are 5 animal rights? | Is killing an animal a crime? | Is article 21 applicable to animals? | What is section 11 in Animal Cruelty Act?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "animallaw.info ; kannananimalwelfare.org ; ncib.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "animal welfare guides",
+   "paa": "What are the guiding principles of animal welfare? | What are ABC rules? | What are 5 animal welfare needs? | What are the five pillars of animal welfare?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "awbi.gov.in ; animalwrites.in ; awbi.gov.in",
+   "url": "/resources/?tag=guide"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "animal welfare ngos in india",
+   "paa": "What are the top 10 animal NGOs in India? | Who is the owner of Vantara? | What is the best charity for animal welfare? | What are the top 6 organizations that protect animals?",
+   "position": 4,
+   "position_text": "4",
+   "top3": "awbi.gov.in ; peopleforanimalsindia.org ; revenuebase.ai",
+   "url": "/directory/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "animal welfare volunteer",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "animalaidunlimited.org ; strayanimalfoundationindia.org ; homegrown.co.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "stray dog petition",
+   "paa": "What is the Supreme Court decision about stray dogs? | What is the latest update on the stray dog case? | How do I complain about a street dog in India? | What is the new law for stray dogs?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "change.org ; api.sci.gov.in ; thehindu.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "hub",
+   "keyword": "letter petition campaign",
+   "paa": "How do I write a petition letter? | What is a letter petition? | How do I write a petition? | What are some examples of petitions?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; instagram.com ; change.org",
+   "url": "/campaigns/animal-writes-1-0/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "home",
+   "keyword": "animal welfare in india",
+   "paa": "What are 5 animal welfare needs? | What are the main animal welfare laws in India? | Which country has the lowest animal cruelty? | What are the top 10 animal NGOs in India?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "awbi.gov.in ; en.wikipedia.org ; animallaw.info",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "campaign",
+   "keyword": "animal writes campaign",
+   "paa": "What are the top 10 animal NGOs in India? | What is animal writing? | Who is the most famous animal rights activist? | What are 10 animal rights and examples?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; instagram.com ; facebook.com",
+   "url": "/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in delhi",
+   "paa": "What are the top 10 animal NGOs in India? | Which NGO is best to join in Delhi? | Which animal charity is the best? | What is NGO for animals?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "so.city ; petofy.com ; pawsindia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in mumbai",
+   "paa": "What are the top 10 NGOs in Mumbai? | Where can I find free animal rescue services in Mumbai? | What are the top 10 animal NGOs in India? | What is the most trusted animal charity?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "petofy.com ; justdial.com ; amtmindia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in bangalore",
+   "paa": "What are the top 5 NGOs in Bangalore? | What is the best charity for animals? | What are the top 10 animal NGOs in India? | What is NGO for animals?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "petofy.com ; justdial.com ; cupabangalore.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in chennai",
+   "paa": "What are the top 10 NGOs in Chennai? | Which animal charity is the best? | What are the top 10 animal NGOs in India? | What is NGO for animals?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "petofy.com ; justdial.com ; bluecrossofindia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in hyderabad",
+   "paa": "What are the top 10 NGOs in Hyderabad? | What are the top 10 animal NGOs in India? | Where can I find free shelter in Hyderabad? | Which animal charity is the best?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "pfahyd.org ; justdial.com ; weaasra.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in kolkata",
+   "paa": "What are some good animal shelters in Kolkata? | What is the name of a famous NGO in Kolkata? | What are the top 10 animal NGOs in India? | Which animal charity is the best?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "arckolkata.org ; justdial.com ; helplocal.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in pune",
+   "paa": "What are some good animal shelters in Pune? | What are the top NGOs in Pune? | Which animal charity is the best? | What are the top 10 animal NGOs in India?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "saahasforpune.org ; petofy.com ; animalrescuetrust.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in jaipur",
+   "paa": "What are the top NGOs in Jaipur? | What is the best charity for animals? | What are the top 10 animal NGOs in India? | Where can I adopt a dog for free in Jaipur?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "helplocal.in ; justdial.com ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in lucknow",
+   "paa": "Where can I find a free dog shelter in Lucknow? | Which NGOs are working in Lucknow? | What is NGO for animals? | Which animal charity is the best?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "petofy.com ; justdial.com ; jeevaashraya.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-district",
+   "keyword": "animal ngo in ahmedabad",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; petofy.com ; jivdayatrust.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-state",
+   "keyword": "animal welfare ngos in kerala",
+   "paa": "What are the top 10 NGOs in Kerala? | What are the top 10 animal NGOs in India? | What is the best charity for animal welfare? | How to open NGO for animals?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; justdial.com ; animalrescuekochi.org",
+   "url": "/directory/kerala/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-state",
+   "keyword": "animal welfare ngos in maharashtra",
+   "paa": "What are some of the best animal welfare NGOs in Mumbai? | What are the top 10 NGOs in Maharashtra? | What are the top 10 animal NGOs in India? | Which animal NGO is located in Pune?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; dahd.maharashtra.gov.in ; ngobase.org",
+   "url": "/directory/maharashtra/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-state",
+   "keyword": "animal welfare ngos in uttar pradesh",
+   "paa": "What are the top 10 NGOs in Uttar Pradesh? | What are some of the best animal welfare NGOs in Lucknow? | What are the top 10 animal NGOs in India? | How many NGOs are there in Uttar Pradesh?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; ngobase.org ; jeevaashraya.com",
+   "url": "/directory/uttar-pradesh/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-state",
+   "keyword": "animal welfare ngos in rajasthan",
+   "paa": "What are some NGOs that help animals in Jaipur? | What are the top NGOs in Rajasthan? | What are the top 10 animal NGOs in India? | What is the best charity for animal welfare?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "helplocal.in ; animalwrites.in ; jaipuranimalwelfareassociation.org",
+   "url": "/directory/rajasthan/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-state",
+   "keyword": "animal welfare ngos in karnataka",
+   "paa": "What are the top 5 NGOs in Karnataka? | Which animal welfare NGO is located in Bangalore? | What are the top 10 animal NGOs in India? | What is the best charity for animal welfare?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; petofy.com ; cupabangalore.org",
+   "url": "/directory/karnataka/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-type",
+   "keyword": "veterinary hospital in pune",
+   "paa": "What are some good animal hospitals in Pune? | Which government veterinary hospitals are located in Pune? | What is the biggest veterinary hospital? | What are the fees for admission to the government veterinary hospital in Pune?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; practo.com ; raintreevet.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "dir-type",
+   "keyword": "government veterinary hospital delhi",
+   "paa": "Where can I find a free veterinary hospital in Delhi? | Is government hospital free in Delhi? | Is there a government veterinary hospital in Palam Colony, Delhi? | Is there a government veterinary hospital near me in Delhi that is currently open?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "development.delhi.gov.in ; ndmc.gov.in ; justdial.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal welfare categories",
+   "paa": "What are 5 domains of animal welfare? | What are the three types of animal welfare? | What are 5 animal welfare needs? | What are the five pillars of animal welfare?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "en.wikipedia.org ; shelteranimalscount.org ; worldanimal.net",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "stray dogs in india",
+   "paa": "What is happening with stray dogs in India? | What is the 3-3-3 rule with dogs? | Where do the stray dogs in India come from? | What is the new rule for dogs in India?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "en.wikipedia.org ; theconversation.com ; kannananimalwelfare.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal birth control",
+   "paa": "Does animal birth control exist? | What are animal birth control rules? | Is animal breeding legal in India? | Does dog birth control exist?",
+   "position": 4,
+   "position_text": "4",
+   "top3": "awbi.gov.in ; awbi.gov.in ; ahd.py.gov.in",
+   "url": "/resources/animal-birth-control-abc-explained/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal welfare court judgments",
+   "paa": "What are the Supreme Court judgements on animal cruelty? | What is the Supreme Court's decision on animal sacrifice? | What is the latest Supreme Court order on stray dogs? | What is the maximum punishment for animal cruelty?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "awbi.gov.in ; animalwrites.in ; scobserver.in",
+   "url": "/category/courts-judgments/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal cruelty cases",
+   "paa": "What are five examples of animal cruelty? | What are the most common cases of animal cruelty in India? | What country has the highest rate of animal cruelty? | What is the most common type of animal cruelty?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "awbi.gov.in ; en.wikipedia.org ; pasadosafehaven.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal protection rules india",
+   "paa": "What are the legal protections for animals in India? | What are the ABC Rules for stray dog management? | Is Section 11 of the animal cruelty Act bailable? | What are 5 animal rights?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "animallaw.info ; awbi.gov.in ; clearias.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal welfare policy india",
+   "paa": "What are the main animal welfare laws in India? | What are 5 animal welfare needs? | What is the main objective of the Animal Welfare Act of 1998 RA 8485? | What are the four main principles of animal welfare?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "awbi.gov.in ; animallaw.info ; en.wikipedia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "wildlife rescue india",
+   "paa": "Which is the largest animal rescue in India? | Is Vantara open to the public? | Who is the CEO of Vantara? | How can I apply for a job at Vantara?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "wrrcindia.org ; wti.org.in ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "gaushalas in india",
+   "paa": "How many Gaushalas are there in India? | What are the top 10 biggest gaushalas in India? | What is the largest goshala in India? | What is the biggest gaushala in Haryana?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "bgrd.org ; mykarunacare.com ; arihantainstitute.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal welfare civic action",
+   "paa": "What is the purpose of animal welfare? | Is Section 11 of the animal cruelty Act bailable? | What are the four main principles of animal welfare? | What are the three types of animal welfare?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; awbi.gov.in ; en.wikipedia.org",
+   "url": "/category/campaigns-civic-action/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "pet shops and breeders",
+   "paa": "Are pet shops legal in India? | Which dog will come in 2000 rupees? | What is the most profitable pet business? | Who are the best dog breeders in India?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "justdial.com ; mrnmrspet.com ; puppiezo.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "veterinary care india",
+   "paa": "What are the top 5 veterinary companies in India? | What is the VCI seat allotment for 2026? | What is the salary of MVSc? | Who are the big 6 vet companies?",
+   "position": null,
+   "position_text": ">10",
+   "top3": "vetcares.in ; vci.dahd.gov.in ; vetic.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "stray animal feeders",
+   "paa": "Is it illegal to feed strays in India? | What is an animal feeder? | What is the best thing to feed a stray dog? | What are the new rules for feeding stray dogs?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "animalfeeders.in ; feedersindia.in ; straybuddy.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "captive animals india",
+   "paa": "Is vantara legal in India? | Which animals cannot be kept in captivity? | Which animals are legal to keep in India? | How many captive elephants are there in India?",
+   "position": 3,
+   "position_text": "3",
+   "top3": "vetscraft.com ; nzpnewdelhi.gov.in ; animalwrites.in",
+   "url": "/category/performing-captive-animals/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal transport rules",
+   "paa": "Does article 21 apply to animals? | What are the ABC rules for dogs? | What are 10 animal rights and examples? | Can we carry goats in a train?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "awbi.gov.in ; indiankanoon.org ; thc.nic.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "rabies in india",
+   "paa": "Is rabies still common in India? | Is 7 days too late for rabies vaccine after a bite? | Can I still get rabies if I'm vaccinated? | Should I have rabies vaccine for India?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "who.int ; rabiesfreeindia.mohfw.gov.in ; pmc.ncbi.nlm.nih.gov",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal disaster rescue",
+   "paa": "",
+   "position": 3,
+   "position_text": "3",
+   "top3": "humaneworld.org ; awcsindia.org ; animalwrites.in",
+   "url": "/category/disaster-rescue/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "animal adoption india",
+   "paa": "What is the 3-3-3 rule with dogs? | Is pet adoption free in India? | Can we adopt a 2 month old baby? | How much does it cost to adopt in India?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "thepetnest.com ; adoption.barket.in ; adopt-a-pet.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "topic",
+   "keyword": "bird rescue india",
+   "paa": "Is Vantara open to the public? | What is the 3-3-3 rule for birds? | Who is the owner of Vantara? | Where can I find bird rescue services in Hyderabad?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "raptorrescue.org ; wrrcindia.org ; indiatoday.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "file a police complaint for animal cruelty",
+   "paa": "How to file a complaint against animal abuse? | How do I report animal cruelty in my area? | Can I report animal cruelty anonymously? | Where to report for animal cruelty?",
+   "position": 3,
+   "position_text": "3",
+   "top3": "awbi.gov.in ; peta.org ; animalwrites.in",
+   "url": "/resources/how-to-file-a-police-complaint-fir-for-animal-cruelty/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "feeding community dogs",
+   "paa": "Is it legal to feed stray dogs in society? | What is the 3-3-3 rule with dogs? | Is feeding stray dogs good or bad? | Is it legal to feed stray dogs in Delhi?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "earthlingstrust.org ; dogwithblog.in ; aldf.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "society stopping feeding dogs",
+   "paa": "Is it illegal to feed stray dogs in society? | What happens if I stop feeding my dog? | What is the Supreme Court's decision on stray dogs today? | Can we remove dogs from our society?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; livelaw.in ; bhaubhaubiscuit.in",
+   "url": "/resources/rwa-or-society-stopping-you-from-feeding-dogs-what-to-do/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "injured animal emergency",
+   "paa": "How to help an injured animal? | What is the 1962 number for? | What is an animal emergency? | Does article 21 apply to animals?",
+   "position": 3,
+   "position_text": "3",
+   "top3": "petaindia.com ; animalaidunlimited.org ; animalwrites.in",
+   "url": "/resources/found-an-injured-animal-what-to-do/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "animal emergency in india",
+   "paa": "Why is the animal ambulance number 1962? | Who has 800 dogs in India? | What is an animal emergency? | What is the new rule for dogs in India?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "petaindia.com ; emri.in ; animalrahat.com",
+   "url": "/resources/found-an-injured-animal-what-to-do/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "abc rules 2023",
+   "paa": "What are the ABC rules? | What is the ABC procedure for dogs? | What are ABC guidelines? | What are the ABC dog rules?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "cdnbbsr.s3waas.gov.in ; awbi.gov.in ; dahd.maharashtra.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "illegal pet shops",
+   "paa": "Are pet shops legal in India? | Is panda banned in India? | Is abandoning a pet illegal in India? | What animals are not allowed to be kept as pets?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "petaindia.com ; humaneworld.org ; hindustantimes.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "animal welfare faq",
+   "paa": "What are 5 animal welfare needs? | What are the three types of animal welfare? | What are the four main principles of animal welfare? | Why is animal welfare important?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "awbi.gov.in ; animal-welfare.extension.org ; anses.fr",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "living alongside animals",
+   "paa": "What is cohabitation in animals? | Can you write 10 lines about animals? | Can humans coexist with animals? | What animals can live together?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "ifaw.org ; wildlifecoexistence.org ; worldwildlife.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "feeding community animals",
+   "paa": "What are the four types of feeding in animals? | Is it legal to feed stray dogs in society? | How can we take care of animals 5 points? | What are the benefits of feeding animals?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; vhd.mcgm.gov.in ; indiatoday.in",
+   "url": "/resources/feeding-community-animals-good-practice/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "adopting a dog",
+   "paa": "What is the 3-3-3 rule with dogs? | How much does it cost to adopt a dog in India? | Which dog is RS 5000? | Can we adopt a 2 month old baby?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "thepetnest.com ; helpguide.org ; awbi.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "animal welfare laws",
+   "paa": "What are the main animal welfare laws in India? | What are 5 animal rights? | What are ABC rules? | What is IPC 428 and 429?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "animallaw.info ; en.wikipedia.org ; awbi.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "helping an injured animal",
+   "paa": "What are 8 ways to prevent animal abuse? | What are 10 ways to help protect animals? | What are some ways to show kindness to animals? | What are some solutions for animal cruelty?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "anticruelty.org ; animalwrites.in ; brainly.in",
+   "url": "/resources/found-an-injured-animal-what-to-do/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "report animal cruelty",
+   "paa": "Can I report animal cruelty online? | How do I report animal cruelty in my area? | How can I legally report animal abuse in India? | Where to report for animal cruelty?",
+   "position": 3,
+   "position_text": "3",
+   "top3": "peta.org ; awbi.gov.in ; animalwrites.in",
+   "url": "/knowledge/how-to-report-animal-cruelty/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "what is animal birth control",
+   "paa": "Does animal birth control exist? | What are animal birth control rules? | Can I give an ipill to my dog? | What is animal control used for?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "awbi.gov.in ; animalwrites.in ; slideshare.net",
+   "url": "/resources/animal-birth-control-abc-explained/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide",
+   "keyword": "caring for community dogs",
+   "paa": "What is the 7-7-7 rule for dogs? | What is the silent killer in dogs? | What is the law regarding street dogs in India? | What is the 3-3-3 rule with dogs?",
+   "position": 1,
+   "position_text": "1",
+   "top3": "animalwrites.in ; vetloc.in ; mytribe.in",
+   "url": "/resources/caring-for-community-dogs-in-your-area/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide-new",
+   "keyword": "dog bite rabies vaccine guide",
+   "paa": "Is 3 doses of rabies vaccine enough after a dog bite? | What is the 10 day rule in dog bite? | Do I need 4 or 5 rabies shots? | Is 7 days too late for rabies vaccine after a bite?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "clinicalestablishments.mohfw.gov.in ; cdn.who.int ; fearlessagainstrabies.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "guide-new",
+   "keyword": "ngo darpan registration guide",
+   "paa": "How to register in NGO Darpan? | Who is eligible for NGO Darpan registration? | What documents are required for NGO Darpan registration? | Is darpan registration compulsory?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "ngodarpan.gov.in ; accountingforngos.org ; caaq.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "pca act 1960",
+   "paa": "What are the ABC Rules for stray dog management? | What are 5 animal rights? | How to register a complaint in PETA? | What is the punishment for cruelty to animals acts?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "awbi.gov.in ; indiankanoon.org ; agriportal.cg.nic.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "pet shop rules 2018",
+   "paa": "Are pet shops legal in India? | What is required to open a pet shop? | How much does a pet shop licence cost in India? | Does article 21 apply to animals?",
+   "position": 4,
+   "position_text": "4",
+   "top3": "awbi.gov.in ; legitquest.com ; humaneworld.org",
+   "url": "/research/the-prevention-of-cruelty-to-animals-pet-shop-rules-2018/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "dog breeding and marketing rules 2017",
+   "paa": "",
+   "position": 4,
+   "position_text": "4",
+   "top3": "awbi.gov.in ; awbi.gov.in ; veterinary.assam.gov.in",
+   "url": "/library/the-prevention-of-cruelty-to-animals-dog-breeding-and-marketing-rules-2017/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "transport of animals rules 1978",
+   "paa": "What are ABC rules? | Can we carry goats in a train? | What is transportation in animal class 7? | Does article 21 apply to animals?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "awbi.gov.in ; indiankanoon.org ; thc.nic.in",
+   "url": "/research/the-transport-of-animals-rules-1978/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "performing animals registration rules 2001",
+   "paa": "",
+   "position": 7,
+   "position_text": "7",
+   "top3": "thc.nic.in ; awbi.gov.in ; faolex.fao.org",
+   "url": "/library/performing-animals-registration-rules-2001/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "slaughter house rules 2001",
+   "paa": "What are the rules and regulations for slaughterhouses? | Is slaughter house legal in India? | Who first banned cow slaughter in India? | Can you provide me with a PDF version of the slaughter House Rules 2001?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "awbi.gov.in ; slideshare.net ; scribd.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "wildlife protection act 1972",
+   "paa": "What is the Wildlife Protection Act 1972? | How many times has the Wildlife Protection Act 1972 been amended? | Is the Wildlife Protection Act bailable? | Who implemented the Indian Wildlife Protection Act in 1972?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "tribal.nic.in ; en.wikipedia.org ; faolex.fao.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "abc rules 2023 pdf",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "cdnbbsr.s3waas.gov.in ; awbi.gov.in ; dahd.maharashtra.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "pca act 1960 pdf",
+   "paa": "What is the PCA Act 1960? | What are the ABC Rules for stray dog management? | What are 5 animal rights? | What is the punishment for cruelty to animals acts?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "awbi.gov.in ; peopleforanimalsindia.org ; agriportal.cg.nic.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "library",
+   "keyword": "awbi circular",
+   "paa": "",
+   "position": 8,
+   "position_text": "8",
+   "top3": "awbi.gov.in ; awbi.gov.in ; awbi.gov.in",
+   "url": "/library/?tag=circular"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "dog bite",
+   "paa": "What should you do if a dog bites you? | How to know if the dog bite is serious? | Is TT injection necessary for dog bite? | Do dog bites carry rabies?",
+   "position": null,
+   "position_text": ">6",
+   "top3": "en.wikipedia.org ; medicalnewstoday.com ; webmd.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "what to do after dog bite",
+   "paa": "Do I need to go to the doctor after a dog bite? | Do you need a tetanus shot after a dog bite? | How do I know I am safe after a dog bite? | Can I wait 10 days after a dog bite?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "health.clevelandclinic.org ; hopkinsmedicine.org ; fortishealthcare.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "rabies vaccine",
+   "paa": "Is 7 days too late for rabies vaccine? | When should a person get a rabies vaccine? | Is the rabies vaccine 3 or 4 doses? | Is rabies vaccine 100% safe?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "en.wikipedia.org ; who.int ; mayoclinic.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "rabies vaccine schedule",
+   "paa": "What is the current rabies vaccine schedule? | Can I take rabies vaccine after 3 days of dog scratch? | Is the rabies vaccine 4 or 5 doses? | How long do 5 doses of rabies vaccine last?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "fearlessagainstrabies.com ; clinicalestablishments.mohfw.gov.in ; rabieswatch.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "dog bite injection",
+   "paa": "Which injection is given when a dog bites? | Is TT injection given for dog bite? | How many days need to inject after a dog bite? | Do I need a vaccine after a dog bite?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "my.clevelandclinic.org ; mayoclinic.org ; msd-animal-health.co.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala near me",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; iskcongev.com ; up.goashray.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala in jaipur",
+   "paa": "What is the PIN code for Goshala in Jaipur? | Are there any Big 4 in Jaipur? | Which zoo is best in Jaipur? | What is the purpose of Goshala?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "justdial.com ; pinjrapolegaushala.com ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala in delhi",
+   "paa": "Is there a Gaushala in South Delhi? | Which is the biggest Gaushala in India? | How to open Gaushala in Delhi? | What are the opening hours of Gaushala Kishanganj in Delhi?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; delhigaushala.com ; facebook.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala in ahmedabad",
+   "paa": "What is the Gaushala scheme in Gujarat? | What is the address of Bansi Gir Gaushala in Ahmedabad? | What is very famous in Ahmedabad? | What is the current price of milk in Ahmedabad?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "justdial.com ; harekrishnamandir.org ; manavkartavya.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala in lucknow",
+   "paa": "What is the best gaushala near me in Lucknow? | Which zoo is best in Lucknow? | What is the price of a cow in Lucknow? | What is Lucknow most famous for?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; jagran.com ; jeevaashraya.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "gaushala in mumbai",
+   "paa": "Which is the biggest gaushala in Mumbai? | How much is the 1 cow price? | Where is the biggest Gaushala in India? | Is cow beef legal in Mumbai?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "justdial.com ; iskconmumbai.com ; shreenarayanigosala.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "veterinary hospital near me",
+   "paa": "How much do vets charge for a consultation fee? | Is veterinary equal to MBBS? | What if I don't have money to go to the vet? | What are some good animal hospitals in Mangalore?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "justdial.com ; ahvs.karnataka.gov.in ; justdial.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "ngo darpan registration",
+   "paa": "Is NGO Darpan registration mandatory? | How do I register for Darpan? | Who will issue the Darpan certificate? | Who is eligible for NGO?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "ngodarpan.gov.in ; juststart.co.in ; caaq.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number delhi",
+   "paa": "",
+   "position": null,
+   "position_text": ">10",
+   "top3": "wildliferescue.eforest.delhi.gov.in ; dogwithblog.in ; sanjaygandhianimalcarecentre.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number mumbai",
+   "paa": "What is the helpline number for animal rescue in Mumbai? | Why is animal Ambulance 1962? | Can you call 999 for a pet? | What is the 112 number in Mumbai?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "memumbai.com ; dogwithblog.in ; strayicare.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number bangalore",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "voicelessindia.org ; ahvs.karnataka.gov.in ; justdial.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number chennai",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "tnawb.tn.gov.in ; agritech.tnau.ac.in ; ahd.tn.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number hyderabad",
+   "paa": "What is the 1962 number for? | Can you call 999 for a pet? | How to help an injured animal? | Where can I find animal rescue services in Hyderabad?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "pfahyd.org ; sniffsociety.in ; voicelessindia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number kolkata",
+   "paa": "What is the 24-hour animal rescue helpline number in Kolkata? | What is the 1962 number for? | Can you call 999 for a pet? | Why is animal Ambulance 1962?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "voicelessindia.org ; arckolkata.org ; facebook.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number pune",
+   "paa": "Is 1962 a toll free number? | Can you call 999 for a pet? | Who will you call if you see a wounded animal? | Where to complain about animals?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "voicelessindia.org ; pmc.gov.in ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number jaipur",
+   "paa": "Why is animal Ambulance 1962? | Is 1962 a toll free number? | Who will you call if you see a wounded animal? | Can you call 999 for a pet?",
+   "position": null,
+   "position_text": ">10",
+   "top3": "helpinsuffering.org ; justdial.com ; helplocal.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number lucknow",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "up.goashray.in ; petkonnect.in ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal helpline number ahmedabad",
+   "paa": "",
+   "position": null,
+   "position_text": ">10",
+   "top3": "animalcares.org ; jivdayatrust.org ; justdial.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal ambulance number uttar pradesh",
+   "paa": "Why is animal Ambulance 1962? | What is the ambulance number for animals? | What is the 112 number in Uttar Pradesh? | What is the 1962 number for?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "emri.in ; indiatoday.in ; indiacustomercare.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal ambulance number maharashtra",
+   "paa": "What is the ambulance number for animals? | Why is animal ambulance 1962? | What is the 112 number in Maharashtra? | What is the 1962 number for?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "justdial.com ; instagram.com ; srmd.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal ambulance number karnataka",
+   "paa": "Why is animal Ambulance 1962? | What is the ambulance number for animals? | What is the 112 number in Karnataka? | What is the 1962 number for?",
+   "position": 7,
+   "position_text": "7",
+   "top3": "ahvs.karnataka.gov.in ; indianhelpline.com ; dogwithblog.in",
+   "url": "/directory/karnataka/bengaluru-urban/animal-ambulance/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal ambulance number tamil nadu",
+   "paa": "What is the ambulance number for animals? | Why is Animal Ambulance 1962? | Is 108 ambulance free in Tamil Nadu? | Is it 102 or 108 for an ambulance?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "ahd.tn.gov.in ; emri.in ; en.wikipedia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal ambulance number rajasthan",
+   "paa": "Why is the animal ambulance number 1962? | What is the ambulance number for animals? | What is the 1962 number for? | How can I find my Pashu tag number in Rajasthan?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "facebook.com ; x.com ; animalaidunlimited.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "1962 helpline",
+   "paa": "Why is Animal Ambulance 1962? | Is 1962 free? | What number is 1962? | Who will you call if you see a wounded animal?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "emri.in ; en.wikipedia.org ; dahvs.odisha.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "injured bird helpline delhi",
+   "paa": "",
+   "position": null,
+   "position_text": ">9",
+   "top3": "wildliferescue.eforest.delhi.gov.in ; justdial.com ; raptorrescue.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "injured bird helpline mumbai",
+   "paa": "How will you help an injured bird? | What is the helpline number for animal rescue in Mumbai? | What is the 112 number in Mumbai? | Who to call for a sick bird?",
+   "position": 4,
+   "position_text": "4",
+   "top3": "justdial.com ; homegrown.co.in ; instagram.com",
+   "url": "/resources/injured-bird-helpline-numbers-by-city/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "injured bird helpline bangalore",
+   "paa": "What is the 1962 number for? | How will you help an injured bird? | Who to call for a sick bird? | Is there a bird sanctuary in Bangalore?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "reddit.com ; justdial.com ; wildarrc.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "injured bird helpline ahmedabad",
+   "paa": "Where can I find bird rescue services in Ahmedabad? | Who do I report an injured bird to near me? | How will you help an injured bird? | Who to call for a sick bird?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "justdial.com ; facebook.com ; jdfoundation.org.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "injured bird helpline jaipur",
+   "paa": "What will you do if you find an injured bird? | What are the emergency numbers in Jaipur? | Is there bird flu in Rajasthan? | Who to call for a sick bird?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "instagram.com ; justdial.com ; hopeandbeyond.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "how to file fir for animal cruelty india",
+   "paa": "How can I legally report animal abuse in India? | How do I report animal cruelty in my area? | Can I report animal cruelty online? | Is there any law for animal cruelty in India?",
+   "position": 2,
+   "position_text": "2",
+   "top3": "awbi.gov.in ; animalwrites.in ; sanjaygandhianimalcarecentre.org",
+   "url": "/resources/how-to-file-a-police-complaint-fir-for-animal-cruelty/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "animal cruelty act section 11 punishment",
+   "paa": "What is the maximum penalty for animal cruelty? | What is the punishment for dog cruelty? | Is cruelty to animals a criminal offence? | What is the punishment for killing a cat in India?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "indiankanoon.org ; awbi.gov.in ; indiankanoon.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "feeding stray dogs law india",
+   "paa": "Is it legal to feed street dogs in India? | What is the new law for stray dogs in India? | What is the Supreme Court's order on feeding stray dogs? | What if someone stops you from feeding stray dogs?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "kannananimalwelfare.org ; dogwithblog.in ; awbi.gov.in",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "supreme court stray dogs judgment",
+   "paa": "What did the Supreme Court order about stray dogs? | What is the new rule for stray dogs? | What is the legal punishment for killing a stray dog? | What are the latest news on stray dogs in India?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "api.sci.gov.in ; scobserver.in ; api.sci.gov.in",
+   "url": "/resources/supreme-court-stray-dog-orders-explained/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "world animal day 2026",
+   "paa": "Which is the World Animal Day? | Which is our national animal in 2026? | What is the slogan for World Animal Day? | Is 4 October animal Day?",
+   "position": 4,
+   "position_text": "4",
+   "top3": "worldanimalday.org ; four-paws.org ; facebook.com",
+   "url": "/legal-watch/observance-of-world-animal-day-on-4th-october-2026/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "demand",
+   "keyword": "world rabies day",
+   "paa": "Why is World Rabies Day celebrated on 28 September? | What is the theme for World Rabies Day in 2026? | What is the nickname for rabies? | What is the slogan for World Rabies Day?",
+   "position": null,
+   "position_text": ">8",
+   "top3": "who.int ; rabiesalliance.org ; en.wikipedia.org",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "blue cross pondicherry",
+   "paa": "Can I give my dog to Blue Cross? | How to file a complaint in Blue Cross? | Where can I find free dog adoption in Pondicherry? | What does a blue cross do?",
+   "position": null,
+   "position_text": ">9",
+   "top3": "bluecrossofindia.org ; facebook.com ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "blue cross vizag",
+   "paa": "Can I leave my dog in Blue Cross? | What does a blue cross do? | Is Blue Cross an NGO? | How to adopt a dog from Blue Cross?",
+   "position": 6,
+   "position_text": "6",
+   "top3": "bluecrossofindia.org ; worldanimal.net ; instagram.com",
+   "url": "/directory/org/blue-cross-animals-environmental-welfare-society/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "daya animal welfare",
+   "paa": "How to register a complaint in PETA? | Is Cupa an NGO? | What is the top animal NGO in India? | What is animal welfare Day?",
+   "position": null,
+   "position_text": ">10",
+   "top3": "dayaawo.org ; facebook.com ; instagram.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "people for animals goa",
+   "paa": "How to register a complaint in PETA? | What is the best place to donate for animals? | What is the 1962 number for? | What is NGO for animals?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "instagram.com ; justdial.com ; peopleforanimalsindia.org",
+   "url": "/directory/org/people-for-animals-goa/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "bezubaan saathi",
+   "paa": "Can we give our dog to shelter? | What is the top animal NGO in India? | Which animal shelter is the best to donate to? | What can we do to help stray animals?",
+   "position": 8,
+   "position_text": "8",
+   "top3": "bezubaansaathi.in ; instagram.com ; justdial.com",
+   "url": "/directory/org/bezubaan-saathi-animal-trust/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "animotel care trust",
+   "paa": "",
+   "position": 10,
+   "position_text": "10",
+   "top3": "justdial.com ; instagram.com ; animotelcaretrust.com",
+   "url": "/directory/org/animotel-care-trust/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "pyaar foundation chandrapur",
+   "paa": "How to donate money to animals? | What are some good orphanages for children in Chandrapur? | What are the top 10 animal NGOs in India? | How to open NGO for animals?",
+   "position": 8,
+   "position_text": "8",
+   "top3": "pyaar.org.in ; instagram.com ; justdial.com",
+   "url": "/directory/org/pyaar-petanity-and-animal-rehabilitators-foundation-chandrapur/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "sans animal welfare trust",
+   "paa": "Where is Sans Animal Welfare Trust? | Can we give our dog to shelter? | Which animal charity is the best? | Where can I adopt a dog for free in Chennai?",
+   "position": null,
+   "position_text": ">7",
+   "top3": "sanstrust.org ; instagram.com ; justdial.com",
+   "url": ""
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "animal helpline number azamgarh",
+   "paa": "What is the toll free number of up veterinary services? | Why is animal Ambulance 1962? | What is the 1962 number for? | How to help an injured animal?",
+   "position": 6,
+   "position_text": "6",
+   "top3": "justdial.com ; indiacustomercare.com ; azamgarh.nic.in",
+   "url": "/directory/org/chief-veterinary-officers-office-azamgarh/"
+  },
+  {
+   "date": "2026-10-22",
+   "group": "quickwin",
+   "keyword": "animal rescue alappuzha contact number",
+   "paa": "Who to contact for animal welfare? | What is the ambulance number for animals? | What is the toll-free number for Kerala veterinary Services? | Who will you call if you see a wounded animal?",
+   "position": 5,
+   "position_text": "5",
+   "top3": "alappuzha.nic.in ; justdial.com ; forest.kerala.gov.in",
+   "url": "/directory/kerala/alappuzha/"
+  }
+ ],
+ "source": "docs/seo/keyword-map.md + docs/seo/rankings-2026-10-21.csv (seeded once; the site table is the source of truth after)",
+ "version": 1
+}

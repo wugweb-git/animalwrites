@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Animal Writes – SEO extras for Rank Math
  * Plugin URI:        https://animalwrites.in/
- * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API and llms.txt ordering and Directory section. Rank Math holds everything else. Does nothing unless Rank Math is active.
- * Version:           1.0.0
+ * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API, llms.txt ordering and Directory section, and Tools → Search Insights (keywords, Search Console by day through Site Kit, priorities; read-only). Rank Math holds everything else. Does nothing unless Rank Math is active.
+ * Version:           1.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -39,9 +39,18 @@ add_action(
 			);
 			return;
 		}
-		foreach ( array( 'helpers', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand', 'llms', 'analysis' ) as $file ) {
+		foreach ( array( 'helpers', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-demand', 'search-insights', 'llms', 'analysis' ) as $file ) {
 			require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 		}
 	},
 	5
+);
+
+// Search Insights keeps its tables and data when the plugin is switched off (owner, 24 Oct 2026); only its cron stops.
+register_deactivation_hook(
+	__FILE__,
+	function () {
+		wp_clear_scheduled_hook( 'aw_si_daily' );
+		wp_clear_scheduled_hook( 'aw_si_rollup' );
+	}
 );
