@@ -43,6 +43,17 @@ function aw_publisher_rating_html( $p ) {
 	return ! empty( $p['rating_url'] ) ? '<a href="' . esc_url( $p['rating_url'] ) . '" target="_blank" rel="noopener">' . esc_html( $txt ) . '</a>' : esc_html( $txt );
 }
 
+/** A publisher's status in words with a core dashicon (no custom CSS). */
+function aw_publisher_status_html( $st ) {
+	$map = array(
+		'allow'   => array( 'yes-alt', 'Allowed' ),
+		'neutral' => array( 'minus', 'Neutral' ),
+		'block'   => array( 'dismiss', 'Blocked' ),
+	);
+	$m = $map[ $st ] ?? $map['neutral'];
+	return '<span class="dashicons dashicons-' . esc_attr( $m[0] ) . '" aria-hidden="true"></span> ' . esc_html( $m[1] );
+}
+
 /**
  * Change log of the Sourcing screen: who changed what, when (newest first, last 300 kept).
  *
@@ -250,6 +261,17 @@ add_action(
 	}
 );
 
+// Screen options: publishers per page.
+add_action(
+	'load-settings_page_aw-sourcing',
+	function () {
+		if ( in_array( sanitize_key( $_GET['tab'] ?? 'publishers' ), array( '', 'publishers' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_screen_option( 'per_page', array( 'label' => 'Publishers per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
+		}
+	}
+);
+add_filter( 'set_screen_option_aw_publishers_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
+
 /** Save handlers. */
 add_action(
 	'admin_post_aw_sourcing',
@@ -284,8 +306,17 @@ add_action(
 			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
 		} else {
 			$pubs   = aw_publishers();
-			$status = sanitize_key( $_POST['bulk_status'] ?? '' );
-			$hosts  = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['hosts'] ?? array() ) );
+			$before = $pubs;
+			$row    = sanitize_text_field( wp_unslash( $_POST['row_status'] ?? '' ) ); // a row action: "status:host"
+			if ( false !== strpos( $row, ':' ) ) {
+				list( $status, $one ) = explode( ':', $row, 2 );
+				$status               = sanitize_key( $status );
+				$hosts                = array( $one );
+			} else { // bulk action, from the top or the bottom of the list
+				$status = sanitize_key( $_POST['bulk_status'] ?? '' );
+				$status = '' !== $status ? $status : sanitize_key( $_POST['bulk_status2'] ?? '' );
+				$hosts  = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['hosts'] ?? array() ) );
+			}
 			if ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 				foreach ( $hosts as $h ) {
 					if ( isset( $pubs[ $h ] ) ) {
@@ -310,8 +341,17 @@ add_action(
 				}
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
+			$changed = $pubs !== $before; // a search or a page change alone saves nothing
 		}
-		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) ) );
+		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) );
+		if ( 'publishers' === $tab ) { // back to the same view, sort and page of the list, with its search
+			$back = remove_query_arg( array( 'updated', 's', 'paged' ), wp_get_referer() ? wp_get_referer() : $back );
+			$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
+			$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
+			$find = sanitize_text_field( wp_unslash( $_POST['s'] ?? '' ) );
+			$back = add_query_arg( array_filter( array( 'updated' => empty( $changed ) ? '' : 1, 's' => '' !== $find ? rawurlencode( $find ) : '' ) ), $back );
+		}
+		wp_safe_redirect( $back );
 		exit;
 	}
 );
@@ -355,8 +395,7 @@ add_action(
 					if ( ! $host ) {
 						return;
 					}
-					$st = aw_publishers()[ $host ]['status'] ?? 'neutral';
-					echo esc_html( $host ) . ' <span class="aw-pub-st aw-pub-st--' . esc_attr( $st ) . '">' . esc_html( ucfirst( $st ) ) . '</span>';
+					echo esc_html( $host ) . '<br>' . aw_publisher_status_html( (string) ( aw_publishers()[ $host ]['status'] ?? 'neutral' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
 				},
 				10,
 				2
@@ -394,7 +433,7 @@ add_action(
 add_action(
 	'admin_head',
 	function () {
-		echo '<style>.aw-pub-st{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:600;background:#f0f0f1}.aw-pub-st--block{background:#fcf0f1;color:#b32d2e}.aw-pub-st--allow{background:#edfaef;color:#00701a}.aw-src-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.aw-src-lists textarea{width:100%;min-height:220px;font-family:monospace}</style>';
+		echo '<style>.aw-src-lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.aw-src-lists textarea{width:100%;min-height:220px;font-family:monospace}</style>';
 	}
 );
 
@@ -459,32 +498,19 @@ function aw_sourcing_page() {
 		return;
 	}
 
-	$pubs   = aw_publishers();
-	$filter = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	uasort( $pubs, fn( $a, $b ) => ( $b['count'] <=> $a['count'] ) ?: strcmp( (string) $b['last'], (string) $a['last'] ) );
-	$counts = array_count_values( array_map( fn( $p ) => $p['status'], $pubs ) );
 	// Add first, as everywhere in WordPress.
-	echo '<p class="aw-src-add"><label for="aw-new-host"><strong>Add a publisher</strong></label> <input type="text" id="aw-new-host" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status" aria-label="Status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
-	submit_button( 'Add', 'secondary', '', false );
+	echo '<p><label for="aw-new-host"><strong>Add a publisher</strong></label> <input type="text" id="aw-new-host" name="new_host" placeholder="example.com" class="regular-text"> <select name="new_status" aria-label="Status"><option value="block">Blocked</option><option value="allow">Allowed</option><option value="neutral">Neutral</option></select> ';
+	submit_button( 'Add', 'secondary', 'add_publisher', false );
 	echo '</p>';
-	echo '<ul class="subsubsub">';
-	foreach ( array( '' => 'All', 'neutral' => 'Neutral (new finds)', 'allow' => 'Allowed', 'block' => 'Blocked' ) as $k => $l ) {
-		$n = '' === $k ? count( $pubs ) : (int) ( $counts[ $k ] ?? 0 );
-		echo '<li><a href="' . esc_url( $base . ( $k ? '&status=' . $k : '' ) ) . '"' . ( $filter === $k ? ' class="current"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . (int) $n . ')</span></a> | </li>';
+	echo '<p>Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check. Short name: what cards show on the source chip (e.g. TOI, PIB, Sentinel); the full name stays on the item page.</p>';
+	if ( ! class_exists( 'WP_List_Table' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
-	echo '</ul><br class="clear">';
-	echo '<p>Short name: what cards show on the source chip (e.g. TOI, PIB, Sentinel). The full name stays on the item page.</p>';
-	echo '<p>Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.</p>';
-	echo '<div class="tablenav top"><select name="bulk_status"><option value="">Change status to…</option><option value="block">Blocked</option><option value="neutral">Neutral</option><option value="allow">Allowed</option></select> ';
-	submit_button( 'Apply', 'action', '', false );
-	echo '</div><table class="widefat striped"><thead><tr><td class="check-column"><input type="checkbox" onclick="document.querySelectorAll(\'.aw-h\').forEach(c=>c.checked=this.checked)" aria-label="Select all"></td><th>Host</th><th>Name</th><th>Short name</th><th>Status</th><th>Rating</th><th>Items</th><th>First seen</th><th>Last seen</th></tr></thead><tbody>';
-	foreach ( $pubs as $h => $p ) {
-		if ( ( $filter && $filter !== $p['status'] ) || ! empty( $p['kind'] ) ) { // kind: a host kept only for its icon (e.g. a directory source), not a publisher
-			continue;
-		}
-		echo '<tr><th class="check-column"><input class="aw-h" type="checkbox" name="hosts[]" value="' . esc_attr( $h ) . '" aria-label="' . esc_attr( 'Select ' . $h ) . '"></th><td><strong>' . esc_html( $h ) . '</strong></td><td>' . esc_html( $p['name'] ) . '</td><td><input type="text" name="short[' . esc_attr( $h ) . ']" value="' . esc_attr( (string) ( $p['short'] ?? '' ) ) . '" maxlength="24" size="12" aria-label="' . esc_attr( 'Short name for ' . $h ) . '"></td><td><span class="aw-pub-st aw-pub-st--' . esc_attr( $p['status'] ) . '">' . esc_html( ucfirst( $p['status'] ) ) . '</span></td><td>' . aw_publisher_rating_html( $p ) . '</td><td>' . (int) $p['count'] . '</td><td>' . esc_html( $p['first'] ) . '</td><td>' . esc_html( $p['last'] ) . '</td></tr>';
-	}
-	echo '</tbody></table>';
-	submit_button( 'Save short names', 'secondary' );
+	require_once __DIR__ . '/class-aw-sourcing-publishers-table.php';
+	$table = new AW_Sourcing_Publishers_Table();
+	$table->prepare_items();
+	$table->views();
+	$table->search_box( 'Search publishers', 'aw-publisher' );
+	$table->display();
 	echo '</form></div>';
 }

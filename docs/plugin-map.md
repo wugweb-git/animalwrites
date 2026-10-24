@@ -54,7 +54,9 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 |---|---|
 | `aw-sourcing.php` | Loader only (no functions): the include order sets the Settings → Sourcing tab order. |
 | `includes/sourcing-policy.php` | Settings → Sourcing (`options-general.php?page=aw-sourcing`): Publishers (allow / neutral / block, short names), Keywords (Include, Animal, Context, Exclude in option aw_relevance), Change log; the gate (aw_sourcing_gate), aw_has_term, GET sourcing-policy for the workers, the Publisher column and "Block host" row action. From Kits Core. |
+| `includes/class-aw-sourcing-publishers-table.php` | Settings → Sourcing → Publishers as a core list table: views by status, search, sortable columns, pagination (screen option, 50 a page), row actions Allow / Neutral / Block, bulk status, short names edited in place. Posts to the same save handler (aw_sourcing, tab publishers), which checks the screen's aw_sourcing nonce; the table prints none of its own. |
 | `includes/sourcing-lists.php` | Tabs News feeds, Library sources, Opportunity sources, Press, Categories, Sections and the "Workers use these lists" switch (option aw_sources). |
+| `includes/class-aw-sourcing-sources-table.php` | News feeds, Library sources and Opportunity sources as a core list table (views On / Off, search, sortable, row and bulk actions: turn on/off, keyword check on/off); each source is edited or added on its own form-table screen (&edit=<id> or &edit=new). |
 | `includes/summary-rules-admin.php` | GET summary-rules for the workers and the Summary rules tab. |
 | `includes/relevance.php` | AI relevance verdicts, the Rejected tab (aw_relevance_rejected), the ingest heartbeat and hourly watchdog (aw_ingest_watchdog). |
 | `includes/ingest.php` | POST ingest: the workers' items arrive here (News, Library, research, opportunities, listings, press drafts). |
@@ -66,13 +68,14 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/enrichment.php` | Directory enrichment: the queue and results endpoints, table {prefix}aw_enrich, apply rules, spend. |
 | `includes/enrichment-admin.php` | Directory → Enrichment review and the Enrichment tab. |
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
-| `includes/review-queue.php` | Inbox → To review. |
+| `includes/review-queue.php`, `includes/class-aw-sourcing-review-table.php` | Inbox → To review as a core list table: views by type, search, sortable, pagination (screen option, 50), row actions Edit / Source / Publish / Reject, bulk Publish / Reject and "Publish all N". |
 | `includes/keyword-suggestions.php`, `includes/class-aw-sourcing-suggestions-table.php` | Settings → Sourcing → Keywords → Suggestions from Search Insights: searches with at least 20 impressions in 28 days that no Include or Exclude word covers (not brand, English only), as a core list table with Add to Include, Add to Exclude and Dismiss (option aw_sourcing_dismissed). Needs aw-seo-extras for the searches; shows nothing without it. |
 | `includes/ai-keys.php` | Settings → AI models: keys, models, usage, twice-daily check (aw_ai_check_all). |
+| `includes/class-aw-sourcing-ai-keys-table.php` | Settings → AI models → Keys as a core list table: saved keys in the workers' order, then the GitHub-secret keys; views Working / Waiting / Broken / GitHub secrets, search, row actions Move up / Move down / Remove and bulk Check again / Remove (admin_post_aw_ai_keys_list), the plugins-list problem row under a broken key. |
 | `includes/site-health.php` | Tools → Site Health → "Sourcing ran on time": the ingest heartbeat as a Site Health test, same rules as the watchdog (critical: no run for 8 hours; recommended: no News for 12 hours, none ever 12 hours after the workers' first report, or half the sources failing). |
 | `includes/relay.php` | GET relay: the fetch proxy for hosts that refuse the workers, and the Relay tab. |
 | `includes/keyword-stats.php` | Which search brought each item in (meta aw_feed, aw_ingested_at, saved at ingest since 24 Oct 2026) and per keyword the items fetched and published in 30 days, News and Library apart (older items: by the word in title or summary, estimated). Offered to aw-seo-extras through the filter aw_sourcing_keyword_items. |
-| `includes/workers.php` | Settings → Sourcing → Workers (24 Oct 2026): the 17 workflows of the workers repository (AW_WORKERS, a copy of `docs/workers.json` there; change both together), POST worker-run (start and end reports), problems (late = no report for twice the interval; failed, cancelled, skipped, stuck), the hourly watchdog email (aw_workers_watchdog, once per new set), the notice, the rows in the dashboard box Scheduled tasks, the Site Health test and Run now (aw_dispatch_workflow, logged in aw_worker_dispatch_log). Also shows the AI models tiles. |
+| `includes/workers.php` | Settings → Sourcing → Workers (24 Oct 2026): the workflows of the workers repository (AW_WORKERS in `includes/workers-registry.php`, an exact copy of `docs/workers.json` there; the Deploy check fails when they differ, `tools/ci/workers_registry_check.php`; when both change, merge the workers PR first), POST worker-run (start and end reports), problems (late = no report for twice the interval; failed, cancelled, skipped, stuck), the hourly watchdog email (aw_workers_watchdog, once per new set), the notice, the rows in the dashboard box Scheduled tasks, the Site Health test and Run now (aw_dispatch_workflow, logged in aw_worker_dispatch_log). Also shows the AI models tiles. |
 
 ## mailweb (Mailweb)
 
@@ -115,3 +118,26 @@ Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-ca
 | `visits.php` | Honest visitor counter: one count per browser session, bots excluded, nothing personal stored. Counting runs in the browser (so cached pages still count). Shown in the footer. |
 
 Removed on 8 Oct 2026 (dead): `testimonials.php` (1.0 testimonials, 0 items, exported), `launch.php` (one-time server setup and media restore, both finished), `media-pr.php` (retired settings screens). Their two shortcodes still in old Home content print nothing (`admin-ia.php`).
+
+## aw-seo-extras: Search Insights (phase 1, 24 Oct 2026)
+
+Plan: `docs/seo/search-insights-plan.md`. Tools → Search Insights (`tools.php?page=aw-search-insights`). Read-only data and suggestions: nothing here writes to Rank Math keyphrases or the Sourcing lists. Tables `wp_aw_si_keywords`, `wp_aw_si_kw_pages`, `wp_aw_si_obs`, `wp_aw_si_rising` (kept on deactivate and delete; only Settings → Delete data or `wp aw-si delete-data --yes` drops them, and that also switches Search Insights off until the owner runs the daily update by hand).
+
+| File | What it does |
+|---|---|
+| `includes/search-insights.php` | Loads the files below. |
+| `includes/search-insights/schema.php` | The four tables (dbDelta, version option `aw_si_db`) and the owner-only drop. |
+| `includes/search-insights/runs.php` | Run log per source (`aw_si_runs`): started, last good run, last error, rows; "late" = more than twice its schedule (counted from install for a source not run yet); a run started over an hour ago with no result "did not finish". |
+| `includes/search-insights/sitekit.php` | Runs a Site Kit module as that module's own owner (`ownerID` in its settings), never another module's. |
+| `includes/search-insights/keywords.php` | Normalising (plurals, dots, punctuation), language (en / hi / hinglish), roles, the one-time seed from `data/search-insights-seed.json`, and the daily role sync from Rank Math (items, terms; listings only mark entities) and AW Sourcing (Include list). |
+| `includes/search-insights/gsc.php` | Search Console by calendar day: one call per day and dimension set (total, query, query + page, page; through `aw_sd_query()`); `aw_si_page_metrics( $paths, $days )` gives clicks, impressions and position per page path from the page rows (hidden searches included), the last 4 days again each morning, a backfill to 90 days of up to 15 days per run within a 50-second budget (its position saved after each day), a "truncated" flag at 5,000 rows. |
+| `includes/search-insights/compute.php` | 28-day figures from daily rows, previous 28 days, latest live check, owning page, conflicts, priority (keyword-map rule), status and suggested action. |
+| `includes/search-insights/rollup.php` | Daily rows older than 90 days become monthly rows (sums, impression-weighted position, last value for indexes). |
+| `includes/search-insights/cron.php` | `aw_si_daily` 07:10 IST and `aw_si_rollup` 23:30 IST. |
+| `includes/search-insights/health.php` | Site Health test "Search Insights sources fresh". |
+| `includes/search-insights/admin.php` | The screen: Overview (postboxes), Keywords, Searches (`aw_sd_screen( true )`; the old `aw-search-demand` address 301s to this tab), tabs from other plugins (filter `aw_si_tabs`, actions `aw_si_load_tab_{key}` and `aw_si_tab_{key}`), Settings (run now, delete data). |
+| `includes/search-insights/class-aw-si-keywords-table.php` | Keywords list table: views, filters, search, sorting, priority overrides. |
+| `includes/search-insights/searches.php` | What the Searches tab (the Search demand screen) reads from the keyword table: its targets ("Our target?") and Gaps. The hard-coded 15 Oct map (`aw_sd_static()`) is gone. |
+| `includes/search-insights/dryrun.php` | `aw_si_dry_report()`: builds the keyword table in memory (seed, Rank Math, Sourcing, Search Console for one day and 28 days) with the daily rule (`aw_si_decide()`), and reports rows per table and source and what each tab would show. Writes nothing. |
+| `includes/search-insights/cli.php` | `wp aw-si status | dry-run | run | rollup | delete-data`. `dry-run` writes nothing. |
+| `data/search-insights-seed.json` | The seed, built once by `tools/search-insights/build_seed.py` from `docs/seo/keyword-map.md` and `docs/seo/rankings-2026-10-21.csv`. |
