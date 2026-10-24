@@ -19,9 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_sourcing_health_test() {
 	$hb    = (array) get_option( 'aw_ingest_heartbeat', array() );
 	$probs = array_intersect_key( aw_ingest_problems(), array_flip( array( 'no_run', 'quiet', 'sources' ) ) ); // scheduled tasks have their own test
-	// No News published yet at all: the watchdog's 12-hour rule needs a first published item, so the heartbeat's last
-	// run that published (or its first report) is the baseline here (Codex review, 24 Oct 2026).
-	$new_at = (int) ( $hb['last_new'] ?? 0 );
+	// No News published yet at all: the watchdog's 12-hour rule needs a first published item, so the workers' first
+	// report is the baseline here (first_run; last_new for heartbeats from before it existed). last_new alone moves on
+	// whenever any other type publishes (Codex review, 24 Oct 2026).
+	$new_at = (int) ( $hb['first_run'] ?? $hb['last_new'] ?? 0 );
 	if ( ! isset( $probs['quiet'] ) && ! aw_newest_published_news() && $new_at && time() - $new_at >= 12 * HOUR_IN_SECONDS ) {
 		$probs['quiet'] = sprintf( 'No News has been published yet; the workers have reported runs since %s.', wp_date( 'j M Y, g:i a', $new_at ) );
 	}
