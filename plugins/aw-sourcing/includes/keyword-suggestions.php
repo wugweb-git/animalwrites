@@ -171,7 +171,8 @@ add_action(
 		echo '<h2 id="aw-suggestions">Suggestions from Search Insights</h2>';
 		$done = sanitize_key( $_GET['suggested'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( $done ) {
-			$n   = (int) ( $_GET['n'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+			$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			/* translators: %d: number of searches or suggestions. */
 			$msg = array(
 				'include' => _n( '%d search added to Include. The workers search it from their next run.', '%d searches added to Include. The workers search them from their next run.', $n ),
 				'exclude' => _n( '%d search added to Exclude.', '%d searches added to Exclude.', $n ),
