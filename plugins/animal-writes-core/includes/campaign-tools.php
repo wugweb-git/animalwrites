@@ -533,13 +533,15 @@ add_shortcode(
 				. wp_get_attachment_image( $art, 'full', false, array( 'alt' => '', 'sizes' => '100vw', 'loading' => 'lazy', 'decoding' => 'async' ) )
 				. '</picture>';
 		}
-		$out  = '<section class="aw-camp aw-camp-band' . ( $pic ? ' has-art' : '' ) . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '>' . $pic . '<div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
+		$out  = '<section class="aw-camp aw-camp-band' . ( $pic ? ' has-art' : '' ) . ( $a['theme'] ? ' aw-camp--' . sanitize_html_class( $a['theme'] ) : '' ) . '" aria-labelledby="aw-camp-band-t"' . $data . '><div class="aw-camp-band-inner"><div class="aw-camp-band-text">';
 		$out .= $a['label'] ? '<p class="aw-camp-band-pill">' . esc_html( $a['label'] ) . '</p>' : '';
 		$out .= '<h2 id="aw-camp-band-t" class="aw-camp-band-title">' . esc_html( $a['title'] ? $a['title'] : get_the_title( $post ) ) . '</h2>';
 		$out .= $a['text'] ? '<p>' . esc_html( $a['text'] ) . '</p>' : '';
 		$out .= $window;
 		$out .= '<p class="aw-camp-band-actions"><a class="wp-element-button" data-track="home_campaign_click" href="' . esc_url( $url . '#send' ) . '">' . esc_html( $a['button'] ) . '</a> <a class="wp-element-button aw-camp-band-ghost" href="' . esc_url( $url . '#rules' ) . '" data-track="home_campaign_click">' . esc_html( $a['link'] ) . '</a></p>';
-		$out .= '</div></div>';
+		// The artwork comes after the text: it is pinned to the band's bottom below 1200, so placed first it moved down while the
+		// browser was still reading the text after the first paint (CLS 0.1 at 768, 24 Oct 2026). Same look: z-index orders them.
+		$out .= '</div></div>' . $pic;
 		return $out . '</section>';
 	}
 );
