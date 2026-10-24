@@ -480,7 +480,7 @@ function aw_item_more_card( $pid ) {
 	}
 	$ts   = aw_item_date_ts( $pid );
 	$line = wp_strip_all_tags( (string) get_the_excerpt( $pid ) );
-	return '<li><article class="kit-card aw-more-card">' . aw_item_card_media( $pid ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $ts ? aw_date( $ts ) : '' ) . '</p>'
+	return '<li><article class="kit-card aw-more-card">' . aw_item_card_media( $pid ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="aw-more-title"><a href="' . esc_url( get_permalink( $pid ) ) . '">' . esc_html( get_the_title( $pid ) ) . '</a></h3>'
 		. ( '' !== $line ? '<p class="aw-more-line">' . esc_html( $line ) . '</p>' : '' ) . '</div></article></li>';
 }

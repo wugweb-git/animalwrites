@@ -469,7 +469,7 @@ function aw_listing_press_card( $pid ) {
 	$ext  = 'aw_press' === $type;
 	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
 	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
-	return '<li><article class="kit-card aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . ( $ts ? aw_date( $ts ) : '' ) . '</p>'
+	return '<li><article class="kit-card aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="aw-more-body"><p class="aw-more-meta kit-meta-row">' . ( $ts ? aw_date( $ts ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
 }
 
@@ -543,7 +543,7 @@ function aw_block_listing_campaigns( $a, $id ) {
 	$cards = '';
 	foreach ( $roles as $c => $role ) {
 		$chip   = '<span class="kit-tag aw-camp-role">' . esc_html( $role ) . '</span>';
-		$cards .= preg_replace( '/(<p class="aw-more-meta kit-meta-row">)/', '$1' . $chip, aw_item_more_card( $c ), 1 );
+		$cards .= preg_replace( '#(<p class="aw-more-meta kit-meta-row">.*?)(</p>)#s', '$1' . $chip . '$2', aw_item_more_card( $c ), 1 ); // after the date: the date always comes first
 	}
 	/* translators: %s: organisation. */
 	return '<section class="aw-more-group aw-listing-campaigns" aria-labelledby="aw-camps-h"><h2 class="aw-more-head has-x-large-font-size" id="aw-camps-h">' . esc_html( sprintf( __( 'Campaigns with %s', 'animal-writes-core' ), get_the_title( $id ) ) ) . '</h2><ul class="aw-more-list">' . $cards . '</ul></section>';
