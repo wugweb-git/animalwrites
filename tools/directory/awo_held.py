@@ -50,6 +50,7 @@ def main(awo_dir, held_csv, listings_file):
         for p in l.get("phones") or []:
             by_phone.setdefault(digits(p), set()).add(l["id"])
     remainder = []
+    decisions = []
     held = list(csv.DictReader(open(held_csv, encoding="utf-8")))
     for h in held:
         o = orgs[h["awo_id"]]
@@ -61,6 +62,7 @@ def main(awo_dir, held_csv, listings_file):
 
         def park(why, lid=0):
             remainder.append(dict(h, decision="owner", reason=why, awo_phone=phone, listing_phones=" ".join((L.get(lid) or {}).get("phones") or [])))
+            decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "owner", "listing": lid or "", "listing_title": (L.get(lid) or {}).get("title", h["existing_listing_title"]), "reason": why + (" (listing phones: " + " ".join((L.get(lid) or {}).get("phones") or []) + ")" if (L.get(lid) or {}).get("phones") else "")})
 
         if "a post" in h["why_held"]:
             park("a post, not an organisation")
@@ -86,6 +88,7 @@ def main(awo_dir, held_csv, listings_file):
             if phone and not l["phones"]:
                 fields["phone"] = phone
             rep.match(fields, dict(sample, listing=target, listing_title=l["title"], why=why))
+            decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "merge", "listing": target, "listing_title": l["title"], "reason": why})
             continue
         l = L.get(lid) or {}
         if not phone or not l.get("phones"):
@@ -113,6 +116,7 @@ def main(awo_dir, held_csv, listings_file):
                  "content": f"{name} is an animal welfare organisation in {where}. It is listed in the AWO List compiled by Saumya Garg (December 2023 to January 2025).{told}",
                  "source_name": SOURCE_NAME, "source_url": "", "source_date": SOURCE_DATE, "data_source": "awol"},
                 dict(sample, name=name, district=dname, why="phones differ"))
+        decisions.append({"awo_id": h["awo_id"], "awo_name": o["name"], "district": o["district"], "awo_phone": phone, "decision": "add as new", "listing": "", "listing_title": "", "reason": "phones differ, names share nothing (held against " + l.get("title", "") + ")"})
     rep.write()
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "out", "awol-held.remainder.csv")
     if remainder:
@@ -120,6 +124,10 @@ def main(awo_dir, held_csv, listings_file):
             w = csv.DictWriter(f, fieldnames=list(remainder[0].keys()))
             w.writeheader()
             w.writerows(remainder)
+    with open(os.path.join(os.path.dirname(out), "awol-held.decisions.csv"), "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(decisions[0].keys()))
+        w.writeheader()
+        w.writerows(decisions)
     print(f"held {len(held)}: merge {sum(1 for r in rep.rows if 'post_id' in r)}, new {sum(1 for r in rep.rows if 'key' in r)}, owner {len(remainder)} ({out})")
 
 
