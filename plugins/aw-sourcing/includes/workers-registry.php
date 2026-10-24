@@ -161,4 +161,13 @@ const AW_WORKERS = array(
 		'needs_input'  => true,
 		'late_after_h' => null,
 	),
+	'search-insights.yml'      => array(
+		'name'         => 'Search Insights: rising terms',
+		'what'         => 'Rising terms for Tools → Search Insights → Rising: Trends trending now, Wikipedia and GDELT daily; autocomplete and Trends related weekly; Trends interest monthly',
+		'crons'        => array( '40 2 * * *', '0 3 * * 1', '30 3 1 * *' ),
+		'interval_min' => 1440,
+		'timeout_min'  => 30,
+		'runnow'       => array( 'dry_run' => 'false' ),
+		'late_after_h' => 36,
+	),
 );
