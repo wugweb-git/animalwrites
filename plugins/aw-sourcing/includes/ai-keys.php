@@ -771,14 +771,15 @@ function aw_ai_keys_screen() {
 	$listed = sanitize_key( $_GET['listed'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( $listed ) {
 		$n   = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		/* translators: %d: number of keys. */
 		$msg = array(
+			/* translators: %d: number of keys. */
 			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Settings → Sourcing → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Settings → Sourcing → Change log.', $n ),
+			/* translators: %d: number of keys. */
 			'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n ),
 			'up'      => 'Moved up. The workers try the keys from the top down.',
 			'down'    => 'Moved down. The workers try the keys from the top down.',
 		);
-		echo 'none' === $listed && isset( $_GET['paged'] ) ? '' : ( isset( $msg[ $listed ] ) && $n
+		echo 'none' === $listed && isset( $_GET['paged'] ) ? '' : ( isset( $msg[ $listed ] ) && $n // phpcs:ignore WordPress.Security.NonceVerification -- display only
 			? '<div class="notice notice-success is-dismissible"><p>' . esc_html( sprintf( $msg[ $listed ], $n ) ) . '</p></div>'
 			: '<div class="notice notice-warning is-dismissible"><p>Nothing changed: choose an action and at least one key.</p></div>' ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
