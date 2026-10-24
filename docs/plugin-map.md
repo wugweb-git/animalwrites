@@ -54,6 +54,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 |---|---|
 | `aw-sourcing.php` | Loader only (no functions): the include order sets the Settings → Sourcing tab order. |
 | `includes/sourcing-policy.php` | Settings → Sourcing (`options-general.php?page=aw-sourcing`): Publishers (allow / neutral / block, short names), Keywords (Include, Animal, Context, Exclude in option aw_relevance), Change log; the gate (aw_sourcing_gate), aw_has_term, GET sourcing-policy for the workers, the Publisher column and "Block host" row action. From Kits Core. |
+| `includes/class-aw-sourcing-publishers-table.php` | Settings → Sourcing → Publishers as a core list table: views by status, search, sortable columns, pagination (screen option, 50 a page), row actions Allow / Neutral / Block, bulk status, short names edited in place. Posts to the same save handler (aw_sourcing, tab publishers) with the list table's nonce. |
 | `includes/sourcing-lists.php` | Tabs News feeds, Library sources, Opportunity sources, Press, Categories, Sections and the "Workers use these lists" switch (option aw_sources). |
 | `includes/summary-rules-admin.php` | GET summary-rules for the workers and the Summary rules tab. |
 | `includes/relevance.php` | AI relevance verdicts, the Rejected tab (aw_relevance_rejected), the ingest heartbeat and hourly watchdog (aw_ingest_watchdog). |
