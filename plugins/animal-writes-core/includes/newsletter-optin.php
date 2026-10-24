@@ -44,9 +44,9 @@ function aw_nl_not_subscribed() {
 		}
 		$rows[ $email ] = array( 'name' => (string) $name, 'email' => $email, 'source' => $source, 'date' => substr( (string) $date, 0, 10 ) );
 	};
-	if ( function_exists( 'aw_vol_table' ) ) {
-		foreach ( (array) $wpdb->get_results( 'SELECT name, email, source, created_at FROM ' . aw_vol_table() . " WHERE status <> 'deleted' ORDER BY created_at DESC", ARRAY_A ) as $r ) { // phpcs:ignore
-			$add( $r['email'], $r['name'], 'volunteer (' . $r['source'] . ')', $r['created_at'] );
+	if ( function_exists( 'aw_crm_volunteers' ) ) { // FluentCRM is the volunteers table (owner, 24 Oct 2026)
+		foreach ( aw_crm_volunteers() as $r ) {
+			$add( $r['email'], $r['name'], 'volunteer (' . ( '' !== $r['vol_source'] ? $r['vol_source'] : 'FluentCRM' ) . ')', '' !== $r['joined'] ? $r['joined'] : $r['created_at'] );
 		}
 	}
 	foreach ( get_posts( array( 'post_type' => array( 'aw_message', 'aw_claim' ), 'post_status' => 'any', 'numberposts' => -1 ) ) as $p ) {

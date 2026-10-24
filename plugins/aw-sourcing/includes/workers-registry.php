@@ -153,4 +153,12 @@ const AW_WORKERS = array(
 		'needs_input'  => true,
 		'late_after_h' => null,
 	),
+	'darpan-import.yml'        => array(
+		'name'         => 'NGO Darpan import',
+		'what'         => 'Imports NGO Darpan CSVs downloaded by the owner into Directory → Enrichment review, after name, state and district checks',
+		'crons'        => array(),
+		'timeout_min'  => 60,
+		'needs_input'  => true,
+		'late_after_h' => null,
+	),
 );
