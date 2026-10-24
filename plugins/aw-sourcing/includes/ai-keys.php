@@ -417,7 +417,7 @@ function aw_ai_check( array $row ): array {
 		}
 	}
 	$row['checked'] = time();
-	$was            = array( $row['provider'] ?? '', $row['model'] ?? '' ); // the model saved on the row is tried first, so a check keeps the owner's choice (22 Oct 2026)
+	// Only the provider's listed (free) models are tried, in order; a model saved on the row is not, so a paid one can never come back (owner, 25 Oct 2026).
 	foreach ( $order as $id ) {
 		list( $code ) = aw_ai_call( $id, $key, '', false );
 		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) && ! in_array( $id, $strong, true ) ) {
@@ -427,9 +427,6 @@ function aw_ai_check( array $row ): array {
 		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
 		$row['status']   = 'no-model';
 		$models          = AW_AI_PROVIDERS[ $id ][3];
-		if ( $id === $was[0] && '' !== $was[1] && ! in_array( $was[1], $models, true ) ) { // a model from the list keeps the list's order, so free models stay first
-			array_unshift( $models, $was[1] );
-		}
 		$no_credit = false;
 		foreach ( array_unique( $models ) as $model ) {
 			list( $code, $body, $headers ) = aw_ai_call( $id, $key, $model );
