@@ -75,8 +75,12 @@ function aw_sourcing_kw_worker_rows() {
  * @return array{strong: string[], animal: string[], context: string[], exclude: string[]}
  */
 function aw_sourcing_kw_lists() {
-	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array() );
-	$map = array( 'strong' => AW_KW_ROLE_INCLUDE, 'animal' => AW_KW_ROLE_ANIMAL, 'context' => AW_KW_ROLE_CONTEXT, 'exclude' => AW_KW_ROLE_EXCLUDE );
+	$out = wp_cache_get( 'lists', 'aw_kw' );
+	if ( is_array( $out ) ) {
+		return $out;
+	}
+	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'search' => array() );
+	$map = array( 'strong' => AW_KW_ROLE_INCLUDE, 'animal' => AW_KW_ROLE_ANIMAL, 'context' => AW_KW_ROLE_CONTEXT, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH );
 	foreach ( aw_sourcing_kw_worker_rows() as $r ) {
 		foreach ( $map as $k => $bit ) {
 			if ( $r['roles'] & $bit ) {
@@ -84,6 +88,7 @@ function aw_sourcing_kw_lists() {
 			}
 		}
 	}
+	wp_cache_set( 'lists', $out, 'aw_kw', HOUR_IN_SECONDS );
 	return $out;
 }
 
@@ -91,8 +96,12 @@ function aw_sourcing_kw_lists() {
 
 add_action(
 	'aw_kw_saved',
-	function () {
+	function ( $id = 0, $changed = null ) {
+		if ( array( 'dismissed' ) === $changed ) { // a suggestion dismissed or shown again: nothing the workers or the old lists read
+			return;
+		}
 		wp_cache_delete( 'worker_rows', 'aw_kw' );
+		wp_cache_delete( 'lists', 'aw_kw' );
 		delete_transient( 'aw_sourcing_kw_stats_30' );
 		if ( aw_sourcing_kw_on() && ! has_action( 'shutdown', 'aw_sourcing_kw_write_mirrors' ) ) {
 			add_action( 'shutdown', 'aw_sourcing_kw_write_mirrors', 1 ); // once per request, after every change
@@ -100,7 +109,9 @@ add_action(
 		if ( aw_sourcing_kw_on() && function_exists( 'aw_sources_sync_soon' ) ) {
 			aw_sources_sync_soon(); // sources.yaml gets the keywords too (a spelling change leaves the old lists as they are)
 		}
-	}
+	},
+	10,
+	2
 );
 
 /**
@@ -221,10 +232,14 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 	}
 	$name = $old['label'];
 	$log  = array();
+	$fail = function ( $err ) use ( &$log ) { // what was written before the refusal is still logged
+		kits_sourcing_log_many( $log );
+		return $err;
+	};
 	if ( isset( $set['lang'] ) && $set['lang'] !== $old['lang'] && 'en' === $set['lang'] ) { // to English first, so roles can follow
 		$r = aw_kw_update( $id, array( 'lang' => 'en' ) );
 		if ( is_wp_error( $r ) ) {
-			return $r;
+			return $fail( $r );
 		}
 		$log[] = array( 'keywords', "$name: language", $old['lang'], 'en' );
 	}
@@ -234,7 +249,7 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 		if ( $want !== $has ) {
 			$r = aw_kw_set_roles( $id, $want & ~$has, $has & ~$want );
 			if ( is_wp_error( $r ) ) {
-				return $r;
+				return $fail( $r );
 			}
 			$log[] = array( 'keywords', "$name: roles", aw_sourcing_kw_role_names( $has ), aw_sourcing_kw_role_names( $want ) );
 		}
@@ -242,7 +257,7 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 	if ( isset( $set['lang'] ) && $set['lang'] !== $old['lang'] && 'en' !== $set['lang'] ) { // away from English: after the roles went
 		$r = aw_kw_update( $id, array( 'lang' => $set['lang'] ) );
 		if ( is_wp_error( $r ) ) {
-			return $r;
+			return $fail( $r );
 		}
 		$log[] = array( 'keywords', "$name: language", $old['lang'], $set['lang'] );
 	}
@@ -284,8 +299,10 @@ function aw_sourcing_kw_add( $label, array $set ) {
 	if ( '' === aw_si_norm( $label ) ) {
 		return new WP_Error( 'aw_kw_empty', 'Type a keyword.' );
 	}
-	$was = aw_kw_id_by_norm( aw_si_norm( $label ) );
-	$id  = aw_kw_create( $label );
+	$was  = aw_kw_id_by_norm( aw_si_norm( $label ) );
+	$lang = isset( $set['lang'] ) && in_array( $set['lang'], array( 'en', 'hi', 'hinglish' ), true ) ? $set['lang'] : null;
+	unset( $set['lang'] ); // a new record's language; an existing record keeps its own (changed on its edit screen)
+	$id = aw_kw_create( $label, null === $lang ? array() : array( 'lang' => $lang ) );
 	if ( ! $id ) {
 		return new WP_Error( 'aw_kw_failed', 'The keyword could not be saved.' );
 	}
@@ -330,12 +347,15 @@ add_action(
 				'variants'   => sanitize_textarea_field( wp_unslash( $_POST['kw_variants'] ?? '' ) ),
 				'categories' => aw_sourcing_kw_cat_slugs( (array) wp_unslash( $_POST['post_category'] ?? array() ) ),
 				'sections'   => array_values( array_intersect( array_map( 'sanitize_key', (array) wp_unslash( $_POST['kw_sections'] ?? array() ) ), array_keys( aw_sourcing_kw_sections() ) ) ),
-				'search_on'  => empty( $_POST['kw_search_on'] ) ? 0 : 1,
 			);
+			if ( 'edit' === $op ) {
+				$set['search_on'] = empty( $_POST['kw_search_on'] ) ? 0 : 1; // the add form has no switch: a new record's search is on, an existing one's stays
+			}
 			if ( 'edit' === $op ) {
 				$lang         = sanitize_key( wp_unslash( $_POST['kw_lang'] ?? 'en' ) );
 				$set['lang']  = in_array( $lang, array( 'en', 'hi', 'hinglish' ), true ) ? $lang : 'en';
-				$set['query'] = trim( sanitize_text_field( wp_unslash( $_POST['kw_query'] ?? '' ) ) );
+				$q            = trim( (string) wp_unslash( $_POST['kw_query'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized next, as an address or as words
+				$set['query'] = preg_match( '#^https?://#i', $q ) ? esc_url_raw( $q ) : sanitize_text_field( $q ); // an address keeps its %XX
 				if ( ! empty( $_POST['kw_delete'] ) ) { // the edit screen's Delete: the Sourcing and Press roles go; the record stays for Search Insights
 					$set = array( 'roles' => 0 );
 				}
@@ -350,10 +370,16 @@ add_action(
 			if ( ! $set['roles'] ) {
 				$err = 'Choose at least one role.';
 			} else {
-				$set['search_on'] = 1;
-				$r                = aw_sourcing_kw_add( sanitize_text_field( wp_unslash( $_POST['kw_label'] ?? '' ) ), $set );
-				$err              = is_wp_error( $r ) ? $r->get_error_message() : '';
-				$n                = $err ? 0 : 1;
+				$set['lang'] = sanitize_key( wp_unslash( $_POST['kw_lang'] ?? 'en' ) );
+				$label       = sanitize_text_field( wp_unslash( $_POST['kw_label'] ?? '' ) );
+				$r           = aw_sourcing_kw_add( $label, $set );
+				$err         = is_wp_error( $r ) ? $r->get_error_message() : '';
+				$n           = $err ? 0 : 1;
+				$there       = $err ? aw_kw_id_by_norm( aw_si_norm( $label ) ) : 0;
+				if ( $there ) { // refused on a record that exists (its language, say): open it, where it can be corrected
+					wp_safe_redirect( add_query_arg( array( 'edit' => $there, 'kw_err' => rawurlencode( $err ) ), $base ) );
+					exit;
+				}
 			}
 			wp_safe_redirect( add_query_arg( $err ? array( 'kw_err' => rawurlencode( $err ) ) : array( 'kw_done' => 'added', 'kw_n' => $n ), $back ) );
 			exit;
@@ -453,6 +479,7 @@ function aw_sourcing_kw_tab() {
 	wp_nonce_field( 'aw_sourcing_kw_add' );
 	echo '<div class="form-field form-required"><label for="aw-kw-label">Keyword</label><input type="text" id="aw-kw-label" name="kw_label" required aria-required="true" aria-describedby="aw-kw-label-description"><p id="aw-kw-label-description">English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog".</p></div>';
 	echo '<div class="form-field"><label for="aw-kw-variants">Other spellings</label><textarea id="aw-kw-variants" name="kw_variants" rows="3" aria-describedby="aw-kw-variants-description"></textarea><p id="aw-kw-variants-description">One per line. A trailing * matches the start of a word (steriliz* matches sterilized and sterilization).</p></div>';
+	echo '<div class="form-field"><label for="aw-kw-lang">Language</label><select id="aw-kw-lang" name="kw_lang"><option value="en">English</option><option value="hinglish">Hinglish</option><option value="hi">Hindi</option></select><p>Sourcing and Press roles are for English keywords only.</p></div>';
 	echo '<fieldset class="form-field"><legend>Roles</legend>';
 	$pre = array( 'include' => AW_KW_ROLE_INCLUDE, 'animal' => AW_KW_ROLE_ANIMAL, 'context' => AW_KW_ROLE_CONTEXT, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH, 'press' => AW_KW_ROLE_PRESS, 'category' => AW_KW_ROLE_CATEGORY )[ $view ] ?? 0;
 	foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
@@ -550,11 +577,11 @@ add_action(
 			return;
 		}
 		if ( 'categories' === $tab ) { // categories are WordPress's own; their keywords show in the Keywords column there
-			wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=category' ), 301 );
+			wp_safe_redirect( admin_url( 'edit-tags.php?taxonomy=category' ) ); // 302: a rollback to phase 1 brings the old tab back
 			exit;
 		}
 		if ( 'press' === $tab ) {
-			wp_safe_redirect( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&view=press' ), 301 );
+			wp_safe_redirect( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&view=press' ) );
 			exit;
 		}
 		if ( 'keywords' !== $tab || 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ) ) {

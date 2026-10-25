@@ -61,7 +61,7 @@ function aw_sourcing_suggestions() {
 		return null;
 	}
 	$rel       = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance();
-	$words     = array_merge( (array) ( $rel['strong'] ?? array() ), (array) ( $rel['exclude'] ?? array() ) );
+	$words     = array_merge( (array) ( $rel['strong'] ?? array() ), (array) ( $rel['exclude'] ?? array() ), (array) ( $rel['search'] ?? array() ) ); // a Search keyword covers it too (phase 2)
 	$dismissed = array_flip( aw_sourcing_dismissed() );
 	$dis_norm  = array_flip( array_map( 'aw_si_norm', array_keys( $dismissed ) ) );
 	$out       = array();
@@ -145,7 +145,10 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'bulk-suggestions' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$ops = array( 'include', 'exclude', 'search', 'dismiss', 'restore' );
+		if ( aw_sourcing_phase() >= 2 && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phase 2 before the table is ready: never the old lists
+			wp_die( 'The keyword table is not ready yet. Open Settings → Sourcing again in a moment.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
+		}
+		$ops = array_merge( array( 'include', 'exclude' ), function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? array( 'search' ) : array(), array( 'dismiss', 'restore' ) );
 		$op  = '';
 		$qs  = array();
 		$one = sanitize_text_field( wp_unslash( $_POST['aw_suggest'] ?? '' ) ); // a row action: "op:search"

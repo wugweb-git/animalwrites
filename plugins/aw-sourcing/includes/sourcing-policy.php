@@ -306,7 +306,7 @@ add_action(
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && ! in_array( sanitize_key( $_GET['view'] ?? '' ), array( 'feeds', 'relay-log' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds and Relay log views have their own
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
-		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
+		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phase 2: keywords-admin.php // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 		}
 	}
