@@ -252,7 +252,7 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	$ignored = array();
 
-	// Categories: only those the item's section uses (Settings → Sourcing → Sections).
+	// Categories: only those the item's section uses (Sourcing → Sections).
 	$cats    = array_values( array_unique( array_map( 'sanitize_title', array_filter( (array) $req->get_param( 'categories' ), 'is_scalar' ) ) ) );
 	$allowed = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : $cats;
 	foreach ( array_diff( $cats, $allowed ) as $bad ) {
@@ -335,7 +335,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	if ( 'research' === $req->get_param( 'type' ) ) {
 		$tags[] = 'research';
 	}
-	// Tags: only those the item's section uses (Settings → Sourcing → Sections); unknown ones are ignored.
+	// Tags: only those the item's section uses (Sourcing → Sections); unknown ones are ignored.
 	$allowed = function_exists( 'aw_section_tags' ) ? aw_section_tags( $type ) : array();
 	$tags    = array_values( array_unique( array_map( 'sanitize_title', array_filter( $tags, 'is_scalar' ) ) ) );
 	// A campaign is not a tag (owner, 20 Oct 2026): campaign-* slugs file the item under its campaign (campaign-links.php).

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Workers: the workflow registry (no functions, so the Deploy check can load it alone).
+ * Sourcing → Workers: the workflow registry (no functions, so the Deploy check can load it alone).
  *
  * @package aw-sourcing
  */

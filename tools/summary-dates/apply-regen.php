@@ -2,7 +2,7 @@
 /**
  * Publication dates in summaries, second pass (owner, 15 Oct 2026): a summary left shorter than its search description
  * after a date or an empty sentence came out is written again from its source under the summary rules ("regen"), or,
- * when the source gives too little or can't be read, waits in Inbox → To review with the reason ("review"). Never padded.
+ * when the source gives too little or can't be read, waits in Sourcing → To review with the reason ("review"). Never padded.
  *
  *   AW_PLAN=~/plan.json [AW_APPLY=1] wp eval-file tools/summary-dates/apply-regen.php
  *
@@ -10,7 +10,7 @@
  * regen: the previous summary goes to aw_summary_history, the new one is written straight to the row (post_excerpt
  * only), so post_date and post_modified never change; the automatic search description follows.
  * review: the summary stays as it is; the item goes to pending (straight to the row, no date moves) with aw_review
- * "held: …", so it shows in Inbox → To review.
+ * "held: …", so it shows in Sourcing → To review.
  *
  * @package animal-writes-core
  */

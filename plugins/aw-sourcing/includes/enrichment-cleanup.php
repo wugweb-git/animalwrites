@@ -2,7 +2,7 @@
 /**
  * Directory clean-up proposals (owner, 25 Oct 2026): the Directory worker's clean-up pass (animal-writes-workers,
  * aw_workers/directory/cleanup.py) sends two kinds of proposal through aw/v1/enrich/results, and they are reviewed in
- * Directory → Enrichment review like every other value.
+ * Sourcing → Enrichment review like every other value.
  *
  * - place = {state, district} (LGD codes), from the listing's own PIN code (India Post) or address. It fills an
  *   empty place only: a listing with no state, or a state and no district, when the proposed district is in that

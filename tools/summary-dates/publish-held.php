@@ -1,6 +1,6 @@
 <?php
 /**
- * Publish items held in Inbox → To review only because their summary is short or the source thin (owner, 15 Oct 2026:
+ * Publish items held in Sourcing → To review only because their summary is short or the source thin (owner, 15 Oct 2026:
  * "just publish them for now"; the rewrite comes later, from short-2026-10-15/rewrite-later.json).
  *
  *   AW_IDS=1,2,3 [AW_THIN_OK=2,3] [AW_APPLY=1] wp eval-file tools/summary-dates/publish-held.php

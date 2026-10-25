@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
+ * Sourcing, the one place for what the workers fetch (S3, 8 Oct 2026). Kits Core gives the screen with
  * Sources (publishers and press sites), Keywords (the one word list) and the Change log; this adds Feeds (one list of the
  * News feeds: RSS and Google News queries, Library sources: AWBI, PIB, Gazette, courts, and Opportunity sources),
  * Press-discovery queries (Settings API), and registers the Categories and Sections tabs, whose core list-table screens
@@ -108,26 +108,23 @@ add_filter(
 	'kits_sourcing_title_action',
 	function ( $add ) {
 		if ( function_exists( 'aw_sourcing_sources_screen' ) && 'feeds' === aw_sourcing_sources_screen() ) { // Sources → Feeds
-			$add['sources'] = array( 'Add New Feed', admin_url( 'options-general.php?page=aw-sourcing&tab=sources&feed=new' ) );
+			$add['sources'] = array( 'Add New Feed', admin_url( 'admin.php?page=aw-sourcing&tab=sources&feed=new' ) );
 		}
 		return $add;
 	}
 );
 
-/** "Workers use these lists" switch, on every tab. */
+/** "Workers use these lists" switch, on Sourcing → Settings (admin-menu.php; it was on top of every tab until 25 Oct 2026). */
+function aw_sources_live_switch() {
+	$c = aw_sources_config();
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+	wp_nonce_field( 'aw_sourcing' );
+	echo '<input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="settings">'
+		. '<p><strong>Workers use these lists:</strong> ' . ( empty( $c['live'] ) ? 'off (they use sources.yaml in the workers repository)' : 'on (read at the start of every run)' ) . ' '
+		. '<button class="button" name="live" value="' . ( empty( $c['live'] ) ? '1' : '0' ) . '">' . ( empty( $c['live'] ) ? 'Turn on' : 'Turn off' ) . '</button></p></form>';
+}
 add_action(
-	'kits_sourcing_page_top',
-	function () {
-		$c = aw_sources_config();
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-		wp_nonce_field( 'aw_sourcing' );
-		echo '<input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="live">'
-			. '<p><strong>Workers use these lists:</strong> ' . ( empty( $c['live'] ) ? 'off (they use sources.yaml in the workers repository)' : 'on (read at the start of every run)' ) . ' '
-			. '<button class="button" name="live" value="' . ( empty( $c['live'] ) ? '1' : '0' ) . '">' . ( empty( $c['live'] ) ? 'Turn on' : 'Turn off' ) . '</button></p></form>';
-	}
-);
-add_action(
-	'kits_sourcing_save_live',
+	'kits_sourcing_save_settings',
 	function () {
 		$c         = aw_sources_config();
 		$c['live'] = ! empty( $_POST['live'] ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
@@ -213,8 +210,8 @@ function aw_sources_edit_form( $id, $type, $host = '' ) {
 	$new  = 'new' === $id;
 	$home = $new ? $host : ( $src ? aw_src_source_host( $src ) : '' );
 	$back = '' !== $home && ! empty( $_GET['host'] ) // phpcs:ignore WordPress.Security.NonceVerification -- opened from a source's screen
-		? add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $home ) ), admin_url( 'options-general.php' ) )
-		: admin_url( 'options-general.php?page=aw-sourcing&tab=sources&view=feeds' );
+		? add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $home ) ), admin_url( 'admin.php' ) )
+		: admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' );
 	if ( ! $new && ! $src ) {
 		echo '<div class="notice notice-error inline"><p>No such feed.</p></div><p><a href="' . esc_url( $back ) . '">Back to Feeds</a></p>';
 		return;
@@ -259,7 +256,7 @@ function aw_sources_edit_form( $id, $type, $host = '' ) {
 
 // Screen options: sources per page (Sources → Feeds).
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( 'sources' === sanitize_key( $_GET['tab'] ?? '' ) && 'feeds' === sanitize_key( $_GET['view'] ?? '' ) && empty( $_GET['feed'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_sources_per_page' ) );
@@ -333,7 +330,7 @@ function aw_sources_list_action() {
 
 /** After a list action: back to the same view, search and page; "Saved" only when something changed. */
 function aw_sources_list_back( $changed ) {
-	$back = remove_query_arg( array( 'updated', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing' ) );
+	$back = remove_query_arg( array( 'updated', 'paged' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-sourcing' ) );
 	$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked by the Kits save handler
 	$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 	wp_safe_redirect( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
@@ -455,10 +452,10 @@ add_action(
 			function () {
 				aw_sourcing_settings_marker( 'aw_sources', 'press' );
 				if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the queries are the Press keywords below
-					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in Inbox → Press to review.</p>';
+					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in Sourcing → To review.</p>';
 					return;
 				}
-				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Inbox → Press to review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
+				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Sourcing → To review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
 			},
 			'aw-sourcing-press'
 		);

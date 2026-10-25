@@ -4,10 +4,10 @@
  * but answer this server. The workers ask GET aw/v1/relay?url=... and get the page or feed as this server sees it.
  *
  * Limits: the workers' login only (an application password), hosts on the allow list (since phase 1 of the sourcing
- * restructure, 25 Oct 2026: the "Fetch through this site (relay)" switch on each source in Settings → Sourcing → Sources),
+ * restructure, 25 Oct 2026: the "Fetch through this site (relay)" switch on each source in Sourcing → Sources),
  * http/https, GET only. The host is resolved first and refused when any address is private, loopback, reserved or this
  * site's own; the checked address is the one connected to, and every redirect (at most 3) is checked the same way.
- * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, Sources → Relay log).
+ * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, Sourcing → Relay log).
  *
  * @package aw-sourcing
  */
@@ -221,9 +221,16 @@ add_filter(
 );
 
 /*
- * The Relay tab moved into Sources (25 Oct 2026): each source has its relay switch, and the request log is the
- * Sources → Relay log view. The old address redirects there (source-sites.php).
+ * The Relay tab moved into Sources (25 Oct 2026): each source has its relay switch. The request log is a report of its
+ * own, Sourcing → Relay log (owner, 25 Oct 2026: reports apart from settings).
  */
+add_filter(
+	'kits_sourcing_tabs',
+	function ( $tabs ) {
+		$tabs['relay-log'] = array( 'Relay log', 'aw_relay_log_view', true ); // nothing to save: its search is a GET form
+		return $tabs;
+	}
+);
 
 /*
  * The old Relay form posted to options.php (aw_sources[_aw_tab] = relay). A copy still open in another browser tab must
@@ -232,7 +239,7 @@ add_filter(
  */
 add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
 
-/** Sources → Relay log: every request the workers made through the site (last 200). */
+/** Sourcing → Relay log: every request the workers made through the site (last 200). */
 function aw_relay_log_view() {
 	$log  = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
 	$rows = array();
@@ -253,7 +260,7 @@ function aw_relay_log_view() {
 		'requests',
 		array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ),
 		$rows,
-		array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.', 'search' => 'Search requests', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'view' => 'relay-log' ) )
+		array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.', 'search' => 'Search requests', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'relay-log' ) )
 	);
 }
 

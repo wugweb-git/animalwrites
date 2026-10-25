@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Rules (sourcing restructure phase 3, owner 25 Oct 2026): one tab in three parts, from the
+ * Sourcing → Rules (sourcing restructure phase 3, owner 25 Oct 2026): one tab in three parts, from the
  * phase 3 migration on. The old Sections, Summary rules and Directory enrichment tabs redirect here.
  *
  * - Section rules (&part=sections): one row per section, the site's content types (AW_Sourcing_Sections_Table); Edit
@@ -49,7 +49,7 @@ add_action(
 	function () {
 		global $pagenow;
 		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a GET redirect, nothing saved; each value is sanitized below.
-		if ( ! aw_rules_live() || 'options-general.php' !== $pagenow || 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) || 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
+		if ( ! aw_rules_live() || 'admin.php' !== $pagenow || 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) || 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
 			return;
 		}
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
@@ -580,7 +580,7 @@ add_action(
 /* ---------- Help tabs ---------- */
 
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( ! aw_rules_live() || 'rules' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which help to show
 			return;
@@ -589,7 +589,7 @@ add_action(
 		$tabs = array(
 			'aw-rules-overview' => array( 'Rules', '<p>One place for the rules the workers follow: <strong>Section rules</strong> (which categories and tags each section uses, and tag rules), <strong>Summary rules</strong> (length, structure and wording of summaries, per section) and <strong>Directory enrichment</strong> (the sources, the trust order and a rule per listing field). Every change is in the Change log with its value before and after. The workers read the rules at the start of every run; Sources sync copies them into the workers repository as their fallback.</p>' ),
 			'aw-rules-sections' => array( 'Section rules', '<p>A section is one of the site\'s content types: every public post type (not pages or media) and the ones that opt in (Media &amp; PR). A new content type shows here by itself, with every category allowed and the News summary rule.</p><p>Which categories and tags each section uses: the workers pick only from these, and each section\'s filters show only these. A section with no category ticked uses every category.</p><p><strong>Tag rules</strong> give an item a tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a "Hold when" pattern, and has none of the "Unless" words, waits for a person with the hold reason.</p>' ),
-			'aw-rules-summary'  => array( 'Summary rules', '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds a News, Library or research item whose summary is over the maximum or not plain text in Inbox → To review (the rule of any other section is read by the workers). A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence.</p><p>Each section has its rule. News, Library and Resources (research) have their own; any other section inherits News until it is given its own (untick "Inherits News").</p>' ),
+			'aw-rules-summary'  => array( 'Summary rules', '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds a News, Library or research item whose summary is over the maximum or not plain text in Sourcing → To review (the rule of any other section is read by the workers). A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence.</p><p>Each section has its rule. News, Library and Resources (research) have their own; any other section inherits News until it is given its own (untick "Inherits News").</p>' ),
 			'aw-rules-enrich'   => array( 'Directory enrichment', '<p>The enrichment worker fills empty listing details from the sources switched on here. The <strong>trust order</strong> decides between sources that disagree. <strong>Field rules</strong> list every listing field: the enrichment fields and the fields of the listing field group (Organisation details); a field added to that group in wp-admin shows here with its rule off until it is set.</p><p>A claimed or verified listing is never changed, and a low-confidence value always waits for review; otherwise each field follows its Apply rule.</p>' ),
 		);
 		foreach ( $tabs as $id => $t ) {

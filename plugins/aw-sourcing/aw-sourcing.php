@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: AW Sourcing
- * Description: What the workers fetch and how it arrives: Settings → Sourcing (sources with their feeds and relay, keywords, press queries, categories, summary rules, rejected items, enrichment, AI models), the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment), auto-review and Inbox → To review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives, in its own Sourcing menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
@@ -34,10 +34,11 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
-// The Sources model (plain functions, tested without WordPress by tests/run.php) first.
+// The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
+require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)
-// Order matters for the Settings → Sourcing tabs (Sources, Keywords, then these in this order).
+// Order matters for the Sourcing screens (Sources, Keywords, then these in this order; reports and Settings go last, menu-model.php).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-lists.php';
@@ -73,3 +74,5 @@ require_once AW_SOURCING_DIR . 'includes/keywords-admin.php'; // phase 2: Keywor
 require_once AW_SOURCING_DIR . 'includes/workers-meta.php';
 require_once AW_SOURCING_DIR . 'includes/workers-admin.php';
 require_once AW_SOURCING_DIR . 'includes/ai-provider-icons.php';
+// The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
+require_once AW_SOURCING_DIR . 'includes/admin-menu.php';

@@ -91,7 +91,7 @@ function aw_rules_url( $part = 'sections', array $args = array() ) {
 		'tab'  => 'rules',
 		'part' => $part,
 	) : array( 'tab' => $part );
-	return add_query_arg( array_merge( array( 'page' => 'aw-sourcing' ), $q, $args ), admin_url( 'options-general.php' ) );
+	return add_query_arg( array_merge( array( 'page' => 'aw-sourcing' ), $q, $args ), admin_url( 'admin.php' ) );
 }
 
 /* ---------- Summary rules by post type ---------- */

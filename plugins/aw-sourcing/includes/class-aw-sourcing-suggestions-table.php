@@ -1,6 +1,6 @@
 <?php
 /**
- * The suggestions list (Settings → Sourcing → Keywords) as a core list table. Loaded only when the tab is shown.
+ * The suggestions list (Sourcing → Keywords) as a core list table. Loaded only when the tab is shown.
  *
  * @package aw-sourcing
  */
@@ -16,7 +16,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 	private $all;
 
 	public function __construct( array $rows ) {
-		parent::__construct( array( 'singular' => 'suggestion', 'plural' => 'suggestions', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'suggestion', 'plural' => 'suggestions', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$this->all = $rows;
 	}
 
@@ -26,7 +26,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 	}
 
 	private function url( array $args = array() ) {
-		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&kw=suggestions' ) );
+		return add_query_arg( $args, admin_url( 'admin.php?page=aw-sourcing&tab=keywords&kw=suggestions' ) );
 	}
 
 	protected function get_views() {

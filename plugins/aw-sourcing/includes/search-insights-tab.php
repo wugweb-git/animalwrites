@@ -5,7 +5,7 @@
  * - "Sourcing keywords" tab (filter aw_si_tabs): per Google News search of the workers, the items it brought in over
  *   30 days, News and Library apart (aw_sourcing_keyword_stats), with the 28-day and 3-month clicks and impressions of the
  *   published items' pages from Search Insights (aw_si_page_metrics: the daily page rows, which include searches Google hides).
- * - The searches behind Settings → Sourcing → Keywords → Suggestions (filter aw_search_demand_terms): Search
+ * - The searches behind Sourcing → Keywords → Suggestions (filter aw_search_demand_terms): Search
  *   Insights' keywords with their 28-day figures, English only (owner: no Hindi or Hinglish suggestions).
  * - Soft link both ways: without aw-seo-extras (or before Search Insights is installed) the tab is not added and the
  *   suggestions get no searches; Search Insights' own screens do not depend on this file.
@@ -29,7 +29,7 @@ add_action(
 		require_once __DIR__ . '/class-aw-sourcing-si-keywords-table.php';
 		$table = new AW_Sourcing_SI_Keywords_Table( aw_sourcing_keyword_stats( 30 ) );
 		$table->prepare_items();
-		echo '<p>Each English Include word in <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) ) . '">Settings → Sourcing → Keywords</a> is a Google News search in every run. '
+		echo '<p>Each English Include word in <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=keywords' ) ) . '">Sourcing → Keywords</a> is a Google News search in every run. '
 			. '<strong>Fetched</strong>: the items it brought in over the last 30 days, whatever happened to them since (held, merged, backfilled). <strong>Published</strong>: those live now. '
 			. '<strong>Impressions and clicks</strong>: Search Console over the last 28 days and the last 3 months for the published items\' own pages, searches Google hides included. '
 			. 'Items from before 24 Oct 2026 did not record their search: they are counted by the word in their title or summary and marked estimated, and one with several of the words counts under each. Hindi Include words are not searches and are not listed.</p>';

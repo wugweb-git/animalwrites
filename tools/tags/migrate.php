@@ -13,7 +13,7 @@
  * links stay right). Slugs are already singular. One slug is in two lists: "wildlife-rescue" is a Listing type
  * (60 listings) and a Service (no listings); they mean the same, so the Listing type becomes the tag and the empty
  * Service term stays where it is (aw_service, no longer registered) until the owner says to remove it.
- * Also: each section's allowed categories and tags (Settings → Sourcing → Sections), Rank Math (Titles & Meta and
+ * Also: each section's allowed categories and tags (Sourcing → Sections), Rank Math (Titles & Meta and
  * sitemap for Tags, llms.txt, Primary Taxonomy for listings), redirects and links that used ?kind=, and each tag's
  * Rank Math title, description and robots (aw_seo_sync_tags).
  * CSVs: ~/backups/tags-before-2026-10-15.csv and ~/backups/tags-after-2026-10-15.csv.

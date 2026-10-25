@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Keywords on the keyword table (sourcing restructure phase 2, owner 25 Oct 2026). Active once
+ * Sourcing → Keywords on the keyword table (sourcing restructure phase 2, owner 25 Oct 2026). Active once
  * phase 2 is migrated (aw_sourcing_phase() >= 2); before that the old word lists show as they were.
  *
  * - The screen: the edit-tags layout. "Add New Keyword" on the left, the records with a Sourcing or Press role on
@@ -342,7 +342,7 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( $nonce ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+		$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 		$back = wp_get_referer() ? remove_query_arg( array( 'kw_done', 'kw_n', 'kw_err' ), wp_get_referer() ) : $base;
 		if ( ! aw_sourcing_kw_on() ) {
 			wp_safe_redirect( $base );
@@ -446,7 +446,7 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'k
 
 /** The Keywords tab on the table: a keyword's edit screen, or the list with the add form. */
 function aw_sourcing_kw_tab() {
-	$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+	$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 	$edit = absint( $_GET['edit'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 	$err  = sanitize_text_field( wp_unslash( $_GET['kw_err'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $err ) {
@@ -530,7 +530,7 @@ function aw_sourcing_kw_tab() {
  * @param int $id Record id.
  */
 function aw_sourcing_kw_edit_form( $id ) {
-	$back = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+	$back = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 	$r    = aw_kw_get( $id );
 	if ( ! $r ) {
 		echo '<div class="notice notice-error inline"><p>No such keyword. <a href="' . esc_url( $back ) . '">Back to Keywords</a></p></div>';
@@ -583,7 +583,7 @@ function aw_sourcing_kw_edit_form( $id ) {
 /* ---------- Screen options, help tabs, old addresses ---------- */
 
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		// phpcs:disable WordPress.Security.NonceVerification -- which screen is shown, nothing saved.
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
@@ -595,7 +595,7 @@ add_action(
 			exit;
 		}
 		if ( 'press' === $tab ) {
-			wp_safe_redirect( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&view=press' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=aw-sourcing&tab=keywords&view=press' ) );
 			exit;
 		}
 		if ( 'keywords' !== $tab || 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ) ) {
@@ -629,7 +629,7 @@ add_action(
 				'id'      => 'aw-kw-searches',
 				'title'   => 'Searches and press',
 				'content' => '<p>Each English Include keyword, and each Search keyword, is a Google News search every run (India edition, the last two days, up to 40 new items). The Items column counts what each one brought in over 30 days.</p>'
-					. '<p>Press keywords are the weekly press-discovery queries (Google News and Google Search), from the date set in the Press view. Results wait in Inbox → Press to review.</p>',
+					. '<p>Press keywords are the weekly press-discovery queries (Google News and Google Search), from the date set in the Press view. Results wait in Sourcing → To review.</p>',
 			)
 		);
 		$screen->add_help_tab(
@@ -676,7 +676,7 @@ add_filter(
 		if ( ! $t instanceof WP_Term ) {
 			return $out;
 		}
-		return '<a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&view=category&cat=' . rawurlencode( $t->slug ) ) ) . '">' . esc_html( number_format_i18n( $n ) ) . '</a>';
+		return '<a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=keywords&view=category&cat=' . rawurlencode( $t->slug ) ) ) . '">' . esc_html( number_format_i18n( $n ) ) . '</a>';
 	},
 	10,
 	3

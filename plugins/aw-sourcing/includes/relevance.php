@@ -14,9 +14,9 @@
  * - POST aw/v1/relevance-rejected  {title, source_url, reason, type, feed, model}, or {entries: [...]} for a run's
  *                                  rejections in one request → the Rejected log: option
  *                                  aw_relevance_rejected, newest first, last 500, one entry per URL. Shown under
- *                                  Settings → Sourcing → Rejected, to administrators only; never in To review.
+ *                                  Sourcing → Rejected, to administrators only; never in To review.
  *
- * Inbox → To review shows only items the check passed (or has not checked): an item whose stored verdict is "not
+ * Sourcing → To review shows only items the check passed (or has not checked): an item whose stored verdict is "not
  * relevant" is left out of the list and its counts.
  *
  * @package aw-sourcing
@@ -113,7 +113,7 @@ function aw_relevance_categories() {
 	return $out;
 }
 
-/** Each section's allowed categories and tags (Settings → Sourcing → Sections): type => {categories, tags} as slug => name. */
+/** Each section's allowed categories and tags (Sourcing → Sections): type => {categories, tags} as slug => name. */
 function aw_relevance_sections() {
 	$out   = array();
 	$names = function ( $tax, $slugs ) {
@@ -356,7 +356,7 @@ function aw_not_news_reason( $title, $url, $type ) {
 	return '';
 }
 
-/** Add one entry to the Rejected log (Settings → Sourcing → Rejected), as the relevance-rejected endpoint does. */
+/** Add one entry to the Rejected log (Sourcing → Rejected), as the relevance-rejected endpoint does. */
 function aw_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 	$url = esc_url_raw( (string) $url );
 	$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
@@ -386,7 +386,7 @@ function aw_relevance_failed( $post_id ) {
 	return is_array( $v ) && array_key_exists( 'relevant', $v ) && ! $v['relevant'];
 }
 
-// Settings → Sourcing → Rejected: the log of items the relevance check refused (never created). Administrators only.
+// Sourcing → Rejected: the log of items the relevance check refused (never created). Administrators only.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
