@@ -23,13 +23,18 @@ class AW_Sourcing_Sections_Table extends WP_List_Table {
 	}
 
 	public function get_columns() {
-		return array(
+		$cols = array(
 			'section'    => 'Section',
 			'categories' => 'Allowed categories',
 			'tags'       => 'Allowed tags',
-			'worker'     => 'Workers file',
-			'summary'    => 'Summary rule',
 		);
+		if ( aw_rules_live() ) { // from the phase 3 migration (Rules → Section rules)
+			$cols += array(
+				'worker'  => 'Workers file',
+				'summary' => 'Summary rule',
+			);
+		}
+		return $cols;
 	}
 
 	protected function get_primary_column_name() {
@@ -80,7 +85,7 @@ class AW_Sourcing_Sections_Table extends WP_List_Table {
 		$edit = aw_rules_url( 'sections', array( 'edit' => $item['type'] ) );
 		$acts = array( 'edit' => '<a href="' . esc_url( $edit ) . '">Edit</a>' );
 		return '<strong><a class="row-title" href="' . esc_url( $edit ) . '">' . esc_html( $item['label'] ) . '</a></strong> <code>' . esc_html( $item['type'] ) . '</code>'
-			. ( $item['stored'] ? '' : '<br><span class="description">No rule saved yet: every category, no tags.</span>' ) . $this->row_actions( $acts );
+			. ( $item['stored'] || ! aw_rules_live() ? '' : '<br><span class="description">No rule saved yet: every category, no tags.</span>' ) . $this->row_actions( $acts );
 	}
 
 	protected function column_worker( $item ) {

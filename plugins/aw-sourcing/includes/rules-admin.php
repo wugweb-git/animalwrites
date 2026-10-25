@@ -29,7 +29,8 @@ const AW_RULES_PARTS = array(
 	'enrich'   => 'Directory enrichment',
 );
 
-// From phase 3: Rules after Keywords, in place of Sections, Summary rules and Directory enrichment.
+// From phase 3: Rules in place of Sections, Summary rules and Directory enrichment. The page puts Sources and Keywords
+// first and these tabs after them (sourcing-policy.php aw_sourcing_page), so the first of them is right after Keywords.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
@@ -63,7 +64,7 @@ add_action(
 		}
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		unset( $q['page'], $q['tab'] );
-		wp_safe_redirect( aw_rules_url( $tab, array_map( 'rawurlencode', $q ) ), 301 );
+		wp_safe_redirect( aw_rules_url( $tab, array_map( 'rawurlencode', $q ) ) ); // 302: a rollback brings the old tabs back
 		exit;
 	}
 );
@@ -336,17 +337,29 @@ add_action(
 		if ( null !== $old && $tag === $original && $old === $rule ) {
 			aw_rules_back( 'sections', 'none', $tag, $back );
 		}
-		$out = array();
+		$out   = array();
+		$moved = array(); // sections whose allowed tags follow a rule to its new tag
 		if ( null === $old ) {
 			$out = $rules + array( $tag => $rule ); // a new rule goes last
 		} else {
 			foreach ( $rules as $k => $v ) { // an edited rule keeps its place, under its (new) tag
 				$out[ $k === $original ? $tag : $k ] = $k === $original ? $rule : $v;
 			}
+			if ( $tag !== $original ) {
+				foreach ( (array) ( $c['sections'] ?? array() ) as $t => $sec ) {
+					$list = array_map( 'strval', (array) ( $sec['tags'] ?? array() ) );
+					$at   = array_search( $original, $list, true );
+					if ( false !== $at ) {
+						$list[ $at ]                 = $tag;
+						$c['sections'][ $t ]['tags'] = array_values( array_unique( $list ) );
+						$moved[]                     = $t;
+					}
+				}
+			}
 		}
 		$c['topic_tags'] = $out;
 		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
+		kits_sourcing_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
 		aw_rules_back( 'sections', null === $old ? 'tag_added' : 'tag_saved', $tag );
 	}
 );
@@ -514,8 +527,8 @@ function aw_rules_field_form( $field ) {
 	echo '<tr><th scope="row">Profile link</th><td><label><input type="checkbox" name="rule[social]" value="1"' . checked( $r['social'], true, false ) . '> A social profile: the website linking to it and the page preview count as one source</label></td></tr>';
 	echo '<tr><th scope="row"><label for="aw-fr-apply">Apply</label></th><td><select id="aw-fr-apply" name="rule[apply]">';
 	foreach ( AW_ENRICH_APPLY as $k => $label ) {
-		if ( 'both' === $k && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) {
-			continue;
+		if ( ( 'both' === $k && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) || ( 'review' !== $k && in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) ) {
+			continue; // two values only where a field can hold them; closed and merge_into always to a person
 		}
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $r['apply'], $k, false ) . '>' . esc_html( $label ) . '</option>';
 	}
@@ -572,7 +585,7 @@ add_action(
 		$tabs = array(
 			'aw-rules-overview' => array( 'Rules', '<p>One place for the rules the workers follow: <strong>Section rules</strong> (which categories and tags each section uses, and tag rules), <strong>Summary rules</strong> (length, structure and wording of summaries, per section) and <strong>Directory enrichment</strong> (the sources, the trust order and a rule per listing field). Every change is in the Change log with its value before and after. The workers read the rules at the start of every run; Sources sync copies them into the workers repository as their fallback.</p>' ),
 			'aw-rules-sections' => array( 'Section rules', '<p>A section is one of the site\'s content types: every public post type (not pages or media) and the ones that opt in (Media &amp; PR). A new content type shows here by itself, with every category allowed and the News summary rule.</p><p>Which categories and tags each section uses: the workers pick only from these, and each section\'s filters show only these. A section with no category ticked uses every category.</p><p><strong>Tag rules</strong> give an item a tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a "Hold when" pattern, and has none of the "Unless" words, waits for a person with the hold reason.</p>' ),
-			'aw-rules-summary'  => array( 'Summary rules', '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Inbox → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence.</p><p>Each section has its rule. News, Library and Resources (research) have their own; any other section inherits News until it is given its own (untick "Inherits News").</p>' ),
+			'aw-rules-summary'  => array( 'Summary rules', '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds a News, Library or research item whose summary is over the maximum or not plain text in Inbox → To review (the rule of any other section is read by the workers). A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence.</p><p>Each section has its rule. News, Library and Resources (research) have their own; any other section inherits News until it is given its own (untick "Inherits News").</p>' ),
 			'aw-rules-enrich'   => array( 'Directory enrichment', '<p>The enrichment worker fills empty listing details from the sources switched on here. The <strong>trust order</strong> decides between sources that disagree. <strong>Field rules</strong> list every listing field: the enrichment fields and the fields of the listing field group (Organisation details); a field added to that group in wp-admin shows here with its rule off until it is set.</p><p>A claimed or verified listing is never changed, and a low-confidence value always waits for review; otherwise each field follows its Apply rule.</p>' ),
 		);
 		foreach ( $tabs as $id => $t ) {

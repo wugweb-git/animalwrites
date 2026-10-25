@@ -296,6 +296,9 @@ function aw_enrich_rule_clean( $field, array $in, array $sources, array $base ) 
 	if ( 'both' === $out['apply'] && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) {
 		$out['apply'] = 'empty'; // only phones, email, website and the list fields can keep two values
 	}
+	if ( in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
+		$out['apply'] = 'review'; // closed and merge_into: always a person
+	}
 	return $out;
 }
 
@@ -342,8 +345,8 @@ function aw_enrich_priority_from_positions( array $positions, array $sources, ar
  * @return string apply, both or queue.
  */
 function aw_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_empty, callable $has_phones, callable $alt_empty, callable $place_fills ) {
-	if ( $protected || 'low' === $conf || 'review' === $apply ) {
-		return 'queue';
+	if ( $protected || 'low' === $conf || 'review' === $apply || in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
+		return 'queue'; // closed and merge_into: always a person, whatever the rule says (a merge is the owner's decision)
 	}
 	if ( 'place' === $field ) {
 		return $place_fills() ? 'apply' : 'queue';
@@ -460,6 +463,20 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
 }
 
 /**
+ * Whether a hold pattern compiles and the workers (Python re) can use it. PCRE-only syntax is refused: the escapes
+ * h, H, R, K, X, p, P, Q, E, G and z, possessive quantifiers, branch resets, atomic groups and verbs.
+ *
+ * @param string $p Pattern.
+ * @return bool
+ */
+function aw_rules_pattern_ok( $p ) {
+	if ( preg_match( '/\\\\[hHRKXpPQEGz]|[+*?}]\\+|\\(\\?[|>]|\\(\\*/', $p ) ) {
+		return false;
+	}
+	return false !== @preg_match( "\x01" . $p . "\x01iu", '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- testing whether a pattern compiles
+}
+
+/**
  * A tag rule from the form: phrases, hold patterns (each a valid regular expression), unless words, the hold reason.
  *
  * @param array $in Posted values (any, hold, unless as text, one per line; hold_reason).
@@ -470,10 +487,10 @@ function aw_rules_tag_rule_clean( array $in ) {
 	$hold  = array();
 	$bad   = array();
 	foreach ( $lines( $in['hold'] ?? '' ) as $p ) {
-		if ( false === @preg_match( '~' . str_replace( '~', '\~', $p ) . '~iu', '' ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- testing whether a pattern compiles
-			$bad[] = $p;
-		} else {
+		if ( aw_rules_pattern_ok( $p ) ) {
 			$hold[] = $p;
+		} else {
+			$bad[] = $p;
 		}
 	}
 	$rule = array(

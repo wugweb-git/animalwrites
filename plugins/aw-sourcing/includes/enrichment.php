@@ -1197,10 +1197,17 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$rule = aw_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or a source not allowed to fill it
-		if ( empty( $rule['on'] ) || ( $rule['sources'] && ! array_intersect( array_column( $srcs, 'key' ), $rule['sources'] ) ) ) {
+		$rule = aw_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or sources not allowed to fill it
+		if ( empty( $rule['on'] ) ) {
 			$out['skipped'][] = $field;
 			continue;
+		}
+		if ( $rule['sources'] ) { // a source not allowed is never credited; nothing left from an allowed one: skipped
+			$srcs = array_values( array_filter( $srcs, fn( $s ) => in_array( $s['key'], $rule['sources'], true ) || 'google_places' === $s['key'] ) );
+			if ( ! $srcs ) {
+				$out['skipped'][] = $field;
+				continue;
+			}
 		}
 		if ( ! array_filter( $srcs, fn( $s ) => 'google_places' !== $s['key'] ) && ! in_array( $field, array( 'place_id', 'maps_url' ), true ) ) {
 			$out['skipped'][] = $field; // Google alone never stores a fact

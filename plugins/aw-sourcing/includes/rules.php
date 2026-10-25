@@ -40,16 +40,22 @@ function aw_rules_live() {
 }
 
 /**
- * The sections: post type => [label, the workers' item type ('' = the workers never file items there)].
+ * The sections: post type => [label, the workers' item type ('' = the workers never file items there)]. From the
+ * phase 3 migration, the site's content types (public, or opted in); before it, the six of aw_post_types() as before.
  *
+ * @param bool $from_types The content types whatever the phase (the migration's dry run).
  * @return array<string, array{label: string, worker_type: string}>
  */
-function aw_rules_sections() {
-	$public = array_values( get_post_types( array( 'public' => true ) ) );
-	$opt_in = array_values( get_post_types_by_support( 'aw-section' ) );
-	$order  = function_exists( 'aw_post_types' ) ? array_keys( aw_post_types() ) : array();
-	$out    = array();
-	foreach ( aw_rules_section_types( $public, $opt_in, $order ) as $t ) {
+function aw_rules_sections( $from_types = false ) {
+	static $memo = array();
+	$live = $from_types || aw_rules_live();
+	if ( isset( $memo[ (int) $live ] ) && did_action( 'init' ) ) {
+		return $memo[ (int) $live ];
+	}
+	$order = function_exists( 'aw_post_types' ) ? array_keys( aw_post_types() ) : array();
+	$types = $live ? aw_rules_section_types( array_values( get_post_types( array( 'public' => true ) ) ), array_values( get_post_types_by_support( 'aw-section' ) ), $order ) : $order;
+	$out   = array();
+	foreach ( $types as $t ) {
 		$obj       = get_post_type_object( $t );
 		$own       = function_exists( 'aw_post_types' ) ? ( aw_post_types()[ $t ][1] ?? '' ) : '';
 		$out[ $t ] = array(
@@ -57,12 +63,20 @@ function aw_rules_sections() {
 			'worker_type' => (string) ( AW_RULES_WORKER_TYPES[ $t ] ?? '' ),
 		);
 	}
+	if ( did_action( 'init' ) ) {
+		$memo[ (int) $live ] = $out;
+	}
 	return $out;
 }
 
-/** Section post type => label. */
-function aw_rules_section_labels() {
-	return array_map( fn( $s ) => $s['label'], aw_rules_sections() );
+/**
+ * Section post type => label.
+ *
+ * @param bool $from_types As aw_rules_sections().
+ * @return array
+ */
+function aw_rules_section_labels( $from_types = false ) {
+	return array_map( fn( $s ) => $s['label'], aw_rules_sections( $from_types ) );
 }
 
 /**
@@ -107,9 +121,15 @@ function aw_enrich_source_keys() {
  * @return array{priority: string[], fields: array}
  */
 function aw_enrich_field_rules() {
-	$seed  = aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) );
+	static $memo = array();
 	$saved = aw_rules_live() ? get_option( AW_ENRICH_RULES_OPTION ) : false; // before phase 3 (or after its rollback): the code's rules
+	$key   = md5( (string) wp_json_encode( $saved ) );
+	if ( isset( $memo[ $key ] ) ) {
+		return $memo[ $key ]; // read once per request (the results endpoint asks for each proposal)
+	}
+	$seed = aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) );
 	if ( ! is_array( $saved ) || empty( $saved['fields'] ) ) {
+		$memo[ $key ] = $seed;
 		return $seed;
 	}
 	$src = aw_enrich_source_keys();
@@ -129,6 +149,7 @@ function aw_enrich_field_rules() {
 			$out['fields'][ $f ] = $r;
 		}
 	}
+	$memo[ $key ] = $out;
 	return $out;
 }
 

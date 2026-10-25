@@ -232,6 +232,9 @@ aw_t( $same, "apply rules: the seeded field rules decide as the code did, in all
 aw_t( 'queue' === aw_enrich_mode_decide( 'email', 'review', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'apply rule "review": always a person' );
 aw_t( 'queue' === aw_enrich_mode_decide( 'phone', 'empty', 'high', false, fn() => false, fn() => true, fn() => true, fn() => true ), 'apply rule "empty" on phones: a second number waits' );
 
+aw_t( 'queue' === aw_enrich_mode_decide( 'merge_into', 'empty', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'merge_into: always a person, whatever its rule says' );
+aw_t( 'review' === aw_enrich_rule_clean( 'closed', array( 'apply' => 'empty' ), $sk, aw_enrich_rule_seed( 'closed' ) )['apply'], 'closed and merge_into cannot be given another apply rule' );
+
 // ---- tag rules ----
 $live_rule        = $p3['topic_tags']['campaign-lab-animals-2026'];
 list( $tr, $bad ) = aw_rules_tag_rule_clean(
@@ -250,3 +253,5 @@ list( $tr, $bad ) = aw_rules_tag_rule_clean(
 	)
 );
 aw_t( array( 'bad(' ) === $bad && array( 'ok' ) === $tr['hold'] && ! isset( $tr['hold_reason'] ), 'a hold pattern that does not compile is refused' );
+aw_t( ! aw_rules_pattern_ok( '\\h+lab' ) && ! aw_rules_pattern_ok( 'foo++' ) && ! aw_rules_pattern_ok( '(?>a)' ), 'PCRE-only patterns the workers cannot read are refused' );
+aw_t( aw_rules_pattern_ok( 'a\\~b' ) && aw_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && aw_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );

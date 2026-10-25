@@ -89,7 +89,7 @@ function aw_sourcing_cli_summary_with( $opt ) {
 function aw_sourcing_cli_schema_lines() {
 	$schema = aw_enrich_schema();
 	$rows   = aw_enrich_field_rule_rows( $schema, aw_enrich_fields(), aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) )['fields'] );
-	$mapped = array_filter( $schema['fields'], fn( $f ) => '' !== $f['enrich'] );
+	$mapped = array_filter( $schema['fields'], fn( $f ) => ! empty( $f['enrich'] ) );
 	$only   = array_filter( $rows, fn( $r ) => 'Listing field' === $r['group'] );
 	return array(
 		sprintf( 'Directory schema (%s, read %s): %d listing fields; %d of them filled by enrichment, %d enrichment fields kept by code (%s); %d listing fields with no enrichment field (rule off until set).', $schema['group'], function_exists( 'acf_get_fields' ) ? 'from ACF' : 'from the local JSON', count( $schema['fields'] ), count( $mapped ), count( $schema['special'] ), implode( ', ', array_column( $schema['special'], 'field' ) ), count( $only ) ),
@@ -115,7 +115,7 @@ add_action(
 			list( $bk ) = aw_sourcing_cli_backup( 3, (string) get_option( 'aw_backup_latest_3', '' ) ); // refuses without a backup
 			WP_CLI::log( "Backup: $bk" );
 		}
-		$types  = array_keys( aw_rules_sections() );
+		$types  = array_keys( aw_rules_sections( true ) );
 		$fields = array_keys( aw_enrich_fields() );
 		$c      = (array) get_option( 'aw_sources', array() );
 		$sum    = get_option( AW_SUMMARY_RULES_OPTION );
@@ -142,7 +142,7 @@ add_action(
 		} else {
 			WP_CLI::log( 'Summary rules: none saved (the defaults apply); nothing to rekey.' );
 		}
-		$labels = aw_rules_section_labels();
+		$labels = aw_rules_section_labels( true );
 		$inh    = array_keys( array_filter( aw_rules_summary_resolve( aw_sourcing_cli_summary_with( $plan['summary'] )['sections'], is_array( $plan['summary'] ) ? (array) ( $plan['summary']['sections'] ?? array() ) : array(), $labels ), fn( $r ) => '' !== (string) ( $r['inherit'] ?? '' ) ) );
 		WP_CLI::log( 'Sections that inherit the News summary rule: ' . ( $inh ? implode( ', ', $inh ) : '(none)' ) );
 		WP_CLI::log( $plan['seeded'] ? sprintf( 'Field rules: seeded, %d fields and a trust order of %d sources (%s), equal to the workers\' constants.', count( $plan['field_rules']['fields'] ), count( $plan['field_rules']['priority'] ), implode( ' > ', $plan['field_rules']['priority'] ) ) : 'Field rules: already stored, kept as they are.' );
