@@ -327,6 +327,24 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 	$undo    = array();
 	$failed  = array();
 	$created = 0;
+	// The undo record is saved before each row changes (Codex): an interrupted run can still be rolled back.
+	$save = function () use ( &$undo, $bk, $plan ) {
+		update_option(
+			'aw_sourcing_phase2_record',
+			array(
+				'at'      => current_time( 'mysql' ),
+				'backup'  => $bk,
+				'records' => $undo,
+				'hindi'   => $plan['hindi'],
+				'checks'  => $plan['checks'],
+				'kw_ids'  => array(),
+				'starred' => $plan['starred'],
+				'partial' => true,
+			),
+			false
+		);
+	};
+	$save();
 	foreach ( $plan['records'] as $norm => $r ) {
 		$fields = array(
 			'variants'  => $r['variants'],
@@ -345,6 +363,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 			}
 			++$created;
 			$undo[ $id ] = array( 'created' => true );
+			$save();
 		} else {
 			$old         = aw_kw_get( $id );
 			$undo[ $id ] = array(
@@ -359,14 +378,16 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 				'categories' => $old['categories'],
 				'sections'   => $old['sections'],
 			);
+			$save();
 			aw_kw_update( $id, $fields );
 		}
-		$now = aw_kw_get( $id );
+		$now                  = aw_kw_get( $id );
+		$undo[ $id ]['added'] = (int) ( $r['roles'] & ~$now['roles'] );
+		$save(); // before the roles change
 		$set = aw_kw_set_roles( $id, $r['roles'] & ~$now['roles'], $now['roles'] & ~$r['roles'] & AW_KW_WORKER_ROLES );
 		if ( is_wp_error( $set ) ) {
 			$failed[] = $r['label'] . ': ' . $set->get_error_message();
 		}
-		$undo[ $id ]['added'] = (int) ( $r['roles'] & ~$now['roles'] );
 		aw_kw_map_set( $id, 'category', $r['categories'] );
 		aw_kw_map_set( $id, 'section', $r['sections'] );
 		$plan['records'][ $norm ]['id'] = $id;
@@ -386,6 +407,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 			'sections'   => $old['sections'],
 			'added'      => 0,
 		);
+		$save();
 		aw_kw_set_roles( $id, 0, AW_KW_WORKER_ROLES );
 	}
 	$record = array(
