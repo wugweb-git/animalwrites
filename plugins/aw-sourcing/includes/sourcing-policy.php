@@ -318,6 +318,9 @@ add_action(
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? 'sources' );
 		$err = '';
+		if ( 'sources' !== $tab && ! has_action( 'kits_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
+			wp_die( 'Nothing saved: this form is from an older version of the Sourcing screens. Open the screen again and make the change there.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
+		}
 		if ( 'sources' !== $tab ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
 		} elseif ( ! empty( $_POST['src_edit'] ) ) { // the Add New / Edit Source form (source-sites.php)

@@ -57,11 +57,6 @@ function aw_src_menu_order( array $tabs ): array {
 	return $settings + $reports + $last;
 }
 
-/** Is this tab a report or job (not a setting)? */
-function aw_src_is_report( string $tab ): bool {
-	return in_array( $tab, AW_SRC_REPORT_TABS, true );
-}
-
 /**
  * A tab's address relative to wp-admin (also its menu item's slug). Sources is the page's first screen, so its address
  * has no tab.

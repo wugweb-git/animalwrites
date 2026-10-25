@@ -382,7 +382,6 @@ $tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Pr
 aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( aw_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );
 $p3 = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'press' => 'Press queries', 'log' => 'Change log', 'workers' => 'Workers', 'settings' => 'Settings' );
 aw_t( array( 'sources', 'keywords', 'rules', 'press', 'workers', 'log', 'settings' ) === array_keys( aw_src_menu_order( $p3 ) ), 'phase 3: Rules after Keywords; a missing report is skipped' );
-aw_t( aw_src_is_report( 'relay-log' ) && aw_src_is_report( 'log' ) && ! aw_src_is_report( 'sources' ) && ! aw_src_is_report( 'settings' ), 'reports are told apart from settings' );
 aw_t( 'admin.php?page=aw-sourcing' === aw_src_tab_path( 'sources' ) && 'admin.php?page=aw-sourcing' === aw_src_tab_path(), 'Sources is the page\'s own address' );
 aw_t( 'admin.php?page=aw-sourcing&tab=workers' === aw_src_tab_path( 'workers' ) && 'admin.php?page=aw-sourcing&tab=relay-log' === aw_src_tab_menu_slug( 'relay-log' ), 'a tab\'s address and menu slug' );
 aw_t( AW_SRC_PAGE === aw_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
@@ -394,6 +393,11 @@ foreach ( glob( $inc . '*.php' ) as $f ) {
 	$all_inc .= (string) file_get_contents( $f );
 }
 aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses the old screen id' );
+// No function is declared twice across the plugin's files (the site would stop with a fatal error on every request).
+preg_match_all( '/^function\s+([a-z0-9_]+)\s*\(/mi', $all_inc, $fn_m );
+$fn_dup = array_keys( array_filter( array_count_values( array_map( 'strtolower', $fn_m[1] ) ), fn( $c ) => $c > 1 ) );
+aw_t( array() === $fn_dup, 'every function is declared once (' . implode( ', ', $fn_dup ) . ')' );
+aw_t( false !== strpos( $menu, "'aw_sourcing_own_settings_tab'" ) && false !== strpos( $menu, 'function aw_sourcing_own_settings_tab()' ), 'Sourcing → Settings draws with its own function' );
 aw_t( false === strpos( $all_inc, "options-general.php?page=aw-sourcing" ) && false === strpos( $all_inc, 'add_options_page' ), 'no link or page under Settings' );
 aw_t( false === strpos( $all_inc, "add_submenu_page( 'aw-inbox'" ) && false === strpos( $all_inc, 'edit.php?post_type=aw_listing&page=aw-enrich-review' ), 'nothing under Inbox or Directory' );
 // Retired addresses (owner, 25 Oct 2026): the old tab redirects and the old POST tab names are gone; the phase switch stays.

@@ -24,14 +24,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function aw_sourcing_tabs() {
+	static $memo = null; // the same answer all request: the menu, the current item, the title and the page ask for it
+	if ( null !== $memo ) {
+		return $memo;
+	}
 	$all = array(
 		'sources'  => array( 'Sources', '', true ),
 		'keywords' => array( 'Keywords', '', true ),
 	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log', '', true ) );
+	// From phase 2 the Press queries and Categories tabs only send you on (keywords-admin.php: Keywords → Press, Posts →
+	// Categories), so they get no menu item of their own; their addresses still go there.
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+		unset( $all['press'], $all['categories'] );
+	}
 	$out = array();
 	foreach ( array_keys( aw_src_menu_order( array_map( fn( $t ) => (string) $t[0], $all ) ) ) as $k ) {
 		$out[ $k ] = $all[ $k ];
 	}
+	$memo = $out;
 	return $out;
 }
 
@@ -71,7 +81,11 @@ add_action(
 		$first = true;
 		foreach ( aw_sourcing_tabs() as $tab => $t ) {
 			if ( $first ) {
-				add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
+				$hook = add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
+				if ( $hook && AW_SRC_SCREEN !== $hook ) { // the menu title changed: the screens' hooks would not fire, so pass them on and say so
+					add_action( 'load-' . $hook, fn() => do_action( 'load-' . AW_SRC_SCREEN ) );
+					error_log( 'AW Sourcing: the Sourcing page is ' . $hook . ', not ' . AW_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				}
 				$first = false;
 				continue;
 			}
@@ -136,13 +150,13 @@ add_filter(
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings', 'aw_sourcing_settings_tab', true ); // its own form (admin-post, as before)
+		$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings', 'aw_sourcing_own_settings_tab', true ); // its own form (admin-post, as before)
 		return $tabs;
 	}
 );
 
-/** Sourcing → Settings. */
-function aw_sourcing_settings_tab() {
+/** Sourcing → Settings (aw_sourcing_settings_tab() is another function: the Settings API forms' marker, sourcing-policy.php). */
+function aw_sourcing_own_settings_tab() {
 	echo '<p>' . esc_html( 'Switches for the whole of Sourcing. What the workers fetch is set on Sources, Keywords and the screens after them.' ) . '</p>';
 	if ( function_exists( 'aw_sources_live_switch' ) ) {
 		aw_sources_live_switch();
@@ -173,7 +187,7 @@ function aw_sourcing_moved_redirect() {
 	}
 	// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	unset( $q['post_type'] );
-	wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $q ), admin_url( 'admin.php' ) ), 301 );
+	wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $q ), admin_url( 'admin.php' ) ) ); // 302: browsers keep no copy, so a rollback of this change is clean
 	exit;
 }
 add_action( 'admin_init', 'aw_sourcing_moved_redirect', 1 );
@@ -212,36 +226,39 @@ function aw_sourcing_overview_workers() {
 }
 
 /**
- * The AI keys at a glance: how many are saved, how many work, and the providers that work. Read only: the saved rows as
- * they are (never written), and no part of any key.
+ * The AI keys at a glance: how many model keys are saved and how many work (the AI models screen's own groups,
+ * aw_ai_status_badge: works / waiting / broken), the providers that work, and the tool keys apart. Read only: the saved
+ * rows as they are (never written, so not aw_ai_rows(), which converts the older option on first read), and no part of
+ * any key.
  */
 function aw_sourcing_overview_ai() {
 	$rows = get_option( 'aw_ai_models', null );
 	if ( ! is_array( $rows ) ) {
-		return esc_html( 'No keys saved on the AI models screen yet.' );
+		return esc_html( get_option( 'aw_ai_keys' ) ? 'Keys saved the old way: opening the AI models screen converts them.' : 'No keys saved on the AI models screen yet.' );
 	}
-	$n     = 0;
-	$works = 0;
-	$wait  = 0;
+	$n     = array( 'works' => 0, 'wait' => 0, 'bad' => 0, 'tool' => 0 );
 	$provs = array();
 	foreach ( $rows as $r ) {
 		if ( ! is_array( $r ) || empty( $r['key'] ) ) {
 			continue;
 		}
-		++$n;
 		$st = (string) ( $r['status'] ?? 'unchecked' );
-		if ( in_array( $st, array( 'works', 'tool' ), true ) ) {
-			++$works;
-			$p           = (string) ( $r['provider'] ?? '' );
-			$provs[ $p ] = defined( 'AW_AI_PROVIDERS' ) && isset( AW_AI_PROVIDERS[ $p ] ) ? AW_AI_PROVIDERS[ $p ][0] : ( defined( 'AW_AI_TOOLS' ) && isset( AW_AI_TOOLS[ $p ] ) ? AW_AI_TOOLS[ $p ][0] : $p );
+		$p  = (string) ( $r['provider'] ?? '' );
+		if ( 'tool' === $st ) {
+			++$n['tool'];
+		} elseif ( 'works' === $st ) {
+			++$n['works'];
+			$provs[ $p ] = defined( 'AW_AI_PROVIDERS' ) && isset( AW_AI_PROVIDERS[ $p ] ) ? AW_AI_PROVIDERS[ $p ][0] : $p;
 		} elseif ( in_array( $st, array( 'limited', 'unchecked', 'card' ), true ) ) {
-			++$wait;
+			++$n['wait'];
+		} else {
+			++$n['bad'];
 		}
 	}
 	$provs = array_filter( $provs );
 	sort( $provs );
-	$text = sprintf( '%1$d keys saved: %2$d work, %3$d waiting or not checked, %4$d refused or out of credit.', $n, $works, $wait, $n - $works - $wait ) . ( $provs ? ' Working: ' . implode( ', ', $provs ) . '.' : '' );
-	return aw_sourcing_overview_status( $works > 0, $text );
+	$text = sprintf( '%1$d AI keys: %2$d work, %3$d waiting or not checked, %4$d refused or out of credit; %5$d tool keys.', $n['works'] + $n['wait'] + $n['bad'], $n['works'], $n['wait'], $n['bad'], $n['tool'] ) . ( $provs ? ' Working: ' . implode( ', ', $provs ) . '.' : '' );
+	return aw_sourcing_overview_status( $n['works'] > 0, $text );
 }
 
 /** The last entry of the Change log. */
@@ -303,11 +320,14 @@ function aw_sourcing_overview_page() {
 			array( 'Site Health', 'Two tests: "Sourcing ran on time" (the ingest heartbeat) and "Workers report on time".', current_user_can( 'view_site_health_checks' ) ? '<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html( 'Tools → Site Health' ) . '</a>' : esc_html( 'Tools → Site Health' ), $auto ),
 		),
 	);
-	// Before phase 2 migration and from phase 4 the Press queries and Categories screens may be there or not: listed when they are.
-	foreach ( array( 'press' => 'Weekly searches for coverage of Animal Writes.', 'categories' => 'The words that put an item in each category.' ) as $k => $what ) {
-		if ( isset( $tabs[ $k ] ) ) {
-			$groups['What the workers fetch'][] = array( $tabs[ $k ][0], $what, $tab( $k ), $auto );
-		}
+	// Press queries and Categories: their own screens before phase 2; from phase 2 a Keywords view and WordPress's own
+	// categories (with a Keywords column); from phase 4 the old screens are gone.
+	$kw_on = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on();
+	if ( isset( $tabs['press'] ) || $kw_on ) {
+		$groups['What the workers fetch'][] = array( 'Press queries', 'Weekly searches for coverage of Animal Writes; results wait in To review.', $kw_on ? aw_sourcing_overview_link( 'Sourcing → Keywords → Press', aw_sourcing_url( 'keywords', array( 'view' => 'press' ) ) ) : $tab( 'press' ), $auto );
+	}
+	if ( isset( $tabs['categories'] ) || $kw_on ) {
+		$groups['What the workers fetch'][] = array( 'Categories', 'The words that put an item in each category.', $kw_on ? aw_sourcing_overview_link( 'Posts → Categories (Keywords column)', admin_url( 'edit-tags.php?taxonomy=category' ), 'manage_categories' ) : $tab( 'categories' ), $auto );
 	}
 
 	echo '<div class="wrap"><h1>' . esc_html( 'Sourcing' ) . '</h1>';
