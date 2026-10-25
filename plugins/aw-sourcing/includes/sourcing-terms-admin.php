@@ -174,8 +174,8 @@ function aw_sources_sections_tab() {
  * @param string $type Post type.
  */
 function aw_sourcing_section_form( $type ) {
-	$back  = admin_url( 'options-general.php?page=aw-sourcing&tab=sections' );
-	$types = aw_post_types();
+	$back  = aw_rules_url( 'sections' );
+	$types = aw_rules_section_labels(); // the sections are the site's content types (rules.php)
 	if ( ! isset( $types[ $type ] ) ) {
 		echo '<div class="notice notice-error inline"><p>No such section. <a href="' . esc_url( $back ) . '">Back to Sections</a></p></div>';
 		return;
@@ -184,7 +184,7 @@ function aw_sourcing_section_form( $type ) {
 		require_once ABSPATH . 'wp-admin/includes/template.php';
 	}
 	$sec = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
-	echo '<h2>' . esc_html( 'Edit section: ' . $types[ $type ][1] ) . '</h2>';
+	echo '<h2>' . esc_html( 'Edit section: ' . $types[ $type ] ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing_section"><input type="hidden" name="type" value="' . esc_attr( $type ) . '">';
 	wp_nonce_field( 'aw_sourcing_section_' . $type );
 	echo '<table class="form-table" role="presentation"><tbody>';
@@ -265,12 +265,13 @@ add_action(
 	'admin_post_aw_sourcing_section',
 	function () {
 		$type = sanitize_key( $_POST['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- the nonce is per section, checked next
-		if ( ! current_user_can( AW_SRC_CAP ) || ! isset( aw_post_types()[ $type ] ) || ! check_admin_referer( 'aw_sourcing_section_' . $type ) ) {
+		if ( ! current_user_can( AW_SRC_CAP ) || ! isset( aw_rules_sections()[ $type ] ) || ! check_admin_referer( 'aw_sourcing_section_' . $type ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$slugs            = fn( $v ) => array_map( 'sanitize_title', array_map( 'strval', (array) $v ) );
 		$tax_in           = isset( $_POST['tax_input'] ) && is_array( $_POST['tax_input'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['tax_input']['post_tag'] ?? array() ) ) : array();
 		$gone             = isset( $_POST['aw_missing'] ) && is_array( $_POST['aw_missing'] ) ? wp_unslash( $_POST['aw_missing'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each list is sanitized just below
+		$was              = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
 		list( $c, $what ) = aw_sourcing_section_apply(
 			aw_sources_config(),
 			$type,
@@ -283,13 +284,13 @@ add_action(
 				'tags'       => $slugs( $gone['tags'] ?? array() ),
 			)
 		);
-		$back = admin_url( 'options-general.php?page=aw-sourcing&tab=sections' );
+		$back = aw_rules_url( 'sections' );
 		if ( ! $what ) {
 			wp_safe_redirect( add_query_arg( array( 'aw_terms_done' => 'none', 'aw_terms_for' => $type ), $back ) );
 			exit;
 		}
 		update_option( 'aw_sources', $c, false );
-		kits_sourcing_log( 'sections', implode( ' · ', $what ) );
+		kits_sourcing_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
 		wp_safe_redirect( add_query_arg( array( 'aw_terms_done' => 'saved', 'aw_terms_for' => $type ), $back ) );
 		exit;
 	}
@@ -300,11 +301,12 @@ function aw_sourcing_terms_notice() {
 	$done = sanitize_key( $_GET['aw_terms_done'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$for  = urldecode( sanitize_text_field( wp_unslash( $_GET['aw_terms_for'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$tab  = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( 'sections' === $tab && isset( aw_post_types()[ $for ] ) ) {
-		$for = aw_post_types()[ $for ][1];
+	$sections = 'sections' === $tab || ( 'rules' === $tab && 'sections' === sanitize_key( $_GET['part'] ?? 'sections' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( $sections && isset( aw_rules_section_labels()[ $for ] ) ) {
+		$for = aw_rules_section_labels()[ $for ];
 	}
 	if ( 'saved' === $done ) {
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( ( 'sections' === $tab ? 'Saved the ' . $for . ' section.' : 'Saved the words for ' . $for . '.' ) . ' The workers use this from their next run.' ) . '</p></div>';
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( ( $sections ? 'Saved the ' . $for . ' section.' : 'Saved the words for ' . $for . '.' ) . ' The workers use this from their next run.' ) . '</p></div>';
 	} elseif ( 'none' === $done ) {
 		echo '<div class="notice notice-info is-dismissible"><p>' . esc_html( 'Nothing changed for ' . $for . '.' ) . '</p></div>';
 	} elseif ( 'nosuch' === $done ) {

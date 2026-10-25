@@ -40,7 +40,6 @@ require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-lists.php';
-require_once AW_SOURCING_DIR . 'includes/summary-rules-admin.php';
 require_once AW_SOURCING_DIR . 'includes/relevance.php';
 require_once AW_SOURCING_DIR . 'includes/ingest.php';
 require_once AW_SOURCING_DIR . 'includes/opportunities-site.php';
@@ -51,6 +50,8 @@ require_once AW_SOURCING_DIR . 'includes/news-titles.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-cleanup.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-admin.php';
+require_once AW_SOURCING_DIR . 'includes/rules-model.php'; // sourcing restructure phase 3: Rules
+require_once AW_SOURCING_DIR . 'includes/rules.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-front.php';
 require_once AW_SOURCING_DIR . 'includes/review-queue.php';
 require_once AW_SOURCING_DIR . 'includes/keyword-suggestions.php';
