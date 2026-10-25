@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_AI_PROVIDERS = array(
 	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
-	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'poolside/laguna-s-2.1:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter
+	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'thinkingmachines/inkling:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter; inkling:free replaced laguna-s-2.1:free, which expires 31 Oct 2026
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free' ) ), // free models (22 Oct 2026); minimax-m3.1-flash:free is gone (25 Oct 2026)
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
