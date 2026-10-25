@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for Tools → FAQ
+require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for AW SEO Plus → FAQ
 
 const AW_FAQ_MIN   = 3;
 const AW_FAQ_MAX   = 6;
@@ -584,6 +584,16 @@ function aw_faq_hub_plain() {
 /* ---------- The page's FAQ ---------- */
 
 /**
+ * A Resources guide: a published post that is not a research summary (research gets no FAQ, docs/faq.md).
+ *
+ * @param WP_Post $post Post.
+ * @return bool
+ */
+function aw_faq_is_guide( $post ) {
+	return $post instanceof WP_Post && 'post' === $post->post_type && 'publish' === $post->post_status && ! has_term( 'research', 'post_tag', $post );
+}
+
+/**
  * The FAQ context of a page: kind (listing | legal | term | hub), object ID, entity name, URL, the page node's and
  * the main entity's @id, the H2. Null where the page has no FAQ (News, Research, Opportunities, format tags, About,
  * Contact, policies, Home, the News and Resources pages …).
@@ -608,6 +618,12 @@ function aw_faq_context( $obj = null ) {
 			'about'   => $url . ( $legal ? ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) ) : '#organization' ),
 			'head'    => 'Questions about ' . ( $legal ? 'the ' . aw_faq_doc_short( $obj->ID ) : aw_faq_plain( get_the_title( $obj ) ) ),
 		);
+	}
+	if ( $obj instanceof WP_Post && aw_faq_is_guide( $obj ) ) {
+		// Resources guides (owner, 25 Oct 2026): their own written questions, stored on the guide (meta aw_faq), shown by
+		// the item-faq block at the end of the content; the Rank Math FAQ block they used is converted on save.
+		$url = get_permalink( $obj );
+		return array( 'kind' => 'guide', 'id' => $obj->ID, 'type' => 'post', 'entity' => aw_faq_plain( get_the_title( $obj ) ), 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'head' => 'Questions and answers' );
 	}
 	if ( $obj instanceof WP_Term && aw_faq_term_allowed( $obj ) ) {
 		$url = (string) kits_term_url( $obj );
@@ -649,7 +665,7 @@ function aw_faq_candidates( $ctx ) {
 		}
 	}
 	// Letter templates have no data fields: they take hand-written, owner-approved items like topics (owner, 25 Oct 2026).
-	if ( in_array( $ctx['kind'], array( 'term', 'hub' ), true ) || ( 'legal' === $ctx['kind'] && 'template' === aw_faq_legal_kind( $ctx['id'] ) ) ) {
+	if ( in_array( $ctx['kind'], array( 'term', 'hub', 'guide' ), true ) || ( 'legal' === $ctx['kind'] && 'template' === aw_faq_legal_kind( $ctx['id'] ) ) ) {
 		$i = 0;
 		foreach ( aw_faq_items( 'term' === $ctx['kind'] ? 'term' : 'post', $ctx['id'] ) as $it ) {
 			if ( 'approved' === $it['status'] ) {
@@ -931,6 +947,92 @@ add_action(
 	}
 );
 
+/* ---------- Resources guides: the FAQ box, and Rank Math FAQ blocks converted on save ---------- */
+
+add_action(
+	'add_meta_boxes_post',
+	function ( $post ) {
+		if ( ! has_term( 'research', 'post_tag', $post ) ) {
+			add_meta_box( 'aw-faq', 'FAQ', fn( $p ) => aw_faq_editor( aw_faq_items( 'post', $p->ID ) ), 'post', 'normal', 'low' );
+		}
+	}
+);
+add_action(
+	'save_post_post',
+	function ( $post_id ) {
+		if ( wp_is_post_revision( $post_id ) || ! empty( $GLOBALS['aw_faq_converting'] ) ) {
+			return; // the conversion's own re-save must not overwrite the questions it just moved
+		}
+		if ( aw_faq_editor_ok( 'edit_post' ) ) {
+			aw_faq_items_save( 'post', $post_id, aw_faq_editor_rows() );
+		}
+		aw_faq_convert_rank_math( $post_id ); // a Rank Math FAQ block added in the editor or by a publish script
+	},
+	20
+);
+
+/**
+ * Move a guide's Rank Math FAQ block into its own FAQ (owner, 25 Oct 2026: one FAQ system, ours). Questions and answers
+ * are kept word for word and approved (they were already published); the block and the heading just before it leave
+ * the content; the removed markup is kept in _aw_faq_rm_block for Undo. A guide that already has FAQ items keeps them
+ * and gets the Rank Math questions added after them.
+ *
+ * @param int  $post_id Post ID.
+ * @param bool $dry     Report only.
+ * @return array|null [ questions moved, words over 50, answers with more than one link ], or null when there was none.
+ */
+function aw_faq_convert_rank_math( $post_id, $dry = false ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'post' !== $post->post_type || ! has_block( 'rank-math/faq-block', $post ) ) {
+		return null;
+	}
+	$blocks  = parse_blocks( $post->post_content );
+	$keep    = array();
+	$removed = array();
+	$moved   = array();
+	foreach ( $blocks as $i => $b ) {
+		if ( 'rank-math/faq-block' === $b['blockName'] ) {
+			foreach ( (array) ( $b['attrs']['questions'] ?? array() ) as $q ) {
+				if ( isset( $q['visible'] ) && ! $q['visible'] ) {
+					continue;
+				}
+				$moved[] = array( 'q' => wp_strip_all_tags( (string) ( $q['title'] ?? '' ) ), 'a' => (string) ( $q['content'] ?? '' ) );
+			}
+			$prev = end( $keep );
+			if ( $prev && 'core/heading' === $prev['blockName'] && preg_match( '/question|faq/i', wp_strip_all_tags( (string) $prev['innerHTML'] ) ) ) {
+				$removed[] = array_pop( $keep );
+			}
+			$removed[] = $b;
+			continue;
+		}
+		$keep[] = $b;
+	}
+	$long  = count( array_filter( $moved, fn( $m ) => aw_faq_word_count( $m['a'] ) > AW_FAQ_WORDS ) );
+	$links = count( array_filter( $moved, fn( $m ) => substr_count( $m['a'], '<a ' ) > 1 ) );
+	if ( $dry ) {
+		return array( count( $moved ), $long, $links );
+	}
+	$items = aw_faq_items( 'post', $post_id );
+	$have  = array_map( fn( $x ) => strtolower( $x['q'] ), $items );
+	foreach ( $moved as $m ) {
+		if ( '' !== $m['q'] && ! in_array( strtolower( $m['q'] ), $have, true ) ) {
+			$items[] = array( 'q' => $m['q'], 'a' => $m['a'], 'sources' => array(), 'keyword' => '', 'status' => 'approved', 'reviewed' => wp_date( 'Y-m-d' ) );
+		}
+	}
+	aw_faq_items_save( 'post', $post_id, $items );
+	add_post_meta( $post_id, '_aw_faq_rm_block', wp_slash( serialize_blocks( $removed ) ) );
+	$GLOBALS['aw_faq_converting'] = true;
+	wp_update_post(
+		array(
+			'ID'           => $post_id,
+			'post_content' => wp_slash( serialize_blocks( $keep ) ),
+		)
+	);
+	$GLOBALS['aw_faq_converting'] = false;
+	clean_post_cache( $post_id );
+	return array( count( $moved ), $long, $links );
+}
+
 /* ---------- Library documents: the fields the FAQ reads that had no home ---------- */
 
 add_action(
@@ -977,7 +1079,7 @@ add_action(
 	}
 );
 
-/* ---------- Tools → FAQ: drafts to approve, counts, the experiment ---------- */
+/* ---------- AW SEO Plus → FAQ: drafts to approve, counts, the experiment ---------- */
 
 /** Every term and hub page with FAQ items: [ [ kind, id, label, edit URL, view URL, items ], … ]. */
 function aw_faq_topic_pages() {
@@ -1039,7 +1141,8 @@ function aw_faq_counts() {
 			continue;
 		}
 		++$c['guide']['total'];
-		if ( has_block( 'rank-math/faq-block', $p ) ) {
+		$gctx = aw_faq_context( $p );
+		if ( ( $gctx && aw_faq_build( $gctx, false ) ) || has_block( 'rank-math/faq-block', $p ) ) { // ours, or a Rank Math block not yet converted
 			++$c['guide']['faq'];
 		} else {
 			$c['guide']['without'][] = (int) $p->ID;
@@ -1057,7 +1160,9 @@ function aw_faq_counts() {
 add_action(
 	'admin_menu',
 	function () {
-		add_management_page( 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' );
+		// AW SEO Plus (owner, 25 Oct 2026): the plugin's own top-level menu, FAQ first, then Search Insights.
+		add_menu_page( 'AW SEO Plus', 'AW SEO Plus', 'manage_categories', 'aw-faq', 'aw_faq_admin_page', 'dashicons-chart-line', 81 );
+		add_submenu_page( 'aw-faq', 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' );
 	}
 );
 
@@ -1087,7 +1192,7 @@ add_action(
 			}
 		}
 		delete_transient( 'aw_faq_counts' );
-		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'done' => $done ), admin_url( 'tools.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'done' => $done ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 );
@@ -1104,12 +1209,12 @@ add_action(
 		$e['changed'] = wp_date( 'Y-m-d' );
 		update_option( 'aw_faq_experiment', $e, false );
 		delete_transient( 'aw_faq_counts' );
-		wp_safe_redirect( add_query_arg( 'page', 'aw-faq', admin_url( 'tools.php' ) ) );
+		wp_safe_redirect( add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ) );
 		exit;
 	}
 );
 
-/** Tools → FAQ. */
+/** AW SEO Plus → FAQ (was Tools → FAQ; the old address redirects). */
 function aw_faq_admin_page() {
 	$e    = aw_faq_experiment();
 	$end  = wp_date( 'Y-m-d', strtotime( $e['start'] . ' +' . (int) $e['weeks'] . ' weeks' ) );
@@ -1142,7 +1247,7 @@ function aw_faq_admin_page() {
 		$g       = $c['guide'];
 		$links   = implode( ', ', array_map( fn( $id ) => '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>', array_slice( $g['without'], 0, 20 ) ) );
 		$cells[] = array(
-			'type'  => 'Resources guides (own Rank Math FAQ block)',
+			'type'  => 'Resources guides',
 			'total' => esc_html( number_format_i18n( $g['total'] ) ),
 			'faq'   => esc_html( number_format_i18n( $g['faq'] ) ),
 			'none'  => esc_html( number_format_i18n( count( $g['without'] ) ) ) . ( $links ? ': ' . $links : '' ),
@@ -1154,7 +1259,7 @@ function aw_faq_admin_page() {
 		array( 'type' => 'Type', 'total' => 'Published', 'faq' => 'With FAQ', 'holdout' => 'Holdout (no FAQ)', 'none' => 'Fewer than 3 questions (no FAQ)', 'sizes' => 'Questions per FAQ' ),
 		$cells
 	);
-	echo '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'tools.php' ) ) ) . '">Count again</a></p>';
+	echo '<p><a href="' . esc_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'admin.php' ) ) ) . '">Count again</a></p>';
 
 	echo '<h2>Experiment</h2><p>' . ( ! empty( $e['on'] ) ? 'Running' : 'Rolled out: every eligible page shows its FAQ' ) . '. ' . (int) $e['pct'] . '% of eligible listings and Library documents (random, stable by ID) show no FAQ, from ' . aw_date( $e['start'] ) . ' for ' . (int) $e['weeks'] . ' weeks (to ' . aw_date( $end ) . '). Compare in Search Console (queries with "contact number", "pdf", "in hindi", "address") and GA4 (sessions from chatgpt.com, perplexity.ai, gemini.google.com) by page: the page lists are <code>wp aw-faq holdout</code>; GA4 also gets <code>faq_group</code> (faq, holdout, none) in the page context.</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_faq_rollout">' . wp_nonce_field( 'aw_faq_rollout', '_wpnonce', true, false ) . ( ! empty( $e['on'] ) ? '<button class="button">Roll out to 100% (end the holdout)</button>' : '<input type="hidden" name="on" value="1"><button class="button">Restart the holdout</button>' ) . '</form>';
@@ -1189,6 +1294,43 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		'aw-faq',
 		function ( $args, $assoc ) {
 			$cmd = $args[0] ?? 'report';
+			if ( 'convert-guides' === $cmd ) { // Rank Math FAQ blocks on guides → their own FAQ (owner, 25 Oct 2026)
+				$dry = ! empty( $assoc['dry-run'] );
+				$tot = array( 0, 0, 0, 0 );
+				foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
+					$r = aw_faq_convert_rank_math( $id, $dry );
+					if ( null === $r ) {
+						continue;
+					}
+					WP_CLI::line( sprintf( '%d %s: %d questions%s%s', $id, get_post_field( 'post_name', $id ), $r[0], $r[1] ? ", $r[1] over 50 words" : '', $r[2] ? ", $r[2] with more than one link" : '' ) . ( $r[0] > AW_FAQ_MAX ? ', MORE THAN ' . AW_FAQ_MAX . ': only the first ' . AW_FAQ_MAX . ' show' : '' ) );
+					++$tot[0];
+					$tot[1] += $r[0];
+					$tot[2] += $r[1];
+					$tot[3] += $r[2];
+				}
+				delete_transient( 'aw_faq_counts' );
+				WP_CLI::success( ( $dry ? 'Would convert ' : 'Converted ' ) . "$tot[0] guides, $tot[1] questions ($tot[2] over 50 words, $tot[3] with more than one link: kept as written)." );
+				return;
+			}
+			if ( 'undo-guide' === $cmd ) { // put a converted guide's Rank Math block back and remove the moved questions
+				$id  = (int) ( $args[1] ?? 0 );
+				$old = (string) get_post_meta( $id, '_aw_faq_rm_block', true );
+				if ( '' === $old ) {
+					WP_CLI::error( "Nothing to undo for $id." );
+				}
+				$GLOBALS['aw_faq_converting'] = true;
+				wp_update_post(
+					array(
+						'ID'           => $id,
+						'post_content' => wp_slash( get_post_field( 'post_content', $id ) . "\n\n" . $old ),
+					)
+				);
+				$GLOBALS['aw_faq_converting'] = false;
+				delete_post_meta( $id, 'aw_faq' );
+				delete_post_meta( $id, '_aw_faq_rm_block' );
+				WP_CLI::success( "Restored the Rank Math FAQ block on $id (at the end of the content; it is converted again on its next save)." );
+				return;
+			}
 			if ( 'import' === $cmd ) {
 				$data = json_decode( (string) file_get_contents( $args[1] ?? '' ), true );
 				if ( ! is_array( $data ) ) {
@@ -1314,3 +1456,6 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	);
 }
+
+// Old Tools addresses lead to the AW SEO Plus menu (animal-writes-core admin-ia.php redirects them).
+add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-faq' => 'admin.php' ) );

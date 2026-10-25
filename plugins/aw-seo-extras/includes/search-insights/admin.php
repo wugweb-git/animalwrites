@@ -31,7 +31,7 @@ function aw_si_url( string $tab = 'overview' ): string {
 			'page' => AW_SI_SLUG,
 			'tab'  => $tab,
 		),
-		admin_url( 'tools.php' )
+		admin_url( 'admin.php' )
 	);
 }
 
@@ -78,7 +78,8 @@ function aw_si_tab(): string {
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_management_page( __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		// Under AW SEO Plus (owner, 25 Oct 2026), after FAQ; the old Tools address redirects (aw_admin_moved_pages below).
+		$hook = add_submenu_page( 'aw-faq', __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
@@ -96,7 +97,7 @@ add_action(
 	100
 );
 
-add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-search-demand' => 'tools.php' ) ); // Its older Settings address → Tools (admin-ia.php).
+add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-search-demand' => 'tools.php', AW_SI_SLUG => 'admin.php' ) ); // Search demand's older Settings address → Tools; Search Insights' Tools address → AW SEO Plus (admin-ia.php).
 
 add_filter(
 	'set_screen_option_aw_si_keywords_per_page',
