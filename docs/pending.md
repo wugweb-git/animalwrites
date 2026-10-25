@@ -14,6 +14,12 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Footer "FAQ" link** (Explore menu → /resources/animal-welfare-faqs/): waiting for the owner's yes.
 - **Replacing thumbnail pictures (later, owner):** the 25 Oct run on the 19 listings with WordPress thumbnails found the full-size pictures, but the site keeps any existing picture (fill-empty rule). Proposed: an existing picture whose source was a WordPress thumbnail (-WxH) or under ~300 px counts as replaceable; owner to choose apply-with-Undo or review. Listing IDs: 409, 661, 684, 1186, 1220, 1779, 2009, 3237, 9084, 16470, 17935, 17985, 18017, 18027, 18037, 18184, 18186, 18191, 18241.
 
+- **Admin menus, after #72 (owner to decide):**
+  - Hidden backup pages reachable only by URL: Volunteers (backup), Newsletter, Not subscribed (animal-writes-core; FluentCRM is the main copy since 17 Oct). Give them a menu place (e.g. Tools → Old data backups) or delete the pages (tables stay)?
+  - Old mail webhook `aw/v1/mail-in` (animal-writes-core `mailweb-aw.php`): remove once hPanel → Emails → each mailbox → Webhooks shows only `mailweb/v1/mail-in` (owner checks hPanel).
+  - "Campaigns" taxonomy label (`aw_campaign_link`, under seven menus) clashes with the Campaigns menu: new label needed (e.g. "Linked campaigns"; copy, owner's words).
+  - AW Sourcing's screens are in five places (Settings → Sourcing, Inbox → To review, Directory → Enrichment review, a Search Insights tab, Site Health); Inbox exists only for To review. For the sourcing session.
+
 ### Claude Code: next work (bigger work: own branch + PR + review gate; small fixes straight onto wordpress-dev)
 - **Rankings, last 48 queries (26 Oct):** from query 83 "rabies vaccine" (Google CAPTCHA at 83 on 25 Oct); after a gap of several hours; stop at any CAPTCHA. Add to `Claude outputs/rankings-2026-10-25-part2.csv`, then compare all 130 with 21 Oct. Recheck "dog breeding and marketing rules 2017" (4 → 7) on 17 Nov.
 - **Search Insights phase 3:** `SI_LIVE=true` set 25 Oct; after the 26 Oct 08:10 IST run, report whether Trends RSS, Wikipedia, GDELT and autocomplete answered and how many rising terms were saved.
