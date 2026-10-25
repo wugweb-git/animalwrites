@@ -426,15 +426,7 @@ function aw_press_campaign_tags( $id, $tags ) {
 	}
 }
 
-// Inbox → "Press to review": the pending items, with a count. Publish = approve; Move to Trash = reject (never comes back).
-add_action(
-	'admin_menu',
-	function () {
-		$n = (int) ( wp_count_posts( 'aw_press' )->pending ?? 0 );
-		add_submenu_page( 'aw-inbox', 'Press to review', 'Press to review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), 'edit_pages', 'edit.php?post_type=aw_press&post_status=pending' );
-	},
-	20
-);
+// Pending press items are reviewed in Inbox → To review (review-queue.php): publish = approve, Move to Trash = reject.
 add_filter( 'manage_aw_press_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'aw_thumb' => '', 'title' => 'Headline', 'aw_platform' => 'Platform', 'aw_account' => 'Publisher / account', 'aw_date' => 'Date', 'aw_query' => 'Found by', 'aw_link' => 'Link' ) );
 add_action(
 	'manage_aw_press_posts_custom_column',

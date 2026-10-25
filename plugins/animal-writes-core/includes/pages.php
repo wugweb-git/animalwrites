@@ -520,8 +520,8 @@ add_action(
 	}
 );
 
-// Inbox → Contact messages: an incoming email's "Reply" opens Inbox → Reply for that email (mail-reply.php); a form
-// message's "Reply" opens your own mail app with the sender and subject filled in (WordPress sends nothing).
+// Inbox → Contact messages: a message's "Reply" opens your own mail app with the sender and subject filled in (WordPress
+// sends nothing). The Inbox → Reply screen (mail-reply.php) was removed, with the branch that linked to it (audit item 17).
 add_filter(
 	'post_row_actions',
 	function ( $actions, $post ) {
@@ -529,9 +529,7 @@ add_filter(
 			return $actions;
 		}
 		$email = (string) get_post_meta( $post->ID, 'aw_m_email', true );
-		if ( function_exists( 'aw_reply_email_item' ) && aw_reply_email_item( $post->ID ) ) {
-			$actions = array( 'aw_reply' => '<a href="' . esc_url( aw_reply_url( $post->ID ) ) . '">Reply</a>' ) + $actions;
-		} elseif ( is_email( $email ) ) {
+		if ( is_email( $email ) ) {
 			$subject = preg_replace( '/^Email:\s*/', '', (string) get_post_field( 'post_title', $post->ID ) );
 			$actions = array( 'aw_reply' => '<a href="' . esc_url( 'mailto:' . rawurlencode( $email ) . '?subject=' . rawurlencode( 'Re: ' . $subject ) ) . '">Reply</a>' ) + $actions;
 		}
