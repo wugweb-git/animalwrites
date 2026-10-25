@@ -198,6 +198,9 @@ function aw_filter_values( $ids, $source ) {
 	if ( ! $ids ) {
 		return array();
 	}
+	if ( in_array( $source, array( 'place', 'publisher', 'press-format', 'resource-kind' ), true ) ) {
+		update_meta_cache( 'post', $ids ); // one query for all the items' meta, not one per item (audit 1, 19 Oct 2026)
+	}
 	if ( 'place' === $source ) {
 		foreach ( $ids as $id ) {
 			foreach ( aw_item_codes( $id )[0] as $c ) {
@@ -228,7 +231,6 @@ function aw_filter_values( $ids, $source ) {
 		}
 	} else {
 		if ( 'resource-kind' === $source ) { // "Sponsored" only when an item is sponsored
-			update_meta_cache( 'post', $ids );
 			foreach ( $ids as $id ) {
 				if ( get_post_meta( $id, 'aw_sponsored', true ) ) {
 					$seen['sponsored'][ $id ] = 1;
