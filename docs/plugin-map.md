@@ -6,6 +6,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 
 | File | What it does |
 |---|---|
+| `admin-home.php` | The Animal Writes menu (Overview, Dates, Check site, Contact links) and Animal Writes → Overview: every feature by group with where to find it and live status (backup, site check, scheduled tasks, deploy, CDN, staging, next date, To review), dashboard widgets, WP-CLI commands. Overview link on the Plugins screen. |
 | `admin-ia.php` | WP Admin information architecture (Phase 11 J): menu order, Classification (Categories, Tags), Inbox (To review from AW Sourcing), labels that match the site. No old-address redirects (owner, 25 Oct 2026); retired lists (Contact messages, Listing claims, Reports) are out of the menu, their items keep their data. |
 | `also-reported.php` | "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold in aw-sourcing). |
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
@@ -35,7 +36,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `reports.php` | "Report a mistake" for every page (owner, 21 Oct 2026): /report/?item=<ID> from any listing, News, Library or Resource item (/report/?listing=<ID> still works); opened on its own it asks for the page link. |
 | `retention.php` | Retention: nothing is ever deleted. Old items are archived instead, and stay reachable at their URL. |
 | `sections.php` | Section header for archives: [aw_section_head]. Title, one-line description, live count and a three-image visual built from real content in that section. |
-| `site-check.php` | "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page. Results show on Tools → Check site. Nothing is changed. |
+| `site-check.php` | Animal Writes → Check site (and the admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page. Results show on Tools → Check site. Nothing is changed. |
 | `sources-config.php` | The sourcing lists (option aw_sources, seeded from data/sources-seed.json). Stays in core because the front end reads the section categories and tags from them; Settings → Sourcing edits them (aw-sourcing). |
 | `summary-rules.php` | The summary rules (option aw_summary_rules over data/summary-rules-default.json), the helpers the site uses (auto-review limits, search description, entities stored per item as aw_entities) and the whole summary on an item's own page. The workers' endpoint and the Settings tab are in aw-sourcing. |
 | `systems.php` | Shared list helpers, the list filters and the trust panel. The filter counts' item IDs are cached per type and filter set (aw_filter_ids: transients aw_lf_*, 12 h; generation option aw_lf_gen_{type} moves on save, trash, status, terms or filter meta). |
@@ -77,7 +78,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `sponsored-blocks.php` | Sponsored blocks (inserter group "Sponsored", owner 12 Oct 2026). |
 | `staging.php` | Staging site (staging.animalwrites.in): the same code and a copy of the database without personal data. |
 | `tags.php` | Labels are WordPress's own Tags (owner, 15 Oct 2026): Library types, Resource types, Opportunity types, Listing types and Services are tags (post_tag) on every section, at /tag/{slug}/, filtered on the hubs by ?tag=. |
-| `team-dates.php` | Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. |
+| `team-dates.php` | Animal Writes → Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. |
 | `term-page.php` | Category and tag pages (owner, 20 Oct 2026): one archive layout for every term. |
 | `thumbs.php` | Thumbnails never repeat (owner, 9 Oct 2026) — for content WE create. |
 
@@ -163,9 +164,10 @@ Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-ca
 | `image-context.php` | imageContext: an editor-facing note on the copy an image supports (Media Library). |
 | `landmarks.php` | Canvas landmarks (shell spec): every page has one <main id="main" tabindex="-1" aria-label="{page title}"> that the skip link targets (WordPress's own block-theme skip link uses the main's id), a sticky <header> and <foo |
 | `performance.php` | Page speed on the front end (Core Web Vitals): - jQuery (and jQuery Migrate) print at the end of the page instead of in the head, so they no longer hold back the first paint. |
-| `preview.php` | Preview: things only the site owner should see before they go public (sample items). |
+| `preview.php` | Kits → Preview: things only the site owner should see before they go public (sample items). |
 | `slugs.php` | Every published item has a slug: wp_publish_post() and direct status changes do not make one, and an item without a slug is left out of lists, search and the sitemap. |
-| `system-screen.php` | Appearance → Kits system: a read-only index of the design system, generated from kits-registry.json in the Kits master theme and in the site's child theme. |
+| `admin-home.php` | The Kits menu (Overview, Design system, Preview) and Kits → Overview: the design and branding of the active Kits theme and its child read live (colours, fonts, templates, parts, patterns, menus, style variations, registry), each linked to the Site Editor, and the plugin's features with their state. Overview link on the Plugins screen. |
+| `system-screen.php` | Kits → Design system: a read-only index of the design system, generated from kits-registry.json in the Kits master theme and in the site's child theme. |
 
 Removed on 8 Oct 2026 (dead): `testimonials.php` (1.0 testimonials, 0 items, exported), `launch.php` (one-time server setup and media restore, both finished), `media-pr.php` (retired settings screens). Their two shortcodes still in old Home content print nothing (`admin-ia.php`).
 

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AW_CORE_VERSION', '0.1.0' );
+define( 'AW_CORE_VERSION', '1.0.0' );
 define( 'AW_CORE_DIR', plugin_dir_path( __FILE__ ) );
 
 // No theme or plugin file editor in WP Admin: all code changes go through GitHub (S0.2).

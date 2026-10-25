@@ -75,7 +75,7 @@ class Kits_Simple_Table extends WP_List_Table {
 		$this->_column_headers = array( $this->get_columns(), array(), array(), $this->opts['primary'] );
 	}
 
-	/** A row with _after gets that row (ready HTML) under it, e.g. the Kits system's visual row. */
+	/** A row with _after gets that row (ready HTML) under it, e.g. the Design system's visual row. */
 	public function single_row( $item ) {
 		parent::single_row( $item );
 		if ( ! empty( $item['_after'] ) ) {
