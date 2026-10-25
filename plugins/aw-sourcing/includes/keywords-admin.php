@@ -343,9 +343,9 @@ add_action(
 		$n   = 0;
 		if ( 'add' === $op || 'edit' === $op ) {
 			$set = array(
-				'roles'      => aw_sourcing_kw_bits( (array) wp_unslash( $_POST['kw_roles'] ?? array() ) ),
+				'roles'      => aw_sourcing_kw_bits( array_map( 'absint', (array) wp_unslash( $_POST['kw_roles'] ?? array() ) ) ),
 				'variants'   => sanitize_textarea_field( wp_unslash( $_POST['kw_variants'] ?? '' ) ),
-				'categories' => aw_sourcing_kw_cat_slugs( (array) wp_unslash( $_POST['post_category'] ?? array() ) ),
+				'categories' => aw_sourcing_kw_cat_slugs( array_map( 'absint', (array) wp_unslash( $_POST['post_category'] ?? array() ) ) ),
 				'sections'   => array_values( array_intersect( array_map( 'sanitize_key', (array) wp_unslash( $_POST['kw_sections'] ?? array() ) ), array_keys( aw_sourcing_kw_sections() ) ) ),
 			);
 			if ( 'edit' === $op ) {
