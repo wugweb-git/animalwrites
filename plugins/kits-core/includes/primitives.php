@@ -209,32 +209,3 @@ function kits_dd_render( $html ) {
 	return function_exists( 'wp_interactivity_process_directives' ) ? wp_interactivity_process_directives( $html ) : $html;
 }
 
-/**
- * One filter inside the combined "Filters" menu (used when a list has more than two filters): a fold with the filter's
- * name (and how many are chosen) and its checkboxes.
- */
-function kits_filter_section( $legend, $param, $options ) {
-	$options  = array_values( array_filter( $options, fn( $o ) => ! empty( $o[2] ) || (int) ( $o[3] ?? 0 ) > 0 ) );
-	$selected = count( array_filter( $options, fn( $o ) => ! empty( $o[2] ) ) );
-	if ( count( $options ) <= 1 && ! $selected ) {
-		return '';
-	}
-	$html = '<details class="kit-dd-section"' . ( $selected ? ' open' : '' ) . '><summary><span>' . esc_html( $legend ) . '</span>' . ( $selected ? ' ' . kits_count( $selected ) : '' ) . '<span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></summary><fieldset><legend class="screen-reader-text">' . esc_html( $legend ) . '</legend><ul class="kit-dd-list">';
-	foreach ( $options as $o ) {
-		$html .= '<li><label class="kit-dd-opt"><input type="checkbox" class="kit-dd-check" name="' . esc_attr( $param ) . '[]" value="' . esc_attr( $o[1] ) . '"' . checked( ! empty( $o[2] ), true, false ) . '><span class="kit-dd-text">' . esc_html( $o[0] ) . '</span>' . kits_count( (int) $o[3] ) . '</label></li>';
-	}
-	return $html . '</ul></fieldset></details>';
-}
-
-/** The combined "Filters" menu: one button; inside, each filter type as a fold. */
-function kits_filter_menu( $sections, $chosen ) {
-	if ( '' === trim( $sections ) ) {
-		return '';
-	}
-	$id   = 'kit-dd-filters-' . wp_unique_id();
-	$html = kits_dd_open( $id, 'kit-dd--menu' ) . '<button type="button" class="kit-dd-btn' . ( $chosen ? ' is-chosen' : '' ) . '" aria-controls="' . esc_attr( $id ) . '" aria-expanded="false" data-wp-bind--aria-expanded="callbacks.isOpen" data-wp-on--click="actions.toggle"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span><span class="kit-dd-label">Filters</span>'
-		. ( $chosen ? ' ' . kits_count( $chosen ) . '<span class="screen-reader-text"> chosen</span>' : '' ) . '<span class="kit-ico kit-ico--chevron-down" aria-hidden="true"></span></button>'
-		. '<div class="kit-dd-panel kit-dd-panel--menu" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen">' . $sections . '<div class="kit-dd-menu-actions"><button type="submit" class="kit-btn kit-btn--sm">Apply</button></div></div>';
-	return kits_dd_render( $html . '</div>' );
-}
-

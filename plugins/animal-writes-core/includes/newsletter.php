@@ -87,12 +87,6 @@ function aw_nl_link( $do, $token ) {
 	return add_query_arg( array( 'aw_nl' => $do, 't' => $token ), home_url( '/' ) );
 }
 
-/** Plain-text email with the unsubscribe line every message carries. */
-function aw_nl_mail( $to, $subject, $body, $token ) {
-	$body .= "\n\n--\nTo stop these emails: " . aw_nl_link( 'unsubscribe', $token );
-	return wp_mail( $to, $subject, $body, array( 'List-Unsubscribe: <' . aw_nl_link( 'unsubscribe', $token ) . '>' ) );
-}
-
 /* ---------- Sign-up form: [aw_newsletter] ---------- */
 
 function aw_newsletter_form() {
