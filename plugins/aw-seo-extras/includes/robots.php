@@ -9,6 +9,7 @@
  * - Directory district × type pages with no listings (AW_THIN_DISTRICT_TYPE = 1): noindex.
  * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
+ * - Every RSS/Atom feed (posts, News, Opportunities, Library, comments): X-Robots-Tag noindex, links followed (owner, 25 Oct 2026).
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
  *
@@ -150,3 +151,6 @@ add_filter(
 
 // "?press=all" lists every item on the profile: the same page, kept out of the index.
 add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
+
+// Feeds stay out of the index (owner, 25 Oct 2026): a header, as a feed has no <head>.
+add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header( 'X-Robots-Tag: noindex, follow' ) : null, 0 );
