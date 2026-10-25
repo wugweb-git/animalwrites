@@ -222,7 +222,7 @@ function aw_enrich_sanitize( $key, $v ) {
  * @return mixed
  */
 function aw_enrich_current( $lid, $field ) {
-	$def = aw_enrich_fields()[ $field ] ?? null;
+	$def = aw_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return '';
 	}
@@ -258,7 +258,7 @@ function aw_enrich_current( $lid, $field ) {
 
 /** Raw state of the store a field lives in, for undo. */
 function aw_enrich_snapshot( $lid, $field ) {
-	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
 			return array( 'rows' => aw_listing_phones( $lid ), 'unv' => aw_unverified_list( $lid ) );
@@ -287,7 +287,7 @@ function aw_enrich_snapshot( $lid, $field ) {
 
 /** Put a snapshot back (undo). */
 function aw_enrich_restore( $lid, $field, $snap ) {
-	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
 			$rows = isset( $snap['rows'] ) ? (array) $snap['rows'] : (array) $snap; // older rows kept the list alone
@@ -339,7 +339,7 @@ function aw_enrich_restore( $lid, $field, $snap ) {
  * @return bool
  */
 function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = array() ) {
-	$def = aw_enrich_fields()[ $field ] ?? null;
+	$def = aw_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return false;
 	}
@@ -423,7 +423,9 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 		case 'merge':
 			return false; // never written as a value: an approved merge runs aw_enrich_merge()
 		default:
-			$v = aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
+			$v = isset( $def[3] ) // a listing field from the field group (phase 3): cleaned by its ACF type
+				? aw_enrich_acf_value( $def[3], is_array( $value ) ? implode( ', ', $value ) : (string) $value )
+				: aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
 			if ( '' === $v ) {
 				return false;
 			}
@@ -622,30 +624,23 @@ function aw_enrich_both_note( $field ) {
 const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
 
 /**
- * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website: keep it next to what
- * is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified listings, and any
- * other field that already has a value).
+ * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website, list fields: keep it
+ * next to what is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified
+ * listings, and any other field that already has a value). Claimed, verified and low-confidence always wait; the rest
+ * follows the field's apply rule (Rules → Directory enrichment → Field rules, phase 3; seeded from the rules that were
+ * written here: closed and merge_into always to review, a merge being the owner's decision, 25 Oct 2026).
  */
 function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
-	if ( $protected || 'low' === $conf || 'closed' === $field || 'merge_into' === $field ) {
-		return 'queue'; // a merge is always the owner's decision (25 Oct 2026)
-	}
-	if ( 'place' === $field ) {
-		return aw_enrich_place_fills( $lid, $value ) ? 'apply' : 'queue';
-	}
-	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
-		return aw_listing_phones( $lid ) ? 'both' : 'apply';
-	}
-	if ( aw_enrich_is_empty( $lid, $field ) ) {
-		return 'apply';
-	}
-	if ( in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ) {
-		return 'both'; // The value is the union (aw_enrich_union): it only adds.
-	}
-	if ( isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ) ) {
-		return 'both';
-	}
-	return 'queue';
+	return aw_enrich_mode_decide(
+		$field,
+		(string) aw_enrich_field_rule( $field )['apply'],
+		$conf,
+		$protected,
+		fn() => aw_enrich_is_empty( $lid, $field ),
+		fn() => (bool) aw_listing_phones( $lid ),
+		fn() => isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ),
+		fn() => aw_enrich_place_fills( $lid, $value )
+	);
 }
 
 /* ---------- Rows ---------- */
@@ -1019,15 +1014,22 @@ add_action(
 	}
 );
 
-/** GET enrich/config. */
+/** GET enrich/config. From phase 3 also the Directory schema, the trust order and the field rules (rules.php). */
 function aw_enrich_rest_config() {
-	return array(
+	$out = array(
 		'sources'      => aw_enrich_sources_on(),
 		'google_spent' => aw_enrich_spent( 'worker' ),
-		'fields'       => array_keys( aw_enrich_fields() ),
+		'fields'       => array_keys( aw_enrich_fields_all() ),
 		'services'     => AW_SERVICES,
 		'counts'       => aw_enrich_progress(),
 	);
+	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
+		$rules              = aw_enrich_field_rules();
+		$out['schema']      = aw_enrich_schema();
+		$out['priority']    = $rules['priority'];
+		$out['field_rules'] = (object) $rules['fields'];
+	}
+	return $out;
 }
 
 /** How far the worker has got: listings checked / total, and pending reviews. */
@@ -1127,7 +1129,7 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 function aw_enrich_listing_payload( $id ) {
 	list( $state, $district ) = aw_listing_place( $id );
 	$now = array();
-	foreach ( array_keys( aw_enrich_fields() ) as $f ) {
+	foreach ( array_keys( aw_enrich_fields_all() ) as $f ) {
 		$v = aw_enrich_current( $id, $f );
 		if ( ( is_array( $v ) && $v ) || ( ! is_array( $v ) && '' !== trim( (string) $v ) ) ) {
 			$now[ $f ] = $v;
@@ -1168,7 +1170,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	}
 	$run       = sanitize_text_field( (string) ( $b['run'] ?? '' ) );
 	$protected = aw_enrich_is_protected( $lid );
-	$fields    = aw_enrich_fields();
+	$fields    = aw_enrich_fields_all(); // with the listing fields whose field rule is on (phase 3)
 	$out       = array( 'applied' => array(), 'queued' => array(), 'skipped' => array(), 'failed' => array() ); // skipped: nothing to do (already held, not usable); failed: a write that did not work, logged as a 'failed' row
 	if ( ! empty( $b['google_cost'] ) ) {
 		aw_enrich_spend( (float) $b['google_cost'], 'worker' );
@@ -1196,6 +1198,18 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		if ( ! isset( $fields[ $field ] ) || 'closed' === $field || ( is_string( $value ) && '' === trim( $value ) ) || ( is_array( $value ) && ! $value ) ) {
 			$out['skipped'][] = $field;
 			continue;
+		}
+		$rule = aw_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or sources not allowed to fill it
+		if ( empty( $rule['on'] ) ) {
+			$out['skipped'][] = $field;
+			continue;
+		}
+		if ( $rule['sources'] ) { // a source not allowed is never credited; nothing left from an allowed one: skipped
+			$srcs = aw_enrich_allowed_sources( $srcs, $rule['sources'] );
+			if ( ! $srcs ) {
+				$out['skipped'][] = $field;
+				continue;
+			}
 		}
 		if ( ! array_filter( $srcs, fn( $s ) => 'google_places' !== $s['key'] ) && ! in_array( $field, array( 'place_id', 'maps_url' ), true ) ) {
 			$out['skipped'][] = $field; // Google alone never stores a fact
@@ -1341,6 +1355,20 @@ function aw_enrich_policy_pass() {
 		if ( aw_enrich_identity_unresolved( $lid ) ) {
 			++$n['queue'];
 			continue;
+		}
+		// The field rule as it is now (Codex, #77): a field switched off, or a row with no allowed source left, waits for
+		// a reviewer instead of being applied; an allowed row is written with its allowed sources only.
+		$rule = aw_enrich_field_rule( $r['field'] );
+		if ( empty( $rule['on'] ) ) {
+			++$n['queue'];
+			continue;
+		}
+		if ( $rule['sources'] ) {
+			$r['sources'] = aw_enrich_allowed_sources( (array) $r['sources'], $rule['sources'] );
+			if ( ! $r['sources'] ) {
+				++$n['queue'];
+				continue;
+			}
 		}
 		$svc_note = '';
 		if ( 'services' === $r['field'] ) {

@@ -52,6 +52,9 @@ require_once AW_SOURCING_DIR . 'includes/news-titles.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-cleanup.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-admin.php';
+require_once AW_SOURCING_DIR . 'includes/rules-model.php'; // sourcing restructure phase 3: Rules
+require_once AW_SOURCING_DIR . 'includes/rules.php';
+require_once AW_SOURCING_DIR . 'includes/rules-admin.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-front.php';
 require_once AW_SOURCING_DIR . 'includes/review-queue.php';
 require_once AW_SOURCING_DIR . 'includes/keyword-suggestions.php';
@@ -60,6 +63,7 @@ require_once AW_SOURCING_DIR . 'includes/site-health.php';
 require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
+require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';

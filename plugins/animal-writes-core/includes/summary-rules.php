@@ -42,7 +42,12 @@ function aw_summary_rules() {
 	foreach ( $saved as $k => $v ) {
 		if ( 'sections' === $k && is_array( $v ) ) {
 			foreach ( $v as $name => $sec ) {
+				// From the sourcing restructure's phase 3 the sections are stored by post type (aw_news, aw_legal, post)
+				// with their old name as alias (news, library, research): read by that name, so every reader sees the
+				// same rules. A section of another post type (its own rule, or inherit) is read by aw-sourcing's Rules.
+				$name = is_array( $sec ) && ! isset( $out['sections'][ $name ] ) ? (string) ( $sec['alias'] ?? '' ) : $name;
 				if ( is_array( $sec ) && isset( $out['sections'][ $name ] ) ) {
+					unset( $sec['alias'], $sec['inherit'] );
 					$out['sections'][ $name ] = array_merge( $out['sections'][ $name ], array_filter( $sec, fn( $x ) => '' !== $x && array() !== $x ) );
 				}
 			}

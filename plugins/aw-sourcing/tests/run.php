@@ -26,6 +26,7 @@ function wp_strip_all_tags( $s ) {
 require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/keyword-model.php';
 require dirname( __DIR__ ) . '/includes/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords-model.php';
+require dirname( __DIR__ ) . '/includes/rules-model.php';
 
 $fails = 0;
 $count = 0;
@@ -364,7 +365,7 @@ $kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 
 $kw_us = aw_kw_searches( $kw_up, array() );
 aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
 
-echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
+require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
