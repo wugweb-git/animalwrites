@@ -986,14 +986,19 @@ function aw_seo_tag_keyword( $term ) {
 /**
  * Keep each tag's Rank Math title, description, focus keyword and robots equal to the ones built here (marked automatic
  * in _aw_seo_auto), so the Rank Math box shows what is printed and every tag is indexed (owner, 21 Oct 2026).
- * A typed title, description or keyword is never replaced. Daily, when a tag is added or saved, and from WP-CLI:
- * `wp eval 'print_r( aw_seo_sync_tags() );'`.
+ * A typed title, description or keyword is never replaced. Daily and from WP-CLI for every tag
+ * (`wp eval 'print_r( aw_seo_sync_tags() );'`); when a tag is added or saved, for that tag only (plugin audit 12).
  *
+ * @param int $term_id Only this tag (0: every tag).
  * @return array slug => [title, description, robots].
  */
-function aw_seo_sync_tags() {
-	$out = array();
-	foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) ) as $term ) {
+function aw_seo_sync_tags( $term_id = 0 ) {
+	$out  = array();
+	$args = array( 'taxonomy' => 'post_tag', 'hide_empty' => false );
+	if ( (int) $term_id > 0 ) {
+		$args['include'] = array( (int) $term_id );
+	}
+	foreach ( get_terms( $args ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$want  = array(
 			'title'         => aw_seo_term_title( $term ), // plain text, 55–58 characters
@@ -1019,5 +1024,5 @@ function aw_seo_sync_tags() {
 	return $out;
 }
 add_action( 'aw_seo_fill_daily', 'aw_seo_sync_tags', 31 );
-add_action( 'created_post_tag', fn() => aw_seo_sync_tags(), 30 );
-add_action( 'edited_post_tag', fn() => aw_seo_sync_tags(), 30 );
+add_action( 'created_post_tag', fn( $term_id ) => aw_seo_sync_tags( (int) $term_id ), 30 );
+add_action( 'edited_post_tag', fn( $term_id ) => aw_seo_sync_tags( (int) $term_id ), 30 );

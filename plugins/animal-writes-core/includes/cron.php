@@ -17,8 +17,27 @@ function aw_cron_schedule() {
 	}
 }
 
+/**
+ * On deactivation: every repeating event of Core and the code it loads (Kits Core, AW Sourcing), so none is left
+ * scheduled without its callback (plugin audit 23). Each is scheduled again on init when the plugin is turned back on.
+ * One-off events (a geocode, a rescan) are left: they run once and are gone.
+ */
 function aw_cron_unschedule() {
-	wp_clear_scheduled_hook( 'aw_daily' );
+	$hooks = array(
+		'aw_daily',
+		'aw_daily_backup',     // backups.php
+		'aw_cc0_run',          // cc0-images.php
+		'aw_raw_prune',        // campaign-form.php
+		'aw_fetch_favicons',   // kits-core attribution.php
+		'kits_spot_map_daily', // kits-core system-screen.php
+		'aw_ai_check_all',     // aw-sourcing ai-keys.php
+		'aw_workers_watchdog', // aw-sourcing workers.php
+		'aw_ingest_watchdog',  // aw-sourcing relevance.php
+		'aw_sourcing_site_meta', // aw-sourcing source-sites.php (AW_SOURCING_SITE_META_CRON)
+	);
+	foreach ( $hooks as $hook ) {
+		wp_clear_scheduled_hook( $hook ); // the no-argument (repeating) events only: a queued one-off with arguments, such as the workers' end-of-run report (aw_workers_watchdog, 'report'), still runs
+	}
 }
 
 /**

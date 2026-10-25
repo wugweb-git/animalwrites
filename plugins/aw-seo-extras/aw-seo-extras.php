@@ -53,5 +53,9 @@ register_deactivation_hook(
 		foreach ( function_exists( 'aw_si_cron_hooks' ) ? aw_si_cron_hooks() : array( 'aw_si_daily', 'aw_si_rollup' ) as $hook ) {
 			wp_clear_scheduled_hook( $hook );
 		}
+		// The SEO jobs too (plugin audit 23): titles.php, health.php.
+		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog' ) as $hook ) {
+			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
+		}
 	}
 );

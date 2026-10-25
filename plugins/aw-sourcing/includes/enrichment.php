@@ -444,7 +444,7 @@ function aw_enrich_sideload( $url, $lid, $alt ) {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	require_once ABSPATH . 'wp-admin/includes/media.php';
-	$tmp = download_url( $url, 20 );
+	$tmp = aw_source_download( $url, 20 ); // cc0-images.php; core download_url() fails fatally on a doubled content-type
 	if ( is_wp_error( $tmp ) ) {
 		return 0;
 	}

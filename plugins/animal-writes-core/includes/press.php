@@ -323,13 +323,13 @@ function aw_press_site_logo( $url ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = download_url( $icon, 15 );
+	$tmp = aw_source_download( $icon, 15 );
 	if ( is_wp_error( $tmp ) || ! wp_get_image_mime( $tmp ) || filesize( $tmp ) < 100 ) { // the site refused: Google's favicon service, as on News
 		if ( ! is_wp_error( $tmp ) ) {
 			wp_delete_file( $tmp );
 		}
 		$icon = 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host ) . '&.png';
-		$tmp  = download_url( $icon, 15 );
+		$tmp  = aw_source_download( $icon, 15 );
 	}
 	$id  = 0;
 	if ( ! is_wp_error( $tmp ) ) {
