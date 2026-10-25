@@ -459,7 +459,7 @@ function aw_directory_filter( $type = '' ) {
 		. aw_directory_service_field( $field )
 		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Verified only</label>' : '' )
 		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'fold' ) : '' ) // folded before the first paint on phones (no layout shift)
-		. '<div class="aw-dir-submit"><input type="hidden" name="aw_filter" value="1"><button type="submit" class="kit-btn">Search</button></div>'
+		. '<div class="aw-dir-submit"><input type="hidden" name="aw_filter" value="1"><button type="submit" class="kit-btn kit-btn--brand">Search</button></div>'
 		. '</form>';
 }
 add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
