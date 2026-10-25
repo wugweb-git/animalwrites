@@ -32,11 +32,11 @@ Library official releases and circulars (owner, 25 Oct 2026): "When was the … 
 
 Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Four fields were added for Library documents (box "FAQ fields"): Short name (`aw_short_name`), Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
 
-Resources guides keep their own Rank Math FAQ block; AW SEO Plus → FAQ counts them in a row of their own (guides with and without one; research summaries are not counted, as Research gets no FAQ).
+Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides with and without an FAQ; research summaries are not counted, as Research gets no FAQ). Since 25 Oct 2026 all 45 guides have one, including the 13 FIR state pages.
 
 ## Topic items
 
-Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`. Edited on the term screen, or in the "FAQ" box of a hub page or a Resources guide. Drafts are never shown. AW SEO Plus → FAQ (was AW SEO Plus → FAQ; the old address redirects) lists every draft with its sources; tick and Approve.
+Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`. Edited on the term screen, or in the "FAQ" box of a hub page or a Resources guide. Drafts are never shown. AW SEO Plus → FAQ (was Tools → FAQ; the old address redirects) lists every draft with its sources; tick and Approve.
 
 ## Experiment
 
@@ -48,7 +48,7 @@ Compare after 6 weeks: Search Console impressions, clicks and CTR for queries co
 
 - `wp aw-faq report` — counts by type and group, questions per FAQ, drafts waiting.
 - `wp aw-faq convert-guides [--dry-run]` — move every guide's Rank Math FAQ block into its own FAQ (also happens on each save); flags answers over 50 words, more than one link, and FAQs over 6 questions (only the first 6 show). `wp aw-faq undo-guide <id>` reverses the latest conversion: the block back and the guide's FAQ as it was before.
-- `wp aw-faq check [--verbose]` — on every page: 3–6 questions or none, schema text = visible text, no duplicate question, ≤ 50 words, one link, holdout pages show none; reports pages whose focus keyphrase is in fewer than 2 questions.
+- `wp aw-faq check [--verbose]` — on every page: 3–6 questions or none (guides 2–6), schema text = visible text, no duplicate question, ≤ 50 words, one link, holdout pages show none; reports pages whose focus keyphrase is in fewer than 2 questions.
 - `wp aw-faq holdout` — CSV of eligible pages: url, type, group, questions.
 - `wp aw-faq import <file.json>` — add topic drafts (`{"post_tag:slug"|"category:slug"|"page:slug"|"library:slug": [{q, a, sources, keyword}]}`; `library:` is for letter templates); existing questions are kept.
 - `tools/ci/faq_live_check.py <url>…` — fetches live pages and compares the visible accordion with the FAQPage JSON-LD.
