@@ -840,20 +840,29 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 @media (max-width: 767px) { .kit-powered { margin-left: 0; } }
 .kit-footer :is(a, summary):focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 
-/* Footer on phones within one screen (owner, 25 Oct 2026; 375×812). Explore, Animal Writes and Newsletter are folds
+/* Footer on phones within one screen (owner, 25 Oct 2026; 375×812). Explore and Animal Writes are folds
    (details.kit-footer-fold, data-kit-fold="767"): open from 768 and without JavaScript, with the summary hidden and the
-   column title shown as before; under 768 the summary is the title (a 44px row with a chevron) and the fold starts
-   closed. Brand compact (address and social icons on one row); helplines keep their own rows; Categories stay plain
-   links, never folded, in one row that scrolls sideways; legal links and "Powered by" share a row. Height still
-   follows the content (footer_check.py). */
+   column title shown as before; under 768 the summary is the title (a 44px row with a chevron), the two folds sit side
+   by side and start closed, and an open fold takes the full width (links in two columns). The Newsletter is never folded
+   (owner, 25 Oct): its title shows and the form is compact (email and name side by side, aw.css). Brand compact: logo
+   with the visits line beside it, the line, then address and social icons on one row; helplines keep their own rows
+   (44px each); Categories stay plain links, never folded, in one row that scrolls sideways beside their title; legal
+   links and "Powered by" share a row. Height still follows the content (footer_check.py). */
 .kit-footer-fold > summary { display: none; }
 @media (max-width: 767px) {
 	.kit-site-footer.kit-footer { padding-top: var(--kit-space-4) !important; }
-	.kit-footer-grid { gap: 0; padding-bottom: var(--kit-space-2); }
-	.kit-footer-brand { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: var(--kit-space-2) var(--kit-space-4); padding-bottom: var(--kit-space-3); }
-	.kit-footer-brand > :is(.kit-wordmark, p) { grid-column: 1 / -1; }
-	.kit-footer-brand > .kit-socials { justify-self: end; }
-	.kit-footer-grid > :is(.kit-footer-col, .kit-footer-newsletter) > :is(.kit-footer-head, .kit-footer-nl-head) { display: none; }
+	.kit-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--kit-space-4); padding-bottom: var(--kit-space-2); }
+	.kit-footer-grid > :is(.kit-footer-brand, .kit-footer-newsletter), .kit-footer-grid:has(.kit-footer-fold[open]) > .kit-footer-col { grid-column: 1 / -1; }
+	.kit-footer-brand { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: var(--kit-space-1) var(--kit-space-3); padding-bottom: var(--kit-space-3); }
+	.kit-footer-brand > .kit-wordmark { grid-column: 1; grid-row: 1; }
+	.kit-footer-brand > .kit-wordmark img { width: auto; height: 36px; }
+	.kit-footer-brand > .kit-visits { grid-column: 2; grid-row: 1; justify-self: end; max-width: none; text-align: end; line-height: 1.4; }
+	.kit-footer-brand > p:not(.kit-visits) { grid-column: 1 / -1; grid-row: 2; max-width: none; font-size: var(--kit-type-sm); }
+	.kit-footer-brand > .kit-footer-mail { grid-column: 1; grid-row: 3; }
+	.kit-footer-brand > .kit-socials { grid-column: 2; grid-row: 3; justify-self: end; }
+	.kit-footer-grid > .kit-footer-col > .kit-footer-head { display: none; }
+	.kit-footer-newsletter { padding-top: var(--kit-space-3); border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
+	.kit-footer-nl-head { margin-bottom: var(--kit-space-2); }
 	.kit-footer-fold { border-top: var(--kit-border-width) solid var(--kit-footer-rule); }
 	.kit-footer-fold[open] { padding-bottom: var(--kit-space-3); }
 	.kit-footer-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-2); min-height: var(--kit-size-target); cursor: pointer; list-style: none; font-weight: var(--kit-weight-strong); color: var(--kit-color-on-ink); }
@@ -861,14 +870,15 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 	.kit-footer-fold > summary > .kit-ico { transition: transform var(--kit-motion-fast) var(--kit-motion-ease); }
 	.kit-footer-fold[open] > summary > .kit-ico { transform: rotate(180deg); }
 	.kit-footer-fold .kit-footer-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-4); }
-	.kit-footer-helprow { padding-bottom: var(--kit-space-4); }
-	.kit-footer-helplines a { min-height: var(--kit-size-target); padding: var(--kit-space-1) 0; }
+	.kit-footer-helprow { padding-bottom: var(--kit-space-3); }
+	.kit-footer-helplines a { min-height: var(--kit-size-target); padding: 0; }
 	.kit-footer-helplines strong { font-size: var(--kit-type-base); }
 	.kit-footer-help-what { font-size: var(--kit-type-xs); line-height: 1.4; }
 	.kit-footer-help-more { min-height: var(--kit-size-target); }
-	.kit-footer-cats { padding: var(--kit-space-3) 0; }
-	.kit-footer-cats .kit-footer-head { margin-bottom: var(--kit-space-2); }
-	.kit-footer-cats .aw-footer-list { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; margin-inline: calc(-1 * var(--kit-space-4)); padding: var(--kit-space-2) var(--kit-space-4); }
+	.kit-footer-cats { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-2) 0; }
+	.kit-footer-cats > .kit-footer-head { flex: none; margin: 0; }
+	.kit-footer-cats > nav { flex: 1; min-width: 0; }
+	.kit-footer-cats .aw-footer-list { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; margin-inline: 0 calc(-1 * var(--kit-space-4)); padding: var(--kit-space-2) var(--kit-space-4) var(--kit-space-2) 0; }
 	.kit-footer-cats .aw-footer-list::-webkit-scrollbar { display: none; }
 	.kit-footer-cats .aw-footer-list > li { flex: none; }
 	.kit-footer-bar { padding-top: var(--kit-space-2); }

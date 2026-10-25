@@ -556,7 +556,7 @@
 
 /* Folded sections (data-kit-fold): open on wide screens, folded at or below the width given (default 1199px), unless
    data-kit-keep-open (e.g. filters in use); open without JavaScript. A link to the fold, to a block around it or to
-   something in it (e.g. #newsletter, where the sign-up returns) opens it. */
+   something in it opens it. */
 (function () {
 	function targeted(d) {
 		var t = null;

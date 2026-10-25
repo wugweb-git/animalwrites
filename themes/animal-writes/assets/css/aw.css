@@ -810,6 +810,16 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-4) var(--kit-space-5); border: 0; border-left: var(--kit-border-accent) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
+/* Footer on phones (owner, 25 Oct 2026: the Newsletter stays open, the footer within one screen at 375×812): email and
+   name side by side with small labels, 44px fields, then Subscribe and the consent line across. Same order, nothing removed. */
+@media (max-width: 767px) {
+	.kit-footer-newsletter .aw-newsletter-form .frm-fluent-form fieldset { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2) var(--kit-space-3); }
+	.kit-footer-newsletter .aw-newsletter-form :is(.ff_submit_btn_wrapper, .ff-custom_html) { grid-column: 1 / -1; }
+	.kit-footer-newsletter .aw-newsletter-form .ff-el-input--label { margin-bottom: var(--kit-space-1); }
+	.kit-footer-newsletter .aw-newsletter-form .ff-el-input--label label { font-size: var(--kit-type-xs); }
+	.kit-footer-newsletter .aw-newsletter-form .ff-el-form-control { height: var(--kit-size-target); min-height: var(--kit-size-target); }
+	.kit-footer-newsletter .aw-newsletter-form .ff-btn-submit.kit-btn { min-height: var(--kit-size-target); }
+}
 /* Contact, Volunteer, Claim, Report and Remove my data in Fluent Forms (16 Oct 2026): the site's form look (kit-field),
  * in tokens. Fluent Forms' markup: .ff-el-group > .ff-el-input--label + .ff-el-input--content; errors in div.error. */
 .aw-form-ff .frm-fluent-form fieldset:not(.kit-step):not(.kit-check-group) { border: 0; padding: 0; margin: 0; min-width: 0; }
