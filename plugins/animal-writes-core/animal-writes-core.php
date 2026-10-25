@@ -41,6 +41,7 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
 require_once AW_CORE_DIR . 'includes/admin-home.php';
+require_once AW_CORE_DIR . 'includes/admin-tidy.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';
 require_once AW_CORE_DIR . 'includes/content-types.php';
