@@ -480,6 +480,10 @@ function aw_sourcing_kw_tab() {
 	}
 
 	echo '<form class="search-form wp-clearfix" method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="keywords">' . ( '' !== $view ? '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">' : '' );
+	$cat = sanitize_title( wp_unslash( $_GET['cat'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a list filter
+	if ( '' !== $cat ) { // a category-filtered view keeps its category when searching (Codex)
+		echo '<input type="hidden" name="cat" value="' . esc_attr( $cat ) . '">';
+	}
 	$table->search_box( 'Search keywords', 'aw-kw' );
 	echo '</form>';
 
