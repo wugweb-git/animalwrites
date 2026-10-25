@@ -185,12 +185,47 @@ function aw_enrich_listing_acf_fields() {
 	return is_array( $json ) ? (array) ( $json['fields'] ?? array() ) : array();
 }
 
-/** The Directory schema (rules-model.php aw_enrich_schema_build) for enrich/config. */
+/** The Directory schema (rules-model.php aw_enrich_schema_build) for enrich/config; built once per request. */
 function aw_enrich_schema() {
+	static $memo = null;
+	if ( null !== $memo && did_action( 'init' ) ) {
+		return $memo;
+	}
 	$secs  = function_exists( 'aw_sources_config' ) ? (array) ( aw_sources_config()['sections'] ?? array() ) : array();
 	$types = (array) ( $secs['aw_listing']['tags'] ?? array() );
-	return aw_enrich_schema_build( aw_enrich_listing_acf_fields(), aw_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
+	$out   = aw_enrich_schema_build( aw_enrich_listing_acf_fields(), aw_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
+	if ( did_action( 'init' ) ) {
+		$memo = $out;
+	}
+	return $out;
 }
+
+/**
+ * Listing fields added in wp-admin whose field rule is on (phase 3): field name => [label, meta key, group, ACF type],
+ * the shape of aw_enrich_fields(). Only types enrichment can write (AW_ENRICH_ACF_WRITABLE).
+ *
+ * @return array
+ */
+function aw_enrich_listing_extra_fields() {
+	if ( ! aw_rules_live() ) {
+		return array();
+	}
+	$rules = aw_enrich_field_rules()['fields'];
+	$out   = array();
+	foreach ( aw_enrich_schema()['fields'] as $f ) {
+		if ( $f['enrich'] || isset( aw_enrich_fields()[ $f['name'] ] ) || empty( $rules[ $f['name'] ]['on'] ) || '' !== aw_enrich_acf_not_writable( $f['type'] ) ) {
+			continue;
+		}
+		$out[ $f['name'] ] = array( $f['label'], $f['name'], 'Listing field', $f['type'] );
+	}
+	return $out;
+}
+
+/** Every field enrichment may fill: the built-in fields and the listing fields switched on in Field rules. */
+function aw_enrich_fields_all() {
+	return aw_enrich_fields() + aw_enrich_listing_extra_fields();
+}
+
 
 /* ---------- The sourcing policy: sections_v2 ---------- */
 

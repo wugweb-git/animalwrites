@@ -79,6 +79,50 @@ const AW_ENRICH_SPECIAL_ACF = array(
 	'photos' => 'aw_gallery',
 );
 
+/**
+ * ACF field types enrichment can write into a listing field added in wp-admin (one text value in post meta, as the
+ * built-in fields are written). Repeaters, galleries, files, images, choices and relations are left to people.
+ */
+const AW_ENRICH_ACF_WRITABLE = array( 'text', 'textarea', 'url', 'email', 'number', 'date_picker' );
+
+/**
+ * Why a listing field cannot be filled by enrichment ('' when it can).
+ *
+ * @param string $type ACF field type.
+ * @return string
+ */
+function aw_enrich_acf_not_writable( $type ) {
+	return in_array( (string) $type, AW_ENRICH_ACF_WRITABLE, true ) ? '' : sprintf( 'a %s field cannot be filled by enrichment (only text, text area, URL, email, number and date fields)', str_replace( '_', ' ', (string) $type ) );
+}
+
+/**
+ * A value for a listing field from the field group, cleaned by its ACF type ('' when it is not usable). Dates are
+ * stored as ACF stores them (Ymd). Uses WordPress's sanitizers (stubbed in tests/rules-tests.php).
+ *
+ * @param string $type  ACF field type.
+ * @param string $value Value.
+ * @return string
+ */
+function aw_enrich_acf_value( $type, $value ) {
+	$value = trim( (string) $value );
+	switch ( $type ) {
+		case 'url':
+			return (string) esc_url_raw( $value );
+		case 'email':
+			return (string) sanitize_email( $value );
+		case 'number':
+			return is_numeric( $value ) ? (string) ( $value + 0 ) : '';
+		case 'date_picker':
+			return preg_match( '/^(\d{4})-?(\d{2})-?(\d{2})$/', $value, $m ) && checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ? $m[1] . $m[2] . $m[3] : '';
+		case 'textarea':
+			return sanitize_textarea_field( $value );
+		case 'text':
+			return sanitize_text_field( $value );
+		default:
+			return ''; // not a type enrichment writes
+	}
+}
+
 /** The apply rules a field rule may have. */
 const AW_ENRICH_APPLY = array(
 	'empty'  => 'Fill an empty field (a value already there waits for review)',
@@ -455,8 +499,10 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
 			'group' => 'Listing field',
 			'store' => $f['name'],
 			'acf'   => true,
-			'rule'  => isset( $rules[ $f['name'] ] ) ? $rules[ $f['name'] ] : aw_enrich_rule_off(),
+			'rule'  => isset( $rules[ $f['name'] ] ) && '' === aw_enrich_acf_not_writable( $f['type'] ) ? $rules[ $f['name'] ] : aw_enrich_rule_off(),
 			'set'   => isset( $rules[ $f['name'] ] ),
+			'type'  => $f['type'],
+			'why'   => aw_enrich_acf_not_writable( $f['type'] ),
 		);
 	}
 	return $rows;

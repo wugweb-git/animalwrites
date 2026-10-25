@@ -222,7 +222,7 @@ function aw_enrich_sanitize( $key, $v ) {
  * @return mixed
  */
 function aw_enrich_current( $lid, $field ) {
-	$def = aw_enrich_fields()[ $field ] ?? null;
+	$def = aw_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return '';
 	}
@@ -258,7 +258,7 @@ function aw_enrich_current( $lid, $field ) {
 
 /** Raw state of the store a field lives in, for undo. */
 function aw_enrich_snapshot( $lid, $field ) {
-	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
 			return array( 'rows' => aw_listing_phones( $lid ), 'unv' => aw_unverified_list( $lid ) );
@@ -287,7 +287,7 @@ function aw_enrich_snapshot( $lid, $field ) {
 
 /** Put a snapshot back (undo). */
 function aw_enrich_restore( $lid, $field, $snap ) {
-	$def = aw_enrich_fields()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
 	switch ( $def[1] ) {
 		case 'phones':
 			$rows = isset( $snap['rows'] ) ? (array) $snap['rows'] : (array) $snap; // older rows kept the list alone
@@ -339,7 +339,7 @@ function aw_enrich_restore( $lid, $field, $snap ) {
  * @return bool
  */
 function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = array() ) {
-	$def = aw_enrich_fields()[ $field ] ?? null;
+	$def = aw_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return false;
 	}
@@ -423,7 +423,9 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 		case 'merge':
 			return false; // never written as a value: an approved merge runs aw_enrich_merge()
 		default:
-			$v = aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
+			$v = isset( $def[3] ) // a listing field from the field group (phase 3): cleaned by its ACF type
+				? aw_enrich_acf_value( $def[3], is_array( $value ) ? implode( ', ', $value ) : (string) $value )
+				: aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
 			if ( '' === $v ) {
 				return false;
 			}
@@ -1017,7 +1019,7 @@ function aw_enrich_rest_config() {
 	$out = array(
 		'sources'      => aw_enrich_sources_on(),
 		'google_spent' => aw_enrich_spent( 'worker' ),
-		'fields'       => array_keys( aw_enrich_fields() ),
+		'fields'       => array_keys( aw_enrich_fields_all() ),
 		'services'     => AW_SERVICES,
 		'counts'       => aw_enrich_progress(),
 	);
@@ -1127,7 +1129,7 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 function aw_enrich_listing_payload( $id ) {
 	list( $state, $district ) = aw_listing_place( $id );
 	$now = array();
-	foreach ( array_keys( aw_enrich_fields() ) as $f ) {
+	foreach ( array_keys( aw_enrich_fields_all() ) as $f ) {
 		$v = aw_enrich_current( $id, $f );
 		if ( ( is_array( $v ) && $v ) || ( ! is_array( $v ) && '' !== trim( (string) $v ) ) ) {
 			$now[ $f ] = $v;
@@ -1168,7 +1170,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	}
 	$run       = sanitize_text_field( (string) ( $b['run'] ?? '' ) );
 	$protected = aw_enrich_is_protected( $lid );
-	$fields    = aw_enrich_fields();
+	$fields    = aw_enrich_fields_all(); // with the listing fields whose field rule is on (phase 3)
 	$out       = array( 'applied' => array(), 'queued' => array(), 'skipped' => array(), 'failed' => array() ); // skipped: nothing to do (already held, not usable); failed: a write that did not work, logged as a 'failed' row
 	if ( ! empty( $b['google_cost'] ) ) {
 		aw_enrich_spend( (float) $b['google_cost'], 'worker' );

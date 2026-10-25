@@ -255,3 +255,37 @@ list( $tr, $bad ) = aw_rules_tag_rule_clean(
 aw_t( array( 'bad(' ) === $bad && array( 'ok' ) === $tr['hold'] && ! isset( $tr['hold_reason'] ), 'a hold pattern that does not compile is refused' );
 aw_t( ! aw_rules_pattern_ok( '\\h+lab' ) && ! aw_rules_pattern_ok( 'foo++' ) && ! aw_rules_pattern_ok( '(?>a)' ), 'PCRE-only patterns the workers cannot read are refused' );
 aw_t( aw_rules_pattern_ok( 'a\\~b' ) && aw_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && aw_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );
+
+// ---- listing fields added in wp-admin: which can be enabled, and how their values are written ----
+// WordPress's sanitizers, as plain stand-ins (no WordPress here).
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	function sanitize_text_field( $v ) { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed, WordPress.NamingConventions.PrefixAllGlobals -- a test stand-in for core's function
+		return trim( strip_tags( (string) $v ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test stand-in
+	}
+}
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	function sanitize_textarea_field( $v ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- a test stand-in for core's function
+		return trim( strip_tags( (string) $v ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- test stand-in
+	}
+}
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( $v ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- a test stand-in for core's function
+		return preg_match( '#^https?://#', (string) $v ) ? (string) $v : '';
+	}
+}
+if ( ! function_exists( 'sanitize_email' ) ) {
+	function sanitize_email( $v ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- a test stand-in for core's function
+		return filter_var( $v, FILTER_VALIDATE_EMAIL ) ? (string) $v : '';
+	}
+}
+aw_t( '' === aw_enrich_acf_not_writable( 'url' ) && '' !== aw_enrich_acf_not_writable( 'repeater' ) && '' !== aw_enrich_acf_not_writable( 'gallery' ), 'text-like ACF fields can be enabled; repeaters and galleries cannot' );
+aw_t( 'https://tiktok.com/@bc' === aw_enrich_acf_value( 'url', ' https://tiktok.com/@bc ' ) && '' === aw_enrich_acf_value( 'url', 'javascript:x' ), 'URL values cleaned' );
+aw_t( '20261025' === aw_enrich_acf_value( 'date_picker', '2026-10-25' ) && '' === aw_enrich_acf_value( 'date_picker', '2026-02-30' ), 'dates stored as ACF does (Ymd), impossible dates refused' );
+aw_t( '12' === aw_enrich_acf_value( 'number', '12' ) && '' === aw_enrich_acf_value( 'number', 'twelve' ) && '' === aw_enrich_acf_value( 'repeater', 'x' ), 'numbers checked; other types never written' );
+$acf3   = $acf['fields'];
+$acf3[] = array( 'name' => 'aw_tiktok', 'label' => 'TikTok', 'type' => 'url' );
+$acf3[] = array( 'name' => 'aw_branches', 'label' => 'Branches', 'type' => 'repeater' );
+$set    = $plan['field_rules']['fields'] + array( 'aw_tiktok' => array_merge( aw_enrich_rule_off(), array( 'on' => true, 'apply' => 'empty' ) ), 'aw_branches' => array_merge( aw_enrich_rule_off(), array( 'on' => true ) ) );
+$rows3  = aw_enrich_field_rule_rows( aw_enrich_schema_build( $acf3, $p3['enrich_fields'], 'g', array(), array() ), $p3['enrich_fields'], $set );
+aw_t( $rows3['aw_tiktok']['rule']['on'] && '' === $rows3['aw_tiktok']['why'], 'a URL field added in wp-admin can be switched on' );
+aw_t( false === $rows3['aw_branches']['rule']['on'] && '' !== $rows3['aw_branches']['why'], 'a repeater added in wp-admin stays off, with the reason shown' );

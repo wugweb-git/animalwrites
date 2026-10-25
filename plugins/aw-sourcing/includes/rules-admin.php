@@ -451,7 +451,7 @@ function aw_rules_field_rules_table() {
 				. '<div class="row-actions"><span class="edit"><a href="' . esc_url( $edit ) . '">Edit</a></span></div>',
 			'group'    => esc_html( $row['group'] ),
 			'store'    => '<code>' . esc_html( $row['store'] ) . '</code>' . ( $row['acf'] ? '' : ' <span class="description">(kept by code)</span>' ),
-			'on'       => $r['on'] ? 'On' : 'Off',
+			'on'       => '' !== ( $row['why'] ?? '' ) ? esc_html( 'Off: ' . $row['why'] ) : ( $r['on'] ? 'On' : 'Off' ),
 			'sources'  => $r['sources'] ? esc_html( implode( ', ', array_map( fn( $s ) => $names[ $s ] ?? $s, $r['sources'] ) ) ) : 'Any',
 			'multi'    => $r['multi'] ? esc_html( sprintf( 'Up to %d', (int) $r['multi'] ) ) : 'One',
 			'official' => '' !== $r['official'] ? esc_html( $names[ $r['official'] ] ?? $r['official'] ) : '—',
@@ -510,7 +510,8 @@ function aw_rules_field_form( $field ) {
 	wp_nonce_field( 'aw_rules_field_' . $field );
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">Field</th><td>' . esc_html( $row['label'] ) . ' <code>' . esc_html( $field ) . '</code> · ' . esc_html( $row['group'] ) . ' · stored in <code>' . esc_html( $row['store'] ) . '</code></td></tr>';
-	echo '<tr><th scope="row">On</th><td><label><input type="checkbox" name="rule[on]" value="1"' . checked( $r['on'], true, false ) . '> The worker may propose values for this field</label></td></tr>';
+	$why = (string) ( $row['why'] ?? '' );
+	echo '<tr><th scope="row">On</th><td><label><input type="checkbox" name="rule[on]" value="1"' . checked( $r['on'], true, false ) . disabled( '' !== $why, true, false ) . '> The worker may propose values for this field</label>' . ( '' !== $why ? '<p class="description">' . esc_html( ucfirst( $why ) . '.' ) . '</p>' : '' ) . '</td></tr>';
 	echo '<tr><th scope="row">May be filled by</th><td><fieldset><legend class="screen-reader-text">May be filled by</legend>';
 	foreach ( $srcs as $k => $s ) {
 		echo '<label><input type="checkbox" name="rule[sources][]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $r['sources'], true ), true, false ) . '> ' . esc_html( $s[0] ) . '</label><br>';
@@ -560,6 +561,9 @@ add_action(
 			'sources'  => array_map( 'sanitize_key', (array) ( $raw['sources'] ?? array() ) ),
 			'apply'    => sanitize_key( $raw['apply'] ?? '' ),
 		);
+		if ( '' !== ( $rows[ $field ]['why'] ?? '' ) ) {
+			$in['on'] = false; // a field type enrichment cannot write stays off
+		}
 		$old = $rows[ $field ]['rule'];
 		$new = aw_enrich_rule_clean( $field, $in, aw_enrich_source_keys(), $old );
 		if ( $new === $old && $rows[ $field ]['set'] ) {

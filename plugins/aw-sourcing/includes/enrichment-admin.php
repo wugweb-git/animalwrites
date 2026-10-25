@@ -91,7 +91,7 @@ add_action(
 /** Meta key => enrichment field. */
 function aw_enrich_meta_fields() {
 	$out = array();
-	foreach ( aw_enrich_fields() as $f => $def ) {
+	foreach ( aw_enrich_fields_all() as $f => $def ) {
 		$key         = array( 'phones' => 'aw_phones', 'hours' => 'aw_opening_hours', 'photos' => 'aw_gallery' )[ $def[1] ] ?? $def[1];
 		$out[ $key ] = $out[ $key ] ?? $f;
 	}
@@ -133,7 +133,7 @@ add_action(
 
 function aw_enrich_prov_box( $post ) {
 	$rows = '';
-	foreach ( aw_enrich_fields() as $f => $def ) {
+	foreach ( aw_enrich_fields_all() as $f => $def ) {
 		$p = aw_enrich_provenance( $post->ID, $f );
 		if ( $p ) {
 			$rows .= '<li><strong>' . esc_html( $def[0] ) . '</strong><br>' . aw_enrich_sources_html( $p['sources'], $post->ID ) . '</li>';
@@ -330,7 +330,7 @@ function aw_enrich_review_page() {
 	if ( $states ) {
 		$sel( 'state', $states, 'All states' );
 	}
-	$sel( 'field', array_map( fn( $f ) => $f[0], aw_enrich_fields() ), 'All fields' );
+	$sel( 'field', array_map( fn( $f ) => $f[0], aw_enrich_fields_all() ), 'All fields' );
 	$sel( 'flag', array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' ), 'Any flag' );
 	submit_button( 'Filter', 'secondary', '', false );
 	echo '</form>';
@@ -344,7 +344,7 @@ function aw_enrich_review_page() {
 	}
 	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : ( 'failed' === $st ? array() : array( 'undo' => 'Undo' ) ); // a failed row has nothing to undo
 	$cells  = array();
-	$labels = aw_enrich_fields();
+	$labels = aw_enrich_fields_all();
 	foreach ( $rows as $r ) {
 		$r     = aw_enrich_decode( $r );
 		$lid   = (int) $r['listing_id'];
