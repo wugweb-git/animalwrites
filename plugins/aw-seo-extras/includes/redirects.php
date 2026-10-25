@@ -4,12 +4,23 @@
  * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author);
  * /?author=N goes there in one hop (below).
  *
- * Rules Rank Math's list cannot hold (they rewrite the address rather than match it) stay here:
+ * Fixed old addresses go into that list (audit item 18, owner 25 Oct 2026): `wp aw redirects-import` (places.php) adds
+ * the old /location/{slug}/ and /source/{slug}/ pages with the targets the PHP handler in places.php uses; the handler
+ * stays until the crawl shows Rank Math answers every one, then a separate change removes it. `wp aw redirects-list`
+ * prints the whole list for tools/redirects/crawl.py, which requests every old address and reports any 404, wrong
+ * target, and which layer answered (X-Redirect-By: "Rank Math" or "Animal Writes").
+ *
+ * Rules Rank Math's list cannot hold (they rewrite the address or read the query string rather than match a path) stay
+ * in PHP:
  * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
- * - ?lang=, ?issuer= and ?court= on the Library → the same list without them.
+ * - ?lang=, ?issuer= and ?court= on the Library → the same list without them; /?author=N → /about/ (below).
  * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
  * - Labels are WordPress Tags with their own pages (/tag/{slug}/); old type addresses (/?cat=N, /directory-type/…,
  *   /opportunity-type/…) and ?kind=, ?type=, ?service= are redirected in animal-writes-core tags.php.
+ * - animal-writes-core: /location/{slug}/ and /source/{slug}/ (places.php) until they are removed after the import;
+ *   /topic/{slug}/… and ?topic= (category-moves.php), older /directory/ shapes (directory.php),
+ *   ?query-N-page= on hubs (hubs.php), ?s= → /search/ and ?about= on Contact (pages.php), /report/?listing=
+ *   (form-blocks.php), comment feeds (admin-ia.php).
  *
  * @package aw-seo-extras
  */
@@ -50,6 +61,32 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact' ) {
 		)
 	);
 	return (int) $r->save();
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * `wp aw redirects-list`: every active redirect in Rank Math's list as CSV (path, target, code, comparison), read
+	 * only. Exact paths are what tools/redirects/crawl.py requests; regex and other rules are listed for reference.
+	 */
+	WP_CLI::add_command(
+		'aw redirects-list',
+		function () {
+			global $wpdb;
+			$table = $wpdb->prefix . 'rank_math_redirections';
+			$rows  = $wpdb->get_results( "SELECT sources, url_to, header_code FROM {$table} WHERE status = 'active' ORDER BY id", ARRAY_A ); // phpcs:ignore WordPress.DB
+			$out   = fopen( 'php://output', 'w' );
+			fputcsv( $out, array( 'path', 'target', 'code', 'comparison' ) );
+			foreach ( (array) $rows as $r ) {
+				foreach ( (array) maybe_unserialize( $r['sources'] ) as $src ) {
+					$cmp = (string) ( $src['comparison'] ?? '' );
+					$pat = (string) ( $src['pattern'] ?? '' );
+					$path = '/' . trim( $pat, '/' ) . ( false === strpos( basename( $pat ), '.' ) ? '/' : '' ); // a file keeps no trailing slash
+					fputcsv( $out, array( 'exact' === $cmp ? $path : $pat, (string) $r['url_to'], (int) $r['header_code'], $cmp ) );
+				}
+			}
+			fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		}
+	);
 }
 
 /** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/volunteer/'). */

@@ -216,7 +216,7 @@ Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admi
 | `opengraph.php` | Open Graph / Twitter details Rank Math's settings cannot express. |
 | `programmatic.php` | Pages built from live data (SEO Phase 4, 15 Oct 2026): the Directory's state, district, district × type and filtered lists (?tag=, ?state=), the 18 category pages and the tag pages. |
 | `rank-math-schema.php` | Rank Math's own schema entries for Pages, Library items, Resources, campaigns, News, Opportunities and Directory listings, so its screens show the schema the page really has. |
-| `redirects.php` | Redirects. |
+| `redirects.php` | Redirects: the one list is Rank Math → Redirections (aw_redirect_add, aw_rank_math_redirect); pattern and query-string rules stay in PHP (list in the file header). `wp aw redirects-import [--dry-run]` (places.php) adds the old /location/ and /source/ addresses there with the PHP handler's targets; `wp aw redirects-list` prints the list as CSV for `tools/redirects/crawl.py` (every old address must redirect to the right target that answers 200; reports which layer answered by X-Redirect-By). |
 | `robots.php` | Robots rules that depend on an item's state or a list's contents, which Rank Math's per-type and per-item settings cannot express. |
 | `schema.php` | The site's own JSON-LD nodes, put into Rank Math's one graph (Rank Math's schema templates cannot build these from the site's fields): - Listings: NGO / VeterinaryCare / AnimalShelter / GovernmentOffice (by listing type, |
 | `sitemap.php` | Rank Math sitemap (/sitemap_index.xml) additions: - a "directory" sitemap (directory-sitemap.xml) of the Directory place pages (/directory/{state}/, /directory/{state}/{district}/) that have listings, and district × list |

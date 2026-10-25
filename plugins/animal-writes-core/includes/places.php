@@ -389,6 +389,85 @@ add_action(
 	1
 );
 
+/**
+ * The old fixed addresses and where each goes: path (no slashes at the ends) => absolute URL. The targets are the ones
+ * the handler above sends them to (audit item 18, owner 25 Oct 2026), so Rank Math → Redirections can hold them:
+ * `wp aw redirects-import` adds them there; the handler stays until both answer the same (then a separate change
+ * removes it).
+ *
+ * @return array<string, string>
+ */
+function aw_old_place_redirects() {
+	global $wpdb;
+	$out = array();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the old lists are not registered taxonomies, so no term API.
+	$rows = $wpdb->get_results( "SELECT tt.taxonomy, t.slug FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE tt.taxonomy IN ('aw_city', 'aw_source_type') ORDER BY tt.taxonomy, t.slug" );
+	foreach ( (array) $rows as $r ) {
+		$slug = sanitize_title( (string) $r->slug );
+		if ( '' === $slug ) {
+			continue;
+		}
+		if ( 'aw_source_type' === $r->taxonomy ) {
+			$out[ 'source/' . $slug ] = home_url( '/library/' );
+		} else {
+			$p                          = aw_place_by_slug( $slug );
+			$out[ 'location/' . $slug ] = $p && function_exists( 'aw_directory_url' ) ? aw_directory_url( $p->slug ) : home_url( '/directory/' );
+		}
+	}
+	return $out;
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * `wp aw redirects-import [--dry-run]`: adds the old /location/ and /source/ addresses to Rank Math → Redirections
+	 * (301, exact), each to the same target the PHP handler uses. Safe to run again: an address already in the list is
+	 * left as it is; one there with another target is listed (warning) and left for the owner to decide.
+	 */
+	WP_CLI::add_command(
+		'aw redirects-import',
+		function ( $args, $assoc ) {
+			if ( ! function_exists( 'aw_rank_math_redirect' ) ) {
+				WP_CLI::error( 'aw-seo-extras (aw_rank_math_redirect) with Rank Math Redirections is needed.' );
+			}
+			$dry  = ! empty( $assoc['dry-run'] );
+			$all  = aw_old_place_redirects();
+			$new  = 0;
+			$have  = 0;
+			$fail  = array();
+			$other = array();
+			foreach ( $all as $path => $to ) {
+				$known = class_exists( '\RankMath\Redirections\DB' ) ? (array) \RankMath\Redirections\DB::match_redirections_source( $path ) : array();
+				$exact = array_filter( $known, fn( $row ) => (bool) array_filter( (array) maybe_unserialize( $row['sources'] ?? '' ), fn( $src ) => 'exact' === ( $src['comparison'] ?? '' ) && trim( (string) ( $src['pattern'] ?? '' ), '/' ) === $path ) );
+				if ( $exact ) {
+					++$have;
+					$row = reset( $exact );
+					if ( untrailingslashit( (string) ( $row['url_to'] ?? '' ) ) !== untrailingslashit( $to ) ) {
+						$other[] = "/$path/ goes to " . $row['url_to'] . ", the PHP handler sends it to $to";
+					}
+					continue;
+				}
+				if ( $dry ) {
+					++$new;
+					continue;
+				}
+				if ( aw_rank_math_redirect( $path, $to ) ) {
+					++$new;
+				} else {
+					$fail[] = $path;
+				}
+			}
+			foreach ( $fail as $path ) {
+				WP_CLI::warning( "Not added: /$path/" );
+			}
+			foreach ( $other as $line ) {
+				WP_CLI::warning( 'Different target, left as it is: ' . $line );
+			}
+			$msg = sprintf( '%d old addresses: %d %s, %d already in Rank Math (%d with another target), %d failed.', count( $all ), $new, $dry ? 'to add (dry run, nothing written)' : 'added', $have, count( $other ), count( $fail ) );
+			$fail ? WP_CLI::error( $msg ) : WP_CLI::success( $msg );
+		}
+	);
+}
+
 /* ---------- PIN code → State and District (India Post, matched to LGD) ---------- */
 
 /**
