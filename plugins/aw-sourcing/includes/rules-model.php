@@ -123,6 +123,21 @@ function aw_enrich_acf_value( $type, $value ) {
 	}
 }
 
+/**
+ * A proposal's sources that its field rule allows: all of them when the rule names none, else only the named ones
+ * (Google too: a place ID or Maps link from Google is kept only when the rule allows Google).
+ *
+ * @param array    $srcs  Sources ({key, ...} each).
+ * @param string[] $allow The rule's sources ([] = any).
+ * @return array
+ */
+function aw_enrich_allowed_sources( array $srcs, array $allow ) {
+	if ( ! $allow ) {
+		return $srcs;
+	}
+	return array_values( array_filter( $srcs, fn( $s ) => in_array( (string) ( $s['key'] ?? '' ), $allow, true ) ) );
+}
+
 /** The apply rules a field rule may have. */
 const AW_ENRICH_APPLY = array(
 	'empty'  => 'Fill an empty field (a value already there waits for review)',

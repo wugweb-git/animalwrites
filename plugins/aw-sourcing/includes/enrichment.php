@@ -1205,7 +1205,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			continue;
 		}
 		if ( $rule['sources'] ) { // a source not allowed is never credited; nothing left from an allowed one: skipped
-			$srcs = array_values( array_filter( $srcs, fn( $s ) => in_array( $s['key'], $rule['sources'], true ) || 'google_places' === $s['key'] ) );
+			$srcs = aw_enrich_allowed_sources( $srcs, $rule['sources'] );
 			if ( ! $srcs ) {
 				$out['skipped'][] = $field;
 				continue;
