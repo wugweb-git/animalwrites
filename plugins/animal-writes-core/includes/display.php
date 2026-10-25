@@ -57,7 +57,7 @@ add_filter(
 
 /**
  * News, Legal Watch and Research lists are ordered by source date (newest first), then by date added.
- * Items without a source date are kept (named meta clause with NOT EXISTS).
+ * News sorts by aw_source_date, the Library by aw_doc_sort; every published item carries its key.
  */
 add_action(
 	'pre_get_posts',
@@ -77,11 +77,20 @@ add_action(
 		$dir          = is_array( $asked ) && 'ASC' === strtoupper( (string) ( $asked['date'] ?? '' ) ) || 'ASC' === strtoupper( (string) $q->get( 'order' ) ) && 'date' === $asked ? 'ASC' : 'DESC';
 		$key          = in_array( 'aw_legal', $types, true ) ? 'aw_doc_sort' : 'aw_source_date'; // Library: the document's date, or its year (Acts, Rules)
 		$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Publisher, State)
-		$mq['aw_src'] = array(
-			'relation'    => 'OR',
-			'source_date' => array( 'key' => $key, 'compare' => 'EXISTS' ),
-			'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
-		);
+		// Lists (one type, published items) need no "or the date is missing" clause: every published item has the key
+		// (aw_news_sort_sync, aw_doc_sort_sync; `wp aw sort-dates`), and that OR made MySQL scan every item of the type
+		// (audit item 2, owner 25 Oct 2026). Mixed News + Library queries (News has no aw_doc_sort) and queries for
+		// drafts or pending items (same-story lookups) keep it, so no item drops out of them.
+		$status = array_diff( (array) $q->get( 'post_status' ), array( '', 'publish' ) );
+		if ( 1 === count( $types ) && ! $status ) {
+			$mq['source_date'] = array( 'key' => $key, 'compare' => 'EXISTS' );
+		} else {
+			$mq['aw_src'] = array(
+				'relation'    => 'OR',
+				'source_date' => array( 'key' => $key, 'compare' => 'EXISTS' ),
+				'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
+			);
+		}
 		$q->set( 'meta_query', $mq );
 		$q->set( 'orderby', array( 'source_date' => $dir, 'date' => $dir ) );
 		$q->set( 'aw_undated_last', true );
