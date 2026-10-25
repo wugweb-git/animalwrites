@@ -508,7 +508,11 @@ add_filter(
 /**
  * The workers' copy of the lists (same shape as sources.yaml), when "Workers use these lists" is on. Sources that are
  * off are left out; a source with "Keyword check" gets the feed keywords.
-
+ *
+ * Sourcing restructure (owner, 25 Oct 2026): new blocks go beside the unchanged v1 keys, inside config so Sources sync
+ * copies them into sources.yaml: category_names (slug => name, the workers' fallback when the site cannot be reached)
+ * and, once phase 1 is migrated, schema {sources: 2} and sources_v2 (each v1 source plus its publisher host, relay
+ * switch, read_by and keyword check). Workers before W1 ignore them; W1 reads v2 and falls back to v1.
  */
 add_filter(
 	'kits_sourcing_policy',
@@ -534,6 +538,13 @@ add_filter(
 		// (dog, cat, pet ...) are for checking feed items, never searches (77 words would be 71 searches, 20 Oct 2026).
 		$search = array_values( array_unique( (array) ( $rel['strong'] ?? array() ) ) );
 		$data['config'] = array( 'defaults' => $c['defaults'], 'keywords' => $search, 'sources' => $sources, 'categories' => $c['categories'], 'sections' => $c['sections'], 'press' => $c['press'], 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
+		if ( function_exists( 'aw_relevance_categories' ) ) {
+			$data['config']['category_names'] = (object) aw_relevance_categories(); // an object in JSON even when empty
+		}
+		if ( function_exists( 'aw_sourcing_phase' ) && aw_sourcing_phase() >= 1 ) {
+			$data['config']['schema']     = array( 'sources' => 2 );
+			$data['config']['sources_v2'] = aw_src_sources_v2( $sources, function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
+		}
 		return $data;
 	}
 );
