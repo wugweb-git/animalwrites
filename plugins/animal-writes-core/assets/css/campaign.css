@@ -162,8 +162,9 @@
 .aw-camp-ladder { list-style: none; margin: var(--kit-space-5) 0; padding: 0; display: grid; gap: var(--kit-space-5); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-ladder { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1200px) { .aw-camp-ladder { grid-template-columns: repeat(4, 1fr); } }
-.aw-camp .aw-camp-tier h4 { font-size: var(--kit-type-h3) !important; } /* tiers keep the card-title size as H4 */
-.aw-camp-tier h4 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
+/* Tiers are H3 under the section H2 (owner, 25 Oct) with the look they had as H4: aw.css gives content H3s line-height 1.25 !important */
+.aw-camp .aw-camp-ladder .aw-camp-tier h3 { font-size: var(--kit-type-h3) !important; line-height: 1.3 !important; }
+.aw-camp-tier h3 { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-h3); font-weight: 800; }
 .aw-camp-tier p { margin: 0 0 var(--kit-space-2); }
 .aw-camp-tier { --fill: 100%; }
 .aw-camp-tier--1 { --fill: 25%; }
