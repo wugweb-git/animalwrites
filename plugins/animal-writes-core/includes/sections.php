@@ -56,7 +56,7 @@ function aw_head_band( $a ) {
 	}
 	return '<header class="kit-section-band alignfull' . ( $a['compact'] ? ' kit-section-band--compact' : '' ) . '"><div class="kit-section-inner">' . $a['crumbs'] . '<div class="kit-section-head"><div>'
 		. '<h1 class="' . esc_attr( $a['title_class'] ) . '">' . $a['icon'] . esc_html( $a['title'] ) . '</h1>'
-		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . esc_html( $a['desc'] ) . '</p>' : '' ) . $a['note']
+		. ( '' !== $a['desc'] ? '<p class="kit-section-desc">' . wp_kses( $a['desc'], array( 'a' => array( 'href' => true ) ) ) . '</p>' : '' ) . $a['note'] // plain links kept (a tag description pointing to its page, owner 25 Oct 2026); everything else escaped
 		. $count
 		. '</div>' . $a['visual'] . '</div>' . ( '' !== $a['filters'] ? '<div class="kit-section-filters">' . $a['filters'] . '</div>' : '' ) . '</div></header>';
 }
