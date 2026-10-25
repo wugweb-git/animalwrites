@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Sources → Feeds as a core list table (owner, 24 Oct 2026; was News feeds, Library sources and
+ * Sourcing → Sources → Feeds as a core list table (owner, 24 Oct 2026; was News feeds, Library sources and
  * Opportunity sources; moved into Sources on 25 Oct 2026): every source of aw_sources in one list with the publisher
  * each belongs to, views All / News / Library / Opportunity / On / Off, search, sortable name, type, publisher and
  * status, pagination (screen option aw_sources_per_page), row actions (Edit, Turn on/off, Keyword check on/off,
@@ -27,13 +27,13 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 	 * @param string $host Only this site's sources ('' for all).
 	 */
 	public function __construct( $host = '' ) {
-		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$this->host = (string) $host;
 		$this->all  = array_values( array_filter( (array) aw_sources_config()['sources'], fn( $s ) => is_array( $s ) && ( '' === $this->host || aw_src_source_host( $s ) === $this->host ) ) );
 	}
 
 	private function url( array $args = array() ) {
-		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=sources&view=feeds' ) );
+		return add_query_arg( $args, admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' ) );
 	}
 
 	/** A source's edit screen (from a source's screen: back there afterwards). */
@@ -42,7 +42,7 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 		if ( '' !== $this->host ) {
 			$args['host'] = rawurlencode( $this->host );
 		}
-		return add_query_arg( $args, admin_url( 'options-general.php' ) );
+		return add_query_arg( $args, admin_url( 'admin.php' ) );
 	}
 
 	/** The view from the address: [type, state]. */
@@ -206,7 +206,7 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 
 	protected function column_host( $item ) {
 		$h    = aw_src_source_host( $item );
-		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'options-general.php' ) );
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'admin.php' ) );
 		return '' === $h ? '—' : '<a href="' . esc_url( $edit ) . '">' . esc_html( $h ) . '</a>' . ( 'code' === aw_src_read_by( $item ) ? '<br><span class="description">Read by code</span>' : '' );
 	}
 

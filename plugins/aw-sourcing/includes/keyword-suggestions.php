@@ -1,6 +1,6 @@
 <?php
 /**
- * Suggestions from Search Insights (owner, 24 Oct 2026): Settings → Sourcing → Keywords lists searches people make that
+ * Suggestions from Search Insights (owner, 24 Oct 2026): Sourcing → Keywords lists searches people make that
  * no sourcing word covers, so the owner can add them to the Include or Exclude list by hand. Nothing is added by itself.
  *
  * - The searches come from aw-seo-extras (filter aw_search_demand_terms). Without it there are no suggestions and
@@ -146,7 +146,7 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		if ( aw_sourcing_phase() >= 2 && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phase 2 before the table is ready: never the old lists
-			wp_die( 'The keyword table is not ready yet. Open Settings → Sourcing again in a moment.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
+			wp_die( 'The keyword table is not ready yet. Open Sourcing again in a moment.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
 		}
 		$ops = array_merge( array( 'include', 'exclude' ), function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? array( 'search' ) : array(), array( 'dismiss', 'restore' ) );
 		$op  = '';
@@ -160,7 +160,7 @@ add_action(
 			$op = '-1' === $op || '' === $op ? sanitize_key( wp_unslash( $_POST['aw_bulk2'] ?? '' ) ) : $op;
 			$qs = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['q'] ?? array() ) );
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&kw=suggestions' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-sourcing&tab=keywords&kw=suggestions' );
 		$back = remove_query_arg( array( 'aw_suggested', 'aw_n', 'updated' ), $back );
 		if ( ! in_array( $op, $ops, true ) && isset( $_POST['paged'] ) ) { // Enter in the page number box: go to that page
 			wp_safe_redirect( add_query_arg( 'paged', max( 1, (int) $_POST['paged'] ), $back ) . '#aw-suggestions' );
@@ -177,7 +177,7 @@ add_filter( 'removable_query_args', fn( $args ) => array_merge( $args, array( 'a
 
 // Screen options: suggestions per page.
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( 'keywords' === sanitize_key( $_GET['tab'] ?? '' ) && 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ) && function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown; only when there can be suggestions
 			add_screen_option( 'per_page', array( 'label' => 'Suggestions per page', 'default' => 20, 'option' => 'aw_suggestions_per_page' ) );
@@ -186,7 +186,7 @@ add_action(
 );
 add_filter( 'set_screen_option_aw_suggestions_per_page', fn( $keep, $option, $value ) => max( 1, min( 200, (int) $value ) ), 10, 3 );
 
-/** Settings → Sourcing → Keywords → Suggestions (the tab's second view, &kw=suggestions, so its paging and sorting are its own). */
+/** Sourcing → Keywords → Suggestions (the tab's second view, &kw=suggestions, so its paging and sorting are its own). */
 add_action(
 	'aw_sourcing_keywords_tab_end',
 	function () {

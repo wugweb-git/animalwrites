@@ -1,6 +1,6 @@
 <?php
 /**
- * Directory → Enrichment review as a core list table (owner, 24 Oct 2026: WP_List_Table, no hand-built tables).
+ * Sourcing → Enrichment review as a core list table (owner, 24 Oct 2026: WP_List_Table, no hand-built tables).
  * The screen fetches one page of rows and builds the cells (escaped HTML); this class adds the checkbox column, the
  * bulk actions and the pages. It sits inside the screen's own POST form to admin-post.php (action aw_enrich_decide,
  * nonce aw_enrich_decide), so the bulk select is named "bulk" (core's "action" would replace admin-post's action) and

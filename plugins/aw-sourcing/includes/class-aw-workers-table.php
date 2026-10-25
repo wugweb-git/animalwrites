@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Workers as a core list table (owner, 24 Oct 2026): one row per worker, the registry's and the
+ * Sourcing → Workers as a core list table (owner, 24 Oct 2026): one row per worker, the registry's and the
  * Planned ones. Views (All, each group, Late, Failing, Planned), search, sortable columns, pages (screen option
  * aw_workers_per_page), row actions Edit | Run now | View runs (| Delete for a Planned worker); a late or failing worker
  * gets the plugins list's problem row. It sits in a GET form (search and the page box), so it prints no nonce.
@@ -25,7 +25,7 @@ class AW_Workers_Table extends WP_List_Table {
 				'singular' => 'worker',
 				'plural'   => 'workers',
 				'ajax'     => false,
-				'screen'   => 'settings_page_aw-sourcing',
+				'screen'   => AW_SRC_SCREEN,
 			)
 		);
 		$kinds = array();
@@ -83,7 +83,7 @@ class AW_Workers_Table extends WP_List_Table {
 	}
 
 	protected function get_views() {
-		$base = admin_url( 'options-general.php?page=aw-sourcing&tab=workers' );
+		$base = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
 		$out  = array();
 		foreach ( $this->views_list() as $k => $v ) {
 			$n = count( array_filter( $this->all, $v[1] ) );
@@ -177,7 +177,7 @@ class AW_Workers_Table extends WP_List_Table {
 	}
 
 	protected function column_name( $r ) {
-		$base = admin_url( 'options-general.php?page=aw-sourcing&tab=workers' );
+		$base = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
 		$acts = array( 'edit' => '<a href="' . esc_url( add_query_arg( 'edit', $r['id'], $base ) ) . '">Edit</a>' );
 		if ( aw_workers_can_run( $r ) ) {
 			$acts['run'] = '<a href="' . esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aw_worker_run&worker=' . rawurlencode( $r['id'] ) ), 'aw_worker_run_' . $r['id'] ) ) . '">Run now</a>';

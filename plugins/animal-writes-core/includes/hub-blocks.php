@@ -556,7 +556,7 @@ function aw_card_meta( $id ) {
 }
 
 /**
- * A short source name for a chip: the publisher record's short name (Settings → Sourcing), an issuer's short name, or one
+ * A short source name for a chip: the publisher record's short name (Sourcing), an issuer's short name, or one
  * made from the full name ("The Sentinel – of this Land, for its People" → "Sentinel"; "… (CCSEA)" → "CCSEA").
  * The full name stays in the item page's Sources block.
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Keywords as one core list table.
+ * Sourcing → Keywords as one core list table.
  *
  * - From phase 2 (owner, 25 Oct 2026; aw_sourcing_kw_on()): one row per keyword record of the keyword table with a
  *   Sourcing or Press role. Views by role (All, Include, Animal, Context, Exclude, Search, Press, Category words) and
@@ -53,7 +53,7 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 	private $stats = array();
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$this->records = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on();
 		$this->rel     = $this->records ? array() : aw_relevance();
 	}
@@ -67,7 +67,7 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 	/** Phase 2: the base address of the list, with its category filter. */
 	private function url( array $args = array() ) {
 		$cat = sanitize_title( wp_unslash( $_GET['cat'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return add_query_arg( $args + ( '' !== $cat ? array( 'cat' => $cat ) : array() ), admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) );
+		return add_query_arg( $args + ( '' !== $cat ? array( 'cat' => $cat ) : array() ), admin_url( 'admin.php?page=aw-sourcing&tab=keywords' ) );
 	}
 
 	/**
@@ -99,10 +99,10 @@ class AW_Sourcing_Keywords_Table extends WP_List_Table {
 				$n                             = count( array_filter( $this->all, fn( $r ) => $this->in_view( $r, $k ) ) );
 				$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $this->url( '' === $k ? array() : array( 'view' => $k ) ) ) . '"' . ( $cur === $k ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $def[0] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 			}
-			$out['suggestions'] = '<a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=keywords&kw=suggestions' ) ) . '">Suggestions from Search Insights</a>';
+			$out['suggestions'] = '<a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=keywords&kw=suggestions' ) ) . '">Suggestions from Search Insights</a>';
 			return $out;
 		}
-		$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+		$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 		$all  = 0;
 		$out  = array();
 		foreach ( self::LISTS as $k => $l ) {

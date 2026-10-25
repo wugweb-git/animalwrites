@@ -4,7 +4,7 @@
  * - "Details from" (the trust box) also lists the enrichment worker's sources, each with its site's icon.
  * - The live Google block: rating, open or closed now, hours, phone and the newest review's date, straight from
  *   Google Places with Google's attribution. Fetched after the page loads, cached 24 hours per place, never written to
- *   the listing; hidden when no key is saved or this month's cap is reached (Settings → Sourcing → Directory enrichment).
+ *   the listing; hidden when no key is saved or this month's cap is reached (Sourcing → Directory enrichment).
  *   Not in the schema (no aggregateRating from Google).
  * - Signals: activity on Instagram (followers, posts, latest post) and the News items that name the organisation.
  *
