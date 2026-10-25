@@ -84,6 +84,9 @@ function aw_sourcing_press_hosts() {
  * @return bool Something changed.
  */
 function aw_sourcing_press_change( array $add, array $remove ) {
+	if ( aw_sourcing_phase() >= 2 ) { // press sites were dropped with Brave in phase 2 (owner's decision 7)
+		return false;
+	}
 	$c     = aw_sources_config();
 	$old   = array_values( (array) ( $c['press']['sites'] ?? array() ) );
 	$sites = array();
