@@ -106,6 +106,7 @@ Moved out of animal-writes-core and Kits Core on 24 Oct 2026 with no change in b
 | `includes/summary-rewrite.php` | The workers' summary rewrite pass (summary-rewrite endpoint). |
 | `includes/news-titles.php` | `wp aw news-titles`: sentence-case news titles. |
 | `includes/enrichment.php` | Directory enrichment: the queue and results endpoints, table {prefix}aw_enrich, apply rules (list fields propose the union, never dropping a value; nothing for a listing whose identity is unresolved), spend. |
+| `includes/enrichment-cleanup.php` | Directory clean-up proposals from the worker's clean-up pass (25 Oct 2026): `place` ({state, district} from the listing's own PIN code or address; fills an empty place only, else review) and `merge_into` (true duplicate; never applied by itself; approving merges: fill-empty + keep-both rows with Undo, types and links moved, the other listing to draft with `aw_merged_into` and a 301; Undo reverses it). GET `aw/v1/enrich/cleanup` gives the worker the listings and the LGD places. |
 | `includes/enrichment-admin.php` | Directory → Enrichment review and the Enrichment tab; the listing's "Identity unresolved" box (flag `identity`). |
 | `includes/enrichment-front.php` | The live Google block on listing pages (listing-live endpoint). |
 | `includes/review-queue.php`, `includes/class-aw-sourcing-review-table.php` | Inbox → To review as a core list table: views by type, search, sortable, pagination (screen option, 50), row actions Edit / Source / Publish / Reject, bulk Publish / Reject and "Publish all N". |

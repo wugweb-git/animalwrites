@@ -51,6 +51,8 @@ function aw_enrich_sources() {
 		'osm'           => array( 'OpenStreetMap', 'openstreetmap.org', true, 'Coordinates and tagged hours (ODbL)' ),
 		'wikidata'      => array( 'Wikidata', 'wikidata.org', true, 'Larger organisations: founded, website, social profiles' ),
 		'awbi'          => array( 'AWBI', 'awbi.gov.in', true, 'The AWBI address already on the listing' ),
+		'listing'       => array( 'The listing\'s own details', '', true, 'Clean-up pass: the address, PIN code and place already on the listing, and same-name listings in the same district' ),
+		'india_post'    => array( 'India Post (PIN codes)', 'postalpincode.in', true, 'Clean-up pass: the district and state of the listing\'s own PIN code' ),
 		'google_places' => array( 'Google Maps', 'google.com', true, 'Locator and check only: place ID, Maps link and website lead are kept' ),
 	);
 }
@@ -112,6 +114,8 @@ function aw_enrich_fields() {
 		'head'           => array( 'Founder / key contact', 'aw_head', 'People' ),
 		'wikidata'       => array( 'Wikidata ID', 'aw_wikidata', 'Signals' ),
 		'closed'         => array( 'Reported closed', 'aw_reported_closed', 'Signals' ),
+		'place'          => array( 'State and district', 'place', 'Location' ),
+		'merge_into'     => array( 'Duplicate: merge into', 'merge', 'Identity' ),
 	);
 }
 
@@ -243,6 +247,10 @@ function aw_enrich_current( $lid, $field ) {
 			return $t ? (string) wp_get_attachment_url( $t ) : '';
 		case 'photos':
 			return array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_url( (int) $p ), array_filter( explode( ',', (string) get_post_meta( $lid, 'aw_gallery', true ) ) ) ) ) );
+		case 'place':
+			return aw_enrich_place_current( $lid );
+		case 'merge':
+			return (int) get_post_meta( $lid, 'aw_merged_into', true ) ? (int) get_post_meta( $lid, 'aw_merged_into', true ) : '';
 		default:
 			return (string) get_post_meta( $lid, $def[1], true );
 	}
@@ -264,6 +272,11 @@ function aw_enrich_snapshot( $lid, $field ) {
 			return (int) get_post_thumbnail_id( $lid );
 		case 'photos':
 			return (string) get_post_meta( $lid, 'aw_gallery', true );
+		case 'place':
+			list( $states, $districts ) = aw_item_codes( $lid );
+			return array( 'states' => $states, 'districts' => $districts );
+		case 'merge':
+			return '';
 		default:
 			if ( isset( AW_ENRICH_ALT[ $field ] ) ) {
 				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ), 'unv' => aw_unverified_list( $lid ) );
@@ -298,6 +311,11 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 		case 'photos':
 			'' === (string) $snap ? delete_post_meta( $lid, 'aw_gallery' ) : update_post_meta( $lid, 'aw_gallery', (string) $snap );
 			break;
+		case 'place':
+			aw_enrich_place_restore( $lid, (array) $snap );
+			break;
+		case 'merge':
+			break; // a merge is undone by aw_enrich_unmerge()
 		default:
 			if ( is_array( $snap ) && isset( $snap['v'] ) ) { // a field that can hold a second value
 				'' === $snap['v'] ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap['v'] );
@@ -394,6 +412,13 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 			}
 			update_post_meta( $lid, 'aw_gallery', implode( ',', $ids ) );
 			break;
+		case 'place':
+			if ( ! aw_enrich_place_write( $lid, $value ) ) {
+				return false;
+			}
+			break;
+		case 'merge':
+			return false; // never written as a value: an approved merge runs aw_enrich_merge()
 		default:
 			$v = aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
 			if ( '' === $v ) {
@@ -476,6 +501,9 @@ function aw_enrich_norm( $field, $v ) {
 
 /** Whether a listing already holds this value (for phones: any of its numbers). */
 function aw_enrich_has_value( $lid, $field, $value ) {
+	if ( 'place' === $field ) {
+		return aw_enrich_place_held( $lid, $value );
+	}
 	$now = aw_enrich_current( $lid, $field );
 	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
 		$want = aw_enrich_norm( $field, $value );
@@ -510,6 +538,9 @@ function aw_enrich_hours_key( $rows ) {
 
 /** Whether a field is empty on the listing. */
 function aw_enrich_is_empty( $lid, $field ) {
+	if ( 'place' === $field ) {
+		return ! aw_item_codes( $lid )[1]; // a state without a district is a place still to fill
+	}
 	if ( in_array( $field, array( 'whatsapp', 'emergency' ), true ) ) {
 		return true; // adding a marked number never removes one
 	}
@@ -546,9 +577,12 @@ const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website
  * is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified listings, and any
  * other field that already has a value).
  */
-function aw_enrich_mode( $lid, $field, $conf, $protected ) {
-	if ( $protected || 'low' === $conf || 'closed' === $field ) {
-		return 'queue';
+function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
+	if ( $protected || 'low' === $conf || 'closed' === $field || 'merge_into' === $field ) {
+		return 'queue'; // a merge is always the owner's decision (25 Oct 2026)
+	}
+	if ( 'place' === $field ) {
+		return aw_enrich_place_fills( $lid, $value ) ? 'apply' : 'queue';
 	}
 	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
 		return aw_listing_phones( $lid ) ? 'both' : 'apply';
@@ -631,6 +665,17 @@ function aw_enrich_approve( $id ) {
 		aw_enrich_after_change( $lid );
 		return true;
 	}
+	if ( 'merge_into' === $r['field'] ) {
+		$done = aw_enrich_merge( $lid, (int) $r['value'], $id );
+		if ( is_string( $done ) ) {
+			aw_enrich_set_status( $id, 'rejected', 'Not merged: ' . $done );
+			return false;
+		}
+		global $wpdb;
+		$wpdb->update( aw_enrich_table(), array( 'old_value' => wp_json_encode( $done ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		aw_enrich_set_status( $id, 'approved' );
+		return true;
+	}
 	$snap = aw_enrich_snapshot( $lid, $r['field'] );
 	if ( ! aw_enrich_write( $lid, $r['field'], $r['value'] ) ) {
 		aw_enrich_set_status( $id, 'rejected', 'Could not be applied (unusable value or picture)' );
@@ -669,6 +714,8 @@ function aw_enrich_undo( $id ) {
 	if ( 'closed' === $r['field'] ) {
 		delete_post_meta( (int) $r['listing_id'], 'aw_reported_closed' );
 		aw_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
+	} elseif ( 'merge_into' === $r['field'] ) {
+		aw_enrich_unmerge( (int) $r['listing_id'], (array) $r['old_value'] );
 	} else {
 		aw_enrich_restore( (int) $r['listing_id'], $r['field'], $r['old_value'] );
 	}
@@ -840,6 +887,7 @@ add_action(
 		register_rest_route( 'aw/v1', '/enrich/queue', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_queue' ) );
 		register_rest_route( 'aw/v1', '/enrich/results', array( 'methods' => 'POST', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_results' ) );
 		register_rest_route( 'aw/v1', '/enrich/index', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_index' ) );
+		register_rest_route( 'aw/v1', '/enrich/cleanup', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_cleanup' ) );
 	}
 );
 
@@ -1036,7 +1084,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // already waiting, or a reviewer said no
 			continue;
 		}
-		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected ); // an outside list (Darpan CSV) always goes to review
+		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
 		if ( 'queue' !== $mode ) {
 			$snap = aw_enrich_snapshot( $lid, $field );
 			if ( aw_enrich_write( $lid, $field, $value, $mode ) ) {
@@ -1048,7 +1096,8 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$note = ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) );
+		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
+		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
 		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, $note );
 		$out['queued'][] = $field;
 	}
@@ -1136,7 +1185,7 @@ function aw_enrich_policy_pass() {
 			$n['skip']++;
 			continue;
 		}
-		$mode = aw_enrich_mode( $lid, $r['field'], $r['confidence'], aw_enrich_is_protected( $lid ) );
+		$mode = aw_enrich_mode( $lid, $r['field'], $r['confidence'], aw_enrich_is_protected( $lid ), $r['value'] );
 		if ( 'queue' === $mode ) {
 			$n['queue']++;
 			continue;
