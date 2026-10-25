@@ -4,8 +4,8 @@
 Input: the CSV from `wp aw redirects-list` (path, target, code, comparison), as a file or on stdin. Only exact paths are
 requested (regex rules are skipped and counted). For each old path it checks, without following redirects:
   1. the old path answers 301/302/307/308 (a 404 or 200 there is reported);
-  2. its Location is the expected target (scheme, host and a trailing slash are ignored);
-  3. the target itself, followed to its end, answers 200 (a 404 is reported);
+  2. its Location is the expected target (scheme, host and a trailing slash are ignored; path case counts);
+  3. the address in that Location, followed to its end, answers 200 (a 404 is reported);
   4. which layer answered: the X-Redirect-By header ("Rank Math" for Rank Math → Redirections, "Animal Writes" for the
      site's PHP redirects, "WordPress" for core). Counted per layer; with --expect-by "Rank Math" any other is reported.
 Read only: GET requests, nothing is sent to the site. Note Rank Math counts a hit on each redirect it serves.
@@ -46,9 +46,11 @@ def fetch(url, follow):
 
 
 def norm(url, base):
+    """Path and query to compare: the path keeps its case (a different case is a different address); scheme and host
+    are left out (the list says animalwrites.in, --base may be a copy), and so is a trailing slash."""
     u = urllib.parse.urlsplit(urllib.parse.urljoin(base + "/", url))
     path = urllib.parse.unquote(u.path).rstrip("/") or "/"
-    return path.lower() + ("?" + u.query if u.query else "")
+    return path + ("?" + u.query if u.query else "")
 
 
 SITE_HOSTS = ("animalwrites.in", "www.animalwrites.in")
@@ -95,7 +97,11 @@ def main():
             problems.append(f"{code or 'ERR'}  {path}  (expected a redirect to {want}{'; ' + loc if not code else ''})")
         elif norm(loc, base) != norm(want, base):
             problems.append(f"WRONG {path}  goes to {loc}, list says {want}")
-        t = rebase(urllib.parse.urljoin(base + "/", want), base)
+        if code not in (301, 302, 307, 308) or not loc:
+            time.sleep(a.delay)
+            continue
+        # The address the redirect actually sends visitors to (not the list's) must answer 200.
+        t = rebase(urllib.parse.urljoin(base + path, loc), base)
         if t not in targets:
             targets[t] = fetch(t, follow=True)
             time.sleep(a.delay)
