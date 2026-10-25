@@ -47,5 +47,5 @@ Compare after 6 weeks: Search Console impressions, clicks and CTR for queries co
 - `wp aw-faq report` — counts by type and group, questions per FAQ, drafts waiting.
 - `wp aw-faq check [--verbose]` — on every page: 3–6 questions or none, schema text = visible text, no duplicate question, ≤ 50 words, one link, holdout pages show none; reports pages whose focus keyphrase is in fewer than 2 questions.
 - `wp aw-faq holdout` — CSV of eligible pages: url, type, group, questions.
-- `wp aw-faq import <file.json>` — add topic drafts (`{"post_tag:slug"|"category:slug"|"page:slug": [{q, a, sources, keyword}]}`); existing questions are kept.
+- `wp aw-faq import <file.json>` — add topic drafts (`{"post_tag:slug"|"category:slug"|"page:slug"|"library:slug": [{q, a, sources, keyword}]}`; `library:` is for letter templates); existing questions are kept.
 - `tools/ci/faq_live_check.py <url>…` — fetches live pages and compares the visible accordion with the FAQPage JSON-LD.

@@ -648,7 +648,8 @@ function aw_faq_candidates( $ctx ) {
 			$out[] = array( 'q' => $x['q'], 'a' => $x['a'], 'fact' => $x['fact'], 'priority' => $e['priority'] + $i / 100, 'key' => $e['key'], 'counts' => true, 'answer' => $e['answer'] );
 		}
 	}
-	if ( in_array( $ctx['kind'], array( 'term', 'hub' ), true ) ) {
+	// Letter templates have no data fields: they take hand-written, owner-approved items like topics (owner, 25 Oct 2026).
+	if ( in_array( $ctx['kind'], array( 'term', 'hub' ), true ) || ( 'legal' === $ctx['kind'] && 'template' === aw_faq_legal_kind( $ctx['id'] ) ) ) {
 		$i = 0;
 		foreach ( aw_faq_items( 'term' === $ctx['kind'] ? 'term' : 'post', $ctx['id'] ) as $it ) {
 			if ( 'approved' === $it['status'] ) {
@@ -991,6 +992,12 @@ function aw_faq_topic_pages() {
 			$out[] = array( 'post', $pid, 'Page: ' . get_the_title( $pid ), get_edit_post_link( $pid, 'raw' ), get_permalink( $pid ), $items );
 		}
 	}
+	foreach ( get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_faq' ) ) as $pid ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+		$items = 'template' === aw_faq_legal_kind( $pid ) ? aw_faq_items( 'post', $pid ) : array();
+		if ( $items ) {
+			$out[] = array( 'post', $pid, 'Library template: ' . html_entity_decode( get_the_title( $pid ) ), get_edit_post_link( $pid, 'raw' ), get_permalink( $pid ), $items );
+		}
+	}
 	return $out;
 }
 
@@ -1176,7 +1183,7 @@ function aw_faq_admin_page() {
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
 	 * FAQ tools: report (counts and samples), check (the spec's tests on every page), holdout (URLs by group, CSV),
-	 * import <file> (topic drafts: {"post_tag:slug"|"category:slug"|"page:slug": [ {q, a, sources, keyword} ] }).
+	 * import <file> (topic drafts: {"post_tag:slug"|"category:slug"|"page:slug"|"library:slug" (letter templates): [ {q, a, sources, keyword} ] }).
 	 */
 	WP_CLI::add_command(
 		'aw-faq',
@@ -1189,10 +1196,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 				$n = 0;
 				foreach ( $data as $key => $rows ) {
-					if ( ! preg_match( '/^(post_tag|category|page):([a-z0-9-]+)$/', (string) $key, $m ) || ! is_array( $rows ) ) {
+					if ( ! preg_match( '/^(post_tag|category|page|library):([a-z0-9-]+)$/', (string) $key, $m ) || ! is_array( $rows ) ) {
 						continue;
 					}
-					if ( 'page' === $m[1] ) {
+					if ( 'library' === $m[1] ) { // a Library letter template, by slug
+						$p    = get_page_by_path( $m[2], OBJECT, 'aw_legal' );
+						$id   = $p && 'template' === aw_faq_legal_kind( $p->ID ) ? (int) $p->ID : 0;
+						$kind = 'post';
+					} elseif ( 'page' === $m[1] ) {
 						$p = get_page_by_path( $m[2] );
 						$id = $p && isset( AW_FAQ_HUBS[ $m[2] ] ) ? (int) $p->ID : 0;
 						$kind = 'post';
