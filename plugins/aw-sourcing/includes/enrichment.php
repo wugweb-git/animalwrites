@@ -601,9 +601,28 @@ function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
 
 /* ---------- Rows ---------- */
 
+/** Whether a value holds a number on the never-publish list (aw_phone_never_publish), at any depth. */
+function aw_enrich_never_publish( $value ) {
+	if ( ! function_exists( 'aw_phone_never_publish' ) ) {
+		return false;
+	}
+	$blocked = false;
+	$vals    = (array) $value;
+	array_walk_recursive(
+		$vals,
+		function ( $v ) use ( &$blocked ) {
+			$blocked = $blocked || ( is_scalar( $v ) && aw_phone_never_publish( $v ) );
+		}
+	);
+	return $blocked;
+}
+
 /** Add a row. */
 function aw_enrich_add_row( $lid, $field, $value, $old, $sources, $confidence, $status, $run = '', $note = '' ) {
 	global $wpdb;
+	if ( aw_enrich_never_publish( $value ) ) {
+		return 0; // On the never-publish list: not proposed, not queued.
+	}
 	$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		aw_enrich_table(),
 		array(
@@ -1071,6 +1090,10 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		}
 		if ( ! array_filter( $srcs, fn( $s ) => 'google_places' !== $s['key'] ) && ! in_array( $field, array( 'place_id', 'maps_url' ), true ) ) {
 			$out['skipped'][] = $field; // Google alone never stores a fact
+			continue;
+		}
+		if ( aw_enrich_never_publish( $value ) ) {
+			$out['skipped'][] = $field; // on the never-publish list (privacy takedown)
 			continue;
 		}
 		$value = aw_enrich_union( $lid, $field, $value ); // List fields: what is there plus what was found.
