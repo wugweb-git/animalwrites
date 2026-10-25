@@ -84,16 +84,9 @@ a.kit-tag { cursor: pointer; }
 .kit-filter-pill.is-loading { opacity: var(--opacity-60); cursor: progress; }
 .kit-filter-pill .kit-count { color: inherit; opacity: var(--opacity-80); }
 
-/* ---------- 4. Filter group + phone sheet ---------- */
+/* ---------- 4. Filters + phone sheet ---------- */
 .kit-filters { display: grid; gap: var(--s-4); margin: 0 0 var(--s-8); }
-.kit-filter-group { border: 0; margin: 0; padding: 0; min-width: 0; }
-.kit-filter-group > legend, .kit-filter-group > .kit-filter-label {
-	padding: 0; margin: 0 0 var(--s-2);
-	font-size: var(--fluid-label); font-weight: var(--weight-label); color: var(--kit-color-muted);
-}
 .kit-filter-options { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-.kit-filter-group:not(.is-expanded) .kit-filter-options > .kit-filter-pill:nth-child(n+9) { display: none; }
-.kit-filter-more { background: none; border: 0; padding: 0 var(--s-2); min-height: var(--kit-size-target); font: inherit; font-size: var(--fluid-body-sm); color: var(--kit-color-link); text-decoration: underline; cursor: pointer; }
 .kit-filter-sheet > summary { display: none; }
 .kit-filter-sheet-actions { display: none; }
 /* Phones (kit.js adds .is-sheet below 768px; without JavaScript the groups stay inline) */

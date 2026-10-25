@@ -56,7 +56,8 @@ add_action(
 	'admin_menu',
 	function () {
 		add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
-	}
+	},
+	11 // after Dates (team-dates.php, 10)
 );
 
 add_action(

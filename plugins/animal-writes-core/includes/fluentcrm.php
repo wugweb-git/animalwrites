@@ -5,8 +5,8 @@
  * - The footer sign-up, the forms' newsletter box and every volunteer sign-up (all Fluent Forms, each with its own
  *   FluentCRM link) add the person to the Newsletter list as "subscribed". FluentCRM sends no email for this. The
  *   site's own list ({prefix}aw_subscribers) is a backup nothing adds to any more (newsletter.php).
- * - The two lists stay in step on unsubscribes: FluentCRM's unsubscribe marks the site's row unsubscribed, and the
- *   site's unsubscribe link unsubscribes the FluentCRM contact.
+ * - The two lists stay in step on unsubscribes: FluentCRM's unsubscribe marks the site's row unsubscribed (below), and
+ *   the site's unsubscribe link unsubscribes the FluentCRM contact (newsletter.php).
  * - Campaigns go out through wp_mail (the site's mailbox, kits-core) under the daily cap in mail-cap.php.
  * - "Remove my data" deletes the FluentCRM contact, and with it its notes, custom fields and emails.
  *
@@ -410,23 +410,6 @@ add_action(
 		global $wpdb;
 		$wpdb->update( aw_nl_table(), array( 'status' => 'unsubscribed', 'updated_at' => current_time( 'mysql', true ) ), array( 'email' => strtolower( (string) $subscriber->email ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-);
-
-// The site's own unsubscribe link (in the sign-up confirmation) also unsubscribes the FluentCRM contact.
-add_action(
-	'template_redirect',
-	function () {
-		if ( 'unsubscribe' !== sanitize_key( $_GET['aw_nl'] ?? '' ) || ! aw_crm_on() ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return;
-		}
-		$token = preg_replace( '/[^a-f0-9]/', '', (string) wp_unslash( $_GET['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$row   = 32 === strlen( $token ) ? aw_nl_get( 'token', $token ) : null;
-		$c     = $row ? FluentCrmApi( 'contacts' )->getContact( $row['email'] ) : null;
-		if ( $c && 'unsubscribed' !== $c->status ) {
-			$c->updateStatus( 'unsubscribed' );
-		}
-	},
-	5 // before newsletter.php's handler redirects
 );
 
 /* ---------- "Remove my data": the FluentCRM contact goes too ---------- */

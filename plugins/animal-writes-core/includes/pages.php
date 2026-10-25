@@ -374,7 +374,8 @@ add_action(
 	'admin_menu',
 	function () {
 		add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
-	}
+	},
+	12 // after Check site (site-check.php, 11)
 );
 function aw_elsewhere_screen() {
 	if ( isset( $_POST['aw_elsewhere'] ) && check_admin_referer( 'aw_elsewhere' ) ) {

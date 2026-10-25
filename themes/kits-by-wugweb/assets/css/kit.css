@@ -587,16 +587,6 @@ body.single main .wp-block-post-featured-image:not(.kit-logo) img ,body.single m
 .kit-empty { padding: var(--kit-space-7); text-align: center; border: var(--kit-border-width) dashed var(--kit-color-line); border-radius: var(--kit-radius-card); color: var(--kit-color-muted); }
 .kit-empty p { margin-inline: auto; }
 
-/* TRUST panel on item pages */
-.kit-trust { margin: var(--kit-space-4) 0 var(--kit-space-6); padding: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); font-size: var(--kit-type-sm); line-height: 1.5; }
-.kit-trust ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); }
-.kit-trust li { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); column-gap: var(--kit-space-3); align-items: start; max-width: none; margin: 0; }
-.kit-trust li > .kit-ico { --kit-ico-size: 1.25rem; margin-top: 0.05em; color: var(--kit-color-muted); }
-.kit-trust li > span:only-child { grid-column: 2; } /* a row without an icon (e.g. the dates) stays in the text column */
-.kit-trust.is-verified li:first-child > .kit-ico { color: var(--kit-color-success); }
-.kit-trust.is-unverified li:first-child > .kit-ico { color: var(--kit-color-warning); }
-.kit-trust a { color: var(--kit-color-link); font-weight: var(--kit-weight-regular); }
-
 @media (prefers-reduced-motion: reduce) { .kit-task ,.kit-res-card ,.kit-story-media img ,.kit-case > .kit-ico { transition: none; } .kit-task:hover ,.kit-res-card:hover { transform: none; } }
 
 /* Editorial building blocks: section head, ghost button, "three big actions", lead + list, editorial queries */
@@ -762,16 +752,11 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 /* Newsletter: one stacked column — title, email, name, Subscribe (full width), consent */
 .kit-footer-newsletter { display: block; min-width: 0; }
 .kit-footer-nl-head { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-xs) !important; font-weight: var(--kit-weight-strong); line-height: 1.4 !important; color: var(--kit-footer-muted) !important; }
-.kit-footer-newsletter .kit-form { display: flex !important; flex-direction: column; gap: var(--kit-space-3); max-width: none; margin: 0; }
 .kit-footer-newsletter .kit-captcha { order: 10; }
 .kit-footer-newsletter .kit-field { margin: 0; }
-.kit-footer-newsletter .kit-field--checkbox { order: 5; }
-.kit-footer-newsletter .kit-nl-submit { order: 4; padding: 0 !important; }
 .kit-footer-newsletter label, .kit-footer-newsletter .kit-optional { color: inherit; }
 .kit-footer-newsletter .kit-field-message { color: var(--kit-color-accent); }
 .kit-footer-newsletter .kit-field-error:empty { display: none; }
-.kit-footer-newsletter .kit-nl-submit .kit-btn { width: 100%; }
-.kit-footer-newsletter .kit-field--checkbox .kit-checkbox { min-height: 0; font-size: var(--kit-type-xs); }
 .kit-footer-newsletter .kit-form-done { background: transparent; border-left-color: var(--kit-color-accent); color: inherit; }
 
 /* Row 2: Helplines in one row */
@@ -1061,16 +1046,6 @@ body { background: var(--kit-surface-page); }
 .kit-overlay::after { content: ""; position: absolute; inset: 0; background: var(--kit-overlay); z-index: 0; pointer-events: none; }
 .kit-overlay > * { position: relative; z-index: 1; }
 
-/* Share (Scriptless Social Sharing plugin): Kits buttons — outlined pills with the network icon; WhatsApp filled */
-.scriptlesssocialsharing { margin: var(--kit-space-6) 0 0; padding-top: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); max-width: var(--kit-width-wide); }
-.scriptlesssocialsharing__heading { margin: 0 0 var(--kit-space-3) !important; font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-regular) !important; color: var(--kit-color-muted); }
-.scriptlesssocialsharing__buttons { display: flex !important; flex-wrap: wrap; gap: var(--kit-space-2); width: auto !important; }
-.scriptlesssocialsharing__buttons a.button { display: inline-flex !important; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important; margin: 0 !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--kit-radius-pill) !important; background: transparent !important; color: var(--kit-color-ink) !important; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none !important; box-shadow: none !important; transition: background-color var(--kit-duration-spring) var(--kit-ease-spring), color var(--kit-duration-spring) var(--kit-ease-spring); }
-.scriptlesssocialsharing__buttons a.button:hover { background: var(--kit-color-ink) !important; color: var(--kit-color-on-ink) !important; border-color: var(--kit-color-ink) !important; }
-.scriptlesssocialsharing__buttons a.button.whatsapp { background: var(--kit-color-whatsapp) !important; border-color: var(--kit-color-whatsapp) !important; color: var(--kit-color-on-ink) !important; }
-.scriptlesssocialsharing__buttons svg, .scriptlesssocialsharing__icon { width: 1.125em !important; height: 1.125em !important; fill: currentColor; }
-.scriptlesssocialsharing__buttons a.button::after { content: none !important; }
-
 /* Mobile menu: the list fills the screen so contact and legal sit at the bottom */
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { display: flex !important; flex-direction: column; min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
@@ -1112,13 +1087,6 @@ body { background: var(--kit-surface-page); }
 .kit-dd-section fieldset { border: 0; margin: 0; padding: 0 0 var(--kit-space-2); max-height: 16rem; overflow: auto; }
 .kit-dd-menu-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; padding: var(--kit-space-2); background: var(--kit-color-raised); }
 .kit-dd--menu .kit-dd-btn > .kit-ico--sliders { --kit-ico-size: 1rem; }
-/* End of an article: tags bottom left, share bottom right */
-.kit-endbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--kit-space-3); margin-top: var(--kit-space-6); padding-top: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--kit-color-line); }
-.kit-endbar-tags { display: flex; flex-wrap: wrap; gap: var(--kit-space-1); }
-.kit-endbar-share { flex: 1 1 100%; min-width: 0; } /* the share row (share.php) from the text's left edge */
-.kit-endbar-share > p:empty, .kit-endbar-share br { display: none; } /* autop leftovers */
-.kit-endbar .kit-share { border-top: 0; padding-top: 0; }
-.kit-endbar .scriptlesssocialsharing { margin: 0; padding: 0; border: 0; }
 /* List count: centred above the pagination */
 .kit-list-count { text-align: center; margin: var(--kit-space-6) 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 /* Error and empty pages (404, no results) */

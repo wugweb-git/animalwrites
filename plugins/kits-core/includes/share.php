@@ -37,14 +37,14 @@ function kits_share_html( $url, $title ) {
 		'whatsapp' => array( 'WhatsApp', 'brand-whatsapp', 'https://wa.me/?text=' . rawurlencode( $title . ' ' . $url ) ),
 		'email'    => array( 'Email', 'mail', 'mailto:?subject=' . rawurlencode( sprintf( 'From %s: %s', $site, $title ) ) . '&body=' . rawurlencode( $url ) ),
 	);
-	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'animal-writes-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Share', 'animal-writes-core' ) . '</span>';
+	$out = '<div class="kit-share" role="group" aria-label="' . esc_attr__( 'Share', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Share', 'kits-core' ) . '</span>';
 	foreach ( $nets as $key => list( $name, $icon, $href ) ) {
 		/* translators: %s: network name. */
-		$label = 'email' === $key ? __( 'Share by email', 'animal-writes-core' ) : sprintf( __( 'Share on %s', 'animal-writes-core' ), $name );
+		$label = 'email' === $key ? __( 'Share by email', 'kits-core' ) : sprintf( __( 'Share on %s', 'kits-core' ), $name );
 		$out  .= '<a class="kit-share-btn kit-share-' . $key . '" href="' . esc_url( $href ) . '"' . ( 'email' === $key ? '' : ' target="_blank" rel="noopener noreferrer"' ) . ' data-kit-share="' . $key . '" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '"><span class="kit-ico kit-ico--' . $icon . '" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $name ) . '</span></a>';
 	}
-	$copy = __( 'Copy link', 'animal-writes-core' );
-	$out .= '<button type="button" class="kit-share-btn kit-share-copy" data-url="' . esc_attr( $url ) . '" data-done="' . esc_attr__( 'Link copied', 'animal-writes-core' ) . '" aria-label="' . esc_attr( $copy ) . '" title="' . esc_attr( $copy ) . '"><span class="kit-ico kit-ico--link" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $copy ) . '</span></button>';
+	$copy = __( 'Copy link', 'kits-core' );
+	$out .= '<button type="button" class="kit-share-btn kit-share-copy" data-url="' . esc_attr( $url ) . '" data-done="' . esc_attr__( 'Link copied', 'kits-core' ) . '" aria-label="' . esc_attr( $copy ) . '" title="' . esc_attr( $copy ) . '"><span class="kit-ico kit-ico--link" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $copy ) . '</span></button>';
 	return $out . '<span class="screen-reader-text" role="status" aria-live="polite"></span></div>';
 }
 

@@ -71,8 +71,7 @@ add_action(
 			if ( function_exists( 'aw_crm_on' ) && aw_crm_on() ) { // and in FluentCRM, where the list is kept
 				$c = FluentCrmApi( 'contacts' )->getContact( $row['email'] );
 				if ( $c && 'unsubscribed' !== $c->status ) {
-					$c->status = 'unsubscribed';
-					$c->save();
+					$c->updateStatus( 'unsubscribed' ); // FluentCRM's own status change, so its unsubscribe hooks run
 				}
 			}
 			$note = 'nl_unsub';
