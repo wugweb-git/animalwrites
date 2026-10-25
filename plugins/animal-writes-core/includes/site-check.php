@@ -2,7 +2,7 @@
 /**
  * "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each
  * with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page.
- * Results show on Tools → Check site. Nothing is changed.
+ * Results show on Animal Writes → Check site. Nothing is changed.
  *
  * @package animal-writes-core
  */
@@ -55,7 +55,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_management_page( 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' );
+		add_submenu_page( AW_CORE_MENU, 'Check site', 'Check site', 'manage_options', 'aw-site-check', 'aw_site_check_page' ); // Animal Writes → Check site
 	}
 );
 
@@ -76,7 +76,7 @@ add_action(
 			$out[] = array( $label, $path, $code, $ms, $why );
 		}
 		update_option( 'aw_site_check_last', array( 'at' => current_time( 'mysql' ), 'rows' => $out ), false );
-		wp_safe_redirect( admin_url( 'tools.php?page=aw-site-check' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=aw-site-check' ) );
 		exit;
 	}
 );

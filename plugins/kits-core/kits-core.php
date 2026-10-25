@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Kits Core
- * Description: Site features shared by Kits sites: form engine with spam guard and per-field errors, share bar, Google Tag Manager, an honest visit counter, source attribution (favicon + source + relative time) and the publisher records the sourcing plugin uses. Configured by the site through filters (kits_*).
- * Version: 0.1.0
+ * Description: Kits by Wugweb, the site features every Kits site shares: form engine with spam guard (ALTCHA) and per-field errors, share bar, Google Tag Manager with consent mode, an honest visit counter, preview-only items, source attribution and the publisher records the sourcing plugin uses; plus the design system index of the Kits theme and its child. Own menu: Kits (Overview, Design system, Preview). Configured by the site through filters (kits_*).
+ * Version: 1.0.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
  *
@@ -16,10 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
 }
-define( 'KITS_CORE_LOADED', '0.1.0' );
+define( 'KITS_CORE_LOADED', '1.0.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
 require_once KITS_CORE_DIR . 'includes/admin-table.php';
+require_once KITS_CORE_DIR . 'includes/admin-home.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';

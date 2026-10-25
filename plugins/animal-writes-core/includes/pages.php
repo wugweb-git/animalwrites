@@ -453,7 +453,7 @@ add_action(
 
 /* ---------- Contact: "Elsewhere" links (Phase 11 H5) ---------- */
 
-/** Links the owner adds in Appearance → Contact links: list of [label, url]. Hidden while empty. */
+/** Links the owner adds in Animal Writes → Contact links: list of [label, url]. Hidden while empty. */
 function aw_elsewhere_links() {
 	return array_values( array_filter( (array) get_option( 'aw_elsewhere', array() ), fn( $r ) => ! empty( $r['label'] ) && ! empty( $r['url'] ) ) );
 }
@@ -476,7 +476,7 @@ add_shortcode(
 add_action(
 	'admin_menu',
 	function () {
-		add_theme_page( 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Appearance → Contact links
+		add_submenu_page( AW_CORE_MENU, 'Contact links', 'Contact links', 'edit_pages', 'aw-elsewhere', 'aw_elsewhere_screen' ); // Animal Writes → Contact links
 	}
 );
 function aw_elsewhere_screen() {
