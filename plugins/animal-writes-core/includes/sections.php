@@ -73,7 +73,7 @@ function aw_section_head_archive() {
 			$tname = function_exists( 'aw_current_type_name' ) ? aw_current_type_name() : '';
 			$title = $tname ? ( $city ? $tname . ' in ' . $city->name : $tname ) : 'Help in ' . ( $city ? $city->name : '' );
 		}
-		$desc = $term_page && term_description() ? wp_strip_all_tags( term_description() ) : ( AW_SECTION_DESC[ $type ] ?? '' );
+		$desc = $term_page && term_description() ? trim( wp_kses( term_description(), array( 'a' => array( 'href' => true ) ) ) ) : ( AW_SECTION_DESC[ $type ] ?? '' ); // plain links kept (aw_head_band allows them)
 		if ( ( 'aw_listing' === $type && ! $term_page ) && function_exists( 'aw_directory_intro' ) ) {
 			$desc = aw_directory_intro();
 		}
