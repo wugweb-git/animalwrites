@@ -362,8 +362,8 @@ function aw_summary_rules_sanitize( $in ) {
 	}
 	if ( $by_type && $log ) {
 		kits_sourcing_log_many( $log ); // phase 3: each change with its value before and after
-	} else {
-		kits_sourcing_log( 'summary', $what ? implode( ' · ', $what ) : 'summary rules saved (no change)' );
+	} elseif ( $what ) { // a save with no change writes nothing, not even a log entry (round-trip rule)
+		kits_sourcing_log( 'summary', implode( ' · ', $what ) );
 	}
 	return $what ? $new : get_option( AW_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
 }
