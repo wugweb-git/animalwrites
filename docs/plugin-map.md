@@ -6,7 +6,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 
 | File | What it does |
 |---|---|
-| `admin-ia.php` | WP Admin information architecture (Phase 11 J). Nothing is deleted: menus move, labels match the site. |
+| `admin-ia.php` | WP Admin information architecture (Phase 11 J): menu order, Classification (Categories, Tags), Inbox (To review from AW Sourcing), labels that match the site. No old-address redirects (owner, 25 Oct 2026); retired lists (Contact messages, Listing claims, Reports) are out of the menu, their items keep their data. |
 | `also-reported.php` | "Also reported by": publisher logos in an item's source row (meta aw_also_reported, written by the same-story fold in aw-sourcing). |
 | `bindings.php` | Block Bindings source "animal-writes/field" so templates can show meta with core blocks. |
 | `breadcrumbs.php` | Breadcrumbs (restructure Phase 5): one trail per page, shown above the page title. The trail is Rank Math's, built in aw-seo-extras `breadcrumbs.php`, which also gives it to search engines as the one BreadcrumbList. |
@@ -139,7 +139,7 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 | `includes/smtp.php` | The site's SMTP mailbox (option `mailweb_smtp`, password encrypted or `MAILWEB_SMTP_PASSWORD`), filters `mailweb_smtp_defaults`, `mailweb_smtp_reply_to`, test email. |
 | `includes/mail-cap.php` | Daily limit and queue (table `{prefix}mailweb_queue`): priorities (`X-Mailweb-Priority`), retries, pause on refusal, FluentCRM pacing. |
 | `includes/crm-sync.php` | FluentCRM feed (option `mailweb_crm`: on, tag, mailboxes): incoming email noted on the sender's contact (made "transactional"), replies noted; every 5 minutes and on webhook; `wp mailweb crm-sync --all`. |
-| `includes/settings-tab.php` | Mail → Settings tabs: Incoming mail (token, secrets, mailboxes, aliases, profiles, FluentCRM) and Site sending (SMTP, daily limit). |
+| `includes/settings-tab.php` | Mail → Settings (its own submenu page `mailweb-settings`, `mailweb_settings_page()`; manage_options), tabs: Incoming mail (token, secrets, mailboxes, aliases, profiles, FluentCRM) and Site sending (SMTP, daily limit). |
 | `includes/overview.php` | Unread badge, cached counts, the Mail dashboard widget; hides FluentCRM's FluentSMTP card. |
 | `languages/`, `composer.json` | Translation template (`mailweb.pot`), coding-standard and make-pot scripts. |
 | `uninstall.php` | Deletes nothing. |
