@@ -367,9 +367,10 @@ function aw_kw_update( $id, array $fields ) {
 	if ( ! $set ) {
 		return false;
 	}
+	$changed        = array_keys( $set );
 	$set['updated'] = aw_si_now();
 	$wpdb->update( aw_si_table( 'keywords' ), $set, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	do_action( 'aw_kw_saved', (int) $id );
+	do_action( 'aw_kw_saved', (int) $id, $changed );
 	return true;
 }
 

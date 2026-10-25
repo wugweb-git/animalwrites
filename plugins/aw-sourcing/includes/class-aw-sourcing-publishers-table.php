@@ -131,7 +131,11 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$base  = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
 		$shown = $this->screen_view();
 		$out   = array();
-		foreach ( array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites', 'feeds' => 'With feeds', 'code' => 'Read by code', 'relay' => 'Relay' ) as $k => $l ) {
+		$views = array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites', 'feeds' => 'With feeds', 'code' => 'Read by code', 'relay' => 'Relay' );
+		if ( aw_sourcing_phase() >= 2 ) { // press sites went with Brave (phase 2, owner's decision 7)
+			unset( $views['press'] );
+		}
+		foreach ( $views as $k => $l ) {
 			$n                             = count( array_filter( $this->all, fn( $r ) => $this->in_view( $r, $k ) ) );
 			$cur                           = '' === $shown && $this->view() === $k;
 			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
@@ -182,9 +186,10 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			'allow'        => 'Change to Allowed',
 			'neutral'      => 'Change to Neutral',
 			'block'        => 'Change to Blocked',
+		) + ( aw_sourcing_phase() < 2 ? array(
 			'press_add'    => 'Search here for coverage',
 			'press_remove' => 'Stop searching here',
-		) + ( aw_sourcing_phase() >= 1 ? array(
+		) : array() ) + ( aw_sourcing_phase() >= 1 ? array(
 			'relay_on'  => 'Relay on (fetch through this site)',
 			'relay_off' => 'Relay off',
 		) : array() );
@@ -300,7 +305,9 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 				}
 			}
 		}
-		$acts['press'] = $item['press'] ? $this->button( 'row_press', 'remove:' . $h, 'Stop searching here' ) : $this->button( 'row_press', 'add:' . $h, 'Search here for coverage' );
+		if ( aw_sourcing_phase() < 2 ) {
+			$acts['press'] = $item['press'] ? $this->button( 'row_press', 'remove:' . $h, 'Stop searching here' ) : $this->button( 'row_press', 'add:' . $h, 'Search here for coverage' );
+		}
 		if ( aw_sourcing_phase() >= 1 ) {
 			$acts['relay'] = $item['relay_own'] ? $this->button( 'row_relay', 'off:' . $h, 'Relay off' ) : $this->button( 'row_relay', 'on:' . $h, 'Relay on' );
 		}

@@ -340,6 +340,13 @@ foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'searc
 	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
 }
 
+// Spellings added on the Keywords screen are searched too (Codex, #76); a "word*" prefix is not a search.
+$kw_rec = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_INCLUDE, 'label' => 'animal cruelty', 'query' => '', 'feed_id' => '', 'src' => array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ), 'added' => array( 'pashu kroorta', 'cruel*' ) ) );
+$kw_q   = array_map( fn( $s ) => $s['q'] ?? '', aw_kw_searches( $kw_rec, array() ) );
+aw_t( in_array( 'animal cruelty', $kw_q, true ) && in_array( 'pashu kroorta', $kw_q, true ) && ! in_array( 'cruel*', $kw_q, true ), 'added Include spellings are searched, prefixes are not' );
+$kw_rec['src'] = array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ) );
+aw_t( 1 === count( aw_kw_searches( $kw_rec, array() ) ), 'migrated spellings only: the search list is unchanged' );
+
 // The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
 $si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/search-insights/keywords.php' );
 $p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
@@ -351,6 +358,13 @@ $p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-m
 aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
 $kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
 aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
+
+// A search address with an upper-case scheme is still an address (Codex, #76).
+$kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 'label' => 'x', 'query' => 'HTTPS://news.google.com/rss/search?q=x', 'feed_id' => 'gnews-x', 'src' => array() );
+$kw_us = aw_kw_searches( $kw_up, array() );
+aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
+
+echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

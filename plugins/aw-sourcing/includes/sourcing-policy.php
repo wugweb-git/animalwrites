@@ -185,7 +185,7 @@ function aw_has_term( $hay, $term ) {
  * @return array{0: bool, 1: string} keep?, reason.
  */
 function aw_relevance_verdict( $text ) {
-	$r   = aw_relevance();
+	$r   = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance(); // phase 2: the keyword table
 	$hay = mb_strtolower( $text );
 	foreach ( (array) $r['exclude'] as $t ) {
 		if ( aw_has_term( $hay, $t ) ) {
@@ -252,6 +252,15 @@ function aw_sourcing_gate( $url, $name, $feed, $text ) {
 	if ( ! empty( $rel['enabled'] ) && 'allow' !== $rec['status'] && ! aw_relevance_verdict( $text )[0] ) {
 		return 'filtered';
 	}
+	// Exclude keywords always apply, filter on or off and whatever the publisher, as in the workers (owner's decision 14,
+	// 25 Oct 2026; policy.py verdict).
+	$excl = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['exclude'] : (array) ( $rel['exclude'] ?? array() );
+	$hay  = mb_strtolower( $text );
+	foreach ( $excl as $t ) {
+		if ( aw_has_term( $hay, (string) $t ) ) {
+			return 'filtered';
+		}
+	}
 	return '';
 }
 
@@ -297,7 +306,7 @@ add_action(
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && ! in_array( sanitize_key( $_GET['view'] ?? '' ), array( 'feeds', 'relay-log' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds and Relay log views have their own
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
-		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
+		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which view is shown; the Suggestions view and phase 2 (keywords-admin.php) have their own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
 		}
 	}
@@ -659,7 +668,11 @@ function aw_sourcing_page() {
 function aw_sourcing_keywords_tab() {
 	$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
 	$sugg = 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>Words</a> | </li>'
+	if ( ! $sugg && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the keyword table (keywords-admin.php)
+		aw_sourcing_kw_tab();
+		return;
+	}
+	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>' . ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? 'Keywords' : 'Words' ) . '</a> | </li>'
 		. '<li><a href="' . esc_url( $base . '&kw=suggestions' ) . '"' . ( $sugg ? ' class="current" aria-current="page"' : '' ) . '>Suggestions from Search Insights</a></li></ul><br class="clear">';
 	if ( $sugg ) {
 		if ( ! has_action( 'aw_sourcing_keywords_tab_end' ) || ( function_exists( 'aw_sourcing_si_available' ) && ! aw_sourcing_si_available() ) ) {
