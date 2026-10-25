@@ -4,7 +4,7 @@
 - Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.0, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
 - Deploys: bigger work (a new plugin or function, restructuring) goes branch + PR into `wordpress-dev` → review gate → owner merges; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`aw-ship.sh`); the cache is purged after every deploy.
 - Mail: replies from support@ (Mailweb); site forms send no email except the Remove-my-data confirmation; the newsletter is the FluentCRM list "Newsletter".
-- Settings → Sourcing (not News → Sourcing); 18 workflows on the Workers tab.
+- Sourcing has its own menu (from this PR, 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
 - Indexing: directory profiles with no contact are noindex and out of the sitemap unless they have Search Console impressions; `?state=` lists and claim forms are noindex; the Directory map and Near me are built.
 - Breakpoints 768 / 1200 (640 retired).
 
