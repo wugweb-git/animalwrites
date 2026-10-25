@@ -153,6 +153,16 @@ function aw_cf_campaign( $data ) {
 	return $id && 'publish' === get_post_status( $id ) && aw_camp_is_open( $id ) ? $id : 0;
 }
 
+/** The ALTCHA answer of a Campaign form send: in the form data, or in the raw post when Fluent Forms left it out (it is not a form field, so it is not kept with the entry). */
+function aw_cf_altcha( $data ) {
+	if ( isset( $data['altcha'] ) && is_scalar( $data['altcha'] ) ) {
+		return (string) $data['altcha'];
+	}
+	$raw = array();
+	parse_str( (string) wp_unslash( $_POST['data'] ?? '' ), $raw ); // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked by kits_altcha_verify
+	return is_scalar( $raw['altcha'] ?? null ) ? (string) $raw['altcha'] : '';
+}
+
 /** Fluent Forms' answer for a send already saved (a retry after a lost answer): the same reference, no new entry. */
 function aw_cf_done( $ref ) {
 	aw_raw_mark( $GLOBALS['aw_raw_id'] ?? 0, 'duplicate' );
@@ -182,6 +192,10 @@ add_filter(
 		$rl = 'aw_rl_aw_campaign_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( ! $errors && (int) get_transient( $rl ) >= AW_CF_RL_LIMIT ) {
 			$errors['aw_form'] = array( 'aw' => 'Too many tries. Wait a minute, then try again.' );
+		}
+		// The bot check (ALTCHA, audit item 4), checked and used up only when everything else is right.
+		if ( ! $errors && ! aw_cl_human( $send, aw_cf_altcha( $data ) ) ) {
+			$errors['altcha'] = array( 'aw' => 'Couldn\'t verify you\'re not a bot. Try again.' );
 		}
 		return $errors;
 	},

@@ -352,6 +352,7 @@ add_shortcode(
 			<input id="aw-letter-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16"></p>
 		<p class="aw-letter-optin"><input type="checkbox" id="aw-letter-wa-optin" name="wa_optin" value="1"> <label for="aw-letter-wa-optin">OK to contact me on WhatsApp.</label></p>
 		<p class="aw-letter-error" role="alert" hidden>Add your name, city and email first.</p>
+		<?php echo function_exists( 'kits_altcha_widget' ) ? str_replace( '<div class="kit-captcha', '<div data-placed class="kit-captcha', kits_altcha_widget( 'invisible' ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in kits_altcha_widget; the sign-up's bot check (campaign.js) ?>
 		<div class="aw-letter-routes">
 			<button type="button" class="wp-element-button" data-route="gmail"><?php echo aw_i( 'brand-gmail' ); ?>Send with Gmail</button>
 			<button type="button" class="wp-element-button aw-letter-alt" data-route="mailto"><?php echo aw_i( 'mail' ); ?>Email app</button>
