@@ -1,0 +1,1314 @@
+{
+    "about": "Read-only copy of the live lists and of the keyword records they name (animalwrites.in, 25 Oct 2026): aw_relevance, aw_sources (keywords, press, categories, sources), aw_sourcing_dismissed, and the wp_aw_si_keywords rows (id, norm, label, lang, roles) whose normal form one of the lists has, or with the Include role. The table had 4578 records.",
+    "table_count": 4578,
+    "relevance": {
+        "enabled": false,
+        "gnews_allow_only": false,
+        "strong": [
+            "animal welfare",
+            "animal cruelty",
+            "cruelty to animals",
+            "stray dog",
+            "street dog",
+            "community dog",
+            "animal birth control",
+            "ABC Rules",
+            "PCA Act",
+            "Prevention of Cruelty",
+            "AWBI",
+            "Animal Welfare Board",
+            "gaushala",
+            "rabies",
+            "animal rescue",
+            "animal shelter",
+            "wildlife crime",
+            "poaching",
+            "पशु क्रूरता",
+            "रेबीज",
+            "stray",
+            "wildlife",
+            "veterinary",
+            "cow shelter",
+            "world animal day 2026",
+            "animal testing india"
+        ],
+        "animal": [
+            "animal",
+            "animals",
+            "dog",
+            "dogs",
+            "cat",
+            "cats",
+            "cattle",
+            "cow",
+            "cows",
+            "bull",
+            "buffalo",
+            "horse",
+            "donkey",
+            "elephant",
+            "leopard",
+            "tiger",
+            "monkey",
+            "bird",
+            "birds",
+            "wildlife",
+            "livestock",
+            "पशु",
+            "जानवर",
+            "कुत्ता",
+            "गाय",
+            "pig",
+            "pigs",
+            "goat",
+            "goats",
+            "sheep",
+            "camel",
+            "camels",
+            "bear",
+            "bears",
+            "snake",
+            "snakes",
+            "turtle",
+            "turtles",
+            "tortoise",
+            "deer",
+            "macaque",
+            "parrot",
+            "parrots",
+            "puppy",
+            "puppies",
+            "kitten",
+            "kittens",
+            "poultry",
+            "chicken",
+            "chickens",
+            "rhino",
+            "lion",
+            "lions",
+            "pet",
+            "pets",
+            "stray",
+            "strays"
+        ],
+        "context": [
+            "court",
+            "judgment",
+            "rules",
+            "law",
+            "police",
+            "FIR",
+            "arrested",
+            "municipal",
+            "ministry",
+            "minister",
+            "policy",
+            "rescue",
+            "shelter",
+            "veterinary",
+            "vet",
+            "hospital",
+            "sterilisation",
+            "vaccination",
+            "feeding",
+            "attack",
+            "bite",
+            "cruelty",
+            "adoption",
+            "smuggling",
+            "slaughter",
+            "transport",
+            "torture",
+            "torturing",
+            "tortured",
+            "abuse",
+            "abused",
+            "neglect",
+            "imports",
+            "import",
+            "trade",
+            "trafficking",
+            "poaching",
+            "ban",
+            "banned",
+            "NGO",
+            "NGOs",
+            "welfare",
+            "protection",
+            "conservation",
+            "petition",
+            "protest",
+            "campaign",
+            "seized",
+            "rescued",
+            "killed",
+            "poisoned",
+            "injured",
+            "sanctuary",
+            "zoo",
+            "forest department"
+        ],
+        "exclude": [
+            "party animal",
+            "bull market",
+            "bear market",
+            "cattle class",
+            "dog-whistle",
+            "top dog",
+            "underdog",
+            "celebrity pet",
+            "pet project",
+            "brand campaign",
+            "IPO",
+            "box office",
+            "cattle theft",
+            "cattle thief",
+            "cattle thieves",
+            "cattle stealing",
+            "stealing cattle",
+            "stole cattle",
+            "cattle stolen",
+            "stolen cattle",
+            "cattle lifting",
+            "cattle lifters",
+            "cow theft",
+            "cow thieves",
+            "buffalo theft",
+            "cattle smuggling",
+            "cattle smuggler",
+            "cattle smugglers",
+            "smuggling of cattle"
+        ]
+    },
+    "sources_option": {
+        "keywords": [
+            "animal welfare",
+            "animal cruelty",
+            "cruelty to animals",
+            "stray",
+            "street dog",
+            "community dog",
+            "cow shelter",
+            "gaushala",
+            "wildlife",
+            "veterinary",
+            "rabies",
+            "animal birth control",
+            "ABC Rules",
+            "PCA Act",
+            "Prevention of Cruelty",
+            "AWBI",
+            "Animal Welfare Board",
+            "पशु",
+            "जानवर",
+            "पशुपालन",
+            "रेबीज"
+        ],
+        "press": {
+            "enabled": true,
+            "date_floor": "2025-11-01",
+            "every_days": 7,
+            "monthly_requests": 900,
+            "weekly_requests": 200,
+            "backfill_requests": 300,
+            "queries": [
+                "Animal Writes",
+                "AnimalWrites",
+                "#animalwrites",
+                "animalwrites.in",
+                "letter petition Supreme Court dogs",
+                "handwritten letters Supreme Court stray dogs",
+                "29 November post office letters Supreme Court",
+                "draft lab animal rules",
+                "CCSEA draft rules",
+                "animal testing rules objection",
+                "GSR 864 animal experiments"
+            ],
+            "sites": [
+                "instagram.com",
+                "facebook.com",
+                "fb.watch",
+                "x.com",
+                "twitter.com",
+                "youtube.com",
+                "threads.net",
+                "linkedin.com",
+                "reddit.com"
+            ]
+        },
+        "categories": {
+            "community-dogs": [
+                "stray dog",
+                "street dog",
+                "community dog",
+                "stray dogs",
+                "street dogs",
+                "community animals",
+                "कुत्त"
+            ],
+            "animal-birth-control": [
+                "animal birth control",
+                "abc rules",
+                "abc programme",
+                "abc program",
+                "sterilis",
+                "steriliz",
+                "neuter"
+            ],
+            "rabies-public-health": [
+                "rabies",
+                "रेबीज",
+                "dog bite",
+                "anti-rabies",
+                "vaccination drive"
+            ],
+            "cruelty-prosecution": [
+                "cruelty",
+                "fir",
+                "arrested",
+                "prosecution",
+                "torture",
+                "abuse",
+                "poison"
+            ],
+            "feeders-caregivers": [
+                "feeder",
+                "feeding",
+                "caregiver"
+            ],
+            "cattle-gaushalas": [
+                "cattle",
+                "cow",
+                "gaushala",
+                "gaushalas",
+                "bovine",
+                "बैल",
+                "गाय"
+            ],
+            "transport-slaughter": [
+                "slaughter",
+                "transportation of animals",
+                "illegal transport",
+                "smuggl"
+            ],
+            "wildlife": [
+                "wildlife",
+                "tiger",
+                "leopard",
+                "elephant",
+                "pangolin",
+                "forest department",
+                "poach",
+                "sanctuary",
+                "national park"
+            ],
+            "birds": [
+                "bird",
+                "birds",
+                "avian",
+                "pigeon",
+                "kite",
+                "peacock"
+            ],
+            "pets-breeding": [
+                "pet shop",
+                "breeder",
+                "breeding",
+                "dog breed",
+                "pet"
+            ],
+            "adoption": [
+                "adopt",
+                "adoption"
+            ],
+            "performing-captive-animals": [
+                "circus",
+                "performing animals",
+                "captive",
+                "zoo",
+                "elephant ride"
+            ],
+            "laws-rules": [
+                "act",
+                "rules",
+                "amendment",
+                "notification",
+                "guidelines",
+                "circular",
+                "gazette"
+            ],
+            "courts-judgments": [
+                "supreme court",
+                "high court",
+                "court",
+                "judgment",
+                "bench",
+                "petition",
+                "tribunal"
+            ],
+            "policy-government": [
+                "ministry",
+                "government",
+                "minister",
+                "municipal",
+                "corporation",
+                "policy",
+                "scheme",
+                "cabinet"
+            ],
+            "disaster-rescue": [
+                "flood",
+                "cyclone",
+                "earthquake",
+                "disaster",
+                "rescue operation"
+            ],
+            "veterinary-care": [
+                "veterinary",
+                "vet",
+                "hospital",
+                "clinic"
+            ],
+            "campaigns-civic-action": [
+                "campaign",
+                "petition",
+                "protest",
+                "letter",
+                "signature",
+                "awareness"
+            ],
+            "animal-experimentation": [
+                "animal testing",
+                "animal experiment",
+                "experiments on animals",
+                "laboratory animal",
+                "lab animal",
+                "ccsea",
+                "cpcsea",
+                "iaec",
+                "non-animal method",
+                "vivisection",
+                "animal research"
+            ]
+        },
+        "sources": [
+            {
+                "id": "gnews-animal-welfare",
+                "name": "Google News – animal welfare India",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://news.google.com/rss/search?q=%22animal+welfare%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+                "on": true,
+                "filter": false,
+                "host": "news.google.com"
+            },
+            {
+                "id": "gnews-animal-cruelty",
+                "name": "Google News – animal cruelty India",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://news.google.com/rss/search?q=%22animal+cruelty%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+                "on": true,
+                "filter": false,
+                "host": "news.google.com"
+            },
+            {
+                "id": "the-hindu-environment",
+                "name": "The Hindu – Energy & Environment",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://www.thehindu.com/sci-tech/energy-and-environment/feeder/default.rss",
+                "keywords": [
+                    "animal welfare",
+                    "animal cruelty",
+                    "cruelty to animals",
+                    "stray",
+                    "street dog",
+                    "community dog",
+                    "cow shelter",
+                    "gaushala",
+                    "wildlife",
+                    "veterinary",
+                    "rabies",
+                    "animal birth control",
+                    "ABC Rules",
+                    "PCA Act",
+                    "Prevention of Cruelty",
+                    "AWBI",
+                    "Animal Welfare Board",
+                    "पशु",
+                    "जानवर",
+                    "पशुपालन",
+                    "रेबीज"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "thehindu.com"
+            },
+            {
+                "id": "awbi-circulars",
+                "name": "Animal Welfare Board of India – Circulars",
+                "kind": "awbi",
+                "type": "legal",
+                "source_type": "awbi",
+                "url": "https://awbi.gov.in/circulars",
+                "on": true,
+                "filter": false,
+                "host": "awbi.gov.in"
+            },
+            {
+                "id": "awbi-notifications",
+                "name": "Animal Welfare Board of India – Notifications",
+                "kind": "awbi",
+                "type": "legal",
+                "source_type": "awbi",
+                "url": "https://awbi.gov.in/notifications",
+                "on": true,
+                "filter": false,
+                "host": "awbi.gov.in"
+            },
+            {
+                "id": "livelaw-top",
+                "name": "LiveLaw",
+                "kind": "rss",
+                "type": "news",
+                "source_type": "auto-court",
+                "url": "https://www.livelaw.in/category/top-stories/google_feeds.xml",
+                "keywords": [
+                    "animal welfare",
+                    "animal cruelty",
+                    "cruelty to animals",
+                    "stray",
+                    "street dog",
+                    "community dog",
+                    "cow shelter",
+                    "gaushala",
+                    "wildlife",
+                    "veterinary",
+                    "rabies",
+                    "animal birth control",
+                    "ABC Rules",
+                    "PCA Act",
+                    "Prevention of Cruelty",
+                    "AWBI",
+                    "Animal Welfare Board",
+                    "पशु",
+                    "जानवर",
+                    "पशुपालन",
+                    "रेबीज"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "livelaw.in"
+            },
+            {
+                "id": "barandbench",
+                "name": "Bar & Bench",
+                "kind": "rss",
+                "type": "news",
+                "source_type": "auto-court",
+                "url": "https://www.barandbench.com/feed",
+                "keywords": [
+                    "animal welfare",
+                    "animal cruelty",
+                    "cruelty to animals",
+                    "stray",
+                    "street dog",
+                    "community dog",
+                    "cow shelter",
+                    "gaushala",
+                    "wildlife",
+                    "veterinary",
+                    "rabies",
+                    "animal birth control",
+                    "ABC Rules",
+                    "PCA Act",
+                    "Prevention of Cruelty",
+                    "AWBI",
+                    "Animal Welfare Board",
+                    "पशु",
+                    "जानवर",
+                    "पशुपालन",
+                    "रेबीज"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "barandbench.com"
+            },
+            {
+                "id": "court-news-animals",
+                "name": "Court news – LiveLaw",
+                "kind": "rss",
+                "type": "news",
+                "source_type": "auto-court",
+                "url": "https://news.google.com/rss/search?q=site:livelaw.in+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+                "lookback_days": 7,
+                "on": true,
+                "filter": false,
+                "host": "livelaw.in"
+            },
+            {
+                "id": "court-news-barandbench",
+                "name": "Court news – Bar & Bench",
+                "kind": "rss",
+                "type": "news",
+                "source_type": "auto-court",
+                "url": "https://news.google.com/rss/search?q=site:barandbench.com+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+                "lookback_days": 7,
+                "on": true,
+                "filter": false,
+                "host": "barandbench.com"
+            },
+            {
+                "id": "court-news-scobserver",
+                "name": "Court news – SC Observer",
+                "kind": "rss",
+                "type": "news",
+                "source_type": "auto-court",
+                "url": "https://news.google.com/rss/search?q=site:scobserver.in+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+                "lookback_days": 7,
+                "on": true,
+                "filter": false,
+                "host": "scobserver.in"
+            },
+            {
+                "id": "pib-releases",
+                "name": "Press Information Bureau",
+                "kind": "rss",
+                "type": "legal",
+                "source_type": "pib",
+                "url": "https://news.google.com/rss/search?q=site:pib.gov.in+(animal+OR+rabies+OR+veterinary+OR+livestock+OR+wildlife)&hl=en-IN&gl=IN&ceid=IN:en",
+                "keywords": [
+                    "animal welfare",
+                    "animal cruelty",
+                    "cruelty to animals",
+                    "stray",
+                    "street dog",
+                    "community dog",
+                    "cow shelter",
+                    "gaushala",
+                    "wildlife",
+                    "veterinary",
+                    "rabies",
+                    "animal birth control",
+                    "ABC Rules",
+                    "PCA Act",
+                    "Prevention of Cruelty",
+                    "AWBI",
+                    "Animal Welfare Board",
+                    "पशु",
+                    "जानवर",
+                    "पशुपालन",
+                    "रेबीज"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "pib.gov.in"
+            },
+            {
+                "id": "ccsea-whats-new",
+                "name": "CCSEA – What's New",
+                "kind": "ccsea",
+                "type": "legal",
+                "source_type": "ccsea",
+                "url": "https://ccsea.gov.in/CCSEAWhatsNews.aspx",
+                "lookback_days": 30,
+                "skip_urls": [
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/DraftPreventionofCrueltytoAnimals(ControlandSupervisionofExperiment,BreedingandTradingofLaboratoryAnimals)Rules,2026.pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/InspectionsofanimalhousefacilitiesandIAECmeetings.pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/AdministrativeCCSEAAmendmentRules2026.pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/ConveningIAECmeetingthroughphysicalmode.pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/PublicNotice_LetterofPeTAIndia.pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/IAECFunctioning-projectpresentationbyPrincipalInvestigator(PI).pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/VaccinetrialsusingDogs(1).pdf",
+                    "https://ccsea.gov.in/WriteReadData/LnPdf/FeeStructureorder.pdf"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "ccsea.gov.in"
+            },
+            {
+                "id": "gnews-lab-animal-rules",
+                "name": "Google News – lab animal rules India",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://news.google.com/rss/search?q=(%22CCSEA%22+OR+%22lab+animal+rules%22+OR+%22laboratory+animals+rules%22+OR+%22animal+experiments%22)+India+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+                "keywords": [
+                    "CCSEA",
+                    "CPCSEA",
+                    "laboratory animal",
+                    "lab animal",
+                    "animal experiment",
+                    "animal testing",
+                    "G.S.R. 864",
+                    "IAEC",
+                    "Palamur",
+                    "non-animal method"
+                ],
+                "on": true,
+                "filter": false,
+                "file_as": "press",
+                "host": "news.google.com"
+            },
+            {
+                "id": "pfa-substack",
+                "name": "People For Animals (Substack)",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://peopleforanimals.substack.com/feed",
+                "keywords": [
+                    "CCSEA",
+                    "CPCSEA",
+                    "laboratory animal",
+                    "lab animal",
+                    "animal experiment",
+                    "animal testing",
+                    "G.S.R. 864",
+                    "IAEC",
+                    "Palamur",
+                    "non-animal method"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "peopleforanimals.substack.com"
+            },
+            {
+                "id": "peta-india",
+                "name": "PETA India",
+                "kind": "rss",
+                "type": "news",
+                "url": "https://www.petaindia.com/feed/",
+                "keywords": [
+                    "CCSEA",
+                    "CPCSEA",
+                    "laboratory animal",
+                    "lab animal",
+                    "animal experiment",
+                    "animal testing",
+                    "G.S.R. 864",
+                    "IAEC",
+                    "Palamur",
+                    "non-animal method"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "petaindia.com"
+            },
+            {
+                "id": "gazette-of-india",
+                "name": "Gazette of India",
+                "kind": "egazette",
+                "type": "legal",
+                "source_type": "gazette",
+                "url": "https://egazette.gov.in/",
+                "lookback_days": 30,
+                "ministries": [
+                    "Ministry of Fisheries, Animal Husbandry and Dairying",
+                    "Ministry of Environment, Forest and Climate Change"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "egazette.gov.in"
+            },
+            {
+                "id": "judgments-supreme-court",
+                "name": "Supreme Court judgments (open dataset, CC BY 4.0)",
+                "kind": "judgments-sc",
+                "type": "legal",
+                "url": "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/",
+                "lookback_days": 120,
+                "on": true,
+                "filter": false,
+                "host": "indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com"
+            },
+            {
+                "id": "judgments-high-courts",
+                "name": "High Court judgments (open dataset, CC BY 4.0)",
+                "kind": "judgments-hc",
+                "type": "legal",
+                "url": "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/",
+                "lookback_days": 60,
+                "on": false,
+                "filter": false,
+                "host": "indian-high-court-judgments.s3.ap-south-1.amazonaws.com"
+            },
+            {
+                "id": "opp-wwf-india",
+                "name": "WWF-India careers",
+                "org": "WWF-India",
+                "kind": "zoho",
+                "type": "opportunity",
+                "opportunity_type": "job",
+                "lookback_days": 120,
+                "url": "https://wwfindia.zohorecruit.com/jobs/careers",
+                "match": "title",
+                "keywords": [
+                    "conservation",
+                    "wildlife",
+                    "biodiversity",
+                    "species",
+                    "raptor",
+                    "tiger",
+                    "elephant",
+                    "rhino",
+                    "bird",
+                    "aquatic",
+                    "wetland",
+                    "river",
+                    "marine",
+                    "forest",
+                    "habitat",
+                    "veterinar",
+                    "animal",
+                    "brahmaputra"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "wwfindia.zohorecruit.com"
+            },
+            {
+                "id": "opp-awbi-notifications",
+                "name": "Animal Welfare Board of India – Notifications",
+                "org": "Animal Welfare Board of India",
+                "kind": "awbi",
+                "type": "opportunity",
+                "opportunity_type": "event",
+                "lookback_days": 120,
+                "url": "https://awbi.gov.in/Notifications",
+                "keywords": [
+                    "invitation for",
+                    "inviting",
+                    "award",
+                    "vacancy",
+                    "vacancies",
+                    "recruitment",
+                    "internship",
+                    "applications are invited",
+                    "walk-in"
+                ],
+                "on": true,
+                "filter": false,
+                "host": "awbi.gov.in"
+            }
+        ]
+    },
+    "dismissed": [
+        "besant memorial animal dispensary",
+        "romanchs law",
+        "yes",
+        "g.s.r. 864(e)"
+    ],
+    "rows": [
+        {
+            "id": 15,
+            "norm": "animal shelter",
+            "label": "animal shelter",
+            "roles": 23,
+            "lang": "en"
+        },
+        {
+            "id": 16,
+            "norm": "gaushala",
+            "label": "gaushala",
+            "roles": 7,
+            "lang": "en"
+        },
+        {
+            "id": 46,
+            "norm": "animal birth control",
+            "label": "animal birth control",
+            "roles": 23,
+            "lang": "en"
+        },
+        {
+            "id": 47,
+            "norm": "abc programme",
+            "label": "abc programme",
+            "roles": 22,
+            "lang": "en"
+        },
+        {
+            "id": 125,
+            "norm": "animal write",
+            "label": "animal writes",
+            "roles": 30,
+            "lang": "en"
+        },
+        {
+            "id": 131,
+            "norm": "dog bite",
+            "label": "dog bite",
+            "roles": 6,
+            "lang": "en"
+        },
+        {
+            "id": 145,
+            "norm": "cpcsea",
+            "label": "cpcsea",
+            "roles": 22,
+            "lang": "en"
+        },
+        {
+            "id": 147,
+            "norm": "awbi",
+            "label": "awbi",
+            "roles": 23,
+            "lang": "en"
+        },
+        {
+            "id": 149,
+            "norm": "gsr 864 e",
+            "label": "g.s.r. 864(e)",
+            "roles": 22,
+            "lang": "en"
+        },
+        {
+            "id": 153,
+            "norm": "world animal day 2026",
+            "label": "world animal day 2026",
+            "roles": 22,
+            "lang": "en"
+        },
+        {
+            "id": 187,
+            "norm": "street dogs",
+            "label": "street dogs",
+            "roles": 6,
+            "lang": "en"
+        },
+        {
+            "id": 190,
+            "norm": "stray dogs",
+            "label": "stray dogs",
+            "roles": 22,
+            "lang": "en"
+        },
+        {
+            "id": 195,
+            "norm": "animalwrite",
+            "label": "animalwrites",
+            "roles": 12,
+            "lang": "en"
+        },
+        {
+            "id": 270,
+            "norm": "animal testing india",
+            "label": "animal testing india",
+            "roles": 18,
+            "lang": "en"
+        },
+        {
+            "id": 274,
+            "norm": "ccsea",
+            "label": "ccsea",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 282,
+            "norm": "romanch law",
+            "label": "romanchs law",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 285,
+            "norm": "yes",
+            "label": "yes",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 360,
+            "norm": "animal rescue",
+            "label": "animal rescue",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 442,
+            "norm": "animal welfare board",
+            "label": "animal welfare board",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 470,
+            "norm": "besant memorial animal dispensary",
+            "label": "besant memorial animal dispensary",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 599,
+            "norm": "draft lab animal rule",
+            "label": "draft lab animal rules",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 665,
+            "norm": "iaec",
+            "label": "iaec",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 737,
+            "norm": "notification",
+            "label": "notification",
+            "roles": 18,
+            "lang": "en"
+        },
+        {
+            "id": 898,
+            "norm": "gsr 864",
+            "label": "gsr 864",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 1043,
+            "norm": "animal testing",
+            "label": "animal testing",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 1301,
+            "norm": "laboratory animal",
+            "label": "laboratory animals",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 1357,
+            "norm": "palamur",
+            "label": "palamur",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 1506,
+            "norm": "abc rule",
+            "label": "abc rules",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 1520,
+            "norm": "animal cruelty",
+            "label": "animal cruelty",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 1644,
+            "norm": "community animal",
+            "label": "community animals",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 1655,
+            "norm": "cruelty to animal",
+            "label": "cruelty to animals",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 2163,
+            "norm": "slaughter",
+            "label": "slaughter",
+            "roles": 18,
+            "lang": "en"
+        },
+        {
+            "id": 2501,
+            "norm": "performing animal",
+            "label": "performing animals",
+            "roles": 18,
+            "lang": "en"
+        },
+        {
+            "id": 2552,
+            "norm": "animal welfare",
+            "label": "animal welfare",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 2570,
+            "norm": "community dog",
+            "label": "community dog",
+            "roles": 17,
+            "lang": "en"
+        },
+        {
+            "id": 2873,
+            "norm": "cow",
+            "label": "cow",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 3040,
+            "norm": "abc program",
+            "label": "abc program",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 3112,
+            "norm": "shelter",
+            "label": "shelter",
+            "roles": 18,
+            "lang": "en"
+        },
+        {
+            "id": 3148,
+            "norm": "dog",
+            "label": "dog",
+            "roles": 16,
+            "lang": "en"
+        },
+        {
+            "id": 3152,
+            "norm": "rabies",
+            "label": "rabies",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 3184,
+            "norm": "stray dog",
+            "label": "stray dog",
+            "roles": 19,
+            "lang": "en"
+        },
+        {
+            "id": 3192,
+            "norm": "ccsea draft rule",
+            "label": "ccsea draft rules",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 3245,
+            "norm": "prevention of cruelty",
+            "label": "prevention of cruelty",
+            "roles": 3,
+            "lang": "en"
+        },
+        {
+            "id": 3396,
+            "norm": "supreme court",
+            "label": "supreme court",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 3672,
+            "norm": "elephant ride",
+            "label": "elephant rides",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 3756,
+            "norm": "pet shop",
+            "label": "pet shop",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 3965,
+            "norm": "experiment on animal",
+            "label": "experiment on animals",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 3977,
+            "norm": "cow shelter",
+            "label": "cow shelter",
+            "roles": 3,
+            "lang": "en"
+        },
+        {
+            "id": 4373,
+            "norm": "animal experiment",
+            "label": "animal experiments",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4404,
+            "norm": "lab animal rule",
+            "label": "lab animal rules",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4485,
+            "norm": "judgment",
+            "label": "judgments",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4486,
+            "norm": "cruelty",
+            "label": "cruelty",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4488,
+            "norm": "policy",
+            "label": "policy",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4489,
+            "norm": "wildlife",
+            "label": "wildlife",
+            "roles": 3,
+            "lang": "en"
+        },
+        {
+            "id": 4491,
+            "norm": "breeding",
+            "label": "breeding",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4493,
+            "norm": "feeder",
+            "label": "feeders",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4495,
+            "norm": "adoption",
+            "label": "adoption",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4496,
+            "norm": "bird",
+            "label": "birds",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4498,
+            "norm": "act",
+            "label": "act",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4500,
+            "norm": "pca act",
+            "label": "pca act",
+            "roles": 3,
+            "lang": "en"
+        },
+        {
+            "id": 4514,
+            "norm": "circular",
+            "label": "circular",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4524,
+            "norm": "feeding",
+            "label": "feeding",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4545,
+            "norm": "rescue",
+            "label": "rescue",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4550,
+            "norm": "rule",
+            "label": "rule",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4556,
+            "norm": "sterilisation",
+            "label": "sterilisation",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4562,
+            "norm": "vaccination",
+            "label": "vaccination",
+            "roles": 2,
+            "lang": "en"
+        },
+        {
+            "id": 4572,
+            "norm": "street dog",
+            "label": "street dog",
+            "roles": 1,
+            "lang": "en"
+        },
+        {
+            "id": 4573,
+            "norm": "wildlife crime",
+            "label": "wildlife crime",
+            "roles": 1,
+            "lang": "en"
+        },
+        {
+            "id": 4574,
+            "norm": "poaching",
+            "label": "poaching",
+            "roles": 1,
+            "lang": "en"
+        },
+        {
+            "id": 4575,
+            "norm": "पशु क्रूरता",
+            "label": "पशु क्रूरता",
+            "roles": 1,
+            "lang": "hi"
+        },
+        {
+            "id": 4576,
+            "norm": "रेबीज",
+            "label": "रेबीज",
+            "roles": 1,
+            "lang": "hi"
+        },
+        {
+            "id": 4577,
+            "norm": "stray",
+            "label": "stray",
+            "roles": 1,
+            "lang": "en"
+        },
+        {
+            "id": 4578,
+            "norm": "veterinary",
+            "label": "veterinary",
+            "roles": 1,
+            "lang": "en"
+        }
+    ]
+}

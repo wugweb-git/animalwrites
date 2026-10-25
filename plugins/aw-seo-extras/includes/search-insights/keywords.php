@@ -10,82 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_ROLE_SOURCING = 1;  // A Google News search in AW Sourcing's Include list.
-const AW_SI_ROLE_FOCUS    = 2;  // A Rank Math focus keyphrase (primary or secondary) on a post or term.
-const AW_SI_ROLE_TRACKED  = 4;  // Keyword map target, demand gap or the monthly check list.
-const AW_SI_ROLE_BRAND    = 8;  // Matches AW_SI_BRAND.
-const AW_SI_ROLE_SEARCHED = 16; // Seen in Search Console.
-
-// Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
-const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
-
-// Words ending in s that are not plurals: never folded ("news" must not become "new").
-const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
-
-/** Role bits with their labels. */
-function aw_si_roles(): array {
-	return array(
-		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'aw-seo-extras' ),
-		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'aw-seo-extras' ),
-		AW_SI_ROLE_SOURCING => __( 'Sourcing', 'aw-seo-extras' ),
-		AW_SI_ROLE_BRAND    => __( 'Brand', 'aw-seo-extras' ),
-		AW_SI_ROLE_SEARCHED => __( 'Searched', 'aw-seo-extras' ),
-	);
-}
-
-/**
- * Whether a phrase is a brand search (AW_SI_BRAND).
- *
- * @param string $s Phrase.
- */
-function aw_si_is_brand( string $s ): bool {
-	return (bool) preg_match( AW_SI_BRAND, $s );
-}
-
-/**
- * Normalised form: lower case, dots dropped (g.s.r. → gsr), other punctuation as spaces ({placeholders} kept), single
- * spaces, and each English word's plural folded (dogs → dog, ngos → ngo, gaushalas → gaushala). Variants that differ only
- * in these ways share one record.
- *
- * @param string $s Phrase as written.
- */
-function aw_si_norm( string $s ): string {
-	$s = mb_strtolower( wp_strip_all_tags( $s ) );
-	$s = str_replace( array( '.', "'", '’' ), '', $s );
-	$s = (string) preg_replace( '/[^\p{L}\p{M}\p{N}{}]+/u', ' ', $s );
-	$w = preg_split( '/\s+/u', trim( $s ) );
-	foreach ( (array) $w as $i => $word ) {
-		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, AW_SI_NOT_PLURAL, true ) ) {
-			$w[ $i ] = substr( $word, 0, -1 );
-		}
-	}
-	return mb_substr( trim( implode( ' ', (array) $w ) ), 0, 191 );
-}
-
-/**
- * Language: hi (Devanagari), hinglish (Latin-script Hindi) or en. Hinglish needs one clear Hindi word, or two of the
- * short ones that are also English-looking ("ke", "se").
- *
- * @param string $s Phrase as written.
- */
-function aw_si_lang( string $s ): string {
-	if ( preg_match( '/\p{Devanagari}/u', $s ) ) {
-		return 'hi';
-	}
-	static $strong = array( 'kutta', 'kutte', 'kutton', 'billi', 'gaay', 'gai', 'gau', 'janwar', 'jaanwar', 'janwaron', 'pashu', 'pashuon', 'chikitsa', 'aspatal', 'kaatna', 'kaata', 'kaat', 'kaise', 'kare', 'karein', 'kya', 'kahan', 'kab', 'manaya', 'jata', 'hota', 'hoti', 'nahi', 'nahin', 'sarkari', 'niyam', 'kanoon', 'kanun', 'shikayat', 'bachao', 'suchna', 'mein', 'liye' );
-	static $weak   = array( 'ke', 'ki', 'ka', 'se', 'hai', 'ko', 'aur', 'par' );
-	$words         = preg_split( '/\s+/', mb_strtolower( $s ) );
-	$weak_hits     = 0;
-	foreach ( (array) $words as $w ) {
-		if ( in_array( $w, $strong, true ) ) {
-			return 'hinglish';
-		}
-		if ( in_array( $w, $weak, true ) ) {
-			++$weak_hits;
-		}
-	}
-	return $weak_hits >= 2 ? 'hinglish' : 'en';
-}
+// The role constants, AW_SI_BRAND, AW_SI_NOT_PLURAL, aw_si_roles(), aw_si_is_brand(), aw_si_norm() and aw_si_lang() moved
+// to Animal Writes Core with the keyword table (includes/keyword-model.php and keyword-table.php; owner's decision 3,
+// 25 Oct 2026), so AW Sourcing reads and writes the table without this plugin.
 
 /** Map of norm => id for every keyword record. */
 function aw_si_kw_map(): array {
@@ -451,7 +378,8 @@ function aw_si_focus_parts( string $field ): array {
  * Daily role sync (read-only towards Rank Math and Sourcing):
  * - focus: Rank Math keyphrases of published items (AW_SEO_ITEM_TYPES without listings) and of terms; listings only mark
  *   matching records as entities (their names are not added one by one: plan, fixed decisions);
- * - sourcing: AW Sourcing's Google News searches (aw_relevance()['strong']), when AW Sourcing is active;
+ * - sourcing: AW Sourcing's Include list (aw_relevance()['strong']), when AW Sourcing is active and before its phase 2
+ *   (from phase 2 the owner sets Include on the record and this leaves it alone);
  * - brand: AW_SI_BRAND.
  *
  * @return array Counts.
@@ -514,11 +442,20 @@ function aw_si_sync_roles(): array {
 		$wpdb->query( "UPDATE {$k} SET entity = 1 WHERE id IN ({$in})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 
-	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise).
-	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
-	if ( $sourcing ) {
-		aw_si_kw_ids( $sourcing, AW_SI_ROLE_SOURCING );
+	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise). From sourcing phase 2 the
+	// Include role is set on the records themselves (Settings → Sourcing → Keywords) and is never rebuilt here.
+	$sourcing = array();
+	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
+	if ( $p2_busy ) {
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- counted for the run log only
+	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: AW Sourcing may be off while this runs
+		$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
+		if ( $sourcing ) {
+			aw_si_kw_ids( $sourcing, AW_SI_ROLE_SOURCING );
+		}
+	} else {
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$k} WHERE roles & %d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- counted for the run log only
 	}
 
 	// Brand: every record whose label matches.

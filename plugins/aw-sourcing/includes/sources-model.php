@@ -443,7 +443,8 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
 /**
  * The policy's sources_v2 block: each source as the workers' v1 list has it (already resolved: no on / filter
  * switches, keyword lists in place) plus its publisher host, relay switch, how it is read and its keyword check (the
- * check names roles and categories from phase 2; empty in phase 1, so the source's own keywords apply).
+ * check names roles and categories from phase 2, stored on the source as `check`; empty otherwise, so the source's own
+ * keywords apply).
  *
  * @param array    $v1    The policy's config.sources (resolved).
  * @param string[] $relay Relay allow list.
@@ -456,13 +457,17 @@ function aw_src_sources_v2( array $v1, array $relay ) {
 			continue;
 		}
 		$h     = aw_src_source_host( $s );
+		$check = isset( $s['check'] ) && is_array( $s['check'] ) ? $s['check'] : array();
 		$out[] = array_merge(
 			$s,
 			array(
 				'host'    => $h,
 				'relay'   => aw_src_host_in( $h, $relay ),
 				'read_by' => aw_src_read_by( $s ),
-				'check'   => array( 'roles' => array(), 'categories' => array() ),
+				'check'   => array(
+					'roles'      => array_values( array_map( 'strval', (array) ( $check['roles'] ?? array() ) ) ),
+					'categories' => array_values( array_map( 'strval', (array) ( $check['categories'] ?? array() ) ) ),
+				),
 			)
 		);
 	}

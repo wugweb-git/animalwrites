@@ -500,6 +500,10 @@ function aw_sources_press_tab() {
 add_filter(
 	'aw_sources_save_press',
 	function ( $c, $in ) {
+		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the press queries are keywords with the Press role; this form is a copy
+			add_settings_error( 'aw_sourcing', 'moved', 'The press queries moved into the keyword table (sourcing phase 2): nothing was saved here.', 'warning' );
+			return $c;
+		}
 		$old                   = $c['press'];
 		$c['press']['queries'] = aw_sourcing_lines( $in['queries'] ?? '' );
 		if ( array_key_exists( 'sites', (array) $in ) ) { // the Sites field moved to the Sources tab: kept as stored unless posted
@@ -509,7 +513,7 @@ add_filter(
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ) {
 			$c['press']['date_floor'] = $d;
 		}
-		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'], $c['press']['sites'] ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
+		kits_sourcing_log( 'press', implode( ' · ', array_filter( array( kits_sourcing_diff( 'Queries', $old['queries'], $c['press']['queries'] ), kits_sourcing_diff( 'Sites', $old['sites'] ?? array(), $c['press']['sites'] ?? array() ), $old['date_floor'] !== $c['press']['date_floor'] ? 'from ' . $c['press']['date_floor'] : '' ) ) ) );
 		return $c;
 	},
 	10,
@@ -542,7 +546,7 @@ add_filter(
 			if ( ! empty( $s['filter'] ) ) {
 				$s['keywords'] = $words; // one keyword list: the Keywords tab's include and animal words
 			}
-			unset( $s['on'], $s['filter'] );
+			unset( $s['on'], $s['filter'], $s['check'], $s['keyword_id'] ); // phase 2 keys (stored by the migration): sent in sources_v2 from S2b's policy, never in v1
 			$sources[] = $s;
 		}
 		// Search words: the Keywords tab's Include list. Each English one is a Google News search per run; the animal words
