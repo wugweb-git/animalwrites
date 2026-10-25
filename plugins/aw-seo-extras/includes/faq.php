@@ -37,6 +37,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for AW SEO Plus → FAQ
 
 const AW_FAQ_MIN   = 3;
+
+/**
+ * Fewest questions a page shows (and marks up): 3, except Resources guides, where 2 is enough (owner, 21 Oct 2026 for
+ * World Rabies Day; 25 Oct 2026 for all guides, so the Rank Math conversion loses none).
+ *
+ * @param array|null $ctx aw_faq_context().
+ * @return int
+ */
+function aw_faq_min( $ctx ) {
+	return is_array( $ctx ) && 'guide' === ( $ctx['kind'] ?? '' ) ? 2 : AW_FAQ_MIN;
+}
 const AW_FAQ_MAX   = 6;
 const AW_FAQ_WORDS = 50;
 
@@ -711,7 +722,7 @@ function aw_faq_build( $ctx = null, $holdout = true ) {
 		$seen[ $qk ]               = true;
 	}
 	$faq = array_slice( $keep, 0, AW_FAQ_MAX );
-	if ( count( array_filter( $faq, fn( $c ) => $c['counts'] ) ) < AW_FAQ_MIN ) { // "based on type" answers do not count toward the 3
+	if ( count( array_filter( $faq, fn( $c ) => $c['counts'] ) ) < aw_faq_min( $ctx ) ) { // "based on type" answers do not count toward the 3
 		return $cache[ $key ] = null;
 	}
 	if ( 'legal' === $ctx['kind'] && '' !== $ctx['full'] && $ctx['full'] !== $ctx['entity'] && ! empty( $faq[0]['answer'] ) ) { // the full official title, once, in the first answer (data answers only: a hand-written item has no answer builder)
@@ -800,7 +811,7 @@ function aw_faq_parse( $html ) {
 function aw_faq_schema() {
 	$faq = aw_faq_build();
 	$qa  = $faq ? aw_faq_parse( aw_faq_html( $faq ) ) : array();
-	if ( count( $qa ) < AW_FAQ_MIN ) {
+	if ( count( $qa ) < aw_faq_min( $faq['ctx'] ?? null ) ) {
 		return null;
 	}
 	return array(
@@ -1437,7 +1448,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					++$seen;
 					$qa   = aw_faq_parse( aw_faq_html( $faq ) );
 					$errs = array();
-					if ( count( $qa ) < AW_FAQ_MIN || count( $qa ) > AW_FAQ_MAX ) {
+					if ( count( $qa ) < aw_faq_min( $faq['ctx'] ?? null ) || count( $qa ) > AW_FAQ_MAX ) {
 						$errs[] = count( $qa ) . ' questions';
 					}
 					if ( count( array_unique( array_map( 'strtolower', wp_list_pluck( $qa, 'q' ) ) ) ) !== count( $qa ) ) {
