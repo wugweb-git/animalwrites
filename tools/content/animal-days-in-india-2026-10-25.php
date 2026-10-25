@@ -8,6 +8,8 @@
  * Veterinary Association (2026 theme, 25 Apr 2026), PIB (International Tiger Day backgrounder, Jul 2024; World Elephant
  * Day backgrounder, 12 Aug 2026; NBWL Standing Committee on National Dolphin Day, 2022), AWBI circulars page.
  *
+ * 25 Oct 2026, later: every day's name links its own guide once all eleven were published.
+ *
  * Usage: wp eval-file animal-days-in-india-2026-10-25.php [dry]
  * Creates the post on the first run; a later run updates the same post (found by its slug) and keeps its date.
  */
@@ -62,6 +64,14 @@ $L    = function ( $path ) use ( &$miss ) {
 $rab = $L( '/resources/world-rabies-day/' );
 $ww  = $L( '/resources/wildlife-week/' );
 $wad = $L( '/resources/world-animal-day-4-october/' );
+$awf = $L( '/resources/animal-welfare-fortnight/' );
+$wwd = $L( '/resources/world-wildlife-day/' );
+$spa = $L( '/resources/world-sparrow-day/' );
+$vet = $L( '/resources/world-veterinary-day/' );
+$zoo = $L( '/resources/world-zoonoses-day/' );
+$tig = $L( '/resources/international-tiger-day/' );
+$ele = $L( '/resources/world-elephant-day/' );
+$dol = $L( '/resources/national-dolphin-day/' );
 $dir = home_url( '/directory/' );
 $cat = get_term_by( 'name', 'Campaigns and Civic Action', 'category' );
 if ( ! $cat ) {
@@ -83,31 +93,31 @@ $d = array(
 		. g_table(
 			array( 'Month', 'Date', 'Day', 'Who marks it' ),
 			array(
-				array( 'January', '14 to 30 January', 'Animal Welfare Fortnight', 'Animal Welfare Board of India (AWBI)' ),
-				array( 'March', '3 March', 'World Wildlife Day', 'United Nations (CITES)' ),
-				array( 'March', '20 March', 'World Sparrow Day', 'Nature Forever Society' ),
-				array( 'April', 'Last Saturday of April (24 April 2027)', 'World Veterinary Day', 'World Veterinary Association' ),
-				array( 'July', '6 July', 'World Zoonoses Day', 'Marks the first rabies vaccine, given by Louis Pasteur on 6 July 1885' ),
-				array( 'July', '29 July', 'International Tiger Day', 'Tiger range countries; in India, the National Tiger Conservation Authority' ),
-				array( 'August', '12 August', 'World Elephant Day', 'World Elephant Day; in India, Project Elephant (Ministry of Environment)' ),
+				array( 'January', '14 to 30 January', g_a( $awf, 'Animal Welfare Fortnight' ), 'Animal Welfare Board of India (AWBI)' ),
+				array( 'March', '3 March', g_a( $wwd, 'World Wildlife Day' ), 'United Nations (CITES)' ),
+				array( 'March', '20 March', g_a( $spa, 'World Sparrow Day' ), 'Nature Forever Society' ),
+				array( 'April', 'Last Saturday of April (24 April 2027)', g_a( $vet, 'World Veterinary Day' ), 'World Veterinary Association' ),
+				array( 'July', '6 July', g_a( $zoo, 'World Zoonoses Day' ), 'Marks the first rabies vaccine, given by Louis Pasteur on 6 July 1885' ),
+				array( 'July', '29 July', g_a( $tig, 'International Tiger Day' ), 'Tiger range countries; in India, the National Tiger Conservation Authority' ),
+				array( 'August', '12 August', g_a( $ele, 'World Elephant Day' ), 'World Elephant Day; in India, Project Elephant (Ministry of Environment)' ),
 				array( 'September', '28 September', g_a( $rab, 'World Rabies Day' ), 'Global Alliance for Rabies Control; WHO' ),
 				array( 'October', '2 to 8 October', g_a( $ww, 'Wildlife Week' ), 'Ministry of Environment, Forest and Climate Change' ),
 				array( 'October', '4 October', g_a( $wad, 'World Animal Day' ), 'World Animal Day organisation' ),
-				array( 'October', '5 October', 'National Dolphin Day', 'National Board for Wildlife (since 2022)' ),
+				array( 'October', '5 October', g_a( $dol, 'National Dolphin Day' ), 'National Board for Wildlife (since 2022)' ),
 			)
 		)
 		. g_h( 'The days, in short' )
-		. g_p( '<strong>Animal Welfare Fortnight (14 to 30 January).</strong> The Animal Welfare Board of India asks local bodies, departments and animal welfare organisations to hold events for animals during the fortnight. Past circulars asked for animal birth control and anti-rabies drives, and for help to sick and injured animals. AWBI issues a circular for each year, and states hold their own events.' )
-		. g_p( '<strong>World Wildlife Day (3 March).</strong> A United Nations day, on the date the CITES convention on trade in endangered species was signed in 1973.' )
-		. g_p( '<strong>World Sparrow Day (20 March).</strong> Started by the Nature Forever Society of India in 2010, to bring back the house sparrow.' )
-		. g_p( '<strong>World Veterinary Day (last Saturday of April).</strong> The World Veterinary Association\'s day for vets. The 2026 theme was "Veterinarians: Guardians of Food and Health" (25 April 2026).' )
-		. g_p( '<strong>World Zoonoses Day (6 July).</strong> For diseases that pass between animals and people, such as rabies. It marks the day in 1885 when Louis Pasteur first gave his rabies vaccine.' )
-		. g_p( '<strong>International Tiger Day (29 July).</strong> Agreed by the tiger range countries at the St Petersburg summit in 2010. India often releases its tiger figures on this day.' )
-		. g_p( '<strong>World Elephant Day (12 August).</strong> Marked since 2012. In India, Project Elephant and state forest departments hold events.' )
+		. g_p( '<strong>Animal Welfare Fortnight (14 to 30 January).</strong> The Animal Welfare Board of India asks local bodies, departments and animal welfare organisations to hold events for animals during the fortnight. Past circulars asked for animal birth control and anti-rabies drives, and for help to sick and injured animals. AWBI issues a circular for each year, and states hold their own events. Full guide: ' . g_a( $awf, 'Animal Welfare Fortnight' ) . '.' )
+		. g_p( '<strong>World Wildlife Day (3 March).</strong> A United Nations day, on the date the CITES convention on trade in endangered species was signed in 1973. Full guide: ' . g_a( $wwd, 'World Wildlife Day' ) . '.' )
+		. g_p( '<strong>World Sparrow Day (20 March).</strong> Started by the Nature Forever Society of India in 2010, to bring back the house sparrow. Full guide: ' . g_a( $spa, 'World Sparrow Day' ) . '.' )
+		. g_p( '<strong>World Veterinary Day (last Saturday of April).</strong> The World Veterinary Association\'s day for vets. The 2026 theme was "Veterinarians: Guardians of Food and Health" (25 April 2026). Full guide: ' . g_a( $vet, 'World Veterinary Day' ) . '.' )
+		. g_p( '<strong>World Zoonoses Day (6 July).</strong> For diseases that pass between animals and people, such as rabies. It marks the day in 1885 when Louis Pasteur first gave his rabies vaccine. Full guide: ' . g_a( $zoo, 'World Zoonoses Day' ) . '.' )
+		. g_p( '<strong>International Tiger Day (29 July).</strong> Agreed by the tiger range countries at the St Petersburg summit in 2010. India often releases its tiger figures on this day. Full guide: ' . g_a( $tig, 'International Tiger Day' ) . '.' )
+		. g_p( '<strong>World Elephant Day (12 August).</strong> Marked since 2012. In India, Project Elephant and state forest departments hold events. Full guide: ' . g_a( $ele, 'World Elephant Day' ) . '.' )
 		. g_p( '<strong>World Rabies Day (28 September).</strong> The anniversary of Louis Pasteur\'s death. India\'s plan is zero human deaths from dog-bite rabies by 2030. Full guide: ' . g_a( $rab, 'World Rabies Day' ) . '.' )
 		. g_p( '<strong>Wildlife Week (2 to 8 October).</strong> India\'s own week, starting on Gandhi Jayanti. Full guide: ' . g_a( $ww, 'Wildlife Week' ) . '.' )
 		. g_p( '<strong>World Animal Day (4 October).</strong> The feast day of St Francis of Assisi, the patron saint of animals. Full guide: ' . g_a( $wad, 'World Animal Day' ) . '.' )
-		. g_p( '<strong>National Dolphin Day (5 October).</strong> Set by the National Board for Wildlife in 2022, for the Gangetic river dolphin, India\'s national aquatic animal.' )
+		. g_p( '<strong>National Dolphin Day (5 October).</strong> Set by the National Board for Wildlife in 2022, for the Gangetic river dolphin, India\'s national aquatic animal. Full guide: ' . g_a( $dol, 'National Dolphin Day' ) . '.' )
 		. g_faq(
 			array(
 				array( 'Which animal days are marked in India?', 'The main ones are Animal Welfare Fortnight (14 to 30 January), World Wildlife Day (3 March), World Sparrow Day (20 March), World Veterinary Day (last Saturday of April), World Zoonoses Day (6 July), International Tiger Day (29 July), World Elephant Day (12 August), World Rabies Day (28 September), Wildlife Week (2 to 8 October), World Animal Day (4 October) and National Dolphin Day (5 October).' ),
@@ -119,7 +129,7 @@ $d = array(
 		. g_h( 'Related on Animal Writes' )
 		. g_ul(
 			array(
-				'Guides: ' . g_a( $rab, 'World Rabies Day' ) . ', ' . g_a( $ww, 'Wildlife Week' ) . ', ' . g_a( $wad, 'World Animal Day' ),
+				'Guides: ' . g_a( $awf, 'Animal Welfare Fortnight' ) . ', ' . g_a( $wwd, 'World Wildlife Day' ) . ', ' . g_a( $spa, 'World Sparrow Day' ) . ', ' . g_a( $vet, 'World Veterinary Day' ) . ', ' . g_a( $zoo, 'World Zoonoses Day' ) . ', ' . g_a( $tig, 'International Tiger Day' ) . ', ' . g_a( $ele, 'World Elephant Day' ) . ', ' . g_a( $rab, 'World Rabies Day' ) . ', ' . g_a( $ww, 'Wildlife Week' ) . ', ' . g_a( $wad, 'World Animal Day' ) . ', ' . g_a( $dol, 'National Dolphin Day' ),
 				'Category: ' . g_a( $catl, 'Campaigns and Civic Action' ),
 				'Directory: ' . g_a( $dir, 'animal welfare organisations' ),
 			)
