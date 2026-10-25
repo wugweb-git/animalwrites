@@ -356,44 +356,27 @@ function aw_place_meta_clause( $place ) {
 
 /* ---------- Old URLs ---------- */
 
-// The location list had archive pages at /location/{slug}/: each goes to its directory page.
-// Issuers had pages at /source/{slug}/: an issuer is a label now, so they go to the Library.
+/*
+ * The location list's archive pages (/location/{slug}/) and the issuer pages (/source/{slug}/) are fixed addresses, one
+ * per term of the old lists (aw_city, aw_source_type; still in the database, no longer registered). Their 301s are in
+ * Rank Math → Redirections (`wp aw redirects-import`, below; audit item 18, owner 25 Oct 2026); the PHP rewrite rules
+ * and handler that did it before were removed once the crawl showed Rank Math answers every one.
+ */
+// Once, after every plugin has added its rules (wp_loaded; a flush during init would drop rules added later, such as
+// the hub pages'): the stored rewrite rules lose the two old ones.
 add_action(
-	'init',
+	'wp_loaded',
 	function () {
-		add_rewrite_rule( '^location/([^/]+)/?$', 'index.php?aw_old_location=$matches[1]', 'top' );
-		add_rewrite_tag( '%aw_old_location%', '([^/]+)' );
-		add_rewrite_rule( '^source/([^/]+)/?$', 'index.php?aw_old_issuer=$matches[1]', 'top' );
-		add_rewrite_tag( '%aw_old_issuer%', '([^/]+)' );
-		if ( '2' !== get_option( 'aw_places_rewrite' ) ) {
+		if ( '3' !== get_option( 'aw_places_rewrite' ) ) { // 3: the /location/ and /source/ rules removed (25 Oct 2026)
 			flush_rewrite_rules( false );
-			update_option( 'aw_places_rewrite', '2', true );
+			update_option( 'aw_places_rewrite', '3', true );
 		}
-	},
-	30
-);
-add_action(
-	'template_redirect',
-	function () {
-		if ( '' !== (string) get_query_var( 'aw_old_issuer' ) ) {
-			wp_safe_redirect( home_url( '/library/' ), 301, 'Animal Writes' );
-			exit;
-		}
-		$slug = (string) get_query_var( 'aw_old_location' );
-		if ( '' !== $slug ) {
-			$p = aw_place_by_slug( sanitize_title( $slug ) );
-			wp_safe_redirect( $p ? aw_directory_url( $p->slug ) : home_url( '/directory/' ), 301, 'Animal Writes' );
-			exit;
-		}
-	},
-	1
+	}
 );
 
 /**
- * The old fixed addresses and where each goes: path (no slashes at the ends) => absolute URL. The targets are the ones
- * the handler above sends them to (audit item 18, owner 25 Oct 2026), so Rank Math → Redirections can hold them:
- * `wp aw redirects-import` adds them there; the handler stays until both answer the same (then a separate change
- * removes it).
+ * The old fixed addresses and where each goes: path (no slashes at the ends) => absolute URL (the targets the removed
+ * PHP handler used). `wp aw redirects-import` adds them to Rank Math → Redirections.
  *
  * @return array<string, string>
  */
