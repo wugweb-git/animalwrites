@@ -215,6 +215,24 @@ const AW_LIST_FIELDS = array(
 );
 
 /**
+ * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (aw_normalise_phone,
+ * e.g. 91XXXXXXXXXX) so the code holds no copy of the number. Checked on every phone write (imports, ingest, claims,
+ * the listing profile, enrichment) and on display. Add a hash with: php -r 'echo hash("sha256","91XXXXXXXXXX");'
+ */
+const AW_NEVER_PUBLISH_PHONES = array(
+	'6eafd3202ed0fb7bd82d280061d154ede4b1c5a97a7b2b76fbf1a46646631289', // Privacy takedown, owner 25 Oct 2026 (contact form entry #4).
+);
+
+/** Whether a phone number is on the never-publish list, in any format (+91, spaces, dashes, leading 0). */
+function aw_phone_never_publish( $raw ) {
+	$n = function_exists( 'aw_normalise_phone' ) ? aw_normalise_phone( $raw ) : preg_replace( '/\D+/', '', (string) $raw );
+	if ( 10 === strlen( $n ) ) {
+		$n = '91' . $n;
+	}
+	return '' !== $n && in_array( hash( 'sha256', $n ), (array) apply_filters( 'aw_never_publish_phones', AW_NEVER_PUBLISH_PHONES ), true );
+}
+
+/**
  * A listing's phone numbers: [ [ number, label, whatsapp (bool) ], … ] from aw_phones.
  *
  * @param int $id Listing ID.
@@ -225,7 +243,7 @@ function aw_listing_phones( $id ) {
 	$n    = (int) get_post_meta( $id, 'aw_phones', true );
 	for ( $i = 0; $i < $n; $i++ ) {
 		$num = trim( (string) get_post_meta( $id, "aw_phones_{$i}_number", true ) );
-		if ( '' !== $num ) {
+		if ( '' !== $num && ! aw_phone_never_publish( $num ) ) {
 			$rows[] = array(
 				'number'   => $num,
 				'label'    => trim( (string) get_post_meta( $id, "aw_phones_{$i}_label", true ) ),
@@ -274,6 +292,9 @@ function aw_listing_hours( $id ) {
 function aw_set_listing_list( $id, $key, array $rows ) {
 	$subs = AW_LIST_FIELDS[ $key ];
 	$old  = (int) get_post_meta( $id, $key, true );
+	if ( 'aw_phones' === $key ) {
+		$rows = array_filter( $rows, fn( $r ) => ! aw_phone_never_publish( $r['number'] ?? '' ) );
+	}
 	$rows = array_values( $rows );
 	foreach ( $rows as $i => $r ) {
 		foreach ( $subs as $name => $fkey ) {
