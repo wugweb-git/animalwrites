@@ -139,7 +139,12 @@ function aw_si_dry_report( string $day ): array {
 	);
 
 	// AW Sourcing (read only).
-	$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : null;
+	// AW Sourcing's Include words: the keyword table from its phase 2 (the old list in aw_relevance is not used from phase 4).
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+		$sourcing = (array) aw_sourcing_kw_lists()['strong'];
+	} else {
+		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : null;
+	}
 	foreach ( (array) $sourcing as $s ) {
 		$add( (string) $s, AW_SI_ROLE_SOURCING );
 	}

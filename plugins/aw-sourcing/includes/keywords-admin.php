@@ -12,7 +12,9 @@
  * - The mirrors: after any keyword change the old lists (aw_relevance strong / animal / context / exclude,
  *   aw_sources.press.queries and .categories, and the old copy of each search that was a feed) are rebuilt from the
  *   table, once per request, so old readers and old workers see the same words until phase 4. Writing them starts
- *   Sources sync, as any list save does.
+ *   Sources sync, as any list save does. From phase 4 (owner, 25 Oct 2026) the old lists are archived and no longer
+ *   rebuilt; only each open-web search's entry in aw_sources.sources still follows its keyword (the Feeds list shows it,
+ *   and the keyword's search takes its settings from it).
  * - The site's checks read the table: the gate's keyword check and "Test a headline" (aw_sourcing_kw_lists()).
  * - The old Categories tab opens Posts → Categories (with a Keywords column); the old Press queries tab opens Keywords →
  *   Press.
@@ -127,9 +129,10 @@ function aw_sourcing_kw_write_mirrors() {
 	$rows = aw_kw_rows( AW_KW_WORKER_ROLES );
 	$m    = aw_kw_mirrors( $rows );
 	$done = array();
+	$old  = aw_sourcing_phase() < 4; // phase 4: the old lists are archived and no longer rebuilt (nor changed)
 	$rel  = aw_relevance();
 	$new  = $rel;
-	foreach ( array( 'strong', 'animal', 'context', 'exclude' ) as $k ) {
+	foreach ( $old ? array( 'strong', 'animal', 'context', 'exclude' ) : array() as $k ) {
 		$new[ $k ] = $m[ $k ];
 	}
 	if ( $new !== $rel ) {
@@ -138,10 +141,12 @@ function aw_sourcing_kw_write_mirrors() {
 	}
 	$c   = (array) get_option( 'aw_sources', array() );
 	$cfg = $c;
-	if ( isset( $cfg['press'] ) || $m['press'] ) {
+	if ( $old && ( isset( $cfg['press'] ) || $m['press'] ) ) {
 		$cfg['press']['queries'] = $m['press'];
 	}
-	$cfg['categories'] = aw_kw_categories_in_order( $m['categories'], (array) ( $c['categories'] ?? array() ) );
+	if ( $old ) {
+		$cfg['categories'] = aw_kw_categories_in_order( $m['categories'], (array) ( $c['categories'] ?? array() ) );
+	}
 	foreach ( (array) ( $cfg['sources'] ?? array() ) as $i => $s ) { // an open-web search that is a keyword: its old copy follows it
 		$id = (int) ( is_array( $s ) ? ( $s['keyword_id'] ?? 0 ) : 0 );
 		if ( ! $id ) {
