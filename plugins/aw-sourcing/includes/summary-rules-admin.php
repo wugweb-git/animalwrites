@@ -155,15 +155,15 @@ add_action(
 	}
 );
 
-/** Length per section: the four limits per section and the published summaries below the minimum. */
+/** Length per section: the word limits per section (no sentence count, owner 25 Oct 2026) and the published summaries below the minimum. */
 function aw_summary_rules_length_table() {
 	$r     = aw_summary_rules();
 	$below = aw_summary_below_counts();
-	$cols  = array( 'label' => 'Section', 'min_words' => 'Minimum words', 'max_words' => 'Maximum words', 'min_sentences' => 'Minimum sentences', 'max_sentences' => 'Maximum sentences', 'below' => 'Published summaries below the minimum' );
+	$cols  = array( 'label' => 'Section', 'min_words' => 'Minimum words', 'max_words' => 'Maximum words', 'below' => 'Published summaries below the minimum' );
 	$rows  = array();
 	foreach ( $r['sections'] as $name => $sec ) {
 		$row = array( 'label' => esc_html( $sec['label'] ) );
-		foreach ( array( 'min_words', 'max_words', 'min_sentences', 'max_sentences' ) as $f ) {
+		foreach ( array( 'min_words', 'max_words' ) as $f ) {
 			$row[ $f ] = '<input type="number" min="1" max="400" class="small-text" name="' . esc_attr( AW_SUMMARY_RULES_OPTION . '[sections][' . $name . '][' . $f . ']' ) . '" value="' . (int) $sec[ $f ] . '" aria-label="' . esc_attr( $sec['label'] . ' ' . str_replace( '_', ' ', $f ) ) . '">';
 		}
 		$b            = $below[ $name ] ?? array( 0, 0 );
@@ -202,7 +202,7 @@ function aw_summary_rules_sanitize( $in ) {
 		if ( ! isset( $old['sections'][ $name ] ) || ! is_array( $sec ) ) {
 			continue;
 		}
-		foreach ( array( 'min_words', 'max_words', 'min_sentences', 'max_sentences' ) as $f ) {
+		foreach ( array( 'min_words', 'max_words' ) as $f ) {
 			if ( isset( $sec[ $f ] ) && (int) $sec[ $f ] > 0 ) {
 				$new['sections'][ $name ][ $f ] = (int) $sec[ $f ];
 			}
@@ -234,7 +234,7 @@ function aw_summary_rules_sanitize( $in ) {
 	remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
 	$what = array();
 	foreach ( $now['sections'] as $name => $sec ) {
-		foreach ( array( 'min_words', 'max_words', 'min_sentences', 'max_sentences' ) as $f ) {
+		foreach ( array( 'min_words', 'max_words' ) as $f ) {
 			if ( (int) $sec[ $f ] !== (int) $old['sections'][ $name ][ $f ] ) {
 				$what[] = $sec['label'] . ' ' . str_replace( '_', ' ', $f ) . ' ' . (int) $old['sections'][ $name ][ $f ] . ' → ' . (int) $sec[ $f ];
 			}
