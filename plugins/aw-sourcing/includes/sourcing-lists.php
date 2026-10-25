@@ -454,12 +454,18 @@ add_action(
 			'',
 			function () {
 				aw_sourcing_settings_marker( 'aw_sources', 'press' );
+				if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the queries are the Press keywords below
+					echo '<p>Weekly searches for coverage of Animal Writes through Google News and Google Search: each keyword in this view (the Press role) is a query. Results wait in Inbox → Press to review.</p>';
+					return;
+				}
 				echo '<p>Searches for coverage of Animal Writes (Brave Search, weekly). Each query runs on each press site and on the open web. Results wait in Inbox → Press to review. The press sites are chosen on the <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=sources&status=press' ) ) . '">Sources</a> tab ("Search here for coverage").</p>';
 			},
 			'aw-sourcing-press'
 		);
 		$press = fn( $k ) => (array) ( aw_sources_config()['press'][ $k ] ?? array() );
-		add_settings_field( 'aw_press_queries', 'Queries', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'queries' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-pq', 'name' => 'aw_sources[queries]', 'rows' => 10, 'help' => 'One per line.' ) );
+		if ( ! function_exists( 'aw_sourcing_kw_on' ) || ! aw_sourcing_kw_on() ) { // phase 2: Press keywords
+			add_settings_field( 'aw_press_queries', 'Queries', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => $press( 'queries' ) ) ), 'aw-sourcing-press', 'aw_press', array( 'label_for' => 'aw-pq', 'name' => 'aw_sources[queries]', 'rows' => 10, 'help' => 'One per line.' ) );
+		}
 		add_settings_field(
 			'aw_press_floor',
 			'Coverage from',
@@ -500,9 +506,8 @@ function aw_sources_press_tab() {
 add_filter(
 	'aw_sources_save_press',
 	function ( $c, $in ) {
-		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the press queries are keywords with the Press role; this form is a copy
-			add_settings_error( 'aw_sourcing', 'moved', 'The press queries moved into the keyword table (sourcing phase 2): nothing was saved here.', 'warning' );
-			return $c;
+		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the queries are Press keywords; this form keeps on/off, from and every n days
+			return function_exists( 'aw_sourcing_kw_save_press' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_save_press( $c, (array) $in ) : $c;
 		}
 		$old                   = $c['press'];
 		$c['press']['queries'] = aw_sourcing_lines( $in['queries'] ?? '' );
@@ -546,7 +551,7 @@ add_filter(
 			if ( ! empty( $s['filter'] ) ) {
 				$s['keywords'] = $words; // one keyword list: the Keywords tab's include and animal words
 			}
-			unset( $s['on'], $s['filter'], $s['check'], $s['keyword_id'] ); // phase 2 keys (stored by the migration): sent in sources_v2 from S2b's policy, never in v1
+			unset( $s['on'], $s['filter'], $s['check'], $s['keyword_id'] ); // phase 2 keys: sent in sources_v2 and keywords, never in v1
 			$sources[] = $s;
 		}
 		// Search words: the Keywords tab's Include list. Each English one is a Google News search per run; the animal words
@@ -556,7 +561,18 @@ add_filter(
 		if ( function_exists( 'aw_relevance_categories' ) ) {
 			$data['config']['category_names'] = (object) aw_relevance_categories(); // an object in JSON even when empty
 		}
-		if ( function_exists( 'aw_sourcing_phase' ) && aw_sourcing_phase() >= 1 ) {
+		if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+			// Phase 2 (plan §6): sources_v2 with each source's keyword check and without the searches that are keywords
+			// now; the keywords with a Sourcing or Press role (English only) at the top level (`keywords`, the plan's
+			// name) and in config as keywords_v2 (config.keywords is the v1 word list, so Sources sync copies the block
+			// into sources.yaml under that name); match "word" switches the workers to whole-word matching.
+			$blocks                        = aw_kw_policy_blocks( (array) $c['sources'], aw_sourcing_kw_worker_rows(), function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
+			$data['keywords']              = $blocks['keywords_v2'];
+			$data['config']['schema']      = $blocks['schema'];
+			$data['config']['match']       = $blocks['match'];
+			$data['config']['sources_v2']  = $blocks['sources_v2'];
+			$data['config']['keywords_v2'] = $blocks['keywords_v2'];
+		} elseif ( function_exists( 'aw_sourcing_phase' ) && aw_sourcing_phase() >= 1 ) {
 			$data['config']['schema']     = array( 'sources' => 2 );
 			$data['config']['sources_v2'] = aw_src_sources_v2( $sources, function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
 		}

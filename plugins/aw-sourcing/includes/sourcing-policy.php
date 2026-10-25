@@ -185,7 +185,7 @@ function aw_has_term( $hay, $term ) {
  * @return array{0: bool, 1: string} keep?, reason.
  */
 function aw_relevance_verdict( $text ) {
-	$r   = aw_relevance();
+	$r   = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance(); // phase 2: the keyword table
 	$hay = mb_strtolower( $text );
 	foreach ( (array) $r['exclude'] as $t ) {
 		if ( aw_has_term( $hay, $t ) ) {
@@ -251,6 +251,15 @@ function aw_sourcing_gate( $url, $name, $feed, $text ) {
 	}
 	if ( ! empty( $rel['enabled'] ) && 'allow' !== $rec['status'] && ! aw_relevance_verdict( $text )[0] ) {
 		return 'filtered';
+	}
+	// Exclude keywords always apply, filter on or off and whatever the publisher, as in the workers (owner's decision 14,
+	// 25 Oct 2026; policy.py verdict).
+	$excl = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['exclude'] : (array) ( $rel['exclude'] ?? array() );
+	$hay  = mb_strtolower( $text );
+	foreach ( $excl as $t ) {
+		if ( aw_has_term( $hay, (string) $t ) ) {
+			return 'filtered';
+		}
 	}
 	return '';
 }
@@ -659,7 +668,11 @@ function aw_sourcing_page() {
 function aw_sourcing_keywords_tab() {
 	$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
 	$sugg = 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>Words</a> | </li>'
+	if ( ! $sugg && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the keyword table (keywords-admin.php)
+		aw_sourcing_kw_tab();
+		return;
+	}
+	echo '<ul class="subsubsub"><li><a href="' . esc_url( $base ) . '"' . ( $sugg ? '' : ' class="current" aria-current="page"' ) . '>' . ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? 'Keywords' : 'Words' ) . '</a> | </li>'
 		. '<li><a href="' . esc_url( $base . '&kw=suggestions' ) . '"' . ( $sugg ? ' class="current" aria-current="page"' : '' ) . '>Suggestions from Search Insights</a></li></ul><br class="clear">';
 	if ( $sugg ) {
 		if ( ! has_action( 'aw_sourcing_keywords_tab_end' ) || ( function_exists( 'aw_sourcing_si_available' ) && ! aw_sourcing_si_available() ) ) {
