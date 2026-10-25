@@ -279,7 +279,10 @@ function aw_si_resolve_page( array $page, string $page_type ): array {
 	return array( 'label', 0, $label );
 }
 
-/** The seed file shipped with the plugin (its build tool, tools/search-insights/build_seed.py, is in git history). */
+/**
+ * The seed file. Removed after the live seed (25 Oct 2026, 07:12); it and its build tool
+ * (tools/search-insights/build_seed.py) are in git history. Without it a fresh seed reports "seed file missing".
+ */
 function aw_si_seed_data(): array {
 	$file = (string) apply_filters( 'aw_si_seed_file', AW_SEO_EXTRAS_DIR . 'data/search-insights-seed.json' );
 	$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file.
