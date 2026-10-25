@@ -17,7 +17,9 @@
  * per batch, for the batch's first post, so stored scores for these types are worked out item by item instead
  * (the same analyzer, the filter applied per item).
  *
- * The rendered copy is cached for 12 hours and dropped when the Page is saved.
+ * The rendered copy is cached for 12 hours for the editor and dropped when the Page is saved. Score runs (Update SEO
+ * Scores, the daily workers) read each item once, so they use a cached copy when there is one but store none (plugin
+ * audit 10: about 900 cached copies, 12 MB, sat in wp_options).
  *
  * @package aw-seo-extras
  */
@@ -44,9 +46,10 @@ function aw_seo_page_is_built( $post ) {
  *
  * @param int  $id    Page ID.
  * @param bool $fresh Fetch again instead of using the cached copy.
+ * @param bool $store Keep the copy for 12 hours (false: score runs, which read each item once).
  * @return string
  */
-function aw_seo_rendered_main( $id, $fresh = false ) {
+function aw_seo_rendered_main( $id, $fresh = false, $store = true ) {
 	$id  = (int) $id;
 	$key = 'aw_seo_rendered_' . $id;
 	if ( ! $fresh ) {
@@ -63,7 +66,9 @@ function aw_seo_rendered_main( $id, $fresh = false ) {
 			$html = trim( preg_replace( '/\s+/', ' ', (string) $html ) );
 		}
 	}
-	set_transient( $key, $html, 12 * HOUR_IN_SECONDS );
+	if ( $store ) {
+		set_transient( $key, $html, 12 * HOUR_IN_SECONDS );
+	}
 	return $html;
 }
 
@@ -73,13 +78,19 @@ const AW_SEO_RENDERED_TYPES = array( 'aw_legal', 'post', 'aw_campaign', 'aw_news
 /** Rank Math tests that do not fit a summary page or a profile (the AW_SEO_RENDERED_TYPES). */
 const AW_SEO_SUMMARY_SKIP_TESTS = array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' );
 
-/** The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''. */
-function aw_seo_analysis_content( $post ) {
+/**
+ * The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''.
+ *
+ * @param int|WP_Post $post  Post.
+ * @param bool        $store Keep the rendered copy (see aw_seo_rendered_main()).
+ * @return string
+ */
+function aw_seo_analysis_content( $post, $store = true ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
 		return '';
 	}
-	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || aw_seo_page_is_built( $post ) ) ? aw_seo_rendered_main( $post->ID ) : '';
+	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || aw_seo_page_is_built( $post ) ) ? aw_seo_rendered_main( $post->ID, false, $store ) : '';
 }
 
 add_action(
@@ -110,7 +121,7 @@ add_filter(
 add_filter(
 	'rank_math/recalculate_score/data',
 	function ( $values, $post_id ) {
-		$html = aw_seo_analysis_content( $post_id );
+		$html = aw_seo_analysis_content( $post_id, false ); // each item is read once per run: no cached copy kept
 		if ( '' !== $html ) {
 			$values['content'] = $html;
 		}
