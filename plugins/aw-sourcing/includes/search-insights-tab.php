@@ -1,6 +1,6 @@
 <?php
 /**
- * AW Sourcing in Tools → Search Insights (owner, 24 Oct 2026; rebuilt on Search Insights phase 1).
+ * AW Sourcing in AW SEO Plus → Search Insights (owner, 24 Oct 2026; rebuilt on Search Insights phase 1).
  *
  * - "Sourcing keywords" tab (filter aw_si_tabs): per Google News search of the workers, the items it brought in over
  *   30 days, News and Library apart (aw_sourcing_keyword_stats), with the 28-day and 3-month clicks and impressions of the

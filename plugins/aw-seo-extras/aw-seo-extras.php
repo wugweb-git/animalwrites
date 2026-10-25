@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       AW SEO Plus
  * Plugin URI:        https://animalwrites.in/
- * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API, llms.txt ordering and Directory section, the FAQ system (listings, Library, topics, hubs and Resources guides) and Search Insights (keywords, Search Console by day through Site Kit, priorities; read-only), both under its own AW SEO Plus menu. Rank Math holds everything else. Does nothing unless Rank Math is active.
- * Version:           1.6.0
+ * Description:       What Rank Math (free) cannot do for animalwrites.in: titles, descriptions and canonicals of list pages (hubs, Directory places, filtered lists), the site's own JSON-LD nodes in Rank Math's graph, the Directory sitemap, dynamic noindex rules, share images, URL clean-up redirects, the focus-keyword API, llms.txt ordering and Directory section, the FAQ system (listings, Library, topics, hubs and Resources guides) and Search Insights (keywords, Search Console by day through Site Kit, priorities; read-only), under its own AW SEO Plus menu (Overview, FAQ, Search Insights). Rank Math holds everything else. Does nothing unless Rank Math is active.
+ * Version:           1.7.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -33,13 +33,13 @@ add_action(
 				'admin_notices',
 				function () {
 					if ( current_user_can( 'activate_plugins' ) ) {
-						echo '<div class="notice notice-warning"><p>' . esc_html__( 'Animal Writes – SEO extras for Rank Math does nothing until Rank Math SEO is active.', 'aw-seo-extras' ) . '</p></div>';
+						echo '<div class="notice notice-warning"><p>' . esc_html__( 'AW SEO Plus does nothing until Rank Math SEO is active.', 'aw-seo-extras' ) . '</p></div>';
 					}
 				}
 			);
 			return;
 		}
-		foreach ( array( 'helpers', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-insights', 'llms', 'analysis' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'search-insights', 'llms', 'analysis' ) as $file ) {
 			require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 		}
 	},

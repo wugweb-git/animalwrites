@@ -1,9 +1,9 @@
 <?php
 /**
- * Tools → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
+ * AW SEO Plus → Search Insights (owner addendum, 24 Oct: core WordPress only, no custom CSS). Tabs: Overview (postboxes),
  * Keywords (list table), tabs added by other files (Pages, Check list, Rising, Sourcing keywords) and Settings
  * (form-table: keys, run now, imports, snapshot, delete data). The old Search demand screen was removed on 25 Oct 2026;
- * its address opens the Keywords tab, and its content gaps are an Overview box.
+ * its content gaps are an Overview box.
  * Each tab starts with a notice per source: last updated, or the error with the date of the data still shown.
  *
  * @package aw-seo-extras
@@ -78,26 +78,14 @@ function aw_si_tab(): string {
 add_action(
 	'admin_menu',
 	function () {
-		// Under AW SEO Plus (owner, 25 Oct 2026), after FAQ; the old Tools address redirects (aw_admin_moved_pages below).
-		$hook = add_submenu_page( 'aw-faq', __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		// AW SEO Plus → Search Insights, after Overview and FAQ.
+		$hook = add_submenu_page( AW_SEO_MENU, __( 'Search Insights', 'aw-seo-extras' ), __( 'Search Insights', 'aw-seo-extras' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'aw_si_load' );
 		}
-		// The old Search demand address (bookmarks, links in docs) opens the Keywords tab: a hidden page that redirects.
-		add_management_page( __( 'Search Insights', 'aw-seo-extras' ), '', aw_si_cap(), 'aw-search-demand', '__return_null' );
-		remove_submenu_page( 'tools.php', 'aw-search-demand' );
-		add_action(
-			'load-tools_page_aw-search-demand',
-			function () {
-				wp_safe_redirect( aw_si_url( 'keywords' ), 301 );
-				exit;
-			}
-		);
 	},
 	100
 );
-
-add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-search-demand' => 'tools.php', AW_SI_SLUG => 'admin.php' ) ); // Search demand's older Settings address → Tools; Search Insights' Tools address → AW SEO Plus (admin-ia.php).
 
 add_filter(
 	'set_screen_option_aw_si_keywords_per_page',

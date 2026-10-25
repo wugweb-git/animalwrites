@@ -171,7 +171,7 @@ Removed on 8 Oct 2026 (dead): `testimonials.php` (1.0 testimonials, 0 items, exp
 
 ## aw-seo-extras: Search Insights (phase 1, 24 Oct 2026; phase 1 leftovers, phases 2, 4 and 5, 25 Oct)
 
-Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admin.php?page=aw-search-insights`; the old Tools address redirects, 25 Oct 2026). Read-only data and suggestions: nothing here writes to Rank Math keyphrases or the Sourcing lists. Tables `wp_aw_si_keywords`, `wp_aw_si_kw_pages`, `wp_aw_si_obs`, `wp_aw_si_rising` (kept on deactivate and delete; only Settings → Delete data or `wp aw-si delete-data --yes` drops them, and that also switches Search Insights off until the owner runs the daily update by hand).
+Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admin.php?page=aw-search-insights`). Read-only data and suggestions: nothing here writes to Rank Math keyphrases or the Sourcing lists. Tables `wp_aw_si_keywords`, `wp_aw_si_kw_pages`, `wp_aw_si_obs`, `wp_aw_si_rising` (kept on deactivate and delete; only Settings → Delete data or `wp aw-si delete-data --yes` drops them, and that also switches Search Insights off until the owner runs the daily update by hand).
 
 | File | What it does |
 |---|---|
@@ -185,7 +185,7 @@ Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admi
 | `includes/search-insights/rollup.php` | Daily rows older than 90 days become monthly rows (sums, impression-weighted position, last value for indexes). |
 | `includes/search-insights/cron.php` | `aw_si_daily` 07:10 IST and `aw_si_rollup` 23:30 IST. |
 | `includes/search-insights/health.php` | Site Health test "Search Insights sources fresh". |
-| `includes/search-insights/admin.php` | The screen: Overview (postboxes), Keywords, Searches (`aw_sd_screen( true )`; the old `aw-search-demand` address 301s to this tab), tabs from other plugins (filter `aw_si_tabs`, actions `aw_si_load_tab_{key}` and `aw_si_tab_{key}`), Settings (run now, delete data). |
+| `includes/search-insights/admin.php` | The screen: Overview (postboxes), Keywords, tabs from other plugins (filter `aw_si_tabs`, actions `aw_si_load_tab_{key}` and `aw_si_tab_{key}`), Settings (run now, delete data). |
 | `includes/search-insights/class-aw-si-keywords-table.php` | Keywords list table: views, filters (role, topic, page type, language), search, sorting, priority overrides. Listing names stay out of every view but Entities: the All view shows them as one combined row plus the 20 that moved most. |
 | `includes/search-insights/searches.php` | What the Searches tab (the Search demand screen) reads from the keyword table: its targets ("Our target?") and Gaps. The hard-coded 15 Oct map (`aw_sd_static()`) is gone. |
 | `includes/search-insights/dryrun.php` | `aw_si_dry_report()`: builds the keyword table in memory (seed, Rank Math, Sourcing, Search Console for one day and 28 days) with the daily rule (`aw_si_decide()`), and reports rows per table and source and what each tab would show. Writes nothing. |
@@ -207,7 +207,8 @@ Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admi
 |---|---|
 | `analysis.php` | Rank Math's content analysis on what visitors see. |
 | `canonical.php` | Canonical URLs Rank Math cannot work out (og:url follows the canonical): - section hub Pages and Directory places: the Page path with /page/N/, without filters; - filtered or sorted lists (?tag=, ?state=, ?category_name= |
-| `faq.php` | FAQ system (owner-approved spec, 20 Oct 2026). |
+| `faq.php` | FAQ system (owner-approved spec, 20 Oct 2026); AW SEO Plus → FAQ. |
+| `overview.php` | The AW SEO Plus menu (Overview, FAQ, Search Insights) and AW SEO Plus → Overview: every module, where it is set up (here or in Rank Math), its status from the existing checks, edit-screen boxes and WP-CLI commands. |
 | `filtered-views.php` | Filtered hub lists (owner approved, 15 Oct 2026): /news/?category_name=wildlife, /library/?tag=rule … - One filter with one value, ?category_name= or ?tag=, on a section hub (not a Directory place) is a page of its own w |
 | `focus-keywords.php` | Focus keywords (Rank Math's rank_math_focus_keyword). |
 | `health.php` | Sitemap and llms.txt watchdog (14 Oct 2026: both answered 404 until rewrite rules were flushed). |
