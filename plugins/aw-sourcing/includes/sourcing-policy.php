@@ -603,6 +603,9 @@ function aw_sourcing_page() {
 		// Entries keep the tab they were made on; tabs since merged are named after their new home (Feeds and Relay
 		// moved into Sources on 25 Oct 2026).
 		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Sources (feeds)', 'library' => 'Sources (Library feeds)', 'opportunities' => 'Sources (Opportunity feeds)', 'relay' => 'Sources (relay)' );
+		if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) { // Sections, Summary rules and Directory enrichment moved into Rules (phase 3)
+			$old += array( 'sections' => 'Rules (section rules)', 'summary' => 'Rules (summary rules)', 'enrich' => 'Rules (Directory enrichment)' );
+		}
 		$rows = array();
 		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
 			$tl     = (string) ( $old[ $e['tab'] ] ?? ( $tabs[ $e['tab'] ] ?? $e['tab'] ) );
