@@ -46,7 +46,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `backups.php` | Daily backup (S0): the database and the deployed code, once a day, into ~/backups on the server (outside the web root), kept 14 days. |
 | `block-states.php` | Animal Writes blocks in their states, on the states sheet (/kits-demo/, administrators only): each block rendered from a real item that is in that state, so the sheet shows what visitors see. |
 | `campaign-form.php` | Campaign form (owner, 21 Oct 2026): "Sign it" in the campaign letter tool is the Fluent Forms form "Campaign form" (forms/10-campaign-form.json; its ID in the option aw_ff_campaign_form). |
-| `campaign-letters.php` | Campaign letters: anonymous statistics and the opt-in at send (owner, 17 Oct 2026; Privacy Policy section 7, "Campaign actions and sign-ups"). |
+| `campaign-letters.php` | Campaign letters: anonymous statistics and the opt-in at send (owner, 17 Oct 2026; Privacy Policy section 7, "Campaign actions and sign-ups"). The sign-up (Campaign form and /optin) needs the site's ALTCHA answer, once per letter (aw_cl_human); /letter adds at most 30 rows per campaign per minute, no IP read (audit 4 and 5, 25 Oct 2026). |
 | `campaign-links.php` | Campaign link (owner, 20 Oct 2026: a campaign "shouldn't be a tag"). |
 | `campaign-record.php` | Campaign record, the parts campaign-tools.php does not hold (Campaign Content Standard v1.0, Notion, approved 17 Oct 2026): metric records for a campaign's own figures, the Real-world impact module, and the editor-only b |
 | `campaign-tools.php` | Campaign tools for an objection or letter campaign (first used by Campaign 2.0, the draft lab animal rules 2026). |
