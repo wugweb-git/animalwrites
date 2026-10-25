@@ -1219,9 +1219,11 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			continue;
 		}
 		global $wpdb;
-		$same = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND status IN ('pending','rejected') AND value = %s LIMIT 1", $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
+		// Already waiting, or a person said no. A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
+		// were 'rejected' with a "Could not be applied" / "could not be copied" note), so that value may come back.
+		$same = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( $same ) {
-			$out['skipped'][] = $field; // already waiting, or a reviewer said no
+			$out['skipped'][] = $field;
 			continue;
 		}
 		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
