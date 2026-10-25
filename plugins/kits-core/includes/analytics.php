@@ -193,4 +193,15 @@ function aw_analytics_skip_user() {
 	return is_user_logged_in() && current_user_can( 'edit_posts' );
 }
 add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() );
-add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() );
+add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || aw_analytics_skip_user() || kits_ga4_in_gtm() );
+
+/**
+ * One GA4 tag (owner, 25 Oct 2026). Site Kit places its own Google tag for GA4 (GT-…) while the GTM container's Google
+ * tag also sends to the same GA4 property, so page views were counted twice. With option kits_ga4_via_gtm on, GA4 comes
+ * from the container only (it carries the page_context fields: page_type, section, category, faq_group): Site Kit's
+ * Analytics tag is held back, its setting ("Place code") and connection stay as they are, so its reports and Search
+ * Insights still read GA4. Only while a container is placed on this request, so GA4 is never left without a tag.
+ */
+function kits_ga4_in_gtm() {
+	return (bool) get_option( 'kits_ga4_via_gtm' ) && '' !== kits_gtm_container();
+}
