@@ -622,30 +622,23 @@ function aw_enrich_both_note( $field ) {
 const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
 
 /**
- * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website: keep it next to what
- * is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified listings, and any
- * other field that already has a value).
+ * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website, list fields: keep it
+ * next to what is there, both unverified) or 'queue' (a reviewer decides: conflicting sources, claimed or verified
+ * listings, and any other field that already has a value). Claimed, verified and low-confidence always wait; the rest
+ * follows the field's apply rule (Rules → Directory enrichment → Field rules, phase 3; seeded from the rules that were
+ * written here: closed and merge_into always to review, a merge being the owner's decision, 25 Oct 2026).
  */
 function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
-	if ( $protected || 'low' === $conf || 'closed' === $field || 'merge_into' === $field ) {
-		return 'queue'; // a merge is always the owner's decision (25 Oct 2026)
-	}
-	if ( 'place' === $field ) {
-		return aw_enrich_place_fills( $lid, $value ) ? 'apply' : 'queue';
-	}
-	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
-		return aw_listing_phones( $lid ) ? 'both' : 'apply';
-	}
-	if ( aw_enrich_is_empty( $lid, $field ) ) {
-		return 'apply';
-	}
-	if ( in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ) {
-		return 'both'; // The value is the union (aw_enrich_union): it only adds.
-	}
-	if ( isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ) ) {
-		return 'both';
-	}
-	return 'queue';
+	return aw_enrich_mode_decide(
+		$field,
+		(string) aw_enrich_field_rule( $field )['apply'],
+		$conf,
+		$protected,
+		fn() => aw_enrich_is_empty( $lid, $field ),
+		fn() => (bool) aw_listing_phones( $lid ),
+		fn() => isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ),
+		fn() => aw_enrich_place_fills( $lid, $value )
+	);
 }
 
 /* ---------- Rows ---------- */
@@ -1019,15 +1012,22 @@ add_action(
 	}
 );
 
-/** GET enrich/config. */
+/** GET enrich/config. From phase 3 also the Directory schema, the trust order and the field rules (rules.php). */
 function aw_enrich_rest_config() {
-	return array(
+	$out = array(
 		'sources'      => aw_enrich_sources_on(),
 		'google_spent' => aw_enrich_spent( 'worker' ),
 		'fields'       => array_keys( aw_enrich_fields() ),
 		'services'     => AW_SERVICES,
 		'counts'       => aw_enrich_progress(),
 	);
+	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
+		$rules              = aw_enrich_field_rules();
+		$out['schema']      = aw_enrich_schema();
+		$out['priority']    = $rules['priority'];
+		$out['field_rules'] = (object) $rules['fields'];
+	}
+	return $out;
 }
 
 /** How far the worker has got: listings checked / total, and pending reviews. */
@@ -1194,6 +1194,11 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			(array) ( $p['sources'] ?? array() )
 		);
 		if ( ! isset( $fields[ $field ] ) || 'closed' === $field || ( is_string( $value ) && '' === trim( $value ) ) || ( is_array( $value ) && ! $value ) ) {
+			$out['skipped'][] = $field;
+			continue;
+		}
+		$rule = aw_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or a source not allowed to fill it
+		if ( empty( $rule['on'] ) || ( $rule['sources'] && ! array_intersect( array_column( $srcs, 'key' ), $rule['sources'] ) ) ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
