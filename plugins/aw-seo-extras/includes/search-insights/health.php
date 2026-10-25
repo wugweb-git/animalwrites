@@ -31,7 +31,7 @@ function aw_si_health_test(): array {
 			'color' => $ok ? 'blue' : 'orange',
 		),
 		'description' => '<p>' . esc_html__( 'Each Search Insights source keeps its last good data when a run fails, and shows when it was last updated.', 'aw-seo-extras' ) . '</p>',
-		'actions'     => '<p><a href="' . esc_url( admin_url( 'tools.php?page=aw-search-insights' ) ) . '">' . esc_html__( 'Open Search Insights', 'aw-seo-extras' ) . '</a></p>',
+		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'aw-seo-extras' ) . '</a></p>',
 		'test'        => 'aw_search_insights_fresh',
 	);
 	if ( ! $ok ) {

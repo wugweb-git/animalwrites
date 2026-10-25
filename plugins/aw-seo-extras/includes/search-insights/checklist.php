@@ -145,7 +145,7 @@ function aw_si_bookmarklet( string $token ): string {
 			'live'  => 1,
 			'token' => $token,
 		),
-		admin_url( 'tools.php' )
+		admin_url( 'admin.php' )
 	);
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 	$host = preg_replace( '/^www\./', '', $host );
