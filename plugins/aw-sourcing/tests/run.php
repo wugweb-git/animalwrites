@@ -13,6 +13,7 @@
 
 define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__ ) . '/includes/sources-model.php';
+require dirname( __DIR__ ) . '/includes/rules-model.php';
 
 $fails = 0;
 $count = 0;
@@ -175,6 +176,8 @@ aw_t( $relay === aw_src_relay_legacy( array(), $relay ) && array( 'a.com' ) === 
 $last = aw_src_relay_last( $log, 'zoomtventertainment.com' );
 aw_t( is_array( $last ) && 'www.zoomtventertainment.com' === $last['host'], 'last relay result includes subdomains' );
 aw_t( null === aw_src_relay_last( $log, 'thehindu.com' ), 'no relay result for a host never relayed' );
+
+require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

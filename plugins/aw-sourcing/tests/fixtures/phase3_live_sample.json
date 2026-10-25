@@ -1,0 +1,612 @@
+{
+ "_about": "Live values of 25 Oct 2026 (read-only wp option get / wp eval on animalwrites.in) for the phase 3 (Rules) tests: aw_sources sections and topic_tags, aw_summary_rules, aw_enrich_sources, the public post types; plus aw_enrich_fields() and the enrichment source keys from enrichment.php.",
+ "public_types": [
+  "post",
+  "page",
+  "attachment",
+  "aw_news",
+  "aw_legal",
+  "aw_campaign",
+  "aw_opportunity",
+  "aw_listing"
+ ],
+ "sections": {
+  "aw_legal": {
+   "tags": [
+    "act",
+    "advisory",
+    "circular",
+    "judgment",
+    "notification",
+    "official-release",
+    "order",
+    "rule",
+    "template"
+   ],
+   "categories": [
+    "adoption",
+    "animal-birth-control",
+    "transport-slaughter",
+    "birds",
+    "campaigns-civic-action",
+    "cattle-gaushalas",
+    "community-dogs",
+    "courts-judgments",
+    "cruelty-prosecution",
+    "disaster-rescue",
+    "feeders-caregivers",
+    "laws-rules",
+    "performing-captive-animals",
+    "pets-breeding",
+    "policy-government",
+    "rabies-public-health",
+    "veterinary-care",
+    "wildlife",
+    "animal-experimentation"
+   ]
+  },
+  "post": {
+   "tags": [
+    "faq",
+    "guide",
+    "research"
+   ],
+   "categories": [
+    "adoption",
+    "animal-birth-control",
+    "transport-slaughter",
+    "birds",
+    "campaigns-civic-action",
+    "cattle-gaushalas",
+    "community-dogs",
+    "courts-judgments",
+    "cruelty-prosecution",
+    "disaster-rescue",
+    "feeders-caregivers",
+    "laws-rules",
+    "performing-captive-animals",
+    "pets-breeding",
+    "policy-government",
+    "rabies-public-health",
+    "veterinary-care",
+    "wildlife",
+    "animal-experimentation"
+   ]
+  },
+  "aw_opportunity": {
+   "tags": [
+    "event",
+    "fellowship",
+    "grant",
+    "internship",
+    "job",
+    "volunteer",
+    "boarding-foster"
+   ],
+   "categories": [
+    "community-dogs",
+    "cattle-gaushalas",
+    "wildlife",
+    "birds",
+    "veterinary-care",
+    "animal-birth-control",
+    "adoption",
+    "disaster-rescue",
+    "feeders-caregivers",
+    "campaigns-civic-action",
+    "policy-government"
+   ]
+  },
+  "aw_listing": {
+   "tags": [
+    "abc-centre",
+    "adoption-network",
+    "animal-ambulance",
+    "animal-shelter",
+    "animal-welfare-organisation",
+    "bird-hospital",
+    "emergency-rescue",
+    "feeder-network",
+    "gaushala",
+    "legal-aid",
+    "mobile-veterinary-unit",
+    "rescue-group",
+    "sanctuary",
+    "veterinary-clinic",
+    "veterinary-dispensary",
+    "veterinary-hospital",
+    "veterinary-office",
+    "wildlife-rescue",
+    "adoption",
+    "ambulance",
+    "boarding-foster",
+    "cattle-care",
+    "feeding",
+    "legal-help",
+    "rescue",
+    "shelter",
+    "sterilisation",
+    "treatment",
+    "vaccination"
+   ],
+   "categories": [
+    "community-dogs",
+    "cattle-gaushalas",
+    "wildlife",
+    "birds",
+    "veterinary-care",
+    "animal-birth-control",
+    "adoption",
+    "disaster-rescue"
+   ]
+  },
+  "aw_news": {
+   "categories": [
+    "adoption",
+    "animal-birth-control",
+    "transport-slaughter",
+    "birds",
+    "campaigns-civic-action",
+    "cattle-gaushalas",
+    "community-dogs",
+    "courts-judgments",
+    "cruelty-prosecution",
+    "disaster-rescue",
+    "feeders-caregivers",
+    "laws-rules",
+    "performing-captive-animals",
+    "pets-breeding",
+    "policy-government",
+    "rabies-public-health",
+    "veterinary-care",
+    "wildlife",
+    "animal-experimentation"
+   ],
+   "tags": []
+  },
+  "aw_campaign": {
+   "categories": [
+    "adoption",
+    "animal-birth-control",
+    "transport-slaughter",
+    "birds",
+    "campaigns-civic-action",
+    "cattle-gaushalas",
+    "community-dogs",
+    "courts-judgments",
+    "cruelty-prosecution",
+    "disaster-rescue",
+    "feeders-caregivers",
+    "laws-rules",
+    "performing-captive-animals",
+    "pets-breeding",
+    "policy-government",
+    "rabies-public-health",
+    "veterinary-care",
+    "wildlife",
+    "animal-experimentation"
+   ],
+   "tags": []
+  }
+ },
+ "topic_tags": {
+  "campaign-lab-animals-2026": {
+   "any": [
+    "ccsea",
+    "cpcsea",
+    "laboratory animal",
+    "lab animal",
+    "animal experiment",
+    "animal testing",
+    "g.s.r. 864",
+    "iaec",
+    "palamur",
+    "non-animal method"
+   ],
+   "hold": [
+    "laboratory animals\\)? rules,? 2026"
+   ],
+   "unless": [
+    "draft",
+    "objection",
+    "comments"
+   ],
+   "hold_reason": "final lab animal rules may have been notified; check and update the campaign page"
+  }
+ },
+ "summary_rules": {
+  "sections": {
+   "news": {
+    "min_words": 100,
+    "max_words": 200,
+    "min_sentences": 4,
+    "max_sentences": 6,
+    "structure": "Sentence 1, the lead: what happened, to which animals, and where, so it can stand alone as the search description. Then who acted or is responsible (police, court, civic body, forest department, NGO, residents), where exactly (district and state as the source names them), and when, only if the source gives the date of the event. Then why it matters (the law, rule, risk or number involved, as the source states it) and what happens next (a hearing, a deadline, an investigation), when the source says so.",
+    "attribution": "Attribute every claim, allegation and number to whoever made it: police said, the court held, the ministry said, the NGO alleged. Name the publisher only when the report is its own finding (its investigation, survey or data); otherwise the source row credits it. Never write 'according to reports' or 'the report says'."
+   },
+   "library": {
+    "min_words": 160,
+    "max_words": 300,
+    "min_sentences": 6,
+    "max_sentences": 10,
+    "structure": "Sentence 1, the lead: who issued it, what kind of document it is (judgment, order, circular, advisory, notification, Act, Rules) and what it decides or asks, in plain language. Then who it applies to (state governments, municipal bodies, police, animal welfare organisations, gaushalas, pet shops, breeders, citizens, community animal feeders) and the key direction, holding or rule, with any deadline, number or penalty it states. Then what it means in practice for citizens and feeders. Give the case or document number and the date of the document when the source gives them. Explain a legal term in a few plain words the first time.",
+    "attribution": "Always name the issuer as the Library names it (Supreme Court of India, the High Court by name, Animal Welfare Board of India, the ministry by its full name). Name the bench or judges only when the source does. One short quote of the operative direction is allowed, attributed to the court or body."
+   },
+   "research": {
+    "min_words": 160,
+    "max_words": 300,
+    "min_sentences": 6,
+    "max_sentences": 19,
+    "structure": "Sentence 1, the lead: what the study found, with its main number, and about which animals or people. Then who did it (institution or journal, when given), where (state, district or city) and when (the study period), and how (design and sample size). Then what it means or recommends, in the authors' own measure: 'found', 'suggests' or 'recommends' as the paper does, never a stronger claim.",
+    "attribution": "Name the authors' institution or the journal when the source gives it; say 'the researchers' or 'the authors', never 'experts say'."
+   }
+  },
+  "lead_max_words": 30,
+  "max_quotes": 1,
+  "max_quote_words": 25,
+  "max_copied_run": 20,
+  "description_max_chars": 155,
+  "general": [
+   "Facts only, from the source in front of you: no opinion, praise, advice, calls to action, or anything from memory. If the source does not say it, leave it out.",
+   "Your own words, in plain English for a general Indian reader. Exact names of laws, cases, bodies and documents stay exact.",
+   "Quotes: at most one direct quote, in double quotation marks, of words a named person, court or body said or wrote, attributed to them.",
+   "Dates: give a date only when the source says the event happened on it. The publication date of the report is never the date of the event, and never say when a report was published.",
+   "Length: never pad to reach the minimum. If the source gives too little, write only what it says, from the source and other reports of the same event; a short accurate summary is published.",
+   "Plain text only: no heading, list, bold, link, URL or line break. Never write 'click here', 'read more' or 'here'.",
+   "Actions (read the PDF, download it, read at the source, apply) are buttons on the page. The summary may say what a reader can do (for example 'feeders can cite the rules to the resident welfare association'), never as a link.",
+   "No AI marker: no 'here is a summary', 'this article', 'as an AI', disclaimer or label.",
+   "English only: no Hindi or other Indian-language script in the output. A Hindi term people use (gaushala) is written in English letters.",
+   "Searched words: use the words people search for. When the source says stray dogs or street dogs, say stray dogs or street dogs; community dogs (the term of the Animal Birth Control Rules, 2023) may stand alongside, never instead. Say NGO when the source does, and gaushala (not only 'cow shelter').",
+   "The page's focus keyword (its main subject in searched words) belongs in the lead sentence, once, naturally. No keyword stuffing.",
+   "Linkable names: name laws, bodies, organisations, places and types exactly as the site names them (see Linkable entities), one form per entity, so they can be linked later. At most a few such names per summary."
+  ],
+  "stock_phrases": [
+   "in a significant development",
+   "in a major development",
+   "in a notable development",
+   "it is worth noting",
+   "worth noting",
+   "it should be noted",
+   "furthermore",
+   "moreover",
+   "additionally",
+   "underscore",
+   "underscores",
+   "underscored",
+   "underscoring",
+   "amid",
+   "amidst",
+   "notably",
+   "in conclusion",
+   "highlight",
+   "highlights",
+   "highlighted",
+   "highlighting",
+   "crucial role",
+   "pivotal",
+   "visionary",
+   "renowned",
+   "remarkable",
+   "innovative",
+   "cutting-edge",
+   "world-class",
+   "state-of-the-art",
+   "landmark",
+   "testament",
+   "delve",
+   "delves",
+   "delving",
+   "landscape",
+   "paving the way",
+   "paves the way",
+   "shed light",
+   "sheds light",
+   "shedding light",
+   "in a bid to",
+   "a move that",
+   "this comes as",
+   "groundbreaking",
+   "commendable",
+   "robust",
+   "comprehensive",
+   "boast",
+   "boasts",
+   "serves as a reminder",
+   "in today's",
+   "heartwarming",
+   "heart-wrenching",
+   "shocking",
+   "tragic",
+   "noble",
+   "laudable",
+   "praiseworthy",
+   "game-changer",
+   "game-changing"
+  ],
+  "ai_markers": [
+   "here is a summary",
+   "here's a summary",
+   "here is the summary",
+   "summary:",
+   "in summary",
+   "to summarise",
+   "to summarize",
+   "this article",
+   "the report says",
+   "according to the report",
+   "according to reports",
+   "as an ai",
+   "i cannot",
+   "i can't",
+   "i am unable",
+   "language model"
+  ],
+  "searched_terms": [
+   "stray dog | stray dogs | street dog | street dogs | community dog | community dogs | indie dog | indie dogs",
+   "stray animal | stray animals | street animal | street animals | community animal | community animals | stray dog | stray dogs | street dog | street dogs | community dog | community dogs | stray cattle",
+   "stray cattle | stray cow | stray cows",
+   "gaushala | gaushalas | goshala | goshalas | gaushaala",
+   "NGO | NGOs"
+  ],
+  "entities": [
+   "Prevention of Cruelty to Animals Act, 1960 | PCA Act, 1960 | PCA Act | Prevention of Cruelty to Animals Act | PCA",
+   "Animal Birth Control Rules, 2023 | ABC Rules, 2023 | ABC Rules 2023 | ABC Rules | Animal Birth Control Rules | Animal Birth Control (Dogs) Rules",
+   "Wildlife (Protection) Act, 1972 | Wildlife Protection Act, 1972 | Wildlife Protection Act | WPA",
+   "Transport of Animals Rules, 1978 | Transport of Animals Rules",
+   "Prevention of Cruelty to Animals (Pet Shop) Rules, 2018 | Pet Shop Rules, 2018 | Pet Shop Rules",
+   "Prevention of Cruelty to Animals (Dog Breeding and Marketing) Rules, 2017 | Dog Breeding and Marketing Rules, 2017 | Dog Breeding Rules",
+   "Prevention of Cruelty to Animals (Slaughter House) Rules, 2001 | Slaughter House Rules, 2001 | Slaughter House Rules",
+   "Performing Animals (Registration) Rules, 2001 | Performing Animals Rules",
+   "Bharatiya Nyaya Sanhita, 2023 | Bharatiya Nyaya Sanhita | BNS",
+   "Animal Welfare Board of India | AWBI",
+   "Supreme Court of India | Apex Court",
+   "National Green Tribunal | NGT",
+   "Central Zoo Authority | CZA",
+   "Ministry of Fisheries, Animal Husbandry and Dairying | Animal Husbandry Ministry",
+   "Ministry of Environment, Forest and Climate Change | MoEFCC | Environment Ministry",
+   "Federation of Indian Animal Protection Organisations | FIAPO",
+   "Humane Society International India | HSI India",
+   "Wildlife SOS",
+   "Blue Cross of India"
+  ],
+  "description": "The search description (Rank Math, at most 155 characters) is the summary condensed, never a separate text: the lead sentence, or the first sentences that fit whole. Only when the lead alone is longer is it cut at a word with an ellipsis. So the lead should answer what happened in about 30 words or fewer.",
+  "card": "Cards show the summary itself, cut to a few lines: the lead sentence must make sense on its own.",
+  "merge": "Same story: a later report's new facts are woven into the first story's summary, which stays one summary in these rules (new facts only from the new report, every number of ours kept). The story's date never changes; the summary before each rewrite is kept in its history.",
+  "fallback": "Short fallback: a summary below the section's minimum is never padded and never sent to To review. The source page is read again; if it is still thin or cannot be read, other coverage of the same event is found (a Google News search with its key names, place and date) and the facts of reputable reports of that same event are merged; the summary is written again from them. The extra publishers are credited as logos in the source row, not in the text. If it is still below the minimum, the best summary that follows the rules is published (accurate and complete beats long). To review is only for critical flags (legitimacy, legal, safety).",
+  "entities_note": "Use one canonical name per entity, exactly as the site titles it: categories and types (Judgment, Gaushala) as listed on the site; states and districts as the Directory names them (Local Government Directory names); laws as titled in the Library; bodies and organisations as titled in the Directory. A name on the right of a line is an alias: write the name on the left instead. Links are never written into the summary; they are added from these names when the page is shown or by the internal-linking pass."
+ },
+ "enrich_sources": {
+  "claim": true,
+  "website": true,
+  "social": true,
+  "darpan": true,
+  "osm": false,
+  "wikidata": true,
+  "awbi": true,
+  "google_places": true
+ },
+ "enrich_fields": {
+  "phone": [
+   "Phone",
+   "phones",
+   "Contact"
+  ],
+  "whatsapp": [
+   "WhatsApp",
+   "phones",
+   "Contact"
+  ],
+  "emergency": [
+   "Emergency / ambulance",
+   "phones",
+   "Contact"
+  ],
+  "email": [
+   "Email",
+   "aw_email",
+   "Contact"
+  ],
+  "website": [
+   "Website",
+   "aw_website",
+   "Contact"
+  ],
+  "address": [
+   "Full address",
+   "aw_address",
+   "Location"
+  ],
+  "pincode": [
+   "PIN code",
+   "aw_pincode",
+   "Location"
+  ],
+  "lat": [
+   "Latitude",
+   "aw_lat",
+   "Location"
+  ],
+  "lng": [
+   "Longitude",
+   "aw_lng",
+   "Location"
+  ],
+  "maps_url": [
+   "Google Maps link",
+   "aw_maps_url",
+   "Location"
+  ],
+  "place_id": [
+   "Google place ID",
+   "aw_place_id",
+   "Location"
+  ],
+  "hours": [
+   "Opening hours",
+   "hours",
+   "Hours"
+  ],
+  "logo": [
+   "Logo",
+   "logo",
+   "Identity"
+  ],
+  "photos": [
+   "Photos",
+   "photos",
+   "Identity"
+  ],
+  "description": [
+   "About (short bio)",
+   "excerpt",
+   "Identity"
+  ],
+  "founded": [
+   "Year established",
+   "aw_founded",
+   "Identity"
+  ],
+  "reg_type": [
+   "Registered as",
+   "aw_reg_type",
+   "Legal"
+  ],
+  "registration": [
+   "Registration number",
+   "aw_registration",
+   "Legal"
+  ],
+  "darpan_id": [
+   "NGO Darpan ID",
+   "aw_darpan_id",
+   "Legal"
+  ],
+  "reg_80g": [
+   "80G",
+   "aw_reg_80g",
+   "Legal"
+  ],
+  "reg_12a": [
+   "12A",
+   "aw_reg_12a",
+   "Legal"
+  ],
+  "fcra": [
+   "FCRA",
+   "aw_fcra",
+   "Legal"
+  ],
+  "services": [
+   "Services",
+   "services",
+   "Work"
+  ],
+  "animals": [
+   "Animals helped",
+   "aw_animals",
+   "Work"
+  ],
+  "areas_served": [
+   "Areas served",
+   "aw_areas_served",
+   "Work"
+  ],
+  "donate_url": [
+   "Donate link",
+   "aw_donate_url",
+   "Action links"
+  ],
+  "upi": [
+   "UPI ID",
+   "aw_upi",
+   "Action links"
+  ],
+  "volunteer_url": [
+   "Volunteer link",
+   "aw_volunteer_url",
+   "Action links"
+  ],
+  "adopt_url": [
+   "Adopt link",
+   "aw_adopt_url",
+   "Action links"
+  ],
+  "instagram": [
+   "Instagram",
+   "aw_instagram",
+   "Social"
+  ],
+  "facebook": [
+   "Facebook",
+   "aw_facebook",
+   "Social"
+  ],
+  "x": [
+   "X",
+   "aw_x",
+   "Social"
+  ],
+  "youtube": [
+   "YouTube",
+   "aw_youtube",
+   "Social"
+  ],
+  "linkedin": [
+   "LinkedIn",
+   "aw_linkedin",
+   "Social"
+  ],
+  "ig_followers": [
+   "Instagram followers",
+   "aw_ig_followers",
+   "Social"
+  ],
+  "ig_posts": [
+   "Instagram posts",
+   "aw_ig_posts",
+   "Social"
+  ],
+  "last_post": [
+   "Last post",
+   "aw_last_post",
+   "Social"
+  ],
+  "head": [
+   "Founder / key contact",
+   "aw_head",
+   "People"
+  ],
+  "wikidata": [
+   "Wikidata ID",
+   "aw_wikidata",
+   "Signals"
+  ],
+  "closed": [
+   "Reported closed",
+   "aw_reported_closed",
+   "Signals"
+  ],
+  "place": [
+   "State and district",
+   "place",
+   "Location"
+  ],
+  "merge_into": [
+   "Duplicate: merge into",
+   "merge",
+   "Identity"
+  ]
+ },
+ "source_keys": [
+  "claim",
+  "website",
+  "social",
+  "darpan",
+  "osm",
+  "wikidata",
+  "awbi",
+  "listing",
+  "india_post",
+  "google_places"
+ ]
+}
