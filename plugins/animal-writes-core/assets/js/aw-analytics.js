@@ -89,7 +89,7 @@
 	}
 	function profileAction(el) {
 		var act = el.getAttribute('data-act'), href = el.getAttribute('href') || '';
-		var area = el.closest('.aw-profile-actions, .aw-profile-actions-na') ? 'actions' : el.closest('.aw-org-details') ? 'details' : el.closest('.aw-listing-help') ? 'help' : el.closest('.aw-profile-head') ? 'head' : el.closest('.scriptlesssocialsharing, [data-kit-share], .kit-share') ? 'share' : 'page';
+		var area = el.closest('.aw-profile-actions, .aw-profile-actions-na') ? 'actions' : el.closest('.aw-org-details') ? 'details' : el.closest('.aw-listing-help') ? 'help' : el.closest('.aw-profile-head') ? 'head' : el.closest('[data-kit-share], .kit-share') ? 'share' : 'page';
 		var action = '', network;
 		if (act) {
 			action = ACT[act] || act;
@@ -158,7 +158,7 @@
 	function campaignLink(a) {
 		var href = a.getAttribute('href') || '', d = domain(href), p = '';
 		try { p = new URL(href, location.href).pathname; } catch (x) {}
-		var share = a.closest('[data-kit-share], .aw-camp-share, .scriptlesssocialsharing');
+		var share = a.closest('[data-kit-share], .aw-camp-share');
 		if (share) return { action: 'share', network: a.getAttribute('data-kit-share') || (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|telegram)\b/) || [, ''])[1] || d.split('.')[0] };
 		if (/^#/.test(href)) return { action: 'section_jump' };
 		if (/^tel:/i.test(href)) return { action: 'call' };

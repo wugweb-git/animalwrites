@@ -1046,16 +1046,6 @@ body { background: var(--kit-surface-page); }
 .kit-overlay::after { content: ""; position: absolute; inset: 0; background: var(--kit-overlay); z-index: 0; pointer-events: none; }
 .kit-overlay > * { position: relative; z-index: 1; }
 
-/* Share (Scriptless Social Sharing plugin): Kits buttons — outlined pills with the network icon; WhatsApp filled */
-.scriptlesssocialsharing { margin: var(--kit-space-6) 0 0; padding-top: var(--kit-space-5); border-top: var(--kit-border-width) solid var(--kit-color-line); max-width: var(--kit-width-wide); }
-.scriptlesssocialsharing__heading { margin: 0 0 var(--kit-space-3) !important; font-size: var(--kit-type-sm) !important; font-weight: var(--kit-weight-regular) !important; color: var(--kit-color-muted); }
-.scriptlesssocialsharing__buttons { display: flex !important; flex-wrap: wrap; gap: var(--kit-space-2); width: auto !important; }
-.scriptlesssocialsharing__buttons a.button { display: inline-flex !important; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-4) !important; margin: 0 !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--kit-radius-pill) !important; background: transparent !important; color: var(--kit-color-ink) !important; font-size: var(--kit-type-sm); font-weight: var(--kit-weight-medium); text-decoration: none !important; box-shadow: none !important; transition: background-color var(--kit-duration-spring) var(--kit-ease-spring), color var(--kit-duration-spring) var(--kit-ease-spring); }
-.scriptlesssocialsharing__buttons a.button:hover { background: var(--kit-color-ink) !important; color: var(--kit-color-on-ink) !important; border-color: var(--kit-color-ink) !important; }
-.scriptlesssocialsharing__buttons a.button.whatsapp { background: var(--kit-color-whatsapp) !important; border-color: var(--kit-color-whatsapp) !important; color: var(--kit-color-on-ink) !important; }
-.scriptlesssocialsharing__buttons svg, .scriptlesssocialsharing__icon { width: 1.125em !important; height: 1.125em !important; fill: currentColor; }
-.scriptlesssocialsharing__buttons a.button::after { content: none !important; }
-
 /* Mobile menu: the list fills the screen so contact and legal sit at the bottom */
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog,
 .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content { display: flex !important; flex-direction: column; min-height: calc(100dvh - var(--kit-header-height) - var(--kit-space-5) - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }

@@ -172,8 +172,3 @@ add_filter(
 	},
 	99
 );
-
-
-// The share plugin's heading comes straight after the page title: h2, so no level is skipped.
-add_filter( 'scriptlesssocialsharing_heading_element', fn() => 'h2' );
-

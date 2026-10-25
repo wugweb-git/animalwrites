@@ -761,7 +761,7 @@
 		var href = a.getAttribute('href') || '';
 		if (a.closest('.kit-dd--sort, .kit-segment') || a.classList.contains('kit-dd-opt') && a.closest('[data-kit-sort], .kit-sort')) { track('sort_change', { value: a.textContent.trim().slice(0, 60) }); return; }
 		// share buttons first: their WhatsApp and email buttons are shares, not contact clicks
-		var share = a.closest('.scriptlesssocialsharing__buttons, [data-kit-share]'); // a link marked data-kit-share="network" is a share too
+		var share = a.closest('[data-kit-share]'); // a link marked data-kit-share="network" is a share too
 		if (share) { track('share_click', { network: a.dataset.kitShare || (a.className.match(/\b(whatsapp|facebook|twitter|linkedin|email|pinterest|reddit|telegram)\b/) || [, 'other'])[1] }); return; }
 		// a share link outside a share row (a "share on WhatsApp/X/Facebook/LinkedIn" intent URL) is a share too, not a contact
 		var intent = shareIntent(href);
