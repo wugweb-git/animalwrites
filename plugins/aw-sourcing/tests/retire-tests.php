@@ -24,9 +24,9 @@ foreach ( $p4plan['records'] as $r ) {
 }
 
 // The options as phase 2 left them on live: the lists are the mirrors rebuilt from the table.
-$p4mir           = aw_kw_mirrors( $p4recs );
-$p4rel           = array_merge( $p4['relevance'], array_intersect_key( $p4mir, array_flip( AW_RETIRE_REL_LISTS ) ) );
-$p4cfg           = $p4['sources_option'];
+$p4mir                     = aw_kw_mirrors( $p4recs );
+$p4rel                     = array_merge( $p4['relevance'], array_intersect_key( $p4mir, array_flip( AW_RETIRE_REL_LISTS ) ) );
+$p4cfg                     = $p4['sources_option'];
 $p4cfg['press']['queries'] = $p4mir['press'];
 $p4cfg['categories']       = aw_kw_categories_in_order( $p4mir['categories'], (array) $p4['sources_option']['categories'] );
 
@@ -45,17 +45,17 @@ $bad           = $p4rel;
 $bad['strong'] = array_merge( $bad['strong'], array( 'zebra crossing ban' ) );
 aw_t( 1 === count( aw_retire_plan( $bad, $p4cfg, $p4['dismissed'], $p4recs )['conflicts'] ), 'a word only the old list has is a conflict' );
 aw_t( 1 === count( aw_retire_plan( $p4rel, $p4cfg, array_merge( $p4['dismissed'], array( 'never dismissed here' ) ), $p4recs )['conflicts'] ), 'a dismissed search with no dismissed record is a conflict' );
-$badc                                     = $p4cfg;
-$badc['categories']['wildlife'][]         = 'unmapped word';
+$badc                             = $p4cfg;
+$badc['categories']['wildlife'][] = 'unmapped word';
 aw_t( 1 === count( aw_retire_plan( $p4rel, $badc, $p4['dismissed'], $p4recs )['conflicts'] ), 'a category word with no Category record for that category is a conflict' );
 
 // The archive: checked against the options, and its checksums.
 $ar = aw_retire_archive( $rp, '2026-10-27 10:00:00', 'aw_backup_4_x' );
 aw_t( array() === aw_retire_archive_problems( $ar, $rp ), 'the archive matches the options it copies' );
-$ar2                                         = $ar;
+$ar2                                       = $ar;
 $ar2['values']['aw_relevance']['strong'][] = 'x';
 aw_t( (bool) aw_retire_archive_problems( $ar2, $rp ), 'an archive that differs from the options is found' );
-$ar3              = $ar;
+$ar3                                  = $ar;
 $ar3['sums']['aw_sourcing_dismissed'] = 'bad';
 aw_t( (bool) aw_retire_archive_problems( $ar3, $rp ), 'an archive whose checksum does not match is found' );
 

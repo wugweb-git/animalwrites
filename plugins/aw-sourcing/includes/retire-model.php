@@ -80,10 +80,10 @@ function aw_retire_norms( array $r ) {
  * @return array{archive: array, counts: array, conflicts: string[], planned: string[]}
  */
 function aw_retire_plan( array $rel, array $cfg, array $dismissed, array $rows ) {
-	$by_role  = array(); // role bit => norm => true
-	$by_cat   = array(); // slug => norm => true
-	$any      = array(); // norm => true (every record)
-	$dismiss  = array(); // norm => true (records marked dismissed)
+	$by_role = array(); // role bit => norm => true
+	$by_cat  = array(); // slug => norm => true
+	$any     = array(); // norm => true (every record)
+	$dismiss = array(); // norm => true (records marked dismissed)
 	foreach ( $rows as $r ) {
 		$norms = aw_retire_norms( $r );
 		$any  += $norms;
@@ -128,14 +128,14 @@ function aw_retire_plan( array $rel, array $cfg, array $dismissed, array $rows )
 			$conflicts[] = $where . ': ' . implode( ', ', $miss ) . ' (no keyword record with that role)';
 		}
 	};
-	$archive = array(
+	$archive   = array(
 		'aw_relevance' => array(),
 		'aw_sources'   => array(),
 	);
-	$counts  = array();
+	$counts    = array();
 	foreach ( AW_RETIRE_LIST_ROLE as $k => $bit ) {
 		if ( array_key_exists( $k, $rel ) ) {
-			$archive['aw_relevance'][ $k ] = $rel[ $k ];
+			$archive['aw_relevance'][ $k ]  = $rel[ $k ];
 			$counts[ 'aw_relevance.' . $k ] = count( (array) $rel[ $k ] );
 			$check( 'aw_relevance.' . $k, (array) $rel[ $k ], $by_role[ $bit ] ?? array() );
 		}
@@ -207,7 +207,7 @@ function aw_retire_archive_problems( array $archive, array $plan ) {
 	$out = array();
 	foreach ( array_unique( array_merge( array_keys( (array) ( $archive['values'] ?? array() ) ), array_keys( $plan['archive'] ) ) ) as $k ) {
 		$a = $archive['values'][ $k ] ?? null;
-		if ( $a !== ( $plan['archive'][ $k ] ?? null ) ) {
+		if ( ( $plan['archive'][ $k ] ?? null ) !== $a ) {
 			$out[] = "the archive's $k differs from the option";
 		} elseif ( ( $archive['sums'][ $k ] ?? '' ) !== hash( 'sha256', (string) json_encode( $a ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- as aw_retire_archive()
 			$out[] = "the archive's $k does not match its checksum";
