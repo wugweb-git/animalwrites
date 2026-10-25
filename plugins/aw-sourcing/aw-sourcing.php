@@ -34,6 +34,8 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
+// The Sources model (plain functions, tested without WordPress by tests/run.php) first.
+require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 // Order matters for the Settings → Sourcing tabs (Sources, Keywords, then these in this order).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';

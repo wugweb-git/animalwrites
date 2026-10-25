@@ -147,6 +147,9 @@ function aw_has_term( $hay, $term ) {
 	if ( '' === $t ) {
 		return false;
 	}
+	if ( str_ends_with( $t, '*' ) ) { // a prefix ("steriliz*"): the shared matcher, as in the workers (policy.has_term)
+		return aw_match_term( $hay, $t );
+	}
 	if ( preg_match( "/^[a-z0-9 \\-'’]+$/u", $t ) ) { // Latin terms: whole words only, plural allowed ("hen" no longer matches "when")
 		return (bool) preg_match( '/(?<![a-z0-9])' . preg_quote( $t, '/' ) . '(?:s|es)?(?![a-z0-9])/u', $hay );
 	}

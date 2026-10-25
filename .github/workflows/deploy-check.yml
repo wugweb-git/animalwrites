@@ -76,6 +76,8 @@ jobs:
         run: php tools/ci/workers_registry_check.php
       - name: Mailweb address parser (typed lists, headers, API lists)
         run: php tools/ci/mailweb_addresses_test.php
+      - name: Sourcing tests without WordPress (shared keyword matcher, Sources model; plugins/aw-sourcing/tests)
+        run: php plugins/aw-sourcing/tests/run.php
       - name: Footer height follows its content (no max-height, vh height or overflow hidden)
         run: python3 tools/ci/footer_check.py
       - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)

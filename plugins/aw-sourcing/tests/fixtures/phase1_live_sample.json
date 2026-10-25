@@ -1,0 +1,973 @@
+{
+ "about": "Live shapes on 25 Oct 2026 (read-only wp option get): aw_sources.sources (all 20), aw_publishers (the hosts the sources and the relay touch, plus an icon-only and a blocked record), aw_relay_log (all rows). Used by tests/run.php.",
+ "sources": [
+  {
+   "id": "gnews-animal-welfare",
+   "name": "Google News – animal welfare India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://news.google.com/rss/search?q=%22animal+welfare%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "gnews-animal-cruelty",
+   "name": "Google News – animal cruelty India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://news.google.com/rss/search?q=%22animal+cruelty%22+India&hl=en-IN&gl=IN&ceid=IN:en",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "the-hindu-environment",
+   "name": "The Hindu – Energy & Environment",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://www.thehindu.com/sci-tech/energy-and-environment/feeder/default.rss",
+   "keywords": [
+    "animal welfare",
+    "animal cruelty",
+    "cruelty to animals",
+    "stray",
+    "street dog",
+    "community dog",
+    "cow shelter",
+    "gaushala",
+    "wildlife",
+    "veterinary",
+    "rabies",
+    "animal birth control",
+    "ABC Rules",
+    "PCA Act",
+    "Prevention of Cruelty",
+    "AWBI",
+    "Animal Welfare Board",
+    "पशु",
+    "जानवर",
+    "पशुपालन",
+    "रेबीज"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "awbi-circulars",
+   "name": "Animal Welfare Board of India – Circulars",
+   "kind": "awbi",
+   "type": "legal",
+   "source_type": "awbi",
+   "url": "https://awbi.gov.in/circulars",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "awbi-notifications",
+   "name": "Animal Welfare Board of India – Notifications",
+   "kind": "awbi",
+   "type": "legal",
+   "source_type": "awbi",
+   "url": "https://awbi.gov.in/notifications",
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "livelaw-top",
+   "name": "LiveLaw",
+   "kind": "rss",
+   "type": "news",
+   "source_type": "auto-court",
+   "url": "https://www.livelaw.in/category/top-stories/google_feeds.xml",
+   "keywords": [
+    "animal welfare",
+    "animal cruelty",
+    "cruelty to animals",
+    "stray",
+    "street dog",
+    "community dog",
+    "cow shelter",
+    "gaushala",
+    "wildlife",
+    "veterinary",
+    "rabies",
+    "animal birth control",
+    "ABC Rules",
+    "PCA Act",
+    "Prevention of Cruelty",
+    "AWBI",
+    "Animal Welfare Board",
+    "पशु",
+    "जानवर",
+    "पशुपालन",
+    "रेबीज"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "barandbench",
+   "name": "Bar & Bench",
+   "kind": "rss",
+   "type": "news",
+   "source_type": "auto-court",
+   "url": "https://www.barandbench.com/feed",
+   "keywords": [
+    "animal welfare",
+    "animal cruelty",
+    "cruelty to animals",
+    "stray",
+    "street dog",
+    "community dog",
+    "cow shelter",
+    "gaushala",
+    "wildlife",
+    "veterinary",
+    "rabies",
+    "animal birth control",
+    "ABC Rules",
+    "PCA Act",
+    "Prevention of Cruelty",
+    "AWBI",
+    "Animal Welfare Board",
+    "पशु",
+    "जानवर",
+    "पशुपालन",
+    "रेबीज"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "court-news-animals",
+   "name": "Court news – LiveLaw",
+   "kind": "rss",
+   "type": "news",
+   "source_type": "auto-court",
+   "url": "https://news.google.com/rss/search?q=site:livelaw.in+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+   "lookback_days": 7,
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "court-news-barandbench",
+   "name": "Court news – Bar & Bench",
+   "kind": "rss",
+   "type": "news",
+   "source_type": "auto-court",
+   "url": "https://news.google.com/rss/search?q=site:barandbench.com+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+   "lookback_days": 7,
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "court-news-scobserver",
+   "name": "Court news – SC Observer",
+   "kind": "rss",
+   "type": "news",
+   "source_type": "auto-court",
+   "url": "https://news.google.com/rss/search?q=site:scobserver.in+(animal+OR+animals+OR+dogs+OR+cattle+OR+cow+OR+wildlife+OR+cruelty+OR+stray+OR+livestock)+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+   "lookback_days": 7,
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "pib-releases",
+   "name": "Press Information Bureau",
+   "kind": "rss",
+   "type": "legal",
+   "source_type": "pib",
+   "url": "https://news.google.com/rss/search?q=site:pib.gov.in+(animal+OR+rabies+OR+veterinary+OR+livestock+OR+wildlife)&hl=en-IN&gl=IN&ceid=IN:en",
+   "keywords": [
+    "animal welfare",
+    "animal cruelty",
+    "cruelty to animals",
+    "stray",
+    "street dog",
+    "community dog",
+    "cow shelter",
+    "gaushala",
+    "wildlife",
+    "veterinary",
+    "rabies",
+    "animal birth control",
+    "ABC Rules",
+    "PCA Act",
+    "Prevention of Cruelty",
+    "AWBI",
+    "Animal Welfare Board",
+    "पशु",
+    "जानवर",
+    "पशुपालन",
+    "रेबीज"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "ccsea-whats-new",
+   "name": "CCSEA – What's New",
+   "kind": "ccsea",
+   "type": "legal",
+   "source_type": "ccsea",
+   "url": "https://ccsea.gov.in/CCSEAWhatsNews.aspx",
+   "lookback_days": 30,
+   "skip_urls": [
+    "https://ccsea.gov.in/WriteReadData/LnPdf/DraftPreventionofCrueltytoAnimals(ControlandSupervisionofExperiment,BreedingandTradingofLaboratoryAnimals)Rules,2026.pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/InspectionsofanimalhousefacilitiesandIAECmeetings.pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/AdministrativeCCSEAAmendmentRules2026.pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/ConveningIAECmeetingthroughphysicalmode.pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/PublicNotice_LetterofPeTAIndia.pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/IAECFunctioning-projectpresentationbyPrincipalInvestigator(PI).pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/VaccinetrialsusingDogs(1).pdf",
+    "https://ccsea.gov.in/WriteReadData/LnPdf/FeeStructureorder.pdf"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "gnews-lab-animal-rules",
+   "name": "Google News – lab animal rules India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://news.google.com/rss/search?q=(%22CCSEA%22+OR+%22lab+animal+rules%22+OR+%22laboratory+animals+rules%22+OR+%22animal+experiments%22)+India+when:7d&hl=en-IN&gl=IN&ceid=IN:en",
+   "keywords": [
+    "CCSEA",
+    "CPCSEA",
+    "laboratory animal",
+    "lab animal",
+    "animal experiment",
+    "animal testing",
+    "G.S.R. 864",
+    "IAEC",
+    "Palamur",
+    "non-animal method"
+   ],
+   "on": true,
+   "filter": false,
+   "file_as": "press"
+  },
+  {
+   "id": "pfa-substack",
+   "name": "People For Animals (Substack)",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://peopleforanimals.substack.com/feed",
+   "keywords": [
+    "CCSEA",
+    "CPCSEA",
+    "laboratory animal",
+    "lab animal",
+    "animal experiment",
+    "animal testing",
+    "G.S.R. 864",
+    "IAEC",
+    "Palamur",
+    "non-animal method"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "peta-india",
+   "name": "PETA India",
+   "kind": "rss",
+   "type": "news",
+   "url": "https://www.petaindia.com/feed/",
+   "keywords": [
+    "CCSEA",
+    "CPCSEA",
+    "laboratory animal",
+    "lab animal",
+    "animal experiment",
+    "animal testing",
+    "G.S.R. 864",
+    "IAEC",
+    "Palamur",
+    "non-animal method"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "gazette-of-india",
+   "name": "Gazette of India",
+   "kind": "egazette",
+   "type": "legal",
+   "source_type": "gazette",
+   "url": "https://egazette.gov.in/",
+   "lookback_days": 30,
+   "ministries": [
+    "Ministry of Fisheries, Animal Husbandry and Dairying",
+    "Ministry of Environment, Forest and Climate Change"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "judgments-supreme-court",
+   "name": "Supreme Court judgments (open dataset, CC BY 4.0)",
+   "kind": "judgments-sc",
+   "type": "legal",
+   "url": "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/",
+   "lookback_days": 120,
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "judgments-high-courts",
+   "name": "High Court judgments (open dataset, CC BY 4.0)",
+   "kind": "judgments-hc",
+   "type": "legal",
+   "url": "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/",
+   "lookback_days": 60,
+   "on": false,
+   "filter": false
+  },
+  {
+   "id": "opp-wwf-india",
+   "name": "WWF-India careers",
+   "org": "WWF-India",
+   "kind": "zoho",
+   "type": "opportunity",
+   "opportunity_type": "job",
+   "lookback_days": 120,
+   "url": "https://wwfindia.zohorecruit.com/jobs/careers",
+   "match": "title",
+   "keywords": [
+    "conservation",
+    "wildlife",
+    "biodiversity",
+    "species",
+    "raptor",
+    "tiger",
+    "elephant",
+    "rhino",
+    "bird",
+    "aquatic",
+    "wetland",
+    "river",
+    "marine",
+    "forest",
+    "habitat",
+    "veterinar",
+    "animal",
+    "brahmaputra"
+   ],
+   "on": true,
+   "filter": false
+  },
+  {
+   "id": "opp-awbi-notifications",
+   "name": "Animal Welfare Board of India – Notifications",
+   "org": "Animal Welfare Board of India",
+   "kind": "awbi",
+   "type": "opportunity",
+   "opportunity_type": "event",
+   "lookback_days": 120,
+   "url": "https://awbi.gov.in/Notifications",
+   "keywords": [
+    "invitation for",
+    "inviting",
+    "award",
+    "vacancy",
+    "vacancies",
+    "recruitment",
+    "internship",
+    "applications are invited",
+    "walk-in"
+   ],
+   "on": true,
+   "filter": false
+  }
+ ],
+ "publishers": {
+  "thehindu.com": {
+   "status": "allow",
+   "name": "The Hindu",
+   "count": 29,
+   "first": "2026-10-05",
+   "last": "2026-10-24",
+   "icon": 7512,
+   "rating": "Mostly factual",
+   "credibility": "High",
+   "rating_url": "https://mediabiasfactcheck.com/the-hindu/",
+   "rating_on": "2026-10-08",
+   "short": "Hindu"
+  },
+  "livelaw.in": {
+   "status": "allow",
+   "name": "Live Law",
+   "count": 105,
+   "first": "2026-10-05",
+   "last": "2026-10-24",
+   "icon": 7523,
+   "short": "LiveLaw"
+  },
+  "barandbench.com": {
+   "status": "allow",
+   "name": "Bar and Bench",
+   "count": 35,
+   "first": "2026-10-05",
+   "last": "2026-10-15",
+   "icon": 7524,
+   "rating": "Mostly factual",
+   "credibility": "High",
+   "rating_url": "https://mediabiasfactcheck.com/bar-bench-bias-and-credibility/",
+   "rating_on": "2026-10-08",
+   "short": "Bar and Bench"
+  },
+  "peopleforanimals.substack.com": {
+   "status": "neutral",
+   "name": "People for Animals",
+   "count": 2,
+   "first": "2026-10-17",
+   "last": "2026-10-17",
+   "icon": 14243,
+   "short": "People for Animals"
+  },
+  "petaindia.com": {
+   "status": "allow",
+   "name": "PETA India",
+   "count": 68,
+   "first": "2026-10-05",
+   "last": "2026-10-23",
+   "icon": 7527,
+   "rating": "Mixed (rating is for PETA)",
+   "credibility": "Low",
+   "rating_url": "https://mediabiasfactcheck.com/peta-people-for-the-ethical-treatment-of-animals/",
+   "rating_on": "2026-10-08",
+   "short": "PETA India"
+  },
+  "scobserver.in": {
+   "status": "allow",
+   "name": "Supreme Court Observer",
+   "count": 1,
+   "first": "2026-10-06",
+   "last": "2026-10-10",
+   "icon": 12259,
+   "short": "Supreme Court Observer"
+  },
+  "pib.gov.in": {
+   "status": "allow",
+   "name": "PIB",
+   "count": 67,
+   "first": "2026-10-05",
+   "last": "2026-10-16",
+   "icon": 7525,
+   "short": "PIB"
+  },
+  "zoomtventertainment.com": {
+   "status": "neutral",
+   "name": "Zoom TV",
+   "count": 1,
+   "first": "2026-10-20",
+   "last": "2026-10-20",
+   "icon": 16995,
+   "short": "Zoom TV"
+  },
+  "awbi.gov.in": {
+   "status": "allow",
+   "name": "Animal Welfare Board of India – Circulars",
+   "count": 25,
+   "first": "2026-10-05",
+   "last": "2026-10-13",
+   "icon": 7526,
+   "short": "AWBI"
+  },
+  "egazette.gov.in": {
+   "name": "Gazette of India",
+   "count": 1,
+   "first": "2026-10-08",
+   "last": "2026-10-08",
+   "status": "allow",
+   "icon": 13710,
+   "short": "Gazette"
+  },
+  "indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com": {
+   "name": "Supreme Court of India · Indian Supreme Court Judgments dataset (CC BY 4.0)",
+   "count": 1,
+   "first": "2026-10-08",
+   "last": "2026-10-10",
+   "status": "allow",
+   "icon": 13715,
+   "short": "Supreme Court"
+  },
+  "wwfindia.org": {
+   "status": "neutral",
+   "name": "WWF India",
+   "count": 1,
+   "first": "2026-10-16",
+   "last": "2026-10-16",
+   "icon": 14156,
+   "short": "WWF India"
+  },
+  "google.com": {
+   "status": "neutral",
+   "name": "Google Maps",
+   "count": 1,
+   "first": "2026-10-18",
+   "last": "2026-10-18",
+   "kind": "directory-source",
+   "icon": 15586
+  },
+  "bollyspice.com": {
+   "name": "BollySpice.com",
+   "count": 2,
+   "first": "2026-10-05",
+   "last": "2026-10-07",
+   "status": "block",
+   "icon": 7510,
+   "short": "BollySpice"
+  }
+ },
+ "relay_log": [
+  {
+   "at": 1792475229,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 258,
+   "note": ""
+  },
+  {
+   "at": 1792475230,
+   "host": "www.zoomtventertainment.com",
+   "path": "/bollywood/kalki-koechlin-abhirami-nafisa-ali-oppose-draft-animal-testing-rules-article-156367853",
+   "status": 200,
+   "bytes": 264303,
+   "ms": 751,
+   "note": ""
+  },
+  {
+   "at": 1792475230,
+   "host": "example.com",
+   "path": "/",
+   "status": "aw_relay_not_allowed",
+   "bytes": 0,
+   "ms": 0,
+   "note": "host not on the relay list: example.com"
+  },
+  {
+   "at": 1792475230,
+   "host": "127.0.0.1",
+   "path": "/",
+   "status": "aw_relay_not_allowed",
+   "bytes": 0,
+   "ms": 0,
+   "note": "host not on the relay list: 127.0.0.1"
+  },
+  {
+   "at": 1792475230,
+   "host": "animalwrites.in",
+   "path": "/",
+   "status": "aw_relay_not_allowed",
+   "bytes": 0,
+   "ms": 0,
+   "note": "host not on the relay list: animalwrites.in"
+  },
+  {
+   "at": 1792475230,
+   "host": "",
+   "path": "/etc/passwd",
+   "status": "aw_relay_not_allowed",
+   "bytes": 0,
+   "ms": 0,
+   "note": "host not on the relay list: "
+  },
+  {
+   "at": 1792475551,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 252,
+   "note": ""
+  },
+  {
+   "at": 1792476411,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 240,
+   "note": ""
+  },
+  {
+   "at": 1792478885,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 463,
+   "note": ""
+  },
+  {
+   "at": 1792483109,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 869,
+   "note": ""
+  },
+  {
+   "at": 1792496110,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 372,
+   "note": ""
+  },
+  {
+   "at": 1792504559,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176695,
+   "ms": 350,
+   "note": ""
+  },
+  {
+   "at": 1792515814,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176743,
+   "ms": 434,
+   "note": ""
+  },
+  {
+   "at": 1792522072,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176767,
+   "ms": 318,
+   "note": ""
+  },
+  {
+   "at": 1792522485,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176767,
+   "ms": 341,
+   "note": ""
+  },
+  {
+   "at": 1792539090,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 176767,
+   "ms": 407,
+   "note": ""
+  },
+  {
+   "at": 1792558029,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179855,
+   "ms": 482,
+   "note": ""
+  },
+  {
+   "at": 1792570028,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179855,
+   "ms": 315,
+   "note": ""
+  },
+  {
+   "at": 1792583413,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 301,
+   "note": ""
+  },
+  {
+   "at": 1792669003,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 378,
+   "note": ""
+  },
+  {
+   "at": 1792670753,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 278,
+   "note": ""
+  },
+  {
+   "at": 1792672161,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 454,
+   "note": ""
+  },
+  {
+   "at": 1792674120,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 416,
+   "note": ""
+  },
+  {
+   "at": 1792678133,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 457,
+   "note": ""
+  },
+  {
+   "at": 1792680131,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 286,
+   "note": ""
+  },
+  {
+   "at": 1792690283,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 331,
+   "note": ""
+  },
+  {
+   "at": 1792695275,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 434,
+   "note": ""
+  },
+  {
+   "at": 1792712434,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 179879,
+   "ms": 322,
+   "note": ""
+  },
+  {
+   "at": 1792730896,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183104,
+   "ms": 316,
+   "note": ""
+  },
+  {
+   "at": 1792742810,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183080,
+   "ms": 442,
+   "note": ""
+  },
+  {
+   "at": 1792755512,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183056,
+   "ms": 359,
+   "note": ""
+  },
+  {
+   "at": 1792764203,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183056,
+   "ms": 294,
+   "note": ""
+  },
+  {
+   "at": 1792775856,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 297,
+   "note": ""
+  },
+  {
+   "at": 1792781245,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 313,
+   "note": ""
+  },
+  {
+   "at": 1792790715,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 389,
+   "note": ""
+  },
+  {
+   "at": 1792798463,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 353,
+   "note": ""
+  },
+  {
+   "at": 1792816517,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 391,
+   "note": ""
+  },
+  {
+   "at": 1792827542,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 317,
+   "note": ""
+  },
+  {
+   "at": 1792839594,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 643,
+   "note": ""
+  },
+  {
+   "at": 1792846734,
+   "host": "ccsea.gov.in",
+   "path": "/CCSEAWhatsNews.aspx",
+   "status": "aw_relay_fetch",
+   "bytes": 0,
+   "ms": 10250,
+   "note": "cURL error 28: Connection timed out after 10001 milliseconds"
+  },
+  {
+   "at": 1792846735,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 285,
+   "note": ""
+  },
+  {
+   "at": 1792857377,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 465,
+   "note": ""
+  },
+  {
+   "at": 1792863532,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 324,
+   "note": ""
+  },
+  {
+   "at": 1792874902,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 321,
+   "note": ""
+  },
+  {
+   "at": 1792881959,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 281,
+   "note": ""
+  },
+  {
+   "at": 1792903153,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 290,
+   "note": ""
+  },
+  {
+   "at": 1792914718,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 314,
+   "note": ""
+  },
+  {
+   "at": 1792927593,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 422,
+   "note": ""
+  },
+  {
+   "at": 1792931738,
+   "host": "peopleforanimals.substack.com",
+   "path": "/feed",
+   "status": 200,
+   "bytes": 183008,
+   "ms": 298,
+   "note": ""
+  }
+ ],
+ "relay_default": [
+  "substack.com",
+  "zoomtventertainment.com",
+  "awbi.gov.in",
+  "ccsea.gov.in",
+  "egazette.gov.in"
+ ]
+}
