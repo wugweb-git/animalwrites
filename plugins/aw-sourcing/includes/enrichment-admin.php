@@ -307,7 +307,7 @@ function aw_enrich_review_page() {
 	}
 	echo '<p>' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked · ' . (int) $prog['pending'] . ' proposals waiting. High-confidence values for empty fields of unclaimed listings are applied automatically and listed under Applied (with Undo).</p>';
 	echo '<ul class="subsubsub">';
-	foreach ( array( 'pending' => 'Waiting', 'applied' => 'Applied', 'rejected' => 'Rejected', 'undone' => 'Undone', 'all' => 'All' ) as $k => $l ) {
+	foreach ( array( 'pending' => 'Waiting', 'applied' => 'Applied', 'rejected' => 'Rejected', 'failed' => 'Failed', 'undone' => 'Undone', 'all' => 'All' ) as $k => $l ) {
 		echo '<li><a href="' . esc_url( add_query_arg( 'status', $k, $base ) ) . '"' . ( $st === $k ? ' class="current"' : '' ) . '>' . esc_html( $l ) . '</a> | </li>';
 	}
 	echo '</ul><br class="clear">';
@@ -342,7 +342,7 @@ function aw_enrich_review_page() {
 			echo '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $q[ $k ] ) . '">';
 		}
 	}
-	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : array( 'undo' => 'Undo' );
+	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : ( 'failed' === $st ? array() : array( 'undo' => 'Undo' ) ); // a failed row has nothing to undo
 	$cells  = array();
 	$labels = aw_enrich_fields();
 	foreach ( $rows as $r ) {

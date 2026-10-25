@@ -5,7 +5,7 @@
  *
  * - Every proposed value is one row of {prefix}aw_enrich: field, value, the value it replaced, its sources
  *   ({key, name, url, fetched_at} each; the exact page), confidence (high / medium / low) and status
- *   (auto-applied, approved, pending, rejected, undone, superseded). The rows are the change log (old → new) and the
+ *   (auto-applied, approved, pending, rejected, undone, superseded, failed). The rows are the change log (old → new) and the
  *   provenance of every value the worker set: a field's source is its latest applied row.
  * - Apply rules (owner's brief, 18 Oct 2026): a listing that is claimed or verified is never changed; everything goes to
  *   the review queue. Otherwise a high-confidence value is applied at once when the field is empty; a value that would
@@ -685,11 +685,25 @@ function aw_enrich_add_row( $lid, $field, $value, $old, $sources, $confidence, $
 			'note'       => substr( (string) $note, 0, 190 ),
 			'run'        => substr( (string) $run, 0, 40 ),
 			'created'    => current_time( 'mysql' ),
-			'decided_at' => in_array( $status, array( 'auto-applied', 'approved' ), true ) ? current_time( 'mysql' ) : null,
+			'decided_at' => in_array( $status, array( 'auto-applied', 'approved', 'failed' ), true ) ? current_time( 'mysql' ) : null,
 			'decided_by' => in_array( $status, array( 'approved', 'rejected' ), true ) ? get_current_user_id() : 0,
 		)
 	);
 	return (int) $wpdb->insert_id;
+}
+
+/**
+ * The note on a value that could not be written (25 Oct 2026): a picture that could not be copied from its source, or
+ * a value the field cannot use. Such a row has status 'failed': it is logged, nothing to review, and it never stops the
+ * same value being proposed again (only a person's rejection does, see aw_enrich_rest_results()).
+ *
+ * @param string $field Field key.
+ * @param bool   $auto  True for an automatic apply, false for a reviewer's Approve.
+ * @return string
+ */
+function aw_enrich_fail_note( $field, $auto ) {
+	$why = in_array( $field, array( 'logo', 'photos' ), true ) ? 'the picture could not be copied from its source' : 'the value could not be used for this field';
+	return 'Could not be applied ' . ( $auto ? 'automatically' : 'on approval' ) . ': ' . $why;
 }
 
 /** One row, decoded. */
@@ -746,7 +760,7 @@ function aw_enrich_approve( $id ) {
 	}
 	$snap = aw_enrich_snapshot( $lid, $r['field'] );
 	if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], 'apply', (array) $r['sources'] ) ) {
-		aw_enrich_set_status( $id, 'rejected', 'Could not be applied (unusable value or picture)' );
+		aw_enrich_set_status( $id, 'failed', aw_enrich_fail_note( $r['field'], false ) );
 		return false;
 	}
 	global $wpdb;
@@ -1155,7 +1169,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 	$run       = sanitize_text_field( (string) ( $b['run'] ?? '' ) );
 	$protected = aw_enrich_is_protected( $lid );
 	$fields    = aw_enrich_fields();
-	$out       = array( 'applied' => array(), 'queued' => array(), 'skipped' => array() );
+	$out       = array( 'applied' => array(), 'queued' => array(), 'skipped' => array(), 'failed' => array() ); // skipped: nothing to do (already held, not usable); failed: a write that did not work, logged as a 'failed' row
 	if ( ! empty( $b['google_cost'] ) ) {
 		aw_enrich_spend( (float) $b['google_cost'], 'worker' );
 	}
@@ -1219,7 +1233,13 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 				$out['applied'][] = $field;
 				continue;
 			}
-			$out['skipped'][] = $field;
+			$prev = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND field = %s AND status = 'failed' AND value = %s ORDER BY id DESC LIMIT 1", $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
+			if ( $prev ) { // the same value failed before: one row, dated by its latest attempt
+				$wpdb->update( aw_enrich_table(), array( 'run' => substr( $run, 0, 40 ), 'decided_at' => current_time( 'mysql' ) ), array( 'id' => (int) $prev ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			} else {
+				aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'failed', $run, aw_enrich_fail_note( $field, true ) );
+			}
+			$out['failed'][] = $field;
 			continue;
 		}
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
