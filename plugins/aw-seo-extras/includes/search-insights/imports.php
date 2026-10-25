@@ -1,14 +1,13 @@
 <?php
 /**
- * Imports and paste forms on the Settings tab (plan §5.4): Keyword Planner volumes, Ahrefs Webmaster Tools keywords and
- * backlinks, Trends averages when the worker can't reach Trends, and data.gov.in / IDSP figures for guides. CSV files
+ * Imports and paste forms on the Settings tab (plan §5.4): Keyword Planner volumes, Trends averages when the worker
+ * can't reach Trends, and data.gov.in / IDSP figures for guides. No Ahrefs import (owner, 25 Oct 2026: no Ahrefs plan
+ * and no CSV exports, ever; the Ahrefs keyword and backlink imports were removed). CSV files
  * go through core upload handling (wp_handle_upload) and are deleted once read; pastes work the same way. Only the
  * owner's files are read; nothing is fetched from those services.
  *
  * Rows in obs, period month, d = first of the import month:
  * - kp: volume (value = lower bound of the range, txt = the range as shown), per keyword;
- * - ahrefs: volume and position per keyword (txt = the ranking URL's path); backlinks per page (value = count, txt =
- *   the top referring domains);
  * - trends (period 12m, d = import day): index per keyword, the same rows the worker writes, so priority uses it;
  * - gov: one figure per state and measure (txt = "state | measure | source | as of"), page_key = md5 of state|measure.
  *
@@ -22,11 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The import kinds and their labels. */
 function aw_si_import_kinds(): array {
 	return array(
-		'kp'       => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'aw-seo-extras' ),
-		'ahrefs'   => __( 'Ahrefs Webmaster Tools: organic keywords (Keyword, Volume, Position, URL)', 'aw-seo-extras' ),
-		'backlink' => __( 'Ahrefs Webmaster Tools: backlinks (Referring page URL, Target URL)', 'aw-seo-extras' ),
-		'trends'   => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'aw-seo-extras' ),
-		'gov'      => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'aw-seo-extras' ),
+		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'aw-seo-extras' ),
+		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'aw-seo-extras' ),
+		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'aw-seo-extras' ),
 	);
 }
 
@@ -105,7 +102,7 @@ function aw_si_import_number( string $v ): ?float {
 /**
  * Store one import.
  *
- * @param string $kind kp, ahrefs, backlink, trends or gov.
+ * @param string $kind kp, trends or gov.
  * @param string $raw  File or pasted text.
  * @return array{rows: int, skipped: int, error: string}
  */
@@ -170,51 +167,13 @@ function aw_si_import( string $kind, string $raw ): array {
 		}
 		return $out;
 	}
-	list( $head, $rows ) = aw_si_parse_table( $raw, 'backlink' === $kind ? 'referring' : 'keyword' );
+	list( $head, $rows ) = aw_si_parse_table( $raw, 'keyword' );
 	if ( ! $head ) {
 		$out['error'] = __( 'No header row was found. Check that the file is the right export.', 'aw-seo-extras' );
 		return $out;
 	}
-	if ( 'backlink' === $kind ) {
-		$from = aw_si_import_col( $head, array( 'referring page url', 'referring page', 'source url' ) );
-		$to   = aw_si_import_col( $head, array( 'target url', 'target' ) );
-		if ( '' === $from || '' === $to ) {
-			$out['error'] = __( 'The backlinks export needs "Referring page URL" and "Target URL" columns.', 'aw-seo-extras' );
-			return $out;
-		}
-		$pages = array();
-		foreach ( $rows as $r ) {
-			$path = aw_si_path( (string) $r[ $to ] );
-			$host = preg_replace( '/^www\./', '', (string) wp_parse_url( (string) $r[ $from ], PHP_URL_HOST ) );
-			if ( '' === $path || '' === $host ) {
-				++$out['skipped'];
-				continue;
-			}
-			$pages[ $path ][ $host ] = ( $pages[ $path ][ $host ] ?? 0 ) + 1;
-		}
-		foreach ( $pages as $path => $hosts ) {
-			arsort( $hosts );
-			$put(
-				aw_si_obs_put(
-					0,
-					$path,
-					'ahrefs',
-					'backlinks',
-					'month',
-					$month,
-					array(
-						'value' => (float) array_sum( $hosts ),
-						'txt'   => implode( ', ', array_slice( array_keys( $hosts ), 0, 3 ) ),
-					)
-				)
-			);
-		}
-		return $out;
-	}
 	$kcol = aw_si_import_col( $head, array( 'keyword' ) );
-	$vcol = aw_si_import_col( $head, 'kp' === $kind ? array( 'avg. monthly searches', 'monthly searches', 'volume' ) : array( 'volume' ) );
-	$pcol = 'ahrefs' === $kind ? aw_si_import_col( $head, array( 'current position', 'position' ) ) : '';
-	$ucol = 'ahrefs' === $kind ? aw_si_import_col( $head, array( 'current url', 'url' ) ) : '';
+	$vcol = aw_si_import_col( $head, array( 'avg. monthly searches', 'monthly searches', 'volume' ) );
 	if ( '' === $kcol || '' === $vcol ) {
 		$out['error'] = __( 'The file needs a keyword column and a volume column.', 'aw-seo-extras' );
 		return $out;
@@ -242,20 +201,6 @@ function aw_si_import( string $kind, string $raw ): array {
 				)
 			)
 		);
-		if ( '' !== $pcol && is_numeric( $r[ $pcol ] ?? '' ) ) {
-			aw_si_obs_put(
-				$id,
-				'',
-				'ahrefs',
-				'position',
-				'month',
-				$month,
-				array(
-					'value' => (float) $r[ $pcol ],
-					'txt'   => '' !== $ucol ? aw_si_path( (string) $r[ $ucol ] ) : '',
-				)
-			);
-		}
 	}
 	return $out;
 }
@@ -278,7 +223,7 @@ function aw_si_import_rows(): void {
 	global $wpdb;
 	if ( aw_si_ready() ) {
 		$o    = aw_si_table( 'obs' );
-		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'ahrefs', 'gov') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		$last = (array) $wpdb->get_results( "SELECT src, MAX(fetched) f, COUNT(*) n FROM {$o} WHERE src IN ('kp', 'gov') OR (src = 'trends' AND txt = 'import') GROUP BY src" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 		if ( $last ) {
 			echo '<ul>';
 			foreach ( $last as $l ) {

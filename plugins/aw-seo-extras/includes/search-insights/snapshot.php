@@ -63,7 +63,6 @@ function aw_si_snapshot_rows(): array {
 	$ids  = array_map( fn( $r ) => (int) $r->id, $rows );
 	$live = aw_si_snapshot_latest( $ids, 'live', array( 'position', 'top3', 'paa', 'url' ) );
 	$kp   = aw_si_snapshot_latest( $ids, 'kp', array( 'volume' ) );
-	$ah   = aw_si_snapshot_latest( $ids, 'ahrefs', array( 'volume' ) );
 	$out  = array();
 	$date = wp_date( 'Y-m-d' );
 	foreach ( $rows as $r ) {
@@ -73,9 +72,9 @@ function aw_si_snapshot_rows(): array {
 		if ( null !== $r->trends ) {
 			$demand[] = 'T ' . (int) $r->trends;
 		}
-		$vol = $kp[ (int) $r->id ]['volume'] ?? ( $ah[ (int) $r->id ]['volume'] ?? null );
+		$vol = $kp[ (int) $r->id ]['volume'] ?? null;
 		if ( $vol ) {
-			$demand[] = ( isset( $kp[ (int) $r->id ] ) ? 'KP ' : 'Ahrefs ' ) . ( '' !== $vol->txt ? $vol->txt : (string) (int) $vol->value );
+			$demand[] = 'KP ' . ( '' !== $vol->txt ? $vol->txt : (string) (int) $vol->value );
 		}
 		if ( (int) $r->impr28 ) {
 			$demand[] = 'GSC ' . (int) $r->impr28 . ' impr';
