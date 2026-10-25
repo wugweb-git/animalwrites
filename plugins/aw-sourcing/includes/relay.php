@@ -311,5 +311,8 @@ function aw_relay_switch( array $pubs, array $hosts, $on ) {
 		}
 	}
 	kits_sourcing_log_many( $log );
+	if ( $log && function_exists( 'aw_sources_sync_soon' ) ) {
+		aw_sources_sync_soon(); // the relay allow list and sources_v2 are copied into the workers' sources.yaml (aw_publishers is not hooked: ingest writes it all the time)
+	}
 	return $pubs;
 }

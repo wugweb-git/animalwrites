@@ -68,7 +68,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 				'kind'    => $pub ? 'publisher' : ( 'relay' === ( $p['kind'] ?? '' ) ? 'relay' : ( $fl ? 'feeds' : 'press' ) ),
 				'feeds'   => count( $fl ),
 				'feeds_on' => count( array_filter( $fl, fn( $x ) => ! empty( $x['on'] ) ) ),
-				'code'    => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ),
+				'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
 				'fnames'  => implode( ' ', array_map( fn( $x ) => (string) ( $x['name'] ?? '' ), $fl ) ),
 				'relay'   => $rel,
 				'relay_own' => ! empty( $p['relay'] ),
@@ -119,7 +119,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			case 'feeds':
 				return $r['feeds'] > 0;
 			case 'code':
-				return $r['code'] > 0;
+				return $r['code_n'] > 0;
 			case 'relay':
 				return $r['relay'];
 			default:
@@ -327,7 +327,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $item['host'] ) ), admin_url( 'options-general.php' ) );
 		/* translators: 1: feeds, 2: feeds that are on. */
 		$out = '<a href="' . esc_url( $edit ) . '">' . esc_html( sprintf( _n( '%1$s feed (%2$s on)', '%1$s feeds (%2$s on)', $item['feeds'] ), number_format_i18n( $item['feeds'] ), number_format_i18n( $item['feeds_on'] ) ) ) . '</a>';
-		return $out . ( $item['code'] ? '<br><span class="description">' . esc_html( number_format_i18n( $item['code'] ) . ' read by code' ) . '</span>' : '' );
+		return $out . ( $item['code_n'] ? '<br><span class="description">' . esc_html( number_format_i18n( $item['code_n'] ) . ' read by code' ) . '</span>' : '' );
 	}
 
 	protected function column_relay( $item ) {
