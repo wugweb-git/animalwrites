@@ -1,6 +1,6 @@
 # How to change a form
 
-Every form uses one shared form kit: the field dictionary, the messages, the look and the behaviour are defined once. Change a field there and it changes in every form. A change to one form goes in that form's own file.
+Every site form is a Fluent Forms form; since 25 Oct 2026 there is no other (owner: the site's own forms and their handlers were removed). Change a form in WP Admin → Fluent Forms, then export it to `forms/` (below). The site's code only shows the forms, adds what Fluent Forms (free) cannot do, and gives them the site's look.
 
 ## The forms are Fluent Forms forms (owner, 21 Oct 2026)
 
@@ -26,7 +26,7 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Remove my data:** the form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
 
-**Exports:** the current volunteer and subscriber lists are exported from **FluentCRM** (Contacts → filter by tag `volunteer` or list Newsletter → Export). The site's old CSV exports (`admin-post.php?action=aw_vol_export`, `?action=aw_nl_export`) hold only the rows from before 21 Oct 2026, when the forms stopped writing those tables; the tables themselves are kept as they were.
+**Exports:** the current volunteer and subscriber lists are exported from **FluentCRM** (Contacts → filter by tag `volunteer` or list Newsletter → Export). The old tables `{prefix}aw_volunteers` and `{prefix}aw_subscribers` hold only rows from before the forms stopped writing them; they are kept as backups with no admin screen (read them with WP-CLI).
 
 **The update link's token** stays private: GA4 gets `/update/` without `t` (GTM variables, `docs/gtm`), the page sends no referrer (`Referrer-Policy: no-referrer`), is never cached, and Microsoft Clarity masks the whole page.
 
@@ -38,39 +38,39 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Custom code** (`plugins/animal-writes-core/includes/forms-fluentforms.php` unless named): ALTCHA, PIN code → State → District (LGD), the private upload (claim logo and proof), the FluentCRM steps a link cannot do (notes, transactional contacts, the 1/0 box), the campaign letter tool (`campaign-letters.php`, `campaign.js`), the listing's Volunteers from FluentCRM (`org-people.php`) and the hidden-field script (`aw-analytics.js`).
 
-The site's own forms below stay installed and show again if Fluent Forms is switched off (`wp aw ff-off <key>`).
+**Which form shows where:** each page calls `aw_ff_form( <key> )` (`forms-fluentforms.php`) with the form's ID from `wp aw ff-form <key> <ID>` (keys: contact, volunteer, claim, report, remove_data; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
 
-## Shared parts (all forms)
+## Where each form is shown
 
-| What | File | Where |
+| Form | Shortcode or block (page) | Code |
 |---|---|---|
-| A field's label, icon, example (placeholder), autocomplete, length limit, messages | `plugins/kits-core/includes/form-kit.php` | `kits_field_dict()` (line 20). Example values for this site can be set with the `kits_field_dict` filter. |
-| Messages for errors that are not about one field ("Couldn't send…", "Too many tries…", ALTCHA, expired page) | `plugins/kits-core/includes/forms.php` | `aw_form_generic_error()` (line 57) and `aw_form_guard()` |
-| Server-side checks (required, email, 10-digit phone, PIN code, web address, length) | `plugins/kits-core/includes/forms.php` | `aw_form_validate()` (line 298) |
-| How fields look (height, border, focus ring, error and valid states, button) | `themes/kits-by-wugweb/assets/css/kit-primitives.css` | sections 11 (Form field) and 16 (Form standard) |
-| Behaviour (checks on send and when leaving a field, focus the first problem, send without reloading, keep what was typed, character counter, fresh key on an old page, expandable and step forms) | `themes/kits-by-wugweb/assets/js/kit.js` | section 4 and "Expandable forms" |
-| PIN code → State and District; District follows State | `themes/animal-writes/assets/js/aw.js` (page) and `plugins/animal-writes-core/includes/places.php` (`aw_pin_lookup()`, `aw_place_fields()`) | |
+| Newsletter (#3) | `[aw_newsletter]` (footer reusable block, campaign pages) | `newsletter-fluentforms.php`, `aw_newsletter_ff_form()` |
+| Newsletter (full, #9) | `[aw_thank_you]` after a footer sign-up (`/thank-you/?form=newsletter`) | `form-blocks.php` |
+| Contact (#4) | `[aw_contact_form]` (`/contact/`); `?about=listing` and so on choose the reason | `pages.php`, `aw_contact_form()`; reasons and message examples `AW_CONTACT_ABOUT`, `AW_CONTACT_PLACEHOLDER` (the placeholder follows the reason, `aw.js`) |
+| Volunteer sign-up (#5) | block `animal-writes/volunteer` (the Volunteer banner pattern, `/volunteer/`); `[aw_volunteer_update]` on `/update/` | `volunteers.php`, `form-blocks.php` |
+| Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`; without a listing, the organisation finder) | `form-blocks.php`, `claims.php` |
+| Report a mistake (#7) | `[aw_report_page]` (`/report/?item=<ID>&reason=`) | `form-blocks.php`, `reports.php` |
+| Remove my data (#8) | `[aw_remove_data]` (`/remove-my-data/`) | `privacy-requests.php` |
 
-## Each form
+Where they appear: the volunteer banner is the theme pattern `themes/animal-writes/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `themes/animal-writes/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
 
-| Form | Fields and layout | What happens on send | Where entries go |
-|---|---|---|---|
-| Contact (`/contact/`) | `plugins/animal-writes-core/includes/pages.php`, `aw_contact_form()` (line 92); reasons and message examples: `AW_CONTACT_ABOUT`, `AW_CONTACT_PLACEHOLDER` (lines 57, 67) | `aw_contact_submit()` (line 123) | Mail → Website forms |
-| Volunteer (banner and `/volunteer/`) | `plugins/animal-writes-core/includes/volunteers.php`, `aw_volunteer_form()` (line 56); "How would you like to help?" options: `AW_VOL_ROLES` (line 13) | `aw_volunteer_submit()` (line 87) | Fluent Forms → Entries |
-| Newsletter (footer) | `plugins/animal-writes-core/includes/newsletter.php`, `aw_newsletter_form()` (line 98) | `aw_newsletter_submit()` (line 122) | Newsletter → Subscribers |
-| Claim this listing (every directory profile) | `plugins/animal-writes-core/includes/claims.php`, `aw_claim_form()` (line 66); roles `AW_CLAIM_ROLES` (line 17); fields a claim may change `AW_CLAIM_FIELDS` (line 26) | `aw_claim_submit()` (line 100) | Fluent Forms → Entries |
-| Report a mistake (every directory profile) | `plugins/animal-writes-core/includes/reports.php`, `aw_report_form()` (line 48); reasons `aw_report_reasons()` (line 16) | `aw_report_submit()` (line 64) | Fluent Forms → Entries |
+## The site's look and the custom fields
 
-Where they appear: the volunteer banner is the theme pattern `themes/animal-writes/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `themes/animal-writes/templates/single-aw_listing.html`; the newsletter strip is in `themes/animal-writes/parts/footer.html`.
+| What | File |
+|---|---|
+| How fields look (height, border, focus ring, error and valid states, button) | `themes/kits-by-wugweb/assets/css/kit-primitives.css` (sections 11 Form field and 16 Form standard); Fluent Forms fields get the site's classes, icons and browser rules in `forms-fluentforms.php` |
+| Behaviour (checks on send and when leaving a field, focus the first problem) | `themes/kits-by-wugweb/assets/js/kit.js` |
+| PIN code → State and District; District follows State | the custom field "PIN code, State and District" (`aw_ff_render_places()` in `forms-fluentforms.php`), `aw.js` and `places.php` (`aw_pin_lookup()`) |
+| Spam check (ALTCHA), timing and honeypot | the custom field "Spam check (ALTCHA)" (`aw_ff_render_check()`); checked in the `fluentform/validation_errors` filter, with the per-form limit (`AW_FF_FORMS`) |
+| Claim logo and proof | the custom field "Private upload" (`aw_ff_render_logo()`, `aw_ff_upload()`; checks in `claims.php`) |
 
 ## Examples
 
-- **Rename a label everywhere** (for example "Your name"): change `label` in `kits_field_dict()`.
-- **Add a reason to Contact**: add a line to `AW_CONTACT_ABOUT` (and, if it needs its own message example, to `AW_CONTACT_PLACEHOLDER`).
-- **Make a field required in one form**: in that form's function, pass `'required' => true` to `kits_dict_field()`, and add the field to the required list in its `…_submit()` function (the second argument of `kits_dict_rules()`).
-- **Change a success message**: the `aw_form_success()` call at the end of that form's `…_submit()` function, and the matching text at the top of its form function (shown after a send without JavaScript).
+- **Rename a label, add an option or a reason, make a field required, change a success message:** in WP Admin → Fluent Forms (the form's fields and its Confirmation), then export it to `forms/` and commit. For a new Contact reason that needs a message example, also add it to `AW_CONTACT_PLACEHOLDER` and `AW_CONTACT_ABOUT` (`pages.php`).
+- **Show a form on another page:** put its shortcode in the page, or call `aw_ff_form( <key> )` in code.
+- **A form was rebuilt and has a new ID:** `wp aw ff-form <key> <new ID>`.
 
-Every change goes through GitHub (see CLAUDE.md). A new form or function, or a restructured one: its own branch and worktree → a pull request into `wordpress-dev` → the review gate and the Deploy check → the owner merges → `aw-ship.sh` ships it. A small fix (a label, a message, making a field required): commit straight onto `wordpress-dev`; the Deploy check still gates `wordpress`, then `aw-ship.sh`. Function line numbers above drift; search for the function name.
+Every change goes through GitHub (see CLAUDE.md). A new form or function, or a restructured one: its own branch and worktree → a pull request into `wordpress-dev` → the review gate and the Deploy check → the owner merges → `aw-ship.sh` ships it. A small fix: commit straight onto `wordpress-dev`; the Deploy check still gates `wordpress`, then `aw-ship.sh`.
 
 ## Campaign form (#10) and the raw copy (21 Oct 2026)
 

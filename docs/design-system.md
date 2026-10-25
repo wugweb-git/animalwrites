@@ -31,7 +31,7 @@ One generic archive template is replaced by four systems, each built for what pe
 | Intelligence | Legal Watch, News, Research Library | Case register (large date, issuer badge by court or body, topic, summary, source, document flag, issuer filters); news with a lead story, side stories and grid, topic filters; document library (kind, year, issuer, Read / PDF) |
 | Action | Opportunities, Get involved | Opportunity cards with type, place, organisation, checked date, Apply and Details; type filters |
 | Archive | Campaign Hub | The 1.0 documentary, other campaigns, an invitation to bring a campaign |
-| Trust | Every news, legal, research, opportunity and listing page | `[aw_trust]`: issuer, source link, published and added dates, document flag, editorial note; for listings, verification state and AWBI recognition |
+| Trust | Every news, legal, research, opportunity and listing page | The item's Sources block and meta row (item-head.php): issuer, source link, published and added dates; for listings, verification state and AWBI recognition. (The old `[aw_trust]` panel was in no page and was removed on 25 Oct 2026.) |
 
 Directory order: verified, then A–Z. No featured listings (owner, 24 Oct 2026): no organisation is ranked above others for any other reason.
 
@@ -246,10 +246,10 @@ Each entry: anatomy, variants, tokens, behaviour, where it is used.
 - **Rules:** required, email, phone (8–15 digits, optional +), https link, max length, file type and size.
 - **Spam guard:** nonce, honeypot, 3-second minimum, per-connection hourly limit (`aw_form_guard`).
 
-### Claim / update panel
-- **Anatomy:** disclosure ("Is this your organisation?" or "Update this listing") → intro → About you → Correct details (placeholders show current values) → logo → notes → "Send for review".
-- **Behaviour:** opens itself when it returns errors. Requests are private (`aw_claim`, administrators only). Admin review shows Now against Proposed; **Approve** applies the fields and logo and sets `aw_verified` and `aw_verified_on` (today); **Reject** closes it.
-- **Code:** `includes/claims.php`; `[aw_claim_box]` in `templates/single-aw_listing.html`.
+### Claim this listing
+- **Where:** the listing's "Is this your organisation?" card links to `/claim/?listing=<ID>`, which shows the Fluent Forms form "Claim this listing" (#6; About you → What should change → logo and proof → "Send for review"). Claims are Fluent Forms entries.
+- **Older claims** (before Fluent Forms) are private `aw_claim` posts, administrators only: the review shows Now against Proposed; **Approve** applies the fields and logo and sets `aw_verified` and `aw_verified_on` (today); **Reject** closes it.
+- **Code:** `includes/form-blocks.php` (`[aw_claim_page]`), `includes/claims.php`, `includes/forms-fluentforms.php`.
 
 ### Upload list (campaign receipts)
 - Take photo (camera), choose files, paste screenshots; per-file label; remove; client-side shrink to 1600px JPEG; inline errors in place of pop-ups. Server re-encodes images (strips EXIF/GPS), keeps files in `uploads/aw-private` (web access denied).
@@ -265,7 +265,7 @@ WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link con
 
 ### Reusable sections (patterns)
 Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
-`help-finder` (state finder + emergency note), `latest-decisions-news`, `campaign-photo-band`, `section-index`, `lend-a-hand`, `campaign` (campaign kit layout).
+`hero` (home hero), `help-now` (Need help now: four tiles and the helplines), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search and states), `aw1-story` (India Writes for Its Community Dogs), `take-action` (volunteer and claim your listing, above the footer), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
 
 ### Directory states panel
 The directory home's header visual: the nine states with the most organisations, set as type (count in Tiro, name below), each linking to its state page. Real counts from the taxonomy; no map. Busiest state in ink, the rest raised; hover lifts, reduced motion respected.
