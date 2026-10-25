@@ -108,7 +108,6 @@ require_once AW_CORE_DIR . 'includes/near-opps.php';
 require_once AW_CORE_DIR . 'includes/entity-links.php';
 require_once AW_CORE_DIR . 'includes/thumbs.php';
 require_once AW_CORE_DIR . 'includes/cc0-images.php';
-require_once AW_CORE_DIR . 'includes/newsletter-optin.php';
 require_once AW_CORE_DIR . 'includes/newsletter-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/forms-fluentforms.php';
 require_once AW_CORE_DIR . 'includes/campaign-form.php'; // "Sign it" as the Fluent Forms Campaign form; the raw copy of every form send

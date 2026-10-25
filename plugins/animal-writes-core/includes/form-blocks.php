@@ -47,7 +47,10 @@ function aw_block_volunteer( $a ) {
 	}
 	$done = true;
 	$form = aw_volunteer_form( aw_volunteer_source() );
-	if ( ! empty( $a['open'] ) || false !== strpos( $form, 'kit-form-done' ) ) {
+	if ( '' === $form ) { // no form (Fluent Forms off): no empty "Register as a volunteer" button either
+		return '';
+	}
+	if ( ! empty( $a['open'] ) ) {
 		return '<div class="aw-volunteer" id="volunteer">' . $form . '</div>';
 	}
 	return kits_disclosure( 'volunteer', 'Register as a volunteer', $form );
