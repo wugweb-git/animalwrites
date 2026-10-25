@@ -698,7 +698,7 @@ function aw_faq_build( $ctx = null, $holdout = true ) {
 	if ( count( array_filter( $faq, fn( $c ) => $c['counts'] ) ) < AW_FAQ_MIN ) { // "based on type" answers do not count toward the 3
 		return $cache[ $key ] = null;
 	}
-	if ( 'legal' === $ctx['kind'] && '' !== $ctx['full'] && $ctx['full'] !== $ctx['entity'] ) { // the full official title, once, in the first answer
+	if ( 'legal' === $ctx['kind'] && '' !== $ctx['full'] && $ctx['full'] !== $ctx['entity'] && ! empty( $faq[0]['answer'] ) ) { // the full official title, once, in the first answer (data answers only: a hand-written item has no answer builder)
 		$r = call_user_func( $faq[0]['answer'], $ctx['id'], $ctx['full'] );
 		if ( isset( $r[0] ) && is_string( $r[0] ) ) {
 			$faq[0]['a'] = $r[0];
