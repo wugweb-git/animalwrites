@@ -160,7 +160,7 @@ These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: sw
 **Each module runs as its own owner.**
 - Site Kit lets each module have its own owner. Today `aw_sd_sitekit()` reads only `googlesitekit_search-console_settings['ownerID']`.
 - Phase 1 generalises it to `aw_si_sitekit( $slug )`. It reads `ownerID` from that module's own settings (`googlesitekit_search-console_settings`, `googlesitekit_analytics-4_settings`, `googlesitekit_pagespeed-insights_settings`) and switches to that user for that call only.
-- If a module has no owner, or the owner can't be loaded, that source fails with a clear error under the failure rule. It never borrows another module's owner.
+- If a module has no owner, or the owner can't be loaded, that source fails with a clear error under the failure rule. It never borrows another module's owner. Exception (owner, 25 Oct 2026): PageSpeed, which Site Kit never gives an owner, runs as the Search Console owner (else the GA4 owner).
 
 **Search Console is stored by day.**
 - The daily job asks for `date` + `query` and `date` + `query` + `page`. It covers the last 4 days, because Google finalises data 2–3 days late; rows already stored are replaced, not added.

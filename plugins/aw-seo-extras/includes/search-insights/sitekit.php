@@ -2,7 +2,8 @@
 /**
  * Site Kit modules, each read as its own owner (plan §5.1). Site Kit lets Search Console, Analytics 4 and PageSpeed be
  * connected by different users; a module is built and called with the user in its own settings' ownerID, never another
- * module's owner. Site Kit's own module layer; its tokens are never read here.
+ * module's owner, except PageSpeed, which Site Kit gives no owner (it runs as the Search Console owner; owner,
+ * 25 Oct 2026). Site Kit's own module layer; its tokens are never read here.
  *
  * @package aw-seo-extras
  */
@@ -45,6 +46,17 @@ function aw_si_with_module( string $slug, callable $callback ) {
 	}
 	$settings = get_option( 'googlesitekit_' . $slug . '_settings' );
 	$owner    = is_array( $settings ) ? (int) ( $settings['ownerID'] ?? 0 ) : 0;
+	if ( ! $owner && 'pagespeed-insights' === $slug ) {
+		// The one exception (owner, 25 Oct 2026): Site Kit never sets an owner for PageSpeed (live: active and connected,
+		// no ownerID), so it is called as the Search Console owner, else the GA4 owner.
+		foreach ( array( 'search-console', 'analytics-4' ) as $other ) {
+			$o     = get_option( 'googlesitekit_' . $other . '_settings' );
+			$owner = is_array( $o ) ? (int) ( $o['ownerID'] ?? 0 ) : 0;
+			if ( $owner && get_userdata( $owner ) ) {
+				break;
+			}
+		}
+	}
 	if ( ! $owner || ! get_userdata( $owner ) ) {
 		/* translators: %s: Site Kit module slug, e.g. search-console. */
 		return new WP_Error( 'aw_si_sitekit', sprintf( __( 'Site Kit module %s has no owner. Connect it under Site Kit → Settings.', 'aw-seo-extras' ), $slug ) );
