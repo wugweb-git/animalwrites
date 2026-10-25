@@ -55,18 +55,40 @@ function aw_publisher_status_html( $st ) {
 }
 
 /**
- * Change log of the Sourcing screen: who changed what, when (newest first, last 300 kept).
+ * Change log of the Sourcing screen: who changed what, when (newest first, last 1,000 kept; 300 before 25 Oct 2026).
+ * An add, edit or delete also gives the value before and after (shown as "old → new"); both are optional, so the
+ * existing calls and entries stay as they are.
  *
  * @param string $tab  Tab.
  * @param string $what What changed, in words.
+ * @param mixed  $old  Value before (null: not given; for an add, '' or an empty list).
+ * @param mixed  $new  Value after (null: not given; for a delete, '' or an empty list).
  */
-function kits_sourcing_log( $tab, $what ) {
+function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
 	if ( '' === trim( $what ) ) {
 		return;
 	}
 	$log = (array) get_option( 'kits_sourcing_log', array() );
-	array_unshift( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ) );
-	update_option( 'kits_sourcing_log', array_slice( $log, 0, 300 ), false );
+	$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ), $old, $new );
+	update_option( 'kits_sourcing_log', $log, false );
+}
+
+/**
+ * Several change log entries in one write (a bulk action): each [tab, what, old, new], old and new optional.
+ *
+ * @param array[] $entries Entries, in the order they happened.
+ */
+function kits_sourcing_log_many( array $entries ) {
+	$entries = array_filter( $entries, fn( $e ) => '' !== trim( (string) ( $e[1] ?? '' ) ) );
+	if ( ! $entries ) {
+		return;
+	}
+	$log  = (array) get_option( 'kits_sourcing_log', array() );
+	$user = wp_get_current_user()->display_name;
+	foreach ( $entries as $e ) {
+		$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => $user, 'tab' => (string) $e[0], 'what' => (string) $e[1] ), $e[2] ?? null, $e[3] ?? null );
+	}
+	update_option( 'kits_sourcing_log', $log, false );
 }
 
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
@@ -147,6 +169,9 @@ function aw_has_term( $hay, $term ) {
 	if ( '' === $t ) {
 		return false;
 	}
+	if ( str_ends_with( $t, '*' ) ) { // a prefix ("steriliz*"): the shared matcher, as in the workers (policy.has_term)
+		return aw_match_term( $hay, $t );
+	}
 	if ( preg_match( "/^[a-z0-9 \\-'’]+$/u", $t ) ) { // Latin terms: whole words only, plural allowed ("hen" no longer matches "when")
 		return (bool) preg_match( '/(?<![a-z0-9])' . preg_quote( $t, '/' ) . '(?:s|es)?(?![a-z0-9])/u', $hay );
 	}
@@ -207,6 +232,10 @@ function aw_sourcing_gate( $url, $name, $feed, $text ) {
 	}
 	$pubs = aw_publishers();
 	$rec  = $pubs[ $host ] ?? array( 'status' => 'neutral', 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' );
+	if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site sends its first item: from now on a publisher (relay kept)
+		unset( $rec['kind'] );
+		$rec['status'] = $rec['status'] ?? 'neutral';
+	}
 	$rec['name']  = $rec['name'] ? $rec['name'] : sanitize_text_field( $name );
 	$rec['last']  = current_time( 'Y-m-d' );
 	$rec['count'] = (int) $rec['count'] + 1;
@@ -266,7 +295,7 @@ add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && ! in_array( sanitize_key( $_GET['view'] ?? '' ), array( 'feeds', 'relay-log' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds and Relay log views have their own
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
 		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Suggestions view has its own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
@@ -295,6 +324,8 @@ add_action(
 			$before = $pubs;
 			$row    = sanitize_text_field( wp_unslash( $_POST['row_status'] ?? '' ) ); // a row action: "status:host"
 			$prow   = sanitize_text_field( wp_unslash( $_POST['row_press'] ?? '' ) ); // a row action: "add|remove:host"
+			$rrow   = sanitize_text_field( wp_unslash( $_POST['row_relay'] ?? '' ) ); // a row action: "on|off:host"
+			$drow   = sanitize_text_field( wp_unslash( $_POST['row_delete'] ?? '' ) ); // a row action: host
 			if ( false !== strpos( $row, ':' ) ) {
 				list( $status, $one ) = explode( ':', $row, 2 );
 				$status               = sanitize_key( $status );
@@ -303,6 +334,13 @@ add_action(
 				list( $status, $one ) = explode( ':', $prow, 2 );
 				$status               = 'press_' . sanitize_key( $status );
 				$hosts                = array( $one );
+			} elseif ( false !== strpos( $rrow, ':' ) ) {
+				list( $status, $one ) = explode( ':', $rrow, 2 );
+				$status               = 'relay_' . sanitize_key( $status );
+				$hosts                = array( $one );
+			} elseif ( '' !== $drow ) {
+				$status = 'delete';
+				$hosts  = array( $drow );
 			} else { // bulk action, from the top or the bottom of the list
 				$status = sanitize_key( $_POST['bulk_status'] ?? '' );
 				$status = '' !== $status ? $status : sanitize_key( $_POST['bulk_status2'] ?? '' );
@@ -312,33 +350,51 @@ add_action(
 			if ( in_array( $status, array( 'press_add', 'press_remove' ), true ) ) { // Search here for coverage / Stop searching here
 				$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', $hosts ) ) );
 				$press = aw_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
-			} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
+			} elseif ( in_array( $status, array( 'relay_on', 'relay_off' ), true ) && aw_sourcing_phase() >= 1 ) { // logged per host
+				$pubs = aw_relay_switch( $pubs, $hosts, 'relay_on' === $status );
+			} elseif ( 'delete' === $status ) {
 				foreach ( $hosts as $h ) {
-					if ( isset( $pubs[ $h ] ) ) {
+					$pubs = aw_sourcing_source_delete( $pubs, $h );
+				}
+			} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
+				$was = array();
+				foreach ( $hosts as $h ) {
+					$kind = (string) ( $pubs[ $h ]['kind'] ?? '' );
+					if ( isset( $pubs[ $h ] ) && ( '' === $kind || 'relay' === $kind ) && ( ( $pubs[ $h ]['status'] ?? 'neutral' ) !== $status || 'relay' === $kind ) ) {
+						$was[ $h ]            = 'relay' === $kind ? 'relay only' : (string) ( $pubs[ $h ]['status'] ?? 'neutral' );
 						$pubs[ $h ]['status'] = $status;
+						unset( $pubs[ $h ]['kind'] ); // a relay-only site given a status is a publisher
 					}
 				}
-				if ( $hosts ) {
-					kits_sourcing_log( 'publishers', implode( ', ', $hosts ) . ' → ' . $status );
+				if ( $was ) {
+					kits_sourcing_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
 				}
 			}
 			$new = aw_host( 'https://' . preg_replace( '#^https?://#', '', sanitize_text_field( wp_unslash( $_POST['new_host'] ?? '' ) ) ) );
 			$ns  = sanitize_key( $_POST['new_status'] ?? 'block' );
 			if ( $new && in_array( $ns, array( 'allow', 'neutral', 'block' ), true ) ) {
+				$prev         = $pubs[ $new ] ?? null;
 				$pubs[ $new ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $new ] ?? array(), array( 'status' => $ns ) );
-				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns );
+				if ( 'relay' === ( $pubs[ $new ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
+					unset( $pubs[ $new ]['kind'] );
+				}
+				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns, null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), $ns );
 			}
 			$shorts = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ); // short names for card chips
 			foreach ( $shorts as $h => $v ) {
 				if ( isset( $pubs[ $h ] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
+					kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
 					$pubs[ $h ]['short'] = $v;
-					kits_sourcing_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ) );
 				}
 			}
 			update_option( AW_PUB_OPTION, $pubs, false );
 			$changed = $pubs !== $before || $press; // a page change alone saves nothing
 		}
 		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) );
+		if ( 'feeds' === $tab ) { // the feed form (Feeds moved into Sources, 25 Oct 2026): back to the screen it was opened from
+			$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['src_back'] ?? '' ) ), '' );
+			$back = add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'options-general.php?page=aw-sourcing&tab=sources&view=feeds' ) );
+		}
 		if ( 'sources' === $tab && ! empty( $_POST['src_edit'] ) ) { // the edit form: back to the list, or to the form with what was wrong
 			$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources' ), admin_url( 'options-general.php' ) );
 			$back = $err ? add_query_arg( 'src_err', $err, wp_get_referer() ? wp_get_referer() : $back ) : ( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
@@ -446,9 +502,13 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$pubs            = aw_publishers();
+		$prev            = $pubs[ $host ] ?? null;
 		$pubs[ $host ]   = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => 'block' ) );
+		if ( 'relay' === ( $pubs[ $host ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
+			unset( $pubs[ $host ]['kind'] );
+		}
 		update_option( AW_PUB_OPTION, $pubs, false );
-		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)' );
+		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
 		wp_safe_redirect( add_query_arg( 'aw_blocked', rawurlencode( $host ), wp_get_referer() ? wp_get_referer() : admin_url() ) );
 		exit;
 	}
@@ -540,22 +600,26 @@ function aw_sourcing_page() {
 	}
 	echo '</nav>';
 	if ( 'log' === $tab ) {
-		// Entries keep the tab they were made on; tabs since merged are named after their new home.
-		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Feeds (News)', 'library' => 'Feeds (Library)', 'opportunities' => 'Feeds (Opportunity)' );
+		// Entries keep the tab they were made on; tabs since merged are named after their new home (Feeds and Relay
+		// moved into Sources on 25 Oct 2026).
+		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Sources (feeds)', 'library' => 'Sources (Library feeds)', 'opportunities' => 'Sources (Opportunity feeds)', 'relay' => 'Sources (relay)' );
 		$rows = array();
 		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
 			$tl     = (string) ( $old[ $e['tab'] ] ?? ( $tabs[ $e['tab'] ] ?? $e['tab'] ) );
+			$has    = array_key_exists( 'old', (array) $e ) || array_key_exists( 'new', (array) $e );
+			$change = $has ? aw_src_log_value( $e['old'] ?? '' ) . ' → ' . aw_src_log_value( $e['new'] ?? '' ) : '';
 			$rows[] = array(
-				'at'    => esc_html( $e['at'] ),
-				'user'  => esc_html( $e['user'] ),
-				'tab'   => esc_html( $tl ),
-				'what'  => esc_html( $e['what'] ),
-				'_find' => $e['user'] . ' ' . $tl . ' ' . $e['what'],
+				'at'     => esc_html( $e['at'] ),
+				'user'   => esc_html( $e['user'] ),
+				'tab'    => esc_html( $tl ),
+				'what'   => esc_html( $e['what'] ),
+				'change' => $has ? esc_html( $change ) : '—',
+				'_find'  => $e['user'] . ' ' . $tl . ' ' . $e['what'] . ' ' . $change,
 			);
 		}
 		aw_sourcing_simple_table(
 			'changes',
-			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed' ),
+			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed', 'change' => 'Old → new' ),
 			$rows,
 			array( 'per_page' => 50, 'sortable' => array( 'at', 'user', 'tab' ), 'empty' => 'No changes yet.', 'search' => 'Search changes', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'log' ) )
 		);

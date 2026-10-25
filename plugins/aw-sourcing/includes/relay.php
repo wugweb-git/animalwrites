@@ -3,10 +3,11 @@
  * Relay for the workers (owner, 20 Oct 2026). Some publishers refuse GitHub's servers (PFA's Substack, Zoom TV: 403)
  * but answer this server. The workers ask GET aw/v1/relay?url=... and get the page or feed as this server sees it.
  *
- * Limits: the workers' login only (an application password), hosts on the allow list in Settings → Sourcing → Relay,
+ * Limits: the workers' login only (an application password), hosts on the allow list (since phase 1 of the sourcing
+ * restructure, 25 Oct 2026: the "Fetch through this site (relay)" switch on each source in Settings → Sourcing → Sources),
  * http/https, GET only. The host is resolved first and refused when any address is private, loopback, reserved or this
  * site's own; the checked address is the one connected to, and every redirect (at most 3) is checked the same way.
- * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, on the Relay tab).
+ * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, Sources → Relay log).
  *
  * @package aw-sourcing
  */
@@ -20,21 +21,25 @@ const AW_RELAY_TIMEOUT   = 20;
 const AW_RELAY_RATE      = 30; // requests per host per 10 minutes
 const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com', 'awbi.gov.in', 'ccsea.gov.in', 'egazette.gov.in' );
 
-/** Allowed hosts (a host or any of its subdomains). */
+/**
+ * Allowed hosts (a host or any of its subdomains): once phase 1 is migrated, the hosts whose relay switch is on
+ * (aw_publishers[host].relay); before that, and after a rollback, the list of before (aw_relay_hosts_legacy).
+ */
 function aw_relay_hosts() {
-	$c = function_exists( 'aw_sources_config' ) ? aw_sources_config() : array();
-	return isset( $c['relay_hosts'] ) ? array_values( (array) $c['relay_hosts'] ) : AW_RELAY_DEFAULT;
+	if ( aw_sourcing_phase() >= 1 ) {
+		return aw_src_relay_hosts_from_pubs( function_exists( 'aw_publishers' ) ? aw_publishers() : array() );
+	}
+	return aw_relay_hosts_legacy();
+}
+
+/** The allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list. */
+function aw_relay_hosts_legacy() {
+	return aw_src_relay_legacy( function_exists( 'aw_sources_config' ) ? aw_sources_config() : array(), AW_RELAY_DEFAULT );
 }
 
 /** True when the host is on the allow list. */
 function aw_relay_host_allowed( $host ) {
-	$host = strtolower( (string) $host );
-	foreach ( aw_relay_hosts() as $h ) {
-		if ( $host === $h || str_ends_with( $host, '.' . $h ) ) {
-			return true;
-		}
-	}
-	return false;
+	return aw_src_host_in( (string) $host, aw_relay_hosts() );
 }
 
 /** This site's own addresses (never fetched through the relay). */
@@ -215,36 +220,21 @@ add_filter(
 	}
 );
 
-// Settings → Sourcing → Relay: the allow list (Settings API, option aw_sources; see sourcing-lists.php) and the log.
-add_filter(
-	'kits_sourcing_tabs',
-	function ( $tabs ) {
-		$tabs['relay'] = array( 'Relay', 'aw_relay_tab', true );
-		return $tabs;
-	}
-);
+/*
+ * The Relay tab moved into Sources (25 Oct 2026): each source has its relay switch, and the request log is the
+ * Sources → Relay log view. The old address redirects there (source-sites.php).
+ */
 
-add_action(
-	'admin_init',
-	function () {
-		add_settings_section(
-			'aw_relay',
-			'',
-			function () {
-				aw_sourcing_settings_marker( 'aw_sources', 'relay' );
-				echo '<p>Publishers that refuse GitHub\'s servers but answer this site. When one answers the workers with 403, they ask this site to fetch the feed or page for them.</p>';
-			},
-			'aw-sourcing-relay'
-		);
-		add_settings_field( 'aw_relay_hosts', 'Hosts', fn( $a ) => aw_sourcing_textarea_field( $a + array( 'value' => aw_relay_hosts() ) ), 'aw-sourcing-relay', 'aw_relay', array( 'label_for' => 'aw-relay-hosts', 'name' => 'aw_sources[relay_hosts]', 'help' => 'One host per line; its subdomains are included.' ) );
-	}
-);
+/*
+ * The old Relay form posted to options.php (aw_sources[_aw_tab] = relay). A copy still open in another browser tab must
+ * not replace the option: aw_sources_sanitize() hands such a post here, and it changes nothing (as for the old
+ * Categories and Sections forms, sourcing-terms-admin.php).
+ */
+add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
 
-/** Relay tab. */
-function aw_relay_tab() {
-	aw_sourcing_settings_form( 'aw_sourcing_sources', 'aw-sourcing-relay' );
-	$log = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
-	echo '<h2>Requests (last 200)</h2>';
+/** Sources → Relay log: every request the workers made through the site (last 200). */
+function aw_relay_log_view() {
+	$log  = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
 	$rows = array();
 	foreach ( array_slice( $log, 0, 200 ) as $r ) {
 		$rows[] = array(
@@ -256,31 +246,73 @@ function aw_relay_tab() {
 			'ms'     => (int) $r['ms'] . ' ms',
 			'note'   => esc_html( $r['note'] ),
 			'_sort'  => array( 'at' => (int) $r['at'], 'bytes' => (int) $r['bytes'], 'ms' => (int) $r['ms'] ),
+			'_find'  => $r['host'] . ' ' . $r['path'] . ' ' . $r['status'] . ' ' . $r['note'],
 		);
 	}
-	aw_sourcing_simple_table( 'requests', array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ), $rows, array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.' ) );
+	aw_sourcing_simple_table(
+		'requests',
+		array( 'at' => 'Time', 'host' => 'Host', 'path' => 'Path', 'status' => 'Result', 'bytes' => 'Size', 'ms' => 'Time taken', 'note' => 'Note' ),
+		$rows,
+		array( 'per_page' => 50, 'sortable' => array( 'at', 'host', 'status', 'bytes', 'ms' ), 'empty' => 'None yet.', 'search' => 'Search requests', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'view' => 'relay-log' ) )
+	);
 }
 
-add_filter(
-	'aw_sources_save_relay',
-	function ( $c, $in ) {
-		$old = aw_relay_hosts();
-		$new = array();
-		foreach ( preg_split( '/[\s,]+/', strtolower( sanitize_textarea_field( (string) ( $in['relay_hosts'] ?? '' ) ) ) ) as $h ) {
-			$h = preg_replace( '#^https?://#', '', trim( $h ) );
-			$h = trim( explode( '/', $h )[0], '.' );
-			if ( preg_match( '/^[a-z0-9-]+(\.[a-z0-9-]+)+$/', $h ) ) {
-				$new[] = $h;
+/** The last relay result of a host in words ("200 · 25 Oct 2026, 10:15 am"), or ''. */
+function aw_relay_last_html( $host ) {
+	$r = aw_src_relay_last( (array) get_option( 'aw_relay_log', array() ), (string) $host );
+	return $r ? aw_relay_result_html( $r ) : '';
+}
+
+/** One relay log row's result in words, with a core dashicon. */
+function aw_relay_result_html( array $r ) {
+	$ok = is_int( $r['status'] ?? null ) && $r['status'] < 400;
+	return '<span class="dashicons dashicons-' . ( $ok ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( (string) $r['status'] . ' · ' . wp_date( 'j M Y, g:i a', (int) $r['at'] ) );
+}
+
+/**
+ * Turn the relay switch on or off for hosts (Sources list and edit form). On for a host without a record adds one
+ * with kind=relay (not a publisher); off removes such a record again. Each change is logged with old → new.
+ *
+ * @param array    $pubs  aw_publishers (read just before).
+ * @param string[] $hosts Hosts.
+ * @param bool     $on    On or off.
+ * @return array The records.
+ */
+function aw_relay_switch( array $pubs, array $hosts, $on ) {
+	$names = array();
+	foreach ( (array) ( aw_sources_config()['sources'] ?? array() ) as $s ) {
+		if ( is_array( $s ) ) {
+			$names[ aw_src_source_host( $s ) ] = $names[ aw_src_source_host( $s ) ] ?? (string) ( $s['name'] ?? '' );
+		}
+	}
+	$log = array();
+	foreach ( $hosts as $h ) {
+		$h = aw_sourcing_norm_host( $h );
+		if ( '' === $h ) {
+			continue;
+		}
+		$was = ! empty( $pubs[ $h ]['relay'] );
+		if ( $on && ! $was ) {
+			if ( isset( $pubs[ $h ] ) ) {
+				$pubs[ $h ]['relay'] = true;
+				$log[]               = array( 'relay', $h . ': fetch through this site', 'off', 'on' );
+			} else {
+				$pubs[ $h ] = array( 'status' => 'neutral', 'name' => (string) ( $names[ $h ] ?? '' ), 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'kind' => 'relay', 'relay' => true );
+				$log[]      = array( 'relay', $h . ': fetch through this site (added as relay only, not a publisher)', '', $pubs[ $h ] );
+			}
+		} elseif ( ! $on && $was ) {
+			if ( 'relay' === ( $pubs[ $h ]['kind'] ?? '' ) ) {
+				$log[] = array( 'relay', $h . ': relay off (relay-only record removed)', $pubs[ $h ], '' );
+				unset( $pubs[ $h ] );
+			} else {
+				unset( $pubs[ $h ]['relay'] );
+				$log[] = array( 'relay', $h . ': fetch through this site', 'on', 'off' );
 			}
 		}
-		$new = array_values( array_unique( $new ) );
-		if ( $new === $old ) {
-			return $c; // unchanged: the built-in list stays built in (no relay_hosts key written)
-		}
-		$c['relay_hosts'] = $new;
-		kits_sourcing_log( 'relay', kits_sourcing_diff( 'relay hosts', $old, $c['relay_hosts'] ) );
-		return $c;
-	},
-	10,
-	2
-);
+	}
+	kits_sourcing_log_many( $log );
+	if ( $log && function_exists( 'aw_sources_sync_soon' ) ) {
+		aw_sources_sync_soon(); // the relay allow list and sources_v2 are copied into the workers' sources.yaml (aw_publishers is not hooked: ingest writes it all the time)
+	}
+	return $pubs;
+}

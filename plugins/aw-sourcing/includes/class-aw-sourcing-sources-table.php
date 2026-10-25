@@ -1,10 +1,11 @@
 <?php
 /**
- * Settings → Sourcing → Feeds as a core list table (owner, 24 Oct 2026; was News feeds, Library sources and
- * Opportunity sources): every source of aw_sources in one list, views All / News / Library / Opportunity / On / Off,
- * search, sortable name, type and status, pagination (screen option aw_sources_per_page), row actions (Edit, Turn
- * on/off, Keyword check on/off) and the same as bulk actions. Inside the tab's POST form (action aw_sourcing, nonce
- * aw_sourcing), so the table prints no nonce of its own. Loaded only when the tab is shown.
+ * Settings → Sourcing → Sources → Feeds as a core list table (owner, 24 Oct 2026; was News feeds, Library sources and
+ * Opportunity sources; moved into Sources on 25 Oct 2026): every source of aw_sources in one list with the publisher
+ * each belongs to, views All / News / Library / Opportunity / On / Off, search, sortable name, type, publisher and
+ * status, pagination (screen option aw_sources_per_page), row actions (Edit, Turn on/off, Keyword check on/off,
+ * Delete a feed) and the same as bulk actions. On a source's edit screen it lists only that site's feeds. Inside a
+ * POST form (action aw_sourcing, tab feeds, nonce aw_sourcing), so the table prints no nonce of its own.
  *
  * @package aw-sourcing
  */
@@ -19,13 +20,29 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 	/** @var array Every source, in the lists' own order. */
 	private $all;
 
-	public function __construct() {
+	/** @var string Only this site's sources ('' for all). */
+	private $host;
+
+	/**
+	 * @param string $host Only this site's sources ('' for all).
+	 */
+	public function __construct( $host = '' ) {
 		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
-		$this->all = array_values( array_filter( (array) aw_sources_config()['sources'], 'is_array' ) );
+		$this->host = (string) $host;
+		$this->all  = array_values( array_filter( (array) aw_sources_config()['sources'], fn( $s ) => is_array( $s ) && ( '' === $this->host || aw_src_source_host( $s ) === $this->host ) ) );
 	}
 
 	private function url( array $args = array() ) {
-		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=feeds' ) );
+		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=sources&view=feeds' ) );
+	}
+
+	/** A source's edit screen (from a source's screen: back there afterwards). */
+	private function edit_url( array $item ) {
+		$args = array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'feed' => $item['id'], 'type' => (string) ( $item['type'] ?? '' ) );
+		if ( '' !== $this->host ) {
+			$args['host'] = rawurlencode( $this->host );
+		}
+		return add_query_arg( $args, admin_url( 'options-general.php' ) );
 	}
 
 	/** The view from the address: [type, state]. */
@@ -58,13 +75,14 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 			'name'   => 'Name',
 			'type'   => 'Type',
 			'url'    => 'Feed URL or Google News search',
+			'host'   => 'Publisher',
 			'on'     => 'Status',
 			'filter' => 'Keyword check',
 		);
 	}
 
 	protected function get_sortable_columns() {
-		return array( 'name' => array( 'name', false ), 'type' => array( 'type', false ), 'on' => array( 'on', false ) );
+		return array( 'name' => array( 'name', false ), 'type' => array( 'type', false ), 'host' => array( 'host', false ), 'on' => array( 'on', false ) );
 	}
 
 	protected function get_primary_column_name() {
@@ -72,7 +90,7 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 	}
 
 	protected function get_bulk_actions() {
-		return array( 'on' => 'Turn on', 'off' => 'Turn off', 'filter_on' => 'Keyword check on', 'filter_off' => 'Keyword check off' );
+		return array( 'on' => 'Turn on', 'off' => 'Turn off', 'filter_on' => 'Keyword check on', 'filter_off' => 'Keyword check off', 'delete' => 'Delete feeds (not sources read by code)' );
 	}
 
 	/** The core bulk menu is named "action", which admin-post.php reads as its own; this one is src_bulk / src_bulk2. */
@@ -107,7 +125,7 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 				$this->all,
 				fn( $x ) => ( '' === $vt || ( $x['type'] ?? '' ) === $vt )
 					&& ( '' === $vs || ( 'on' === $vs ) === ! empty( $x['on'] ) )
-					&& ( '' === $s || false !== strpos( mb_strtolower( ( $x['name'] ?? '' ) . ' ' . ( $x['url'] ?? '' ) ), $s ) )
+					&& ( '' === $s || false !== strpos( mb_strtolower( ( $x['name'] ?? '' ) . ' ' . ( $x['url'] ?? '' ) . ' ' . aw_src_source_host( $x ) ), $s ) )
 			)
 		);
 		$by = sanitize_key( $_GET['orderby'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -118,6 +136,8 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 				function ( $a, $b ) use ( $by, $asc ) {
 					if ( 'on' === $by ) {
 						$c = (int) ! empty( $a['on'] ) <=> (int) ! empty( $b['on'] );
+					} elseif ( 'host' === $by ) {
+						$c = strcmp( aw_src_source_host( $a ), aw_src_source_host( $b ) );
 					} else {
 						$c = strcasecmp( (string) ( $a[ $by ] ?? '' ), (string) ( $b[ $by ] ?? '' ) );
 					}
@@ -157,11 +177,13 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 
 	protected function column_name( $item ) {
 		$rss  = 'rss' === ( $item['kind'] ?? '' );
-		$edit = $this->url( array( 'edit' => $item['id'], 'type' => (string) ( $item['type'] ?? '' ) ) );
+		$edit = $this->edit_url( $item );
 		$acts = array( 'edit' => '<a href="' . esc_url( $edit ) . '" aria-label="' . esc_attr( 'Edit ' . $item['name'] ) . '">Edit</a>' );
 		$acts[ empty( $item['on'] ) ? 'on' : 'trash' ] = $this->op_button( empty( $item['on'] ) ? 'on' : 'off', empty( $item['on'] ) ? 'Turn on' : 'Turn off', $item );
 		if ( $rss ) {
 			$acts['filter'] = $this->op_button( empty( $item['filter'] ) ? 'filter_on' : 'filter_off', empty( $item['filter'] ) ? 'Keyword check on' : 'Keyword check off', $item );
+			// core's "are you sure" warning (common.js showNotice) before a delete
+			$acts['delete'] = '<button type="submit" class="button-link submitdelete" name="src_row" value="' . esc_attr( 'delete:' . $this->key( $item ) ) . '" onclick="return showNotice.warn();">Delete</button>';
 		}
 		$host = preg_match( '#^https?://#', (string) ( $item['url'] ?? '' ) ) ? aw_host( $item['url'] ) : '';
 		$icon = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
@@ -180,6 +202,12 @@ class AW_Sourcing_Sources_Table extends WP_List_Table {
 		}
 		$q = aw_gnews_query( $item['url'] );
 		return $q ? esc_html( $q ) . '<br><span class="description">Google News search</span>' : '<code>' . esc_html( $item['url'] ) . '</code>';
+	}
+
+	protected function column_host( $item ) {
+		$h    = aw_src_source_host( $item );
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'options-general.php' ) );
+		return '' === $h ? '—' : '<a href="' . esc_url( $edit ) . '">' . esc_html( $h ) . '</a>' . ( 'code' === aw_src_read_by( $item ) ? '<br><span class="description">Read by code</span>' : '' );
 	}
 
 	protected function column_on( $item ) {

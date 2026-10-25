@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: AW Sourcing
- * Description: What the workers fetch and how it arrives: Settings → Sourcing (sources, keywords, feeds, press queries, categories, summary rules, rejected items, enrichment, relay, AI models), the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment), auto-review and Inbox → To review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives: Settings → Sourcing (sources with their feeds and relay, keywords, press queries, categories, summary rules, rejected items, enrichment, AI models), the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment), auto-review and Inbox → To review. Needs Animal Writes Core, which loads it from this folder; it can also be activated on its own.
  * Version: 0.1.0
  * Author: Wugweb
  * License: GPL-2.0-or-later
@@ -34,6 +34,8 @@ if ( ! defined( 'AW_CORE_DIR' ) ) {
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
+// The Sources model (plain functions, tested without WordPress by tests/run.php) first.
+require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 // Order matters for the Settings → Sourcing tabs (Sources, Keywords, then these in this order).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
@@ -55,6 +57,7 @@ require_once AW_SOURCING_DIR . 'includes/keyword-suggestions.php';
 require_once AW_SOURCING_DIR . 'includes/ai-keys.php';
 require_once AW_SOURCING_DIR . 'includes/site-health.php';
 require_once AW_SOURCING_DIR . 'includes/relay.php';
+require_once AW_SOURCING_DIR . 'includes/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';

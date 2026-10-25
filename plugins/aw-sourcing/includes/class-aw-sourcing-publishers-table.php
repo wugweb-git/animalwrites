@@ -10,6 +10,12 @@
  * A press site that is not a publisher shows "—" for status and gets no Allow / Neutral / Block: giving it a status
  * would create a publisher record, which only the Add New / Edit form does, on purpose.
  *
+ * Sourcing restructure phase 1 (owner, 25 Oct 2026): Feeds and Relay moved in. Each row also counts its feeds and
+ * sources read by code (aw_sources.sources by publisher host) and shows its relay switch with the last result. Rows
+ * also cover a relay-only site (record kind=relay) and a site only feeds come from (no record). Views: With feeds,
+ * Read by code, Relay, and the links to the Feeds and Relay log screens. Row actions: Relay on / off (once phase 1
+ * is migrated) and Delete (a source with no items, feeds or press search; core's warning first).
+ *
  * @package aw-sourcing
  */
 
@@ -19,6 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Publishers and press sites, one row per host. */
 class AW_Sourcing_Publishers_Table extends WP_List_Table {
+
+	/** The list's views (status= in the address). */
+	const VIEWS = array( 'allow', 'neutral', 'block', 'press', 'feeds', 'code', 'relay' );
 
 	/** @var array host => row */
 	private $all = array();
@@ -38,17 +47,35 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$meta        = is_array( $meta ) ? $meta : array();
 		$press       = array_flip( aw_sourcing_press_hosts() );
 		$pubs        = aw_publishers();
-		$hosts       = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) ) ); // a host kept only for its icon (kind) is not a publisher
-		foreach ( array_unique( array_merge( $hosts, array_keys( $press ) ) ) as $h ) {
+		$feeds       = aw_sourcing_feeds_by_host();
+		$relay       = aw_relay_hosts();
+		$log         = aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
+		// A host kept only for its icon (kind=directory-source) is not listed; a relay-only one (kind=relay) is.
+		$hosts = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) || 'relay' === $p['kind'] ) );
+		foreach ( array_unique( array_merge( $hosts, array_keys( $press ), array_keys( $feeds ) ) ) as $h ) {
+			if ( '' === (string) $h ) {
+				continue;
+			}
 			$p   = $pubs[ $h ] ?? array();
 			$pub = isset( $pubs[ $h ] ) && empty( $p['kind'] );
 			$s   = $stats['hosts'][ $h ] ?? array();
 			$m   = $meta[ $h ] ?? array();
+			$fl  = $feeds[ $h ] ?? array();
+			$rel = aw_src_host_in( $h, $relay );
 			$this->all[ $h ] = array(
 				'host'    => $h,
 				'pub'     => $pub,
+				'kind'    => $pub ? 'publisher' : ( 'relay' === ( $p['kind'] ?? '' ) ? 'relay' : ( $fl ? 'feeds' : 'press' ) ),
+				'feeds'   => count( $fl ),
+				'feeds_on' => count( array_filter( $fl, fn( $x ) => ! empty( $x['on'] ) ) ),
+				'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
+				'fnames'  => implode( ' ', array_map( fn( $x ) => (string) ( $x['name'] ?? '' ), $fl ) ),
+				'relay'   => $rel,
+				'relay_own' => ! empty( $p['relay'] ),
+				'relay_last' => aw_src_relay_last( $log, $h ),
+				'count'   => (int) ( $p['count'] ?? 0 ),
 				'press'   => isset( $press[ $h ] ),
-				'name'    => $pub ? (string) ( $p['name'] ?? '' ) : '',
+				'name'    => $pub || 'relay' === ( $p['kind'] ?? '' ) ? (string) ( $p['name'] ?? '' ) : '',
 				'short'   => $pub ? (string) ( $p['short'] ?? '' ) : '',
 				'status'  => $pub ? (string) ( $p['status'] ?? 'neutral' ) : '',
 				'rec'     => $pub ? $p : array(),
@@ -76,17 +103,43 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 
 	private function view() {
 		$s = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		return in_array( $s, array( 'allow', 'neutral', 'block', 'press' ), true ) ? $s : '';
+		return in_array( $s, self::VIEWS, true ) ? $s : '';
+	}
+
+	/** The screen shown: '' (this list), feeds or relay-log (their own screens, with these views on top). */
+	private function screen_view() {
+		return function_exists( 'aw_sourcing_sources_screen' ) ? aw_sourcing_sources_screen() : '';
+	}
+
+	/** True when a row is in a view. */
+	private function in_view( array $r, $v ) {
+		switch ( $v ) {
+			case 'press':
+				return $r['press'];
+			case 'feeds':
+				return $r['feeds'] > 0;
+			case 'code':
+				return $r['code_n'] > 0;
+			case 'relay':
+				return $r['relay'];
+			default:
+				return '' === $v || $r['status'] === $v;
+		}
 	}
 
 	protected function get_views() {
-		$base   = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
-		$counts = array_count_values( array_filter( array_column( $this->all, 'status' ) ) );
-		$press  = count( array_filter( array_column( $this->all, 'press' ) ) );
-		$out    = array();
-		foreach ( array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites' ) as $k => $l ) {
-			$n                             = '' === $k ? count( $this->all ) : ( 'press' === $k ? $press : (int) ( $counts[ $k ] ?? 0 ) );
-			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $this->view() === $k ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+		$base  = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
+		$shown = $this->screen_view();
+		$out   = array();
+		foreach ( array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites', 'feeds' => 'With feeds', 'code' => 'Read by code', 'relay' => 'Relay' ) as $k => $l ) {
+			$n                             = count( array_filter( $this->all, fn( $r ) => $this->in_view( $r, $k ) ) );
+			$cur                           = '' === $shown && $this->view() === $k;
+			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+		}
+		$all_feeds = array_sum( array_column( $this->all, 'feeds' ) );
+		$log_n     = count( (array) get_option( 'aw_relay_log', array() ) );
+		foreach ( array( 'feeds' => array( 'all-feeds', 'Feeds', $all_feeds ), 'relay-log' => array( 'relay-log', 'Relay log', $log_n ) ) as $v => $d ) {
+			$out[ $d[0] ] = '<a href="' . esc_url( add_query_arg( 'view', $v, $base ) ) . '"' . ( $shown === $v ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $d[1] ) . ' <span class="count">(' . esc_html( number_format_i18n( $d[2] ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -99,6 +152,8 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			'status' => 'Status',
 			'rating' => 'Rating',
 			'dr'     => 'Domain Rating',
+			'feeds'  => 'Feeds',
+			'relay'  => 'Relay',
 			'items'  => 'Items (30 days / published)',
 			'search' => 'Search value',
 			'seo'    => 'SEO',
@@ -111,6 +166,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			'host'   => array( 'host', false ),
 			'status' => array( 'status', false ),
 			'dr'     => array( 'dr', true ),
+			'feeds'  => array( 'feeds', true ),
 			'items'  => array( 'items', true ),
 			'search' => array( 'search', true ),
 			'last'   => array( 'last', true ),
@@ -128,7 +184,10 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			'block'        => 'Change to Blocked',
 			'press_add'    => 'Search here for coverage',
 			'press_remove' => 'Stop searching here',
-		);
+		) + ( aw_sourcing_phase() >= 1 ? array(
+			'relay_on'  => 'Relay on (fetch through this site)',
+			'relay_off' => 'Relay off',
+		) : array() );
 	}
 
 	/** The core bulk menu is named "action", which admin-post.php reads as its own; this one is bulk_status. */
@@ -169,10 +228,10 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$s    = mb_strtolower( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$rows = array();
 		foreach ( $this->all as $r ) {
-			if ( ( 'press' === $v && ! $r['press'] ) || ( $v && 'press' !== $v && $r['status'] !== $v ) ) {
+			if ( ! $this->in_view( $r, $v ) ) {
 				continue;
 			}
-			if ( '' !== $s && false === strpos( mb_strtolower( $r['host'] . ' ' . $r['name'] . ' ' . $r['short'] . ' ' . $r['title'] ), $s ) ) {
+			if ( '' !== $s && false === strpos( mb_strtolower( $r['host'] . ' ' . $r['name'] . ' ' . $r['short'] . ' ' . $r['title'] . ' ' . $r['fnames'] ), $s ) ) {
 				continue;
 			}
 			$rows[] = $r;
@@ -192,6 +251,9 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 						break;
 					case 'items':
 						$c = ( $a['f30'] <=> $b['f30'] ) ?: ( $a['pub_n'] <=> $b['pub_n'] );
+						break;
+					case 'feeds':
+						$c = ( $a['feeds'] <=> $b['feeds'] ) ?: ( $a['feeds_on'] <=> $b['feeds_on'] );
 						break;
 					case 'search':
 						$c = ( $a['impr'] <=> $b['impr'] ) ?: ( $a['impr3'] <=> $b['impr3'] );
@@ -239,11 +301,39 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			}
 		}
 		$acts['press'] = $item['press'] ? $this->button( 'row_press', 'remove:' . $h, 'Stop searching here' ) : $this->button( 'row_press', 'add:' . $h, 'Search here for coverage' );
+		if ( aw_sourcing_phase() >= 1 ) {
+			$acts['relay'] = $item['relay_own'] ? $this->button( 'row_relay', 'off:' . $h, 'Relay off' ) : $this->button( 'row_relay', 'on:' . $h, 'Relay on' );
+		}
+		if ( $this->deletable( $item ) ) { // core's "are you sure" warning (common.js showNotice) before a delete
+			$acts['delete'] = '<button type="submit" class="button-link submitdelete" name="row_delete" value="' . esc_attr( $h ) . '" onclick="return showNotice.warn();">Delete</button>';
+		}
 		$icon          = function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $h ) : '';
 		$mark          = $icon ? '<img src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async"> ' : '<span class="dashicons dashicons-admin-site-alt3" aria-hidden="true"></span> ';
 		return $mark . '<strong><a class="row-title" href="' . esc_url( $edit ) . '">' . esc_html( $h ) . '</a></strong>'
 			. ( '' !== $item['name'] ? '<br>' . esc_html( $item['name'] ) : '' )
 			. $this->row_actions( $acts );
+	}
+
+	/** A source with nothing attached (no items, feeds or press search): a publisher record or a relay-only one. */
+	private function deletable( array $item ) {
+		return in_array( $item['kind'], array( 'publisher', 'relay' ), true ) && ! $item['feeds'] && ! $item['press']
+			&& ! $item['count'] && ! $item['f30'] && ! $item['pub_n'];
+	}
+
+	protected function column_feeds( $item ) {
+		if ( ! $item['feeds'] ) {
+			return '<span aria-label="No feeds">—</span>';
+		}
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $item['host'] ) ), admin_url( 'options-general.php' ) );
+		/* translators: 1: feeds, 2: feeds that are on. */
+		$out = '<a href="' . esc_url( $edit ) . '">' . esc_html( sprintf( _n( '%1$s feed (%2$s on)', '%1$s feeds (%2$s on)', $item['feeds'] ), number_format_i18n( $item['feeds'] ), number_format_i18n( $item['feeds_on'] ) ) ) . '</a>';
+		return $out . ( $item['code_n'] ? '<br><span class="description">' . esc_html( number_format_i18n( $item['code_n'] ) . ' read by code' ) . '</span>' : '' );
+	}
+
+	protected function column_relay( $item ) {
+		$last = $item['relay_last'] ? aw_relay_result_html( $item['relay_last'] ) : '';
+		$on   = $item['relay'] ? '<span class="dashicons dashicons-update" aria-hidden="true"></span> On' : '<span aria-label="Off">—</span>';
+		return $on . ( '' !== $last ? '<br><span class="description">Last: </span>' . $last : ( $item['relay'] ? '<br><span class="description">Not used yet</span>' : '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_relay_result_html
 	}
 
 	protected function column_short( $item ) {
@@ -254,7 +344,8 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	}
 
 	protected function column_status( $item ) {
-		$out = $item['pub'] ? aw_publisher_status_html( $item['status'] ) : '<span aria-label="Not a publisher">—</span>';
+		$not = array( 'relay' => 'Relay only', 'feeds' => 'Feeds only', 'press' => '' )[ $item['kind'] ] ?? '';
+		$out = $item['pub'] ? aw_publisher_status_html( $item['status'] ) : '<span aria-label="Not a publisher">—</span>' . ( '' !== $not ? ' <span class="description">' . esc_html( $not . ' (not a publisher)' ) . '</span>' : '' );
 		return $out . ( $item['press'] ? '<br><span class="dashicons dashicons-search" aria-hidden="true"></span> Searched for coverage' : '' );
 	}
 

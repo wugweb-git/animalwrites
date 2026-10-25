@@ -30,6 +30,30 @@ const AW_SOURCING_SITE_META = 'aw_source_site_meta';
 /** Cron hook of the home-page check. */
 const AW_SOURCING_SITE_META_CRON = 'aw_sourcing_site_meta';
 
+/**
+ * The sourcing restructure phase migrated on this site (option aw_sourcing_phase, set by `wp aw-sourcing migrate`,
+ * put back by `wp aw-sourcing rollback`): 0 before phase 1. Phase 1 makes the relay switches the allow list and adds
+ * sources_v2 to the policy.
+ */
+function aw_sourcing_phase() {
+	return (int) get_option( 'aw_sourcing_phase', 0 );
+}
+
+/**
+ * Every source (feeds and sources read by code) by its publisher host, in the lists' order.
+ *
+ * @return array<string, array[]>
+ */
+function aw_sourcing_feeds_by_host() {
+	$out = array();
+	foreach ( (array) ( aw_sources_config()['sources'] ?? array() ) as $s ) {
+		if ( is_array( $s ) ) {
+			$out[ aw_src_source_host( $s ) ][] = $s;
+		}
+	}
+	return $out;
+}
+
 /** A host typed or posted (with or without https://, www.) as aw_host() keeps it, or ''. */
 function aw_sourcing_norm_host( $in ) {
 	$in = trim( (string) $in );
@@ -332,7 +356,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 }
 
-/* ---------- Old addresses (owner, 24 Oct 2026): Publishers → Sources; Library and Opportunity sources → Feeds ---------- */
+/*
+ * ---------- Old addresses: Publishers → Sources (24 Oct 2026); Feeds, Library and Opportunity sources → Sources →
+ * Feeds; Relay → Sources → Relay log (25 Oct 2026) ----------
+ */
 
 add_action(
 	'admin_init',
@@ -344,8 +371,10 @@ add_action(
 		}
 		$map = array(
 			'publishers'    => array( 'tab' => 'sources' ),
-			'library'       => array( 'tab' => 'feeds', 'type' => 'legal' ),
-			'opportunities' => array( 'tab' => 'feeds', 'type' => 'opportunity' ),
+			'feeds'         => array( 'tab' => 'sources', 'view' => 'feeds' ),
+			'library'       => array( 'tab' => 'sources', 'view' => 'feeds', 'type' => 'legal' ),
+			'opportunities' => array( 'tab' => 'sources', 'view' => 'feeds', 'type' => 'opportunity' ),
+			'relay'         => array( 'tab' => 'sources', 'view' => 'relay-log' ),
 		);
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
 		if ( ! isset( $map[ $tab ] ) ) {
@@ -358,6 +387,11 @@ add_action(
 			}
 		}
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( 'publishers' !== $tab && isset( $q['edit'] ) ) { // a feed's edit address: on Sources, edit= is a host
+			$q['feed'] = $q['edit'];
+			unset( $q['edit'], $q['view'] );
+			$map[ $tab ] = array( 'tab' => 'sources' ) + ( isset( $map[ $tab ]['type'] ) ? array( 'type' => $map[ $tab ]['type'] ) : array() );
+		}
 		$q = array_merge( $q, $map[ $tab ] );
 		wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $q ), admin_url( 'options-general.php' ) ), 301 );
 		exit;
@@ -366,7 +400,21 @@ add_action(
 
 /* ---------- The Sources tab ---------- */
 
-// Help tab (core contextual help): what each column means and where it comes from.
+/** The Sources tab's screen: list (''), feeds (all feeds), relay-log, or an edit form (edit=host, feed=id). */
+function aw_sourcing_sources_screen() {
+	// phpcs:disable WordPress.Security.NonceVerification -- which screen to show, nothing saved.
+	if ( '' !== sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ) ) {
+		return 'edit';
+	}
+	if ( '' !== sanitize_key( $_GET['feed'] ?? '' ) ) {
+		return 'feed';
+	}
+	$v = sanitize_key( $_GET['view'] ?? '' );
+	// phpcs:enable WordPress.Security.NonceVerification
+	return in_array( $v, array( 'feeds', 'relay-log' ), true ) ? $v : '';
+}
+
+// Help tabs (core contextual help): the screen's explanation and what each column means.
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
@@ -374,43 +422,99 @@ add_action(
 		if ( ! in_array( $tab, array( '', 'sources' ), true ) ) {
 			return;
 		}
-		get_current_screen()->add_help_tab(
+		$screen = get_current_screen();
+		$view   = aw_sourcing_sources_screen();
+		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. The Relay log view lists every such request (the last 200), and the list shows each source\'s last result.</p>'
+			. ( aw_sourcing_phase() < 1 ? '<p>Until the phase 1 migration (<code>wp aw-sourcing migrate --phase=1</code>) the relay list is the list of before: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p>' : '' );
+		$screen->add_help_tab(
 			array(
-				'id'      => 'aw-sources-columns',
-				'title'   => 'Columns',
-				'content' => '<p><strong>Status</strong>: Blocked publishers are refused when the workers send their items; Neutral is the default for new hosts; Allowed publishers skip the keyword check. A press site that is not a publisher shows —.</p>'
-					. '<p><strong>Rating</strong>: Media Bias/Fact Check factual reporting and credibility, where recorded.</p>'
-					. '<p><strong>Domain Rating</strong>: Ahrefs Domain Rating (0–100) from Ahrefs\' free Domain Rating lookup, run by Claude and imported with <code>wp aw-sourcing import-dr</code>; the date is when it was looked up.</p>'
-					. '<p><strong>Items</strong>: fetched in the last 30 days (every status) / published (all time).</p>'
-					. '<p><strong>Search value</strong>: Search Console impressions and clicks of this source\'s published items\' pages over 28 days and 3 months. Shown only when Search Insights has a Search Console run within 28 days. Figures are refreshed hourly.</p>'
-					. '<p><strong>SEO</strong>: the site\'s own home page title and description, read in the background (a few sites an hour, each again after 30 days), with the date and the HTTP result.</p>'
-					. '<p><strong>Search here for coverage</strong>: the press queries (Press queries tab) also run on this site.</p>',
+				'id'      => 'aw-sources-overview',
+				'title'   => 'Overview',
+				'content' => '<p>Every host the workers have sent, the sites searched for press coverage, and every site a feed or a source read by code comes from. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip (e.g. TOI, PIB); the full name stays on the item page.</p>'
+					. '<p>Each source lists its feeds on its edit screen. The Feeds view lists every feed and source read by code in one list (News, Library and Opportunity), with the publisher each belongs to. A Google News search limited to one site belongs to that site; a search of the open web belongs to news.google.com.</p>',
 			)
 		);
+		$screen->add_help_tab(
+			array(
+				'id'      => 'aw-sources-feeds',
+				'title'   => 'Feeds',
+				'content' => '<p>News: RSS feeds and Google News searches. Library: where Library documents and legal news come from (Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here). Opportunity: where opportunities come from (only name and on/off; new kinds of site need code).</p>'
+					. '<p>"Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word). A feed can be deleted; a source read by code cannot (it needs code), but it can be turned off.</p>',
+			)
+		);
+		$screen->add_help_tab( array( 'id' => 'aw-sources-relay', 'title' => 'Relay', 'content' => $relay ) );
+		if ( '' === $view ) {
+			$screen->add_help_tab(
+				array(
+					'id'      => 'aw-sources-columns',
+					'title'   => 'Columns',
+					'content' => '<p><strong>Status</strong>: Blocked publishers are refused when the workers send their items; Neutral is the default for new hosts; Allowed publishers skip the keyword check. A site that is not a publisher (a press site, a relay-only site, or a site only feeds come from) shows —.</p>'
+						. '<p><strong>Rating</strong>: Media Bias/Fact Check factual reporting and credibility, where recorded.</p>'
+						. '<p><strong>Domain Rating</strong>: Ahrefs Domain Rating (0–100) from Ahrefs\' free Domain Rating lookup, run by Claude and imported with <code>wp aw-sourcing import-dr</code>; the date is when it was looked up.</p>'
+						. '<p><strong>Feeds</strong>: the feeds and sources read by code that belong to this site (how many are on).</p>'
+						. '<p><strong>Relay</strong>: whether the workers may fetch this site through this one, and the last relay result.</p>'
+						. '<p><strong>Items</strong>: fetched in the last 30 days (every status) / published (all time).</p>'
+						. '<p><strong>Search value</strong>: Search Console impressions and clicks of this source\'s published items\' pages over 28 days and 3 months. Shown only when Search Insights has a Search Console run within 28 days. Figures are refreshed hourly.</p>'
+						. '<p><strong>SEO</strong>: the site\'s own home page title and description, read in the background (a few sites an hour, each again after 30 days), with the date and the HTTP result.</p>'
+						. '<p><strong>Search here for coverage</strong>: the press queries (Press queries tab) also run on this site.</p>',
+				)
+			);
+		}
+		$screen->set_help_sidebar( '<p><strong>Change log</strong></p><p>Every add, edit and delete here is in the Change log tab, with the value before and after.</p>' );
 	}
 );
 
-/** The Sources tab: the list, or one source to add (edit=new) or edit (edit=<host>). */
+/** The Sources list table (built once per request: the views of every Sources screen come from it). */
+function aw_sourcing_publishers_table() {
+	static $table = null;
+	if ( null === $table ) {
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
+		require_once __DIR__ . '/class-aw-sourcing-publishers-table.php';
+		$table = new AW_Sourcing_Publishers_Table();
+	}
+	return $table;
+}
+
+/** The Sources tab: the list, the Feeds view, the Relay log view, or one source or feed to add or edit. */
 function aw_sourcing_sources_tab() {
-	$edit = sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( '' !== $edit ) {
+	$screen = aw_sourcing_sources_screen();
+	if ( 'edit' === $screen ) {
+		$edit = sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		aw_sourcing_source_form( 'new' === $edit ? '' : aw_sourcing_norm_host( $edit ) );
 		return;
 	}
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+	if ( 'feed' === $screen ) {
+		// phpcs:disable WordPress.Security.NonceVerification -- which feed to show.
+		aw_sources_edit_form( sanitize_key( $_GET['feed'] ?? '' ), sanitize_key( $_GET['type'] ?? '' ), aw_sourcing_norm_host( sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) ) ) );
+		// phpcs:enable WordPress.Security.NonceVerification
+		return;
 	}
-	require_once __DIR__ . '/class-aw-sourcing-publishers-table.php';
-	$table = new AW_Sourcing_Publishers_Table();
+	$table = aw_sourcing_publishers_table();
+	if ( aw_sourcing_phase() < 1 ) {
+		echo '<div class="notice notice-info inline"><p>Relay switches take over once the phase 1 migration has run (<code>wp aw-sourcing migrate --phase=1</code>). Until then the workers may fetch these sites through this one: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p></div>';
+	}
+	if ( 'feeds' === $screen ) {
+		$table->views();
+		echo '<br class="clear">';
+		aw_sources_tab();
+		return;
+	}
+	if ( 'relay-log' === $screen ) {
+		$table->views();
+		echo '<br class="clear">';
+		aw_relay_log_view();
+		return;
+	}
 	$table->prepare_items();
-	echo '<p>Every host the workers have sent, and the sites searched for press coverage. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip (e.g. TOI, PIB); the full name stays on the item page. See Help for the columns.</p>';
 	if ( $table->search_stale() ) {
 		echo '<div class="notice notice-info inline"><p>Search value: Search Console has not run within 28 days, so there are no figures for this window.</p></div>';
 	}
 	$table->views();
 	$st = sanitize_key( $_GET['status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<form method="get"><input type="hidden" name="page" value="aw-sourcing"><input type="hidden" name="tab" value="sources">'
-		. ( in_array( $st, array( 'allow', 'neutral', 'block', 'press' ), true ) ? '<input type="hidden" name="status" value="' . esc_attr( $st ) . '">' : '' );
+		. ( in_array( $st, AW_Sourcing_Publishers_Table::VIEWS, true ) ? '<input type="hidden" name="status" value="' . esc_attr( $st ) . '">' : '' );
 	$table->search_box( 'Search sources', 'aw-source' );
 	echo '</form>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="sources">';
@@ -420,7 +524,8 @@ function aw_sourcing_sources_tab() {
 }
 
 /**
- * Add a source or edit one (core form-table edit screen). Saved by aw_sourcing_source_save() through admin-post.
+ * Add a source or edit one (core form-table edit screen), then its feeds (the feeds list filtered to this site, with
+ * Add New Feed). Saved by aw_sourcing_source_save() through admin-post.
  *
  * @param string $host Host to edit, '' to add.
  */
@@ -429,12 +534,13 @@ function aw_sourcing_source_form( $host ) {
 	$new   = '' === $host;
 	$rec   = $new ? null : ( $all[ $host ] ?? null );
 	$press = in_array( $host, aw_sourcing_press_hosts(), true );
+	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
 	$back  = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
-	if ( ! $new && null === $rec && ! $press ) {
+	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
 		echo '<div class="notice notice-error inline"><p>No such source.</p></div><p><a href="' . esc_url( $back ) . '">Back to Sources</a></p>';
 		return;
 	}
-	$pub    = null !== $rec && empty( $rec['kind'] ); // a host kept only for its icon (kind) is not a publisher
+	$pub    = null !== $rec && empty( $rec['kind'] ); // a host kept only for its icon (kind) or for the relay is not a publisher
 	$status = $pub ? (string) ( $rec['status'] ?? 'neutral' ) : ( $new ? 'block' : 'none' );
 	echo '<h2>' . esc_html( $new ? 'Add New Source' : 'Edit Source' ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_sourcing"><input type="hidden" name="tab" value="sources"><input type="hidden" name="src_edit" value="1">';
@@ -452,21 +558,35 @@ function aw_sourcing_source_form( $host ) {
 	echo '<tr><th scope="row"><label for="aw-src-status">Status</label></th><td><select id="aw-src-status" name="src_status">';
 	$opts = array( 'block' => 'Blocked', 'allow' => 'Allowed', 'neutral' => 'Neutral' );
 	if ( ! $pub ) {
-		$opts['none'] = 'Not a publisher (press site only)';
+		$opts['none'] = 'Not a publisher (press site, relay or feeds only)';
 	}
 	foreach ( $opts as $k => $l ) {
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $status, $k, false ) . '>' . esc_html( $l ) . '</option>';
 	}
 	echo '</select><p class="description">Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.</p></td></tr>';
 	echo '<tr><th scope="row">Press coverage</th><td><label><input type="checkbox" name="src_press" value="1"' . checked( $press, true, false ) . '> Search here for coverage</label><p class="description">The press queries also run on this site.</p></td></tr>';
+	echo '<tr><th scope="row">Relay</th><td>';
+	if ( aw_sourcing_phase() >= 1 ) {
+		echo '<input type="hidden" name="src_relay_shown" value="1"><label><input type="checkbox" name="src_relay" value="1"' . checked( ! empty( $rec['relay'] ), true, false ) . '> Fetch through this site (relay)</label>';
+	} else {
+		echo esc_html( ( ! $new && aw_src_host_in( $host, aw_relay_hosts() ) ) ? 'On' : 'Off' ) . ' <span class="description">(the list of before, until the phase 1 migration)</span>';
+	}
+	$last = $new ? '' : aw_relay_last_html( $host );
+	echo '<p class="description">When this site refuses the workers (GitHub\'s servers) with 403, they ask this site to fetch the feed or page. Its subdomains are included.' . ( '' !== $last ? '</p><p>Last relay result: ' . $last : '' ) . '</p></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in aw_relay_last_html
 	echo '</tbody></table>';
 	submit_button( $new ? 'Add Source' : 'Update', 'primary', 'submit', false );
 	echo ' <a href="' . esc_url( $back ) . '" class="button">Cancel</a></form>';
+	if ( $new ) {
+		return;
+	}
+	echo '<h2 class="wp-heading-inline">Feeds</h2> <a href="' . esc_url( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'feed' => 'new', 'host' => $host ), admin_url( 'options-general.php' ) ) ) . '" class="page-title-action">Add New Feed</a><hr class="wp-header-end">';
+	aw_sources_tab( $host );
 }
 
 /**
  * Save the Add New / Edit Source form (called by the aw_sourcing handler, nonce checked there). Logged as the list's
- * own changes are: status, name and short name as tab publishers, press sites as tab press.
+ * own changes are, with old → new: status, name and short name as tab publishers, press sites as tab press, the
+ * relay switch as tab relay.
  *
  * @return array{0: bool, 1: string} changed, error code ('' when none).
  */
@@ -477,31 +597,46 @@ function aw_sourcing_source_save() {
 	$name   = sanitize_text_field( wp_unslash( $_POST['src_name'] ?? '' ) );
 	$short  = sanitize_text_field( wp_unslash( $_POST['src_short'] ?? '' ) );
 	$press  = ! empty( $_POST['src_press'] );
+	$shown  = ! empty( $_POST['src_relay_shown'] ) && aw_sourcing_phase() >= 1; // the relay switch was on the form
+	$relay  = ! empty( $_POST['src_relay'] );
 	// phpcs:enable WordPress.Security.NonceVerification
 	if ( '' === $host ) {
 		return array( false, 'host' );
 	}
-	$pubs    = aw_publishers();
+	$pubs    = aw_publishers(); // read just before the write: the ingest gate updates the same option
 	$is_pub  = isset( $pubs[ $host ] ) && empty( $pubs[ $host ]['kind'] );
 	$was     = in_array( $host, aw_sourcing_press_hosts(), true );
+	$feeds   = ! empty( aw_sourcing_feeds_by_host()[ $host ] );
 	$changed = false;
 	if ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 		$before = $pubs[ $host ] ?? null;
-		$rec    = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => $status ) );
-		if ( null === $before ) {
-			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status );
+		// An existing record keeps its keys in their order (an unchanged save then writes nothing); a new one gets the defaults.
+		$rec = null === $before ? array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'status' => $status ) : array_merge( $before, array( 'status' => $status ) );
+		if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site becomes a publisher
+			unset( $rec['kind'] );
+			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
+		} elseif ( null === $before ) {
+			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status, '', $status );
 		} elseif ( (string) ( $before['status'] ?? 'neutral' ) !== $status ) {
-			kits_sourcing_log( 'publishers', $host . ' → ' . $status );
+			kits_sourcing_log( 'publishers', $host . ' → ' . $status, (string) ( $before['status'] ?? 'neutral' ), $status );
 		}
 		if ( (string) $rec['name'] !== $name ) {
 			if ( null !== $before ) {
-				kits_sourcing_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ) );
+				kits_sourcing_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) $rec['name'], $name );
 			}
 			$rec['name'] = $name;
 		}
 		if ( (string) ( $rec['short'] ?? '' ) !== $short && ( '' !== $short || isset( $rec['short'] ) ) ) {
-			kits_sourcing_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ) );
+			kits_sourcing_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ), (string) ( $rec['short'] ?? '' ), $short );
 			$rec['short'] = $short;
+		}
+		if ( $shown && $relay !== ! empty( $rec['relay'] ) ) {
+			if ( $relay ) {
+				$rec['relay'] = true;
+			} else {
+				unset( $rec['relay'] ); // no relay key rather than false: an unchanged record keeps its shape
+			}
+			kits_sourcing_log( 'relay', $host . ': fetch through this site', $relay ? 'off' : 'on', $relay ? 'on' : 'off' );
 		}
 		if ( $rec !== $before ) {
 			$pubs[ $host ] = $rec;
@@ -510,13 +645,50 @@ function aw_sourcing_source_save() {
 		}
 	} elseif ( 'none' !== $status || $is_pub ) {
 		return array( false, 'status' );
-	} elseif ( ! $press && ! $was ) {
-		return array( false, 'nothing' ); // neither a publisher nor a press site: nothing to keep
+	} else {
+		$is_relay = ! empty( $pubs[ $host ]['relay'] );
+		$existed  = isset( $pubs[ $host ] ) && 'relay' === ( $pubs[ $host ]['kind'] ?? '' ); // a relay-only record the form showed
+		if ( ! $press && ! $was && ! $feeds && ! ( $shown ? $relay : $is_relay ) ) {
+			return array( false, 'nothing' ); // not a publisher, not searched for coverage, no feeds, not relayed: nothing to keep
+		}
+		if ( $shown && $relay !== $is_relay ) {
+			$pubs = aw_relay_switch( $pubs, array( $host ), $relay );
+			update_option( AW_PUB_OPTION, $pubs, false );
+			$changed = true;
+		}
+		if ( $existed && isset( $pubs[ $host ] ) && (string) ( $pubs[ $host ]['name'] ?? '' ) !== $name ) { // its name, as the form showed it
+			kits_sourcing_log( 'relay', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) ( $pubs[ $host ]['name'] ?? '' ), $name );
+			$pubs[ $host ]['name'] = $name;
+			update_option( AW_PUB_OPTION, $pubs, false );
+			$changed = true;
+		}
 	}
 	if ( $press !== $was ) {
 		$changed = aw_sourcing_press_change( $press ? array( $host ) : array(), $press ? array() : array( $host ) ) || $changed;
 	}
 	return array( $changed, '' );
+}
+
+/**
+ * Delete a source (Sources list row action): a publisher record with no items, no feeds and no press search, or a
+ * relay-only record with no feeds. Logged with the record as it was.
+ *
+ * @param array  $pubs aw_publishers (read just before).
+ * @param string $host Host.
+ * @return array The records.
+ */
+function aw_sourcing_source_delete( array $pubs, $host ) {
+	$host  = aw_sourcing_norm_host( $host );
+	$stats = aw_sourcing_host_stats()['hosts'][ $host ] ?? array();
+	$rec   = $pubs[ $host ] ?? null;
+	if ( null === $rec || ! empty( aw_sourcing_feeds_by_host()[ $host ] ) || in_array( $host, aw_sourcing_press_hosts(), true )
+		|| (int) ( $rec['count'] ?? 0 ) > 0 || (int) ( $stats['f30'] ?? 0 ) > 0 || (int) ( $stats['pub'] ?? 0 ) > 0
+		|| ! in_array( (string) ( $rec['kind'] ?? '' ), array( '', 'relay' ), true ) ) {
+		return $pubs; // only a source with nothing attached is deleted
+	}
+	unset( $pubs[ $host ] );
+	kits_sourcing_log( 'publishers', 'deleted ' . $host, $rec, '' );
+	return $pubs;
 }
 
 /** Notices of the Sources edit form (src_err=host|status|nothing). */
@@ -527,7 +699,7 @@ add_action(
 		$msg = array(
 			'host'    => 'Nothing saved: that is not a host (example.com).',
 			'status'  => 'Nothing saved: choose Allowed, Neutral or Blocked.',
-			'nothing' => 'Nothing saved: a source that is not a publisher must be searched for coverage.',
+			'nothing' => 'Nothing saved: a source that is not a publisher must be searched for coverage, relayed or have feeds.',
 		);
 		if ( isset( $msg[ $err ] ) ) {
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $msg[ $err ] ) . '</p></div>';
