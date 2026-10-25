@@ -8,7 +8,7 @@
  *   as estimated.
  * - aw_sourcing_keyword_stats(): per search, items fetched (every status: held, merged and backfilled too) and
  *   published, News and Library apart. Offered to aw-seo-extras through the filter aw_sourcing_keyword_items, which
- *   shows them in AW SEO Plus → Search Insights with Search Console figures.
+ *   shows them in Tools → Search Insights with Search Console figures.
  * - aw-seo-extras is optional: without it nothing here is shown and sourcing works as before.
  *
  * @package aw-sourcing
@@ -131,5 +131,5 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 	return $out;
 }
 
-// For aw-seo-extras (AW SEO Plus → Search Insights): null there means AW Sourcing is off.
+// For aw-seo-extras (Tools → Search Insights): null there means AW Sourcing is off.
 add_filter( 'aw_sourcing_keyword_items', fn( $v, $days = 30 ) => aw_sourcing_keyword_stats( $days ), 10, 2 );

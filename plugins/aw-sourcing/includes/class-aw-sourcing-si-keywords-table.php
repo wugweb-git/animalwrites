@@ -1,6 +1,6 @@
 <?php
 /**
- * AW SEO Plus → Search Insights → Sourcing keywords: a core list table, sortable and read-only (owner, 24 Oct 2026).
+ * Tools → Search Insights → Sourcing keywords: a core list table, sortable and read-only (owner, 24 Oct 2026).
  * Loaded only when the tab is shown.
  *
  * @package aw-sourcing
