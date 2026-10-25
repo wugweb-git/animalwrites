@@ -171,6 +171,12 @@ function aw_si_psi_step(): array {
 	if ( ! is_array( $q ) || empty( $q['todo'] ) || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
 		return is_array( $q ) ? $q : array();
 	}
+	// The next step is booked before any call (25 Oct 2026): a step the host's time limit cuts off mid-call never reached
+	// the booking after the loop, so the queue stopped until someone pressed Start PageSpeed again. The call it was making
+	// is still in the saved queue and is tried again.
+	if ( ! wp_next_scheduled( AW_SI_PSI_MORE ) ) {
+		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, AW_SI_PSI_MORE );
+	}
 	$start = microtime( true );
 	while ( $q['todo'] && microtime( true ) - $start < AW_SI_PSI_BUDGET ) {
 		list( $path, $strategy ) = array_shift( $q['todo'] );
@@ -191,11 +197,9 @@ function aw_si_psi_step(): array {
 		update_option( AW_SI_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
 	}
 	if ( $q['todo'] ) {
-		if ( ! wp_next_scheduled( AW_SI_PSI_MORE ) ) {
-			wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, AW_SI_PSI_MORE );
-		}
-		return $q;
+		return $q; // The next step is already booked (above).
 	}
+	wp_clear_scheduled_hook( AW_SI_PSI_MORE ); // Done: no further step.
 	// Finished: good when at least one call worked; every error is listed either way.
 	if ( $q['done'] ) {
 		aw_si_run_ok(
