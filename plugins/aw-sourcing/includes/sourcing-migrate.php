@@ -14,6 +14,8 @@
  *     wp aw-sourcing verify --phase=1
  *     wp aw-sourcing rollback --phase=1 [--restore-all]
  *
+ * Phase 3 (Rules) uses the same commands with --phase=3; its steps are in sourcing-migrate-rules.php.
+ *
  * Backups: option aw_backup_<phase>_<YmdHis> (autoload off) and the file wp-content/uploads/aw-backups/<phase>-<YmdHis>.json
  * (the folder refuses web access). The migration record: option aw_sourcing_phase1_record.
  *
@@ -31,13 +33,19 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 /** Options a phase 1 backup holds. */
 const AW_SOURCING_BACKUP_OPTIONS = array( 'aw_publishers', 'aw_sources', 'aw_relay_log', 'kits_sourcing_log', 'aw_sourcing_phase' );
 
-/** The phase asked for (only 1 so far), or an error. */
+/** The phase asked for (1, or a phase another file adds through aw_sourcing_cli_phases), or an error. */
 function aw_sourcing_cli_phase( $assoc ) {
-	$phase = (int) ( $assoc['phase'] ?? 0 );
-	if ( 1 !== $phase ) {
-		WP_CLI::error( 'Only --phase=1 exists so far.' );
+	$phase  = (int) ( $assoc['phase'] ?? 0 );
+	$phases = array_map( 'intval', (array) apply_filters( 'aw_sourcing_cli_phases', array( 1 ) ) );
+	if ( ! in_array( $phase, $phases, true ) ) {
+		WP_CLI::error( 'Phases: --phase=' . implode( ', --phase=', $phases ) . '.' );
 	}
 	return $phase;
+}
+
+/** The options a phase's backup holds (aw_sourcing_cli_backup_options filter for the other phases). */
+function aw_sourcing_cli_backup_options( $phase ) {
+	return 1 === $phase ? AW_SOURCING_BACKUP_OPTIONS : (array) apply_filters( 'aw_sourcing_cli_backup_options', array(), $phase );
 }
 
 /** A value's checksum (sha256 of its JSON). */
@@ -106,7 +114,7 @@ WP_CLI::add_command(
 		$stamp = gmdate( 'YmdHis' );
 		$opts  = array();
 		$sums  = array();
-		foreach ( AW_SOURCING_BACKUP_OPTIONS as $k ) {
+		foreach ( aw_sourcing_cli_backup_options( $phase ) as $k ) {
 			$opts[ $k ] = get_option( $k, null );
 			$sums[ $k ] = aw_sourcing_cli_sum( $opts[ $k ] );
 		}
@@ -140,7 +148,7 @@ WP_CLI::add_command(
 		} else {
 			WP_CLI::warning( "Phase $phase is already migrated: this backup is kept, but migrate, verify and rollback use the one taken before the migration." );
 		}
-		WP_CLI::log( aw_sourcing_cli_counts( $opts ) );
+		WP_CLI::log( 1 === $phase ? aw_sourcing_cli_counts( $opts ) : (string) apply_filters( 'aw_sourcing_cli_counts', '', $phase, $opts ) );
 		foreach ( $sums as $k => $v ) {
 			WP_CLI::log( "sha256 $k: $v" );
 		}
@@ -165,6 +173,10 @@ WP_CLI::add_command(
 	function ( $args, $assoc ) {
 		$phase = aw_sourcing_cli_phase( $assoc );
 		$dry   = ! empty( $assoc['dry-run'] );
+		if ( 1 !== $phase ) { // another phase's steps (sourcing-migrate-rules.php for phase 3)
+			do_action( 'aw_sourcing_cli_migrate_' . $phase, $assoc, $dry );
+			return;
+		}
 		if ( aw_sourcing_phase() >= $phase ) {
 			WP_CLI::error( "Phase $phase is already migrated (aw_sourcing_phase = " . aw_sourcing_phase() . '). wp aw-sourcing verify --phase=1 checks it.' );
 		}
@@ -244,7 +256,11 @@ WP_CLI::add_command(
 WP_CLI::add_command(
 	'aw-sourcing verify',
 	function ( $args, $assoc ) {
-		$phase            = aw_sourcing_cli_phase( $assoc );
+		$phase = aw_sourcing_cli_phase( $assoc );
+		if ( 1 !== $phase ) {
+			do_action( 'aw_sourcing_cli_verify_' . $phase, $assoc );
+			return;
+		}
 		list( $bk, $old ) = aw_sourcing_cli_backup( $phase );
 		WP_CLI::log( "Backup: $bk" );
 		WP_CLI::log( 'Backup: ' . aw_sourcing_cli_counts( $old ) );
@@ -323,7 +339,11 @@ WP_CLI::add_command(
 WP_CLI::add_command(
 	'aw-sourcing rollback',
 	function ( $args, $assoc ) {
-		$phase            = aw_sourcing_cli_phase( $assoc );
+		$phase = aw_sourcing_cli_phase( $assoc );
+		if ( 1 !== $phase ) {
+			do_action( 'aw_sourcing_cli_rollback_' . $phase, $assoc );
+			return;
+		}
 		list( $bk, $old ) = aw_sourcing_cli_backup( $phase );
 		$all              = ! empty( $assoc['restore-all'] );
 		WP_CLI::confirm( "Roll phase $phase back " . ( $all ? "to backup $bk exactly (aw_publishers and aw_sources as backed up)" : '(undo the migration on the current records)' ) . '?', $assoc );
