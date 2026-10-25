@@ -41,7 +41,7 @@ Status checked on 24 Oct against the live site, WP-CLI (read only) and git; the 
 28. **Performance regression check:** CLS re-measured and fixed on 24 Oct; a full PageSpeed re-run waits for a PageSpeed API key.
 29. **Opportunities workers:** still paused (workers `run.py:435`, owner 9 Oct); last opportunity published 7 Oct.
 30. **Press discovery:** Google News press searches run (press-gnews.yml); the Brave search stays off (no key; no paid plan, owner).
-31. **High Court judgments as documents:** the Supreme Court is a source (`judgments-supreme-court`); no High Court source, HC reports arrive only as court News.
+31. **High Court judgments as documents:** built 25 Oct (owner: "build it"), waiting for the owner: the source `judgments-high-courts` (workers kind `judgments-hc`) is in Settings → Sourcing → Feeds, off. Turn it on after checking the dry-run list in the workers PR (branch `high-court-judgments`). Until then HC reports arrive only as court News.
 33. **Google News Publisher Center; Semrush keyword run** (no API units on the account): not done.
 35. **Directory data clean-up:** of 6,794 published listings, 557 have a state but no district (298 on 8 Oct; includes state-wide 1962 MVUs), 14 no place, 227 no state; duplicate names: 55 groups (133 listings) within the same district. The 11 duplicate groups kept as separate organisations are not recorded anywhere: owner's list needed. Project Nayna (52) has no type; Healing Saathi (53) has a second listing "Healing Saathi, Dehradun" (18321); Tabassum (44) is Animal Shelter: confirm.
 
