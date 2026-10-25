@@ -26,8 +26,13 @@ function aw_sourcing_suggest_norm( $s ) {
 	return trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( (string) $s ) ) );
 }
 
-/** Dismissed searches. */
+/** Dismissed searches (from phase 2: the records marked dismissed). */
 function aw_sourcing_dismissed() {
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+		global $wpdb;
+		$k = aw_si_table( 'keywords' );
+		return array_map( 'aw_sourcing_suggest_norm', (array) $wpdb->get_col( "SELECT label FROM {$k} WHERE dismissed = 1" ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	}
 	return array_values( array_filter( (array) get_option( AW_SOURCING_DISMISSED, array() ), 'is_string' ) );
 }
 
@@ -55,9 +60,10 @@ function aw_sourcing_suggestions() {
 	if ( ! is_array( $terms ) ) {
 		return null;
 	}
-	$rel       = aw_relevance();
+	$rel       = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance();
 	$words     = array_merge( (array) ( $rel['strong'] ?? array() ), (array) ( $rel['exclude'] ?? array() ) );
 	$dismissed = array_flip( aw_sourcing_dismissed() );
+	$dis_norm  = array_flip( array_map( 'aw_si_norm', array_keys( $dismissed ) ) );
 	$out       = array();
 	foreach ( $terms as $t ) {
 		$q = aw_sourcing_suggest_norm( $t['q'] ?? '' );
@@ -78,7 +84,7 @@ function aw_sourcing_suggestions() {
 			'clicks'    => (int) ( $t['clicks'] ?? 0 ),
 			'pos'       => (float) ( $t['pos'] ?? 0 ),
 			'rising'    => ! empty( $t['rising'] ),
-			'dismissed' => isset( $dismissed[ $q ] ),
+			'dismissed' => isset( $dismissed[ $q ] ) || ( function_exists( 'aw_si_norm' ) && isset( $dis_norm[ aw_si_norm( $q ) ] ) ),
 		);
 	}
 	return array_values( $out );
@@ -89,6 +95,30 @@ function aw_sourcing_suggest_apply( $op, array $qs ) {
 	$qs = array_values( array_unique( array_filter( array_map( 'aw_sourcing_suggest_norm', $qs ) ) ) );
 	if ( ! $qs ) {
 		return 0;
+	}
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: roles and the dismissed flag on the record
+		$n = 0;
+		foreach ( $qs as $q ) {
+			if ( in_array( $op, array( 'include', 'exclude', 'search' ), true ) ) {
+				$bit = array( 'include' => AW_KW_ROLE_INCLUDE, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH )[ $op ];
+				$id  = aw_kw_id_by_norm( aw_si_norm( $q ) );
+				$was = $id ? (int) aw_kw_get( $id )['roles'] : 0;
+				$r   = aw_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => AW_KW_ROLE_EXCLUDE === $bit ? array() : array( 'aw_news' ) ) );
+				if ( ! is_wp_error( $r ) && ! ( $was & $bit ) ) {
+					++$n;
+					kits_sourcing_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );
+				}
+				continue;
+			}
+			$id = aw_kw_id_by_norm( aw_si_norm( $q ) );
+			$id = $id ? $id : aw_kw_create( $q );
+			$on = 'dismiss' === $op ? 1 : 0;
+			if ( $id && true === aw_kw_update( $id, array( 'dismissed' => $on ) ) ) {
+				++$n;
+				kits_sourcing_log( 'keywords', $q . ': suggestion ' . ( $on ? 'dismissed' : 'shown again' ), (bool) ! $on, (bool) $on );
+			}
+		}
+		return $n;
 	}
 	if ( 'include' === $op || 'exclude' === $op ) {
 		$rel   = aw_relevance();
@@ -115,10 +145,7 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'bulk-suggestions' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the lists are the keyword table's now; these screens are copies until the new ones arrive
-			wp_die( 'The keyword lists moved into the keyword table (sourcing phase 2). They are edited on the new Keywords screen; this old form is read-only.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
-		}
-		$ops = array( 'include', 'exclude', 'dismiss', 'restore' );
+		$ops = array( 'include', 'exclude', 'search', 'dismiss', 'restore' );
 		$op  = '';
 		$qs  = array();
 		$one = sanitize_text_field( wp_unslash( $_POST['aw_suggest'] ?? '' ) ); // a row action: "op:search"
@@ -180,6 +207,8 @@ add_action(
 				'include' => _n( '%d search added to Include. The workers search it from their next run.', '%d searches added to Include. The workers search them from their next run.', $n ),
 				/* translators: %d: number of searches or suggestions. */
 				'exclude' => _n( '%d search added to Exclude.', '%d searches added to Exclude.', $n ),
+				/* translators: %d: number of searches or suggestions. */
+				'search'  => _n( '%d search added as its own Google News search. The workers search it from their next run.', '%d searches added as their own Google News searches. The workers search them from their next run.', $n ),
 				/* translators: %d: number of searches or suggestions. */
 				'dismiss' => _n( '%d suggestion dismissed.', '%d suggestions dismissed.', $n ),
 				/* translators: %d: number of searches or suggestions. */
