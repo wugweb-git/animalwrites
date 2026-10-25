@@ -86,7 +86,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 		if ( 'top' !== $which ) {
 			return;
 		}
-		$include = count( (array) ( aw_relevance()['strong'] ?? array() ) );
+		$include = count( (array) ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['strong'] : ( aw_relevance()['strong'] ?? array() ) ) ); // the table from phase 2
 		echo '<div class="alignleft actions"><span class="dashicons dashicons-search" aria-hidden="true"></span> Include list: <strong>' . esc_html( number_format_i18n( $include ) ) . ' words</strong> · about <strong>' . esc_html( number_format_i18n( aw_sourcing_suggest_search_count() ) ) . ' Google News searches per run</strong>. Each English word added to Include is one more search per run (up to 40 new items); Exclude adds none.</div>';
 	}
 

@@ -275,20 +275,38 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
-				'callback'            => function () {
-					$pubs = aw_publishers();
-					$rel  = aw_relevance();
-					$by   = fn( $s ) => array_values( array_keys( array_filter( $pubs, fn( $p ) => ( $p['status'] ?? '' ) === $s ) ) );
-					$data = array(
-						'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
-						'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'], 'animal' => $rel['animal'], 'context' => $rel['context'], 'exclude' => $rel['exclude'] ),
-					);
-					return apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
-				},
+				'callback'            => 'aw_sourcing_policy_payload',
 			)
 		);
 	}
 );
+
+/**
+ * The sourcing policy the workers read. From phase 4 (owner, 25 Oct 2026) the v1 keys are not sent: relevance holds
+ * only its switch and config only the v2 blocks (retire-model.php aw_retire_policy()). The v1 code stays, so a
+ * rollback to phase 3 sends them again.
+ *
+ * @return array
+ */
+function aw_sourcing_policy_payload() {
+	$pubs = aw_publishers();
+	$rel  = aw_relevance();
+	$by   = fn( $s ) => array_values( array_keys( array_filter( $pubs, fn( $p ) => ( $p['status'] ?? '' ) === $s ) ) );
+	$data = array(
+		'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
+		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ),
+	);
+	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
+	if ( aw_sourcing_phase() < 4 || ! function_exists( 'aw_retire_policy' ) ) {
+		return $data;
+	}
+	// Phase 4: the keyword table always goes (also with "Workers use these lists" off), so the workers have the words
+	// the relevance switch needs; without the table nothing is stripped (the archived v1 lists still go).
+	if ( ! isset( $data['keywords'] ) && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+		$data['keywords'] = aw_kw_payload( aw_sourcing_kw_worker_rows(), (array) ( aw_sources_config()['sources'] ?? array() ) );
+	}
+	return aw_retire_policy( $data );
+}
 
 /* ---------- WP Admin: News → Sourcing ---------- */
 

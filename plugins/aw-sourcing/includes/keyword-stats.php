@@ -77,7 +77,7 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 	global $wpdb;
 	$since    = time() - $days * DAY_IN_SECONDS;
 	$searches = aw_sourcing_searches();
-	$include  = array_map( 'strval', (array) ( aw_relevance()['strong'] ?? array() ) );
+	$include  = array_map( 'strval', (array) ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['strong'] : ( aw_relevance()['strong'] ?? array() ) ) ); // the table from phase 2 (the old list is archived in phase 4)
 	$rows     = array();
 	$row      = function ( $feed, $term ) use ( &$rows, $include ) {
 		if ( ! isset( $rows[ $feed ] ) ) {

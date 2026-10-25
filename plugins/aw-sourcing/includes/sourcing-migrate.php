@@ -17,6 +17,8 @@
  * Phase 2 (Keywords: the lists into the keyword table, sourcing-migrate-phase2.php) takes the same commands with
  * --phase=2; its dry run prints every list's counts and the per-word whole-word report for the owner.
  * Phase 3 (Rules) uses the same commands with --phase=3; its steps are in sourcing-migrate-rules.php.
+ * Phase 4 (Retire: the old lists archived and no longer used, the v1 policy keys no longer sent) uses them with
+ * --phase=4; its steps are in sourcing-migrate-retire.php.
  *
  * Backups: option aw_backup_<phase>_<YmdHis> (autoload off) and the file wp-content/uploads/aw-backups/<phase>-<YmdHis>.json
  * (the folder refuses web access). The migration record: option aw_sourcing_phase1_record.
@@ -134,7 +136,7 @@ function aw_sourcing_cli_relay_before( array $sources_option ) {
  * ## OPTIONS
  *
  * --phase=<n>
- * : The phase (1 or 2).
+ * : The phase (1 to 4).
  */
 WP_CLI::add_command(
 	'aw-sourcing backup',
@@ -197,7 +199,7 @@ WP_CLI::add_command(
  * ## OPTIONS
  *
  * --phase=<n>
- * : The phase (1 or 2).
+ * : The phase (1 to 4).
  *
  * [--dry-run]
  * : Print every count before and after; write nothing.
@@ -289,12 +291,16 @@ WP_CLI::add_command(
  * ## OPTIONS
  *
  * --phase=<n>
- * : The phase (1 or 2).
+ * : The phase (1 to 4).
  */
 WP_CLI::add_command(
 	'aw-sourcing verify',
 	function ( $args, $assoc ) {
 		$phase = aw_sourcing_cli_phase( $assoc );
+		$why   = (string) apply_filters( 'aw_sourcing_cli_refusal', '', $phase, 'verify' ); // a later phase may forbid it (phase 4)
+		if ( '' !== $why ) {
+			WP_CLI::error( $why );
+		}
 		if ( ! in_array( $phase, array( 1, 2 ), true ) ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_verify_' . $phase, $assoc );
 			return;
@@ -370,7 +376,7 @@ WP_CLI::add_command(
  * ## OPTIONS
  *
  * --phase=<n>
- * : The phase (1 or 2).
+ * : The phase (1 to 4).
  *
  * [--restore-all]
  * : Restore aw_publishers and aw_sources exactly as backed up (loses the ingest gate's counts and new hosts since).
@@ -382,6 +388,10 @@ WP_CLI::add_command(
 	'aw-sourcing rollback',
 	function ( $args, $assoc ) {
 		$phase = aw_sourcing_cli_phase( $assoc );
+		$why   = (string) apply_filters( 'aw_sourcing_cli_refusal', '', $phase, 'rollback' ); // a later phase may forbid it (phase 4)
+		if ( '' !== $why ) {
+			WP_CLI::error( $why );
+		}
 		if ( ! in_array( $phase, array( 1, 2 ), true ) ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_rollback_' . $phase, $assoc );
 			return;
