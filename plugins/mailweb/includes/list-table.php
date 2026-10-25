@@ -122,7 +122,7 @@ class Mailweb_List_Table extends WP_List_Table {
 					'box'     => $key,
 					'uid'     => (int) $m['uid'],
 					'from'    => $sent ? implode( ', ', array_map( fn( $a ) => mailweb_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : mailweb_who( $m['from'] ?? array(), true ),
-					'email'   => $sent ? '' : implode( '', mailweb_addr_list( array( $m['from'] ?? array() ) ) ),
+					'email'   => $sent ? '' : implode( '', mailweb_addresses( array( $m['from'] ?? array() ) ) ),
 					'subject' => trim( (string) ( $m['subject'] ?? '' ) ),
 					'date'    => (string) ( $m['date'] ?? '' ),
 					'unseen'  => ! empty( $m['unseen'] ),

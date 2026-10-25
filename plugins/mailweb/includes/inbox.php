@@ -142,18 +142,6 @@ function mailweb_who( $a, $name_only = false ) {
 	return '' !== $n ? $n . ' <' . $e . '>' : $e;
 }
 
-/** Plain addresses of an API address list. */
-function mailweb_addr_list( $list ) {
-	$out = array();
-	foreach ( (array) $list as $a ) {
-		$e = strtolower( trim( (string) ( is_array( $a ) ? ( $a['address'] ?? '' ) : $a ) ) );
-		if ( is_email( $e ) ) {
-			$out[] = $e;
-		}
-	}
-	return array_values( array_unique( $out ) );
-}
-
 /** Our own addresses (mailboxes and aliases). */
 function mailweb_own() {
 	return array_merge( array_values( mailweb_all_boxes() ), array_keys( mailweb_aliases() ) );
@@ -499,9 +487,9 @@ function mailweb_compose_screen( $s, $mode ) {
 				$subj = mailweb_prefix( 'Fwd:', $m['subject'] ?? '' );
 			} else {
 				$subj = mailweb_prefix( 'Re:', $m['subject'] ?? '' );
-				$to   = 'sent' === $s['folder'] ? mailweb_addr_list( $m['to'] ?? array() ) : mailweb_addr_list( array( $m['from'] ?? array() ) );
+				$to   = 'sent' === $s['folder'] ? mailweb_addresses( $m['to'] ?? array() ) : mailweb_addresses( array( $m['from'] ?? array() ) );
 				if ( 'all' === $mode ) {
-					$cc = array_values( array_diff( array_merge( mailweb_addr_list( $m['to'] ?? array() ), mailweb_addr_list( $m['cc'] ?? array() ) ), $own, $to ) );
+					$cc = array_values( array_diff( array_merge( mailweb_addresses( $m['to'] ?? array() ), mailweb_addresses( $m['cc'] ?? array() ) ), $own, $to ) );
 				}
 			}
 			$ref   = $path . '|' . (int) $s['uid'];
@@ -734,11 +722,6 @@ add_action(
 	}
 );
 
-/** Comma list of addresses → valid addresses. */
-function mailweb_parse_addrs( $s ) {
-	return array_values( array_unique( array_filter( array_map( fn( $a ) => strtolower( trim( $a ) ), preg_split( '/[,;\s]+/', (string) $s ) ), 'is_email' ) ) );
-}
-
 function mailweb_send_from_form( $in, $refbox ) {
 	check_admin_referer( 'mailweb_act' ); // also checked by the caller; here too because this reads $_FILES
 	$boxes = mailweb_send_boxes(); // only mailboxes allowed to send, whatever the form sends
@@ -746,9 +729,9 @@ function mailweb_send_from_form( $in, $refbox ) {
 	$from  = isset( $boxes[ $from ] ) ? $from : mailweb_default_from();
 	$mode  = sanitize_key( $in['mode'] ?? 'new' );
 	$item  = absint( $in['item'] ?? 0 );
-	$to    = mailweb_parse_addrs( $in['to'] ?? '' );
-	$cc    = mailweb_parse_addrs( $in['cc'] ?? '' );
-	$bcc   = mailweb_parse_addrs( $in['bcc'] ?? '' );
+	$to    = mailweb_addresses( $in['to'] ?? '' );
+	$cc    = mailweb_addresses( $in['cc'] ?? '' );
+	$bcc   = mailweb_addresses( $in['bcc'] ?? '' );
 	$subj  = sanitize_text_field( (string) ( $in['subject'] ?? '' ) );
 	$html  = wpautop( wp_kses_post( (string) ( $in['body'] ?? '' ) ) ); // the editor saves line breaks as newlines
 	$html  = preg_replace( '/<div class="signature"[^>]*>/', '<div class="signature" style="margin-top:28px">', $html, 1 ); // space between message and signature

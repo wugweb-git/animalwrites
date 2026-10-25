@@ -139,7 +139,7 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 		$text = trim( wp_strip_all_tags( (string) ( $t['data']['html'] ?? '' ) ) );
 	}
 	$box   = mailweb_all_boxes()[ $key ] ?? '';
-	$own   = array_values( array_intersect( mailweb_addr_list( array_merge( (array) ( $m['to'] ?? array() ), (array) ( $m['cc'] ?? array() ) ) ), mailweb_own() ) );
+	$own   = array_values( array_intersect( mailweb_addresses( array_merge( (array) ( $m['to'] ?? array() ), (array) ( $m['cc'] ?? array() ) ) ), mailweb_own() ) );
 	$sent  = ! empty( $m['date'] ) ? strtotime( (string) $m['date'] ) : time();
 	$files = array_map( fn( $a ) => (string) ( $a['filename'] ?? 'attachment' ), array_filter( (array) ( $m['attachments'] ?? array() ), fn( $a ) => empty( $a['inline'] ) ) );
 	$head  = array_filter(
