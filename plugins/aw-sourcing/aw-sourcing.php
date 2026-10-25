@@ -36,6 +36,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 
 // The Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
+require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)
 // Order matters for the Settings → Sourcing tabs (Sources, Keywords, then these in this order).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
@@ -61,6 +62,7 @@ require_once AW_SOURCING_DIR . 'includes/ai-keys.php';
 require_once AW_SOURCING_DIR . 'includes/site-health.php';
 require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
+require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';

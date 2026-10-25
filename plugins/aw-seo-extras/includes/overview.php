@@ -26,6 +26,21 @@ add_action(
 	9 // Before FAQ (10) and Search Insights (100), so Overview is the first item.
 );
 
+// Plugins screen: Overview, FAQ and Search Insights under the plugin's name.
+add_filter(
+	'plugin_action_links_' . plugin_basename( AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' ),
+	function ( $links ) {
+		$own = array(
+			'<a href="' . esc_url( add_query_arg( 'page', AW_SEO_MENU, admin_url( 'admin.php' ) ) ) . '">Overview</a>',
+			'<a href="' . esc_url( add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ) ) . '">FAQ</a>',
+		);
+		if ( function_exists( 'aw_si_url' ) && current_user_can( aw_si_cap() ) ) {
+			$own[] = '<a href="' . esc_url( aw_si_url() ) . '">Search Insights</a>';
+		}
+		return array_merge( $own, (array) $links );
+	}
+);
+
 /** A Rank Math screen's address. */
 function aw_seo_rank_math_url( string $page ): string {
 	return add_query_arg( 'page', $page, admin_url( 'admin.php' ) );

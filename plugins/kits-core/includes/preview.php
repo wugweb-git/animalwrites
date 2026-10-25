@@ -2,7 +2,7 @@
 /**
  * Preview: things only the site owner should see before they go public (sample items). Ads are Advanced Ads' alone.
  *
- * Who previews: logged-in administrators, requests from a preview IP address (Settings > Preview; IPv4 exact, IPv6 by its
+ * Who previews: logged-in administrators, requests from a preview IP address (Kits → Preview; IPv4 exact, IPv6 by its
  * /64 network), and registered preview devices (a long-lived HttpOnly cookie holding a random token; only its hash is
  * stored). Pages are served from a public cache, so the page HTML never varies by IP or device: it carries everything,
  * and CSS hides preview-only parts unless the page is marked html.kits-preview (set by a small script after asking the
@@ -42,7 +42,7 @@ function kits_preview_only_ids() {
 	return array_values( array_filter( array_map( 'intval', (array) apply_filters( 'kits_preview_only_ids', array() ) ) ) );
 }
 
-/** The preview IP list (one per line in Settings > Ads). */
+/** The preview IP list (one per line in Kits → Preview). */
 function kits_preview_ips() {
 	return array_values( array_filter( array_map( 'trim', preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) ) );
 }
@@ -228,12 +228,13 @@ add_action(
 	1
 );
 
-/* ---------- Settings > Preview: preview IP addresses and devices (administrators only) ---------- */
+/* ---------- Kits → Preview: preview IP addresses and devices (administrators only) ---------- */
 
 add_action(
 	'admin_menu',
 	function () {
-		add_options_page(
+		add_submenu_page(
+			KITS_MENU, // Kits → Preview
 			'Preview',
 			'Preview',
 			'manage_options',
@@ -257,7 +258,7 @@ add_action(
 	}
 );
 
-/** The preview devices part of Settings > Preview. */
+/** The preview devices part of Kits → Preview. */
 function kits_preview_devices_screen() {
 	$post = esc_url( admin_url( 'admin-post.php' ) );
 	echo '<h2 class="title" style="margin-top:2em">Preview devices</h2><p class="description">A registered device sees preview-only items on any network, without logging in.</p>';
@@ -287,9 +288,9 @@ function kits_preview_devices_screen() {
 		. '<label>Device name <input type="text" name="label" placeholder="Phone"></label> <button type="submit" class="button">Create a device link</button></form>';
 }
 
-/** Back to Settings > Preview. */
+/** Back to Kits → Preview. */
 function kits_preview_back() {
-	wp_safe_redirect( admin_url( 'options-general.php?page=kits-preview' ) );
+	wp_safe_redirect( admin_url( 'admin.php?page=kits-preview' ) );
 	exit;
 }
 

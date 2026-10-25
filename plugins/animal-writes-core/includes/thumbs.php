@@ -11,7 +11,7 @@
  * (option aw_thumb_map: post ID => attachment ID) and rebuilt when an item is published, changed or removed, and daily.
  * Library items with their own document page (aw_file_id / aw_doc_preview) keep it: it is unique to them.
  *
- * Check: GET /wp-json/aw/v1/thumb-dupes → { "duplicates": n } (the deploy gate fails when n > 0); Tools → Check site.
+ * Check: GET /wp-json/aw/v1/thumb-dupes → { "duplicates": n } (the deploy gate fails when n > 0); Animal Writes → Check site.
  *
  * @package animal-writes-core
  */

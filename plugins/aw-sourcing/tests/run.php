@@ -2,7 +2,9 @@
 /**
  * Sourcing tests that need no WordPress (owner rule: no local WordPress or MySQL): the shared keyword matcher against
  * tests/fixtures/match_cases.json (the same file as the workers' tests) and the phase 1 Sources model (sources-model.php)
- * against the live shapes of 25 Oct 2026 (tests/fixtures/phase1_live_sample.json). Run by the Deploy check.
+ * against the live shapes of 25 Oct 2026 (tests/fixtures/phase1_live_sample.json), and the phase 2 keyword model
+ * (animal-writes-core keyword-model.php, keywords-model.php) against the live lists and keyword records
+ * (tests/fixtures/phase2_live_sample.json). Run by the Deploy check.
  *
  * Usage: php plugins/aw-sourcing/tests/run.php
  *
@@ -12,7 +14,18 @@
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 
 define( 'ABSPATH', __DIR__ . '/' );
+
+/**
+ * WordPress's tag stripper, for aw_si_norm() (the only WordPress function the models use).
+ *
+ * @param string $s Text.
+ */
+function wp_strip_all_tags( $s ) {
+	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
+}
+require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/keyword-model.php';
 require dirname( __DIR__ ) . '/includes/sources-model.php';
+require dirname( __DIR__ ) . '/includes/keywords-model.php';
 require dirname( __DIR__ ) . '/includes/rules-model.php';
 
 $fails = 0;
@@ -176,6 +189,169 @@ aw_t( $relay === aw_src_relay_legacy( array(), $relay ) && array( 'a.com' ) === 
 $last = aw_src_relay_last( $log, 'zoomtventertainment.com' );
 aw_t( is_array( $last ) && 'www.zoomtventertainment.com' === $last['host'], 'last relay result includes subdomains' );
 aw_t( null === aw_src_relay_last( $log, 'thehindu.com' ), 'no relay result for a host never relayed' );
+
+
+// ==== Phase 2: the keyword table ====
+
+// The one role check: Sourcing and Press roles English only; never Include with Exclude; removing always allowed.
+aw_t( array( 1, '' ) === aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'en' ), 'roles: Include on an English keyword' );
+aw_t( '' !== aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'hi' )[1] && 0 === aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'hi' )[0], 'roles: Include refused on a Hindi keyword' );
+aw_t( '' !== aw_kw_roles_check( 0, AW_KW_ROLE_PRESS, 0, 'hinglish' )[1], 'roles: Press refused on a Hinglish keyword' );
+aw_t( array( AW_SI_ROLE_TRACKED, '' ) === aw_kw_roles_check( AW_SI_ROLE_TRACKED, AW_SI_ROLE_TRACKED, 0, 'hi' ), 'roles: other roles still allowed on Hindi' );
+aw_t( array( 0, '' ) === aw_kw_roles_check( AW_KW_ROLE_INCLUDE, 0, AW_KW_ROLE_INCLUDE, 'hi' ), 'roles: a Sourcing role can always be removed' );
+aw_t( '' !== aw_kw_roles_check( AW_KW_ROLE_INCLUDE, AW_KW_ROLE_EXCLUDE, 0, 'en' )[1], 'roles: Include + Exclude refused' );
+aw_t( array( AW_KW_ROLE_EXCLUDE, '' ) === aw_kw_roles_check( AW_KW_ROLE_INCLUDE, AW_KW_ROLE_EXCLUDE, AW_KW_ROLE_INCLUDE, 'en' ), 'roles: Include moved to Exclude' );
+aw_t( 'gaushala' === aw_si_norm( 'Gaushalas' ) && 'dogs' === aw_si_norm( 'dogs' ) && 'gsr 864' === aw_si_norm( 'G.S.R. 864' ) && 'animalwrite' === aw_si_norm( '#animalwrites' ) && 'rabies' === aw_si_norm( 'rabies' ), 'aw_si_norm folds plurals and punctuation' );
+aw_t( 'hi' === aw_si_lang( 'पशु' ) && 'hinglish' === aw_si_lang( 'kutta bite' ) && 'en' === aw_si_lang( 'stray dog' ), 'aw_si_lang' );
+aw_t( array( 'include', 'search' ) === aw_kw_roles_to_slugs( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_SEARCH | AW_SI_ROLE_BRAND ), 'role slugs for the workers' );
+aw_t( array( 'a', 'b*' ) === aw_kw_variants_list( "a\n\n A \nb*\r\n" ), 'other spellings: one per line, no repeats' );
+
+// The migration plan on the live lists and records of 25 Oct 2026.
+$p2   = json_decode( file_get_contents( $fx . 'phase2_live_sample.json' ), true );
+$rows = array();
+foreach ( $p2['rows'] as $r ) {
+	$rows[] = $r + array( 'variants' => array(), 'src' => array(), 'categories' => array(), 'sections' => array(), 'query' => '', 'feed_id' => '', 'search_on' => 1, 'dismissed' => 0 );
+}
+$rel  = $p2['relevance'];
+$cfg  = $p2['sources_option'];
+$plan = aw_kw_phase2_plan( $rel, $cfg, $p2['dismissed'], $rows );
+$L    = $plan['lists'];
+aw_t( 26 === $L['strong']['items'] && 26 === $L['strong']['distinct'] && 26 === $L['strong']['existing'], 'Include: 26 words, all already records' );
+aw_t( 57 === $L['animal']['items'] && 45 === $L['animal']['distinct'] && 12 === count( $L['animal']['merged'] ), 'Animal: 57 words fold to 45 (12 plural pairs)' );
+aw_t( 55 === $L['context']['items'] && 54 === $L['context']['distinct'] && array( 'imports / import' ) === $L['context']['merged'], 'Context: 55 → 54 (imports / import)' );
+aw_t( 29 === $L['exclude']['items'] && 28 === $L['exclude']['distinct'] && 0 === $L['exclude']['existing'], 'Exclude: 29 → 28, none in the table yet' );
+aw_t( 11 === $L['press']['items'] && 10 === $L['press']['distinct'] && array( 'AnimalWrites / #animalwrites' ) === $L['press']['merged'], 'Press: 11 queries → 10 records' );
+aw_t( 2 === $L['lab']['items'], 'two lab words that no category had (G.S.R. 864, Palamur)' );
+aw_t( 164 === $plan['new'] && 73 === $plan['existing'], 'records: 164 new, 73 existing (' . $plan['new'] . ', ' . $plan['existing'] . ')' );
+aw_t( 115 === $plan['cat_maps'], 'category mappings: 113 + the 2 lab words (' . $plan['cat_maps'] . ')' );
+aw_t( array() === $plan['conflicts'], 'no Include + Exclude conflicts' );
+aw_t( 10 === count( $plan['hindi'] ), '10 Hindi spellings lose the Sourcing role (decision 13)' );
+aw_t( array( 'gnews-animal-welfare', 'gnews-animal-cruelty', 'gnews-lab-animal-rules', 'gnews-kw-stray-dogs' ) === array_keys( $plan['searches'] ), 'searches: the 3 open-web feeds and "stray dogs" keep their feed ids' );
+aw_t( 7 === count( $plan['checks'] ) && array( 'include' ) === $plan['checks']['livelaw-top']['roles'] && array( 'animal-experimentation' ) === $plan['checks']['peta-india']['categories'], 'keyword checks: 4 on Include, 3 on Animal Experimentation (decisions 4, 5)' );
+$hindi_ok = true;
+$kept     = true;
+foreach ( $plan['records'] as $r ) {
+	if ( 'en' !== $r['lang'] && ( $r['roles'] & AW_KW_WORKER_ROLES ) ) {
+		$hindi_ok = false;
+	}
+	if ( $r['id'] && ( ( $r['roles_was'] & ~AW_KW_WORKER_ROLES ) & ~$r['roles'] ) ) {
+		$kept = false; // a merge never removes a role (only Sourcing roles from non-English records)
+	}
+}
+aw_t( $hindi_ok, 'no record that is not English has a Sourcing or Press role' );
+aw_t( $kept, 'roles add up: no other role removed' );
+$every = true;
+foreach ( array( 'strong', 'animal', 'context', 'exclude' ) as $k ) {
+	foreach ( $rel[ $k ] as $w ) {
+		$r     = $plan['records'][ aw_si_norm( $w ) ] ?? null;
+		$every = $every && $r && in_array( mb_strtolower( $w ), array_map( 'mb_strtolower', aw_kw_spellings( $r ) ), true );
+	}
+}
+aw_t( $every, 'every original spelling is kept on its record' );
+aw_t( (bool) ( $plan['records']['stray dogs']['roles'] & AW_KW_ROLE_SEARCH ) && 'gnews-kw-stray-dogs' === $plan['records']['stray dogs']['feed_id'], '"stray dogs" is a Search keyword with its feed id' );
+aw_t( array( 'aw_press' ) === $plan['records'][ aw_si_norm( 'lab animal rules' ) ]['sections'], 'the lab search files as press' );
+aw_t( array( 'courts-judgments', 'campaigns-civic-action' ) === $plan['records']['petition']['categories'], '"petition" is mapped to 2 categories' );
+aw_t( 1 === $plan['records'][ aw_si_norm( 'yes' ) ]['dismissed'], 'dismissed suggestions are a column on the record' );
+
+// Ids as the migration gives them; the mirrors equal the old lists apart from the planned Hindi and lab changes.
+$i    = 900000;
+$recs = array();
+foreach ( $plan['records'] as $r ) {
+	$r['id'] = $r['id'] ? $r['id'] : ++$i;
+	$recs[]  = $r;
+}
+$old             = array( 'strong' => $rel['strong'], 'animal' => $rel['animal'], 'context' => $rel['context'], 'exclude' => $rel['exclude'], 'press' => $cfg['press']['queries'], 'categories' => $cfg['categories'] );
+$mir             = aw_kw_mirrors( $recs );
+$mir['categories'] = aw_kw_categories_in_order( $mir['categories'], $cfg['categories'] );
+$cmp             = aw_kw_compare_mirrors( $old, $mir, $plan['hindi'] );
+aw_t( array() === $cmp['diffs'], 'mirrors: the old lists rebuilt exactly (' . implode( '; ', $cmp['diffs'] ) . ')' );
+aw_t( 6 === count( $cmp['planned'] ), 'mirrors: 5 lists lose Hindi words, the lab category gains 2 words' );
+aw_t( $mir['press'] === $cfg['press']['queries'], 'press queries rebuilt in order' );
+aw_t( array_keys( $mir['categories'] ) === array_keys( $cfg['categories'] ), 'categories in the old order' );
+$bad   = $recs;
+$bad[] = array( 'id' => 1, 'label' => 'new word', 'roles' => AW_KW_ROLE_INCLUDE, 'src' => array(), 'categories' => array() );
+aw_t( array( 'new word' ) === array_slice( aw_kw_mirrors( $bad )['strong'], -1 ), 'a keyword given Include later joins the mirror at the end' );
+aw_t( (bool) aw_kw_compare_mirrors( $old, aw_kw_mirrors( $bad ), $plan['hindi'] )['diffs'], 'verify finds an unplanned change in a mirror' );
+
+// The workers' keywords: Sourcing and Press roles, English only; the same searches and press queries as before.
+$pay = aw_kw_payload( $recs, $cfg['sources'] );
+aw_t( 225 === count( $pay ), 'keywords for the workers: 225 (' . count( $pay ) . ')' );
+aw_t( ! array_filter( $pay, fn( $k ) => 'en' !== $k['lang'] || ! $k['roles'] ), 'only English keywords with a Sourcing or Press role' );
+$on   = array_values( array_filter( $cfg['sources'], fn( $s ) => ! empty( $s['on'] ) ) );
+$open = aw_kw_open_searches( $cfg['sources'] );
+$v1   = aw_kw_v1_searches( $on, $rel['strong'] );
+$v2   = aw_kw_v2_searches( array_values( array_filter( $on, fn( $s ) => ! isset( $open[ $s['id'] ] ) ) ), $pay );
+ksort( $v1 );
+ksort( $v2 );
+aw_t( 30 === count( $v1 ) && $v1 === $v2, 'acceptance: the same 30 Google News searches (feed id and query) from the keywords' );
+$q = array();
+foreach ( $pay as $k ) {
+	foreach ( (array) ( $k['queries'] ?? array() ) as $x ) {
+		$q[ mb_strtolower( $x ) ] = $x;
+	}
+}
+aw_t( array_values( $q ) === $cfg['press']['queries'], 'press queries from the keywords: the same 11' );
+$sd = array_values( array_filter( $pay, fn( $k ) => 'animal welfare' === $k['label'] ) )[0];
+aw_t( 'gnews-animal-welfare' === $sd['searches'][0]['feed'] && isset( $sd['searches'][0]['url'] ) && 'gnews-kw-animal-welfare' === $sd['searches'][1]['feed'], 'a former feed comes first, with its URL' );
+
+// The sources after the migration: checks stored; the policy's phase 2 blocks.
+$kwid    = array( 'gnews-animal-welfare' => 11, 'gnews-animal-cruelty' => 12, 'gnews-lab-animal-rules' => 13 );
+$srcs    = aw_kw_apply_to_sources( $cfg['sources'], $plan['checks'], $kwid );
+$blocks  = aw_kw_policy_blocks( $srcs, $recs, array( 'awbi.gov.in' ) );
+$v2ids   = array_column( $blocks['sources_v2'], null, 'id' );
+aw_t( 16 === count( $blocks['sources_v2'] ) && ! isset( $v2ids['gnews-animal-welfare'] ), 'sources_v2: the 16 feeds that are on, without the 3 that are keywords now' );
+aw_t( array( 'include' ) === $v2ids['the-hindu-environment']['check']['roles'] && array( 'animal-experimentation' ) === $v2ids['pfa-substack']['check']['categories'], 'sources_v2 carries the stored keyword checks' );
+aw_t( 'word' === $blocks['match'] && 2 === $blocks['schema']['keywords'] && 225 === count( $blocks['keywords_v2'] ), 'match "word", schema keywords 2' );
+$lab = array_values( array_filter( $blocks['keywords_v2'], fn( $k ) => 'lab animal rules' === $k['label'] ) )[0]['searches'][0];
+aw_t( 'press' === $lab['file_as'] && array( 'animal-experimentation' ) === $lab['check']['categories'], 'the lab search keeps its filing and its check' );
+
+// Running the plan again on the migrated records changes nothing (idempotent).
+$again = aw_kw_phase2_plan( $rel, $cfg, $p2['dismissed'], $recs );
+$same  = 0 === $again['new'];
+foreach ( $again['records'] as $n => $r ) {
+	$same = $same && $r['roles'] === $plan['records'][ $n ]['roles'] && $r['variants'] === $plan['records'][ $n ]['variants'] && $r['categories'] === $plan['records'][ $n ]['categories'];
+}
+aw_t( $same, 'running the migration twice changes nothing' );
+
+// The whole-word report and the * spellings (decision 6).
+$texts = array( 'Sterilisation drive for street dogs', 'Mass sterilisations planned', 'Minister and administers', 'Dogs adopted', 'Petitions filed' );
+$rep   = aw_kw_word_report( array( 'sterilis', 'minister', 'adopt', 'petition', 'पशु' ), $texts );
+aw_t( array( 2, 0, 2, true ) === $rep['sterilis'], 'sterilis: 2 → 0 whole words, 2 with *: * added' );
+aw_t( array( 1, 1, 1, false ) === $rep['minister'] || ! $rep['minister'][3], 'minister: no * when it wins nothing back' );
+aw_t( $rep['petition'][0] === $rep['petition'][1] && ! $rep['petition'][3], 'petition: plural allowed, no change' );
+aw_t( ! $rep['पशु'][3], 'Hindi words get no *' );
+$starred = aw_kw_plan_add_stars( $plan, array( 'sterilis' => array( 78, 0, 78, true ) ) );
+aw_t( in_array( 'sterilis*', $starred['records']['sterili']['variants'] ?? $starred['records'][ aw_si_norm( 'sterilis' ) ]['variants'], true ), 'the * spelling is added to the record' );
+aw_t( aw_kw_legacy_match( 'a fir filed', 'fir' ) && ! aw_kw_legacy_match( 'first', 'fir' ) && aw_kw_legacy_match( 'sterilisation', 'sterilis' ), 'today\'s category matching (short words whole, others substring)' );
+
+// Rollback order (Codex, PR #75): phase 1 waits while a phase 2 migration (complete or partial) is recorded; a phase 2
+// rollback puts the marker back to the phase before it and never raises it.
+aw_t( '' !== aw_src_rollback_refusal( 1, 1, true ), 'rollback --phase=1 refused while a partial phase 2 is recorded' );
+aw_t( '' !== aw_src_rollback_refusal( 1, 2, true ) && '' !== aw_src_rollback_refusal( 1, 2, false ), 'rollback --phase=1 refused while phase 2 is migrated' );
+aw_t( '' === aw_src_rollback_refusal( 1, 1, false ), 'rollback --phase=1 allowed with no phase 2' );
+aw_t( '' === aw_src_rollback_refusal( 2, 1, true ) && '' === aw_src_rollback_refusal( 2, 2, true ) && '' !== aw_src_rollback_refusal( 2, 1, false ), 'rollback --phase=2: a partial or complete record, else refused' );
+aw_t( 1 === aw_src_phase_after_p2_rollback( 1, 2, false ) && 1 === aw_src_phase_after_p2_rollback( 1, 1, true ) && 0 === aw_src_phase_after_p2_rollback( 1, 0, true ), 'the phase marker goes back to the phase before 2, never up' );
+
+// "Delete Search Insights data" resets Search Insights' columns on the records it keeps (Codex, PR #75), never the owner's.
+$reset = aw_si_reset_sql( AW_KW_OWNER_ROLES );
+foreach ( array( 'group_id = id', 'page_type', 'intent', 'priority_override', 'entity = 0', "note = ''", 'impr28 = 0', 'roles = roles & ' . AW_KW_OWNER_ROLES ) as $x ) {
+	aw_t( false !== strpos( $reset, $x ), "Search Insights reset sets $x" );
+}
+foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'search_on', 'dismissed', 'src_note' ) as $x ) {
+	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
+}
+
+// The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
+$si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/search-insights/keywords.php' );
+$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
+aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
+
+// Interrupted runs can roll back: the undo record is saved before rows change; switched-off searches stay off (Codex, #75).
+$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
+$kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
+aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
 
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 

@@ -28,14 +28,14 @@ add_action(
 			AW_CAMPAIGN_LINK_TYPES,
 			array(
 				'labels'             => array(
-					'name'          => 'Campaigns',
-					'singular_name' => 'Campaign',
-					'menu_name'     => 'Campaign links',
-					'all_items'     => 'All campaigns',
-					'edit_item'     => 'Edit campaign',
-					'add_new_item'  => 'Add campaign',
-					'search_items'  => 'Search campaigns',
-					'not_found'     => 'No campaigns',
+					'name'          => 'Linked campaigns', // owner, 25 Oct 2026: not "Campaigns", which is the Campaigns menu
+					'singular_name' => 'Linked campaign',
+					'menu_name'     => 'Linked campaigns',
+					'all_items'     => 'All linked campaigns',
+					'edit_item'     => 'Edit linked campaign',
+					'add_new_item'  => 'Add linked campaign',
+					'search_items'  => 'Search linked campaigns',
+					'not_found'     => 'No linked campaigns',
 				),
 				'description'        => 'Which campaign an item belongs to. Not a tag: no public page.',
 				'public'             => false,

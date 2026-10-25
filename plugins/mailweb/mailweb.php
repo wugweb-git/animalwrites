@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Mailweb
- * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus SMTP sending with a daily limit and queue.
+ * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
  * Version:           3.1.0
  * Requires at least: 6.4
  * Requires PHP:      8.0
@@ -62,6 +62,7 @@ require_once MAILWEB_DIR . 'includes/inbox.php';
 require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
 require_once MAILWEB_DIR . 'includes/overview.php';
+require_once MAILWEB_DIR . 'includes/home.php';
 
 // Deactivation stops Mailweb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
 register_deactivation_hook(
