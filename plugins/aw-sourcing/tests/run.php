@@ -4,7 +4,8 @@
  * tests/fixtures/match_cases.json (the same file as the workers' tests) and the phase 1 Sources model (sources-model.php)
  * against the live shapes of 25 Oct 2026 (tests/fixtures/phase1_live_sample.json), and the phase 2 keyword model
  * (animal-writes-core keyword-model.php, keywords-model.php) against the live lists and keyword records
- * (tests/fixtures/phase2_live_sample.json). Run by the Deploy check.
+ * (tests/fixtures/phase2_live_sample.json), and the Sourcing menu's shape (menu-model.php, admin-menu.php). Run by the
+ * Deploy check.
  *
  * Usage: php plugins/aw-sourcing/tests/run.php
  *
@@ -27,6 +28,7 @@ require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/keyword-model.php'
 require dirname( __DIR__ ) . '/includes/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords-model.php';
 require dirname( __DIR__ ) . '/includes/rules-model.php';
+require dirname( __DIR__ ) . '/includes/menu-model.php';
 
 $fails = 0;
 $count = 0;
@@ -364,6 +366,44 @@ aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a
 $kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 'label' => 'x', 'query' => 'HTTPS://news.google.com/rss/search?q=x', 'feed_id' => 'gnews-x', 'src' => array() );
 $kw_us = aw_kw_searches( $kw_up, array() );
 aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
+
+// ---- the Sourcing menu (owner, 25 Oct 2026: its own menu, Overview first, Plugins screen links, retired addresses gone) ----
+$inc   = dirname( __DIR__ ) . '/includes/';
+$menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
+aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
+aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
+aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu title' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'Sourcing', 'Sourcing', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page'" ), 'the menu is registered with the plain title "Sourcing" (the screen id depends on it) and opens the Overview' );
+aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'Sourcing', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is on the Sourcing menu' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is on the Sourcing menu' );
+// Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
+$tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
+aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( aw_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );
+$p3 = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'press' => 'Press queries', 'log' => 'Change log', 'workers' => 'Workers', 'settings' => 'Settings' );
+aw_t( array( 'sources', 'keywords', 'rules', 'press', 'workers', 'log', 'settings' ) === array_keys( aw_src_menu_order( $p3 ) ), 'phase 3: Rules after Keywords; a missing report is skipped' );
+aw_t( aw_src_is_report( 'relay-log' ) && aw_src_is_report( 'log' ) && ! aw_src_is_report( 'sources' ) && ! aw_src_is_report( 'settings' ), 'reports are told apart from settings' );
+aw_t( 'admin.php?page=aw-sourcing' === aw_src_tab_path( 'sources' ) && 'admin.php?page=aw-sourcing' === aw_src_tab_path(), 'Sources is the page\'s own address' );
+aw_t( 'admin.php?page=aw-sourcing&tab=workers' === aw_src_tab_path( 'workers' ) && 'admin.php?page=aw-sourcing&tab=relay-log' === aw_src_tab_menu_slug( 'relay-log' ), 'a tab\'s address and menu slug' );
+aw_t( AW_SRC_PAGE === aw_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
+aw_t( array( 'Overview' => 'admin.php?page=aw-sourcing-menu', 'Settings' => 'admin.php?page=aw-sourcing&tab=settings' ) === aw_src_action_link_paths(), 'Plugins screen links: Overview, Settings' );
+aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' )" ), 'the links are added under AW Sourcing on the Plugins screen' );
+// No screen is under Settings or Inbox any more, and no old screen id is used.
+$all_inc = '';
+foreach ( glob( $inc . '*.php' ) as $f ) {
+	$all_inc .= (string) file_get_contents( $f );
+}
+aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses the old screen id' );
+aw_t( false === strpos( $all_inc, "options-general.php?page=aw-sourcing" ) && false === strpos( $all_inc, 'add_options_page' ), 'no link or page under Settings' );
+aw_t( false === strpos( $all_inc, "add_submenu_page( 'aw-inbox'" ) && false === strpos( $all_inc, 'edit.php?post_type=aw_listing&page=aw-enrich-review' ), 'nothing under Inbox or Directory' );
+// Retired addresses (owner, 25 Oct 2026): the old tab redirects and the old POST tab names are gone; the phase switch stays.
+$sites  = (string) file_get_contents( $inc . 'source-sites.php' );
+$policy = (string) file_get_contents( $inc . 'sourcing-policy.php' );
+$rules  = (string) file_get_contents( $inc . 'rules-admin.php' );
+aw_t( false === strpos( $sites, "'publishers'    => array( 'tab' => 'sources' )" ) && false === strpos( $sites, ', 301 )' ), 'no 301 map for the old Publishers, Feeds, Library, Opportunities and Relay tabs' );
+aw_t( false === strpos( $policy, "array( 'publishers' => 'sources', 'library' => 'feeds', 'opportunities' => 'feeds' )" ), 'no translation of old POST tab names' );
+aw_t( false !== strpos( $rules, 'aw_rules_live()' ) && false !== strpos( $rules, "wp_safe_redirect( aw_rules_url( \$tab, array_map( 'rawurlencode', \$q ) ) ); // 302" ), 'the phase 3 switch (old tabs to Rules, 302) stays' );
+aw_t( false !== strpos( $rules, "'admin.php' !== \$pagenow" ), 'the phase 3 switch works on the page\'s new address' );
 
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 
