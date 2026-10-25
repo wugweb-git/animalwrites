@@ -287,8 +287,9 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 		}
 		$n = $touch( $label );
 		$put( $n, 'search', count( $searches ), $label, AW_KW_ROLE_SEARCH );
-		$recs[ $n ]['feed_id'] = $id;
-		$recs[ $n ]['query']   = (string) $src['url'];
+		$recs[ $n ]['feed_id']   = $id;
+		$recs[ $n ]['query']     = (string) $src['url'];
+		$recs[ $n ]['search_on'] = array_key_exists( 'on', (array) $src ) && empty( $src['on'] ) ? 0 : 1; // a search the owner switched off stays off (Codex)
 		$section               = 'press' === ( $src['file_as'] ?? '' ) ? 'aw_press' : ( 'legal' === ( $src['type'] ?? '' ) ? 'aw_legal' : 'aw_news' );
 		if ( ! in_array( $section, $recs[ $n ]['sections'], true ) ) {
 			$recs[ $n ]['sections'][] = $section;

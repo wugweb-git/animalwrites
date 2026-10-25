@@ -346,5 +346,11 @@ $p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-mi
 aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
 aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
 
+// Interrupted runs can roll back: the undo record is saved before rows change; switched-off searches stay off (Codex, #75).
+$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
+$kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
+aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
