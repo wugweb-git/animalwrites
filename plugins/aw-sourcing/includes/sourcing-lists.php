@@ -548,21 +548,19 @@ add_filter(
 		if ( empty( $c['live'] ) ) {
 			return $data;
 		}
-		if ( aw_sourcing_phase() >= 4 ) { // phase 4: no v1 keys
+		if ( aw_sourcing_phase() >= 4 && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 4: no v1 keys (without the keyword table the v1 lists still go)
 			$press = (array) ( $c['press'] ?? array() );
 			unset( $press['queries'] ); // the Press keywords carry them
 			$data['config'] = array( 'defaults' => $c['defaults'], 'press' => $press, 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
 			if ( function_exists( 'aw_relevance_categories' ) ) {
 				$data['config']['category_names'] = (object) aw_relevance_categories();
 			}
-			if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
-				$blocks                        = aw_kw_policy_blocks( (array) $c['sources'], aw_sourcing_kw_worker_rows(), function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
-				$data['keywords']              = $blocks['keywords_v2'];
-				$data['config']['schema']      = $blocks['schema'];
-				$data['config']['match']       = $blocks['match'];
-				$data['config']['sources_v2']  = $blocks['sources_v2'];
-				$data['config']['keywords_v2'] = $blocks['keywords_v2'];
-			}
+			$blocks                        = aw_kw_policy_blocks( (array) $c['sources'], aw_sourcing_kw_worker_rows(), function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
+			$data['keywords']              = $blocks['keywords_v2'];
+			$data['config']['schema']      = $blocks['schema'];
+			$data['config']['match']       = $blocks['match'];
+			$data['config']['sources_v2']  = $blocks['sources_v2'];
+			$data['config']['keywords_v2'] = $blocks['keywords_v2'];
 			return $data;
 		}
 		$rel     = function_exists( 'aw_relevance' ) ? aw_relevance() : array();

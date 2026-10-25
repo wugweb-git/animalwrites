@@ -19,7 +19,8 @@
  *
  * While it runs the option aw_sourcing_migrating is 4; the record aw_sourcing_phase4_record is saved before each step.
  * Rollback sets the phase back to 3 (the options were never changed, so everything is as it was); with --restore-all it
- * also puts the backed-up options back exactly. The archive option stays (a copy, read by nothing).
+ * also puts the backed-up options back exactly. The archive option stays (a copy, read by nothing). The old lists hold
+ * what they held at the migration: the next keyword save at phase 3 rebuilds them from the table, as before.
  *
  * Backups are never deleted here: the aw_backup_* options and the files in wp-content/uploads/aw-backups stay until the
  * owner says otherwise.
@@ -217,21 +218,26 @@ add_action(
 				$planned[] = "$k unchanged";
 			}
 		}
-		// The archive: the backup's old lists, exactly, with its checksums.
+		// The archive: the old lists exactly as the options hold them (phase 4 never changes them), with its checksums;
+		// against the backup only as a warning (a keyword saved before the migration rebuilt them since).
 		$plan_old = aw_retire_plan( (array) $old['aw_relevance'], (array) $old['aw_sources'], array_values( array_filter( (array) $old['aw_sourcing_dismissed'], 'is_string' ) ), aw_sourcing_cli_p4_rows() );
+		$plan_now = aw_sourcing_cli_p4_plan();
 		if ( ! is_array( $now['aw_sourcing_v1_archive'] ) ) {
 			$diffs[] = 'aw_sourcing_v1_archive is missing';
 		} else {
-			foreach ( aw_retire_archive_problems( $now['aw_sourcing_v1_archive'], $plan_old ) as $p ) {
+			foreach ( aw_retire_archive_problems( $now['aw_sourcing_v1_archive'], $plan_now ) as $p ) {
 				$diffs[] = $p;
+			}
+			foreach ( aw_retire_archive_problems( $now['aw_sourcing_v1_archive'], $plan_old ) as $p ) {
+				WP_CLI::warning( "against the backup: $p (a keyword saved between the backup and the migration?)" );
 			}
 			$planned[] = 'aw_sourcing_v1_archive holds the old lists of ' . (string) $now['aw_sourcing_v1_archive']['at'] . ' (' . implode( ', ', array_map( fn( $k, $n ) => "$k $n", array_keys( $plan_old['counts'] ), $plan_old['counts'] ) ) . ')';
 		}
 		// Nothing only the old lists hold stopped being used: every word has its keyword record and role.
-		foreach ( $plan_old['conflicts'] as $c ) {
+		foreach ( $plan_now['conflicts'] as $c ) {
 			$diffs[] = "no longer used: $c";
 		}
-		$planned = array_merge( $planned, $plan_old['planned'] );
+		$planned = array_merge( $planned, $plan_now['planned'] );
 		// The workers' view: the same Google News searches from the keywords as from the backed-up v1 lists.
 		if ( function_exists( 'aw_kw_v1_searches' ) ) {
 			// As phase 2's verify: v1 sent every source that is on (the open-web searches too) plus the Include words;
@@ -279,7 +285,7 @@ add_action(
 		if ( aw_sourcing_phase() < 4 && ! $rec ) {
 			WP_CLI::error( 'Phase 4 is not migrated (aw_sourcing_phase = ' . aw_sourcing_phase() . ').' );
 		}
-		list( $bk, $old ) = aw_sourcing_cli_backup( 4 );
+		list( $bk, $old ) = aw_sourcing_cli_backup( 4, is_array( $rec ) && ! empty( $rec['backup'] ) ? (string) $rec['backup'] : '' ); // the run's own backup
 		$all              = ! empty( $assoc['restore-all'] );
 		WP_CLI::confirm( 'Roll phase 4 back ' . ( $all ? "and put aw_relevance, aw_sources and aw_sourcing_dismissed back exactly as in backup $bk" : '(the phase back to 3: the old lists, tabs and policy keys are used again; no option was changed)' ) . '?', $assoc );
 		update_option( 'aw_sourcing_migrating', 4, false );

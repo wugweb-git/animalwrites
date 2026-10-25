@@ -297,7 +297,15 @@ function aw_sourcing_policy_payload() {
 		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ),
 	);
 	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
-	return aw_sourcing_phase() >= 4 && function_exists( 'aw_retire_policy' ) ? aw_retire_policy( $data ) : $data;
+	if ( aw_sourcing_phase() < 4 || ! function_exists( 'aw_retire_policy' ) ) {
+		return $data;
+	}
+	// Phase 4: the keyword table always goes (also with "Workers use these lists" off), so the workers have the words
+	// the relevance switch needs; without the table nothing is stripped (the archived v1 lists still go).
+	if ( ! isset( $data['keywords'] ) && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+		$data['keywords'] = aw_kw_payload( aw_sourcing_kw_worker_rows(), (array) ( aw_sources_config()['sources'] ?? array() ) );
+	}
+	return aw_retire_policy( $data );
 }
 
 /* ---------- WP Admin: News → Sourcing ---------- */

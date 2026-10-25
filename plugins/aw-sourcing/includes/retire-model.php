@@ -162,9 +162,13 @@ function aw_retire_plan( array $rel, array $cfg, array $dismissed, array $rows )
 	}
 	$archive['aw_sourcing_dismissed'] = array_values( $dismissed );
 	$counts['aw_sourcing_dismissed']  = count( $dismissed );
-	$lost                             = array_values( array_filter( $dismissed, fn( $q ) => ! isset( $dismiss[ aw_si_norm( (string) $q ) ] ) ) );
+	$lost                             = array_values( array_filter( $dismissed, fn( $q ) => ! isset( $any[ aw_si_norm( (string) $q ) ] ) ) );
+	$shown                            = array_values( array_filter( $dismissed, fn( $q ) => isset( $any[ aw_si_norm( (string) $q ) ] ) && ! isset( $dismiss[ aw_si_norm( (string) $q ) ] ) ) );
 	if ( $lost ) {
-		$conflicts[] = 'aw_sourcing_dismissed: ' . implode( ', ', array_map( 'strval', $lost ) ) . ' (no dismissed keyword record)';
+		$conflicts[] = 'aw_sourcing_dismissed: ' . implode( ', ', array_map( 'strval', $lost ) ) . ' (no keyword record)';
+	}
+	if ( $shown ) { // shown again on the Keywords screen since phase 2: the owner's later choice stands
+		$planned[] = 'aw_sourcing_dismissed: ' . implode( ', ', array_map( 'strval', $shown ) ) . ' (shown again since phase 2; the record decides)';
 	}
 	return array(
 		'archive'   => $archive,
@@ -218,12 +222,20 @@ function aw_retire_archive_problems( array $archive, array $plan ) {
 
 /**
  * The policy without the v1 keys (phase 4): relevance keeps only its switch; config loses the old lists and the old
- * sources and sections (sources_v2, the keyword table and sections_v2 replace them) and press its queries.
+ * sources and sections (sources_v2, the keyword table and sections_v2 replace them) and press its queries. A policy
+ * without the keyword table (top-level `keywords`) or without sources_v2 is returned as it is: the workers would have
+ * no words or no sources otherwise.
  *
  * @param array $data The policy.
  * @return array
  */
 function aw_retire_policy( array $data ) {
+	if ( ! isset( $data['keywords'] ) || ! is_array( $data['keywords'] ) ) {
+		return $data;
+	}
+	if ( isset( $data['config'] ) && empty( $data['config']['sources_v2'] ) ) {
+		return $data;
+	}
 	if ( isset( $data['relevance'] ) && is_array( $data['relevance'] ) ) {
 		$data['relevance'] = array( 'enabled' => ! empty( $data['relevance']['enabled'] ) );
 	}
@@ -251,6 +263,9 @@ function aw_retire_policy_problems( array $data ) {
 			$out[] = "relevance.$k is still sent";
 		}
 	}
+	if ( ! isset( $data['keywords'] ) || ! is_array( $data['keywords'] ) ) {
+		$out[] = 'keywords (the keyword table) is missing';
+	}
 	if ( ! isset( $data['config'] ) ) {
 		return $out; // "Workers use these lists" is off: no lists are sent at all
 	}
@@ -266,9 +281,6 @@ function aw_retire_policy_problems( array $data ) {
 		if ( ! array_key_exists( $k, (array) $data['config'] ) ) {
 			$out[] = "config.$k is missing";
 		}
-	}
-	if ( ! isset( $data['keywords'] ) || ! is_array( $data['keywords'] ) ) {
-		$out[] = 'keywords (the keyword table) is missing';
 	}
 	return $out;
 }

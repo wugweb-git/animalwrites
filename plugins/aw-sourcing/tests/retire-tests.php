@@ -44,7 +44,9 @@ aw_t( array() === $rp1['conflicts'] && (bool) array_filter( $rp1['planned'], fn(
 $bad           = $p4rel;
 $bad['strong'] = array_merge( $bad['strong'], array( 'zebra crossing ban' ) );
 aw_t( 1 === count( aw_retire_plan( $bad, $p4cfg, $p4['dismissed'], $p4recs )['conflicts'] ), 'a word only the old list has is a conflict' );
-aw_t( 1 === count( aw_retire_plan( $p4rel, $p4cfg, array_merge( $p4['dismissed'], array( 'never dismissed here' ) ), $p4recs )['conflicts'] ), 'a dismissed search with no dismissed record is a conflict' );
+aw_t( 1 === count( aw_retire_plan( $p4rel, $p4cfg, array_merge( $p4['dismissed'], array( 'never dismissed here' ) ), $p4recs )['conflicts'] ), 'a dismissed search with no keyword record is a conflict' );
+$p4shown = aw_retire_plan( $p4rel, $p4cfg, array_merge( $p4['dismissed'], array( 'animal welfare' ) ), $p4recs );
+aw_t( array() === $p4shown['conflicts'] && (bool) array_filter( $p4shown['planned'], fn( $x ) => false !== strpos( $x, 'shown again' ) ), 'a search shown again since phase 2 (its record not dismissed) is planned: the record decides' );
 $badc                             = $p4cfg;
 $badc['categories']['wildlife'][] = 'unmapped word';
 aw_t( 1 === count( aw_retire_plan( $p4rel, $badc, $p4['dismissed'], $p4recs )['conflicts'] ), 'a category word with no Category record for that category is a conflict' );
@@ -76,7 +78,7 @@ $pol = array(
 		'category_names' => array(),
 		'schema'         => array( 'sources' => 2, 'keywords' => 2, 'rules' => 2 ),
 		'match'          => 'word',
-		'sources_v2'     => array(),
+		'sources_v2'     => array( array( 'id' => 'livelaw-top' ) ),
 		'keywords_v2'    => array(),
 		'sections_v2'    => array(),
 	),
@@ -85,6 +87,12 @@ aw_t( 9 === count( aw_retire_policy_problems( $pol ) ), 'the v1 policy: 4 releva
 $p4pol = aw_retire_policy( $pol );
 aw_t( array() === aw_retire_policy_problems( $p4pol ), 'the phase 4 policy has no v1 keys and every v2 block' );
 aw_t( array( 'enabled' => false ) === $p4pol['relevance'] && array( 'enabled' => true, 'date_floor' => '2025-11-01', 'every_days' => 7 ) === $p4pol['config']['press'] && $p4pol['relay_hosts'] === $pol['relay_hosts'] && $p4pol['publishers'] === $pol['publishers'], 'the switches, publishers, relay hosts, press settings and tag rules stay' );
+$p4nokw = array_diff_key( $pol, array( 'keywords' => 1 ) );
+aw_t( $p4nokw === aw_retire_policy( $p4nokw ), 'without the keyword table nothing is stripped (the workers keep the v1 lists)' );
+$p4nov2                         = $pol;
+$p4nov2['config']['sources_v2'] = array();
+aw_t( $p4nov2 === aw_retire_policy( $p4nov2 ), 'without sources_v2 nothing is stripped (the workers keep the v1 sources)' );
+aw_t( in_array( 'keywords (the keyword table) is missing', aw_retire_policy_problems( array( 'relevance' => array( 'enabled' => true ) ) ), true ), 'verify finds a missing keyword table also with the lists switch off' );
 aw_t( array( 'config.sections_v2 is missing' ) === aw_retire_policy_problems( array_merge( $p4pol, array( 'config' => array_diff_key( $p4pol['config'], array( 'sections_v2' => 1 ) ) ) ) ), 'a missing v2 block is found' );
 
 // Rollback order: phase 1–3 wait while phase 4 is migrated or half-migrated.
@@ -100,5 +108,5 @@ $p4_lists = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing
 $p4_kwa   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
 $p4_pol   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
 aw_t( false !== strpos( $p4_lists, "\$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );" ) && false !== strpos( $p4_lists, 'aw_sourcing_phase() >= 4 ) { // phase 4: hidden' ), 'the old tabs stay in the code, hidden from phase 4 (a rollback shows them)' );
-aw_t( false !== strpos( $p4_kwa, '$old  = aw_sourcing_phase() < 4;' ), 'the old lists are no longer rebuilt from phase 4 (rebuilt again after a rollback)' );
-aw_t( false !== strpos( $p4_pol, "aw_sourcing_phase() >= 4 && function_exists( 'aw_retire_policy' )" ) && false !== strpos( $p4_lists, "if ( aw_sourcing_phase() >= 4 ) { // phase 4: no v1 keys" ), 'the policy drops the v1 keys only from phase 4; the v1 code stays' );
+aw_t( false !== strpos( $p4_kwa, '$old  = aw_sourcing_phase() < 4;' ), 'the old lists are no longer rebuilt from phase 4 (at phase 3, after a rollback, the next keyword save rebuilds them)' );
+aw_t( false !== strpos( $p4_pol, "if ( aw_sourcing_phase() < 4 || ! function_exists( 'aw_retire_policy' ) ) {" ) && false !== strpos( $p4_lists, "if ( aw_sourcing_phase() >= 4 && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 4: no v1 keys" ), 'the policy drops the v1 keys only from phase 4; the v1 code stays' );
