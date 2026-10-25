@@ -99,7 +99,7 @@ add_filter(
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), array( 'name' => 'Contact messages', 'menu_name' => 'Contact messages', 'all_items' => 'Contact messages' ) );
 		}
 		if ( in_array( $type, array( 'aw_message', 'aw_claim' ), true ) ) {
-			$args['show_in_menu'] = 'aw-inbox';
+			$args['show_in_menu'] = false; // retired: website forms are in Mail, claims in Fluent Forms; items keep their data
 		}
 		return $args;
 	},
@@ -110,38 +110,18 @@ add_filter(
 
 /* ---------- Menus ---------- */
 
-/**
- * Unread messages (no aw_read flag yet) and claims waiting for a decision. Cached 5 minutes (audit 9, owner 21 Oct 2026:
- * every admin page ran two unbounded queries, twice); a change to a message, claim or review item clears it.
- */
-function aw_inbox_counts() {
-	static $now = null;
-	if ( null !== $now ) {
-		return $now;
-	}
-	$cached = get_transient( 'aw_inbox_counts' );
-	if ( is_array( $cached ) ) {
-		return $now = $cached;
-	}
-	$messages = count( get_posts( array( 'post_type' => 'aw_message', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => 'aw_read', 'compare' => 'NOT EXISTS' ) ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	$claims   = count( get_posts( array( 'post_type' => 'aw_claim', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => 'aw_c_status', 'value' => 'pending' ) ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	set_transient( 'aw_inbox_counts', array( $messages, $claims ), 5 * MINUTE_IN_SECONDS );
-	return $now = array( $messages, $claims );
-}
-
-/** Forget the cached Inbox and To-review counts (a message, claim or review item changed). */
+/** Forget the cached To-review count on the Inbox menu (a review item changed). */
 function aw_inbox_counts_flush() {
-	delete_transient( 'aw_inbox_counts' );
 	delete_transient( 'aw_review_count' );
 }
 add_action( 'transition_post_status', function ( $new, $old, $post ) {
-	if ( in_array( $post->post_type, array( 'aw_message', 'aw_claim', 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
+	if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
 		aw_inbox_counts_flush();
 	}
 }, 10, 3 );
 foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_ia_hook ) {
 	add_action( $aw_ia_hook, function ( $mid, $id, $key ) {
-		if ( in_array( $key, array( 'aw_read', 'aw_c_status', 'aw_review' ), true ) ) {
+		if ( 'aw_review' === $key ) {
 			aw_inbox_counts_flush();
 		}
 	}, 10, 3 );
@@ -167,12 +147,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		global $submenu;
-		list( $msg, $claims ) = aw_inbox_counts();
-		// The count is what the sections inside show: pending claims and To review. Contact messages moved to Mailweb
-		// (Mail → Website forms), so old filed email copies no longer count here (owner, 19 Oct 2026).
-		// Form submissions (claims, reports, volunteer sign-ups, data requests) are Fluent Forms entries since 21 Oct 2026
-		// (owner): their unread counts are in Fluent Forms, so claims no longer count here.
+		// Inbox counts what is waiting in To review. Website forms are in Mail; form entries in Fluent Forms.
 		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
@@ -196,21 +171,7 @@ add_action(
 		remove_menu_page( 'aw-volunteers' );
 		remove_menu_page( 'aw-newsletter' );
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
-		// Inbox: the two post-type lists (registered with show_in_menu = aw-inbox), with their own counts.
-		list( $msg, $claims ) = aw_inbox_counts();
-		foreach ( (array) ( $submenu['aw-inbox'] ?? array() ) as $i => $item ) {
-			if ( 'edit.php?post_type=aw_message' === $item[2] ) {
-				$submenu['aw-inbox'][ $i ][0] .= aw_menu_count( $msg ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-			} elseif ( 'edit.php?post_type=aw_claim' === $item[2] ) {
-				unset( $submenu['aw-inbox'][ $i ] ); // retired: Fluent Forms entries (Claim #6) since 21 Oct 2026; the list keeps its URL
-			}
-		}
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
-		// Inbox order (S2.3): Contact messages · Listing claims · Reports · Volunteer sign-ups · Data removal · To review.
-		$rank = array( 'edit.php?post_type=aw_message' => 1, 'edit.php?post_type=aw_claim' => 2, 'edit.php?post_type=aw_report' => 3, 'admin.php?page=aw-volunteers' => 4, 'erase-personal-data.php' => 4.5, 'aw-review' => 5 );
-		if ( isset( $submenu['aw-inbox'] ) ) {
-			usort( $submenu['aw-inbox'], fn( $x, $y ) => ( $rank[ $x[2] ] ?? 9 ) <=> ( $rank[ $y[2] ] ?? 9 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-		}
 		// Categories: only under Classification.
 		foreach ( array_keys( (array) $submenu ) as $parent ) {
 			foreach ( AW_SHARED_TAXONOMIES as $tax ) {
@@ -225,28 +186,7 @@ add_action(
 	999
 );
 
-/**
- * Screens moved between Settings and Tools (owner, 15 Oct 2026: Settings = configuration, Tools = reports and jobs).
- * Old bookmarks (options-general.php?page=…, admin.php?page=…) are sent to the new parent with a 301. Each screen adds
- * itself with the aw_admin_moved_pages filter: slug => new parent file.
- */
-function aw_admin_moved_redirect() {
-	global $pagenow;
-	$page  = sanitize_key( $_GET['page'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$moved = (array) apply_filters( 'aw_admin_moved_pages', array() );
-	if ( '' === $page || ! isset( $moved[ $page ] ) || $moved[ $page ] === $pagenow ) {
-		return;
-	}
-	if ( ! in_array( $pagenow, array( 'options-general.php', 'admin.php', 'tools.php' ), true ) ) {
-		return;
-	}
-	wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', wp_unslash( $_GET ) ), admin_url( $moved[ $page ] ) ), 301 ); // phpcs:ignore WordPress.Security.NonceVerification
-	exit;
-}
-add_action( 'admin_page_access_denied', 'aw_admin_moved_redirect' ); // WordPress refuses a page under the wrong parent before admin_init.
-add_action( 'admin_init', 'aw_admin_moved_redirect' );
-
-// Keep the right top-level item open on the moved screens.
+// Categories and Tags open under Classification.
 add_filter(
 	'parent_file',
 	function ( $parent ) {
@@ -256,12 +196,6 @@ add_filter(
 		}
 		if ( in_array( $screen->taxonomy, AW_SHARED_TAXONOMIES, true ) ) {
 			return 'aw-classification';
-		}
-		if ( in_array( $screen->post_type, array( 'aw_message', 'aw_claim', 'aw_report' ), true ) ) {
-			return 'aw-inbox';
-		}
-		if ( 'aw-volunteers' === ( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return 'aw-inbox';
 		}
 		return $parent;
 	}
