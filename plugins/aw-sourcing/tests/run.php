@@ -340,5 +340,12 @@ foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'searc
 	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
 }
 
+// Spellings added on the Keywords screen are searched too (Codex, #76); a "word*" prefix is not a search.
+$kw_rec = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_INCLUDE, 'label' => 'animal cruelty', 'query' => '', 'feed_id' => '', 'src' => array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ), 'added' => array( 'pashu kroorta', 'cruel*' ) ) );
+$kw_q   = array_map( fn( $s ) => $s['q'] ?? '', aw_kw_searches( $kw_rec, array() ) );
+aw_t( in_array( 'animal cruelty', $kw_q, true ) && in_array( 'pashu kroorta', $kw_q, true ) && ! in_array( 'cruel*', $kw_q, true ), 'added Include spellings are searched, prefixes are not' );
+$kw_rec['src'] = array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ) );
+aw_t( 1 === count( aw_kw_searches( $kw_rec, array() ) ), 'migrated spellings only: the search list is unchanged' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

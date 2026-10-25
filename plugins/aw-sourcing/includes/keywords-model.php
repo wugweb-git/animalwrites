@@ -485,7 +485,13 @@ function aw_kw_searches( array $r, array $sources ) {
 		foreach ( (array) ( $r['src']['lists']['strong'] ?? array() ) as $p ) {
 			$spell[] = (string) $p[1];
 		}
-		foreach ( $spell ? $spell : array( (string) $r['label'] ) as $sp ) {
+		$spell = $spell ? $spell : array( (string) $r['label'] );
+		foreach ( (array) ( $r['src']['added'] ?? array() ) as $sp ) { // spellings added on the Keywords screen (a "word*" prefix is for matching, not a search)
+			if ( '*' !== substr( (string) $sp, -1 ) ) {
+				$spell[] = (string) $sp;
+			}
+		}
+		foreach ( array_unique( $spell ) as $sp ) {
 			if ( aw_kw_ascii( $sp ) ) {
 				$out[] = array( 'feed' => aw_kw_feed_id( $sp ), 'q' => $sp );
 			}

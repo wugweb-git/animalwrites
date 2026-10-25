@@ -267,6 +267,15 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 			$fields[ $f ] = $set[ $f ];
 		}
 	}
+	if ( isset( $fields['variants'] ) ) { // spellings the owner adds after the migration are searched too (Include); the migrated ones keep the old search list
+		$new_v  = aw_kw_variants_list( $fields['variants'] );
+		$src    = is_array( $old['src'] ?? null ) ? (array) $old['src'] : array();
+		$added  = array_values( array_intersect( array_unique( array_merge( (array) ( $src['added'] ?? array() ), array_diff( $new_v, $old['variants'] ) ) ), $new_v ) );
+		if ( $added !== array_values( (array) ( $src['added'] ?? array() ) ) ) {
+			$src['added']         = $added;
+			$fields['src_note'] = wp_json_encode( $src );
+		}
+	}
 	if ( $fields && true === aw_kw_update( $id, $fields ) ) {
 		if ( isset( $fields['variants'] ) && aw_kw_variants_list( $fields['variants'] ) !== $old['variants'] ) {
 			$log[] = array( 'keywords', "$name: other spellings", $old['variants'], aw_kw_variants_list( $fields['variants'] ) );
