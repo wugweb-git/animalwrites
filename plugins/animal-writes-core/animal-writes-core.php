@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Animal Writes Core
- * Description: Content types, directory and ingest endpoint for Animal Writes 2.0. Theme-independent.
- * Version: 0.1.0
+ * Description: The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, and the jobs that keep it running (backups, site check, scheduled tasks, deploy purge, CDN cache). Own menu: Animal Writes (Overview, Dates, Check site, Contact links). Theme-independent.
+ * Version: 1.0.0
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: Wugweb
@@ -40,6 +40,7 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 }
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
+require_once AW_CORE_DIR . 'includes/admin-home.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';
 require_once AW_CORE_DIR . 'includes/content-types.php';

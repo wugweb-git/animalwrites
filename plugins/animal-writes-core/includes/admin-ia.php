@@ -223,8 +223,10 @@ add_filter(
 			'aw-classification',
 			'aw-inbox',
 			'mailweb', // Mail (Mailweb plugin): unread count and latest messages
+			'animal-writes', // Animal Writes: Overview, Dates, Check site, Contact links (admin-home.php)
 			'separator2',
 			'themes.php',
+			'kits', // Kits: Overview, Design system, Preview (kits-core admin-home.php)
 			'plugins.php',
 			'users.php',
 			'tools.php',
