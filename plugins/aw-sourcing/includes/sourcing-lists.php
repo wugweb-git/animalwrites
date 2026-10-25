@@ -35,6 +35,41 @@ add_action(
 	}
 );
 
+/**
+ * Seed (once): the High Court judgments source (owner, 25 Oct 2026). The seed file is read only when the lists do not
+ * exist yet, so the live lists get it here: added after the Supreme Court source, off, for the owner to turn on in
+ * Feeds after checking the workers' dry run. A list that already has it is left as it is.
+ */
+add_action(
+	'init',
+	function () {
+		if ( '1' === get_option( 'aw_sourcing_seed_hc' ) || ! function_exists( 'aw_sources_config' ) ) {
+			return;
+		}
+		$c       = aw_sources_config();
+		$sources = array_values( (array) ( $c['sources'] ?? array() ) );
+		$ids     = array_column( $sources, 'id' );
+		if ( ! in_array( 'judgments-high-courts', $ids, true ) ) {
+			$hc  = array(
+				'id'            => 'judgments-high-courts',
+				'name'          => 'High Court judgments (open dataset, CC BY 4.0)',
+				'kind'          => 'judgments-hc',
+				'type'          => 'legal',
+				'url'           => 'https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/',
+				'lookback_days' => 60,
+				'on'            => false,
+				'filter'        => false,
+			);
+			$at  = array_search( 'judgments-supreme-court', $ids, true );
+			$pos = false === $at ? count( $sources ) : $at + 1;
+			array_splice( $sources, $pos, 0, array( $hc ) );
+			$c['sources'] = $sources;
+			update_option( 'aw_sources', $c, false );
+		}
+		update_option( 'aw_sourcing_seed_hc', '1', false );
+	}
+);
+
 /** Google News RSS URL for a search query (India, English). */
 function aw_gnews_url( $query ) {
 	return 'https://news.google.com/rss/search?q=' . rawurlencode( trim( $query ) ) . '&hl=en-IN&gl=IN&ceid=IN:en';

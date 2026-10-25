@@ -141,6 +141,16 @@
    "filter": false
   },
   {
+   "id": "judgments-high-courts",
+   "name": "High Court judgments (open dataset, CC BY 4.0)",
+   "kind": "judgments-hc",
+   "type": "legal",
+   "url": "https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/",
+   "lookback_days": 60,
+   "on": false,
+   "filter": false
+  },
+  {
    "id": "opp-wwf-india",
    "name": "WWF-India careers",
    "org": "WWF-India",
