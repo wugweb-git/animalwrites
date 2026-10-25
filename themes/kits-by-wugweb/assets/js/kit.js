@@ -555,13 +555,20 @@
 })();
 
 /* Folded sections (data-kit-fold): open on wide screens, folded at or below the width given (default 1199px), unless
-   data-kit-keep-open (e.g. filters in use); open without JavaScript. */
+   data-kit-keep-open (e.g. filters in use); open without JavaScript. A link to the fold, to a block around it or to
+   something in it (e.g. #newsletter, where the sign-up returns) opens it. */
 (function () {
+	function targeted(d) {
+		var t = null;
+		try { t = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { t = null; }
+		return !!t && (t.contains(d) || d.contains(t));
+	}
 	document.querySelectorAll('details[data-kit-fold]').forEach(function (d) {
 		var mq = window.matchMedia('(max-width: ' + (parseInt(d.getAttribute('data-kit-fold'), 10) || 1199) + 'px)');
-		function apply() { d.open = !mq.matches || d.hasAttribute('data-kit-keep-open'); }
+		function apply() { d.open = !mq.matches || d.hasAttribute('data-kit-keep-open') || targeted(d); }
 		apply();
 		if (mq.addEventListener) mq.addEventListener('change', apply);
+		window.addEventListener('hashchange', function () { if (targeted(d)) d.open = true; });
 	});
 })();
 
