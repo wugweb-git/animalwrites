@@ -73,6 +73,24 @@ function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
 	update_option( 'kits_sourcing_log', $log, false );
 }
 
+/**
+ * Several change log entries in one write (a bulk action): each [tab, what, old, new], old and new optional.
+ *
+ * @param array[] $entries Entries, in the order they happened.
+ */
+function kits_sourcing_log_many( array $entries ) {
+	$entries = array_filter( $entries, fn( $e ) => '' !== trim( (string) ( $e[1] ?? '' ) ) );
+	if ( ! $entries ) {
+		return;
+	}
+	$log  = (array) get_option( 'kits_sourcing_log', array() );
+	$user = wp_get_current_user()->display_name;
+	foreach ( $entries as $e ) {
+		$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => $user, 'tab' => (string) $e[0], 'what' => (string) $e[1] ), $e[2] ?? null, $e[3] ?? null );
+	}
+	update_option( 'kits_sourcing_log', $log, false );
+}
+
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
 function kits_sourcing_diff( $label, $old, $new ) {
 	$add = array_diff( (array) $new, (array) $old );
@@ -341,9 +359,11 @@ add_action(
 			} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 				$was = array();
 				foreach ( $hosts as $h ) {
-					if ( isset( $pubs[ $h ] ) && empty( $pubs[ $h ]['kind'] ) && ( $pubs[ $h ]['status'] ?? 'neutral' ) !== $status ) {
-						$was[ $h ]            = (string) ( $pubs[ $h ]['status'] ?? 'neutral' );
+					$kind = (string) ( $pubs[ $h ]['kind'] ?? '' );
+					if ( isset( $pubs[ $h ] ) && ( '' === $kind || 'relay' === $kind ) && ( ( $pubs[ $h ]['status'] ?? 'neutral' ) !== $status || 'relay' === $kind ) ) {
+						$was[ $h ]            = 'relay' === $kind ? 'relay only' : (string) ( $pubs[ $h ]['status'] ?? 'neutral' );
 						$pubs[ $h ]['status'] = $status;
+						unset( $pubs[ $h ]['kind'] ); // a relay-only site given a status is a publisher
 					}
 				}
 				if ( $was ) {
@@ -355,6 +375,9 @@ add_action(
 			if ( $new && in_array( $ns, array( 'allow', 'neutral', 'block' ), true ) ) {
 				$prev         = $pubs[ $new ] ?? null;
 				$pubs[ $new ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $new ] ?? array(), array( 'status' => $ns ) );
+				if ( 'relay' === ( $pubs[ $new ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
+					unset( $pubs[ $new ]['kind'] );
+				}
 				kits_sourcing_log( 'publishers', 'added ' . $new . ' as ' . $ns, null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), $ns );
 			}
 			$shorts = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['short'] ?? array() ) ); // short names for card chips
@@ -479,9 +502,13 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$pubs            = aw_publishers();
+		$prev            = $pubs[ $host ] ?? null;
 		$pubs[ $host ]   = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => 'block' ) );
+		if ( 'relay' === ( $pubs[ $host ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
+			unset( $pubs[ $host ]['kind'] );
+		}
 		update_option( AW_PUB_OPTION, $pubs, false );
-		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)' );
+		kits_sourcing_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
 		wp_safe_redirect( add_query_arg( 'aw_blocked', rawurlencode( $host ), wp_get_referer() ? wp_get_referer() : admin_url() ) );
 		exit;
 	}

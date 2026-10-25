@@ -102,6 +102,17 @@ function aw_src_host_in( $host, array $list ) {
 }
 
 /**
+ * The relay allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list.
+ *
+ * @param array    $sources_option aw_sources.
+ * @param string[] $default        The built-in list (AW_RELAY_DEFAULT).
+ * @return string[]
+ */
+function aw_src_relay_legacy( array $sources_option, array $default ) {
+	return isset( $sources_option['relay_hosts'] ) ? array_values( (array) $sources_option['relay_hosts'] ) : array_values( $default );
+}
+
+/**
  * The relay allow list from the publishers' switches (in the records' order).
  *
  * @param array $pubs aw_publishers.
@@ -118,10 +129,30 @@ function aw_src_relay_hosts_from_pubs( array $pubs ) {
 }
 
 /**
- * Per host, the newest relay request (the log row) for that host or one of its subdomains, from the newest
- * row back.
+ * The relay log reduced to the newest row per host it names (a few hosts, however long the log), for
+ * aw_src_relay_last() over many hosts.
  *
- * @param array  $log  aw_relay_log rows (oldest first).
+ * @param array $log aw_relay_log rows (oldest first).
+ * @return array<string, array>
+ */
+function aw_src_relay_index( array $log ) {
+	$out = array();
+	foreach ( $log as $r ) {
+		if ( ! is_array( $r ) ) {
+			continue;
+		}
+		$h = strtolower( trim( (string) ( $r['host'] ?? '' ), '.' ) );
+		if ( '' !== $h && ( ! isset( $out[ $h ] ) || (int) ( $r['at'] ?? 0 ) >= (int) ( $out[ $h ]['at'] ?? 0 ) ) ) {
+			$out[ $h ] = $r;
+		}
+	}
+	return $out;
+}
+
+/**
+ * The newest relay request (the log row) for a host or one of its subdomains, or null.
+ *
+ * @param array  $log  aw_relay_log rows, or an index from aw_src_relay_index().
  * @param string $host Host.
  * @return array|null
  */
@@ -195,10 +226,11 @@ function aw_src_log_value( $v ) {
  * @param string[] $relay   The relay allow list before (stored relay_hosts or the built-in list).
  * @param string   $today   Y-m-d, for a new record's first-seen date.
  * @param array    $map     Host => host to switch on instead.
- * @return array{pubs: array, sources: array, flagged: string[], added: string[], hosts: array, relay_before: string[], relay_after: string[], mapped: array}
+ * @return array{pubs: array, sources: array, flagged: string[], added: string[], hosts: array, hosted: string[], relay_before: string[], relay_after: string[], mapped: array}
  */
 function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, array $map = AW_SRC_RELAY_MAP ) {
-	$hosts = array();
+	$hosts  = array();
+	$hosted = array();
 	foreach ( $sources as $i => $s ) {
 		if ( ! is_array( $s ) ) {
 			continue;
@@ -206,6 +238,7 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
 		$h = aw_src_source_host( $s );
 		if ( '' !== $h && empty( $s['host'] ) ) {
 			$sources[ $i ]['host'] = $h;
+			$hosted[]              = (string) ( $s['id'] ?? '' );
 		}
 		$hosts[ (string) ( $s['id'] ?? $i ) ] = $h;
 	}
@@ -244,6 +277,7 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
 		'flagged'      => $flagged,
 		'added'        => $added,
 		'hosts'        => $hosts,
+		'hosted'       => $hosted,
 		'relay_before' => array_values( array_map( 'strval', $relay ) ),
 		'relay_after'  => aw_src_relay_hosts_from_pubs( $pubs ),
 		'mapped'       => $mapped,
@@ -252,14 +286,16 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
 
 /**
  * Undo the phase 1 migration on the current records (keeps everything else that changed since: counts, new
- * publishers, feeds added or edited): relay switches off, kind=relay records removed (unless the ingest gate has
- * since made one a publisher), the host key taken off every source.
+ * publishers, feeds added or edited): relay switches off (phase 0 does not read them), kind=relay records removed
+ * (unless the ingest gate has since made one a publisher), and the host key taken off the sources the migration gave
+ * one (a host set by hand before it stays).
  *
- * @param array $pubs    aw_publishers now.
- * @param array $sources aw_sources.sources now.
+ * @param array         $pubs    aw_publishers now.
+ * @param array         $sources aw_sources.sources now.
+ * @param string[]|null $hosted  Ids of the sources the migration gave a host (null: every source).
  * @return array{pubs: array, sources: array, unflagged: string[], removed: string[]}
  */
-function aw_src_phase1_undo( array $pubs, array $sources ) {
+function aw_src_phase1_undo( array $pubs, array $sources, $hosted = null ) {
 	$unflagged = array();
 	$removed   = array();
 	foreach ( $pubs as $h => $p ) {
@@ -277,7 +313,7 @@ function aw_src_phase1_undo( array $pubs, array $sources ) {
 		}
 	}
 	foreach ( $sources as $i => $s ) {
-		if ( is_array( $s ) ) {
+		if ( is_array( $s ) && ( null === $hosted || in_array( (string) ( $s['id'] ?? '' ), (array) $hosted, true ) ) ) {
 			unset( $sources[ $i ]['host'] );
 		}
 	}
@@ -383,16 +419,23 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
 			$diffs[] = 'relay host ' . $h . ' is no longer allowed';
 		}
 	}
-	$seen = array();
+	$seen     = array();
+	$narrowed = array_keys( $map );
+	$kept     = array_values( array_diff( array_map( 'strtolower', array_map( 'strval', $relay_before ) ), $narrowed ) );
 	foreach ( $relay_log as $r ) {
 		$host = strtolower( (string) ( $r['host'] ?? '' ) );
 		if ( '' === $host || isset( $seen[ $host ] ) || ! is_int( $r['status'] ?? null ) || $r['status'] >= 400 || ! aw_src_host_in( $host, $relay_before ) ) {
 			continue; // refused or failed requests, and hosts never allowed, are not a use to keep
 		}
 		$seen[ $host ] = true;
-		if ( ! aw_src_host_in( $host, $relay_after ) ) {
-			$diffs[] = 'relayed host ' . $host . ' (in the relay log) is no longer allowed';
+		if ( aw_src_host_in( $host, $relay_after ) ) {
+			continue;
 		}
+		if ( ! aw_src_host_in( $host, $kept ) && aw_src_host_in( $host, $narrowed ) ) { // allowed only through a narrowed entry
+			$planned[] = 'relayed host ' . $host . ' (in the relay log) no longer relayed: narrowed on purpose';
+			continue;
+		}
+		$diffs[] = 'relayed host ' . $host . ' (in the relay log) is no longer allowed';
 	}
 	return array( 'diffs' => $diffs, 'planned' => $planned, 'since' => $since );
 }

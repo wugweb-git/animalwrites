@@ -155,6 +155,22 @@ $big = array_fill( 0, 1005, array( 'at' => 'z' ) );
 aw_t( 1000 === count( aw_src_log_push( $big, array( 'at' => 'n' ) ) ), 'log: 1,000 kept' );
 aw_t( 'on' === aw_src_log_value( true ) && 'a, b' === aw_src_log_value( array( 'a', 'b' ) ) && '(none)' === aw_src_log_value( '' ), 'log values in words' );
 
+// Review fixes (25 Oct): a host set by hand before the migration survives a rollback; hosts reached only through the
+// narrowed substack.com entry are a planned change, not a conflict; the relay index; the legacy list.
+$hand                                = $sources;
+$hand[2]['host']                     = 'example.org';
+$plan2                               = aw_src_phase1_plan( $pubs, $hand, $relay, '2026-10-26' );
+aw_t( ! in_array( $hand[2]['id'], $plan2['hosted'], true ) && 19 === count( $plan2['hosted'] ), 'the plan records which sources it gave a host' );
+$undo2 = aw_src_phase1_undo( $plan2['pubs'], $plan2['sources'], $plan2['hosted'] );
+aw_t( $undo2['sources'] === $hand, 'undo keeps a host set by hand before the migration' );
+$log2   = $log;
+$log2[] = array( 'at' => 1792999999, 'host' => 'someoneelse.substack.com', 'path' => '/feed', 'status' => 200, 'bytes' => 10, 'ms' => 5, 'note' => '' );
+$cmp2   = aw_src_phase1_compare( $pubs, $sources, $plan['pubs'], $plan['sources'], $relay, $plan['relay_after'], $log2 );
+aw_t( array() === $cmp2['diffs'] && (bool) array_filter( $cmp2['planned'], fn( $x ) => str_contains( $x, 'someoneelse.substack.com' ) ), 'another Substack in the log is a planned narrowing, not a conflict' );
+$idx = aw_src_relay_index( $log );
+aw_t( count( $idx ) < count( $log ) && aw_src_relay_last( $idx, 'peopleforanimals.substack.com' ) === aw_src_relay_last( $log, 'peopleforanimals.substack.com' ), 'relay index gives the same last result' );
+aw_t( $relay === aw_src_relay_legacy( array(), $relay ) && array( 'a.com' ) === aw_src_relay_legacy( array( 'relay_hosts' => array( 'a.com' ) ), $relay ), 'legacy relay list: stored, else built in' );
+
 // Last relay result: the newest row for the host or a subdomain.
 $last = aw_src_relay_last( $log, 'zoomtventertainment.com' );
 aw_t( is_array( $last ) && 'www.zoomtventertainment.com' === $last['host'], 'last relay result includes subdomains' );

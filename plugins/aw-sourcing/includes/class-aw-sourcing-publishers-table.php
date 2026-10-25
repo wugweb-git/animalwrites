@@ -49,7 +49,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		$pubs        = aw_publishers();
 		$feeds       = aw_sourcing_feeds_by_host();
 		$relay       = aw_relay_hosts();
-		$log         = (array) get_option( 'aw_relay_log', array() );
+		$log         = aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
 		// A host kept only for its icon (kind=directory-source) is not listed; a relay-only one (kind=relay) is.
 		$hosts = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) || 'relay' === $p['kind'] ) );
 		foreach ( array_unique( array_merge( $hosts, array_keys( $press ), array_keys( $feeds ) ) ) as $h ) {

@@ -34,8 +34,7 @@ function aw_relay_hosts() {
 
 /** The allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list. */
 function aw_relay_hosts_legacy() {
-	$c = function_exists( 'aw_sources_config' ) ? aw_sources_config() : array();
-	return isset( $c['relay_hosts'] ) ? array_values( (array) $c['relay_hosts'] ) : AW_RELAY_DEFAULT;
+	return aw_src_relay_legacy( function_exists( 'aw_sources_config' ) ? aw_sources_config() : array(), AW_RELAY_DEFAULT );
 }
 
 /** True when the host is on the allow list. */
@@ -226,6 +225,13 @@ add_filter(
  * Sources → Relay log view. The old address redirects there (source-sites.php).
  */
 
+/*
+ * The old Relay form posted to options.php (aw_sources[_aw_tab] = relay). A copy still open in another browser tab must
+ * not replace the option: aw_sources_sanitize() hands such a post here, and it changes nothing (as for the old
+ * Categories and Sections forms, sourcing-terms-admin.php).
+ */
+add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
+
 /** Sources → Relay log: every request the workers made through the site (last 200). */
 function aw_relay_log_view() {
 	$log  = array_reverse( (array) get_option( 'aw_relay_log', array() ) );
@@ -279,6 +285,7 @@ function aw_relay_switch( array $pubs, array $hosts, $on ) {
 			$names[ aw_src_source_host( $s ) ] = $names[ aw_src_source_host( $s ) ] ?? (string) ( $s['name'] ?? '' );
 		}
 	}
+	$log = array();
 	foreach ( $hosts as $h ) {
 		$h = aw_sourcing_norm_host( $h );
 		if ( '' === $h ) {
@@ -288,20 +295,21 @@ function aw_relay_switch( array $pubs, array $hosts, $on ) {
 		if ( $on && ! $was ) {
 			if ( isset( $pubs[ $h ] ) ) {
 				$pubs[ $h ]['relay'] = true;
-				kits_sourcing_log( 'relay', $h . ': fetch through this site', 'off', 'on' );
+				$log[]               = array( 'relay', $h . ': fetch through this site', 'off', 'on' );
 			} else {
 				$pubs[ $h ] = array( 'status' => 'neutral', 'name' => (string) ( $names[ $h ] ?? '' ), 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'kind' => 'relay', 'relay' => true );
-				kits_sourcing_log( 'relay', $h . ': fetch through this site (added as relay only, not a publisher)', '', $pubs[ $h ] );
+				$log[]      = array( 'relay', $h . ': fetch through this site (added as relay only, not a publisher)', '', $pubs[ $h ] );
 			}
 		} elseif ( ! $on && $was ) {
 			if ( 'relay' === ( $pubs[ $h ]['kind'] ?? '' ) ) {
-				kits_sourcing_log( 'relay', $h . ': relay off (relay-only record removed)', $pubs[ $h ], '' );
+				$log[] = array( 'relay', $h . ': relay off (relay-only record removed)', $pubs[ $h ], '' );
 				unset( $pubs[ $h ] );
 			} else {
 				unset( $pubs[ $h ]['relay'] );
-				kits_sourcing_log( 'relay', $h . ': fetch through this site', 'on', 'off' );
+				$log[] = array( 'relay', $h . ': fetch through this site', 'on', 'off' );
 			}
 		}
 	}
+	kits_sourcing_log_many( $log );
 	return $pubs;
 }

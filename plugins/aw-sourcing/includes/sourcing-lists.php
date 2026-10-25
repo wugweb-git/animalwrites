@@ -320,11 +320,13 @@ function aw_sources_list_action() {
 	}
 	$c['sources'] = $keep;
 	update_option( 'aw_sources', $c, false );
+	$log = array();
 	foreach ( $what as $t => $w ) {
 		foreach ( $w as $e ) {
-			kits_sourcing_log( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
+			$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 		}
 	}
+	kits_sourcing_log_many( $log );
 	aw_sources_list_back( (bool) $what );
 	return true;
 }
@@ -355,7 +357,11 @@ add_action(
 			$url  = trim( sanitize_text_field( $r['url'] ?? '' ) );
 			$on   = ! empty( $r['on'] );
 			$flt  = ! empty( $r['filter'] );
-			$host = array_key_exists( 'host', (array) $r ) ? aw_sourcing_norm_host( sanitize_text_field( (string) $r['host'] ) ) : null; // null: the form had no Publisher field
+			$raw  = array_key_exists( 'host', (array) $r ) ? trim( sanitize_text_field( (string) $r['host'] ) ) : null; // null: the form had no Publisher field
+			$host = null === $raw ? null : aw_sourcing_norm_host( $raw );
+			if ( null !== $raw && '' !== $raw && '' === $host ) {
+				$host = null; // not a host (a typo): the publisher stays as it is
+			}
 			if ( '' === $id ) { // a new feed: News or Library (new kinds of opportunity site need code)
 				$type = in_array( $type, array( 'news', 'legal' ), true ) ? $type : 'news';
 				if ( '' === $name || '' === $url ) {
@@ -383,8 +389,9 @@ add_action(
 			if ( null === $at ) {
 				continue;
 			}
-			$s = &$c['sources'][ $at ];
-			$t = (string) ( $s['type'] ?? '' );
+			$s     = &$c['sources'][ $at ];
+			$t     = (string) ( $s['type'] ?? '' );
+			$shown = aw_src_source_host( $s ); // the Publisher the form showed (before the address below changes)
 			if ( ! empty( $s['on'] ) !== $on ) {
 				$what[ $t ][] = array( $s['name'] . ( $on ? ' on' : ' off' ), ! empty( $s['on'] ), $on );
 			}
@@ -404,27 +411,28 @@ add_action(
 					$s['filter']  = $flt;
 				}
 			}
-			if ( 'rss' === $s['kind'] && null !== $host ) { // the Publisher field: a change only when it differs from what applies now
-				$was     = (string) ( $s['host'] ?? '' );
+			if ( 'rss' === $s['kind'] && null !== $host && $host !== $shown ) { // the Publisher field, changed on the form
 				$plain   = $s;
 				unset( $plain['host'] );
-				$derived = aw_src_source_host( $plain );
-				if ( '' === $host && '' !== $was ) {
+				$derived = aw_src_source_host( $plain ); // from the (new) address
+				if ( '' === $host ) {
 					unset( $s['host'] );
-					$what[ $t ][] = array( $s['name'] . ' publisher → ' . $derived . ' (from its address)', $was, $derived );
-				} elseif ( '' !== $host && $host !== ( '' !== $was ? $was : $derived ) ) {
-					$what[ $t ][] = array( $s['name'] . ' publisher → ' . $host, '' !== $was ? $was : $derived, $host );
+					$what[ $t ][] = array( $s['name'] . ' publisher → ' . $derived . ' (from its address)', $shown, $derived );
+				} else {
+					$what[ $t ][] = array( $s['name'] . ' publisher → ' . $host, $shown, $host );
 					$s['host']    = $host;
 				}
 			}
 			unset( $s );
 		}
 		update_option( 'aw_sources', $c, false );
+		$log = array();
 		foreach ( $what as $t => $w ) {
 			foreach ( $w as $e ) {
-				kits_sourcing_log( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
+				$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 			}
 		}
+		kits_sourcing_log_many( $log );
 	}
 );
 
@@ -473,8 +481,11 @@ add_action(
  */
 function aw_sources_sanitize( $value ) {
 	$tab = aw_sourcing_settings_tab( $value );
-	if ( '' === $tab || ! has_filter( 'aw_sources_save_' . $tab ) ) {
+	if ( '' === $tab ) {
 		return $value;
+	}
+	if ( ! has_filter( 'aw_sources_save_' . $tab ) ) { // a form of a tab that no longer exists: never replace the lists with it
+		return get_option( 'aw_sources' );
 	}
 	$was = aw_sources_config();
 	$c   = apply_filters( 'aw_sources_save_' . $tab, $was, $value );

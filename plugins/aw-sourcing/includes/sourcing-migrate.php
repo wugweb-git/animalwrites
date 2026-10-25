@@ -58,12 +58,25 @@ function aw_sourcing_cli_counts( array $opts ) {
 	);
 }
 
-/** The newest backup of a phase: [option name, options], or an error. */
-function aw_sourcing_cli_backup( $phase ) {
-	$name = (string) get_option( 'aw_backup_latest_' . $phase, '' );
+/**
+ * The backup of a phase taken before it was migrated: [option name, options], or an error. Migrate uses the newest one;
+ * verify and rollback the one the migration recorded. A backup taken after the migration is never used.
+ *
+ * @param int    $phase Phase.
+ * @param string $name  Backup option name ('' for the one to use).
+ * @return array
+ */
+function aw_sourcing_cli_backup( $phase, $name = '' ) {
+	if ( '' === $name ) {
+		$rec  = get_option( 'aw_sourcing_phase' . $phase . '_record' );
+		$name = is_array( $rec ) && ! empty( $rec['backup'] ) && aw_sourcing_phase() >= $phase ? (string) $rec['backup'] : (string) get_option( 'aw_backup_latest_' . $phase, '' );
+	}
 	$data = '' !== $name ? get_option( $name ) : false;
 	if ( ! is_array( $data ) || empty( $data['options'] ) ) {
 		WP_CLI::error( "No backup for phase $phase. Run: wp aw-sourcing backup --phase=$phase" );
+	}
+	if ( (int) ( $data['options']['aw_sourcing_phase'] ?? 0 ) >= $phase ) {
+		WP_CLI::error( "Backup $name was taken after phase $phase was migrated; it cannot be used to migrate, verify or roll back. Take a backup before migrating." );
 	}
 	foreach ( (array) $data['options'] as $k => $v ) {
 		if ( ( $data['sums'][ $k ] ?? '' ) !== aw_sourcing_cli_sum( $v ) ) {
@@ -73,9 +86,9 @@ function aw_sourcing_cli_backup( $phase ) {
 	return array( $name, (array) $data['options'] );
 }
 
-/** The relay allow list as it was before phase 1, from a backup's aw_sources. */
+/** The relay allow list as it was before phase 1, from a backup's aw_sources (as aw_relay_hosts_legacy reads it). */
 function aw_sourcing_cli_relay_before( array $sources_option ) {
-	return isset( $sources_option['relay_hosts'] ) ? array_values( (array) $sources_option['relay_hosts'] ) : AW_RELAY_DEFAULT;
+	return aw_src_relay_legacy( $sources_option, AW_RELAY_DEFAULT );
 }
 
 /**
@@ -122,7 +135,11 @@ WP_CLI::add_command(
 		if ( ! $n || filesize( $file ) < 100 ) { // an empty file is no backup (owner, 24 Oct 2026)
 			WP_CLI::error( "The backup file $file is empty (the option backup $name was written)." );
 		}
-		update_option( 'aw_backup_latest_' . $phase, $name, false );
+		if ( aw_sourcing_phase() < $phase ) {
+			update_option( 'aw_backup_latest_' . $phase, $name, false ); // the one migrate uses
+		} else {
+			WP_CLI::warning( "Phase $phase is already migrated: this backup is kept, but migrate, verify and rollback use the one taken before the migration." );
+		}
 		WP_CLI::log( aw_sourcing_cli_counts( $opts ) );
 		foreach ( $sums as $k => $v ) {
 			WP_CLI::log( "sha256 $k: $v" );
@@ -151,8 +168,9 @@ WP_CLI::add_command(
 		if ( aw_sourcing_phase() >= $phase ) {
 			WP_CLI::error( "Phase $phase is already migrated (aw_sourcing_phase = " . aw_sourcing_phase() . '). wp aw-sourcing verify --phase=1 checks it.' );
 		}
+		$bk = '';
 		if ( ! $dry ) {
-			list( $bk ) = aw_sourcing_cli_backup( $phase ); // refuses without a backup
+			list( $bk ) = aw_sourcing_cli_backup( $phase, (string) get_option( 'aw_backup_latest_' . $phase, '' ) ); // refuses without a backup
 			WP_CLI::log( "Backup: $bk" );
 		}
 		$c      = (array) get_option( 'aw_sources', array() );
@@ -199,9 +217,10 @@ WP_CLI::add_command(
 		}
 		update_option( AW_PUB_OPTION, $now, false );
 		$c            = (array) get_option( 'aw_sources', array() );
-		$c['sources'] = aw_src_phase1_plan( $now, (array) ( $c['sources'] ?? array() ), array(), current_time( 'Y-m-d' ) )['sources'];
+		$hostplan     = aw_src_phase1_plan( $now, (array) ( $c['sources'] ?? array() ), array(), current_time( 'Y-m-d' ) );
+		$c['sources'] = $hostplan['sources'];
 		update_option( 'aw_sources', $c, false );
-		update_option( 'aw_sourcing_phase1_record', array( 'at' => current_time( 'mysql' ), 'backup' => (string) get_option( 'aw_backup_latest_1' ), 'flagged' => $plan['flagged'], 'added' => $plan['added'], 'mapped' => $plan['mapped'], 'relay_before' => $plan['relay_before'] ), false );
+		update_option( 'aw_sourcing_phase1_record', array( 'at' => current_time( 'mysql' ), 'backup' => $bk, 'flagged' => $plan['flagged'], 'added' => $plan['added'], 'hosted' => $hostplan['hosted'], 'mapped' => $plan['mapped'], 'relay_before' => $plan['relay_before'] ), false );
 		update_option( 'aw_sourcing_phase', 1, false );
 		kits_sourcing_log(
 			'sources',
@@ -265,8 +284,9 @@ WP_CLI::add_command(
 		} else {
 			WP_CLI::log( 'policy: "Workers use these lists" is off, so config (and sources_v2) is not sent.' );
 		}
-		if ( (array) ( $policy['relay_hosts'] ?? array() ) !== aw_relay_hosts() ) {
-			$cmp['diffs'][] = 'policy: relay_hosts is not the switch list';
+		$rec = (array) get_option( 'aw_sourcing_phase1_record', array() );
+		if ( isset( $rec['relay_before'] ) && array_values( (array) $rec['relay_before'] ) !== aw_sourcing_cli_relay_before( $c_old ) ) {
+			$cmp['diffs'][] = 'the relay list the migration started from (' . implode( ', ', (array) $rec['relay_before'] ) . ') is not the backup\'s';
 		}
 		foreach ( $cmp['planned'] as $p ) {
 			WP_CLI::log( "planned: $p" );
@@ -312,8 +332,9 @@ WP_CLI::add_command(
 			update_option( 'aw_sources', $old['aw_sources'], false );
 			$what = "restored aw_publishers and aw_sources from $bk";
 		} else {
+			$rec          = get_option( 'aw_sourcing_phase1_record' );
 			$c            = (array) get_option( 'aw_sources', array() );
-			$undo         = aw_src_phase1_undo( aw_publishers(), (array) ( $c['sources'] ?? array() ) );
+			$undo         = aw_src_phase1_undo( aw_publishers(), (array) ( $c['sources'] ?? array() ), is_array( $rec ) && isset( $rec['hosted'] ) ? (array) $rec['hosted'] : null );
 			$c['sources'] = $undo['sources'];
 			update_option( AW_PUB_OPTION, $undo['pubs'], false );
 			update_option( 'aw_sources', $c, false );
@@ -324,6 +345,8 @@ WP_CLI::add_command(
 		} else {
 			update_option( 'aw_sourcing_phase', $old['aw_sourcing_phase'], false );
 		}
+		delete_option( 'aw_sourcing_phase1_record' );
+		delete_option( 'aw_backup_latest_' . $phase ); // a new migration starts from a new backup (the backups themselves stay)
 		kits_sourcing_log( 'sources', "Phase $phase rolled back (WP-CLI): $what; relay list back to " . implode( ', ', aw_relay_hosts() ), 'phase ' . $phase, 'phase ' . aw_sourcing_phase() );
 		WP_CLI::success( "Rolled back: $what. Relay hosts: " . implode( ', ', aw_relay_hosts() ) . '. The backup stays (' . $bk . ').' );
 	},

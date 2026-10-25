@@ -610,7 +610,8 @@ function aw_sourcing_source_save() {
 	$changed = false;
 	if ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 		$before = $pubs[ $host ] ?? null;
-		$rec    = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => $status ) );
+		// An existing record keeps its keys in their order (an unchanged save then writes nothing); a new one gets the defaults.
+		$rec = null === $before ? array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'status' => $status ) : array_merge( $before, array( 'status' => $status ) );
 		if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site becomes a publisher
 			unset( $rec['kind'] );
 			kits_sourcing_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
