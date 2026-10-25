@@ -13,24 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SPONSORED_BLOCKS = array( 'animal-writes/sponsored-item', 'animal-writes/sponsored-banner' );
-
-/** Does a post (or a synced pattern it uses) hold a sponsored block? */
-function aw_has_sponsored_block( $id ) {
-	$content = (string) get_post_field( 'post_content', $id );
-	if ( preg_match_all( '/<!-- wp:block \{"ref":(\d+)/', $content, $m ) ) {
-		foreach ( array_slice( $m[1], 0, 20 ) as $ref ) {
-			$content .= (string) get_post_field( 'post_content', (int) $ref );
-		}
-	}
-	foreach ( AW_SPONSORED_BLOCKS as $b ) {
-		if ( false !== strpos( $content, '<!-- wp:' . $b . ' ' ) || false !== strpos( $content, '<!-- wp:' . $b . ' /-->' ) ) {
-			return true;
-		}
-	}
-	return false;
-}
-
 /** The "Sponsored" label line: badge, and "Sponsored by {name}" when a name is given. */
 function aw_sponsored_label( $name ) {
 	$name = trim( (string) $name );

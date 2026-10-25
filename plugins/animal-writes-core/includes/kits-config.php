@@ -9,8 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_CONTENT_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' );
-
 // Tags: Site Kit only (Analytics GT-TXZHFR39 -> G-4P5YMJ04RL, AdSense, Tag Manager GTM-TB3FCFQB). Kits Core prints
 // no GTM of its own, so nothing loads twice. Do not put a GA4 tag inside GTM-TB3FCFQB while Site Kit Analytics is on.
 add_filter( 'kits_gtm_id', fn() => '' );
@@ -38,8 +36,6 @@ add_filter(
 );
 
 // End bar on items: categories bottom left, share bottom right.
-add_filter( 'kits_endbar_taxonomy', fn( $t, $type ) => 'aw_listing' === $type ? '' : 'category', 10, 2 ); // listings: none (their tags sit under the name)
-add_filter( 'kits_endbar_share_types', fn() => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign', 'aw_listing' ) );
 
 
 /** Analytics page context (kits-core analytics.php): what this page is, for GTM and the events in kit.js. */

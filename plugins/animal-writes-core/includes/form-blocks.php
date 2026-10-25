@@ -47,7 +47,10 @@ function aw_block_volunteer( $a ) {
 	}
 	$done = true;
 	$form = aw_volunteer_form( aw_volunteer_source() );
-	if ( ! empty( $a['open'] ) || false !== strpos( $form, 'kit-form-done' ) ) {
+	if ( '' === $form ) { // no form (Fluent Forms off): no empty "Register as a volunteer" button either
+		return '';
+	}
+	if ( ! empty( $a['open'] ) ) {
 		return '<div class="aw-volunteer" id="volunteer">' . $form . '</div>';
 	}
 	return kits_disclosure( 'volunteer', 'Register as a volunteer', $form );
@@ -104,11 +107,6 @@ function aw_form_page_for( $listing ) {
 	$place = 'aw_listing' !== $listing->post_type ? ( AW_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
 	return '<p class="aw-form-for"><a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( get_the_title( $listing ) ) . '</a>'
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
-}
-
-/** Without a published listing: the message and a link to the Directory. */
-function aw_form_page_missing() {
-	return '<p>This listing could not be found.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/directory/' ) ) . '">Directory</a></p>';
 }
 
 /**

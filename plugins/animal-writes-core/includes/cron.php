@@ -82,11 +82,6 @@ function aw_daily() {
 	}
 }
 
-/** True when the listing's AWBI recognition has a "valid until" date that has passed. */
-function aw_awbi_lapsed( $id ) {
-	$v = (string) get_post_meta( $id, 'aw_awbi_valid', true );
-	return '' !== $v && $v < current_time( 'Y-m-d' );
-}
 add_action( 'aw_daily', 'aw_daily' );
 
 /**

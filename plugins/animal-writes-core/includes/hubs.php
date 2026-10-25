@@ -577,9 +577,6 @@ add_action(
  * go H1 > H2 list > H3 items. A card title inside any Query Loop at H2 is printed as an H3; a section page's list or a
  * tag or category page's list without an H2 of its own gets one for screen readers.
  */
-function aw_is_library_hub() {
-	return ! is_admin() && is_page( 'library' );
-}
 function aw_card_lists_live() {
 	return ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST );
 }

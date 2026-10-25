@@ -1,9 +1,9 @@
 <?php
 /**
- * Volunteer sign-up form (shared form kit): name, email, phone, PIN code → State and District (LGD), how you'd like to
- * help, consent. Entries go to FluentCRM only (owner, 24 Oct 2026: it is the one volunteers table): a contact tagged
- * Volunteer with the details and the page they came from in custom fields (fluentcrm.php). The site's volunteers table
- * is a read-only backup (volunteers-db.php).
+ * Volunteer sign-up: the Fluent Forms form "Volunteer sign-up" (forms-fluentforms.php), the only form since 25 Oct 2026
+ * (owner: the site's own form and its handler were removed). Each sign-up is a FluentCRM contact tagged Volunteer, by
+ * the form's own FluentCRM link (owner, 24 Oct 2026: FluentCRM is the one volunteers table). The site's volunteers
+ * table is a read-only backup (volunteers-db.php); the aw_volunteer post type stays registered for its old items.
  *
  * @package animal-writes-core
  */
@@ -50,50 +50,12 @@ add_action(
 	}
 );
 
-/**
- * Form markup.
- *
- * @return string
- */
+/** The volunteer form (the block in form-blocks.php): the Fluent Forms form. $source: the page it is on (S6.6). */
 function aw_volunteer_form( $source = '' ) {
-	if ( isset( $_GET['aw_done'] ) && 'volunteer' === $_GET['aw_done'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">' . esc_html__( 'Thank you for signing up.', 'animal-writes-core' ) . '</p><p>'
-			. esc_html__( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) . '</p></div>';
-	}
-	$ff = apply_filters( 'aw_form_html', '', 'volunteer', array( 'source' => $source ) ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
-	if ( '' !== $ff ) {
-		return $ff;
-	}
-	$form   = 'aw_volunteer';
-	$state  = aw_form_state( $form );
-	$picked = (array) ( $state['values']['roles'] ?? array() );
-	$err    = $state['errors']['roles'] ?? '';
-	$html   = aw_form_open( $form, array_filter( array( 'class' => 'kit-form aw-volunteer-form', 'data-source' => $source ) ) );
-	$html  .= '<fieldset class="kit-field kit-check-group aw-vol-roles' . ( $err ? ' is-invalid' : '' ) . '" data-min="1" data-msg-required="Choose how you\'d like to help" aria-describedby="aw-volunteer-roles-error"><legend>How would you like to help?</legend>';
-	foreach ( AW_VOL_ROLES as $k => $label ) {
-		$html .= '<label class="kit-checkbox aw-vol-role"><input type="checkbox" name="roles[]" value="' . esc_attr( $k ) . '"' . checked( in_array( $k, $picked, true ), true, false ) . '> <span>' . esc_html( $label ) . '</span></label>';
-	}
-	$html .= '<span class="kit-field-message kit-field-error" id="aw-volunteer-roles-error" aria-live="polite">' . esc_html( $err ) . '</span></fieldset>';
-	$html  .= '<div class="kit-form-grid aw-vol-details">';
-	$html  .= kits_dict_field( $form, 'name', array( 'required' => true ) );
-	$html  .= kits_dict_field( $form, 'email' );
-	$html  .= kits_dict_field( $form, 'phone' );
-	$html  .= kits_dict_field( $form, 'pincode' );
-	$html  .= aw_place_fields( $form );
-	$html  .= '</div>';
-	$html .= kits_dict_field( $form, 'consent', array( 'label' => AW_VOL_CONSENT_LABEL ) );
-	$html .= function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form, true ) : ''; // updates: their own box, ticked (owner, 20 Oct 2026)
-	$html .= '<div class="kit-form-actions"><button type="submit" class="kit-btn">' . esc_html__( 'Sign up to volunteer', 'animal-writes-core' ) . '</button></div></form>';
-	return $html;
+	return aw_ff_form( 'volunteer', array( 'source' => $source ) );
 }
-add_shortcode( 'aw_volunteer_form', fn() => aw_volunteer_form() );
 
-/** The consent line on the volunteer form and its version. Updates are a separate, unticked box (owner, 20 Oct 2026; DPDP:
- *  consent per purpose), so this line covers volunteering only. */
-const AW_VOL_CONSENT_LABEL   = 'I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.';
-const AW_VOL_CONSENT_VERSION = 'v3-form-consent-volunteering';
-
-/** A sign-up's values from submitted data (already unslashed): the site's form and Fluent Forms use this. */
+/** A sign-up's values from submitted data (already unslashed); aw_ff_errors() checks the place fields with them. */
 function aw_volunteer_values( $in ) {
 	$roles = $in['roles'] ?? array();
 	return array(
@@ -129,47 +91,6 @@ function aw_volunteer_errors( $v ) {
 	return $errors;
 }
 
-/**
- * Save a checked sign-up to FluentCRM (one contact per email; signing up again updates it), email the team, and add
- * the volunteer to the newsletter (owner, 20 Oct 2026: they join whether or not the updates box stays ticked). Nothing
- * is written to the volunteers table (owner, 24 Oct 2026).
- *
- * @return array|null array{url, title, text} for the thank-you page; null when FluentCRM could not take it.
- */
-function aw_volunteer_save( $v, $source ) {
-	if ( ! function_exists( 'aw_crm_on' ) || ! aw_crm_on() ) {
-		return null;
-	}
-	$term  = aw_place_by_slug( $v['state'] );
-	$dist  = $v['district'] ? aw_place_by_slug( $v['district'] ) : null;
-	$phone = kits_clean_phone( $v['phone'] );
-	$had   = FluentCrmApi( 'contacts' )->getContact( $v['email'] );
-	$again = $had && aw_crm_has_tag( $had, 'volunteer' ); // already registered (same email): their details are updated, no second record
-	aw_newsletter_join( $v['email'], $v['name'], 'site:volunteer', AW_VOL_CONSENT_VERSION, aw_crm_volunteer_fields( $term->slug, $dist ? $dist->slug : '', $dist ? $dist->name : '', $v['pincode'], $phone ), array( 'volunteer' ) ); // makes or updates the contact; no email from this
-	$saved = aw_crm_volunteer_signup(
-		$v['email'],
-		array(
-			'vol_help'            => implode( '; ', array_map( fn( $k ) => AW_VOL_ROLES[ $k ] ?? $k, $v['roles'] ) ),
-			'vol_state'           => $term->name,
-			'vol_district'        => $dist ? $dist->name : '',
-			'vol_city'            => $dist ? $dist->name : '',
-			'vol_pincode'         => $v['pincode'],
-			'vol_phone'           => preg_replace( '/[^0-9+ ]/', '', (string) $phone ),
-			'vol_page'            => sanitize_text_field( (string) $source ),
-			'vol_source'          => '2.0 form',
-			'vol_consent'         => 'volunteering',
-			'vol_consent_version' => AW_VOL_CONSENT_VERSION,
-		)
-	);
-	if ( ! $saved ) {
-		return null;
-	}
-	wp_mail( 'contact@animalwrites.in', ( $again ? 'Volunteer updated their details: ' : 'New volunteer: ' ) . $v['name'] . ', ' . $term->name, ( $again ? 'A registered volunteer signed up again; their details were updated.' : 'A new volunteer signed up.' ) . "\nName: {$v['name']}\nState: {$term->name}\nDistrict: " . ( $dist ? $dist->name : '' ) . "\nFrom: " . $source . "\nView in FluentCRM > Contacts (tag Volunteer)." );
-	$title = $again ? __( 'You are already registered.', 'animal-writes-core' ) : __( 'Thank you for signing up.', 'animal-writes-core' );
-	$text  = $again ? __( 'We have updated your details. We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' ) : __( 'We will contact you when there is work in your area. You can ask us to delete your details at any time.', 'animal-writes-core' );
-	return array( 'url' => kits_thanks_url( 'volunteer', array(), $title, $text ), 'title' => $title, 'text' => $text );
-}
-
 /* ---------- The update link's page: /update/?t=<token> (owner, 21 Oct 2026; the link: aw_update_link()) ---------- */
 
 /** [aw_volunteer_update]: the Volunteer form filled in from their FluentCRM contact, or why the link does not work. */
@@ -180,8 +101,7 @@ add_shortcode(
 		if ( ! is_object( $c ) ) {
 			return '<p>' . esc_html( 'expired' === $c ? 'This link has expired. Ask us for a new one at contact@animalwrites.in.' : 'This link does not work. Check that it is complete, or ask us for a new one at contact@animalwrites.in.' ) . '</p>';
 		}
-		$html = apply_filters( 'aw_form_html', '', 'volunteer', array( 'vol_contact' => $c ) );
-		return '' !== $html ? '<p>Check your details and change what is different. Sending the form updates them.</p>' . $html : '<p>This form is not available right now.</p>';
+		return aw_ff_id( 'volunteer' ) ? '<p>Check your details and change what is different. Sending the form updates them.</p>' . aw_ff_form( 'volunteer', array( 'vol_contact' => $c ) ) : '<p>This form is not available right now.</p>' . aw_ff_missing( 'Volunteer sign-up', 'wp aw ff-form volunteer <form ID>' );
 	}
 );
 
@@ -257,29 +177,6 @@ add_action(
 	}
 );
 add_filter( 'aw_cdn_excluded_slugs', fn( $s ) => array_merge( (array) $s, array( 'update' ) ) );
-
-/**
- * Handle a submission.
- */
-function aw_volunteer_submit() {
-	$form   = 'aw_volunteer';
-	$back   = aw_form_back( '/volunteer/' );
-	$done   = kits_thanks_url( 'volunteer' );
-	$rl     = aw_form_guard( $form, $back, 'volunteer', $done );
-	$v      = aw_volunteer_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
-	$errors = aw_volunteer_errors( $v );
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'volunteer' );
-	}
-	$res = aw_volunteer_save( $v, kits_submitted_source() );
-	if ( ! $res ) { // FluentCRM is off or refused it: say so, keep what they typed (nothing is saved anywhere else)
-		aw_form_fail( $form, array(), $v, $back, 'volunteer', aw_form_generic_error( $form ) );
-	}
-	aw_form_count( $rl );
-	aw_form_success( $res['url'], $res['title'], $res['text'] );
-}
-add_action( 'admin_post_nopriv_aw_volunteer', 'aw_volunteer_submit' );
-add_action( 'admin_post_aw_volunteer', 'aw_volunteer_submit' );
 
 // Admin list: useful columns, no personal data in the title beyond name and state.
 add_filter( 'manage_aw_volunteer_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'title' => 'Name (state)', 'aw_email' => 'Email', 'aw_phone' => 'Phone', 'aw_city' => 'City', 'aw_roles' => 'Wants to', 'date' => 'Signed up' ) );

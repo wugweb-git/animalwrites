@@ -6,8 +6,8 @@
  * Fields: the item (hidden), what's wrong, details (up to 1,000 characters), an optional email (only to reply about the
  * report) and the spam check. The form is the Fluent Forms form #7 (/forms/7-report-a-mistake.json): it reads the
  * item from the link ({get.item}) and the reason ({get.reason}); each report is a Fluent Forms entry (favourite = needs
- * action, notes = what was done). Nothing on the item changes automatically. The site's own form below (shown only if
- * Fluent Forms is off) saves a private aw_report as before.
+ * action, notes = what was done). Nothing on the item changes automatically. The site's own form and its handler were
+ * removed (owner, 25 Oct 2026); reports sent before are private aw_report posts, still listed below.
  *
  * @package animal-writes-core
  */
@@ -65,127 +65,14 @@ function aw_report_item( $id ) {
 	return $p && isset( AW_REPORT_TYPES[ $p->post_type ] ) && 'publish' === $p->post_status ? $p : null;
 }
 
-/** The item a page link points to on this site, or null. */
-function aw_report_item_from_url( $url ) {
-	$url = (string) $url;
-	if ( '' === $url || wp_parse_url( $url, PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
-		return null;
-	}
-	return aw_report_item( url_to_postid( $url ) );
-}
-
-/** The report form (S7.3). $item: the item it is about, or null (then it asks for the page link). */
+/** The report form (S7.3), the Fluent Forms form. $item: the item it is about, or null (then it asks for the page link). */
 function aw_report_form( $item, $reason = '' ) {
 	$reason = isset( aw_report_reasons()[ $reason ] ) ? $reason : '';
-	$ff     = apply_filters( 'aw_form_html', '', 'report', array( 'item' => $item, 'listing' => $item && 'aw_listing' === $item->post_type ? $item : null, 'reason' => $reason ) ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
-	if ( '' !== $ff ) {
-		return $ff;
-	}
-	$form  = 'aw_report';
-	$state = aw_form_state( $form );
-	$html  = aw_form_open( $form, array( 'class' => 'kit-form aw-report-form', 'id' => 'aw-form-aw_report', 'data-key' => $item ? (string) $item->ID : '', 'data-source' => $item ? trim( wp_make_link_relative( (string) get_permalink( $item ) ), '/' ) : 'report' ) )
-		. '<input type="hidden" name="item" value="' . esc_attr( $item ? (string) $item->ID : '' ) . '">';
-	if ( ! $item ) {
-		$html .= aw_field( $form, array( 'name' => 'page', 'label' => 'Page link', 'type' => 'url', 'required' => true, 'hint' => 'The address of the page with the mistake.', 'attrs' => array( 'placeholder' => home_url( '/news/…' ), 'inputmode' => 'url' ), 'messages' => array( 'required' => 'Add the link to the page' ) ) );
-	}
-	$pick  = (string) ( $state['values']['reason'] ?? $reason );
-	$html .= aw_field( $form, array( 'name' => 'reason', 'label' => 'What\'s wrong?', 'type' => 'select', 'required' => true, 'value' => $pick, 'options' => array( '' => 'Choose one' ) + aw_report_reasons(), 'messages' => array( 'required' => 'Choose what is wrong' ) ) )
-		. aw_field( $form, array( 'name' => 'details', 'label' => 'Details', 'type' => 'textarea', 'hint' => 'Tell us the correct details if you know them.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 4 ) ) )
-		. kits_dict_field( $form, 'email', array( 'required' => false, 'hint' => 'Optional. Only to reply about this report.' ) )
-		. '<div class="kit-form-actions"><button type="submit" class="kit-btn">Send report</button></div></form>';
-	return $html;
+	return aw_ff_form( 'report', array( 'item' => $item, 'listing' => $item && 'aw_listing' === $item->post_type ? $item : null, 'reason' => $reason ) );
 }
 
 /** Back-compat: [aw_report_box] prints the report form of the current item. */
 add_shortcode( 'aw_report_box', fn() => get_post() ? aw_report_form( aw_report_item( get_the_ID() ) ) : '' );
-
-/** A report's values from submitted data (already unslashed). */
-function aw_report_values( $in ) {
-	return array(
-		'reason'  => sanitize_key( (string) ( $in['reason'] ?? '' ) ),
-		'details' => sanitize_textarea_field( (string) ( $in['details'] ?? '' ) ),
-		'email'   => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
-		'page'    => substr( esc_url_raw( trim( (string) ( $in['page'] ?? '' ) ) ), 0, 500 ),
-	);
-}
-
-/** Server rules for a report: field => message. $item: the item it is about, or null (the page link is then needed). */
-function aw_report_errors( $v, $item = null ) {
-	$rules  = array( 'reason' => array( 'required' ), 'details' => array( 'max:1000' ), 'email' => array( 'email' ) );
-	$msgs   = array( 'reason' => array( 'required' => 'Choose what is wrong' ), 'email' => array( 'email' => 'Enter a full email address, like you@example.com' ) );
-	$labels = array( 'reason' => 'What\'s wrong?', 'details' => 'Details', 'email' => 'Email', 'page' => 'Page link' );
-	if ( ! $item ) {
-		$rules['page'] = array( 'required' );
-		$msgs['page']  = array( 'required' => 'Add the link to the page' );
-	}
-	$errors = aw_form_validate( $rules, $v, $labels, $msgs );
-	if ( $v['reason'] && ! isset( aw_report_reasons()[ $v['reason'] ] ) ) {
-		$errors['reason'] = 'Choose what is wrong';
-	}
-	if ( ! $item && '' !== $v['page'] && wp_parse_url( $v['page'], PHP_URL_HOST ) !== wp_parse_url( home_url(), PHP_URL_HOST ) ) {
-		$errors['page'] = 'Use the link of a page on ' . wp_parse_url( home_url(), PHP_URL_HOST );
-	}
-	return $errors;
-}
-
-/**
- * Save a checked report (Inbox > Reports, status New) with its ticks and visit block. Nothing on the item changes.
- * Never reaches FluentCRM: the email is optional and only for replying about this report, so reporting a mistake is
- * not a reason to add or update anyone in FluentCRM.
- *
- * @param array        $v      Values.
- * @param WP_Post|null $item   The item (null: only a page link was given).
- * @param string       $source The page it was sent from.
- * @param array        $extra  The Fluent Forms form: ref (AW-R-…), entry.
- * @return array|false array{url, title, text}, or false when it could not be saved.
- */
-function aw_report_save( $v, $item, $source, $extra = array() ) {
-	$item = $item ? $item : aw_report_item_from_url( $v['page'] );
-	$id   = wp_insert_post( array( 'post_type' => 'aw_report', 'post_status' => 'private', 'post_title' => $item ? $item->post_title : ( '' !== $v['page'] ? $v['page'] : 'Report' ) ), true );
-	if ( is_wp_error( $id ) ) {
-		return false;
-	}
-	update_post_meta( $id, 'aw_r_item', $item ? $item->ID : 0 );
-	update_post_meta( $id, 'aw_r_type', $item ? AW_REPORT_TYPES[ $item->post_type ] : 'Page' );
-	if ( $item && 'aw_listing' === $item->post_type ) {
-		update_post_meta( $id, 'aw_r_listing', $item->ID ); // as before (listing claims and reports read it)
-	}
-	update_post_meta( $id, 'aw_r_page', $item ? (string) get_permalink( $item ) : $v['page'] );
-	update_post_meta( $id, 'aw_r_reason', $v['reason'] );
-	update_post_meta( $id, 'aw_r_details', $v['details'] );
-	update_post_meta( $id, 'aw_r_email', $v['email'] );
-	update_post_meta( $id, 'aw_r_status', 'new' );
-	update_post_meta( $id, 'aw_r_source', $source ); // the page it came from (S5.8)
-	foreach ( array( 'ref', 'entry' ) as $k ) {
-		if ( ! empty( $extra[ $k ] ) ) {
-			update_post_meta( $id, 'aw_r_' . $k, $extra[ $k ] );
-		}
-	}
-	$args = $item ? array( 'item' => (int) $item->ID, 'from' => false ) : array();
-	return array( 'url' => kits_thanks_url( 'report', $args, 'Thanks — we\'ll check it.' ), 'title' => 'Thanks — we\'ll check it.', 'text' => '' );
-}
-
-/** Handle a report. */
-function aw_report_submit() {
-	$form   = 'aw_report';
-	$item   = aw_report_item( (int) ( $_POST['item'] ?? ( $_POST['listing'] ?? 0 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$back   = aw_report_url( $item ? $item->ID : 0 ); // errors: back to /report/?item=<ID>, details kept
-	$done   = kits_thanks_url( 'report', $item ? array( 'item' => (int) $item->ID, 'from' => false ) : array() );
-	$rl     = aw_form_guard( $form, $back, 'report', $done, 10 );
-	$v      = aw_report_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
-	$errors = aw_report_errors( $v, $item );
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'report' );
-	}
-	$res = aw_report_save( $v, $item, kits_submitted_source() );
-	if ( ! $res ) {
-		aw_form_fail( $form, array(), $v, $back, 'report', aw_form_generic_error( $form ) );
-	}
-	aw_form_count( $rl );
-	aw_form_success( $res['url'], $res['title'] );
-}
-add_action( 'admin_post_nopriv_aw_report', 'aw_report_submit' );
-add_action( 'admin_post_aw_report', 'aw_report_submit' );
 
 /* ---------- Admin review ---------- */
 

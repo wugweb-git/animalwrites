@@ -8,7 +8,7 @@
  * - aw_authors (array of names as printed) and aw_journal (string) on a research post (Resources, tag "research").
  * - The research worker sends authors and journal with each paper (ingest.php saves them). A paper that arrives
  *   without authors gets them from doi.org (CSL-JSON) in the background (aw_research_citation).
- * - aw_research_citation_backfill() fills every research post that has none yet (run once with WP-CLI).
+ * - The one-off fill of older research posts (aw_research_citation_backfill) ran and was removed (25 Oct 2026).
  *
  * @package animal-writes-core
  */
@@ -103,24 +103,6 @@ function aw_research_citation_fetch( $id ) {
 	return (bool) $names || '' !== $journal;
 }
 add_action( 'aw_research_citation', 'aw_research_citation_fetch' );
-
-/**
- * Fill every published research post that has no authors yet. Returns [checked, filled].
- *
- * @return int[]
- */
-function aw_research_citation_backfill() {
-	$ids    = get_posts( array( 'post_type' => 'post', 'tag' => 'research', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) );
-	$filled = 0;
-	foreach ( $ids as $id ) {
-		if ( get_post_meta( $id, 'aw_authors', true ) && '' !== aw_research_study_title( $id ) ) {
-			continue;
-		}
-		$filled += aw_research_citation_fetch( $id ) ? 1 : 0;
-		usleep( 300000 ); // doi.org: gently
-	}
-	return array( count( $ids ), $filled );
-}
 
 /** The credit line's names: up to three, then "et al.". */
 function aw_research_authors_text( $id ) {
