@@ -40,6 +40,46 @@ const AW_KW_WORKER_ROLES = AW_KW_SOURCING_ROLES | AW_KW_ROLE_PRESS;
 /** Roles the owner sets by hand: kept when Search Insights' data is deleted, never rebuilt by its daily sync. */
 const AW_KW_OWNER_ROLES = AW_KW_WORKER_ROLES | AW_SI_ROLE_TRACKED;
 
+/**
+ * Search Insights' own columns, as a new record has them: "Delete Search Insights data" puts these back on the records
+ * it keeps (Codex, PR #75). group_id goes back to the record itself. Never the owner's: label, norm, lang, roles (only
+ * Search Insights' bits are cleared), variants, query, feed_id, search_on, dismissed, src_note, and the maps.
+ */
+const AW_SI_RESET_COLUMNS = array(
+	'topic'             => '',
+	'page_type'         => '',
+	'intent'            => '',
+	'priority'          => '',
+	'priority_override' => '',
+	'status'            => '',
+	'action'            => '',
+	'entity'            => 0,
+	'note'              => '',
+	'page'              => '',
+	'trends'            => null,
+	'impr28'            => 0,
+	'clicks28'          => 0,
+	'pos28'             => null,
+	'pos_prev'          => null,
+	'live_pos'          => null,
+	'live_txt'          => '',
+	'live_date'         => null,
+);
+
+/**
+ * The SET part of the reset (Search Insights' columns, its role bits off, group_id back to the record).
+ *
+ * @param int $keep Role bits kept (AW_KW_OWNER_ROLES).
+ * @return string
+ */
+function aw_si_reset_sql( $keep ) {
+	$out = array( 'roles = roles & ' . (int) $keep, 'group_id = id' );
+	foreach ( AW_SI_RESET_COLUMNS as $col => $v ) {
+		$out[] = $col . ' = ' . ( null === $v ? 'NULL' : ( is_int( $v ) ? (string) $v : "''" ) );
+	}
+	return implode( ', ', $out );
+}
+
 // Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
 const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
 

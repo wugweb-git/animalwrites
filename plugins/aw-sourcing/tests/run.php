@@ -331,5 +331,14 @@ aw_t( '' === aw_src_rollback_refusal( 1, 1, false ), 'rollback --phase=1 allowed
 aw_t( '' === aw_src_rollback_refusal( 2, 1, true ) && '' === aw_src_rollback_refusal( 2, 2, true ) && '' !== aw_src_rollback_refusal( 2, 1, false ), 'rollback --phase=2: a partial or complete record, else refused' );
 aw_t( 1 === aw_src_phase_after_p2_rollback( 1, 2, false ) && 1 === aw_src_phase_after_p2_rollback( 1, 1, true ) && 0 === aw_src_phase_after_p2_rollback( 1, 0, true ), 'the phase marker goes back to the phase before 2, never up' );
 
+// "Delete Search Insights data" resets Search Insights' columns on the records it keeps (Codex, PR #75), never the owner's.
+$reset = aw_si_reset_sql( AW_KW_OWNER_ROLES );
+foreach ( array( 'group_id = id', 'page_type', 'intent', 'priority_override', 'entity = 0', "note = ''", 'impr28 = 0', 'roles = roles & ' . AW_KW_OWNER_ROLES ) as $x ) {
+	aw_t( false !== strpos( $reset, $x ), "Search Insights reset sets $x" );
+}
+foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'search_on', 'dismissed', 'src_note' ) as $x ) {
+	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
+}
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

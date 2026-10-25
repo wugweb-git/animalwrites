@@ -120,7 +120,8 @@ function aw_si_drop_all(): void {
 	$m = aw_si_table( 'kw_map' );
 	$keep = aw_kw_ready() ? " AND dismissed = 0 AND (src_note IS NULL OR src_note = '')" : ''; // a dismissed suggestion or a migrated spelling is the owner's too
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$k} WHERE roles & %d = 0{$keep}", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & %d, topic = '', priority = '', status = '', action = '', page = '', trends = NULL, impr28 = 0, clicks28 = 0, pos28 = NULL, pos_prev = NULL, live_pos = NULL, live_txt = '', live_date = NULL", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // every Search Insights column back to a new record's (Codex, PR #75)
+	$wpdb->query( "UPDATE {$k} SET {$set}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed columns only.
 	if ( aw_kw_ready() ) {
 		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 	}
