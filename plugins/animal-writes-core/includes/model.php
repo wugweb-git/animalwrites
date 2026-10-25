@@ -80,43 +80,7 @@ add_action(
 	20
 );
 
-/**
- * News reports filed in the Library move to News (S1.3, 8 Oct 2026): LiveLaw and Bar and Bench reports are reporting,
- * not documents. Each keeps its status and slug; a published one gets one 301 from its Library URL. Once.
- */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_reports_to_news_done' ) || ! function_exists( 'aw_redirect_add' ) ) {
-			return;
-		}
-		$moved = array();
-		foreach ( array( 8879, 7486, 7487, 203 ) as $id ) {
-			$p = get_post( $id );
-			if ( ! $p || 'aw_legal' !== $p->post_type ) {
-				continue;
-			}
-			$old = wp_parse_url( get_permalink( $p ), PHP_URL_PATH );
-			$iss = (string) get_post_meta( $id, 'aw_issuer', true );
-			if ( '' !== $iss ) {
-				update_post_meta( $id, 'aw_issuer_legacy', $iss ); // News items have a publisher, not an issuer
-				delete_post_meta( $id, 'aw_issuer' );
-			}
-			wp_update_post( array( 'ID' => $id, 'post_type' => 'aw_news', 'post_name' => wp_unique_post_slug( $p->post_name, $id, $p->post_status, 'aw_news', 0 ) ) );
-			$key = function_exists( 'aw_publisher_key' ) ? aw_publisher_key( $id ) : '';
-			if ( '' !== $key ) {
-				update_post_meta( $id, 'aw_publisher', $key );
-			}
-			if ( 'publish' === $p->post_status ) {
-				aw_redirect_add( $old, $id );
-			}
-			$moved[] = array( $id, $p->post_status, $old, wp_parse_url( get_permalink( $id ), PHP_URL_PATH ) );
-		}
-		update_option( 'aw_reports_to_news_report', $moved, false );
-		update_option( 'aw_reports_to_news_done', '1', false );
-	},
-	40
-);
+// The one-time move of four news reports from the Library to News (S1.3, 8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /* ---------- Internal organisation ---------- */
 

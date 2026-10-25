@@ -115,18 +115,6 @@ function mailweb_api( $path ) {
 	return is_array( $json ) ? ( $json['data'] ?? $json ) : $body;
 }
 
-/** "Name <a@b>" / {name, address} / list → list of plain addresses. */
-function mailweb_addresses( $v ) {
-	$out = array();
-	foreach ( is_array( $v ) && ! isset( $v['address'] ) && ! isset( $v['email'] ) ? $v : array( $v ) as $x ) {
-		$s = is_array( $x ) ? (string) ( $x['address'] ?? $x['email'] ?? '' ) : (string) $x;
-		if ( preg_match_all( '/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i', $s, $m ) ) {
-			$out = array_merge( $out, array_map( 'strtolower', $m[0] ) );
-		}
-	}
-	return array_values( array_unique( $out ) );
-}
-
 /* ---------- Webhook ---------- */
 
 /**

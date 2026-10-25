@@ -211,23 +211,7 @@ function aw_ff_update_values( $data, $form ) {
 	return $data;
 }
 
-// /update/ is made once, never cached (it shows one person's details) and never indexed.
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_update_page' ) ) {
-			return;
-		}
-		if ( ! get_page_by_path( 'update' ) ) {
-			$id = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Update your volunteer details', 'post_name' => 'update', 'post_content' => '<!-- wp:shortcode -->[aw_volunteer_update]<!-- /wp:shortcode -->' ) );
-			if ( $id && ! is_wp_error( $id ) ) {
-				update_post_meta( $id, 'rank_math_robots', array( 'noindex', 'nofollow' ) );
-			}
-		}
-		update_option( 'aw_update_page', '1', false );
-	},
-	47
-);
+// /update/ was made once (that step ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history)); it is never cached (it shows one person's details) and never indexed.
 add_action(
 	'template_redirect',
 	function () {

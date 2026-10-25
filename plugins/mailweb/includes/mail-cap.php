@@ -315,13 +315,7 @@ function mailweb_flush( $max = 40 ) {
 	return $sent;
 }
 
-add_filter(
-	'cron_schedules',
-	function ( $s ) {
-		$s['mailweb_5min'] = array( 'interval' => 300, 'display' => __( 'Every 5 minutes', 'mailweb' ) );
-		return $s;
-	}
-);
+// The 5-minute schedule (mailweb_5min) is registered once, in mailweb.php (audit item 20).
 add_action( 'mailweb_flush', 'mailweb_flush' );
 add_action(
 	'init',

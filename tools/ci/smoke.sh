@@ -27,6 +27,8 @@ wp plugin activate mailweb --quiet
 wp post create --post_type=page --post_title="Contact us" --post_name=contact --post_status=publish --quiet
 wp post create --post_type=page --post_title="Home" --post_name=home --post_status=publish --quiet
 wp post create --post_type=page --post_title="Search" --post_name=search --post_status=publish --post_content="[aw_search]" --quiet
+# /volunteer/ as on live (the one-time step that made it was removed, audit 16, 25 Oct 2026).
+wp post create --post_type=page --post_title="Register as a volunteer" --post_name=volunteer --post_status=publish --post_content='<!-- wp:animal-writes/volunteer {"open":true} /-->' --quiet
 wp term create category "Community Dogs" --slug=community-dogs --quiet || true
 N=$(wp post create --post_type=aw_news --post_title="CI news item" --post_status=publish --porcelain)
 wp post meta add "$N" aw_source_url "https://www.thehindu.com/ci-item/" --quiet

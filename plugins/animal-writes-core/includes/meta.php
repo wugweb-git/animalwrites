@@ -187,15 +187,7 @@ function aw_register_meta() {
 }
 add_action( 'init', 'aw_register_meta' );
 
-// The featured-flag backfill is gone (owner, 24 Oct 2026); remove the option it kept.
-add_action(
-	'admin_init',
-	function () {
-		if ( false !== get_option( 'aw_core_backfill_version' ) ) {
-			delete_option( 'aw_core_backfill_version' );
-		}
-	}
-);
+// The featured-flag backfill and the clean-up of its option ran and were removed (audit item 16; the option is gone on live, 25 Oct 2026).
 
 /*
  * Phone numbers and opening hours: the only source is the two lists (SCF repeaters aw_phones and aw_opening_hours),

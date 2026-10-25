@@ -72,7 +72,6 @@ add_action(
 		if ( $hook ) { // Screen options: items per page.
 			add_action( 'load-' . $hook, fn() => add_screen_option( 'per_page', array( 'label' => 'Items per page', 'default' => 50, 'option' => 'aw_review_per_page' ) ) );
 		}
-		remove_submenu_page( 'aw-inbox', 'edit.php?post_type=aw_press&post_status=pending' ); // now part of To review
 	},
 	21
 );

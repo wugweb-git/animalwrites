@@ -19,11 +19,8 @@
  * - Volunteers are contacts tagged "Volunteer", with their volunteer details in custom fields (group "Volunteer").
  *   FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write here only; the site's volunteers table
  *   ({prefix}aw_volunteers) is a read-only backup, copied in once with `wp aw vol-to-crm` (dry run first).
- * - Replies (owner, 17 Oct 2026): only to incoming emails, one email at a time. FluentCRM free has no "Send Email" on
- *   the profile, so each email's note carries a Reply link to Inbox → Reply (mail-reply.php), as do the email's Inbox
- *   row and screen. The reply goes out through wp_mail (the site's mailbox) under the daily cap, first in the queue
- *   (mail-cap.php), Reply-To the address that email was sent to, so the answer comes back through the mail webhook as
- *   a new note; the reply itself is logged as a note "Reply sent: <subject>". Form messages get no Reply.
+ * - Replies: the Inbox → Reply screen (mail-reply.php) was removed, and with it the Reply link on email notes (audit
+ *   item 17, 25 Oct 2026). Emails are answered from Mailweb's Inbox (Reply, Reply all, Forward).
  * Setup (sends nothing): `wp aw crm-setup`, `wp aw crm-import`, `wp aw crm-move` (fields, notes), `wp aw vol-to-crm`.
  *
  * @package animal-writes-core
@@ -210,9 +207,8 @@ function aw_crm_message_note( $id ) {
 		$html .= '<strong>' . esc_html( $k ) . ':</strong> ' . esc_html( $v ) . '<br>';
 	}
 	$text = trim( (string) $post->post_content );
-	$reply = $email && function_exists( 'aw_reply_url' ) ? '<a href="' . esc_url( aw_reply_url( $id ) ) . '">Reply to this email</a> · ' : ''; // emails only (mail-reply.php)
-	$html  = '<p>' . $html . '</p>' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '<p><em>(no text)</em></p>' )
-		. '<p>' . $reply . '<a href="' . esc_url( admin_url( 'post.php?post=' . $id . '&action=edit' ) ) . '">Open in Inbox → Contact messages</a></p>';
+	$html = '<p>' . $html . '</p>' . ( '' !== $text ? wpautop( esc_html( $text ) ) : '<p><em>(no text)</em></p>' )
+		. '<p><a href="' . esc_url( admin_url( 'post.php?post=' . $id . '&action=edit' ) ) . '">Open in Inbox → Contact messages</a></p>';
 	$note = (int) get_post_meta( $id, 'aw_m_crm_note', true );
 	$row  = $note ? \FluentCrm\App\Models\SubscriberNote::where( 'id', $note )->first() : null;
 	if ( $row ) {
@@ -256,7 +252,7 @@ function aw_crm_reply_to( $email ) {
 /* ---------- FluentCRM Pro's one-off email (profile → Emails → Send Email; not in FluentCRM free) ---------- */
 
 // Only if FluentCRM Pro is ever added: its one-off email gets Reply-To = where they last wrote; first in the site's
-// queue (mail-cap.php reads and removes X-AW-Priority); no List-Unsubscribe. Replies today use mail-reply.php.
+// queue (mail-cap.php reads and removes X-AW-Priority); no List-Unsubscribe.
 add_filter(
 	'fluent_crm/email_headers',
 	function ( $headers, $data, $subscriber, $email_model ) {

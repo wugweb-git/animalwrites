@@ -186,9 +186,9 @@ add_action(
 
 /* ---------- Sending ---------- */
 
-// Newsletters are sent from an external CRM (S2.4, 8 Oct 2026): WordPress keeps the sign-up list only. Any send
-// still scheduled from the old screen is cleared (its last draft and job stay in the options aw_nl_draft, aw_nl_job).
-add_action( 'init', fn() => wp_next_scheduled( 'aw_nl_batch' ) && wp_clear_scheduled_hook( 'aw_nl_batch' ) );
+// Newsletters are sent from an external CRM (S2.4, 8 Oct 2026): WordPress keeps the sign-up list only. The old screen's
+// last draft and job stay in the options aw_nl_draft, aw_nl_job; its aw_nl_batch job is long gone (none scheduled on
+// live, 25 Oct 2026), so the check that cleared it on every load was removed (audit item 17).
 
 /* ---------- Admin: WP Admin > Newsletter ---------- */
 

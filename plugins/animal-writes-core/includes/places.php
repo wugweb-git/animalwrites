@@ -47,11 +47,6 @@ const AW_DISTRICT_COMMON_NAMES = array(
 	766 => 'Mauganj',        // LGD: MAUGANJ.
 );
 
-/** True once items carry LGD codes (the one-time move has run). */
-function aw_places_ready() {
-	return '1' === get_option( 'aw_places_migrated' );
-}
-
 /* ---------- Reference data ---------- */
 
 /** The LGD file, indexed. */
@@ -491,64 +486,7 @@ add_shortcode(
 	}
 );
 
-/* ---------- One-time move from the WordPress location list ---------- */
-
-/**
- * Copy every item's locations into the code fields and back up the old list. Runs once, before any query.
- * Matching is by the old term ID (each is in lgd.json); a district-only item also gets its state's code.
- */
-function aw_places_migrate() {
-	global $wpdb;
-	if ( '1' === get_option( 'aw_places_migrated' ) || get_transient( 'aw_places_migrating' ) ) {
-		return;
-	}
-	set_transient( 'aw_places_migrating', 1, 5 * MINUTE_IN_SECONDS );
-	$rows = $wpdb->get_results( "SELECT tr.object_id id, tt.term_id, tt.parent, t.slug, t.name, tr.term_order FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_city' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$terms = $wpdb->get_results( "SELECT t.term_id, t.slug, t.name, tt.parent, tt.count FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->terms} t ON t.term_id = tt.term_id WHERE tt.taxonomy = 'aw_city'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	// Backup first (private folder, not served).
-	$dir = aw_private_dir();
-	$ok  = file_put_contents( $dir . '/locations-backup-2026-10-08.json', wp_json_encode( array( 'terms' => $terms, 'links' => $rows ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-	if ( ! $ok ) {
-		delete_transient( 'aw_places_migrating' );
-		return;
-	}
-	$per       = array();
-	$unmatched = array();
-	foreach ( $rows as $r ) {
-		$p = aw_place_by_id( (int) $r->term_id );
-		if ( ! $p ) {
-			$unmatched[] = array( (int) $r->id, $r->slug );
-			continue;
-		}
-		$per[ (int) $r->id ]['s'][ $p->state ] = $p->state;
-		if ( 'district' === $p->kind ) {
-			$per[ (int) $r->id ]['d'][ $p->code ] = $p->code;
-		}
-	}
-	$done = $wpdb->get_col( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ('aw_state_code','aw_district_code')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$done = array_flip( array_map( 'intval', $done ) );
-	$vals = array();
-	foreach ( $per as $id => $c ) {
-		if ( isset( $done[ $id ] ) ) {
-			continue; // already has codes
-		}
-		foreach ( $c['s'] ?? array() as $code ) {
-			$vals[] = $wpdb->prepare( '(%d,%s,%s)', $id, 'aw_state_code', (string) $code );
-		}
-		foreach ( $c['d'] ?? array() as $code ) {
-			$vals[] = $wpdb->prepare( '(%d,%s,%s)', $id, 'aw_district_code', (string) $code );
-		}
-	}
-	foreach ( array_chunk( $vals, 500 ) as $chunk ) {
-		$wpdb->query( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES " . implode( ',', $chunk ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
-	}
-	wp_cache_flush();
-	update_option( 'aw_places_unmatched', $unmatched, false );
-	update_option( 'aw_places_migrated', '1', true );
-	aw_place_counts_reset();
-	delete_transient( 'aw_places_migrating' );
-}
-add_action( 'init', 'aw_places_migrate', 0 );
+// The one-time move from the WordPress location list (8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /**
  * State and district names of a listing.
