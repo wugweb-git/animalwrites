@@ -32,7 +32,7 @@ Library official releases and circulars (owner, 25 Oct 2026): "When was the … 
 
 Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Four fields were added for Library documents (box "FAQ fields"): Short name (`aw_short_name`), Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
 
-Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides with and without an FAQ; research summaries are not counted, as Research gets no FAQ). Since 25 Oct 2026 all 45 guides have one, including the 13 FIR state pages.
+Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides with and without an FAQ; research summaries are not counted, as Research gets no FAQ). Since 25 Oct 2026 every guide has one.
 
 ## Topic items
 
