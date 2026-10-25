@@ -191,6 +191,9 @@ function aw_rules_tag_table() {
 	foreach ( aw_rules_tag_rules() as $slug => $r ) {
 		$slug = (string) $slug;
 		$term = get_term_by( 'slug', $slug, 'post_tag' );
+		if ( ! $term && 0 === strpos( $slug, 'campaign-' ) && taxonomy_exists( 'aw_campaign_link' ) ) { // a campaign slug: ingest links it through Linked campaigns, not a tag
+			$term = get_term_by( 'slug', $slug, 'aw_campaign_link' );
+		}
 		$edit = aw_rules_url( 'sections', array( 'tagrule' => $slug ) );
 		$del  = wp_nonce_url(
 			add_query_arg(

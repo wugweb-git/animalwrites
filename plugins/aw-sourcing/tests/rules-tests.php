@@ -298,3 +298,5 @@ aw_t( false === $rows3['aw_branches']['rule']['on'] && '' !== $rows3['aw_branche
 $g = array( array( 'key' => 'google_places' ), array( 'key' => 'website' ) );
 aw_t( array() === aw_enrich_allowed_sources( array( array( 'key' => 'google_places' ) ), array( 'website' ) ) && array( array( 'key' => 'website' ) ) === aw_enrich_allowed_sources( $g, array( 'website' ) ), 'a source allow list without Google drops Google (place ID and Maps link too)' );
 aw_t( $g === aw_enrich_allowed_sources( $g, array() ) && 2 === count( aw_enrich_allowed_sources( $g, array( 'google_places', 'website' ) ) ), 'no allow list keeps every source; an allow list naming Google keeps it' );
+$sra_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/summary-rules-admin.php' );
+aw_t( false === strpos( $sra_src, 'saved (no change)' ), 'an unchanged summary rules save writes no change-log entry (round trip)' );
