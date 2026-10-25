@@ -563,23 +563,107 @@ function aw_seo_share_safe_url( $url ) {
 			return array( $base . substr( $stem, strlen( $up['basedir'] ) ) . '.' . $ext, (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ), $type );
 		}
 	}
-	$out = $stem . '-og.jpg';
-	if ( ! file_exists( $out ) ) {
-		$ed = file_exists( $path ) ? wp_get_image_editor( $path ) : null;
-		if ( ! $ed || is_wp_error( $ed ) ) {
-			return array( $url, 0, 0, '' );
-		}
-		$ed->resize( 1200, 630, true );
-		$ed->set_quality( 85 );
-		add_filter( 'image_editor_output_format', '__return_empty_array', 99 ); // or Modern Image Formats saves AVIF again
-		$saved = $ed->save( $out, 'image/jpeg' );
-		remove_filter( 'image_editor_output_format', '__return_empty_array', 99 );
-		if ( is_wp_error( $saved ) || ! file_exists( $out ) ) {
-			return array( $url, 0, 0, '' );
-		}
+	// Made at upload (wp_generate_attachment_metadata, below); built here only for older uploads, or if it failed then.
+	$out = file_exists( $stem . '-og.jpg' ) ? $stem . '-og.jpg' : aw_seo_share_jpeg_build( $path );
+	if ( '' === $out ) {
+		return array( $url, 0, 0, '' );
 	}
 	$size = wp_getimagesize( $out );
 	return array( $base . substr( $out, strlen( $up['basedir'] ) ), (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ), 'image/jpeg' );
+}
+
+/**
+ * The 1200x630 share JPEG ({name}-og.jpg) of an AVIF upload with no original kept beside it.
+ *
+ * @param string $path AVIF file (the full upload or one of its sizes).
+ * @return string The JPEG's path ('' when the file is not such an AVIF or the JPEG could not be made).
+ */
+function aw_seo_share_jpeg_build( $path ) {
+	if ( ! preg_match( '/\.avif$/i', (string) $path ) || ! file_exists( $path ) ) {
+		return '';
+	}
+	$stem = preg_replace( '/(-\d+x\d+)?\.avif$/i', '', $path );
+	foreach ( array( 'jpg', 'jpeg', 'webp', 'png' ) as $ext ) {
+		if ( file_exists( $stem . '.' . $ext ) ) {
+			return ''; // the original is shared as it is
+		}
+	}
+	$out = $stem . '-og.jpg';
+	if ( file_exists( $out ) ) {
+		return $out;
+	}
+	$ed = wp_get_image_editor( $path );
+	if ( is_wp_error( $ed ) ) {
+		return '';
+	}
+	$ed->resize( 1200, 630, true );
+	$ed->set_quality( 85 );
+	add_filter( 'image_editor_output_format', '__return_empty_array', 99 ); // or Modern Image Formats saves AVIF again
+	$saved = $ed->save( $out, 'image/jpeg' );
+	remove_filter( 'image_editor_output_format', '__return_empty_array', 99 );
+	return is_wp_error( $saved ) || ! file_exists( $out ) ? '' : $out;
+}
+
+/**
+ * Share JPEGs of an AVIF attachment: one per file name stem (the full upload, and its sizes, whose stem differs when
+ * WordPress scaled a big upload to "-scaled"). Returns how many were made or already there.
+ *
+ * @param int        $att  Attachment ID.
+ * @param array|null $meta Attachment metadata (read when null).
+ * @return int
+ */
+function aw_seo_share_jpegs_for( $att, $meta = null ) {
+	$file = (string) get_attached_file( (int) $att );
+	if ( ! preg_match( '/\.avif$/i', $file ) ) {
+		return 0;
+	}
+	$meta  = is_array( $meta ) ? $meta : (array) wp_get_attachment_metadata( (int) $att );
+	$paths = array( $file );
+	foreach ( (array) ( $meta['sizes'] ?? array() ) as $size ) {
+		if ( ! empty( $size['file'] ) ) {
+			$paths[] = path_join( dirname( $file ), (string) $size['file'] );
+		}
+	}
+	$made = array();
+	foreach ( $paths as $path ) {
+		$out = aw_seo_share_jpeg_build( $path );
+		if ( '' !== $out ) {
+			$made[ $out ] = 1;
+		}
+	}
+	return count( $made );
+}
+
+/**
+ * The share JPEG is made when an AVIF picture is uploaded, not on the first share-preview request (audit item 14,
+ * owner 25 Oct 2026). Runs after the sizes (and Modern Image Formats' AVIF) are made; never changes the metadata.
+ */
+add_filter(
+	'wp_generate_attachment_metadata',
+	function ( $meta, $att ) {
+		aw_seo_share_jpegs_for( (int) $att, $meta );
+		return $meta;
+	},
+	100,
+	2
+);
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/** `wp aw-seo share-jpegs`: makes the share JPEG of every AVIF upload kept without its original (existing uploads). */
+	WP_CLI::add_command(
+		'aw-seo share-jpegs',
+		function () {
+			$n = 0;
+			$f = 0;
+			// Every picture: a converted upload may keep its original type while its file is AVIF; others are skipped.
+			foreach ( get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'inherit', 'numberposts' => -1, 'fields' => 'ids' ) ) as $att ) {
+				$c  = aw_seo_share_jpegs_for( $att );
+				$n += $c;
+				$f += $c ? 1 : 0;
+			}
+			WP_CLI::success( "$f AVIF uploads have their share JPEG ($n files, made now or already there)." );
+		}
+	);
 }
 
 /** The site's default share image (Settings), as aw_seo_attachment(). */

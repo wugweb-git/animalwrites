@@ -18,7 +18,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `data-sources.php` | Where an organisation's details come from: one small label per data source on every listing. |
 | `deploy-purge.php` | Purges LiteSpeed once after each deploy: the first uncached web request that sees a new deployed commit purges and stores it (option aw_deployed_head); the Deploy check requests the home page with ?aw_deploy_nudge= for 5 minutes after each deploy so that request happens. Skips command-line PHP and requests whose headers are already sent. |
 | `directory.php` | Directory: /directory/, /directory/{state}/, /directory/{state}/{district}/, /directory/{state}/{district}/{type}/; verified first, then A–Z (no featured listings). |
-| `display.php` | Small front-end display tweaks. |
+| `display.php` | Small front-end display tweaks; the News / Library list sort (aw_source_date / aw_doc_sort; every published item carries its key: aw_news_sort_sync, aw_doc_sort_sync; `wp aw sort-dates [--fix]` reports or fills missing ones). |
 | `form-blocks.php` | Form blocks and pages (S6, S7, 8 Oct 2026). |
 | `hub-blocks.php` | Small blocks for what core blocks cannot show (Phase 12 Part D, D4). Each is a registered, server-rendered block (no shortcodes), editable in the block editor (preview via ServerSideRender), used in the hub Pages and their list patterns. Inside a Query Loop they read the item from the block context (postId). |
 | `hubs.php` | Hub Pages (Phase 12 Part D): each section hub is a Page that the owner edits (breadcrumb, H1, intro, banner, body) with its list as a synced pattern of core blocks (Query Loop + Post Template + pagination + empty state). |
@@ -38,7 +38,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `site-check.php` | "Check site" (admin bar, administrators): loads one page of every kind, as the deploy check does, and lists each with its status and time. A page fails on anything but 200, a PHP error or WordPress's "critical error" page. Results show on Tools → Check site. Nothing is changed. |
 | `sources-config.php` | The sourcing lists (option aw_sources, seeded from data/sources-seed.json). Stays in core because the front end reads the section categories and tags from them; Settings → Sourcing edits them (aw-sourcing). |
 | `summary-rules.php` | The summary rules (option aw_summary_rules over data/summary-rules-default.json), the helpers the site uses (auto-review limits, search description, entities stored per item as aw_entities) and the whole summary on an item's own page. The workers' endpoint and the Settings tab are in aw-sourcing. |
-| `systems.php` | Shared list helpers, the list filters and the trust panel. |
+| `systems.php` | Shared list helpers, the list filters and the trust panel. The filter counts' item IDs are cached per type and filter set (aw_filter_ids: transients aw_lf_*, 12 h; generation option aw_lf_gen_{type} moves on save, trash, status, terms or filter meta). |
 | `category-images.php` | Category and tag photos, set in WP Admin on the Categories and Tags screens: add or edit a category's name, slug, write-up (Description) and photo (pick or upload from the media library). News and Library items show their category's photo (see aw_item_image() in media.php). Stored as term meta `aw_category_image` (attachment ID). The general photos for items without a category stay in the option aw_category_images['default']. |
 | `unverified.php` | Unverified values on a listing (meta aw_unverified) and the small mark the listing template shows after them. |
 | `volunteers-db.php` | The old volunteers table (`{prefix}aw_volunteers`: 1.0 campaign volunteers and 2.0 sign-ups up to 24 Oct 2026), kept as a read-only backup. FluentCRM is the one volunteers table; nothing writes here any more except "Remove my data", which deletes a person's row. Administrators can view and export it at WP Admin → Volunteers (backup). |
@@ -210,7 +210,7 @@ Plan: `docs/seo/search-insights-plan.md`. AW SEO Plus → Search Insights (`admi
 | `filtered-views.php` | Filtered hub lists (owner approved, 15 Oct 2026): /news/?category_name=wildlife, /library/?tag=rule … - One filter with one value, ?category_name= or ?tag=, on a section hub (not a Directory place) is a page of its own w |
 | `focus-keywords.php` | Focus keywords (Rank Math's rank_math_focus_keyword). |
 | `health.php` | Sitemap and llms.txt watchdog (14 Oct 2026: both answered 404 until rewrite rules were flushed). |
-| `helpers.php` | Shared helpers: text cutting, page numbers, a page's own intro, the site's naming rules, and share images. |
+| `helpers.php` | Shared helpers: text cutting, page numbers, a page's own intro, the site's naming rules, and share images (an AVIF upload's share JPEG {name}-og.jpg is made at upload; `wp aw-seo share-jpegs` for older uploads). |
 | `llms.php` | llms.txt (SEO Phase 5, AI visibility, 15 Oct 2026). |
 | `opengraph.php` | Open Graph / Twitter details Rank Math's settings cannot express. |
 | `programmatic.php` | Pages built from live data (SEO Phase 4, 15 Oct 2026): the Directory's state, district, district × type and filtered lists (?tag=, ?state=), the 18 category pages and the tag pages. |

@@ -57,7 +57,7 @@ add_filter(
 
 /**
  * News, Legal Watch and Research lists are ordered by source date (newest first), then by date added.
- * Items without a source date are kept (named meta clause with NOT EXISTS).
+ * News sorts by aw_source_date, the Library by aw_doc_sort; every published item carries its key.
  */
 add_action(
 	'pre_get_posts',
@@ -77,11 +77,20 @@ add_action(
 		$dir          = is_array( $asked ) && 'ASC' === strtoupper( (string) ( $asked['date'] ?? '' ) ) || 'ASC' === strtoupper( (string) $q->get( 'order' ) ) && 'date' === $asked ? 'ASC' : 'DESC';
 		$key          = in_array( 'aw_legal', $types, true ) ? 'aw_doc_sort' : 'aw_source_date'; // Library: the document's date, or its year (Acts, Rules)
 		$mq           = (array) $q->get( 'meta_query' ); // keep the list filters (Publisher, State)
-		$mq['aw_src'] = array(
-			'relation'    => 'OR',
-			'source_date' => array( 'key' => $key, 'compare' => 'EXISTS' ),
-			'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
-		);
+		// Lists (one type, published items) need no "or the date is missing" clause: every published item has the key
+		// (aw_news_sort_sync, aw_doc_sort_sync; `wp aw sort-dates`), and that OR made MySQL scan every item of the type
+		// (audit item 2, owner 25 Oct 2026). Mixed News + Library queries (News has no aw_doc_sort) and queries for
+		// drafts or pending items (same-story lookups) keep it, so no item drops out of them.
+		$status = array_diff( (array) $q->get( 'post_status' ), array( '', 'publish' ) );
+		if ( 1 === count( $types ) && ! $status ) {
+			$mq['source_date'] = array( 'key' => $key, 'compare' => 'EXISTS' );
+		} else {
+			$mq['aw_src'] = array(
+				'relation'    => 'OR',
+				'source_date' => array( 'key' => $key, 'compare' => 'EXISTS' ),
+				'no_date'     => array( 'key' => $key, 'compare' => 'NOT EXISTS' ),
+			);
+		}
 		$q->set( 'meta_query', $mq );
 		$q->set( 'orderby', array( 'source_date' => $dir, 'date' => $dir ) );
 		$q->set( 'aw_undated_last', true );
@@ -133,6 +142,76 @@ function aw_doc_sort_sync( $id ) {
 	update_post_meta( $id, 'aw_doc_sort', preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? $d : '0001-01-01' );
 }
 add_action( 'save_post_aw_legal', 'aw_doc_sort_sync', 20 );
+
+/**
+ * News sort date: every published News item carries aw_source_date, so the list sort needs no "or the date is missing"
+ * clause (audit item 2, owner 25 Oct 2026). Ingest sets it; an item saved without one (written by hand, or a source
+ * that gave no date) gets its own publish day, which is the date its card already shows.
+ */
+function aw_news_sort_sync( $id ) {
+	if ( 'aw_news' !== get_post_type( $id ) || ! in_array( get_post_status( $id ), array( 'publish', 'future', 'private' ), true ) ) {
+		return;
+	}
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) get_post_meta( $id, 'aw_source_date', true ) ) ) {
+		return;
+	}
+	update_post_meta( $id, 'aw_source_date', get_the_date( 'Y-m-d', $id ) );
+}
+add_action( 'save_post_aw_news', 'aw_news_sort_sync', 20 );
+
+/**
+ * Items the list sort cannot place: News without a valid aw_source_date, Library items without aw_doc_sort.
+ * Counts published, scheduled and private items (the ones lists can show).
+ *
+ * @return array{news: int[], legal: int[]} Post IDs.
+ */
+function aw_sort_dates_missing() {
+	global $wpdb;
+	$news  = $wpdb->get_col(
+		"SELECT p.ID FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_date'
+		WHERE p.post_type = 'aw_news' AND p.post_status IN ('publish','future','private')
+		GROUP BY p.ID HAVING COALESCE( SUM( m.meta_value REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' ), 0 ) = 0"
+	);
+	$legal = $wpdb->get_col(
+		"SELECT p.ID FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_doc_sort'
+		WHERE p.post_type = 'aw_legal' AND p.post_status IN ('publish','future','private') AND m.meta_id IS NULL"
+	);
+	return array(
+		'news'  => array_map( 'intval', $news ),
+		'legal' => array_map( 'intval', $legal ),
+	);
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * Fills the list sort dates: `wp aw sort-dates` reports what is missing (read-only); `--fix` writes them.
+	 * News: aw_source_date = the item's publish day. Library: aw_doc_sort from its own date or the year in its title.
+	 */
+	WP_CLI::add_command(
+		'aw sort-dates',
+		function ( $args, $assoc ) {
+			$missing = aw_sort_dates_missing();
+			WP_CLI::log( sprintf( 'News without a source date: %d; Library items without a sort date: %d', count( $missing['news'] ), count( $missing['legal'] ) ) );
+			if ( empty( $assoc['fix'] ) ) {
+				foreach ( array_slice( array_merge( $missing['news'], $missing['legal'] ), 0, 50 ) as $id ) {
+					WP_CLI::log( sprintf( '  %d  %s  %s  %s', $id, get_post_type( $id ), get_the_date( 'Y-m-d', $id ), get_the_title( $id ) ) );
+				}
+				WP_CLI::log( 'Read-only. Run with --fix to write the dates.' );
+				return;
+			}
+			foreach ( $missing['news'] as $id ) {
+				aw_news_sort_sync( $id );
+			}
+			foreach ( $missing['legal'] as $id ) {
+				aw_doc_sort_sync( $id );
+			}
+			$left = aw_sort_dates_missing();
+			WP_CLI::success( sprintf( 'Filled %d News and %d Library items. Still missing: %d News, %d Library.', count( $missing['news'] ), count( $missing['legal'] ), count( $left['news'] ), count( $left['legal'] ) ) );
+		}
+	);
+}
 foreach ( array( 'added_post_meta', 'updated_post_meta' ) as $aw_hook ) {
 	add_action(
 		$aw_hook,

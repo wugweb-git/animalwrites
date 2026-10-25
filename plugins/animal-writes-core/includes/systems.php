@@ -253,6 +253,67 @@ function aw_filter_values( $ids, $source ) {
 }
 
 /**
+ * Published items of a type matching a set of filters (IDs), for the filter counts. Cached in a transient per type and
+ * filter set (audit item 3, owner 25 Oct 2026): the plain list and one-value filters only, and never an empty result,
+ * so crawlers walking filter combinations or made-up values cannot fill wp_options. A save, trash, delete or status
+ * change of an item of the type starts a new generation.
+ *
+ * @param string $type   Post type.
+ * @param array  $active Filters: param => value slugs.
+ * @return int[]
+ */
+function aw_filter_ids( $type, $active ) {
+	$cache = count( $active, COUNT_RECURSIVE ) - count( $active ) <= 1;
+	if ( $cache ) {
+		ksort( $active );
+		$key = 'aw_lf_' . md5( $type . '|' . (int) get_option( 'aw_lf_gen_' . $type, 0 ) . '|' . wp_json_encode( $active ) );
+		$ids = get_transient( $key );
+		if ( is_array( $ids ) ) {
+			return $ids;
+		}
+	}
+	list( $tq, $mq, $in ) = aw_filter_clauses( $type, $active );
+	$ids = array_map( 'intval', get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) + ( null === $in ? array() : array( 'post__in' => $in ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+	if ( $cache && ( $ids || ! $active ) ) { // an empty result (an unknown value in the address) is not kept
+		set_transient( $key, $ids, 12 * HOUR_IN_SECONDS );
+	}
+	return $ids;
+}
+
+/**
+ * Starts a new filter-ID generation for a post's type (old transients are never read again and expire). Once when the
+ * first change of a request happens and once more at its end, so a list built while the item's terms were still being
+ * set is not kept.
+ */
+function aw_filter_ids_flush( $post_id ) {
+	static $done = array();
+	$type = get_post_type( $post_id );
+	if ( ! $type || ! isset( AW_LIST_FILTERS[ $type ] ) || isset( $done[ $type ] ) ) {
+		return;
+	}
+	$done[ $type ] = true;
+	$bump          = fn() => update_option( 'aw_lf_gen_' . $type, (int) get_option( 'aw_lf_gen_' . $type, 0 ) + 1, true );
+	$bump();
+	add_action( 'shutdown', $bump );
+}
+foreach ( array( 'save_post', 'wp_after_insert_post', 'trashed_post', 'untrashed_post', 'delete_post', 'set_object_terms' ) as $aw_hook ) {
+	add_action( $aw_hook, 'aw_filter_ids_flush' ); // set_object_terms: the post ID is the first argument too
+}
+add_action( 'transition_post_status', fn( $new, $old, $post ) => $new !== $old ? aw_filter_ids_flush( $post->ID ) : null, 10, 3 );
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_hook ) {
+	add_action(
+		$aw_hook,
+		function ( $mid, $id, $key ) {
+			if ( in_array( $key, array( 'aw_publisher', 'aw_press_group', 'aw_sponsored', 'aw_state_code', 'aw_district_code' ), true ) ) {
+				aw_filter_ids_flush( $id );
+			}
+		},
+		10,
+		3
+	);
+}
+
+/**
  * The filter bar for a list: one dropdown per filter (several choices; counts respect the other active filters; values
  * with no items hidden; a filter with one value hidden), Sort on the right, and the active filters as removable chips.
  */
@@ -274,8 +335,7 @@ function aw_list_filters( $type ) {
 		$mine   = $active[ $param ] ?? array();
 		$others = array_diff_key( $active, array( $param => '' ) );
 		// Items matching the other filters: the counts for this filter.
-		list( $tq, $mq, $in ) = aw_filter_clauses( $type, $others );
-		$ids     = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) + ( null === $in ? array() : array( 'post__in' => $in ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$ids     = aw_filter_ids( $type, $others );
 		$options = array();
 		$allow   = in_array( $source, array( 'post_tag', 'resource-kind' ), true ) ? array_merge( aw_section_tags( $type ), array( 'sponsored' ) ) : ( 'category' === $source ? aw_section_categories( $type ) : null ); // only this section's lists (Sourcing)
 		foreach ( aw_filter_values( $ids, $source ) as $slug => $v ) {

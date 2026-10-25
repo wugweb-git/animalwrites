@@ -239,7 +239,12 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_hold', $hold );
 	}
 	update_post_meta( $post_id, 'aw_source_name', sanitize_text_field( (string) $req->get_param( 'source_name' ) ) );
-	update_post_meta( $post_id, 'aw_source_date', aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' ) );
+	$source_date = aw_sanitize_meta( (string) $req->get_param( 'source_date' ), 'aw_source_date' );
+	if ( '' === $source_date && 'aw_news' === $type ) {
+		// Every News item carries a sort date (audit item 2, owner 25 Oct 2026): no date from the source = the day it came in.
+		$source_date = wp_date( 'Y-m-d' );
+	}
+	update_post_meta( $post_id, 'aw_source_date', $source_date );
 	$image = esc_url_raw( (string) $req->get_param( 'image_url' ) );
 	if ( $image && preg_match( '#^https://#', $image ) ) {
 		update_post_meta( $post_id, 'aw_source_image', $image ); // Linked, never downloaded.
