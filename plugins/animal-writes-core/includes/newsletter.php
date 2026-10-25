@@ -173,9 +173,21 @@ add_action(
 			if ( 'active' !== $row['status'] ) {
 				$wpdb->update( aw_nl_table(), array( 'status' => 'active', 'consent_text_version' => AW_NL_CONSENT . ( 'invited' === $row['status'] ? '-invite' : '' ), 'consent_at' => $now, 'updated_at' => $now ), array( 'id' => (int) $row['id'] ) ); // phpcs:ignore
 			}
+			// A confirmed sign-up from this fallback form (used only when the Fluent Forms Newsletter form is missing)
+			// joins the FluentCRM list too, so it is managed with everyone else; the table has no admin screen.
+			if ( function_exists( 'aw_crm_on' ) && aw_crm_on() ) {
+				aw_crm_subscribe( $row['email'], (string) ( $row['name'] ?? '' ), array( 'source' => (string) ( $row['source'] ?? '' ) ), array( 'newsletter' ) );
+			}
 			$note = 'nl_confirmed';
 		} elseif ( $row && 'unsubscribe' === $do ) {
 			$wpdb->update( aw_nl_table(), array( 'status' => 'unsubscribed', 'updated_at' => $now ), array( 'id' => (int) $row['id'] ) ); // phpcs:ignore
+			if ( function_exists( 'aw_crm_on' ) && aw_crm_on() ) { // and in FluentCRM, where the list is kept
+				$c = FluentCrmApi( 'contacts' )->getContact( $row['email'] );
+				if ( $c && 'unsubscribed' !== $c->status ) {
+					$c->status = 'unsubscribed';
+					$c->save();
+				}
+			}
 			$note = 'nl_unsub';
 		}
 		nocache_headers();
