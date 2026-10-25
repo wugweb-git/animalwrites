@@ -278,7 +278,6 @@ function aw_places_from_text( $text ) {
 function aw_place_counts_reset() {
 	delete_option( 'aw_place_counts' );
 	delete_transient( 'aw_sitemap_dir_pairs' );
-	delete_transient( 'aw_stats' );
 }
 
 /**
@@ -507,20 +506,6 @@ function aw_pin_public() {
 }
 
 /* ---------- Display ---------- */
-
-/** [aw_place_links] An item's places, each linked to its directory page (item pages). */
-add_shortcode(
-	'aw_place_links',
-	function () {
-		$id    = get_the_ID();
-		$links = array();
-		foreach ( aw_item_places( $id ) as $p ) {
-			$label   = 'district' === $p->kind ? $p->name . ', ' . aw_place_state( $p->state )->name : $p->name;
-			$links[] = function_exists( 'kits_chip' ) ? kits_chip( $label, aw_directory_url( $p->slug ) ) : '<a href="' . esc_url( aw_directory_url( $p->slug ) ) . '">' . esc_html( $label ) . '</a>';
-		}
-		return $links ? '<div class="taxonomy-aw_place wp-block-post-terms kit-tags">' . implode( '', $links ) . '</div>' : '';
-	}
-);
 
 // The one-time move from the WordPress location list (8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 

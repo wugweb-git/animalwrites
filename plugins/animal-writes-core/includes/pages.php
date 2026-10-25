@@ -159,8 +159,6 @@ add_filter(
 
 /* ---------- Site search at /search/?q= (noindex: Rank Math's robots field on the page) ---------- */
 
-const AW_SEARCH_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'page' );
-
 // WordPress's own search (?s=) goes to the search page, so there is one search address.
 add_action(
 	'template_redirect',

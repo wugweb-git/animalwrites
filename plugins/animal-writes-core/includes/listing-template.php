@@ -420,25 +420,6 @@ add_filter(
 );
 
 
-/**
- * Listings whose gallery holds stock or CC images: [listing ID => stock attachment IDs]. They are never shown
- * (aw_listing_photo_ids); nothing is deleted.
- *
- * @return array
- */
-function aw_listing_stock_galleries() {
-	global $wpdb;
-	$rows = $wpdb->get_results( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_gallery' WHERE p.post_type = 'aw_listing' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB
-	$out  = array();
-	foreach ( $rows as $r ) {
-		$stock = array_values( array_filter( array_map( 'absint', explode( ',', (string) $r->meta_value ) ), 'aw_is_stock_image' ) );
-		if ( $stock ) {
-			$out[ (int) $r->ID ] = $stock;
-		}
-	}
-	return $out;
-}
-
 /* ---------- Activity (after Photos): stored Google and Instagram figures, never fetched on page load ---------- */
 
 /** "as on" date for a profile's figures: a dated detail source for that site, else the last enrichment check, else the source date. */

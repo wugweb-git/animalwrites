@@ -109,8 +109,6 @@ function aw_rel_time_html( $id ) {
 	return '<time class="aw-rel-time" datetime="' . esc_attr( $exact ? gmdate( 'c', $ts ) : $src ) . '" title="' . esc_attr( wp_date( $exact ? get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) : (string) get_option( 'date_format' ), $ts ) ) . '">' . esc_html( $label ) . '</time>';
 }
 
-add_shortcode( 'aw_rel_time', fn() => aw_rel_time_html( (int) get_the_ID() ) );
-
 // News card dates (core post-date block inside query loops) use relative time.
 add_filter(
 	'render_block_core/post-date',

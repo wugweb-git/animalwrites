@@ -504,7 +504,6 @@ function aw_browse_states() {
 	}
 	return $items ? '<nav class="aw-browse-states" aria-labelledby="aw-browse-states-h"><h2 id="aw-browse-states-h">Browse by state</h2><ul>' . $items . '</ul></nav>' : '';
 }
-add_shortcode( 'aw_browse_states', 'aw_browse_states' );
 
 /** Listings in a state, its districts included (stored counts, places.php). */
 function aw_state_count( $state ) {

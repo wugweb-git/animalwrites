@@ -23,7 +23,6 @@ if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy fo
  *  kits_badge()          state: verified, unconfirmed, featured, sponsored, ad, closed, new
  *  kits_eyebrow()        small label that carries information                   span.kit-eyebrow
  *  kits_count()          number beside a label                                  span.kit-count
- *  kits_filter_group()   labelled group of filter pills (links; selected = aria-current)
  *  kits_filter_dropdown() one filter as a dropdown: a button with a checkbox list (several choices, counts)
  *  kits_sort_dropdown()  "Sort" as a dropdown of links (one choice)
  *  kits_filter_bar()     the filters in one row (dropdowns, Sort on the right), a "Filters" sheet on phones, and the
@@ -54,33 +53,6 @@ function kits_eyebrow( $text ) {
 
 function kits_count( $n ) {
 	return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
-}
-
-/**
- * One filter group.
- *
- * @param string $legend  Visible label.
- * @param array  $options List of [label, url, selected (bool), count (int|null)]. The first is usually "All".
- * @param int    $show    Options shown before "Show more".
- * @return string '' when there is at most one real choice and nothing is selected.
- */
-function kits_filter_group( $legend, $options, $show = 8 ) {
-	$real     = array_filter( $options, fn( $o ) => null !== ( $o[3] ?? null ) );
-	$selected = array_filter( $options, fn( $o ) => ! empty( $o[2] ) && null !== ( $o[3] ?? null ) );
-	if ( count( $real ) <= 1 && ! $selected ) {
-		return '';
-	}
-	$id   = 'kit-fg-' . sanitize_title( $legend ) . '-' . wp_unique_id();
-	$html = '<fieldset class="kit-filter-group" id="' . esc_attr( $id ) . '"><legend>' . esc_html( $legend ) . '</legend><div class="kit-filter-options">';
-	foreach ( $options as $o ) {
-		$html .= '<a class="kit-filter-pill" href="' . esc_url( $o[1] ) . '"' . ( ! empty( $o[2] ) ? ' aria-current="true"' : '' ) . '>' . esc_html( $o[0] )
-			. ( isset( $o[3] ) && null !== $o[3] ? ' ' . kits_count( $o[3] ) : '' ) . '</a>';
-	}
-	$html .= '</div>';
-	if ( count( $options ) > $show ) {
-		$html .= '<button type="button" class="kit-filter-more" aria-expanded="false" aria-controls="' . esc_attr( $id ) . '" data-more="' . esc_attr( 'Show all (' . count( $options ) . ')' ) . '" data-less="Show fewer">' . esc_html( 'Show all (' . count( $options ) . ')' ) . '</button>';
-	}
-	return $html . '</fieldset>';
 }
 
 /**
@@ -147,7 +119,7 @@ function kits_fold_now( $kind ) {
 }
 
 /**
- * Filter bar: the filters in one row (pills from kits_filter_group, or dropdowns from kits_filter_dropdown), Sort on the
+ * Filter bar: the filters in one row (dropdowns from kits_filter_dropdown), Sort on the
  * right, folded into a "Filters" sheet on phones by kit.js, and the active filters as removable chips with "Clear all".
  *
  * @param string $groups Filters' HTML.

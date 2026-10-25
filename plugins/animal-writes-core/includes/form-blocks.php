@@ -109,11 +109,6 @@ function aw_form_page_for( $listing ) {
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
 }
 
-/** Without a published listing: the message and a link to the Directory. */
-function aw_form_page_missing() {
-	return '<p>This listing could not be found.</p><p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/directory/' ) ) . '">Directory</a></p>';
-}
-
 /**
  * /claim/ opened on its own (owner, 12 Oct 2026: a page to register a claim): find your organisation by name, then claim it.
  * Results link to /claim/?listing=ID, which shows the claim form. Not listed yet → add it through the Contact form.

@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Order', 'judgment' => 'Judgment', 'circular' => 'Circular', 'notification' => 'Notification', 'template' => 'Template', 'advisory' => 'Advisory', 'official-release' => 'Official Release' ); // government press releases (PIB); reports about cases (LiveLaw, Bar & Bench) are News (owner, 14 Oct 2026)
-const AW_COURTS      = array( 'supreme-court' => 'Supreme Court', 'high-court' => 'High Court', 'national-green-tribunal' => 'National Green Tribunal' );
 /** Services a listing offers: a fixed list (owner, 9 Oct 2026). Shown as tags; a Directory filter once 3+ listings use one. Names are activities, title case (owner, 20 Oct 2026, replacing sentence case). */
 const AW_SERVICES = array( 'rescue' => 'Rescue Work', 'treatment' => 'Treatment and Vet Care', 'shelter' => 'Sheltering', 'adoption' => 'Adoption Service', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance Service', 'boarding-foster' => 'Boarding and Fostering', 'wildlife-rescue' => 'Wildlife Rescue', 'legal-help' => 'Legal Help', 'cattle-care' => 'Cattle Care', 'animal-welfare' => 'Animal Welfare', 'bird-treatment' => 'Bird Treatment', 'emergency-rescue' => 'Emergency Rescue' ); // Animal welfare, Bird treatment: added 20 Oct 2026 for services implied by type; Emergency rescue (the existing type tag, owner 20 Oct 2026)
 
@@ -303,48 +302,4 @@ add_action(
 		echo '</td></tr>';
 	},
 	20
-);
-
-/* ---------- Organisation profile (restructure Phase 8) ---------- */
-
-/**
- * [aw_org_links]: on a listing, what links to it — campaigns it organised or joined, its open opportunities, what it is
- * featured in (featured.php) and its volunteers shown by choice (org-people.php). Each group shows only when it has something.
- */
-add_shortcode(
-	'aw_org_links',
-	function () {
-		$id = get_the_ID();
-		if ( ! $id || 'aw_listing' !== get_post_type( $id ) ) {
-			return '';
-		}
-		$find  = function ( $key, $type, $extra = array() ) use ( $id ) {
-			return get_posts(
-				array_merge(
-					array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 30, 'meta_key' => $key, 'meta_value' => (string) $id, 'orderby' => 'date', 'order' => 'DESC' ), // phpcs:ignore
-					$extra
-				)
-			);
-		};
-		$open   = function_exists( 'aw_open_opportunities_meta_query' ) ? array( 'meta_query' => array( aw_open_opportunities_meta_query() ) ) : array(); // phpcs:ignore
-		$groups = array(
-			'Campaigns organised' => $find( 'aw_organiser', 'aw_campaign' ),
-			'Campaigns joined'    => $find( 'aw_participant', 'aw_campaign' ),
-			'Open opportunities'  => $find( 'aw_organisation', 'aw_opportunity', $open ),
-		);
-		$html = '';
-		foreach ( $groups as $label => $posts ) {
-			if ( ! $posts ) {
-				continue;
-			}
-			$html .= '<section class="aw-org-links-group"><h2>' . esc_html( $label ) . '</h2><ul>';
-			foreach ( $posts as $p ) {
-				$html .= '<li><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
-			}
-			$html .= '</ul></section>';
-		}
-		$html .= function_exists( 'aw_featured_html' ) ? aw_featured_html( $id ) : ''; // news, Library, resources, press, campaigns (featured.php)
-		$html .= function_exists( 'aw_org_people_html' ) ? aw_org_people_html( $id ) : ''; // volunteers shown by choice (org-people.php)
-		return $html ? '<div class="aw-org-links">' . $html . '</div>' : ''; // claiming is in the "Is this your organisation?" card
-	}
 );

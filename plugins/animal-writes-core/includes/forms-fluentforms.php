@@ -63,8 +63,6 @@ const AW_FF_FORMS  = array(
 	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
 	'remove_data' => array( 'title' => 'Remove my data', 'thanks' => 'remove-data', 'limit' => 3 ),
 );
-/** Consent version for the newsletter box on Contact and Claim (owner, 16 Oct 2026: ticked by default). */
-const AW_FF_NL_CONSENT = 'v2-optin-preticked-1';
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
 const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token' );
 
@@ -326,12 +324,6 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 
 // The custom fields' inputs are kept with the entry.
 add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
-
-/** The listing a claim is about, when it is published. */
-function aw_ff_listing( $data ) {
-	$listing = get_post( (int) ( $data['listing'] ?? 0 ) );
-	return $listing && 'aw_listing' === $listing->post_type && 'publish' === $listing->post_status ? $listing : null;
-}
 
 /** Was a Fluent Forms tick box ticked? Fluent Forms saves nothing for an unticked box: empty is 0. */
 function aw_ff_ticked( $data, $name ) {
