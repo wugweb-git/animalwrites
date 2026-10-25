@@ -126,8 +126,18 @@ function aw_enrich_merge( $from, $into, $rid ) {
 	$undo = array( 'into' => $into, 'old_url' => (string) get_permalink( $from ), 'rows' => array(), 'meta' => array(), 'tags' => array(), 'links' => array(), 'redirect' => 0, 'repointed' => array() );
 	$src  = array( array( 'key' => 'listing', 'name' => sprintf( 'Merged listing #%d', $from ), 'url' => $undo['old_url'], 'fetched_at' => wp_date( 'c' ) ) );
 	$log  = function ( $field, $value, $snap, $mode ) use ( $into, $src, $rid, &$undo ) {
-		$undo['rows'][] = aw_enrich_add_row( $into, $field, $value, $snap, $src, 'high', 'approved', 'merge-' . $rid, 'both' === $mode ? aw_enrich_both_note( $field ) : 'From the merged listing (its field was empty here)' );
+		$row            = aw_enrich_add_row( $into, $field, $value, $snap, $src, 'high', 'approved', 'merge-' . $rid, 'both' === $mode ? aw_enrich_both_note( $field ) : 'From the merged listing (its field was empty here)' );
+		$undo['rows'][] = $row;
+		aw_enrich_supersede( $into, $field, (int) $row ); // a pending proposal for this field must not overwrite the merged value later
+		if ( 'services' === ( aw_enrich_fields()[ $field ][1] ?? '' ) ) {
+			$undo['services_touched'] = true;
+		}
 	};
+	// Services also carry where they came from and when (aw_enrich_write sets both): kept so Undo puts them back.
+	$undo['services_attr'] = array(
+		'source' => metadata_exists( 'post', $into, 'aw_services_source' ) ? (string) get_post_meta( $into, 'aw_services_source', true ) : null,
+		'on'     => metadata_exists( 'post', $into, 'aw_services_on' ) ? (string) get_post_meta( $into, 'aw_services_on', true ) : null,
+	);
 
 	// Phones: every number the kept listing does not have; a second number is kept beside the first, both unverified.
 	foreach ( aw_listing_phones( $from ) as $row ) {
@@ -236,6 +246,11 @@ function aw_enrich_unmerge( $from, $u ) {
 	}
 	foreach ( (array) ( $u['meta'] ?? array() ) as $key ) {
 		delete_post_meta( $into, $key );
+	}
+	if ( ! empty( $u['services_touched'] ) && isset( $u['services_attr'] ) && is_array( $u['services_attr'] ) ) { // the services' source and date as they were before the merge
+		foreach ( array( 'source' => 'aw_services_source', 'on' => 'aw_services_on' ) as $k => $meta ) {
+			null === ( $u['services_attr'][ $k ] ?? null ) ? delete_post_meta( $into, $meta ) : update_post_meta( $into, $meta, (string) $u['services_attr'][ $k ] );
+		}
 	}
 	if ( ! empty( $u['tags'] ) ) {
 		wp_remove_object_terms( $into, (array) $u['tags'], 'post_tag' );
