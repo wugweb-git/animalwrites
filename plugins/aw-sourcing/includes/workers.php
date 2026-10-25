@@ -238,7 +238,7 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				// Only an application password (never a browser cookie), of the workers' own user or an administrator.
-				'permission_callback' => fn() => did_action( 'application_password_did_authenticate' ) && ( 'ingest' === wp_get_current_user()->user_login || current_user_can( 'manage_options' ) ),
+				'permission_callback' => fn() => did_action( 'application_password_did_authenticate' ) && ( current_user_can( 'aw_worker' ) || current_user_can( 'manage_options' ) ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$file = sanitize_file_name( (string) $req->get_param( 'workflow' ) );
 					$run  = preg_replace( '/\D/', '', (string) $req->get_param( 'run_id' ) );

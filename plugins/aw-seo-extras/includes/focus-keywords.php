@@ -23,9 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Whether the current request may use the focus-keyword API. */
+/** Whether the current request may use the focus-keyword API: administrators, or the workers' user (aw_worker capability). */
 function aw_seo_api_allowed() {
-	return current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login;
+	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
 }
 
 /** Words that alone make no search phrase ("save animals", "animal welfare india"). */

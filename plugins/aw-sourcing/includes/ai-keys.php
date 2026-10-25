@@ -514,7 +514,7 @@ add_action(
 			'/ai-keys',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => fn() => current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login,
+				'permission_callback' => fn() => current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' ),
 				// Optional ?worker=<id> (the workflow file without .yml; "sourcing.yml" works too): only that worker's keys.
 				'args'                => array(
 					'worker' => array(
