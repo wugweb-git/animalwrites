@@ -144,6 +144,8 @@ add_action(
 		$n     = mailweb_overview_unread() + ( function_exists( 'mailweb_forms_unread' ) ? mailweb_forms_unread() : 0 );
 		$badge = $n ? ' <span class="awaiting-mod count-' . (int) $n . '"><span class="pending-count">' . (int) $n . '</span></span>' : '';
 		add_menu_page( __( 'Mail', 'mailweb' ), __( 'Mail', 'mailweb' ) . $badge, MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page', 'dashicons-email', 27 ); // the inbox (inbox.php)
+		add_submenu_page( 'mailweb', __( 'Mail', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
+		add_submenu_page( 'mailweb', __( 'Mail settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); // settings-tab.php
 	}
 );
 

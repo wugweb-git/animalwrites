@@ -36,7 +36,7 @@ Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides 
 
 ## Topic items
 
-Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`. Edited on the term screen, or in the "FAQ" box of a hub page or a Resources guide. Drafts are never shown. AW SEO Plus → FAQ (was Tools → FAQ; the old address redirects) lists every draft with its sources; tick and Approve.
+Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`. Edited on the term screen, or in the "FAQ" box of a hub page or a Resources guide. Drafts are never shown. AW SEO Plus → FAQ lists every draft with its sources; tick and Approve.
 
 ## Experiment
 

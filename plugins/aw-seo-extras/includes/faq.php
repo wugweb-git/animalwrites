@@ -8,7 +8,7 @@
  *   pattern it targets. Nothing is stored per page; the answers are the page's own fields.
  * - Topic (organisation types, distinct services, categories; the Directory, Volunteer, Claim and Opportunities pages):
  *   FAQ items stored on the term or page (meta aw_faq, JSON): question, answer, sources, target keyword, status
- *   (draft / approved) and last reviewed. Only approved items are shown; drafts wait in Tools → FAQ for the owner.
+ *   (draft / approved) and last reviewed. Only approved items are shown; drafts wait in AW SEO Plus → FAQ for the owner.
  *
  * aw_faq_build(): candidates (registry + approved items) → keep those whose fields have values → dedupe by the fact
  * they state → sort by priority → first 6 → fewer than 3: no FAQ and no schema. The accordion (H2 "Questions about …"
@@ -21,7 +21,7 @@
  * News and Resources pages.
  *
  * Experiment (spec §8): 10% of eligible listings and Library documents (stable by ID) get no FAQ until the owner rolls
- * out to 100% (Tools → FAQ). The page context (kits_page_context) carries faq_group = faq | holdout | none for GA4.
+ * out to 100% (AW SEO Plus → FAQ). The page context (kits_page_context) carries faq_group = faq | holdout | none for GA4.
  *
  * WP-CLI: wp aw-faq report | check | holdout | import <file>. docs/faq.md describes it all.
  *
@@ -517,7 +517,7 @@ function aw_faq_items( $kind, $id ) {
 }
 
 /**
- * Store a term's or page's FAQ items (the edit screens, Tools → FAQ and wp aw-faq import).
+ * Store a term's or page's FAQ items (the edit screens, AW SEO Plus → FAQ and wp aw-faq import).
  *
  * @param string $kind 'term' or 'post'.
  * @param int    $id   Term or post ID.
@@ -1183,9 +1183,7 @@ function aw_faq_counts() {
 add_action(
 	'admin_menu',
 	function () {
-		// AW SEO Plus (owner, 25 Oct 2026): the plugin's own top-level menu, FAQ first, then Search Insights.
-		add_menu_page( 'AW SEO Plus', 'AW SEO Plus', 'manage_categories', 'aw-faq', 'aw_faq_admin_page', 'dashicons-chart-line', 81 );
-		add_submenu_page( 'aw-faq', 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' );
+		add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', 'manage_categories', 'aw-faq', 'aw_faq_admin_page' ); // AW SEO Plus → FAQ (overview.php has the menu).
 	}
 );
 
@@ -1237,7 +1235,7 @@ add_action(
 	}
 );
 
-/** AW SEO Plus → FAQ (was Tools → FAQ; the old address redirects). */
+/** AW SEO Plus → FAQ. */
 function aw_faq_admin_page() {
 	$e    = aw_faq_experiment();
 	$end  = wp_date( 'Y-m-d', strtotime( $e['start'] . ' +' . (int) $e['weeks'] . ' weeks' ) );
@@ -1489,5 +1487,3 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 }
 
-// Old Tools addresses lead to the AW SEO Plus menu (animal-writes-core admin-ia.php redirects them).
-add_filter( 'aw_admin_moved_pages', fn( $m ) => $m + array( 'aw-faq' => 'admin.php' ) );

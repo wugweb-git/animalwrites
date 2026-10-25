@@ -191,24 +191,6 @@ add_filter(
 	)
 );
 
-// Inbox → Contact messages is Mail → Website forms (one inbox). The list redirects; single items still open.
-add_action(
-	'admin_menu',
-	function () {
-		remove_submenu_page( 'aw-inbox', 'edit.php?post_type=aw_message' );
-	},
-	999
-);
-add_action(
-	'load-edit.php',
-	function () {
-		if ( 'aw_message' === sanitize_key( wp_unslash( $_GET['post_type'] ?? '' ) ) && empty( $_GET['post_status'] ) && function_exists( 'mailweb_forms' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a redirect between list screens
-			wp_safe_redirect( admin_url( 'admin.php?page=mailweb&folder=forms' ) );
-			exit;
-		}
-	}
-);
-
 /* ---------- The old webhook address ---------- */
 
 add_action(
