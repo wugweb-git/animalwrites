@@ -1,7 +1,7 @@
 <?php
 /**
  * Restructure Phase 6: the parts the new pages are built from. The pages themselves hold structure only; the owner
- * writes their text (tools/restructure/phase6.php creates them).
+ * writes their text (made once by tools/restructure/phase6.php, removed 25 Oct 2026; see git history).
  *
  * - [aw_copy_needed what="…"]: a marker for text still to be written, shown to editors only.
  * - [aw_categories_index]: every category with its photo and item count (/categories/).

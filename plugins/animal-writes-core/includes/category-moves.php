@@ -5,7 +5,7 @@
  * - /topic/{slug}/ (and its /page/N/ and /feed/) → /category/{slug}/…
  * - ?topic= on a list → ?category_name= (WordPress's own query var; the same list, same values).
  * - /?cat=N of an old Resource type: tags.php.
- * - /topics/ → /categories/ is in Rank Math → Redirections (tools/categories/migrate.php adds it).
+ * - /topics/ → /categories/ is in Rank Math → Redirections (added once by tools/categories/migrate.php, removed 25 Oct 2026; see git history).
  *
  * @package animal-writes-core
  */
