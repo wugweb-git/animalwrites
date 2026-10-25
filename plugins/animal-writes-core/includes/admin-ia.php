@@ -110,23 +110,7 @@ add_filter(
 
 /* ---------- Menus ---------- */
 
-/** Forget the cached To-review count on the Inbox menu (a review item changed). */
-function aw_inbox_counts_flush() {
-	delete_transient( 'aw_review_count' );
-}
-add_action( 'transition_post_status', function ( $new, $old, $post ) {
-	if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
-		aw_inbox_counts_flush();
-	}
-}, 10, 3 );
-foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_ia_hook ) {
-	add_action( $aw_ia_hook, function ( $mid, $id, $key ) {
-		if ( 'aw_review' === $key ) {
-			aw_inbox_counts_flush();
-		}
-	}, 10, 3 );
-}
-unset( $aw_ia_hook );
+// The To review count's cache is cleared by AW Sourcing (review-queue.php aw_review_count_flush), since 25 Oct 2026.
 
 /** A count bubble like WordPress's own. */
 function aw_menu_count( $n ) {
@@ -147,8 +131,6 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		// Inbox counts what is waiting in To review. Website forms are in Mail; form entries in Fluent Forms.
-		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
@@ -167,7 +149,6 @@ add_action(
 		// Hidden: Comments.
 		remove_menu_page( 'edit-comments.php' );
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
-		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
 		// Categories: only under Classification.
 		foreach ( array_keys( (array) $submenu ) as $parent ) {
 			foreach ( AW_SHARED_TAXONOMIES as $tax ) {
@@ -221,7 +202,7 @@ add_filter(
 			'edit.php?post_type=page',
 			'upload.php',
 			'aw-classification',
-			'aw-inbox',
+			'aw-sourcing-menu', // Sourcing (AW Sourcing): To review and the sourcing screens; was Inbox (removed 25 Oct 2026)
 			'mailweb', // Mail (Mailweb plugin): unread count and latest messages
 			'animal-writes', // Animal Writes: Overview, Dates, Check site, Contact links (admin-home.php)
 			'separator2',

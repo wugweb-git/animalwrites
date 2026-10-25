@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Categories and Sections on core screens (owner, 24 Oct 2026). Same option, same shape, same
+ * Sourcing → Categories and Sections on core screens (owner, 24 Oct 2026). Same option, same shape, same
  * tab addresses (&tab=categories, &tab=sections); the tabs stay registered in sourcing-lists.php.
  *
  * - Categories: a core list table, one row per WordPress category plus any slug in aw_sources['categories'] without
@@ -63,7 +63,7 @@ function aw_sources_categories_tab() {
  * @param string $slug Category slug (sanitize_title form).
  */
 function aw_sourcing_category_words_form( $slug ) {
-	$back  = admin_url( 'options-general.php?page=aw-sourcing&tab=categories' );
+	$back  = admin_url( 'admin.php?page=aw-sourcing&tab=categories' );
 	$words = (array) aw_sources_config()['categories'];
 	$term  = get_term_by( 'slug', $slug, 'category' );
 	if ( ! $term && ! isset( $words[ $slug ] ) ) {
@@ -136,7 +136,7 @@ add_action(
 			wp_die( 'The keyword lists moved into the keyword table (sourcing phase 2). They are edited on the new Keywords screen; this old form is read-only.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
 		}
 		$c    = aw_sources_config();
-		$back = admin_url( 'options-general.php?page=aw-sourcing&tab=categories' );
+		$back = admin_url( 'admin.php?page=aw-sourcing&tab=categories' );
 		if ( ! get_term_by( 'slug', $slug, 'category' ) && ! isset( $c['categories'][ $slug ] ) ) {
 			wp_safe_redirect( add_query_arg( 'aw_terms_done', 'nosuch', $back ) );
 			exit;
@@ -320,7 +320,7 @@ add_filter( 'removable_query_args', fn( $args ) => 'aw-sourcing' === sanitize_ke
 
 // Screen options: categories per page (the list, not the edit screen).
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( 'categories' === sanitize_key( $_GET['tab'] ?? '' ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			add_screen_option( 'per_page', array( 'label' => 'Categories per page', 'default' => 50, 'option' => 'aw_categories_per_page' ) );

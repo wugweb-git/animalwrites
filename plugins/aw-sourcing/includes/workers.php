@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Workers (owner, 24 Oct 2026): every workflow of the workers repository, its last run, counts,
+ * Sourcing → Workers (owner, 24 Oct 2026): every workflow of the workers repository, its last run, counts,
  * problems and Run now. Schedules are changed in the workflows, never here; names, groups, descriptions and late limits
  * can be overridden, and Planned workers added (workers-meta.php; the screens are in workers-admin.php).
  *
@@ -204,7 +204,7 @@ function aw_workers_watchdog() {
 	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
 		return; // the same problems were emailed in the last 12 hours
 	}
-	$body = "Animal Writes workers need attention:\n\n- " . implode( "\n- ", $problems ) . "\n\nWorkers: " . admin_url( 'options-general.php?page=aw-sourcing&tab=workers' ) . "\nRuns: https://github.com/wugweb-git/animal-writes-workers/actions\n";
+	$body = "Animal Writes workers need attention:\n\n- " . implode( "\n- ", $problems ) . "\n\nWorkers: " . admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) . "\nRuns: https://github.com/wugweb-git/animal-writes-workers/actions\n";
 	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: worker problem — ' . reset( $problems ), $body ) ) {
 		set_transient( 'aw_workers_alert_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 	}
@@ -356,12 +356,12 @@ function aw_workers_columns() {
 
 // Screen Options (columns, rows per page) on the Workers list only (not a worker's form or runs).
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( 'workers' !== sanitize_key( $_GET['tab'] ?? '' ) || isset( $_GET['edit'] ) || isset( $_GET['runs'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
 		}
-		add_filter( 'manage_settings_page_aw-sourcing_columns', 'aw_workers_columns' );
+		add_filter( 'manage_' . AW_SRC_SCREEN . '_columns', 'aw_workers_columns' );
 		add_screen_option(
 			'per_page',
 			array(
@@ -406,17 +406,17 @@ function aw_workers_run_now( $file ) {
 	return $res;
 }
 
-// Notice on the dashboard and Settings → Sourcing.
+// Notice on the dashboard and Sourcing.
 add_action(
 	'admin_notices',
 	function () {
 		$screen = get_current_screen();
-		if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', 'settings_page_aw-sourcing' ), true ) ) {
+		if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', AW_SRC_SCREEN ), true ) ) {
 			return;
 		}
 		$problems = aw_workers_problems();
 		if ( $problems ) {
-			echo '<div class="notice notice-error is-dismissible"><p><strong>Workers need attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ' <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=workers' ) ) . '">Workers</a></p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p><strong>Workers need attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Workers</a></p></div>';
 		}
 	}
 );
@@ -432,7 +432,7 @@ add_action(
 			'aw_cron_health_after',
 			function () {
 				$problems = aw_workers_problems();
-				$url      = admin_url( 'options-general.php?page=aw-sourcing&tab=workers' );
+				$url      = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
 				if ( ! $problems ) {
 					echo '<p><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> Workers: no problems. <a href="' . esc_url( $url ) . '">Workers</a></p>';
 					return;
@@ -462,7 +462,7 @@ add_filter(
 						'color' => $problems ? 'red' : 'blue',
 					),
 					'description' => '<p>' . ( $problems ? esc_html( implode( ' ', $problems ) ) : 'Every workflow of the workers repository that has reported is on time and its last run went through.' ) . '</p>',
-					'actions'     => '<p><a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=workers' ) ) . '">Settings → Sourcing → Workers</a></p>',
+					'actions'     => '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Sourcing → Workers</a></p>',
 					'test'        => 'aw_workers',
 				);
 			},

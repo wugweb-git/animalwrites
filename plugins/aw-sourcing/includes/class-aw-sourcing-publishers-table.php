@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Sources as a core list table (owner, 24 Oct 2026; was the Publishers tab): one row per host,
+ * Sourcing → Sources as a core list table (owner, 24 Oct 2026; was the Publishers tab): one row per host,
  * every publisher (aw_publishers records without kind) and every press-coverage site. Views by status and Press sites,
  * search, sortable columns, pagination with a screen option (aw_publishers_per_page), row actions (Edit, Allow,
  * Neutral, Block, Search here for coverage / Stop searching here) and the same as bulk actions. The short name is
@@ -13,7 +13,7 @@
  * Sourcing restructure phase 1 (owner, 25 Oct 2026): Feeds and Relay moved in. Each row also counts its feeds and
  * sources read by code (aw_sources.sources by publisher host) and shows its relay switch with the last result. Rows
  * also cover a relay-only site (record kind=relay) and a site only feeds come from (no record). Views: With feeds,
- * Read by code, Relay, and the links to the Feeds and Relay log screens. Row actions: Relay on / off (once phase 1
+ * Read by code, Relay, and the link to the Feeds screen (the Relay log is Sourcing → Relay log). Row actions: Relay on / off (once phase 1
  * is migrated) and Delete (a source with no items, feeds or press search; core's warning first).
  *
  * @package aw-sourcing
@@ -39,7 +39,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	private $stale = false;
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'source', 'plural' => 'sources', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$stats       = aw_sourcing_host_stats();
 		$this->si    = ! empty( $stats['si'] );
 		$this->stale = ! empty( $stats['stale'] );
@@ -106,7 +106,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		return in_array( $s, self::VIEWS, true ) ? $s : '';
 	}
 
-	/** The screen shown: '' (this list), feeds or relay-log (their own screens, with these views on top). */
+	/** The screen shown: '' (this list) or feeds (its own screen, with these views on top). */
 	private function screen_view() {
 		return function_exists( 'aw_sourcing_sources_screen' ) ? aw_sourcing_sources_screen() : '';
 	}
@@ -128,7 +128,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 	}
 
 	protected function get_views() {
-		$base  = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
+		$base  = admin_url( 'admin.php?page=aw-sourcing&tab=sources' );
 		$shown = $this->screen_view();
 		$out   = array();
 		$views = array( '' => 'All', 'allow' => 'Allowed', 'neutral' => 'Neutral', 'block' => 'Blocked', 'press' => 'Press sites', 'feeds' => 'With feeds', 'code' => 'Read by code', 'relay' => 'Relay' );
@@ -141,8 +141,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 			$out[ '' === $k ? 'all' : $k ] = '<a href="' . esc_url( $k ? add_query_arg( 'status', $k, $base ) : $base ) . '"' . ( $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $l ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		$all_feeds = array_sum( array_column( $this->all, 'feeds' ) );
-		$log_n     = count( (array) get_option( 'aw_relay_log', array() ) );
-		foreach ( array( 'feeds' => array( 'all-feeds', 'Feeds', $all_feeds ), 'relay-log' => array( 'relay-log', 'Relay log', $log_n ) ) as $v => $d ) {
+		foreach ( array( 'feeds' => array( 'all-feeds', 'Feeds', $all_feeds ) ) as $v => $d ) {
 			$out[ $d[0] ] = '<a href="' . esc_url( add_query_arg( 'view', $v, $base ) ) . '"' . ( $shown === $v ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $d[1] ) . ' <span class="count">(' . esc_html( number_format_i18n( $d[2] ) ) . ')</span></a>';
 		}
 		return $out;
@@ -296,7 +295,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 
 	protected function column_host( $item ) {
 		$h    = $item['host'];
-		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'options-general.php' ) );
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $h ) ), admin_url( 'admin.php' ) );
 		$acts = array( 'edit' => '<a href="' . esc_url( $edit ) . '" aria-label="' . esc_attr( 'Edit ' . $h ) . '">Edit</a>' );
 		if ( $item['pub'] ) {
 			foreach ( array( 'allow' => 'Allow', 'neutral' => 'Neutral', 'block' => 'Block' ) as $st => $l ) {
@@ -331,7 +330,7 @@ class AW_Sourcing_Publishers_Table extends WP_List_Table {
 		if ( ! $item['feeds'] ) {
 			return '<span aria-label="No feeds">—</span>';
 		}
-		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $item['host'] ) ), admin_url( 'options-general.php' ) );
+		$edit = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'edit' => rawurlencode( $item['host'] ) ), admin_url( 'admin.php' ) );
 		/* translators: 1: feeds, 2: feeds that are on. */
 		$out = '<a href="' . esc_url( $edit ) . '">' . esc_html( sprintf( _n( '%1$s feed (%2$s on)', '%1$s feeds (%2$s on)', $item['feeds'] ), number_format_i18n( $item['feeds'] ), number_format_i18n( $item['feeds_on'] ) ) ) . '</a>';
 		return $out . ( $item['code_n'] ? '<br><span class="description">' . esc_html( number_format_i18n( $item['code_n'] ) . ' read by code' ) . '</span>' : '' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → AI models: every key in one core list table (owner, 24 Oct 2026). The keys saved here (in the order the
+ * Sourcing → AI models: every key in one core list table (owner, 24 Oct 2026). The keys saved here (in the order the
  * workers try them), then the keys in the workers' GitHub secrets (from their own reports; changed in GitHub).
  * Views by state, search, row actions (Edit, Move up, Move down, Check again, Remove) and bulk actions (Attach to worker,
  * Detach from worker, Check again, Remove), all posting to admin-post.php (action aw_ai_keys_list) with the table's
@@ -21,7 +21,7 @@ class AW_Sourcing_AI_Keys_Table extends WP_List_Table {
 	private $all = array();
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'key', 'plural' => 'keys', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'key', 'plural' => 'keys', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$usage = aw_ai_usage();
 		$shown = array();
 		foreach ( aw_ai_rows() as $i => $r ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → AI models: each provider's own site icon (owner, 24 Oct 2026).
+ * Sourcing → AI models: each provider's own site icon (owner, 24 Oct 2026).
  *
  * Shown with the site's favicon helper (aw_favicon_url() in Kits Core, attribution.php) when the provider's host is a
  * known publisher; otherwise from option aw_ai_provider_icons (host => attachment ID, 0 = tried and none found), which

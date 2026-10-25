@@ -1,6 +1,6 @@
 <?php
 /**
- * Sourcing policy managed in WP Admin (Settings → Sourcing): sources (publishers) and relevance keywords. Moved from Kits Core
+ * Sourcing policy managed in WP Admin (Sourcing): sources (publishers) and relevance keywords. Moved from Kits Core
  * (24 Oct 2026); the sourced post types, aw_host(), aw_publishers() and the option constants stay there.
  *
  * - Publishers: every host the workers send is recorded automatically. Each is Allowed, Neutral or Blocked.
@@ -310,19 +310,14 @@ function aw_sourcing_policy_payload() {
 
 /* ---------- WP Admin: News → Sourcing ---------- */
 
-add_action(
-	'admin_menu',
-	function () {
-		add_options_page( 'Sourcing', 'Sourcing', AW_SRC_CAP, 'aw-sourcing', 'aw_sourcing_page' ); // Settings → Sourcing
-	}
-);
+// The page is on the Sourcing menu (admin-menu.php).
 
 // Screen options: sources per page on the Sources tab (the publishers' option, as before).
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && ! in_array( sanitize_key( $_GET['view'] ?? '' ), array( 'feeds', 'relay-log' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds and Relay log views have their own
+		if ( in_array( $tab, array( '', 'sources' ), true ) && empty( $_GET['edit'] ) && empty( $_GET['feed'] ) && 'feeds' !== sanitize_key( $_GET['view'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the Feeds view has its own
 			add_screen_option( 'per_page', array( 'label' => 'Sources per page', 'default' => 50, 'option' => 'aw_publishers_per_page' ) );
 		} elseif ( 'keywords' === $tab && 'suggestions' !== sanitize_key( $_GET['kw'] ?? '' ) && ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which view is shown; the Suggestions view and phase 2 (keywords-admin.php) have their own
 			add_screen_option( 'per_page', array( 'label' => 'Words per page', 'default' => 100, 'option' => 'aw_keywords_per_page' ) );
@@ -340,8 +335,10 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? 'sources' );
-		$tab = array( 'publishers' => 'sources', 'library' => 'feeds', 'opportunities' => 'feeds' )[ $tab ] ?? $tab; // a form from before the tabs were merged
 		$err = '';
+		if ( 'sources' !== $tab && ! has_action( 'kits_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
+			wp_die( 'Nothing saved: this form is from an older version of the Sourcing screens. Open the screen again and make the change there.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
+		}
 		if ( 'sources' !== $tab ) {
 			do_action( 'kits_sourcing_save_' . $tab ); // a site's own tabs save themselves (and log)
 		} elseif ( ! empty( $_POST['src_edit'] ) ) { // the Add New / Edit Source form (source-sites.php)
@@ -417,13 +414,13 @@ add_action(
 			update_option( AW_PUB_OPTION, $pubs, false );
 			$changed = $pubs !== $before || $press; // a page change alone saves nothing
 		}
-		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'options-general.php' ) );
+		$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => $tab, 'updated' => 1 ), admin_url( 'admin.php' ) );
 		if ( 'feeds' === $tab ) { // the feed form (Feeds moved into Sources, 25 Oct 2026): back to the screen it was opened from
 			$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['src_back'] ?? '' ) ), '' );
-			$back = add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'options-general.php?page=aw-sourcing&tab=sources&view=feeds' ) );
+			$back = add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' ) );
 		}
 		if ( 'sources' === $tab && ! empty( $_POST['src_edit'] ) ) { // the edit form: back to the list, or to the form with what was wrong
-			$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources' ), admin_url( 'options-general.php' ) );
+			$back = add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources' ), admin_url( 'admin.php' ) );
 			$back = $err ? add_query_arg( 'src_err', $err, wp_get_referer() ? wp_get_referer() : $back ) : ( $changed ? add_query_arg( 'updated', 1, $back ) : $back );
 		} elseif ( 'sources' === $tab ) { // back to the same view, sort and page of the list, with its search
 			$back = remove_query_arg( array( 'updated', 'paged', 'src_err' ), wp_get_referer() ? wp_get_referer() : $back );
@@ -509,7 +506,7 @@ add_action(
 			kits_sourcing_log( 'keywords', implode( ' · ', array_filter( $what ) ) );
 		}
 		$ref  = wp_get_referer();
-		$back = remove_query_arg( array( 'updated', 'kw_done', 'kw_n', 'paged' ), $ref ? $ref : admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' ) );
+		$back = remove_query_arg( array( 'updated', 'kw_done', 'kw_n', 'paged' ), $ref ? $ref : admin_url( 'admin.php?page=aw-sourcing&tab=keywords' ) );
 		$page = absint( wp_unslash( $_POST['paged'] ?? 0 ) ); // the page-number box of the list
 		$back = $page > 1 ? add_query_arg( 'paged', $page, $back ) : $back;
 		parse_str( (string) wp_parse_url( (string) $ref, PHP_URL_QUERY ), $was );
@@ -596,7 +593,7 @@ add_action(
 	'admin_notices',
 	function () {
 		if ( ! empty( $_GET['aw_blocked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing&tab=sources&status=block' ) ) . '">Manage sources</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+			echo '<div class="notice notice-success is-dismissible"><p>Blocked ' . esc_html( sanitize_text_field( wp_unslash( $_GET['aw_blocked'] ) ) ) . '. New items from it will be refused. Items already on the site are unchanged. <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources&status=block' ) ) . '">Manage sources</a></p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
 	}
 );
@@ -606,29 +603,24 @@ function aw_sourcing_page() {
 	if ( ! current_user_can( AW_SRC_CAP ) ) {
 		return;
 	}
-	$tab  = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base = admin_url( 'options-general.php?page=aw-sourcing' );
-	// Tabs: Sources, Keywords, the site's own (kits_sourcing_tabs: slug => [label, render callback, own form?]), Change log.
+	$base = admin_url( 'admin.php?page=aw-sourcing' );
+	// Each tab is an item of the Sourcing menu (admin-menu.php aw_sourcing_tabs: slug => [label, render callback, own form?]).
 	// A tab whose third value is true is drawn outside the shared aw_sourcing form (a Settings API form, its own forms, or nothing to save).
-	$extra = (array) apply_filters( 'kits_sourcing_tabs', array() );
-	$tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords' ) + array_map( fn( $t ) => $t[0], $extra ) + array( 'log' => 'Change log' );
-	$tab   = isset( $tabs[ $tab ] ) ? $tab : 'sources';
+	$extra = aw_sourcing_tabs();
+	$tabs  = array_map( fn( $t ) => $t[0], $extra );
+	$tab   = aw_sourcing_current_tab();
 	// Core's "Add New" button beside the heading, on the lists that have one (kits_sourcing_title_action: tab => [label, url]).
 	$add = (array) apply_filters( 'kits_sourcing_title_action', array( 'sources' => array( 'Add New Source', $base . '&tab=sources&edit=new' ) ) );
-	echo '<div class="wrap"><h1 class="wp-heading-inline">Sourcing</h1>';
+	echo '<div class="wrap"><h1 class="wp-heading-inline">' . esc_html( $tabs[ $tab ] ) . '</h1>';
 	if ( isset( $add[ $tab ] ) && empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo ' <a href="' . esc_url( $add[ $tab ][1] ) . '" class="page-title-action">' . esc_html( $add[ $tab ][0] ) . '</a>';
 	}
 	echo '<hr class="wp-header-end">';
+	settings_errors(); // the Settings API forms' notices: WordPress prints them by itself only on Settings screens
 	if ( ! empty( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<div class="notice notice-success is-dismissible"><p>Saved. The workers use this from their next run.</p></div>';
 	}
 	do_action( 'kits_sourcing_page_top' );
-	echo '<nav class="nav-tab-wrapper">';
-	foreach ( $tabs as $k => $l ) {
-		echo '<a class="nav-tab' . ( $tab === $k ? ' nav-tab-active' : '' ) . '" href="' . esc_url( $base . ( 'sources' === $k ? '' : '&tab=' . $k ) ) . '">' . esc_html( $l ) . '</a>';
-	}
-	echo '</nav>';
 	if ( 'log' === $tab ) {
 		// Entries keep the tab they were made on; tabs since merged are named after their new home (Feeds and Relay
 		// moved into Sources on 25 Oct 2026).
@@ -687,7 +679,7 @@ function aw_sourcing_page() {
  * switches, add words, the word lists, the headline test) and Suggestions from Search Insights (&kw=suggestions).
  */
 function aw_sourcing_keywords_tab() {
-	$base = admin_url( 'options-general.php?page=aw-sourcing&tab=keywords' );
+	$base = admin_url( 'admin.php?page=aw-sourcing&tab=keywords' );
 	$sugg = 'suggestions' === sanitize_key( $_GET['kw'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( ! $sugg && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: the keyword table (keywords-admin.php)
 		aw_sourcing_kw_tab();

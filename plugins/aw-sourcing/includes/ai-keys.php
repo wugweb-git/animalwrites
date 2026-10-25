@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → AI models (owner, 10 + 12 Oct 2026; a tab since 24 Oct 2026): paste a key; the site works out the provider and a model that
+ * Sourcing → AI models (owner, 10 + 12 Oct 2026; a tab since 24 Oct 2026): paste a key; the site works out the provider and a model that
  * answers, and shows whether the key works. One row per key, tried top to bottom, each kept separately.
  * Option aw_ai_models = list of {key, provider, model, url, status, checked, label, workers} (not autoloaded).
  * label: the owner's note. workers: the worker IDs (workers-meta.php) the key is for; empty or missing = every worker.
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const AW_AI_PROVIDERS = array(
 	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
-	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'poolside/laguna-s-2.1:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter
+	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'thinkingmachines/inkling:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter; inkling:free replaced laguna-s-2.1:free, which expires 31 Oct 2026
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free' ) ), // free models (22 Oct 2026); minimax-m3.1-flash:free is gone (25 Oct 2026)
 	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
@@ -174,16 +174,16 @@ function aw_ai_status_badge( $status ) {
 }
 
 /**
- * The AI models screen: a tab of Settings → Sourcing (owner, 24 Oct 2026; it was its own Settings page until then).
+ * The AI models screen: a tab of Sourcing (owner, 24 Oct 2026; it was its own Settings page until then).
  *
  * @param array $args Extra query args.
  * @return string
  */
 function aw_ai_keys_url( array $args = array() ) {
-	return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=ai' ) );
+	return add_query_arg( $args, admin_url( 'admin.php?page=aw-sourcing&tab=ai' ) );
 }
 
-// Settings → Sourcing → AI models. Its own forms (keys, the list), so it is drawn outside the shared Sourcing form.
+// Sourcing → AI models. Its own forms (keys, the list), so it is drawn outside the shared Sourcing form.
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
@@ -212,7 +212,7 @@ add_action(
 
 // Screen options on the tab: keys per page.
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		if ( 'ai' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown
 			return;
@@ -935,7 +935,7 @@ function aw_ai_overview( array $rows ) {
 		. esc_html( $pct . '% of the daily supply with caps (' . number_format_i18n( $ok ) . ' of about ' . number_format_i18n( $daily ) . '). Supply uses the providers\' published free limits, so it is an estimate.' ) . '</td></tr>'
 		. '<tr><th scope="row">AI workers</th><td>' . esc_html( count( $wf ) . ' of ' . count( $workers ) . ' workers' . ( $wf ? ' used AI in the last 24 h: ' . implode( ', ', array_map( fn( $id ) => $workers[ $id ]['name'] ?? $id, array_keys( $wf ) ) ) : ': none used AI in the last 24 h' ) ) . '</td></tr>'
 		. '</tbody></table>';
-	// The real workers (Settings → Sourcing → Workers), with how many of the keys served now each one may use.
+	// The real workers (Sourcing → Workers), with how many of the keys served now each one may use.
 	$all_rows = count( aw_ai_served()['rows'] );
 	$list     = array();
 	foreach ( $workers as $id => $w ) {
@@ -993,7 +993,7 @@ function aw_ai_tier_summary( array $rows ) {
 	aw_sourcing_simple_table( 'groups', array( 'group' => 'Group', 'means' => 'What it means', 'provs' => 'Providers (working / saved)' ), $rows, array( 'empty' => 'No keys yet.' ) );
 }
 
-/** Settings → Sourcing → AI models (the Sourcing screen prints the wrap, title and tabs). */
+/** Sourcing → AI models (the Sourcing screen prints the wrap, title and tabs). */
 function aw_ai_keys_screen() {
 	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
 	if ( 'new' === $edit ) {
@@ -1026,7 +1026,7 @@ function aw_ai_keys_screen() {
 		$skip = absint( wp_unslash( $_GET['skip'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		$msg  = array(
 			/* translators: %d: number of keys. */
-			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Settings → Sourcing → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Settings → Sourcing → Change log.', $n ),
+			'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in Sourcing → Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in Sourcing → Change log.', $n ),
 			/* translators: %d: number of keys. */
 			'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n ),
 			'up'      => 'Moved up. The workers try the keys from the top down.',

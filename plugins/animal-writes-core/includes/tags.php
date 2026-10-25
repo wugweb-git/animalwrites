@@ -3,7 +3,7 @@
  * Labels are WordPress's own Tags (owner, 15 Oct 2026): Library types, Resource types, Opportunity types, Listing types
  * and Services are tags (post_tag) on every section, at /tag/{slug}/, filtered on the hubs by ?tag=.
  *
- * Which tags (and categories) a section uses is a Sourcing setting (Settings → Sourcing → Sections), not a WordPress
+ * Which tags (and categories) a section uses is a Sourcing setting (Sourcing → Sections), not a WordPress
  * list: aw_section_tags( 'aw_listing' ) are the Directory's tags, and so on. Listing types are the Directory's tags
  * that are not services.
  *

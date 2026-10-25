@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Sections as a core list table (owner, 24 Oct 2026; from phase 3 Rules → Section rules): one row
+ * Sourcing → Sections as a core list table (owner, 24 Oct 2026; from phase 3 Rules → Section rules): one row
  * per section, the site's content types (rules.php aw_rules_sections()), with the categories and tags it may use
  * (aw_sources['sections']), the items the workers file there and the summary rule it follows. Row action Edit opens the
  * section's checklists (sourcing-terms-admin.php). Read-only. Loaded only when the tab is shown.
@@ -19,7 +19,7 @@ class AW_Sourcing_Sections_Table extends WP_List_Table {
 	const FEW = 8;
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'section', 'plural' => 'sections', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'section', 'plural' => 'sections', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 	}
 
 	public function get_columns() {

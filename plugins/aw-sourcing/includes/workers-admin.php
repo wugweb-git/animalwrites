@@ -1,13 +1,13 @@
 <?php
 /**
- * Settings → Sourcing → Workers screens (owner, 24 Oct 2026), drawn outside the shared Sourcing form:
+ * Sourcing → Workers screens (owner, 24 Oct 2026), drawn outside the shared Sourcing form:
  * - the list (core list table, class-aw-workers-table.php) with "Add New Worker", and the Run now log;
  * - &edit=new / &edit=<id>: a worker's form-table (name, what it does, group, late limit; for a Planned worker also the
  *   ID and the schedule wanted; for every worker the saved keys it may use). A registry worker's ID, workflow and
  *   schedule are read-only: they are changed in the workflow;
  * - &runs=<id>: the worker's reported runs, read-only.
  * Handlers (admin-post.php): aw_worker_save, aw_worker_delete (Planned only), aw_worker_run (Run now, as before). Every
- * change goes to Settings → Sourcing → Change log.
+ * change goes to Sourcing → Change log.
  *
  * @package aw-sourcing
  */
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The Workers tab's address. */
 function aw_workers_url( array $args = array() ) {
-	return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=workers' ) );
+	return add_query_arg( $args, admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) );
 }
 
 /** Run now is offered: a registry workflow that needs no input, and the dispatch token is set. */
@@ -36,7 +36,7 @@ function aw_workers_late_words( array $w ) {
 	return 'Late after ' . ( $h >= 48 ? round( $h / 24 ) . ' days' : $h . ' h' );
 }
 
-/** Settings → Sourcing → Workers. */
+/** Sourcing → Workers. */
 function aw_workers_tab() {
 	$edit = sanitize_key( $_GET['edit'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
 	$runs = sanitize_key( $_GET['runs'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
@@ -244,7 +244,7 @@ function aw_workers_keys_checkboxes( $id ) {
 			. ' <span class="description">(' . esc_html( $ws ? 'for ' . count( $ws ) . ' worker' . ( 1 === count( $ws ) ? '' : 's' ) : 'all workers' ) . ')</span></label><br>';
 	}
 	echo '<input type="hidden" name="worker_keys_shown" value="1"></fieldset>';
-	echo '<p class="description">Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. The same is on Settings → Sourcing → AI models (Edit, or Attach to / Detach from worker).</p>';
+	echo '<p class="description">Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. The same is on Sourcing → AI models (Edit, or Attach to / Detach from worker).</p>';
 }
 
 /**

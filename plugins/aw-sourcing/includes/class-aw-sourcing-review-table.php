@@ -1,6 +1,6 @@
 <?php
 /**
- * Inbox → To review as a core list table (owner, 24 Oct 2026): views by type, search, sortable columns, pagination with
+ * Sourcing → To review as a core list table (owner, 24 Oct 2026): views by type, search, sortable columns, pagination with
  * a screen option, row actions (Edit, Source, Publish, Reject) and bulk actions (Publish, Reject) plus "Publish all N".
  * The form keeps its aw_review nonce, so the table prints none of its own. Loaded only on that screen.
  *
