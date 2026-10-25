@@ -340,5 +340,11 @@ foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'searc
 	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
 }
 
+// The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
+$si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/search-insights/keywords.php' );
+$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
+aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

@@ -319,6 +319,10 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 		WP_CLI::error( 'Not migrated: resolve the conflicts and list changes above first.' );
 	}
 
+	// Search Insights' daily role sync must not rebuild Include from the old list while records are being written
+	// (it would put the role back on rows this migration took it from); cleared when phase 2 is set or rolled back.
+	update_option( 'aw_sourcing_migrating', 2, false );
+
 	// The records: created or updated, roles through the one role setter, maps replaced by the planned ones.
 	$undo    = array();
 	$failed  = array();
@@ -429,6 +433,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 	unset( $record['partial'] );
 	update_option( 'aw_sourcing_phase2_record', $record, false );
 	update_option( 'aw_sourcing_phase', 2, false );
+	delete_option( 'aw_sourcing_migrating' );
 	$log = array();
 	foreach ( $plan['lists'] as $k => $l ) {
 		$log[] = array( 'keywords', sprintf( 'Phase 2 migrated (WP-CLI): %s, %d words → %d keyword records (%d already there)', $k, $l['items'], $l['distinct'], $l['existing'] ) );
@@ -671,6 +676,7 @@ function aw_sourcing_cli_p2_rollback( $bk, array $old, array $assoc ) {
 	update_option( 'aw_sourcing_dismissed', $old['aw_sourcing_dismissed'] ?? array(), false );
 	update_option( 'aw_sourcing_phase', aw_src_phase_after_p2_rollback( (int) ( $old['aw_sourcing_phase'] ?? 1 ), aw_sourcing_phase(), ! empty( $rec['partial'] ) ), false );
 	delete_option( 'aw_sourcing_phase2_record' );
+	delete_option( 'aw_sourcing_migrating' );
 	delete_option( 'aw_backup_latest_2' );
 	$what = "$del records deleted, $back restored; lists, keyword checks and press settings from $bk";
 	kits_sourcing_log( 'keywords', "Phase 2 rolled back (WP-CLI): $what", 'phase 2', 'phase ' . aw_sourcing_phase() );
