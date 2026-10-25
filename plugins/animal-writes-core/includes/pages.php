@@ -661,3 +661,72 @@ add_filter(
 	},
 	20
 );
+
+/**
+ * Decorative letters to plain ones (owner, 25 Oct 2026): bold/italic "math" letters (U+1D400–U+1D7FF), full-width
+ * letters and digits, circled and squared letters, and small capitals. Anything else is left as it is (Hindi, ₹, ½...).
+ *
+ * @param string $s Text.
+ * @return string
+ */
+function aw_plain_letters( $s ) {
+	static $small = array( 'ᴀ' => 'a', 'ʙ' => 'b', 'ᴄ' => 'c', 'ᴅ' => 'd', 'ᴇ' => 'e', 'ꜰ' => 'f', 'ɢ' => 'g', 'ʜ' => 'h', 'ɪ' => 'i', 'ᴊ' => 'j', 'ᴋ' => 'k', 'ʟ' => 'l', 'ᴍ' => 'm', 'ɴ' => 'n', 'ᴏ' => 'o', 'ᴘ' => 'p', 'ʀ' => 'r', 'ꜱ' => 's', 'ᴛ' => 't', 'ᴜ' => 'u', 'ᴠ' => 'v', 'ᴡ' => 'w', 'ʏ' => 'y', 'ᴢ' => 'z' );
+	$s = strtr( (string) $s, $small );
+	return (string) preg_replace_callback(
+		'/[\x{1D400}-\x{1D7FF}\x{FF01}-\x{FF5E}\x{2460}-\x{24FF}\x{1F130}-\x{1F189}]+/u',
+		fn( $m ) => aw_plain_letters_fallback( class_exists( 'Normalizer' ) ? (string) Normalizer::normalize( $m[0], Normalizer::FORM_KC ) : $m[0] ), // NFKC leaves the negative circled and squared letters
+		$s
+	);
+}
+
+/**
+ * Letters and digits worked out from their code points: the whole job without the intl extension, and the negative
+ * circled and squared letters NFKC leaves (Greek math letters and symbols with no plain form stay as they are).
+ *
+ * @param string $s A run of decorative characters.
+ * @return string
+ */
+function aw_plain_letters_fallback( $s ) {
+	$out = '';
+	foreach ( preg_split( '//u', $s, -1, PREG_SPLIT_NO_EMPTY ) as $ch ) {
+		$cp = mb_ord( $ch, 'UTF-8' );
+		if ( $cp >= 0xFF01 && $cp <= 0xFF5E ) {
+			$out .= chr( $cp - 0xFEE0 ); // full-width ASCII
+		} elseif ( $cp >= 0x1D400 && $cp <= 0x1D6A3 ) {
+			$i    = ( $cp - 0x1D400 ) % 52; // 13 alphabets of A–Z then a–z
+			$out .= chr( $i < 26 ? 65 + $i : 71 + $i );
+		} elseif ( $cp >= 0x1D7CE && $cp <= 0x1D7FF ) {
+			$out .= chr( 48 + ( $cp - 0x1D7CE ) % 10 ); // five sets of 0–9
+		} elseif ( $cp >= 0x24B6 && $cp <= 0x24E9 ) {
+			$out .= chr( $cp <= 0x24CF ? 65 + $cp - 0x24B6 : 97 + $cp - 0x24D0 ); // circled A–Z, a–z
+		} elseif ( $cp >= 0x1F130 && $cp <= 0x1F189 && ( $cp - 0x1F130 ) % 32 < 26 ) {
+			$out .= chr( 65 + ( $cp - 0x1F130 ) % 32 ); // squared and negative circled/squared A–Z
+		} else {
+			$out .= $ch;
+		}
+	}
+	return $out;
+}
+
+/*
+ * Every save (imports, ingest from the workers, editors) keeps titles in plain letters; a slug made from the decorative
+ * title is made again from the plain one.
+ */
+add_filter(
+	'wp_insert_post_data',
+	function ( $data, $postarr ) {
+		$title = wp_unslash( (string) ( $data['post_title'] ?? '' ) );
+		$plain = aw_plain_letters( $title );
+		if ( $plain === $title ) {
+			return $data;
+		}
+		$data['post_title'] = wp_slash( $plain );
+		$slug               = (string) ( $data['post_name'] ?? '' );
+		if ( '' !== $slug && sanitize_title( $title ) === $slug ) {
+			$data['post_name'] = wp_unique_post_slug( sanitize_title( $plain ), (int) ( $postarr['ID'] ?? 0 ), $data['post_status'], $data['post_type'], (int) $data['post_parent'] );
+		}
+		return $data;
+	},
+	21,
+	2
+);
