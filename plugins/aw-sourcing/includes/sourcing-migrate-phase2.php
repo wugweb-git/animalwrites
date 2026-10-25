@@ -609,8 +609,9 @@ function aw_sourcing_cli_p2_verify( $bk, array $old ) {
 function aw_sourcing_cli_p2_rollback( $bk, array $old, array $assoc ) {
 	global $wpdb;
 	$rec = (array) get_option( 'aw_sourcing_phase2_record', array() );
-	if ( aw_sourcing_phase() < 2 && empty( $rec['partial'] ) ) {
-		WP_CLI::error( 'Phase 2 is not migrated (aw_sourcing_phase = ' . aw_sourcing_phase() . ').' );
+	$why = aw_src_rollback_refusal( 2, aw_sourcing_phase(), (bool) $rec );
+	if ( '' !== $why ) {
+		WP_CLI::error( $why );
 	}
 	WP_CLI::confirm( "Roll phase 2 back to backup $bk (records the migration created are deleted; keyword edits made since phase 2 are lost from the old lists)?", $assoc );
 	$k    = aw_si_table( 'keywords' );
@@ -668,7 +669,7 @@ function aw_sourcing_cli_p2_rollback( $bk, array $old, array $assoc ) {
 	}
 	update_option( 'aw_sources', $cfg, false );
 	update_option( 'aw_sourcing_dismissed', $old['aw_sourcing_dismissed'] ?? array(), false );
-	update_option( 'aw_sourcing_phase', (int) ( $old['aw_sourcing_phase'] ?? 1 ), false );
+	update_option( 'aw_sourcing_phase', aw_src_phase_after_p2_rollback( (int) ( $old['aw_sourcing_phase'] ?? 1 ), aw_sourcing_phase(), ! empty( $rec['partial'] ) ), false );
 	delete_option( 'aw_sourcing_phase2_record' );
 	delete_option( 'aw_backup_latest_2' );
 	$what = "$del records deleted, $back restored; lists, keyword checks and press settings from $bk";

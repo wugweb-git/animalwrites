@@ -323,5 +323,13 @@ $starred = aw_kw_plan_add_stars( $plan, array( 'sterilis' => array( 78, 0, 78, t
 aw_t( in_array( 'sterilis*', $starred['records']['sterili']['variants'] ?? $starred['records'][ aw_si_norm( 'sterilis' ) ]['variants'], true ), 'the * spelling is added to the record' );
 aw_t( aw_kw_legacy_match( 'a fir filed', 'fir' ) && ! aw_kw_legacy_match( 'first', 'fir' ) && aw_kw_legacy_match( 'sterilisation', 'sterilis' ), 'today\'s category matching (short words whole, others substring)' );
 
+// Rollback order (Codex, PR #75): phase 1 waits while a phase 2 migration (complete or partial) is recorded; a phase 2
+// rollback puts the marker back to the phase before it and never raises it.
+aw_t( '' !== aw_src_rollback_refusal( 1, 1, true ), 'rollback --phase=1 refused while a partial phase 2 is recorded' );
+aw_t( '' !== aw_src_rollback_refusal( 1, 2, true ) && '' !== aw_src_rollback_refusal( 1, 2, false ), 'rollback --phase=1 refused while phase 2 is migrated' );
+aw_t( '' === aw_src_rollback_refusal( 1, 1, false ), 'rollback --phase=1 allowed with no phase 2' );
+aw_t( '' === aw_src_rollback_refusal( 2, 1, true ) && '' === aw_src_rollback_refusal( 2, 2, true ) && '' !== aw_src_rollback_refusal( 2, 1, false ), 'rollback --phase=2: a partial or complete record, else refused' );
+aw_t( 1 === aw_src_phase_after_p2_rollback( 1, 2, false ) && 1 === aw_src_phase_after_p2_rollback( 1, 1, true ) && 0 === aw_src_phase_after_p2_rollback( 1, 0, true ), 'the phase marker goes back to the phase before 2, never up' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

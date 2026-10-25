@@ -41,6 +41,38 @@ const AW_KW_EXTRA_SEARCHES = array( 'stray dogs' );
 const AW_KW_PRESS_DROPPED = array( 'sites', 'monthly_requests', 'weekly_requests', 'backfill_requests' );
 
 /**
+ * Whether a rollback may run (Codex, PR #75): a phase rolls back only when no later phase is migrated or half-migrated
+ * (a phase 2 migration record, complete or partial, means phase 2 must be rolled back first).
+ *
+ * @param int  $phase     Phase to roll back.
+ * @param int  $current   aw_sourcing_phase now.
+ * @param bool $p2_record A phase 2 migration record exists (aw_sourcing_phase2_record).
+ * @return string Why not ('' when it may run).
+ */
+function aw_src_rollback_refusal( $phase, $current, $p2_record ) {
+	if ( 1 === (int) $phase && ( (int) $current > 1 || $p2_record ) ) {
+		return 'Phase 2 is migrated or half-migrated: roll it back first (wp aw-sourcing rollback --phase=2).';
+	}
+	if ( 2 === (int) $phase && (int) $current < 2 && ! $p2_record ) {
+		return 'Phase 2 is not migrated (aw_sourcing_phase = ' . (int) $current . ').';
+	}
+	return '';
+}
+
+/**
+ * The phase marker after a phase 2 rollback: the one before phase 2 (from the backup), never higher than the marker now
+ * (a half-done migration never set it to 2, and must not raise it past a phase that was rolled back since).
+ *
+ * @param int  $backup  aw_sourcing_phase in the phase 2 backup.
+ * @param int  $current aw_sourcing_phase now.
+ * @param bool $partial The migration stopped before setting the phase.
+ * @return int
+ */
+function aw_src_phase_after_p2_rollback( $backup, $current, $partial ) {
+	return $partial ? min( (int) $backup, (int) $current ) : min( (int) $backup, 1 );
+}
+
+/**
  * A search's feed id, as the workers make it (gnews-kw-<slug>).
  *
  * @param string $term Search words.
