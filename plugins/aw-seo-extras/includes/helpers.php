@@ -17,7 +17,7 @@ if ( ! function_exists( 'kits_term_url' ) ) { // Kits Core's helper (a term's ad
 }
 
 /** Longest search description, in characters (155: Google's desktop snippet fits about 151 of ours, so more would be cut). */
-const AW_SEO_DESC_MAX = 155;
+// AW_SEO_DESC_MAX: AW SEO Plus → Settings (settings.php).
 
 /**
  * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
@@ -387,32 +387,13 @@ function aw_seo_listing_name( $id ) {
 }
 
 /** Fixed titles of the section hubs (post type => title). */
-const AW_HUB_TITLES = array(
-	'aw_news'        => 'Animal Welfare News from India – Animal Writes',
-	'aw_legal'       => 'Animal Laws and Court Orders in India – Animal Writes',
-	'post'           => 'Animal Welfare Guides & Research in India – Animal Writes',
-	'aw_listing'     => 'Directory of 5,000+ Animal Welfare NGOs in India',
-	'aw_opportunity' => 'Animal Welfare Volunteering and Jobs in India',
-	'aw_press'       => 'Animal Writes in the News',
-	'aw_campaign'    => 'Animal Welfare Campaigns in India – Animal Writes',
-);
+// AW_HUB_TITLES: AW SEO Plus → Settings (settings.php).
 
 /** Fixed descriptions of the section hubs that are not built from their intro. */
-const AW_HUB_DESCRIPTIONS = array(
-	'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
-	'aw_press'       => 'Press coverage of Animal Writes campaigns for animals in India: news articles, videos and social posts.',
-	'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in every state and district of India, with phone, address and services.',
-);
+// AW_HUB_DESCRIPTIONS: AW SEO Plus → Settings (settings.php).
 
 /** Descriptions of the content types' own archives (post type => description). */
-const AW_ARCHIVE_DESCRIPTIONS = array(
-	'aw_news'        => 'Animal-welfare news from across India, summarised with a link to every source.',
-	'aw_legal'       => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
-	'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
-	'aw_campaign'    => 'Citizen campaigns for animals in India: what each one asks for, how to take part and what it achieved.',
-	'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
-	'aw_listing'     => 'Animal welfare organisations, Gaushalas and government vets across India.',
-);
+// AW_ARCHIVE_DESCRIPTIONS: AW SEO Plus → Settings (settings.php).
 
 /** Plural of a listing type for a sentence: "Gaushalas" (always capitalised, owner 15 Oct 2026), "ABC centres", "veterinary dispensaries". */
 function aw_seo_type_plural( $slug ) {
@@ -672,10 +653,10 @@ function aw_seo_default_image() {
 }
 
 /** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
-const AW_SEO_LISTING_SHARE_IMAGE = 8814;
+// AW_SEO_LISTING_SHARE_IMAGE: AW SEO Plus → Settings (settings.php).
 
 /** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
-const AW_SEO_SOURCE_IMAGE_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' );
+// AW_SEO_SOURCE_IMAGE_TYPES: AW SEO Plus → Settings (settings.php).
 
 /**
  * The item's own image (owner, 15 Oct 2026: ingested items use the publisher's image, linked; never a category photo
@@ -821,3 +802,8 @@ add_action(
 	},
 	10000
 );
+
+/** Whether the current request may use the site's SEO APIs (focus keywords, Search Insights): administrators, or the workers' user (aw_worker capability). */
+function aw_seo_api_allowed() {
+	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
+}

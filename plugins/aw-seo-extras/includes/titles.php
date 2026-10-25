@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Content types whose items carry stored titles, descriptions and focus keywords. */
-const AW_SEO_ITEM_TYPES = array( 'aw_listing', 'aw_news', 'post', 'aw_legal', 'aw_press', 'page', 'aw_opportunity', 'aw_campaign' );
+// AW_SEO_ITEM_TYPES: AW SEO Plus → Settings (settings.php).
 
 /** Whether a post is a section hub Page (a list, not an item). */
 function aw_seo_is_hub_page( $post ) {

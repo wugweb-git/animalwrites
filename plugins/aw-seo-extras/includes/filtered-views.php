@@ -30,25 +30,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Fewest items for a filtered list to be indexed. */
-const AW_FILTERED_MIN_ITEMS = 3;
+// AW_FILTERED_MIN_ITEMS: AW SEO Plus → Settings (settings.php).
 
 /** Hubs whose ?category_name= views can be indexed (Directory listings have no categories as a filter). */
-const AW_FILTERED_CATEGORY_HUBS = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign' );
+// AW_FILTERED_CATEGORY_HUBS: AW SEO Plus → Settings (settings.php).
 
 /**
  * Title shapes of a filtered view per section (words from the hub titles), longest first; %s is the category name.
  * No colon or comma: the only separator in a title is the " – " before Animal Writes (owner, 15 Oct 2026).
  */
-const AW_FILTERED_TITLE_WORDS = array(
-	'aw_news'        => array( '%s News from India', '%s News' ),
-	'aw_legal'       => array( '%s Laws and Court Orders in India', '%s Laws and Court Orders', '%s Library Documents in India', '%s Library Documents' ),
-	'post'           => array( '%s Guides and Research', '%s Resources' ),
-	'aw_opportunity' => array( '%s Volunteer Roles and Jobs', '%s Opportunities' ),
-	'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
-);
+// AW_FILTERED_TITLE_WORDS: AW SEO Plus → Settings (settings.php).
 
 /** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026: News, Library, Opportunities). */
-const AW_FILTERED_STATE_NOINDEX = array( 'aw_news', 'aw_legal', 'aw_opportunity' );
+// AW_FILTERED_STATE_NOINDEX: AW SEO Plus → Settings (settings.php).
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
 const AW_FILTERED_PLACE_TITLE_WORDS = array(

@@ -74,7 +74,7 @@ function aw_rm_page_schema_type( $id ) {
 }
 
 /** Post types whose items get a Rank Math schema entry. */
-const AW_RM_SCHEMA_TYPES = array( 'page', 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' );
+// AW_RM_SCHEMA_TYPES: AW SEO Plus → Settings (settings.php).
 
 /** Post meta set when this plugin wrote Rank Math's "no schema" flag (a closed Opportunity). */
 const AW_RM_SCHEMA_OFF = '_aw_rm_schema_off';

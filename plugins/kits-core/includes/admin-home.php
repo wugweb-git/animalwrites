@@ -3,8 +3,8 @@
  * Kits menu and Overview (owner, 25 Oct 2026: our plugins and themes work like any marketplace product: one menu, an
  * overview of every feature and where it lives, links from the Plugins screen).
  *
- * Kits → Overview (this file), Design system (system-screen.php, was Appearance → Kits system), Preview (preview.php,
- * was Settings → Preview). The Overview covers the plugin's features and the design and branding of the active Kits
+ * Kits → Overview (this file); Navigation, Styles, Templates, Header & footer, Patterns (the Site Editor's screens);
+ * Design system (system-screen.php, was Appearance → Kits system); Preview (preview.php, was Settings → Preview). The Overview covers the plugin's features and the design and branding of the active Kits
  * theme and its child (colours, fonts, templates, parts, patterns, style variations, the design registry), read live
  * from WordPress, each linked to where it is edited. Core WordPress only.
  *
@@ -22,9 +22,24 @@ add_action(
 	function () {
 		add_menu_page( 'Kits', 'Kits', 'manage_options', KITS_MENU, 'kits_overview_page', 'dashicons-layout', 61 );
 		add_submenu_page( KITS_MENU, 'Kits', 'Overview', 'manage_options', KITS_MENU, 'kits_overview_page' );
+		// The theme's own settings, each opening its Site Editor screen (owner, 25 Oct 2026: reachable from the menu).
+		foreach ( kits_theme_screens() as $slug => $s ) {
+			add_submenu_page( KITS_MENU, $s[0], $s[0], 'edit_theme_options', $s[1] );
+		}
 	},
 	9 // before Design system and Preview join the menu
 );
+
+/** The theme's settings in the Site Editor: menu label and address (relative to wp-admin), in menu order. */
+function kits_theme_screens(): array {
+	return array(
+		'navigation' => array( 'Navigation', 'site-editor.php?path=/navigation' ),
+		'styles'     => array( 'Styles (colours, fonts)', 'site-editor.php?path=/wp_global_styles' ),
+		'templates'  => array( 'Templates', 'site-editor.php?postType=wp_template' ),
+		'parts'      => array( 'Header & footer', 'site-editor.php?postType=wp_template_part' ),
+		'patterns'   => array( 'Patterns', 'site-editor.php?path=/patterns' ),
+	);
+}
 
 // Plugins screen: Overview under the plugin's name (when Kits Core is active on its own).
 add_filter(

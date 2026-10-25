@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_KEEP_DAYS = 90;
+// AW_SI_KEEP_DAYS: AW SEO Plus → Settings (settings.php).
 
 /**
  * How a metric's value rolls up: sum (counts) or last (indexes, positions, text).
