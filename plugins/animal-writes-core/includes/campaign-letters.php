@@ -195,11 +195,20 @@ add_action(
 					if ( $ref ) {
 						return array( 'ok' => true, 'ref' => $ref );
 					}
+					// At most 20 new sign-ups an hour from one connection, counted as the site's forms count theirs
+					// (aw_form_guard; plugin audit 4). A retried call above is not counted.
+					$rl = 'aw_rl_campaign-optin_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+					if ( (int) get_transient( $rl ) >= 20 ) {
+						return new WP_Error( 'aw_optin_limit', 'Too many tries. Wait a minute, then try again.', array( 'status' => 429 ) );
+					}
 					$ref = 'AW-L-' . aw_cl_next_ref();
 					if ( $send ) {
 						set_transient( 'aw_cl_s_' . $send, $ref, DAY_IN_SECONDS );
 					}
 					aw_crm_campaign_signer( $email, $name, $city, $slug, 1 === aw_cl_tick( $req['consent'] ), $wa, 1 === aw_cl_tick( $req['wa_optin'] ), $ref, AW_CL_CONSENT );
+					if ( function_exists( 'aw_form_count' ) ) {
+						aw_form_count( $rl );
+					}
 					if ( $raw ) {
 						aw_raw_mark( $raw, 'saved' );
 					}
