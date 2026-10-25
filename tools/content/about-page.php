@@ -149,7 +149,7 @@ $content = <<<'HTML'
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p>Explore court decisions, <a href="https://www.indiacode.nic.in/">legislation</a>, government notifications, and official documents that shape animal welfare. Find summaries alongside links to original sources.</p>
+<p>Explore court decisions, <a href="https://indiacode.gov.in/">legislation</a>, government notifications, and official documents that shape animal welfare. Find summaries alongside links to original sources.</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:buttons -->
