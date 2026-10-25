@@ -31,16 +31,18 @@ add_filter(
 		if ( ! $d || 'district' !== $d->kind ) {
 			return $html;
 		}
-		$type = (string) get_query_var( 'aw_dir_type' );
-		$term = '' !== $type ? get_term_by( 'slug', $type, 'post_tag' ) : null;
-		if ( '' !== $type && ! $term ) {
+		$type  = (string) get_query_var( 'aw_dir_type' );
+		$types = '' !== $type ? explode( ',', $type ) : array(); // "veterinary" is every AW_VET_TYPES slug, comma-joined (directory.php)
+		$vet   = count( $types ) > 1 || 'veterinary' === $type;
+		$term  = 1 === count( $types ) && ! $vet ? get_term_by( 'slug', $type, 'post_tag' ) : null;
+		if ( $types && ! $vet && ! $term ) {
 			return $html;
 		}
 		$n = 0;
-		if ( $term ) {
-			foreach ( aw_place_counts()['pairs'] as $p ) { // stored counts, as the robots rule and the sitemap
-				if ( (int) $p[0] === (int) $d->code && $p[1] === $type ) {
-					$n = (int) $p[3];
+		if ( $types ) {
+			foreach ( aw_place_counts()['pairs'] as $p ) { // stored counts, as the robots rule and the sitemap (a listing with two vet types counts twice: the card is then left out, never shown wrongly)
+				if ( (int) $p[0] === (int) $d->code && in_array( $p[1], $vet ? AW_VET_TYPES : $types, true ) ) {
+					$n += (int) $p[3];
 				}
 			}
 		} else {
@@ -50,13 +52,13 @@ add_filter(
 		if ( $n >= 3 || ! $state ) {
 			return $html;
 		}
-		$what = $term ? mb_strtolower( $term->name ) . ' listings' : 'listings'; // type names are singular ("Rescue Group")
+		$what = $vet ? 'veterinary listings' : ( $term ? mb_strtolower( $term->name ) . ' listings' : 'listings' ); // type names are singular ("Rescue Group")
 		return $html . aw_local_card(
 			sprintf( 'Few %s in %s yet', $what, $d->name ),
 			sprintf( 'If there\'s no group near you, you can volunteer to help animals in %s, or tell us about one we\'ve missed.', $d->name ),
 			'<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">Volunteer near you</a>'
 			. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Add an organisation</a>'
-			. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug, $type ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>'
+			. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug, $vet ? 'veterinary' : $type ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>'
 		);
 	},
 	10,
