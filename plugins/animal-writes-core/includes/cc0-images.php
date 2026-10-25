@@ -416,11 +416,13 @@ function aw_source_pdf_cover( $post_id ) {
  *
  * @param string $url     Address.
  * @param int    $timeout Seconds.
- * @param int    $max     Largest file accepted, in bytes.
+ * @param int    $max        Largest file accepted, in bytes.
+ * @param array  $headers    Extra request headers (enrichment pictures: Accept, Referer).
+ * @param string $user_agent User-Agent ('' = the site's own).
  * @return string|WP_Error Temporary file path.
  */
-function aw_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES ) {
-	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'limit_response_size' => (int) $max ) );
+function aw_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES, $headers = array(), $user_agent = '' ) {
+	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => '' !== $user_agent ? $user_agent : 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'headers' => (array) $headers, 'limit_response_size' => (int) $max ) );
 	if ( is_wp_error( $r ) ) {
 		return $r;
 	}
