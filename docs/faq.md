@@ -8,7 +8,7 @@ Owner-approved spec, 20 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php`
 - Each answer: first sentence answers and names the subject; at most 50 words; one link (the section or the source); dates j M Y with the calendar icon.
 - The FAQPage node is parsed from the rendered accordion, so its text is the visible text word for word.
 - No FAQ on News, Research, Opportunities, format tags, About, Contact, policies, Home, News and Resources pages.
-- Resources guides (owner, 25 Oct 2026): their own questions in the guide's FAQ box (meta `aw_faq`, approved items only), shown by the `item-faq` block at the end of the content with our FAQPage schema. A Rank Math FAQ block on a guide (from the editor or a publish script) is converted on save: questions and answers word for word, the block and its heading removed, the old markup kept in `_aw_faq_rm_block`. One FAQ system for the whole site; Rank Math keeps titles, descriptions, sitemaps and redirects.
+- Resources guides (owner, 25 Oct 2026): their own questions in the guide's FAQ box (meta `aw_faq`, approved items only), shown by the `item-faq` block at the end of the content with our FAQPage schema. A Rank Math FAQ block on a guide (from the editor or a publish script) is converted on save: questions and answers word for word, the block and its heading removed, each conversion's removed markup and the FAQ as it was before kept in `_aw_faq_rm_block` (a list, newest last). One FAQ system for the whole site; Rank Math keeps titles, descriptions, sitemaps and redirects.
 
 ## Where it shows
 
@@ -47,7 +47,7 @@ Compare after 6 weeks: Search Console impressions, clicks and CTR for queries co
 ## Commands
 
 - `wp aw-faq report` — counts by type and group, questions per FAQ, drafts waiting.
-- `wp aw-faq convert-guides [--dry-run]` — move every guide's Rank Math FAQ block into its own FAQ (also happens on each save); flags answers over 50 words, more than one link, and FAQs over 6 questions (only the first 6 show). `wp aw-faq undo-guide <id>` puts the block back.
+- `wp aw-faq convert-guides [--dry-run]` — move every guide's Rank Math FAQ block into its own FAQ (also happens on each save); flags answers over 50 words, more than one link, and FAQs over 6 questions (only the first 6 show). `wp aw-faq undo-guide <id>` reverses the latest conversion: the block back and the guide's FAQ as it was before.
 - `wp aw-faq check [--verbose]` — on every page: 3–6 questions or none, schema text = visible text, no duplicate question, ≤ 50 words, one link, holdout pages show none; reports pages whose focus keyphrase is in fewer than 2 questions.
 - `wp aw-faq holdout` — CSV of eligible pages: url, type, group, questions.
 - `wp aw-faq import <file.json>` — add topic drafts (`{"post_tag:slug"|"category:slug"|"page:slug"|"library:slug": [{q, a, sources, keyword}]}`; `library:` is for letter templates); existing questions are kept.

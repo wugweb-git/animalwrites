@@ -1012,15 +1012,24 @@ function aw_faq_convert_rank_math( $post_id, $dry = false ) {
 	if ( $dry ) {
 		return array( count( $moved ), $long, $links );
 	}
-	$items = aw_faq_items( 'post', $post_id );
-	$have  = array_map( fn( $x ) => strtolower( $x['q'] ), $items );
+	$items  = aw_faq_items( 'post', $post_id );
+	$before = (string) get_post_meta( $post_id, 'aw_faq', true ); // the FAQ as it was, for undo
+	$have   = array_map( fn( $x ) => strtolower( $x['q'] ), $items );
 	foreach ( $moved as $m ) {
 		if ( '' !== $m['q'] && ! in_array( strtolower( $m['q'] ), $have, true ) ) {
 			$items[] = array( 'q' => $m['q'], 'a' => $m['a'], 'sources' => array(), 'keyword' => '', 'status' => 'approved', 'reviewed' => wp_date( 'Y-m-d' ) );
 		}
 	}
 	aw_faq_items_save( 'post', $post_id, $items );
-	add_post_meta( $post_id, '_aw_faq_rm_block', wp_slash( serialize_blocks( $removed ) ) );
+	// One backup per conversion, newest last: undo reverses only the latest one (block back, FAQ as it was before it).
+	$log   = json_decode( (string) get_post_meta( $post_id, '_aw_faq_rm_block', true ), true );
+	$log   = is_array( $log ) ? $log : array();
+	$log[] = array(
+		'at'     => wp_date( 'Y-m-d H:i' ),
+		'blocks' => serialize_blocks( $removed ),
+		'faq'    => $before,
+	);
+	update_post_meta( $post_id, '_aw_faq_rm_block', wp_slash( wp_json_encode( $log ) ) );
 	$GLOBALS['aw_faq_converting'] = true;
 	wp_update_post(
 		array(
@@ -1312,23 +1321,32 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::success( ( $dry ? 'Would convert ' : 'Converted ' ) . "$tot[0] guides, $tot[1] questions ($tot[2] over 50 words, $tot[3] with more than one link: kept as written)." );
 				return;
 			}
-			if ( 'undo-guide' === $cmd ) { // put a converted guide's Rank Math block back and remove the moved questions
-				$id  = (int) ( $args[1] ?? 0 );
-				$old = (string) get_post_meta( $id, '_aw_faq_rm_block', true );
-				if ( '' === $old ) {
+			if ( 'undo-guide' === $cmd ) { // reverse a guide's latest conversion: its Rank Math block back, its FAQ as it was before
+				$id   = (int) ( $args[1] ?? 0 );
+				$log  = json_decode( (string) get_post_meta( $id, '_aw_faq_rm_block', true ), true );
+				$last = is_array( $log ) && $log ? array_pop( $log ) : null;
+				if ( ! $last ) {
 					WP_CLI::error( "Nothing to undo for $id." );
 				}
 				$GLOBALS['aw_faq_converting'] = true;
 				wp_update_post(
 					array(
 						'ID'           => $id,
-						'post_content' => wp_slash( get_post_field( 'post_content', $id ) . "\n\n" . $old ),
+						'post_content' => wp_slash( get_post_field( 'post_content', $id ) . "\n\n" . $last['blocks'] ),
 					)
 				);
 				$GLOBALS['aw_faq_converting'] = false;
-				delete_post_meta( $id, 'aw_faq' );
-				delete_post_meta( $id, '_aw_faq_rm_block' );
-				WP_CLI::success( "Restored the Rank Math FAQ block on $id (at the end of the content; it is converted again on its next save)." );
+				if ( '' === (string) $last['faq'] ) {
+					delete_post_meta( $id, 'aw_faq' );
+				} else {
+					update_post_meta( $id, 'aw_faq', wp_slash( $last['faq'] ) );
+				}
+				if ( $log ) {
+					update_post_meta( $id, '_aw_faq_rm_block', wp_slash( wp_json_encode( $log ) ) );
+				} else {
+					delete_post_meta( $id, '_aw_faq_rm_block' );
+				}
+				WP_CLI::success( "Reversed the conversion of {$last['at']} on $id: Rank Math FAQ block back at the end of the content (converted again on its next save), FAQ as it was before." );
 				return;
 			}
 			if ( 'import' === $cmd ) {
