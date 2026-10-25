@@ -1158,6 +1158,9 @@ function aw_faq_counts() {
 		}
 	}
 	foreach ( aw_faq_topic_pages() as $p ) {
+		if ( 'post' === $p[0] && 'aw_legal' === get_post_type( $p[1] ) ) {
+			continue; // Library templates are counted in the Library row
+		}
 		$k        = 'term' === $p[0] ? 'term' : 'hub';
 		$approved = count( array_filter( $p[5], fn( $i ) => 'approved' === $i['status'] ) );
 		$c[ $k ]['shown']  += $approved >= AW_FAQ_MIN ? 1 : 0;
