@@ -36,7 +36,7 @@ function aw_cron_unschedule() {
 		'aw_sourcing_site_meta', // aw-sourcing source-sites.php (AW_SOURCING_SITE_META_CRON)
 	);
 	foreach ( $hooks as $hook ) {
-		wp_unschedule_hook( $hook );
+		wp_clear_scheduled_hook( $hook ); // the no-argument (repeating) events only: a queued one-off with arguments, such as the workers' end-of-run report (aw_workers_watchdog, 'report'), still runs
 	}
 }
 
