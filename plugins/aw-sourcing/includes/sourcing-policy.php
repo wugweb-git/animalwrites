@@ -420,6 +420,9 @@ add_action(
 		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( $adding ? 'aw_sourcing_keywords_add' : 'bulk-keywords' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
+		if ( aw_sourcing_phase() >= 2 ) { // phase 2: the lists are the keyword table's now; these screens are copies until the new ones arrive
+			wp_die( 'The keyword lists moved into the keyword table (sourcing phase 2). They are edited on the new Keywords screen; this old form is read-only.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
+		}
 		$lists = array( 'strong' => 'Include', 'animal' => 'Animal words', 'context' => 'Context words', 'exclude' => 'Exclude' );
 		$rel   = aw_relevance();
 		$old   = $rel;

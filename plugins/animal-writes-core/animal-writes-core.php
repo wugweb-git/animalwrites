@@ -50,6 +50,7 @@ require_once AW_CORE_DIR . 'includes/meta.php';
 require_once AW_CORE_DIR . 'includes/scf.php';
 require_once AW_CORE_DIR . 'includes/places.php';
 require_once AW_CORE_DIR . 'includes/issuers.php';
+require_once AW_CORE_DIR . 'includes/keyword-table.php'; // the keyword table (Search Insights and Sourcing; owner's decision 3, 25 Oct 2026)
 require_once AW_CORE_DIR . 'includes/sources-config.php';
 require_once AW_CORE_DIR . 'includes/summary-rules.php';
 require_once AW_CORE_DIR . 'includes/places-admin.php';
