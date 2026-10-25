@@ -65,7 +65,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 	protected function get_bulk_actions() {
 		return $this->is_dismissed_view()
 			? array( 'restore' => 'Show again' )
-			: array( 'include' => 'Add to Include', 'exclude' => 'Add to Exclude', 'dismiss' => 'Dismiss' );
+			: array( 'include' => 'Add to Include', 'exclude' => 'Add to Exclude' ) + ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? array( 'search' => 'Add as Search' ) : array() ) + array( 'dismiss' => 'Dismiss' );
 	}
 
 	/** The core bulk menu is named "action", which admin-post.php reads as its own; these are aw_bulk / aw_bulk2. */
@@ -126,6 +126,7 @@ class AW_Sourcing_Suggestions_Table extends WP_List_Table {
 			: array(
 				'include' => $this->action_button( 'include', 'Add to Include', $item['q'] ),
 				'exclude' => $this->action_button( 'exclude', 'Add to Exclude', $item['q'] ),
+			) + ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? array( 'search' => $this->action_button( 'search', 'Add as Search', $item['q'] ) ) : array() ) + array(
 				'trash'   => $this->action_button( 'dismiss', 'Dismiss', $item['q'] ),
 			);
 		return '<strong>' . esc_html( $item['q'] ) . '</strong>' . ( $item['rising'] ? ' — <span class="post-state">Rising</span>' : '' ) . $this->row_actions( $acts );

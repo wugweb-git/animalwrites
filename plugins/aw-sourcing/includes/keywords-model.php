@@ -472,7 +472,7 @@ function aw_kw_searches( array $r, array $sources ) {
 	if ( (int) $r['roles'] & AW_KW_ROLE_SEARCH ) {
 		$q    = '' !== (string) ( $r['query'] ?? '' ) ? (string) $r['query'] : (string) $r['label'];
 		$feed = '' !== (string) ( $r['feed_id'] ?? '' ) ? (string) $r['feed_id'] : aw_kw_feed_id( $q );
-		if ( preg_match( '#^https?://#', $q ) ) {
+		if ( preg_match( '#^https?://#i', $q ) ) {
 			$base = $sources[ $feed ] ?? array( 'name' => 'Google News – ' . $r['label'], 'kind' => 'rss', 'type' => 'news' );
 			unset( $base['on'], $base['filter'], $base['keyword_id'], $base['host'] ); // its keyword check (check) goes with it
 			$base['id'] = $feed;
@@ -486,7 +486,13 @@ function aw_kw_searches( array $r, array $sources ) {
 		foreach ( (array) ( $r['src']['lists']['strong'] ?? array() ) as $p ) {
 			$spell[] = (string) $p[1];
 		}
-		foreach ( $spell ? $spell : array( (string) $r['label'] ) as $sp ) {
+		$spell = $spell ? $spell : array( (string) $r['label'] );
+		foreach ( (array) ( $r['src']['added'] ?? array() ) as $sp ) { // spellings added on the Keywords screen (a "word*" prefix is for matching, not a search)
+			if ( '*' !== substr( (string) $sp, -1 ) ) {
+				$spell[] = (string) $sp;
+			}
+		}
+		foreach ( array_unique( $spell ) as $sp ) {
 			if ( aw_kw_ascii( $sp ) ) {
 				$out[] = array( 'feed' => aw_kw_feed_id( $sp ), 'q' => $sp );
 			}
