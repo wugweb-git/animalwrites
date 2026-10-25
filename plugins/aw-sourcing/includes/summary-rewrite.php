@@ -266,6 +266,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		}
 		$m['checked']   = current_time( 'mysql' );
 		$m['src_chars'] = max( 0, (int) $req->get_param( 'recheck' ) );
+		$m['retry_min'] = $sec_min; // a re-read uses this minimum's one try too: never listed again for the same change
 		update_post_meta( $id, 'aw_summary_rw', $m );
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short', 'checked' => $m['checked'] ) );
 	}
