@@ -55,7 +55,7 @@ register_deactivation_hook(
 		}
 		// The SEO jobs too (plugin audit 23): titles.php, health.php.
 		foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog' ) as $hook ) {
-			wp_unschedule_hook( $hook );
+			wp_clear_scheduled_hook( $hook ); // repeating (no-argument) events only, as Core
 		}
 	}
 );
