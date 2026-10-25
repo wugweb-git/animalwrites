@@ -1408,3 +1408,30 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.home .aw-ed-find .aw-browse-states ul::-webkit-scrollbar { display: none; }
 	.home .aw-ed-find .aw-browse-states li { scroll-snap-align: start; }
 }
+
+/* Home on tablets (owner, 25 Oct 2026): every section fits one screen at 768×1024 and 800×1280, the phone approach above.
+   From 768 up to desktop (1024) the What's happening, From the Library and Guides card lists and the Library tiles scroll
+   sideways in one row, two cards and a part of the next in view (cards one size, 2:1 picture, two-line summary). Nothing
+   is removed; the Tab order is the reading order. Only 767/768 and 1199/1200 are media widths (breakpoint_check.py), so
+   the page is a size container from 768 to 1199 and the rows apply while it is narrower than 1008px: under 1024 with
+   a desktop scroll bar of up to 16px, so a 1024px desktop window is never changed. 1024 and up: nothing here applies. */
+@media (min-width: 768px) and (max-width: 1199px) { .home .wp-site-blocks { container: aw-home / inline-size; } }
+@container aw-home (max-width: 1007px) {
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template,
+	.home .aw-ed-law > .kit-stack {
+		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-grid) !important;
+		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
+		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
+	}
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
+	.home .aw-ed-law > .kit-stack::-webkit-scrollbar { display: none; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template > li { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
+	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
+	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
+	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; }
+}
