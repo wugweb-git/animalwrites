@@ -50,9 +50,9 @@ add_filter(
 		if ( $n >= 3 || ! $state ) {
 			return $html;
 		}
-		$what = $term ? mb_strtolower( $term->name ) : 'organisations';
+		$what = $term ? mb_strtolower( $term->name ) . ' listings' : 'listings'; // type names are singular ("Rescue Group")
 		return $html . aw_local_card(
-			sprintf( 'Few %s listed in %s yet', $what, $d->name ),
+			sprintf( 'Few %s in %s yet', $what, $d->name ),
 			sprintf( 'If there\'s no group near you, you can volunteer to help animals in %s, or tell us about one we\'ve missed.', $d->name ),
 			'<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">Volunteer near you</a>'
 			. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Add an organisation</a>'
