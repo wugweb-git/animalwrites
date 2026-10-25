@@ -366,6 +366,30 @@ add_filter(
 	2
 );
 
+/*
+ * Links to a court's own site open in a new tab: the Delhi High Court's hyperlinking policy asks that its pages open in a
+ * new window and are never framed (owner, 25 Oct 2026). Item text only; template links already open in a new tab.
+ */
+add_filter(
+	'the_content',
+	function ( $content ) {
+		if ( false === stripos( $content, 'court' ) && false === stripos( $content, 'sci.gov.in' ) ) {
+			return $content;
+		}
+		$p = new WP_HTML_Tag_Processor( $content );
+		while ( $p->next_tag( 'A' ) ) {
+			$host = strtolower( (string) wp_parse_url( (string) $p->get_attribute( 'href' ), PHP_URL_HOST ) );
+			if ( '' === $host || ! preg_match( '/(^|\.)(sci\.gov\.in|ecourts\.gov\.in)$|court/', $host ) ) {
+				continue;
+			}
+			$p->set_attribute( 'target', '_blank' );
+			$p->set_attribute( 'rel', 'noopener' );
+		}
+		return $p->get_updated_html();
+	},
+	20
+);
+
 /**
  * Keep a copy of a government PDF (gov.in / nic.in, or the open judgment datasets) we may host (aw_doc_hostable) so it can be read inside the page.
  *
