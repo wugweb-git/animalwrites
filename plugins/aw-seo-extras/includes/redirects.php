@@ -5,8 +5,8 @@
  * /?author=N goes there in one hop (below).
  *
  * Fixed old addresses go into that list (audit item 18, owner 25 Oct 2026): `wp aw redirects-import` (places.php) adds
- * the old /location/{slug}/ and /source/{slug}/ pages with the targets the PHP handler in places.php uses; the handler
- * stays until the crawl shows Rank Math answers every one, then a separate change removes it. `wp aw redirects-list`
+ * the old /location/{slug}/ and /source/{slug}/ pages (their PHP handler was removed once the crawl showed Rank Math
+ * answers every one). `wp aw redirects-list`
  * prints the whole list for tools/redirects/crawl.py, which requests every old address and reports any 404, wrong
  * target, and which layer answered (X-Redirect-By: "Rank Math" or "Animal Writes").
  *
@@ -17,8 +17,7 @@
  * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
  * - Labels are WordPress Tags with their own pages (/tag/{slug}/); old type addresses (/?cat=N, /directory-type/…,
  *   /opportunity-type/…) and ?kind=, ?type=, ?service= are redirected in animal-writes-core tags.php.
- * - animal-writes-core: /location/{slug}/ and /source/{slug}/ (places.php) until they are removed after the import;
- *   /topic/{slug}/… and ?topic= (category-moves.php), older /directory/ shapes (directory.php),
+ * - animal-writes-core: /topic/{slug}/… and ?topic= (category-moves.php), older /directory/ shapes (directory.php),
  *   ?query-N-page= on hubs (hubs.php), ?s= → /search/ and ?about= on Contact (pages.php), /report/?listing=
  *   (form-blocks.php), comment feeds (admin-ia.php).
  *
