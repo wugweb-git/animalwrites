@@ -23,9 +23,10 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Search Insights phase 3:** `SI_LIVE=true` set 25 Oct; after the 26 Oct 08:10 IST run, report whether Trends RSS, Wikipedia, GDELT and autocomplete answered and how many rising terms were saved.
 16. **Enrichment:** keeps running on its other sources (website and social pages, OpenStreetMap, Wikidata, AWBI, claims) after each sourcing run; only the Google Places check is quota-bound. From 1 Nov the 1,773 listings checked while Google was off (marked Google-pending) get their Google pass, no-contact ones first (district searches cost 2 requests each; watch the 950 a month). The live Google block (rating, hours, open now) stays hidden: it needs a paid request per view (no paid plans). Not done from the first brief: Rich Results test and 375px screenshots of an enriched listing.
 
-### FIR state pages: next
-- Uttarakhand gets a page once its police portal is verified from an Indian network (draft ready: Claude outputs/fir-by-state/six-new/uttarakhand.md). Chhattisgarh stays a row (no Board contact, no working police route).
-- Held until re-checked live from an Indian network (sources read only from archived copies or would not open): Delhi, Uttar Pradesh, West Bengal, Tripura, Odisha, Karnataka, Andhra Pradesh, Madhya Pradesh; Himachal Pradesh until a police route is verified. Rows in 127's state table until then.
+### FIR state pages: background (not tasks)
+- Uttarakhand and Chhattisgarh stay rows in 127's state table; an Uttarakhand page only if its police portal is ever verified from an Indian network (draft: Claude outputs/fir-by-state/six-new/uttarakhand.md).
+- Delhi, Uttar Pradesh, West Bengal, Tripura, Odisha, Karnataka, Andhra Pradesh, Madhya Pradesh and Himachal Pradesh stay rows (sources not verified live).
+- Goa Police site carries injected links; our Goa page doesn't link to it. Nothing for us to do.
 
 ### Waiting on dates (see Dates below)
 19. **1 Nov:** Google Places free quota returns (950 requests a month, no paid plan); no-contact profiles first.
