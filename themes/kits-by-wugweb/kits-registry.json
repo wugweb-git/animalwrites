@@ -442,8 +442,7 @@
    "classes": [
     "kit-form",
     "kit-captcha",
-    "kit-hp",
-    "kit-nl"
+    "kit-hp"
    ],
    "states": [
     "default",
@@ -1201,35 +1200,6 @@
    }
   },
   {
-   "name": "Trust box",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "kit-trust"
-   ],
-   "states": [
-    "sourced",
-    "verified",
-    "unconfirmed"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "<aside>",
-    "aria": "none",
-    "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
-    "motion": "none",
-    "sr": "source, dates and status in words"
-   },
-   "seo": {
-    "heading": "none",
-    "link": "the original source",
-    "alt": "n/a",
-    "schema": "none"
-   }
-  },
-  {
    "name": "Carousel dots",
    "type": "primitive",
    "status": "live",
@@ -1658,35 +1628,6 @@
     "link": "section names",
     "alt": "n/a",
     "schema": "none (404 status)"
-   }
-  },
-  {
-   "name": "End bar (tags left, share right)",
-   "type": "component",
-   "status": "live",
-   "classes": [
-    "kit-endbar"
-   ],
-   "states": [
-    "tags and share",
-    "tags only",
-    "share only"
-   ],
-   "tokens": [],
-   "a11y": {
-    "element": "see states",
-    "aria": "none",
-    "keyboard": "Tab; Enter",
-    "focus": "3px ring",
-    "target": "44px",
-    "motion": "none",
-    "sr": "visible text"
-   },
-   "seo": {
-    "heading": "none",
-    "link": "category names (crawlable)",
-    "alt": "n/a",
-    "schema": "none"
    }
   },
   {

@@ -3,7 +3,7 @@
 	'use strict';
 	/* Directory search: District stays off until a State is chosen, then lists that state's districts; it resets
 	   when the State changes. Without JavaScript the server-rendered list works as is. */
-	document.querySelectorAll('.aw-dir-search, form.kit-form, .aw-form-ff form').forEach(function (f) {
+	document.querySelectorAll('.aw-dir-search, .aw-form-ff form').forEach(function (f) {
 		var st = f.querySelector('[name=state]'), di = f.querySelector('[name=district]');
 		if (!st || !di) return;
 		var first = di.options[0];
@@ -32,8 +32,7 @@
 			var v = pin.value.replace(/\D/g, '');
 			if (v.length !== 6 || v === last) return;
 			last = v;
-			var ajax = f.getAttribute('action') ? f.getAttribute('action').replace('admin-post.php', 'admin-ajax.php') : '/wp-admin/admin-ajax.php'; // Fluent Forms forms have no action
-			fetch(ajax + '?action=aw_pin&pin=' + v, { credentials: 'same-origin' })
+			fetch('/wp-admin/admin-ajax.php?action=aw_pin&pin=' + v, { credentials: 'same-origin' }) // Fluent Forms forms have no action
 				.then(function (r) { return r.json(); })
 				.then(function (r) {
 					if (!r.success) { if (msg) msg.textContent = r.data; return; }
@@ -46,7 +45,7 @@
 	});
 
 	/* Logo (claim, Fluent Forms): a picked file is checked, then sent at once to the private folder; the form carries
-	   its token. A wrong file shows the same message as the site's own form. */
+	   its token. A wrong file shows the field's own message. */
 	document.querySelectorAll('input[type=file][data-aw-upload]').forEach(function (inp) {
 		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[name=logo_token]'), msg = document.getElementById(inp.id + '-error');
 		inp.addEventListener('change', function () {
@@ -75,8 +74,8 @@
 	document.querySelectorAll('.aw-contact-form').forEach(function (f) {
 		var sel = f.querySelector('[name=about]'), msg = f.querySelector('[name=message]');
 		if (!sel || !msg) return;
-		var map = {}; try { map = JSON.parse(f.dataset.placeholders || '{}'); } catch (x) {} // the Fluent Forms version keeps them on its wrapper
-		sel.addEventListener('change', function () { msg.placeholder = sel.selectedOptions[0].dataset.placeholder || map[sel.value] || ''; });
+		var map = {}; try { map = JSON.parse(f.dataset.placeholders || '{}'); } catch (x) {} // reason => placeholder, on the form's wrapper
+		sel.addEventListener('change', function () { msg.placeholder = map[sel.value] || ''; });
 		// The rows on the page (List your organisation, Post an opportunity …) choose their reason here and move to the form.
 		document.querySelectorAll('a.aw-contact-pick[data-about]').forEach(function (a) {
 			a.addEventListener('click', function (e) {

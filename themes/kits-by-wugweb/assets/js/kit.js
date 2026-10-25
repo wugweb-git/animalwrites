@@ -216,7 +216,7 @@
 		form.replaceWith(box);
 		box.focus();
 	}
-	document.querySelectorAll('form.kit-form, form.kit-form').forEach(function (form) {
+	document.querySelectorAll('form.kit-form').forEach(function (form) {
 		form.setAttribute('novalidate', '');
 		var submitted = false;
 		var served = form.querySelector('.kit-form-summary') || form.querySelector('.kit-form-status:not(:empty)') || form.querySelector('[aria-invalid=true]');
@@ -493,8 +493,7 @@
 	main.setAttribute('data-scroll-flow', ids.join(' '));
 })();
 
-/* Filters (kits_filter_bar): below 768px the groups fold into a "Filters" sheet (focus kept inside, Esc closes);
-   groups with many options show the first eight until "Show more". */
+/* Filters (kits_filter_bar): below 768px the filters fold into a "Filters" sheet (focus kept inside, Esc closes). */
 (function () {
 	var phone = window.matchMedia('(max-width: 767px)');
 	document.querySelectorAll('.kit-filter-sheet').forEach(function (sheet) {
@@ -520,14 +519,6 @@
 			if (!f.length) return;
 			if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
 			else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
-		});
-	});
-	document.querySelectorAll('.kit-filter-more').forEach(function (btn) {
-		var group = document.getElementById(btn.getAttribute('aria-controls'));
-		btn.addEventListener('click', function () {
-			var open = group.classList.toggle('is-expanded');
-			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-			btn.textContent = open ? btn.getAttribute('data-less') : btn.getAttribute('data-more');
 		});
 	});
 })();
@@ -691,15 +682,14 @@
 		var named = form && form.closest && form.closest('[data-kit-form]'); // a form from a form plugin, named by its wrapper
 		if (named) return named.dataset.kitForm;
 		var a = form && form.querySelector('input[name=action]');
-		var v = a ? a.value.replace(/^aw_/, '') : (form && form.id || '');
-		return { newsletter: 'newsletter', volunteer: 'volunteer', claim: 'claim', report: 'report', contact: 'contact', remove_data: 'remove_data' }[v] || v;
+		return a ? a.value.replace(/^aw_/, '') : (form && form.id || '');
 	}
 	document.addEventListener('kit:form-done', function (e) { track('form_submit_success', { form: formName(e.target) }); });
 	document.addEventListener('kit:form-error', function (e) { track('form_error', { form: formName(e.target), where: e.detail.where, fields: e.detail.fields }); });
 	// Fluent Forms (AJAX): its own success and failure events, on document, with the form in detail.form
 	document.addEventListener('fluentform_submission_success', function (e) {
 		var res = e.detail && e.detail.response && e.detail.response.data && e.detail.response.data.result;
-		if (res && res.redirectUrl && res.redirectUrl.indexOf('/thank-you/') > -1) { try { sessionStorage.setItem('kit-sent', '1'); return; } catch (x) {} } // the thank-you page counts it, as for the site's own forms
+		if (res && res.redirectUrl && res.redirectUrl.indexOf('/thank-you/') > -1) { try { sessionStorage.setItem('kit-sent', '1'); return; } catch (x) {} } // the thank-you page counts it
 		track('form_submit_success', { form: formName(e.detail && e.detail.form) });
 	});
 	document.addEventListener('fluentform_submission_failed', function (e) { track('form_error', { form: formName(e.detail && e.detail.form), where: 'server', fields: '' }); });
