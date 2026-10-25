@@ -374,6 +374,9 @@ WP_CLI::add_command(
 			aw_sourcing_cli_p2_rollback( $bk, $old, $assoc );
 			return;
 		}
+		if ( aw_sourcing_phase() > 1 ) {
+			WP_CLI::error( 'Phase ' . aw_sourcing_phase() . ' is migrated: roll that back first (wp aw-sourcing rollback --phase=' . aw_sourcing_phase() . ').' );
+		}
 		$all              = ! empty( $assoc['restore-all'] );
 		WP_CLI::confirm( "Roll phase $phase back " . ( $all ? "to backup $bk exactly (aw_publishers and aw_sources as backed up)" : '(undo the migration on the current records)' ) . '?', $assoc );
 		if ( $all ) {

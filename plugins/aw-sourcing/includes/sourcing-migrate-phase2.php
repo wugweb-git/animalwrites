@@ -66,16 +66,28 @@ function aw_sourcing_cli_p2_rows( array $norms ) {
 	$out  = array();
 	foreach ( array_chunk( array_values( array_unique( $norms ) ), 200 ) as $chunk ) {
 		$in   = implode( ',', array_fill( 0, count( $chunk ), '%s' ) );
-		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT {$cols} FROM {$k} WHERE norm IN ({$in})", $chunk ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per norm.
-		foreach ( $rows as $r ) {
-			$r                    = aw_kw_decode( $r );
-			$r['categories']      = array();
-			$r['sections']        = array();
-			$out[ (int) $r['id'] ] = $r;
-		}
+		$out  = array_merge( $out, (array) $wpdb->get_results( $wpdb->prepare( "SELECT {$cols} FROM {$k} WHERE norm IN ({$in})", $chunk ), ARRAY_A ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per norm.
 	}
-	foreach ( aw_kw_maps( array_keys( $out ) ) as $m ) {
-		$out[ $m['kw_id'] ][ 'category' === $m['kind'] ? 'categories' : 'sections' ][] = $m['value'];
+	return aw_kw_attach_maps( $out );
+}
+
+/**
+ * Records with a Sourcing or Press role that none of the lists names (an Include bit Search Insights' daily sync had not
+ * cleared yet, or one set on a Hindi word): the migration removes those roles, so the lists stay exactly as they are.
+ *
+ * @param array $plan The plan.
+ * @return array[] id => [label, roles].
+ */
+function aw_sourcing_cli_p2_stray( array $plan ) {
+	global $wpdb;
+	$k    = aw_si_table( 'keywords' );
+	$ids  = array_flip( array_filter( array_map( fn( $r ) => (int) $r['id'], $plan['records'] ) ) );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label, roles FROM {$k} WHERE roles & %d", AW_KW_WORKER_ROLES ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$out  = array();
+	foreach ( $rows as $r ) {
+		if ( ! isset( $ids[ (int) $r['id'] ] ) ) {
+			$out[ (int) $r['id'] ] = array( (string) $r['label'], (int) $r['roles'] );
+		}
 	}
 	return $out;
 }
@@ -190,6 +202,8 @@ function aw_sourcing_cli_p2_print( array $plan, array $report, $n, $total ) {
 	WP_CLI::log( 'Not English, so no Sourcing role (decision 13; kept as records for Search Insights): ' . ( $plan['hindi'] ? implode( ', ', array_map( fn( $h ) => $h[1] . ' (' . $h[0] . ')', $plan['hindi'] ) ) : '(none)' ) );
 	WP_CLI::log( 'Include and Exclude on one record: ' . ( $plan['conflicts'] ? implode( '; ', $plan['conflicts'] ) : '0' ) );
 	WP_CLI::log( 'Dismissed suggestions moved to the record: ' . count( $plan['dismissed'] ) );
+	$stray = aw_sourcing_cli_p2_stray( $plan );
+	WP_CLI::log( 'Records with a Sourcing role that no list names (the role is removed): ' . ( $stray ? implode( ', ', array_map( fn( $x ) => $x[0], $stray ) ) : '(none)' ) );
 	$cfg  = (array) get_option( 'aw_sources', array() );
 	$rel  = aw_relevance();
 	$cats = (array) ( $cfg['categories'] ?? array() );
@@ -263,6 +277,9 @@ function aw_sourcing_cli_p2_print( array $plan, array $report, $n, $total ) {
 	usort( $rows, fn( $a, $b ) => ( abs( $b['change'] ) <=> abs( $a['change'] ) ) ?: strcmp( $a['word'], $b['word'] ) );
 	WP_CLI\Utils\format_items( 'table', $rows, array( 'word', 'today', 'whole words', 'change', 'with *', '* added' ) );
 	WP_CLI::log( sprintf( '%d of %d words match differently; * added to %d: %s', count( array_filter( $rows, fn( $r ) => 0 !== $r['change'] ) ), count( $rows ), count( $plan['starred'] ), implode( ', ', array_map( fn( $w ) => $w . '*', array_keys( $plan['starred'] ) ) ) ) );
+	if ( $plan['not_starred'] ) {
+		WP_CLI::log( 'No * for these, as they are also Include or Exclude words (a spelling counts for every role): ' . implode( ', ', array_keys( $plan['not_starred'] ) ) );
+	}
 	return $cmp;
 }
 
@@ -280,6 +297,9 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 		WP_CLI::error( 'Phase 1 first (aw_sourcing_phase = ' . aw_sourcing_phase() . ').' );
 	}
 	$bk = '';
+	if ( ! $dry && get_option( 'aw_sourcing_phase2_record' ) ) {
+		WP_CLI::error( 'An unfinished phase 2 migration is recorded (aw_sourcing_phase2_record). Undo it first: wp aw-sourcing rollback --phase=2' );
+	}
 	if ( ! $dry ) {
 		list( $bk ) = aw_sourcing_cli_backup( 2, (string) get_option( 'aw_backup_latest_2', '' ) ); // refuses without a backup
 		WP_CLI::log( "Backup: $bk" );
@@ -312,7 +332,7 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 			'dismissed' => $r['dismissed'],
 			'src_note'  => $r['src'] ? (string) wp_json_encode( $r['src'], JSON_UNESCAPED_UNICODE ) : '',
 		);
-		$id     = (int) $r['id'];
+		$id     = (int) $r['id'] ? (int) $r['id'] : aw_kw_id_by_norm( $norm ); // Search Insights may have added it since the plan was read
 		if ( ! $id ) {
 			$id = aw_kw_create( $r['label'], $fields + array( 'lang' => $r['lang'] ) );
 			if ( ! $id ) {
@@ -347,8 +367,48 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 		aw_kw_map_set( $id, 'section', $r['sections'] );
 		$plan['records'][ $norm ]['id'] = $id;
 	}
+	foreach ( aw_sourcing_cli_p2_stray( $plan ) as $id => $x ) { // a Sourcing role no list names: removed, so the lists stay as they are
+		$old         = aw_kw_get( $id );
+		$undo[ $id ] = array(
+			'created'    => false,
+			'roles'      => (int) $old['roles'],
+			'variants'   => $old['variants'],
+			'query'      => (string) $old['query'],
+			'feed_id'    => (string) $old['feed_id'],
+			'search_on'  => (int) $old['search_on'],
+			'dismissed'  => (int) $old['dismissed'],
+			'src_note'   => (string) ( $old['src_note'] ?? '' ),
+			'categories' => $old['categories'],
+			'sections'   => $old['sections'],
+			'added'      => 0,
+		);
+		aw_kw_set_roles( $id, 0, AW_KW_WORKER_ROLES );
+	}
+	$record = array(
+		'at'      => current_time( 'mysql' ),
+		'backup'  => $bk,
+		'records' => $undo,
+		'hindi'   => $plan['hindi'],
+		'checks'  => $plan['checks'],
+		'kw_ids'  => array(),
+		'starred' => $plan['starred'],
+		'partial' => true, // until the options are written too
+	);
+	update_option( 'aw_sourcing_phase2_record', $record, false );
 	if ( $failed ) {
-		WP_CLI::warning( 'Not written: ' . implode( '; ', $failed ) );
+		WP_CLI::error( 'Not written: ' . implode( '; ', $failed ) . '. The options and the phase are unchanged; undo the records written: wp aw-sourcing rollback --phase=2' );
+	}
+	// The lists as the records give them now must be the lists the plan gave (nothing lost on the way).
+	$cfg0    = (array) get_option( 'aw_sources', array() );
+	$planned = array();
+	foreach ( $plan['records'] as $r ) {
+		$planned[] = $r;
+	}
+	$want               = aw_kw_mirrors( $planned );
+	$want['categories'] = aw_kw_categories_in_order( $want['categories'], (array) ( $cfg0['categories'] ?? array() ) );
+	$got                = aw_sourcing_cli_p2_mirrors( (array) ( $cfg0['categories'] ?? array() ) );
+	if ( $got !== $want ) {
+		WP_CLI::error( 'The lists rebuilt from the table are not the planned ones; nothing else was written. Undo the records: wp aw-sourcing rollback --phase=2' );
 	}
 
 	// The old options: mirrors, checks and keyword ids on the sources, press without Brave.
@@ -364,22 +424,10 @@ function aw_sourcing_cli_p2_migrate( $dry ) {
 	foreach ( AW_KW_PRESS_DROPPED as $k ) {
 		unset( $cfg['press'][ $k ] );
 	}
-	$m = aw_sourcing_cli_p2_mirrors( (array) ( $cfg['categories'] ?? array() ) );
-	aw_sourcing_cli_p2_write_mirrors( $m, $cfg );
-
-	update_option(
-		'aw_sourcing_phase2_record',
-		array(
-			'at'      => current_time( 'mysql' ),
-			'backup'  => $bk,
-			'records' => $undo,
-			'hindi'   => $plan['hindi'],
-			'checks'  => $plan['checks'],
-			'kw_ids'  => $kw_ids,
-			'starred' => $plan['starred'],
-		),
-		false
-	);
+	aw_sourcing_cli_p2_write_mirrors( $got, $cfg );
+	$record['kw_ids'] = $kw_ids;
+	unset( $record['partial'] );
+	update_option( 'aw_sourcing_phase2_record', $record, false );
 	update_option( 'aw_sourcing_phase', 2, false );
 	$log = array();
 	foreach ( $plan['lists'] as $k => $l ) {
@@ -560,8 +608,11 @@ function aw_sourcing_cli_p2_verify( $bk, array $old ) {
  */
 function aw_sourcing_cli_p2_rollback( $bk, array $old, array $assoc ) {
 	global $wpdb;
+	$rec = (array) get_option( 'aw_sourcing_phase2_record', array() );
+	if ( aw_sourcing_phase() < 2 && empty( $rec['partial'] ) ) {
+		WP_CLI::error( 'Phase 2 is not migrated (aw_sourcing_phase = ' . aw_sourcing_phase() . ').' );
+	}
 	WP_CLI::confirm( "Roll phase 2 back to backup $bk (records the migration created are deleted; keyword edits made since phase 2 are lost from the old lists)?", $assoc );
-	$rec  = (array) get_option( 'aw_sourcing_phase2_record', array() );
 	$k    = aw_si_table( 'keywords' );
 	$m    = aw_si_table( 'kw_map' );
 	$del  = 0;

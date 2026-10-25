@@ -115,10 +115,11 @@ function aw_si_drop_all(): void {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
-	// records with one of those stay, with Search Insights' own roles and figures cleared; the others are deleted.
+	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
 	$k = aw_si_table( 'keywords' );
 	$m = aw_si_table( 'kw_map' );
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$k} WHERE roles & %d = 0", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$keep = aw_kw_ready() ? " AND dismissed = 0 AND (src_note IS NULL OR src_note = '')" : ''; // a dismissed suggestion or a migrated spelling is the owner's too
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$k} WHERE roles & %d = 0{$keep}", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & %d, topic = '', priority = '', status = '', action = '', page = '', trends = NULL, impr28 = 0, clicks28 = 0, pos28 = NULL, pos_prev = NULL, live_pos = NULL, live_txt = '', live_date = NULL", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	if ( aw_kw_ready() ) {
 		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.

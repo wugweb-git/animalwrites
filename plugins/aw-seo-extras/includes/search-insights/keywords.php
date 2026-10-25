@@ -445,7 +445,7 @@ function aw_si_sync_roles(): array {
 	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise). From sourcing phase 2 the
 	// Include role is set on the records themselves (Settings → Sourcing → Keywords) and is never rebuilt here.
 	$sourcing = array();
-	if ( ! function_exists( 'aw_sourcing_phase' ) || aw_sourcing_phase() < 2 ) {
+	if ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: AW Sourcing may be off while this runs
 		$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & ~%d", AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
 		if ( $sourcing ) {

@@ -174,7 +174,17 @@ function aw_kw_rows( $mask = AW_KW_OWNER_ROLES, $en_only = false ) {
 	$sql .= ' ORDER BY id';
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name only; placeholders built above.
 	$rows = (array) $wpdb->get_results( $args ? $wpdb->prepare( $sql, $args ) : $sql, ARRAY_A );
-	$out  = array();
+	return aw_kw_attach_maps( $rows );
+}
+
+/**
+ * Rows decoded (aw_kw_decode) and given their category and section maps, by id.
+ *
+ * @param array $rows Rows as read.
+ * @return array[] id => record.
+ */
+function aw_kw_attach_maps( array $rows ) {
+	$out = array();
 	foreach ( $rows as $r ) {
 		$r               = aw_kw_decode( $r );
 		$r['categories'] = array();
@@ -202,13 +212,8 @@ function aw_kw_get( $id ) {
 	if ( ! $r ) {
 		return null;
 	}
-	$r               = aw_kw_decode( $r );
-	$r['categories'] = array();
-	$r['sections']   = array();
-	foreach ( aw_kw_maps( array( $r['id'] ) ) as $m ) {
-		$r[ 'category' === $m['kind'] ? 'categories' : 'sections' ][] = $m['value'];
-	}
-	return $r;
+	$out = aw_kw_attach_maps( array( $r ) );
+	return reset( $out );
 }
 
 /**

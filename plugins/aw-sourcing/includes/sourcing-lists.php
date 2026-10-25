@@ -546,7 +546,7 @@ add_filter(
 			if ( ! empty( $s['filter'] ) ) {
 				$s['keywords'] = $words; // one keyword list: the Keywords tab's include and animal words
 			}
-			unset( $s['on'], $s['filter'], $s['check'], $s['keyword_id'] ); // check and keyword_id (phase 2) are for sources_v2 only
+			unset( $s['on'], $s['filter'], $s['check'], $s['keyword_id'] ); // phase 2 keys (stored by the migration): sent in sources_v2 from S2b's policy, never in v1
 			$sources[] = $s;
 		}
 		// Search words: the Keywords tab's Include list. Each English one is a Google News search per run; the animal words

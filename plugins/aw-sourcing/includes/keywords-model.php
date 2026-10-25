@@ -24,11 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The old lists and the role each gives: list key => [role bit, where it lives, label]. */
 const AW_KW_LISTS = array(
-	'strong'  => array( 1, 'aw_relevance.strong', 'Include' ),
-	'animal'  => array( 32, 'aw_relevance.animal', 'Animal' ),
-	'context' => array( 64, 'aw_relevance.context', 'Context' ),
-	'exclude' => array( 128, 'aw_relevance.exclude', 'Exclude' ),
-	'press'   => array( 512, 'aw_sources.press.queries', 'Press queries' ),
+	'strong'  => array( AW_KW_ROLE_INCLUDE, 'aw_relevance.strong', 'Include' ),
+	'animal'  => array( AW_KW_ROLE_ANIMAL, 'aw_relevance.animal', 'Animal' ),
+	'context' => array( AW_KW_ROLE_CONTEXT, 'aw_relevance.context', 'Context' ),
+	'exclude' => array( AW_KW_ROLE_EXCLUDE, 'aw_relevance.exclude', 'Exclude' ),
+	'press'   => array( AW_KW_ROLE_PRESS, 'aw_sources.press.queries', 'Press queries' ),
 );
 
 /** The category the lab check words belong to, and the lab words no category list had (owner's decision 5). */
@@ -81,7 +81,10 @@ function aw_kw_open_searches( array $sources ) {
 			parse_str( (string) parse_url( (string) $s['url'], PHP_URL_QUERY ), $q ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- pure function
 			$label = trim( (string) preg_replace( '/\bwhen:\S+|\bIndia\b|["()]/i', ' ', (string) ( $q['q'] ?? '' ) ) );
 		}
-		$out[ (string) $s['id'] ] = trim( (string) preg_replace( '/\s+/', ' ', $label ) );
+		$label = trim( (string) preg_replace( '/\s+/', ' ', $label ) );
+		if ( '' !== aw_si_norm( $label ) ) { // a search with no words of its own stays a feed
+			$out[ (string) $s['id'] ] = $label;
+		}
 	}
 	return $out;
 }
@@ -578,13 +581,18 @@ function aw_kw_word_report( array $words, array $texts ) {
  * @return array The plan, with `starred` (word => norm).
  */
 function aw_kw_plan_add_stars( array $plan, array $report ) {
-	$plan['starred'] = array();
+	$plan['starred']     = array();
+	$plan['not_starred'] = array();
 	foreach ( $report as $w => $r ) {
 		if ( empty( $r[3] ) ) {
 			continue;
 		}
 		$n = aw_si_norm( (string) $w );
 		if ( ! isset( $plan['records'][ $n ] ) || ! ( $plan['records'][ $n ]['roles'] & AW_KW_ROLE_CATEGORY ) ) {
+			continue;
+		}
+		if ( $plan['records'][ $n ]['roles'] & ( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_EXCLUDE ) ) { // a spelling counts for every role: never widen Include or Exclude
+			$plan['not_starred'][ (string) $w ] = $n;
 			continue;
 		}
 		$plan['records'][ $n ]['variants'] = aw_kw_variants_list( array_merge( $plan['records'][ $n ]['variants'], array( mb_strtolower( (string) $w ) . '*' ) ) );
