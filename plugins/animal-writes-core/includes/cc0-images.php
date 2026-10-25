@@ -410,17 +410,25 @@ function aw_source_pdf_cover( $post_id ) {
 
 /**
  * Download a picture to a temporary file. Not core download_url(): it fails fatally on a content-type header sent
- * twice (it indexes an array with it), which some publishers' CDNs do.
+ * twice (it indexes an array with it), which some publishers' CDNs do. Publisher, CC0, press and enrichment pictures
+ * use it (plugin audit 22). Like download_url(), only public addresses are fetched (wp_safe_remote_get). A file cut off
+ * at $max is refused, never kept half.
  *
+ * @param string $url     Address.
+ * @param int    $timeout Seconds.
+ * @param int    $max     Largest file accepted, in bytes.
  * @return string|WP_Error Temporary file path.
  */
-function aw_source_download( $url ) {
-	$r = wp_remote_get( $url, array( 'timeout' => 30, 'redirection' => 5, 'user-agent' => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'limit_response_size' => 15 * MB_IN_BYTES ) );
+function aw_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES ) {
+	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'limit_response_size' => (int) $max ) );
 	if ( is_wp_error( $r ) ) {
 		return $r;
 	}
 	if ( 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
 		return new WP_Error( 'aw_http', 'HTTP ' . (int) wp_remote_retrieve_response_code( $r ) );
+	}
+	if ( strlen( (string) wp_remote_retrieve_body( $r ) ) >= (int) $max ) {
+		return new WP_Error( 'aw_too_big', 'over ' . size_format( (int) $max ) );
 	}
 	if ( ! function_exists( 'wp_tempnam' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -859,7 +867,7 @@ function aw_cc0_sideload( $post_id, $x, $q, &$used ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
-	$tmp = download_url( $x['url'], 40 );
+	$tmp = aw_source_download( $x['url'], 40, 26 * MB_IN_BYTES ); // over 25 MB is refused below
 	if ( is_wp_error( $tmp ) ) {
 		aw_cc0_log( '#' . $post_id . ' download failed: ' . $x['url'] . ' (' . $tmp->get_error_message() . ')' );
 		return 0;
