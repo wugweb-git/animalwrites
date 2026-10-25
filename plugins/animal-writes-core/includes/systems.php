@@ -254,8 +254,9 @@ function aw_filter_values( $ids, $source ) {
 
 /**
  * Published items of a type matching a set of filters (IDs), for the filter counts. Cached in a transient per type and
- * filter set (audit item 3, owner 25 Oct 2026): the plain list and one-value filters only, so crawlers walking filter
- * combinations cannot fill wp_options. A save, trash or status change of an item of the type starts a new generation.
+ * filter set (audit item 3, owner 25 Oct 2026): the plain list and one-value filters only, and never an empty result,
+ * so crawlers walking filter combinations or made-up values cannot fill wp_options. A save, trash, delete or status
+ * change of an item of the type starts a new generation.
  *
  * @param string $type   Post type.
  * @param array  $active Filters: param => value slugs.
@@ -273,7 +274,7 @@ function aw_filter_ids( $type, $active ) {
 	}
 	list( $tq, $mq, $in ) = aw_filter_clauses( $type, $active );
 	$ids = array_map( 'intval', get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'tax_query' => $tq, 'meta_query' => $mq ) + ( null === $in ? array() : array( 'post__in' => $in ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
-	if ( $cache ) {
+	if ( $cache && ( $ids || ! $active ) ) { // an empty result (an unknown value in the address) is not kept
 		set_transient( $key, $ids, 12 * HOUR_IN_SECONDS );
 	}
 	return $ids;
@@ -295,7 +296,7 @@ function aw_filter_ids_flush( $post_id ) {
 	$bump();
 	add_action( 'shutdown', $bump );
 }
-foreach ( array( 'save_post', 'wp_after_insert_post', 'trashed_post', 'untrashed_post', 'deleted_post', 'set_object_terms' ) as $aw_hook ) {
+foreach ( array( 'save_post', 'wp_after_insert_post', 'trashed_post', 'untrashed_post', 'delete_post', 'set_object_terms' ) as $aw_hook ) {
 	add_action( $aw_hook, 'aw_filter_ids_flush' ); // set_object_terms: the post ID is the first argument too
 }
 add_action( 'transition_post_status', fn( $new, $old, $post ) => $new !== $old ? aw_filter_ids_flush( $post->ID ) : null, 10, 3 );
