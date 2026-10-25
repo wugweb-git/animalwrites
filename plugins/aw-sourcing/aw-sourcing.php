@@ -47,6 +47,7 @@ require_once AW_SOURCING_DIR . 'includes/same-story.php';
 require_once AW_SOURCING_DIR . 'includes/summary-rewrite.php';
 require_once AW_SOURCING_DIR . 'includes/news-titles.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment.php';
+require_once AW_SOURCING_DIR . 'includes/enrichment-cleanup.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-admin.php';
 require_once AW_SOURCING_DIR . 'includes/enrichment-front.php';
 require_once AW_SOURCING_DIR . 'includes/review-queue.php';

@@ -197,7 +197,7 @@ add_action(
 		if ( 'approve_high' === $do ) {
 			global $wpdb;
 			list( $where, $args ) = aw_enrich_where( array_merge( wp_unslash( $_REQUEST ), array( 'status' => 'pending', 'confidence' => 'high' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT e.id FROM ' . aw_enrich_table() . " e WHERE {$where}", $args ) ) ); // phpcs:ignore WordPress.DB
+			$ids = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT e.id FROM ' . aw_enrich_table() . " e WHERE {$where} AND e.field <> 'merge_into'", $args ) ) ); // phpcs:ignore WordPress.DB -- merges are approved one by one
 			$do  = 'approve';
 		}
 		$done = 0;
@@ -259,6 +259,15 @@ function aw_enrich_where( $q ) {
 
 /** A value for the table. */
 function aw_enrich_show( $field, $v ) {
+	if ( 'place' === $field ) {
+		return esc_html( '' !== $v && array() !== $v ? aw_enrich_place_label( $v ) : '' );
+	}
+	if ( 'merge_into' === $field ) {
+		if ( is_array( $v ) ) { // an applied merge's undo record: nothing was there before
+			return '';
+		}
+		return (int) $v ? '<a href="' . esc_url( (string) get_edit_post_link( (int) $v ) ) . '">#' . (int) $v . ' ' . esc_html( html_entity_decode( get_the_title( (int) $v ), ENT_QUOTES ) ) . '</a>' : '';
+	}
 	if ( 'hours' === $field && is_array( $v ) ) {
 		return esc_html( implode( '; ', array_map( fn( $r ) => ( $r['day'] ?? '' ) . ' ' . ( ! empty( $r['closed'] ) ? 'closed' : ( $r['open'] ?? '' ) . '–' . ( $r['close'] ?? '' ) ), $v ) ) );
 	}
