@@ -9,7 +9,7 @@
 
 $doc = get_page_by_path( 'draft-laboratory-animals-rules-2026', OBJECT, 'aw_legal' );
 if ( ! $doc ) {
-	WP_CLI::error( 'Library item draft-laboratory-animals-rules-2026 not found (run campaign2-library.php first)' );
+	WP_CLI::error( 'Library item draft-laboratory-animals-rules-2026 not found (it was made by tools/content/campaign2-library.php, in git history)' );
 }
 $lib_draft = home_url( '/library/draft-laboratory-animals-rules-2026/' );
 $lib_1998  = home_url( '/library/breeding-experiments-animals-rules-1998/' );

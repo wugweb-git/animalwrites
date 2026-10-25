@@ -177,21 +177,3 @@ add_filter(
 // The share plugin's heading comes straight after the page title: h2, so no level is skipped.
 add_filter( 'scriptlesssocialsharing_heading_element', fn() => 'h2' );
 
-/**
- * End of an article: its tags bottom left (crawlable text links) and the share buttons bottom right, one row.
- * Printed by [kits_endbar] at the end of the single templates (news has no post content, so not on the_content).
- */
-function kits_endbar( $id = 0 ) {
-	$id    = $id ? (int) $id : get_the_ID();
-	$tax   = (string) apply_filters( 'kits_endbar_taxonomy', 'category', get_post_type( $id ) );
-	$tags  = get_the_term_list( $id, $tax, '<div class="kit-endbar-tags wp-block-post-terms taxonomy-' . esc_attr( $tax ) . '">', '', '</div>' );
-	$tags  = is_wp_error( $tags ) ? '' : (string) $tags;
-	$share = function_exists( 'aw_share_html' ) && in_array( get_post_type( $id ), (array) apply_filters( 'kits_endbar_share_types', array() ), true ) ? aw_share_html( $id ) : ''; // the Kits share bar (share.php): X, Facebook, LinkedIn, WhatsApp, Email, Copy link
-	$before = (string) apply_filters( 'kits_endbar_before', '' ); // anything a site prints before the end bar
-	$after  = (string) apply_filters( 'kits_endbar_after', '' ); // or after it
-	if ( '' === $tags . $share ) {
-		return $before . $after;
-	}
-	return $before . '<div class="kit-endbar' . ( '' === $tags ? ' kit-endbar--share-only' : '' ) . '">' . $tags . ( $share ? '<div class="kit-endbar-share">' . $share . '</div>' : '' ) . '</div>' . $after;
-}
-add_shortcode( 'kits_endbar', fn() => is_singular() ? kits_endbar( get_queried_object_id() ) : '' );

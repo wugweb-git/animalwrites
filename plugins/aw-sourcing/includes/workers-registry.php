@@ -28,7 +28,7 @@ const AW_WORKERS = array(
 	),
 	'summary-rewrite.yml'      => array(
 		'name'         => 'Summaries: rewrite those that break the current rules',
-		'what'         => 'Rewrites summaries that break Settings → Sourcing → Summary rules; starts its next run while items remain',
+		'what'         => 'Rewrites summaries that break Settings → Sourcing → Rules → Summary rules; starts its next run while items remain',
 		'crons'        => array( '7,37 * * * *' ),
 		'interval_min' => 30,
 		'timeout_min'  => 50,

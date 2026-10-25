@@ -245,32 +245,6 @@ function aw_list_page( $type, $term_page ) {
 }
 
 /**
- * [aw_stats] Live counts for the homepage hero: organisations, states and UTs covered, legal updates, guides and documents.
- * Cached for an hour.
- */
-add_shortcode(
-	'aw_stats',
-	function () {
-		$stats = get_transient( 'aw_stats' );
-		if ( false === $stats ) {
-			$states = array_filter( aw_place_states(), 'aw_place_count' );
-			$stats  = array(
-				array( aw_listing_public_count(), 'organisations listed', '/directory/' ),
-				array( count( $states ), 'states and UTs covered', '/directory/' ),
-				array( (int) wp_count_posts( 'aw_legal' )->publish, 'official documents and templates', '/library/' ),
-				array( (int) wp_count_posts( 'post' )->publish, 'guides and resources', '/resources/' ),
-			);
-			set_transient( 'aw_stats', $stats, HOUR_IN_SECONDS );
-		}
-		$out = '<ul class="aw-stats" aria-label="Animal Writes in numbers">';
-		foreach ( $stats as $s ) {
-			$out .= '<li><a href="' . esc_url( $s[2] ) . '"><strong>' . esc_html( number_format_i18n( $s[0] ) ) . '</strong> <span>' . esc_html( $s[1] ) . '</span></a></li>';
-		}
-		return $out . '</ul>';
-	}
-);
-
-/**
  * [aw_find_help] Directory discovery for the home page (the section heading is a core Heading in the pattern): the total,
  * a search box whose state picker lists every state and union territory, and the twelve states with the most
  * organisations in the Directory's own state index style, with a link to all of them (owner, 18 Oct 2026).

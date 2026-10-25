@@ -1,11 +1,12 @@
 <?php
 /**
- * Claim or update a directory listing: [aw_claim_box] on each listing.
+ * Claim or update a directory listing: /claim/?listing=<ID> (form-blocks.php) shows the Fluent Forms form "Claim this
+ * listing", the only claim form since 25 Oct 2026 (owner: the site's own form and its handler were removed). Claims are
+ * Fluent Forms entries; the logo and proof uploads use aw_claim_logo_ok() and aw_claim_logo_store() below.
  *
- * Requests are private aw_claim posts, readable by administrators only. An administrator
- * reviews current against proposed values and approves, which applies the changes and marks
- * the listing verified today (and features it, free, when the claimant asked), or rejects. Nothing changes on the
- * public listing until then.
+ * Claims sent before Fluent Forms are private aw_claim posts (still registered so they stay readable), administrators
+ * only. An administrator reviews current against proposed values and approves, which applies the changes and marks
+ * the listing verified today, or rejects. Nothing changes on the public listing until then.
  *
  * @package animal-writes-core
  */
@@ -58,24 +59,6 @@ add_action(
 	}
 );
 
-/**
- * The claim form (S7.2): step 1 "About you", step 2 "What should change" (all optional; empty keeps what is shown).
- *
- * @param WP_Post $listing Listing.
- * @return string
- */
-/** Services as tick boxes from the fixed list; the listing's current services start ticked. */
-function aw_claim_services_field( $form, $listing ) {
-	$state = aw_form_state( $form );
-	$kept  = isset( $state['values']['aw_services'] ) ? explode( ',', (string) $state['values']['aw_services'] ) : wp_list_pluck( aw_item_tags( $listing->ID, aw_service_slugs() ), 'slug' );
-	$kept  = is_wp_error( $kept ) ? array() : $kept;
-	$boxes = '';
-	foreach ( AW_SERVICES as $slug => $name ) {
-		$boxes .= '<label class="kit-checkbox"><input type="checkbox" name="aw_services[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, $kept, true ), true, false ) . '> ' . esc_html( $name ) . '</label>';
-	}
-	return '<fieldset class="kit-field kit-check-group aw-claim-services"><legend>Services</legend>' . $boxes . '</fieldset>';
-}
-
 /** What a listing shows now for a claim field: phones from the Phone numbers list, the rest from its meta. */
 function aw_claim_current( $lid, $key ) {
 	if ( 'aw_phone' === $key || 'aw_whatsapp' === $key ) {
@@ -84,77 +67,9 @@ function aw_claim_current( $lid, $key ) {
 	return (string) get_post_meta( $lid, $key, true );
 }
 
+/** The claim form for a listing: the Fluent Forms form. */
 function aw_claim_form( $listing ) {
-	$ff = apply_filters( 'aw_form_html', '', 'claim', array( 'listing' => $listing ) ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
-	if ( '' !== $ff ) {
-		return $ff;
-	}
-	$form = 'aw_claim';
-	$about  = kits_dict_field( $form, 'name', array( 'required' => true ) )
-		. kits_dict_field( $form, 'role', array( 'options' => AW_CLAIM_ROLES ) )
-		. kits_dict_field( $form, 'email', array( 'hint' => 'We use this only to check this request. It is not shown on the page.' ) )
-		. kits_dict_field( $form, 'phone' );
-	$cur    = fn( $k ) => aw_claim_current( $listing->ID, $k );
-	$keep   = fn( $k ) => array( 'placeholder' => '' !== $cur( $k ) ? $cur( $k ) : 'Not listed' );
-	$change = '<p class="kit-field-hint">Leave a field empty to keep what is shown now.</p>'
-		. kits_dict_field( $form, 'phone', array( 'name' => 'aw_phone', 'attrs' => $keep( 'aw_phone' ) ) )
-		. kits_dict_field( $form, 'whatsapp', array( 'name' => 'aw_whatsapp', 'attrs' => $keep( 'aw_whatsapp' ) ) )
-		. kits_dict_field( $form, 'email', array( 'name' => 'aw_email', 'label' => 'Public email', 'required' => false, 'attrs' => $keep( 'aw_email' ) ) )
-		. kits_dict_field( $form, 'website', array( 'name' => 'aw_website', 'attrs' => $keep( 'aw_website' ) ) )
-		. kits_dict_field( $form, 'area', array( 'name' => 'aw_area', 'attrs' => $keep( 'aw_area' ) ) )
-		. aw_claim_services_field( $form, $listing )
-		. kits_dict_field( $form, 'logo', array( 'hint' => 'PNG, JPG or WebP, up to 2 MB.' ) )
-		. aw_field( $form, array( 'name' => 'notes', 'label' => 'Anything else we should change', 'type' => 'textarea', 'hint' => 'For example a new address area, a closed branch or a wrong name.', 'attrs' => array( 'maxlength' => 1000, 'rows' => 3 ) ) )
-		. ( function_exists( 'aw_nl_optin_box' ) ? aw_nl_optin_box( $form ) : '' );
-	return aw_form_open( $form, array( 'enctype' => 'multipart/form-data', 'class' => 'kit-form aw-claim-form', 'id' => 'aw-form-aw_claim', 'data-key' => (string) $listing->ID, 'data-source' => trim( wp_make_link_relative( (string) get_permalink( $listing ) ), '/' ) ) )
-		. '<input type="hidden" name="listing" value="' . esc_attr( (string) $listing->ID ) . '">'
-		. kits_form_steps( array( array( 'About you', $about ), array( 'What should change', $change ) ), 'Send for review' )
-		. '</form>';
-}
-
-/** Back-compat: [aw_claim_box] prints the claim form of the current listing. */
-add_shortcode( 'aw_claim_box', fn() => get_post() ? aw_claim_form( get_post() ) : '' );
-
-/** A claim's values from submitted data (already unslashed): the site's form and Fluent Forms use this. */
-function aw_claim_values( $in ) {
-	$v = array(
-		'name'  => trim( sanitize_text_field( (string) ( $in['name'] ?? '' ) ) ),
-		'role'  => sanitize_key( (string) ( $in['role'] ?? '' ) ),
-		'email' => aw_clean_email( sanitize_text_field( (string) ( $in['email'] ?? '' ) ) ),
-		'phone' => trim( sanitize_text_field( (string) ( $in['phone'] ?? '' ) ) ),
-		'notes' => sanitize_textarea_field( (string) ( $in['notes'] ?? '' ) ),
-	);
-	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
-		$raw       = 'aw_services' === $key ? implode( ',', array_intersect( array_map( 'sanitize_title', (array) ( $in['aw_services'] ?? array() ) ), array_keys( AW_SERVICES ) ) ) : (string) ( $in[ $key ] ?? '' );
-		$v[ $key ] = 'aw_website' === $key ? esc_url_raw( kits_clean_url( $raw ) ) : ( 'phone' === $def[1] ? trim( sanitize_text_field( $raw ) ) : sanitize_text_field( $raw ) );
-		if ( 'aw_website' === $key && '' !== trim( $raw ) && '' === $v[ $key ] ) {
-			$v[ $key ] = trim( $raw ); // Keep what they typed so validation can say what is wrong.
-		}
-	}
-	return $v;
-}
-
-/** Server rules for a claim: field => message. $has_logo: a logo came with it (its file is checked separately). */
-function aw_claim_errors( $v, $has_logo = false ) {
-	$rules  = array( 'name' => array( 'required', 'max:80' ), 'role' => array( 'required' ), 'email' => array( 'required', 'email' ), 'phone' => array( 'phone' ), 'notes' => array( 'max:1000' ) );
-	$labels = array( 'name' => 'Your name', 'role' => 'Your role here', 'email' => 'Your email', 'phone' => 'Your phone', 'notes' => 'Anything else' );
-	foreach ( AW_CLAIM_FIELDS as $key => $def ) {
-		$rules[ $key ]  = array( $def[1] );
-		$labels[ $key ] = $def[0];
-	}
-	$errors = aw_form_validate( $rules, $v, $labels, array( 'name' => array( 'required' => 'Enter your name' ), 'role' => array( 'required' => 'Choose your role' ) ) );
-	if ( $v['role'] && ! isset( AW_CLAIM_ROLES[ $v['role'] ] ) ) {
-		$errors['role'] = 'Choose your role';
-	}
-	if ( ! $errors && ! aw_claim_proposed( $v ) && ! $has_logo && '' === $v['notes'] ) {
-		$errors['notes'] = 'Anything else: tell us at least one detail to confirm or change.';
-	}
-	return $errors;
-}
-
-/** The listing changes a claim asks for (empty fields keep what is shown). */
-function aw_claim_proposed( $v ) {
-	return array_filter( array_intersect_key( $v, AW_CLAIM_FIELDS ), fn( $x ) => '' !== $x );
+	return aw_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
 /** Is the uploaded logo a PNG, JPG or WebP under 2 MB? */
@@ -175,78 +90,6 @@ function aw_claim_logo_store( $tmp, $name = '' ) {
 	$saved = $editor->save( aw_private_dir() . '/' . $name, 'image/png' );
 	return is_wp_error( $saved ) ? '' : $name;
 }
-
-/**
- * Save a checked claim for review, email the team, and add the claimant to the newsletter when the box is ticked.
- *
- * @param array   $v       Values.
- * @param WP_Post $listing Listing.
- * @param string  $file    Logo file name in the private folder, or ''.
- * @return array|false array{url, title, text}, or false when it could not be saved.
- */
-function aw_claim_save( $v, $listing, $file, $source, $nl, $nl_consent = null ) {
-	$proposed = aw_claim_proposed( $v );
-	$id       = wp_insert_post(
-		array( 'post_type' => 'aw_claim', 'post_status' => 'private', 'post_title' => $listing->post_title . ': ' . $v['name'] ),
-		true
-	);
-	if ( is_wp_error( $id ) ) {
-		return false;
-	}
-	update_post_meta( $id, 'aw_c_listing', $listing->ID );
-	update_post_meta( $id, 'aw_c_status', 'pending' );
-	foreach ( array( 'name', 'role', 'email', 'phone', 'notes' ) as $k ) {
-		update_post_meta( $id, 'aw_c_' . $k, $v[ $k ] );
-	}
-	update_post_meta( $id, 'aw_c_logo', $file );
-	update_post_meta( $id, 'aw_c_source', $source ); // the page it came from (S5.8)
-	foreach ( array( 'aw_phone', 'aw_whatsapp' ) as $pk ) { // phones as 10 digits
-		if ( isset( $proposed[ $pk ] ) && kits_clean_phone( $proposed[ $pk ] ) ) {
-			$proposed[ $pk ] = kits_clean_phone( $proposed[ $pk ] );
-		}
-	}
-	update_post_meta( $id, 'aw_c_proposed', $proposed );
-	wp_mail( 'contact@animalwrites.in', 'Listing claim: ' . $listing->post_title, "Someone asked to claim or update a directory listing.\nListing: {$listing->post_title}\nReview it in WP Admin > Listing claims." );
-	if ( function_exists( 'aw_nl_optin' ) ) {
-		null === $nl_consent ? aw_nl_optin( $v['email'], $v['name'], 'claim', $nl ) : aw_nl_optin( $v['email'], $v['name'], 'claim', $nl, $nl_consent );
-	}
-	$text = sprintf( 'We\'ll check it and email you at %s.', $v['email'] );
-	return array( 'url' => kits_thanks_url( 'claim', array( 'listing' => (int) $listing->ID, 'from' => false ), 'Request sent.', $text ), 'title' => 'Request sent.', 'text' => $text );
-}
-
-/**
- * Handle a claim.
- */
-function aw_claim_submit() {
-	$form    = 'aw_claim';
-	$listing = get_post( (int) ( $_POST['listing'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$lid     = $listing ? (int) $listing->ID : 0;
-	$back    = aw_claim_url( $lid ); // errors: back to /claim/?listing=<ID>, details kept
-	$done    = kits_thanks_url( 'claim', array( 'listing' => $lid, 'from' => false ) );
-	$rl      = aw_form_guard( $form, $back, 'claim', $done );
-	if ( ! $listing || 'aw_listing' !== $listing->post_type || 'publish' !== $listing->post_status ) {
-		aw_form_fail( $form, array(), array(), $back, 'claim', 'This listing could not be found.' );
-	}
-	$v        = aw_claim_values( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_form_guard()
-	$logo     = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$has_logo = $logo && UPLOAD_ERR_NO_FILE !== (int) $logo['error'];
-	$errors   = aw_claim_errors( $v, $has_logo );
-	if ( $has_logo && ! aw_claim_logo_ok( $logo ) ) {
-		$errors['logo'] = 'Use a PNG, JPG or WebP under 2 MB.';
-	}
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'claim' );
-	}
-	$file = $has_logo ? aw_claim_logo_store( $logo['tmp_name'] ) : '';
-	$res  = aw_claim_save( $v, $listing, $file, kits_submitted_source(), ! empty( $_POST['nl_optin'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( ! $res ) {
-		aw_form_fail( $form, array(), $v, $back, 'claim', aw_form_generic_error( $form ) );
-	}
-	aw_form_count( $rl );
-	aw_form_success( $res['url'], $res['title'], $res['text'] );
-}
-add_action( 'admin_post_nopriv_aw_claim', 'aw_claim_submit' );
-add_action( 'admin_post_aw_claim', 'aw_claim_submit' );
 
 /* ---------- Admin review ---------- */
 

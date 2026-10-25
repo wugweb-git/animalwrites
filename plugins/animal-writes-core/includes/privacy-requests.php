@@ -20,57 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The form. */
+/** [aw_remove_data]: the Fluent Forms form "Remove my data" (the site's own form and its handler were removed, owner
+ *  25 Oct 2026). */
 function aw_remove_data_form() {
-	$done = sanitize_key( wp_unslash( $_GET['aw_done'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	if ( 'rd_check' === $done ) {
-		$to = sanitize_email( wp_unslash( $_GET['to'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		return '<div class="kit-form-done" role="status" tabindex="-1"><p class="aw-form-done-title">Request received</p><p>' . esc_html( sprintf( 'We\'ll email %s to confirm it before removing anything.', $to ) ) . '</p></div>';
-	}
-	$ff = apply_filters( 'aw_form_html', '', 'remove_data', array() ); // the Fluent Forms version when it is set up (forms-fluentforms.php)
-	if ( '' !== $ff ) {
-		return $ff;
-	}
-	$form  = 'aw_remove_data';
-	$html  = aw_form_open( $form, array( 'class' => 'kit-form aw-remove-data-form' ) );
-	$html .= kits_dict_field( $form, 'email' );
-	$html .= '<button type="submit" class="kit-btn">Send confirmation link</button></form>';
-	return $html;
+	return aw_ff_form( 'remove_data' );
 }
 add_shortcode( 'aw_remove_data', 'aw_remove_data_form' );
-
-/**
- * The site's own form (shown only when Fluent Forms is off): the request is kept as a contact message tagged "Data
- * removal" for the owner, who then starts it in Tools → Erase Personal Data. Nothing is created or erased here.
- *
- * @return array array{url, title, text} for the thank-you page.
- */
-function aw_remove_data_save( $email ) {
-	$id = wp_insert_post( array( 'post_type' => 'aw_message', 'post_status' => 'private', 'post_title' => 'Remove my data: ' . $email, 'post_content' => 'Remove my data (the site\'s own form). Start it in Tools → Erase Personal Data.' ) );
-	if ( $id && ! is_wp_error( $id ) ) {
-		update_post_meta( $id, 'aw_m_email', $email );
-		update_post_meta( $id, 'aw_m_about', 'remove-data' );
-		update_post_meta( $id, 'aw_m_tag', 'Data removal' );
-	}
-	$text = sprintf( 'We\'ll email %s to confirm it before removing anything.', $email );
-	return array( 'url' => kits_thanks_url( 'remove-data', array(), 'Request received', $text ), 'title' => 'Request received', 'text' => $text );
-}
-
-function aw_remove_data_submit() {
-	$form = 'aw_remove_data';
-	$back = aw_form_back( '/remove-my-data/' );
-	$rl   = aw_form_guard( $form, $back, 'remove-data', kits_thanks_url( 'remove-data' ), 3 );
-	$v    = array( 'email' => aw_clean_email( sanitize_text_field( wp_unslash( $_POST['email'] ?? '' ) ) ) );
-	$errors = aw_form_validate( array( 'email' => array( 'required', 'email' ) ), $v, array( 'email' => 'Email' ) );
-	if ( $errors ) {
-		aw_form_fail( $form, $errors, $v, $back, 'remove-data' );
-	}
-	$res = aw_remove_data_save( $v['email'] );
-	aw_form_count( $rl );
-	aw_form_success( $res['url'], $res['title'], $res['text'] );
-}
-add_action( 'admin_post_nopriv_aw_remove_data', 'aw_remove_data_submit' );
-add_action( 'admin_post_aw_remove_data', 'aw_remove_data_submit' );
 
 /* ---------- Erasers (one per place we keep a person's details) ---------- */
 
@@ -107,7 +62,7 @@ add_filter(
 				return array( 'items_removed' => (bool) $ids, 'items_retained' => false, 'messages' => array(), 'done' => true );
 			},
 		);
-		// Contact messages (owner, 16 Oct 2026): the site's form and incoming email both keep the sender in aw_m_email.
+		// Contact messages (owner, 16 Oct 2026): the old contact form and incoming email both kept the sender in aw_m_email.
 		// Matched without regard to case; the message, anything attached to it, and its Fluent Forms copy (the
 		// aw-fluentforms eraser) go. Only the number removed is logged.
 		$erasers['aw-messages'] = array(

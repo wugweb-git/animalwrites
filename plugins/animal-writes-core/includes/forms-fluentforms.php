@@ -16,7 +16,8 @@
  *   (transactional, tag claimant); every contact gets the newsletter box as 1/0 ("Newsletter box (last form)"); a
  *   volunteer's State, District and PIN code from the LGD picker go into their Volunteer fields.
  * - The site's look on Fluent Forms fields (icons, tick-box styles, the browser rules kit.js checks with).
- * - aw_form_html shows the Fluent Forms form in the place of the site's own one (kept for Fluent Forms off).
+ * - aw_ff_form() shows each form. Fluent Forms is the only form since 25 Oct 2026 (owner): the site's own forms and
+ *   their submit handlers were removed, so a missing form shows nothing to visitors and a short note to administrators.
  * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (aw_ff_mail_off).
  *
  * @package animal-writes-core
@@ -62,12 +63,10 @@ const AW_FF_FORMS  = array(
 	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
 	'remove_data' => array( 'title' => 'Remove my data', 'thanks' => 'remove-data', 'limit' => 3 ),
 );
-/** Consent version for the newsletter box on Contact and Claim (owner, 16 Oct 2026: ticked by default). */
-const AW_FF_NL_CONSENT = 'v2-optin-preticked-1';
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
 const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token' );
 
-/** The Fluent Forms form ID for a form key, or 0 (Fluent Forms off, or the form not set up: the site's own form shows). */
+/** The Fluent Forms form ID for a form key, or 0 (Fluent Forms off, or the form not set up: nothing shows). */
 function aw_ff_id( $key ) {
 	if ( ! defined( 'FLUENTFORM' ) ) {
 		return 0;
@@ -100,30 +99,41 @@ function aw_ff_ctx( $k = null ) {
 
 /* ---------- Showing the form ---------- */
 
-/** The Fluent Forms form in the place of the site's own one (same wrapper classes, so the same look and analytics). */
-add_filter(
-	'aw_form_html',
-	function ( $html, $key, $ctx ) {
-		$id = aw_ff_id( $key );
-		if ( ! $id ) {
-			return $html;
-		}
-		$GLOBALS['aw_ff_ctx'] = (array) $ctx + array( 'key' => $key );
-		$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
-		$GLOBALS['aw_ff_ctx'] = array();
-		$attrs                = '';
-		if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
-			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
-		}
-		$listing = $ctx['listing'] ?? null;
-		if ( $listing ) {
-			$attrs .= ' data-key="' . esc_attr( (string) $listing->ID ) . '"';
-		}
-		return '<div class="kit-form aw-form-ff aw-' . esc_attr( str_replace( '_', '-', $key ) ) . '-form" data-kit-form="' . esc_attr( $key ) . '"' . $attrs . '>' . $form . '</div>';
-	},
-	10,
-	3
-);
+/**
+ * A form, as Fluent Forms renders it, in the site's wrapper (the same classes, so the same look and analytics).
+ * Without Fluent Forms or the form's ID (wp aw ff-form): nothing for visitors, a short note for administrators.
+ *
+ * @param string $key Form key (AW_FF_FORMS).
+ * @param array  $ctx What the form is shown for: listing, item, reason, source, vol_contact.
+ * @return string
+ */
+function aw_ff_form( $key, $ctx = array() ) {
+	$id = aw_ff_id( $key );
+	if ( ! $id ) {
+		return aw_ff_missing( AW_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
+	}
+	$GLOBALS['aw_ff_ctx'] = (array) $ctx + array( 'key' => $key );
+	$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
+	$GLOBALS['aw_ff_ctx'] = array();
+	$attrs                = '';
+	if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
+		$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
+	}
+	$listing = $ctx['listing'] ?? null;
+	if ( $listing ) {
+		$attrs .= ' data-key="' . esc_attr( (string) $listing->ID ) . '"';
+	}
+	return '<div class="kit-form aw-form-ff aw-' . esc_attr( str_replace( '_', '-', $key ) ) . '-form" data-kit-form="' . esc_attr( $key ) . '"' . $attrs . '>' . $form . '</div>';
+}
+
+/** A form that cannot show (Fluent Forms off, or its ID not set): nothing for visitors, a note for administrators. */
+function aw_ff_missing( $title, $fix ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return '';
+	}
+	return '<p class="aw-form-missing"><strong>Only administrators see this:</strong> the ' . esc_html( $title ) . ' form is missing. '
+		. ( defined( 'FLUENTFORM' ) ? 'Set its Fluent Forms ID: <code>' . esc_html( $fix ) . '</code>.' : 'Turn on Fluent Forms.' ) . '</p>';
+}
 
 // No browser bubbles: Fluent Forms and the site's messages show the errors.
 add_filter( 'fluentform/html_attributes', fn( $a, $form ) => aw_ff_key( $form ) ? $a + array( 'novalidate' => 'novalidate' ) : $a, 10, 2 );
@@ -315,12 +325,6 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 // The custom fields' inputs are kept with the entry.
 add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
 
-/** The listing a claim is about, when it is published. */
-function aw_ff_listing( $data ) {
-	$listing = get_post( (int) ( $data['listing'] ?? 0 ) );
-	return $listing && 'aw_listing' === $listing->post_type && 'publish' === $listing->post_status ? $listing : null;
-}
-
 /** Was a Fluent Forms tick box ticked? Fluent Forms saves nothing for an unticked box: empty is 0. */
 function aw_ff_ticked( $data, $name ) {
 	return (bool) array_filter( (array) ( $data[ $name ] ?? array() ), fn( $v ) => '' !== (string) $v && '0' !== (string) $v );
@@ -366,7 +370,7 @@ function aw_ff_errors( $key, $data ) {
 	return $errors;
 }
 
-/** Rate-limit key: the same one as the site's own form, so both count together. */
+/** Rate-limit key: per form and connection (the key the site's own forms used, so counts carry on). */
 function aw_ff_rl( $key ) {
 	return 'aw_rl_aw_' . $key . '_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 }
@@ -514,8 +518,9 @@ add_action( 'wp_ajax_nopriv_aw_ff_upload', 'aw_ff_upload' );
 add_action( 'wp_ajax_aw_ff_upload', 'aw_ff_upload' );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	// wp aw ff-form <key> <id>: show the Fluent Forms form <id> in the place of the site's own <key> form. The forms
-	// themselves are built in Fluent Forms and versioned in /forms/*.json (tools/forms/forms.php).
+	// wp aw ff-form <key> <id>: which Fluent Forms form shows as the site's <key> form (a setup tool: needed again
+	// whenever a form is rebuilt with a new ID). The forms themselves are built in Fluent Forms and versioned in
+	// /forms/*.json (tools/forms/forms.php).
 	WP_CLI::add_command(
 		'aw ff-form',
 		function ( $args ) {
@@ -528,16 +533,6 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$ids[ $key ] = $id;
 			update_option( AW_FF_OPTION, $ids, false );
 			WP_CLI::success( "{$key}: form {$id}" );
-		}
-	);
-	// wp aw ff-off <key>: back to the site's own form (the Fluent Forms form and its entries stay).
-	WP_CLI::add_command(
-		'aw ff-off',
-		function ( $args ) {
-			$ids = (array) get_option( AW_FF_OPTION, array() );
-			unset( $ids[ (string) ( $args[0] ?? '' ) ] );
-			update_option( AW_FF_OPTION, $ids, false );
-			WP_CLI::success( 'The site\'s own form shows again.' );
 		}
 	);
 }

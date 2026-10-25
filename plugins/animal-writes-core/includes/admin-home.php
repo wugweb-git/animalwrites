@@ -154,8 +154,8 @@ function aw_core_overview_page() {
 		'aw-commands',
 		array( 'cmd' => 'Command', 'what' => 'What it does' ),
 		array(
-			array( 'cmd' => '<code>wp aw crm-setup</code>, <code>crm-import</code>, <code>crm-move</code>, <code>vol-to-crm</code>, <code>nl-import-volunteers</code>', 'what' => 'FluentCRM list, tags and imports' ),
-			array( 'cmd' => '<code>wp aw ff-form</code>, <code>ff-off</code>, <code>nl-form</code>', 'what' => 'Fluent Forms forms' ),
+			array( 'cmd' => '<code>wp aw crm-setup</code>', 'what' => 'FluentCRM sender, list, tags and custom fields' ),
+			array( 'cmd' => '<code>wp aw ff-form</code>', 'what' => 'Which Fluent Forms form shows as each site form' ),
 			array( 'cmd' => '<code>wp aw geocode</code>', 'what' => 'Listing coordinates for the map' ),
 			array( 'cmd' => '<code>wp aw sort-dates</code>', 'what' => 'News and Library sort dates' ),
 			array( 'cmd' => '<code>wp aw redirects-import</code>', 'what' => 'Old addresses into Rank Math Redirections' ),

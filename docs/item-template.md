@@ -53,4 +53,4 @@ DOI); guides Article (+ Rank Math FAQPage); opportunities JobPosting with `valid
 ## Research authors
 
 `aw_authors` and `aw_journal` on research posts (`research-citation.php`): sent by the research worker, else read from
-doi.org (CSL-JSON) after ingest. `aw_research_citation_backfill()` fills the rest.
+doi.org (CSL-JSON) after ingest. (The one-off fill of older posts ran and was removed on 25 Oct 2026.)

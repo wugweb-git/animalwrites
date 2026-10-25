@@ -98,6 +98,9 @@ add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
 		// Feeds moved into Sources (25 Oct 2026): Sources → Feeds and each source's edit screen; the old address redirects.
+		if ( aw_sourcing_phase() >= 4 ) { // phase 4: hidden (Keywords → Press, Posts → Categories, Rules); a rollback shows them again
+			return $tabs;
+		}
 		$tabs['press']      = array( 'Press queries', 'aw_sources_press_tab', true ); // Settings API forms (options.php)
 		$tabs['categories'] = array( 'Categories', 'aw_sources_categories_tab', true );
 		$tabs['sections']   = array( 'Sections', 'aw_sources_sections_tab', true );
@@ -530,12 +533,31 @@ add_filter(
  * copies them into sources.yaml: category_names (slug => name, the workers' fallback when the site cannot be reached)
  * and, once phase 1 is migrated, schema {sources: 2} and sources_v2 (each v1 source plus its publisher host, relay
  * switch, read_by and keyword check). Workers before W1 ignore them; W1 reads v2 and falls back to v1.
+ *
+ * Phase 4 (owner, 25 Oct 2026; once migrated, aw_sourcing_phase() >= 4): the v1 keys are not built or sent. config
+ * holds defaults, press (its switches), topic_tags (the tag rules), category_names and the blocks (schema, match,
+ * sources_v2, keywords_v2, and sections_v2 from rules.php). The v1 code stays for a rollback.
  */
 add_filter(
 	'kits_sourcing_policy',
 	function ( $data ) {
 		$c = aw_sources_config();
 		if ( empty( $c['live'] ) ) {
+			return $data;
+		}
+		if ( aw_sourcing_phase() >= 4 && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 4: no v1 keys (without the keyword table the v1 lists still go)
+			$press = (array) ( $c['press'] ?? array() );
+			unset( $press['queries'] ); // the Press keywords carry them
+			$data['config'] = array( 'defaults' => $c['defaults'], 'press' => $press, 'topic_tags' => (array) ( $c['topic_tags'] ?? array() ) );
+			if ( function_exists( 'aw_relevance_categories' ) ) {
+				$data['config']['category_names'] = (object) aw_relevance_categories();
+			}
+			$blocks                        = aw_kw_policy_blocks( (array) $c['sources'], aw_sourcing_kw_worker_rows(), function_exists( 'aw_relay_hosts' ) ? aw_relay_hosts() : array() );
+			$data['keywords']              = $blocks['keywords_v2'];
+			$data['config']['schema']      = $blocks['schema'];
+			$data['config']['match']       = $blocks['match'];
+			$data['config']['sources_v2']  = $blocks['sources_v2'];
+			$data['config']['keywords_v2'] = $blocks['keywords_v2'];
 			return $data;
 		}
 		$rel     = function_exists( 'aw_relevance' ) ? aw_relevance() : array();

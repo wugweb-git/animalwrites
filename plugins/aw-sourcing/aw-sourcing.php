@@ -38,6 +38,7 @@ define( 'AW_SOURCING_DIR', __DIR__ . '/' );
 require_once AW_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
 require_once AW_SOURCING_DIR . 'includes/sources-model.php';
 require_once AW_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)
+require_once AW_SOURCING_DIR . 'includes/retire-model.php'; // phase 4: what stops being used, the policy without v1 keys
 // Order matters for the Sourcing screens (Sources, Keywords, then these in this order; reports and Settings go last, menu-model.php).
 require_once AW_SOURCING_DIR . 'includes/sourcing-policy.php';
 require_once AW_SOURCING_DIR . 'includes/source-sites.php';
@@ -65,6 +66,7 @@ require_once AW_SOURCING_DIR . 'includes/relay.php';
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
 require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
+require_once AW_SOURCING_DIR . 'includes/sourcing-migrate-retire.php'; // WP-CLI only: phase 4 (Retire: archive, stop using the old lists)
 require_once AW_SOURCING_DIR . 'includes/keyword-stats.php';
 require_once AW_SOURCING_DIR . 'includes/search-insights-tab.php';
 require_once AW_SOURCING_DIR . 'includes/workers.php';

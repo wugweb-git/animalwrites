@@ -28,6 +28,7 @@ require dirname( __DIR__, 2 ) . '/animal-writes-core/includes/keyword-model.php'
 require dirname( __DIR__ ) . '/includes/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords-model.php';
 require dirname( __DIR__ ) . '/includes/rules-model.php';
+require dirname( __DIR__ ) . '/includes/retire-model.php';
 require dirname( __DIR__ ) . '/includes/menu-model.php';
 
 $fails = 0;
@@ -410,6 +411,7 @@ aw_t( false !== strpos( $rules, 'aw_rules_live()' ) && false !== strpos( $rules,
 aw_t( false !== strpos( $rules, "'admin.php' !== \$pagenow" ), 'the phase 3 switch works on the page\'s new address' );
 
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
+require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

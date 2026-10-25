@@ -54,15 +54,6 @@ function mailweb_aliases_of( $mailbox ) {
 	return array_keys( array_filter( mailweb_aliases(), fn( $m ) => strtolower( $mailbox ) === $m ) );
 }
 
-/** The mailbox an address lands in (itself for a mailbox, its mailbox for an alias), or ''. */
-function mailweb_mailbox_of( $address ) {
-	$a = strtolower( trim( (string) $address ) );
-	if ( in_array( $a, mailweb_all_boxes(), true ) ) {
-		return $a;
-	}
-	return (string) ( mailweb_aliases()[ $a ] ?? '' );
-}
-
 /** The domains of our own mailboxes and aliases. */
 function mailweb_own_domains() {
 	$out = array();

@@ -278,7 +278,6 @@ function aw_places_from_text( $text ) {
 function aw_place_counts_reset() {
 	delete_option( 'aw_place_counts' );
 	delete_transient( 'aw_sitemap_dir_pairs' );
-	delete_transient( 'aw_stats' );
 }
 
 /**
@@ -506,47 +505,7 @@ function aw_pin_public() {
 	is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 }
 
-/** State and District fields from the LGD file (District follows State; a PIN field fills both). */
-function aw_place_fields( $form, $state_slug = '', $district_slug = '', $required_state = true ) {
-	$s_opts = array( '' => 'Choose a state' );
-	foreach ( aw_place_states() as $st ) {
-		$s_opts[ $st->slug ] = $st->name;
-	}
-	$state  = aw_form_state( $form );
-	$cur_s  = (string) ( $state['values']['state'] ?? $state_slug );
-	$cur_d  = (string) ( $state['values']['district'] ?? $district_slug );
-	$st_obj = $cur_s ? aw_place_by_slug( $cur_s ) : null;
-	$html   = kits_dict_field( $form, 'state', array( 'required' => $required_state, 'options' => $s_opts, 'attrs' => array( 'data-district-select' => aw_field_id( $form, 'district' ) ) ) );
-	$id     = aw_field_id( $form, 'district' );
-	$opts   = '<option value="">' . ( $st_obj ? 'Choose a district' : 'Choose a state first' ) . '</option>';
-	foreach ( aw_place_states() as $st ) {
-		$on    = $st_obj && $st_obj->code === $st->code;
-		$opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '"' . ( $on ? '' : ' hidden disabled' ) . '>';
-		foreach ( aw_place_districts( $st->code ) as $d ) {
-			$opts .= '<option value="' . esc_attr( $d->slug ) . '"' . selected( $cur_d, $d->slug, false ) . '>' . esc_html( $d->name ) . '</option>';
-		}
-		$opts .= '</optgroup>';
-	}
-	$err   = $state['errors']['district'] ?? '';
-	$html .= '<div class="kit-field kit-field--select' . ( $err ? ' is-invalid' : '' ) . '"><label for="' . esc_attr( $id ) . '">District <span class="kit-optional">(optional)</span></label><div class="kit-field-control"><select id="' . esc_attr( $id ) . '" name="district" autocomplete="address-level2" data-none="Choose a state first" data-all="Choose a district" aria-describedby="' . esc_attr( $id ) . '-error"' . ( $st_obj ? '' : ' disabled' ) . '>' . $opts . '</select></div><span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span></div>';
-	return $html;
-}
-
 /* ---------- Display ---------- */
-
-/** [aw_place_links] An item's places, each linked to its directory page (item pages). */
-add_shortcode(
-	'aw_place_links',
-	function () {
-		$id    = get_the_ID();
-		$links = array();
-		foreach ( aw_item_places( $id ) as $p ) {
-			$label   = 'district' === $p->kind ? $p->name . ', ' . aw_place_state( $p->state )->name : $p->name;
-			$links[] = function_exists( 'kits_chip' ) ? kits_chip( $label, aw_directory_url( $p->slug ) ) : '<a href="' . esc_url( aw_directory_url( $p->slug ) ) . '">' . esc_html( $label ) . '</a>';
-		}
-		return $links ? '<div class="taxonomy-aw_place wp-block-post-terms kit-tags">' . implode( '', $links ) . '</div>' : '';
-	}
-);
 
 // The one-time move from the WordPress location list (8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 

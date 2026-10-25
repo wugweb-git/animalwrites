@@ -134,25 +134,3 @@ function aw_mail_campaign_strip_html() {
 		. '<td bgcolor="' . esc_attr( $c[3] ) . '" style="background:' . esc_attr( $c[3] ) . ';' . ( '' === $tab ? 'border-radius:8px 8px 0 0;' : 'border-radius:0 8px 0 0;' ) . 'padding:16px;vertical-align:middle;' . $font . 'color:#ffffff">' . $words . '</td></tr>'
 		. '<tr><td colspan="' . (int) $cols . '" bgcolor="' . esc_attr( $c[3] ) . '" style="background:' . esc_attr( $c[3] ) . ';border-radius:0 0 8px 8px;padding:0 16px 16px"><a href="' . esc_url( $c[1] ) . '" style="display:block;background:#141414;color:#ffffff;border:2px solid #ffffff;border-radius:6px;text-decoration:none;text-align:center;' . $font . 'font-size:16px;font-weight:bold;line-height:20px;padding:12px 16px">' . esc_html( $c[5] ) . ' &rarr;</a></td></tr></table>';
 }
-
-/** The strip as one plain-text line ('' when none). */
-function aw_mail_campaign_strip_text() {
-	$c = aw_mail_open_campaign();
-	if ( ! $c ) {
-		return '';
-	}
-	$days = aw_mail_campaign_days_left( $c[2] );
-	$left = null === $days ? '' : ( 0 === $days ? ' · last day' : ' · ' . $days . ( 1 === $days ? ' day left' : ' days left' ) );
-	return $c[0] . ( '' !== $c[7] ? ' (' . strtolower( $c[7][0] ) . substr( $c[7], 1 ) . ')' : '' ) . $left . ( $c[2] ? ' · ' . strtolower( $c[6] ) . ' ' . wp_date( 'j M Y', strtotime( $c[2] . ' 12:00:00' ) ) : '' ) . ': ' . $c[1];
-}
-
-/** Put the strip right under the signature in an HTML email (or at the end when there is no signature block). */
-function aw_mail_add_campaign_strip( $html ) {
-	$strip = aw_mail_campaign_strip_html();
-	if ( '' === $strip || false !== strpos( $html, $strip ) ) {
-		return $html;
-	}
-	$pos = strpos( $html, 'class="signature"' );
-	$end = false !== $pos ? strpos( $html, '</table>', $pos ) : false;
-	return false !== $end ? substr_replace( $html, '</table>' . $strip, $end, 8 ) : $html . $strip;
-}

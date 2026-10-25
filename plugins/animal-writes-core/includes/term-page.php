@@ -15,11 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Taxonomies with term pages. */
-function aw_term_page_taxonomies() {
-	return array( 'post_tag', 'category' );
-}
-
 /** The current category or tag page's term, or null. */
 function aw_term_page_term() {
 	$t = get_queried_object();

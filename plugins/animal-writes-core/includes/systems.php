@@ -1,9 +1,9 @@
 <?php
 /**
- * Shared list helpers, the list filters and the trust panel.
+ * Shared list helpers and the list filters. The trust panel ([aw_trust]) was in no page or template and was removed
+ * (25 Oct 2026): an item's source and dates are in its Sources block and meta row (item-head.php).
  *
  *   Lists         the hub Pages' Query Loops (hubs.php, hub-blocks.php); the filters below drive them.
- *   TRUST         [aw_trust]  source, dates and verification on every item page
  *
  * @package animal-writes-core
  */
@@ -111,7 +111,6 @@ const AW_LIST_SORTS = array(
 	'aw_press'       => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
 	'term'           => array( 'new' => 'Newest first', 'old' => 'Oldest first', 'az' => 'A–Z', 'za' => 'Z–A' ),
 );
-const AW_LIST_SIZES = array( 'aw_legal' => 20, 'aw_news' => 13, 'post' => 40, 'aw_opportunity' => 24, 'aw_campaign' => 20 );
 
 /** Active filters on this request: param => list of value slugs (tag=a,b or tag[]=a&tag[]=b; WordPress's own query vars tag and category_name). */
 function aw_active_filters( $type ) {
@@ -420,98 +419,6 @@ function aw_publisher_sync( $mid, $id, $key ) {
 add_action( 'updated_post_meta', 'aw_publisher_sync', 10, 3 );
 add_action( 'added_post_meta', 'aw_publisher_sync', 10, 3 );
 // The one-time fill of every news item's publisher key ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
-
-/* ---------- TRUST: source, dates, verification ---------- */
-
-add_shortcode(
-	'aw_trust',
-	function () {
-		$id   = get_the_ID();
-		$type = get_post_type( $id );
-		$rows = array();
-		if ( 'aw_listing' === $type ) {
-			$verified = (bool) get_post_meta( $id, 'aw_verified', true );
-			$on       = (string) get_post_meta( $id, 'aw_verified_on', true );
-			$code     = (string) get_post_meta( $id, 'aw_awbi_code', true );
-			$rows[]   = $verified
-				? array( 'check', 'Verified by Animal Writes' . ( $on ? ' on ' . aw_date( $on ) : '' ), true )
-				: array( 'alert', 'Not yet confirmed by the organisation. Check details before you travel.' );
-			if ( $code ) {
-				$since  = (string) get_post_meta( $id, 'aw_awbi_recognised', true );
-				$until  = (string) get_post_meta( $id, 'aw_awbi_valid', true );
-				$dropped = (string) get_post_meta( $id, 'aw_awbi_dropped', true );
-				$rows[]  = $dropped // on an older AWBI list, not on the current one (owner, 18 Oct 2026)
-					? array( 'alert', 'On the Animal Welfare Board of India\'s list of ' . aw_date( (string) get_post_meta( $id, 'aw_awbi_list_on', true ) ) . ' (code ' . esc_html( $code ) . '), but not on its current list (' . aw_date( $dropped ) . '). Its recognition may have lapsed.', true )
-					: ( aw_awbi_lapsed( $id )
-					? array( 'alert', 'AWBI recognition (code ' . esc_html( $code ) . ') was valid until ' . aw_date( $until ) . '. Needs re-check.', true )
-					: array( 'research', 'Recognised by the Animal Welfare Board of India, code ' . esc_html( $code ) . ( $since ? ', since ' . aw_date( $since ) : '' ) . ( $until ? ', valid until ' . aw_date( $until ) : '' ) . ' (list as on ' . aw_date( get_post_meta( $id, 'aw_awbi_list_on', true ) ? get_post_meta( $id, 'aw_awbi_list_on', true ) : '2026-05-31' ) . ')', true ) );
-			}
-			$darpan = (string) get_post_meta( $id, 'aw_darpan_id', true );
-			if ( $darpan ) { // like the AWBI code (owner, 18 Oct 2026): the NITI Aayog NGO registry's ID
-				$as     = (string) get_post_meta( $id, 'aw_reg_type', true );
-				$rows[] = array( 'research', 'Registered on NGO Darpan (NITI Aayog), Darpan ID ' . esc_html( $darpan ) . ( $as ? ', as ' . esc_html( $as ) : '' ), true );
-			}
-			$bl_on = (string) get_post_meta( $id, 'aw_darpan_blacklisted_on', true );
-			if ( $bl_on ) { // NITI Aayog's list of blacklisted NPOs (ngodarpan.gov.in/#/blacklisted)
-				$bl_by  = (string) get_post_meta( $id, 'aw_darpan_blacklisted_by', true );
-				$rows[] = array( 'alert', 'NGO Darpan (NITI Aayog) lists this organisation as blacklisted' . ( $bl_by ? ' by ' . esc_html( $bl_by ) : '' ) . ', from ' . aw_date( $bl_on ) . '.', true );
-			}
-			$abc = (string) get_post_meta( $id, 'aw_abc_valid', true );
-			if ( $abc ) {
-				$rows[] = array( 'research', 'ABC project recognised by the AWBI, valid until ' . aw_date( $abc ), true );
-			}
-			$closed = (string) get_post_meta( $id, 'aw_reported_closed', true );
-			if ( $closed ) { // enrichment.php: Google Maps reports it permanently closed (the listing is out of search until reviewed)
-				$rows[] = array( 'alert', 'Reported closed: Google Maps showed this place as permanently closed on ' . aw_date( $closed ) . '. We are checking.', true );
-			}
-			$labels = aw_source_labels( $id, true );
-			if ( $labels ) {
-				$rows[] = array( 'link', 'Details from: ' . $labels, true );
-			}
-			$cls = $verified ? 'is-verified' : 'is-unverified';
-		} else {
-			$src  = (string) get_post_meta( $id, 'aw_source_url', true );
-			$name = (string) get_post_meta( $id, 'aw_source_name', true );
-			$iss  = aw_item_issuer( $id );
-			if ( $iss ) {
-				$rows[] = array( 'legal', 'Issued by ' . $iss->name );
-			}
-			if ( $src ) {
-				$host   = $name ? $name : wp_parse_url( $src, PHP_URL_HOST );
-				// Library pages have no source row above the title: the "also reported by" logos follow the publisher here.
-				$also   = 'aw_legal' === $type && function_exists( 'aw_also_logos_html' ) ? aw_also_logos_html( $id ) : '';
-				$rows[] = array( 'link', 'Source: <a href="' . esc_url( $src ) . '" rel="noopener">' . esc_html( $host ) . '</a>' . $also, true );
-			}
-			// "Also reported by" is shown as publisher logos in the source row (same-story.php), not as text lines here.
-			$t      = fn( $iso, $text ) => aw_date( $iso ); // the one date component
-			$pub    = get_post_meta( $id, 'aw_source_date', true ) ? aw_src_date( $id, 'Y-m-d' ) : '';
-			$added  = get_the_date( 'Y-m-d', $id );
-			$rows[] = array(
-				'',
-				$pub === $added ? 'Published ' . $t( $pub, '' ) // same day: one date (owner, 15 Oct 2026)
-					: ( $pub ? 'Published ' . $t( $pub, '' ) . ', added ' : 'Added ' ) . $t( $added, '' ),
-				true,
-			);
-			if ( get_post_meta( $id, 'aw_file_id', true ) ) {
-				$rows[] = array( 'research', 'Official document attached below' );
-			} elseif ( get_post_meta( $id, 'aw_doc_preview', true ) ) {
-				$rows[] = array( 'research', 'Official document linked below' );
-			}
-			if ( in_array( $type, array( 'aw_news', 'aw_legal' ), true ) ) {
-				$rows[] = array( 'knowledge', 'Summary written by Animal Writes. Read the original before relying on it. <a href="/editorial-policy/">Editorial policy</a>', true );
-			}
-			$cls = 'is-sourced';
-		}
-		if ( ! $rows ) {
-			return '';
-		}
-		$out = '<aside class="kit-trust ' . $cls . '" aria-label="About this information"><ul>';
-		foreach ( $rows as $r ) {
-			$out .= '<li>' . ( $r[0] ? aw_i( $r[0] ) : '' ) . '<span>' . ( empty( $r[2] ) ? esc_html( $r[1] ) : wp_kses( $r[1], array( 'a' => array( 'href' => true, 'rel' => true, 'target' => true, 'class' => true, 'title' => true, 'aria-label' => true ), 'span' => array( 'class' => true, 'title' => true, 'aria-hidden' => true ), 'time' => array( 'datetime' => true ), 'ul' => array( 'class' => true, 'aria-label' => true ), 'li' => array(), 'img' => array( 'class' => true, 'src' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true, 'decoding' => true ) ) ) ) . '</span></li>';
-		}
-		return $out . '</ul></aside>';
-	}
-);
 
 /*
  * Query blocks filtered by a taxonomy that has no public pages (e.g. the Library's "kind": act, rule, template).
