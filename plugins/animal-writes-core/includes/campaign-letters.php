@@ -12,6 +12,9 @@
  *   newsletter and the volunteers in FluentCRM (Newsletter list, tags newsletter, volunteer, campaign-<slug>), whatever
  *   the box says (owner, 18 Oct 2026), through FluentCRM's own API (aw_crm_campaign_signer), with the box as 1/0, the
  *   WhatsApp number and tick, and a reference (AW-L-<n>) shown to them after sending.
+ * - Bot check on the sign-up (audit item 4, owner 25 Oct 2026): the site's own ALTCHA (proof of work in the visitor's
+ *   browser; no third party, no cookies, nothing about the visitor kept), on both the Fluent Forms Campaign form and the
+ *   older endpoint below. No double opt-in (owner: every sender joins).
  * - WP Admin → Campaigns → Letter report: totals, by city, by ground, by route, by device and by day, with a CSV export
  *   of the anonymous rows.
  *
@@ -138,6 +141,28 @@ function aw_cl_record_letter( $id, $req ) {
 	);
 }
 
+/**
+ * The sign-up's bot check (audit item 4, owner 25 Oct 2026): the site's own ALTCHA (kits-core altcha.php), solved in the
+ * letter tool while the visitor fills it in. One solved check covers one letter (send_id): the Fluent Forms Campaign
+ * form and the older endpoint below both accept it, and a retried call for the same letter is not asked again.
+ *
+ * @param string $send    The letter's send_id ('' when the script sent none).
+ * @param string $payload The ALTCHA answer.
+ * @return bool
+ */
+function aw_cl_human( $send, $payload ) {
+	if ( $send && get_transient( 'aw_cl_h_' . $send ) ) {
+		return true;
+	}
+	if ( ! function_exists( 'kits_altcha_verify' ) || ! kits_altcha_verify( (string) $payload ) ) {
+		return false;
+	}
+	if ( $send ) {
+		set_transient( 'aw_cl_h_' . $send, 1, HOUR_IN_SECONDS );
+	}
+	return true;
+}
+
 /* ---------- REST: a letter sent (anonymous), and the opt-in ---------- */
 add_action(
 	'rest_api_init',
@@ -200,6 +225,9 @@ add_action(
 					$rl = 'aw_rl_campaign-optin_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 					if ( (int) get_transient( $rl ) >= 20 ) {
 						return new WP_Error( 'aw_optin_limit', 'Too many tries. Wait a minute, then try again.', array( 'status' => 429 ) );
+					}
+					if ( ! aw_cl_human( $send, (string) $req['altcha'] ) ) {
+						return new WP_Error( 'aw_optin_check', 'Couldn\'t verify you\'re not a bot. Try again.', array( 'status' => 403 ) );
 					}
 					$ref = 'AW-L-' . aw_cl_next_ref();
 					if ( $send ) {

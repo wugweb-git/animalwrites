@@ -302,17 +302,53 @@
 					if (box && ref) { box.querySelector('strong').textContent = ref; box.hidden = false; }
 					track('newsletter_optin', { source: cfg.source || '' });
 				})
-				.catch(function () { joined = false; });
+				.catch(function () { joined = false; botAnswer = ''; }); // the next send tries again, with a fresh bot check
 		}
 	}
+
+	/* The sign-up's bot check (audit item 4, owner 25 Oct 2026): the site's own ALTCHA widget (kits-core altcha.php),
+	   placed hidden in the letter tool. It is solved while the visitor fills the form in, so the answer is ready when
+	   Gmail or the mail app takes the page away. One answer covers the letter's send_id on the server. */
+	var bot = form.querySelector('altcha-widget'), botAnswer = '', botWait = null;
+	if (bot) bot.addEventListener('statechange', function (e) { var d = e.detail || {}; botAnswer = d.state === 'verified' && d.payload ? d.payload : ''; });
+	function botCheck() {
+		if (botAnswer) return Promise.resolve(botAnswer);
+		if (botWait) return botWait;
+		if (!bot || !window.customElements) return Promise.resolve('');
+		botWait = new Promise(function (done) {
+			var tries = 0, stop = setTimeout(function () { finish(''); }, 20000);
+			function finish(p) { clearTimeout(stop); bot.removeEventListener('statechange', on); done(p); }
+			function on(e) {
+				var d = e.detail || {};
+				if (d.state === 'verified' && d.payload) finish(d.payload);
+				else if (d.state === 'error') finish('');
+			}
+			bot.addEventListener('statechange', on);
+			/* The widget mounts just after its script defines it: try again shortly until its verify() is there. */
+			function start() {
+				if (typeof bot.verify === 'function') {
+					try { if (typeof bot.reset === 'function') bot.reset(); bot.verify(); return; } catch (e) { /* not mounted yet */ }
+				}
+				if (++tries < 25) setTimeout(start, 200);
+				else finish('');
+			}
+			customElements.whenDefined('altcha-widget').then(function () { setTimeout(start, 0); });
+		}).then(function (p) { botWait = null; return p; });
+		return botWait;
+	}
+	form.addEventListener('focusin', function () { botCheck(); }); // the widget's script loads on the same first touch (kits-core)
 
 	/* The sign-up: the Fluent Forms Campaign form (campaign-form.php) when it is set up, else the older endpoint. The
 	   server copies every send as it arrives, before any check (wp_aw_form_raw). Resolves with the reference. */
 	function signUp(row, join, waOn) {
+		return botCheck().then(function (altcha) { return signUpAs(row, join, waOn, altcha); });
+	}
+	function signUpAs(row, join, waOn, altcha) {
 		var person = { email: val('email'), name: val('name'), city: val('city'), own: val('own'), whatsapp: val('whatsapp') };
-		function older() { return post(cfg.optin, Object.assign({ consent: join ? '1' : '0' }, person, row)).then(function (r) { return r.json(); }).then(function (d) { return d && d.ref; }); }
+		function older() { return post(cfg.optin, Object.assign({ consent: join ? '1' : '0', altcha: altcha }, person, row)).then(function (r) { return r.json(); }).then(function (d) { return d && d.ref; }); }
 		if (!cfg.ff || !cfg.ajax) return older();
 		var f = new URLSearchParams();
+		f.append('altcha', altcha);
 		Object.keys(person).forEach(function (k) { f.append(k, person[k]); });
 		if (join) f.append('nl_optin[]', '1');
 		if (waOn === '1') f.append('wa_optin[]', '1');
