@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* ---------- Directory data: listings per state, district and India, by type ---------- */
 
 /** Types named in a place's breakdown, in this order when counts tie ("veterinary" = every veterinary type, as the filter). */
-const AW_SEO_BREAKDOWN = array( 'animal-welfare-organisation', 'gaushala', 'veterinary', 'abc-centre', 'wildlife-rescue' );
+// AW_SEO_BREAKDOWN: AW SEO Plus → Settings (settings.php).
 
 /**
  * Published listings counted per state code, district code and for all of India, by listing type (its slug), by
@@ -697,76 +697,7 @@ add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
  * Search titles of the categories and tags, written to fit 55–58 characters with " – Animal Writes" (keyword first,
  * plain text, the site name only as the suffix). A term not listed gets aw_seo_term_title_rule().
  */
-const AW_SEO_TERM_TITLES = array(
-	'category:adoption' => 'Animal Adoption News and Guides for India',
-	'category:animal-birth-control' => 'ABC Animal Birth Control Rules and News',
-	'category:transport-slaughter' => 'Animal Transport and Slaughter in India',
-	'category:birds' => 'Bird Rescue and Welfare News from India',
-	'category:campaigns-civic-action' => 'Animal Welfare Campaigns and Civic Action',
-	'category:cattle-gaushalas' => 'Cattle Welfare and Gaushala News in India',
-	'category:community-dogs' => 'Laws and News on Stray and Community Dogs',
-	'category:courts-judgments' => 'Animal Welfare Court Cases and Judgments',
-	'category:cruelty-prosecution' => 'Animal Cruelty Cases and Prosecution News',
-	'category:disaster-rescue' => 'Animal Rescue in Disasters and Emergencies',
-	'category:feeders-caregivers' => 'Rights of People Feeding Street Animals',
-	'category:laws-rules' => 'Animal Protection Laws and Rules in India',
-	'category:performing-captive-animals' => 'Performing and Captive Animals in India',
-	'category:pets-breeding' => 'Pet Shop and Dog Breeding Rules in India',
-	'category:policy-government' => 'Animal Welfare Policy and Government News',
-	'category:rabies-public-health' => 'Rabies Control and Public Health in India',
-	'category:veterinary-care' => 'Veterinary Care and Animal Health in India',
-	'category:wildlife' => 'Wildlife Protection and Rescue in India',
-	'post_tag:abc-centre' => 'ABC Centres by State and District',
-	'post_tag:animal-welfare-organisation' => 'Animal Welfare NGOs by State and District',
-	'post_tag:gaushala' => 'Gaushalas by State and District',
-	'post_tag:veterinary-office' => 'Government Veterinary Offices by State and District', // "Veterinary", not "Vet" (owner, 20 Oct 2026)
-	'post_tag:mobile-veterinary-unit' => '1962 Mobile Veterinary Units by State and District',
-	'post_tag:veterinary-dispensary' => 'Veterinary Dispensaries by State and District',
-	'post_tag:veterinary-hospital' => 'Veterinary Hospitals by State and District',
-	'post_tag:wildlife-rescue' => 'Wildlife Rescue Groups by State and District',
-	'post_tag:veterinary-clinic' => 'Veterinary Clinics by State and District',
-	'post_tag:bird-hospital' => 'Bird Hospitals by State and District',
-	'post_tag:animal-shelter' => 'Animal Shelters by State and District',
-	'post_tag:animal-ambulance' => 'Animal Ambulances by State and District',
-	'post_tag:adoption-network' => 'Adoption Networks by State and District',
-	'post_tag:emergency-rescue' => 'Emergency Rescue by State and District',
-	'post_tag:feeder-network' => 'Feeder Networks by State and District',
-	'post_tag:legal-aid' => 'Free Legal Aid (DLSA) by State and District',
-	'post_tag:rescue-group' => 'Animal Rescue Groups by State and District',
-	'post_tag:sanctuary' => 'Animal Sanctuaries by State and District',
-	'post_tag:animal-welfare' => 'NGOs Doing Animal Welfare Work in India', // owner-approved 20 Oct 2026
-	'post_tag:bird-treatment' => 'NGOs Treating Injured Birds across India',
-	'post_tag:adoption' => 'NGOs Offering Animal Adoption across India',
-	'post_tag:ambulance' => 'NGOs Running Animal Ambulances in India',
-	'post_tag:boarding-foster' => 'NGOs Offering Pet Boarding and Fostering',
-	'post_tag:cattle-care' => 'NGOs Offering Cattle Care in Indian States',
-	'post_tag:feeding' => 'NGOs Feeding Street Animals across India',
-	'post_tag:legal-help' => 'NGOs Offering Animal Legal Help in India',
-	'post_tag:rescue' => 'NGOs Offering Animal Rescue across India',
-	'post_tag:shelter' => 'NGOs Offering Animal Shelter across India',
-	'post_tag:sterilisation' => 'NGOs Offering ABC Sterilisation in India',
-	'post_tag:treatment' => 'NGOs Treating Injured Animals across India',
-	'post_tag:vaccination' => 'NGOs Offering Animal Vaccination in India',
-	'post_tag:act' => 'Animal Welfare Acts of India Summarised',
-	'post_tag:advisory' => 'Animal Welfare Advisories Issued in India',
-	'post_tag:circular' => 'Animal Welfare Circulars Issued in India',
-	'post_tag:judgment' => 'Animal Welfare Court Judgments in India',
-	'post_tag:notification' => 'Government Notifications on Animal Welfare',
-	'post_tag:official-release' => 'Official Press Releases on Animal Welfare',
-	'post_tag:order' => 'Court Orders on Animal Welfare in India',
-	'post_tag:rule' => 'Animal Welfare Rules of India Summarised',
-	'post_tag:template' => 'Letter Templates for Animal Welfare Cases',
-	'post_tag:event' => 'Animal Welfare Event Listings for India',
-	'post_tag:fellowship' => 'Animal Welfare Fellowship Opportunities',
-	'post_tag:foster' => 'Animal Fostering Opportunities in India',
-	'post_tag:grant' => 'Grants for Animal Welfare Work in India',
-	'post_tag:internship' => 'Animal Welfare Internship Opportunities',
-	'post_tag:job' => 'Jobs in Animal Welfare NGOs across India',
-	'post_tag:volunteer' => 'Animal Welfare Volunteer Roles in India',
-	'post_tag:faq' => 'Animal Welfare FAQs and Answers on the Law',
-	'post_tag:guide' => 'Practical Animal Welfare Guides for India',
-	'post_tag:research' => 'Animal Welfare Research Studies from India',
-);
+// AW_SEO_TERM_TITLES: AW SEO Plus → Settings (settings.php).
 
 /** A category's or tag's search title, with " – Animal Writes". */
 function aw_seo_term_title( $term ) {

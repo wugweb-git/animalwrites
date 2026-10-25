@@ -19,7 +19,7 @@ const AW_SI_PSI_CRON   = 'aw_si_psi';
 const AW_SI_PSI_MORE   = 'aw_si_psi_more';
 const AW_SI_PSI_QUEUE  = 'aw_si_psi_queue';
 const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
-const AW_SI_PSI_FLAG   = 50; // Mobile score under this flags the page.
+// AW_SI_PSI_FLAG: AW SEO Plus → Settings (settings.php).
 
 /**
  * The 16 key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, and the newest item of each

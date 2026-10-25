@@ -4,7 +4,7 @@ Owner-approved spec, 20 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php`
 
 ## Rules
 
-- One FAQ per page, 3 to 6 questions. Fewer than 3: no FAQ section and no FAQPage schema. Resources guides: 2 to 6 (owner, 21 and 25 Oct 2026).
+- One FAQ per page, 3 to 6 questions (AW SEO Plus → Settings → FAQ: fewest, fewest on a guide, most, longest answer). Fewer than 3: no FAQ section and no FAQPage schema. Resources guides: 2 to 6 (owner, 21 and 25 Oct 2026).
 - Each answer: first sentence answers and names the subject; at most 50 words; one link (the section or the source); dates j M Y with the calendar icon.
 - The FAQPage node is parsed from the rendered accordion, so its text is the visible text word for word.
 - No FAQ on News, Research, Opportunities, format tags, About, Contact, policies, Home, News and Resources pages.

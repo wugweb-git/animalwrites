@@ -29,6 +29,15 @@ function aw_sourcing_feed_id( $term ) {
 /** The Google News searches the workers make per run: the English Include words and the fixed ones, once each. */
 function aw_sourcing_searches() {
 	$out = array();
+	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: every keyword's searches (feed ids kept)
+		$by = array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' );
+		foreach ( aw_sourcing_kw_worker_rows() as $r ) {
+			foreach ( aw_kw_searches( $r, $by ) as $x ) {
+				$out[ $x['feed'] ] = $out[ $x['feed'] ] ?? (string) ( $x['q'] ?? $r['label'] );
+			}
+		}
+		return $out;
+	}
 	foreach ( array_merge( (array) ( aw_relevance()['strong'] ?? array() ), AW_SOURCING_EXTRA_SEARCHES ) as $t ) {
 		$t = trim( (string) $t );
 		if ( '' !== $t && preg_match( '/^[\x20-\x7e]+$/', $t ) ) {
@@ -40,11 +49,15 @@ function aw_sourcing_searches() {
 
 /** The keyword behind a feed id ('' when the feed is not a keyword search). A word since removed is named from the id. */
 function aw_sourcing_feed_keyword( $feed ) {
-	$feed = (string) $feed;
+	static $s = null; // once per request (the stats call this for every item)
+	$feed     = (string) $feed;
+	$s        = null === $s ? aw_sourcing_searches() : $s;
+	if ( isset( $s[ $feed ] ) ) {
+		return $s[ $feed ];
+	}
 	if ( 0 !== strpos( $feed, 'gnews-kw-' ) ) {
 		return '';
 	}
-	$s = aw_sourcing_searches();
 	return $s[ $feed ] ?? str_replace( '-', ' ', substr( $feed, 9 ) );
 }
 
@@ -68,7 +81,7 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 	$rows     = array();
 	$row      = function ( $feed, $term ) use ( &$rows, $include ) {
 		if ( ! isset( $rows[ $feed ] ) ) {
-			$fixed          = in_array( $term, AW_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
+			$fixed          = ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) && in_array( $term, AW_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
 			$rows[ $feed ] = array(
 				'term'      => $term,
 				'listed'    => in_array( mb_strtolower( $term ), array_map( 'mb_strtolower', $include ), true ),
