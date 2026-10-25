@@ -23,13 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Whether the current request may use the focus-keyword API: administrators, or the workers' user (aw_worker capability). */
-function aw_seo_api_allowed() {
-	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
-}
-
 /** Words that alone make no search phrase ("save animals", "animal welfare india"). */
-const AW_SEO_GENERIC_WORDS = array( 'animal', 'animals', 'welfare', 'india', 'indian', 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' );
+// AW_SEO_GENERIC_WORDS: AW SEO Plus → Settings (settings.php).
 
 /**
  * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable:

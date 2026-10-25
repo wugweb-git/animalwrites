@@ -49,17 +49,16 @@ function aw_sourcing_cli_phase( $assoc ) {
 }
 
 /**
- * The options a phase's backup holds (aw_sourcing_cli_backup_options filter for the phases after 2).
+ * The options a phase's backup holds (aw_sourcing_cli_backup_options filter for phases after 2).
  *
  * @param int $phase Phase.
  * @return string[]
  */
 function aw_sourcing_cli_backup_options( $phase ) {
-	$phase = (int) $phase;
-	if ( 1 === $phase ) {
-		return AW_SOURCING_BACKUP_OPTIONS;
+	if ( in_array( (int) $phase, array( 1, 2 ), true ) ) {
+		return 2 === (int) $phase ? AW_SOURCING_BACKUP_OPTIONS_2 : AW_SOURCING_BACKUP_OPTIONS;
 	}
-	return 2 === $phase ? AW_SOURCING_BACKUP_OPTIONS_2 : (array) apply_filters( 'aw_sourcing_cli_backup_options', array(), $phase );
+	return (array) apply_filters( 'aw_sourcing_cli_backup_options', array(), $phase );
 }
 
 /** A value's checksum (sha256 of its JSON). */
@@ -212,7 +211,7 @@ WP_CLI::add_command(
 			aw_sourcing_cli_p2_migrate( $dry );
 			return;
 		}
-		if ( 1 !== $phase ) { // another phase's steps (sourcing-migrate-rules.php for phase 3)
+		if ( 1 !== $phase ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_migrate_' . $phase, $assoc, $dry );
 			return;
 		}
@@ -296,7 +295,7 @@ WP_CLI::add_command(
 	'aw-sourcing verify',
 	function ( $args, $assoc ) {
 		$phase = aw_sourcing_cli_phase( $assoc );
-		if ( ! in_array( $phase, array( 1, 2 ), true ) ) {
+		if ( ! in_array( $phase, array( 1, 2 ), true ) ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_verify_' . $phase, $assoc );
 			return;
 		}
@@ -383,9 +382,12 @@ WP_CLI::add_command(
 	'aw-sourcing rollback',
 	function ( $args, $assoc ) {
 		$phase = aw_sourcing_cli_phase( $assoc );
-		if ( ! in_array( $phase, array( 1, 2 ), true ) ) {
+		if ( ! in_array( $phase, array( 1, 2 ), true ) ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_rollback_' . $phase, $assoc );
 			return;
+		}
+		if ( aw_sourcing_phase() > $phase ) {
+			WP_CLI::error( 'Phase ' . aw_sourcing_phase() . ' is migrated: roll it back first (wp aw-sourcing rollback --phase=' . aw_sourcing_phase() . ').' );
 		}
 		list( $bk, $old ) = aw_sourcing_cli_backup( $phase );
 		if ( 2 === $phase ) {

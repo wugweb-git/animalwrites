@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post types shared as articles. */
-const AW_SEO_ARTICLE_TYPES = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' );
+// AW_SEO_ARTICLE_TYPES: AW SEO Plus → Settings (settings.php).
 
 foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 	add_action(

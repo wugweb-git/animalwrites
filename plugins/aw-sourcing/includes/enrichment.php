@@ -1356,6 +1356,20 @@ function aw_enrich_policy_pass() {
 			++$n['queue'];
 			continue;
 		}
+		// The field rule as it is now (Codex, #77): a field switched off, or a row with no allowed source left, waits for
+		// a reviewer instead of being applied; an allowed row is written with its allowed sources only.
+		$rule = aw_enrich_field_rule( $r['field'] );
+		if ( empty( $rule['on'] ) ) {
+			++$n['queue'];
+			continue;
+		}
+		if ( $rule['sources'] ) {
+			$r['sources'] = aw_enrich_allowed_sources( (array) $r['sources'], $rule['sources'] );
+			if ( ! $r['sources'] ) {
+				++$n['queue'];
+				continue;
+			}
+		}
 		$svc_note = '';
 		if ( 'services' === $r['field'] ) {
 			list( $r['value'], $svc_note ) = aw_enrich_services_norm( $r['value'] );

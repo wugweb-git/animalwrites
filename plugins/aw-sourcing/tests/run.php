@@ -359,14 +359,13 @@ $p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-m
 aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
 $kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
 aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
-require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 
 // A search address with an upper-case scheme is still an address (Codex, #76).
 $kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 'label' => 'x', 'query' => 'HTTPS://news.google.com/rss/search?q=x', 'feed_id' => 'gnews-x', 'src' => array() );
 $kw_us = aw_kw_searches( $kw_up, array() );
 aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
 
-echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
+require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

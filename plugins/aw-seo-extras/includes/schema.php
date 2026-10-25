@@ -732,7 +732,7 @@ function aw_schema_language( $node ) {
 }
 
 /** Other names of the site and organisation (owner, 20 Oct 2026); Google reads the WebSite's for the site name in results. */
-const AW_SITE_ALT_NAMES = array( 'AnimalWrites', 'animalwrites.in' );
+// AW_SITE_ALT_NAMES: AW SEO Plus → Settings (settings.php).
 
 /** The site itself, with site search (shown on every page). */
 function aw_website_schema() {

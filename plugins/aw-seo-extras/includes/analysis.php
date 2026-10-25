@@ -73,10 +73,10 @@ function aw_seo_rendered_main( $id, $fresh = false, $store = true ) {
 }
 
 /** Post types analysed on their rendered <main> whatever their content (Library, Resources, campaigns, News, Opportunities, Directory). */
-const AW_SEO_RENDERED_TYPES = array( 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' );
+// AW_SEO_RENDERED_TYPES: AW SEO Plus → Settings (settings.php).
 
 /** Rank Math tests that do not fit a summary page or a profile (the AW_SEO_RENDERED_TYPES). */
-const AW_SEO_SUMMARY_SKIP_TESTS = array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' );
+// AW_SEO_SUMMARY_SKIP_TESTS: AW SEO Plus → Settings (settings.php).
 
 /**
  * The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''.
