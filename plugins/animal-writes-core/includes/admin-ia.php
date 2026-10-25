@@ -147,8 +147,6 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		// Inbox counts what is waiting in To review. Website forms are in Mail; form entries in Fluent Forms.
-		add_menu_page( 'Inbox', 'Inbox' . aw_menu_count( function_exists( 'aw_review_count' ) ? aw_review_count() : 0 ), AW_VOL_CAP, 'aw-inbox', '__return_null', 'dashicons-feedback', 26 );
 		add_menu_page( 'Classification', 'Classification', 'manage_categories', 'aw-classification', '__return_null', 'dashicons-tag', 25 );
 		foreach ( AW_SHARED_TAXONOMIES as $tax ) {
 			$t = get_taxonomy( $tax );
@@ -167,7 +165,6 @@ add_action(
 		// Hidden: Comments.
 		remove_menu_page( 'edit-comments.php' );
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
-		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
 		// Categories: only under Classification.
 		foreach ( array_keys( (array) $submenu ) as $parent ) {
 			foreach ( AW_SHARED_TAXONOMIES as $tax ) {
@@ -221,7 +218,7 @@ add_filter(
 			'edit.php?post_type=page',
 			'upload.php',
 			'aw-classification',
-			'aw-inbox',
+			'aw-sourcing-menu', // Sourcing (AW Sourcing): To review and the sourcing screens; was Inbox (removed 25 Oct 2026)
 			'mailweb', // Mail (Mailweb plugin): unread count and latest messages
 			'animal-writes', // Animal Writes: Overview, Dates, Check site, Contact links (admin-home.php)
 			'separator2',
