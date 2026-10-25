@@ -79,17 +79,12 @@ function aw_summary_words( $text ) {
 	return preg_match_all( "/[\\p{L}\\p{N}_'’-]+/u", (string) $text );
 }
 
-/** Sentences as the workers count them. */
-function aw_summary_sentences( $text ) {
-	return count( array_filter( preg_split( '/(?<=[.!?])\s+(?=["“‘(]?[A-Z0-9])/u', trim( (string) $text ) ) ) );
-}
-
 /**
  * Why a summary breaks the length or plain-text rules of its section, or ''.
  *
  * @param string $text     The summary.
  * @param string $section  news|library|research.
- * @param bool   $short_ok Below the minimum words or sentences is not a problem (auto-review: never held for it).
+ * @param bool   $short_ok Below the minimum words is not a problem (auto-review: never held for it).
  * @return string
  */
 function aw_summary_problem( $text, $section, $short_ok = false ) {
@@ -114,11 +109,7 @@ function aw_summary_problem( $text, $section, $short_ok = false ) {
 	if ( $w > (int) $sec['max_words'] ) {
 		return sprintf( 'summary over the maximum (%d words; %s allows %d)', $w, $sec['label'], (int) $sec['max_words'] );
 	}
-	$s = aw_summary_sentences( $text );
-	if ( ( $s < (int) $sec['min_sentences'] && ! $short_ok ) || $s > (int) $sec['max_sentences'] ) {
-		return sprintf( 'summary has %d sentences (%s: %d to %d)', $s, $sec['label'], (int) $sec['min_sentences'], (int) $sec['max_sentences'] );
-	}
-	return '';
+	return ''; // length is words only; no sentence count (owner, 25 Oct 2026)
 }
 
 /**
