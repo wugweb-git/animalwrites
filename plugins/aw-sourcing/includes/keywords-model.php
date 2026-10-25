@@ -472,7 +472,7 @@ function aw_kw_searches( array $r, array $sources ) {
 	if ( (int) $r['roles'] & AW_KW_ROLE_SEARCH ) {
 		$q    = '' !== (string) ( $r['query'] ?? '' ) ? (string) $r['query'] : (string) $r['label'];
 		$feed = '' !== (string) ( $r['feed_id'] ?? '' ) ? (string) $r['feed_id'] : aw_kw_feed_id( $q );
-		if ( preg_match( '#^https?://#', $q ) ) {
+		if ( preg_match( '#^https?://#i', $q ) ) {
 			$base = $sources[ $feed ] ?? array( 'name' => 'Google News – ' . $r['label'], 'kind' => 'rss', 'type' => 'news' );
 			unset( $base['on'], $base['filter'], $base['keyword_id'], $base['host'] ); // its keyword check (check) goes with it
 			$base['id'] = $feed;

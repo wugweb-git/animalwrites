@@ -149,7 +149,7 @@ function aw_sourcing_kw_write_mirrors() {
 		}
 		$r  = $rows[ $id ] ?? aw_kw_get( $id );
 		$on = $r && ( $r['roles'] & AW_KW_ROLE_SEARCH ) && $r['search_on'] && 'en' === $r['lang'];
-		if ( $on && preg_match( '#^https?://#', (string) $r['query'] ) ) {
+		if ( $on && preg_match( '#^https?://#i', (string) $r['query'] ) ) {
 			$cfg['sources'][ $i ]['url'] = (string) $r['query'];
 		}
 		$cfg['sources'][ $i ]['on'] = $on;
@@ -364,6 +364,7 @@ add_action(
 				$lang         = sanitize_key( wp_unslash( $_POST['kw_lang'] ?? 'en' ) );
 				$set['lang']  = in_array( $lang, array( 'en', 'hi', 'hinglish' ), true ) ? $lang : 'en';
 				$q            = trim( (string) wp_unslash( $_POST['kw_query'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized next, as an address or as words
+				$q            = (string) preg_replace_callback( '#^(https?)://#i', fn( $m ) => strtolower( $m[1] ) . '://', $q ); // HTTPS:// is stored as https:// (Codex)
 				$set['query'] = preg_match( '#^https?://#i', $q ) ? esc_url_raw( $q ) : sanitize_text_field( $q ); // an address keeps its %XX
 				if ( ! empty( $_POST['kw_delete'] ) ) { // the edit screen's Delete: the Sourcing and Press roles go; the record stays for Search Insights
 					$set = array( 'roles' => 0 );
