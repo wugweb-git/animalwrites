@@ -563,7 +563,7 @@ function aw_seo_share_safe_url( $url ) {
 			return array( $base . substr( $stem, strlen( $up['basedir'] ) ) . '.' . $ext, (int) ( $size[0] ?? 0 ), (int) ( $size[1] ?? 0 ), $type );
 		}
 	}
-	// Made at upload (aw_seo_share_jpeg_on_upload); built here only for files uploaded before that, or if it failed then.
+	// Made at upload (wp_generate_attachment_metadata, below); built here only for older uploads, or if it failed then.
 	$out = file_exists( $stem . '-og.jpg' ) ? $stem . '-og.jpg' : aw_seo_share_jpeg_build( $path );
 	if ( '' === $out ) {
 		return array( $url, 0, 0, '' );
@@ -655,7 +655,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function () {
 			$n = 0;
 			$f = 0;
-			foreach ( get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image/avif', 'post_status' => 'inherit', 'numberposts' => -1, 'fields' => 'ids' ) ) as $att ) {
+			// Every picture: a converted upload may keep its original type while its file is AVIF; others are skipped.
+			foreach ( get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'inherit', 'numberposts' => -1, 'fields' => 'ids' ) ) as $att ) {
 				$c  = aw_seo_share_jpegs_for( $att );
 				$n += $c;
 				$f += $c ? 1 : 0;
