@@ -30,6 +30,12 @@ const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Wr
 const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
 const AW_CL_DEVICES    = array( 'phone' => 'Phone', 'tablet' => 'Tablet', 'desktop' => 'Desktop' );
+/**
+ * Anonymous rows the open /letter call adds per campaign per minute (audit item 5, owner 25 Oct 2026, option b). No IP
+ * address is read: the cap is per campaign. The busiest day so far (24 Oct 2026) had 744 letters, about 0.5 a minute.
+ * A letter over the cap still gets its row from the sign-up call, which carries the same send_id and needs ALTCHA.
+ */
+const AW_CL_LETTER_CAP = 30;
 
 function aw_cl_table() {
 	global $wpdb;
@@ -182,6 +188,14 @@ add_action(
 					if ( ! $id ) {
 						return new WP_Error( 'aw_closed', 'Not open', array( 'status' => 404 ) );
 					}
+					// One counter per campaign: [minute, rows in that minute].
+					$min = (int) floor( time() / MINUTE_IN_SECONDS );
+					$cap = get_transient( 'aw_cl_cap_' . $id );
+					$n   = is_array( $cap ) && (int) ( $cap[0] ?? 0 ) === $min ? (int) ( $cap[1] ?? 0 ) : 0;
+					if ( $n >= AW_CL_LETTER_CAP ) {
+						return new WP_Error( 'aw_letter_busy', 'Busy. Try again in a minute.', array( 'status' => 429 ) );
+					}
+					set_transient( 'aw_cl_cap_' . $id, array( $min, $n + 1 ), 2 * MINUTE_IN_SECONDS );
 					aw_cl_record_letter( $id, $req );
 					return array( 'ok' => true );
 				},
