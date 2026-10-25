@@ -36,7 +36,7 @@ const AW_WORKERS = array(
 	),
 	'sources-sync.yml'         => array(
 		'name'         => 'Sources sync',
-		'what'         => 'Copies the site\'s source lists into sources.yaml (the workers\' fallback) when Workers use these lists is on; started from the site when the lists are saved, plus once a day',
+		'what'         => 'Copies the site\'s source lists into sources.yaml (the workers\' fallback) when Workers use these lists is on, and the summary rules and Directory schema into summary_rules.json and directory_schema.json; started from the site when the lists are saved, plus once a day',
 		'crons'        => array( '23 2 * * *' ),
 		'interval_min' => 1440,
 		'timeout_min'  => 5,
