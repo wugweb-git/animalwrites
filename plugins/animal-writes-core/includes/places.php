@@ -27,6 +27,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Post types that can have a place. */
 const AW_PLACE_TYPES = array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw_news', 'aw_legal' );
 
+/**
+ * Display names for districts whose LGD name is not the name people use (owner, 25 Oct 2026: "Angul", not "Anugola").
+ * LGD code => common name. The LGD code, the official name (->lgd) and the URL name (slug) stay as they are; matching
+ * by name accepts both. Sources: odisha.gov.in/about-us/districts (Odisha), ntr.ap.gov.in, mauganj.nic.in,
+ * jamshedpur.nic.in (East Singhbhum).
+ */
+const AW_DISTRICT_COMMON_NAMES = array(
+	344 => 'Angul',          // LGD: Anugola.
+	347 => 'Bargarh',        // LGD: Baragada.
+	350 => 'Cuttack',        // LGD: Kataka.
+	351 => 'Deogarh',        // LGD: Debagada.
+	359 => 'Kandhamal',      // LGD: Kandhamala.
+	360 => 'Kendrapara',     // LGD: Kendrapada.
+	367 => 'Nayagarh',       // LGD: Nayagada.
+	373 => 'Sundargarh',     // LGD: Sundaragada.
+	327 => 'East Singhbhum', // LGD: East Singhbum.
+	749 => 'NTR',            // LGD: Ntr.
+	766 => 'Mauganj',        // LGD: MAUGANJ.
+);
+
 /** True once items carry LGD codes (the one-time move has run). */
 function aw_places_ready() {
 	return '1' === get_option( 'aw_places_migrated' );
@@ -51,7 +71,7 @@ function aw_lgd() {
 		if ( ! $st ) {
 			continue;
 		}
-		$p = (object) array( 'term_id' => (int) ( $s['id'] ? $s['id'] : 1000000 + $s['code'] ), 'code' => (int) $s['code'], 'slug' => $s['slug'], 'name' => $s['name'], 'lgd' => $s['lgd'], 'parent' => $st->term_id, 'state' => $st->code, 'kind' => 'district', 'taxonomy' => 'aw_place' );
+		$p = (object) array( 'term_id' => (int) ( $s['id'] ? $s['id'] : 1000000 + $s['code'] ), 'code' => (int) $s['code'], 'slug' => $s['slug'], 'name' => AW_DISTRICT_COMMON_NAMES[ (int) $s['code'] ] ?? $s['name'], 'lgd' => $s['lgd'], 'parent' => $st->term_id, 'state' => $st->code, 'kind' => 'district', 'taxonomy' => 'aw_place' );
 		$d['districts'][ $p->code ]          = $p;
 		$d['by_state'][ $st->code ][ $p->code ] = $p;
 	}
