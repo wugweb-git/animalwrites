@@ -1,10 +1,10 @@
 <?php
 /**
  * Directory enrichment in WP Admin:
- * - Directory → Enrichment review: current | proposed | source | confidence, approve / reject one by one or in bulk,
+ * - Sourcing → Enrichment review (Directory → Enrichment review until 25 Oct 2026): current | proposed | source | confidence, approve / reject one by one or in bulk,
  *   filters (source, confidence, state, field, Invite to claim, Reported closed, Possible duplicate), and the change
  *   log of applied values with Undo.
- * - Settings → Sourcing → Directory enrichment: each source on or off, the live Google block's key and monthly cap,
+ * - Sourcing → Rules → Directory enrichment (Sourcing → Directory enrichment before phase 3): each source on or off, the live Google block's key and monthly cap,
  *   progress.
  * - On each listing: the source icon and name beside every field the worker set (hover: the page and the date).
  *
@@ -145,7 +145,7 @@ function aw_enrich_prov_box( $post ) {
 	if ( $flags ) {
 		echo '<p>' . esc_html( implode( ' · ', array_map( fn( $k ) => aw_enrich_flag_label( $k ), array_keys( $flags ) ) ) ) . '</p>';
 	}
-	echo '<p class="description">' . ( $chk ? 'Last checked ' . esc_html( wp_date( 'j M Y', strtotime( $chk ) ) ) . '. ' : '' ) . '<a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review&listing=' . $post->ID . '&status=all' ) ) . '">Changes and proposals</a></p>';
+	echo '<p class="description">' . ( $chk ? 'Last checked ' . esc_html( wp_date( 'j M Y', strtotime( $chk ) ) ) . '. ' : '' ) . '<a href="' . esc_url( admin_url( 'admin.php?page=aw-enrich-review&listing=' . $post->ID . '&status=all' ) ) . '">Changes and proposals</a></p>';
 	wp_nonce_field( 'aw_enrich_identity', 'aw_enrich_identity_nonce' );
 	echo '<p><label><input type="checkbox" name="aw_enrich_identity" value="1"' . checked( ! empty( $flags['identity'] ), true, false ) . '> Identity unresolved</label></p>';
 	echo '<p class="description">Tick when it is not known which organisation this listing is: enrichment then proposes nothing for it.</p>';
@@ -170,7 +170,7 @@ function aw_enrich_flag_label( $k ) {
 	return array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' )[ $k ] ?? $k;
 }
 
-/* ---------- Directory → Enrichment review ---------- */
+/* ---------- Sourcing → Enrichment review ---------- */
 
 add_action(
 	'admin_menu',
@@ -180,9 +180,9 @@ add_action(
 			global $wpdb;
 			$n = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . aw_enrich_table() . " WHERE status = 'pending'" ); // phpcs:ignore WordPress.DB
 		}
-		add_submenu_page( 'edit.php?post_type=aw_listing', 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'aw_enrich_review_page' );
+		add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'aw_menu_count' ) ? aw_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'aw_enrich_review_page' );
 	},
-	20
+	11 // after To review (review-queue.php, 10)
 );
 
 /** Approve, reject, undo (one, or the ticked rows, or every high one in the current filter). */
@@ -205,7 +205,7 @@ add_action(
 			$fn    = array( 'approve' => 'aw_enrich_approve', 'reject' => 'aw_enrich_reject', 'undo' => 'aw_enrich_undo' )[ $do ] ?? '';
 			$done += $fn && $fn( $id ) ? 1 : 0;
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-enrich-review' );
 		wp_safe_redirect( add_query_arg( 'done', $done, remove_query_arg( 'done', $back ) ) );
 		exit;
 	}
@@ -298,7 +298,7 @@ function aw_enrich_review_page() {
 	$t     = aw_enrich_table();
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} e WHERE {$where}", $args ) ); // phpcs:ignore WordPress.DB
 	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT e.* FROM {$t} e WHERE {$where} ORDER BY FIELD(e.confidence,'high','medium','low'), e.listing_id, e.id DESC LIMIT %d OFFSET %d", array_merge( $args, array( $per, ( $page - 1 ) * $per ) ) ), ARRAY_A ); // phpcs:ignore WordPress.DB
-	$base  = admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review' );
+	$base  = admin_url( 'admin.php?page=aw-enrich-review' );
 	$prog  = aw_enrich_progress();
 
 	echo '<div class="wrap"><h1>Enrichment review</h1>';
@@ -313,7 +313,7 @@ function aw_enrich_review_page() {
 	echo '</ul><br class="clear">';
 
 	// Filters.
-	echo '<form method="get" style="margin:8px 0"><input type="hidden" name="post_type" value="aw_listing"><input type="hidden" name="page" value="aw-enrich-review"><input type="hidden" name="status" value="' . esc_attr( $st ) . '">';
+	echo '<form method="get" style="margin:8px 0"><input type="hidden" name="page" value="aw-enrich-review"><input type="hidden" name="status" value="' . esc_attr( $st ) . '">';
 	$sel = function ( $name, $opts, $label ) use ( $q ) {
 		echo '<select name="' . esc_attr( $name ) . '"><option value="">' . esc_html( $label ) . '</option>';
 		foreach ( $opts as $k => $l ) {
@@ -381,7 +381,7 @@ function aw_enrich_review_page() {
 	echo '</form></div>';
 }
 
-/* ---------- Settings → Sourcing → Directory enrichment (Settings API) ---------- */
+/* ---------- Sourcing → Directory enrichment (Settings API; from phase 3 a part of Rules) ---------- */
 
 add_filter(
 	'kits_sourcing_tabs',
@@ -403,7 +403,7 @@ add_action(
 			function () {
 				$prog = aw_enrich_progress();
 				aw_sourcing_settings_marker( 'aw_enrich_sources', 'enrich' );
-				echo '<p>The enrichment worker (GitHub, after the SEO scores at 05:15 IST) fills empty listing details from these sources. ' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked; ' . (int) $prog['pending'] . ' proposals in <a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing&page=aw-enrich-review' ) ) . '">Enrichment review</a>.</p>';
+				echo '<p>The enrichment worker (GitHub, after the SEO scores at 05:15 IST) fills empty listing details from these sources. ' . (int) $prog['checked'] . ' of ' . (int) $prog['total'] . ' listings checked; ' . (int) $prog['pending'] . ' proposals in <a href="' . esc_url( admin_url( 'admin.php?page=aw-enrich-review' ) ) . '">Enrichment review</a>.</p>';
 			},
 			'aw-sourcing-enrich'
 		);

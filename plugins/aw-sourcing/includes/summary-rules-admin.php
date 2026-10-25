@@ -1,6 +1,6 @@
 <?php
 /**
- * Summary rules for the workers and the owner: GET aw/v1/summary-rules and the Settings → Sourcing → Summary rules tab.
+ * Summary rules for the workers and the owner: GET aw/v1/summary-rules and the Sourcing → Summary rules tab.
  * The rules themselves (option aw_summary_rules) and the site's own use of them stay in core (summary-rules.php).
  *
  * @package aw-sourcing
@@ -40,7 +40,7 @@ function aw_summary_rules_payload() {
 	return $out;
 }
 
-/* ---------- Settings → Sourcing → Summary rules (from phase 3: Rules → Summary rules) ---------- */
+/* ---------- Sourcing → Summary rules (from phase 3: Rules → Summary rules) ---------- */
 
 add_filter(
 	'kits_sourcing_tabs',
@@ -103,7 +103,7 @@ add_action(
 	'admin_init',
 	function () {
 		register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_summary_rules_sanitize', 'show_in_rest' => false ) );
-		if ( 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the form is drawn only on Settings → Sourcing
+		if ( 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the form is drawn only on Sourcing
 			return;
 		}
 		$page = 'aw-sourcing-summary';
@@ -115,7 +115,7 @@ add_action(
 			function () {
 				aw_sourcing_settings_marker( AW_SUMMARY_RULES_OPTION, 'summary' );
 				if ( ! ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) ) { // from phase 3 the text is in the screen's Help tab
-					echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Inbox → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) aw_summary_rules()['description_max_chars'] . ' characters).</p>';
+					echo '<p>One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules (GET aw/v1/summary-rules), and the site holds an item whose summary is over the maximum or not plain text in Sourcing → To review. A short summary is never held: the workers read the source again, then other coverage of the same story, and publish the best summary that follows the rules. A summary is never shorter than the search description, which is its lead sentence (at most ' . (int) aw_summary_rules()['description_max_chars'] . ' characters).</p>';
 				}
 			},
 			$page

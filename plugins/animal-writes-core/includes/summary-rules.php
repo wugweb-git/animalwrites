@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Summary rules (owner, 15 Oct 2026): the one rule set for the summaries of News, the Library
+ * Sourcing → Summary rules (owner, 15 Oct 2026): the one rule set for the summaries of News, the Library
  * and Resources research, kept in one place.
  *
  * - Option aw_summary_rules: the owner's edits over the defaults (data/summary-rules-default.json, the same file as

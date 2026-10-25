@@ -158,7 +158,7 @@ add_action(
 			return;
 		}
 		if ( $plan['conflicts'] ) {
-			WP_CLI::error( 'Not migrated: give every word above a keyword record with its role first (Settings → Sourcing → Keywords).' );
+			WP_CLI::error( 'Not migrated: give every word above a keyword record with its role first (Sourcing → Keywords).' );
 		}
 
 		// The record first; then the archive, read back and checked; only then the phase. No option is changed.

@@ -1,6 +1,6 @@
 <?php
 /**
- * Inbox → To review: one list of everything that came in automatically and is waiting for a person — news, Library
+ * Sourcing → To review (Inbox → To review until 25 Oct 2026): one list of everything that came in automatically and is waiting for a person — news, Library
  * items, opportunities and press — with why each was held (aw_review). Publish puts an item live; Reject moves it to
  * Drafts with a note (nothing is deleted). One at a time or several together. Replaces "Press to review".
  *
@@ -10,6 +10,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/** Who reviews: the To review screen and its Publish and Reject. */
+const AW_REVIEW_CAP = 'edit_others_posts';
 
 /** Types in the queue: post type => label. */
 const AW_REVIEW_TYPES = array(
@@ -55,7 +58,7 @@ function aw_review_items( $type = '' ) {
 function aw_review_count() {
 	static $n = null;
 	if ( null === $n ) {
-		$cached = get_transient( 'aw_review_count' ); // cached 5 minutes; aw_inbox_counts_flush() (admin-ia.php) clears it (audit 9)
+		$cached = get_transient( 'aw_review_count' ); // cached 5 minutes; aw_review_count_flush() clears it (audit 9)
 		if ( false === $cached ) {
 			$cached = count( aw_review_items() );
 			set_transient( 'aw_review_count', $cached, 5 * MINUTE_IN_SECONDS );
@@ -65,15 +68,43 @@ function aw_review_count() {
 	return $n;
 }
 
+/** Forget the cached To review count (a review item changed). Moved from Core's admin-ia.php (aw_inbox_counts_flush), 25 Oct 2026. */
+function aw_review_count_flush() {
+	delete_transient( 'aw_review_count' );
+}
+add_action(
+	'transition_post_status',
+	function ( $new, $old, $post ) {
+		if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
+			aw_review_count_flush();
+		}
+	},
+	10,
+	3
+);
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_review_hook ) {
+	add_action(
+		$aw_review_hook,
+		function ( $mid, $id, $key ) {
+			if ( 'aw_review' === $key ) {
+				aw_review_count_flush();
+			}
+		},
+		10,
+		3
+	);
+}
+unset( $aw_review_hook );
+
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( 'aw-inbox', 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), 'edit_others_posts', 'aw-review', 'aw_review_page' );
+		$hook = add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'aw_menu_count' ) ? aw_menu_count( aw_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'aw_review_page' );
 		if ( $hook ) { // Screen options: items per page.
 			add_action( 'load-' . $hook, fn() => add_screen_option( 'per_page', array( 'label' => 'Items per page', 'default' => 50, 'option' => 'aw_review_per_page' ) ) );
 		}
 	},
-	21
+	10 // after the menu and its Overview (admin-menu.php, 9)
 );
 
 /**
@@ -113,7 +144,7 @@ function aw_review_apply( $ids, $action ) {
 add_action(
 	'admin_post_aw_review',
 	function () {
-		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_review' ) ) {
+		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_review' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		// Two action menus (above and below the list): whichever one was set wins.
@@ -210,7 +241,7 @@ add_action(
 	function () {
 		$type   = sanitize_key( $_GET['post_type'] ?? '' );
 		$status = sanitize_key( $_GET['status'] ?? '' );
-		if ( ! current_user_can( 'edit_others_posts' ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$ids = get_posts( array( 'post_type' => $type, 'post_status' => $status, 'fields' => 'ids', 'numberposts' => -1 ) );

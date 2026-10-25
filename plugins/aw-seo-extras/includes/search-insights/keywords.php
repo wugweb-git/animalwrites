@@ -443,7 +443,7 @@ function aw_si_sync_roles(): array {
 	}
 
 	// Sourcing: read only, and only when AW Sourcing is active (the section hides otherwise). From sourcing phase 2 the
-	// Include role is set on the records themselves (Settings → Sourcing → Keywords) and is never rebuilt here.
+	// Include role is set on the records themselves (Sourcing → Keywords) and is never rebuilt here.
 	$sourcing = array();
 	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
 	if ( $p2_busy ) {

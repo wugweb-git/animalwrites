@@ -36,7 +36,7 @@ function aw_sourcing_health_test() {
 		(int) ( $hb['sources_failed'] ?? 0 )
 	) : ''; // the problem list says so
 
-	$actions = '<a href="' . esc_url( admin_url( 'options-general.php?page=aw-sourcing' ) ) . '">Settings → Sourcing</a>';
+	$actions = '<a href="' . esc_url( admin_url( aw_src_overview_path() ) ) . '">Sourcing → Overview</a>';
 	if ( ! empty( $hb['last_link'] ) ) {
 		$actions .= ' · <a href="' . esc_url( (string) $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run on GitHub<span class="screen-reader-text"> (opens in a new tab)</span></a>';
 	}

@@ -1,7 +1,7 @@
 <?php
 /**
  * The sourcing lists (option aw_sources, seeded once from data/sources-seed.json). Kept in core: the front end reads
- * the section categories and tags from them (tags.php). The Settings → Sourcing tabs that edit them are in aw-sourcing.
+ * the section categories and tags from them (tags.php). The Sourcing tabs that edit them are in aw-sourcing.
  *
  * @package animal-writes-core
  */

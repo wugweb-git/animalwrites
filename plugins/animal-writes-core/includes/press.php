@@ -426,7 +426,7 @@ function aw_press_campaign_tags( $id, $tags ) {
 	}
 }
 
-// Pending press items are reviewed in Inbox → To review (review-queue.php): publish = approve, Move to Trash = reject.
+// Pending press items are reviewed in Sourcing → To review (review-queue.php): publish = approve, Move to Trash = reject.
 add_filter( 'manage_aw_press_posts_columns', fn( $c ) => array( 'cb' => $c['cb'], 'aw_thumb' => '', 'title' => 'Headline', 'aw_platform' => 'Platform', 'aw_account' => 'Publisher / account', 'aw_date' => 'Date', 'aw_query' => 'Found by', 'aw_link' => 'Link' ) );
 add_action(
 	'manage_aw_press_posts_custom_column',

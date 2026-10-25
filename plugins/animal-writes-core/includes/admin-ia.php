@@ -110,23 +110,7 @@ add_filter(
 
 /* ---------- Menus ---------- */
 
-/** Forget the cached To-review count on the Inbox menu (a review item changed). */
-function aw_inbox_counts_flush() {
-	delete_transient( 'aw_review_count' );
-}
-add_action( 'transition_post_status', function ( $new, $old, $post ) {
-	if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press' ), true ) ) {
-		aw_inbox_counts_flush();
-	}
-}, 10, 3 );
-foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_ia_hook ) {
-	add_action( $aw_ia_hook, function ( $mid, $id, $key ) {
-		if ( 'aw_review' === $key ) {
-			aw_inbox_counts_flush();
-		}
-	}, 10, 3 );
-}
-unset( $aw_ia_hook );
+// The To review count's cache is cleared by AW Sourcing (review-queue.php aw_review_count_flush), since 25 Oct 2026.
 
 /** A count bubble like WordPress's own. */
 function aw_menu_count( $n ) {

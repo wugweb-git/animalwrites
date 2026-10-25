@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Categories as a core list table (owner, 24 Oct 2026): one row per WordPress category, plus
+ * Sourcing → Categories as a core list table (owner, 24 Oct 2026): one row per WordPress category, plus
  * any slug in aw_sources['categories'] with no category behind it ("No such category"). Views All / With words /
  * Without words, search, sortable name and items, pagination with a screen option, row actions Edit words / Add words
  * and View items. Read-only: the words are edited on their own screen (sourcing-terms-admin.php). Loaded only when the
@@ -20,7 +20,7 @@ class AW_Sourcing_Categories_Table extends WP_List_Table {
 	private $all = array();
 
 	public function __construct() {
-		parent::__construct( array( 'singular' => 'category', 'plural' => 'categories', 'ajax' => false, 'screen' => 'settings_page_aw-sourcing' ) );
+		parent::__construct( array( 'singular' => 'category', 'plural' => 'categories', 'ajax' => false, 'screen' => AW_SRC_SCREEN ) );
 		$this->all = self::build();
 	}
 
@@ -66,7 +66,7 @@ class AW_Sourcing_Categories_Table extends WP_List_Table {
 	}
 
 	private function url( array $args = array() ) {
-		return add_query_arg( $args, admin_url( 'options-general.php?page=aw-sourcing&tab=categories' ) );
+		return add_query_arg( $args, admin_url( 'admin.php?page=aw-sourcing&tab=categories' ) );
 	}
 
 	private function view() {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings → Sourcing → Sources (owner, 24 Oct 2026): one row per host, publishers and press sites together. This
+ * Sourcing → Sources (owner, 24 Oct 2026): one row per host, publishers and press sites together. This
  * file has the tab's screen (list and the Add New / Edit form), the figures it shows and how they are gathered:
  *
  * - Items: fetched in 30 days and published (all time), from one query over the sourced types' aw_source_url meta,
@@ -12,7 +12,6 @@
  *   run, never on page load) into the option aw_source_site_meta (autoload off).
  * - Domain Rating: publisher record keys dr and dr_at, set by `wp aw-sourcing import-dr <file.json>` (values from
  *   Ahrefs' free Domain Rating lookup, run by Claude).
- * - Old addresses of the Publishers, Library sources and Opportunity sources tabs redirect (301) to the new tabs.
  *
  * Status changes, short names and press sites save through the screen's admin-post handler (sourcing-policy.php),
  * logged in the Change log as before (tab publishers; press-site changes as tab press).
@@ -359,51 +358,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 }
 
-/*
- * ---------- Old addresses: Publishers → Sources (24 Oct 2026); Feeds, Library and Opportunity sources → Sources →
- * Feeds; Relay → Sources → Relay log (25 Oct 2026) ----------
- */
-
-add_action(
-	'admin_init',
-	function () {
-		global $pagenow;
-		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a GET redirect, nothing saved; each value is sanitized below.
-		if ( 'options-general.php' !== $pagenow || 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) || 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
-			return;
-		}
-		$map = array(
-			'publishers'    => array( 'tab' => 'sources' ),
-			'feeds'         => array( 'tab' => 'sources', 'view' => 'feeds' ),
-			'library'       => array( 'tab' => 'sources', 'view' => 'feeds', 'type' => 'legal' ),
-			'opportunities' => array( 'tab' => 'sources', 'view' => 'feeds', 'type' => 'opportunity' ),
-			'relay'         => array( 'tab' => 'sources', 'view' => 'relay-log' ),
-		);
-		$tab = sanitize_key( $_GET['tab'] ?? '' );
-		if ( ! isset( $map[ $tab ] ) ) {
-			return;
-		}
-		$q = array();
-		foreach ( wp_unslash( $_GET ) as $k => $v ) { // every other argument kept (status, edit, s, orderby, paged...)
-			if ( is_scalar( $v ) ) {
-				$q[ sanitize_key( $k ) ] = sanitize_text_field( (string) $v );
-			}
-		}
-		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( 'publishers' !== $tab && isset( $q['edit'] ) ) { // a feed's edit address: on Sources, edit= is a host
-			$q['feed'] = $q['edit'];
-			unset( $q['edit'], $q['view'] );
-			$map[ $tab ] = array( 'tab' => 'sources' ) + ( isset( $map[ $tab ]['type'] ) ? array( 'type' => $map[ $tab ]['type'] ) : array() );
-		}
-		$q = array_merge( $q, $map[ $tab ] );
-		wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $q ), admin_url( 'options-general.php' ) ), 301 );
-		exit;
-	}
-);
-
 /* ---------- The Sources tab ---------- */
 
-/** The Sources tab's screen: list (''), feeds (all feeds), relay-log, or an edit form (edit=host, feed=id). */
+/** The Sources tab's screen: list (''), feeds (all feeds), or an edit form (edit=host, feed=id). */
 function aw_sourcing_sources_screen() {
 	// phpcs:disable WordPress.Security.NonceVerification -- which screen to show, nothing saved.
 	if ( '' !== sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ) ) {
@@ -414,12 +371,12 @@ function aw_sourcing_sources_screen() {
 	}
 	$v = sanitize_key( $_GET['view'] ?? '' );
 	// phpcs:enable WordPress.Security.NonceVerification
-	return in_array( $v, array( 'feeds', 'relay-log' ), true ) ? $v : '';
+	return 'feeds' === $v ? $v : ''; // the Relay log is its own screen (Sourcing → Relay log, relay.php)
 }
 
 // Help tabs (core contextual help): the screen's explanation and what each column means.
 add_action(
-	'load-settings_page_aw-sourcing',
+	'load-' . AW_SRC_SCREEN,
 	function () {
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! in_array( $tab, array( '', 'sources' ), true ) ) {
@@ -427,7 +384,7 @@ add_action(
 		}
 		$screen = get_current_screen();
 		$view   = aw_sourcing_sources_screen();
-		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. The Relay log view lists every such request (the last 200), and the list shows each source\'s last result.</p>'
+		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. Sourcing → Relay log lists every such request (the last 200), and the list shows each source\'s last result.</p>'
 			. ( aw_sourcing_phase() < 1 ? '<p>Until the phase 1 migration (<code>wp aw-sourcing migrate --phase=1</code>) the relay list is the list of before: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p>' : '' );
 		$screen->add_help_tab(
 			array(
@@ -480,7 +437,7 @@ function aw_sourcing_publishers_table() {
 	return $table;
 }
 
-/** The Sources tab: the list, the Feeds view, the Relay log view, or one source or feed to add or edit. */
+/** The Sources tab: the list, the Feeds view, or one source or feed to add or edit. */
 function aw_sourcing_sources_tab() {
 	$screen = aw_sourcing_sources_screen();
 	if ( 'edit' === $screen ) {
@@ -502,12 +459,6 @@ function aw_sourcing_sources_tab() {
 		$table->views();
 		echo '<br class="clear">';
 		aw_sources_tab();
-		return;
-	}
-	if ( 'relay-log' === $screen ) {
-		$table->views();
-		echo '<br class="clear">';
-		aw_relay_log_view();
 		return;
 	}
 	$table->prepare_items();
@@ -538,7 +489,7 @@ function aw_sourcing_source_form( $host ) {
 	$rec   = $new ? null : ( $all[ $host ] ?? null );
 	$press = in_array( $host, aw_sourcing_press_hosts(), true );
 	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
-	$back  = admin_url( 'options-general.php?page=aw-sourcing&tab=sources' );
+	$back  = admin_url( 'admin.php?page=aw-sourcing&tab=sources' );
 	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
 		echo '<div class="notice notice-error inline"><p>No such source.</p></div><p><a href="' . esc_url( $back ) . '">Back to Sources</a></p>';
 		return;
@@ -582,7 +533,7 @@ function aw_sourcing_source_form( $host ) {
 	if ( $new ) {
 		return;
 	}
-	echo '<h2 class="wp-heading-inline">Feeds</h2> <a href="' . esc_url( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'feed' => 'new', 'host' => $host ), admin_url( 'options-general.php' ) ) ) . '" class="page-title-action">Add New Feed</a><hr class="wp-header-end">';
+	echo '<h2 class="wp-heading-inline">Feeds</h2> <a href="' . esc_url( add_query_arg( array( 'page' => 'aw-sourcing', 'tab' => 'sources', 'feed' => 'new', 'host' => $host ), admin_url( 'admin.php' ) ) ) . '" class="page-title-action">Add New Feed</a><hr class="wp-header-end">';
 	aw_sources_tab( $host );
 }
 

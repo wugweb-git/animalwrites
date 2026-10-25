@@ -57,7 +57,7 @@ function aw_enrich_sources() {
 	);
 }
 
-/** Switched-on sources (Settings → Sourcing → Directory enrichment). */
+/** Switched-on sources (Sourcing → Directory enrichment). */
 function aw_enrich_sources_on() {
 	$saved = get_option( 'aw_enrich_sources' );
 	$out   = array();
@@ -1339,6 +1339,8 @@ function aw_enrich_duplicates( $lid ) {
  * Apply the owner's rule (21 Oct 2026) to proposals already waiting: a sourced value fills an empty field; a second
  * phone, email or website is kept next to the first, both unverified. Rows of claimed or verified listings and low
  * confidence rows stay for review. wp eval 'echo aw_enrich_policy_pass();'
+ *
+ * A server tool, run by hand with wp eval: no code calls it, on purpose (audit, 25 Oct 2026). Keep it.
  *
  * @return string What was done.
  */
