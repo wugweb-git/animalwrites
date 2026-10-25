@@ -333,15 +333,18 @@ function aw_enrich_restore( $lid, $field, $snap ) {
  *
  * @param int    $lid   Listing ID.
  * @param string $field Field key.
- * @param mixed  $value Value (string; list for hours, services, photos).
+ * @param mixed  $value   Value (string; list for hours, services, photos).
+ * @param string $mode    apply or both (aw_enrich_mode()).
+ * @param array  $sources The row's sources: a picture is fetched with the page it was found on as the Referer.
  * @return bool
  */
-function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
+function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = array() ) {
 	$def = aw_enrich_fields()[ $field ] ?? null;
 	if ( ! $def ) {
 		return false;
 	}
 	$name = get_the_title( $lid );
+	$page = aw_enrich_source_page( $sources );
 	switch ( $def[1] ) {
 		case 'phones':
 			$num  = trim( sanitize_text_field( (string) $value ) );
@@ -381,7 +384,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 			aw_set_listing_list( $lid, 'aw_opening_hours', $rows );
 			break;
 		case 'services':
-			$slugs = array_values( array_intersect( array_map( 'sanitize_title', (array) $value ), aw_service_slugs() ) );
+			$slugs = aw_enrich_services_norm( $value )[0];
 			if ( ! $slugs ) {
 				return false;
 			}
@@ -393,7 +396,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 			wp_update_post( array( 'ID' => $lid, 'post_excerpt' => sanitize_textarea_field( (string) $value ) ) );
 			break;
 		case 'logo':
-			$att = aw_enrich_sideload( (string) $value, $lid, $name . ' logo' );
+			$att = aw_enrich_sideload( (string) $value, $lid, $name . ' logo', $page );
 			if ( ! $att ) {
 				return false;
 			}
@@ -402,7 +405,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 		case 'photos':
 			$ids = array();
 			foreach ( array_slice( (array) $value, 0, 6 ) as $url ) {
-				$att = aw_enrich_sideload( (string) $url, $lid, $name );
+				$att = aw_enrich_sideload( (string) $url, $lid, $name, $page );
 				if ( $att ) {
 					$ids[] = $att;
 				}
@@ -436,15 +439,61 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply' ) {
 	return true;
 }
 
-/** A picture from a public page into the Media Library (alt = the organisation's name). */
-function aw_enrich_sideload( $url, $lid, $alt ) {
+/**
+ * The page a value was found on: the first source address that is not Google's (Google Maps is never where a picture
+ * is published). '' when none.
+ *
+ * @param array $sources Row sources ({key, name, url, fetched_at} each).
+ * @return string
+ */
+function aw_enrich_source_page( $sources ) {
+	foreach ( (array) $sources as $s ) {
+		if ( ! is_array( $s ) ) {
+			continue;
+		}
+		$u = (string) ( $s['url'] ?? '' );
+		if ( 'google_places' !== ( $s['key'] ?? '' ) && preg_match( '#^https?://#i', $u ) ) {
+			return esc_url_raw( $u );
+		}
+	}
+	return '';
+}
+
+/**
+ * Download a picture as a browser opening it from the page it is on would (owner, 25 Oct 2026): a normal browser
+ * User-Agent and that page as the Referer, because some sites (smptindia.org, swordodisha, vardodisha) refuse other
+ * requests with 403. Nothing else is changed: the same download as before (aw_source_download: wp_safe_remote_get,
+ * redirects, 20 s, 15 MB), then the type and size checks in aw_enrich_sideload. Returns a temporary file or WP_Error.
+ *
+ * @param string $url     Picture address.
+ * @param string $referer Page the picture was found on ('' for none).
+ * @return string|WP_Error
+ */
+function aw_enrich_download( $url, $referer = '' ) {
+	$headers = array( 'Accept' => 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5' );
+	if ( '' !== $referer ) {
+		$headers['Referer'] = $referer;
+	}
+	return aw_source_download( $url, 20, 15 * MB_IN_BYTES, $headers, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36' ); // cc0-images.php
+}
+
+/**
+ * A picture from a public page into the Media Library (alt = the organisation's name).
+ *
+ * @param string $url     Picture address.
+ * @param int    $lid     Listing ID.
+ * @param string $alt     Alt text.
+ * @param string $referer Page the picture was found on (sent as the Referer).
+ * @return int Attachment ID, or 0.
+ */
+function aw_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 	if ( ! preg_match( '#^https?://#i', $url ) ) { // http too: the picture is copied into Media, never linked
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	require_once ABSPATH . 'wp-admin/includes/media.php';
-	$tmp = aw_source_download( $url, 20 ); // cc0-images.php; core download_url() fails fatally on a doubled content-type
+	$tmp = aw_enrich_download( $url, $referer ); // core download_url() fails fatally on a doubled content-type
 	if ( is_wp_error( $tmp ) ) {
 		return 0;
 	}
@@ -696,7 +745,7 @@ function aw_enrich_approve( $id ) {
 		return true;
 	}
 	$snap = aw_enrich_snapshot( $lid, $r['field'] );
-	if ( ! aw_enrich_write( $lid, $r['field'], $r['value'] ) ) {
+	if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], 'apply', (array) $r['sources'] ) ) {
 		aw_enrich_set_status( $id, 'rejected', 'Could not be applied (unusable value or picture)' );
 		return false;
 	}
@@ -825,6 +874,52 @@ const AW_ENRICH_LIST_FIELDS = array( 'services', 'animals', 'areas_served' );
 function aw_enrich_list_items( $v ) {
 	$items = is_array( $v ) ? $v : explode( ',', (string) $v );
 	return array_values( array_filter( array_map( fn( $s ) => trim( (string) $s ), $items ), 'strlen' ) );
+}
+
+/**
+ * Words the worker uses for a service that are not services on the site, and the service each one is stored as
+ * (owner, 25 Oct 2026). "wildlife-rescue" and "emergency-rescue" are listing types, not services (aw_service_slugs()).
+ */
+const AW_ENRICH_SERVICE_MAP = array(
+	'wildlife-rescue'  => 'rescue',
+	'emergency-rescue' => 'rescue',
+);
+
+/**
+ * A services proposal as the site's service slugs: known ones kept, mapped ones (AW_ENRICH_SERVICE_MAP) replaced,
+ * others dropped. Returns the slugs and a note for the change-log row naming what was mapped or dropped ('' if none).
+ *
+ * @param mixed $value Proposed services (list or comma-separated text).
+ * @return array{0: string[], 1: string}
+ */
+function aw_enrich_services_norm( $value ) {
+	$known  = aw_service_slugs();
+	$out    = array();
+	$mapped = array();
+	$drop   = array();
+	foreach ( aw_enrich_list_items( $value ) as $item ) {
+		$slug = sanitize_title( $item );
+		if ( isset( AW_ENRICH_SERVICE_MAP[ $slug ] ) && in_array( AW_ENRICH_SERVICE_MAP[ $slug ], $known, true ) ) {
+			$mapped[] = $slug . ' as ' . AW_ENRICH_SERVICE_MAP[ $slug ];
+			$slug     = AW_ENRICH_SERVICE_MAP[ $slug ];
+		} elseif ( ! in_array( $slug, $known, true ) ) {
+			if ( '' !== $slug ) {
+				$drop[] = $slug;
+			}
+			continue;
+		}
+		if ( ! in_array( $slug, $out, true ) ) {
+			$out[] = $slug;
+		}
+	}
+	$note = array();
+	if ( $mapped ) {
+		$note[] = 'Stored as site services: ' . implode( ', ', array_unique( $mapped ) );
+	}
+	if ( $drop ) {
+		$note[] = 'Not services on the site, dropped: ' . implode( ', ', array_unique( $drop ) );
+	}
+	return array( $out, implode( '. ', $note ) );
 }
 
 /**
@@ -1096,6 +1191,14 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // on the never-publish list (privacy takedown)
 			continue;
 		}
+		$svc_note = '';
+		if ( 'services' === $field ) { // the site's own service slugs; what was mapped or dropped goes into the row's note
+			list( $value, $svc_note ) = aw_enrich_services_norm( $value );
+			if ( ! $value ) {
+				$out['skipped'][] = $field;
+				continue;
+			}
+		}
 		$value = aw_enrich_union( $lid, $field, $value ); // List fields: what is there plus what was found.
 		if ( aw_enrich_has_value( $lid, $field, $value ) ) {
 			$out['skipped'][] = $field;
@@ -1110,8 +1213,8 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
 		if ( 'queue' !== $mode ) {
 			$snap = aw_enrich_snapshot( $lid, $field );
-			if ( aw_enrich_write( $lid, $field, $value, $mode ) ) {
-				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, 'both' === $mode ? aw_enrich_both_note( $field ) : '' );
+			if ( aw_enrich_write( $lid, $field, $value, $mode, $srcs ) ) {
+				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, trim( $svc_note . ( 'both' === $mode ? '. ' . aw_enrich_both_note( $field ) : '' ), '. ' ) );
 				aw_enrich_supersede( $lid, $field, $rid );
 				$out['applied'][] = $field;
 				continue;
@@ -1121,7 +1224,7 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		}
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
 		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
-		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, $note );
+		aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
 		$out['queued'][] = $field;
 	}
 
@@ -1153,6 +1256,21 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		delete_post_meta( $lid, 'aw_enrich_google_pending' );
 	}
 	return $out + array( 'protected' => $protected );
+}
+
+/**
+ * When enrichment last changed this listing: the newest applied row (auto-applied or approved; undone rows do not
+ * count), as Y-m-d H:i:s site time, or ''. Used by the profile's "Last updated" (owner, 25 Oct 2026).
+ *
+ * @param int $lid Listing ID.
+ * @return string
+ */
+function aw_enrich_last_applied( $lid ) {
+	if ( ! get_option( 'aw_enrich_db' ) ) {
+		return '';
+	}
+	global $wpdb;
+	return (string) $wpdb->get_var( $wpdb->prepare( 'SELECT MAX( COALESCE( decided_at, created ) ) FROM ' . aw_enrich_table() . " WHERE listing_id = %d AND status IN ('auto-applied','approved')", $lid ) ); // phpcs:ignore WordPress.DB
 }
 
 /** Another listing with the same place ID or Darpan ID (stored or waiting in the queue): flag both, never merge. */
@@ -1202,6 +1320,15 @@ function aw_enrich_policy_pass() {
 			++$n['queue'];
 			continue;
 		}
+		$svc_note = '';
+		if ( 'services' === $r['field'] ) {
+			list( $r['value'], $svc_note ) = aw_enrich_services_norm( $r['value'] );
+			if ( ! $r['value'] ) { // none of the words is a service on the site: nothing to apply
+				aw_enrich_set_status( (int) $r['id'], 'superseded', 'Nothing to apply. ' . $svc_note );
+				$n['skip']++;
+				continue;
+			}
+		}
 		$r['value'] = aw_enrich_union( $lid, $r['field'], $r['value'] );
 		if ( aw_enrich_has_value( $lid, $r['field'], $r['value'] ) ) {
 			aw_enrich_set_status( (int) $r['id'], 'superseded', 'Already on the listing' );
@@ -1214,11 +1341,11 @@ function aw_enrich_policy_pass() {
 			continue;
 		}
 		$snap = aw_enrich_snapshot( $lid, $r['field'] );
-		if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], $mode ) ) {
+		if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], $mode, (array) $r['sources'] ) ) {
 			$n['queue']++;
 			continue;
 		}
-		$wpdb->update( $t, array( 'value' => wp_json_encode( $r['value'] ), 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => 'both' === $mode ? aw_enrich_both_note( $r['field'] ) : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
+		$wpdb->update( $t, array( 'value' => wp_json_encode( $r['value'] ), 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => substr( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . ( 'both' === $mode ? aw_enrich_both_note( $r['field'] ) : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), 0, 190 ) ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
 		aw_enrich_supersede( $lid, $r['field'], (int) $r['id'] );
 		$n[ $mode ]++;
 	}

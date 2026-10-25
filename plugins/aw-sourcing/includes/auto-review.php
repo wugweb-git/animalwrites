@@ -45,7 +45,9 @@ function aw_title_places( $title ) {
 		if ( function_exists( 'aw_lgd' ) ) {
 			$lgd = aw_lgd();
 			foreach ( $lgd['districts'] as $p ) {
-				$index[ aw_place_key( $p->name ) ][] = array( 'd' . $p->code, 's' . $p->state );
+				foreach ( array_unique( array( aw_place_key( $p->name ), aw_place_key( $p->lgd ) ) ) as $k ) { // common and LGD spelling (Angul, Anugola)
+					$index[ $k ][] = array( 'd' . $p->code, 's' . $p->state );
+				}
 			}
 			foreach ( $lgd['states'] as $p ) {
 				$index[ aw_place_key( $p->name, 'state' ) ][] = array( '', 's' . $p->code );

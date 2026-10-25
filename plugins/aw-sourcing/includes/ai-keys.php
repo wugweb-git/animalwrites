@@ -214,9 +214,23 @@ add_action(
 add_action(
 	'load-settings_page_aw-sourcing',
 	function () {
-		if ( 'ai' === sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown
-			add_screen_option( 'per_page', array( 'label' => 'Keys per page', 'default' => 100, 'option' => 'aw_ai_keys_per_page' ) );
+		if ( 'ai' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown
+			return;
 		}
+		if ( ! isset( $_GET['overview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_screen_option( 'per_page', array( 'label' => 'Keys per page', 'default' => 100, 'option' => 'aw_ai_keys_per_page' ) );
+			return;
+		}
+		// Keys overview (owner, 25 Oct 2026): help in the core Help tab.
+		get_current_screen()->add_help_tab(
+			array(
+				'id'      => 'aw-ai-overview',
+				'title'   => 'Keys overview',
+				'content' => '<p>A read-only view of every key saved on the AI models tab and of what each worker gets. Keys show only their last 4 characters. To change a key, use Edit on the AI models tab.</p>'
+					. '<p><strong>Attached to</strong>: the workers a key is for. <em>All workers</em> means the key is attached to none, so every worker may use it, also workers added later.</p>'
+					. '<p><strong>Usable keys per worker</strong>: what GET aw/v1/ai-keys serves that worker now: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys (such as Firecrawl). A key that is not checked yet, refused or out of credit is not counted.</p>',
+			)
+		);
 	}
 );
 add_filter( 'set_screen_option_aw_ai_keys_per_page', fn( $keep, $option, $value ) => max( 1, min( 500, (int) $value ) ), 10, 3 );
@@ -514,7 +528,7 @@ add_action(
 			'/ai-keys',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => fn() => current_user_can( 'manage_options' ) || 'ingest' === wp_get_current_user()->user_login,
+				'permission_callback' => fn() => current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' ),
 				// Optional ?worker=<id> (the workflow file without .yml; "sourcing.yml" works too): only that worker's keys.
 				'args'                => array(
 					'worker' => array(
@@ -990,6 +1004,10 @@ function aw_ai_keys_screen() {
 		aw_ai_key_edit_screen( $edit );
 		return;
 	}
+	if ( isset( $_GET['overview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which screen is shown
+		aw_ai_keys_overview_screen();
+		return;
+	}
 	$rows = aw_ai_rows();
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$added = absint( $_GET['saved'] ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -1031,7 +1049,7 @@ function aw_ai_keys_screen() {
 			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html( sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $skip ), $skip ) ) . '</p></div>';
 		}
 	}
-	echo '<p>Keys the workers use, tried from the top down. Each key is for every worker unless it is attached to some (Edit, or the bulk actions Attach to worker / Detach from worker). <a href="' . esc_url( aw_ai_keys_url( array( 'edit' => 'new' ) ) ) . '" class="page-title-action">Add New Key</a></p>';
+	echo '<p>Keys the workers use, tried from the top down. Each key is for every worker unless it is attached to some (Edit, or the bulk actions Attach to worker / Detach from worker). <a href="' . esc_url( aw_ai_keys_url( array( 'edit' => 'new' ) ) ) . '" class="page-title-action">Add New Key</a> <a href="' . esc_url( aw_ai_keys_url( array( 'overview' => 1 ) ) ) . '" class="page-title-action">Keys overview</a></p>';
 	aw_ai_overview( $rows );
 	aw_ai_free_caps_table();
 	aw_ai_tier_summary( $rows );
@@ -1050,6 +1068,41 @@ function aw_ai_keys_screen() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_ai_keys_list">';
 	$table->display();
 	echo '</form>';
+}
+
+/**
+ * Keys overview (&tab=ai&overview=1, owner 25 Oct 2026): read-only. Every saved key as "…last4 (provider, label)" with
+ * its status and the workers it is attached to, then per worker how many usable keys aw_ai_served() gives it.
+ * Never more of a key than its last 4 characters.
+ */
+function aw_ai_keys_overview_screen() {
+	$workers = aw_workers_all();
+	echo '<h2>Keys overview</h2><p>Read-only. <a href="' . esc_url( aw_ai_keys_url() ) . '">Back to the keys</a></p>';
+	$keys = array();
+	foreach ( aw_ai_rows() as $r ) {
+		$ws     = aw_ai_row_workers( $r );
+		$names  = array_map( fn( $id ) => isset( $workers[ $id ] ) ? $workers[ $id ]['name'] : $id . ' (no longer exists)', $ws );
+		$keys[] = array(
+			'key'     => '<code>' . esc_html( aw_ai_key_short( $r ) ) . '</code>',
+			'status'  => aw_ai_status_badge( (string) $r['status'] ),
+			'workers' => esc_html( $ws ? implode( ', ', $names ) : 'All workers' ),
+			'_sort'   => array( 'key' => aw_ai_key_short( $r ), 'status' => (string) $r['status'], 'workers' => $ws ? implode( ', ', $names ) : '' ),
+		);
+	}
+	echo '<h3>Keys</h3>';
+	aw_sourcing_simple_table( 'ai-overview-keys', array( 'key' => 'Key', 'status' => 'Status', 'workers' => 'Attached to' ), $keys, array( 'sortable' => array( 'key', 'status', 'workers' ), 'empty' => 'No keys saved yet.' ) );
+	$per = array();
+	foreach ( $workers as $id => $w ) {
+		$served = aw_ai_served( $id );
+		$per[]  = array(
+			'worker' => aw_worker_label_html( $id ) . ' <code>' . esc_html( $id ) . '</code>' . ( $w['planned'] ? ' (planned)' : '' ),
+			'ai'     => esc_html( (string) count( $served['rows'] ) ),
+			'tools'  => esc_html( (string) count( $served['tools'] ) ),
+			'_sort'  => array( 'worker' => $w['name'], 'ai' => count( $served['rows'] ), 'tools' => count( $served['tools'] ) ),
+		);
+	}
+	echo '<h3>Usable keys per worker</h3>';
+	aw_sourcing_simple_table( 'ai-overview-workers', array( 'worker' => 'Worker', 'ai' => 'Usable AI keys', 'tools' => 'Tool keys' ), $per, array( 'sortable' => array( 'worker', 'ai', 'tools' ), 'empty' => 'No workers.' ) );
 }
 
 /** Add New Key (&tab=ai&edit=new): core form-table, posts to the existing save (admin_post_aw_ai_keys). */

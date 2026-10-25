@@ -97,13 +97,31 @@ function aw_listing_validity( $date ) {
 
 /* ---------- 4–5 Logo and description ---------- */
 
+/**
+ * The body is only the line a directory import wrote (tools/directory/build_*.py, awo_held.py): one paragraph saying
+ * which list the organisation is in ("… It is listed in <list>.") or that AWBI recognises it ("Recognised by the Animal
+ * Welfare Board of India (AWBI code …"). The Sources block says the same, so an enriched description replaces it.
+ *
+ * @param string $body Post content.
+ * @return bool
+ */
+function aw_listing_is_template_intro( $body ) {
+	if ( substr_count( strtolower( $body ), '<p' ) > 1 ) {
+		return false;
+	}
+	$t = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $body ) ) );
+	return '' !== $t && ( false !== strpos( $t, '. It is listed in ' ) || 0 === strpos( $t, 'Recognised by the Animal Welfare Board of India (AWBI code' ) );
+}
+
 function aw_block_listing_about( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
 		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Logo and description' ) : '';
 	}
 	$logo = get_the_post_thumbnail( $id, 'thumbnail', array( 'class' => 'aw-listing-logo', 'alt' => '', 'loading' => 'eager' ) );
 	$body = trim( (string) get_post_field( 'post_content', $id ) );
-	$text = '' !== trim( wp_strip_all_tags( $body ) ) ? apply_filters( 'the_content', $body ) : ( has_excerpt( $id ) ? wpautop( esc_html( get_post_field( 'post_excerpt', $id ) ) ) : '' );
+	// The excerpt (the enriched "About", owner 25 Oct 2026) replaces an empty body or an import's one-line template intro.
+	$use  = has_excerpt( $id ) && ( '' === trim( wp_strip_all_tags( $body ) ) || aw_listing_is_template_intro( $body ) );
+	$text = $use ? wpautop( esc_html( get_post_field( 'post_excerpt', $id ) ) ) : ( '' !== trim( wp_strip_all_tags( $body ) ) ? apply_filters( 'the_content', $body ) : '' );
 	if ( '' === $logo . trim( wp_strip_all_tags( $text ) ) ) {
 		return '';
 	}
@@ -354,9 +372,15 @@ function aw_block_listing_photos( $a, $id ) {
 
 /* ---------- 15 Sources (the item template's Sources block, listing variant) ---------- */
 
-/** "Last updated": the latest of verified on, the source's date and the details checked; never the post's own date. */
+/**
+ * "Last updated": the latest of verified on, the source's date, the details checked and the newest applied enrichment
+ * change (owner, 25 Oct 2026); never the post's own date (imports and migrations touched every listing in Oct 2026).
+ */
 function aw_listing_last_updated( $id ) {
 	$dates = array( aw_lf( $id, 'aw_verified_on' ), aw_lf( $id, 'aw_source_date' ) );
+	if ( function_exists( 'aw_enrich_last_applied' ) ) {
+		$dates[] = substr( aw_enrich_last_applied( $id ), 0, 10 );
+	}
 	$n     = (int) get_post_meta( $id, 'aw_detail_sources', true );
 	for ( $i = 0; $i < $n; $i++ ) {
 		$dates[] = trim( (string) get_post_meta( $id, "aw_detail_sources_{$i}_checked", true ) );
