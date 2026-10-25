@@ -29,9 +29,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_SI_RISING_CRON      = 'aw_si_rising_spikes';
-const AW_SI_SPIKE_RATIO      = 3;   // Sourcing spike: 3× the 14-day average or more.
-const AW_SI_SPIKE_MIN        = 3;   // And at least 3 items that day.
-const AW_SI_SPIKE_WINDOW     = 14;
+// AW_SI_SPIKE_RATIO: AW SEO Plus → Settings (settings.php).
+// AW_SI_SPIKE_MIN: AW SEO Plus → Settings (settings.php).
+// AW_SI_SPIKE_WINDOW: AW SEO Plus → Settings (settings.php).
 const AW_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
 const AW_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
 const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'sourcing' ); // Sources that mean "in the news".

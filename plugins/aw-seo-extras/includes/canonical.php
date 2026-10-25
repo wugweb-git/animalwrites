@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Query parameters that filter a list: such a URL is indexed with its own canonical (owner, 10 Oct 2026). */
-const AW_FILTER_PARAMS = array( 'tag', 'state', 'district', 'q', 'category_name', 'verified', 'sort', 'publisher', 'court', 'issuer' );
+// AW_FILTER_PARAMS: AW SEO Plus → Settings (settings.php).
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function aw_hub_canonical() {

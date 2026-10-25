@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/admin-table.php'; // aw_seo_extras_simple_table() for AW SEO Plus → FAQ
 
-const AW_FAQ_MIN   = 3;
+// AW_FAQ_MIN: AW SEO Plus → Settings (settings.php).
 
 /**
  * Fewest questions a page shows (and marks up): 3, except Resources guides, where 2 is enough (owner, 21 Oct 2026 for
@@ -46,10 +46,10 @@ const AW_FAQ_MIN   = 3;
  * @return int
  */
 function aw_faq_min( $ctx ) {
-	return is_array( $ctx ) && 'guide' === ( $ctx['kind'] ?? '' ) ? 2 : AW_FAQ_MIN;
+	return is_array( $ctx ) && 'guide' === ( $ctx['kind'] ?? '' ) ? AW_FAQ_MIN_GUIDE : AW_FAQ_MIN;
 }
-const AW_FAQ_MAX   = 6;
-const AW_FAQ_WORDS = 50;
+// AW_FAQ_MAX: AW SEO Plus → Settings (settings.php).
+// AW_FAQ_WORDS: AW SEO Plus → Settings (settings.php).
 
 /** Tags allowed in a topic answer (the page and the schema print the same HTML). */
 const AW_FAQ_ANSWER_HTML = array(
@@ -59,12 +59,7 @@ const AW_FAQ_ANSWER_HTML = array(
 );
 
 /** Hub pages with a topic FAQ: page slug => the H2's subject. */
-const AW_FAQ_HUBS = array(
-	'directory'     => 'the Directory',
-	'volunteer'     => 'volunteering',
-	'claim'         => 'claiming a listing',
-	'opportunities' => 'Opportunities',
-);
+// AW_FAQ_HUBS: AW SEO Plus → Settings (settings.php).
 
 /* ---------- Experiment (holdout) ---------- */
 

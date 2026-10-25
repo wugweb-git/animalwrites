@@ -24,29 +24,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Owner, 21 Oct 2026: the 3-organisation rule of 20 Oct is withdrawn. A district × type page with at least 1 organisation is
  * indexed and in the sitemap; only a page with none (nothing to show) stays noindex (stored counts).
  */
-const AW_THIN_DISTRICT_TYPE = 1;
+// AW_THIN_DISTRICT_TYPE: AW SEO Plus → Settings (settings.php).
 
 /**
  * Thin district × type pages that stay indexed: every one with Search Console clicks or impressions in the 90 days to
  * 20 Oct 2026 (owner). Paths under /directory/.
  */
-const AW_DIRECTORY_KEEP_INDEXED = array(
-	'haryana/jhajjar/animal-welfare-organisation',
-	'madhya-pradesh/sheopur/animal-welfare-organisation',
-	'maharashtra/pune/animal-welfare-organisation',
-	'maharashtra/pune/wildlife-rescue',
-	'telangana/kumuram-bheem-asifabad/veterinary-office',
-	'telangana/mancherial/veterinary-office',
-	'telangana/medchal-malkajgiri/veterinary-office',
-	'telangana/nizamabad/animal-welfare-organisation',
-	'uttar-pradesh/chandauli/veterinary-office',
-	'uttar-pradesh/gautam-buddha-nagar/animal-welfare-organisation',
-	'uttar-pradesh/kushinagar/animal-welfare-organisation',
-	'uttar-pradesh/mahrajganj/animal-welfare-organisation',
-	'uttar-pradesh/siddharthnagar/gaushala',
-	'uttarakhand/chamoli/animal-welfare-organisation',
-	'west-bengal/purba-medinipur/veterinary-office',
-);
+// AW_DIRECTORY_KEEP_INDEXED: AW SEO Plus → Settings (settings.php).
 
 /** Whether a district × type page (its URL) is on the keep-indexed list. */
 function aw_directory_keep_indexed( $url ) {
