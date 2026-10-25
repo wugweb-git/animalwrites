@@ -14,15 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_DB_VERSION = '1';
 const AW_SI_DB_OPTION  = 'aw_si_db';
 
-/**
- * Full name of a Search Insights table.
- *
- * @param string $name keywords, kw_pages, obs or rising.
- */
-function aw_si_table( string $name ): string {
-	global $wpdb;
-	return $wpdb->prefix . 'aw_si_' . $name;
-}
+// aw_si_table() and aw_si_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
 
 /** Create or update the tables when the version changes. Cheap when nothing changed (one option read). */
 function aw_si_install(): void {
@@ -32,47 +24,11 @@ function aw_si_install(): void {
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	$c = $wpdb->get_charset_collate();
-	$k = aw_si_table( 'keywords' );
 	$p = aw_si_table( 'kw_pages' );
 	$o = aw_si_table( 'obs' );
 	$r = aw_si_table( 'rising' );
-	// One record per normalised keyword. The 28-day figures and the latest live check are copied here by
-	// aw_si_compute() so the Keywords list sorts and filters without aggregating obs on every view.
-	dbDelta(
-		"CREATE TABLE {$k} (
-		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-		norm varchar(191) NOT NULL,
-		label varchar(255) NOT NULL DEFAULT '',
-		lang varchar(8) NOT NULL DEFAULT 'en',
-		group_id bigint(20) unsigned NOT NULL DEFAULT 0,
-		roles int(10) unsigned NOT NULL DEFAULT 0,
-		topic varchar(100) NOT NULL DEFAULT '',
-		page_type varchar(32) NOT NULL DEFAULT '',
-		intent varchar(16) NOT NULL DEFAULT '',
-		priority char(2) NOT NULL DEFAULT '',
-		priority_override char(2) NOT NULL DEFAULT '',
-		status varchar(16) NOT NULL DEFAULT '',
-		action varchar(32) NOT NULL DEFAULT '',
-		entity tinyint(1) NOT NULL DEFAULT 0,
-		note varchar(255) NOT NULL DEFAULT '',
-		page varchar(255) NOT NULL DEFAULT '',
-		trends int(11) DEFAULT NULL,
-		impr28 int(11) NOT NULL DEFAULT 0,
-		clicks28 int(11) NOT NULL DEFAULT 0,
-		pos28 float DEFAULT NULL,
-		pos_prev float DEFAULT NULL,
-		live_pos float DEFAULT NULL,
-		live_txt varchar(16) NOT NULL DEFAULT '',
-		live_date date DEFAULT NULL,
-		created datetime NOT NULL,
-		updated datetime NOT NULL,
-		PRIMARY KEY  (id),
-		UNIQUE KEY norm (norm),
-		KEY priority (priority),
-		KEY group_id (group_id),
-		KEY impr28 (impr28)
-		) {$c};"
-	);
+	// The keyword table itself is Animal Writes Core's (aw_kw_install(), owner's decision 3, 25 Oct 2026).
+	aw_kw_install();
 	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
 	dbDelta(
 		"CREATE TABLE {$p} (
@@ -147,14 +103,25 @@ function aw_si_ready(): bool {
 }
 
 /**
- * Drop every Search Insights table and option, and switch Search Insights off so the daily run does not rebuild them.
+ * Drop Search Insights' tables and options, and switch Search Insights off so the daily run does not rebuild them. The
+ * keyword table is not dropped (it is Animal Writes Core's): records the owner gave a Sourcing, Press or Tracked role
+ * stay (sourcing phase 2, plan §10), the rest are deleted.
  * Only from the owner's typed confirmation (admin.php) or `wp aw-si delete-data --yes`. "Run the daily update" (or
  * `wp aw-si run`) switches it on again.
  */
 function aw_si_drop_all(): void {
 	global $wpdb;
-	foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising' ) as $t ) {
+	foreach ( array( 'kw_pages', 'obs', 'rising' ) as $t ) {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+	}
+	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
+	// records with one of those stay, with Search Insights' own roles and figures cleared; the others are deleted.
+	$k = aw_si_table( 'keywords' );
+	$m = aw_si_table( 'kw_map' );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$k} WHERE roles & %d = 0", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$wpdb->query( $wpdb->prepare( "UPDATE {$k} SET roles = roles & %d, topic = '', priority = '', status = '', action = '', page = '', trends = NULL, impr28 = 0, clicks28 = 0, pos28 = NULL, pos_prev = NULL, live_pos = NULL, live_txt = '', live_date = NULL", AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	if ( aw_kw_ready() ) {
+		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 	}
 	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls' ) as $opt ) {
 		delete_option( $opt );
@@ -166,7 +133,3 @@ function aw_si_drop_all(): void {
 	}
 }
 
-/** Current time in MySQL format, site time zone (IST). */
-function aw_si_now(): string {
-	return current_time( 'mysql' );
-}

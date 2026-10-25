@@ -16,6 +16,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// The keyword table and its helpers are Animal Writes Core's (owner's decision 3, 25 Oct 2026): without Core, Search
+// Insights stays off.
+if ( ! function_exists( 'aw_kw_install' ) ) {
+	add_action(
+		'admin_notices',
+		function () {
+			if ( current_user_can( 'manage_options' ) ) {
+				echo '<div class="notice notice-warning"><p>' . esc_html__( 'Search Insights needs Animal Writes Core (the keyword table lives there). It is off until Core is active.', 'aw-seo-extras' ) . '</p></div>';
+			}
+		}
+	);
+	return;
+}
+
 foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rollup', 'cron', 'health', 'searches', 'dryrun', 'rising', 'admin', 'cli' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
