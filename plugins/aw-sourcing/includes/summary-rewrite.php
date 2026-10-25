@@ -13,6 +13,15 @@
  *        item's cache is purged.
  *   POST aw/v1/summary-rewrite {id, before_md5, failed:"reason"}   an attempt that produced nothing usable.
  *   POST aw/v1/summary-rewrite {id, before_md5, settle:"reason"}   the summary stays as it is: nothing better can be said.
+ *   GET  aw/v1/summary-rewrite?short=1&per_page=10   'short' items due another try (owner, 25 Oct 2026), oldest first:
+ *        why = "rules" when their section's word minimum changed since they were settled (one try per change), or
+ *        "recheck" when their source has not been re-read for AW_SUMMARY_RW_RECHECK_DAYS (the worker re-reads it and
+ *        rewrites only when it finds more text than src_chars; never padded). The worker asks for them only after the
+ *        new and failed items, a few per run, so they never hold up new ones.
+ *   POST aw/v1/summary-rewrite {id, before_md5, recheck: chars}   a short item's source re-read, nothing new: only the
+ *        re-read day and the source length are kept.
+ *   Writes and settles may carry src_chars (the length of the source text read); a 'short' state also keeps the
+ *   section's minimum it was judged by (min_words).
  *
  * State lives in the meta aw_summary_rw = {state: ok|done|short|failed, md5, at, tries, model, reason}. A state counts
  * only while the summary still has the md5 it was settled with. Nothing is deleted.
@@ -35,6 +44,81 @@ function aw_summary_rw_settled( $id, $excerpt ) {
 		return false;
 	}
 	return in_array( $m['state'] ?? '', array( 'ok', 'done', 'short' ), true ) || ( 'failed' === ( $m['state'] ?? '' ) && (int) ( $m['tries'] ?? 0 ) >= 2 );
+}
+
+/** Days before a short item's source is read again. */
+const AW_SUMMARY_RW_RECHECK_DAYS = 14;
+
+/** The word minimum a short item was judged by: stored since 25 Oct 2026, before that read from its reason. */
+function aw_summary_rw_short_min( array $m ) {
+	if ( isset( $m['min_words'] ) ) {
+		return (int) $m['min_words'];
+	}
+	return preg_match( '/needs at least (\d+) words/', (string) ( $m['reason'] ?? '' ), $x ) ? (int) $x[1] : 0;
+}
+
+/**
+ * Why a settled short item is due another try ('rules' | 'recheck'), or ''.
+ *
+ * @param array  $m       Its aw_summary_rw meta (state short, md5 of the current summary).
+ * @param string $section news|library|research.
+ * @param int    $now     Timestamp.
+ * @return string
+ */
+function aw_summary_rw_short_due( array $m, $section, $now ) {
+	$min = (int) ( aw_summary_rules()['sections'][ $section ]['min_words'] ?? 0 );
+	if ( $min && aw_summary_rw_short_min( $m ) !== $min && (int) ( $m['retry_min'] ?? -1 ) !== $min ) {
+		return 'rules'; // the minimum changed since it was judged: one try per change
+	}
+	$last = strtotime( (string) ( $m['checked'] ?? $m['at'] ?? '' ) );
+	return ( ! $last || $now - $last >= AW_SUMMARY_RW_RECHECK_DAYS * DAY_IN_SECONDS ) ? 'recheck' : '';
+}
+
+/** GET ?short=1: the short items due another try, oldest first (the day they were judged or re-read). */
+function aw_summary_rw_short_list( $per ) {
+	global $wpdb;
+	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post') AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB
+	$now  = strtotime( current_time( 'mysql' ) ); // the meta's times are local, as current_time( 'mysql' )
+	$due  = array();
+	foreach ( $rows as $r ) {
+		$m = maybe_unserialize( $r->meta_value );
+		if ( ! is_array( $m ) || 'short' !== ( $m['state'] ?? '' ) || md5( (string) $r->post_excerpt ) !== ( $m['md5'] ?? '' ) ) {
+			continue;
+		}
+		$id  = (int) $r->ID;
+		$sec = aw_summary_section( $id );
+		$url = (string) get_post_meta( $id, 'aw_source_url', true );
+		if ( '' === $sec || '' === $url ) {
+			continue;
+		}
+		$why = aw_summary_rw_short_due( $m, $sec, $now );
+		if ( '' === $why ) {
+			continue;
+		}
+		$due[] = array(
+			'id'          => $id,
+			'type'        => $r->post_type,
+			'section'     => $sec,
+			'title'       => html_entity_decode( $r->post_title, ENT_QUOTES ),
+			'summary'     => wp_strip_all_tags( $r->post_excerpt ),
+			'md5'         => md5( (string) $r->post_excerpt ),
+			'source_url'  => $url,
+			'source_date' => (string) get_post_meta( $id, 'aw_source_date', true ),
+			'date'        => substr( $r->post_date, 0, 10 ),
+			'publisher'   => (string) get_post_meta( $id, 'aw_source_name', true ),
+			'tries'       => 0,
+			'why'         => $why,
+			'src_chars'   => isset( $m['src_chars'] ) ? (int) $m['src_chars'] : null,
+			'since'       => (string) ( $m['checked'] ?? $m['at'] ?? '' ),
+		);
+	}
+	usort( $due, fn( $a, $b ) => ( 'rules' === $b['why'] ) <=> ( 'rules' === $a['why'] ) ?: strcmp( $a['since'], $b['since'] ) );
+	return new WP_REST_Response(
+		array(
+			'items' => array_slice( $due, 0, $per ),
+			'due'   => count( $due ),
+		)
+	);
 }
 
 function aw_summary_rw_set( $id, $excerpt, $state, $extra = array() ) {
@@ -61,6 +145,9 @@ function aw_summary_rw_list( WP_REST_Request $req ) {
 		return aw_summary_rw_progress();
 	}
 	$per  = max( 1, min( 100, (int) ( $req->get_param( 'per_page' ) ?: 100 ) ) );
+	if ( $req->get_param( 'short' ) ) {
+		return aw_summary_rw_short_list( $per );
+	}
 	$skip = max( 0, (int) $req->get_param( 'skip' ) );
 	$only = array_map( 'intval', (array) $req->get_param( 'ids' ) );
 	$sql  = "SELECT ID, post_type, post_title, post_excerpt, post_date FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')";
@@ -169,6 +256,19 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 	if ( md5( (string) $p->post_excerpt ) !== (string) $req->get_param( 'before_md5' ) ) {
 		return new WP_Error( 'aw_changed', 'The summary changed since it was read', array( 'status' => 409 ) );
 	}
+	$src_chars = null !== $req->get_param( 'src_chars' ) ? max( 0, (int) $req->get_param( 'src_chars' ) ) : null;
+	$sec_min   = (int) ( aw_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
+	$short_by  = array( 'min_words' => $sec_min ) + ( null !== $src_chars ? array( 'src_chars' => $src_chars ) : array() );
+	if ( null !== $req->get_param( 'recheck' ) ) { // a short item's source re-read and nothing new found: state kept
+		$m = get_post_meta( $id, 'aw_summary_rw', true );
+		if ( ! is_array( $m ) || 'short' !== ( $m['state'] ?? '' ) ) {
+			return new WP_Error( 'aw_not_short', 'Only a short item is re-checked', array( 'status' => 409 ) );
+		}
+		$m['checked']   = current_time( 'mysql' );
+		$m['src_chars'] = max( 0, (int) $req->get_param( 'recheck' ) );
+		update_post_meta( $id, 'aw_summary_rw', $m );
+		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short', 'checked' => $m['checked'] ) );
+	}
 	$failed = trim( (string) $req->get_param( 'failed' ) );
 	if ( '' !== $failed ) {
 		aw_summary_rw_set( $id, $p->post_excerpt, 'failed', array( 'reason' => mb_substr( sanitize_text_field( $failed ), 0, 300 ) ) );
@@ -176,7 +276,10 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 	}
 	$settle = trim( (string) $req->get_param( 'settle' ) );
 	if ( '' !== $settle ) { // the best that can be said from the source and other coverage is what is already there
-		aw_summary_rw_set( $id, $p->post_excerpt, 'short', array( 'reason' => mb_substr( sanitize_text_field( $settle ), 0, 300 ) ) );
+		$old = get_post_meta( $id, 'aw_summary_rw', true );
+		$was = is_array( $old ) && 'short' === ( $old['state'] ?? '' ) && md5( (string) $p->post_excerpt ) === ( $old['md5'] ?? '' ) ? $old : array();
+		$keep = $was ? array_intersect_key( $was, array_flip( array( 'src_chars', 'model' ) ) ) : array();
+		aw_summary_rw_set( $id, $p->post_excerpt, 'short', array_merge( $keep, array( 'reason' => mb_substr( sanitize_text_field( $settle ), 0, 300 ), 'checked' => current_time( 'mysql' ), 'retry_min' => $sec_min ), $short_by ) );
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short' ) );
 	}
 	$summary = trim( preg_replace( '/\s+/u', ' ', sanitize_textarea_field( (string) $req->get_param( 'summary' ) ) ) );
@@ -237,9 +340,12 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		$id,
 		$summary . $suffix,
 		$state,
-		array(
-			'model'  => sanitize_text_field( (string) $req->get_param( 'model' ) ),
-			'reason' => mb_substr( sanitize_text_field( (string) $req->get_param( 'reason' ) ), 0, 300 ),
+		array_merge(
+			array(
+				'model'  => sanitize_text_field( (string) $req->get_param( 'model' ) ),
+				'reason' => mb_substr( sanitize_text_field( (string) $req->get_param( 'reason' ) ), 0, 300 ),
+			),
+			'short' === $state ? $short_by + array( 'checked' => current_time( 'mysql' ) ) : array()
 		)
 	);
 	do_action( 'litespeed_purge_post', $id ); // this item only
