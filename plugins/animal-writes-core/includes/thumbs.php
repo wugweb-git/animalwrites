@@ -117,8 +117,16 @@ add_action(
 			'/thumb-dupes',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => '__return_true',
-				'callback'            => fn() => new WP_REST_Response( array( 'duplicates' => count( aw_thumb_duplicates() ) ), 200 ),
+				'permission_callback' => '__return_true', // the deploy gate reads it without logging in (tools/ci/thumb_check.py)
+				'callback'            => function () {
+					// The full scan takes about a second, so the public count is kept 5 minutes (plugin audit 6).
+					$n = get_transient( 'aw_thumb_dupes_n' );
+					if ( false === $n ) {
+						$n = count( aw_thumb_duplicates() );
+						set_transient( 'aw_thumb_dupes_n', $n, 5 * MINUTE_IN_SECONDS );
+					}
+					return new WP_REST_Response( array( 'duplicates' => (int) $n ), 200 );
+				},
 			)
 		);
 	}
