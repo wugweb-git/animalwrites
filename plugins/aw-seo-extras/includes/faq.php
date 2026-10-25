@@ -186,9 +186,10 @@ function aw_faq_registry() {
 		'aw_legal'   => array(
 			array( 'key' => 'pdf', 'priority' => 1, 'q' => 'Where can I download the %s PDF?', 'needs' => array( 'aw_file_id (PDF)', 'aw_source_url (.pdf)' ), 'pattern' => '<doc> pdf / pdf download', 'answer' => 'aw_faq_legal_pdf' ),
 			array( 'key' => 'force', 'priority' => 2, 'q' => 'Is the %s in force?', 'needs' => array( 'aw_legal_force' ), 'pattern' => '<doc> latest / today', 'answer' => 'aw_faq_legal_force' ),
-			array( 'key' => 'date', 'priority' => 3, 'q' => 'When was the %s %s?', 'needs' => array( 'aw_source_date', 'aw_legal_number' ), 'pattern' => '<doc> gazette / notification', 'answer' => 'aw_faq_legal_date' ),
+			array( 'key' => 'date', 'priority' => 3, 'q' => 'When was the %s %s?', 'needs' => array( 'aw_source_date', 'aw_legal_number (not needed for official releases and circulars)' ), 'pattern' => '<doc> gazette / notification', 'answer' => 'aw_faq_legal_date' ),
 			array( 'key' => 'issuer', 'priority' => 4, 'q' => 'Who issued the %s?', 'needs' => array( 'aw_issuer (not for Acts and Rules: the stored issuer is whose copy it is)' ), 'pattern' => '—', 'answer' => 'aw_faq_legal_issuer' ),
 			array( 'key' => 'hindi', 'priority' => 5, 'q' => 'Is the %s available in Hindi?', 'needs' => array( 'aw_file_hi_url' ), 'pattern' => '<doc> in hindi', 'answer' => 'aw_faq_legal_hindi' ),
+			array( 'key' => 'read', 'priority' => 7, 'q' => 'Where can I read the %s?', 'needs' => array( 'aw_source_url (not a PDF)', 'aw_issuer', 'official release' ), 'pattern' => '<doc> press release', 'answer' => 'aw_faq_legal_read' ),
 			array( 'key' => 'sections', 'priority' => 6, 'q' => 'What does section %2$s of the %1$s say?', 'needs' => array( 'aw_key_sections (Acts and Rules)' ), 'pattern' => 'pca act section 11 / punishment', 'answer' => 'aw_faq_legal_sections' ),
 		),
 	);
@@ -376,14 +377,22 @@ function aw_faq_legal_force( $id, $doc ) {
 /** The verb for when a document came out: notified (laws), delivered (judgments), passed (orders), else issued. */
 function aw_faq_legal_verb( $id ) {
 	$k = aw_faq_legal_kind( $id );
-	return in_array( $k, array( 'act', 'rule', 'notification' ), true ) ? 'notified' : ( 'judgment' === $k ? 'delivered' : ( 'order' === $k ? 'passed' : 'issued' ) );
+	return in_array( $k, array( 'act', 'rule', 'notification' ), true ) ? 'notified' : ( 'judgment' === $k ? 'delivered' : ( 'order' === $k ? 'passed' : ( 'official-release' === $k ? 'released' : 'issued' ) ) );
 }
 
 function aw_faq_legal_date( $id, $doc ) {
 	$d  = (string) get_post_meta( $id, 'aw_source_date', true );
 	$no = trim( (string) get_post_meta( $id, 'aw_legal_number', true ) );
-	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) || $d < '1900' || '' === $no ) {
+	if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) || $d < '1900' ) {
 		return null;
+	}
+	if ( '' === $no ) {
+		// Releases and circulars carry no number (owner, 25 Oct 2026): the date alone, with who released or issued it.
+		$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+		if ( ! $iss || ! in_array( aw_faq_legal_kind( $id ), array( 'official-release', 'circular' ), true ) ) {
+			return null;
+		}
+		return array( esc_html( $iss->name ) . ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ) . ' on ' . aw_date( $d ) . '.', 'date' );
 	}
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
 	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
@@ -399,6 +408,22 @@ function aw_faq_legal_issuer( $id, $doc ) {
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
 	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( $iss->name ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
 	return array( $a, 'issuer' );
+}
+
+/**
+ * Where to read an official release that has no PDF (owner, 25 Oct 2026): the issuer's own page.
+ *
+ * @param int    $id  Document ID.
+ * @param string $doc Document short name.
+ * @return array|null [ answer html, fact ] or null.
+ */
+function aw_faq_legal_read( $id, $doc ) {
+	$src = (string) get_post_meta( $id, 'aw_source_url', true );
+	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	if ( '' === $src || ! $iss || 'official-release' !== aw_faq_legal_kind( $id ) || '' !== aw_faq_legal_pdf_url( $id ) ) {
+		return null;
+	}
+	return array( 'On the website of ' . esc_html( $iss->name ) . ': ' . aw_faq_a( $src, 'read the ' . esc_html( $doc ) ) . '.', 'read' );
 }
 
 function aw_faq_legal_hindi( $id, $doc ) {
@@ -999,6 +1024,20 @@ function aw_faq_counts() {
 		}
 		ksort( $c[ $k ]['sizes'] );
 	}
+	// Resources (owner, 25 Oct 2026): guides carry their own Rank Math FAQ block; research summaries get none (spec).
+	$c['guide'] = array( 'total' => 0, 'faq' => 0, 'research' => 0, 'without' => array() );
+	foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => -1, 'no_found_rows' => true ) ) as $p ) {
+		if ( has_term( 'research', 'post_tag', $p ) ) {
+			++$c['guide']['research'];
+			continue;
+		}
+		++$c['guide']['total'];
+		if ( has_block( 'rank-math/faq-block', $p ) ) {
+			++$c['guide']['faq'];
+		} else {
+			$c['guide']['without'][] = (int) $p->ID;
+		}
+	}
 	foreach ( aw_faq_topic_pages() as $p ) {
 		$k        = 'term' === $p[0] ? 'term' : 'hub';
 		$approved = count( array_filter( $p[5], fn( $i ) => 'approved' === $i['status'] ) );
@@ -1092,6 +1131,17 @@ function aw_faq_admin_page() {
 	// No colspan in a list table: the topic and hub lines carry their text in the second column.
 	$cells[] = array( 'type' => 'Types, services, categories', 'total' => (int) $c['term']['shown'] . ' shown; ' . (int) $c['term']['drafts'] . ' draft questions waiting' );
 	$cells[] = array( 'type' => 'Directory, Volunteer, Claim, Opportunities', 'total' => (int) $c['hub']['shown'] . ' shown; ' . (int) $c['hub']['drafts'] . ' draft questions waiting' );
+	if ( isset( $c['guide'] ) ) {
+		$g       = $c['guide'];
+		$links   = implode( ', ', array_map( fn( $id ) => '<a href="' . esc_url( (string) get_edit_post_link( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>', array_slice( $g['without'], 0, 20 ) ) );
+		$cells[] = array(
+			'type'  => 'Resources guides (own Rank Math FAQ block)',
+			'total' => esc_html( number_format_i18n( $g['total'] ) ),
+			'faq'   => esc_html( number_format_i18n( $g['faq'] ) ),
+			'none'  => esc_html( number_format_i18n( count( $g['without'] ) ) ) . ( $links ? ': ' . $links : '' ),
+			'sizes' => esc_html( number_format_i18n( $g['research'] ) . ' research summaries not counted (no FAQ on Research)' ),
+		);
+	}
 	aw_seo_extras_simple_table(
 		'faq-pages',
 		array( 'type' => 'Type', 'total' => 'Published', 'faq' => 'With FAQ', 'holdout' => 'Holdout (no FAQ)', 'none' => 'Fewer than 3 questions (no FAQ)', 'sizes' => 'Questions per FAQ' ),

@@ -26,7 +26,11 @@ Owner-approved spec, 20 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php`
 - Library questions use the document's short name: the "Short name" field (`aw_short_name`, e.g. PCA Act 1960, ABC Rules 2023), else the primary focus keyphrase. The first answer gives the full official title once.
 - The accordion is texturized before the schema is parsed from it (WordPress texturizes the page: " - " → " – ", "24x7" → "24×7"), so both hold the same characters.
 
+Library official releases and circulars (owner, 25 Oct 2026): "When was the … released / issued?" is asked without a document number (they have none), naming who released it; official releases with no PDF also get "Where can I read the …?" (the issuer's page). Letter templates get hand-written topic questions instead (no data fields).
+
 Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is whose copy it is, not the law-maker). Four fields were added for Library documents (box "FAQ fields"): Short name (`aw_short_name`), Hindi version link (`aw_file_hi_url`), Issued under (`aw_legal_act`), Key sections (`aw_key_sections`, Acts and Rules only, one per line `number | one-line summary | link`). Section questions come only from that list.
+
+Resources guides keep their own Rank Math FAQ block; Tools → FAQ counts them in a row of their own (guides with and without one; research summaries are not counted, as Research gets no FAQ).
 
 ## Topic items
 
