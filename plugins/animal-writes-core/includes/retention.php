@@ -79,19 +79,7 @@ add_action(
 	10,
 	3
 );
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_closes_done' ) ) {
-			return;
-		}
-		foreach ( get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
-			aw_opportunity_sync_closes( $id );
-		}
-		update_option( 'aw_closes_done', '1', false );
-	},
-	40
-);
+// The one-time fill of every opportunity's closing date ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /** Open opportunities: the deadline is today or later; with no deadline, the review date is today or later. */
 function aw_open_opportunities_meta_query() {

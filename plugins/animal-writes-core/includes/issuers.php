@@ -127,27 +127,4 @@ add_shortcode(
 	}
 );
 
-/* ---------- One-time copy from the former list ---------- */
-
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_issuers_migrated' ) ) {
-			return;
-		}
-		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug, t.name FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_source_type' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id ORDER BY tr.object_id, tr.term_order" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		if ( ! file_put_contents( aw_private_dir() . '/issuers-backup-2026-10-08.json', wp_json_encode( $rows ) ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
-			return;
-		}
-		$n = 0;
-		foreach ( $rows as $r ) {
-			if ( '' === (string) get_post_meta( (int) $r->id, 'aw_issuer', true ) && aw_set_issuer( (int) $r->id, $r->slug ) ) {
-				$n++;
-			}
-		}
-		update_option( 'aw_issuers_report', array( 'links' => count( $rows ), 'copied' => $n ), false );
-		update_option( 'aw_issuers_migrated', '1', false );
-	},
-	5
-);
+// The one-time copy from the former issuer list (8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).

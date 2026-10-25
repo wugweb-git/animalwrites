@@ -151,18 +151,7 @@ add_action(
 		do_action( 'litespeed_purge_all' );
 	}
 );
-add_action(
-	'admin_init',
-	function () { // campaigns published before this existed: schedule once
-		if ( get_option( 'aw_camp_close_scheduled' ) ) {
-			return;
-		}
-		foreach ( get_posts( array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $cid ) {
-			aw_camp_schedule_close( $cid );
-		}
-		update_option( 'aw_camp_close_scheduled', 1, false );
-	}
-);
+// Campaigns published before the closing job existed were scheduled once; that step ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /* ---------- Open / closed blocks ---------- */
 add_filter(

@@ -306,35 +306,5 @@ add_filter(
 	PHP_INT_MAX
 );
 
-/* ---------- One-time data steps (no deletion) ---------- */
-
-add_action(
-	'admin_init',
-	function () {
-		if ( '1' === get_option( 'aw_admin_ia_done' ) || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		update_option( 'default_comment_status', 'closed' );
-		update_option( 'default_ping_status', 'closed' );
-		// The default "Hello world!" post → draft.
-		foreach ( get_posts( array( 'post_type' => 'post', 'name' => 'hello-world', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) { // only that one: Posts are Resources now
-			wp_update_post( array( 'ID' => $id, 'post_status' => 'draft' ) );
-		}
-		// News items with a court: keep the value as meta before the taxonomy leaves news.
-		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT tr.object_id id, t.slug FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'aw_court' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id JOIN {$wpdb->posts} p ON p.ID = tr.object_id AND p.post_type = 'aw_news'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		foreach ( $rows as $r ) {
-			add_post_meta( (int) $r->id, 'aw_court_legacy', $r->slug );
-		}
-		// Testimonials: export to the private folder (they stay in the database too).
-		$t = array();
-		foreach ( get_posts( array( 'post_type' => 'aw_testimonial', 'post_status' => 'any', 'numberposts' => -1 ) ) as $p ) {
-			$t[] = array( 'id' => $p->ID, 'status' => $p->post_status, 'title' => $p->post_title, 'content' => $p->post_content, 'meta' => get_post_meta( $p->ID ) );
-		}
-		if ( function_exists( 'aw_private_dir' ) ) {
-			file_put_contents( aw_private_dir() . '/testimonials-export-' . gmdate( 'Y-m-d' ) . '.json', wp_json_encode( $t ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		}
-		update_option( 'aw_admin_ia_report', array( 'news_court_terms' => count( $rows ), 'testimonials' => count( $t ) ), false );
-		update_option( 'aw_admin_ia_done', '1', false );
-	}
-);
+// The one-time data steps (comments closed by default, Hello world to draft, news court terms kept as meta, testimonials
+// exported) ran and were removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).

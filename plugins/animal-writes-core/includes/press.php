@@ -52,19 +52,7 @@ function aw_press_group_sync( $mid, $id, $key, $value ) {
 		update_post_meta( $id, 'aw_press_group', aw_press_group( (string) $value ) );
 	}
 }
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_press_group_done' ) ) {
-			return;
-		}
-		foreach ( get_posts( array( 'post_type' => 'aw_press', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
-			update_post_meta( $id, 'aw_press_group', aw_press_group( (string) get_post_meta( $id, 'aw_press_format', true ) ) );
-		}
-		update_option( 'aw_press_group_done', '1', false );
-	},
-	30
-);
+// The one-time fill of every press item's format group ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 const AW_PRESS_UA      = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 // Instagram, Facebook and Threads give a browser a login wall (og:image = the platform logo); their link-preview crawlers
 // get the post's own picture (owner, 18 Oct 2026). Tried in this order.
@@ -364,36 +352,7 @@ function aw_press_list() {
 
 // The Media & PR list is the hub Query Loop on the Media & PR Page (hubs.php, hub-blocks.php).
 
-/** One-time move of the old Settings list (option aw_press) into press items; the option is kept as an archive. */
-add_action(
-	'admin_init',
-	function () {
-		if ( '1' === get_option( 'aw_press_migrated' ) || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		foreach ( (array) get_option( 'aw_press', array() ) as $i => $r ) {
-			if ( empty( $r['url'] ) ) {
-				continue;
-			}
-			$id = wp_insert_post( array( 'post_type' => 'aw_press', 'post_status' => 'publish', 'post_title' => $r['headline'] ?? '', 'menu_order' => $i ) );
-			if ( $id && ! is_wp_error( $id ) ) {
-				update_post_meta( $id, 'aw_press_url', esc_url_raw( $r['url'] ) );
-				$pub = ucwords( strtolower( (string) ( $r['outlet'] ?? '' ) ) ); // the old list had outlets in capitals
-				if ( $pub ) {
-					update_post_meta( $id, 'aw_press_publisher', $pub );
-				}
-				if ( ! empty( $r['date'] ) ) {
-					update_post_meta( $id, 'aw_press_date', $r['date'] );
-				}
-				if ( ! empty( $r['logo'] ) ) {
-					update_post_meta( $id, 'aw_press_logo', (int) $r['logo'] );
-				}
-				aw_press_fetch( $id );
-			}
-		}
-		update_option( 'aw_press_migrated', '1', false );
-	}
-);
+// The one-time move of the old Settings list (option aw_press, kept as an archive) into press items ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 
 /* ---------- Press discovery (worker) → "Press: to review" ---------- */

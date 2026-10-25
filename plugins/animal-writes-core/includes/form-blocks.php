@@ -212,89 +212,9 @@ add_action(
 	}
 );
 
-/** Make /claim/, /report/ and /thank-you/ once. */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_form_pages_done' ) ) {
-			return;
-		}
-		foreach ( array( 'claim' => array( 'Claim this listing', 'aw_claim_page' ), 'report' => array( 'Report a mistake', 'aw_report_page' ), 'thank-you' => array( 'Thank you', 'aw_thank_you' ) ) as $slug => $p ) {
-			$page = get_page_by_path( $slug );
-			$id   = $page ? $page->ID : wp_insert_post(
-				array(
-					'post_type'    => 'page',
-					'post_status'  => 'publish',
-					'post_title'   => $p[0],
-					'post_name'    => $slug,
-					'post_content' => '<!-- wp:shortcode -->[' . $p[1] . ']<!-- /wp:shortcode -->',
-				)
-			);
-			if ( $id && ! is_wp_error( $id ) && 'claim' !== $slug ) {
-				update_post_meta( $id, 'rank_math_robots', array( 'noindex' ) );
-			}
-		}
-		update_option( 'aw_form_pages_done', '1', false );
-	},
-	46
-);
+// The one-time steps that made /claim/, /report/ and /thank-you/ and set /report/'s Rank Math title ran and were removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
-// /report/'s Rank Math title and description cover every page it is opened from, not only Directory listings
-// (owner, 21 Oct 2026). Set once; editing them later in Rank Math is not overwritten.
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_report_seo_2026_10_21' ) ) {
-			return;
-		}
-		$page = get_page_by_path( 'report' );
-		if ( $page ) {
-			update_post_meta( $page->ID, 'rank_math_title', 'Report a Mistake or Out-of-Date Detail – Animal Writes' );
-			update_post_meta( $page->ID, 'rank_math_description', 'Report a mistake on Animal Writes: wrong or missing details in a Directory listing, an out-of-date news story, a broken link in the Library or Resources, or a closed organisation.' );
-		}
-		update_option( 'aw_report_seo_2026_10_21', '1', false );
-	},
-	48
-);
-
-/* ---------- Pages, placement and redirects (once) ---------- */
-
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_forms_s6_done' ) || ! function_exists( 'aw_redirect_add' ) ) {
-			return;
-		}
-		// /volunteer/: the form, open (it was falling through to a guessed opportunity URL).
-		if ( ! get_page_by_path( 'volunteer' ) ) {
-			wp_insert_post(
-				array(
-					'post_type'    => 'page',
-					'post_status'  => 'publish',
-					'post_title'   => 'Register as a volunteer',
-					'post_name'    => 'volunteer',
-					'post_excerpt' => 'Register as an Animal Writes volunteer: rescue, feed and speak up for animals near you.',
-					'post_content' => '<!-- wp:animal-writes/volunteer {"open":true} /-->',
-				)
-			);
-		}
-		aw_redirect_add( '/get-involved/', '/volunteer/' ); // was /#volunteer
-		// The banner on Home, About, Contact, and the Campaigns and Opportunities hubs (campaign pages get it below).
-		$placed = array();
-		foreach ( array( 'home', 'about', 'contact', 'campaigns', 'opportunities' ) as $slug ) {
-			$p = get_page_by_path( $slug );
-			if ( $p && false === strpos( $p->post_content, 'animal-writes/volunteer-banner' ) && false === strpos( $p->post_content, 'wp:animal-writes/volunteer' ) ) {
-				wp_update_post( array( 'ID' => $p->ID, 'post_content' => rtrim( $p->post_content ) . "\n\n<!-- wp:pattern {\"slug\":\"animal-writes/volunteer-banner\"} /-->\n" ) );
-				$placed[] = $slug;
-			}
-		}
-		// The photo is a placeholder until the owner picks one.
-		wp_update_post( array( 'ID' => 8856, 'post_content' => 'placeholder: replace (volunteer banner)' ) );
-		update_option( 'aw_forms_s6_report', $placed, false );
-		update_option( 'aw_forms_s6_done', '1', false );
-	},
-	45
-);
+// The one-time step that made /volunteer/, its redirect and the volunteer banners ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 // Every campaign page ends with the Home page's last section, Take action (Volunteer, Claim your listing), in the
 // campaign's own colours (owner, 19 Oct 2026); a page without a campaign class keeps the volunteer banner.

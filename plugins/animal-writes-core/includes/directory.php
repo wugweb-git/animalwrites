@@ -486,19 +486,7 @@ function aw_contact_score_sync( $mid, $id, $key ) {
 }
 add_action( 'updated_post_meta', 'aw_contact_score_sync', 10, 3 );
 add_action( 'added_post_meta', 'aw_contact_score_sync', 10, 3 );
-// Every listing needs the score so the sort can include it; fill it once.
-add_action(
-	'admin_init',
-	function () {
-		if ( '1' === get_option( 'aw_contact_score_done' ) || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		foreach ( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids' ) ) as $id ) {
-			update_post_meta( $id, 'aw_contact_score', aw_contact_score( $id ) );
-		}
-		update_option( 'aw_contact_score_done', '1', false );
-	}
-);
+// The one-time fill of every listing's contact score ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /**
  * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
