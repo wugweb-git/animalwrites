@@ -12,7 +12,7 @@
  *   address). Never applied by itself. Approving it merges: the kept listing's values stand; the other's fill its
  *   empty fields, and a second phone, email or website is kept beside the first (fill-empty + keep-both, each logged
  *   as an applied row with Undo); its types are added; links from other items (Featured in, organiser) move; the other
- *   listing becomes a draft with aw_merged_into and a 301 to the kept one (site rule: unpublish, never delete). Undo
+ *   listing goes to the trash with aw_merged_into and a 301 to the kept one (owner, 25 Oct: trash, not draft; WordPress empties the trash after 30 days). Undo
  *   reverses all of it.
  *
  * GET aw/v1/enrich/cleanup?page=N: the published listings (1,000 a page) with their place codes, their own place text
@@ -215,7 +215,7 @@ function aw_enrich_merge( $from, $into, $rid ) {
 		}
 		$undo['repointed'] = $ids;
 	}
-	wp_update_post( array( 'ID' => $from, 'post_status' => 'draft' ) );
+	wp_trash_post( $from ); // owner, 25 Oct 2026: merged duplicates go to the trash (WordPress empties it after 30 days; Undo works until then)
 	update_post_meta( $from, 'aw_merged_into', $into );
 	if ( function_exists( 'aw_rank_math_redirect' ) ) {
 		$path             = trim( (string) wp_parse_url( $undo['old_url'], PHP_URL_PATH ), '/' );
@@ -261,6 +261,9 @@ function aw_enrich_unmerge( $from, $u ) {
 		} elseif ( ! empty( $l['mid'] ) ) {
 			update_metadata_by_mid( 'post', (int) $l['mid'], (string) $from );
 		}
+	}
+	if ( 'trash' === get_post_status( $from ) ) {
+		wp_untrash_post( $from );
 	}
 	wp_update_post( array( 'ID' => $from, 'post_status' => 'publish' ) );
 	delete_post_meta( $from, 'aw_merged_into' );
