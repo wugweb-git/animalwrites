@@ -55,18 +55,22 @@ function aw_publisher_status_html( $st ) {
 }
 
 /**
- * Change log of the Sourcing screen: who changed what, when (newest first, last 300 kept).
+ * Change log of the Sourcing screen: who changed what, when (newest first, last 1,000 kept; 300 before 25 Oct 2026).
+ * An add, edit or delete also gives the value before and after (shown as "old → new"); both are optional, so the
+ * existing calls and entries stay as they are.
  *
  * @param string $tab  Tab.
  * @param string $what What changed, in words.
+ * @param mixed  $old  Value before (null: not given; for an add, '' or an empty list).
+ * @param mixed  $new  Value after (null: not given; for a delete, '' or an empty list).
  */
-function kits_sourcing_log( $tab, $what ) {
+function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
 	if ( '' === trim( $what ) ) {
 		return;
 	}
 	$log = (array) get_option( 'kits_sourcing_log', array() );
-	array_unshift( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ) );
-	update_option( 'kits_sourcing_log', array_slice( $log, 0, 300 ), false );
+	$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ), $old, $new );
+	update_option( 'kits_sourcing_log', $log, false );
 }
 
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
@@ -543,22 +547,26 @@ function aw_sourcing_page() {
 	}
 	echo '</nav>';
 	if ( 'log' === $tab ) {
-		// Entries keep the tab they were made on; tabs since merged are named after their new home.
-		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Feeds (News)', 'library' => 'Feeds (Library)', 'opportunities' => 'Feeds (Opportunity)' );
+		// Entries keep the tab they were made on; tabs since merged are named after their new home (Feeds and Relay
+		// moved into Sources on 25 Oct 2026).
+		$old  = array( 'publishers' => 'Sources', 'feeds' => 'Sources (feeds)', 'library' => 'Sources (Library feeds)', 'opportunities' => 'Sources (Opportunity feeds)', 'relay' => 'Sources (relay)' );
 		$rows = array();
 		foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
 			$tl     = (string) ( $old[ $e['tab'] ] ?? ( $tabs[ $e['tab'] ] ?? $e['tab'] ) );
+			$has    = array_key_exists( 'old', (array) $e ) || array_key_exists( 'new', (array) $e );
+			$change = $has ? aw_src_log_value( $e['old'] ?? '' ) . ' → ' . aw_src_log_value( $e['new'] ?? '' ) : '';
 			$rows[] = array(
-				'at'    => esc_html( $e['at'] ),
-				'user'  => esc_html( $e['user'] ),
-				'tab'   => esc_html( $tl ),
-				'what'  => esc_html( $e['what'] ),
-				'_find' => $e['user'] . ' ' . $tl . ' ' . $e['what'],
+				'at'     => esc_html( $e['at'] ),
+				'user'   => esc_html( $e['user'] ),
+				'tab'    => esc_html( $tl ),
+				'what'   => esc_html( $e['what'] ),
+				'change' => $has ? esc_html( $change ) : '—',
+				'_find'  => $e['user'] . ' ' . $tl . ' ' . $e['what'] . ' ' . $change,
 			);
 		}
 		aw_sourcing_simple_table(
 			'changes',
-			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed' ),
+			array( 'at' => 'When', 'user' => 'Who', 'tab' => 'Tab', 'what' => 'What changed', 'change' => 'Old → new' ),
 			$rows,
 			array( 'per_page' => 50, 'sortable' => array( 'at', 'user', 'tab' ), 'empty' => 'No changes yet.', 'search' => 'Search changes', 'hidden' => array( 'page' => 'aw-sourcing', 'tab' => 'log' ) )
 		);
