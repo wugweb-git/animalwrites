@@ -1,6 +1,6 @@
 <?php
 /**
- * Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. Tools → Dates shows a month grid, the list of
+ * Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. Animal Writes → Dates shows a month grid, the list of
  * dates with their notes, and a form to add or remove one; the Dashboard shows what is next. No plugin and no public page:
  * The Events Calendar was installed but inactive, and it would add public event pages and an /events/ archive to the
  * sitemap. The dates live in the option aw_team_dates: a list of {date Y-m-d, title, note}.
@@ -56,11 +56,11 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
-		add_management_page( 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' );
+		add_submenu_page( AW_CORE_MENU, 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
 	}
 );
 
-/** Tools → Dates. */
+/** Animal Writes → Dates. */
 function aw_team_dates_screen() {
 	if ( ! current_user_can( AW_DATES_CAP ) ) {
 		wp_die( 'Not allowed.', 403 );
@@ -74,7 +74,7 @@ function aw_team_dates_screen() {
 	foreach ( $dates as $d ) {
 		$by[ $d['date'] ][] = $d;
 	}
-	$base  = admin_url( 'tools.php?page=aw-dates' );
+	$base  = admin_url( 'admin.php?page=aw-dates' );
 	$lead  = (int) wp_date( 'N', $first ) - 1; // Monday first
 	$days  = (int) wp_date( 't', $first );
 	$today = wp_date( 'Y-m-d' );
@@ -135,7 +135,7 @@ add_action(
 			$all[] = array( 'date' => $date, 'title' => $name, 'note' => sanitize_textarea_field( wp_unslash( $_POST['note'] ?? '' ) ) );
 			update_option( 'aw_team_dates', $all, false );
 		}
-		wp_safe_redirect( admin_url( 'tools.php?page=aw-dates&m=' . substr( $date, 0, 7 ) ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=aw-dates&m=' . substr( $date, 0, 7 ) ) );
 		exit;
 	}
 );
@@ -152,7 +152,7 @@ add_action(
 			unset( $all[ $i ] );
 			update_option( 'aw_team_dates', array_values( $all ), false );
 		}
-		wp_safe_redirect( admin_url( 'tools.php?page=aw-dates' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=aw-dates' ) );
 		exit;
 	}
 );
@@ -180,7 +180,7 @@ add_action(
 					}
 					echo '</ul>';
 				}
-				echo '<p><a href="' . esc_url( admin_url( 'tools.php?page=aw-dates' ) ) . '">Open the calendar</a></p>';
+				echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-dates' ) ) . '">Open the calendar</a></p>';
 			}
 		);
 	}

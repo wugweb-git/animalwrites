@@ -1,6 +1,6 @@
 <?php
 /**
- * Appearance → Kits system: a read-only index of the design system, generated from kits-registry.json in the Kits
+ * Kits → Design system: a read-only index of the design system, generated from kits-registry.json in the Kits
  * master theme and in the site's child theme. Every component, block, pattern and menu type with its states, its
  * accessibility record and its SEO output; where each is used (from the theme and plugin files); the colour pairs
  * with their contrast worked out from the live tokens; and the tokens themselves. Classes in use with no registry
@@ -128,7 +128,7 @@ function kits_class_usage() {
 add_action(
 	'admin_menu',
 	function () {
-		add_theme_page( 'Kits system', 'Kits system', 'manage_options', 'kits-system', 'kits_system_page' );
+		add_submenu_page( KITS_MENU, 'Design system', 'Design system', 'manage_options', 'kits-system', 'kits_system_page' ); // Kits → Design system
 	}
 );
 
@@ -136,7 +136,7 @@ function kits_system_page() {
 	$reg   = kits_registry();
 	$tab   = sanitize_key( $_GET['tab'] ?? 'components' ); // phpcs:ignore WordPress.Security.NonceVerification
 	$type  = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base  = admin_url( 'themes.php?page=kits-system' );
+	$base  = admin_url( 'admin.php?page=kits-system' );
 	$used  = kits_class_usage();
 	$vals  = kits_token_values();
 	$demo  = get_page_by_path( 'kits-demo' );
@@ -147,7 +147,7 @@ function kits_system_page() {
 	}
 	$missing = array_filter( array_keys( $used ), fn( $c ) => ! array_filter( $pref, fn( $p ) => $c === $p || 0 === strpos( $c, $p . '-' ) ) );
 
-	echo '<div class="wrap"><h1 class="wp-heading-inline">Kits system</h1><hr class="wp-header-end">';
+	echo '<div class="wrap"><h1 class="wp-heading-inline">Design system</h1><hr class="wp-header-end">';
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
 		echo '<div class="notice notice-error inline"><p><strong>' . count( $missing ) . ' class(es) in use with no registry entry:</strong> ' . esc_html( implode( ', ', $missing ) ) . '. The deploy check stops on these.</p></div>';

@@ -227,7 +227,7 @@ add_shortcode(
 			return '';
 		}
 		$pattern = sanitize_text_field( wp_unslash( $_GET['kits_pattern'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( '' !== $pattern && WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern ) ) { // one pattern drawn on its own (Kits system > Components)
+		if ( '' !== $pattern && WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern ) ) { // one pattern drawn on its own (Design system > Components)
 			return do_blocks( '<!-- wp:pattern {"slug":"' . esc_attr( $pattern ) . '"} /-->' );
 		}
 		return '<style>.kit-demo{display:grid;gap:var(--s-8)}@media(min-width:1200px){.kit-demo{grid-template-columns:repeat(2,minmax(0,1fr))}}.kit-demo>section{padding:var(--s-6);border:1px solid var(--kit-color-line);border-radius:var(--kit-radius-card);background:var(--kit-color-bg);color:var(--kit-color-text)}.kit-demo-h{font-size:var(--fluid-body-md);margin:var(--s-6) 0 var(--s-2)}.kit-demo-ink{background:var(--kit-color-ink);padding:var(--s-3);border-radius:var(--kit-radius-control);margin-top:var(--s-2)}.kit-demo-fields{display:grid;gap:0 var(--s-4);grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))}'
@@ -239,13 +239,13 @@ add_shortcode(
 	}
 );
 
-// The states sheet lives in Appearance > Kits system (owner, 18 Oct 2026): opening the page directly goes there; inside
+// The states sheet lives in Kits → Design system (owner, 18 Oct 2026): opening the page directly goes there; inside
 // that screen the page is shown without the site's header, footer and ads.
 add_action(
 	'template_redirect',
 	function () {
 		if ( is_page( 'kits-demo' ) && ! isset( $_GET['kits_embed'] ) && current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( admin_url( 'themes.php?page=kits-system&tab=states' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=kits-system&tab=states' ) );
 			exit;
 		}
 	}
@@ -259,7 +259,7 @@ add_action(
 	}
 );
 
-// Kits system > Components shows each entry's own visual: the states sheet keeps only the sections drawing that entry
+// Design system > Components shows each entry's own visual: the states sheet keeps only the sections drawing that entry
 // (its classes, or its block named in the heading); an entry the sheet does not draw is shown on a live page instead,
 // scrolled to its first use and outlined (kits_spot).
 /** Sample pages read daily to find where each entry is first used (kits_spot_map); a site adds its own (filter kits_spot_pages). */
