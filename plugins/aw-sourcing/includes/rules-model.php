@@ -531,8 +531,33 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
  * @return bool
  */
 function aw_rules_pattern_ok( $p ) {
-	if ( preg_match( '/\\\\[hHRKXpPQEGz]|[+*?}]\\+|\\(\\?[|>]|\\(\\*/', $p ) ) {
+	if ( preg_match( '/[+*?}]\\+|\\(\\?[|>R0-9&+-]|\\(\\?P>|\\(\\?<(?![=!])|\\(\\*/', $p ) ) {
 		return false;
+	}
+	// Escapes: only what Python re compiles (Codex, #77). A letter escape must be one Python knows; \x takes exactly
+	// two hex digits, \u four, \U eight (so PCRE's \x{1F600}, \o{..}, \cX, \e, \g, \k and \N without {name} fail).
+	if ( preg_match_all( '/\\\\(.)/su', $p, $m, PREG_OFFSET_CAPTURE ) ) {
+		foreach ( $m[1] as $e ) {
+			$c    = $e[0];
+			$rest = substr( $p, $e[1] + strlen( $c ) );
+			if ( ! ctype_alpha( $c ) ) {
+				continue; // a digit (group reference) or an escaped symbol
+			}
+			if ( 'x' === $c ) {
+				$ok = (bool) preg_match( '/^[0-9a-fA-F]{2}/', $rest );
+			} elseif ( 'u' === $c ) {
+				$ok = (bool) preg_match( '/^[0-9a-fA-F]{4}/', $rest );
+			} elseif ( 'U' === $c ) {
+				$ok = (bool) preg_match( '/^[0-9a-fA-F]{8}/', $rest );
+			} elseif ( 'N' === $c ) {
+				$ok = (bool) preg_match( '/^\\{[A-Z0-9 \\-]+\\}/', $rest );
+			} else {
+				$ok = false !== strpos( 'AbBdDsSwWZafnrtv', $c );
+			}
+			if ( ! $ok ) {
+				return false;
+			}
+		}
 	}
 	return false !== @preg_match( "\x01" . $p . "\x01iu", '' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- testing whether a pattern compiles
 }

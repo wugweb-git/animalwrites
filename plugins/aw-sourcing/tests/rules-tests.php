@@ -255,6 +255,12 @@ list( $tr, $bad ) = aw_rules_tag_rule_clean(
 aw_t( array( 'bad(' ) === $bad && array( 'ok' ) === $tr['hold'] && ! isset( $tr['hold_reason'] ), 'a hold pattern that does not compile is refused' );
 aw_t( ! aw_rules_pattern_ok( '\\h+lab' ) && ! aw_rules_pattern_ok( 'foo++' ) && ! aw_rules_pattern_ok( '(?>a)' ), 'PCRE-only patterns the workers cannot read are refused' );
 aw_t( aw_rules_pattern_ok( 'a\\~b' ) && aw_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && aw_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );
+aw_t( ! aw_rules_pattern_ok( '\\x{1F600}' ) && ! aw_rules_pattern_ok( '\\e' ) && ! aw_rules_pattern_ok( '\\cA' ) && ! aw_rules_pattern_ok( '(?<n>a)' ) && ! aw_rules_pattern_ok( '(?R)' ), 'escapes and groups Python re cannot compile are refused (Codex, #77)' );
+aw_t( aw_rules_pattern_ok( '\\x41\\d+\\s\\bG\\.S\\.R\\.' ) && aw_rules_pattern_ok( '\\\\d' ) && aw_rules_pattern_ok( '(?P<n>a)(?<=b)(?<!c)' ), 'Python-compatible escapes and lookbehinds are accepted' );
+$en_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enrichment.php' );
+$pp_at  = strpos( $en_src, 'function aw_enrich_policy_pass' );
+$pp_src = false === $pp_at ? '' : substr( $en_src, $pp_at, 2500 );
+aw_t( false !== strpos( $pp_src, 'aw_enrich_field_rule( $r[\'field\'] )' ) && false !== strpos( $pp_src, 'aw_enrich_allowed_sources(' ), 'the policy pass rechecks the field rule and its sources before applying queued rows (Codex, #77)' );
 
 // ---- listing fields added in wp-admin: which can be enabled, and how their values are written ----
 // WordPress's sanitizers, as plain stand-ins (no WordPress here).
