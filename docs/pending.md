@@ -5,9 +5,7 @@ Check this list against git and the live site before acting on it. Refer to item
 ## Open
 
 ### Only the owner (sign-ins, keys, files)
-1. **AW_GITHUB_DISPATCH_TOKEN** in wp-config.php (fine-grained token, workers repo only, Actions read/write). Not set on live (checked 24 Oct): Hostinger has never started sourcing (no cron line, `aw_dispatch_log` empty) and Run now on the Workers tab is off.
 2. **Workers repo protection:** add the deploy key (public key under Deploy keys with write access; private key as an Actions secret), so Sources sync and Keepalive can still commit once `main` is protected.
-4. **Delhi HC order of 16 Sep 2025:** type the CAPTCHA in the court's search (W.P.(C) 9350/2025) so the official PDF can be added (Library #13904 waits for it).
 5. **Yandex:** add `sitemap_index.xml` when the Sitemap tool works again (read-only since 21 Oct; wp-sitemap.xml is queued and 301s to it). **Bing Webmaster:** sign in.
 6. **GA4:** star volunteer_signup and claim_sent once GA4 lists them. (Starred already: contact_sent, newsletter_signup, newsletter_optin, objection_sent, objection_confirmed.)
 7. **Vercel key:** only if that AI provider is wanted.
@@ -81,6 +79,8 @@ These live in WordPress: **Tools → Dates** (month calendar, add and remove) an
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (25 Oct 2026)
+- **GitHub dispatch token (owner, 25 Oct).** `AW_GITHUB_DISPATCH_TOKEN` is in wp-config.php (fine-grained: animal-writes-workers only, Actions read and write, Metadata read); Run now works (tests.yml started from the site 07:49 UTC). The sourcing cron (every 3 h, `aw_dispatch_workflow("sourcing.yml", …)`) is in hPanel → Cron Jobs (owner); SSH has no crontab on this plan.
+- **Delhi HC W.P.(C) 9350/2025 (Library #13904).** Source now the court's official judgment PDF (16 Sep 2025), named "Delhi High Court" (owner: link only, no archived copy). All 12 orders and the judgment are on the owner's Mac (`~/Documents/delhi-hc-wpc-9350-2025/`). Court policy: linking needs no permission, no framing, open in a new window; reproduction needs an email (Copyright Act s.52(1)(q)(iv) allows publishing judgments).
 - **Mail** (owner, 25 Oct): done.
 - **AW Sourcing admin screens and AI keys (24–25 Oct; site #40, #43, #47–#52 and direct fixes, live at 7042991; workers #6, #8, #10).** Keywords, Categories, Sections, Sources (publishers + press sites, Add New Source), Feeds, Workers (worker IDs, Add New Worker, Planned workers) and AI models (Add New Key, attach/detach keys to workers, provider icons) on core list tables and the Settings API; ~30 hand-built admin tables converted; 3-month page figures; PHPCS security delta in the Deploy check; old AI models link redirects (hooks `admin_page_access_denied`). Workers send `?worker=<id>` for keys. **No paid AI models, ever (owner, 25 Oct):** site and workers try free models only (OpenRouter's minimax free model was gone, so checks had fallen to paid gpt-4o-mini); Summaries ends before the 50-minute job limit. Domain Rating dropped (no CSV, owner). 4 unusable keys left as they are (owner).
 - **Server (25 Oct).** WordPress 7.1.3 core verifies again on live and staging (25 cut-short names in `wp-includes/php-ai-client` from a 5 Oct archive upload; folder replaced from the official package; backups in `~/aw-backups`). `aw-private/archived-docs` removed on live and staging (the 4 AWBI documents are Library items 142–145); staging's three 8 Oct backup files removed.
