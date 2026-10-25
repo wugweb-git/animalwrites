@@ -57,7 +57,8 @@ add_action(
 	'admin_menu',
 	function () {
 		add_submenu_page( AW_CORE_MENU, 'Dates', 'Dates', AW_DATES_CAP, 'aw-dates', 'aw_team_dates_screen' ); // Animal Writes → Dates
-	}
+	},
+	10 // menu order: Overview (9) · Dates · Check site (11) · Contact links (12)
 );
 
 /** Animal Writes → Dates. */

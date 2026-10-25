@@ -22,7 +22,7 @@ add_action(
 		add_menu_page( 'Animal Writes', 'Animal Writes', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page', 'dashicons-pets', 28 );
 		add_submenu_page( AW_CORE_MENU, 'Animal Writes', 'Overview', 'edit_posts', AW_CORE_MENU, 'aw_core_overview_page' );
 	},
-	9 // before the screens that join this menu (Dates, Check site, Contact links)
+	9 // before the screens that join this menu, in this order: Dates (10), Check site (11), Contact links (12)
 );
 
 // Plugins screen: Overview under the plugin's name.
