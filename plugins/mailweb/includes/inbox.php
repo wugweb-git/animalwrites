@@ -286,16 +286,8 @@ function mailweb_inbox_page() {
 		wp_die( esc_html__( 'Not allowed.', 'mailweb' ), 403 );
 	}
 	$s   = mailweb_state();
-	$tab = sanitize_key( $_GET['tab'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 	echo '<style>#mailweb tr.unread td,#mailweb tr.unread th{background-color:#fcf9e8}#mailweb tr.unread .check-column{box-shadow:inset 4px 0 0 #2271b1}#mailweb tr.unread .column-from,#mailweb tr.unread .column-subject>a{font-weight:600}#mailweb .column-date{width:9em}#mailweb .column-mailbox{width:12em}#mailweb .column-from{width:22%}#mailweb .awm-box{float:right;margin-top:9px}#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}@media (max-width:767px){#mailweb .awm-box{float:none;margin:8px 0}}</style>';
 	echo '<div class="wrap" id="mailweb">';
-	if ( 'settings' === $tab && current_user_can( 'manage_options' ) ) {
-		echo '<h1>' . esc_html__( 'Mail settings', 'mailweb' ) . '</h1>';
-		mailweb_notice();
-		do_action( 'mailweb_settings_tab' );
-		echo '</div>';
-		return;
-	}
 	if ( isset( $_GET['compose'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		mailweb_compose_screen( $s, sanitize_key( $_GET['compose'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	} elseif ( MAILWEB_FORMS === $s['folder'] && $s['item'] ) {
@@ -338,9 +330,6 @@ function mailweb_list_screen( $s ) {
 	require_once MAILWEB_DIR . 'includes/list-table.php';
 	$boxes = mailweb_all_boxes();
 	echo '<h1 class="wp-heading-inline">' . esc_html__( 'Mail', 'mailweb' ) . '</h1> <a class="page-title-action" href="' . esc_url( mailweb_url( array( 'compose' => 'new', 'paged' => null, 's' => null ) ) ) . '">' . esc_html__( 'New message', 'mailweb' ) . '</a>';
-	if ( current_user_can( 'manage_options' ) ) {
-		echo ' <a class="page-title-action" href="' . esc_url( admin_url( 'admin.php?page=mailweb&tab=settings' ) ) . '">' . esc_html__( 'Settings', 'mailweb' ) . '</a>';
-	}
 	// Mailbox picker (right).
 	echo '<form class="awm-box" method="get"><input type="hidden" name="page" value="mailweb"><input type="hidden" name="folder" value="' . esc_attr( MAILWEB_FORMS === $s['folder'] ? 'inbox' : $s['folder'] ) . '"><label for="awm-box" class="screen-reader-text">' . esc_html__( 'Mailbox', 'mailweb' ) . '</label><select id="awm-box" name="box" onchange="this.form.submit()"><option value="all"' . selected( 'all', $s['box'], false ) . '>' . esc_html__( 'All mailboxes', 'mailweb' ) . '</option>';
 	foreach ( $boxes as $k => $a ) {

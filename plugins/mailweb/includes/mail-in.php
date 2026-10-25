@@ -48,7 +48,7 @@ function mailweb_save_setting( $key, $value ) {
 
 /** Mail → Settings URL for a tab ('incoming' or 'sending'), with extra query arguments. */
 function mailweb_settings_url( $sub = 'incoming', $args = array(), $anchor = '' ) {
-	$url = add_query_arg( array_merge( array( 'page' => 'mailweb', 'tab' => 'settings', 'sub' => $sub ), $args ), admin_url( 'admin.php' ) );
+	$url = add_query_arg( array_merge( array( 'page' => 'mailweb-settings', 'sub' => $sub ), $args ), admin_url( 'admin.php' ) );
 	return $url . ( '' !== $anchor ? '#' . $anchor : '' );
 }
 
