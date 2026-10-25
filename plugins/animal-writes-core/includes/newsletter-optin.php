@@ -5,8 +5,7 @@
  * - Contact and Listing claim forms carry an unticked box with the footer form's wording. Ticked → the
  *   person goes onto the newsletter list as "active" with the form as source (16 Oct 2026). Unticked → nothing is added. (The Report form asks for no email, so it has no box.)
  * - Volunteers: the updates box is shown ticked and volunteers join the newsletter whether or not it stays ticked
- *   (owner, 20 Oct 2026; volunteers.php). Claimants, contact senders and incoming emails are never added on their own. Newsletter → Not subscribed
- *   lists them (name, email, source, date) with a CSV export, for a one-time opt-in invite sent outside WordPress.
+ *   (owner, 20 Oct 2026; volunteers.php). Claimants, contact senders and incoming emails are never added on their own.
  *
  * @package animal-writes-core
  */
@@ -31,72 +30,3 @@ function aw_nl_optin( $email, $name, $source, $ticked = null, $consent = AW_NL_C
 	}
 	aw_newsletter_join( $email, $name, 'site:' . $source, $consent, array(), array( 'newsletter' ) ); // site list and FluentCRM
 }
-
-/** Everyone we hold an email for who is not on the newsletter (active or pending). */
-function aw_nl_not_subscribed() {
-	global $wpdb;
-	$on   = array_flip( (array) $wpdb->get_col( 'SELECT email FROM ' . aw_nl_table() . " WHERE status IN ('active','pending')" ) ); // phpcs:ignore
-	$rows = array();
-	$add  = function ( $email, $name, $source, $date ) use ( &$rows, $on ) {
-		$email = strtolower( trim( (string) $email ) );
-		if ( ! is_email( $email ) || isset( $on[ $email ] ) || isset( $rows[ $email ] ) || str_ends_with( $email, '@animalwrites.in' ) ) {
-			return;
-		}
-		$rows[ $email ] = array( 'name' => (string) $name, 'email' => $email, 'source' => $source, 'date' => substr( (string) $date, 0, 10 ) );
-	};
-	if ( function_exists( 'aw_crm_volunteers' ) ) { // FluentCRM is the volunteers table (owner, 24 Oct 2026)
-		foreach ( aw_crm_volunteers() as $r ) {
-			$add( $r['email'], $r['name'], 'volunteer (' . ( '' !== $r['vol_source'] ? $r['vol_source'] : 'FluentCRM' ) . ')', '' !== $r['joined'] ? $r['joined'] : $r['created_at'] );
-		}
-	}
-	foreach ( get_posts( array( 'post_type' => array( 'aw_message', 'aw_claim' ), 'post_status' => 'any', 'numberposts' => -1 ) ) as $p ) {
-		$claim = 'aw_claim' === $p->post_type;
-		$add(
-			get_post_meta( $p->ID, $claim ? 'aw_c_email' : 'aw_m_email', true ),
-			get_post_meta( $p->ID, $claim ? 'aw_c_name' : 'aw_m_name', true ),
-			$claim ? 'listing claim' : ( 'Email' === get_post_meta( $p->ID, 'aw_m_tag', true ) ? 'email to ' . get_post_meta( $p->ID, 'aw_m_to', true ) : 'contact form' ),
-			$p->post_date
-		);
-	}
-	return array_values( $rows );
-}
-
-add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page( 'aw-newsletter', 'Not subscribed', 'Not subscribed', AW_VOL_CAP, 'aw-not-subscribed', 'aw_nl_not_subscribed_page' );
-	},
-	30
-);
-
-function aw_nl_not_subscribed_page() {
-	$rows = aw_nl_not_subscribed();
-	$csv  = wp_nonce_url( admin_url( 'admin-post.php?action=aw_not_subscribed_csv' ), 'aw_not_subscribed_csv' );
-	echo '<div class="wrap"><h1>Not subscribed</h1><p>People we have an email for who have not joined the newsletter. They are never added automatically; send them a one-time invite from your own mail if you wish.</p>';
-	echo '<p><a class="button button-primary" href="' . esc_url( $csv ) . '">Download CSV (' . (int) count( $rows ) . ')</a></p>';
-	$cells = array();
-	foreach ( array_slice( $rows, 0, 500 ) as $r ) {
-		$cells[] = array( 'name' => esc_html( $r['name'] ), 'email' => esc_html( $r['email'] ), 'source' => esc_html( $r['source'] ), 'date' => esc_html( $r['date'] ) );
-	}
-	aw_core_simple_table( 'not-subscribed', array( 'name' => 'Name', 'email' => 'Email', 'source' => 'Source', 'date' => 'Date' ), $cells, array( 'empty' => 'Nobody.' ) );
-	echo '</div>';
-}
-
-add_action(
-	'admin_post_aw_not_subscribed_csv',
-	function () {
-		if ( ! current_user_can( AW_VOL_CAP ) || ! check_admin_referer( 'aw_not_subscribed_csv' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		nocache_headers();
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=not-subscribed-' . gmdate( 'Y-m-d' ) . '.csv' );
-		$out = fopen( 'php://output', 'w' );
-		fputcsv( $out, array( 'name', 'email', 'source', 'date' ) );
-		foreach ( aw_nl_not_subscribed() as $r ) {
-			fputcsv( $out, array( $r['name'], $r['email'], $r['source'], $r['date'] ) );
-		}
-		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		exit;
-	}
-);

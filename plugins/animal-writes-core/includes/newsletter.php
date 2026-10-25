@@ -1,6 +1,6 @@
 <?php
 /**
- * Newsletter: sign-up with email confirmation and the sign-up list (WP Admin > Audience > Newsletter, CSV export).
+ * Newsletter: sign-up with email confirmation and the sign-up list (the list is in FluentCRM; this table is the backup, no admin screen since 25 Oct 2026).
  * Sending happens in an external mailing service, not in WordPress (S2.4).
  *
  * Table {prefix}aw_subscribers. Statuses: pending (signed up, not yet confirmed), invited (1.0 volunteer sent the
@@ -189,54 +189,3 @@ add_action(
 // Newsletters are sent from an external CRM (S2.4, 8 Oct 2026): WordPress keeps the sign-up list only. The old screen's
 // last draft and job stay in the options aw_nl_draft, aw_nl_job; its aw_nl_batch job is long gone (none scheduled on
 // live, 25 Oct 2026), so the check that cleared it on every load was removed (audit item 17).
-
-/* ---------- Admin: WP Admin > Newsletter ---------- */
-
-add_action(
-	'admin_menu',
-	function () {
-		add_menu_page( 'Newsletter sign-ups', 'Newsletter', AW_VOL_CAP, 'aw-newsletter', 'aw_nl_admin_page', 'dashicons-email-alt', 27 );
-	}
-);
-
-function aw_nl_admin_page() {
-	global $wpdb;
-	$t      = aw_nl_table();
-	$counts = wp_list_pluck( $wpdb->get_results( "SELECT status, COUNT(*) n FROM {$t} GROUP BY status", ARRAY_A ), 'n', 'status' ); // phpcs:ignore
-	$page   = max( 1, absint( $_GET['paged'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$rows   = $wpdb->get_results( $wpdb->prepare( "SELECT email, name, source, status, created_at FROM {$t} ORDER BY id DESC LIMIT 50 OFFSET %d", ( $page - 1 ) * 50 ), ARRAY_A ); // phpcs:ignore
-	$total  = (int) array_sum( $counts );
-	echo '<div class="wrap"><h1>Newsletter sign-ups</h1>';
-	echo '<p>Confirmed: <strong>' . (int) ( $counts['active'] ?? 0 ) . '</strong> · Waiting to confirm: ' . (int) ( $counts['pending'] ?? 0 )
-		. ' · Invited, not yet confirmed: ' . (int) ( $counts['invited'] ?? 0 ) . ' · Unsubscribed: ' . (int) ( $counts['unsubscribed'] ?? 0 ) . '</p>';
-	echo '<p class="description">Newsletters are sent from the external mailing service, not from WordPress.</p>';
-	$export = wp_nonce_url( admin_url( 'admin-post.php?action=aw_nl_export' ), 'aw_nl_export' );
-	echo '<p><a class="button" href="' . esc_url( $export ) . '">Export sign-ups (CSV)</a></p>';
-	$cells = array();
-	foreach ( $rows as $r ) {
-		$cells[] = array( 'email' => esc_html( $r['email'] ), 'name' => esc_html( $r['name'] ), 'source' => esc_html( $r['source'] ), 'status' => esc_html( $r['status'] ), 'created' => esc_html( substr( (string) $r['created_at'], 0, 10 ) ) );
-	}
-	aw_core_simple_table( 'sign-ups', array( 'email' => 'Email', 'name' => 'Name', 'source' => 'Source', 'status' => 'Status', 'created' => 'Signed up' ), $cells, array( 'per_page' => 50, 'total' => $total, 'empty' => 'No sign-ups yet.' ) );
-	echo '</div>';
-}
-
-add_action(
-	'admin_post_aw_nl_export',
-	function () {
-		if ( ! current_user_can( AW_VOL_CAP ) || ! check_admin_referer( 'aw_nl_export' ) ) {
-			wp_die( 'Not allowed.', 403 );
-		}
-		global $wpdb;
-		$t = aw_nl_table();
-		nocache_headers();
-		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename="aw-subscribers-' . gmdate( 'Y-m-d' ) . '.csv"' );
-		$out = fopen( 'php://output', 'w' ); // phpcs:ignore
-		fputcsv( $out, array( 'email', 'name', 'source', 'status', 'consent_text_version', 'consent_at', 'created_at' ) );
-		foreach ( $wpdb->get_results( "SELECT email, name, source, status, consent_text_version, consent_at, created_at FROM {$t} ORDER BY id", ARRAY_A ) as $r ) { // phpcs:ignore
-			fputcsv( $out, array_map( fn( $v ) => is_string( $v ) && preg_match( '/^[=+\-@]/', $v ) ? "'" . $v : $v, $r ) );
-		}
-		fclose( $out ); // phpcs:ignore
-		exit;
-	}
-);

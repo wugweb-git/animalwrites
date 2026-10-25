@@ -166,10 +166,6 @@ add_action(
 		global $submenu, $menu;
 		// Hidden: Comments.
 		remove_menu_page( 'edit-comments.php' );
-		// Volunteers and Newsletter (with Not subscribed) are in FluentCRM now (owner, 17 Oct 2026): hidden from the menu
-		// only; their pages keep their URLs and the site's tables stay as the backup.
-		remove_menu_page( 'aw-volunteers' );
-		remove_menu_page( 'aw-newsletter' );
 		remove_submenu_page( 'aw-classification', 'aw-classification' );
 		remove_submenu_page( 'aw-inbox', 'aw-inbox' );
 		// Categories: only under Classification.
