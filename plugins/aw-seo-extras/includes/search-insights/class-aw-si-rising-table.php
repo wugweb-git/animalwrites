@@ -189,7 +189,7 @@ class AW_SI_Rising_Table extends WP_List_Table {
 
 	/** Message when the list is empty. */
 	public function no_items() {
-		echo esc_html__( 'No rising terms here yet. The workers send them daily (and weekly for autocomplete and Trends related searches); Sourcing spikes are worked out nightly.', 'aw-seo-extras' );
+		echo esc_html__( 'No rising terms here yet. The workers send them daily (and weekly for autocomplete and Trends related searches); "In the news" is worked out nightly.', 'aw-seo-extras' );
 	}
 
 	/**
