@@ -7,8 +7,9 @@
  *   GET gives the job its lists (English keywords, topics, species, watchlists, seeds); POST takes one source's rising
  *   terms and figures and records that source's run (Trends trending now, Wikipedia, GDELT daily; autocomplete and
  *   Trends related queries weekly; Trends interest monthly).
- * - Sourcing spikes, on the site: daily counts of publishers, states, species and laws across the News items AW Sourcing
- *   fetched, flagged at 3× the 14-day average (daily at 23:40 IST, after the rollup).
+ * - In the news, on the site: daily counts of states, species and laws across the News items AW Sourcing fetched, flagged
+ *   at 3× the 14-day average (daily at 23:40 IST, after the rollup). Publishers are not counted (owner, 26 Oct 2026: a
+ *   publisher's count is our own feed volume, not a topic); the label says "In the news" so it is not read as search demand.
  * - The Rising tab (filter aw_si_tabs): the rising terms with their sources, growth, first seen, matching page and
  *   suggested action; the owner marks them Noted or Dismissed. A paste form takes Trends figures when the worker is
  *   refused.
@@ -74,7 +75,7 @@ function aw_si_rising_sources(): array {
 			'worker' => true,
 		),
 		'sourcing'        => array(
-			'label'  => __( 'Sourcing spikes', 'aw-seo-extras' ),
+			'label'  => __( 'In the news (our News: species, states, laws)', 'aw-seo-extras' ),
 			'every'  => DAY_IN_SECONDS,
 			'worker' => false,
 		),
@@ -452,8 +453,8 @@ add_action(
 );
 
 /**
- * Counts per day across the News items AW Sourcing fetched (any status but auto-draft): publishers, states, species and
- * laws. Days are IST calendar days of aw_ingested_at.
+ * Counts per day across the News items AW Sourcing fetched (any status but auto-draft): states, species and laws
+ * (publishers are not counted: owner, 26 Oct 2026). Days are IST calendar days of aw_ingested_at.
  *
  * @param string $from First day (Y-m-d).
  * @param string $to   Last day (Y-m-d).
@@ -484,18 +485,10 @@ function aw_si_sourcing_counts( string $from, string $to ): array {
 	foreach ( $rows as $r ) {
 		$day   = wp_date( 'Y-m-d', (int) $r->t, $tz );
 		$found = array(
-			'publisher' => array(),
-			'state'     => array(),
-			'species'   => array(),
-			'law'       => array(),
+			'state'   => array(),
+			'species' => array(),
+			'law'     => array(),
 		);
-		$pub   = trim( (string) get_post_meta( (int) $r->ID, 'aw_source_name', true ) );
-		if ( '' === $pub ) {
-			$pub = (string) wp_parse_url( (string) get_post_meta( (int) $r->ID, 'aw_source_url', true ), PHP_URL_HOST );
-		}
-		if ( '' !== $pub ) {
-			$found['publisher'][ $pub ] = true;
-		}
 		$ent = json_decode( (string) get_post_meta( (int) $r->ID, 'aw_entities', true ), true );
 		foreach ( (array) ( $ent['places'] ?? array() ) as $p ) {
 			$code = (string) ( $p['state'] ?? '' );
@@ -571,10 +564,9 @@ function aw_si_sourcing_spikes_run( int $days = 2, bool $dry = false ): array {
 	$first  = $today->modify( '-' . ( $days - 1 ) . ' days' )->format( 'Y-m-d' );
 	$counts = aw_si_sourcing_counts( $today->modify( '-' . ( $days - 1 + AW_SI_SPIKE_WINDOW ) . ' days' )->format( 'Y-m-d' ), $today->format( 'Y-m-d' ) );
 	$kinds  = array(
-		'publisher' => __( 'Publisher', 'aw-seo-extras' ),
-		'state'     => __( 'State', 'aw-seo-extras' ),
-		'species'   => __( 'Species', 'aw-seo-extras' ),
-		'law'       => __( 'Law', 'aw-seo-extras' ),
+		'state'   => __( 'State', 'aw-seo-extras' ),
+		'species' => __( 'Species', 'aw-seo-extras' ),
+		'law'     => __( 'Law', 'aw-seo-extras' ),
 	);
 	$out    = array(
 		'days'   => $days,
@@ -607,7 +599,7 @@ function aw_si_sourcing_spikes_run( int $days = 2, bool $dry = false ): array {
 			$out['spikes'][] = $s;
 			if ( ! $dry ) {
 				/* translators: 1: Publisher, State, Species or Law, 2: items, 3: date, 4: average. */
-				$note = sprintf( __( 'Sourcing: %1$s in %2$d News items on %3$s, 14-day average %4$s', 'aw-seo-extras' ), $kinds[ $s['kind'] ] ?? $s['kind'], $s['count'], wp_date( 'j M', strtotime( $day . ' 12:00' ), $tz ), number_format_i18n( $s['avg'], 1 ) );
+				$note = sprintf( __( 'In the news: %1$s in %2$d News items on %3$s, 14-day average %4$s', 'aw-seo-extras' ), $kinds[ $s['kind'] ] ?? $s['kind'], $s['count'], wp_date( 'j M', strtotime( $day . ' 12:00' ), $tz ), number_format_i18n( $s['avg'], 1 ) );
 				aw_si_rising_put( $s['name'], 'sourcing', $s['growth'], $day, $note );
 			}
 		}
@@ -732,7 +724,7 @@ function aw_si_rising_tab(): void {
 		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Pasted: %1$d lines stored, %2$d skipped.', 'aw-seo-extras' ), absint( wp_unslash( $_GET['pasted'] ) ), absint( wp_unslash( $_GET['skipped'] ?? 0 ) ) ) ) . '</p></div>';
 	}
 	// phpcs:enable
-	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly; and spikes in the News that Sourcing fetches. Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'Terms rising in India from free sources: Trends trending now, Wikipedia pageviews and Indian news (GDELT) daily; Google autocomplete and Trends rising related searches weekly; and "In the news": species, states and laws suddenly frequent in the News we publish (not search demand). Growth is how many times the usual level (– when the source gives no ratio). Nothing here changes Rank Math or the Sourcing lists: mark each term Noted or Dismissed.', 'aw-seo-extras' ) . '</p>';
 	$table = new AW_SI_Rising_Table();
 	$table->prepare_items();
 	$table->views();
