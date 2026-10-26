@@ -234,7 +234,9 @@
                     "uniqElKey": "el_aw_wa_optin",
                     "attributes": {
                         "name": "wa_optin",
-                        "value": [],
+                        "value": [
+                            "1"
+                        ],
                         "type": "checkbox"
                     },
                     "settings": {

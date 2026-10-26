@@ -240,7 +240,9 @@
                     "uniqElKey": "el_aw_cf_waopt",
                     "attributes": {
                         "name": "wa_optin",
-                        "value": [],
+                        "value": [
+                            "1"
+                        ],
                         "type": "checkbox"
                     },
                     "settings": {
