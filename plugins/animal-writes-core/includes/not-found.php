@@ -18,12 +18,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Sections whose missing items get the newest-items list: first part of the address => post type, label. */
+/** Sections whose missing items get the newest-items list: post type => label. Their addresses come from AW_HUBS. */
 const AW_NOT_FOUND_SECTIONS = array(
-	'news'          => array( 'aw_news', 'News' ),
-	'library'       => array( 'aw_legal', 'Library' ),
-	'opportunities' => array( 'aw_opportunity', 'Opportunities' ),
+	'aw_news'        => 'News',
+	'aw_legal'       => 'Library',
+	'aw_opportunity' => 'Opportunities',
 );
+
+/** The section (post type => label) a missing address is under, e.g. array( 'aw_news', 'News' ), or null. */
+function aw_not_found_section() {
+	$parts = aw_not_found_parts();
+	if ( count( $parts ) < 2 ) {
+		return null;
+	}
+	foreach ( AW_NOT_FOUND_SECTIONS as $type => $label ) {
+		if ( isset( AW_HUBS[ $type ] ) && AW_HUBS[ $type ][0] === $parts[0] ) {
+			return array( $type, $label );
+		}
+	}
+	return null;
+}
 
 /** Post types whose trashed items answer 410. */
 const AW_GONE_TYPES = array( 'aw_news', 'aw_legal' );
@@ -45,15 +59,13 @@ function aw_removed_item() {
 	if ( false !== $item ) {
 		return $item;
 	}
-	$item  = null;
-	$parts = aw_not_found_parts();
-	if ( ! is_404() || 2 !== count( $parts ) || ! isset( AW_NOT_FOUND_SECTIONS[ $parts[0] ] ) ) {
+	$item    = null;
+	$parts   = aw_not_found_parts();
+	$section = aw_not_found_section();
+	if ( ! is_404() || 2 !== count( $parts ) || ! $section || ! in_array( $section[0], AW_GONE_TYPES, true ) ) {
 		return $item;
 	}
-	$type = AW_NOT_FOUND_SECTIONS[ $parts[0] ][0];
-	if ( ! in_array( $type, AW_GONE_TYPES, true ) ) {
-		return $item;
-	}
+	$type = $section[0];
 	global $wpdb;
 	$slug = sanitize_title( $parts[1] );
 	$id   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_wp_desired_post_slug' WHERE p.post_status = 'trash' AND p.post_type = %s AND m.meta_value = %s LIMIT 1", $type, $slug ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -74,11 +86,14 @@ add_action(
 	99
 );
 
-/** Words for the search field from the missing address: its last part, with hyphens as spaces; '' for file paths. */
+/**
+ * Words for the search field from the missing address: its last part, with hyphens as spaces. '' for files, WordPress
+ * and dot paths (/wp-…, /_…, /.well-known/…) and script leftovers such as /null or /undefined.
+ */
 function aw_not_found_query() {
 	$parts = aw_not_found_parts();
 	$last  = (string) end( $parts );
-	if ( '' === $last || false !== strpos( $last, '.' ) || preg_match( '#^(wp-|_)#', (string) ( $parts[0] ?? '' ) ) ) {
+	if ( '' === $last || false !== strpos( $last, '.' ) || in_array( strtolower( $last ), array( 'null', 'undefined', 'false' ), true ) || preg_match( '#^(wp-|_|\.)#', (string) ( $parts[0] ?? '' ) ) ) {
 		return '';
 	}
 	$words = preg_split( '/[-_\s]+/u', preg_replace( '/__trashed$/', '', $last ) );
@@ -90,8 +105,7 @@ add_shortcode(
 	'aw_not_found',
 	function () {
 		$gone    = aw_removed_item();
-		$parts   = aw_not_found_parts();
-		$section = isset( $parts[0], AW_NOT_FOUND_SECTIONS[ $parts[0] ] ) && count( $parts ) > 1 ? AW_NOT_FOUND_SECTIONS[ $parts[0] ] : null;
+		$section = aw_not_found_section();
 		$q       = aw_not_found_query();
 
 		$html = '<p class="kit-error-code">' . ( $gone ? '410' : '404' ) . '</p>';
@@ -104,7 +118,7 @@ add_shortcode(
 		$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"><button type="submit" class="kit-btn"><span class="kit-ico kit-ico--search" aria-hidden="true"></span>Search</button></form>';
 
 		if ( $section ) {
-			$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC', 'no_found_rows' => true ) );
+			$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC' ) );
 			if ( $posts ) {
 				$html .= '<section class="aw-hub-group"><h2>Latest from ' . esc_html( $section[1] ) . '</h2><ul' . ( 'aw_news' === $section[0] ? ' class="aw-hub-news"' : '' ) . '>';
 				foreach ( $posts as $p ) {
