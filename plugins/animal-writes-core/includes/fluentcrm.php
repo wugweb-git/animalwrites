@@ -55,6 +55,7 @@ const AW_CRM_TAG_TITLES = array(
 	// Added 21 Oct 2026 (owner) next to the existing ones; newsletter ("Joined via site form"), volunteer-1.0 and
 	// campaign-<slug> are kept as they are. The owner sets org-approved, vol-active and vol-paused by hand.
 	'claimant'            => 'Claimant',
+	'campaign-own-line'   => 'Campaign: own line', // signed a campaign letter with their own line (owner, 26 Oct 2026: a filter to reply to each)
 	'org-pending'         => 'Organisation: pending',
 	'org-approved'        => 'Organisation: approved',
 	'vol-active'          => 'Volunteer: active',

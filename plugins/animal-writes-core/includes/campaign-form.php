@@ -291,6 +291,9 @@ add_action(
 				),
 				false
 			);
+			if ( '' !== trim( (string) ( $data['own'] ?? '' ) ) ) { // wrote their own line: tagged, so FluentCRM can list them (owner, 26 Oct 2026)
+				$c->attachTags( aw_crm_tag_ids( array( 'campaign-own-line' ) ) );
+			}
 		}
 		aw_cl_record_letter(
 			$id,
