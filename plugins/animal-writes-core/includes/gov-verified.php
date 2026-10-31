@@ -86,9 +86,9 @@ function aw_gov_verified_sync( $id, $dry = false ) {
 	if ( $dry ) {
 		return $docs;
 	}
-	$on  = $docs ? max( array_map( fn( $d ) => '' !== $d ? $d : '0000-00-00', $docs ) ) : '';
-	$on  = '0000-00-00' === $on ? wp_date( 'Y-m-d' ) : $on; // no date on the document: the day it was given
 	$was = (string) get_post_meta( $id, 'aw_gov_verified_on', true );
+	$on  = $docs ? max( array_map( fn( $d ) => '' !== $d ? $d : '0000-00-00', $docs ) ) : '';
+	$on  = '0000-00-00' === $on ? ( '' !== $was ? $was : wp_date( 'Y-m-d' ) ) : $on; // no date on the document: the day it was first given, kept on later checks
 	if ( $docs ) {
 		update_post_meta( $id, 'aw_gov_verified_on', $on );
 		update_post_meta( $id, 'aw_gov_verified_by', implode( ',', array_keys( $docs ) ) );
