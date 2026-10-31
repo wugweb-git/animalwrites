@@ -7,7 +7,7 @@
  * restructure, 25 Oct 2026: the "Fetch through this site (relay)" switch on each source in Sourcing → Sources),
  * http/https, GET only. The host is resolved first and refused when any address is private, loopback, reserved or this
  * site's own; the checked address is the one connected to, and every redirect (at most 3) is checked the same way.
- * At most 5 MB, 20 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, Sourcing → Relay log).
+ * At most 5 MB, 40 seconds, 30 requests per host per 10 minutes. Every request is logged (last 200, Sourcing → Relay log).
  *
  * @package aw-sourcing
  */
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_RELAY_MAX_BYTES = 5 * MB_IN_BYTES;
-const AW_RELAY_TIMEOUT   = 20;
+const AW_RELAY_TIMEOUT   = 40; // GDELT takes 12–17 s (31 Oct 2026); was 20
 const AW_RELAY_RATE      = 30; // requests per host per 10 minutes
 const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com', 'awbi.gov.in', 'ccsea.gov.in', 'egazette.gov.in' );
 
