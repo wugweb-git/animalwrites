@@ -124,8 +124,8 @@ function aw_ff_social_user( $field, $v ) {
 /** A date typed as "8 Oct 2026" (or 2026-10-08) as Y-m-d; '' when it cannot be read. */
 function aw_ff_date_ymd( $v ) {
 	$v = trim( (string) $v );
-	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $v ) ) {
-		return $v;
+	if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $v, $m ) ) {
+		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ? $v : ''; // a real calendar date only (not 2026-99-99)
 	}
 	foreach ( array( '!j M Y', '!j F Y' ) as $fmt ) {
 		$d = date_create_immutable_from_format( $fmt, $v );
