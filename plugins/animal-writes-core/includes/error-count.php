@@ -3,17 +3,17 @@
  * Daily server-error count. A 500 or 503 page never loads the analytics tag, so analytics cannot see it; the server's
  * own logs can.
  *
- * - Once a day (event aw_error_count_daily) the site counts, for the last 24 hours, the 5xx responses in the web
- *   server's access log and the "PHP Fatal error" / "PHP Parse error" lines in the PHP error log.
+ * - Once a day (event aw_error_count_daily) the site counts, for the last 24 hours, the "PHP Fatal error" /
+ *   "PHP Parse error" lines in the PHP error log. (The host gives PHP no access log, so 5xx responses are not counted.)
  * - The result (time, counts, files read, up to 5 samples each) is kept in the option aw_error_count (not autoloaded)
  *   and shown in the "Scheduled tasks" dashboard box. A log that cannot be found or read shows "Not found", never 0.
- * - When either count is above zero, the admin email gets one plain-text message for that run.
- * - Log paths are found at run time. Override them with the constants AW_ACCESS_LOG / AW_PHP_ERROR_LOG (a file or a
- *   folder) in wp-config.php, or the filters aw_error_count_access_paths / aw_error_count_php_paths.
+ * - When the count is above zero, the admin email gets one plain-text message for that run.
+ * - Log paths are found at run time. Override them with the constant AW_PHP_ERROR_LOG (a file or a folder) in
+ *   wp-config.php, or the filter aw_error_count_php_paths.
  * - `wp aw error-count [--paths]` prints the counts and the files read (with --paths, every path tried), without
  *   saving or emailing.
  * Large files are read from the end (last 32 MB by default, filter aw_error_count_tail_bytes), line by line; gzipped
- * logs are streamed. Samples keep only the status and the path (no addresses, no query strings).
+ * logs are streamed.
  *
  * @package animal-writes-core
  */
@@ -31,22 +31,6 @@ function aw_error_count_dirs() {
 	$domain = dirname( $root );
 	$home   = dirname( dirname( $domain ) );
 	return array( 'root' => $root, 'domain' => $domain, 'home' => $home );
-}
-
-/**
- * Access-log candidates in order (files or folders). The first one that gives a readable log is used.
- *
- * @return string[]
- */
-function aw_error_count_access_candidates() {
-	$d   = aw_error_count_dirs();
-	$out = array();
-	if ( defined( 'AW_ACCESS_LOG' ) && AW_ACCESS_LOG ) {
-		$out[] = (string) AW_ACCESS_LOG;
-	}
-	$out[] = $d['domain'] . '/logs'; // this domain's folders only: account-wide log folders can hold other sites' logs (set AW_ACCESS_LOG for those)
-	$out[] = $d['domain'] . '/access-logs';
-	return array_values( array_unique( (array) apply_filters( 'aw_error_count_access_paths', $out ) ) );
 }
 
 /**
@@ -94,18 +78,15 @@ function aw_error_count_allowed( $path ) {
 }
 
 /**
- * Turn candidates into log files.
+ * Turn candidates into log files: every readable file, and in a folder the files with "error" in the name.
  *
  * @param string[] $candidates Files or folders.
- * @param string   $kind       'access' (first candidate with a log wins; folder files changed in the last 48 hours,
- *                             names without "error") or 'php' (every readable file; folder files with "error" in the name).
  * @return array{files:string[],tried:array<string,string>,unreadable:bool}
  */
-function aw_error_count_resolve( array $candidates, $kind ) {
+function aw_error_count_resolve( array $candidates ) {
 	$files      = array();
 	$tried      = array();
 	$unreadable = false;
-	$recent     = time() - 2 * DAY_IN_SECONDS;
 	foreach ( $candidates as $c ) {
 		$c = (string) $c;
 		if ( ! aw_error_count_allowed( $c ) || ! file_exists( $c ) ) {
@@ -118,10 +99,7 @@ function aw_error_count_resolve( array $candidates, $kind ) {
 			foreach ( $names as $n ) {
 				$p     = $c . '/' . $n;
 				$error = false !== stripos( (string) $n, 'error' );
-				if ( '.' === $n[0] || ! is_file( $p ) || ( 'access' === $kind ? $error : ! $error ) ) {
-					continue;
-				}
-				if ( 'access' === $kind && (int) filemtime( $p ) < $recent ) {
+				if ( '.' === $n[0] || ! is_file( $p ) || ! $error ) {
 					continue;
 				}
 				if ( is_readable( $p ) ) {
@@ -142,9 +120,6 @@ function aw_error_count_resolve( array $candidates, $kind ) {
 		foreach ( $found as $f ) {
 			$real           = (string) realpath( $f );
 			$files[ $real ] = $f;
-		}
-		if ( 'access' === $kind && $files ) {
-			break;
 		}
 	}
 	return array( 'files' => array_values( $files ), 'tried' => $tried, 'unreadable' => $unreadable );
@@ -223,67 +198,6 @@ function aw_error_count_top( array $samples ) {
 }
 
 /**
- * Count 5xx responses since $since in the access logs.
- *
- * @param int $since Unix time.
- * @return array Result: status ok|not_found|unreadable|unrecognised, count, files (path => lines), partial, samples, tried.
- */
-function aw_error_count_access( $since ) {
-	$res = aw_error_count_resolve( aw_error_count_access_candidates(), 'access' );
-	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'tried' => $res['tried'] );
-	if ( ! $res['files'] ) {
-		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
-		return $out;
-	}
-	$count   = 0;
-	$parsed  = 0;
-	$samples = array();
-	$re      = '~\[(\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2} [+-]\d{4})\] "(?:[A-Z]+ )?([^" ]*)[^"]*" (\d{3}) ~';
-	foreach ( $res['files'] as $f ) {
-		if ( (int) filemtime( $f ) < $since ) {
-			$out['files'][ $f ] = 0; // nothing written in the window
-			continue;
-		}
-		$first              = null;
-		$read               = aw_error_count_each_line(
-			$f,
-			function ( $line ) use ( $re, $since, &$count, &$parsed, &$samples, &$first ) {
-				if ( null !== $first && ! preg_match( '~" 5\d\d ~', $line ) ) {
-					return; // only the first line and 5xx lines need a full parse
-				}
-				if ( ! preg_match( $re, $line, $m ) ) {
-					return;
-				}
-				++$parsed;
-				$t = DateTime::createFromFormat( 'd/M/Y:H:i:s O', $m[1] );
-				$t = $t ? $t->getTimestamp() : 0;
-				if ( null === $first ) {
-					$first = $t;
-				}
-				if ( $t < $since || '5' !== $m[3][0] ) {
-					return;
-				}
-				++$count;
-				$path = strtok( $m[2], '?' );
-				aw_error_count_tally( $samples, $m[3] . ' ' . mb_substr( false === $path ? '' : $path, 0, 120 ) );
-			}
-		);
-		$out['files'][ $f ] = $read['lines'];
-		if ( $read['cut'] && null !== $first && $first >= $since ) {
-			$out['partial'] = true; // the part read starts inside the window: the count is a minimum
-		}
-	}
-	if ( array_sum( $out['files'] ) && ! $parsed ) { // lines, but none in the expected format
-		$out['status'] = 'unrecognised';
-		return $out;
-	}
-	$out['status']  = 'ok';
-	$out['count']   = $count;
-	$out['samples'] = aw_error_count_top( $samples );
-	return $out;
-}
-
-/**
  * A fatal-error message for display: site paths made relative, single line, at most 200 characters.
  *
  * @param string $msg Message from the log.
@@ -301,10 +215,10 @@ function aw_error_count_clean_message( $msg ) {
  * Count "PHP Fatal error" and "PHP Parse error" lines since $since in the PHP error logs.
  *
  * @param int $since Unix time.
- * @return array Same shape as aw_error_count_access().
+ * @return array Result: status ok|not_found|unreadable, count, files (path => lines), partial, samples, tried.
  */
 function aw_error_count_php( $since ) {
-	$res = aw_error_count_resolve( aw_error_count_php_candidates(), 'php' );
+	$res = aw_error_count_resolve( aw_error_count_php_candidates() );
 	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'tried' => $res['tried'] );
 	if ( ! $res['files'] ) {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
@@ -347,23 +261,22 @@ function aw_error_count_php( $since ) {
 }
 
 /**
- * Count both logs for the last 24 hours.
+ * Count the PHP error log for the last 24 hours.
  *
- * @return array{at:int,since:int,access:array,php:array}
+ * @return array{at:int,since:int,php:array}
  */
 function aw_error_count_collect() {
 	$now   = time();
 	$since = $now - DAY_IN_SECONDS;
 	return array(
-		'at'     => $now,
-		'since'  => $since,
-		'access' => aw_error_count_access( $since ),
-		'php'    => aw_error_count_php( $since ),
+		'at'    => $now,
+		'since' => $since,
+		'php'   => aw_error_count_php( $since ),
 	);
 }
 
 /**
- * "3", "at least 3", or "Not found" / "Not readable" / "Unrecognised format".
+ * "3", "at least 3", or "Not found" / "Not readable".
  *
  * @param array $r One log's result.
  * @return string
@@ -374,35 +287,25 @@ function aw_error_count_label( array $r ) {
 			return ( empty( $r['partial'] ) ? '' : 'at least ' ) . (int) $r['count'];
 		case 'unreadable':
 			return 'Not readable';
-		case 'unrecognised':
-			return 'Unrecognised format';
 		default:
 			return 'Not found';
 	}
 }
 
 /**
- * Errors found (both logs that could be read).
+ * Errors found (when the log could be read).
  *
  * @param array $run Result of aw_error_count_collect().
  * @return int
  */
 function aw_error_count_total( array $run ) {
-	$n = 0;
-	foreach ( array( 'access', 'php' ) as $k ) {
-		if ( 'ok' === ( $run[ $k ]['status'] ?? '' ) ) {
-			$n += (int) $run[ $k ]['count'];
-		}
-	}
-	return $n;
+	return 'ok' === ( $run['php']['status'] ?? '' ) ? (int) $run['php']['count'] : 0;
 }
 
 /** Daily event: count, store, and email the admin address when anything was found. */
 function aw_error_count_daily() {
 	$run = aw_error_count_collect();
-	foreach ( array( 'access', 'php' ) as $k ) {
-		unset( $run[ $k ]['tried'] ); // only the CLI shows them
-	}
+	unset( $run['php']['tried'] ); // only the CLI shows them
 	update_option( 'aw_error_count', $run, false );
 	$total = aw_error_count_total( $run );
 	if ( ! $total || get_transient( 'aw_error_count_mailed' ) ) {
@@ -411,16 +314,8 @@ function aw_error_count_daily() {
 	$lines = array(
 		sprintf( 'Server errors on %s in the 24 hours to %s:', wp_parse_url( home_url(), PHP_URL_HOST ), wp_date( 'j M Y, g:i a', $run['at'] ) ),
 		'',
-		'- 5xx responses: ' . aw_error_count_label( $run['access'] ),
 		'- PHP fatal errors: ' . aw_error_count_label( $run['php'] ),
 	);
-	if ( $run['access']['samples'] ) {
-		$lines[] = '';
-		$lines[] = 'Most frequent 5xx responses:';
-		foreach ( $run['access']['samples'] as $s => $n ) {
-			$lines[] = sprintf( '- %s (%d)', $s, $n );
-		}
-	}
 	if ( $run['php']['samples'] ) {
 		$lines[] = '';
 		$lines[] = 'Most frequent PHP fatal errors:';
@@ -463,7 +358,7 @@ add_action(
 				}
 				echo '<p><strong>Server errors, last 24 hours</strong> (counted ' . esc_html( wp_date( 'j M Y, g:i a', (int) $run['at'] ) ) . ')</p>';
 				$rows = array();
-				foreach ( array( 'access' => '5xx responses', 'php' => 'PHP fatal errors' ) as $k => $name ) {
+				foreach ( array( 'php' => 'PHP fatal errors' ) as $k => $name ) {
 					$r     = (array) ( $run[ $k ] ?? array() );
 					$label = aw_error_count_label( $r );
 					$ok    = 'ok' === ( $r['status'] ?? '' );
@@ -491,14 +386,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw error-count',
 		/**
-		 * Count 5xx responses and PHP fatal errors in the last 24 hours and show the files read. Saves and emails nothing.
+		 * Count PHP fatal errors in the last 24 hours and show the files read. Saves and emails nothing.
 		 *
 		 * [--paths]
 		 * : Also list every path tried and what was found there.
 		 */
 		function ( $args, $assoc ) {
 			$run = aw_error_count_collect();
-			foreach ( array( 'access' => '5xx responses', 'php' => 'PHP fatal errors' ) as $k => $name ) {
+			foreach ( array( 'php' => 'PHP fatal errors' ) as $k => $name ) {
 				$r = $run[ $k ];
 				WP_CLI::log( $name . ': ' . aw_error_count_label( $r ) );
 				foreach ( $r['files'] as $f => $n ) {
