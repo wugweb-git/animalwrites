@@ -210,6 +210,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 main > .kit-section-band:first-child, main > p:first-child + .kit-section-band { margin-top: 0 !important; }
 .kit-section-band:not(:has(.kit-section-filters)) { margin-bottom: 0 !important; padding-bottom: var(--kit-space-head); } /* head band (breadcrumb, H1, description): its last row › what follows 16 */
 .kit-section-band:not(:has(.kit-section-filters)) + * { margin-block-start: 0; } /* no flow-layout gap under it */
+.kit-section-band:not(:has(.kit-section-filters)) + .kit-section-filters--below { margin-block-start: var(--kit-space-band-gap); } /* a list toolbar under the head band: 24 / 32 / 40, never touching it */
 .kit-section-band:not(:has(.kit-section-filters)) + :is(.wp-block-post-content, .wp-block-post-featured-image, .kit-with-sidebar) { margin-block-start: var(--kit-space-section); } /* a page's content starts a section below the head (48 / 70 / 96; owner, 31 Oct 2026: it touched the band) */
 .kit-section-band:not(:has(.kit-section-filters)) + .wp-block-post-content > :first-child { margin-block-start: 0; } /* the gap once, not the first block's own margin as well */
 .kit-section-band:not(:has(.kit-section-filters)) .kit-section-visual { overflow: hidden; } /* the pictures stay inside the head, off the filters below */
