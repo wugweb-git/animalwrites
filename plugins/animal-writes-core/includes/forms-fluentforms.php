@@ -449,10 +449,11 @@ add_action(
 );
 
 /*
- * After each form's FluentCRM link (it runs at priority 10): what a link cannot do. A link only makes "subscribed"
- * contacts, only when its condition holds, and cannot add a note, so: every Contact sender becomes a contact
- * (transactional when new, tag contact-form) with the message as a note; every claimant a contact (transactional when
- * new, tag claimant); and every Contact, Claim and Volunteer contact gets the newsletter box as 1/0. A Contact send
+ * After each form's FluentCRM link (it runs at priority 10, only when "Email me updates" is ticked): what a link cannot
+ * do. A link only makes "subscribed" contacts and cannot add a note, so: every Contact, Claim and Volunteer sender
+ * becomes a contact (transactional when new; tags contact-form, claimant, volunteer), the message or the claim as a
+ * note, and the newsletter box as 1/0. Unticked (owner, 31 Oct 2026): on the Newsletter list all the same, with
+ * everything the link would have saved, but never emailed (aw_crm_unticked()). A Contact send
  * with the reason Remove my data never reaches FluentCRM (owner, 31 Oct 2026),
  * whatever is ticked; its entry is kept like any other. Also counts the submission for the per-connection limit.
  */
@@ -472,10 +473,13 @@ add_action(
 		}
 		$email = strtolower( trim( (string) ( $data['email'] ?? '' ) ) );
 		$name  = sanitize_text_field( (string) ( $data['name'] ?? '' ) );
-		$tags  = array( 'contact' => array( 'contact-form' ), 'claim' => array( 'claimant' ), 'volunteer' => array() )[ $key ];
-		$c     = 'volunteer' === $key ? FluentCrmApi( 'contacts' )->getContact( $email ) : aw_crm_contact_for( $email, $name, $tags, 'contact' === $key ? 'contact-form' : 'claim' );
+		$tags  = array( 'contact' => array( 'contact-form' ), 'claim' => array( 'claimant' ), 'volunteer' => array( 'volunteer' ) )[ $key ];
+		$c     = aw_crm_contact_for( $email, $name, $tags, array( 'contact' => 'contact-form', 'claim' => 'claim', 'volunteer' => 'volunteer-form' )[ $key ] );
 		if ( ! $c ) {
 			return;
+		}
+		if ( ! aw_ff_ticked( $data, 'nl_optin' ) ) {
+			aw_crm_unticked( $c, (int) $form->id, $data );
 		}
 		aw_crm_nl_box( $c, aw_ff_ticked( $data, 'nl_optin' ), AW_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
 		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
@@ -490,6 +494,9 @@ add_action(
 		}
 		if ( 'contact' === $key ) {
 			aw_crm_entry_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
+		}
+		if ( 'claim' === $key ) {
+			aw_crm_claim_note( $c, $entry_id, $data, (int) $form->id, aw_ff_ref( $key, $entry_id ) );
 		}
 		if ( in_array( $key, array( 'contact', 'claim' ), true ) ) { // Claim asks for WhatsApp too (found 21 Oct 2026: not copied)
 			$wa = trim( sanitize_text_field( (string) ( $data['whatsapp'] ?? '' ) ) );

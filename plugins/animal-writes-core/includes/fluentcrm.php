@@ -113,6 +113,90 @@ function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array()
 	return $c ? (int) $c->id : 0;
 }
 
+/* ---------- Unticked: on the list, not emailed (owner, 31 Oct 2026) ---------- */
+
+/**
+ * A sender who left "Email me updates" unticked: on the Newsletter list all the same, with everything the form's
+ * FluentCRM link would have saved, but as a transactional contact (never sent a newsletter; a contact who is already
+ * subscribed keeps that status). The link itself runs only when the box is ticked.
+ *
+ * @param object $c    FluentCRM contact (aw_crm_contact_for()).
+ * @param int    $form Fluent Forms form ID.
+ * @param array  $data The submission.
+ */
+function aw_crm_unticked( $c, $form, $data ) {
+	global $wpdb;
+	$list = aw_crm_list_id();
+	if ( $list ) {
+		$c->attachLists( array( $list ) );
+	}
+	$skip  = aw_crm_tag_ids( array( 'newsletter' ) );
+	$feeds = (array) $wpdb->get_col( $wpdb->prepare( "SELECT value FROM {$wpdb->prefix}fluentform_form_meta WHERE form_id = %d AND meta_key = 'fluentcrm_feeds'", (int) $form ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$value = function ( $tpl ) use ( $data ) { // {inputs.name} → the sent value (a list joined with commas)
+		return trim( (string) preg_replace_callback( '/\{inputs\.([a-z0-9_]+)\}/i', fn( $m ) => is_array( $data[ $m[1] ] ?? '' ) ? implode( ', ', array_map( 'strval', $data[ $m[1] ] ) ) : (string) ( $data[ $m[1] ] ?? '' ), (string) $tpl ) );
+	};
+	foreach ( $feeds as $json ) {
+		$f    = (array) json_decode( (string) $json, true );
+		$cond = (array) ( $f['conditionals']['conditions'] ?? array() );
+		if ( ! array_filter( $cond, fn( $x ) => 'nl_optin' === ( $x['field'] ?? '' ) ) ) {
+			continue; // only the link that runs for a ticked box
+		}
+		$fields = array();
+		foreach ( (array) ( $f['other_fields'] ?? array() ) as $o ) {
+			$v = $value( $o['item_value'] ?? '' );
+			if ( '' !== (string) ( $o['label'] ?? '' ) && '' !== $v ) {
+				$fields[ (string) $o['label'] ] = $v;
+			}
+		}
+		if ( isset( $fields['phone'] ) ) { // the contact's own phone field, not a custom one
+			if ( '' === (string) $c->phone ) {
+				$c->phone = $fields['phone'];
+				$c->save();
+			}
+			unset( $fields['phone'] );
+		}
+		if ( $fields ) {
+			$c->syncCustomFieldValues( $fields, false );
+		}
+		$tags = array_values( array_diff( array_map( 'intval', (array) ( $f['tag_ids'] ?? array() ) ), $skip ) );
+		if ( $tags ) {
+			$c->attachTags( $tags );
+		}
+	}
+}
+
+/**
+ * A claim on the claimant's contact (owner, 31 Oct 2026: capture all info): the listing, role, phone, WhatsApp, "Show my
+ * name", the reference and a link to the entry.
+ */
+function aw_crm_claim_note( $c, $entry, $data, $form, $ref ) {
+	if ( ! $c ) {
+		return 0;
+	}
+	$lid  = absint( $data['listing'] ?? 0 );
+	$rows = array(
+		'Reference'            => $ref,
+		'Listing'              => $lid ? get_the_title( $lid ) . ' (' . $lid . ')' : '',
+		'Role'                 => defined( 'AW_CLAIM_ROLES' ) ? ( AW_CLAIM_ROLES[ (string) ( $data['role'] ?? '' ) ] ?? (string) ( $data['role'] ?? '' ) ) : (string) ( $data['role'] ?? '' ),
+		'Phone'                => (string) ( $data['phone'] ?? '' ),
+		'WhatsApp'             => (string) ( $data['whatsapp'] ?? '' ),
+		'OK on WhatsApp'       => '' !== (string) ( $data['whatsapp'] ?? '' ) ? ( aw_ff_ticked( $data, 'wa_optin' ) ? '1 (yes)' : '0 (no)' ) : '',
+		'Show name on listing' => 'yes' === (string) ( $data['show_on_listing'] ?? '' ) ? 'Yes' : 'No',
+		'Email me updates'     => aw_ff_ticked( $data, 'nl_optin' ) ? '1 (yes)' : '0 (no)',
+	);
+	$html = '';
+	foreach ( $rows as $k => $v ) {
+		if ( '' !== trim( (string) $v ) ) {
+			$html .= '<strong>' . esc_html( $k ) . ':</strong> ' . esc_html( (string) $v ) . '<br>';
+		}
+	}
+	$notes = trim( (string) ( $data['notes'] ?? '' ) );
+	$html  = '<p>' . $html . '</p>' . ( '' !== $notes ? wpautop( esc_html( $notes ) ) : '' )
+		. '<p><a href="' . esc_url( admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . (int) $form . '#/entries/' . (int) $entry ) ) . '">Open the entry in Fluent Forms</a></p>';
+	$row = \FluentCrm\App\Models\SubscriberNote::create( array( 'subscriber_id' => (int) $c->id, 'type' => 'note', 'title' => 'Claim: ' . ( $lid ? get_the_title( $lid ) : 'listing' ) . ( '' !== $ref ? ' (' . $ref . ')' : '' ), 'description' => $html, 'created_at' => current_time( 'mysql' ) ) );
+	return $row ? (int) $row->id : 0;
+}
+
 /* ---------- Messages: a note on the sender's contact ---------- */
 
 /**
