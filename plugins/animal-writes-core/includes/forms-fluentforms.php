@@ -376,7 +376,7 @@ function aw_ff_render_logo( $element, $form ) {
 const AW_VOL_ROLE_ICONS = array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' );
 
 /** Icons inside fields, as the site's own forms have them. */
-const AW_FF_ICONS = array( 'name' => 'name', 'email' => 'mail', 'phone' => 'phone', 'whatsapp' => 'brand-whatsapp', 'org' => 'building', 'org_name' => 'building', 'aw_phone' => 'phone', 'aw_whatsapp' => 'brand-whatsapp', 'aw_email' => 'mail', 'aw_website' => 'world' );
+const AW_FF_ICONS = array( 'name' => 'name', 'email' => 'mail', 'phone' => 'phone', 'whatsapp' => 'brand-whatsapp', 'org' => 'building', 'org_name' => 'building', 'aw_phone' => 'phone', 'org_phone' => 'phone', 'l_phone1' => 'phone', 'l_phone2' => 'phone', 'l_phone3' => 'phone', 'aw_whatsapp' => 'brand-whatsapp', 'aw_email' => 'mail', 'aw_website' => 'world' );
 
 foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio', 'input_hidden' ) as $aw_ff_el ) {
 	// The step check (kit.js) uses the browser's rules with the site's words.
@@ -436,8 +436,16 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					$html = (string) preg_replace( '#(value=[\'"]' . preg_quote( $val, '#' ) . '[\'"][^>]*>)(\s*)<span>#', '$1$2<span class="kit-ico kit-ico--' . $ico . ' aw-vol-role-ico" aria-hidden="true"></span><span>', $html, 1 );
 				}
 			}
-			$icon = '' !== (string) ( $data['settings']['prefix_label'] ?? '' ) ? '' : ( AW_FF_ICONS[ $name ] ?? '' ); // a "+91" or link prefix replaces the icon
-			if ( $icon && in_array( $el, array( 'input_text', 'input_email' ), true ) ) {
+			$prefix = (string) ( $data['settings']['prefix_label'] ?? '' );
+			$icon   = AW_FF_ICONS[ $name ] ?? ( '' === $prefix ? '' : ( '+91' === $prefix ? 'phone' : 'world' ) );
+			if ( $icon && '' !== $prefix && in_array( $el, array( 'input_text', 'input_email' ), true ) ) { // the icon, then the fixed part ("+91", "instagram.com/") as plain text inside the same box
+				$html = (string) preg_replace(
+					'#<div class=[\'"]ff_input-group[\'"]>\s*<div class=[\'"]ff_input-group-prepend[\'"]>\s*<span class=[\'"]ff_input-group-text[\'"]>.*?</span>\s*</div>\s*(<input\b[^>]*>)\s*</div>#s',
+					'<div class="kit-field-control aw-ff-prefixed" style="--aw-ff-prefix:' . ( mb_strlen( $prefix ) + 1 ) . 'ch"><span class="kit-ico kit-ico--' . $icon . ' kit-field-icon" aria-hidden="true"></span><span class="aw-ff-prefix" aria-hidden="true">' . esc_html( $prefix ) . '</span>$1</div>',
+					$html,
+					1
+				);
+			} elseif ( $icon && in_array( $el, array( 'input_text', 'input_email' ), true ) ) {
 				$html = preg_replace( '/(<input\b[^>]*>)/', '<div class="kit-field-control"><span class="kit-ico kit-ico--' . $icon . ' kit-field-icon" aria-hidden="true"></span>$1</div>', $html, 1 );
 			}
 			return $html;
