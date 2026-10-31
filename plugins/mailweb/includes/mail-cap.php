@@ -87,9 +87,32 @@ function mailweb_clean_error( $msg ) {
 	return mb_substr( trim( preg_replace( '/\s+/', ' ', $msg ) ), 0, 250 );
 }
 
-/** Errors that mean the mailbox itself is refused (blocked, disabled, suspended, sign-in refused): stop everything. */
+/**
+ * Errors that mean our own mailbox is refused (sign-in refused, account suspended or over its sending limit): stop
+ * everything. An error about one recipient (no such user, mailbox full, too many recipients) only fails that email.
+ *
+ * PHPMailer's messages, as wp_mail_failed passes them (addresses already replaced by [address]):
+ * - "SMTP Error: Could not authenticate."
+ * - "The following From address failed: [address] : MAIL FROM command failed,550 5.7.1 ...": the sender refused.
+ * - "SMTP Error: The following recipients failed: [address]: 550 5.1.1 ...": one recipient refused.
+ * - "SMTP Error: data not accepted." / "Could not connect to SMTP host.": no detail, treated as a one-email failure.
+ */
 function mailweb_is_block_error( $msg ) {
-	return (bool) preg_match( '/\b5\.7\.\d+|\b554\b|\b550\b|\b535\b|disabled|blocked|suspend|abuse|not allowed|authenticat|too many|rate limit|quota/i', (string) $msg );
+	$msg = (string) $msg;
+	// Our own sending limit, even when the server says so at a recipient: the next email would be refused too.
+	if ( preg_match( '/(sending|send|daily|hourly) (limit|quota)|rate.?limit|too many (messages|emails|mails|connections|logins?)/i', $msg ) ) {
+		return true;
+	}
+	// Anything else about a recipient ("disabled", "blocked", 5.7.1) may be that recipient's own account.
+	if ( false !== stripos( $msg, 'recipients failed' ) ) {
+		return false;
+	}
+	// Sign-in refused, or the account suspended or blocked.
+	if ( preg_match( '/could not authenticate|authenticat\w*\s+(failed|unsuccessful|rejected|required)|\b535\b|\b5\.7\.8\b|suspend|account\W+(is\W+)?(disabled|blocked|locked)|\babuse\b/i', $msg ) ) {
+		return true;
+	}
+	// The sender address refused for good (5xx): this mailbox may not send.
+	return false !== stripos( $msg, 'From address failed' ) && (bool) preg_match( '/\b5\d\d\b|\b5\.\d{1,3}\.\d{1,3}\b/', $msg );
 }
 
 /** Stop all sending until someone presses Resume. No email is used to tell anyone. */
@@ -270,8 +293,18 @@ function mailweb_flush( $max = 40 ) {
 	set_transient( 'mailweb_flush_lock', 1, 5 * MINUTE_IN_SECONDS );
 	$t    = mailweb_table();
 	$sent = 0;
-	// A send that never reported back (crash, time-out): retry it, never lose it.
-	$wpdb->query( $wpdb->prepare( "UPDATE {$t} SET status = 'failed', tries = tries + 1, error = 'No confirmation from the mail server', next_try = %s WHERE status = 'sending' AND created_at < %s AND mail IS NOT NULL", gmdate( 'Y-m-d H:i:s', time() + 15 * MINUTE_IN_SECONDS ), gmdate( 'Y-m-d H:i:s', time() - 10 * MINUTE_IN_SECONDS ) ) ); // phpcs:ignore
+	// A send that never reported back (crash, time-out): retry it after 15 minutes, and hold it after MAILWEB_TRIES
+	// tries, as the server may have accepted it. Aged from the start of the send (sent_at, set when a queue send
+	// starts; direct sends have only created_at). Status and next_try read tries before it is raised.
+	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare(
+			"UPDATE {$t} SET status = IF( tries + 1 >= %d, 'held', 'failed' ), next_try = IF( tries + 1 >= %d, NULL, %s ), tries = tries + 1, sent_at = NULL, error = 'No confirmation from the mail server' WHERE status = 'sending' AND COALESCE( sent_at, created_at ) < %s AND mail IS NOT NULL", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the plugin's own table name
+			MAILWEB_TRIES,
+			MAILWEB_TRIES,
+			gmdate( 'Y-m-d H:i:s', time() + 15 * MINUTE_IN_SECONDS ),
+			gmdate( 'Y-m-d H:i:s', time() - 10 * MINUTE_IN_SECONDS )
+		)
+	);
 	for ( $i = 0; $i < $max; $i++ ) {
 		if ( mailweb_paused() ) {
 			break;

@@ -7,8 +7,8 @@
  *   sent to, the mailbox, when it was sent, attachment names, the full text and an "Open in Mail" link. Each email is
  *   noted once (by Message-ID). Mail from our own domains, Hostinger and automatic senders makes no contact.
  * - Runs every 5 minutes on the newest mail and at once when the webhook fires; `wp mailweb crm-sync --all` goes
- *   through the whole Inbox and Archive. Reading the text marks a message read in webmail, so unread mail is put back
- *   to unread.
+ *   through the whole Inbox and Archive. Reading the text leaves the message's read or unread state as it is. One
+ *   run at a time: a webhook run that finds another running is skipped, and the next 5-minute run notes that mail.
  * - A reply sent from Mail adds "Reply sent: <subject>" with its text to each recipient's existing contact.
  *
  * @package mailweb
@@ -96,7 +96,7 @@ function mailweb_crm_done() {
 function mailweb_crm_mark_done( $mid, $note ) {
 	$done         = mailweb_crm_done();
 	$done[ $mid ] = (int) $note;
-	update_option( 'mailweb_crm_done', array_slice( $done, -2000, null, true ), false );
+	update_option( 'mailweb_crm_done', array_slice( $done, -5000, null, true ), false );
 }
 
 /**
@@ -119,18 +119,14 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 	$from  = is_array( $from ) && isset( $from[0] ) ? $from[0] : $from;
 	$email = strtolower( (string) ( $from['address'] ?? '' ) );
 	if ( ! mailweb_crm_person( $email ) ) {
-		mailweb_crm_mark_done( $mid, 0 );
-		return 'skipped';
+		return 'skipped'; // not stored as done: this check is cheap and keeps the list for noted mail
 	}
 	$c = mailweb_crm_contact_for( $email, (string) ( $from['name'] ?? '' ) );
 	if ( ! $c ) {
 		return 'skipped';
 	}
-	// The text (this marks it read in webmail: put unread mail back to unread).
+	// The text (fetching it does not mark the message read).
 	list( $code, $t ) = mailweb_call( 'GET', mailweb_fpath( $key, $folder ) . '/messages/' . (int) $m['uid'] . '/text' );
-	if ( ! empty( $m['unseen'] ) ) {
-		mailweb_call( 'PATCH', mailweb_fpath( $key, $folder ) . '/messages/' . (int) $m['uid'], array( 'removeFlags' => array( '\\Seen' ) ) );
-	}
 	if ( 200 !== $code ) {
 		return 'error';
 	}
@@ -173,14 +169,53 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 }
 
 /**
- * Note new mail in a mailbox's folder (newest $per, or every page with $all). Returns counts by result.
+ * One sync at a time (cron, webhook and WP-CLI), so two runs never note the same email or overwrite the done list.
+ * An atomic INSERT IGNORE on the options table; a lock older than 15 minutes is from a run that died.
+ *
+ * @return bool True when this run holds the lock.
+ */
+function mailweb_crm_lock() {
+	global $wpdb;
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = 'mailweb_crm_lock' AND option_value < %d", time() - 15 * MINUTE_IN_SECONDS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return 1 === (int) $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('mailweb_crm_lock', %s, 'off')", (string) time() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/** Keep the lock fresh during a long run (WP-CLI --all). */
+function mailweb_crm_lock_touch() {
+	global $wpdb;
+	$wpdb->update( $wpdb->options, array( 'option_value' => (string) time() ), array( 'option_name' => 'mailweb_crm_lock' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/** Release the sync lock. */
+function mailweb_crm_unlock() {
+	global $wpdb;
+	$wpdb->delete( $wpdb->options, array( 'option_name' => 'mailweb_crm_lock' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/**
+ * Note new mail in a mailbox's folder (newest $per, or every page with $all). Returns counts by result, or
+ * array( 'busy' => 1 ) when another sync is running.
  */
 function mailweb_crm_sync( $key, $folder = 'INBOX', $all = false, $per = 25 ) {
-	$n = array();
 	if ( ! mailweb_crm_on() || '' === mailweb_box_id( $key ) ) {
-		return $n;
+		return array();
 	}
+	if ( ! mailweb_crm_lock() ) {
+		return array( 'busy' => 1 );
+	}
+	try {
+		$n = mailweb_crm_sync_pages( $key, $folder, $all, $per );
+	} finally {
+		mailweb_crm_unlock();
+	}
+	return $n;
+}
+
+/** The pages of one sync (called with the lock held). */
+function mailweb_crm_sync_pages( $key, $folder, $all, $per ) {
+	$n = array();
 	for ( $page = 1; $page <= ( $all ? 50 : 1 ); $page++ ) {
+		mailweb_crm_lock_touch();
 		list( $code, $l ) = mailweb_call( 'GET', mailweb_fpath( $key, $folder ) . '/messages?' . http_build_query( array( 'page' => $page, 'perPage' => $all ? 100 : $per, 'sort' => '-date' ) ) );
 		$rows             = 200 === $code ? (array) ( $l['data'] ?? array() ) : array();
 		foreach ( $rows as $m ) {
