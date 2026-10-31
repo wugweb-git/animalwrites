@@ -44,22 +44,31 @@
 		});
 	});
 
-	/* Logo (claim, Fluent Forms): a picked file is checked, then sent at once to the private folder; the form carries
-	   its token. A wrong file shows the field's own message. */
+	/* Private uploads (claim logo, photos, proof; Fluent Forms): picked files are checked, then sent at once to the
+	   private folder; the form carries their tokens (several, comma-separated, for photos). A wrong file shows the
+	   field's own message. */
 	document.querySelectorAll('input[type=file][data-aw-upload]').forEach(function (inp) {
-		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[name=logo_token]'), msg = document.getElementById(inp.id + '-error');
+		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[type=hidden]'), msg = document.getElementById(inp.id + '-error');
+		if (!tok) return;
+		function fail(t) { inp.removeAttribute('aria-busy'); tok.value = ''; if (msg) msg.textContent = t || inp.dataset.msgFile; inp.value = ''; }
 		inp.addEventListener('change', function () {
-			var file = inp.files && inp.files[0];
-			if (tok) tok.value = '';
+			var files = Array.prototype.slice.call(inp.files || []), max = +(inp.dataset.maxFiles || 1);
+			tok.value = '';
 			if (msg) msg.textContent = '';
-			if (!file) return;
-			if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > +(inp.dataset.maxBytes || Infinity)) { if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; return; }
-			var fd = new FormData(); fd.append('logo', file);
+			if (!files.length) return;
+			if (files.length > max) { fail(inp.dataset.msgFiles); return; }
+			if (files.some(function (f) { return !/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > +(inp.dataset.maxBytes || Infinity); })) { fail(); return; }
 			inp.setAttribute('aria-busy', 'true');
-			fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' })
-				.then(function (r) { return r.json(); })
-				.then(function (r) { inp.removeAttribute('aria-busy'); if (r.success) { tok.value = r.data.token; } else { if (msg) msg.textContent = r.data; inp.value = ''; } })
-				.catch(function () { inp.removeAttribute('aria-busy'); if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; });
+			var tokens = [];
+			files.reduce(function (p, file) { // one at a time, in order
+				return p.then(function () {
+					var fd = new FormData(); fd.append('logo', file);
+					return fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json(); })
+						.then(function (r) { if (!r.success) throw new Error(r.data); tokens.push(r.data.token); });
+				});
+			}, Promise.resolve())
+				.then(function () { inp.removeAttribute('aria-busy'); tok.value = tokens.join(','); })
+				.catch(function (e) { fail(e && e.message && e.message !== '[object Object]' ? e.message : ''); });
 		});
 	});
 
