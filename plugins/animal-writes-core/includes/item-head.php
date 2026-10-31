@@ -185,7 +185,7 @@ function aw_block_item_meta( $a, $id ) {
 			$row .= get_post_meta( $id, 'aw_needs_reverify', true )
 				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'animal-writes-core' ) . '</span>'
 				/* translators: %s: date. */
-				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Verified on %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Verified', 'animal-writes-core' ) ) . '</span>';
+				: '<span class="kit-tag kit-tag--success aw-item-verified"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . ( $on ? sprintf( esc_html__( 'Claimed on %s', 'animal-writes-core' ), esc_html( wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) : esc_html__( 'Claimed', 'animal-writes-core' ) ) . '</span>';
 		}
 	} else {
 		$cats = get_the_terms( $id, 'category' );

@@ -101,7 +101,7 @@ function aw_binding_value( $key, $post_id ) {
 			}
 			$on = aw_format_date( $m( 'aw_verified_on' ) );
 			/* translators: %s: date. */
-			return $on ? sprintf( __( 'Verified on %s', 'animal-writes-core' ), $on ) : __( 'Verified', 'animal-writes-core' );
+			return $on ? sprintf( __( 'Claimed on %s', 'animal-writes-core' ), $on ) : __( 'Claimed', 'animal-writes-core' ); // aw_verified = an approved claim
 		case 'blacklisted_label':
 			return get_post_meta( $post_id, 'aw_darpan_blacklisted_on', true ) ? __( 'Blacklisted on NGO Darpan', 'animal-writes-core' ) : ''; // the trust panel says by whom and from when
 		case 'area':

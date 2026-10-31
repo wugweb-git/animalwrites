@@ -481,7 +481,8 @@ add_filter(
 
 /** The Verified mark on a listing's name, on cards and on the profile (owner, 12 Oct 2026). */
 function aw_verified_mark() {
-	return ' <span class="aw-verified-mark" title="Verified by Animal Writes">' . aw_i( 'check' ) . '<span class="screen-reader-text">Verified</span></span>';
+	// aw_verified is set only when a claim is approved, so the mark means "claimed" (owner, 31 Oct 2026).
+	return ' <span class="aw-verified-mark" title="Claimed by the organisation and checked by Animal Writes">' . aw_i( 'badge-check' ) . '<span class="screen-reader-text">Claimed by the organisation and checked by Animal Writes</span></span>';
 }
 add_filter(
 	'render_block_core/post-title',
