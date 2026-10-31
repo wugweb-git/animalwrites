@@ -45,7 +45,7 @@ function aw_gov_value_official( $id, $enrich_field ) {
 }
 
 /** The listing fields whose change can change Verified. */
-const AW_GOV_WATCH = array( 'aw_awbi_code', 'aw_awbi_dropped', 'aw_awbi_list_on', 'aw_data_sources', 'aw_source_date', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_fcra', 'aw_darpan_id' );
+const AW_GOV_WATCH = array( 'aw_awbi_code', 'aw_awbi_dropped', 'aw_awbi_list_on', 'aw_data_sources', 'aw_source_name', 'aw_source_date', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_fcra', 'aw_darpan_id' );
 
 /**
  * The government documents behind a listing: source slug => the document's date (Y-m-d, or '' when unknown).
