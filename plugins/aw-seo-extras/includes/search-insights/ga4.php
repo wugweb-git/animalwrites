@@ -186,6 +186,24 @@ function aw_si_ga4_obs_rows( array $data ): array {
 }
 
 /**
+ * A day's new GA4 rows without referral rows, plus the referral rows already stored for that day (a referral report
+ * failed, so the day's replace must not delete them).
+ *
+ * @param string $day  Date (Y-m-d).
+ * @param array  $rows New rows, as aw_si_ga4_obs_rows().
+ */
+function aw_si_ga4_keep_ref( string $day, array $rows ): array {
+	global $wpdb;
+	$o    = aw_si_table( 'obs' );
+	$rows = array_values( array_filter( $rows, fn( $r ) => ! in_array( $r[3], array( 'ref', 'ref_eng', 'ref_key' ), true ) ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, page_key, metric, value, txt FROM {$o} WHERE src = 'ga4' AND period = 'day' AND d = %s AND metric IN ('ref', 'ref_eng', 'ref_key')", $day ) ) as $r ) {
+		$rows[] = array( (int) $r->kw_id, (string) $r->page, (string) $r->page_key, (string) $r->metric, (float) $r->value, (string) $r->txt );
+	}
+	return $rows;
+}
+
+/**
  * Site path of a GA4 landing page ('/news/x/?utm…' → '/news/x/'), or '' for "(not set)".
  *
  * @param string $lp Landing page as GA4 reports it.
@@ -262,6 +280,9 @@ function aw_si_ga4_run( array $args = array() ): array {
 					break;
 				}
 				$rows = aw_si_ga4_obs_rows( $data );
+				if ( ! empty( $data['warnings'] ) && ! $dry ) {
+					$rows = aw_si_ga4_keep_ref( $day, $rows ); // A referral report failed: the day's earlier referral rows stay.
+				}
 				$n    = $dry ? count( $rows ) : aw_si_obs_replace_day( 'ga4', $day, $rows );
 				if ( is_wp_error( $n ) ) {
 					$rep['error'] = $n->get_error_message();
@@ -305,6 +326,10 @@ function aw_si_ga4_run( array $args = array() ): array {
 					'up_to'     => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
 				)
 			);
+			if ( ! empty( $rep['warnings'] ) ) {
+				/* translators: 1: dates, 2: GA4's error. */
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 referral figures could not be read for %1$s (the earlier figures were kept): %2$s', 'aw-seo-extras' ), implode( ', ', array_keys( $rep['warnings'] ) ), (string) reset( $rep['warnings'] )[0] ) );
+			}
 		}
 	}
 	return $rep;
