@@ -38,6 +38,8 @@ function aw_meta_schema() {
 		'aw_awbi_dropped'    => array( 'string', array( 'aw_listing' ), 'Date of the current AWBI list the code is missing from (Y-m-d): recognition may have lapsed' ),
 		'aw_awbi_list_on'    => array( 'string', array( 'aw_listing' ), 'Date of the AWBI list the code comes from (Y-m-d; empty = 31 May 2026 list)' ),
 		'aw_needs_reverify'  => array( 'boolean', array( 'aw_listing' ), 'Flagged for re-verification' ),
+		'aw_gov_verified_on' => array( 'string', array( 'aw_listing' ), 'Verified: date of the government document (Y-m-d; set by code, gov-verified.php)' ),
+		'aw_gov_verified_by' => array( 'string', array( 'aw_listing' ), 'Verified: the government sources (set by code)' ),
 		'aw_email'           => array( 'string', array( 'aw_listing' ), 'Email' ),
 		'aw_website'         => array( 'string', array( 'aw_listing', 'aw_opportunity' ), 'Website' ),
 		'aw_area'            => array( 'string', array( 'aw_listing' ), 'Area / locality (no full address)' ),

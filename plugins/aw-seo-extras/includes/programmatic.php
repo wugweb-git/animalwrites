@@ -236,7 +236,7 @@ function aw_seo_dir_view() {
 		$type = function_exists( 'aw_request_type' ) ? aw_request_type() : ''; // ?tag= (a listing type)
 	}
 	$other = false;
-	foreach ( array( 'q', 'verified' ) as $k ) {
+	foreach ( array( 'q', 'verified', 'gov' ) as $k ) {
 		$other = $other || ( isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 	$other = $other || ( function_exists( 'aw_request_services' ) && aw_request_services() ); // a service chosen too

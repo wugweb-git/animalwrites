@@ -101,7 +101,7 @@ add_filter(
 			if ( $paged > 1 ) {
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
 			}
-			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'gov', 'tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $keep ), $url ), 301, 'Animal Writes' );
 			exit;
 		};
@@ -185,6 +185,9 @@ function aw_directory_query_vars( $v ) {
 	}
 	if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
+	}
+	if ( ! empty( $_GET['gov'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- Verified only (gov-verified.php): a read-only filter
+		$mq['only_gov'] = array( 'key' => 'aw_gov_verified_on', 'compare' => 'EXISTS' );
 	}
 	$type = (string) get_query_var( 'aw_dir_type' );
 	if ( '' === $type ) {
@@ -358,6 +361,7 @@ add_action(
 			array(
 				'q'        => sanitize_text_field( $g['q'] ?? '' ),
 				'verified' => empty( $g['verified'] ) ? '' : '1',
+				'gov'      => empty( $g['gov'] ) ? '' : '1',
 			)
 		);
 		wp_safe_redirect( add_query_arg( $extra, $base ) );
@@ -411,6 +415,7 @@ function aw_directory_filter( $type = '' ) {
 	$district = $cur_city && $cur_city->parent ? $cur_city : null;
 	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
+	$gov      = ! empty( $_GET['gov'] ); // phpcs:ignore WordPress.Security.NonceVerification
 
 	// States and districts with listings, with their counts (stored counts, places.php).
 	$states = array_filter( aw_place_states(), 'aw_place_count' );
@@ -451,13 +456,14 @@ function aw_directory_filter( $type = '' ) {
 	}
 	$field = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
 	return '<form class="aw-dir-search kit-section-search" role="search" method="get" action="' . esc_url( aw_hub_url( 'aw_listing' ) ) . '">'
-		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off"><button type="button" class="aw-dir-filter-toggle' . ( $state || $cur_type || $verified ? ' has-filters' : '' ) . '" aria-label="Filters" aria-controls="aw-dir-more" aria-expanded="' . ( $state || $cur_type || $verified ? 'true' : 'false' ) . '"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></button>', 'q' )
-		. '<details class="aw-dir-more" id="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified ? ' data-kit-keep-open' : '' ) . ' open><summary class="screen-reader-text">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
+		. $field( 'aw-dir-q', 'Name or PIN code', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input type="search" id="aw-dir-q" name="q" value="' . esc_attr( $text ) . '" placeholder="Blue Cross" autocomplete="off"><button type="button" class="aw-dir-filter-toggle' . ( $state || $cur_type || $verified || $gov ? ' has-filters' : '' ) . '" aria-label="Filters" aria-controls="aw-dir-more" aria-expanded="' . ( $state || $cur_type || $verified || $gov ? 'true' : 'false' ) . '"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></button>', 'q' )
+		. '<details class="aw-dir-more" id="aw-dir-more" data-kit-fold="767"' . ( $state || $cur_type || $verified || $gov ? ' data-kit-keep-open' : '' ) . ' open><summary class="screen-reader-text">Filters</summary><div class="aw-dir-more-body">' // phones: one field and "Filters"
 		. $field( 'aw-dir-state', 'State', '<select id="aw-dir-state" name="state">' . $s_opts . '</select>', 'state' )
 		. $field( 'aw-dir-district', 'District', '<select id="aw-dir-district" name="district"' . ( $state ? '' : ' disabled' ) . '>' . $d_opts . '</select>', 'district' )
 		. $field( 'aw-dir-type', 'Type', '<select id="aw-dir-type" name="tag[]">' . $t_opts . '</select>', 'type' )
 		. aw_directory_service_field( $field )
 		. ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
+		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' )
 		. '</div></details>' . ( function_exists( 'kits_fold_now' ) ? kits_fold_now( 'fold' ) : '' ) // folded before the first paint on phones (no layout shift)
 		. '<div class="aw-dir-submit"><input type="hidden" name="aw_filter" value="1"><button type="submit" class="kit-btn kit-btn--brand">Search</button></div>'
 		. '</form>';

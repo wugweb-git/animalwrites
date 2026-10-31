@@ -1052,6 +1052,12 @@ body { background: var(--kit-color-canvas); }
 .aw-datasrc .aw-datasrc-mark:has(.aw-datasrc-img) { display: inline-flex; align-items: center; }
 .aw-verified-mark { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-left: .2em; color: var(--kit-color-success); vertical-align: -0.12em; } /* the badge's outline replaces the old filled circle */
 .aw-verified-mark .kit-ico { width: 1.1em; height: 1.1em; vertical-align: 0; }
+/* Verified (owner, 31 Oct 2026): registration from government documents. The green tick beside the name (the mark that
+   said "Verified" before the Claimed badge) and the "Verified on" badge in the profile's meta row. */
+.aw-gov-mark { display: inline-flex; align-items: center; justify-content: center; width: 1.1em; height: 1.1em; margin-left: .2em; border-radius: 50%; background: var(--kit-color-success); color: var(--kit-color-on-ink, #fff); vertical-align: -0.12em; }
+.aw-gov-mark .kit-ico { width: .7em; height: .7em; }
+.aw-item-gov { display: inline-flex; align-items: center; gap: var(--kit-space-1); }
+.aw-item-gov .kit-ico { width: 1em; height: 1em; }
 
 /* Sponsored blocks (sponsored-blocks.php): a card or a banner, always labelled "Sponsored". Phone: one column; from
    768px the banner puts its picture beside the text. */
