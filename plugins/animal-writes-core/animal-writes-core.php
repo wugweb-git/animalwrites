@@ -76,6 +76,7 @@ require_once AW_CORE_DIR . 'includes/sections.php';
 require_once AW_CORE_DIR . 'includes/hubs.php';
 require_once AW_CORE_DIR . 'includes/hub-blocks.php';
 require_once AW_CORE_DIR . 'includes/term-page.php';
+require_once AW_CORE_DIR . 'includes/faq-data.php'; // the site's FAQ questions and rules for AW SEO Plus (owner, 31 Oct 2026)
 require_once AW_CORE_DIR . 'includes/sponsored-blocks.php';
 require_once AW_CORE_DIR . 'includes/form-blocks.php';
 require_once AW_CORE_DIR . 'includes/site-check.php';

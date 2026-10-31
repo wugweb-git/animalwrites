@@ -1326,6 +1326,21 @@ add_filter(
 		}
 		$faq = function_exists( 'aw_faq_schema' ) ? aw_faq_schema() : null; // parsed from the page's own FAQ accordion (animal-writes-core faq.php)
 		if ( $faq ) {
+			// Every page type has the FAQ now (31 Oct 2026): link it to a node this graph has, else to the page's own node.
+			$ids  = array();
+			$page = '';
+			foreach ( $data as $node ) {
+				if ( is_array( $node ) && ! empty( $node['@id'] ) ) {
+					$ids[ $node['@id'] ] = true;
+					if ( '' === $page && array_intersect( (array) ( $node['@type'] ?? array() ), array( 'WebPage', 'CollectionPage', 'ContactPage', 'AboutPage', 'ItemPage', 'SearchResultsPage' ) ) ) {
+						$page = $node['@id'];
+					}
+				}
+			}
+			if ( '' !== $page ) {
+				$faq['isPartOf']['@id'] = isset( $ids[ $faq['isPartOf']['@id'] ] ) ? $faq['isPartOf']['@id'] : $page;
+				$faq['about']['@id']    = isset( $ids[ $faq['about']['@id'] ] ) ? $faq['about']['@id'] : $faq['isPartOf']['@id'];
+			}
 			$data['aw_faq'] = $faq;
 		}
 		if ( ! empty( $data['BreadcrumbList']['@id'] ) ) { // Rank Math's own trail (breadcrumbs.php gives it the places and sections)
