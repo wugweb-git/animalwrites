@@ -118,6 +118,8 @@ require_once AW_CORE_DIR . 'includes/fluentcrm.php';
 require_once AW_CORE_DIR . 'includes/admin-ia.php';
 require_once AW_CORE_DIR . 'includes/team-dates.php';
 require_once AW_CORE_DIR . 'includes/cron-health.php';
+require_once AW_CORE_DIR . 'includes/error-count.php';
+require_once AW_CORE_DIR . 'includes/error-pages.php';
 
 // AW Sourcing (feeds, keywords, publishers, worker endpoints, AI keys, enrichment, review). Loaded from the sibling
 // plugin folder when it is not active on its own; after Core's includes, which it uses.
