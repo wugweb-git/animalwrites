@@ -696,6 +696,7 @@
     "kit-steps",
     "kit-step",
     "kit-steps-progress",
+    "kit-fold-group",
     "kit-steps-num",
     "kit-steps-name"
    ],

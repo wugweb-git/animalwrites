@@ -344,7 +344,7 @@ function aw_enrich_review_page() {
 	}
 	$bulk   = 'pending' === $st ? array( 'approve' => 'Approve', 'reject' => 'Reject', 'approve_high' => 'Approve all high (this filter)' ) : ( 'failed' === $st ? array() : array( 'undo' => 'Undo' ) ); // a failed row has nothing to undo
 	$cells  = array();
-	$labels = aw_enrich_fields_all();
+	$labels = aw_enrich_fields_all() + ( function_exists( 'aw_enrich_claim_fields' ) ? aw_enrich_claim_fields() : array() ); // with the fields only a claim writes
 	foreach ( $rows as $r ) {
 		$r     = aw_enrich_decode( $r );
 		$lid   = (int) $r['listing_id'];

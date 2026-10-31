@@ -166,6 +166,9 @@ function aw_block_section_head( $a ) {
 	if ( ! is_singular() ) {
 		return do_shortcode( '[aw_section_head]' ); // the archive band (it places the breadcrumb itself; a category's banner is added to it)
 	}
+	if ( is_page( 'claim' ) && function_exists( 'aw_claim_head_band' ) ) {
+		return aw_claim_head_band(); // the listing's own head (form-blocks.php)
+	}
 	$crumbs = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
 	$type = (string) ( $a['postType'] ?? '' );
 	$hub  = '' !== $type;

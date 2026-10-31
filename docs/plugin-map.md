@@ -15,6 +15,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `campaigns.php` | Campaign kit: countdown, and the private upload folder used by listing claims. (The proof-of-posting receipts and live counts were removed on 8 Oct 2026; they had no entries.) |
 | `cdn-cache.php` | Hostinger CDN (hcdn) lifetime for anonymous public pages: `Cache-Control: public, s-maxage=N` only on anonymous 200 GETs of public pages, never on forms, nonce or personal pages. Option aw_cdn_ttl (0 = off, 60 to 900 s). |
 | `claims.php` | Claim or update a directory listing: /claim/?listing=<ID> shows the Fluent Forms form "Claim this listing" (form-blocks.php). Keeps the logo/proof upload checks (aw_claim_logo_ok, aw_claim_logo_store) and the review of claims sent before Fluent Forms (aw_claim posts, still registered: Approve / Reject). The site's own claim form, its handler and [aw_claim_box] were removed on 25 Oct 2026. |
+| `claims-review.php` | Claim form #6 (owner, 31 Oct 2026): the pre-fill of every `l_*` field from the listing (one rendering_field_data filter; public fields only), AW_CLAIM_L (form field → listing field → enrichment field), Directory → Claims (WP_List_Table) and a claim's screen: now → proposed for changed fields, approve per field (aw_claim_apply_field: logged first as an approved enrichment row, source "Claimed by organisation", Undo in Enrichment review), aw_verified / aw_verified_on, and for "Show my name" the FluentCRM link to the listing. Review state in the entry's meta `aw_claim_review`. |
 | `content-types.php` | Post types and taxonomies. Each pillar keeps its own URL space for SEO. |
 | `cron.php` | Daily housekeeping: flag listings due for re-verification. |
 | `data-sources.php` | Where an organisation's details come from: one small label per data source on every listing. |
@@ -74,7 +75,7 @@ Each file in the plugins and what it does. animal-writes-core, Kits Core and AW 
 | `map-picker.php` | Map picker on the listing edit screen (wp-admin only): an OpenStreetMap map beside the Latitude and Longitude fields. |
 | `near-opps.php` | Home "Opportunities near you" (owner, 16 Oct 2026): the list shows opportunities in the visitor's state. Routes: `aw/v1/opps-near`. |
 | `newsletter-fluentforms.php` | [aw_newsletter]: the Fluent Forms form "Newsletter" (footer and campaign pages), after what an old confirm or unsubscribe link did; a missing form shows nothing to visitors and a note to administrators. The confirmation email's unsubscribe link. Removed 25 Oct 2026 (ran once): `wp aw nl-form`, `wp aw nl-import-volunteers`. |
-| `org-people.php` | Volunteers of an organisation, from FluentCRM (owner, 21 Oct 2026; was the site's volunteers table). |
+| `org-people.php` | Volunteers of an organisation, from FluentCRM (owner, 21 Oct 2026; was the site's volunteers table). A claimant approved with "Show my name" shows with their role (`vol_org_role`). |
 | `related.php` | Related items (SEO Phase 7, internal linking): [aw_related] at the end of an item page. |
 | `research-citation.php` | Research papers' credit (owner, 20 Oct 2026): "Study: <study title> by <authors> in <journal>" in the item's Sources block, and the ScholarlyArticle it is based on in its schema. |
 | `scf.php` | Secure Custom Fields (SCF): the editing screens for the meta that meta.php registers. |

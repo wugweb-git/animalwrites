@@ -90,3 +90,39 @@ function aw_set_campaign_links( $id, $slugs ) {
 	}
 	return $ids;
 }
+
+/**
+ * Campaign links by keyword for Media & PR items (owner, 31 Oct 2026: a social post that matches a campaign's keywords
+ * shows on that campaign's page). The keywords are the campaign rules in Sourcing (aw_sources['topic_tags'][slug]['any']),
+ * the same rules the workers apply at ingest; this also covers items added by hand and by the press search. Checks the
+ * title, text, excerpt and link; adds links only, never removes one.
+ *
+ * @param int $id Media & PR item.
+ * @return int[] Term IDs added.
+ */
+function aw_campaign_links_by_keyword( $id ) {
+	$rules = (array) ( ( (array) get_option( 'aw_sources', array() ) )['topic_tags'] ?? array() );
+	$hay   = strtolower( get_the_title( $id ) . ' ' . get_post_field( 'post_content', $id ) . ' ' . get_post_field( 'post_excerpt', $id ) . ' ' . get_post_meta( $id, 'aw_press_url', true ) );
+	$hits  = array();
+	foreach ( $rules as $slug => $rule ) {
+		foreach ( (array) ( $rule['any'] ?? array() ) as $k ) {
+			$k = strtolower( trim( (string) $k ) );
+			if ( '' !== $k && false !== strpos( $hay, $k ) ) {
+				$hits[] = (string) $slug;
+				break;
+			}
+		}
+	}
+	return $hits ? aw_set_campaign_links( $id, $hits ) : array();
+}
+add_action(
+	'save_post_aw_press',
+	function ( $id, $post ) {
+		if ( wp_is_post_revision( $id ) || 'auto-draft' === $post->post_status ) {
+			return;
+		}
+		aw_campaign_links_by_keyword( $id );
+	},
+	30, // after press.php's fetch (10) has filled the title
+	2
+);

@@ -85,6 +85,7 @@ require_once AW_CORE_DIR . 'includes/directory-map.php';
 require_once AW_CORE_DIR . 'includes/backups.php';
 require_once AW_CORE_DIR . 'includes/staging.php';
 require_once AW_CORE_DIR . 'includes/claims.php';
+require_once AW_CORE_DIR . 'includes/claims-review.php';
 require_once AW_CORE_DIR . 'includes/unverified.php';
 require_once AW_CORE_DIR . 'includes/systems.php';
 require_once AW_CORE_DIR . 'includes/reports.php';

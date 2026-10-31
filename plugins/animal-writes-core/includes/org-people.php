@@ -47,7 +47,7 @@ function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
 			$for  = (int) ( $f['vol_org_listing'] ?? 0 );
 			$hits = $for ? $for === $lid : ( strlen( $org ) >= 3 && strlen( $title ) >= 3 && ( false !== strpos( $title, $org ) || false !== strpos( $org, $title ) ) );
 			if ( $hits ) {
-				$out[] = array( 'id' => (int) $c->id, 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'show' => '' !== (string) ( $f['vol_org_show'] ?? '' ) && '0' !== (string) $f['vol_org_show'] );
+				$out[] = array( 'id' => (int) $c->id, 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'role' => trim( (string) ( $f['vol_org_role'] ?? '' ) ), 'show' => '' !== (string) ( $f['vol_org_show'] ?? '' ) && '0' !== (string) $f['vol_org_show'] );
 			}
 		}
 	}
@@ -71,11 +71,12 @@ function aw_org_people_public_names( $lid ) {
  * @return string
  */
 function aw_org_people_html( $lid ) {
-	$names = aw_org_people_public_names( $lid );
-	if ( ! $names ) {
+	$people = array_values( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
+	if ( ! $people ) {
 		return '';
 	}
-	return '<section class="aw-org-links-group aw-org-people"><h2>Volunteers</h2><ul>' . implode( '', array_map( fn( $n ) => '<li>' . esc_html( $n ) . '</li>', $names ) ) . '</ul></section>';
+	// A claimant shows with their role (owner, 31 Oct 2026: claim form #6), a volunteer with their name alone.
+	return '<section class="aw-org-links-group aw-org-people"><h2>Volunteers</h2><ul>' . implode( '', array_map( fn( $p ) => '<li>' . esc_html( $p['name'] ) . ( '' !== $p['role'] ? '<span class="aw-org-people-role">, ' . esc_html( $p['role'] ) . '</span>' : '' ) . '</li>', $people ) ) . '</ul></section>';
 }
 
 // [aw_org_people] on the listing template: the Volunteers part of the former [aw_org_links] (whose other parts the
@@ -95,7 +96,8 @@ add_shortcode(
  * @return array
  */
 function aw_org_people_schema( $lid ) {
-	return array_map( fn( $n ) => array( '@type' => 'OrganizationRole', 'roleName' => 'Volunteer', 'member' => array( '@type' => 'Person', 'name' => $n ) ), aw_org_people_public_names( $lid ) );
+	$people = array_values( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
+	return array_map( fn( $p ) => array( '@type' => 'OrganizationRole', 'roleName' => '' !== $p['role'] ? $p['role'] : 'Volunteer', 'member' => array( '@type' => 'Person', 'name' => $p['name'] ) ), $people );
 }
 
 /* ---------- WP Admin: the Volunteers box on a listing (read-only) ---------- */

@@ -44,23 +44,67 @@
 		});
 	});
 
-	/* Logo (claim, Fluent Forms): a picked file is checked, then sent at once to the private folder; the form carries
-	   its token. A wrong file shows the field's own message. */
+	/* Private uploads (claim logo, photos, proof; Fluent Forms): picked files are checked, then sent at once to the
+	   private folder; the form carries their tokens (several, comma-separated, for photos). A wrong file shows the
+	   field's own message. */
 	document.querySelectorAll('input[type=file][data-aw-upload]').forEach(function (inp) {
-		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[name=logo_token]'), msg = document.getElementById(inp.id + '-error');
+		var box = inp.closest('.ff-el-input--content'), tok = box && box.querySelector('input[type=hidden]'), msg = document.getElementById(inp.id + '-error');
+		if (!tok) return;
+		function fail(t) { inp.removeAttribute('aria-busy'); tok.value = ''; if (msg) msg.textContent = t || inp.dataset.msgFile; inp.value = ''; }
 		inp.addEventListener('change', function () {
-			var file = inp.files && inp.files[0];
-			if (tok) tok.value = '';
+			var files = Array.prototype.slice.call(inp.files || []), max = +(inp.dataset.maxFiles || 1);
+			tok.value = '';
 			if (msg) msg.textContent = '';
-			if (!file) return;
-			if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > +(inp.dataset.maxBytes || Infinity)) { if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; return; }
-			var fd = new FormData(); fd.append('logo', file);
+			if (!files.length) return;
+			if (files.length > max) { fail(inp.dataset.msgFiles); return; }
+			if (files.some(function (f) { return !/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > +(inp.dataset.maxBytes || Infinity); })) { fail(); return; }
 			inp.setAttribute('aria-busy', 'true');
-			fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' })
-				.then(function (r) { return r.json(); })
-				.then(function (r) { inp.removeAttribute('aria-busy'); if (r.success) { tok.value = r.data.token; } else { if (msg) msg.textContent = r.data; inp.value = ''; } })
-				.catch(function () { inp.removeAttribute('aria-busy'); if (msg) msg.textContent = inp.dataset.msgFile; inp.value = ''; });
+			var tokens = [];
+			files.reduce(function (p, file) { // one at a time, in order
+				return p.then(function () {
+					var fd = new FormData(); fd.append('logo', file);
+					return fetch(inp.dataset.awUpload, { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json(); })
+						.then(function (r) { if (!r.success) throw new Error(r.data); tokens.push(r.data.token); });
+				});
+			}, Promise.resolve())
+				.then(function () { inp.removeAttribute('aria-busy'); tok.value = tokens.join(','); })
+				.catch(function (e) { fail(e && e.message && e.message !== '[object Object]' ? e.message : ''); });
 		});
+	});
+
+	/* Claim form, last step: "Summary of changes" lists only the listing fields the claimant changed (owner, 31 Oct
+	   2026), from each field's pre-filled value; read-only. */
+	document.addEventListener('kit:step', function (e) {
+		var form = e.target.closest && e.target.closest('form'), sum = form && form.querySelector('[data-aw-claim-summary]');
+		var st = sum && sum.closest('.kit-step');
+		if (!sum || (st && +st.getAttribute('data-step') !== e.detail.step)) return; // kit:step fires before the step is shown
+		var dl = sum.querySelector('dl'), seen = {};
+		dl.textContent = '';
+		form.querySelectorAll('[name^="l_"], input[type=hidden][name="logo_token"], input[type=hidden][name="photo_tokens"]').forEach(function (el) {
+			var name = el.name.replace(/\[\]$/, ''), group = el.closest('.ff-el-group'), changed, value;
+			if (seen[name] || !group) return;
+			seen[name] = true;
+			var label = group.querySelector('label, .ff-el-input--label') ? (group.querySelector('.ff-el-input--label label') || group.querySelector('label')).textContent.replace(/\(optional\)/, '').trim() : name;
+			if (el.type === 'checkbox') {
+				var boxes = form.querySelectorAll('[name="' + el.name + '"]');
+				changed = Array.prototype.some.call(boxes, function (b) { return b.checked !== b.defaultChecked; });
+				value = Array.prototype.filter.call(boxes, function (b) { return b.checked; }).map(function (b) { return b.closest('label') ? b.closest('label').textContent.trim() : b.value; }).join(', ') || '(none)';
+			} else if (el.type === 'hidden') {
+				changed = el.value !== '';
+				value = el.name === 'photo_tokens' ? el.value.split(',').length + ' new' : 'new file';
+				var lab = el.closest('.ff-el-input--content') && el.closest('.ff-el-group').querySelector('label');
+				label = lab ? lab.textContent.trim() : label;
+			} else {
+				changed = el.value.trim() !== el.defaultValue.trim();
+				value = el.value.trim() || '(removed)';
+			}
+			if (!changed) return;
+			var dt = document.createElement('dt'), dd = document.createElement('dd');
+			dt.textContent = label; dd.textContent = value;
+			dl.appendChild(dt); dl.appendChild(dd);
+		});
+		if (!dl.children.length) { var none = document.createElement('dd'); none.textContent = 'No changes to the listing\'s details.'; dl.appendChild(none); }
+		sum.hidden = false;
 	});
 
 	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
