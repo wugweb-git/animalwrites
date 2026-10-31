@@ -2,7 +2,7 @@
     {
         "id": "7",
         "title": "Report a mistake",
-        "status": "published",
+        "status": "unpublished",
         "appearance_settings": null,
         "form_fields": {
             "fields": [
