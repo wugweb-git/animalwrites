@@ -203,13 +203,14 @@ function aw_seo_modules(): array {
 			'label'  => 'FAQ',
 			'switch' => true,
 			'files'  => array( 'faq' ),
-			'desc'   => 'Questions and answers with FAQPage schema on listings, Library documents, topics, hubs and Resources guides.',
+			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy, and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
-				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
-				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a Resources guide', 'help' => '', 'default' => 2 ),
+				'AW_FAQ_OFF_TYPES' => array( 'type' => 'list', 'label' => 'Types without the FAQ box', 'help' => 'Every public post type and taxonomy has the FAQ box. Post types or taxonomies listed here (one per line, e.g. aw_press) get none and show no FAQ.', 'default' => array() ),
+				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
+				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
 				'AW_FAQ_MAX' => array( 'type' => 'int', 'label' => 'Most questions shown', 'help' => '', 'default' => 6 ),
 				'AW_FAQ_WORDS' => array( 'type' => 'int', 'label' => 'Longest answer (words)', 'help' => 'Longer answers are flagged by the checks.', 'default' => 50 ),
-				'AW_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Hub pages with a topic FAQ', 'help' => 'One per line: page slug | subject of the heading.', 'default' => array(
+				'AW_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Pages with a subject in the FAQ heading', 'help' => 'One per line: page slug | subject ("Questions about <subject>"). Their FAQ sits under the list, wide. Other pages: "Questions about <page title>".', 'default' => array(
 						'directory'     => 'the Directory',
 						'volunteer'     => 'volunteering',
 						'claim'         => 'claiming a listing',

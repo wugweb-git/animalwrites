@@ -2706,8 +2706,8 @@
    ],
    "states": [
     "see the states sheet",
-    "3 to 6 questions from the page's own fields (listings, Library documents)",
-    "empty (prints nothing): fewer than 3 questions, a holdout page, any other item type"
+    "3 to 6 questions from the page's FAQ box (automatic ones from its own fields)",
+    "empty (prints nothing): fewer than the minimum"
    ],
    "tokens": [],
    "a11y": {

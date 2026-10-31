@@ -20,7 +20,6 @@ function aw_team_dates_seed() {
 		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
 		array( 'date' => '2026-11-07', 'title' => 'Decide the lab rules Post phase', 'note' => 'Owner decides what 13848 shows after closing. Until then no closed-state or Post content and no FAQ visibility changes on it.' ),
 		array( 'date' => '2026-11-17', 'title' => 'Directory thin-page re-check and keyword positions', 'note' => 'Scheduled tasks at 10:00 (Directory indexing against the 20 Oct baseline) and 11:00 (8 tracked keywords).' ),
-		array( 'date' => '2026-12-01', 'title' => 'FAQ holdout ends', 'note' => 'Started 20 Oct, 6 weeks. Compare Search Console and GA4 (Has FAQ, faq_group) before rolling the FAQs out to 100%.' ),
 	);
 }
 
@@ -61,6 +60,23 @@ function aw_team_dates_add_links_read() {
 	update_option( 'aw_team_dates_links_read', time(), false );
 }
 add_action( 'admin_init', 'aw_team_dates_add_links_read' );
+
+/**
+ * The FAQ holdout ended early (owner, 31 Oct 2026: no holdout): its 1 Dec date leaves the calendar, once (flag
+ * aw_team_dates_faq_holdout_off).
+ */
+function aw_team_dates_drop_faq_holdout() {
+	if ( get_option( 'aw_team_dates_faq_holdout_off' ) ) {
+		return;
+	}
+	$all  = aw_team_dates();
+	$keep = array_values( array_filter( $all, fn( $d ) => 'FAQ holdout ends' !== ( $d['title'] ?? '' ) ) );
+	if ( count( $keep ) !== count( $all ) ) {
+		update_option( 'aw_team_dates', $keep, false );
+	}
+	update_option( 'aw_team_dates_faq_holdout_off', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_drop_faq_holdout' );
 
 /** A date in the site's one format, j M Y. */
 function aw_team_date_label( $ymd ) {

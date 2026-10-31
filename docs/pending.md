@@ -38,6 +38,8 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Data notes:** #959 PFA Faridabad Unit II has no phone until a claim or an official source gives one (owner). District slugs keep LGD spellings (e.g. /directory/odisha/anugola/); names show the common spelling.
 - **Enrichment: Google pass from 1 Nov:** enrichment keeps running on its other sources (website and social pages, Wikidata, AWBI, claims) after each sourcing run; only the Google Places check is quota-bound. From 1 Nov the 1,773 listings checked while Google was off (marked Google-pending) get their Google pass, no-contact ones first (district searches cost 2 requests each; watch the 950 a month). The live Google block (rating, hours, open now) stays hidden: it needs a paid request per view (no paid plans). Not done from the first brief: Rich Results test and 375px screenshots of an enriched listing.
 
+- **FAQ on every page (owner, 31 Oct): PR open, waiting for "merge #N".** AW SEO Plus: FAQ box on every public post type and taxonomy (Settings → FAQ opt-out), automatic questions filled in (Auto / Edited), AW SEO Plus → FAQ as an overview list, no holdout. After ship: 3 former holdout pages show FAQ + FAQPage, one FAQPage per page, Schema.org validator 0 errors, count before/after (before: 628 pages).
+
 ### FIR state pages: background (not tasks)
 - Uttarakhand and Chhattisgarh stay rows in 127's state table; an Uttarakhand page only if its police portal is ever verified from an Indian network (a draft exists).
 - Delhi, Uttar Pradesh, West Bengal, Tripura, Odisha, Karnataka, Andhra Pradesh, Madhya Pradesh and Himachal Pradesh stay rows (sources not verified live).
@@ -47,7 +49,6 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **1 Nov:** Google Places free quota returns (950 requests a month, no paid plan); no-contact profiles first.
 - **5 Nov:** lab rules objections close. **6 Nov:** revisit the High Court judgments source. **7 Nov:** the owner's Post-phase decision.
 - **17 Nov:** indexing re-check (6,752 "discovered, not indexed" should fall after the no-contact noindex of 24 Oct) and the 8 tracked keywords.
-- **1 Dec:** FAQ holdout ends; compare Search Console and GA4 ("Has FAQ", `faq_group`), then roll out to 100%.
 - **AdSense approval:** ads stay off on live until the owner switches Advanced Ads on; then check the ads fill (logged out).
 
 ### No source yet (parked until one appears)
@@ -83,7 +84,6 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **5 Nov 2026**: lab rules objections close (campaign 13848).
 - **7 Nov 2026**: owner decides the lab rules Post phase. Until then no closed-state or Post content, and no FAQ visibility changes, on 13848.
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
-- **1 Dec 2026**: FAQ holdout ends (started 20 Oct, 6 weeks); then compare GSC and GA4 ("Has FAQ", `faq_group`) before rolling out to 100%.
 
 ## Notes to keep
 - **FluentCRM: everyone on the Newsletter list (owner, 31 Oct 2026):** Contact, Volunteer sign-up and Claim senders are all on the Newsletter list; "Email me updates" decides the status for new and existing contacts alike, also on the volunteer update link: ticked = subscribed, unticked = unsubscribed (`aw_crm_nl_status()`, fluentcrm.php; bounced or complained addresses left as they are); 1/0 is recorded. Remove my data never reaches FluentCRM; the Campaign form is unchanged. No automations on live; any future FluentCRM automation or campaign must target subscribed contacts only.

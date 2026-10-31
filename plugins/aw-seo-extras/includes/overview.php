@@ -74,20 +74,15 @@ function aw_seo_overview_si_status(): string {
 	return '<span class="dashicons dashicons-' . ( 'good' === $t['status'] ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $t['label'] );
 }
 
-/** Status of the FAQ: the holdout and waiting drafts (from the FAQ screen's hourly count, when there is one). */
+/** Status of the FAQ: pages with one and drafts waiting (from the FAQ screen's hourly count, when there is one). */
 function aw_seo_overview_faq_status(): string {
-	$out = array();
-	if ( function_exists( 'aw_faq_experiment' ) ) {
-		$e     = aw_faq_experiment();
-		$end   = wp_date( 'j M Y', strtotime( $e['start'] . ' +' . (int) $e['weeks'] . ' weeks' ) );
-		$out[] = ! empty( $e['on'] ) ? sprintf( 'Holdout running (%d%%) until %s.', (int) $e['pct'], $end ) : 'Rolled out to every eligible page.';
+	$ix = get_transient( 'aw_faq_index' );
+	if ( ! is_array( $ix ) || ! isset( $ix['counts'] ) ) {
+		return '';
 	}
-	$c = get_transient( 'aw_faq_counts' );
-	if ( is_array( $c ) ) {
-		$drafts = (int) ( $c['term']['drafts'] ?? 0 ) + (int) ( $c['hub']['drafts'] ?? 0 );
-		$out[]  = $drafts ? sprintf( '%d draft questions waiting.', $drafts ) : 'No drafts waiting.';
-	}
-	return esc_html( implode( ' ', $out ) );
+	$faq    = array_sum( wp_list_pluck( $ix['counts'], 'faq' ) );
+	$drafts = array_sum( wp_list_pluck( $ix['counts'], 'drafts' ) );
+	return esc_html( sprintf( '%s pages show an FAQ. %s', number_format_i18n( $faq ), $drafts ? sprintf( '%d draft questions waiting.', $drafts ) : 'No drafts waiting.' ) );
 }
 
 /** AW SEO Plus → Overview. */
@@ -106,7 +101,7 @@ function aw_seo_overview_page() {
 		array(
 			'module' => '<strong>' . ( function_exists( 'aw_faq_admin_page' ) ? aw_seo_overview_link( 'FAQ', $faq ) : 'FAQ' ) . '</strong>',
 			'mods'   => array( 'faq' ),
-			'what'   => 'Questions and answers with FAQPage schema on Directory listings, Library documents, organisation types, categories, hubs and Resources guides.',
+			'what'   => 'The FAQ box on every edit screen (pages, posts, every public type and taxonomy; automatic questions filled in where the page has data) and the questions with FAQPage schema on the page.',
 			'where'  => aw_seo_overview_link( 'AW SEO Plus → FAQ', $faq ) . '; each item’s FAQ box',
 			'status' => aw_seo_overview_faq_status(),
 		),
@@ -261,7 +256,7 @@ function aw_seo_overview_page() {
 		array(
 			array(
 				'cmd'  => '<code>wp aw-faq</code>',
-				'what' => 'report, check, holdout, import, convert-guides, undo-guide',
+				'what' => 'report, check, import, convert-guides, undo-guide',
 			),
 			array(
 				'cmd'  => '<code>wp aw-si</code>, <code>wp aw-si-rising</code>',
