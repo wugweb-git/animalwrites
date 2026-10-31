@@ -1,14 +1,15 @@
 <?php
 /**
- * Workers on time (owner, 31 Oct 2026). GitHub starts scheduled workflows 3 to 6 hours late and ran wp-cron.yml about
- * 5 times a day instead of 96. Hostinger's cron (hPanel → Advanced → Cron Jobs) runs this every 15 minutes instead:
+ * Workers on time (owner, 31 Oct 2026). GitHub starts scheduled workflows 3 to 6 hours late. Hostinger's cron (hPanel →
+ * Advanced → Cron Jobs) runs this every 15 minutes instead:
  *
  *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp aw workers-tick >> /home/u544169507/aw-cron.log 2>&1
  *
- * 1. WordPress's due cron events run here on the server (DISABLE_WP_CRON is on; nothing waits for GitHub).
- * 2. Each workflow in AW_WORKERS (workers-registry.php) whose cron time has come since the last tick is started through
- *    GitHub's API (aw_dispatch_workflow, animal-writes-core cron-health.php) with the input scheduled_cron, so the run
- *    behaves as GitHub's scheduled run for that cron. One start per cron, however many slots were missed.
+ * Each workflow in AW_WORKERS (workers-registry.php) whose cron time has come since the last tick is started through
+ * GitHub's API (aw_dispatch_workflow, animal-writes-core cron-health.php) with the input scheduled_cron, so the run
+ * behaves as GitHub's scheduled run for that cron. One start per cron, however many slots were missed; a start GitHub
+ * refused is tried again at the next tick. WordPress's own cron is not run here: hPanel already runs wp-cron every
+ * 5 minutes (cron-health.php, trigger "hostinger").
  *
  * GitHub's own scheduled runs are skipped while the workers repository's variable AW_SCHEDULER is "site"; unset it to go
  * back to GitHub's schedule. This tick replaces the old hPanel job that started sourcing.yml every 4 hours.
@@ -20,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Started elsewhere: wp-cron.yml (step 1 does its work), keepalive.yml (GitHub's own), backup-offsite.yml (UpdraftPlus). */
+/** Not started here: wp-cron.yml (hPanel runs wp-cron), keepalive.yml (GitHub's own), backup-offsite.yml (UpdraftPlus). */
 const AW_TICK_SKIP = array( 'wp-cron.yml', 'keepalive.yml', 'backup-offsite.yml' );
 
 /** Longest look back for a missed slot (the server cron was down): one day. */
@@ -120,8 +121,8 @@ function aw_workers_tick( $now, $dispatch = null ) {
 			if ( ! $slot ) {
 				continue;
 			}
-			$res             = call_user_func( $dispatch, $file, array( 'scheduled_cron' => $cron ) );
-			$state[ $key ]   = $slot; // a failed start is not retried at the next tick: the next slot is
+			$res           = call_user_func( $dispatch, $file, array( 'scheduled_cron' => $cron ) );
+			$state[ $key ] = true === $res ? $slot : $slot - 60; // refused: the same slot is tried again at the next tick
 			$lines[]         = sprintf( '%s %s (%s, slot %s UTC): %s', gmdate( 'Y-m-d H:i', $now ), $file, $cron, gmdate( 'H:i', $slot ), true === $res ? 'started' : 'NOT started: ' . ( is_wp_error( $res ) ? $res->get_error_message() : 'unknown' ) );
 		}
 	}
@@ -132,26 +133,38 @@ function aw_workers_tick( $now, $dispatch = null ) {
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
-	 * `wp aw workers-tick [--dry-run]`: WordPress's due cron events, then the workflows whose time has come (see above).
-	 * --dry-run: lists what would start; runs no cron events and starts nothing.
+	 * `wp aw workers-tick [--dry-run]`: starts the workflows whose time has come (see above). --dry-run: lists what would
+	 * start and starts nothing.
 	 */
 	WP_CLI::add_command(
 		'aw workers-tick',
 		function ( $args, $assoc ) {
 			$dry = ! empty( $assoc['dry-run'] );
 			$now = time();
-			if ( ! $dry ) {
-				$cron = WP_CLI::runcommand( 'cron event run --due-now', array( 'return' => 'all', 'launch' => true, 'exit_error' => false ) );
-				WP_CLI::log( gmdate( 'Y-m-d H:i', $now ) . ' wp-cron: ' . trim( (string) ( $cron->stdout ?? '' ) . ' ' . (string) ( $cron->stderr ?? '' ) ) );
-			}
 			if ( ! function_exists( 'aw_dispatch_workflow' ) ) {
 				WP_CLI::error( 'aw_dispatch_workflow (animal-writes-core cron-health.php) is needed.' );
+			}
+			// One tick at a time: two ticks at once would both start the same slot. add_option fails when the lock exists.
+			$held = (int) get_option( 'aw_workers_tick_lock', 0 );
+			if ( $held && $now - $held < 10 * MINUTE_IN_SECONDS ) {
+				WP_CLI::log( gmdate( 'Y-m-d H:i', $now ) . ' another tick is running (since ' . gmdate( 'H:i', $held ) . ' UTC): nothing done' );
+				return;
+			}
+			if ( $held ) {
+				delete_option( 'aw_workers_tick_lock' ); // left by a tick that died more than 10 minutes ago
+			}
+			if ( ! $dry && ! add_option( 'aw_workers_tick_lock', $now, '', false ) ) {
+				WP_CLI::log( gmdate( 'Y-m-d H:i', $now ) . ' another tick started at the same moment: nothing done' );
+				return;
 			}
 			$saved = get_option( 'aw_workers_tick', array() );
 			$lines = aw_workers_tick( $now, $dry ? fn() => true : null );
 			if ( $dry ) {
 				update_option( 'aw_workers_tick', $saved, false ); // a dry run moves nothing on
 				$lines = array_map( fn( $l ) => str_replace( ': started', ': would start', $l ), $lines );
+			}
+			if ( ! $dry ) {
+				delete_option( 'aw_workers_tick_lock' );
 			}
 			foreach ( $lines as $line ) {
 				WP_CLI::log( $line );
