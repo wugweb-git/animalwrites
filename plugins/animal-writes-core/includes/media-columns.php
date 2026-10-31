@@ -72,7 +72,7 @@ function aw_media_usage( $ids ) {
 		$labels = aw_media_post_meta_uses();
 		$keys   = array_keys( $labels );
 		$kin    = implode( ',', array_fill( 0, count( $keys ), '%s' ) );
-		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the IN lists are only %d / %s placeholders built with array_fill
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.meta_value AS att, m.meta_key AS k, p.ID AS pid, p.post_title AS title FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key IN ($kin) AND m.meta_value IN ($in) AND p.post_type <> 'attachment' LIMIT 2000", array_merge( $keys, $new ) ) );
 		foreach ( (array) $rows as $r ) {
 			$found[ (int) $r->att ]['uses'][ 'p' . $r->pid . $r->k ] = esc_html( $labels[ $r->k ] ) . ': <a href="' . esc_url( get_edit_post_link( (int) $r->pid ) ) . '">' . esc_html( wp_html_excerpt( html_entity_decode( $r->title, ENT_QUOTES, 'UTF-8' ), 40, '…' ) ) . '</a>';
