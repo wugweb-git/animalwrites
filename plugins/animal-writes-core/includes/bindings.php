@@ -239,7 +239,8 @@ function aw_profile_actions_note( $content ) {
 	$names = array( 'phone' => 'Call', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website' );
 	$list  = implode( ', ', array_map( fn( $a ) => $names[ $a ] ?? $a, $m[1] ) );
 	$id    = (int) get_queried_object_id();
+	$field = 1 === count( $m[1] ) ? ( array( 'phone' => 'phone', 'email' => 'email' )[ $m[1][0] ] ?? '' ) : ''; // one missing: the form names it
 	return $content . '<p class="aw-profile-actions-na"><span>' . esc_html( 'Not available yet: ' . $list ) . '</span>'
-		. ( function_exists( 'aw_report_url' ) ? ' <a href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Suggest an update</a>' : '' ) . '</p>';
+		. ( function_exists( 'aw_report_url' ) ? ' <a href="' . esc_url( aw_report_url( $id, $field ) ) . '" rel="nofollow">Suggest an update</a>' : '' ) . '</p>';
 }
 add_filter( 'render_block_core/buttons', 'aw_profile_actions_note', 15 );

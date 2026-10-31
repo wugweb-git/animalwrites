@@ -78,9 +78,9 @@ function aw_listing_parts( $parts ) {
  * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services,
  * registration and the AWBI number.
  */
-function aw_listing_na( $id ) {
+function aw_listing_na( $id, $field = '' ) {
 	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'animal-writes-core' ) . '</span>'
-		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'animal-writes-core' ) . '</a>' : '' );
+		. ( function_exists( 'aw_report_url' ) ? ' <a class="aw-facts-suggest" href="' . esc_url( aw_report_url( $id, $field ) ) . '" rel="nofollow">' . esc_html__( 'Suggest an update', 'animal-writes-core' ) . '</a>' : '' );
 }
 
 /** "valid until <date>", or "expired <date>" in the warning colour once the date has passed (today, India). */
@@ -183,9 +183,9 @@ function aw_block_listing_contact( $a, $id ) {
 		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</a>'
 		: '<span class="kit-btn kit-btn--secondary" role="link" aria-disabled="true" data-act="maps_url">' . aw_i( 'map-pin' ) . esc_html__( 'Directions', 'animal-writes-core' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
-	foreach ( array( array( '' === $first, __( 'Phone', 'animal-writes-core' ), 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'animal-writes-core' ), 'mail' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'animal-writes-core' ), 'world' ) ) as $na ) {
+	foreach ( array( array( '' === $first, __( 'Phone', 'animal-writes-core' ), 'phone', 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'animal-writes-core' ), 'mail', 'email' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'animal-writes-core' ), 'world', '' ) ) as $na ) {
 		if ( $na[0] ) { // a missing way to reach them is said, never hidden
-			$more[] = array( $na[1], aw_listing_na( $id ), $na[2] );
+			$more[] = array( $na[1], aw_listing_na( $id, $na[3] ), $na[2] );
 		}
 	}
 	foreach ( array_slice( $phones, 1 ) as $p ) {
@@ -222,9 +222,9 @@ function aw_block_listing_location( $a, $id ) {
 	}
 	$hours = function_exists( 'aw_org_hours_html' ) && function_exists( 'aw_listing_hours' ) ? aw_org_hours_html( aw_listing_hours( $id ) ) : '';
 	$rows  = array(
-		array( __( 'Address', 'animal-writes-core' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id ), 'map-pin' ),
+		array( __( 'Address', 'animal-writes-core' ), '' !== $addr ? esc_html( $addr ) : aw_listing_na( $id, 'address' ), 'map-pin' ),
 		array( __( 'District', 'animal-writes-core' ), $place, 'directory' ),
-		array( __( 'Opening hours', 'animal-writes-core' ), '' !== $hours ? $hours : aw_listing_na( $id ), 'clock' ),
+		array( __( 'Opening hours', 'animal-writes-core' ), '' !== $hours ? $hours : aw_listing_na( $id, 'hours' ), 'clock' ),
 	);
 	return aw_listing_group( 'location', __( 'Location', 'animal-writes-core' ), aw_listing_dl( $rows ) );
 }

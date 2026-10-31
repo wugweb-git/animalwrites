@@ -9,11 +9,11 @@ Every site form is built in **Fluent Forms** (free) and reaches **FluentCRM** (f
 | Form | ID | File | Reference | FluentCRM |
 |---|---|---|---|---|
 | Newsletter (footer, inline) | 3 | `forms/3-newsletter.json` | – | everyone → Newsletter, `newsletter`; then the thank-you page, which shows #9 for topics |
-| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` ticked → Newsletter, `contact-form`, `newsletter` (and the WhatsApp fields); every sender a contact with `contact-form`, the WhatsApp fields and the message as a note (code). Report a mistake and Remove my data are plain links above the form, not reasons. Entries also show in Mail → Website forms |
+| Contact | 4 | `forms/4-contact.json` | AW-… | `nl_optin` ticked → Newsletter, `contact-form`, `newsletter` (and the WhatsApp fields); every sender a contact with `contact-form`, the WhatsApp fields and the message as a note (code). Report a mistake (`correction`) and Remove my data (`remove`) are reasons again (owner, 31 Oct 2026); on a removal request the WhatsApp and newsletter boxes are hidden and the FluentCRM link does not run (`about != remove`). Entries also show in Mail → Website forms |
 | Volunteer sign-up | 5 | `forms/5-volunteer-sign-up.json` | AW-V-… | everyone → Newsletter, `volunteer`, volunteer fields; organisation ticked → `org-pending` |
 | Claim this listing | 6 | `forms/6-claim-this-listing.json` | AW-C-… | ticked → Newsletter, `newsletter`, `claimant`; every claimant a contact with `claimant` (code) |
-| Report a mistake | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none |
-| Remove my data | 8 | `forms/8-remove-my-data.json` | AW-D-… | none |
+| Report a mistake (inactive since 31 Oct 2026: now a Contact reason) | 7 | `forms/7-report-a-mistake.json` | AW-R-… | none |
+| Remove my data (inactive since 31 Oct 2026: now a Contact reason) | 8 | `forms/8-remove-my-data.json` | AW-D-… | none |
 | Newsletter (full) | 9 | `forms/9-newsletter-full.json` | – | everyone → Newsletter, `newsletter`; each topic ticked → `topic-…` |
 
 A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 0). Each contact also gets "Newsletter box (last form)" 1/0 with the form and its consent wording.
@@ -24,7 +24,9 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Volunteer update link:** put `{{aw.update_link}}` in a FluentCRM email. Each contact gets their own signed link, `/update/?t=…`, valid 30 days, with no name or email in it (GA4 and Clarity record addresses). It opens the Volunteer form filled in from their contact; sending it updates the contact (FluentCRM matches by email). An edited or expired link is refused.
 
-**Remove my data:** the form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
+**Report a mistake** (Contact, reason `correction`; owner, 31 Oct 2026): `/contact/?about=correction&item=<ID>` (`aw_report_url()`, form-blocks.php; `&field=picture|about|phone|email|address|hours` from a listing's empty field). Page shows the item's title, read-only (`{aw.item_title}`; the ID in the hidden `item`, `{aw.item_id}`; both from `?item=` or the older `?listing=`, reports.php); without an item it asks for the page link. What's wrong (`wrong`, as form #7, `{get.reason}`), Field (`field`, `{get.field}`, listings only: hidden `item_type`), Details. No Message field. Nothing changes on the item automatically.
+
+**Remove my data:** Contact, reason `remove` (owner, 31 Oct 2026): What should we remove? (`scope`, as form #8) and Reason (`remove_reason`). The form only collects the request. Tools → Erase Personal Data → add the email (WordPress sends its own confirmation) → once confirmed, Erase.
 
 **Exports:** the current volunteer and subscriber lists are exported from **FluentCRM** (Contacts → filter by tag `volunteer` or list Newsletter → Export). The old tables `{prefix}aw_volunteers` and `{prefix}aw_subscribers` hold only rows from before the forms stopped writing them; they are kept as backups with no admin screen (read them with WP-CLI).
 
@@ -49,8 +51,7 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 | Contact (#4) | `[aw_contact_form]` (`/contact/`); `?about=listing` and so on choose the reason | `pages.php`, `aw_contact_form()`; reasons and message examples `AW_CONTACT_ABOUT`, `AW_CONTACT_PLACEHOLDER` (the placeholder follows the reason, `aw.js`) |
 | Volunteer sign-up (#5) | block `animal-writes/volunteer` (the Volunteer banner pattern, `/volunteer/`); `[aw_volunteer_update]` on `/update/` | `volunteers.php`, `form-blocks.php` |
 | Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`; without a listing, the organisation finder) | `form-blocks.php`, `claims.php` |
-| Report a mistake (#7) | `[aw_report_page]` (`/report/?item=<ID>&reason=`) | `form-blocks.php`, `reports.php` |
-| Remove my data (#8) | `[aw_remove_data]` (`/remove-my-data/`) | `privacy-requests.php` |
+| Report a mistake, Remove my data | Contact (#4), `?about=correction`, `?about=remove`. `/report/` and `/remove-my-data/` are Rank Math 301s to them (the query string is kept, so `?item=` and `?listing=` still name the item); the pages are in the trash and forms #7 and #8 inactive (entries kept; export 31 Oct in `Claude outputs/`). | `pages.php`, `reports.php`, `form-blocks.php` |
 
 Where they appear: the volunteer banner is the theme pattern `themes/animal-writes/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `themes/animal-writes/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
 

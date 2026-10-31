@@ -62,12 +62,12 @@ const AW_CONTACT_ABOUT = array(
 	'opportunity' => 'Post an opportunity',
 	'partnership' => 'Partner with us',
 	'correction'  => 'Report a mistake',
-	'remove-data' => 'Remove my data',
+	'remove'      => 'Remove my data',
+	'remove-data' => 'Remove my data', // messages from before 21 Oct 2026
 );
-/** Message placeholder by reason (Phase 11 H4). */
+/** Message placeholder by reason (Phase 11 H4). Report a mistake and Remove my data have their own fields, no Message. */
 const AW_CONTACT_PLACEHOLDER = array(
-	'listing'    => 'Organisation name, district, services, phone or email',
-	'correction' => 'Page link and what\'s wrong',
+	'listing' => 'Organisation name, district, services, phone or email',
 );
 
 add_action(
@@ -404,15 +404,14 @@ function aw_elsewhere_screen() {
 	echo '</form></div>';
 }
 
-// Report a mistake and Remove my data have their own forms and are no longer Contact reasons (owner, 21 Oct 2026): the
-// Contact form shows plain links to them, and older links to those reasons open the forms.
+// Report a mistake and Remove my data are Contact reasons again (owner, 31 Oct 2026: one Contact form; the Report and
+// Remove pages are Rank Math redirects here). Older links to the removal reason, ?about=remove-data, open ?about=remove.
 add_action(
 	'template_redirect',
 	function () {
 		$about = sanitize_key( wp_unslash( $_GET['about'] ?? ( $_GET['type'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$to    = array( 'correction' => '/report/', 'remove-data' => '/remove-my-data/' )[ $about ] ?? '';
-		if ( '' !== $to && is_page( 'contact' ) ) {
-			wp_safe_redirect( home_url( $to ), 301, 'Animal Writes' );
+		if ( 'remove-data' === $about && is_page( 'contact' ) ) {
+			wp_safe_redirect( add_query_arg( 'about', 'remove', home_url( '/contact/' ) ), 301, 'Animal Writes' );
 			exit;
 		}
 	}
@@ -449,10 +448,10 @@ add_filter(
 		}
 		$text = trim( html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES ) );
 		$key  = array_search( $text, AW_CONTACT_ABOUT, true );
-		if ( ! $key || ! in_array( $key, array( 'listing', 'opportunity', 'partnership', 'correction' ), true ) ) {
+		if ( ! $key || ! in_array( $key, array( 'listing', 'opportunity', 'partnership', 'correction', 'remove' ), true ) ) {
 			return $html;
 		}
-		$url = 'correction' === $key ? home_url( '/report/' ) : add_query_arg( 'about', $key, get_permalink() ) . '#write';
+		$url = add_query_arg( 'about', $key, get_permalink() ) . '#write';
 		return (string) preg_replace( '/(<h[1-6][^>]*>)(.*?)(<\/h[1-6]>)/s', '$1<a class="aw-contact-pick" href="' . esc_url( $url ) . '" data-about="' . esc_attr( $key ) . '">$2</a>$3', $html, 1 );
 	}
 );

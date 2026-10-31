@@ -167,8 +167,9 @@ function aw_block_org_details( $a, $id ) {
 		'aw_website' => array( 'link', 'Website', aw_org_two_values( $id, 'aw_website', 'website', $rel ) ),
 	);
 	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
-	$suggest = function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id, 'missing' ) ) . '" rel="nofollow">Suggest an update</a>' : '';
-	$missing = fn( $k ) => '<span class="aw-org-fact-na">' . esc_html( $na[ $k ] ) . '</span>' . $suggest;
+	$field   = array( 'aw_phone' => 'phone', 'aw_email' => 'email', 'aw_area' => 'address', 'aw_hours' => 'hours' ); // the Contact form's Field
+	$suggest = fn( $k ) => function_exists( 'aw_report_url' ) ? '<a class="aw-org-fact-note" href="' . esc_url( aw_report_url( $id, $field[ $k ] ?? '' ) ) . '" rel="nofollow">Suggest an update</a>' : '';
+	$missing = fn( $k ) => '<span class="aw-org-fact-na">' . esc_html( $na[ $k ] ) . '</span>' . $suggest( $k );
 	$facts   = '';
 	foreach ( $contact as $k => $c ) {
 		$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . aw_i( $c[0] ) . '</span>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';

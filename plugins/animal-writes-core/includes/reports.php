@@ -65,6 +65,34 @@ function aw_report_item( $id ) {
 	return $p && isset( AW_REPORT_TYPES[ $p->post_type ] ) && 'publish' === $p->post_status ? $p : null;
 }
 
+/**
+ * {aw.item_id}, {aw.item_title} and {aw.item_type}: default values for the Contact form's Report a mistake fields (owner,
+ * 31 Oct 2026), from the link's ?item= (or the older ?listing=). Fluent Forms has no smartcode for another page's title.
+ * Only a published listing, News, Library or Resource item; otherwise empty, and the form asks for the page link.
+ */
+add_filter(
+	'fluentform/editor_shortcode_callback_group_aw',
+	function ( $value, $form, $keys ) {
+		$what = (string) ( $keys[0] ?? '' );
+		if ( ! in_array( $what, array( 'item_id', 'item_title', 'item_type' ), true ) ) {
+			return $value;
+		}
+		$item = aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! $item ) {
+			return '';
+		}
+		return esc_html(
+			array(
+				'item_id'    => (string) $item->ID,
+				'item_title' => (string) $item->post_title,
+				'item_type'  => strtolower( AW_REPORT_TYPES[ $item->post_type ] ),
+			)[ $what ]
+		); // as Fluent Forms' own smartcodes are
+	},
+	10,
+	3
+);
+
 /** The report form (S7.3), the Fluent Forms form. $item: the item it is about, or null (then it asks for the page link). */
 function aw_report_form( $item, $reason = '' ) {
 	$reason = isset( aw_report_reasons()[ $reason ] ) ? $reason : '';

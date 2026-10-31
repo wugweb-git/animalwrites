@@ -79,22 +79,20 @@ function aw_claim_url( $id ) {
 	return add_query_arg( 'listing', (int) $id, home_url( '/claim/' ) );
 }
 
-/** /report/?item=<ID> for a listing, News, Library or Resource item (owner, 21 Oct 2026); $reason picks what is wrong
- *  (the "Data not yet available" links send "missing"). The Fluent Forms form reads both ({get.item}, {get.reason}). */
-function aw_report_url( $id, $reason = '' ) {
-	return add_query_arg( array_filter( array( 'item' => (int) $id, 'reason' => sanitize_key( (string) $reason ) ) ), home_url( '/report/' ) );
-}
+/** The listing fields a "Suggest an update" link can name (the Contact form's Field). */
+const AW_CORRECTION_FIELDS = array( 'picture', 'about', 'phone', 'email', 'address', 'hours' );
 
-// Older links: /report/?listing=<ID> opens /report/?item=<ID>.
-add_action(
-	'template_redirect',
-	function () {
-		if ( is_page( 'report' ) && ! empty( $_GET['listing'] ) && empty( $_GET['item'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( aw_report_url( absint( $_GET['listing'] ), sanitize_key( wp_unslash( $_GET['reason'] ?? '' ) ) ), 301, 'Animal Writes' ); // phpcs:ignore WordPress.Security.NonceVerification
-			exit;
-		}
-	}
-);
+/**
+ * Report a mistake is a Contact reason (owner, 31 Oct 2026): /contact/?about=correction&item=<ID> for a listing, News,
+ * Library or Resource item, and &field= for an empty listing field. The form fills the page from the link
+ * ({aw.item_title}, reports.php) and the field ({get.field}). Escape the result once, where it is printed.
+ */
+function aw_report_url( $id, $field = '' ) {
+	$field = in_array( $field, AW_CORRECTION_FIELDS, true ) ? $field : '';
+	return add_query_arg( array_filter( array( 'about' => 'correction', 'item' => (int) $id, 'field' => $field ) ), home_url( '/contact/' ) );
+}
+// /report/ and /remove-my-data/ are Rank Math redirects to the Contact reasons; Rank Math keeps the query string, so
+// /report/?item=<ID> and the older /report/?listing=<ID> still name the item (reports.php reads both).
 
 /** The published listing a form page is about (?listing=), or null. */
 function aw_form_page_listing() {
