@@ -558,7 +558,7 @@ body { background: var(--kit-color-canvas); }
    Rows are information only: hairline dividers, no cards. */
 .aw-contact { display: grid; gap: var(--kit-space-6); }
 .aw-contact > * { margin: 0 !important; min-width: 0; }
-.aw-contact-intro, .aw-contact-org, .aw-contact-report { max-width: 70ch; }
+.aw-contact-org, .aw-contact-report { max-width: 70ch; }
 .aw-contact-row { padding-block: var(--kit-space-4); border-top: var(--kit-border-width) solid var(--neutral-2); }
 .aw-contact-row:last-child { border-bottom: var(--kit-border-width) solid var(--neutral-2); }
 .aw-contact-row h3 { margin: 0 0 var(--kit-space-1); font-size: var(--fluid-h5); }
@@ -569,10 +569,9 @@ body { background: var(--kit-color-canvas); }
 .aw-elsewhere a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); }
 @media (min-width: 1200px) {
 	.aw-contact { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); column-gap: var(--kit-space-7); align-items: start; }
-	.aw-contact-intro { grid-column: 1; grid-row: 1; }
-	.aw-contact-org { grid-column: 1; grid-row: 2; }
-	.aw-contact-report { grid-column: 1; grid-row: 3; }
-	.aw-contact-form-col { grid-column: 2; grid-row: 1 / span 3; position: sticky; top: var(--kit-space-5); }
+	.aw-contact-org { grid-column: 1; grid-row: 1; }
+	.aw-contact-report { grid-column: 1; grid-row: 2; }
+	.aw-contact-form-col { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: var(--kit-space-5); }
 }
 
 /* Card title links are at least 24px tall to tap (WCAG 2.5.8), also when the title is one line (Phase 11 D). */
@@ -868,7 +867,7 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::after { border-color: var(--kit-color-ink); background: var(--kit-color-ink); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { content: ""; position: absolute; z-index: 1; top: calc(var(--kit-space-3) + 0.1875rem); right: calc(var(--kit-space-3) + 0.1875rem); width: 0.875rem; height: 0.875rem; background: var(--kit-color-bg); -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; } /* the tick on the dark box */
 @media (min-width: 768px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1200px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(5, minmax(0, 1fr)); } .kit-with-sidebar .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* beside a sidebar the main column is too narrow for five */
 .aw-form-ff .aw-ff-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); grid-column: 1 / -1; }
 .aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: 1 / -1; }
 @media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } .aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: auto; } }
