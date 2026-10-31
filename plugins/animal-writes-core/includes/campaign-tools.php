@@ -714,13 +714,14 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 }
 
 /*
- * Campaign pages' Media & PR lists ("What's happening") show people's own social media posts only (owner, 21 Oct 2026):
+ * The lab rules page's Media & PR list ("On social media") shows people's own social media posts only (owner, 21 Oct 2026):
  * Instagram, Facebook, X, YouTube and the like (aw_press_group social or videos), never news articles.
  */
 add_filter(
 	'query_loop_block_query_vars',
 	function ( $q ) {
-		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== ( $q['post_type'] ?? '' ) ) {
+		// The lab rules page only: the community dogs page keeps its own Media coverage list of articles (31 Oct 2026).
+		if ( ! is_singular( 'aw_campaign' ) || 'aw_press' !== ( $q['post_type'] ?? '' ) || 'lab-animals-rules-2026' !== get_post_field( 'post_name', get_queried_object_id() ) ) {
 			return $q;
 		}
 		$q['meta_query']   = isset( $q['meta_query'] ) && is_array( $q['meta_query'] ) ? $q['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery
