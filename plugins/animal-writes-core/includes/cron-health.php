@@ -135,7 +135,8 @@ add_action(
  * so Hostinger's server cron starts the workers through GitHub's API every 3 hours:
  *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp eval 'aw_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'
  * A run started this way begins at once. GitHub's schedule stays as the backup; the workflow's concurrency group keeps
- * runs from overlapping. The token is a fine-grained GitHub token for wugweb-git/animal-writes-workers only, with
+ * runs from overlapping. Since 31 Oct 2026 `wp aw workers-tick` (aw-sourcing workers-tick.php) starts every scheduled
+ * workflow this way, replacing the sourcing-only job above. The token is a fine-grained GitHub token for wugweb-git/animal-writes-workers only, with
  * Actions read and write, kept in wp-config.php as AW_GITHUB_DISPATCH_TOKEN (never in a repository).
  */
 
