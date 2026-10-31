@@ -333,7 +333,7 @@ function aw_si_crawl_receive( array $body ) {
 		'runner' => sanitize_key( (string) ( $body['runner'] ?? 'github' ) ),
 		'checks' => $checks,
 		'burst'  => $burst,
-		'cut'    => false,
+		'cut'    => ! empty( $body['cut'] ), // The workers job stopped at its deadline.
 	);
 	aw_si_crawl_store( 'outside', $run );
 	return array(
