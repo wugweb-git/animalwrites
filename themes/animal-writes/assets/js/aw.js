@@ -122,6 +122,17 @@
 		ph.addEventListener('input', function () { if (box.checked) sync(); });
 	});
 
+	/* Every Fluent Forms form: when the send itself fails (no connection, a server error: no field errors came back), a
+	   plain line under the button (owner, 31 Oct 2026; wording for the owner's yes). */
+	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
+		var res = d && d.response, f = d && d.form && d.form[0];
+		if (!f || (res && res.responseJSON && res.responseJSON.errors)) return;
+		var box = f.querySelector('.aw-ff-send-failed');
+		if (!box) { box = document.createElement('p'); box.className = 'aw-ff-send-failed kit-field-message kit-field-error'; box.setAttribute('role', 'alert'); (f.querySelector('.ff_submit_btn_wrapper') || f).appendChild(box); }
+		box.textContent = 'Your message didn\'t send. Check your connection and try again.';
+	});
+	if (window.jQuery) jQuery(document).on('fluentform_submission_success', function (e, d) { var b = d && d.form && d.form[0] && d.form[0].querySelector('.aw-ff-send-failed'); if (b) b.remove(); });
+
 	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
 	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
 		var err = d && d.response && d.response.responseJSON && d.response.responseJSON.errors, f = d && d.form && d.form[0];
