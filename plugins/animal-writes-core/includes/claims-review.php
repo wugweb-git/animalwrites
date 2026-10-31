@@ -373,9 +373,10 @@ function aw_claim_review_screen( $entry_id ) {
 	$file = fn( $f ) => add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $f ), admin_url( 'admin-post.php' ) );
 	foreach ( $changes as $key => $ch ) {
 		$hand   = 'l_hours' === $key; // entered by hand in the listing's Opening hours
+		$bad    = 'phones' === $key && array_filter( explode( "\n", (string) $ch[2] ), fn( $l ) => '' !== trim( $l ) && ! aw_claim_phone_ok( explode( '|', $l )[0] ) );
 		$rows[] = array(
-			'cb'    => $pending && ! $hand ? '<input type="checkbox" name="fields[]" value="' . esc_attr( $key ) . '" checked>' : '',
-			'field' => esc_html( $ch[0] ) . ( $hand ? '<br><span class="description">Enter by hand in the listing\'s Opening hours.</span>' : '' ),
+			'cb'    => $pending && ! $hand ? '<input type="checkbox" name="fields[]" value="' . esc_attr( $key ) . '"' . ( $bad ? '' : ' checked' ) . '>' : '',
+			'field' => esc_html( $ch[0] ) . ( $hand ? '<br><span class="description">Enter by hand in the listing\'s Opening hours.</span>' : '' ) . ( $bad ? '<br><span class="description">A line is not a phone number: approving keeps the list as it is.</span>' : '' ),
 			'now'   => nl2br( esc_html( '' !== $ch[1] ? $ch[1] : '—' ) ),
 			'new'   => nl2br( esc_html( '' !== $ch[2] ? $ch[2] : '(remove)' ) ),
 		);
@@ -408,6 +409,13 @@ function aw_claim_review_screen( $entry_id ) {
 		echo '<p>Approved fields: ' . esc_html( implode( ', ', (array) $c['review']['fields'] ) ) . '.</p>';
 	}
 	echo '</form>';
+}
+
+/** A plausible phone number: digits with spaces, +, -, brackets or /, and 6 to 15 digits. */
+function aw_claim_phone_ok( $v ) {
+	$v = trim( (string) $v );
+	$n = strlen( preg_replace( '/\D+/', '', $v ) );
+	return (bool) preg_match( '#^[0-9+()\-/ .]+$#', $v ) && $n >= 6 && $n <= 15;
 }
 
 /** A claimed value cleaned for its listing field ('' when it cannot be used). */
@@ -519,10 +527,17 @@ function aw_claim_apply_field( $c, $key ) {
 	$new = (string) $c['propose'][ $key ];
 	switch ( $def[1] ) {
 		case 'phones':
-			$rows = array();
-			foreach ( array_filter( explode( "\n", $new ) ) as $line ) {
-				$p      = array_map( 'trim', explode( '|', $line ) );
+			$rows  = array();
+			$lines = array_filter( explode( "\n", $new ) );
+			foreach ( $lines as $line ) {
+				$p = array_map( 'trim', explode( '|', $line ) );
+				if ( ! aw_claim_phone_ok( $p[0] ) ) {
+					continue; // not a phone number: never stored
+				}
 				$rows[] = array( 'number' => sanitize_text_field( $p[0] ), 'label' => sanitize_text_field( 'WhatsApp' !== ( $p[1] ?? '' ) ? ( $p[1] ?? '' ) : '' ), 'whatsapp' => in_array( 'WhatsApp', $p, true ) );
+			}
+			if ( $lines && count( $rows ) !== count( $lines ) ) {
+				return false; // a line is not a phone number: the list stays as it is, the field is reported as not applied
 			}
 			$log( 'phone', wp_list_pluck( $rows, 'number' ) );
 			aw_set_listing_list( $lid, 'aw_phones', $rows );
