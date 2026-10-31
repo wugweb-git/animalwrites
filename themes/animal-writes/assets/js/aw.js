@@ -72,6 +72,40 @@
 		});
 	});
 
+	/* Claim form, last step: "Summary of changes" lists only the listing fields the claimant changed (owner, 31 Oct
+	   2026), from each field's pre-filled value; read-only. */
+	document.addEventListener('kit:step', function (e) {
+		var form = e.target.closest && e.target.closest('form'), sum = form && form.querySelector('[data-aw-claim-summary]');
+		if (!sum || sum.closest('.kit-step[hidden]')) return;
+		var dl = sum.querySelector('dl'), seen = {};
+		dl.textContent = '';
+		form.querySelectorAll('[name^="l_"], input[type=hidden][name$="_token"], input[type=hidden][name="photo_tokens"]').forEach(function (el) {
+			var name = el.name.replace(/\[\]$/, ''), group = el.closest('.ff-el-group'), changed, value;
+			if (seen[name] || !group) return;
+			seen[name] = true;
+			var label = group.querySelector('label, .ff-el-input--label') ? (group.querySelector('.ff-el-input--label label') || group.querySelector('label')).textContent.replace(/\(optional\)/, '').trim() : name;
+			if (el.type === 'checkbox') {
+				var boxes = form.querySelectorAll('[name="' + el.name + '"]');
+				changed = Array.prototype.some.call(boxes, function (b) { return b.checked !== b.defaultChecked; });
+				value = Array.prototype.filter.call(boxes, function (b) { return b.checked; }).map(function (b) { return b.closest('label') ? b.closest('label').textContent.trim() : b.value; }).join(', ') || '(none)';
+			} else if (el.type === 'hidden') {
+				changed = el.value !== '';
+				value = el.name === 'photo_tokens' ? el.value.split(',').length + ' new' : 'new file';
+				var lab = el.closest('.ff-el-input--content') && el.closest('.ff-el-group').querySelector('label');
+				label = lab ? lab.textContent.trim() : label;
+			} else {
+				changed = el.value.trim() !== el.defaultValue.trim();
+				value = el.value.trim() || '(removed)';
+			}
+			if (!changed) return;
+			var dt = document.createElement('dt'), dd = document.createElement('dd');
+			dt.textContent = label; dd.textContent = value;
+			dl.appendChild(dt); dl.appendChild(dd);
+		});
+		if (!dl.children.length) { var none = document.createElement('dd'); none.textContent = 'No changes to the listing\'s details.'; dl.appendChild(none); }
+		sum.hidden = false;
+	});
+
 	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
 	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
 		var err = d && d.response && d.response.responseJSON && d.response.responseJSON.errors, f = d && d.form && d.form[0];

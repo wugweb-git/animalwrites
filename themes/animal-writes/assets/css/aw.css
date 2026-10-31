@@ -1025,6 +1025,19 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-services .kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: var(--kit-press-offset-sm) var(--kit-press-offset-sm) 0 var(--kit-color-accent); }
 .aw-claim-services .kit-checkbox:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 @media (min-width: 768px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
+/* Claim form #6 (31 Oct 2026): the listing's logo in the head band, step intros, folded groups, the summary of changes. */
+.kit-section-band .aw-claim-logo { display: inline-block; width: 1.4em; height: 1.4em; margin-right: var(--kit-space-3); object-fit: contain; vertical-align: -0.2em; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
+.aw-claim-meta { margin-top: var(--kit-space-3); }
+.aw-claim-form .kit-step-intro { margin: 0 0 var(--kit-space-4); color: var(--kit-color-muted); }
+.aw-claim-form .kit-fold-group { margin-bottom: var(--kit-space-2); }
+.aw-claim-form .kit-fold-group[open] { padding-bottom: var(--kit-space-4); }
+.aw-claim-form .ff-el-section-break { margin: var(--kit-space-6) 0 var(--kit-space-3); }
+.aw-claim-summary { margin-bottom: var(--kit-space-5); padding: var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); }
+.aw-claim-summary-title { margin: 0 0 var(--kit-space-3); font-weight: var(--kit-weight-strong); }
+.aw-claim-summary dl { display: grid; grid-template-columns: minmax(8em, max-content) 1fr; gap: var(--kit-space-2) var(--kit-space-4); margin: 0; }
+.aw-claim-summary dt { font-weight: var(--kit-weight-strong); }
+.aw-claim-summary dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .aw-claim-summary dl { grid-template-columns: 1fr; } .aw-claim-summary dd { margin-bottom: var(--kit-space-2); } }
 @media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }
 
 /* Directory search, wide screens (fix 12 Oct 2026): the name field, the three selects and Search sit on one line,
