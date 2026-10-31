@@ -98,11 +98,24 @@ function aw_ff_phone_store( $v ) {
 	return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
 }
 
-/** A social link or "@name" as the username alone ('' when it is not one of that platform's). */
+/** Each social field's own hosts and the path before the username in its links. */
+const AW_FF_SOCIAL_HOSTS = array(
+	'l_instagram' => array( 'instagram\.com', '' ),
+	'l_facebook'  => array( '(?:facebook|fb)\.com', '' ),
+	'l_x'         => array( '(?:x|twitter)\.com', '' ),
+	'l_youtube'   => array( 'youtube\.com', '@' ),
+	'l_linkedin'  => array( 'linkedin\.com', 'company/' ), // a person's /in/ profile is not reduced: kept as a link
+);
+
+/** A social link or "@name" as the username alone ('' when it is not a username or a link of that field's platform). */
 function aw_ff_social_user( $field, $v ) {
 	$v = trim( (string) $v );
-	if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?(instagram\.com|facebook\.com|fb\.com|x\.com|twitter\.com|youtube\.com|linkedin\.com)/(?:company/|in/|@)?([A-Za-z0-9._-]{1,100})/?(?:[?#].*)?$#i', $v, $m ) ) {
-		$v = $m[2];
+	if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) { // a link: only this platform's, in its username form
+		$h = AW_FF_SOCIAL_HOSTS[ $field ] ?? null;
+		if ( ! $h || ! preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . $h[0] . '/' . preg_quote( $h[1], '#' ) . '([A-Za-z0-9._-]{1,100})/?(?:[?\#].*)?$#i', $v, $m ) ) {
+			return '';
+		}
+		$v = $m[1];
 	}
 	$v = ltrim( $v, '@' );
 	return preg_match( '/^[A-Za-z0-9._-]{1,100}$/', $v ) ? $v : '';
@@ -114,8 +127,14 @@ function aw_ff_date_ymd( $v ) {
 	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $v ) ) {
 		return $v;
 	}
-	$d = date_create_immutable_from_format( '!j M Y', $v ) ?: date_create_immutable_from_format( '!j F Y', $v );
-	return $d ? $d->format( 'Y-m-d' ) : '';
+	foreach ( array( '!j M Y', '!j F Y' ) as $fmt ) {
+		$d = date_create_immutable_from_format( $fmt, $v );
+		$e = date_get_last_errors();
+		if ( $d && ( ! $e || ( ! $e['warning_count'] && ! $e['error_count'] ) ) ) { // "31 Feb 2026" is a warning (it would roll over): refused
+			return $d->format( 'Y-m-d' );
+		}
+	}
+	return '';
 }
 
 /** The form's values as saved (phones +91, claim usernames, claim dates Y-m-d). */
@@ -364,7 +383,12 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					$data['attributes']['data-msg-email'] = (string) $rules['email']['message'];
 				}
 			}
-			return function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
+			$data = function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
+			$name = (string) ( $data['attributes']['name'] ?? '' );
+			if ( in_array( $name, AW_FF_PHONES, true ) && is_string( $data['attributes']['value'] ?? null ) && '' !== aw_ff_phone10( $data['attributes']['value'] ) ) {
+				$data['attributes']['value'] = aw_ff_phone10( $data['attributes']['value'] ); // the 10 digits after the "+91" in front of the box
+			}
+			return $data;
 		},
 		10,
 		2
@@ -451,7 +475,8 @@ function aw_ff_errors( $key, $data ) {
 	if ( 'claim' === $key ) {
 		foreach ( array_keys( AW_FF_SOCIAL ) as $k ) {
 			$v = trim( (string) ( $data[ $k ] ?? '' ) );
-			if ( '' !== $v && '' === aw_ff_social_user( $k, $v ) && ! preg_match( '#^https?://#i', $v ) ) {
+			$own = (bool) preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . AW_FF_SOCIAL_HOSTS[ $k ][0] . '/#i', $v ); // a link of this platform the box cannot reduce (a channel, an /in/ profile) is kept
+			if ( '' !== $v && '' === aw_ff_social_user( $k, $v ) && ! $own ) {
 				$errors[ $k ] = 'Enter the username only, like animalwrites.';
 			}
 		}

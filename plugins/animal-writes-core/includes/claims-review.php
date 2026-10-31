@@ -444,8 +444,8 @@ function aw_claim_clean( $meta_key, $v ) {
 		case 'aw_x':
 		case 'aw_youtube':
 		case 'aw_linkedin':
-			if ( preg_match( '#^https?://#i', $v ) ) {
-				return (string) esc_url_raw( $v ); // a link the username box cannot hold (a YouTube channel and the like)
+			if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) {
+				return (string) esc_url_raw( preg_match( '#^https?://#i', $v ) ? $v : 'https://' . $v ); // a link the username box cannot hold (a YouTube channel, a LinkedIn /in/ profile)
 			}
 			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], AW_FF_SOCIAL ), true );
 			$user  = '' !== $field ? aw_ff_social_user( $field, $v ) : '';
