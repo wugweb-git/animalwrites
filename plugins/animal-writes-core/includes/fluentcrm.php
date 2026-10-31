@@ -113,12 +113,30 @@ function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array()
 	return $c ? (int) $c->id : 0;
 }
 
-/* ---------- Unticked: on the list, not emailed (owner, 31 Oct 2026) ---------- */
+/* ---------- Unticked: on the list, unsubscribed (owner, 31 Oct 2026) ---------- */
+
+/**
+ * "Email me updates" decides the status, for new and existing contacts alike (owner, 31 Oct 2026): ticked = subscribed,
+ * unticked = unsubscribed. The contact stays on the Newsletter list either way and the box is recorded as 1/0
+ * (aw_crm_nl_box()). A bounced or complained address is left as it is. FluentCRM's own status change runs its hooks.
+ *
+ * @param object $c      FluentCRM contact.
+ * @param bool   $ticked The box.
+ */
+function aw_crm_nl_status( $c, $ticked ) {
+	if ( ! $c || in_array( (string) $c->status, array( 'bounced', 'complained' ), true ) ) {
+		return;
+	}
+	$want = $ticked ? 'subscribed' : 'unsubscribed';
+	if ( $want !== (string) $c->status && method_exists( $c, 'updateStatus' ) ) {
+		$c->updateStatus( $want );
+	}
+}
 
 /**
  * A sender who left "Email me updates" unticked: on the Newsletter list all the same, with everything the form's
- * FluentCRM link would have saved, but as a transactional contact (never sent a newsletter; a contact who is already
- * subscribed keeps that status). The link itself runs only when the box is ticked.
+ * FluentCRM link would have saved (the link itself runs only when the box is ticked); the status is set by
+ * aw_crm_nl_status().
  *
  * @param object $c    FluentCRM contact (aw_crm_contact_for()).
  * @param int    $form Fluent Forms form ID.

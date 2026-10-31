@@ -877,11 +877,18 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked) { border-width: 2px; }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::after { border-color: var(--kit-color-ink); background: var(--kit-color-ink); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { content: ""; position: absolute; z-index: 1; top: calc(var(--kit-space-3) + 0.1875rem); right: calc(var(--kit-space-3) + 0.1875rem); width: 0.875rem; height: 0.875rem; background: var(--kit-color-bg); -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; } /* the tick on the dark box */
-@media (max-width: 767px) { .aw-form-ff .aw-vol-role.kit-checkbox { min-height: 6rem; padding: var(--kit-space-3); } } /* phones: the tiles take their words' height, with less padding (two columns, three rows) */
+@media (max-width: 767px) { /* phones: one compact row per way to help, icon left of the words, the tick box on the right */
+	.aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-2); }
+	.aw-form-ff .aw-vol-role.kit-checkbox { flex-direction: row; align-items: center; gap: var(--kit-space-3); min-height: 3.5rem; padding: var(--kit-space-2) calc(var(--kit-space-3) * 2 + 1.25rem) var(--kit-space-2) var(--kit-space-3); }
+	.aw-form-ff .aw-vol-role .aw-ff-opt-ico { width: 1.5rem; height: 1.5rem; }
+	.aw-form-ff .aw-vol-role.kit-checkbox::after { top: 50%; transform: translateY(-50%); }
+	.aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { top: 50%; transform: translateY(-50%); }
+}
 @media (min-width: 768px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(5, minmax(0, 1fr)); } .kit-with-sidebar .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* beside a sidebar the main column is too narrow for five */
-.aw-form-ff .aw-ff-places { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--s-4); grid-column: 1 / -1; } /* PIN, State, District one under the other on phones */
-@media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-form-ff .aw-ff-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); grid-column: 1 / -1; } /* phones: PIN and State side by side, District on its own row (its "Choose a state first" needs the width) */
+.aw-form-ff .aw-ff-places > .ff-el-group:nth-child(3) { grid-column: 1 / -1; }
+@media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } .aw-form-ff .aw-ff-places > .ff-el-group:nth-child(3) { grid-column: auto; } }
 @media (min-width: 768px) { .aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-right { grid-column: 2; margin-top: calc(-1 * var(--s-2)); } }
 .aw-form-ff .kit-chips .ff-el-input--content { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .aw-form-ff .kit-chips .ff-el-form-check { margin: 0; }
