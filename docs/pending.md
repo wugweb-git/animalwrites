@@ -10,6 +10,14 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 7. **Vercel key:** only if that AI provider is wanted.
 - **Plugin auto-updates in hPanel (31 Oct):** Hostinger's "Smart Auto Updates" (mu-plugin) overrides WordPress's own auto-update switch, so turn on plugin auto-updates in hPanel → Websites → animalwrites.in → WordPress → Updates. WordPress's flag is already on for all 30 third-party plugins. Updates waiting: FluentCRM 3.2.6, WP Dark Mode.
 
+- **Hostinger connector (31 Oct):** authorise it once (/mcp) so a session can read hPanel bot protection / firewall settings for "Crawler block (26 Oct)".
+- **Bing Webmaster API key (31 Oct):** none on the site (only IndexNow keys and the verification code, which are different). Bing Webmaster → Settings → API access → add as `AW_BING_WEBMASTER_KEY` in wp-config.php; then run `wp aw-si fetch bing --dry` once (daily or weekly dates?).
+
+### Search Insights: data completeness (owner, 31 Oct)
+- **Crawler block (26 Oct):** step 0 tested, nothing changed. Every agent (browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot) got 200 on 20 pages, single and in bursts, from the owner's Mac and from the server. robots.txt allows all; no user-agent rules in our code or LiteSpeed. Likely cause: Hostinger CDN (hcdn) bot protection against some data-centre addresses. To finish: read hPanel (needs the connector) and the first outside run; then a fix proposal, owner approves, its own PR.
+- **PRs, merge in this order:** wugweb-git/animal-writes-workers#27 (outside crawler check) → animalwrites#90 (all referrals + crawler check; its Deploy check is red until #27 is merged) → animalwrites#91 (Links view, Bing monthly, 51 seeded links; rebase after #90). After shipping: set the workers variable `CRAWL_LIVE=true`, backfill 90 days of GA4 referrals (`wp aw-si fetch ga4 --day=…`, read only), visit wp-admin once (schema v2).
+- **Links reminder:** Dates has "Search Console Links read (Claude Code session)" on the 1st of each month, Nov 2026–Oct 2027; add more after that.
+
 ### For the AW Sourcing session
 - **Enrichment 504s (31 Oct health check):** the Directory enrichment worker got HTTP 504 on `/wp-json/aw/v1/enrich/results` on 27 and 28 Oct (a big batch timing out; fine on other days). Fix: smaller batches or one retry on 504. Its session is archived, so the note is kept here.
 
