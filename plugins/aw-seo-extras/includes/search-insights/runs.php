@@ -35,6 +35,31 @@ function aw_si_sources(): array {
 	return (array) apply_filters( 'aw_si_sources', $s );
 }
 
+/**
+ * A service key: Animal Writes → Keys (a wp-config.php constant of the same name wins), or just the constant without
+ * Animal Writes Core.
+ *
+ * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ */
+function aw_si_key( string $name ): string {
+	if ( function_exists( 'aw_key' ) ) {
+		return aw_key( $name );
+	}
+	return defined( $name ) ? (string) constant( $name ) : '';
+}
+
+// Search Insights' keys on Animal Writes → Keys.
+add_filter(
+	'aw_keys',
+	function ( $keys ) {
+		$by                             = __( 'Search Insights', 'aw-seo-extras' );
+		$keys['AW_CLARITY_TOKEN']       = array( __( 'Clarity Data Export token', 'aw-seo-extras' ), __( 'Clarity → Settings → Data Export → Generate new API token.', 'aw-seo-extras' ), $by );
+		$keys['AW_BING_WEBMASTER_KEY']  = array( __( 'Bing Webmaster API key', 'aw-seo-extras' ), __( 'Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key.', 'aw-seo-extras' ), $by );
+		$keys['AW_PSI_KEY']             = array( __( 'PageSpeed Insights API key (Google, optional)', 'aw-seo-extras' ), __( 'Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit\'s PageSpeed can\'t be used.', 'aw-seo-extras' ), $by );
+		return $keys;
+	}
+);
+
 /** The run log: source => ok, error, info. */
 function aw_si_runs(): array {
 	$r = get_option( AW_SI_RUNS, array() );

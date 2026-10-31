@@ -3,7 +3,8 @@
  * The plugin's own menu and Overview (owner, 25 Oct 2026: our plugins work like any marketplace plugin: one menu, an
  * overview of every feature and where it lives, links from the Plugins screen).
  *
- * Animal Writes → Overview (this file), Dates (team-dates.php), Check site (site-check.php), Contact links (pages.php).
+ * Animal Writes → Overview (this file), Dates (team-dates.php), Check site (site-check.php), Contact links (pages.php),
+ * Keys (keys.php).
  * Content menus (Directory, News, Resources, Library, Opportunities, Campaigns, Press coverage), Classification and
  * Inbox stay where the content is. Core WordPress only.
  *
@@ -113,6 +114,7 @@ function aw_core_overview_page() {
 			array( 'Dates', 'The team\'s calendar (observance days, deadlines) and the Dates dashboard widget.', aw_core_link( 'Animal Writes → Dates', 'admin.php?page=aw-dates' ), $st['dates'] ),
 			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Animal Writes → Check site', 'admin.php?page=aw-site-check' ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Animal Writes → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
+			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Animal Writes → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
 			array( 'To review', 'Items waiting for a person (from AW Sourcing).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
