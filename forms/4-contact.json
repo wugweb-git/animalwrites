@@ -315,7 +315,7 @@
                         "type": "checkbox"
                     },
                     "settings": {
-                        "container_class": "kit-field kit-check-group",
+                        "container_class": "kit-field kit-check-group kit-chips",
                         "label": "Services",
                         "label_placement": "",
                         "admin_field_label": "Services",
@@ -947,7 +947,17 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": [],
+                        "conditional_logics": {
+                            "type": "all",
+                            "status": true,
+                            "conditions": [
+                                {
+                                    "field": "whatsapp",
+                                    "operator": "!=",
+                                    "value": ""
+                                }
+                            ]
+                        },
                         "display_type": "",
                         "enable_other_option": "no",
                         "layout_class": ""

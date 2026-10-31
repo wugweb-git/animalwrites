@@ -447,10 +447,11 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-field-control > .kit-field-icon { --kit-ico-size: 18px; width: 18px; height: 18px; color: var(--neutral-5); }
 @media (hover: hover) { .kit-field :is(input, select, textarea):hover:not([disabled]):not([readonly]) { border-color: var(--neutral-5); box-shadow: none; } }
 .kit-field :is(input, select, textarea):focus, .kit-field :is(input, select, textarea):focus-visible { outline: none; border-color: var(--color-blue); box-shadow: 0 0 0 2px var(--color-blue); } /* the ring is never removed */
-.kit-field :is(input, select, textarea)[aria-invalid=true] { border-color: var(--color-peach); padding-right: calc(var(--s-3) + 18px + var(--s-2));
+.kit-field :is(input, select, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); padding-right: calc(var(--s-3) + 18px + var(--s-2));
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
 	background-repeat: no-repeat; background-position: right var(--s-3) center; background-size: 18px; }
 .kit-field select[aria-invalid=true] { background-position: right calc(var(--s-3) + 1.25rem) center, right var(--s-3) center; }
+.kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); } /* outranks the field's own border above (same :is list), so the error border shows */
 .kit-field :is(input, select, textarea).is-valid { border-color: var(--color-green); }
 .kit-field :is(input, select, textarea)[disabled] { opacity: var(--opacity-disabled); }
 .kit-field-hint { font-size: var(--kit-field-hint-size); color: var(--kit-field-hint); }

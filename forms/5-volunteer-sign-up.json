@@ -432,7 +432,7 @@
                         "type": "radio"
                     },
                     "settings": {
-                        "container_class": "kit-field kit-chips kit-chips--segment",
+                        "container_class": "kit-field kit-chips",
                         "label": "How far will you travel?",
                         "label_placement": "",
                         "admin_field_label": "How far will you travel?",

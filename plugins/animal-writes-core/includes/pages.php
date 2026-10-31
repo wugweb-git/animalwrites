@@ -350,6 +350,21 @@ add_action(
 
 /* ---------- Contact: "Elsewhere" links (Phase 11 H5) ---------- */
 
+/**
+ * The icon for a social platform, from a link or a bare host ("instagram.com"): instagram, facebook, x-brand, linkedin
+ * or youtube; '' for any other site. Used by the "Elsewhere" links and the form boxes for social links.
+ */
+function aw_social_icon( $host_or_url ) {
+	$v    = (string) $host_or_url;
+	$host = (string) wp_parse_url( false === strpos( $v, '//' ) ? 'https://' . $v : $v, PHP_URL_HOST );
+	foreach ( array( 'instagram' => 'instagram\.com', 'facebook' => 'facebook\.com', 'x-brand' => '(?:x|twitter)\.com', 'linkedin' => 'linkedin\.com', 'youtube' => '(?:youtube\.com|youtu\.be)' ) as $icon => $re ) {
+		if ( preg_match( '/(^|\.)' . $re . '$/i', $host ) ) {
+			return $icon;
+		}
+	}
+	return '';
+}
+
 /** Links the owner adds in Animal Writes → Contact links: list of [label, url]. Hidden while empty. */
 function aw_elsewhere_links() {
 	return array_values( array_filter( (array) get_option( 'aw_elsewhere', array() ), fn( $r ) => ! empty( $r['label'] ) && ! empty( $r['url'] ) ) );
@@ -363,8 +378,7 @@ add_shortcode(
 		}
 		$html = '<section class="aw-elsewhere"><h2>Elsewhere</h2><ul>';
 		foreach ( $links as $l ) {
-			$host  = (string) wp_parse_url( $l['url'], PHP_URL_HOST );
-			$icon  = preg_match( '/instagram\.com$/', $host ) ? 'instagram' : ( preg_match( '/facebook\.com$/', $host ) ? 'facebook' : ( preg_match( '/(^|\.)(x|twitter)\.com$/', $host ) ? 'x-brand' : ( preg_match( '/(^|\.)linkedin\.com$/', $host ) ? 'linkedin' : '' ) ) );
+			$icon  = aw_social_icon( $l['url'] );
 			$html .= '<li><a href="' . esc_url( $l['url'] ) . '" target="_blank" rel="noopener noreferrer">' . ( $icon ? aw_i( $icon ) : '' ) . esc_html( $l['label'] ) . ' ' . aw_i( 'arrow-up-right' ) . '<span class="screen-reader-text"> (opens in a new tab)</span></a></li>';
 		}
 		return $html . '</ul></section>';

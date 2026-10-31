@@ -564,7 +564,6 @@ body { background: var(--kit-color-canvas); }
 .aw-contact-row h3 { margin: 0 0 var(--kit-space-1); font-size: var(--fluid-h5); }
 .aw-contact-pick { color: var(--kit-color-link); text-decoration: underline; text-underline-offset: 0.18em; } /* opens the form with this reason */
 .aw-contact-row p { margin: 0; }
-.aw-contact-form-col .kit-form { max-width: none; }
 .aw-elsewhere ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2) var(--kit-space-5); }
 .aw-elsewhere a { display: inline-flex; align-items: center; gap: var(--kit-space-1); min-height: var(--kit-size-target); }
 @media (min-width: 1200px) {
@@ -820,29 +819,31 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .ff-el-input--label { margin: 0 0 var(--s-2); }
 .aw-form-ff .ff-el-input--label label { display: block; margin: 0; font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
 .aw-form-ff .ff-el-input--label.ff-el-is-required label::after, .aw-form-ff .ff-el-input--label label::after { content: none; }
-.aw-form-ff .ff-el-help-message { display: block; margin: 0 0 var(--s-2); font-size: var(--kit-field-hint-size); font-style: normal; color: var(--kit-field-hint); }
+.aw-form-ff .ff-el-help-message, .aw-form-ff .ff-el-help-message.ff_ahm { display: block; margin: calc(-1 * var(--s-1)) 0 var(--s-2); font-size: var(--kit-field-hint-size); font-style: normal; color: var(--kit-field-hint); }
 .aw-form-ff, .aw-newsletter-form { --fluentform-border-color: var(--kit-field-border); } /* Fluent Forms' own field border uses the Kits token (it outranks .kit-field) */
-.aw-form-ff .ff-el-is-error .ff-el-form-control, .aw-form-ff .ff-el-form-control[aria-invalid=true] { border-color: var(--color-peach); }
-.aw-form-ff .ff-el-input--content .error, .aw-form-ff .kit-field-message:not(:empty) { display: block; min-height: 0; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); }
+.aw-form-ff .ff-el-is-error :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea), .aw-form-ff .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea)[aria-invalid=true] { border-color: var(--kit-color-danger); } /* one red for borders and messages; outranks the field's own border */
+.aw-form-ff .ff-el-input--content .error, .aw-form-ff .kit-field-message:not(:empty) { display: block; min-height: 0; margin-top: var(--s-1); font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-strong); color: var(--kit-color-danger); }
 .aw-form-ff .ff-el-form-check { margin: 0; }
 .aw-form-ff .ff-el-form-check-label.kit-checkbox { display: flex; margin: 0; }
 .aw-form-ff .ff-el-form-check-label.kit-checkbox > span { flex: 1; }
-.aw-form-ff .aw-claim-services { margin: 0 0 var(--s-4); }
+.aw-form-ff .aw-vol-role.kit-checkbox > span { flex: none; } /* a tile is a column: icon and words keep their own height, so every icon sits at the same place */
+.aw-form-ff .ff-el-form-control::placeholder { color: var(--kit-color-muted); opacity: 1; } /* AA on the box */
+.aw-form-ff .ff-el-group.kit-field .ff-el-input--content textarea.ff-el-form-control { min-height: calc(5 * 1.5em + 2 * var(--s-3)); } /* every text area five lines tall at least; outranks the field's one-line height */
+.aw-form-ff .kit-field-control > :is(.kit-field-icon, .aw-ff-prefix) { top: calc(var(--kit-field-height) / 2); } /* centred on the box, also when an error line shows under it */
 .aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
 .aw-form-ff .ff_submit_btn_wrapper { margin: 0; }
-/* A fixed part before the box (owner, 31 Oct 2026): "+91" before phone numbers, the platform's link before a username. */
-.aw-form-ff .ff_input-group { display: flex; flex-wrap: nowrap; align-items: stretch; } /* Fluent Forms wraps it; the prefix stays inside the box */
-.aw-form-ff .ff_input-group-prepend { display: flex; }
-.aw-form-ff .ff_input-group-text { display: flex; align-items: center; padding: 0 var(--s-3); white-space: nowrap; font-size: var(--fluid-body-sm); color: var(--neutral-7); background: var(--kit-color-surface); border: var(--kit-border-control) solid var(--kit-field-border); border-right: 0; border-radius: var(--kit-radius-control) 0 0 var(--kit-radius-control); }
-.aw-form-ff .ff_input-group > input { flex: 1; width: auto; min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.aw-form-ff .kit-field-control.aw-ff-prefixed > .aw-ff-prefix { position: absolute; left: calc(var(--s-3) + 1.25rem + var(--s-2)); top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--kit-field-hint); pointer-events: none; } /* "+91" or a link's start after the icon, inside the box; the same size as the box's text */
+/* A fixed part before the box (owner, 31 Oct 2026): "+91" before phone numbers, the platform's link before a username.
+   The PHP replaces Fluent Forms' prefix tab with this span inside the box, after the field's icon. */
+.aw-form-ff .kit-field-control.aw-ff-prefixed > .aw-ff-prefix { position: absolute; left: calc(var(--s-3) + 1.25rem + var(--s-2)); top: 50%; transform: translateY(-50%); font-size: var(--kit-field-text-size); color: var(--kit-field-hint); pointer-events: none; } /* "+91" or a link's start after the icon, inside the box; the same size as the box's text */
 .aw-form-ff .kit-field .kit-field-control.aw-ff-prefixed:has(> .kit-field-icon) > input.ff-el-form-control { padding-left: calc(var(--s-3) + 1.25rem + var(--s-2) + var(--aw-ff-prefix, 4ch)); }
 .aw-form-ff .kit-field-message:empty { min-height: 0; margin: 0; } /* stays in place for live announcements, but no reserved line under a box until there is an error, so a field icon centres on the box */
 .aw-form-ff .kit-step-nav { align-items: center; }
 .aw-form-ff .kit-step-nav .ff-el-group { margin: 0; }
 .aw-form-ff .ff-errors-in-stack { margin-top: var(--s-3); color: var(--kit-color-danger); }
 .aw-form-ff .ff-errors-in-stack .error { margin: 0 0 var(--s-1); }
-.aw-form-ff input[type=file] { display: block; max-width: 100%; font: inherit; }
+.aw-form-ff input[type=file] { display: block; box-sizing: border-box; width: 100%; max-width: 100%; min-height: var(--kit-field-height); padding: var(--s-2) var(--s-3); border: var(--kit-border-control) dashed var(--kit-field-border); border-radius: var(--kit-radius-control); background: var(--neutral-0); font: inherit; font-size: var(--fluid-body-sm); color: var(--neutral-9); cursor: pointer; } /* an upload is a box like the others, dashed */
+.aw-form-ff input[type=file]::file-selector-button { min-height: 2rem; margin: 0 var(--s-3) 0 0; padding: 0 var(--s-4); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--kit-radius-pill); background: var(--kit-btn-secondary-bg); font: inherit; font-weight: var(--kit-weight-strong); color: var(--kit-btn-secondary-fg); cursor: pointer; } /* the Kits secondary pill */
+.aw-form-ff input[type=file]:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-form-ff input[type=file][aria-busy=true] { opacity: var(--opacity-disabled); }
 /* Volunteer: the ways to help as cards (as .aw-vol-roles), then the details in two columns from md */
 .aw-form-ff .aw-vol-roles .ff-el-input--label label { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: inherit; }
@@ -876,29 +877,23 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked) { border-width: 2px; }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::after { border-color: var(--kit-color-ink); background: var(--kit-color-ink); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { content: ""; position: absolute; z-index: 1; top: calc(var(--kit-space-3) + 0.1875rem); right: calc(var(--kit-space-3) + 0.1875rem); width: 0.875rem; height: 0.875rem; background: var(--kit-color-bg); -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; } /* the tick on the dark box */
+@media (max-width: 767px) { .aw-form-ff .aw-vol-role.kit-checkbox { min-height: 6rem; padding: var(--kit-space-3); } } /* phones: the tiles take their words' height, with less padding (two columns, three rows) */
 @media (min-width: 768px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1200px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(5, minmax(0, 1fr)); } .kit-with-sidebar .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* beside a sidebar the main column is too narrow for five */
-.aw-form-ff .aw-ff-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); grid-column: 1 / -1; }
-.aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: 1 / -1; }
-@media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } .aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: auto; } }
+.aw-form-ff .aw-ff-places { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--s-4); grid-column: 1 / -1; } /* PIN, State, District one under the other on phones */
+@media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 768px) { .aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-right { grid-column: 2; margin-top: calc(-1 * var(--s-2)); } }
 .aw-form-ff .kit-chips .ff-el-input--content { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .aw-form-ff .kit-chips .ff-el-form-check { margin: 0; }
 .aw-form-ff .kit-chips .kit-checkbox { position: relative; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target, 44px); padding: 0 var(--kit-space-4); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--kit-radius-pill); background: var(--kit-color-bg); font-size: var(--fluid-body-sm); cursor: pointer; }
 .aw-form-ff .kit-chips .kit-checkbox > span { flex: none; }
-.aw-form-ff .kit-chips .kit-checkbox:has(input:checked) { border: 2px solid var(--kit-color-ink); font-weight: var(--kit-weight-strong); }
-.aw-form-ff .kit-chips .kit-checkbox:has(input:checked)::before { content: ""; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; }
+.aw-form-ff .kit-chips .kit-checkbox:has(input:checked) { border: 2px solid var(--kit-color-ink); padding-inline: calc(var(--kit-space-4) - 2px + var(--kit-border-control)); font-weight: var(--kit-weight-strong); } /* a chip with an icon keeps it: the 2px border marks the choice (not colour alone); a chip without one adds the tick */
+.aw-form-ff .kit-chips .kit-checkbox:not(:has(.aw-ff-opt-ico)):has(input:checked)::before { content: ""; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; }
 .aw-form-ff :is(.kit-chips .kit-checkbox, .aw-vol-role.kit-checkbox):has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-form-ff .kit-chips--segment .ff-el-input--content { gap: 0; }
-.aw-form-ff .kit-chips--segment .ff-el-form-check + .ff-el-form-check .kit-checkbox { margin-left: calc(-1 * var(--kit-border-control)); }
-.aw-form-ff .kit-chips--segment .ff-el-form-check:not(:first-child):not(:last-child) .kit-checkbox { border-radius: 0; }
-.aw-form-ff .kit-chips--segment .ff-el-form-check:first-child .kit-checkbox { border-radius: var(--kit-radius-pill) 0 0 var(--kit-radius-pill); }
-.aw-form-ff .kit-chips--segment .ff-el-form-check:last-child .kit-checkbox { border-radius: 0 var(--kit-radius-pill) var(--kit-radius-pill) 0; }
-.aw-form-ff .kit-chips--segment .kit-checkbox:has(input:checked) { position: relative; z-index: 1; }
 /* Volunteer form: the Organisation box's list of Directory listings (owner, 31 Oct 2026). */
 .aw-org-host { position: relative; }
-.aw-org-list { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin: var(--s-1) 0 0; padding: var(--s-1) 0; list-style: none; max-height: 18rem; overflow: auto; background: var(--kit-color-bg); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2); box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
-.aw-org-opt { display: flex; align-items: center; min-height: var(--kit-size-target, 44px); padding: 0 var(--s-3); cursor: pointer; font-size: var(--fluid-body-sm); }
+.aw-org-list { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin: var(--s-1) 0 0; padding: var(--s-1) 0; list-style: none; max-height: 18rem; overflow: auto; background: var(--kit-color-bg); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2); box-shadow: var(--kit-elevation-2); }
+.aw-org-opt { display: block; min-height: var(--kit-size-target, 44px); padding: var(--s-3); cursor: pointer; font-size: var(--fluid-body-sm); line-height: 1.25; } /* name and place on one line, wrapping as text */
 .aw-org-opt[aria-selected=true], .aw-org-opt:hover { background: var(--kit-color-surface); }
 .aw-org-place { margin-left: 0.25em; color: var(--kit-field-hint); }
 .aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
@@ -1043,20 +1038,8 @@ body { background: var(--kit-color-canvas); }
 .aw-vol-page .aw-vol-banner-title { font-size: var(--kit-type-h3); }
 .aw-vol-page .aw-vol-banner-body > p { color: var(--kit-color-muted); max-width: 34rem; }
 
-.aw-vol-roles { border: 0; padding: 0; margin: var(--kit-space-5) 0 var(--kit-space-6); display: grid; gap: var(--kit-space-3); }
-.aw-vol-roles > legend { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); margin-bottom: var(--kit-space-4); padding: 0; }
-.aw-vol-role.kit-checkbox {
-	display: flex; align-items: center; gap: var(--kit-space-4); margin: 0; cursor: pointer;
-	min-height: var(--kit-size-control-lg); padding: var(--kit-space-2) var(--kit-space-4);
-	border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--r-3, 10px); background: var(--kit-color-bg);
-	font-size: var(--kit-type-lead); font-weight: var(--kit-weight-strong); line-height: 1.3;
-	transition: transform var(--kit-motion-fast, 150ms) var(--kit-ease-spring, ease), box-shadow var(--kit-motion-fast, 150ms) var(--kit-ease-spring, ease), border-color var(--kit-motion-fast, 150ms) ease;
-}
-.aw-vol-role.kit-checkbox input { width: var(--kit-size-check); height: var(--kit-size-check); flex: none; margin: 0; accent-color: var(--kit-color-ink); }
-.aw-vol-role.kit-checkbox:hover { border-color: var(--kit-color-ink); }
-.aw-vol-role.kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: var(--kit-press-offset) var(--kit-press-offset) 0 var(--kit-color-accent); transform: translate(-2px, -2px); }
-.aw-vol-role.kit-checkbox:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-vol-roles.is-invalid .aw-vol-role.kit-checkbox { border-color: var(--kit-color-danger); }
+.aw-vol-roles { display: grid; gap: var(--kit-space-3); } /* the question over the tiles */
+.aw-vol-role.kit-checkbox { margin: 0; cursor: pointer; border-radius: var(--r-3, 10px); background: var(--kit-color-bg); } /* the tile itself; its layout and states: the .aw-form-ff rules */
 
 @media (min-width: 768px) {
 	.aw-vol-page .aw-vol-banner-photo img { height: 240px; }
@@ -1066,20 +1049,9 @@ body { background: var(--kit-color-canvas); }
 	.aw-vol-page { grid-template-columns: minmax(0, 1fr); }
 	.aw-vol-page .aw-vol-banner-photo img { height: 360px; }
 }
-@media (prefers-reduced-motion: reduce) {
-	.aw-vol-role.kit-checkbox { transition: none; }
-	.aw-vol-role.kit-checkbox:has(input:checked) { transform: none; }
-}
 
-/* Claim page (12 Oct 2026): the listing as a card, services as tap rows like the Volunteer page. */
+/* Claim page (12 Oct 2026): the listing as a card. */
 #claim .aw-form-for { background: var(--kit-color-surface); border-color: transparent; font-size: var(--kit-type-lead); }
-.aw-claim-services { border: 0; padding: 0; display: grid; gap: var(--kit-space-2); }
-.aw-claim-services > legend { font-weight: var(--kit-weight-strong); margin-bottom: var(--kit-space-3); }
-.aw-claim-services .kit-checkbox { display: flex; align-items: center; gap: var(--kit-space-3); margin: 0; min-height: var(--kit-size-control); padding: var(--kit-space-2) var(--kit-space-3); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--r-3, 12px); background: var(--kit-color-bg); cursor: pointer; transition: border-color var(--kit-motion-fast, 150ms) ease, box-shadow var(--kit-motion-fast, 150ms) ease; }
-.aw-claim-services .kit-checkbox input { width: var(--kit-icon-md); height: var(--kit-icon-md); margin: 0; flex: none; accent-color: var(--kit-color-ink); }
-.aw-claim-services .kit-checkbox:has(input:checked) { border-color: var(--kit-color-ink); box-shadow: var(--kit-press-offset-sm) var(--kit-press-offset-sm) 0 var(--kit-color-accent); }
-.aw-claim-services .kit-checkbox:has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-@media (min-width: 768px) { .aw-claim-services { grid-template-columns: 1fr 1fr; } .aw-claim-services > legend { grid-column: 1 / -1; } }
 /* Claim form #6 (31 Oct 2026): the listing's logo in the head band, step intros, folded groups, the summary of changes. */
 .kit-section-band .aw-claim-logo { display: inline-block; width: 1.4em; height: 1.4em; margin-right: var(--kit-space-3); object-fit: contain; vertical-align: -0.2em; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-claim-meta { margin-top: var(--kit-space-3); }
@@ -1093,7 +1065,6 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-summary dt { font-weight: var(--kit-weight-strong); }
 .aw-claim-summary dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 767px) { .aw-claim-summary dl { grid-template-columns: 1fr; } .aw-claim-summary dd { margin-bottom: var(--kit-space-2); } }
-@media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }
 
 /* Directory search, wide screens (fix 12 Oct 2026): the name field, the three selects and Search sit on one line,
  * top-aligned; "Verified only" goes on its own line under the selects instead of pushing the row out of line. */
@@ -1405,7 +1376,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    owner's call: iPhones zoom the page when a field under 16px is tapped). From 768: labels and small text 11 to 13px (small 12 to 13,
    extra small 11 to 12, meta 13). The Directory page is the reference. */
 .kit-btn, .wp-block-button__link, .fluentform .ff-btn.kit-btn { font-size: .875rem; } /* the Fluent Forms submit button carried its own 16px (ff-btn-md) */
-:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: .875rem !important; }
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]), select, textarea) { font-size: var(--kit-field-text-size) !important; }
 .kit-section-desc { font-size: .875rem; }
 @media (min-width: 768px) {
 	:root { --kit-type-sm: clamp(.75rem, .7273rem + .0909vw, .8125rem); --kit-type-xs: clamp(.6875rem, .6591rem + .1136vw, .75rem); --kit-meta-size: .8125rem; }

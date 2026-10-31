@@ -170,6 +170,7 @@
   --kit-field-height: var(--kit-size-control);
   --kit-field-border: var(--neutral-5); /* #7D7D7D: 3.7:1 on the page (#F4F4F4), 4.1:1 on white (WCAG 1.4.11, 31 Oct 2026; was #BABABA, 1.8:1) */
   --kit-field-hint: var(--neutral-7); /* help text under a label: #4A4A4A, over 7:1 (WCAG 1.4.3; was #7D7D7D) */
+  --kit-field-text-size: .875rem; /* what is typed in a box, and a fixed part before it ("+91"): 14px at every width */
   --kit-field-hint-size: var(--fluid-body-sm); /* 13 to 14px (was the 10 to 12px caption size) */
   --kit-btn-pad: var(--s-4);
   --kit-btn-pad-sm: var(--s-4);

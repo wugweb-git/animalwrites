@@ -303,7 +303,17 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": [],
+                        "conditional_logics": {
+                            "type": "all",
+                            "status": true,
+                            "conditions": [
+                                {
+                                    "field": "whatsapp",
+                                    "operator": "!=",
+                                    "value": ""
+                                }
+                            ]
+                        },
                         "display_type": "",
                         "enable_other_option": "no",
                         "layout_class": ""
@@ -1233,7 +1243,7 @@
                         "type": "checkbox"
                     },
                     "settings": {
-                        "container_class": "kit-field kit-check-group aw-claim-services",
+                        "container_class": "kit-field kit-check-group kit-chips",
                         "label": "Services <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Services",
