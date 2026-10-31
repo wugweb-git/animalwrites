@@ -281,6 +281,9 @@ function aw_si_bing_run( array $args = array() ): array {
 		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.', 'aw-seo-extras' ) );
 	}
 	$dry = ! empty( $args['dry'] );
+	if ( ! $dry && get_option( 'aw_si_off' ) ) { // After Delete data nothing is written until Search Insights is switched back on.
+		return array( 'error' => __( 'Search Insights is off (its data was deleted), so Bing Webmaster did not run.', 'aw-seo-extras' ) );
+	}
 	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( ! $dry ) {
 		aw_si_install();
