@@ -108,11 +108,12 @@ function aw_si_links_seed_data(): array {
 /**
  * Add the seed rows once.
  *
- * @param bool $force Run again even when marked done (a repeat only moves dates).
+ * @param bool $force Run again even when marked done or after Delete data (a repeat only moves dates).
  * @return array Counts, or an empty array when already seeded.
  */
 function aw_si_links_seed( bool $force = false ): array {
-	if ( ! $force && get_option( 'aw_si_links_seeded' ) ) {
+	// After "Delete Search Insights data" (aw_si_off is set) the built-in links stay deleted; only --force brings them back.
+	if ( ! $force && ( get_option( 'aw_si_links_seeded' ) || get_option( 'aw_si_off' ) ) ) {
 		return array();
 	}
 	$count = array(
