@@ -64,6 +64,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'keywords' => __( 'Keywords owned', 'aw-seo-extras' ),
 			'organic'  => __( 'Organic sessions (GA4)', 'aw-seo-extras' ),
 			'ai'       => __( 'AI referrals', 'aw-seo-extras' ),
+			'ref'      => __( 'Referrals (GA4)', 'aw-seo-extras' ),
 			'clarity'  => __( 'Clarity (28 days)', 'aw-seo-extras' ),
 			'psi'      => __( 'PageSpeed (mobile / desktop)', 'aw-seo-extras' ),
 			'rm_score' => __( 'SEO score (Rank Math)', 'aw-seo-extras' ),
@@ -81,6 +82,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'keywords' => array( 'keywords', true ),
 			'organic'  => array( 'organic', true ),
 			'ai'       => array( 'ai', true ),
+			'ref'      => array( 'ref', true ),
 			'clarity'  => array( 'c_sessions', true ),
 			'psi'      => array( 'psi_score-mobile', false ),
 			'rm_score' => array( 'rm_score', false ),
@@ -98,6 +100,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'all'       => '__return_true',
 			'flagged'   => fn( $r ) => ! empty( $r['flagged'] ),
 			'ai'        => fn( $r ) => ! empty( $r['ai'] ),
+			'ref'       => fn( $r ) => ! empty( $r['ref'] ),
 			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
 			'noted'     => fn( $r ) => ! empty( $r['note'] ),
 			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
@@ -110,6 +113,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			'all'       => __( 'All', 'aw-seo-extras' ),
 			'flagged'   => __( 'Page quality flagged', 'aw-seo-extras' ),
 			'ai'        => __( 'AI referrals', 'aw-seo-extras' ),
+			'ref'       => __( 'With referrals', 'aw-seo-extras' ),
 			'conflicts' => __( 'With conflicts', 'aw-seo-extras' ),
 			'noted'     => __( 'With Clarity notes', 'aw-seo-extras' ),
 			/* translators: %d: score limit, e.g. 50. */
@@ -219,6 +223,20 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		$by = (array) ( $item['ai_by'] ?? array() );
 		arsort( $by );
 		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . esc_html( implode( ', ', array_slice( array_keys( $by ), 0, 2 ) ) ) . '</span>';
+	}
+
+	/**
+	 * Referral and social sessions and the two sources that sent most.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_ref( $item ) {
+		if ( empty( $item['ref'] ) ) {
+			return '–';
+		}
+		$by = (array) ( $item['ref_by'] ?? array() );
+		arsort( $by );
+		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . esc_html( implode( ', ', array_slice( array_keys( $by ), 0, 2 ) ) ) . '</span>';
 	}
 
 	/**

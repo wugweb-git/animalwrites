@@ -122,6 +122,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-movers', __( 'Movers (28 days against the 28 before)', 'aw-seo-extras' ), 'aw_si_box_movers', $screen, 'normal' );
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
+		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
 		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
 		wp_enqueue_script( 'postbox' );
@@ -452,6 +453,35 @@ function aw_si_box_ai(): void {
 	echo '</tbody></table>';
 }
 
+/** Overview box: every referring site and social source, 28 days and 3 months (owner, 31 Oct 2026). */
+function aw_si_box_referrers(): void {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$o     = aw_si_table( 'obs' );
+	$today = new DateTimeImmutable( 'today', wp_timezone() );
+	$d28   = $today->modify( '-28 days' )->format( 'Y-m-d' );
+	$d90   = $today->modify( '-3 months' )->format( 'Y-m-d' );
+	$skip  = aw_si_ga4_skip_sql();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and fixed dates only.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM {$o} WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY s28 DESC, s90 DESC LIMIT 20", $d28, $d28, $d28, $d90 ) );
+	if ( ! $rows ) {
+		echo '<p>' . esc_html__( 'No referrals recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
+	} else {
+		$since = min( wp_list_pluck( $rows, 'since' ) );
+		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Key events', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Sessions (3 months)', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+		foreach ( $rows as $r ) {
+			echo '<tr><td>' . esc_html( $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>';
+		}
+		echo '</tbody></table>';
+		/* translators: %s: first date with referral figures. */
+		echo '<p class="description">' . esc_html( sprintf( __( 'Figures from %s.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( $since ) ) ) ) . '</p>';
+	}
+	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag (#80).', 'aw-seo-extras' ) . '</p>';
+}
+
 /** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
 function aw_si_box_gaps(): void {
 	$gaps = aw_si_searches_gaps();
@@ -493,7 +523,7 @@ function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
 	$keys = array(
 		'AW_CLARITY_TOKEN' => __( 'Clarity Data Export token (Clarity → Settings → Data Export). Needed for Clarity figures and Clarity page-quality flags.', 'aw-seo-extras' ),

@@ -5,10 +5,13 @@
  * stored days are replaced):
  * - search: view_search_results events by search term (terms that look like personal data are dropped);
  * - ai: sessions from AI assistants (chatgpt.com, perplexity.ai, gemini.google.com, copilot …) by landing page;
- * - organic: sessions from Organic Search by landing page.
+ * - organic: sessions from Organic Search by landing page;
+ * - ref, social: every referral (channel Referral, Organic Social, Paid Social) and the social sources below, by source
+ *   and landing page, with sessions, engaged sessions and key events (owner, 31 Oct 2026).
  *
  * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
- * txt = source), organic (page = landing path). value = events or sessions.
+ * txt = source), organic (page = landing path), ref / ref_eng / ref_key (page = landing path, txt = source). value =
+ * events or sessions. Referral counts leave out AW_SI_GA4_SKIP_DAYS (22 Oct 2026: test events).
  *
  * @package aw-seo-extras
  */
@@ -20,6 +23,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_GA4_DAYS = 3;
 const AW_SI_GA4_CRON = 'aw_si_ga4';
 const AW_SI_GA4_ROWS = 10000; // Rows per report; a report that returns this many is marked truncated.
+
+/** Days left out of referral counts: 22 Oct 2026 has GA4 test events (owner, 31 Oct 2026). */
+const AW_SI_GA4_SKIP_DAYS = array( '2026-10-22' );
+
+/** Social sources counted as referrals even when GA4 files them under another channel. Filter aw_si_social_sources. */
+function aw_si_social_sources(): array {
+	return (array) apply_filters( 'aw_si_social_sources', array( 'instagram.com', 'l.instagram.com', 'instagram', 'facebook.com', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com', 'facebook', 't.co', 'x.com', 'twitter.com', 'linkedin.com', 'lnkd.in', 'linkedin', 'reddit.com', 'out.reddit.com', 'reddit', 'whatsapp', 'wa.me', 'web.whatsapp.com', 'telegram', 't.me', 'web.telegram.org', 'linktr.ee' ) );
+}
+
+/** SQL condition that leaves out AW_SI_GA4_SKIP_DAYS (column d). */
+function aw_si_ga4_skip_sql(): string {
+	return AW_SI_GA4_SKIP_DAYS ? " AND d NOT IN ('" . implode( "', '", array_map( 'esc_sql', AW_SI_GA4_SKIP_DAYS ) ) . "')" : '';
+}
 
 /** Session sources counted as AI referrals. Filter aw_si_ai_sources adds more. */
 function aw_si_ai_sources(): array {
@@ -64,11 +80,11 @@ function aw_si_ga4_report( $module, array $args ) {
 }
 
 /**
- * The three reports for one day.
+ * The reports for one day.
  *
  * @param object $module Site Kit's analytics-4 module.
  * @param string $day    Date (Y-m-d).
- * @return array|WP_Error array{search: array, ai: array, organic: array}
+ * @return array|WP_Error array{search: array, ai: array, organic: array, ref: array, social: array}
  */
 function aw_si_ga4_fetch_day( $module, string $day ) {
 	$base = array(
@@ -90,6 +106,16 @@ function aw_si_ga4_fetch_day( $module, string $day ) {
 			'dimensions'       => array( 'landingPage' ),
 			'metrics'          => array( 'sessions' ),
 			'dimensionFilters' => array( 'sessionDefaultChannelGroup' => 'Organic Search' ),
+		),
+		'ref'     => array(
+			'dimensions'       => array( 'sessionSource', 'landingPage' ),
+			'metrics'          => array( 'sessions', 'engagedSessions', 'keyEvents' ),
+			'dimensionFilters' => array( 'sessionDefaultChannelGroup' => array( 'Referral', 'Organic Social', 'Paid Social' ) ),
+		),
+		'social'  => array(
+			'dimensions'       => array( 'sessionSource', 'landingPage' ),
+			'metrics'          => array( 'sessions', 'engagedSessions', 'keyEvents' ),
+			'dimensionFilters' => array( 'sessionSource' => array_values( aw_si_social_sources() ) ),
 		),
 	);
 	$out  = array();
@@ -117,7 +143,7 @@ function aw_si_ga4_obs_rows( array $data ): array {
 			$out[ $key ][4] += $value;
 			return;
 		}
-		$pk          = 'search' === $metric ? md5( 'term:' . $txt ) : md5( $page . ( 'ai' === $metric ? '|' . $txt : '' ) );
+		$pk          = 'search' === $metric ? md5( 'term:' . $txt ) : md5( $page . ( '' !== $txt ? '|' . $txt : '' ) );
 		$out[ $key ] = array( 0, $page, $pk, $metric, $value, $txt );
 	};
 	foreach ( (array) ( $data['search'] ?? array() ) as $r ) {
@@ -136,6 +162,23 @@ function aw_si_ga4_obs_rows( array $data ): array {
 		$path = aw_si_landing_path( (string) ( $r[0][0] ?? '' ) );
 		if ( '' !== $path ) {
 			$add( 'organic', $path, '', (float) ( $r[1][0] ?? 0 ) );
+		}
+	}
+	// Referrals: the channel report, then social sources it missed (the same source and landing page is counted once).
+	$seen = array();
+	foreach ( array( 'ref', 'social' ) as $rep_key ) {
+		foreach ( (array) ( $data[ $rep_key ] ?? array() ) as $r ) {
+			$path = aw_si_landing_path( (string) ( $r[0][1] ?? '' ) );
+			$src  = mb_substr( strtolower( (string) ( $r[0][0] ?? '' ) ), 0, 100 );
+			if ( '' === $path || '' === $src || ( 'social' === $rep_key && isset( $seen[ $src . '|' . $path ] ) ) ) {
+				continue;
+			}
+			if ( 'ref' === $rep_key ) {
+				$seen[ $src . '|' . $path ] = true; // Several landing URLs of one path add up; the social report only fills gaps.
+			}
+			$add( 'ref', $path, $src, (float) ( $r[1][0] ?? 0 ) );
+			$add( 'ref_eng', $path, $src, (float) ( $r[1][1] ?? 0 ) );
+			$add( 'ref_key', $path, $src, (float) ( $r[1][2] ?? 0 ) );
 		}
 	}
 	return array_values( $out );
@@ -223,7 +266,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 					$rep['error'] = $n->get_error_message();
 					break;
 				}
-				foreach ( array( 'search', 'ai', 'organic' ) as $key ) {
+				foreach ( array( 'search', 'ai', 'organic', 'ref', 'social' ) as $key ) {
 					if ( count( $data[ $key ] ) >= AW_SI_GA4_ROWS ) {
 						$rep['truncated'][ $day ][] = $key;
 					}
@@ -232,6 +275,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 					'search'  => count( $data['search'] ),
 					'ai'      => count( $data['ai'] ),
 					'organic' => count( $data['organic'] ),
+					'ref'     => count( $data['ref'] ) + count( $data['social'] ),
 				);
 				$rep['rows']        += $n;
 				if ( $dry ) {
