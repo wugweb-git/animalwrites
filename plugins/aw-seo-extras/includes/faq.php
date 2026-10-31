@@ -616,8 +616,10 @@ add_filter(
 		$c = ( is_singular() || is_category() || is_tag() || is_tax() ) ? aw_faq_context() : null;
 		if ( $c ) {
 			// faq | none (31 Oct 2026: no holdout). Same rule as the page: an after-content FAQ is hidden on later pages,
-			// filtered lists and the site's own list views (aw_faq_show_here).
-			$ctx['faq_group'] = aw_faq_visible_here( $c ) && aw_faq_build( $c ) ? 'faq' : 'none';
+			// filtered lists and the site's own list views (aw_faq_show_here). A page that keeps its Rank Math FAQ block
+			// shows that one (ours is suppressed), so it is 'faq' too.
+			$rm               = 'post' === $c['store'] && has_block( 'rank-math/faq-block', get_post( $c['id'] ) );
+			$ctx['faq_group'] = $rm || ( aw_faq_visible_here( $c ) && aw_faq_build( $c ) ) ? 'faq' : 'none';
 		}
 		return $ctx;
 	}
