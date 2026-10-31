@@ -156,7 +156,7 @@ body.single-aw_research .kit-lead-media { display: none; }
 
 /* 4.4 Field — shared by volunteer, receipt and claim forms.
    States: default, hover, focus, invalid (aria-invalid), valid, disabled; error text; summary. */
-.kit-form { max-width: 560px; }
+.kit-form { max-width: var(--kit-width-content); } /* forms follow the 720px content width */
 .kit-form p ,.kit-field { margin: 0 0 var(--kit-space-4); }
 .kit-form label ,.kit-form legend { display: block; font-weight: var(--kit-weight-regular); margin-bottom: var(--kit-space-2); color: var(--kit-color-ink); }
 .kit-form :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) ,.kit-finder select ,.kit-link-row :is(input, select) {

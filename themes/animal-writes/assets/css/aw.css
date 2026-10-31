@@ -895,8 +895,6 @@ body { background: var(--kit-color-canvas); }
 .aw-org-opt[aria-selected=true], .aw-org-opt:hover { background: var(--kit-color-surface); }
 .aw-org-place { margin-left: 0.25em; color: var(--kit-field-hint); }
 .aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
-/* /volunteer/: the main column keeps its 720px cap; the sidebar follows the Kits rule (beside it from 1200, none below). */
-.aw-vol-layout .aw-volunteer-form.kit-form { max-width: none; } /* the form fills the 720px main column */
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
 #claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
