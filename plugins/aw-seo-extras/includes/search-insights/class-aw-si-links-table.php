@@ -77,9 +77,9 @@ class AW_SI_Links_Table extends WP_List_Table {
 		return aw_si_link_actions();
 	}
 
-	/** Views: All (not hidden), one per type, Unsorted, Hidden. Spam rows show only in Spam. */
+	/** Views: All (not hidden), one per type, Unsorted, Hidden. Spam rows show only in Spam, even when unhidden. */
 	private function views_sql(): array {
-		$out = array( 'all' => array( __( 'All', 'aw-seo-extras' ), 'hidden = 0' ) );
+		$out = array( 'all' => array( __( 'All', 'aw-seo-extras' ), "hidden = 0 AND type <> 'spam'" ) );
 		foreach ( aw_si_link_types() as $key => $label ) {
 			$out[ $key ] = array( $label, 'spam' === $key ? "type = 'spam'" : "type = '{$key}' AND hidden = 0" );
 		}

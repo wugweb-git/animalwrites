@@ -9,9 +9,10 @@
  *   A new row whose anchor sells links or gambling is typed spam and hidden; the rest stay unsorted for the owner.
  * - Figures: GetQueryStats and GetPageStats into obs, src bing, period day (Bing's own dates), as Search Console's:
  *   q (query, matched to an existing keyword record; other queries are skipped, no record is created) and p (page,
- *   kw 0). Only the last 85 days are stored, so the 90-day rollup never counts a day twice.
+ *   kw 0). Only days the rollup has not reached are stored (aw_si_bing_days()), so no day is counted twice.
  *
- * A failed run is logged with aw_si_run_fail( 'bing' ) and the stored rows stay.
+ * A failed run is logged with aw_si_run_fail( 'bing' ) and the stored rows stay. A failed or timed-out GetUrlLinks call
+ * only makes the run partial: what was read is saved, with a warning.
  *
  * @package aw-seo-extras
  */
@@ -25,7 +26,7 @@ const AW_SI_BING_API    = 'https://ssl.bing.com/webmaster/api.svc/json/';
 const AW_SI_BING_SOURCE = 'Bing Webmaster';
 const AW_SI_BING_PAGES  = 20; // Pages of GetLinkCounts, and of GetUrlLinks per linked page, at most.
 const AW_SI_BING_BUDGET = 120; // Seconds per run: stop before a host time limit, so the run is always logged.
-const AW_SI_BING_DAYS   = 85; // Figures older than this are not stored (the rollup turns 90-day-old rows into months).
+const AW_SI_BING_DAYS   = 85; // Figures stored: at most this many days, and 5 fewer than the rollup keeps (aw_si_bing_days()).
 
 /** Whether the Webmaster API key is set. */
 function aw_si_bing_on(): bool {
@@ -58,7 +59,7 @@ function aw_si_bing_call( string $method, array $args = array() ) {
 	$res = wp_remote_get(
 		$url,
 		array(
-			'timeout' => 60,
+			'timeout' => 20,
 			'headers' => array( 'Accept' => 'application/json' ),
 		)
 	);
@@ -87,16 +88,28 @@ function aw_si_bing_date( string $d ): string {
 	return wp_date( 'Y-m-d', (int) floor( (int) $m[1] / 1000 ) );
 }
 
+/** Days of figures stored: fewer than the rollup keeps as days, so a day already rolled up is never stored again. */
+function aw_si_bing_days(): int {
+	$keep = defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90;
+	return max( 1, min( AW_SI_BING_DAYS, $keep - 5 ) );
+}
+
 /**
- * Inbound links: [linked_url, from_url, anchor] for every page Bing lists, within the time budget.
+ * Inbound links: [linked_url, from_url, anchor] for every page Bing lists, within the time budget. A failed
+ * GetLinkCounts call fails the run; a failed GetUrlLinks call stops here and keeps what was read (partial).
  *
  * @param float $until Stop time (microtime).
- * @return array|WP_Error array{links: array, partial: bool}
+ * @return array|WP_Error array{links: array, partial: bool, warning: string}
  */
 function aw_si_bing_links( float $until ) {
 	$ours    = array();
 	$partial = false;
+	$warning = '';
 	for ( $page = 0; $page < AW_SI_BING_PAGES; $page++ ) {
+		if ( microtime( true ) > $until ) {
+			$partial = true;
+			break;
+		}
 		$d = aw_si_bing_call( 'GetLinkCounts', array( 'page' => $page ) );
 		if ( is_wp_error( $d ) ) {
 			return $d;
@@ -125,7 +138,9 @@ function aw_si_bing_links( float $until ) {
 				)
 			);
 			if ( is_wp_error( $d ) ) {
-				return $d;
+				$partial = true;
+				$warning = $d->get_error_message();
+				break 2;
 			}
 			foreach ( (array) ( $d['Details'] ?? array() ) as $r ) {
 				if ( ! empty( $r['Url'] ) ) {
@@ -140,6 +155,7 @@ function aw_si_bing_links( float $until ) {
 	return array(
 		'links'   => $out,
 		'partial' => $partial,
+		'warning' => $warning,
 	);
 }
 
@@ -151,7 +167,7 @@ function aw_si_bing_links( float $until ) {
  * @return array array{rows: array, skipped: int}
  */
 function aw_si_bing_obs_rows( array $queries, array $pages ): array {
-	$since   = wp_date( 'Y-m-d', time() - AW_SI_BING_DAYS * DAY_IN_SECONDS );
+	$since   = wp_date( 'Y-m-d', time() - aw_si_bing_days() * DAY_IN_SECONDS );
 	$map     = aw_si_ready() ? aw_si_kw_map() : array();
 	$out     = array();
 	$skipped = 0;
@@ -193,7 +209,8 @@ function aw_si_bing_obs_rows( array $queries, array $pages ): array {
 }
 
 /**
- * The monthly run. Never throws; failures go to the run log and stored rows stay.
+ * The monthly run. Never throws; failures go to the run log and stored rows stay. Figures are saved before the
+ * per-page link calls, so a link call that fails or runs out of time never loses them.
  *
  * @param array $args dry (fetch and report only).
  * @return array Report.
@@ -203,78 +220,97 @@ function aw_si_bing_run( array $args = array() ): array {
 		return array( 'error' => __( 'Bing Webmaster is not set up: add AW_BING_WEBMASTER_KEY to wp-config.php.', 'aw-seo-extras' ) );
 	}
 	$dry = ! empty( $args['dry'] );
+	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( ! $dry ) {
 		aw_si_install();
 		aw_si_run_start( 'bing' );
 	}
-	$rep = array();
+	$rep = array(
+		'rows'     => 0,
+		'added'    => 0,
+		'updated'  => 0,
+		'skipped'  => 0,
+		'failed'   => 0,
+		'partial'  => false,
+		'warnings' => array(),
+	);
 	try {
 		$until = microtime( true ) + AW_SI_BING_BUDGET;
 		$q     = aw_si_bing_call( 'GetQueryStats' );
 		$p     = is_wp_error( $q ) ? $q : aw_si_bing_call( 'GetPageStats' );
-		$l     = is_wp_error( $p ) ? $p : aw_si_bing_links( $until );
-		if ( is_wp_error( $l ) ) {
-			$rep['error'] = $l->get_error_message();
+		if ( is_wp_error( $p ) ) {
+			$rep['error'] = $p->get_error_message();
 		} else {
-			$obs = aw_si_bing_obs_rows( (array) $q, (array) $p );
-			$rep = array(
-				'queries'  => count( (array) $q ),
-				'pages'    => count( (array) $p ),
-				'obs'      => count( $obs['rows'] ),
-				'skipped'  => $obs['skipped'],
-				'links'    => count( $l['links'] ),
-				'added'    => 0,
-				'updated'  => 0,
-				'partial'  => $l['partial'],
-				'rows'     => 0,
-				'failed'   => 0,
-				'warnings' => array(),
-			);
-			if ( $dry ) {
-				$rep['sample'] = array(
-					'obs'   => array_slice( $obs['rows'], 0, 5 ),
-					'links' => array_slice( $l['links'], 0, 10 ),
-				);
-				return $rep;
-			}
-			foreach ( $obs['rows'] as $v ) {
-				$ok = aw_si_obs_put(
-					$v[0],
-					$v[1],
-					'bing',
-					$v[2],
-					'day',
-					$v[3],
-					array(
-						'clicks' => $v[4],
-						'impr'   => $v[5],
-						'pos'    => round( $v[6], 2 ),
-					)
-				);
-				$ok ? ++$rep['rows'] : ++$rep['failed'];
-			}
-			foreach ( $l['links'] as $v ) {
-				$n = aw_si_link_put(
-					array(
-						'from_url'   => $v[1],
-						'linked_url' => $v[0],
-						'anchor'     => $v[2],
-						'source'     => AW_SI_BING_SOURCE,
-						'type'       => aw_si_link_auto_type( $v[2] ),
-					)
-				);
-				if ( 1 === $n ) {
-					++$rep['added'];
-				} elseif ( $n >= 0 ) {
-					++$rep['updated'];
-				} else {
-					++$rep['failed'];
+			$obs                  = aw_si_bing_obs_rows( (array) $q, (array) $p );
+			$rep['queries']       = count( (array) $q );
+			$rep['pages']         = count( (array) $p );
+			$rep['obs']           = count( $obs['rows'] );
+			$rep['queries_no_kw'] = $obs['skipped'];
+			if ( ! $dry ) {
+				foreach ( $obs['rows'] as $v ) {
+					$ok = aw_si_obs_put(
+						$v[0],
+						$v[1],
+						'bing',
+						$v[2],
+						'day',
+						$v[3],
+						array(
+							'clicks' => $v[4],
+							'impr'   => $v[5],
+							'pos'    => round( $v[6], 2 ),
+						)
+					);
+					$ok ? ++$rep['rows'] : ++$rep['failed'];
 				}
 			}
-			if ( $l['partial'] ) {
-				$rep['warnings'][] = __( 'Time ran out before every linked page was read; the rest wait for next month.', 'aw-seo-extras' );
+			$l = aw_si_bing_links( $until );
+			if ( is_wp_error( $l ) ) {
+				$rep['error'] = $l->get_error_message();
+			} else {
+				$rep['links']   = count( $l['links'] );
+				$rep['partial'] = $l['partial'];
+				if ( '' !== $l['warning'] ) {
+					/* translators: %s: Bing's error. */
+					$rep['warnings'][] = sprintf( __( 'Some linked pages could not be read (%s); the rest wait for next month.', 'aw-seo-extras' ), $l['warning'] );
+				} elseif ( $l['partial'] ) {
+					$rep['warnings'][] = __( 'Time ran out before every linked page was read; the rest wait for next month.', 'aw-seo-extras' );
+				}
+				if ( $dry ) {
+					$rep['sample'] = array(
+						'obs'   => array_slice( $obs['rows'], 0, 5 ),
+						'links' => array_slice( $l['links'], 0, 10 ),
+					);
+					return $rep;
+				}
+				foreach ( $l['links'] as $v ) {
+					if ( '' === aw_si_link_domain( $v[1] ) || '' === esc_url_raw( $v[0] ) ) {
+						++$rep['skipped']; // No usable address: nothing to store.
+						continue;
+					}
+					$n = aw_si_link_put(
+						array(
+							'from_url'   => $v[1],
+							'linked_url' => $v[0],
+							'anchor'     => $v[2],
+							'source'     => AW_SI_BING_SOURCE,
+							'type'       => aw_si_link_auto_type( $v[2] ),
+						)
+					);
+					if ( 1 === $n ) {
+						++$rep['added'];
+					} elseif ( $n >= 0 ) {
+						++$rep['updated'];
+					} else {
+						++$rep['failed'];
+					}
+				}
+				if ( $rep['skipped'] ) {
+					/* translators: %d: links. */
+					$rep['warnings'][] = sprintf( __( '%d links had no usable address and were skipped.', 'aw-seo-extras' ), $rep['skipped'] );
+				}
 			}
-			if ( $rep['failed'] ) {
+			if ( empty( $rep['error'] ) && $rep['failed'] ) {
 				/* translators: %d: rows. */
 				$rep['error'] = sprintf( __( '%d Bing rows could not be saved.', 'aw-seo-extras' ), $rep['failed'] );
 			}
