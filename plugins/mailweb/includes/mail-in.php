@@ -60,24 +60,54 @@ function mailweb_settings_url( $sub = 'incoming', $args = array(), $anchor = '' 
  * @return array key => ID
  */
 function mailweb_box_ids( $refresh = false ) {
+	static $known = null; // one lookup per request
+	if ( ! $refresh && null !== $known ) {
+		return $known;
+	}
 	$ids = (array) get_option( 'mailweb_box_ids', array() );
-	if ( $refresh || ! $ids || false === get_option( 'mailweb_box_addresses', false ) ) {
+	$ask = ! $ids || false === get_option( 'mailweb_box_addresses', false );
+	// After a failed or empty lookup, wait a few minutes before asking again (this runs on every admin page).
+	if ( $refresh || ( $ask && ! get_transient( 'mailweb_box_ids_wait' ) ) ) {
 		$me = mailweb_api( '/api/v1/me' );
 		if ( is_array( $me ) && isset( $me['mailboxes'] ) ) {
-			$ids = array();
-			$adr = array();
+			$old  = array_flip( array_map( 'strtolower', (array) get_option( 'mailweb_box_addresses', array() ) ) ); // address => key
+			$ids  = array();
+			$adr  = array();
+			$list = array();
 			foreach ( (array) $me['mailboxes'] as $mb ) {
 				$a = strtolower( (string) ( $mb['address'] ?? '' ) );
 				if ( is_email( $a ) && ! empty( $mb['resourceId'] ) ) {
-					$key         = sanitize_key( strstr( $a, '@', true ) );
-					$ids[ $key ] = (string) $mb['resourceId'];
-					$adr[ $key ] = $a;
+					$list[ $a ] = (string) $mb['resourceId'];
 				}
+			}
+			// Mailboxes that already have a key go first and keep it (saved secrets, options and URLs use it).
+			uksort( $list, fn( $x, $y ) => (int) isset( $old[ $y ] ) <=> (int) isset( $old[ $x ] ) );
+			foreach ( $list as $a => $id ) {
+				$local = sanitize_key( strstr( $a, '@', true ) );
+				$key   = (string) ( $old[ $a ] ?? $local );
+				if ( isset( $adr[ $key ] ) ) {
+					// Same local part on another domain (support@a.in, support@b.in): add the domain to the key.
+					$base = $local . '-' . sanitize_key( str_replace( '.', '-', substr( strrchr( $a, '@' ), 1 ) ) );
+					$key  = $base;
+					for ( $n = 2; isset( $adr[ $key ] ); $n++ ) {
+						$key = $base . '-' . $n;
+					}
+				}
+				$ids[ $key ] = $id;
+				$adr[ $key ] = $a;
 			}
 			update_option( 'mailweb_box_ids', $ids, false );
 			update_option( 'mailweb_box_addresses', $adr, false );
+			if ( $ids ) {
+				delete_transient( 'mailweb_box_ids_wait' );
+			} else {
+				set_transient( 'mailweb_box_ids_wait', 1, 5 * MINUTE_IN_SECONDS );
+			}
+		} else {
+			set_transient( 'mailweb_box_ids_wait', 1, 5 * MINUTE_IN_SECONDS );
 		}
 	}
+	$known = $ids;
 	return $ids;
 }
 

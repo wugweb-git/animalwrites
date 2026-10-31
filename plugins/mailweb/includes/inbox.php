@@ -12,7 +12,8 @@
  * - Read: the message in a sandboxed frame (no scripts; remote pictures off until "Show pictures"), attachments to
  *   download. Opening a message marks it read in webmail too.
  * - Reply, Reply all, Forward, New message: sent from the mailbox through the Mail API (inReplyTo / forwardOf keep the
- *   thread and set Answered / Forwarded); a copy lands in the mailbox's Sent. The mailbox's signature is added.
+ *   thread; the original is flagged Answered / Forwarded); a copy lands in the mailbox's Sent. The mailbox's signature
+ *   is added.
  * - Archive, Move, Spam / Not spam, Delete (to Trash only; nothing is ever deleted for good), Mark read / unread.
  * - Who: administrators and editors. Every action checks a nonce. Sending: at most 30 an hour. No message text is
  *   logged anywhere.
@@ -370,7 +371,7 @@ function mailweb_message_screen( $s ) {
 	$msg  = mailweb_get( $s['box'], $path, $s['uid'] );
 	$view = 'all' === $s['view'] || isset( mailweb_all_boxes()[ $s['view'] ] ) ? $s['view'] : $s['box'];
 	$back = add_query_arg( array( 'page' => 'mailweb', 'box' => $view, 'folder' => $s['folder'] ), admin_url( 'admin.php' ) );
-	echo '<h1 class="wp-heading-inline">' . esc_html( mailweb_roles()[ $s['folder'] ][0] ) . '</h1> <a class="page-title-action" href="' . esc_url( $back ) . '">' . esc_html__( 'Back to the list', 'mailweb' ) . '</a><hr class="wp-header-end">';
+	echo '<h1 class="wp-heading-inline">' . esc_html( mailweb_roles()[ $s['folder'] ][0] ?? __( 'Inbox', 'mailweb' ) ) . '</h1> <a class="page-title-action" href="' . esc_url( $back ) . '">' . esc_html__( 'Back to the list', 'mailweb' ) . '</a><hr class="wp-header-end">';
 	mailweb_notice();
 	if ( ! $msg ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ) . '</p></div>';
@@ -397,11 +398,11 @@ function mailweb_message_screen( $s ) {
 	}
 	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
 	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
-	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']https?:#i', $html );
+	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
 	$u      = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
 	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
-	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) $m['subject'] ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
+	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
 	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'From', 'mailweb' ) . '</th><td><strong>' . esc_html( mailweb_who( $m['from'] ?? array() ) ) . '</strong></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'To', 'mailweb' ) . '</th><td>' . esc_html( implode( ', ', array_map( 'mailweb_who', (array) ( $m['to'] ?? array() ) ) ) ) . '</td></tr>';
@@ -596,10 +597,12 @@ function mailweb_safe_html( $html, $images, $inline ) {
 	$style = '';
 	if ( preg_match_all( '#<style[^>]*>(.*?)</style>#is', $html, $mm ) ) {
 		$style = implode( "\n", $mm[1] );
+		$style = str_replace( array( '<!--', '-->' ), '', $style ); // old-style CSS wrappers; escaping them would break the first rule
+		$style = str_replace( '<', '\\3C ', $style ); // cannot close the frame's <style> tag
 		$style = preg_replace( '#@import[^;]*;#i', '', $style );
 		$style = preg_replace( '#expression\s*\(#i', '(', $style );
 		if ( ! $images ) {
-			$style = preg_replace( '#url\(\s*[\'"]?https?:[^)]*\)#i', 'none', $style );
+			$style = preg_replace( '#url\(\s*[\'"]?\s*(?:https?:)?//[^)]*\)#i', 'none', $style );
 		}
 	}
 	$html    = preg_replace( '#<(script|style|head|title|iframe|object|embed|form)[^>]*>.*?</\1>#is', '', $html );
@@ -611,10 +614,12 @@ function mailweb_safe_html( $html, $images, $inline ) {
 	// Inline (cid:) pictures from the message itself.
 	$html = preg_replace_callback( '#src=(["\'])cid:([^"\']+)\1#i', fn( $m ) => isset( $inline[ $m[2] ] ) ? 'src="' . $inline[ $m[2] ] . '"' : 'src=""', $html );
 	if ( ! $images ) {
-		$html = preg_replace( '#<img\b([^>]*?)\ssrc=(["\'])https?:[^"\']*\2#i', '<img$1 src="" data-blocked="1"', $html );
-		$html = preg_replace( '#url\(\s*[\'"]?https?:[^)]*\)#i', 'none', $html );
+		$html = preg_replace( '#<img\b([^>]*?)\ssrc=(["\'])\s*(?:https?:)?//[^"\']*\2#i', '<img$1 src="" data-blocked="1"', $html );
+		$html = preg_replace( '#url\(\s*[\'"]?\s*(?:https?:)?//[^)]*\)#i', 'none', $html );
 	}
-	return '<!doctype html><html><head><meta charset="utf-8"><base target="_blank"><style>body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1d2327;margin:12px;word-wrap:break-word}img[data-blocked]{display:none}blockquote{border-left:3px solid #dcdcde;margin:0 0 0 4px;padding-left:10px;color:#50575e}</style><style>' . $style . '</style></head><body>' . $html . '</body></html>';
+	// The browser enforces this too, so escaped CSS, image-set() and the like load nothing remote. Inline pictures are data: URIs.
+	$csp = $images ? "default-src 'none'; img-src https: http: data:; style-src 'unsafe-inline'; font-src https: data:" : "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:";
+	return '<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="' . $csp . '"><meta charset="utf-8"><base target="_blank"><style>body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1d2327;margin:12px;word-wrap:break-word}img[data-blocked]{display:none}blockquote{border-left:3px solid #dcdcde;margin:0 0 0 4px;padding-left:10px;color:#50575e}</style><style>' . $style . '</style></head><body>' . $html . '</body></html>';
 }
 
 /** Plain text as safe frame HTML (links clickable). */
@@ -815,12 +820,9 @@ function mailweb_send_from_form( $in, $refbox ) {
 		exit;
 	}
 	if ( $orig ) {
-		// A replied or forwarded message has been read. Sent from another mailbox, the Mail API does not flag the
-		// original Answered / Forwarded either: add that too, as webmail would.
-		$flags = array( '\\Seen' );
-		if ( ! isset( $req['inReplyTo'] ) && ! isset( $req['forwardOf'] ) ) {
-			$flags[] = 'forward' === $mode ? '$Forwarded' : '\\Answered';
-		}
+		// A replied or forwarded message has been read and is flagged Answered / Forwarded, as webmail would. Adding a
+		// flag the Mail API already set does no harm.
+		$flags = array( '\\Seen', 'forward' === $mode ? '$Forwarded' : '\\Answered' );
 		mailweb_call( 'PATCH', mailweb_fpath( $orig[0], $orig[1] ) . '/messages/' . $orig[2], array( 'addFlags' => $flags ) );
 		delete_transient( 'mailweb_folders_' . $orig[0] );
 	}
