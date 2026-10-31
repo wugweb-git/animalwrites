@@ -339,7 +339,8 @@ function aw_si_seed(): array {
  * @param string $metric Metric of that source.
  * @param string $period day, month, or a rolling window such as 12m.
  * @param string $d      Date (Y-m-d).
- * @param array  $m      Any of clicks, impr, pos, value, txt.
+ * @param array  $m      Any of clicks, impr, pos, value, txt; page_key overrides md5( $page ) (rows keyed by page and
+ *                       source, such as GA4 ai and ref rows, keep their own key).
  * @return bool Whether the row was written.
  */
 function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, string $period, string $d, array $m ): bool {
@@ -349,7 +350,7 @@ function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, s
 		array(
 			'kw_id'    => $kw_id,
 			'page'     => mb_substr( $page, 0, 255 ),
-			'page_key' => '' === $page ? '' : md5( $page ),
+			'page_key' => isset( $m['page_key'] ) ? (string) $m['page_key'] : ( '' === $page ? '' : md5( $page ) ),
 			'src'      => $src,
 			'metric'   => $metric,
 			'period'   => $period,

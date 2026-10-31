@@ -79,6 +79,9 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 				}
 			} else {
 				$g['value'] = (float) $g['value'] + (float) $r->value;
+				if ( '' === $g['txt'] ) {
+					$g['txt'] = (string) $r->txt; // The group's source or term: rows keyed by it keep it in the month.
+				}
 			}
 		}
 		$groups[ $key ] = $g;
@@ -120,8 +123,9 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 				'clicks' => $clicks,
 				'impr'   => $impr,
 				'pos'    => $impr ? round( $posw / $impr, 2 ) : null,
-				'value'  => $value,
-				'txt'    => $g['txt'],
+				'value'    => $value,
+				'txt'      => $g['txt'],
+				'page_key' => $g['page_key'],
 			)
 		);
 		++$written;

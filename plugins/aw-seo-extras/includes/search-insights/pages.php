@@ -85,6 +85,12 @@ function aw_si_pages_data(): array {
 		$set( $r->page, 'ai', (int) ( $out[ $r->page ]['ai'] ?? 0 ) + (int) $r->v );
 		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) $r->v;
 	}
+	// Referral and social sessions (owner, 31 Oct 2026), without the GA4 test-event day.
+	$skip = aw_si_ga4_skip_sql();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM {$o} WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $from, $to ) ) as $r ) {
+		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
+		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) $r->v;
+	}
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, MAX(value) m FROM {$o} WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $from, $to ) ) as $r ) {
 		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) $r->m : round( (float) $r->a, 1 ) ) );
 	}
