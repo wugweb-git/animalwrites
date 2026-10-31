@@ -203,9 +203,8 @@ function aw_seo_modules(): array {
 			'label'  => 'FAQ',
 			'switch' => true,
 			'files'  => array( 'faq' ),
-			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy, and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
+			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: AW SEO Plus → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
-				'AW_FAQ_OFF_TYPES' => array( 'type' => 'list', 'label' => 'Types without the FAQ box', 'help' => 'Every public post type and taxonomy has the FAQ box. Post types or taxonomies listed here (one per line, e.g. aw_press) get none and show no FAQ.', 'default' => array() ),
 				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
 				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
 				'AW_FAQ_MAX' => array( 'type' => 'int', 'label' => 'Most questions shown', 'help' => '', 'default' => 6 ),

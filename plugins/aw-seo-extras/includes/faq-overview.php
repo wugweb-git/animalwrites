@@ -1,7 +1,8 @@
 <?php
 /**
- * AW SEO Plus → FAQ (owner, 31 Oct 2026): the overview only. Questions are written, edited and approved in each item's
- * own FAQ box; this screen lists the items that show an FAQ (one core list table: name, type, questions shown, auto /
+ * AW SEO Plus → FAQ (owner, 31 Oct 2026): which post types and taxonomies have the FAQ box ("FAQ box on": all ticked by
+ * default; the unticked ones are stored in option aw_faq_off_types), then the overview. Questions are written, edited
+ * and approved in each item's own FAQ box; this screen lists the items that show an FAQ (one core list table: name, type, questions shown, auto /
  * edited / own; search, sort, filter by type), a "Waiting for approval" view of draft questions with bulk Approve, and
  * the counts by type with Recount.
  *
@@ -147,6 +148,62 @@ function aw_faq_admin_load() {
 	}
 }
 
+/** Every public post type (not attachments) and every public taxonomy with an edit screen: slug => label. */
+function aw_faq_type_choices() {
+	$out = array( 'post' => array(), 'term' => array() );
+	foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $slug => $o ) {
+		if ( 'attachment' !== $slug ) {
+			$out['post'][ $slug ] = (string) $o->label;
+		}
+	}
+	foreach ( get_taxonomies( array( 'public' => true, 'show_ui' => true ), 'objects' ) as $slug => $o ) {
+		$out['term'][ $slug ] = (string) $o->label;
+	}
+	return $out;
+}
+
+/** "FAQ box on": a core form-table of checkboxes, ticked = the type has the box. Administrators only can save it. */
+function aw_faq_types_form() {
+	$choices = aw_faq_type_choices();
+	$off     = aw_faq_off_types();
+	$can     = current_user_can( 'manage_options' );
+	echo '<h2>FAQ box on</h2>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_faq_types">';
+	wp_nonce_field( 'aw_faq_types' );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	foreach ( array( 'post' => 'Post types', 'term' => 'Taxonomies' ) as $store => $label ) {
+		echo '<tr><th scope="row">' . esc_html( $label ) . '</th><td><fieldset><legend class="screen-reader-text"><span>' . esc_html( $label ) . '</span></legend>';
+		foreach ( $choices[ $store ] as $slug => $name ) {
+			echo '<label><input type="checkbox" name="on[]" value="' . esc_attr( $slug ) . '"' . checked( ! in_array( $slug, $off, true ), true, false ) . disabled( $can, false, false ) . '> ' . esc_html( $name ) . ' <code>' . esc_html( $slug ) . '</code></label><br>';
+		}
+		echo '</fieldset></td></tr>';
+	}
+	echo '</tbody></table>';
+	if ( $can ) {
+		submit_button( 'Save' );
+	} else {
+		echo '<p class="description">Only administrators can change this.</p>';
+	}
+	echo '</form>';
+}
+
+add_action(
+	'admin_post_aw_faq_types',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		check_admin_referer( 'aw_faq_types' );
+		$on      = array_map( 'sanitize_key', (array) wp_unslash( $_POST['on'] ?? array() ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key on each
+		$choices = aw_faq_type_choices();
+		$all     = array_merge( array_keys( $choices['post'] ), array_keys( $choices['term'] ) );
+		update_option( 'aw_faq_off_types', array_values( array_diff( $all, $on ) ), false ); // only the unticked: a type registered later has the box
+		delete_transient( 'aw_faq_index' );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'types_saved' => 1 ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+);
+
 /** AW SEO Plus → FAQ. */
 function aw_faq_admin_page() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -163,7 +220,12 @@ function aw_faq_admin_page() {
 	if ( isset( $_GET['counted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
 		echo '<div class="notice notice-success is-dismissible"><p>Counted again.</p></div>';
 	}
+	if ( isset( $_GET['types_saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
+		echo '<div class="notice notice-success is-dismissible"><p>Saved: the FAQ box is on the ticked types.</p></div>';
+	}
 	echo '<p>Every page’s questions are in its own FAQ box: open it with Edit. A page shows its FAQ when its box has enough questions to show. This list: the pages that show one, and the draft questions waiting for approval.</p>';
+	aw_faq_types_form();
+	echo '<h2>Pages with an FAQ</h2>';
 	$table->views();
 	echo '<form method="get"><input type="hidden" name="page" value="aw-faq">';
 	if ( 'waiting' === $table->view ) {
