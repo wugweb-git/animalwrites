@@ -65,7 +65,7 @@ const AW_CONTACT_ABOUT = array(
 	'remove'      => 'Remove my data',
 	'remove-data' => 'Remove my data', // messages from before 21 Oct 2026
 );
-/** Message placeholder by reason (Phase 11 H4). Report a mistake and Remove my data have their own fields, no Message. */
+/** Message placeholder by reason (Phase 11 H4). Report a mistake fills the Message itself ({aw.correction_message}). */
 const AW_CONTACT_PLACEHOLDER = array(
 	'listing' => 'Organisation name, district, services, phone or email',
 );

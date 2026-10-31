@@ -37,7 +37,8 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'rol
 // Phase 4: the Check list tab with the bookmarklet live check, and the imports on the Settings tab.
 // Phase 5: the monthly snapshot CSV and the rebuilt keyword map. Rank Math: SEO scores, and its Search Console rows as a backup.
 // Links (31 Oct 2026): who links to us, the Bing Webmaster monthly run and the links seed.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed' ) as $aw_si_file ) {
+// Crawler access (31 Oct 2026): weekly checks from the server and from outside (workers), in Site Health.
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );

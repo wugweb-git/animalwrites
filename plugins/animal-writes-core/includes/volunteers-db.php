@@ -5,7 +5,7 @@
  * FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write there only (volunteers.php) and the
  * readers use it. Nothing writes to {prefix}aw_volunteers any more; its rows were copied into FluentCRM once with
  * `wp aw vol-to-crm` (removed 25 Oct 2026, see git history). Nothing creates or upgrades the table any more (owner,
- * 25 Oct 2026). "Remove my data" still deletes a person's row (privacy-requests.php). It has no admin screen (owner,
+ * 25 Oct 2026). Removal requests are handled by hand (owner, 31 Oct 2026). It has no admin screen (owner,
  * 25 Oct 2026); read it with WP-CLI.
  *
  * @package animal-writes-core
