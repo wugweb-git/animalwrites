@@ -100,6 +100,12 @@ function aw_seo_breadcrumb_trail() {
 	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
 		$obj   = get_queried_object();
 		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );
+	} elseif ( is_page( 'claim' ) && function_exists( 'aw_form_page_listing' ) && aw_form_page_listing() ) {
+		// /claim/?listing=<ID> (owner, 31 Oct 2026): the listing's trail, then the listing, then Claim.
+		$lid   = aw_form_page_listing()->ID;
+		$trail = array_merge( array( $dir ), $place( function_exists( 'aw_item_place' ) ? aw_item_place( $lid ) : null ) );
+		$trail[] = array( get_the_title( $lid ), get_permalink( $lid ) );
+		$trail[] = array( 'Claim', function_exists( 'aw_claim_url' ) ? aw_claim_url( $lid ) : get_permalink( get_queried_object_id() ) );
 	} elseif ( is_page() ) {
 		$id = get_queried_object_id();
 		foreach ( array_reverse( get_post_ancestors( $id ) ) as $a ) {

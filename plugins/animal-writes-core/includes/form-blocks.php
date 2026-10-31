@@ -132,11 +132,43 @@ function aw_claim_finder() {
 	return $html . '<p><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Not listed yet? Add your organisation</a></p>';
 }
 
+/**
+ * /claim/?listing=<ID>: the listing's own head band (owner, 31 Oct 2026): breadcrumbs … › {Listing} › Claim (the trail
+ * is aw-seo-extras' breadcrumbs.php), its name, logo, types and place, then the intro. Without a listing: "Claim a listing".
+ */
+function aw_claim_head_band() {
+	$listing = aw_form_page_listing();
+	$crumbs  = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
+	if ( ! $listing ) {
+		return aw_head_band( array( 'crumbs' => $crumbs, 'title' => 'Claim a listing', 'title_class' => 'wp-block-post-title' ) );
+	}
+	$id   = $listing->ID;
+	$meta = '';
+	foreach ( array_slice( function_exists( 'aw_item_type_terms' ) ? aw_item_type_terms( $id ) : array(), 0, 3 ) as $t ) { // as on the listing page: at most 3 types
+		$meta .= aw_item_chip( $t );
+	}
+	foreach ( function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array() as $p ) {
+		$st    = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
+		$meta .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
+	}
+	$logo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'thumbnail', array( 'class' => 'aw-claim-logo', 'alt' => '', 'loading' => 'eager' ) ) : '';
+	return aw_head_band(
+		array(
+			'crumbs'      => $crumbs,
+			'title'       => wp_strip_all_tags( get_the_title( $listing ) ),
+			'title_class' => 'wp-block-post-title',
+			'icon'        => $logo,
+			'note'        => ( '' !== $meta ? '<div class="aw-item-meta aw-claim-meta">' . $meta . '</div>' : '' )
+				. '<p class="kit-section-desc">People looking for help find you here. Claim your listing to correct your phone, email, services and logo, so they reach the right place. Free, checked by hand, usually within 4 to 5 days.</p>',
+		)
+	);
+}
+
 add_shortcode(
 	'aw_claim_page',
 	function () {
 		$listing = aw_form_page_listing();
-		return $listing ? '<div class="aw-form-page" id="claim">' . aw_form_page_for( $listing ) . aw_claim_form( $listing ) . '</div>' : '<div class="aw-form-page" id="claim">' . aw_claim_finder() . '</div>';
+		return '<div class="aw-form-page" id="claim">' . ( $listing ? aw_claim_form( $listing ) : aw_claim_finder() ) . '</div>'; // the listing is named in the head band
 	}
 );
 add_shortcode(
