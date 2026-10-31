@@ -114,7 +114,7 @@ function aw_ff_update_values( $data, $form ) {
 	$f    = (array) $c->custom_fields();
 	$list = fn( $k ) => array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $f[ $k ] ?? '' ) ) ) ) );
 	$name = (string) ( $data['attributes']['name'] ?? '' );
-	$text = array( 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'email' => $c->email, 'phone' => (string) $c->phone, 'whatsapp' => $f['vol_whatsapp'] ?? '', 'travel_range' => $f['vol_travel_range'] ?? '', 'languages' => $f['vol_languages'] ?? '', 'org_name' => $f['vol_organisation'] ?? '' );
+	$text = array( 'name' => trim( $c->first_name . ' ' . $c->last_name ), 'email' => $c->email, 'phone' => (string) $c->phone, 'whatsapp' => $f['vol_whatsapp'] ?? '', 'travel_range' => $f['vol_travel_range'] ?? '', 'languages' => $f['vol_languages'] ?? '', 'org_name' => $f['vol_organisation'] ?? '', 'org_listing' => $f['vol_org_listing'] ?? '' );
 	if ( isset( $text[ $name ] ) ) {
 		$data['attributes']['value'] = (string) $text[ $name ];
 	} elseif ( in_array( $name, array( 'availability', 'skills' ), true ) ) {

@@ -139,6 +139,13 @@ function aw_ff_date_ymd( $v ) {
 
 /** The form's values as saved (phones +91, claim usernames, claim dates Y-m-d). */
 function aw_ff_normalise( $data ) {
+	if ( array_key_exists( 'org_listing', $data ) ) { // the Organisation picked from the Directory: only a published listing; its own name
+		$lid                 = function_exists( 'aw_org_listing_ok' ) && aw_ff_ticked( $data, 'org_assoc' ) ? aw_org_listing_ok( $data['org_listing'] ) : 0;
+		$data['org_listing'] = $lid ? (string) $lid : '';
+		if ( $lid ) {
+			$data['org_name'] = html_entity_decode( get_the_title( $lid ), ENT_QUOTES );
+		}
+	}
 	if ( aw_ff_ticked( $data, 'wa_same' ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
 		$data['whatsapp'] = (string) $data['phone']; // "Same as my phone"
 	}
@@ -371,7 +378,7 @@ const AW_VOL_ROLE_ICONS = array( 'coordinate' => 'campaign', 'letters' => 'send'
 /** Icons inside fields, as the site's own forms have them. */
 const AW_FF_ICONS = array( 'name' => 'name', 'email' => 'mail', 'phone' => 'phone', 'whatsapp' => 'brand-whatsapp', 'org' => 'building', 'org_name' => 'building', 'aw_phone' => 'phone', 'aw_whatsapp' => 'brand-whatsapp', 'aw_email' => 'mail', 'aw_website' => 'world' );
 
-foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio' ) as $aw_ff_el ) {
+foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select', 'input_checkbox', 'input_radio', 'input_hidden' ) as $aw_ff_el ) {
 	// The step check (kit.js) uses the browser's rules with the site's words.
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_ff_el,
@@ -391,6 +398,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 			}
 			$data = function_exists( 'aw_ff_update_values' ) ? aw_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
 			$name = (string) ( $data['attributes']['name'] ?? '' );
+			if ( 'org_name' === $name && 'volunteer' === aw_ff_key( $form ) ) { // the Directory picker (aw.js, org-people.php)
+				$data['attributes']['data-aw-org-search'] = admin_url( 'admin-ajax.php?action=aw_org_search' );
+			}
 			if ( in_array( $name, AW_FF_PHONES, true ) && is_string( $data['attributes']['value'] ?? null ) && '' !== aw_ff_phone10( $data['attributes']['value'] ) ) {
 				$data['attributes']['value'] = aw_ff_phone10( $data['attributes']['value'] ); // the 10 digits after the "+91" in front of the box
 			}

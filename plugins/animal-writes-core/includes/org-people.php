@@ -133,3 +133,39 @@ function aw_org_people_box( $post ) {
 	}
 	echo '<p class="description">From the Volunteer form: contacts whose organisation name matches this listing (or whose "organisation\'s listing ID" is ' . (int) $post->ID . '). Email and phone are never shown.</p>';
 }
+
+/*
+ * Volunteer form #5, Organisation from the Directory (owner, 31 Oct 2026): typing in "Organisation name" lists up to 8
+ * published listings whose name matches, as "name · district, state" (aw.js). Picking one saves the listing in
+ * org_listing (FluentCRM vol_org_listing) and its name in org_name; "My organisation isn't listed" keeps a typed name.
+ * Public and read-only, like the PIN lookup (places.php), with a per-connection limit.
+ */
+function aw_org_search_public() {
+	nocache_headers();
+	$key = 'aw_orgq_rl_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$n   = (int) get_transient( $key );
+	if ( $n >= 120 ) {
+		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
+	}
+	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
+	$q = trim( sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( mb_strlen( $q ) < 3 ) {
+		wp_send_json_success( array() );
+	}
+	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'posts_per_page' => 8, 'fields' => 'ids', 'orderby' => 'relevance', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? (array) kits_preview_only_ids() : array() ) );
+	$out = array();
+	foreach ( $ids as $id ) {
+		list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+		$out[] = array( 'id' => (int) $id, 'name' => html_entity_decode( get_the_title( $id ), ENT_QUOTES ), 'place' => implode( ', ', array_filter( array( $district, $state ) ) ) );
+	}
+	wp_send_json_success( $out );
+}
+add_action( 'wp_ajax_nopriv_aw_org_search', 'aw_org_search_public' );
+add_action( 'wp_ajax_aw_org_search', 'aw_org_search_public' );
+
+/** A picked organisation: the published listing's ID, or 0. */
+function aw_org_listing_ok( $id ) {
+	$id = absint( $id );
+	return $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ? $id : 0;
+}
+

@@ -886,6 +886,13 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .kit-chips--segment .ff-el-form-check:first-child .kit-checkbox { border-radius: var(--kit-radius-pill) 0 0 var(--kit-radius-pill); }
 .aw-form-ff .kit-chips--segment .ff-el-form-check:last-child .kit-checkbox { border-radius: 0 var(--kit-radius-pill) var(--kit-radius-pill) 0; }
 .aw-form-ff .kit-chips--segment .kit-checkbox:has(input:checked) { position: relative; z-index: 1; }
+/* Volunteer form: the Organisation box's list of Directory listings (owner, 31 Oct 2026). */
+.aw-org-host { position: relative; }
+.aw-org-list { position: absolute; z-index: 20; left: 0; right: 0; top: 100%; margin: var(--s-1) 0 0; padding: var(--s-1) 0; list-style: none; max-height: 18rem; overflow: auto; background: var(--kit-color-bg); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2); box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
+.aw-org-opt { display: flex; align-items: center; min-height: var(--kit-size-target, 44px); padding: 0 var(--s-3); cursor: pointer; font-size: var(--fluid-body-sm); }
+.aw-org-opt[aria-selected=true], .aw-org-opt:hover { background: var(--kit-color-surface); }
+.aw-org-place { margin-left: 0.25em; color: var(--kit-field-hint); }
+.aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
 /* /volunteer/: the sidebar (campaign, Claim, the picture) from 768, under the form; beside it from 1200 (Kits). */
 @media (min-width: 768px) and (max-width: 1199px) { .aw-vol-layout.kit-with-sidebar > .kit-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; } }
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
