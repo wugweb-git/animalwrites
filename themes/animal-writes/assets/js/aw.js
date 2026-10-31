@@ -130,6 +130,7 @@
 		var box = f.querySelector('.aw-ff-send-failed');
 		if (!box) { box = document.createElement('p'); box.className = 'aw-ff-send-failed kit-field-message kit-field-error'; box.setAttribute('role', 'alert'); (f.querySelector('.ff_submit_btn_wrapper') || f).appendChild(box); }
 		box.textContent = 'Your message didn\'t send. Check your connection and try again.';
+		f.querySelectorAll('.ff-errors-in-stack').forEach(function (s) { s.hidden = true; }); // one message, not Fluent Forms' generic one as well
 	});
 	if (window.jQuery) jQuery(document).on('fluentform_submission_success', function (e, d) { var b = d && d.form && d.form[0] && d.form[0].querySelector('.aw-ff-send-failed'); if (b) b.remove(); });
 

@@ -414,9 +414,11 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 				$cls  = 'roles' === rtrim( $name, '[]' ) ? ' kit-checkbox aw-vol-role' : ' kit-checkbox';
 				$html = str_replace( "class='ff-el-form-check-label", "class='ff-el-form-check-label" . $cls, $html );
 			}
-			if ( in_array( $el, array( 'input_checkbox', 'input_radio' ), true ) && preg_match( '#<div class=[\'"]ff-el-input--label[^>]*>\s*<label>#', $html ) ) { // a group of ticks or choices: named by its label (WCAG 1.3.1)
-				$gid  = 'aw-g-' . (int) $form->id . '-' . sanitize_key( rtrim( $name, '[]' ) );
-				$html = (string) preg_replace( '#(<div class=[\'"]ff-el-input--label[^>]*>\s*)<label>#', '$1<label id="' . $gid . '">', $html, 1 );
+			if ( in_array( $el, array( 'input_checkbox', 'input_radio' ), true ) && preg_match( '#<div class=[\'"]ff-el-input--label[^>]*>\s*<label\b([^>]*)>#', $html, $lm ) ) { // a group of ticks or choices: named by its label (WCAG 1.3.1)
+				$gid = preg_match( '#\bid=[\'"]([^\'"]+)#', $lm[1], $im ) ? $im[1] : 'aw-g-' . (int) $form->id . '-' . sanitize_key( rtrim( $name, '[]' ) );
+				if ( empty( $im ) ) {
+					$html = (string) preg_replace( '#(<div class=[\'"]ff-el-input--label[^>]*>\s*)<label\b#', '$1<label id="' . $gid . '"', $html, 1 );
+				}
 				$html = (string) preg_replace( '#<div class=([\'"])ff-el-input--content\1#', '<div role="' . ( 'input_radio' === $el ? 'radiogroup' : 'group' ) . '" aria-labelledby="' . $gid . '" class=$1ff-el-input--content$1', $html, 1 );
 			}
 			if ( 'roles' === rtrim( $name, '[]' ) ) { // the ways to help as tiles, each with its icon (owner, 31 Oct 2026)
