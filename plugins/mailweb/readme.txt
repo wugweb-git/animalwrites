@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.1.1
+Stable tag: 3.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,16 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 3.2.0 =
+* Message view: no remote content loads while pictures are hidden (a Content-Security-Policy in the frame; protocol-relative and escaped URLs included), and an email's own CSS cannot break out of its style tag.
+* Replying or forwarding always flags the original Answered / Forwarded.
+* All mailboxes: paging reads deeper into each mailbox, so later pages no longer skip messages or come up empty; dates are compared as dates.
+* The mailbox lookup runs once per request and waits 5 minutes after a failure, so admin pages do not stall when the Mail API is down.
+* Mailboxes with the same name on different domains get their own key.
+* Queue: an email with no confirmation from the server is held after 4 tries instead of being resent; only errors about our own mailbox pause sending, not a refused recipient.
+* FluentCRM: the sync no longer marks mail unread, runs one at a time and does not duplicate notes.
+* Overview and dashboard: read and unread shown as in the inbox. No PHP warnings from crafted URLs.
 
 = 3.1.1 =
 * Opening a message marks it read, and replying to or forwarding a message marks the original read. The Mail API does not do this when the text is fetched.
