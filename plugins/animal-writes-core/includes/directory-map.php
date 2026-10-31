@@ -28,8 +28,8 @@ const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
  * Every published listing as a compact row, cached: [id, lat|null, lng|null, approx 0/1, primary type slug, name,
- * district name, path, state codes, district codes, tag slugs, verified 0/1, precision (own, address, locality, pin,
- * district)].
+ * district name, path, state codes, district codes, tag slugs, claimed 0/1 (aw_verified), precision (own, address,
+ * locality, pin, district), Verified 0/1 (government documents)].
  */
 function aw_dir_points_all() {
 	$all = get_transient( 'aw_dir_points' );
@@ -61,6 +61,7 @@ function aw_dir_points_all() {
 			$tags,
 			'1' === (string) get_post_meta( $id, 'aw_verified', true ) ? 1 : 0,
 			$pt ? (string) $pt[2] : '',
+			'' !== (string) get_post_meta( $id, 'aw_gov_verified_on', true ) ? 1 : 0,
 		);
 	}
 	set_transient( 'aw_dir_points', $all, 12 * HOUR_IN_SECONDS );
@@ -72,7 +73,7 @@ add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_dir_points' ) 
 /**
  * The rows matching a Directory view's filters.
  *
- * @param WP_REST_Request $r place (state or district slug), type (comma list), service (comma list), verified, q.
+ * @param WP_REST_Request $r place (state or district slug), type (comma list), service (comma list), verified (claimed), gov (Verified), q.
  * @return array
  */
 function aw_dir_points_filter( WP_REST_Request $r ) {
@@ -81,6 +82,7 @@ function aw_dir_points_filter( WP_REST_Request $r ) {
 	$types    = in_array( 'veterinary', $types, true ) ? array_merge( array_diff( $types, array( 'veterinary' ) ), AW_VET_TYPES ) : $types;
 	$services = array_filter( array_map( 'sanitize_title', explode( ',', (string) $r->get_param( 'service' ) ) ) );
 	$verified = (bool) $r->get_param( 'verified' );
+	$gov      = (bool) $r->get_param( 'gov' );
 	$q        = strtolower( trim( sanitize_text_field( (string) $r->get_param( 'q' ) ) ) );
 	$out      = array();
 	foreach ( aw_dir_points_all() as $row ) {
@@ -93,7 +95,7 @@ function aw_dir_points_filter( WP_REST_Request $r ) {
 		if ( $services && array_diff( $services, $row[10] ) ) {
 			continue;
 		}
-		if ( ( $verified && ! $row[11] ) || ( '' !== $q && false === strpos( strtolower( $row[5] ), $q ) ) ) {
+		if ( ( $verified && ! $row[11] ) || ( $gov && empty( $row[13] ) ) || ( '' !== $q && false === strpos( strtolower( $row[5] ), $q ) ) ) {
 			continue;
 		}
 		$out[] = $row;
@@ -138,6 +140,7 @@ add_action(
 			'type'     => array( 'type' => 'string' ),
 			'service'  => array( 'type' => 'string' ),
 			'verified' => array( 'type' => 'string' ),
+			'gov'      => array( 'type' => 'string' ),
 			'q'        => array( 'type' => 'string' ),
 		);
 		register_rest_route(
@@ -269,6 +272,7 @@ function aw_dir_view_filters() {
 			'type'     => $type,
 			'service'  => implode( ',', aw_request_services() ),
 			'verified' => empty( $_GET['verified'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
+			'gov'      => empty( $_GET['gov'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 			'q'        => sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification
 		)
 	);

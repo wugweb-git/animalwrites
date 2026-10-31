@@ -143,7 +143,7 @@ function aw_seo_filtered_view() {
 	}
 	$view  = array( 'type' => $type, 'key' => '', 'slug' => '', 'name' => '', 'n' => 0, 'index' => false, 'canonical' => '' );
 	$key   = (string) array_key_first( $params );
-	$own   = 'aw_listing' === $type ? array( 'tag', 'q', 'verified' ) : array_column( AW_LIST_FILTERS[ $type ] ?? array(), 0 );
+	$own   = 'aw_listing' === $type ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( AW_LIST_FILTERS[ $type ] ?? array(), 0 );
 	$value = (string) $params[ $key ];
 	if ( count( $params ) > 1 || ! in_array( $key, $own, true ) || preg_match( '/,|%2C|\[\]/i', $value ) ) {
 		return $view; // several filters, several values, or not a filter of this hub: noindex

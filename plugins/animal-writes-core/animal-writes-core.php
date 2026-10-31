@@ -59,6 +59,7 @@ require_once AW_CORE_DIR . 'includes/summary-rules.php';
 require_once AW_CORE_DIR . 'includes/places-admin.php';
 require_once AW_CORE_DIR . 'includes/directory.php';
 require_once AW_CORE_DIR . 'includes/data-sources.php';
+require_once AW_CORE_DIR . 'includes/gov-verified.php';
 require_once AW_CORE_DIR . 'includes/bindings.php';
 require_once AW_CORE_DIR . 'includes/also-reported.php';
 require_once AW_CORE_DIR . 'includes/category-images.php';

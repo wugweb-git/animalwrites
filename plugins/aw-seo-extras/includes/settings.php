@@ -143,7 +143,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'canonical' ),
 			'desc'   => 'Canonical addresses Rank Math cannot work out: hub pages, Directory places, filtered lists.',
 			'fields' => array(
-				'AW_FILTER_PARAMS' => array( 'type' => 'list', 'label' => 'Filter parameters', 'help' => 'Query parameters that make a filtered list. One per line.', 'default' => array( 'tag', 'state', 'district', 'q', 'category_name', 'verified', 'sort', 'publisher', 'court', 'issuer' ) ),
+				'AW_FILTER_PARAMS' => array( 'type' => 'list', 'label' => 'Filter parameters', 'help' => 'Query parameters that make a filtered list. One per line.', 'default' => array( 'tag', 'state', 'district', 'q', 'category_name', 'verified', 'gov', 'sort', 'publisher', 'court', 'issuer' ) ),
 			),
 		),
 		'robots' => array(

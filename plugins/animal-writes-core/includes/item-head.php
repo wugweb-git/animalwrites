@@ -180,7 +180,8 @@ function aw_block_item_meta( $a, $id ) {
 		if ( '' !== $bl ) {
 			$row .= '<span class="kit-tag kit-tag--danger">' . esc_html( $bl ) . '</span>';
 		}
-		if ( get_post_meta( $id, 'aw_verified', true ) ) { // one status: Needs re-check instead of Verified while it is due
+		$row .= function_exists( 'aw_gov_verified_line' ) ? aw_gov_verified_line( $id ) : ''; // Verified on {date}: registration from government documents
+		if ( get_post_meta( $id, 'aw_verified', true ) ) { // Claimed; one status: Needs re-check instead of Claimed while it is due
 			$on   = (string) get_post_meta( $id, 'aw_verified_on', true );
 			$row .= get_post_meta( $id, 'aw_needs_reverify', true )
 				? '<span class="kit-tag kit-tag--warning">' . esc_html__( 'Needs re-check', 'animal-writes-core' ) . '</span>'
