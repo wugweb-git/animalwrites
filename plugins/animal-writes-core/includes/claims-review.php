@@ -57,10 +57,8 @@ const AW_CLAIM_L = array(
 	'l_awbi_rec'   => array( 'AWBI recognised on', 'aw_awbi_recognised', 'awbi_recognised', true ),
 	'l_awbi_ren'   => array( 'AWBI renewed on', 'aw_awbi_renewed', 'awbi_renewed', true ),
 	'l_awbi_valid' => array( 'AWBI valid until', 'aw_awbi_valid', 'awbi_valid', true ),
-	'l_donate'     => array( 'Donate link', 'aw_donate_url', 'donate_url', true ),
 	'l_volunteer'  => array( 'Volunteer link', 'aw_volunteer_url', 'volunteer_url', true ),
 	'l_adopt'      => array( 'Adopt link', 'aw_adopt_url', 'adopt_url', true ),
-	'l_upi'        => array( 'UPI ID', 'aw_upi', 'upi', true ),
 );
 
 /** The claim form's Fluent Forms ID (0 when it is not set up). */

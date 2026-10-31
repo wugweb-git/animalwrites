@@ -329,18 +329,17 @@ function aw_block_listing_profiles( $a, $id ) {
 
 function aw_block_listing_support( $a, $id ) {
 	if ( ! aw_listing_here( $id ) ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Support: Donate, Volunteer, Adopt, UPI' ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Support: Volunteer, Adopt' ) : '';
 	}
 	$rel  = aw_listing_rel( $id );
 	$btns = '';
-	foreach ( array( 'aw_donate_url' => array( 'heart', __( 'Donate', 'animal-writes-core' ) ), 'aw_volunteer_url' => array( 'name', __( 'Volunteer', 'animal-writes-core' ) ), 'aw_adopt_url' => array( 'home', __( 'Adopt', 'animal-writes-core' ) ) ) as $k => $l ) {
+	// No money anywhere (owner, 31 Oct 2026): no Donate link and no UPI ID on listings; the stored values stay, unused.
+	foreach ( array( 'aw_volunteer_url' => array( 'name', __( 'Volunteer', 'animal-writes-core' ) ), 'aw_adopt_url' => array( 'home', __( 'Adopt', 'animal-writes-core' ) ) ) as $k => $l ) {
 		if ( aw_lf( $id, $k ) ) {
 			$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . aw_i( $l[0] ) . esc_html( $l[1] ) . '</a>';
 		}
 	}
-	$upi  = aw_lf( $id, 'aw_upi' );
-	$body = ( '' !== $btns ? '<div class="aw-listing-actions">' . $btns . '</div>' : '' )
-		. ( '' !== $upi ? aw_listing_dl( array( array( 'UPI', '<span class="aw-listing-upi">' . esc_html( $upi ) . '</span><button type="button" class="kit-btn kit-btn--secondary kit-btn--sm kit-share-copy aw-upi-copy" data-url="' . esc_attr( $upi ) . '" data-done="' . esc_attr__( 'UPI ID copied', 'animal-writes-core' ) . '" aria-label="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '" title="' . esc_attr__( 'Copy UPI ID', 'animal-writes-core' ) . '"><span class="kit-ico kit-ico--copy" aria-hidden="true"></span><span class="kit-share-name">' . esc_html__( 'Copy', 'animal-writes-core' ) . '</span></button><span class="screen-reader-text" role="status" aria-live="polite"></span>', 'send' ) ) ) : '' );
+	$body = '' !== $btns ? '<div class="aw-listing-actions">' . $btns . '</div>' : '';
 	return aw_listing_group( 'support', __( 'Support', 'animal-writes-core' ), $body );
 }
 
