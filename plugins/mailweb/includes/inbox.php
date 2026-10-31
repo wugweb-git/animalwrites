@@ -376,6 +376,10 @@ function mailweb_message_screen( $s ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'This message could not be opened (moved or deleted in webmail?).', 'mailweb' ) . '</p></div>';
 		return;
 	}
+	// The Mail API does not mark a message read when its text is fetched: mark it read here, as webmail does on open.
+	if ( ! in_array( '\\Seen', (array) ( $msg['m']['flags'] ?? array() ), true ) ) {
+		mailweb_call( 'PATCH', mailweb_fpath( $s['box'], $path ) . '/messages/' . (int) $s['uid'], array( 'addFlags' => array( '\\Seen' ) ) );
+	}
 	delete_transient( 'mailweb_folders_' . $s['box'] );
 	if ( function_exists( 'mailweb_overview_flush' ) ) {
 		mailweb_overview_flush();
@@ -574,7 +578,7 @@ function mailweb_form_item_screen( $s ) {
 
 /* ---------- Reading ---------- */
 
-/** One message: meta and text (text fetch marks it read), cached per request. */
+/** One message: meta and text, cached per request. Fetching does not mark it read; mailweb_message_screen() does. */
 function mailweb_get( $key, $folder, $uid ) {
 	static $cache = array();
 	$k = $key . '|' . $folder . '|' . $uid;
@@ -810,9 +814,14 @@ function mailweb_send_from_form( $in, $refbox ) {
 		wp_safe_redirect( add_query_arg( 'mailweb_done', 'fail', $retry ) );
 		exit;
 	}
-	if ( $orig && ! isset( $req['inReplyTo'] ) && ! isset( $req['forwardOf'] ) ) {
-		// Sent from another mailbox: flag the original Answered / Forwarded ourselves, as webmail would.
-		mailweb_call( 'PATCH', mailweb_fpath( $orig[0], $orig[1] ) . '/messages/' . $orig[2], array( 'addFlags' => array( 'forward' === $mode ? '$Forwarded' : '\\Answered' ) ) );
+	if ( $orig ) {
+		// A replied or forwarded message has been read. Sent from another mailbox, the Mail API does not flag the
+		// original Answered / Forwarded either: add that too, as webmail would.
+		$flags = array( '\\Seen' );
+		if ( ! isset( $req['inReplyTo'] ) && ! isset( $req['forwardOf'] ) ) {
+			$flags[] = 'forward' === $mode ? '$Forwarded' : '\\Answered';
+		}
+		mailweb_call( 'PATCH', mailweb_fpath( $orig[0], $orig[1] ) . '/messages/' . $orig[2], array( 'addFlags' => $flags ) );
 		delete_transient( 'mailweb_folders_' . $orig[0] );
 	}
 	if ( function_exists( 'mailweb_crm_note_reply' ) ) {

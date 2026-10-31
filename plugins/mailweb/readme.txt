@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.0.0
+Stable tag: 3.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,9 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 Nothing is deleted. Settings and earlier data stay in place.
 
 == Changelog ==
+
+= 3.1.1 =
+* Opening a message marks it read, and replying to or forwarding a message marks the original read. The Mail API does not do this when the text is fetched.
 
 = 3.0.0 =
 * Now a standalone product: slug, folder and text domain `mailweb`; functions, options, hooks and the queue table renamed to `mailweb_`.
