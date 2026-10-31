@@ -5,7 +5,7 @@
  *
  * Table {prefix}aw_subscribers: the backup of the list from before FluentCRM (no admin screen since 25 Oct 2026; read
  * it with WP-CLI). Nothing creates or upgrades it any more (owner, 25 Oct 2026: the site's own form and its handler were
- * removed); removal requests are handled by hand (owner, 31 Oct 2026); FluentCRM's unsubscribe marks a row
+ * removed); FluentCRM's unsubscribe marks a row
  * (fluentcrm.php). Statuses: pending, invited, active, unsubscribed. Emails sent before carry a confirm and an
  * unsubscribe link with the row's token; those links keep working (below).
  *

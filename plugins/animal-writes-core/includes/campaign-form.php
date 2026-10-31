@@ -11,8 +11,8 @@
  * The raw copy (owner, 21 Oct 2026: "keep a ready fallback"): every form send (all Fluent Forms forms, and the campaign
  * sign-up) is copied whole into wp_aw_form_raw the moment it reaches the server, before any check. Its status says
  * what happened: received (refused by a check, or failed), saved (with the entry ID), duplicate (a retry of a
- * send already saved). Kept 180 days; a removal request
- * is handled by hand (owner, 31 Oct 2026). wp aw raw-export writes it as CSV.
+ * send already saved). Kept 180 days.
+ * wp aw raw-export writes it as CSV.
  *
  * @package AnimalWritesCore
  */

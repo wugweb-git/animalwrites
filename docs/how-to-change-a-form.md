@@ -26,7 +26,7 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Report a mistake** (Contact, reason `correction`; owner, 31 Oct 2026): `/contact/?about=correction&item=<ID>[&field=picture|about|phone|email|address|hours]` (`aw_report_url()`, form-blocks.php) chooses the reason and fills the Message box with "Page: {title}", "Field: {field}" (only when given), the page's link and an empty line (`{aw.correction_message}`, reports.php; also from the older `?listing=`). No extra or hidden fields.
 
-**Remove my data** (Contact, reason `remove`): `/contact/?about=remove`; Message empty. Handled by hand by the owner (Mail → Website forms). There is no automatic removal: no confirmation email, no eraser of the site's own (the erasers and `privacy-requests.php` were removed, 31 Oct 2026).
+**Remove my data** (Contact, reason `remove`): `/contact/?about=remove`; Message empty; no FluentCRM step runs.
 
 **Exports:** the current volunteer and subscriber lists are exported from **FluentCRM** (Contacts → filter by tag `volunteer` or list Newsletter → Export). The old tables `{prefix}aw_volunteers` and `{prefix}aw_subscribers` hold only rows from before the forms stopped writing them; they are kept as backups with no admin screen (read them with WP-CLI).
 
@@ -78,4 +78,4 @@ Every change goes through GitHub (see CLAUDE.md). A new form or function, or a r
 - "Sign it" in the campaign letter tool is the Fluent Forms form **Campaign form** (`forms/10-campaign-form.json`, option `aw_ff_campaign_form`). The letter tool keeps its own screen; when a letter is sent, `campaign.js` submits the signer to it. Entries: Fluent Forms → Campaign form. Its FluentCRM link: Newsletter list, tags newsletter and volunteer, fields vol_city, vol_page, vol_source, vol_whatsapp, campaign_ref, campaign_last, campaign_grounds, campaign_route, campaign_date, campaign_line. After the link (`campaign-form.php`): tag campaign-<slug>, the boxes as 1/0, the statistics row.
 - The labels on the page come from the letter tool (`campaign-tools.php`), not from the form: change both.
 - Unticked boxes (newsletter, WhatsApp, organisation, show my name, consent) are saved as 0 in every entry and contact.
-- **Raw copy:** every form send reaches `wp_aw_form_raw` whole, before any check. Status: saved (entry ID), received (refused or failed), duplicate (a retry). 180 days; removal requests are handled by hand. To get it: `wp aw raw-export --since=2026-10-21 > raw.csv` (add `--status=received` for sends that did not become entries).
+- **Raw copy:** every form send reaches `wp_aw_form_raw` whole, before any check. Status: saved (entry ID), received (refused or failed), duplicate (a retry). 180 days. To get it: `wp aw raw-export --since=2026-10-21 > raw.csv` (add `--status=received` for sends that did not become entries).

@@ -443,7 +443,7 @@ add_action(
  * contacts, only when its condition holds, and cannot add a note, so: every Contact sender becomes a contact
  * (transactional when new, tag contact-form) with the message as a note; every claimant a contact (transactional when
  * new, tag claimant); and every Contact, Claim and Volunteer contact gets the newsletter box as 1/0. A Contact send
- * with the reason Remove my data never reaches FluentCRM (a removal request asks us to hold less; owner, 31 Oct 2026),
+ * with the reason Remove my data never reaches FluentCRM (owner, 31 Oct 2026),
  * whatever is ticked; its entry is kept like any other. Also counts the submission for the per-connection limit.
  */
 add_action(
