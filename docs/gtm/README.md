@@ -14,7 +14,7 @@ First import:
 1. GTM → Admin → Import container → choose the file → workspace "Default" → **Merge** → "Overwrite conflicting tags, triggers and variables" (never Rename).
 2. Preview on animalwrites.in, click around (search, a phone link, a PDF), check the events arrive in GA4 DebugView.
 3. Submit / Publish the container.
-4. Tell Claude Code it is published: it then switches off Site Kit's direct GA4 tag (option `kits_ga4_via_gtm` = 1),
+4. Once it is published, switch off Site Kit's direct GA4 tag (option `kits_ga4_via_gtm` = 1),
    so GA4 is counted only through GTM. Until then the site sends events to GA4 through Site Kit's tag, and this
    container must stay unpublished (or GA4 would count twice).
 

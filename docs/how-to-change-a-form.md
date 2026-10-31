@@ -65,9 +65,9 @@ Any ?form= that lands on /thank-you/ (`aw_thanks_forms()`): its heading is the H
 | Wrong format | Email: Fluent Forms' email rule message; phone / WhatsApp: "Enter a 10-digit number, like 9876543210."; claim username: "Enter the username only, like animalwrites."; claim date: "Enter a date like 8 Oct 2026."; year: "Enter a year, like 2010."; web address: the form's url rule message; upload: "Use a PNG, JPG or WebP under 2 MB." |
 | Spam check | "Couldn't verify you're not a bot. Try again." |
 | Too many sends | "Too many tries. Wait a minute, then try again." |
-| The send itself fails (no connection, server error) | "Your message didn't send. Check your connection and try again." (aw.js; wording waiting for the owner's yes) |
+| The send itself fails (no connection, server error) | "Your message didn't send. Check your connection and try again." (aw.js) |
 
-**Which form shows where:** each page calls `aw_ff_form( <key> )` (`forms-fluentforms.php`) with the form's ID from `wp aw ff-form <key> <ID>` (keys: contact, volunteer, claim, report, remove_data; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
+**Which form shows where:** each page calls `aw_ff_form( <key> )` (`forms-fluentforms.php`) with the form's ID from `wp aw ff-form <key> <ID>` (keys in `AW_FF_FORMS`: contact, volunteer, claim, and report for the inactive form #7, still printed by the old `[aw_report_box]` shortcode; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
 
 ## Where each form is shown
 
@@ -78,7 +78,7 @@ Any ?form= that lands on /thank-you/ (`aw_thanks_forms()`): its heading is the H
 | Contact (#4) | `[aw_contact_form]` (`/contact/`); `?about=listing` and so on choose the reason | `pages.php`, `aw_contact_form()`; reasons and message examples `AW_CONTACT_ABOUT`, `AW_CONTACT_PLACEHOLDER` (the placeholder follows the reason, `aw.js`) |
 | Volunteer sign-up (#5) | block `animal-writes/volunteer` (the Volunteer banner pattern, `/volunteer/`); `[aw_volunteer_update]` on `/update/` | `volunteers.php`, `form-blocks.php` |
 | Claim this listing (#6) | `[aw_claim_page]` (`/claim/?listing=<ID>`, with the listing's own head band; without a listing, the organisation finder) | `form-blocks.php`, `claims.php`, `claims-review.php` |
-| Report a mistake, Remove my data | Contact (#4), `?about=correction`, `?about=remove`. `/report/` and `/remove-my-data/` are Rank Math 301s to them (the query string is kept, so `?item=` and `?listing=` still name the item); the pages are in the trash and forms #7 and #8 inactive (entries kept; export 31 Oct in `Claude outputs/`). | `pages.php`, `reports.php`, `form-blocks.php` |
+| Report a mistake, Remove my data | Contact (#4), `?about=correction`, `?about=remove`. `/report/` and `/remove-my-data/` are Rank Math 301s to them (the query string is kept, so `?item=` and `?listing=` still name the item); the pages are in the trash and forms #7 and #8 inactive (entries kept and exported on 31 Oct). | `pages.php`, `reports.php`, `form-blocks.php` |
 
 Where they appear: the volunteer banner is the theme pattern `themes/animal-writes/patterns/volunteer-banner.php` (block `animal-writes/volunteer`); the listing card is the block `animal-writes/listing-help` in `themes/animal-writes/templates/single-aw_listing.html`; the newsletter strip is in the footer (reusable block 12752, `[aw_newsletter]`).
 
@@ -98,7 +98,7 @@ Where they appear: the volunteer banner is the theme pattern `themes/animal-writ
 - **Show a form on another page:** put its shortcode in the page, or call `aw_ff_form( <key> )` in code.
 - **A form was rebuilt and has a new ID:** `wp aw ff-form <key> <new ID>`.
 
-Every change goes through GitHub (see CLAUDE.md). A new form or function, or a restructured one: its own branch and worktree → a pull request into `wordpress-dev` → the review gate and the Deploy check → the owner merges → `aw-ship.sh` ships it. A small fix: commit straight onto `wordpress-dev`; the Deploy check still gates `wordpress`, then `aw-ship.sh`.
+Every change goes through GitHub (see CLAUDE.md): a new form or function, or a restructured one, as a pull request into `wordpress-dev`; a small fix straight onto `wordpress-dev`. The Deploy check gates `wordpress`, then `aw-ship.sh` ships it.
 
 ## Campaign form (#10) and the raw copy (21 Oct 2026)
 

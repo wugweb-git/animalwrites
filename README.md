@@ -4,15 +4,15 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 
 - `themes/kits-by-wugweb/` — the Kits by Wugweb parent theme (in this repo).
 - `themes/animal-writes/` — the Animal Writes child theme (brand palette, templates).
-- `plugins/animal-writes-core/` — content types, templates, directory, campaigns, forms glue, deploy purge.
+- `plugins/animal-writes-core/` — content types, templates, directory, campaigns, forms glue, deploy purge, branded error pages.
 - `plugins/aw-sourcing/` — feeds, keywords, publishers, relay, AI keys, To review, enrichment, the Workers tab, the ingest API.
 - `plugins/aw-seo-extras/` — all SEO code (with Rank Math), the FAQ system, Search Insights.
 - `plugins/kits-core/` — reusable design-system parts (no site-specific code).
-- `plugins/mailweb/` — Mailweb 3.0: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
+- `plugins/mailweb/` — Mailweb 3.2: the WordPress inbox for the Hostinger mailboxes; replies go from support@.
 
 ## Docs
-- [CLAUDE.md](CLAUDE.md) — working rules (branch + PR + review gate for bigger work, small changes straight onto `wordpress-dev`, shipping).
-- [docs/pending.md](docs/pending.md) — open work (mirrored in Notion "8. Status & Pending").
+- [CLAUDE.md](CLAUDE.md) — working rules (pull requests for bigger work, small changes straight onto `wordpress-dev`, shipping).
+- [docs/pending.md](docs/pending.md) — open and finished work.
 - [docs/plugin-map.md](docs/plugin-map.md) — every plugin file and what it does.
 - [docs/design-system.md](docs/design-system.md) — breakpoints (768 / 1200), tokens, components.
 - [docs/rollback.md](docs/rollback.md) — release tags and rollback.
@@ -33,5 +33,5 @@ Live at https://animalwrites.in. How changes are made, reviewed and shipped: [CL
 ## Guardrails
 - Sponsored items show "Sponsored by …" automatically.
 - Imported listings are never verified. A daily job flags listings verified more than 180 days ago (`aw_needs_reverify`).
-- Site forms (Fluent Forms + FluentCRM) send no email except WordPress's Remove-my-data confirmation.
+- Site forms (Fluent Forms + FluentCRM) send no email (`aw_ff_mail_off()`); Report a mistake and Remove my data are reasons on the Contact form (`/report/` and `/remove-my-data/` redirect to `/contact/`).
 - Ads: Advanced Ads only, switched off on live.

@@ -1,10 +1,10 @@
 # Animal Writes 2.0: status
 
-**This file is a snapshot of 7 Oct 2026, kept as history.** Current state: [pending.md](pending.md) (open and done work) and [plugin-map.md](plugin-map.md) (what each file does). What changed since, in short (24 Oct 2026):
-- Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.0, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
-- Deploys: bigger work (a new plugin or function, restructuring) goes branch + PR into `wordpress-dev` → review gate → owner merges; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`aw-ship.sh`); the cache is purged after every deploy.
-- Mail: replies from support@ (Mailweb); site forms send no email except the Remove-my-data confirmation; the newsletter is the FluentCRM list "Newsletter".
-- Sourcing has its own menu (from this PR, 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
+**This file is a snapshot of 7 Oct 2026, kept as history.** Current state: [pending.md](pending.md) (open and done work) and [plugin-map.md](plugin-map.md) (what each file does). What changed since, in short (31 Oct 2026):
+- Plugins: Animal Writes Core, AW Sourcing, AW SEO extras (with Rank Math, the SEO system; sitemap `/sitemap_index.xml`), Kits Core (reusable parts only), Mailweb 3.2, Fluent Forms + FluentCRM, Advanced Ads (switched off on live), LiteSpeed Cache, Site Kit.
+- Deploys: bigger work (a new plugin or function, restructuring) goes as a pull request into `wordpress-dev`, merged by the owner; small changes (data, docs, small fixes) go straight onto `wordpress-dev`. Then the Deploy check moves `wordpress` → Hostinger pulls (`aw-ship.sh`); the cache is purged after every deploy.
+- Mail: replies from support@ (Mailweb); site forms send no email; Report a mistake and Remove my data are reasons on the Contact form; the newsletter is the FluentCRM list "Newsletter".
+- Sourcing has its own menu (since 25 Oct 2026; it was Settings → Sourcing): Overview, To review, Enrichment review, the settings screens, the reports and jobs, Settings; 18 workflows on Sourcing → Workers.
 - Indexing: directory profiles with no contact are noindex and out of the sitemap unless they have Search Console impressions; `?state=` lists and claim forms are noindex; the Directory map and Near me are built.
 - Breakpoints 768 / 1200 (640 retired).
 
@@ -91,11 +91,11 @@
 | News | title, source, date, link, image URL, our summary | Google News keyword feeds, The Hindu RSS | every 6 h | workers, then **automatic review** (below) |
 | Legal Watch | same, plus PDFs for government notices | AWBI pages, PIB (via Google News), LiveLaw, Bar & Bench, SC Observer | every 6 h | workers, then **automatic review** |
 | Opportunities | title, organisation, place, deadline, link (factual line, no AI wording) | WWF-India careers, AWBI notifications (workers); Wildlife SOS careers (fetched by the site daily) | every 6 h / daily | published directly |
-| Research | full PDFs | AWBI, SC, WHO | one-off | Claude Code |
-| Directory | name, code, area, type, phone where published | AWBI lists, DAHD | one-off per list | Claude Code (`tools/directory`) |
+| Research | full PDFs | AWBI, SC, WHO | one-off | by hand |
+| Directory | name, code, area, type, phone where published | AWBI lists, DAHD | one-off per list | import scripts (`tools/directory`) |
 | Directory updates | changes | the organisations | on request | claim form + admin |
-| States/districts | 36 + 820 | LGD | one-off | Claude Code |
-| Helplines, guides, campaigns, opportunities, resources | content | government sources, 1.0, by hand | one-off | Claude Code |
+| States/districts | 36 + 820 | LGD | one-off | import script |
+| Helplines, guides, campaigns, opportunities, resources | content | government sources, 1.0, by hand | one-off | by hand |
 
 **Automatic review (owner's decision, 7 Oct 2026):** a news or legal item goes live when it passes every check: relevance (owner's keyword lists), not a web story/video/gallery, not the same story as one published in the last 7 days, legal items from a legal or government source, a sane summary. Anything else waits in Pending with the reason in the "Review" column; the owner reviews only those.
 
@@ -180,7 +180,7 @@
 
 ## 10. Notion
 - **🐾 Animal Writes 2.0:** build status and a **Pending** section (merged from the ⏳ Pending page, which now points there), updated 7 Oct.
-- **Topic write-ups and photos** table: the owner fills it in; Claude copies it to WP Admin → Topics.
+- **Topic write-ups and photos** table: the owner fills it in; it is copied to WP Admin → Topics.
 
 ## 11. Pending
 
