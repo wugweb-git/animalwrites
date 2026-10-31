@@ -199,7 +199,7 @@ gives the ad-blocker rate.
 | **Campaign title** | `campaign_title` | the same (new) |
 | **Ad slot** | `ad_slot` | ad_slot_status, ad_slot_view (retired 21 Oct; GTM items removed 31 Oct) |
 | **Ad status** | `ad_status` | ad_slot_status, ad_slot_view (retired 21 Oct; GTM items removed 31 Oct) |
-| Has FAQ | `faq_group` | every event (Google tag; FAQ experiment group) |
+| Has FAQ | `faq_group` | every event (Google tag): `faq` or `none` on every page with the FAQ box (31 Oct 2026: the holdout experiment ended, so `holdout` no longer occurs; no GA4 or GTM change) |
 | Contact reason | `contact_reason` | aw_form_submit (31 Oct) |
 | **Sponsor** | `sponsor` | sponsored_view, sponsored_click (new) |
 | **Sponsored type** | `sponsored_type` | sponsored_view, sponsored_click (new) |

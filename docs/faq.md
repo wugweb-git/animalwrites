@@ -1,28 +1,37 @@
 # FAQ system
 
-Owner-approved spec, 20 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php`; schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
+Owner-approved spec, 20 Oct 2026; FAQ on every page, 31 Oct 2026. Code: `plugins/aw-seo-extras/includes/faq.php` (the feature, generic), `faq-overview.php` (AW SEO Plus → FAQ), `plugins/animal-writes-core/includes/faq-data.php` (the site's automatic questions and rules, through filters); schema: `plugins/aw-seo-extras/includes/schema.php`; accordion style and script: Kits `kit.css` / `kit.js` (`kit-faq`).
 
 ## Rules
 
-- One FAQ per page, 3 to 6 questions (AW SEO Plus → Settings → FAQ: fewest, fewest on a guide, most, longest answer). Fewer than 3: no FAQ section and no FAQPage schema. Resources guides: 2 to 6 (owner, 21 and 25 Oct 2026).
+- One FAQ per page, 3 to 6 questions (AW SEO Plus → Settings → FAQ: fewest, fewest on a post, most, longest answer). Fewer than 3: no FAQ section and no FAQPage schema. Posts (Resources guides): 2 to 6 (owner, 21 and 25 Oct 2026).
 - Each answer: first sentence answers and names the subject; at most 50 words; one link (the section or the source); dates j M Y with the calendar icon.
-- The FAQPage node is parsed from the rendered accordion, so its text is the visible text word for word.
-- No FAQ on News, Research, Opportunities, format tags, About, Contact, policies, Home, News and Resources pages.
-- Resources guides (owner, 25 Oct 2026): their own questions in the guide's FAQ box (meta `aw_faq`, approved items only), shown by the `item-faq` block at the end of the content with our FAQPage schema. A Rank Math FAQ block on a guide (from the editor or a publish script) is converted on save: questions and answers word for word, the block and its heading removed, each conversion's removed markup and the FAQ as it was before kept in `_aw_faq_rm_block` (a list, newest last). One FAQ system for the whole site; Rank Math keeps titles, descriptions, sitemaps and redirects.
+- The FAQPage node is parsed from the rendered accordion, so its text is the visible text word for word. Its `isPartOf` / `about` point at a node the page's graph has (else the page's own node).
+- One FAQ per page: a page with a Rank Math FAQ block in its content keeps that one and shows none from its box (today: campaign 13848, frozen until 7 Nov).
+- Resources guides (owner, 25 Oct 2026): a Rank Math FAQ block on a guide (from the editor or a publish script) is converted on save into the guide's FAQ box: questions and answers word for word, the block and its heading removed, each conversion's removed markup and the FAQ as it was before kept in `_aw_faq_rm_block` (a list, newest last). One FAQ system for the whole site; Rank Math keeps titles, descriptions, sitemaps and redirects.
+
+## The FAQ box (every page, owner 31 Oct 2026)
+
+- Every public post type and every public taxonomy has the FAQ box on its edit screen: pages (forms pages such as Contact, Volunteer, Claim; policy pages such as Terms, Privacy, Disclaimer), posts, Library, campaigns, Directory listings, News, any future type; tags and categories. AW SEO Plus → Settings → FAQ: on for all; "Types without the FAQ box" lists post types or taxonomies to leave out. No list of Animal Writes types in the plugin: the site's rules are in `faq-data.php` (filters `aw_faq_registry`, `aw_faq_context`, `aw_faq_show_here`).
+- A page shows its FAQ only when its box has enough questions to show (the minimum).
+- Automatic questions (Directory listings, Library documents: the registry below) are in the box filled in, marked **Auto**. Untouched, they follow the data. Edited, they are the page's own (**Edited**) and the data no longer changes them; "Back to automatic" undoes that. **Remove** hides one; **Order** moves rows. New data later adds its question at the end.
+- Own questions (**Own**): written in the box or imported as drafts; shown once **Approved**.
+- Each row says whether the page shows it and why not (draft, removed, repeats a question above, over the limit of 6), and the box says when the page shows no FAQ.
+- Storage: meta `aw_faq` (post or term), JSON list in the box's order. Own rows `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`; automatic rows `{auto: id, state: auto|edited|removed}` (+ `q`, `a` when edited). A box in its default order with nothing edited or removed stores no automatic rows.
 
 ## Where it shows
 
-| Page | Questions | Position |
-|---|---|---|
-| Directory listing | registry A (data) | after Support, before Sources (`single-aw_listing.html`) |
-| Library document | registry B (data) | last in Content, before Sources (`single.html`) |
-| Organisation type, service, category | approved topic items | after the list, before Share (`term-faq` block) |
-| Directory, Volunteer, Claim, Opportunities | approved topic items | after the list (end of the page content), page 1 only, no filters |
-| Resources guide | the guide's own approved items (FAQ box) | `item-faq` block, last in Content, before Sources (`single.html`) |
+| Page | Position |
+|---|---|
+| Directory listing | after Support, before Sources (`single-aw_listing.html`, `item-faq` block) |
+| Library document, Resources guide, News, Opportunity | last in Content, before Sources (`single.html`, `item-faq` block) |
+| Category and tag pages | after the list, before Share (`term-faq` block) |
+| Directory, Volunteer, Claim, Opportunities (Settings: pages with a subject in the heading) | after the list (the end of the page's content), wide, page 1 only, no filters, never on a Directory place or type view |
+| Every other page or campaign | after the page's content at the content width, page 1 only, no filters |
 
-## Registry (data-driven)
+## Registry (automatic questions)
 
-`aw_faq_registry()`: question template, fields needed, answer builder, priority, search pattern. Nothing is stored per page. Candidates are kept when their fields have values, deduped by the fact they state (e.g. "Does X offer adoption?" from the Adoption service tag repeats the services answer and is dropped), sorted by priority, capped at 6.
+`aw_faq_registry()` (filter; the site's entries in `faq-data.php`): question template, fields needed, answer builder, priority, search pattern. Nothing is stored per page unless the box changes a question. Candidates are kept when their fields have values, deduped by the fact they state (e.g. "Does X offer adoption?" from the Adoption service tag repeats the services answer and is dropped), sorted by priority, capped at 6.
 
 - A listing's services answer "based on type" is shown but does not count toward the 3 (owner, 20 Oct 2026): a listing needs 3 answers from its own data.
 - Library questions use the document's short name: the "Short name" field (`aw_short_name`, e.g. PCA Act 1960, ABC Rules 2023), else the primary focus keyphrase. The first answer gives the full official title once.
@@ -34,21 +43,18 @@ Library: "Who issued …" is not asked for Acts and Rules (the stored issuer is 
 
 Resources guides: AW SEO Plus → FAQ counts them in a row of their own (guides with and without an FAQ; research summaries are not counted, as Research gets no FAQ). Since 25 Oct 2026 every guide has one.
 
-## Topic items
+## AW SEO Plus → FAQ
 
-Meta `aw_faq` (term or page): JSON list of `{q, a, sources[{name,url}], keyword, status draft|approved, reviewed Y-m-d}`. Edited on the term screen, or in the "FAQ" box of a hub page or a Resources guide. Drafts are never shown. AW SEO Plus → FAQ lists every draft with its sources; tick and Approve.
+The overview only; approved questions are not listed here (they are in each page's box). One core list table, one row per item that shows an FAQ: name, type, questions shown, auto / edited / own; Edit FAQ (→ the item's box) · View; search, sort, filter by type. "Waiting for approval": items with draft questions (AI-proposed or imported), with the drafts listed; approve them in the item's box or tick and **Approve** (bulk). Counts by type (published, show an FAQ, questions but fewer than the minimum, drafts waiting) and Recount; the counts are cached for an hour.
 
-## Experiment
+## No holdout (owner, 31 Oct 2026)
 
-10% of eligible listings and Library documents (crc32 of salt + ID, stable) show no FAQ until the owner rolls out (AW SEO Plus → FAQ). Option `aw_faq_experiment` holds start, weeks (6), pct (10), salt, on. The page context pushed to GTM has `faq_group` = faq | holdout | none on listings and Library documents; GTM variable `DLV - faq_group` sends it on the GA4 Google tag (GTM version 8, 20 Oct 2026) and GA4 has the event-scoped custom dimension "Has FAQ" (`faq_group`).
-
-Compare after 6 weeks: Search Console impressions, clicks and CTR for queries containing "contact number", "pdf", "in hindi", "address" on FAQ pages vs holdout pages (page lists: `wp aw-faq holdout`), and GA4 sessions referred by chatgpt.com, perplexity.ai and gemini.google.com by landing page.
+The 20 Oct experiment (10% of listings and Library documents without an FAQ) is removed: option `aw_faq_experiment`, the holdout code and the `wp aw-faq holdout` command are gone; every eligible page shows its FAQ. The page context's `faq_group` is `faq` or `none` on every page with the box (GA4 dimension "Has FAQ" unchanged; docs/analytics/ga4-setup.md).
 
 ## Commands
 
-- `wp aw-faq report` — counts by type and group, questions per FAQ, drafts waiting.
+- `wp aw-faq report` — counts by type: published, show an FAQ, fewer than the minimum, drafts waiting.
 - `wp aw-faq convert-guides [--dry-run]` — move every guide's Rank Math FAQ block into its own FAQ (also happens on each save); flags answers over 50 words, more than one link, and FAQs over 6 questions (only the first 6 show). `wp aw-faq undo-guide <id>` reverses the latest conversion: the block back and the guide's FAQ as it was before.
-- `wp aw-faq check [--verbose]` — on every page: 3–6 questions or none (guides 2–6), schema text = visible text, no duplicate question, ≤ 50 words, one link, holdout pages show none; reports pages whose focus keyphrase is in fewer than 2 questions.
-- `wp aw-faq holdout` — CSV of eligible pages: url, type, group, questions.
-- `wp aw-faq import <file.json>` — add topic drafts (`{"post_tag:slug"|"category:slug"|"page:slug"|"library:slug": [{q, a, sources, keyword}]}`; `library:` is for letter templates); existing questions are kept.
+- `wp aw-faq check [--verbose]` — on every page with an FAQ: the minimum to 6 questions, schema text = visible text, no duplicate question, ≤ 50 words, one link; reports pages whose focus keyphrase is in fewer than 2 questions.
+- `wp aw-faq import <file.json>` — add draft questions (`{"<post type or taxonomy>:<slug>": [{q, a, sources, keyword}]}`, e.g. `post_tag:adoption`, `page:directory`, `aw_legal:<slug>` for letter templates); existing questions are kept.
 - `tools/ci/faq_live_check.py <url>…` — fetches live pages and compares the visible accordion with the FAQPage JSON-LD.
