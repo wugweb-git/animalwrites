@@ -2,6 +2,18 @@
 
 Each file in the plugins and what it does. animal-writes-core, Kits Core and AW Sourcing load from `animal-writes-core/animal-writes-core.php` (Kits Core is required first, AW Sourcing last; either may also be active on its own and is then not loaded twice); Mailweb (`mailweb`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
+## Three areas, three owners (owner, 31 Oct 2026)
+
+Search Insights, Sourcing and Classification are separate areas. A change belongs to the area that owns the screen and the logic, not to the area whose data it reads.
+
+| Area | Plugin and menu | Owns | Reads, never edits |
+|---|---|---|---|
+| **Search Insights** (search demand and site performance) | `aw-seo-extras`, AW SEO Plus → Search Insights (Overview, Keywords, Rising, Pages, Links, Check list, Settings) | Search Console, GA4 (incl. referrals), PageSpeed, Clarity, Bing Webmaster, the rising-terms job and its spikes, the Links view, the crawler-access check, the keyword table's Search Insights roles and figures, the monthly snapshot | Sourcing's items and counts (News spikes, per-keyword items), Rank Math keyphrases |
+| **Sourcing** (what the workers fetch and how it arrives) | `aw-sourcing`, Sourcing menu (Overview, To review, Enrichment review, Sources, Keywords, Rules, AI models, Workers, reports, Settings) | Feeds and publishers, relevance keywords, rules and summaries, AI models, auto-review, Directory enrichment, the workers' endpoints and the Workers tab | Search Insights' searches (only as suggestions in Keywords → Suggestions; never added automatically) |
+| **Classification** (how content is organised on the site) | `animal-writes-core`, Classification menu (Categories, Tags) and the content types | Categories, tags, sections, the content model | Nothing from the other two |
+
+Where they meet, the line stays: the keyword table is Core's (`keyword-table.php`), and each area writes only its own roles. Search Insights → Sourcing keywords (`aw-sourcing/includes/search-insights-tab.php`) is Sourcing's code shown inside Search Insights. Sourcing → Keywords → Suggestions only reads Search Insights. Rising's "In the news" spikes are Search Insights' logic over Sourcing's items.
+
 ## animal-writes-core
 
 | File | What it does |
