@@ -1,14 +1,14 @@
 <?php
 /**
- * Media Library list columns (owner, 31 Oct 2026): name, slug, where each file is used, an SEO score and what to optimise.
+ * Media Library list columns (owner, 31 Oct 2026): name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
  *
  * - No Author column (the site has one author).
  * - "Uploaded to" stays as WordPress has it (with Attach / Detach); "Also used in" sits beside it and lists every other
  *   place the file is used: featured image, source image, document preview, logos, social image, a category or tag photo,
  *   the site icon, and the source a favicon or logo belongs to. A file used more than once shows all of them.
- * - SEO score (0-100) is worked out per file from its own fields (the fields already on the attachment: Alternative Text,
- *   Caption = SEO title, Description = SEO description, Image context) plus the Rank Math score of the pages that use it.
- *   Rank Math does not score attachments, so the page score is shown next to it, not mixed into it.
+ * - SEO: the Rank Math score of the pages that use the file (Rank Math does not score attachments, so no score of our
+ *   own is made up), and what is missing on the file itself, from the fields already on the attachment: Alternative Text,
+ *   Caption = SEO title, Description = SEO description, Image context, the focus keyword of the pages that use it.
  * - Optimisation: size, format and what is missing (no resized copies, over 300 KB, under 64 px).
  * Core list-table columns only: no custom CSS, no scripts. Read only; nothing is saved by this file.
  *
@@ -125,11 +125,11 @@ function aw_media_usage( $ids ) {
 }
 
 /**
- * The SEO score of one file, and what to fix.
+ * What to fix on one file (no score: Rank Math gives none for attachments).
  *
  * @param WP_Post $post Attachment.
  * @param array   $use  Row from aw_media_usage().
- * @return array array( score 0-100, issues[] ).
+ * @return string[] Issues; empty when the file is complete.
  */
 function aw_media_seo( $post, $use ) {
 	$is_img = wp_attachment_is_image( $post );
@@ -140,11 +140,9 @@ function aw_media_seo( $post, $use ) {
 	$desc   = trim( wp_strip_all_tags( (string) $post->post_content ) );
 	$ctx    = trim( (string) get_post_meta( $post->ID, 'kits_image_context', true ) );
 	$kw     = strtolower( (string) $use['kw'] );
-	$score  = 0;
 	$issues = array();
 	$title  = html_entity_decode( (string) $post->post_title, ENT_QUOTES, 'UTF-8' );
 	if ( '' !== $title && mb_strlen( $title ) <= 60 ) {
-		$score += 10;
 	} else {
 		$issues[] = 'name over 60 characters';
 	}
@@ -152,35 +150,27 @@ function aw_media_seo( $post, $use ) {
 		if ( '' === $alt ) {
 			$issues[] = 'no alt text';
 		} elseif ( mb_strlen( $alt ) > 125 ) {
-			$score   += 8;
 			$issues[] = 'alt over 125 characters';
 		} else {
-			$score += 15;
 		}
 	} else {
-		$score += 15; // Alt text does not apply to documents.
 	}
 	if ( '' !== $cap ) {
-		$score += 15;
 	} else {
 		$issues[] = 'no caption (SEO title)';
 	}
 	$dl = mb_strlen( $desc );
 	if ( $dl >= 100 && $dl <= 155 ) {
-		$score += 15;
 	} elseif ( $dl > 0 ) {
-		$score   += 8;
 		$issues[] = 'description not 100-155 characters';
 	} else {
 		$issues[] = 'no description (SEO description)';
 	}
 	if ( '' !== $ctx ) {
-		$score += 10;
 	} else {
 		$issues[] = 'no image context';
 	}
 	if ( '' === $kw || false !== stripos( $cap . ' ' . $desc . ' ' . $alt, $kw ) ) {
-		$score += 10; // No focus keyword on the pages that use it: nothing to match.
 	} else {
 		$issues[] = 'focus keyword "' . $kw . '" not used';
 	}
@@ -188,20 +178,16 @@ function aw_media_seo( $post, $use ) {
 		if ( $bytes > 300000 ) {
 			$issues[] = 'over 300 KB';
 		} elseif ( empty( $meta['sizes'] ) ) {
-			$score   += 7;
 			$issues[] = 'no resized copies';
 		} else {
-			$score += 15;
 		}
 	} else {
-		$score += 15;
 	}
 	if ( $use['uses'] || (int) $post->post_parent ) {
-		$score += 10;
 	} else {
 		$issues[] = 'not used anywhere';
 	}
-	return array( $score, $issues );
+	return $issues;
 }
 
 add_filter(
@@ -218,7 +204,7 @@ add_filter(
 				$out['aw_used'] = 'Also used in';
 			}
 		}
-		$out['aw_seo'] = 'SEO score';
+		$out['aw_seo'] = 'SEO';
 		$out['aw_opt'] = 'Optimisation';
 		return $out;
 	}
@@ -257,8 +243,7 @@ add_action(
 			return;
 		}
 		if ( 'aw_seo' === $column ) {
-			list( $score, $issues ) = aw_media_seo( $post, $use );
-			echo '<strong>' . (int) $score . '/100</strong>';
+			$issues = aw_media_seo( $post, $use );
 			$best = null;
 			foreach ( $use['pages'] as $pid ) {
 				$s = (int) get_post_meta( $pid, 'rank_math_seo_score', true );
@@ -266,12 +251,12 @@ add_action(
 					$best = $s;
 				}
 			}
+			$lines = array();
 			if ( null !== $best ) {
-				echo '<br>Page score: ' . (int) $best;
+				$lines[] = 'Page score: ' . (int) $best;
 			}
-			if ( $issues ) {
-				echo '<br>' . esc_html( implode( '; ', array_slice( $issues, 0, 3 ) ) );
-			}
+			$lines[] = $issues ? esc_html( implode( '; ', array_slice( $issues, 0, 3 ) ) ) : 'Complete';
+			echo wp_kses_post( implode( '<br>', $lines ) );
 			return;
 		}
 		// Optimisation.
