@@ -66,6 +66,80 @@ const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 
 /** Private uploads: field => most files (photo_tokens: comma-separated tokens; owner, 31 Oct 2026). */
 const AW_FF_UPLOADS = array( 'logo_token' => 1, 'proof_token' => 1, 'photo_tokens' => 5 );
 
+/** Indian phone fields (owner, 31 Oct 2026): +91 shown before the box, 10 digits typed, saved as "+91 98765 43210". */
+const AW_FF_PHONES = array( 'phone', 'whatsapp', 'org_phone', 'l_phone1', 'l_phone2', 'l_phone3' );
+
+/** Claim form social fields => [listing field, link before the username] (the username alone is typed). */
+const AW_FF_SOCIAL = array(
+	'l_instagram' => array( 'aw_instagram', 'https://www.instagram.com/%s/' ),
+	'l_facebook'  => array( 'aw_facebook', 'https://www.facebook.com/%s' ),
+	'l_x'         => array( 'aw_x', 'https://x.com/%s' ),
+	'l_youtube'   => array( 'aw_youtube', 'https://www.youtube.com/@%s' ),
+	'l_linkedin'  => array( 'aw_linkedin', 'https://www.linkedin.com/company/%s' ),
+);
+
+/** Claim form dates: typed and shown in the site's format ("8 Oct 2026"), saved as Y-m-d. */
+const AW_FF_DATES = array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
+
+/** An Indian number's 10 digits ('' when it is not one): +91, 91 or 0 before it, spaces and dashes allowed. */
+function aw_ff_phone10( $v ) {
+	$d = preg_replace( '/\D+/', '', (string) $v );
+	if ( 12 === strlen( $d ) && 0 === strpos( $d, '91' ) ) {
+		$d = substr( $d, 2 );
+	} elseif ( 11 === strlen( $d ) && '0' === $d[0] ) {
+		$d = substr( $d, 1 );
+	}
+	return preg_match( '/^[1-9]\d{9}$/', $d ) ? $d : '';
+}
+
+/** A number as the site saves it: "+91 98765 43210"; anything else unchanged. */
+function aw_ff_phone_store( $v ) {
+	$d = aw_ff_phone10( $v );
+	return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
+}
+
+/** A social link or "@name" as the username alone ('' when it is not one of that platform's). */
+function aw_ff_social_user( $field, $v ) {
+	$v = trim( (string) $v );
+	if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?(instagram\.com|facebook\.com|fb\.com|x\.com|twitter\.com|youtube\.com|linkedin\.com)/(?:company/|in/|@)?([A-Za-z0-9._-]{1,100})/?(?:[?#].*)?$#i', $v, $m ) ) {
+		$v = $m[2];
+	}
+	$v = ltrim( $v, '@' );
+	return preg_match( '/^[A-Za-z0-9._-]{1,100}$/', $v ) ? $v : '';
+}
+
+/** A date typed as "8 Oct 2026" (or 2026-10-08) as Y-m-d; '' when it cannot be read. */
+function aw_ff_date_ymd( $v ) {
+	$v = trim( (string) $v );
+	if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $v ) ) {
+		return $v;
+	}
+	$d = date_create_immutable_from_format( '!j M Y', $v ) ?: date_create_immutable_from_format( '!j F Y', $v );
+	return $d ? $d->format( 'Y-m-d' ) : '';
+}
+
+/** The form's values as saved (phones +91, claim usernames, claim dates Y-m-d). */
+function aw_ff_normalise( $data ) {
+	foreach ( AW_FF_PHONES as $k ) {
+		if ( isset( $data[ $k ] ) && is_string( $data[ $k ] ) && '' !== trim( $data[ $k ] ) ) {
+			$data[ $k ] = aw_ff_phone_store( $data[ $k ] );
+		}
+	}
+	foreach ( array_keys( AW_FF_SOCIAL ) as $k ) {
+		$u = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? aw_ff_social_user( $k, $data[ $k ] ) : '';
+		if ( '' !== $u ) {
+			$data[ $k ] = $u;
+		}
+	}
+	foreach ( AW_FF_DATES as $k ) {
+		$d = isset( $data[ $k ] ) && is_string( $data[ $k ] ) ? aw_ff_date_ymd( $data[ $k ] ) : '';
+		if ( '' !== $d ) {
+			$data[ $k ] = $d;
+		}
+	}
+	return $data;
+}
+
 /** The Fluent Forms form ID for a form key, or 0 (Fluent Forms off, or the form not set up: nothing shows). */
 function aw_ff_id( $key ) {
 	if ( ! defined( 'FLUENTFORM' ) ) {
@@ -310,7 +384,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 				$cls  = 'roles' === rtrim( $name, '[]' ) ? ' kit-checkbox aw-vol-role' : ' kit-checkbox';
 				$html = str_replace( "class='ff-el-form-check-label", "class='ff-el-form-check-label" . $cls, $html );
 			}
-			$icon = AW_FF_ICONS[ $name ] ?? '';
+			$icon = '' !== (string) ( $data['settings']['prefix_label'] ?? '' ) ? '' : ( AW_FF_ICONS[ $name ] ?? '' ); // a "+91" or link prefix replaces the icon
 			if ( $icon && in_array( $el, array( 'input_text', 'input_email' ), true ) ) {
 				$html = preg_replace( '/(<input\b[^>]*>)/', '<div class="kit-field-control"><span class="kit-ico kit-ico--' . $icon . ' kit-field-icon" aria-hidden="true"></span>$1</div>', $html, 1 );
 			}
@@ -322,6 +396,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 }
 
 /* ---------- Submitting ---------- */
+
+// The values the FluentCRM links and the follow-up below see: the same as saved (+91 numbers and so on).
+add_filter( 'fluentform/submission_form_data', fn( $data, $insert_id, $form ) => aw_ff_key( $form ) ? aw_ff_normalise( (array) $data ) : $data, 10, 3 );
 
 // The custom fields' inputs are kept with the entry.
 add_filter( 'fluentform/white_listed_fields', fn( $f, $form_id ) => aw_ff_key( $form_id ) ? array_merge( $f, AW_FF_EXTRA ) : $f, 10, 2 );
@@ -362,6 +439,32 @@ function aw_ff_errors( $key, $data ) {
 	$errors = array();
 	if ( 'volunteer' === $key ) {
 		$errors = array_intersect_key( aw_volunteer_errors( aw_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
+	}
+	$lid  = 'claim' === $key ? absint( $data['listing'] ?? 0 ) : 0;
+	$have = $lid && function_exists( 'aw_listing_phones' ) ? array_map( fn( $r ) => preg_replace( '/\D+/', '', $r['number'] ), aw_listing_phones( $lid ) ) : array();
+	foreach ( AW_FF_PHONES as $k ) {
+		$v = trim( (string) ( is_string( $data[ $k ] ?? '' ) ? ( $data[ $k ] ?? '' ) : '' ) );
+		if ( '' !== $v && '' === aw_ff_phone10( $v ) && ! in_array( preg_replace( '/\D+/', '', $v ), $have, true ) ) { // a listing's own number may stay as it is (helplines like 1962)
+			$errors[ $k ] = 'Enter a 10-digit number, like 9876543210.';
+		}
+	}
+	if ( 'claim' === $key ) {
+		foreach ( array_keys( AW_FF_SOCIAL ) as $k ) {
+			$v = trim( (string) ( $data[ $k ] ?? '' ) );
+			if ( '' !== $v && '' === aw_ff_social_user( $k, $v ) && ! preg_match( '#^https?://#i', $v ) ) {
+				$errors[ $k ] = 'Enter the username only, like animalwrites.';
+			}
+		}
+		foreach ( AW_FF_DATES as $k ) {
+			$v = trim( (string) ( $data[ $k ] ?? '' ) );
+			if ( '' !== $v && '' === aw_ff_date_ymd( $v ) ) {
+				$errors[ $k ] = 'Enter a date like 8 Oct 2026.';
+			}
+		}
+		$y = trim( (string) ( $data['l_founded'] ?? '' ) );
+		if ( '' !== $y && ! preg_match( '/^(18|19|20)\d{2}$/', $y ) ) {
+			$errors['l_founded'] = 'Enter a year, like 2010.';
+		}
 	}
 	foreach ( AW_FF_UPLOADS as $up => $max ) {
 		$tokens = array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) );
@@ -416,6 +519,7 @@ add_filter(
 		if ( ! aw_ff_key( $form_id ) ) {
 			return $data;
 		}
+		$data = aw_ff_normalise( $data ); // phones +91, claim usernames and dates as saved
 		foreach ( AW_FF_UPLOADS as $up => $max ) {
 			$links = array();
 			foreach ( array_slice( array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) ), 0, $max ) as $token ) {

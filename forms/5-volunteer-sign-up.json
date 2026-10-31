@@ -168,15 +168,15 @@
                         "type": "text",
                         "autocomplete": "tel",
                         "inputmode": "tel",
-                        "maxlength": 16,
-                        "placeholder": "98765 43210"
+                        "maxlength": 14,
+                        "placeholder": "9876543210"
                     },
                     "settings": {
                         "container_class": "kit-field aw-form-ff-half",
                         "label": "Phone <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone",
-                        "help_message": "",
+                        "help_message": "10 digits.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -185,7 +185,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -203,15 +204,16 @@
                         "value": "",
                         "id": "",
                         "class": "",
-                        "placeholder": "",
-                        "inputmode": "tel"
+                        "placeholder": "9876543210",
+                        "inputmode": "tel",
+                        "maxlength": 14
                     },
                     "settings": {
                         "container_class": "kit-field",
                         "label": "WhatsApp number <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "WhatsApp number",
-                        "help_message": "10 digits, like 98765 43210.",
+                        "help_message": "10 digits, like 9876543210.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -220,7 +222,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",

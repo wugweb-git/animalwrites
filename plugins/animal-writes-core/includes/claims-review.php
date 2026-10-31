@@ -107,7 +107,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 	}
 	switch ( $def[1] ) {
 		case 'phones':
-			return implode( "\n", array_map( fn( $r ) => $r['number'] . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), aw_listing_phones( $lid ) ) );
+			return implode( "\n", array_map( fn( $r ) => aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), aw_listing_phones( $lid ) ) );
 		case 'hours':
 			return aw_claim_hours_text( $lid );
 		case 'services':
@@ -146,7 +146,8 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				$row = aw_listing_phones( $lid )[ (int) $m[1] - 1 ] ?? null;
 				if ( $row ) {
 					$part                        = $m[2] ?? '';
-					$data['attributes']['value'] = '_wa' === $part ? ( $row['whatsapp'] ? array( '1' ) : array() ) : ( '_label' === $part ? $row['label'] : $row['number'] );
+					$ten                         = aw_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
+					$data['attributes']['value'] = '_wa' === $part ? ( $row['whatsapp'] ? array( '1' ) : array() ) : ( '_label' === $part ? $row['label'] : ( '' !== $ten ? $ten : $row['number'] ) );
 				}
 				return $data;
 			}
@@ -155,7 +156,13 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				return $data;
 			}
 			if ( isset( AW_CLAIM_L[ $field ] ) ) {
-				$data['attributes']['value'] = aw_claim_now( $lid, $field, true );
+				$now = aw_claim_now( $lid, $field, true );
+				if ( isset( AW_FF_SOCIAL[ $field ] ) && '' !== aw_ff_social_user( $field, $now ) ) {
+					$now = aw_ff_social_user( $field, $now ); // the username after the link shown in front of the box
+				} elseif ( in_array( $field, AW_FF_DATES, true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
+					$now = wp_date( 'j M Y', strtotime( $now . ' 12:00:00' ) ); // the site's date format
+				}
+				$data['attributes']['value'] = $now;
 			}
 			return $data;
 		},
@@ -209,14 +216,14 @@ function aw_claim_entry( $entry_id ) {
 			if ( 'phones' === $key ) {
 				$lines = array();
 				for ( $i = 1; $i <= 3; $i++ ) {
-					$num = $s( "l_phone{$i}" );
+					$num = aw_ff_phone_store( $s( "l_phone{$i}" ) );
 					if ( '' !== $num ) {
 						$lab     = $s( "l_phone{$i}_label" );
 						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'aw_ff_ticked' ) && aw_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
 				foreach ( array_slice( $lid ? aw_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
-					$lines[] = $r['number'] . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
+					$lines[] = aw_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
 				}
 				$propose['phones'] = implode( "\n", $lines );
 				continue;
@@ -269,6 +276,10 @@ function aw_claim_changes( $c ) {
 	$out = array();
 	foreach ( $c['propose'] as $key => $new ) {
 		$now   = aw_claim_now( $c['listing'], $key, false );
+		if ( isset( AW_FF_SOCIAL[ $key ] ) && '' !== aw_ff_social_user( $key, $now ) && '' !== aw_ff_social_user( $key, $new ) ) {
+			$now = aw_ff_social_user( $key, $now ); // the link and its username are the same thing
+			$new = aw_ff_social_user( $key, $new );
+		}
 		$loose = 'l_email' === $key || 0 === strpos( AW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', AW_CLAIM_L[ $key ][1] );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
 			$out[ $key ] = array( AW_CLAIM_L[ $key ][0], $now, $new );
@@ -433,13 +444,12 @@ function aw_claim_clean( $meta_key, $v ) {
 		case 'aw_x':
 		case 'aw_youtube':
 		case 'aw_linkedin':
-			if ( preg_match( '/^@?([A-Za-z0-9_.\-]{2,100})$/', $v, $h ) && false === strpos( $h[1], '.' ) || preg_match( '/^@([A-Za-z0-9_.\-]{2,100})$/', $v, $h ) ) { // a handle, not a link
-				$base = array( 'aw_instagram' => 'https://www.instagram.com/%s/', 'aw_facebook' => 'https://www.facebook.com/%s', 'aw_x' => 'https://x.com/%s', 'aw_youtube' => 'https://www.youtube.com/@%s', 'aw_linkedin' => 'https://www.linkedin.com/company/%s' )[ $meta_key ];
-				return sprintf( $base, rawurlencode( $h[1] ) );
+			if ( preg_match( '#^https?://#i', $v ) ) {
+				return (string) esc_url_raw( $v ); // a link the username box cannot hold (a YouTube channel and the like)
 			}
-			return (string) esc_url_raw( $v );
-		case 'aw_upi':
-			return preg_match( '/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/', $v ) ? $v : '';
+			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], AW_FF_SOCIAL ), true );
+			$user  = '' !== $field ? aw_ff_social_user( $field, $v ) : '';
+			return '' !== $user ? sprintf( AW_FF_SOCIAL[ $field ][1], rawurlencode( $user ) ) : '';
 		case 'aw_founded':
 			return preg_match( '/^(18|19|20)\d{2}$/', $v ) ? $v : '';
 		case 'aw_reg_date':

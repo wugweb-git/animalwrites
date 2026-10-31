@@ -201,8 +201,8 @@
                         "class": "",
                         "type": "text",
                         "inputmode": "tel",
-                        "maxlength": 20,
-                        "placeholder": "",
+                        "maxlength": 14,
+                        "placeholder": "9876543210",
                         "autocomplete": "tel"
                     },
                     "settings": {
@@ -210,7 +210,7 @@
                         "label": "Your phone <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Your phone",
-                        "help_message": "",
+                        "help_message": "10 digits.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -219,7 +219,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -237,15 +238,16 @@
                         "value": "",
                         "id": "",
                         "class": "",
-                        "placeholder": "",
-                        "inputmode": "tel"
+                        "placeholder": "9876543210",
+                        "inputmode": "tel",
+                        "maxlength": 14
                     },
                     "settings": {
                         "container_class": "kit-field",
                         "label": "Your WhatsApp <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Your WhatsApp",
-                        "help_message": "10 digits, like 98765 43210.",
+                        "help_message": "10 digits, like 9876543210.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -254,7 +256,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -460,15 +463,15 @@
                         "class": "",
                         "type": "text",
                         "inputmode": "tel",
-                        "maxlength": 20,
-                        "placeholder": ""
+                        "maxlength": 14,
+                        "placeholder": "9876543210"
                     },
                     "settings": {
                         "container_class": "kit-field",
                         "label": "Phone 1 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 1",
-                        "help_message": "",
+                        "help_message": "10 digits.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -477,7 +480,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -578,15 +582,15 @@
                         "class": "",
                         "type": "text",
                         "inputmode": "tel",
-                        "maxlength": 20,
-                        "placeholder": ""
+                        "maxlength": 14,
+                        "placeholder": "9876543210"
                     },
                     "settings": {
                         "container_class": "kit-field",
                         "label": "Phone 2 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 2",
-                        "help_message": "",
+                        "help_message": "10 digits.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -595,7 +599,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -696,15 +701,15 @@
                         "class": "",
                         "type": "text",
                         "inputmode": "tel",
-                        "maxlength": 20,
-                        "placeholder": ""
+                        "maxlength": 14,
+                        "placeholder": "9876543210"
                     },
                     "settings": {
                         "container_class": "kit-field",
                         "label": "Phone 3 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 3",
-                        "help_message": "",
+                        "help_message": "10 digits.",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -713,7 +718,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "+91"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1454,7 +1460,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 200,
-                        "placeholder": "Link or @name"
+                        "placeholder": "username"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1470,7 +1476,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "instagram.com/"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1489,7 +1496,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 200,
-                        "placeholder": "Link or @name"
+                        "placeholder": "username"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1505,7 +1512,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "facebook.com/"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1524,7 +1532,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 200,
-                        "placeholder": "Link or @name"
+                        "placeholder": "username"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1540,7 +1548,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "x.com/"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1559,7 +1568,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 200,
-                        "placeholder": "Link or @name"
+                        "placeholder": "username"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1575,7 +1584,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "youtube.com/@"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1594,7 +1604,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 200,
-                        "placeholder": "Link or @name"
+                        "placeholder": "username"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1610,7 +1620,8 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": []
+                        "conditional_logics": [],
+                        "prefix_label": "linkedin.com/company/"
                     },
                     "editor_options": {
                         "title": "Simple Text",
@@ -1894,7 +1905,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 120,
-                        "placeholder": "YYYY-MM-DD"
+                        "placeholder": "8 Oct 2026"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -1999,7 +2010,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 120,
-                        "placeholder": "YYYY-MM-DD"
+                        "placeholder": "8 Oct 2026"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -2034,7 +2045,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 120,
-                        "placeholder": "YYYY-MM-DD"
+                        "placeholder": "8 Oct 2026"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -2069,7 +2080,7 @@
                         "class": "",
                         "type": "text",
                         "maxlength": 120,
-                        "placeholder": "YYYY-MM-DD"
+                        "placeholder": "8 Oct 2026"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -2116,46 +2127,6 @@
                 {
                     "index": 59,
                     "element": "input_url",
-                    "uniqElKey": "el_aw_l_donate",
-                    "attributes": {
-                        "type": "url",
-                        "name": "l_donate",
-                        "value": "",
-                        "id": "",
-                        "class": "",
-                        "placeholder": ""
-                    },
-                    "settings": {
-                        "container_class": "kit-field",
-                        "label": "Donate link <span class=\"kit-optional\">(optional)</span>",
-                        "label_placement": "",
-                        "admin_field_label": "Donate link",
-                        "help_message": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            },
-                            "url": {
-                                "value": true,
-                                "message": "Enter a web address, like https://example.org",
-                                "global_message": "Enter a web address, like https://example.org",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "Website URL",
-                        "icon_class": "ff-edit-text",
-                        "template": "inputText"
-                    }
-                },
-                {
-                    "index": 60,
-                    "element": "input_url",
                     "uniqElKey": "el_aw_l_volunteer",
                     "attributes": {
                         "type": "url",
@@ -2194,7 +2165,7 @@
                     }
                 },
                 {
-                    "index": 61,
+                    "index": 60,
                     "element": "input_url",
                     "uniqElKey": "el_aw_l_adopt",
                     "attributes": {
@@ -2234,41 +2205,6 @@
                     }
                 },
                 {
-                    "index": 62,
-                    "element": "input_text",
-                    "uniqElKey": "el_aw_l_upi",
-                    "attributes": {
-                        "name": "l_upi",
-                        "value": "",
-                        "id": "",
-                        "class": "",
-                        "type": "text",
-                        "maxlength": 120,
-                        "placeholder": "name@bank"
-                    },
-                    "settings": {
-                        "container_class": "kit-field",
-                        "label": "UPI ID <span class=\"kit-optional\">(optional)</span>",
-                        "label_placement": "",
-                        "admin_field_label": "UPI ID",
-                        "help_message": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": false,
-                                "message": "",
-                                "global_message": "",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "Simple Text",
-                        "icon_class": "ff-edit-text",
-                        "template": "inputText"
-                    }
-                },
-                {
                     "element": "section_break",
                     "uniqElKey": "el_aw_fold_pictures",
                     "attributes": {
@@ -2286,10 +2222,10 @@
                         "icon_class": "ff-edit-section-break",
                         "template": "sectionBreak"
                     },
-                    "index": 63
+                    "index": 61
                 },
                 {
-                    "index": 64,
+                    "index": 62,
                     "element": "aw_logo",
                     "uniqElKey": "el_aw_logo_token",
                     "attributes": {
@@ -2309,7 +2245,7 @@
                     }
                 },
                 {
-                    "index": 65,
+                    "index": 63,
                     "element": "aw_logo",
                     "uniqElKey": "el_aw_photo_tokens",
                     "attributes": {
@@ -2346,10 +2282,10 @@
                         "icon_class": "ff-edit-section-break",
                         "template": "sectionBreak"
                     },
-                    "index": 66
+                    "index": 64
                 },
                 {
-                    "index": 67,
+                    "index": 65,
                     "element": "aw_logo",
                     "uniqElKey": "el_aw_proof_token",
                     "attributes": {
@@ -2369,7 +2305,7 @@
                     }
                 },
                 {
-                    "index": 68,
+                    "index": 66,
                     "element": "textarea",
                     "uniqElKey": "el_aw_notes",
                     "attributes": {
@@ -2420,10 +2356,10 @@
                         "icon_class": "ff-edit-section-break",
                         "template": "sectionBreak"
                     },
-                    "index": 69
+                    "index": 67
                 },
                 {
-                    "index": 70,
+                    "index": 68,
                     "element": "custom_html",
                     "uniqElKey": "el_aw_claim_summary",
                     "attributes": [],
@@ -2439,7 +2375,7 @@
                     }
                 },
                 {
-                    "index": 71,
+                    "index": 69,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_consent",
                     "attributes": {
@@ -2486,7 +2422,7 @@
                     }
                 },
                 {
-                    "index": 72,
+                    "index": 70,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_nl_optin",
                     "attributes": {
@@ -2535,7 +2471,7 @@
                     }
                 },
                 {
-                    "index": 73,
+                    "index": 71,
                     "element": "aw_check",
                     "uniqElKey": "el_aw_check",
                     "attributes": {
@@ -2554,7 +2490,7 @@
                     }
                 },
                 {
-                    "index": 74,
+                    "index": 72,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_id",
                     "attributes": {
@@ -2572,7 +2508,7 @@
                     }
                 },
                 {
-                    "index": 75,
+                    "index": 73,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_title",
                     "attributes": {
@@ -2590,7 +2526,7 @@
                     }
                 },
                 {
-                    "index": 76,
+                    "index": 74,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_referrer",
                     "attributes": {
@@ -2608,7 +2544,7 @@
                     }
                 },
                 {
-                    "index": 77,
+                    "index": 75,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_source",
                     "attributes": {
@@ -2626,7 +2562,7 @@
                     }
                 },
                 {
-                    "index": 78,
+                    "index": 76,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_medium",
                     "attributes": {
@@ -2644,7 +2580,7 @@
                     }
                 },
                 {
-                    "index": 79,
+                    "index": 77,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_campaign",
                     "attributes": {
@@ -2662,7 +2598,7 @@
                     }
                 },
                 {
-                    "index": 80,
+                    "index": 78,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
@@ -2680,7 +2616,7 @@
                     }
                 },
                 {
-                    "index": 81,
+                    "index": 79,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -2698,7 +2634,7 @@
                     }
                 },
                 {
-                    "index": 82,
+                    "index": 80,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_screen",
                     "attributes": {
@@ -2716,7 +2652,7 @@
                     }
                 },
                 {
-                    "index": 83,
+                    "index": 81,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_lang",
                     "attributes": {
@@ -2734,7 +2670,7 @@
                     }
                 },
                 {
-                    "index": 84,
+                    "index": 82,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_tz",
                     "attributes": {
@@ -2752,7 +2688,7 @@
                     }
                 },
                 {
-                    "index": 85,
+                    "index": 83,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_secs",
                     "attributes": {
@@ -2770,7 +2706,7 @@
                     }
                 },
                 {
-                    "index": 86,
+                    "index": 84,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_first_visit",
                     "attributes": {
@@ -2788,7 +2724,7 @@
                     }
                 },
                 {
-                    "index": 87,
+                    "index": 85,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_visits",
                     "attributes": {
@@ -2806,7 +2742,7 @@
                     }
                 },
                 {
-                    "index": 88,
+                    "index": 86,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
