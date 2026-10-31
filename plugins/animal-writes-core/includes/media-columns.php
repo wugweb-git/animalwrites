@@ -142,8 +142,7 @@ function aw_media_seo( $post, $use ) {
 	$kw     = strtolower( (string) $use['kw'] );
 	$issues = array();
 	$title  = html_entity_decode( (string) $post->post_title, ENT_QUOTES, 'UTF-8' );
-	if ( '' !== $title && mb_strlen( $title ) <= 60 ) {
-	} else {
+	if ( '' === $title || mb_strlen( $title ) > 60 ) {
 		$issues[] = 'name over 60 characters';
 	}
 	if ( $is_img ) {
@@ -151,27 +150,21 @@ function aw_media_seo( $post, $use ) {
 			$issues[] = 'no alt text';
 		} elseif ( mb_strlen( $alt ) > 125 ) {
 			$issues[] = 'alt over 125 characters';
-		} else {
 		}
-	} else {
 	}
-	if ( '' !== $cap ) {
-	} else {
+	if ( '' === $cap ) {
 		$issues[] = 'no caption (SEO title)';
 	}
 	$dl = mb_strlen( $desc );
-	if ( $dl >= 100 && $dl <= 155 ) {
-	} elseif ( $dl > 0 ) {
-		$issues[] = 'description not 100-155 characters';
-	} else {
+	if ( 0 === $dl ) {
 		$issues[] = 'no description (SEO description)';
+	} elseif ( $dl < 100 || $dl > 155 ) {
+		$issues[] = 'description not 100-155 characters';
 	}
-	if ( '' !== $ctx ) {
-	} else {
+	if ( '' === $ctx ) {
 		$issues[] = 'no image context';
 	}
-	if ( '' === $kw || false !== stripos( $cap . ' ' . $desc . ' ' . $alt, $kw ) ) {
-	} else {
+	if ( '' !== $kw && false === stripos( $cap . ' ' . $desc . ' ' . $alt, $kw ) ) {
 		$issues[] = 'focus keyword "' . $kw . '" not used';
 	}
 	if ( $is_img ) {
@@ -179,12 +172,9 @@ function aw_media_seo( $post, $use ) {
 			$issues[] = 'over 300 KB';
 		} elseif ( empty( $meta['sizes'] ) ) {
 			$issues[] = 'no resized copies';
-		} else {
 		}
-	} else {
 	}
-	if ( $use['uses'] || (int) $post->post_parent ) {
-	} else {
+	if ( ! $use['uses'] && ! (int) $post->post_parent ) {
 		$issues[] = 'not used anywhere';
 	}
 	return $issues;
