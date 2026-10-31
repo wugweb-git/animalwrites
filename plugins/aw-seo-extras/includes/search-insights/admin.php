@@ -495,16 +495,15 @@ function aw_si_settings_tab(): void {
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
-	$keys = array(
-		'AW_CLARITY_TOKEN'      => __( 'Clarity Data Export token (Clarity → Settings → Data Export). Needed for Clarity figures and Clarity page-quality flags.', 'aw-seo-extras' ),
-		'AW_PSI_KEY'            => __( 'Free PageSpeed API key. Only needed if Site Kit\'s PageSpeed module can\'t be used.', 'aw-seo-extras' ),
-		'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster API key (Bing Webmaster Tools → Settings → API access; not an IndexNow key). Needed for the Links tab\'s Bing rows and Bing figures.', 'aw-seo-extras' ),
-	);
-	foreach ( $keys as $const => $what ) {
-		$set = defined( $const ) && '' !== (string) constant( $const );
-		echo '<li><span class="dashicons dashicons-' . ( $set ? 'yes-alt' : 'minus' ) . '" aria-hidden="true"></span> <code>' . esc_html( $const ) . '</code> ' . esc_html( $set ? __( 'is set in wp-config.php.', 'aw-seo-extras' ) : __( 'is not set.', 'aw-seo-extras' ) ) . ' <span class="description">' . esc_html( $what ) . '</span></li>';
+	foreach ( array( 'AW_CLARITY_TOKEN' => __( 'Clarity', 'aw-seo-extras' ), 'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster', 'aw-seo-extras' ), 'AW_PSI_KEY' => __( 'PageSpeed (optional)', 'aw-seo-extras' ) ) as $const => $label ) {
+		$set = '' !== aw_si_key( $const );
+		echo '<li><span class="dashicons dashicons-' . ( $set ? 'yes-alt' : 'minus' ) . '" aria-hidden="true"></span> ' . esc_html( $label . ': ' . ( $set ? __( 'set', 'aw-seo-extras' ) : __( 'not set', 'aw-seo-extras' ) ) ) . '</li>';
 	}
-	echo '</ul><p class="description">' . esc_html__( 'Keys live in wp-config.php only; their values are never shown or stored here.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '</ul>';
+	if ( function_exists( 'aw_key' ) && current_user_can( 'manage_options' ) ) {
+		echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=aw-keys' ) ) . '">' . esc_html__( 'Animal Writes → Keys', 'aw-seo-extras' ) . '</a></p>';
+	}
+	echo '<p class="description">' . esc_html__( 'Keys are set under Animal Writes → Keys (or as wp-config.php constants, which win); their values are never shown.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keyword map seed', 'aw-seo-extras' ) . '</th><td><p>';
 	echo $seeded
 		/* translators: %s: date. */

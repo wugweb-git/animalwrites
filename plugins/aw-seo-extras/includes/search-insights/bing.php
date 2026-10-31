@@ -1,7 +1,7 @@
 <?php
 /**
  * Bing Webmaster (owner, 31 Oct 2026), free JSON API, monthly on the 2nd at 07:40 IST. Only with
- * AW_BING_WEBMASTER_KEY in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
+ * AW_BING_WEBMASTER_KEY under Animal Writes → Keys or in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
  * source is not listed. The key is never logged or shown.
  *
  * - Links: GetLinkCounts (our pages with inbound links, paged), then GetUrlLinks for each page (linking page and anchor),
@@ -31,7 +31,7 @@ const AW_SI_BING_DAYS   = 85; // Figures stored: at most this many days, and 5 f
 
 /** Whether the Webmaster API key is set. */
 function aw_si_bing_on(): bool {
-	return defined( 'AW_BING_WEBMASTER_KEY' ) && '' !== (string) AW_BING_WEBMASTER_KEY;
+	return '' !== aw_si_key( 'AW_BING_WEBMASTER_KEY' );
 }
 
 add_filter(
@@ -55,7 +55,7 @@ add_filter(
  * @return mixed|WP_Error The "d" part.
  */
 function aw_si_bing_call( string $method, array $args = array() ) {
-	$key = (string) AW_BING_WEBMASTER_KEY;
+	$key = aw_si_key( 'AW_BING_WEBMASTER_KEY' );
 	$url = add_query_arg( array_map( 'rawurlencode', array( 'siteUrl' => home_url( '/' ) ) + $args + array( 'apikey' => $key ) ), AW_SI_BING_API . $method );
 	$res = wp_remote_get(
 		$url,
@@ -278,7 +278,7 @@ function aw_si_bing_obs_rows( array $queries, array $pages ): array {
  */
 function aw_si_bing_run( array $args = array() ): array {
 	if ( ! aw_si_bing_on() ) {
-		return array( 'error' => __( 'Bing Webmaster is not set up: add AW_BING_WEBMASTER_KEY to wp-config.php.', 'aw-seo-extras' ) );
+		return array( 'error' => __( 'Bing Webmaster is not set up: add its API key under Animal Writes → Keys.', 'aw-seo-extras' ) );
 	}
 	$dry = ! empty( $args['dry'] );
 	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
@@ -380,7 +380,7 @@ function aw_si_bing_run( array $args = array() ): array {
 			}
 		}
 	} catch ( Throwable $e ) {
-		$rep['error'] = str_replace( (string) AW_BING_WEBMASTER_KEY, '…', $e->getMessage() );
+		$rep['error'] = str_replace( aw_si_key( 'AW_BING_WEBMASTER_KEY' ), '…', $e->getMessage() );
 	}
 	if ( ! $dry ) {
 		if ( ! empty( $rep['error'] ) ) {

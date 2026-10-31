@@ -175,7 +175,7 @@ add_action( 'aw_si_load_tab_links', 'aw_si_links_load' );
 function aw_si_links_tab(): void {
 	require_once __DIR__ . '/class-aw-si-links-table.php';
 	if ( ! function_exists( 'aw_si_bing_on' ) || ! aw_si_bing_on() ) {
-		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'No Bing Webmaster API key yet: add AW_BING_WEBMASTER_KEY to wp-config.php. Bing Webmaster is not set up, so this list has only the rows added by hand.', 'aw-seo-extras' ) . '</p></div>';
+		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'No Bing Webmaster API key yet: add it under Animal Writes → Keys.', 'aw-seo-extras' ) . '</p></div>';
 	}
 	if ( isset( $_GET['linked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$n = absint( wp_unslash( $_GET['linked'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- message only.

@@ -41,6 +41,7 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && file_exists( dirname( AW_CORE_DIR ) . '/
 require_once AW_CORE_DIR . 'includes/kits-config.php';
 require_once AW_CORE_DIR . 'includes/admin-table.php';
 require_once AW_CORE_DIR . 'includes/admin-home.php';
+require_once AW_CORE_DIR . 'includes/keys.php'; // Animal Writes → Keys: service keys in WP admin (owner, 31 Oct 2026)
 require_once AW_CORE_DIR . 'includes/admin-tidy.php';
 require_once AW_CORE_DIR . 'includes/cdn-cache.php';
 require_once AW_CORE_DIR . 'includes/deploy-purge.php';

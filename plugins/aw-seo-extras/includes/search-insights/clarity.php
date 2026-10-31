@@ -1,7 +1,7 @@
 <?php
 /**
  * Microsoft Clarity Data Export API (plan §5.2), daily at 06:30 IST, only when the owner has put a project API token in
- * wp-config.php as AW_CLARITY_TOKEN (never in the repo or the database). Two calls a day (by URL, by device) for the
+ * Animal Writes → Keys or wp-config.php as AW_CLARITY_TOKEN (never in the repo). Two calls a day (by URL, by device) for the
  * last 24 hours; the API allows 10 a day per project, so the job stops itself at 8. Only per-URL and per-device totals
  * are stored: never recordings, session IDs or anything per session.
  *
@@ -25,7 +25,7 @@ const AW_SI_CLARITY_RETRY = 'aw_si_clarity_retry'; // One later try on a day who
 
 /** Whether the Clarity token is set in wp-config.php. */
 function aw_si_clarity_on(): bool {
-	return defined( 'AW_CLARITY_TOKEN' ) && '' !== (string) AW_CLARITY_TOKEN;
+	return '' !== aw_si_key( 'AW_CLARITY_TOKEN' );
 }
 
 /**
@@ -76,7 +76,7 @@ function aw_si_clarity_call( string $dimension ) {
 		array(
 			'timeout' => 60, // Clarity's export can take over 30 s; the 30 s limit failed every run 27–31 Oct 2026.
 			'headers' => array(
-				'Authorization' => 'Bearer ' . AW_CLARITY_TOKEN,
+				'Authorization' => 'Bearer ' . aw_si_key( 'AW_CLARITY_TOKEN' ),
 				'Content-Type'  => 'application/json',
 			),
 		)
@@ -186,7 +186,7 @@ function aw_si_clarity_flagged( array $m ): bool {
 function aw_si_clarity_run( array $args = array() ): array {
 	$dry = ! empty( $args['dry'] );
 	if ( ! aw_si_clarity_on() ) {
-		return array( 'error' => __( 'No Clarity token: add AW_CLARITY_TOKEN to wp-config.php.', 'aw-seo-extras' ) );
+		return array( 'error' => __( 'No Clarity token: add it under Animal Writes → Keys.', 'aw-seo-extras' ) );
 	}
 	if ( ! $dry ) {
 		aw_si_run_start( 'clarity' );
