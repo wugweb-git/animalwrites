@@ -44,6 +44,29 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **Claim form #6 (owner, 31 Oct 2026):** four steps (About you · Your listing · Show you work there · Send). The steps and the groups that fold open are Fluent Forms Section Breaks with the class `kit-step-break` or `kit-fold-break`; kit.js turns them into steps (Back/Next, each step's required fields checked before Next); without JavaScript it is one long form. Every `l_*` field is filled from the listing (`claims-review.php`, public fields only; `{Listing}` in a label names it). Photos (`photo_tokens`, up to 5), logo and proof use the private upload. The last step's summary lists only changed fields (aw.js). Claims are reviewed in Directory → Claims: now → proposed for changed fields, approved per field, each written with the source "Claimed by organisation" and logged in the enrichment change log (Undo there); approval marks the listing claimed. After this form changes, `wp aw crm-setup` adds any new FluentCRM field (`vol_org_role`).
 
+**Volunteer form #5 and /volunteer/ (owner, 31 Oct 2026):** order: ways to help (icon tiles, `AW_VOL_ROLE_ICONS`), PIN / State / District (one row from 768), full name, email, phone, WhatsApp ("Same as my phone" `wa_same` copies the phone, in aw.js and on the server), "OK to contact me on WhatsApp" only when a WhatsApp number is filled, when / how far / skills as chips (`kit-chips`, `kit-chips--segment`), languages, organisation, "I'm 18 or older." (`adult`, required), consent, newsletter. Tiles and chips are real checkboxes and radios (input hidden visually); each group is named by its label (`role="group"`, `aria-labelledby`). The page (`page-volunteer.html`): head band with the page's intro (meta `aw_page_intro`), the form beside the sidebar (from 768 under it, from 1200 beside it), the page's picture first in the sidebar and no "Help animals near you" card there. Organisation from the Directory: typing three letters in "Organisation name" lists up to 8 published listings ("name · district, state"; `aw_org_search_public()`, org-people.php, a public read-only admin-ajax search like the PIN lookup); picking one saves the listing ID in the hidden `org_listing` (FluentCRM `vol_org_listing`, so an `org-approved` volunteer with "Show my name" appears on that listing's people box) and the listing's own name in `org_name`; "My organisation isn't listed" keeps the typed name with no ID. The server keeps an ID only for a published listing. The update link pre-fills both. Field borders and help text use the Kits tokens `--kit-field-border`, `--kit-field-hint`, `--kit-field-hint-size` (WCAG AA).
+
+**Messages (31 Oct 2026; wording changes only on the owner's yes):**
+
+| Form | Where the success shows | Success message |
+|---|---|---|
+| Newsletter #3 | /thank-you/?form=newsletter: H1 "You're subscribed", description "Thank you for signing up for Animal Writes updates." (head band; no notice box), then "Choose your topics (optional)" (#9), then Home / Back | – |
+| Contact #4 | Same page | Message sent. We'll reply by email. Your reference: AW-{n} |
+| Volunteer sign-up #5 | Same page | Thank you for signing up. We will contact you when there is work in your area. You can ask us to delete your details at any time. Your reference: AW-V-{n} |
+| Claim this listing #6 | Same page | Request sent. We'll check it and email you, usually within 4 to 5 days. Nothing on your listing changes until we've checked it. Your reference: AW-C-{n} |
+| Newsletter (full) #9 | Same page (the thank-you page) | Thank you. Your topics are saved. |
+| Campaign form #10 | The letter tool | Thank you. Your reference: {ref} |
+
+Any ?form= that lands on /thank-you/ (`aw_thanks_forms()`): its heading is the H1 and its line the head description (`aw_thanks_head()`).
+
+| Failure | Message |
+|---|---|
+| Required field empty | The field's own message from the form (e.g. "Enter your name", "Choose a state", "Choose your role") |
+| Wrong format | Email: Fluent Forms' email rule message; phone / WhatsApp: "Enter a 10-digit number, like 9876543210."; claim username: "Enter the username only, like animalwrites."; claim date: "Enter a date like 8 Oct 2026."; year: "Enter a year, like 2010."; web address: the form's url rule message; upload: "Use a PNG, JPG or WebP under 2 MB." |
+| Spam check | "Couldn't verify you're not a bot. Try again." |
+| Too many sends | "Too many tries. Wait a minute, then try again." |
+| The send itself fails (no connection, server error) | "Your message didn't send. Check your connection and try again." (aw.js; wording waiting for the owner's yes) |
+
 **Which form shows where:** each page calls `aw_ff_form( <key> )` (`forms-fluentforms.php`) with the form's ID from `wp aw ff-form <key> <ID>` (keys: contact, volunteer, claim, report, remove_data; the newsletter forms use the options `aw_nl_ff_form` and `aw_nl_ff_form_full`). If Fluent Forms is off or an ID is missing, visitors see nothing in its place and administrators see a short note saying what to set. There is no fallback form.
 
 ## Where each form is shown

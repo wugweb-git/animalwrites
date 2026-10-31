@@ -169,6 +169,10 @@ function aw_block_section_head( $a ) {
 	if ( is_page( 'claim' ) && function_exists( 'aw_claim_head_band' ) ) {
 		return aw_claim_head_band(); // the listing's own head (form-blocks.php)
 	}
+	$thanks = is_page( 'thank-you' ) && function_exists( 'aw_thanks_head' ) ? aw_thanks_head() : null;
+	if ( $thanks ) { // the success heading as the H1, its line as the description (form-blocks.php)
+		return aw_head_band( array( 'crumbs' => function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '', 'title' => $thanks['title'], 'title_class' => 'wp-block-post-title', 'desc' => $thanks['text'] ) );
+	}
 	$crumbs = function_exists( 'aw_breadcrumbs_claim' ) ? aw_breadcrumbs_claim() : '';
 	$type = (string) ( $a['postType'] ?? '' );
 	$hub  = '' !== $type;
@@ -181,7 +185,7 @@ function aw_block_section_head( $a ) {
 			'crumbs'      => $crumbs,
 			'title'       => wp_strip_all_tags( get_the_title() ),
 			'title_class' => $hub ? 'wp-block-query-title wp-block-post-title' : 'wp-block-post-title',
-			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '',
+			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : trim( (string) get_post_meta( get_the_ID(), 'aw_page_intro', true ) ), // a Page's own intro (meta aw_page_intro), as a section's
 			'filters'     => (string) $filt,
 			'count'       => $hub && 'aw_listing' !== $type && aw_list_page( $type, false ) && function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '', // the Directory's count stays with its results
 			'compact'     => 'aw_listing' === $type,

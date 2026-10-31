@@ -188,8 +188,18 @@ function aw_thanks_forms() {
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
 		'newsletter'  => array( 'newsletter', 'You\'re subscribed', 'Thank you for signing up for Animal Writes updates.' ),
 		'claim'       => array( 'claim', 'Request sent.', '' ),
-		'report'      => array( 'report', 'Thanks — we\'ll check it.', '' ),
 	);
+}
+
+/** The thank-you page's head (owner, 31 Oct 2026): the form's success heading as the H1 and its line as the description; null for no known form. */
+function aw_thanks_head() {
+	$forms = aw_thanks_forms();
+	$form  = function_exists( 'kits_thanks_form' ) ? kits_thanks_form() : '';
+	if ( ! isset( $forms[ $form ] ) ) {
+		return null;
+	}
+	$msg = function_exists( 'kits_thanks_message' ) ? kits_thanks_message() : null;
+	return array( 'title' => $msg ? (string) $msg['title'] : $forms[ $form ][1], 'text' => $msg ? (string) $msg['text'] : $forms[ $form ][2] );
 }
 
 add_shortcode(
@@ -201,10 +211,7 @@ add_shortcode(
 		if ( ! isset( $forms[ $form ] ) ) {
 			return '<p class="aw-thanks-links"><a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/' ) ) . '">Home</a></p>';
 		}
-		$msg   = kits_thanks_message();
-		$title = $msg ? (string) $msg['title'] : $forms[ $form ][1];
-		$text  = $msg ? (string) $msg['text'] : $forms[ $form ][2];
-		if ( in_array( $form, array( 'claim', 'report' ), true ) ) {
+		if ( 'claim' === $form ) {
 			$listing = aw_form_page_listing();
 			$links  .= $listing ? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( 'Back to ' . get_the_title( $listing ) ) . '</a>' : '';
 		} else {
@@ -220,9 +227,9 @@ add_shortcode(
 		$more = 'newsletter' === $form && $full && defined( 'FLUENTFORM' )
 			? '<section class="aw-thanks-more"><h2 class="has-large-font-size">Choose your topics (optional)</h2><div class="kit-form aw-form-ff aw-newsletter-full-form" data-kit-form="newsletter_full">' . do_shortcode( '[fluentform id="' . $full . '"]' ) . '</div></section>'
 			: '';
-		return '<div class="kit-form-done aw-thanks" role="status" tabindex="-1" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '"><p class="aw-form-done-title">' . esc_html( $title ) . '</p>'
-			. ( '' !== $text ? '<p>' . esc_html( $text ) . '</p>' : '' ) . '</div>'
-			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' ) . $more;
+		// The heading and its line are the head band (aw_thanks_head()); the page keeps the analytics marker only.
+		return '<div class="aw-thanks" data-kit-thanks="' . esc_attr( $forms[ $form ][0] ) . '" hidden></div>' . $more
+			. ( $links ? '<p class="aw-thanks-links">' . $links . '</p>' : '' );
 	}
 );
 

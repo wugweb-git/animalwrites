@@ -79,6 +79,25 @@
                 },
                 {
                     "index": 2,
+                    "element": "aw_places",
+                    "uniqElKey": "el_aw_places",
+                    "attributes": {
+                        "name": "aw_places"
+                    },
+                    "settings": {
+                        "label": "PIN code, State and District",
+                        "container_class": "",
+                        "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
+                        "conditional_logics": []
+                    },
+                    "editor_options": {
+                        "title": "PIN code, State and District",
+                        "icon_class": "ff-edit-html",
+                        "template": "customHTML"
+                    }
+                },
+                {
+                    "index": 3,
                     "element": "input_text",
                     "uniqElKey": "el_aw_name",
                     "attributes": {
@@ -114,7 +133,7 @@
                     }
                 },
                 {
-                    "index": 3,
+                    "index": 4,
                     "element": "input_email",
                     "uniqElKey": "el_aw_email",
                     "attributes": {
@@ -157,7 +176,7 @@
                     }
                 },
                 {
-                    "index": 4,
+                    "index": 5,
                     "element": "input_text",
                     "uniqElKey": "el_aw_phone",
                     "attributes": {
@@ -195,7 +214,7 @@
                     }
                 },
                 {
-                    "index": 5,
+                    "index": 6,
                     "element": "input_text",
                     "uniqElKey": "el_aw_whatsapp",
                     "attributes": {
@@ -206,10 +225,11 @@
                         "class": "",
                         "placeholder": "9876543210",
                         "inputmode": "tel",
-                        "maxlength": 14
+                        "maxlength": 14,
+                        "autocomplete": "tel"
                     },
                     "settings": {
-                        "container_class": "kit-field",
+                        "container_class": "kit-field aw-form-ff-half",
                         "label": "WhatsApp number <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "WhatsApp number",
@@ -232,7 +252,54 @@
                     }
                 },
                 {
-                    "index": 6,
+                    "index": 7,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_wa_same",
+                    "attributes": {
+                        "name": "wa_same",
+                        "value": [],
+                        "type": "checkbox"
+                    },
+                    "settings": {
+                        "container_class": "kit-field aw-form-ff-right aw-wa-same",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "Same as my phone",
+                        "help_message": "",
+                        "advanced_options": [
+                            {
+                                "label": "Same as my phone",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "dynamic_default_value": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": false,
+                                "message": "",
+                                "global_message": "",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "display_type": "",
+                        "enable_other_option": "no",
+                        "layout_class": ""
+                    },
+                    "editor_options": {
+                        "title": "Checkbox",
+                        "icon_class": "ff-edit-checkbox-1",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 8,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_wa_optin",
                     "attributes": {
@@ -269,7 +336,17 @@
                                 "global": false
                             }
                         },
-                        "conditional_logics": [],
+                        "conditional_logics": {
+                            "type": "all",
+                            "status": true,
+                            "conditions": [
+                                {
+                                    "field": "whatsapp",
+                                    "operator": "!=",
+                                    "value": ""
+                                }
+                            ]
+                        },
                         "display_type": "",
                         "enable_other_option": "no",
                         "layout_class": ""
@@ -281,26 +358,7 @@
                     }
                 },
                 {
-                    "index": 7,
-                    "element": "aw_places",
-                    "uniqElKey": "el_aw_places",
-                    "attributes": {
-                        "name": "aw_places"
-                    },
-                    "settings": {
-                        "label": "PIN code, State and District",
-                        "container_class": "",
-                        "html_codes": "<p>PIN code, State and District (Animal Writes)</p>",
-                        "conditional_logics": []
-                    },
-                    "editor_options": {
-                        "title": "PIN code, State and District",
-                        "icon_class": "ff-edit-html",
-                        "template": "customHTML"
-                    }
-                },
-                {
-                    "index": 8,
+                    "index": 9,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_availability",
                     "attributes": {
@@ -309,7 +367,7 @@
                         "type": "checkbox"
                     },
                     "settings": {
-                        "container_class": "kit-field kit-check-group",
+                        "container_class": "kit-field kit-check-group kit-chips",
                         "label": "When can you help?",
                         "label_placement": "",
                         "admin_field_label": "When can you help?",
@@ -365,7 +423,7 @@
                     }
                 },
                 {
-                    "index": 9,
+                    "index": 10,
                     "element": "input_radio",
                     "uniqElKey": "el_aw_travel_range",
                     "attributes": {
@@ -374,7 +432,7 @@
                         "type": "radio"
                     },
                     "settings": {
-                        "container_class": "kit-field",
+                        "container_class": "kit-field kit-chips kit-chips--segment",
                         "label": "How far will you travel?",
                         "label_placement": "",
                         "admin_field_label": "How far will you travel?",
@@ -430,7 +488,7 @@
                     }
                 },
                 {
-                    "index": 10,
+                    "index": 11,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_skills",
                     "attributes": {
@@ -439,7 +497,7 @@
                         "type": "checkbox"
                     },
                     "settings": {
-                        "container_class": "kit-field kit-check-group",
+                        "container_class": "kit-field kit-check-group kit-chips",
                         "label": "Skills",
                         "label_placement": "",
                         "admin_field_label": "Skills",
@@ -507,7 +565,7 @@
                     }
                 },
                 {
-                    "index": 11,
+                    "index": 12,
                     "element": "input_text",
                     "uniqElKey": "el_aw_languages",
                     "attributes": {
@@ -516,7 +574,8 @@
                         "value": "",
                         "id": "",
                         "class": "",
-                        "placeholder": ""
+                        "placeholder": "",
+                        "maxlength": 120
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -551,7 +610,7 @@
                     }
                 },
                 {
-                    "index": 12,
+                    "index": 13,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_org_assoc",
                     "attributes": {
@@ -598,7 +657,7 @@
                     }
                 },
                 {
-                    "index": 13,
+                    "index": 14,
                     "element": "input_text",
                     "uniqElKey": "el_aw_org_name",
                     "attributes": {
@@ -607,7 +666,9 @@
                         "value": "",
                         "id": "",
                         "class": "",
-                        "placeholder": ""
+                        "placeholder": "",
+                        "maxlength": 120,
+                        "autocomplete": "organization"
                     },
                     "settings": {
                         "container_class": "kit-field",
@@ -642,7 +703,25 @@
                     }
                 },
                 {
-                    "index": 14,
+                    "index": 15,
+                    "element": "input_hidden",
+                    "uniqElKey": "el_aw_org_listing",
+                    "attributes": {
+                        "type": "hidden",
+                        "name": "org_listing",
+                        "value": ""
+                    },
+                    "settings": {
+                        "admin_field_label": "Organisation listing ID"
+                    },
+                    "editor_options": {
+                        "title": "Hidden Field",
+                        "icon_class": "ff-edit-hidden-field",
+                        "template": "inputHidden"
+                    }
+                },
+                {
+                    "index": 16,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_org_show",
                     "attributes": {
@@ -699,7 +778,54 @@
                     }
                 },
                 {
-                    "index": 15,
+                    "index": 17,
+                    "element": "input_checkbox",
+                    "uniqElKey": "el_aw_adult",
+                    "attributes": {
+                        "type": "checkbox",
+                        "name": "adult",
+                        "value": []
+                    },
+                    "settings": {
+                        "container_class": "kit-field",
+                        "label": "",
+                        "label_placement": "",
+                        "admin_field_label": "I'm 18 or older",
+                        "help_message": "",
+                        "validation_rules": {
+                            "required": {
+                                "value": true,
+                                "message": "Tick to confirm you're 18 or older",
+                                "global_message": "Tick to confirm you're 18 or older",
+                                "global": false
+                            }
+                        },
+                        "conditional_logics": [],
+                        "advanced_options": [
+                            {
+                                "label": "I'm 18 or older.",
+                                "value": "1",
+                                "calc_value": "",
+                                "image": ""
+                            }
+                        ],
+                        "calc_value_status": false,
+                        "enable_image_input": false,
+                        "values_visible": false,
+                        "randomize_options": "no",
+                        "enable_select_2": "no",
+                        "enable_option_groups": "no",
+                        "enable_other_option": "no",
+                        "dynamic_default_value": ""
+                    },
+                    "editor_options": {
+                        "title": "Check Box",
+                        "icon_class": "ff-edit-text",
+                        "template": "inputCheckable"
+                    }
+                },
+                {
+                    "index": 18,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_consent",
                     "attributes": {
@@ -746,7 +872,7 @@
                     }
                 },
                 {
-                    "index": 16,
+                    "index": 19,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_nl_optin",
                     "attributes": {
@@ -795,7 +921,7 @@
                     }
                 },
                 {
-                    "index": 17,
+                    "index": 20,
                     "element": "aw_check",
                     "uniqElKey": "el_aw_check",
                     "attributes": {
@@ -814,7 +940,7 @@
                     }
                 },
                 {
-                    "index": 18,
+                    "index": 21,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_id",
                     "attributes": {
@@ -832,7 +958,7 @@
                     }
                 },
                 {
-                    "index": 19,
+                    "index": 22,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_page_title",
                     "attributes": {
@@ -850,7 +976,7 @@
                     }
                 },
                 {
-                    "index": 20,
+                    "index": 23,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_referrer",
                     "attributes": {
@@ -868,7 +994,7 @@
                     }
                 },
                 {
-                    "index": 21,
+                    "index": 24,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_source",
                     "attributes": {
@@ -886,7 +1012,7 @@
                     }
                 },
                 {
-                    "index": 22,
+                    "index": 25,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_medium",
                     "attributes": {
@@ -904,7 +1030,7 @@
                     }
                 },
                 {
-                    "index": 23,
+                    "index": 26,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_utm_campaign",
                     "attributes": {
@@ -922,7 +1048,7 @@
                     }
                 },
                 {
-                    "index": 24,
+                    "index": 27,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_ga",
                     "attributes": {
@@ -940,7 +1066,7 @@
                     }
                 },
                 {
-                    "index": 25,
+                    "index": 28,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_clarity",
                     "attributes": {
@@ -958,7 +1084,7 @@
                     }
                 },
                 {
-                    "index": 26,
+                    "index": 29,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_screen",
                     "attributes": {
@@ -976,7 +1102,7 @@
                     }
                 },
                 {
-                    "index": 27,
+                    "index": 30,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_lang",
                     "attributes": {
@@ -994,7 +1120,7 @@
                     }
                 },
                 {
-                    "index": 28,
+                    "index": 31,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_tz",
                     "attributes": {
@@ -1012,7 +1138,7 @@
                     }
                 },
                 {
-                    "index": 29,
+                    "index": 32,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_secs",
                     "attributes": {
@@ -1030,7 +1156,7 @@
                     }
                 },
                 {
-                    "index": 30,
+                    "index": 33,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_first_visit",
                     "attributes": {
@@ -1048,7 +1174,7 @@
                     }
                 },
                 {
-                    "index": 31,
+                    "index": 34,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_v_visits",
                     "attributes": {
@@ -1066,7 +1192,7 @@
                     }
                 },
                 {
-                    "index": 32,
+                    "index": 35,
                     "element": "input_hidden",
                     "uniqElKey": "el_aw_consent_version",
                     "attributes": {
@@ -1133,7 +1259,7 @@
             },
             {
                 "meta_key": "fluentcrm_feeds",
-                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"label\":\"phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_help\",\"item_value\":\"{inputs.roles}\"},{\"label\":\"vol_phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_whatsapp\",\"item_value\":\"{inputs.whatsapp}\"},{\"label\":\"vol_wa_optin\",\"item_value\":\"{inputs.wa_optin}\"},{\"label\":\"vol_availability\",\"item_value\":\"{inputs.availability}\"},{\"label\":\"vol_travel_range\",\"item_value\":\"{inputs.travel_range}\"},{\"label\":\"vol_skills\",\"item_value\":\"{inputs.skills}\"},{\"label\":\"vol_languages\",\"item_value\":\"{inputs.languages}\"},{\"label\":\"vol_organisation\",\"item_value\":\"{inputs.org_name}\"},{\"label\":\"vol_org_show\",\"item_value\":\"{inputs.org_show}\"},{\"label\":\"vol_page\",\"item_value\":\"{inputs.v_page_title}\"},{\"label\":\"vol_source\",\"item_value\":\"2.0 form\"},{\"label\":\"vol_consent\",\"item_value\":\"volunteering\"},{\"label\":\"vol_consent_version\",\"item_value\":\"{inputs.consent_version}\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Volunteer sign-up → FluentCRM (newsletter box ticked: Newsletter, volunteer, volunteer fields; unticked: the same in code, not emailed)\",\"tag_ids\":[\"volunteer\"]}"
+                "value": "{\"first_name\":\"\",\"last_name\":\"\",\"full_name\":\"{inputs.name}\",\"email\":\"{inputs.email}\",\"other_fields\":[{\"label\":\"phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_help\",\"item_value\":\"{inputs.roles}\"},{\"label\":\"vol_phone\",\"item_value\":\"{inputs.phone}\"},{\"label\":\"vol_whatsapp\",\"item_value\":\"{inputs.whatsapp}\"},{\"label\":\"vol_wa_optin\",\"item_value\":\"{inputs.wa_optin}\"},{\"label\":\"vol_availability\",\"item_value\":\"{inputs.availability}\"},{\"label\":\"vol_travel_range\",\"item_value\":\"{inputs.travel_range}\"},{\"label\":\"vol_skills\",\"item_value\":\"{inputs.skills}\"},{\"label\":\"vol_languages\",\"item_value\":\"{inputs.languages}\"},{\"label\":\"vol_organisation\",\"item_value\":\"{inputs.org_name}\"},{\"label\":\"vol_org_show\",\"item_value\":\"{inputs.org_show}\"},{\"label\":\"vol_page\",\"item_value\":\"{inputs.v_page_title}\"},{\"label\":\"vol_source\",\"item_value\":\"2.0 form\"},{\"label\":\"vol_consent\",\"item_value\":\"volunteering\"},{\"label\":\"vol_consent_version\",\"item_value\":\"{inputs.consent_version}\"},{\"label\":\"vol_org_listing\",\"item_value\":\"{inputs.org_listing}\"}],\"company_fields\":[{\"item_value\":\"\",\"label\":\"\"}],\"list_id\":\"newsletter\",\"tag_ids_selection_type\":\"simple\",\"tag_routers\":[],\"skip_if_exists\":false,\"double_opt_in\":false,\"force_subscribe\":false,\"skip_primary_data\":true,\"conditionals\":{\"conditions\":[{\"field\":\"nl_optin\",\"operator\":\"=\",\"value\":\"1\"}],\"status\":true,\"type\":\"all\"},\"run_events_only\":[],\"remove_tags\":[],\"enabled\":true,\"name\":\"Volunteer sign-up → FluentCRM (newsletter box ticked: Newsletter, volunteer, volunteer fields; unticked: the same in code, not emailed)\",\"tag_ids\":[\"volunteer\"]}"
             },
             {
                 "meta_key": "fluentcrm_feeds",

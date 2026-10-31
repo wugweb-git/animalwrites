@@ -107,6 +107,91 @@
 		sum.hidden = false;
 	});
 
+	/* Volunteer form, "Same as my phone" (owner, 31 Oct 2026): the WhatsApp number follows the phone number while ticked
+	   (the server copies it too). The change event lets Fluent Forms show "OK to contact me on WhatsApp". */
+	document.querySelectorAll('input[name="wa_same[]"]').forEach(function (box) {
+		var f = box.form, ph = f && f.querySelector('input[name=phone]'), wa = f && f.querySelector('input[name=whatsapp]');
+		if (!ph || !wa) return;
+		function sync() {
+			if (box.checked) wa.value = ph.value;
+			wa.readOnly = box.checked;
+			wa.dispatchEvent(new Event('input', { bubbles: true })); wa.dispatchEvent(new Event('change', { bubbles: true }));
+			if (window.jQuery) jQuery(wa).trigger('change');
+		}
+		box.addEventListener('change', sync);
+		ph.addEventListener('input', function () { if (box.checked) sync(); });
+	});
+
+	/* Volunteer form, Organisation from the Directory (owner, 31 Oct 2026): typing three letters lists matching listings
+	   ("name · district, state"); picking one saves its ID in org_listing and its name in the box. "My organisation isn't
+	   listed" keeps the typed name. A combobox: arrow keys, Enter, Escape; the choice is announced. */
+	document.querySelectorAll('input[data-aw-org-search]').forEach(function (inp) {
+		var f = inp.form, idf = f && f.querySelector('input[name=org_listing]');
+		if (!idf) return;
+		var host = inp.parentNode, list = document.createElement('ul'), live = document.createElement('span');
+		list.id = (inp.id || 'aw-org') + '-list'; list.className = 'aw-org-list'; list.setAttribute('role', 'listbox'); list.hidden = true;
+		live.className = 'screen-reader-text'; live.setAttribute('role', 'status');
+		inp.setAttribute('role', 'combobox'); inp.setAttribute('aria-autocomplete', 'list'); inp.setAttribute('aria-expanded', 'false'); inp.setAttribute('aria-controls', list.id);
+		host.classList.add('aw-org-host'); host.appendChild(list); host.appendChild(live);
+		var picked = idf.value ? inp.value : '', items = [], cur = -1, timer;
+		function close() { list.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); cur = -1; }
+		function choose(i) {
+			var it = items[i];
+			if (it && it.id) { inp.value = it.name; idf.value = String(it.id); picked = it.name; live.textContent = it.name + ' chosen'; }
+			else { idf.value = ''; picked = ''; live.textContent = ''; }
+			close();
+		}
+		function mark() {
+			Array.prototype.forEach.call(list.children, function (li, i) { li.setAttribute('aria-selected', i === cur ? 'true' : 'false'); });
+			if (cur > -1) { inp.setAttribute('aria-activedescendant', list.id + '-' + cur); list.children[cur].scrollIntoView({ block: 'nearest' }); }
+		}
+		function render() {
+			list.textContent = '';
+			items.forEach(function (it, i) {
+				var li = document.createElement('li');
+				li.id = list.id + '-' + i; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', 'false');
+				li.className = 'aw-org-opt' + (it.id ? '' : ' aw-org-none');
+				li.textContent = it.name;
+				if (it.place) { var s = document.createElement('span'); s.className = 'aw-org-place'; s.textContent = ' · ' + it.place; li.appendChild(s); }
+				li.addEventListener('mousedown', function (e) { e.preventDefault(); choose(i); });
+				list.appendChild(li);
+			});
+			list.hidden = !items.length; inp.setAttribute('aria-expanded', items.length ? 'true' : 'false');
+		}
+		inp.addEventListener('input', function () {
+			if (inp.value !== picked) { idf.value = ''; picked = ''; }
+			clearTimeout(timer);
+			var q = inp.value.trim();
+			if (q.length < 3) { items = []; render(); return; }
+			timer = setTimeout(function () {
+				fetch(inp.dataset.awOrgSearch + '&q=' + encodeURIComponent(q), { credentials: 'same-origin' })
+					.then(function (r) { return r.json(); })
+					.then(function (r) { items = (r && r.success ? r.data : []).concat([{ id: 0, name: 'My organisation isn\'t listed' }]); cur = -1; render(); })
+					.catch(function () {});
+			}, 250);
+		});
+		inp.addEventListener('keydown', function (e) {
+			if (list.hidden) return;
+			if (e.key === 'ArrowDown') { cur = Math.min(cur + 1, items.length - 1); mark(); e.preventDefault(); }
+			else if (e.key === 'ArrowUp') { cur = Math.max(cur - 1, 0); mark(); e.preventDefault(); }
+			else if (e.key === 'Enter' && cur > -1) { choose(cur); e.preventDefault(); }
+			else if (e.key === 'Escape') { close(); }
+		});
+		inp.addEventListener('blur', function () { setTimeout(close, 150); });
+	});
+
+	/* Every Fluent Forms form: when the send itself fails (no connection, a server error: no field errors came back), a
+	   plain line under the button (owner, 31 Oct 2026; wording for the owner's yes). */
+	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
+		var res = d && d.response, f = d && d.form && d.form[0];
+		if (!f || (res && res.responseJSON && res.responseJSON.errors)) return;
+		var box = f.querySelector('.aw-ff-send-failed');
+		if (!box) { box = document.createElement('p'); box.className = 'aw-ff-send-failed kit-field-message kit-field-error'; box.setAttribute('role', 'alert'); (f.querySelector('.ff_submit_btn_wrapper') || f).appendChild(box); }
+		box.textContent = 'Your message didn\'t send. Check your connection and try again.';
+		f.querySelectorAll('.ff-errors-in-stack').forEach(function (s) { s.hidden = true; }); // one message, not Fluent Forms' generic one as well
+	});
+	if (window.jQuery) jQuery(document).on('fluentform_submission_success', function (e, d) { var b = d && d.form && d.form[0] && d.form[0].querySelector('.aw-ff-send-failed'); if (b) b.remove(); });
+
 	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
 	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
 		var err = d && d.response && d.response.responseJSON && d.response.responseJSON.errors, f = d && d.form && d.form[0];
