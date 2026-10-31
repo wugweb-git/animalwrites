@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_CLARITY_CRON = 'aw_si_clarity';
 const AW_SI_CLARITY_API  = 'https://www.clarity.ms/export-data/api/v1/project-live-insights';
 const AW_SI_CLARITY_MAX  = 8; // Calls a day this job allows itself (Clarity's limit is 10).
+const AW_SI_CLARITY_RETRY = 'aw_si_clarity_retry'; // One later try on a day whose run failed (owner, 31 Oct 2026).
 
 /** Whether the Clarity token is set in wp-config.php. */
 function aw_si_clarity_on(): bool {
@@ -73,7 +74,7 @@ function aw_si_clarity_call( string $dimension ) {
 			AW_SI_CLARITY_API
 		),
 		array(
-			'timeout' => 30,
+			'timeout' => 60, // Clarity's export can take over 30 s; the 30 s limit failed every run 27–31 Oct 2026.
 			'headers' => array(
 				'Authorization' => 'Bearer ' . AW_CLARITY_TOKEN,
 				'Content-Type'  => 'application/json',
@@ -237,12 +238,19 @@ function aw_si_clarity_run( array $args = array() ): array {
 	}
 	if ( '' !== $rep['error'] ) {
 		aw_si_run_fail( 'clarity', $rep['error'] );
+		// One more try 3 hours later, once a day (calls stay well inside Clarity's 10 a day).
+		$today = wp_date( 'Y-m-d' );
+		if ( get_option( 'aw_si_clarity_retried' ) !== $today && ! wp_next_scheduled( AW_SI_CLARITY_RETRY ) ) {
+			update_option( 'aw_si_clarity_retried', $today, false );
+			wp_schedule_single_event( time() + 3 * HOUR_IN_SECONDS, AW_SI_CLARITY_RETRY );
+		}
 	} else {
 		aw_si_run_ok( 'clarity', $rep + array( 'up_to' => $day ) );
 	}
 	return $rep;
 }
 add_action( AW_SI_CLARITY_CRON, fn() => get_option( 'aw_si_off' ) || ! aw_si_clarity_on() ? null : aw_si_clarity_run() );
+add_action( AW_SI_CLARITY_RETRY, fn() => get_option( 'aw_si_off' ) || ! aw_si_clarity_on() ? null : aw_si_clarity_run() );
 
 /**
  * Save a Clarity note for a page (the owner's short dated summary of the recordings; plan §5.2).
