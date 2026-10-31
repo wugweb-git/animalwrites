@@ -373,7 +373,13 @@ function aw_ff_render_logo( $element, $form ) {
 /* ---------- Fluent Forms fields: the site's look ---------- */
 
 /** The Volunteer form's ways to help => Kits icon (owner, 31 Oct 2026). */
-const AW_VOL_ROLE_ICONS = array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' );
+/** An icon before each choice: field name => ( option value => Kits icon ). Tiles and chips use the same map. */
+const AW_FF_OPTION_ICONS = array(
+	'roles'        => array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' ),
+	'availability' => array( 'weekdays' => 'calendar', 'weekends' => 'sun', 'evenings' => 'moon', 'emergencies' => 'siren' ),
+	'travel_range' => array( '5km' => 'map-pin', 'district' => 'map', 'state' => 'landmark', 'anywhere' => 'world' ),
+	'skills'       => array( 'first_aid' => 'briefcase-medical', 'driving' => 'car', 'foster' => 'home', 'photo_video' => 'camera', 'social' => 'share', 'languages' => 'languages' ),
+);
 
 /** Icons inside fields, as the site's own forms have them. */
 const AW_FF_ICONS = array( 'name' => 'name', 'email' => 'mail', 'phone' => 'phone', 'whatsapp' => 'brand-whatsapp', 'org' => 'building', 'org_name' => 'building', 'aw_phone' => 'phone', 'org_phone' => 'phone', 'l_phone1' => 'phone', 'l_phone2' => 'phone', 'l_phone3' => 'phone', 'aw_whatsapp' => 'brand-whatsapp', 'aw_email' => 'mail', 'aw_website' => 'world' );
@@ -431,10 +437,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 				}
 				$html = (string) preg_replace( '#<div class=([\'"])ff-el-input--content\1#', '<div role="' . ( 'input_radio' === $el ? 'radiogroup' : 'group' ) . '" aria-labelledby="' . $gid . '" class=$1ff-el-input--content$1', $html, 1 );
 			}
-			if ( 'roles' === rtrim( $name, '[]' ) ) { // the ways to help as tiles, each with its icon (owner, 31 Oct 2026)
-				foreach ( AW_VOL_ROLE_ICONS as $val => $ico ) {
-					$html = (string) preg_replace( '#(value=[\'"]' . preg_quote( $val, '#' ) . '[\'"][^>]*>)(\s*)<span>#', '$1$2<span class="kit-ico kit-ico--' . $ico . ' aw-vol-role-ico" aria-hidden="true"></span><span>', $html, 1 );
-				}
+			$opt_icons = AW_FF_OPTION_ICONS[ rtrim( $name, '[]' ) ] ?? array(); // each choice with its icon: role tiles, chips and the segment
+			foreach ( $opt_icons as $val => $ico ) {
+				$html = (string) preg_replace( '#(value=[\'"]' . preg_quote( $val, '#' ) . '[\'"][^>]*>)(\s*)<span>#', '$1$2<span class="kit-ico kit-ico--' . $ico . ' aw-ff-opt-ico" aria-hidden="true"></span><span>', $html, 1 );
 			}
 			$prefix = (string) ( $data['settings']['prefix_label'] ?? '' );
 			$icon   = AW_FF_ICONS[ $name ] ?? ( '' === $prefix ? '' : ( '+91' === $prefix ? 'phone' : 'world' ) );

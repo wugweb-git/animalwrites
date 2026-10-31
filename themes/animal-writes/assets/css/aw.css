@@ -857,13 +857,20 @@ body { background: var(--kit-color-canvas); }
 	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-half { grid-column: auto; }
 	.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: auto; }
 }
+/* Form type scale, in one place: a question over a group of choices = h4, strong; field labels, box text, choices and
+   ticks = body-sm, regular; a chosen option = strong. Tiles use the same field border as boxes and chips. */
+.aw-form-ff :is(.kit-check-group, .kit-chips) > .ff-el-input--label label { font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); color: inherit; }
+.aw-form-ff .ff-el-form-check-label.kit-checkbox { font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); line-height: 1.4; }
+.aw-form-ff .aw-vol-role.kit-checkbox { border: var(--kit-border-control) solid var(--kit-field-border); font-weight: var(--kit-weight-regular); }
+.aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked) { font-weight: var(--kit-weight-strong); }
 /* Volunteer form layout (owner, 31 Oct 2026): ways to help as icon tiles; PIN, State, District in one row; "Same as my
    phone" under WhatsApp; when, how far and skills as chips. Tiles and chips stay real checkboxes and radios (the input is
    hidden visually, not from keyboards or screen readers): selected = a tick and a dark border, not colour alone; the
    Kits focus ring; 44px targets. */
 .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .aw-form-ff .aw-vol-role.kit-checkbox { position: relative; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: var(--kit-space-2); height: 100%; min-height: 7.5rem; padding: var(--kit-space-4); font-size: var(--fluid-body-sm); }
-.aw-form-ff .aw-vol-role-ico { width: 1.75rem; height: 1.75rem; }
+.aw-form-ff .aw-ff-opt-ico { width: 1.125rem; height: 1.125rem; } /* a choice's icon (chips, segment) */
+.aw-form-ff .aw-vol-role .aw-ff-opt-ico { width: 1.75rem; height: 1.75rem; } /* larger on a tile */
 .aw-form-ff .aw-vol-role.kit-checkbox input, .aw-form-ff .kit-chips .kit-checkbox input { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; opacity: 0; }
 .aw-form-ff .aw-vol-role.kit-checkbox::after { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: 1.25rem; height: 1.25rem; border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-1, 4px); background: var(--kit-color-bg); }
 .aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked) { border-width: 2px; }
