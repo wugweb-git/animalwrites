@@ -16,6 +16,8 @@ Every site form is built in **Fluent Forms** (free) and reaches **FluentCRM** (f
 | Remove my data (inactive since 31 Oct 2026: now a Contact reason) | 8 | `forms/8-remove-my-data.json` | AW-D-… | none |
 | Newsletter (full) | 9 | `forms/9-newsletter-full.json` | – | everyone → Newsletter, `newsletter`; each topic ticked → `topic-…` |
 
+**Email me updates (owner, 31 Oct 2026):** on Contact, Volunteer sign-up and Claim, ticked → the form's FluentCRM link (Newsletter, subscribed); unticked → the same contact on the Newsletter list with the same fields and tags (not `newsletter`), transactional, so never emailed (`aw_crm_unticked()`, fluentcrm.php); a contact already subscribed keeps that status. Remove my data never reaches FluentCRM; the Campaign form is unchanged.
+
 A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 0). Each contact also gets "Newsletter box (last form)" 1/0 with the form and its consent wording.
 
 **Versioned:** after changing a form in Fluent Forms, `wp eval-file tools/forms/forms.php export` and commit. To put the repo's version on a site (keeps the form's ID, entries and links; the form as it was goes to `~/backups/forms-before-…`): `… dry`, then `… import` (or `… import 4`). Links name tags and lists by slug in the files; import turns them into the site's IDs.
