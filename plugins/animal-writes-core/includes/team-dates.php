@@ -36,6 +36,32 @@ function aw_team_dates() {
 	return $dates;
 }
 
+/**
+ * Monthly reminder (owner, 31 Oct 2026): the Search Console Links read on the 1st. Dates are one-off entries, so the
+ * next 12 months are added once (flag aw_team_dates_links_read); each can be removed like any other date.
+ */
+function aw_team_dates_add_links_read() {
+	if ( get_option( 'aw_team_dates_links_read' ) ) {
+		return;
+	}
+	$title = 'Search Console Links read (Claude Code session)';
+	$all   = aw_team_dates();
+	$have  = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	$first = new DateTimeImmutable( 'first day of next month', wp_timezone() );
+	for ( $i = 0; $i < 12; $i++ ) {
+		$ymd = $first->modify( '+' . $i . ' months' )->format( 'Y-m-d' );
+		if ( ! isset( $have[ $ymd . '|' . $title ] ) ) {
+			$all[] = array( 'date' => $ymd, 'title' => $title, 'note' => 'Read Search Console → Links and add new linking pages with wp aw-si links add (they show in AW SEO Plus → Search Insights → Links).' );
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_links_read', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_links_read' );
+
 /** A date in the site's one format, j M Y. */
 function aw_team_date_label( $ymd ) {
 	return wp_date( 'j M Y', strtotime( $ymd . ' 12:00:00' ) );
