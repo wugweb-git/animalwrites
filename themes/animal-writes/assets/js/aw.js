@@ -76,10 +76,11 @@
 	   2026), from each field's pre-filled value; read-only. */
 	document.addEventListener('kit:step', function (e) {
 		var form = e.target.closest && e.target.closest('form'), sum = form && form.querySelector('[data-aw-claim-summary]');
-		if (!sum || sum.closest('.kit-step[hidden]')) return;
+		var st = sum && sum.closest('.kit-step');
+		if (!sum || (st && +st.getAttribute('data-step') !== e.detail.step)) return; // kit:step fires before the step is shown
 		var dl = sum.querySelector('dl'), seen = {};
 		dl.textContent = '';
-		form.querySelectorAll('[name^="l_"], input[type=hidden][name$="_token"], input[type=hidden][name="photo_tokens"]').forEach(function (el) {
+		form.querySelectorAll('[name^="l_"], input[type=hidden][name="logo_token"], input[type=hidden][name="photo_tokens"]').forEach(function (el) {
 			var name = el.name.replace(/\[\]$/, ''), group = el.closest('.ff-el-group'), changed, value;
 			if (seen[name] || !group) return;
 			seen[name] = true;

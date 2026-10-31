@@ -86,8 +86,11 @@ function aw_claim_service_slugs( $lid ) {
 
 /** The listing's About text as the form shows it: its body, or its short bio when the body is empty. */
 function aw_claim_about( $lid ) {
-	$body = trim( wp_strip_all_tags( (string) get_post_field( 'post_content', $lid ) ) );
-	return '' !== $body ? $body : trim( (string) get_post_field( 'post_excerpt', $lid ) );
+	$raw  = (string) get_post_field( 'post_content', $lid );
+	$body = trim( wp_strip_all_tags( $raw ) );
+	// As the listing page shows it (aw_block_listing_about): the short bio when the body is empty or an import's template intro.
+	$bio = has_excerpt( $lid ) && ( '' === $body || ( function_exists( 'aw_listing_is_template_intro' ) && aw_listing_is_template_intro( trim( $raw ) ) ) );
+	return $bio ? trim( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
 }
 
 /**
@@ -213,6 +216,9 @@ function aw_claim_entry( $entry_id ) {
 						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'aw_ff_ticked' ) && aw_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
+				foreach ( array_slice( $lid ? aw_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
+					$lines[] = $r['number'] . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
+				}
 				$propose['phones'] = implode( "\n", $lines );
 				continue;
 			}
@@ -251,20 +257,21 @@ function aw_claim_entry( $entry_id ) {
 
 /**
  * The fields where the claim differs from the listing now: key => [label, now, proposed]. Compared without regard to
- * case and spacing; links without scheme, www and a closing slash.
+ * spacing; email and links also without regard to case, and links without scheme, www and a closing slash.
  *
  * @param array $c aw_claim_entry().
  * @return array
  */
 function aw_claim_changes( $c ) {
-	$norm = function ( $v ) {
-		$v = strtolower( trim( preg_replace( '/\s+/', ' ', (string) $v ) ) );
-		return rtrim( preg_replace( '#^https?://(www\.)?#', '', $v ), '/' );
+	$norm = function ( $v, $loose ) {
+		$v = trim( preg_replace( '/\s+/', ' ', (string) $v ) );
+		return $loose ? rtrim( preg_replace( '#^https?://(www\.)?#', '', strtolower( $v ) ), '/' ) : $v; // links and email without regard to case
 	};
 	$out = array();
 	foreach ( $c['propose'] as $key => $new ) {
-		$now = aw_claim_now( $c['listing'], $key, false );
-		if ( $norm( $now ) !== $norm( $new ) ) {
+		$now   = aw_claim_now( $c['listing'], $key, false );
+		$loose = 'l_email' === $key || 0 === strpos( AW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', AW_CLAIM_L[ $key ][1] );
+		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
 			$out[ $key ] = array( AW_CLAIM_L[ $key ][0], $now, $new );
 		}
 	}
@@ -302,8 +309,11 @@ function aw_claims_screen() {
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'approved' === $done ? 'Claim approved: the ticked fields are on the listing (Undo in Sourcing → Enrichment review).' : 'Claim rejected.' ) . '</p></div>';
 	}
 	global $wpdb;
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed' ORDER BY id DESC LIMIT 200", aw_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$rows = array();
+	$per   = 20;
+	$paged = max( 1, absint( wp_unslash( $_GET['paged'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- read only
+	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed'", aw_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed' ORDER BY id DESC LIMIT %d OFFSET %d", aw_claim_ff_id(), $per, ( $paged - 1 ) * $per ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows  = array();
 	foreach ( $ids as $id ) {
 		$c = aw_claim_entry( (int) $id );
 		if ( ! $c ) {
@@ -320,7 +330,7 @@ function aw_claims_screen() {
 			'sent'    => esc_html( mysql2date( 'j M Y', $c['sent'] ) ),
 		);
 	}
-	aw_core_simple_table( 'aw-claims', array( 'listing' => 'Listing', 'from' => 'From', 'changes' => 'Changes', 'status' => 'Status', 'ref' => 'Reference', 'sent' => 'Sent' ), $rows, array( 'per_page' => 50, 'empty' => 'No claims yet.' ) );
+	aw_core_simple_table( 'aw-claims', array( 'listing' => 'Listing', 'from' => 'From', 'changes' => 'Changes', 'status' => 'Status', 'ref' => 'Reference', 'sent' => 'Sent' ), $rows, array( 'per_page' => $per, 'total' => $total, 'empty' => 'No claims yet.' ) );
 	echo '</div>';
 }
 
@@ -411,6 +421,16 @@ function aw_claim_clean( $meta_key, $v ) {
 		case 'aw_volunteer_url':
 		case 'aw_adopt_url':
 			return (string) esc_url_raw( $v );
+		case 'aw_instagram':
+		case 'aw_facebook':
+		case 'aw_x':
+		case 'aw_youtube':
+		case 'aw_linkedin':
+			if ( preg_match( '/^@?([A-Za-z0-9_.\-]{2,100})$/', $v, $h ) && false === strpos( $h[1], '.' ) || preg_match( '/^@([A-Za-z0-9_.\-]{2,100})$/', $v, $h ) ) { // a handle, not a link
+				$base = array( 'aw_instagram' => 'https://www.instagram.com/%s/', 'aw_facebook' => 'https://www.facebook.com/%s', 'aw_x' => 'https://x.com/%s', 'aw_youtube' => 'https://www.youtube.com/@%s', 'aw_linkedin' => 'https://www.linkedin.com/company/%s' )[ $meta_key ];
+				return sprintf( $base, rawurlencode( $h[1] ) );
+			}
+			return (string) esc_url_raw( $v );
 		case 'aw_upi':
 			return preg_match( '/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/', $v ) ? $v : '';
 		case 'aw_founded':
@@ -457,19 +477,25 @@ function aw_claim_sideload( $file, $lid, $title ) {
 function aw_claim_apply_field( $c, $key ) {
 	$lid = $c['listing'];
 	$src = array( array( 'key' => 'claim', 'name' => 'Claimed by organisation', 'url' => '', 'fetched_at' => wp_date( 'c' ) ) );
-	$log = function ( $field, $value ) use ( $lid, $src, $c ) {
-		if ( function_exists( 'aw_enrich_add_row' ) && function_exists( 'aw_enrich_snapshot' ) && function_exists( 'aw_enrich_install' ) ) {
+	$on   = function_exists( 'aw_enrich_add_row' ) && function_exists( 'aw_enrich_snapshot' ) && function_exists( 'aw_enrich_install' );
+	$snap = fn( $field ) => $on ? aw_enrich_snapshot( $lid, $field ) : null;
+	$log  = function ( $field, $value, $old = null ) use ( $lid, $src, $c, $on ) {
+		if ( $on ) {
 			aw_enrich_install();
-			aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $c['id'], 'Claimed by organisation' );
+			aw_enrich_add_row( $lid, $field, $value, null !== $old ? $old : aw_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $c['id'], 'Claimed by organisation' );
 		}
 	};
 	if ( 'logo' === $key ) {
-		$log( 'logo', 'claim upload' );
+		$old = $snap( 'logo' );
 		$att = aw_claim_sideload( $c['logo'], $lid, get_the_title( $lid ) . ' logo' );
-		return $att ? (bool) set_post_thumbnail( $lid, $att ) : false;
+		if ( ! $att || ! set_post_thumbnail( $lid, $att ) ) {
+			return false;
+		}
+		$log( 'logo', 'claim upload', $old ); // logged once it worked, with what was there before
+		return true;
 	}
 	if ( 'photos' === $key ) {
-		$log( 'photos', 'claim upload' );
+		$old = $snap( 'photos' );
 		$ids = array();
 		foreach ( array_slice( $c['photos'], 0, 5 ) as $f ) {
 			$att = aw_claim_sideload( $f, $lid, get_the_title( $lid ) );
@@ -477,9 +503,13 @@ function aw_claim_apply_field( $c, $key ) {
 				$ids[] = $att;
 			}
 		}
+		if ( ! $ids ) {
+			return false;
+		}
 		$have = array_filter( array_map( 'absint', explode( ',', (string) get_post_meta( $lid, 'aw_gallery', true ) ) ) );
 		update_post_meta( $lid, 'aw_gallery', implode( ',', array_slice( array_merge( $ids, $have ), 0, 6 ) ) );
-		return (bool) $ids;
+		$log( 'photos', 'claim upload', $old );
+		return true;
 	}
 	$def = AW_CLAIM_L[ $key ] ?? null;
 	if ( ! $def || 'l_hours' === $key || ! array_key_exists( $key, $c['propose'] ) ) {
@@ -511,8 +541,12 @@ function aw_claim_apply_field( $c, $key ) {
 			if ( '' === $val && '' !== $new ) {
 				return false; // not usable for this field (a link, a date or a UPI ID that does not match)
 			}
-			$log( $def[2], $val );
+			$log( $def[2], $val ); // the snapshot keeps a second email or website too, for Undo
 			'' === $val ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $val );
+			$alt = array( 'aw_email' => 'aw_email_alt', 'aw_website' => 'aw_website_alt' )[ $def[1] ] ?? '';
+			if ( '' !== $alt ) {
+				delete_post_meta( $lid, $alt ); // the organisation has given its own: an unverified second value goes, as for earlier claims
+			}
 			return true;
 	}
 }
