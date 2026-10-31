@@ -184,6 +184,7 @@ function aw_claim_entry( $entry_id ) {
 	$d       = (array) json_decode( (string) $row['response'], true );
 	$s       = fn( $k ) => is_array( $d[ $k ] ?? '' ) ? implode( ',', array_map( 'strval', $d[ $k ] ) ) : trim( (string) ( $d[ $k ] ?? '' ) );
 	$lid     = absint( $d['listing'] ?? 0 );
+	$lid     = $lid && 'aw_listing' === get_post_type( $lid ) ? $lid : 0; // the hidden listing field comes from the page: only a real listing
 	$propose = array();
 	$legacy  = isset( $d['aw_email'] ) || isset( $d['aw_phone'] ) || isset( $d['aw_services'] );
 	if ( $legacy ) { // the form before 31 Oct 2026: only what was typed; an empty box meant "keep"

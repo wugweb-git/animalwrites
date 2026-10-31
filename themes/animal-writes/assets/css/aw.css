@@ -1037,7 +1037,7 @@ body { background: var(--kit-color-canvas); }
 .aw-claim-summary dl { display: grid; grid-template-columns: minmax(8em, max-content) 1fr; gap: var(--kit-space-2) var(--kit-space-4); margin: 0; }
 .aw-claim-summary dt { font-weight: var(--kit-weight-strong); }
 .aw-claim-summary dd { margin: 0; overflow-wrap: anywhere; }
-@media (max-width: 480px) { .aw-claim-summary dl { grid-template-columns: 1fr; } .aw-claim-summary dd { margin-bottom: var(--kit-space-2); } }
+@media (max-width: 767px) { .aw-claim-summary dl { grid-template-columns: 1fr; } .aw-claim-summary dd { margin-bottom: var(--kit-space-2); } }
 @media (prefers-reduced-motion: reduce) { .aw-claim-services .kit-checkbox { transition: none; } }
 
 /* Directory search, wide screens (fix 12 Oct 2026): the name field, the three selects and Search sit on one line,
