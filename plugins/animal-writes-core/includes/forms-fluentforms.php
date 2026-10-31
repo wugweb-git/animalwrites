@@ -139,6 +139,9 @@ function aw_ff_date_ymd( $v ) {
 
 /** The form's values as saved (phones +91, claim usernames, claim dates Y-m-d). */
 function aw_ff_normalise( $data ) {
+	if ( aw_ff_ticked( $data, 'wa_same' ) && '' !== trim( (string) ( $data['phone'] ?? '' ) ) ) {
+		$data['whatsapp'] = (string) $data['phone']; // "Same as my phone"
+	}
 	foreach ( AW_FF_PHONES as $k ) {
 		if ( isset( $data[ $k ] ) && is_string( $data[ $k ] ) && '' !== trim( $data[ $k ] ) ) {
 			$data[ $k ] = aw_ff_phone_store( $data[ $k ] );
@@ -332,7 +335,7 @@ function aw_ff_render_places( $element, $form ) {
 		$opts .= '</optgroup>';
 	}
 	$html .= aw_ff_group( $did, 'District', '<select id="' . esc_attr( $did ) . '" name="district" class="ff-el-form-control" autocomplete="address-level2" disabled>' . $opts . '</select>', array( 'class' => 'aw-form-ff-half' ) );
-	return $html;
+	return '<div class="aw-ff-places">' . $html . '</div>'; // PIN, State, District as one row from 768 (owner, 31 Oct 2026)
 }
 
 /** The spam check: ALTCHA (no third party, no cookies), plus the site's timing, honeypot and source fields. */
@@ -361,6 +364,9 @@ function aw_ff_render_logo( $element, $form ) {
 }
 
 /* ---------- Fluent Forms fields: the site's look ---------- */
+
+/** The Volunteer form's ways to help => Kits icon (owner, 31 Oct 2026). */
+const AW_VOL_ROLE_ICONS = array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' );
 
 /** Icons inside fields, as the site's own forms have them. */
 const AW_FF_ICONS = array( 'name' => 'name', 'email' => 'mail', 'phone' => 'phone', 'whatsapp' => 'brand-whatsapp', 'org' => 'building', 'org_name' => 'building', 'aw_phone' => 'phone', 'aw_whatsapp' => 'brand-whatsapp', 'aw_email' => 'mail', 'aw_website' => 'world' );
@@ -407,6 +413,16 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 			if ( in_array( $el, array( 'input_checkbox', 'input_radio' ), true ) || false !== strpos( $html, 'ff-el-form-check' ) ) { // the site's tick boxes (and the volunteer cards)
 				$cls  = 'roles' === rtrim( $name, '[]' ) ? ' kit-checkbox aw-vol-role' : ' kit-checkbox';
 				$html = str_replace( "class='ff-el-form-check-label", "class='ff-el-form-check-label" . $cls, $html );
+			}
+			if ( in_array( $el, array( 'input_checkbox', 'input_radio' ), true ) && preg_match( '#<div class=[\'"]ff-el-input--label[^>]*>\s*<label>#', $html ) ) { // a group of ticks or choices: named by its label (WCAG 1.3.1)
+				$gid  = 'aw-g-' . (int) $form->id . '-' . sanitize_key( rtrim( $name, '[]' ) );
+				$html = (string) preg_replace( '#(<div class=[\'"]ff-el-input--label[^>]*>\s*)<label>#', '$1<label id="' . $gid . '">', $html, 1 );
+				$html = (string) preg_replace( '#<div class=([\'"])ff-el-input--content\1#', '<div role="' . ( 'input_radio' === $el ? 'radiogroup' : 'group' ) . '" aria-labelledby="' . $gid . '" class=$1ff-el-input--content$1', $html, 1 );
+			}
+			if ( 'roles' === rtrim( $name, '[]' ) ) { // the ways to help as tiles, each with its icon (owner, 31 Oct 2026)
+				foreach ( AW_VOL_ROLE_ICONS as $val => $ico ) {
+					$html = (string) preg_replace( '#(value=[\'"]' . preg_quote( $val, '#' ) . '[\'"][^>]*>)(\s*)<span>#', '$1$2<span class="kit-ico kit-ico--' . $ico . ' aw-vol-role-ico" aria-hidden="true"></span><span>', $html, 1 );
+				}
 			}
 			$icon = '' !== (string) ( $data['settings']['prefix_label'] ?? '' ) ? '' : ( AW_FF_ICONS[ $name ] ?? '' ); // a "+91" or link prefix replaces the icon
 			if ( $icon && in_array( $el, array( 'input_text', 'input_email' ), true ) ) {

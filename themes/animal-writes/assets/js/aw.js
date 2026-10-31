@@ -107,6 +107,21 @@
 		sum.hidden = false;
 	});
 
+	/* Volunteer form, "Same as my phone" (owner, 31 Oct 2026): the WhatsApp number follows the phone number while ticked
+	   (the server copies it too). The change event lets Fluent Forms show "OK to contact me on WhatsApp". */
+	document.querySelectorAll('input[name="wa_same[]"]').forEach(function (box) {
+		var f = box.form, ph = f && f.querySelector('input[name=phone]'), wa = f && f.querySelector('input[name=whatsapp]');
+		if (!ph || !wa) return;
+		function sync() {
+			if (box.checked) wa.value = ph.value;
+			wa.readOnly = box.checked;
+			wa.dispatchEvent(new Event('input', { bubbles: true })); wa.dispatchEvent(new Event('change', { bubbles: true }));
+			if (window.jQuery) jQuery(wa).trigger('change');
+		}
+		box.addEventListener('change', sync);
+		ph.addEventListener('input', function () { if (box.checked) sync(); });
+	});
+
 	/* Fluent Forms: when the spam check was not accepted, it starts again (a solved check works once). */
 	if (window.jQuery) jQuery(document).on('fluentform_submission_failed', function (e, d) {
 		var err = d && d.response && d.response.responseJSON && d.response.responseJSON.errors, f = d && d.form && d.form[0];

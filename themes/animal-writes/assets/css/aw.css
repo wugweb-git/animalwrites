@@ -793,7 +793,7 @@ body { background: var(--kit-color-canvas); }
 	/* the standard field (kit-primitives.css section 16): height, border, radius, hover and focus */
 	width: 100%; box-sizing: border-box; height: var(--kit-field-height); min-height: var(--kit-field-height); padding: 0 var(--s-3);
 	font: inherit; color: var(--neutral-10); background-color: var(--neutral-0);
-	border: var(--kit-border-control) solid var(--neutral-3); border-radius: var(--r-2);
+	border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-2);
 	transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-fast) var(--kit-motion-ease);
 }
 @media (hover: hover) { .aw-newsletter-form .ff-el-form-control:hover { border-color: var(--neutral-5); box-shadow: none; } }
@@ -821,7 +821,8 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .ff-el-input--label { margin: 0 0 var(--s-2); }
 .aw-form-ff .ff-el-input--label label { display: block; margin: 0; font-size: var(--fluid-body-sm); font-weight: var(--kit-weight-regular); color: var(--neutral-9); }
 .aw-form-ff .ff-el-input--label.ff-el-is-required label::after, .aw-form-ff .ff-el-input--label label::after { content: none; }
-.aw-form-ff .ff-el-help-message { display: block; margin: 0 0 var(--s-2); font-size: var(--fluid-caption); font-style: normal; color: var(--neutral-5); }
+.aw-form-ff .ff-el-help-message { display: block; margin: 0 0 var(--s-2); font-size: var(--kit-field-hint-size); font-style: normal; color: var(--kit-field-hint); }
+.aw-form-ff, .aw-newsletter-form { --fluentform-border-color: var(--kit-field-border); } /* Fluent Forms' own field border uses the Kits token (it outranks .kit-field) */
 .aw-form-ff .ff-el-is-error .ff-el-form-control, .aw-form-ff .ff-el-form-control[aria-invalid=true] { border-color: var(--color-peach); }
 .aw-form-ff .ff-el-input--content .error, .aw-form-ff .kit-field-message:not(:empty) { display: block; min-height: 0; margin-top: var(--s-1); font-size: var(--fluid-body-sm); color: var(--kit-color-danger); }
 .aw-form-ff .ff-el-form-check { margin: 0; }
@@ -854,6 +855,39 @@ body { background: var(--kit-color-canvas); }
 	.aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-half { grid-column: auto; }
 	.aw-vol-page .aw-volunteer-form.aw-form-ff .ff-btn-submit { width: auto; }
 }
+/* Volunteer form layout (owner, 31 Oct 2026): ways to help as icon tiles; PIN, State, District in one row; "Same as my
+   phone" under WhatsApp; when, how far and skills as chips. Tiles and chips stay real checkboxes and radios (the input is
+   hidden visually, not from keyboards or screen readers): selected = a tick and a dark border, not colour alone; the
+   Kits focus ring; 44px targets. */
+.aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.aw-form-ff .aw-vol-role.kit-checkbox { position: relative; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: var(--kit-space-2); height: 100%; min-height: 7.5rem; padding: var(--kit-space-4); font-size: var(--fluid-body-sm); }
+.aw-form-ff .aw-vol-role-ico { width: 1.75rem; height: 1.75rem; }
+.aw-form-ff .aw-vol-role.kit-checkbox input, .aw-form-ff .kit-chips .kit-checkbox input { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; opacity: 0; }
+.aw-form-ff .aw-vol-role.kit-checkbox::after { content: ""; position: absolute; top: var(--kit-space-3); right: var(--kit-space-3); width: 1.25rem; height: 1.25rem; border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--r-1, 4px); background: var(--kit-color-bg); }
+.aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked) { border-width: 2px; }
+.aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::after { border-color: var(--kit-color-ink); background: var(--kit-color-ink); }
+.aw-form-ff .aw-vol-role.kit-checkbox:has(input:checked)::before { content: ""; position: absolute; z-index: 1; top: calc(var(--kit-space-3) + 0.1875rem); right: calc(var(--kit-space-3) + 0.1875rem); width: 0.875rem; height: 0.875rem; background: var(--kit-color-bg); -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; } /* the tick on the dark box */
+@media (min-width: 768px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { .aw-form-ff .aw-vol-roles .ff-el-input--content { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.aw-form-ff .aw-ff-places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--s-4); grid-column: 1 / -1; }
+.aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: 1 / -1; }
+@media (min-width: 768px) { .aw-form-ff .aw-ff-places { grid-template-columns: repeat(3, minmax(0, 1fr)); } .aw-form-ff .aw-ff-places > .ff-el-group:first-child { grid-column: auto; } }
+@media (min-width: 768px) { .aw-volunteer-form.aw-form-ff .frm-fluent-form > fieldset > .aw-form-ff-right { grid-column: 2; margin-top: calc(-1 * var(--s-2)); } }
+.aw-form-ff .kit-chips .ff-el-input--content { display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
+.aw-form-ff .kit-chips .ff-el-form-check { margin: 0; }
+.aw-form-ff .kit-chips .kit-checkbox { position: relative; display: inline-flex; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target, 44px); padding: 0 var(--kit-space-4); border: var(--kit-border-control) solid var(--kit-field-border); border-radius: var(--kit-radius-pill); background: var(--kit-color-bg); font-size: var(--fluid-body-sm); cursor: pointer; }
+.aw-form-ff .kit-chips .kit-checkbox > span { flex: none; }
+.aw-form-ff .kit-chips .kit-checkbox:has(input:checked) { border: 2px solid var(--kit-color-ink); font-weight: var(--kit-weight-strong); }
+.aw-form-ff .kit-chips .kit-checkbox:has(input:checked)::before { content: ""; width: 1rem; height: 1rem; background: currentColor; -webkit-mask: var(--kit-ico-check) center / contain no-repeat; mask: var(--kit-ico-check) center / contain no-repeat; }
+.aw-form-ff :is(.kit-chips .kit-checkbox, .aw-vol-role.kit-checkbox):has(input:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-form-ff .kit-chips--segment .ff-el-input--content { gap: 0; }
+.aw-form-ff .kit-chips--segment .ff-el-form-check + .ff-el-form-check .kit-checkbox { margin-left: calc(-1 * var(--kit-border-control)); }
+.aw-form-ff .kit-chips--segment .ff-el-form-check:not(:first-child):not(:last-child) .kit-checkbox { border-radius: 0; }
+.aw-form-ff .kit-chips--segment .ff-el-form-check:first-child .kit-checkbox { border-radius: var(--kit-radius-pill) 0 0 var(--kit-radius-pill); }
+.aw-form-ff .kit-chips--segment .ff-el-form-check:last-child .kit-checkbox { border-radius: 0 var(--kit-radius-pill) var(--kit-radius-pill) 0; }
+.aw-form-ff .kit-chips--segment .kit-checkbox:has(input:checked) { position: relative; z-index: 1; }
+/* /volunteer/: the sidebar (campaign, Claim, the picture) from 768, under the form; beside it from 1200 (Kits). */
+@media (min-width: 768px) and (max-width: 1199px) { .aw-vol-layout.kit-with-sidebar > .kit-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; } }
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
 #claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }

@@ -439,7 +439,7 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-field .kit-optional { font-weight: 400; color: var(--kit-color-muted); } /* neutral-5 was 4.1:1 on white */
 .kit-field :is(input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea) {
 	min-height: var(--kit-field-height); padding: 0 var(--s-3); border-radius: var(--r-2);
-	background-color: var(--neutral-0); border: 1px solid var(--neutral-3); color: var(--neutral-10);
+	background-color: var(--neutral-0); border: 1px solid var(--kit-field-border); color: var(--neutral-10);
 }
 .kit-field input:not([type=checkbox]):not([type=radio]):not([type=file]), .kit-field select { height: var(--kit-field-height); }
 .kit-field textarea { padding-block: var(--s-3); min-height: calc(5 * 1.5em + 2 * var(--s-3)); }
@@ -453,7 +453,7 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 .kit-field select[aria-invalid=true] { background-position: right calc(var(--s-3) + 1.25rem) center, right var(--s-3) center; }
 .kit-field :is(input, select, textarea).is-valid { border-color: var(--color-green); }
 .kit-field :is(input, select, textarea)[disabled] { opacity: var(--opacity-disabled); }
-.kit-field-hint { font-size: var(--fluid-caption); color: var(--neutral-5); }
+.kit-field-hint { font-size: var(--kit-field-hint-size); color: var(--kit-field-hint); }
 .kit-field-message:not(:empty)::before { content: none; } /* the alert icon sits in the field */
 .kit-check-group { border: 0; padding: 0; margin: 0 0 var(--s-4); min-width: 0; }
 .kit-check-group > legend { padding: 0; margin: 0 0 var(--s-2); }
