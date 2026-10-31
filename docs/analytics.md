@@ -1,6 +1,6 @@
 # Analytics and ads (Animal Writes 2.0)
 
-**Current setup: see [analytics/ga4-setup.md](analytics/ga4-setup.md).** In short (24 Oct 2026): GA4 (G-4P5YMJ04RL) counts only through Tag Manager GTM-TB3FCFQB (Site Kit loads the container; Site Kit's own GA4 snippet is off, `kits_ga4_via_gtm` = 1). Ads: Advanced Ads only, switched off on live; ads.txt is a static file in public_html (option `aw_ads_txt` deleted). Clarity: one copy, from Kits Core. The old 1.0 container GTM-W9D28GKV is not used.
+**Current setup: see [analytics/ga4-setup.md](analytics/ga4-setup.md).** In short (24 Oct 2026): GA4 (G-4P5YMJ04RL) counts only through Tag Manager GTM-TB3FCFQB (kits-core places the container that Site Kit is set up with; Site Kit's GA4 tag is held back while `kits_ga4_via_gtm` = 1, its "Place code" setting unchanged). GTM is at version 11 (31 Oct 2026); see the state section at the top of ga4-setup.md. Ads: Advanced Ads only, switched off on live; ads.txt is a static file in public_html (option `aw_ads_txt` deleted). Clarity: one copy, from Kits Core. The old 1.0 container GTM-W9D28GKV is not used.
 
 **Rules (owner, 22 Oct 2026):** never send test events to live GA4 (verify GTM in Preview / Tag Assistant only); no GA4 or GTM changes without the owner's OK; never full-import the GTM exports in this repo (they are stale): add new items by hand.
 

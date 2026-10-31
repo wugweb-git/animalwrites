@@ -32,3 +32,5 @@ Import with Merge → Overwrite, then publish.
 21 Oct 2026 (owner): the Google tag sets `page_location` and `page_referrer` from two variables ("JS - page_location
 (no update token)", "JS - page_referrer (no update token)") that remove the `t` parameter on /update/, so the volunteer
 update link's personal token never reaches GA4 (every event takes these from the Google tag).
+
+31 Oct 2026 (version 11, made by hand in the GTM UI, not by import): the listener also pushes `contact_reason` (the Contact form's `about`); `contact_sent` skips `correction` and `remove`; new `report_sent` for `correction`; the listener's GA4 event is now `aw_form_submit` (GA4's own Form interactions also sends `form_submit`); the newsletter trigger matches `^(newsletter|form-3)$`; the `ad_slot_status` / `ad_slot_view` tags, triggers and variables are removed. Neither export in the repo has these changes.

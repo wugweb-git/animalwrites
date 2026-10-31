@@ -1,5 +1,19 @@
 # GA4 and GTM setup (Animal Writes, 15 Oct 2026; Directory, money, campaigns and sign-ups added 17 Oct 2026)
 
+## State on 31 Oct 2026 (GTM version 11, read from the live container and GA4 Admin)
+
+This section is the current state; where an older section below disagrees, this one holds.
+
+- **Forms.** Two parallel chains. (a) kit.js pushes `form_submit_success` with `form` (the wrapper's `data-kit-form`). (b) The GTM tag "Fluent Forms - form_submit and Clarity form_ref (listener)" (Custom HTML, needs analytics_storage) pushes `form_submit` with `form`, `form_ref` (AW-… reference) and, since 31 Oct, `contact_reason` (the Contact form's `about` value, else the page's `?about=`).
+- **Sent-events are built on the listener's `form_submit`**, not on `form_submit_success`: `contact_sent` (form `^(contact|form-4)$` and `contact_reason` not `^(correction|remove)$`), `report_sent` (form contact, `contact_reason` = `correction`; Report a mistake; not a key event), `volunteer_signup` (`^(volunteer|form-5)$`), `claim_sent` (`^(claim|form-6)$`), `newsletter_signup` (`^(newsletter|form-3)$`). Remove my data (`about=remove`) has no sent-event.
+- **The listener's GA4 event is `aw_form_submit`** (was `form_submit` until 31 Oct), with `form`, `ref`, `contact_reason`. Renamed because GA4's enhanced measurement "Form interactions" (on) sends its own `form_submit`.
+- **Key events (14):** `contact_sent`, `claim_sent`, `volunteer_signup`, `newsletter_signup`, `newsletter_optin`, `objection_sent`, `objection_confirmed`, `call_click`, `whatsapp_click`, `email_click`, `pin_search`, plus GA4's defaults `purchase`, `qualify_lead`, `close_convert_lead`. `form_submit_success` was unmarked on 31 Oct (each send counted twice in the total).
+- **Custom dimensions (event scope): 44 of 50.** 38 site ones (new 31 Oct: Contact reason, `contact_reason`; "Has FAQ" = `faq_group`), 6 created by Site Kit. "Search term" on `term`, "Ad slot" and "Ad status" are still registered (no new data; kept so older reports stay readable).
+- **Removed 31 Oct:** the GTM tags, triggers and variables for `ad_slot_status` / `ad_slot_view` (their code was removed 21 Oct).
+- **Web stream:** enhanced measurement Page views, Video engagement, Form interactions. Redaction: email, and the URL query parameter `t` (the /update/ token; GTM's page_location/page_referrer variables also strip it). User-provided data collection is off at the property. Google signals on.
+- **One GA4 tag per page:** pages load only GTM-TB3FCFQB; Site Kit's GA4 tag (GT-TXZHFR39) is held back while `kits_ga4_via_gtm` = 1 (since 25 Oct), its setting unchanged. Data before 25 Oct may count page views twice.
+- **Consent in practice:** the Google tag and GA4 event tags carry no extra consent rule (with analytics_storage denied they send cookieless pings); the listener and `aw_form_submit` need analytics_storage, so in the consent regions with no update the sent-events do not fire while `form_submit_success` still does.
+
 ## How events reach GA4 (once)
 
 | Piece | State on the live site (checked 15 Oct 2026) |
@@ -41,7 +55,7 @@ trigger and variable names, plus `DLV - gtag` and the guard).
 
 | Event | Why |
 |---|---|
-| `form_submit_success` | every form sent (split by the `form` dimension); keep it marked until the four below have data, then unmark it |
+| ~~`form_submit_success`~~ | unmarked 31 Oct 2026 (the sent-events below are the form key events) |
 | `volunteer_signup` | a volunteer registration (GTM tag: `form_submit_success` where `form` = `volunteer`) |
 | `newsletter_signup` | a newsletter sign-up (`form` = `newsletter`) |
 | `claim_sent` | a listing claim sent (`form` = `claim`; carries `listing_id`, `listing_name`) |
@@ -165,7 +179,7 @@ gives the ad-blocker rate.
 | Filter | `filter` | filter_apply |
 | Filter value | `value` | filter_apply, sort_change |
 | Hub | `hub` | filter_apply |
-| Search term | built-in (GA4 reads `search_term`) | search, no_results. The GTM tags send the dataLayer `term` as `search_term` (17 Oct): an event parameter named `term` is read as a traffic-source field. The old custom dimension on `term` is archived. |
+| Search term | built-in (GA4 reads `search_term`) | search, no_results. The GTM tags send the dataLayer `term` as `search_term` (17 Oct): an event parameter named `term` is read as a traffic-source field. The old custom dimension on `term` is still registered (no new data since 17 Oct). |
 | Claim step | `step` | claim_step |
 | List | `list` | card_click |
 | Outbound domain | `domain` | outbound_click |
@@ -183,8 +197,10 @@ gives the ad-blocker rate.
 | **Lead source** | `lead_source` | generate_lead (new) |
 | **Campaign slug** | `campaign_slug` | campaign_view, campaign_action, older campaign events (new) |
 | **Campaign title** | `campaign_title` | the same (new) |
-| **Ad slot** | `ad_slot` | ad_slot_status, ad_slot_view (new) |
-| **Ad status** | `ad_status` | ad_slot_status, ad_slot_view (new) |
+| **Ad slot** | `ad_slot` | ad_slot_status, ad_slot_view (retired 21 Oct; GTM items removed 31 Oct) |
+| **Ad status** | `ad_status` | ad_slot_status, ad_slot_view (retired 21 Oct; GTM items removed 31 Oct) |
+| Has FAQ | `faq_group` | every event (Google tag; FAQ experiment group) |
+| Contact reason | `contact_reason` | aw_form_submit (31 Oct) |
 | **Sponsor** | `sponsor` | sponsored_view, sponsored_click (new) |
 | **Sponsored type** | `sponsored_type` | sponsored_view, sponsored_click (new) |
 
@@ -203,7 +219,7 @@ visible in DebugView and BigQuery).
 
 GA4 → Admin → Data streams → web stream → Enhanced measurement: turn **off** Scrolls, Outbound clicks, File
 downloads and Site search, since the site sends `scroll_depth`, `outbound_click`, `pdf_download` and `search`
-itself. Keep Page views on.
+itself. Keep Page views on. (31 Oct 2026: Form interactions and Video engagement are on too; GA4's own `form_submit` is why the GTM listener's event is `aw_form_submit`.)
 
 ## Microsoft Clarity
 
@@ -217,7 +233,7 @@ itself. Keep Page views on.
 
 ## Consent (kits-core analytics.php, since 17 Oct 2026)
 
-- Consent mode v2 (basic), set before every Google tag: in the EEA, the UK and Switzerland (`kits_consent_regions`) ad and analytics storage are denied by default until a consent update arrives; everywhere else they are granted. Ad data redaction and URL passthrough are on while denied.
+- Consent mode v2, set before every Google tag (the GA4 tags in GTM have no extra consent rule, so they behave as advanced mode: cookieless pings while denied; only the Fluent Forms listener and `aw_form_submit` wait for analytics_storage): in the EEA, the UK and Switzerland (`kits_consent_regions`) ad and analytics storage are denied by default until a consent update arrives; everywhere else they are granted. Ad data redaction and URL passthrough are on while denied.
 - Clarity: outside those regions it loads without waiting for consent (its script is fetched after the first scroll, tap or key press); inside them (judged by the browser's time zone) only once analytics storage is granted, then it gets `consentv2`.
 - There is no consent banner of the site's own. The code expects Google's CMP, loaded by AdSense, to send the update; with Advanced Ads switched off on live nothing loads it, so visitors in those regions stay denied.
 - India (DPDP Act 2023, Rules notified Nov 2025): consent duties for personal data phase in through 2027; analytics cookies are not singled out, but notice and consent for personal data are. Owner decision whether to add a banner.
