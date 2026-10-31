@@ -150,14 +150,18 @@ function aw_faq_hub_pages() {
 
 /**
  * Whether a page shows its FAQ after its content here: page 1, and no search or filter in the address (tracking
- * parameters aside). Filter aw_faq_show_here for the site's own list views.
+ * parameters and page 1 of a core Query Loop aside). Filter aw_faq_show_here for the site's own list views.
  *
  * @return bool
  */
 function aw_faq_show_here() {
 	$show = ! is_paged();
 	foreach ( array_keys( $_GET ) as $k ) { // phpcs:ignore WordPress.Security.NonceVerification -- reading which parameters are present only
-		if ( ! preg_match( '/^(utm_[a-z]+|gclid|fbclid|nocache|ref|v)$/', (string) $k ) ) {
+		if ( preg_match( '/^query-\d+-page$/', (string) $k ) ) { // core Query Loop pagination: page 1 is not a filter
+			if ( (int) sanitize_text_field( wp_unslash( $_GET[ $k ] ) ) > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- a page number, read only
+				$show = false;
+			}
+		} elseif ( ! preg_match( '/^(utm_[a-z]+|gclid|fbclid|nocache|ref|v)$/', (string) $k ) ) {
 			$show = false;
 		}
 	}
