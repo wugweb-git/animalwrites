@@ -324,7 +324,7 @@ function aw_faq_rows( $ctx, $cache = true ) {
 			$auto[ $s['auto'] ]['placed'] = true;
 		}
 		if ( 'edited' === $s['state'] ) {
-			$placed[] = array( 'origin' => 'edited', 'id' => $s['auto'], 'q' => $s['q'], 'a' => $s['a'], 'gen' => $g, 'key' => 'edited', 'fact' => 'edited:' . $s['auto'] ) + $base;
+			$placed[] = array( 'origin' => 'edited', 'id' => $s['auto'], 'q' => $s['q'], 'a' => $s['a'], 'gen' => $g, 'key' => 'edited', 'fact' => $g ? $g['fact'] : 'edited:' . $s['auto'] ) + $base; // the fact it states, so a repeat of it is still dropped
 		} elseif ( $g ) { // automatic or removed: only while the data still gives the question
 			$placed[] = $gen( 'removed' === $s['state'] ? 'removed' : 'auto', $g );
 		}
@@ -494,6 +494,7 @@ function aw_faq_parse( $html ) {
  */
 function aw_faq_schema() {
 	$faq = aw_faq_build();
+	$faq = $faq && aw_faq_visible_here( $faq['ctx'] ) ? $faq : null; // no FAQPage where the page hides its FAQ (schema text = visible text)
 	$qa  = $faq ? aw_faq_parse( aw_faq_html( $faq ) ) : array();
 	if ( count( $qa ) < aw_faq_min( $faq['ctx'] ?? null ) ) {
 		return null;
@@ -511,6 +512,17 @@ function aw_faq_schema() {
 }
 
 /* ---------- Placement ---------- */
+
+/**
+ * Whether the current view shows the item's FAQ where it is placed: term pages and item templates always; the
+ * after-content position only on page 1 with no filters (aw_faq_show_here). Used by the schema and analytics.
+ *
+ * @param array $ctx aw_faq_context().
+ * @return bool
+ */
+function aw_faq_visible_here( $ctx ) {
+	return 'term' === $ctx['store'] || aw_faq_template_has_block() || aw_faq_show_here();
+}
 
 /** The page's FAQ accordion the first time it is asked for, '' after (one FAQ per page). */
 function aw_faq_print_once() {
@@ -577,8 +589,7 @@ add_filter(
 		if ( $c ) {
 			// faq | none (31 Oct 2026: no holdout). Same rule as the page: an after-content FAQ is hidden on later pages,
 			// filtered lists and the site's own list views (aw_faq_show_here).
-			$here             = 'term' === $c['store'] || aw_faq_template_has_block() || aw_faq_show_here();
-			$ctx['faq_group'] = $here && aw_faq_build( $c ) ? 'faq' : 'none';
+			$ctx['faq_group'] = aw_faq_visible_here( $c ) && aw_faq_build( $c ) ? 'faq' : 'none';
 		}
 		return $ctx;
 	}
@@ -606,6 +617,11 @@ function aw_faq_editor( $ctx ) {
 	$r    = aw_faq_rows( $ctx, false );
 	$rows = $r['rows'];
 	wp_nonce_field( 'aw_faq_items', 'aw_faq_items_nonce' );
+	// The default order as rendered (no automatic rows stored): saving it unchanged stores none, even when the item's
+	// own fields changed in the same save (they are saved first, so the questions now may differ from these).
+	$stored_auto = array_filter( aw_faq_items( $ctx['store'], $ctx['id'] ), fn( $x ) => '' !== ( $x['auto'] ?? '' ) );
+	$rendered    = $stored_auto ? '' : implode( ',', wp_list_pluck( wp_list_filter( $rows, array( 'origin' => 'auto' ) ), 'id' ) );
+	echo '<input type="hidden" name="aw_faq_default" value="' . esc_attr( '' === $rendered ? '-' : $rendered ) . '">';
 	printf(
 		'<p class="description">%s</p>',
 		esc_html(
@@ -724,15 +740,22 @@ function aw_faq_editor_save( $ctx ) {
 			$seq[]  = '';
 		}
 	}
-	// Default order (automatic by priority, then own) with nothing edited or removed: store own rows only.
-	$auto_ids = array();
-	foreach ( aw_faq_auto( $ctx ) as $g ) {
-		$auto_ids[ $g['id'] ] = $g['priority'];
+	// Stored automatic rows the box did not show (their data is empty now) keep their state, so a removal survives.
+	$posted_ids = array_filter( array_map( fn( $x ) => (string) ( $x['auto'] ?? '' ), $rows ), 'strlen' );
+	foreach ( aw_faq_items( $ctx['store'], $ctx['id'] ) as $old ) {
+		if ( '' !== ( $old['auto'] ?? '' ) && ! in_array( $old['auto'], $posted_ids, true ) ) {
+			$rows[] = $old;
+			$plain  = $plain && 'auto' === $old['state'];
+		}
 	}
-	asort( $auto_ids );
-	$expect = array_merge( array_keys( $auto_ids ), array_fill( 0, count( array_filter( $seq, fn( $s ) => '' === $s ) ), '' ) );
-	if ( $plain && $seq === $expect ) {
-		$rows = array_values( array_filter( $rows, fn( $x ) => '' === ( $x['auto'] ?? '' ) ) );
+	// The box was in its default order and is saved as rendered, with nothing edited or removed: store own rows only.
+	$default = sanitize_text_field( wp_unslash( $_POST['aw_faq_default'] ?? '-' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- nonce: aw_faq_editor_posted()
+	if ( '-' !== $default ) {
+		$ids    = array_values( array_filter( explode( ',', $default ), 'strlen' ) );
+		$expect = array_merge( $ids, array_fill( 0, count( array_filter( $seq, fn( $x ) => '' === $x ) ), '' ) );
+		if ( $plain && $seq === $expect ) {
+			$rows = array_values( array_filter( $rows, fn( $x ) => '' === ( $x['auto'] ?? '' ) ) );
+		}
 	}
 	aw_faq_items_save( $ctx['store'], $ctx['id'], $rows );
 }
