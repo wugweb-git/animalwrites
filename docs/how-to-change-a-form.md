@@ -50,14 +50,14 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 | Form | Where the success shows | Success message |
 |---|---|---|
-| Newsletter #3 | /thank-you/?form=newsletter: H1 "You're subscribed", description "Thank you for signing up for Animal Writes updates." (head band; no notice box), then "Choose your topics (optional)" (#9), then Home / Back | – |
-| Contact #4 | Same page | Message sent. We'll reply by email. Your reference: AW-{n} |
-| Volunteer sign-up #5 | Same page | Thank you for signing up. We will contact you when there is work in your area. You can ask us to delete your details at any time. Your reference: AW-V-{n} |
-| Claim this listing #6 | Same page | Request sent. We'll check it and email you, usually within 4 to 5 days. Nothing on your listing changes until we've checked it. Your reference: AW-C-{n} |
-| Newsletter (full) #9 | Same page (the thank-you page) | Thank you. Your topics are saved. |
+| Newsletter #3 | Redirects to /thank-you/?form=newsletter (the only form that does): H1 "You're subscribed", description "Thank you for signing up for Animal Writes updates." (head band; no notice box), then "Choose your topics (optional)" (#9), then Home / Back | – |
+| Contact #4 | On the form's own page, in place of the form | Message sent. We'll reply by email. Your reference: AW-{n} |
+| Volunteer sign-up #5 | On the form's own page, in place of the form | Thank you for signing up. We will contact you when there is work in your area. You can ask us to delete your details at any time. Your reference: AW-V-{n} |
+| Claim this listing #6 | On the form's own page, in place of the form | Request sent. We'll check it and email you, usually within 4 to 5 days. Nothing on your listing changes until we've checked it. Your reference: AW-C-{n} |
+| Newsletter (full) #9 | On /thank-you/, in place of the form; #9 shows only there, after a newsletter sign-up | Thank you. Your topics are saved. |
 | Campaign form #10 | The letter tool | Thank you. Your reference: {ref} |
 
-Any ?form= that lands on /thank-you/ (`aw_thanks_forms()`): its heading is the H1 and its line the head description (`aw_thanks_head()`).
+Only Newsletter #3 sends people to /thank-you/ (Fluent Forms confirmation "redirect to" a custom URL); Contact, Volunteer sign-up and Claim keep "same page". Any ?form= that lands on /thank-you/ (`aw_thanks_forms()`): its heading is the H1 and its line the head description (`aw_thanks_head()`).
 
 | Failure | Message |
 |---|---|
