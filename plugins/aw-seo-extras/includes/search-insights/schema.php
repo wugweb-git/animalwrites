@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_DB_VERSION = '1';
+const AW_SI_DB_VERSION = '2'; // 2: links table (31 Oct 2026).
 const AW_SI_DB_OPTION  = 'aw_si_db';
 
 // aw_si_table() and aw_si_now() moved to Animal Writes Core (includes/keyword-table.php) with the keyword table.
@@ -27,6 +27,7 @@ function aw_si_install(): void {
 	$p = aw_si_table( 'kw_pages' );
 	$o = aw_si_table( 'obs' );
 	$r = aw_si_table( 'rising' );
+	$l = aw_si_table( 'links' );
 	// The keyword table itself is Animal Writes Core's (aw_kw_install(), owner's decision 3, 25 Oct 2026).
 	aw_kw_install();
 	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
@@ -92,8 +93,35 @@ function aw_si_install(): void {
 		KEY status (status)
 		) {$c};"
 	);
+	// Who links to us (Links tab). link_key = md5 of linking page (or domain), linked page, anchor and source, so a
+	// source seen again only moves last_seen. Spam is hidden, never deleted.
+	dbDelta(
+		"CREATE TABLE {$l} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		link_key char(32) NOT NULL,
+		domain varchar(191) NOT NULL DEFAULT '',
+		from_url varchar(500) NOT NULL DEFAULT '',
+		linked_url varchar(255) NOT NULL DEFAULT '',
+		anchor varchar(255) NOT NULL DEFAULT '',
+		links int(11) NOT NULL DEFAULT 1,
+		first_seen date DEFAULT NULL,
+		last_seen date DEFAULT NULL,
+		source varchar(100) NOT NULL DEFAULT '',
+		type varchar(16) NOT NULL DEFAULT '',
+		hidden tinyint(1) NOT NULL DEFAULT 0,
+		note varchar(255) NOT NULL DEFAULT '',
+		PRIMARY KEY  (id),
+		UNIQUE KEY link_key (link_key),
+		KEY domain (domain),
+		KEY type_hidden (type,hidden),
+		KEY last_seen (last_seen)
+		) {$c};"
+	);
 	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 	add_option( 'aw_si_installed', time(), '', false );
+	if ( function_exists( 'aw_si_links_seed' ) ) {
+		aw_si_links_seed(); // Once (option aw_si_links_seeded); a repeat only moves dates.
+	}
 }
 add_action( 'admin_init', 'aw_si_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
 
@@ -111,7 +139,7 @@ function aw_si_ready(): bool {
  */
 function aw_si_drop_all(): void {
 	global $wpdb;
-	foreach ( array( 'kw_pages', 'obs', 'rising' ) as $t ) {
+	foreach ( array( 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . aw_si_table( $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
@@ -125,7 +153,7 @@ function aw_si_drop_all(): void {
 	if ( aw_kw_ready() ) {
 		$wpdb->query( "DELETE FROM {$m} WHERE kw_id NOT IN (SELECT id FROM {$k})" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls' ) as $opt ) {
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_links_seeded' ) as $opt ) {
 		delete_option( $opt );
 	}
 	delete_transient( 'aw_si_redirects' );
