@@ -53,7 +53,7 @@ function aw_error_page_sync_one( $src, $dst ) {
 	$exists = file_exists( $dst );
 	if ( $exists ) {
 		$old = is_readable( $dst ) ? (string) file_get_contents( $dst ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
-		if ( md5( $old ) === md5( $new ) ) {
+		if ( $old === $new ) {
 			return 'current';
 		}
 		if ( false === strpos( $old, AW_ERROR_PAGE_MARKER ) ) {
@@ -85,12 +85,29 @@ function aw_error_page_sync_one( $src, $dst ) {
 add_action( 'add_option_aw_deployed_head', 'aw_error_pages_sync' );
 add_action( 'update_option_aw_deployed_head', 'aw_error_pages_sync' );
 
-// On admin screens (not Ajax or the heartbeat): puts the pages back if one was deleted, and covers a first install.
+// On admin screens (not Ajax or the heartbeat), at most once an hour: puts the pages back if one was deleted, and covers a first install.
 add_action(
 	'admin_init',
 	function () {
-		if ( ! wp_doing_ajax() ) {
-			aw_error_pages_sync();
+		if ( wp_doing_ajax() || get_transient( 'aw_error_pages_checked' ) ) {
+			return;
+		}
+		set_transient( 'aw_error_pages_checked', 1, HOUR_IN_SECONDS );
+		aw_error_pages_sync();
+	}
+);
+
+// Tell administrators on the dashboard when a page could not be installed.
+add_action(
+	'admin_notices',
+	function () {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || 'dashboard' !== $screen->id || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$bad = array_keys( array_filter( (array) get_option( 'aw_error_pages', array() ), fn( $s ) => in_array( $s, array( 'unwritable', 'foreign', 'no-source' ), true ) ) );
+		if ( $bad ) {
+			wp_admin_notice( esc_html( 'The branded error pages are not installed (' . implode( ', ', $bad ) . '): WordPress shows its own pages instead. Check that wp-content is writable.' ), array( 'type' => 'warning' ) );
 		}
 	}
 );

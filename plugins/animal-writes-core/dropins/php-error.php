@@ -14,8 +14,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// wp-admin and the login page keep WordPress's own page: it tells administrators about recovery mode.
-if ( isset( $this, $error, $handled ) && $this instanceof WP_Fatal_Error_Handler && function_exists( 'is_protected_endpoint' ) && is_protected_endpoint() ) {
+// wp-admin and the login page keep WordPress's own page (it tells administrators about recovery mode), and API,
+// Ajax and JSON requests keep WordPress's own error response (JSON for clients that expect it).
+$aw_core_page = ( function_exists( 'is_protected_endpoint' ) && is_protected_endpoint() )
+	|| ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() )
+	|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+	|| ( function_exists( 'wp_is_json_request' ) && wp_is_json_request() )
+	|| ( function_exists( 'wp_is_jsonp_request' ) && wp_is_jsonp_request() )
+	|| ( function_exists( 'wp_is_xml_request' ) && wp_is_xml_request() );
+if ( $aw_core_page && isset( $this, $error, $handled ) && $this instanceof WP_Fatal_Error_Handler ) {
 	$this->display_default_error_template( $error, $handled );
 	return;
 }

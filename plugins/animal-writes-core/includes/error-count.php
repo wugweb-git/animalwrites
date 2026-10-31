@@ -44,10 +44,8 @@ function aw_error_count_access_candidates() {
 	if ( defined( 'AW_ACCESS_LOG' ) && AW_ACCESS_LOG ) {
 		$out[] = (string) AW_ACCESS_LOG;
 	}
-	$out[] = $d['domain'] . '/logs';
-	$out[] = $d['home'] . '/logs';
+	$out[] = $d['domain'] . '/logs'; // this domain's folders only: account-wide log folders can hold other sites' logs (set AW_ACCESS_LOG for those)
 	$out[] = $d['domain'] . '/access-logs';
-	$out[] = $d['home'] . '/access-logs';
 	return array_values( array_unique( (array) apply_filters( 'aw_error_count_access_paths', $out ) ) );
 }
 
