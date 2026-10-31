@@ -828,6 +828,11 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-claim-services { margin: 0 0 var(--s-4); }
 .aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
 .aw-form-ff .ff_submit_btn_wrapper { margin: 0; }
+/* A fixed part before the box (owner, 31 Oct 2026): "+91" before phone numbers, the platform's link before a username. */
+.aw-form-ff .ff_input-group { display: flex; align-items: stretch; }
+.aw-form-ff .ff_input-group-prepend { display: flex; }
+.aw-form-ff .ff_input-group-text { display: flex; align-items: center; padding: 0 var(--s-3); white-space: nowrap; font-size: var(--fluid-body-sm); color: var(--neutral-7); background: var(--kit-color-surface); border: var(--kit-border-control) solid var(--kit-color-ink); border-right: 0; border-radius: var(--kit-radius-control) 0 0 var(--kit-radius-control); }
+.aw-form-ff .ff_input-group > input { flex: 1; min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .aw-form-ff .kit-step-nav { align-items: center; }
 .aw-form-ff .kit-step-nav .ff-el-group { margin: 0; }
 .aw-form-ff .ff-errors-in-stack { margin-top: var(--s-3); color: var(--kit-color-danger); }

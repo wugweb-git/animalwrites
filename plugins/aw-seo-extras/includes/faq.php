@@ -183,7 +183,6 @@ function aw_faq_registry() {
 			array( 'key' => 'services', 'priority' => 3, 'q' => 'What services does %s offer?', 'needs' => array( 'aw_services', 'type' ), 'pattern' => '<org> services / adoption / rescue', 'answer' => 'aw_faq_listing_services' ),
 			array( 'key' => 'awbi', 'priority' => 4, 'q' => 'Is %s recognised by the Animal Welfare Board of India?', 'needs' => array( 'aw_awbi_code' ), 'pattern' => '<org> awbi', 'answer' => 'aw_faq_listing_awbi' ),
 			array( 'key' => 'volunteer', 'priority' => 5, 'q' => 'How can I volunteer with %s?', 'needs' => array( 'aw_volunteer_url' ), 'pattern' => '<org> volunteer', 'answer' => 'aw_faq_listing_volunteer' ),
-			array( 'key' => 'donate', 'priority' => 6, 'q' => 'How can I donate to %s? Is it tax-deductible?', 'needs' => array( 'aw_donate_url', 'aw_upi', 'aw_reg_80g' ), 'pattern' => '<org> donate', 'answer' => 'aw_faq_listing_donate' ),
 			array( 'key' => 'hours', 'priority' => 7, 'q' => 'What are the opening hours of %s?', 'needs' => array( 'aw_opening_hours' ), 'pattern' => '<org> timings', 'answer' => 'aw_faq_listing_hours' ),
 			array( 'key' => 'adoption', 'priority' => 8, 'q' => 'Does %s offer adoption?', 'needs' => array( 'aw_adopt_url', 'Adoption Service' ), 'pattern' => '<org> adoption', 'answer' => 'aw_faq_listing_adoption' ),
 			array( 'key' => 'registration', 'priority' => 9, 'q' => 'What is the registration number or NGO Darpan ID of %s?', 'needs' => array( 'aw_registration', 'aw_darpan_id' ), 'pattern' => '<org> registration', 'answer' => 'aw_faq_listing_registration' ),
@@ -293,19 +292,6 @@ function aw_faq_listing_awbi( $id, $name ) {
 function aw_faq_listing_volunteer( $id, $name ) {
 	$url = aw_lf( $id, 'aw_volunteer_url' );
 	return $url ? array( 'You can volunteer with ' . esc_html( $name ) . ' through its ' . aw_faq_a( $url, 'volunteer page' ) . '.', 'volunteer' ) : null;
-}
-
-function aw_faq_listing_donate( $id, $name ) {
-	$url = aw_lf( $id, 'aw_donate_url' );
-	$upi = aw_lf( $id, 'aw_upi' );
-	if ( '' === $url && '' === $upi ) {
-		return null;
-	}
-	$a  = $url ? 'You can donate to ' . esc_html( $name ) . ' through its ' . aw_faq_a( $url, 'donation page' ) . ( $upi ? ' or by UPI (' . esc_html( $upi ) . ')' : '' ) . '.'
-		: 'You can donate to ' . esc_html( $name ) . ' by UPI: ' . esc_html( $upi ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'support' ), 'See how to support it' ) . '.';
-	$g  = aw_lf( $id, 'aw_reg_80g' );
-	$a .= $g ? ' It is registered under 80G (number ' . esc_html( $g ) . '), so donations can be tax-deductible.' : ' No 80G registration is on record.';
-	return array( $a, 'donate' );
 }
 
 function aw_faq_listing_hours( $id, $name ) {

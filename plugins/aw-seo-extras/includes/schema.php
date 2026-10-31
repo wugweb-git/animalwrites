@@ -166,9 +166,7 @@ function aw_listing_schema( $id ) {
 		$org = array_filter( $org, fn( $v ) => null !== $v );
 	}
 	$acts = array();
-	if ( $m( 'aw_donate_url' ) ) {
-		$acts[] = array( '@type' => 'DonateAction', 'target' => esc_url_raw( $m( 'aw_donate_url' ) ), 'recipient' => array( '@id' => $org['@id'] ?? '' ) );
-	}
+	// No DonateAction: no money anywhere on the site (owner, 31 Oct 2026).
 	if ( $m( 'aw_volunteer_url' ) ) {
 		$acts[] = array( '@type' => 'JoinAction', 'name' => 'Volunteer', 'target' => esc_url_raw( $m( 'aw_volunteer_url' ) ) );
 	}
