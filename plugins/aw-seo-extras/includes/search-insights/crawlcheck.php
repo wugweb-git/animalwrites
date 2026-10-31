@@ -24,6 +24,7 @@ const AW_SI_CRAWL_IN    = 'aw_si_crawl_inside'; // Option: the last inside run.
 const AW_SI_CRAWL_OUT   = 'aw_si_crawl_outside'; // Option: the last outside run.
 const AW_SI_CRAWL_WEEKS = 12;
 const AW_SI_CRAWL_TIME  = 240; // Seconds the inside run may take before it stops.
+const AW_SI_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this no longer counts (the job stopped?).
 
 /** User agents: the same as the workers job (aw_workers/crawl_check.py AGENTS). */
 function aw_si_crawl_agents(): array {
@@ -114,7 +115,9 @@ function aw_si_crawl_verdict( int $code, string $body ): string {
 	if ( 200 !== $code ) {
 		return 'refused';
 	}
-	return ( false === strpos( $body, 'rel="canonical"' ) && false === strpos( $body, "rel='canonical'" ) ) ? 'challenge' : 'ok';
+	// One of our pages has a canonical link or, on a noindex page without one, our /wp-content/ assets; a CDN challenge has neither.
+	$ours = false !== strpos( $body, 'rel="canonical"' ) || false !== strpos( $body, "rel='canonical'" ) || false !== strpos( $body, '/wp-content/' );
+	return $ours ? 'ok' : 'challenge';
 }
 
 /**
@@ -126,6 +129,9 @@ function aw_si_crawl_verdict( int $code, string $body ): string {
 function aw_si_crawl_run( bool $dry = false ): array {
 	if ( ! $dry ) {
 		aw_si_run_start( 'crawl-in' );
+	}
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( AW_SI_CRAWL_TIME + 60 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions -- the run stops itself at AW_SI_CRAWL_TIME.
 	}
 	$plan   = aw_si_crawl_pages();
 	$start  = time();
@@ -177,6 +183,19 @@ function aw_si_crawl_run( bool $dry = false ): array {
 }
 
 /**
+ * A stored run, or [] when there is none, or (outside only) it is older than AW_SI_CRAWL_STALE.
+ *
+ * @param string $opt AW_SI_CRAWL_IN or AW_SI_CRAWL_OUT.
+ */
+function aw_si_crawl_last( string $opt ): array {
+	$run = (array) get_option( $opt, array() );
+	if ( empty( $run['at'] ) || ( AW_SI_CRAWL_OUT === $opt && time() - (int) $run['at'] > AW_SI_CRAWL_STALE ) ) {
+		return array();
+	}
+	return $run;
+}
+
+/**
  * Problems in one run, in plain words.
  *
  * @param array $run A stored run.
@@ -189,6 +208,9 @@ function aw_si_crawl_problems( array $run ): array {
 			$what  = 'challenge' === $c['result'] ? __( 'challenge page', 'aw-seo-extras' ) : ( $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'aw-seo-extras' ) );
 			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $what );
 		}
+	}
+	if ( ! empty( $run['cut'] ) ) {
+		$out[] = __( 'The check stopped early: some agents and pages were not asked.', 'aw-seo-extras' );
 	}
 	foreach ( (array) ( $run['burst'] ?? array() ) as $b ) {
 		if ( (int) ( $b['ok'] ?? 0 ) < (int) ( $b['n'] ?? 0 ) ) {
@@ -251,7 +273,7 @@ function aw_si_crawl_alert(): void {
 		__( 'From the server', 'aw-seo-extras' )  => AW_SI_CRAWL_IN,
 		__( 'From outside', 'aw-seo-extras' )     => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		foreach ( aw_si_crawl_problems( (array) get_option( $opt, array() ) ) as $p ) {
+		foreach ( aw_si_crawl_problems( aw_si_crawl_last( $opt ) ) as $p ) {
 			$all[] = $label . ': ' . $p;
 		}
 	}
@@ -387,13 +409,14 @@ function aw_si_crawl_health_test(): array {
 	$items = '';
 	$any   = false;
 	$bad   = 0;
+	$out   = (bool) aw_si_crawl_last( AW_SI_CRAWL_OUT );
 	foreach ( array(
 		__( 'From the server (user-agent rules only)', 'aw-seo-extras' ) => AW_SI_CRAWL_IN,
 		__( 'From outside (GitHub runner, weekly)', 'aw-seo-extras' )    => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		$run = (array) get_option( $opt, array() );
+		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
-			$items .= '<li>' . esc_html( $label . ': ' . __( 'not run yet.', 'aw-seo-extras' ) ) . '</li>';
+			$items .= '<li>' . esc_html( $label . ': ' . __( 'no result from the last 15 days.', 'aw-seo-extras' ) ) . '</li>';
 			continue;
 		}
 		$any      = true;
@@ -403,9 +426,10 @@ function aw_si_crawl_health_test(): array {
 		$line   = sprintf( __( '%1$s: %2$d checks, %3$d problems', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ), count( $problems ) );
 		$items .= '<li>' . esc_html( $label . ' — ' . $line ) . ( $problems ? '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', array_slice( $problems, 0, 20 ) ) ) . '</li></ul>' : '' ) . '</li>';
 	}
-	$status = $bad ? 'critical' : ( $any ? 'good' : 'recommended' );
+	// Good only with an outside result: the server's own check cannot see blocks that depend on the caller's address.
+	$status = $bad ? 'critical' : ( $out ? 'good' : 'recommended' );
 	return array(
-		'label'       => $bad ? __( 'Some search or AI crawlers cannot read the site', 'aw-seo-extras' ) : ( $any ? __( 'Search and AI crawlers can read the site', 'aw-seo-extras' ) : __( 'Crawler access has not been checked yet', 'aw-seo-extras' ) ),
+		'label'       => $bad ? __( 'Some search or AI crawlers cannot read the site', 'aw-seo-extras' ) : ( $out ? __( 'Search and AI crawlers can read the site', 'aw-seo-extras' ) : ( $any ? __( 'Crawler access checked from the server only (the outside check has not reported yet)', 'aw-seo-extras' ) : __( 'Crawler access has not been checked yet', 'aw-seo-extras' ) ) ),
 		'status'      => $status,
 		'badge'       => array(
 			'label' => __( 'Search Insights', 'aw-seo-extras' ),
@@ -434,9 +458,9 @@ function aw_si_box_crawl(): void {
 		__( 'From the server', 'aw-seo-extras' )         => AW_SI_CRAWL_IN,
 		__( 'From outside (workers)', 'aw-seo-extras' ) => AW_SI_CRAWL_OUT,
 	) as $label => $opt ) {
-		$run = (array) get_option( $opt, array() );
+		$run = aw_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
-			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html__( 'not run yet (weekly, Monday morning).', 'aw-seo-extras' ) . '</p>';
+			echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html__( 'no result from the last 15 days (weekly, Monday morning).', 'aw-seo-extras' ) . '</p>';
 			continue;
 		}
 		$problems = aw_si_crawl_problems( $run );

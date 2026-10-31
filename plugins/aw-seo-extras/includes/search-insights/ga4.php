@@ -113,7 +113,7 @@ function aw_si_ga4_fetch_day( $module, string $day ) {
 			'dimensionFilters' => array( 'sessionDefaultChannelGroup' => array( 'Referral', 'Organic Social', 'Paid Social' ) ),
 		),
 		'social'  => array(
-			'dimensions'       => array( 'sessionSource', 'landingPage' ),
+			'dimensions'       => array( 'sessionSource', 'landingPage', 'sessionDefaultChannelGroup' ),
 			'metrics'          => array( 'sessions', 'engagedSessions', 'keyEvents' ),
 			'dimensionFilters' => array( 'sessionSource' => array_values( aw_si_social_sources() ) ),
 		),
@@ -121,7 +121,10 @@ function aw_si_ga4_fetch_day( $module, string $day ) {
 	$out  = array();
 	foreach ( $reqs as $key => $args ) {
 		$rows = aw_si_ga4_report( $module, $base + $args );
-		if ( is_wp_error( $rows ) ) {
+		if ( is_wp_error( $rows ) && in_array( $key, array( 'ref', 'social' ), true ) ) {
+			$out['warnings'][] = $key . ': ' . $rows->get_error_message(); // The referral reports never stop the older three.
+			$rows              = array();
+		} elseif ( is_wp_error( $rows ) ) {
 			return $rows;
 		}
 		$out[ $key ] = $rows;
@@ -164,17 +167,15 @@ function aw_si_ga4_obs_rows( array $data ): array {
 			$add( 'organic', $path, '', (float) ( $r[1][0] ?? 0 ) );
 		}
 	}
-	// Referrals: the channel report, then social sources it missed (the same source and landing page is counted once).
-	$seen = array();
+	// Referrals: the channel report, then the social sources' sessions in any other channel (the social report is split
+	// by channel, so sessions the channel report already has are not counted twice).
+	$channels = array( 'Referral', 'Organic Social', 'Paid Social' );
 	foreach ( array( 'ref', 'social' ) as $rep_key ) {
 		foreach ( (array) ( $data[ $rep_key ] ?? array() ) as $r ) {
 			$path = aw_si_landing_path( (string) ( $r[0][1] ?? '' ) );
 			$src  = mb_substr( strtolower( (string) ( $r[0][0] ?? '' ) ), 0, 100 );
-			if ( '' === $path || '' === $src || ( 'social' === $rep_key && isset( $seen[ $src . '|' . $path ] ) ) ) {
+			if ( '' === $path || '' === $src || ( 'social' === $rep_key && in_array( (string) ( $r[0][2] ?? '' ), $channels, true ) ) ) {
 				continue;
-			}
-			if ( 'ref' === $rep_key ) {
-				$seen[ $src . '|' . $path ] = true; // Several landing URLs of one path add up; the social report only fills gaps.
 			}
 			$add( 'ref', $path, $src, (float) ( $r[1][0] ?? 0 ) );
 			$add( 'ref_eng', $path, $src, (float) ( $r[1][1] ?? 0 ) );
@@ -271,6 +272,9 @@ function aw_si_ga4_run( array $args = array() ): array {
 						$rep['truncated'][ $day ][] = $key;
 					}
 				}
+				if ( ! empty( $data['warnings'] ) ) {
+					$rep['warnings'][ $day ] = $data['warnings'];
+				}
 				$rep['days'][ $day ] = array(
 					'search'  => count( $data['search'] ),
 					'ai'      => count( $data['ai'] ),
@@ -297,6 +301,7 @@ function aw_si_ga4_run( array $args = array() ): array {
 				array(
 					'rows'      => $rep['rows'],
 					'truncated' => $rep['truncated'] ?? array(),
+					'warnings'  => $rep['warnings'] ?? array(),
 					'up_to'     => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
 				)
 			);
