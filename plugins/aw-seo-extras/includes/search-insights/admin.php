@@ -493,11 +493,12 @@ function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
 	$keys = array(
-		'AW_CLARITY_TOKEN' => __( 'Clarity Data Export token (Clarity → Settings → Data Export). Needed for Clarity figures and Clarity page-quality flags.', 'aw-seo-extras' ),
-		'AW_PSI_KEY'       => __( 'Free PageSpeed API key. Only needed if Site Kit\'s PageSpeed module can\'t be used.', 'aw-seo-extras' ),
+		'AW_CLARITY_TOKEN'      => __( 'Clarity Data Export token (Clarity → Settings → Data Export). Needed for Clarity figures and Clarity page-quality flags.', 'aw-seo-extras' ),
+		'AW_PSI_KEY'            => __( 'Free PageSpeed API key. Only needed if Site Kit\'s PageSpeed module can\'t be used.', 'aw-seo-extras' ),
+		'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster API key (Bing Webmaster Tools → Settings → API access; not an IndexNow key). Needed for the Links tab\'s Bing rows and Bing figures.', 'aw-seo-extras' ),
 	);
 	foreach ( $keys as $const => $what ) {
 		$set = defined( $const ) && '' !== (string) constant( $const );
@@ -517,6 +518,9 @@ function aw_si_settings_tab(): void {
 	echo '<button type="submit" name="what" value="rollup" class="button">' . esc_html__( 'Run the 90-day rollup', 'aw-seo-extras' ) . '</button> ';
 	echo '<button type="submit" name="what" value="ga4" class="button">' . esc_html__( 'Run GA4', 'aw-seo-extras' ) . '</button> ';
 	echo '<button type="submit" name="what" value="psi" class="button">' . esc_html__( 'Start PageSpeed', 'aw-seo-extras' ) . '</button>';
+	if ( aw_si_bing_on() ) {
+		echo ' <button type="submit" name="what" value="bing" class="button">' . esc_html__( 'Run Bing Webmaster', 'aw-seo-extras' ) . '</button>';
+	}
 	if ( aw_si_clarity_on() ) {
 		echo ' <button type="submit" name="what" value="clarity" class="button">' . esc_html__( 'Run Clarity (uses 2 of its 10 daily calls)', 'aw-seo-extras' ) . '</button>';
 	}
@@ -549,6 +553,8 @@ add_action(
 			aw_si_psi_start(); // The first calls now; the rest every five minutes.
 		} elseif ( 'clarity' === $what ) {
 			aw_si_clarity_run();
+		} elseif ( 'bing' === $what ) {
+			aw_si_bing_run();
 		} else {
 			aw_si_daily( true );
 		}
