@@ -139,7 +139,7 @@ class Mailweb_List_Table extends WP_List_Table {
 					);
 				}
 				$got += count( $data );
-				if ( count( $data ) < $size || $got >= $sum ) {
+				if ( count( $data ) < $size || ( $sum && $got >= $sum ) ) {
 					break; // this mailbox has no more
 				}
 			}
@@ -147,11 +147,13 @@ class Mailweb_List_Table extends WP_List_Table {
 				continue;
 			}
 			++$okay;
-			// Mixed: count only what can be shown, so the pager offers no pages that cannot be filled.
-			$total += $mixed ? min( $sum, $cap ) : $sum;
+			$total += $sum;
 		}
 		$this->failed = ! $okay && $boxes;
 		if ( $mixed ) {
+			// Each mailbox is read to at most $cap, so only the newest $cap merged messages are in the right order:
+			// the pager offers no more than that. Older mail: choose one mailbox.
+			$total = min( $total, $cap );
 			usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last
 			$rows = array_slice( $rows, ( $page - 1 ) * $per, $per );
 		}

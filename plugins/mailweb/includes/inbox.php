@@ -398,7 +398,7 @@ function mailweb_message_screen( $s ) {
 	}
 	$html   = trim( (string) ( $msg['t']['html'] ?? '' ) );
 	$doc    = '' !== $html ? mailweb_safe_html( $html, $images, $inline ) : mailweb_text_html( (string) ( $msg['t']['text'] ?? '' ) );
-	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//#i', $html );
+	$remote = '' !== $html && preg_match( '#<img\b[^>]*src=["\']\s*(?:https?:)?//|url\(\s*[\'"]?\s*(?:https?:)?//#i', $html );
 	$u      = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
 	$c      = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
@@ -597,6 +597,7 @@ function mailweb_safe_html( $html, $images, $inline ) {
 	$style = '';
 	if ( preg_match_all( '#<style[^>]*>(.*?)</style>#is', $html, $mm ) ) {
 		$style = implode( "\n", $mm[1] );
+		$style = str_replace( array( '<!--', '-->' ), '', $style ); // old-style CSS wrappers; escaping them would break the first rule
 		$style = str_replace( '<', '\\3C ', $style ); // cannot close the frame's <style> tag
 		$style = preg_replace( '#@import[^;]*;#i', '', $style );
 		$style = preg_replace( '#expression\s*\(#i', '(', $style );

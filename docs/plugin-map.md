@@ -159,8 +159,8 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 | `includes/list-table.php` | The Mail list as a WordPress list table (`Mailweb_List_Table`). |
 | `includes/profiles.php` | Per-mailbox display name, signature, picture; site emails laid out with the signature; `mailweb_after_signature` filter for a block under it; header `X-Mailweb-No-Signature: 1` skips it. |
 | `includes/smtp.php` | The site's SMTP mailbox (option `mailweb_smtp`, password encrypted or `MAILWEB_SMTP_PASSWORD`), filters `mailweb_smtp_defaults`, `mailweb_smtp_reply_to`, test email. |
-| `includes/mail-cap.php` | Daily limit and queue (table `{prefix}mailweb_queue`): priorities (`X-Mailweb-Priority`), retries, pause on refusal, FluentCRM pacing. |
-| `includes/crm-sync.php` | FluentCRM feed (option `mailweb_crm`: on, tag, mailboxes): incoming email noted on the sender's contact (made "transactional"), replies noted; every 5 minutes and on webhook; `wp mailweb crm-sync --all`. |
+| `includes/mail-cap.php` | Daily limit and queue (table `{prefix}mailweb_queue`): priorities (`X-Mailweb-Priority`), retries (an email with no confirmation from the server is held after 4 tries), a pause only when the site's own mailbox is refused (sign-in, suspended, sending limit; a refused recipient fails only that email), FluentCRM pacing. |
+| `includes/crm-sync.php` | FluentCRM feed (option `mailweb_crm`: on, tag, mailboxes): incoming email noted on the sender's contact (made "transactional"), replies noted; every 5 minutes and on webhook, one run at a time; read/unread state left as it is; `wp mailweb crm-sync --all`. |
 | `includes/settings-tab.php` | Mail → Settings (its own submenu page `mailweb-settings`, `mailweb_settings_page()`; manage_options), tabs: Incoming mail (token, secrets, mailboxes, aliases, profiles, FluentCRM) and Site sending (SMTP, daily limit). |
 | `includes/overview.php` | Unread badge, cached counts, the Mail dashboard widget; hides FluentCRM's FluentSMTP card. |
 | `languages/`, `composer.json` | Translation template (`mailweb.pot`), coding-standard and make-pot scripts. |
