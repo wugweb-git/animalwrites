@@ -68,7 +68,10 @@ function aw_si_link_put( array $l ): int {
 	$source = mb_substr( trim( (string) ( $l['source'] ?? '' ) ), 0, 100 );
 	$type   = (string) ( $l['type'] ?? '' );
 	$type   = isset( aw_si_link_types()[ $type ] ) ? $type : '';
-	$key    = md5( strtolower( '' !== $from ? $from : $domain ) . '|' . $to . '|' . $anchor . '|' . $source );
+	// The key ignores a read date in the source ("…, read 26 Oct 2026", "… (read 1 Dec 2026)"): the same link from the
+	// next monthly read updates its dates instead of adding a row (Codex, PR #91). The date is last_seen.
+	$src_key = trim( (string) preg_replace( '/[\s,]*\(?read\b[^)]*\)?\s*$/i', '', $source ) );
+	$key     = md5( strtolower( '' !== $from ? $from : $domain ) . '|' . $to . '|' . $anchor . '|' . strtolower( $src_key ) );
 	$t      = aw_si_table( 'links' );
 	$n      = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(

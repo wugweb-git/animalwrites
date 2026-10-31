@@ -151,7 +151,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * : add: the anchor text.
 			 *
 			 * [--source=<text>]
-			 * : add: where the link was found. Default: "Search Console (read <today>)".
+			 * : add: where the link was found. Default: "Search Console Links" (the read date is --seen).
 			 *
 			 * [--type=<type>]
 			 * : add: press, organisation, social, directory, copy or spam (spam is hidden). Default: spam for link-selling
@@ -213,7 +213,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						'links'      => (int) ( $assoc['links'] ?? 1 ),
 						'first_seen' => $seen,
 						'last_seen'  => $seen,
-						'source'     => (string) ( $assoc['source'] ?? sprintf( 'Search Console (read %s)', wp_date( 'j M Y' ) ) ),
+						'source'     => (string) ( $assoc['source'] ?? 'Search Console Links' ), // The read date is --seen (last_seen).
 						'type'       => '' !== $type ? $type : aw_si_link_auto_type( $anchor ),
 						'note'       => (string) ( $assoc['note'] ?? '' ),
 					)
