@@ -231,21 +231,9 @@ function aw_crm_contact_for( $email, $name, $tags, $source ) {
 	return $c ? $c : null;
 }
 
-/** The address an item was written to: an incoming email's own To (one of ours), else its mailbox; the form: contact@. */
-function aw_crm_message_to( $id ) {
-	if ( 'email' !== get_post_meta( $id, 'aw_m_about', true ) ) {
-		return 'contact@animalwrites.in';
-	}
-	$to = strtolower( trim( (string) get_post_meta( $id, 'aw_m_to', true ) ) );
-	$mb = strtolower( trim( (string) get_post_meta( $id, 'aw_m_mailbox', true ) ) );
-	return str_ends_with( $to, '@animalwrites.in' ) ? $to : ( $mb ? $mb : 'contact@animalwrites.in' );
-}
-
-/** Reply-To for a reply to this person: the address they last wrote to (email or form), else contact@. */
-function aw_crm_reply_to( $email ) {
-	global $wpdb;
-	$id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_m_email' WHERE p.post_type = 'aw_message' AND LOWER(TRIM(m.meta_value)) = %s ORDER BY p.post_date DESC, p.ID DESC LIMIT 1", strtolower( trim( (string) $email ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	return $id ? aw_crm_message_to( $id ) : 'contact@animalwrites.in';
+/** Reply-To for an email to a person: always support@, the address for all mail with people (owner, 31 Oct 2026). */
+function aw_crm_reply_to( $email = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- kept for callers
+	return 'support@animalwrites.in';
 }
 
 /* ---------- FluentCRM Pro's one-off email (profile → Emails → Send Email; not in FluentCRM free) ---------- */

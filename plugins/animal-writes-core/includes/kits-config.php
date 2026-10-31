@@ -126,9 +126,10 @@ add_action(
 	}
 );
 
-// Mail (owner, 9 Oct 2026): sent as "Animal Writes <noreply@animalwrites.in>", replies to contact@ (vedanshu@'s alias).
+// Mail (owner, 31 Oct 2026): site emails go out as "Animal Writes <noreply@animalwrites.in>" (bulk and automatic
+// mail only); replies to them go to support@, the address for all mail with people.
 add_filter( 'mailweb_smtp_defaults', fn( $d ) => array_merge( $d, array( 'user' => 'noreply@animalwrites.in', 'name' => 'Animal Writes' ) ) );
-add_filter( 'mailweb_smtp_reply_to', fn() => 'contact@animalwrites.in' );
+add_filter( 'mailweb_smtp_reply_to', fn() => 'support@animalwrites.in' );
 
 // Visits are posted to the plugin's lightweight endpoint (visit.php: WordPress in SHORTINIT mode), not the REST route.
 add_filter( 'kits_visit_endpoint', fn() => plugins_url( 'visit.php', AW_CORE_DIR . 'animal-writes-core.php' ) );
