@@ -26,6 +26,7 @@ const AW_SI_BING_API    = 'https://ssl.bing.com/webmaster/api.svc/json/';
 const AW_SI_BING_SOURCE = 'Bing Webmaster';
 const AW_SI_BING_PAGES  = 20; // Pages of GetLinkCounts, and of GetUrlLinks per linked page, at most.
 const AW_SI_BING_BUDGET = 120; // Seconds per run: stop before a host time limit, so the run is always logged.
+const AW_SI_BING_CURSOR = 'aw_si_bing_cursor'; // Option: where the last cut-short link read stopped (targets, next, page).
 const AW_SI_BING_DAYS   = 85; // Figures stored: at most this many days, and 5 fewer than the rollup keeps (aw_si_bing_days()).
 
 /** Whether the Webmaster API key is set. */
@@ -96,50 +97,65 @@ function aw_si_bing_days(): int {
 
 /**
  * Inbound links: [linked_url, from_url, anchor] for every page Bing lists, within the time budget. A failed
- * GetLinkCounts call fails the run; a failed GetUrlLinks call stops here and keeps what was read (partial).
+ * GetLinkCounts call fails the run; a failed GetUrlLinks call stops here and keeps what was read (partial). A read cut
+ * short by time, a page cap or an error saves where it stopped (AW_SI_BING_CURSOR) and the next run carries on there
+ * (Codex, PR #91): links are upserted, so reading a page twice only moves its dates.
  *
  * @param float $until Stop time (microtime).
+ * @param bool  $dry   Read only: the cursor is neither used up nor saved.
  * @return array|WP_Error array{links: array, partial: bool, warning: string}
  */
-function aw_si_bing_links( float $until ) {
-	$ours    = array();
+function aw_si_bing_links( float $until, bool $dry = false ) {
 	$partial = false;
 	$warning = '';
-	for ( $page = 0; $page < AW_SI_BING_PAGES; $page++ ) {
-		if ( microtime( true ) > $until ) {
-			$partial = true;
-			break;
-		}
-		$d = aw_si_bing_call( 'GetLinkCounts', array( 'page' => $page ) );
-		if ( is_wp_error( $d ) ) {
-			return $d;
-		}
-		foreach ( (array) ( $d['Links'] ?? array() ) as $l ) {
-			if ( ! empty( $l['Url'] ) ) {
-				$ours[] = (string) $l['Url'];
-			}
-		}
-		if ( $page + 1 >= (int) ( $d['TotalPages'] ?? 0 ) ) {
-			break;
-		}
-	}
-	$out = array();
-	foreach ( array_unique( $ours ) as $to ) {
+	$cur     = (array) get_option( AW_SI_BING_CURSOR, array() );
+	if ( ! empty( $cur['targets'] ) && time() - (int) ( $cur['at'] ?? 0 ) < 45 * DAY_IN_SECONDS ) {
+		$ours = array_values( (array) $cur['targets'] ); // Carry on with last run's list of our linked pages.
+		$next = (int) ( $cur['next'] ?? 0 );
+		$from = (int) ( $cur['page'] ?? 0 );
+	} else {
+		$ours = array();
+		$next = 0;
+		$from = 0;
 		for ( $page = 0; $page < AW_SI_BING_PAGES; $page++ ) {
 			if ( microtime( true ) > $until ) {
 				$partial = true;
+				break;
+			}
+			$d = aw_si_bing_call( 'GetLinkCounts', array( 'page' => $page ) );
+			if ( is_wp_error( $d ) ) {
+				return $d;
+			}
+			foreach ( (array) ( $d['Links'] ?? array() ) as $l ) {
+				if ( ! empty( $l['Url'] ) ) {
+					$ours[] = (string) $l['Url'];
+				}
+			}
+			$total = (int) ( $d['TotalPages'] ?? 0 );
+			if ( $page + 1 >= $total ) {
+				break;
+			}
+			if ( $page + 1 >= AW_SI_BING_PAGES ) {
+				$partial = true; // More pages of our linked pages than one run reads.
+			}
+		}
+		$ours = array_values( array_unique( $ours ) );
+	}
+	$out  = array();
+	$stop = null; // [target index, page] where this run stopped.
+	for ( $i = $next; $i < count( $ours ); $i++ ) {
+		$to = $ours[ $i ];
+		for ( $page = $i === $next ? $from : 0; ; $page++ ) {
+			if ( microtime( true ) > $until || $page >= ( $i === $next ? $from : 0 ) + AW_SI_BING_PAGES ) {
+				$partial = true;
+				$stop    = array( $i, $page );
 				break 2;
 			}
-			$d = aw_si_bing_call(
-				'GetUrlLinks',
-				array(
-					'link' => $to,
-					'page' => $page,
-				)
-			);
+			$d = aw_si_bing_url_links( $to, $page );
 			if ( is_wp_error( $d ) ) {
 				$partial = true;
 				$warning = $d->get_error_message();
+				$stop    = array( $i, $page );
 				break 2;
 			}
 			foreach ( (array) ( $d['Details'] ?? array() ) as $r ) {
@@ -152,11 +168,56 @@ function aw_si_bing_links( float $until ) {
 			}
 		}
 	}
+	if ( ! $dry ) {
+		if ( $stop ) {
+			update_option(
+				AW_SI_BING_CURSOR,
+				array(
+					'targets' => $ours,
+					'next'    => $stop[0],
+					'page'    => $stop[1],
+					'at'      => time(),
+				),
+				false
+			);
+		} else {
+			delete_option( AW_SI_BING_CURSOR );
+		}
+	}
 	return array(
 		'links'   => $out,
 		'partial' => $partial,
 		'warning' => $warning,
+		'resume'  => (bool) $stop,
 	);
+}
+
+/**
+ * GetUrlLinks for one of our pages. Bing's JSON examples pass "link" as a JSON string; a plain URL is tried first and a
+ * 400 is retried JSON-quoted (Codex, PR #91), so either form works.
+ *
+ * @param string $to   Our page.
+ * @param int    $page Result page.
+ * @return array|WP_Error
+ */
+function aw_si_bing_url_links( string $to, int $page ) {
+	$d = aw_si_bing_call(
+		'GetUrlLinks',
+		array(
+			'link' => $to,
+			'page' => $page,
+		)
+	);
+	if ( is_wp_error( $d ) && false !== strpos( $d->get_error_message(), ' 400' ) ) {
+		$d = aw_si_bing_call(
+			'GetUrlLinks',
+			array(
+				'link' => (string) wp_json_encode( $to, JSON_UNESCAPED_SLASHES ),
+				'page' => $page,
+			)
+		);
+	}
+	return $d;
 }
 
 /**
@@ -264,7 +325,7 @@ function aw_si_bing_run( array $args = array() ): array {
 					$ok ? ++$rep['rows'] : ++$rep['failed'];
 				}
 			}
-			$l = aw_si_bing_links( $until );
+			$l = aw_si_bing_links( $until, $dry );
 			if ( is_wp_error( $l ) ) {
 				$rep['error'] = $l->get_error_message();
 			} else {
@@ -272,9 +333,12 @@ function aw_si_bing_run( array $args = array() ): array {
 				$rep['partial'] = $l['partial'];
 				if ( '' !== $l['warning'] ) {
 					/* translators: %s: Bing's error. */
-					$rep['warnings'][] = sprintf( __( 'Some linked pages could not be read (%s); the rest wait for next month.', 'aw-seo-extras' ), $l['warning'] );
+					$rep['warnings'][] = sprintf( __( 'Some linked pages could not be read (%s); the next run carries on from there.', 'aw-seo-extras' ), $l['warning'] );
 				} elseif ( $l['partial'] ) {
-					$rep['warnings'][] = __( 'Time ran out before every linked page was read; the rest wait for next month.', 'aw-seo-extras' );
+					$rep['warnings'][] = __( 'Not every linked page was read in time; the next run carries on from there.', 'aw-seo-extras' );
+				}
+				if ( ! $dry && ! empty( $l['resume'] ) && ! wp_next_scheduled( AW_SI_BING_CRON ) ) {
+					wp_schedule_single_event( time() + HOUR_IN_SECONDS, AW_SI_BING_CRON ); // Carry on in an hour, not next month.
 				}
 				if ( $dry ) {
 					$rep['sample'] = array(
