@@ -778,53 +778,6 @@
                     }
                 },
                 {
-                    "index": 17,
-                    "element": "input_checkbox",
-                    "uniqElKey": "el_aw_adult",
-                    "attributes": {
-                        "type": "checkbox",
-                        "name": "adult",
-                        "value": []
-                    },
-                    "settings": {
-                        "container_class": "kit-field",
-                        "label": "",
-                        "label_placement": "",
-                        "admin_field_label": "I'm 18 or older",
-                        "help_message": "",
-                        "validation_rules": {
-                            "required": {
-                                "value": true,
-                                "message": "Tick to confirm you're 18 or older",
-                                "global_message": "Tick to confirm you're 18 or older",
-                                "global": false
-                            }
-                        },
-                        "conditional_logics": [],
-                        "advanced_options": [
-                            {
-                                "label": "I'm 18 or older.",
-                                "value": "1",
-                                "calc_value": "",
-                                "image": ""
-                            }
-                        ],
-                        "calc_value_status": false,
-                        "enable_image_input": false,
-                        "values_visible": false,
-                        "randomize_options": "no",
-                        "enable_select_2": "no",
-                        "enable_option_groups": "no",
-                        "enable_other_option": "no",
-                        "dynamic_default_value": ""
-                    },
-                    "editor_options": {
-                        "title": "Check Box",
-                        "icon_class": "ff-edit-text",
-                        "template": "inputCheckable"
-                    }
-                },
-                {
                     "index": 18,
                     "element": "input_checkbox",
                     "uniqElKey": "el_aw_consent",
@@ -850,7 +803,7 @@
                         "conditional_logics": [],
                         "advanced_options": [
                             {
-                                "label": "I agree that Animal Writes may keep these details and contact me about volunteering. I can ask for them to be deleted at any time.",
+                                "label": "I'm 18 or older. Animal Writes may keep these details and contact me about volunteering; I can ask for them to be deleted at any time.",
                                 "value": "1",
                                 "calc_value": "",
                                 "image": ""
@@ -1198,7 +1151,7 @@
                     "attributes": {
                         "type": "hidden",
                         "name": "consent_version",
-                        "value": "v3-form-consent-volunteering"
+                        "value": "v4-form-consent-volunteering"
                     },
                     "settings": {
                         "admin_field_label": "Consent wording version"
