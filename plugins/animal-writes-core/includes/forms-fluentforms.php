@@ -62,7 +62,9 @@ const AW_FF_FORMS  = array(
 	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
 );
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
-const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token' );
+const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token', 'photo_tokens' );
+/** Private uploads: field => most files (photo_tokens: comma-separated tokens; owner, 31 Oct 2026). */
+const AW_FF_UPLOADS = array( 'logo_token' => 1, 'proof_token' => 1, 'photo_tokens' => 5 );
 
 /** The Fluent Forms form ID for a form key, or 0 (Fluent Forms off, or the form not set up: nothing shows). */
 function aw_ff_id( $key ) {
@@ -250,13 +252,14 @@ function aw_ff_render_check( $element, $form ) {
 		. $widget . '</div></div>';
 }
 
-/** A private upload: picked → checked and sent at once to the private folder (aw.js), the form then carries its token.
- *  The field's name (logo_token, proof_token), label and help come from the form. */
+/** A private upload: picked → checked and sent at once to the private folder (aw.js), the form then carries its token
+ *  (several, comma-separated, for photo_tokens). The field's name (AW_FF_UPLOADS), label and help come from the form. */
 function aw_ff_render_logo( $element, $form ) {
-	$name = in_array( $element['attributes']['name'] ?? '', array( 'logo_token', 'proof_token' ), true ) ? $element['attributes']['name'] : 'logo_token';
+	$name = isset( AW_FF_UPLOADS[ $element['attributes']['name'] ?? '' ] ) ? $element['attributes']['name'] : 'logo_token';
+	$max  = AW_FF_UPLOADS[ $name ];
 	$id   = 'ff' . (int) $form->id . '-' . $name;
 	$d    = kits_field_dict()['logo'];
-	$ctl  = '<input type="file" id="' . esc_attr( $id ) . '" accept="' . esc_attr( $d['attrs']['accept'] ) . '" data-max-bytes="' . (int) $d['attrs']['data-max-bytes'] . '" data-msg-file="' . esc_attr( $d['attrs']['data-msg-file'] ) . '" data-aw-upload="' . esc_url( admin_url( 'admin-ajax.php?action=aw_ff_upload' ) ) . '" aria-describedby="' . esc_attr( $id ) . '-error">'
+	$ctl  = '<input type="file" id="' . esc_attr( $id ) . '" accept="' . esc_attr( $d['attrs']['accept'] ) . '" data-max-bytes="' . (int) $d['attrs']['data-max-bytes'] . '" data-msg-file="' . esc_attr( $d['attrs']['data-msg-file'] ) . '" data-aw-upload="' . esc_url( admin_url( 'admin-ajax.php?action=aw_ff_upload' ) ) . '"' . ( $max > 1 ? ' multiple data-max-files="' . (int) $max . '" data-msg-files="' . esc_attr( 'Choose up to ' . $max . ' pictures.' ) . '"' : '' ) . ' aria-describedby="' . esc_attr( $id ) . '-error">'
 		. '<input type="hidden" name="' . esc_attr( $name ) . '" value="">'
 		. '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite"></span>';
 	$label = wp_strip_all_tags( (string) ( $element['settings']['label'] ?? 'Logo' ) );
@@ -360,9 +363,10 @@ function aw_ff_errors( $key, $data ) {
 	if ( 'volunteer' === $key ) {
 		$errors = array_intersect_key( aw_volunteer_errors( aw_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
 	}
-	foreach ( array( 'logo_token', 'proof_token' ) as $up ) {
-		if ( '' !== (string) ( $data[ $up ] ?? '' ) && ! aw_ff_logo_file( $data[ $up ] ) ) {
-			$errors[ $up ] = 'Use a PNG, JPG or WebP under 2 MB.';
+	foreach ( AW_FF_UPLOADS as $up => $max ) {
+		$tokens = array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) );
+		if ( count( $tokens ) > $max || array_filter( $tokens, fn( $t ) => ! aw_ff_logo_file( $t ) ) ) {
+			$errors[ $up ] = 1 < $max ? 'Use up to ' . $max . ' PNG, JPG or WebP pictures, each under 2 MB.' : 'Use a PNG, JPG or WebP under 2 MB.';
 		}
 	}
 	return $errors;
@@ -404,18 +408,24 @@ add_filter(
 	4
 );
 
-// The private uploads (claim logo and proof): on submit the file moves from its temporary name to its own, and the entry
-// keeps a link only an administrator can open (aw_ff_file), in place of the upload's token.
+// The private uploads (claim logo, photos and proof): on submit each file moves from its temporary name to its own, and the
+// entry keeps a link only an administrator can open (aw_ff_file) in place of each token (photos: comma-separated links).
 add_filter(
 	'fluentform/insert_response_data',
 	function ( $data, $form_id ) {
 		if ( ! aw_ff_key( $form_id ) ) {
 			return $data;
 		}
-		foreach ( array( 'logo_token', 'proof_token' ) as $up ) {
-			$file = '' !== (string) ( $data[ $up ] ?? '' ) ? aw_ff_keep_upload( $data[ $up ] ) : '';
-			if ( $file ) {
-				$data[ $up ] = add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $file ), admin_url( 'admin-post.php' ) );
+		foreach ( AW_FF_UPLOADS as $up => $max ) {
+			$links = array();
+			foreach ( array_slice( array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) ), 0, $max ) as $token ) {
+				$file = aw_ff_keep_upload( $token );
+				if ( $file ) {
+					$links[] = add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $file ), admin_url( 'admin-post.php' ) );
+				}
+			}
+			if ( $links ) {
+				$data[ $up ] = implode( ',', $links );
 			}
 		}
 		return $data;
@@ -496,7 +506,7 @@ add_action(
 function aw_ff_upload() {
 	nocache_headers();
 	$rl = 'aw_rl_aw_ff_upload_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	if ( (int) get_transient( $rl ) >= 10 ) {
+	if ( (int) get_transient( $rl ) >= 20 ) { // a claim can send 7 (logo, 5 photos, proof)
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()

@@ -341,6 +341,59 @@
 	fromHash();
 	window.addEventListener('hashchange', fromHash);
 
+	/* Steps from a form plugin's section breaks (claim form, owner 31 Oct 2026: Fluent Forms free has no steps). A
+	   .kit-step-break starts a step (its title names the step, its description is the step's intro); a .kit-fold-break
+	   starts a group inside the step that folds open on tap. The fields move into the same .kit-steps markup
+	   kits_form_steps() prints, so the step code below runs them; the submit button goes into the last step. Without
+	   JavaScript none of this runs: the form is one long page with the section titles. */
+	document.querySelectorAll('form').forEach(function (form) {
+		var breaks = form.querySelectorAll('.kit-step-break');
+		if (breaks.length < 2) return;
+		var parent = breaks[0].parentNode, n = breaks.length, i = 0, step = null, fold = null;
+		if (Array.prototype.some.call(breaks, function (b) { return b.parentNode !== parent; })) return; // fields not side by side: leave the form as it is
+		var box = document.createElement('div');
+		box.className = 'kit-steps'; box.setAttribute('data-steps', String(n));
+		parent.insertBefore(box, breaks[0]);
+		var text = function (el, sel) { var t = el.querySelector(sel); return t ? t.textContent.trim() : ''; };
+		var node = box.nextSibling, submit = null;
+		while (node) {
+			var next = node.nextSibling;
+			if (node.nodeType === 1 && node.classList.contains('kit-step-break')) {
+				i++;
+				step = document.createElement('fieldset');
+				step.className = 'kit-step'; step.setAttribute('data-step', String(i));
+				var lg = document.createElement('legend');
+				lg.innerHTML = '<span class="kit-step-count"></span> <span class="kit-step-title"></span>';
+				lg.firstChild.textContent = 'Step ' + i + ' of ' + n;
+				lg.lastChild.textContent = text(node, '.ff-el-section-title');
+				step.appendChild(lg);
+				var intro = text(node, '.ff-section_break_desk');
+				if (intro) { var p = document.createElement('p'); p.className = 'kit-step-intro'; p.textContent = intro; step.appendChild(p); }
+				box.appendChild(step); fold = null; parent.removeChild(node);
+			} else if (node.nodeType === 1 && node.classList.contains('kit-fold-break') && step) {
+				fold = document.createElement('details');
+				fold.className = 'wp-block-details kit-fold-group';
+				var sm = document.createElement('summary'); sm.textContent = text(node, '.ff-el-section-title'); fold.appendChild(sm);
+				var fd = text(node, '.ff-section_break_desk');
+				if (fd) { var fp = document.createElement('p'); fp.className = 'kit-field-hint'; fp.textContent = fd; fold.appendChild(fp); }
+				step.appendChild(fold); parent.removeChild(node);
+			} else if (node.nodeType === 1 && node.classList.contains('ff_submit_btn_wrapper')) {
+				submit = node; break;
+			} else if (step) {
+				(fold || step).appendChild(node);
+			}
+			node = next;
+		}
+		var all = box.querySelectorAll('.kit-step');
+		Array.prototype.forEach.call(all, function (s, k) {
+			var nav = document.createElement('div'); nav.className = 'kit-step-nav';
+			if (k < all.length - 1) nav.innerHTML = '<button type="button" class="kit-btn" data-step-next>Next</button>';
+			else if (submit) nav.appendChild(submit);
+			if (k > 0) { var b = document.createElement('button'); b.type = 'button'; b.className = 'kit-btn kit-btn--secondary'; b.setAttribute('data-step-back', ''); b.textContent = 'Back'; nav.appendChild(b); }
+			s.appendChild(nav);
+		});
+	});
+
 	document.querySelectorAll('.kit-steps').forEach(function (box) {
 		var steps = Array.prototype.slice.call(box.querySelectorAll('.kit-step'));
 		if (steps.length < 2) return;
@@ -385,6 +438,7 @@
 					}
 					if (m) m.textContent = text;
 				});
+				wrong.forEach(function (el) { var d = el.closest('details'); if (d) d.open = true; }); // a folded group with a wrong field opens
 				wrong[0].focus();
 				box.dispatchEvent(new CustomEvent('kit:form-error', { bubbles: true, detail: { where: 'step ' + (cur + 1), fields: wrong.length } })); // analytics
 				return;
@@ -395,6 +449,7 @@
 		if (window.jQuery) jQuery(box.closest('form')).on('fluentform_validation_failed fluentform_submission_failed', function () {
 			setTimeout(function () {
 				var i = steps.findIndex(function (s) { return s.querySelector('.ff-el-is-error, [aria-invalid=true]'); });
+				box.querySelectorAll('details').forEach(function (d) { if (d.querySelector('.ff-el-is-error, [aria-invalid=true]')) d.open = true; });
 				if (i > -1 && i !== cur) go(i);
 			}, 0);
 		});

@@ -230,6 +230,7 @@ const AW_CRM_VOL_FIELDS = array(
 	'vol_organisation'    => array( 'Volunteer: organisation (as given)', 'text' ),
 	'vol_org_show'        => array( 'Volunteer: show my name on the organisation\'s page (1 = yes, empty = no)', 'text' ),
 	'vol_org_listing'     => array( 'Volunteer: organisation\'s listing ID (set by the owner when the name does not match)', 'text' ),
+	'vol_org_role'        => array( 'Organisation: role (from an approved claim)', 'text' ),
 );
 
 /** Custom fields (group "Forms"): the newsletter box on the last form a contact sent (owner, 21 Oct 2026). */

@@ -101,9 +101,9 @@
                     },
                     "settings": {
                         "container_class": "kit-field",
-                        "label": "Your name",
+                        "label": "Full name",
                         "label_placement": "",
-                        "admin_field_label": "Your name",
+                        "admin_field_label": "Full name",
                         "help_message": "",
                         "validation_rules": {
                             "required": {

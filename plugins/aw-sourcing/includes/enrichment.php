@@ -256,10 +256,40 @@ function aw_enrich_current( $lid, $field ) {
 	}
 }
 
+/**
+ * Fields only an approved claim writes (animal-writes-core claims-review.php, owner 31 Oct 2026): field => [label, store,
+ * group]. Kept out of aw_enrich_fields_all() so the workers are never asked for them; used for the change log's
+ * snapshot, Undo and labels.
+ */
+function aw_enrich_claim_fields() {
+	return array(
+		'area'            => array( 'Area or landmark', 'aw_area', 'Location' ),
+		'about'           => array( 'About', 'content', 'Identity' ),
+		'aliases'         => array( 'Also known as', 'aw_aliases', 'Identity' ),
+		'languages'       => array( 'Languages', 'aw_languages', 'Work' ),
+		'reg_authority'   => array( 'Registration authority', 'aw_reg_authority', 'Legal' ),
+		'reg_act'         => array( 'Registration act', 'aw_reg_act', 'Legal' ),
+		'reg_date'        => array( 'Date of registration', 'aw_reg_date', 'Legal' ),
+		'awbi_code'       => array( 'AWBI code', 'aw_awbi_code', 'Legal' ),
+		'awbi_recognised' => array( 'AWBI recognised on', 'aw_awbi_recognised', 'Legal' ),
+		'awbi_renewed'    => array( 'AWBI renewed on', 'aw_awbi_renewed', 'Legal' ),
+		'awbi_valid'      => array( 'AWBI valid until', 'aw_awbi_valid', 'Legal' ),
+	);
+}
+
+/** A field's definition for the change log: the enrichment fields, then the claim-only fields. */
+function aw_enrich_field_def( $field ) {
+	return aw_enrich_fields_all()[ $field ] ?? ( aw_enrich_claim_fields()[ $field ] ?? array( '', '' ) );
+}
+
 /** Raw state of the store a field lives in, for undo. */
 function aw_enrich_snapshot( $lid, $field ) {
-	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_field_def( $field );
 	switch ( $def[1] ) {
+		case '':
+			return ''; // an unknown field: nothing to keep
+		case 'content':
+			return (string) get_post_field( 'post_content', $lid );
 		case 'phones':
 			return array( 'rows' => aw_listing_phones( $lid ), 'unv' => aw_unverified_list( $lid ) );
 		case 'hours':
@@ -287,8 +317,13 @@ function aw_enrich_snapshot( $lid, $field ) {
 
 /** Put a snapshot back (undo). */
 function aw_enrich_restore( $lid, $field, $snap ) {
-	$def = aw_enrich_fields_all()[ $field ] ?? array( '', '' );
+	$def = aw_enrich_field_def( $field );
 	switch ( $def[1] ) {
+		case '':
+			return; // an unknown field: nothing to put back
+		case 'content':
+			wp_update_post( array( 'ID' => $lid, 'post_content' => (string) $snap ) );
+			break;
 		case 'phones':
 			$rows = isset( $snap['rows'] ) ? (array) $snap['rows'] : (array) $snap; // older rows kept the list alone
 			aw_set_listing_list( $lid, 'aw_phones', $rows );
