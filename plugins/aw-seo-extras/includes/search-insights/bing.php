@@ -7,9 +7,10 @@
  * - Links: GetLinkCounts (our pages with inbound links, paged), then GetUrlLinks for each page (linking page and anchor),
  *   into wp_aw_si_links with source "Bing Webmaster": new rows get first_seen today, rows already there move last_seen.
  *   A new row whose anchor sells links or gambling is typed spam and hidden; the rest stay unsorted for the owner.
- * - Figures: GetQueryStats and GetPageStats into obs, src bing, period day (Bing's own dates), as Search Console's:
+ * - Figures: GetQueryStats and GetPageStats into obs, src bing, period week (Bing groups them by week; each row keeps
+ *   Bing's own date, and is never spread over days; owner, 31 Oct 2026), as Search Console's:
  *   q (query, matched to an existing keyword record; other queries are skipped, no record is created) and p (page,
- *   kw 0). Only days the rollup has not reached are stored (aw_si_bing_days()), so no day is counted twice.
+ *   kw 0). Weekly rows are not rolled up; a later run replaces the same week's row.
  *
  * A failed run is logged with aw_si_run_fail( 'bing' ) and the stored rows stay. A failed or timed-out GetUrlLinks call
  * only makes the run partial: what was read is saved, with a warning.
@@ -317,7 +318,7 @@ function aw_si_bing_run( array $args = array() ): array {
 						$v[1],
 						'bing',
 						$v[2],
-						'day',
+						'week', // Bing's own weekly grouping (owner, 31 Oct 2026).
 						$v[3],
 						array(
 							'clicks' => $v[4],
