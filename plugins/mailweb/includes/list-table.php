@@ -96,44 +96,63 @@ class Mailweb_List_Table extends WP_List_Table {
 		$total = 0;
 		$boxes = mailweb_view_boxes( $this->s['box'] );
 		$mixed = count( $boxes ) > 1;
-		// Mixed: each mailbox's newest page*per (up to 100), merged by date; one mailbox: its own page.
-		$take = $mixed ? min( 100, $page * $per ) : $per;
-		$ask  = $mixed ? 1 : $page;
+		// Mixed: each mailbox's newest page*per (at most $cap), read in API pages of up to 100, merged by date.
+		// One mailbox: its own page.
+		$cap  = 500;
+		$need = $mixed ? min( $page * $per, $cap ) : $per;
+		$size = $mixed ? min( 100, $need ) : $per;
+		$asks = $mixed ? (int) ceil( $need / $size ) : 1;
 		$okay = 0;
+		$sent = 'sent' === $this->s['folder'];
 		foreach ( $boxes as $key => $addr ) {
 			if ( ! isset( mailweb_folders( $key )[ $path ] ) ) {
 				continue; // this mailbox has no such folder (yet)
 			}
-			$qs = array( 'page' => $ask, 'perPage' => $take, 'sort' => '-date' );
-			if ( '' !== $this->s['q'] ) {
-				list( $code, $j ) = mailweb_call( 'POST', mailweb_fpath( $key, $path ) . '/messages/search?' . http_build_query( $qs ), array( 'text' => $this->s['q'] ) );
-			} else {
-				list( $code, $j ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages?' . http_build_query( $qs ) );
+			$ok  = false;
+			$got = 0;
+			$sum = 0;
+			for ( $p = 1; $p <= $asks; $p++ ) {
+				$qs = array( 'page' => $mixed ? $p : $page, 'perPage' => $size, 'sort' => '-date' );
+				if ( '' !== $this->s['q'] ) {
+					list( $code, $j ) = mailweb_call( 'POST', mailweb_fpath( $key, $path ) . '/messages/search?' . http_build_query( $qs ), array( 'text' => $this->s['q'] ) );
+				} else {
+					list( $code, $j ) = mailweb_call( 'GET', mailweb_fpath( $key, $path ) . '/messages?' . http_build_query( $qs ) );
+				}
+				if ( 200 !== $code ) {
+					break;
+				}
+				$ok   = true;
+				$sum  = (int) ( $j['pagination']['total'] ?? 0 );
+				$data = (array) ( $j['data'] ?? array() );
+				foreach ( $data as $m ) {
+					$rows[] = array(
+						'id'      => $key . '|' . (int) $m['uid'],
+						'box'     => $key,
+						'uid'     => (int) $m['uid'],
+						'from'    => $sent ? implode( ', ', array_map( fn( $a ) => mailweb_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : mailweb_who( $m['from'] ?? array(), true ),
+						'email'   => $sent ? '' : implode( '', mailweb_addresses( array( $m['from'] ?? array() ) ) ),
+						'subject' => trim( (string) ( $m['subject'] ?? '' ) ),
+						'date'    => (string) ( $m['date'] ?? '' ),
+						'unseen'  => ! empty( $m['unseen'] ),
+						'files'   => ! empty( $m['attachments'] ),
+						'mailbox' => $addr,
+					);
+				}
+				$got += count( $data );
+				if ( count( $data ) < $size || $got >= $sum ) {
+					break; // this mailbox has no more
+				}
 			}
-			if ( 200 !== $code ) {
+			if ( ! $ok ) {
 				continue;
 			}
 			++$okay;
-			$total += (int) ( $j['pagination']['total'] ?? 0 );
-			foreach ( (array) ( $j['data'] ?? array() ) as $m ) {
-				$sent   = 'sent' === $this->s['folder'];
-				$rows[] = array(
-					'id'      => $key . '|' . (int) $m['uid'],
-					'box'     => $key,
-					'uid'     => (int) $m['uid'],
-					'from'    => $sent ? implode( ', ', array_map( fn( $a ) => mailweb_who( $a, true ), (array) ( $m['to'] ?? array() ) ) ) : mailweb_who( $m['from'] ?? array(), true ),
-					'email'   => $sent ? '' : implode( '', mailweb_addresses( array( $m['from'] ?? array() ) ) ),
-					'subject' => trim( (string) ( $m['subject'] ?? '' ) ),
-					'date'    => (string) ( $m['date'] ?? '' ),
-					'unseen'  => ! empty( $m['unseen'] ),
-					'files'   => ! empty( $m['attachments'] ),
-					'mailbox' => $addr,
-				);
-			}
+			// Mixed: count only what can be shown, so the pager offers no pages that cannot be filled.
+			$total += $mixed ? min( $sum, $cap ) : $sum;
 		}
 		$this->failed = ! $okay && $boxes;
 		if ( $mixed ) {
-			usort( $rows, fn( $a, $b ) => strcmp( $b['date'], $a['date'] ) );
+			usort( $rows, fn( $a, $b ) => (int) strtotime( $b['date'] ) <=> (int) strtotime( $a['date'] ) ); // newest first; unreadable dates last
 			$rows = array_slice( $rows, ( $page - 1 ) * $per, $per );
 		}
 		$this->items = $rows;

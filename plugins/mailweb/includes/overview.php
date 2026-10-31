@@ -54,7 +54,7 @@ function mailweb_overview_box( $key ) {
 			'name'    => '' !== $name ? $name : $addr,
 			'subject' => trim( wp_strip_all_tags( (string) ( $m['subject'] ?? '' ) ) ),
 			'date'    => (string) ( $m['date'] ?? '' ),
-			'unseen'  => ! empty( $m['unseen'] ) || ! in_array( '\\Seen', (array) ( $m['flags'] ?? array() ), true ),
+			'unseen'  => ! empty( $m['unseen'] ),
 		);
 	}
 	$out = array( 'unread' => $unread, 'messages' => $msgs );
