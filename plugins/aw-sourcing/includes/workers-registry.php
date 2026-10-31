@@ -170,4 +170,13 @@ const AW_WORKERS = array(
 		'runnow'       => array( 'dry_run' => 'false' ),
 		'late_after_h' => 36,
 	),
+	'crawl-check.yml'          => array(
+		'name'         => 'Search Insights: crawler access',
+		'what'         => 'Asks the site\'s sample pages from outside with each search and AI crawler\'s user agent, plus a 20-page burst; refusals and challenge pages show in Site Health',
+		'crons'        => array( '45 3 * * 1' ),
+		'interval_min' => 10080,
+		'timeout_min'  => 15,
+		'runnow'       => array( 'dry_run' => 'false' ),
+		'late_after_h' => 192,
+	),
 );
