@@ -8,12 +8,11 @@
  * - The two lists stay in step on unsubscribes: FluentCRM's unsubscribe marks the site's row unsubscribed (below), and
  *   the site's unsubscribe link unsubscribes the FluentCRM contact (newsletter.php).
  * - Campaigns go out through wp_mail (the site's mailbox, kits-core) under the daily cap in mail-cap.php.
- * - "Remove my data" deletes the FluentCRM contact, and with it its notes, custom fields and emails.
  *
  * FluentCRM is where people are kept (owner, 17 Oct 2026):
  * - Every Contact form entry finds or creates the sender's contact and adds a note (aw_crm_entry_note, called from
  *   forms-fluentforms.php). A contact made this way is "transactional" (never sent the newsletter); an existing contact
- *   keeps its status. Tag "Contact form". "Remove my data" removes the contact and its notes.
+ *   keeps its status. Tag "Contact form".
  * - Volunteers are contacts tagged "Volunteer", with their volunteer details in custom fields (group "Volunteer").
  *   FluentCRM is the one volunteers table (owner, 24 Oct 2026): sign-ups write here only; the site's volunteers table
  *   ({prefix}aw_volunteers) is a read-only backup, copied in once.
@@ -410,25 +409,6 @@ add_action(
 	function ( $subscriber ) {
 		global $wpdb;
 		$wpdb->update( aw_nl_table(), array( 'status' => 'unsubscribed', 'updated_at' => current_time( 'mysql', true ) ), array( 'email' => strtolower( (string) $subscriber->email ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	}
-);
-
-/* ---------- "Remove my data": the FluentCRM contact goes too ---------- */
-
-add_filter(
-	'wp_privacy_personal_data_erasers',
-	function ( $erasers ) {
-		$erasers['aw-fluentcrm'] = array(
-			'eraser_friendly_name' => 'FluentCRM contact (newsletter, volunteer details, notes, emails)', // FluentCRM's delete removes its notes, fields and emails too
-			'callback'             => function ( $email ) {
-				$c = aw_crm_on() ? FluentCrmApi( 'contacts' )->getContact( strtolower( trim( (string) $email ) ) ) : null;
-				if ( $c ) {
-					\FluentCrm\App\Services\Helper::deleteContacts( array( (int) $c->id ) );
-				}
-				return array( 'items_removed' => (bool) $c, 'items_retained' => false, 'messages' => array(), 'done' => true );
-			},
-		);
-		return $erasers;
 	}
 );
 

@@ -11,8 +11,8 @@
  * The raw copy (owner, 21 Oct 2026: "keep a ready fallback"): every form send (all Fluent Forms forms, and the campaign
  * sign-up) is copied whole into wp_aw_form_raw the moment it reaches the server, before any check. Its status says
  * what happened: received (refused by a check, or failed), saved (with the entry ID), duplicate (a retry of a
- * send already saved). Kept 180 days; "Remove my data"
- * erases it by email. wp aw raw-export writes it as CSV.
+ * send already saved). Kept 180 days; a removal request
+ * is handled by hand (owner, 31 Oct 2026). wp aw raw-export writes it as CSV.
  *
  * @package AnimalWritesCore
  */
@@ -127,21 +127,6 @@ add_action(
 	function () {
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . aw_raw_table() . ' WHERE received_at < %s', gmdate( 'Y-m-d H:i:s', time() - AW_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	}
-);
-
-add_filter(
-	'wp_privacy_personal_data_erasers',
-	function ( $erasers ) {
-		$erasers['aw-form-raw'] = array(
-			'eraser_friendly_name' => 'Raw copies of form sends',
-			'callback'             => function ( $email ) {
-				global $wpdb;
-				$n = $wpdb->delete( aw_raw_table(), array( 'email' => strtolower( trim( (string) $email ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				return array( 'items_removed' => (bool) $n, 'items_retained' => false, 'messages' => array(), 'done' => true );
-			},
-		);
-		return $erasers;
 	}
 );
 

@@ -10,7 +10,7 @@
  * - Listing card (block animal-writes/listing-help): "Is this your organisation?" with "Claim this listing" and
  *   "Report a mistake", links to their own pages (owner, 10 Oct 2026): /claim/?listing=<ID> (two steps, logo upload)
  *   and /report/?listing=<ID>. Both name the listing and link back to it; noindex and out of the sitemap.
- * - /thank-you/?form=<name>[&listing=<ID>]: where every form goes when it is sent (contact, remove-data, volunteer,
+ * - /thank-you/?form=<name>[&listing=<ID>]: where every form goes when it is sent (contact, volunteer,
  *   newsletter, claim, report), with the form's own success message and links back. noindex, not in the sitemap.
  *
  * @package animal-writes-core
@@ -153,7 +153,6 @@ add_shortcode(
 function aw_thanks_forms() {
 	return array(
 		'contact'     => array( 'contact', 'Message sent.', '' ),
-		'remove-data' => array( 'remove_data', 'Message sent.', '' ),
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
 		'newsletter'  => array( 'newsletter', 'You\'re subscribed', 'Thank you for signing up for Animal Writes updates.' ),
 		'claim'       => array( 'claim', 'Request sent.', '' ),

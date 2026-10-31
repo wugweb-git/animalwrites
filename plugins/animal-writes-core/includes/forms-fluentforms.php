@@ -1,7 +1,7 @@
 <?php
 /**
  * The site's forms in Fluent Forms (free) and FluentCRM (free), built with their own features (owner, 21 Oct 2026).
- * Newsletter #3, Contact #4, Volunteer sign-up #5, Claim this listing #6, Report a mistake #7, Remove my data #8,
+ * Newsletter #3, Contact #4, Volunteer sign-up #5, Claim this listing #6, Report a mistake #7 (inactive),
  * Newsletter (full) #9. Fields, conditions, hidden fields, confirmation (with the reference
  * {submission.serial_number}) and each form's Fluent Forms → FluentCRM link are Fluent Forms settings, versioned in
  * /forms/*.json and put on a site with tools/forms/forms.php. Requests are Fluent Forms entries (favourite = needs
@@ -30,7 +30,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 // No email from a Fluent Forms submission, to anyone (owner, 21 Oct 2026): Fluent Forms' own email notifications are
 // switched off, and while a submission is handled every wp_mail is dropped (the contact@ alerts for messages,
 // volunteers and claims, the newsletter confirmation, any opt-in email). Entries are still saved where they always are.
-// One exception: the "Remove my data" confirmation link to the person asking (privacy-requests.php).
 // On again: wp option update aw_ff_send_email 1
 function aw_ff_mail_off() {
 	return '1' !== (string) get_option( 'aw_ff_send_email', '0' );
@@ -61,7 +60,6 @@ const AW_FF_FORMS  = array(
 	'volunteer'   => array( 'title' => 'Volunteer sign-up', 'thanks' => 'volunteer', 'limit' => 5 ),
 	'claim'       => array( 'title' => 'Claim this listing', 'thanks' => 'claim', 'limit' => 5 ),
 	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
-	'remove_data' => array( 'title' => 'Remove my data', 'thanks' => 'remove-data', 'limit' => 3 ),
 );
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
 const AW_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token' );
@@ -348,7 +346,7 @@ function aw_ff_keep_upload( $token ) {
 
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
 function aw_ff_ref( $key, $entry_id ) {
-	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-', 'remove_data' => 'AW-D-' );
+	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-' );
 	$serial = (int) \FluentForm\App\Models\Submission::where( 'id', (int) $entry_id )->value( 'serial_number' );
 	return $serial ? ( $prefix[ $key ] ?? 'AW-' ) . $serial : '';
 }
@@ -444,9 +442,9 @@ add_action(
  * After each form's FluentCRM link (it runs at priority 10): what a link cannot do. A link only makes "subscribed"
  * contacts, only when its condition holds, and cannot add a note, so: every Contact sender becomes a contact
  * (transactional when new, tag contact-form) with the message as a note; every claimant a contact (transactional when
- * new, tag claimant); and every Contact, Claim and Volunteer contact gets the newsletter box as 1/0. Report a mistake
- * and Remove my data never reach FluentCRM: a report's email is only for replying about it, and a removal request asks
- * us to hold less. Also counts the submission for the per-connection limit.
+ * new, tag claimant); and every Contact, Claim and Volunteer contact gets the newsletter box as 1/0. A Contact send
+ * with the reason Remove my data never reaches FluentCRM (a removal request asks us to hold less; owner, 31 Oct 2026),
+ * whatever is ticked; its entry is kept like any other. Also counts the submission for the per-connection limit.
  */
 add_action(
 	'fluentform/submission_inserted',
@@ -458,6 +456,9 @@ add_action(
 		set_transient( aw_ff_rl( $key ), (int) get_transient( aw_ff_rl( $key ) ) + 1, HOUR_IN_SECONDS );
 		if ( ! in_array( $key, array( 'contact', 'claim', 'volunteer' ), true ) || ! aw_crm_on() ) {
 			return;
+		}
+		if ( 'contact' === $key && 'remove' === (string) ( $data['about'] ?? '' ) ) {
+			return; // Remove my data (owner, 31 Oct 2026): the entry is kept, but the sender never becomes or changes a FluentCRM contact (the form's FluentCRM link has the same condition)
 		}
 		$email = strtolower( trim( (string) ( $data['email'] ?? '' ) ) );
 		$name  = sanitize_text_field( (string) ( $data['name'] ?? '' ) );

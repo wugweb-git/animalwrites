@@ -66,28 +66,25 @@ function aw_report_item( $id ) {
 }
 
 /**
- * {aw.item_id}, {aw.item_title} and {aw.item_type}: default values for the Contact form's Report a mistake fields (owner,
- * 31 Oct 2026), from the link's ?item= (or the older ?listing=). Fluent Forms has no smartcode for another page's title.
- * Only a published listing, News, Library or Resource item; otherwise empty, and the form asks for the page link.
+ * {aw.correction_message}: the Contact form's Message box, pre-filled for Report a mistake (owner, 31 Oct 2026: one
+ * standard form, no extra fields). /contact/?about=correction&item=<ID>[&field=<x>] (or the older ?listing=) gives
+ * "Page: {title}", "Field: {field}" (only when given), the page's link and an empty line. Otherwise empty. Only a
+ * published listing, News, Library or Resource item. Fluent Forms has no smartcode for another page's title.
  */
 add_filter(
 	'fluentform/editor_shortcode_callback_group_aw',
 	function ( $value, $form, $keys ) {
-		$what = (string) ( $keys[0] ?? '' );
-		if ( ! in_array( $what, array( 'item_id', 'item_title', 'item_type' ), true ) ) {
+		if ( 'correction_message' !== (string) ( $keys[0] ?? '' ) ) {
 			return $value;
 		}
-		$item = aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$about = sanitize_key( wp_unslash( $_GET['about'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$item  = 'correction' === $about ? aw_report_item( absint( wp_unslash( $_GET['item'] ?? ( $_GET['listing'] ?? 0 ) ) ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! $item ) {
 			return '';
 		}
-		return esc_html(
-			array(
-				'item_id'    => (string) $item->ID,
-				'item_title' => (string) $item->post_title,
-				'item_type'  => strtolower( AW_REPORT_TYPES[ $item->post_type ] ),
-			)[ $what ]
-		); // as Fluent Forms' own smartcodes are
+		$fields = array( 'picture' => 'Picture', 'about' => 'About', 'phone' => 'Phone', 'email' => 'Email', 'address' => 'Address', 'hours' => 'Opening hours' );
+		$field  = $fields[ sanitize_key( wp_unslash( $_GET['field'] ?? '' ) ) ] ?? ''; // phpcs:ignore WordPress.Security.NonceVerification
+		return esc_html( 'Page: ' . $item->post_title . "\n" . ( '' !== $field ? 'Field: ' . $field . "\n" : '' ) . get_permalink( $item ) . "\n\n" ); // escaped as Fluent Forms' own smartcodes are
 	},
 	10,
 	3

@@ -8,7 +8,6 @@
  * - Each sign-up goes to FluentCRM's Newsletter list (subscribed, tag newsletter) by the form's own FluentCRM link.
  * - Fluent Forms' confirmation email (off since 21 Oct 2026: aw_ff_mail_off in forms-fluentforms.php) carries the
  *   unsubscribe link when it is on.
- * - "Remove my data" also removes the person's Fluent Forms entries.
  * The one-time commands `wp aw nl-form` (made the form) and `wp aw nl-import-volunteers` ran and were removed (owner,
  * 25 Oct 2026; see git history).
  *
@@ -61,32 +60,3 @@ add_filter(
 	4
 );
 
-/* ---------- "Remove my data": Fluent Forms entries ---------- */
-
-add_filter(
-	'wp_privacy_personal_data_erasers',
-	function ( $erasers ) {
-		$erasers['aw-fluentforms'] = array(
-			'eraser_friendly_name' => 'Form entries (Fluent Forms)',
-			'callback'             => function ( $email ) {
-				global $wpdb;
-				$ids = array();
-				if ( defined( 'FLUENTFORM' ) ) {
-					$email = strtolower( trim( (string) $email ) );
-					$like  = '%' . $wpdb->esc_like( '"' . $email . '"' ) . '%';
-					$rows  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, form_id FROM {$wpdb->prefix}fluentform_submissions WHERE LOWER(response) LIKE %s OR id IN (SELECT submission_id FROM {$wpdb->prefix}fluentform_entry_details WHERE LOWER(field_value) = %s)", $like, $email ) ); // phpcs:ignore
-					$by    = array();
-					foreach ( $rows as $r ) {
-						$by[ (int) $r->form_id ][] = (int) $r->id;
-						$ids[]                     = (int) $r->id;
-					}
-					foreach ( $by as $form_id => $sub_ids ) { // Fluent Forms removes entries one form at a time
-						\FluentForm\App\Models\Submission::remove( $sub_ids, $form_id );
-					}
-				}
-				return array( 'items_removed' => (bool) $ids, 'items_retained' => false, 'messages' => array(), 'done' => true );
-			},
-		);
-		return $erasers;
-	}
-);
