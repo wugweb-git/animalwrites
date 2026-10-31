@@ -62,7 +62,12 @@ function aw_gov_verification( $id ) {
 		$list        = $ymd( $m( 'aw_awbi_list_on' ) );
 		$out['awbi'] = '' !== $list ? $list : (string) ( function_exists( 'aw_data_sources' ) ? aw_data_sources()['awbi'][2] : '' ); // empty: the current AWBI list
 	}
-	$gov = array_values( array_intersect( array_filter( (array) get_post_meta( $id, 'aw_data_sources', true ) ), AW_GOV_SOURCES ) );
+	$srcs = array_filter( (array) get_post_meta( $id, 'aw_data_sources', true ) );
+	$name = $m( 'aw_source_name' );
+	if ( ! $srcs && '' !== $name && false === stripos( $name, 'google' ) && false === stripos( $name, 'AWBI' ) ) {
+		$srcs = array( 'gov' ); // imported before aw_data_sources was kept: the named list is a government one (as aw_listing_sources() labels it)
+	}
+	$gov = array_values( array_intersect( $srcs, AW_GOV_SOURCES ) );
 	if ( $gov && array_filter( AW_GOV_REG_KEYS, fn( $f, $k ) => '' !== $m( $k ) && aw_gov_value_official( $id, $f ), ARRAY_FILTER_USE_BOTH ) ) {
 		$out[ $gov[0] ] = $ymd( $m( 'aw_source_date' ) );
 	}

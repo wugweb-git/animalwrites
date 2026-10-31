@@ -186,7 +186,7 @@ function aw_directory_query_vars( $v ) {
 	if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
 	}
-	if ( ! empty( $_GET['gov'] ) ) { // Verified only: registration from government documents (gov-verified.php)
+	if ( ! empty( $_GET['gov'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- Verified only (gov-verified.php): a read-only filter
 		$mq['only_gov'] = array( 'key' => 'aw_gov_verified_on', 'compare' => 'EXISTS' );
 	}
 	$type = (string) get_query_var( 'aw_dir_type' );
