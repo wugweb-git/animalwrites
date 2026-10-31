@@ -831,10 +831,11 @@ body { background: var(--kit-color-canvas); }
 .aw-form-ff .aw-form-ff-check { margin: 0 0 var(--s-3); }
 .aw-form-ff .ff_submit_btn_wrapper { margin: 0; }
 /* A fixed part before the box (owner, 31 Oct 2026): "+91" before phone numbers, the platform's link before a username. */
-.aw-form-ff .ff_input-group { display: flex; align-items: stretch; }
+.aw-form-ff .ff_input-group { display: flex; flex-wrap: nowrap; align-items: stretch; } /* Fluent Forms wraps it; the prefix stays inside the box */
 .aw-form-ff .ff_input-group-prepend { display: flex; }
-.aw-form-ff .ff_input-group-text { display: flex; align-items: center; padding: 0 var(--s-3); white-space: nowrap; font-size: var(--fluid-body-sm); color: var(--neutral-7); background: var(--kit-color-surface); border: var(--kit-border-control) solid var(--kit-color-ink); border-right: 0; border-radius: var(--kit-radius-control) 0 0 var(--kit-radius-control); }
-.aw-form-ff .ff_input-group > input { flex: 1; min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.aw-form-ff .ff_input-group-text { display: flex; align-items: center; padding: 0 var(--s-3); white-space: nowrap; font-size: var(--fluid-body-sm); color: var(--neutral-7); background: var(--kit-color-surface); border: var(--kit-border-control) solid var(--kit-field-border); border-right: 0; border-radius: var(--kit-radius-control) 0 0 var(--kit-radius-control); }
+.aw-form-ff .ff_input-group > input { flex: 1; width: auto; min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.aw-form-ff .kit-field-message:empty { min-height: 0; margin: 0; } /* stays in place for live announcements, but no reserved line under a box until there is an error, so a field icon centres on the box */
 .aw-form-ff .kit-step-nav { align-items: center; }
 .aw-form-ff .kit-step-nav .ff-el-group { margin: 0; }
 .aw-form-ff .ff-errors-in-stack { margin-top: var(--s-3); color: var(--kit-color-danger); }
@@ -892,8 +893,8 @@ body { background: var(--kit-color-canvas); }
 .aw-org-opt[aria-selected=true], .aw-org-opt:hover { background: var(--kit-color-surface); }
 .aw-org-place { margin-left: 0.25em; color: var(--kit-field-hint); }
 .aw-org-none { border-top: var(--kit-border-width) solid var(--kit-color-line); font-style: italic; }
-/* /volunteer/: the sidebar (campaign, Claim, the picture) from 768, under the form; beside it from 1200 (Kits). */
-@media (min-width: 768px) and (max-width: 1199px) { .aw-vol-layout.kit-with-sidebar > .kit-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; } }
+/* /volunteer/: the form fills the main column at every width; the sidebar follows the Kits rule (beside it from 1200, none below). */
+.aw-vol-layout > .kit-main, .aw-vol-layout .aw-volunteer-form.kit-form { max-width: none; }
 .aw-dir-search [type=submit] { --kit-btn-ico: var(--kit-ico-search); }
 #claim > summary, .aw-claim-link, .aw-claim-form [type=submit] { --kit-btn-ico: var(--kit-ico-check); }
 #report > summary, .aw-report-link, .aw-report-form [type=submit] { --kit-btn-ico: var(--kit-ico-alert); }
