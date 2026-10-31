@@ -210,7 +210,7 @@
                         "label": "Your phone <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Your phone",
-                        "help_message": "10 digits.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -247,7 +247,7 @@
                         "label": "Your WhatsApp <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Your WhatsApp",
-                        "help_message": "10 digits, like 9876543210.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -471,7 +471,7 @@
                         "label": "Phone 1 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 1",
-                        "help_message": "10 digits.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -590,7 +590,7 @@
                         "label": "Phone 2 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 2",
-                        "help_message": "10 digits.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -709,7 +709,7 @@
                         "label": "Phone 3 <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone 3",
-                        "help_message": "10 digits.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,

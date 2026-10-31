@@ -195,7 +195,7 @@
                         "label": "Phone <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "Phone",
-                        "help_message": "10 digits.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
@@ -233,7 +233,7 @@
                         "label": "WhatsApp number <span class=\"kit-optional\">(optional)</span>",
                         "label_placement": "",
                         "admin_field_label": "WhatsApp number",
-                        "help_message": "10 digits, like 9876543210.",
+                        "help_message": "",
                         "validation_rules": {
                             "required": {
                                 "value": false,
