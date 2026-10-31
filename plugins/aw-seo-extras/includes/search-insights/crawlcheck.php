@@ -9,6 +9,10 @@
  *   plus a 20-page burst, and posts here (aw/v1/search-insights/crawl, the ingest user's application password).
  * A page that is not a 200, or a 200 that is not one of our pages (a challenge page), is a problem: Site Health shows
  * it and the owner gets one email per new set of problems. Results are kept 12 weeks.
+ * From outside, a search or AI crawler's name sent from a GitHub address is a fake, and Hostinger's CDN refuses fakes
+ * (403, 429 or no answer) while letting the real crawlers in by their own addresses (hPanel → CDN → AI Audit: 0 blocked,
+ * 31 Oct 2026). Those refusals are "expected", not problems (owner, 31 Oct 2026); the browser, the generic crawler and
+ * the bursts still count from outside, and every agent counts from the server.
  *
  * obs rows: src crawl, period day, metric inside / outside, txt = agent, value = problems in that run.
  *
@@ -41,6 +45,7 @@ function aw_si_crawl_agents(): array {
 			'ClaudeBot'       => 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)',
 			'Google-Extended' => 'Mozilla/5.0 (compatible; Google-Extended)',
 			'Applebot'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15 (Applebot/0.1; +http://www.apple.com/go/applebot)',
+			'Generic crawler' => 'Mozilla/5.0 (compatible; SiteAuditBot/1.0; +https://animalwrites.in/)', // An SEO tool's kind of crawler (the 26 Oct block), not a named bot.
 		)
 	);
 }
@@ -195,6 +200,38 @@ function aw_si_crawl_last( string $opt ): array {
 	return $run;
 }
 
+/** Named search and AI crawlers that CDNs check by address: from outside, a refusal of their name is a refused fake. */
+function aw_si_crawl_verified_bots(): array {
+	return array( 'Googlebot', 'Bingbot', 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'ClaudeBot', 'Google-Extended', 'Applebot' );
+}
+
+/**
+ * Whether a failed check is expected: an outside run, a named crawler, refused (403, 429 or no answer).
+ *
+ * @param array $run The run.
+ * @param array $c   One check.
+ */
+function aw_si_crawl_expected( array $run, array $c ): bool {
+	return 'server' !== ( $run['runner'] ?? 'server' ) && 'refused' === ( $c['result'] ?? '' )
+		&& in_array( (string) ( $c['agent'] ?? '' ), aw_si_crawl_verified_bots(), true ) && in_array( (int) ( $c['code'] ?? 0 ), array( 0, 403, 429 ), true );
+}
+
+/**
+ * Expected refusals in one run (fake named crawlers refused from outside), in plain words.
+ *
+ * @param array $run A stored run.
+ * @return string[]
+ */
+function aw_si_crawl_refused_fakes( array $run ): array {
+	$out = array();
+	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
+		if ( 'ok' !== ( $c['result'] ?? '' ) && aw_si_crawl_expected( $run, $c ) ) {
+			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'aw-seo-extras' ) );
+		}
+	}
+	return $out;
+}
+
 /**
  * Problems in one run, in plain words.
  *
@@ -204,7 +241,7 @@ function aw_si_crawl_last( string $opt ): array {
 function aw_si_crawl_problems( array $run ): array {
 	$out = array();
 	foreach ( (array) ( $run['checks'] ?? array() ) as $c ) {
-		if ( 'ok' !== ( $c['result'] ?? '' ) ) {
+		if ( 'ok' !== ( $c['result'] ?? '' ) && ! aw_si_crawl_expected( $run, $c ) ) {
 			$what  = 'challenge' === $c['result'] ? __( 'challenge page', 'aw-seo-extras' ) : ( $c['code'] ? 'HTTP ' . $c['code'] : __( 'no answer', 'aw-seo-extras' ) );
 			$out[] = sprintf( '%s, %s: %s', $c['agent'], $c['kind'], $what );
 		}
@@ -233,7 +270,7 @@ function aw_si_crawl_store( string $side, array $run ): void {
 	$day = wp_date( 'Y-m-d', (int) $run['at'] );
 	$per = array();
 	foreach ( (array) $run['checks'] as $c ) {
-		$per[ $c['agent'] ] = ( $per[ $c['agent'] ] ?? 0 ) + ( 'ok' === $c['result'] ? 0 : 1 );
+		$per[ $c['agent'] ] = ( $per[ $c['agent'] ] ?? 0 ) + ( 'ok' === $c['result'] || aw_si_crawl_expected( $run, $c ) ? 0 : 1 );
 	}
 	$o = aw_si_table( 'obs' );
 	foreach ( $per as $agent => $n ) {
@@ -435,7 +472,7 @@ function aw_si_crawl_health_test(): array {
 			'label' => __( 'Search Insights', 'aw-seo-extras' ),
 			'color' => $bad ? 'red' : 'blue',
 		),
-		'description' => '<p>' . esc_html__( 'Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended and Applebot: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem.', 'aw-seo-extras' ) . '</p><ul>' . $items . '</ul>',
+		'description' => '<p>' . esc_html__( 'Each week the home page and five sample pages are asked with the user agents of a browser, Googlebot, Bingbot, GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Applebot and a generic SEO crawler: from this server, and from outside by the workers. A page that is not a 200, or a challenge page, is a problem. From outside, a refused request with a named crawler\'s name is a refused fake (expected: the CDN lets the real crawlers in by their own addresses), so it is not counted.', 'aw-seo-extras' ) . '</p><ul>' . $items . '</ul>',
 		'actions'     => '<p><a href="' . esc_url( aw_si_url() ) . '">' . esc_html__( 'Open Search Insights', 'aw-seo-extras' ) . '</a></p>',
 		'test'        => 'aw_search_insights_crawl',
 	);
@@ -464,9 +501,14 @@ function aw_si_box_crawl(): void {
 			continue;
 		}
 		$problems = aw_si_crawl_problems( $run );
+		$fakes    = aw_si_crawl_refused_fakes( $run );
 		/* translators: 1: date, 2: checks. */
 		$line = sprintf( __( '%1$s, %2$d checks', 'aw-seo-extras' ), wp_date( 'j M, H:i', (int) $run['at'] ), count( (array) $run['checks'] ) );
 		echo '<p><strong>' . esc_html( $label ) . ':</strong> ' . esc_html( $line ) . ' — ' . ( $problems ? '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( implode( '; ', array_slice( $problems, 0, 8 ) ) ) : '<span class="dashicons dashicons-yes" aria-hidden="true"></span> ' . esc_html__( 'every agent got every page.', 'aw-seo-extras' ) ) . '</p>';
+		if ( $fakes ) {
+			/* translators: %d: refused requests. */
+			echo '<p class="description">' . esc_html( sprintf( _n( '%d request with a search or AI crawler\'s name was refused as a fake (expected: the CDN lets the real crawlers in by their own addresses).', '%d requests with a search or AI crawler\'s name were refused as fakes (expected: the CDN lets the real crawlers in by their own addresses).', count( $fakes ), 'aw-seo-extras' ), count( $fakes ) ) ) . '</p>';
+		}
 	}
 	echo '<p class="description">' . esc_html__( 'The server check only shows user-agent rules: blocks that depend on the caller\'s address show only in the outside check.', 'aw-seo-extras' ) . '</p>';
 }
