@@ -74,6 +74,13 @@ Nothing is deleted. Settings and earlier data stay in place.
 
 = 3.1.1 =
 * Opening a message marks it read, and replying to or forwarding a message marks the original read. The Mail API does not do this when the text is fetched.
+* Translation template (languages/mailweb.pot) brought up to date.
+
+= 3.1.0 =
+* Mail menu: Inbox, Overview and Settings; Settings and Overview links on the Plugins screen.
+* Mail lists are WordPress list tables: checkboxes, bulk actions, row actions, search and pagination.
+* One address parser for every input; the 5-minute schedule is registered once.
+* Unused functions removed.
 
 = 3.0.0 =
 * Now a standalone product: slug, folder and text domain `mailweb`; functions, options, hooks and the queue table renamed to `mailweb_`.

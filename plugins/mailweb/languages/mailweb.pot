@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mailweb 3.0.0\n"
+"Project-Id-Version: Mailweb 3.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mailweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T17:57:37+00:00\n"
+"POT-Creation-Date: 2026-10-31T14:26:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mailweb\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Description of the plugin
 #: mailweb.php
-msgid "Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus SMTP sending with a daily limit and queue."
+msgid "Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings)."
 msgstr ""
 
 #. Author of the plugin
@@ -34,6 +34,10 @@ msgstr ""
 msgid "https://wugweb.com/"
 msgstr ""
 
+#: includes/class-mailweb-simple-table.php:38
+msgid "Nothing yet."
+msgstr ""
+
 #: includes/crm-sync.php:27
 msgid "Emailed us"
 msgstr ""
@@ -43,22 +47,22 @@ msgid "Sent to"
 msgstr ""
 
 #: includes/crm-sync.php:148
-#: includes/inbox.php:357
+#: includes/inbox.php:334
 #: includes/list-table.php:36
-#: includes/mailboxes.php:94
+#: includes/mailboxes.php:98
 msgid "Mailbox"
 msgstr ""
 
 #: includes/crm-sync.php:149
 #: includes/inbox.php:116
 #: includes/inbox.php:117
-#: includes/inbox.php:168
+#: includes/inbox.php:156
 msgid "Sent"
 msgstr ""
 
 #: includes/crm-sync.php:150
-#: includes/inbox.php:438
-#: includes/inbox.php:553
+#: includes/inbox.php:419
+#: includes/inbox.php:534
 msgid "Attachments"
 msgstr ""
 
@@ -69,11 +73,11 @@ msgid "Email: %s"
 msgstr ""
 
 #: includes/crm-sync.php:165
-#: includes/inbox.php:423
-#: includes/inbox.php:647
-#: includes/inbox.php:768
+#: includes/inbox.php:404
+#: includes/inbox.php:628
+#: includes/inbox.php:744
 #: includes/list-table.php:168
-#: includes/overview.php:119
+#: includes/overview.php:125
 msgid "(no subject)"
 msgstr ""
 
@@ -112,9 +116,9 @@ msgid "FluentCRM"
 msgstr ""
 
 #: includes/crm-sync.php:287
-#: includes/mail-cap.php:359
-#: includes/mail-in.php:227
-#: includes/mailboxes.php:83
+#: includes/mail-cap.php:353
+#: includes/mail-in.php:215
+#: includes/mailboxes.php:74
 #: includes/smtp.php:71
 msgid "Saved."
 msgstr ""
@@ -140,6 +144,7 @@ msgid "Added to people who email you (empty = no tag)."
 msgstr ""
 
 #: includes/crm-sync.php:294
+#: includes/home.php:64
 msgid "Mailboxes"
 msgstr ""
 
@@ -148,14 +153,205 @@ msgid "Save FluentCRM settings"
 msgstr ""
 
 #: includes/crm-sync.php:309
-#: includes/inbox.php:248
-#: includes/inbox.php:298
-#: includes/inbox.php:663
-#: includes/mail-cap.php:420
-#: includes/mailboxes.php:122
-#: includes/profiles.php:187
+#: includes/home.php:40
+#: includes/inbox.php:236
+#: includes/inbox.php:286
+#: includes/inbox.php:644
+#: includes/mail-cap.php:414
+#: includes/mailboxes.php:116
+#: includes/profiles.php:191
+#: includes/settings-tab.php:19
 #: includes/smtp.php:112
 msgid "Not allowed."
+msgstr ""
+
+#: includes/home.php:22
+#: includes/home.php:58
+#: includes/inbox.php:116
+#: includes/inbox.php:155
+#: includes/overview.php:147
+msgid "Inbox"
+msgstr ""
+
+#: includes/home.php:23
+#: includes/overview.php:148
+msgid "Overview"
+msgstr ""
+
+#: includes/home.php:26
+#: includes/overview.php:149
+msgid "Settings"
+msgstr ""
+
+#: includes/home.php:43
+msgid "Administrators"
+msgstr ""
+
+#: includes/home.php:59
+msgid "Read, reply, reply all, forward and write from every mailbox; folders, search, archive, spam, trash, attachments. Website forms appear as their own folder."
+msgstr ""
+
+#: includes/home.php:60
+msgid "Mail → Inbox"
+msgstr ""
+
+#. translators: 1: unread emails, 2: unread form messages
+#: includes/home.php:61
+#, php-format
+msgid "%1$d unread emails, %2$d unread form messages."
+msgstr ""
+
+#: includes/home.php:65
+msgid "Mailboxes found from the Mail API token; per mailbox \"send from it\", the default From, aliases."
+msgstr ""
+
+#: includes/home.php:66
+#: includes/home.php:72
+msgid "Settings → Incoming"
+msgstr ""
+
+#. translators: 1: mailboxes, 2: aliases
+#: includes/home.php:67
+#, php-format
+msgid "%1$d mailboxes, %2$d aliases."
+msgstr ""
+
+#. translators: 1: mailboxes, 2: aliases
+#: includes/home.php:67
+msgid "No Mail API token."
+msgstr ""
+
+#: includes/home.php:70
+msgid "Incoming mail (webhook)"
+msgstr ""
+
+#: includes/home.php:71
+msgid "Hostinger calls the site when mail arrives; per-mailbox secrets; counts refresh at once."
+msgstr ""
+
+#: includes/home.php:76
+msgid "Profiles and signatures"
+msgstr ""
+
+#: includes/home.php:77
+msgid "Per-mailbox display name, signature and picture; site emails laid out with the signature."
+msgstr ""
+
+#: includes/home.php:78
+msgid "Settings → Incoming → Profiles"
+msgstr ""
+
+#: includes/home.php:79
+#: includes/home.php:103
+msgid "Automatic"
+msgstr ""
+
+#: includes/home.php:82
+msgid "Site sending (SMTP)"
+msgstr ""
+
+#: includes/home.php:83
+msgid "Every email the site sends goes through one Hostinger mailbox; test email."
+msgstr ""
+
+#: includes/home.php:84
+msgid "Settings → Sending"
+msgstr ""
+
+#: includes/home.php:85
+msgid "no password set"
+msgstr ""
+
+#: includes/home.php:88
+msgid "Daily limit and queue"
+msgstr ""
+
+#: includes/home.php:89
+msgid "A daily sending budget with priorities (replies first, newsletters last), retries, and a pause when Hostinger refuses."
+msgstr ""
+
+#: includes/home.php:90
+msgid "Settings → Sending → Daily limit"
+msgstr ""
+
+#. translators: 1: sent, 2: budget, 3: queued
+#: includes/home.php:91
+#, php-format
+msgid "%1$d of %2$d sent in 24 h, %3$d queued."
+msgstr ""
+
+#. translators: 1: sent, 2: budget, 3: queued
+#: includes/home.php:91
+#: includes/mail-cap.php:364
+msgid "Sending is paused."
+msgstr ""
+
+#: includes/home.php:94
+msgid "FluentCRM feed"
+msgstr ""
+
+#: includes/home.php:95
+msgid "Incoming email and replies noted on the sender's contact (transactional), every 5 minutes and on each webhook."
+msgstr ""
+
+#: includes/home.php:96
+msgid "Settings → Incoming → FluentCRM"
+msgstr ""
+
+#: includes/home.php:97
+msgid "On."
+msgstr ""
+
+#: includes/home.php:97
+msgid "Off."
+msgstr ""
+
+#: includes/home.php:100
+msgid "Dashboard widget"
+msgstr ""
+
+#: includes/home.php:101
+msgid "Unread counts and the last 5 messages per mailbox."
+msgstr ""
+
+#: includes/home.php:102
+msgid "Dashboard"
+msgstr ""
+
+#: includes/home.php:106
+msgid "Command"
+msgstr ""
+
+#: includes/home.php:107
+msgid "Run the FluentCRM feed for every mailbox."
+msgstr ""
+
+#: includes/home.php:121
+#: includes/inbox.php:332
+#: includes/overview.php:146
+#: includes/overview.php:147
+#: includes/overview.php:158
+msgid "Mail"
+msgstr ""
+
+#: includes/home.php:122
+msgid "Hostinger Mail inside WordPress, and the site's own sending. Secrets are encrypted; nothing is deleted on uninstall."
+msgstr ""
+
+#: includes/home.php:123
+msgid "Feature"
+msgstr ""
+
+#: includes/home.php:123
+msgid "What it does"
+msgstr ""
+
+#: includes/home.php:123
+msgid "Where"
+msgstr ""
+
+#: includes/home.php:123
+msgid "On this site"
 msgstr ""
 
 #: includes/inbox.php:49
@@ -163,14 +359,9 @@ msgid "Website forms"
 msgstr ""
 
 #: includes/inbox.php:116
-#: includes/inbox.php:167
-msgid "Inbox"
-msgstr ""
-
-#: includes/inbox.php:116
 #: includes/inbox.php:117
-#: includes/inbox.php:169
-#: includes/inbox.php:451
+#: includes/inbox.php:157
+#: includes/inbox.php:432
 #: includes/list-table.php:48
 #: includes/list-table.php:183
 msgid "Archive"
@@ -178,187 +369,172 @@ msgstr ""
 
 #: includes/inbox.php:116
 #: includes/inbox.php:117
-#: includes/inbox.php:170
-#: includes/inbox.php:457
+#: includes/inbox.php:158
+#: includes/inbox.php:438
 #: includes/list-table.php:54
 msgid "Spam"
 msgstr ""
 
 #: includes/inbox.php:116
 #: includes/inbox.php:117
-#: includes/inbox.php:171
+#: includes/inbox.php:159
 #: includes/list-table.php:178
 #: includes/list-table.php:187
 msgid "Trash"
 msgstr ""
 
-#: includes/inbox.php:305
-msgid "Mail settings"
-msgstr ""
-
-#: includes/inbox.php:327
+#: includes/inbox.php:307
 msgid "Message sent. A copy is in Sent."
 msgstr ""
 
-#: includes/inbox.php:328
+#: includes/inbox.php:308
 msgid "Message moved."
 msgstr ""
 
-#: includes/inbox.php:329
+#: includes/inbox.php:309
 msgid "Moved to Trash."
 msgstr ""
 
-#: includes/inbox.php:330
+#: includes/inbox.php:310
 msgid "Done."
 msgstr ""
 
-#: includes/inbox.php:331
+#: includes/inbox.php:311
 msgid "That did not work: the mail server refused it. Nothing was changed."
 msgstr ""
 
 #. translators: %d: number of messages that may be sent per hour.
-#: includes/inbox.php:333
+#: includes/inbox.php:313
 #, php-format
 msgid "Sending paused: %d messages were sent in the last hour. Try again later."
 msgstr ""
 
-#: includes/inbox.php:334
+#: includes/inbox.php:314
 msgid "Add a recipient and a subject or message."
 msgstr ""
 
-#: includes/inbox.php:335
+#: includes/inbox.php:315
 msgid "Attachments are limited to 10 MB in total."
 msgstr ""
 
-#: includes/inbox.php:352
-#: includes/overview.php:137
-#: includes/overview.php:146
-#: includes/settings-tab.php:21
-msgid "Mail"
-msgstr ""
-
-#: includes/inbox.php:352
-#: includes/inbox.php:524
+#: includes/inbox.php:332
+#: includes/inbox.php:505
 msgid "New message"
 msgstr ""
 
-#: includes/inbox.php:354
-msgid "Settings"
-msgstr ""
-
-#: includes/inbox.php:357
+#: includes/inbox.php:334
 msgid "All mailboxes"
 msgstr ""
 
-#: includes/inbox.php:362
+#: includes/inbox.php:339
 msgid "Show"
 msgstr ""
 
-#: includes/inbox.php:380
+#: includes/inbox.php:357
 msgid "Search mail"
 msgstr ""
 
 #. translators: %s: "Hostinger webmail" link.
-#: includes/inbox.php:385
+#: includes/inbox.php:362
 #, php-format
 msgid "Read in step with %s: what you read, move or send here shows there too."
 msgstr ""
 
-#: includes/inbox.php:386
+#: includes/inbox.php:363
 msgid "Hostinger webmail"
 msgstr ""
 
-#: includes/inbox.php:396
-#: includes/inbox.php:570
+#: includes/inbox.php:373
+#: includes/inbox.php:551
 msgid "Back to the list"
 msgstr ""
 
-#: includes/inbox.php:399
+#: includes/inbox.php:376
 msgid "This message could not be opened (moved or deleted in webmail?)."
 msgstr ""
 
-#: includes/inbox.php:425
-#: includes/inbox.php:544
+#: includes/inbox.php:406
+#: includes/inbox.php:525
 #: includes/list-table.php:32
 #: includes/list-table.php:34
 #: includes/overview.php:115
 msgid "From"
 msgstr ""
 
-#: includes/inbox.php:426
-#: includes/inbox.php:532
+#: includes/inbox.php:407
+#: includes/inbox.php:513
 #: includes/list-table.php:34
 msgid "To"
 msgstr ""
 
-#: includes/inbox.php:428
-#: includes/inbox.php:535
+#: includes/inbox.php:409
+#: includes/inbox.php:516
 msgid "Cc"
 msgstr ""
 
-#: includes/inbox.php:430
-#: includes/inbox.php:586
+#: includes/inbox.php:411
+#: includes/inbox.php:567
 #: includes/list-table.php:32
 #: includes/list-table.php:38
 #: includes/overview.php:115
 msgid "Date"
 msgstr ""
 
-#: includes/inbox.php:433
+#: includes/inbox.php:414
 msgid "Pictures from the internet are hidden: they can tell the sender you opened the message."
 msgstr ""
 
-#: includes/inbox.php:433
+#: includes/inbox.php:414
 msgid "Show pictures"
 msgstr ""
 
-#: includes/inbox.php:435
-#: includes/inbox.php:449
+#: includes/inbox.php:416
+#: includes/inbox.php:430
 msgid "Message"
 msgstr ""
 
-#: includes/inbox.php:440
+#: includes/inbox.php:421
 msgid "attachment"
 msgstr ""
 
-#: includes/inbox.php:445
-#: includes/inbox.php:446
-#: includes/inbox.php:524
-#: includes/inbox.php:588
-#: includes/inbox.php:590
+#: includes/inbox.php:426
+#: includes/inbox.php:427
+#: includes/inbox.php:505
+#: includes/inbox.php:569
+#: includes/inbox.php:571
 #: includes/list-table.php:175
 #: includes/list-table.php:181
 msgid "Reply"
 msgstr ""
 
-#: includes/inbox.php:446
-#: includes/inbox.php:524
+#: includes/inbox.php:427
+#: includes/inbox.php:505
 msgid "Reply all"
 msgstr ""
 
-#: includes/inbox.php:446
-#: includes/inbox.php:524
+#: includes/inbox.php:427
+#: includes/inbox.php:505
 msgid "Forward"
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/inbox.php:448
+#: includes/inbox.php:429
 #, php-format
 msgid "Sent from %s."
 msgstr ""
 
-#: includes/inbox.php:454
+#: includes/inbox.php:435
 #: includes/list-table.php:51
 msgid "Not spam"
 msgstr ""
 
-#: includes/inbox.php:454
+#: includes/inbox.php:435
 #: includes/list-table.php:51
 msgid "Move to Inbox"
 msgstr ""
 
-#: includes/inbox.php:459
-#: includes/inbox.php:592
+#: includes/inbox.php:440
+#: includes/inbox.php:573
 #: includes/list-table.php:44
 #: includes/list-table.php:46
 #: includes/list-table.php:177
@@ -366,75 +542,75 @@ msgstr ""
 msgid "Mark unread"
 msgstr ""
 
-#: includes/inbox.php:465
+#: includes/inbox.php:446
 msgid "Move to folder"
 msgstr ""
 
-#: includes/inbox.php:469
+#: includes/inbox.php:450
 msgid "Move"
 msgstr ""
 
-#: includes/inbox.php:472
-#: includes/inbox.php:593
+#: includes/inbox.php:453
+#: includes/inbox.php:574
 #: includes/list-table.php:44
 #: includes/list-table.php:57
 msgid "Move to Trash"
 msgstr ""
 
-#: includes/inbox.php:513
+#: includes/inbox.php:494
 msgid "---------- Forwarded message ----------"
 msgstr ""
 
 #. translators: 1: date and time of the original message, 2: its sender.
-#: includes/inbox.php:515
+#: includes/inbox.php:496
 #, php-format
 msgid "On %1$s, %2$s wrote:"
 msgstr ""
 
-#: includes/inbox.php:532
+#: includes/inbox.php:513
 msgid "name@example.com, …"
 msgstr ""
 
-#: includes/inbox.php:534
+#: includes/inbox.php:515
 msgid "Add Cc / Bcc"
 msgstr ""
 
-#: includes/inbox.php:535
+#: includes/inbox.php:516
 msgid "Bcc"
 msgstr ""
 
-#: includes/inbox.php:536
+#: includes/inbox.php:517
 #: includes/list-table.php:34
 #: includes/overview.php:115
 msgid "Subject"
 msgstr ""
 
-#: includes/inbox.php:541
+#: includes/inbox.php:522
 msgid "Added under your signature when sent:"
 msgstr ""
 
-#: includes/inbox.php:544
-#: includes/inbox.php:551
+#: includes/inbox.php:525
+#: includes/inbox.php:532
 msgid "Send"
 msgstr ""
 
-#: includes/inbox.php:550
+#: includes/inbox.php:531
 msgid "Sent from a different mailbox than the one the message is in, the reply carries no thread link (most mail apps still group it by subject)."
 msgstr ""
 
-#: includes/inbox.php:551
+#: includes/inbox.php:532
 msgid "Discard"
 msgstr ""
 
-#: includes/inbox.php:553
+#: includes/inbox.php:534
 msgid "Up to 10 MB in total."
 msgstr ""
 
-#: includes/inbox.php:553
+#: includes/inbox.php:534
 msgid "The forwarded message's attachments are included."
 msgstr ""
 
-#: includes/inbox.php:574
+#: includes/inbox.php:555
 msgid "Not found."
 msgstr ""
 
@@ -477,256 +653,247 @@ msgstr ""
 msgid "Has attachments"
 msgstr ""
 
-#: includes/mail-cap.php:321
-#: mailweb.php:40
-msgid "Every 5 minutes"
-msgstr ""
-
-#: includes/mail-cap.php:357
+#: includes/mail-cap.php:351
 msgid "Daily sending limit"
 msgstr ""
 
-#: includes/mail-cap.php:361
+#: includes/mail-cap.php:355
 msgid "Sending resumed."
 msgstr ""
 
-#: includes/mail-cap.php:363
+#: includes/mail-cap.php:357
 msgid "Held emails will be tried again."
 msgstr ""
 
 #. translators: %d: number of queued emails sent
-#: includes/mail-cap.php:367
+#: includes/mail-cap.php:361
 #, php-format
 msgid "Sent %d queued email."
 msgid_plural "Sent %d queued emails."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/mail-cap.php:370
-msgid "Sending is paused."
-msgstr ""
-
 #. translators: 1: date and time of the refusal, 2: the mail server's error message
-#: includes/mail-cap.php:373
+#: includes/mail-cap.php:367
 #, php-format
 msgid "The mail server refused an email on %1$s: %2$s. Nothing is being sent and nothing is lost; emails wait in the queue. Resume only when the mailbox is working again."
 msgstr ""
 
-#: includes/mail-cap.php:380
+#: includes/mail-cap.php:374
 msgid "Resume sending"
 msgstr ""
 
-#: includes/mail-cap.php:382
+#: includes/mail-cap.php:376
 msgid "Mail plans limit how many emails a mailbox may send in any 24 hours. The site keeps under the limit below; anything over it waits in the queue and is sent as the limit frees: replies typed in FluentCRM first, then notices, then sign-up confirmations, then newsletter campaigns."
 msgstr ""
 
-#: includes/mail-cap.php:385
+#: includes/mail-cap.php:379
 msgid "Sent in the last 24 hours"
 msgstr ""
 
 #. translators: 1: emails sent in the last 24 hours, 2: the daily limit
-#: includes/mail-cap.php:387
+#: includes/mail-cap.php:381
 #, php-format
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: includes/mail-cap.php:391
+#: includes/mail-cap.php:385
 msgid "Waiting: replies from FluentCRM"
 msgstr ""
 
-#: includes/mail-cap.php:392
+#: includes/mail-cap.php:386
 msgid "Waiting: notices"
 msgstr ""
 
-#: includes/mail-cap.php:393
+#: includes/mail-cap.php:387
 msgid "Waiting: sign-up confirmations"
 msgstr ""
 
-#: includes/mail-cap.php:394
+#: includes/mail-cap.php:388
 msgid "Waiting: newsletter campaigns"
 msgstr ""
 
-#: includes/mail-cap.php:395
+#: includes/mail-cap.php:389
 msgid "Oldest waiting since (UTC)"
 msgstr ""
 
-#: includes/mail-cap.php:396
+#: includes/mail-cap.php:390
 msgid "Queued (waiting for the limit or a slot)"
 msgstr ""
 
-#: includes/mail-cap.php:397
+#: includes/mail-cap.php:391
 msgid "Failed, will be retried"
 msgstr ""
 
-#: includes/mail-cap.php:398
+#: includes/mail-cap.php:392
 msgid "Held after 4 failed tries"
 msgstr ""
 
-#: includes/mail-cap.php:399
+#: includes/mail-cap.php:393
 msgid "Sent today"
 msgstr ""
 
-#: includes/mail-cap.php:400
+#: includes/mail-cap.php:394
 msgid "Last error"
 msgstr ""
 
-#: includes/mail-cap.php:401
+#: includes/mail-cap.php:395
 msgid "All time: sent at once / queued / sent from the queue"
 msgstr ""
 
-#: includes/mail-cap.php:410
+#: includes/mail-cap.php:404
 msgid "Emails per 24 hours"
 msgstr ""
 
-#: includes/mail-cap.php:410
+#: includes/mail-cap.php:404
 msgid "Your mail plan's daily limit, less a margin (Hostinger Business Email free: 100, so 90)."
 msgstr ""
 
-#: includes/mail-cap.php:411
+#: includes/mail-cap.php:405
 msgid "Kept back from campaigns"
 msgstr ""
 
-#: includes/mail-cap.php:411
+#: includes/mail-cap.php:405
 msgid "Campaigns use at most the limit minus this, so notices and confirmations always have room."
 msgstr ""
 
-#: includes/mail-cap.php:412
+#: includes/mail-cap.php:406
 msgid "Save limit"
 msgstr ""
 
-#: includes/mail-cap.php:412
+#: includes/mail-cap.php:406
 msgid "Send queued emails now (within the limit)"
 msgstr ""
 
-#: includes/mail-cap.php:412
+#: includes/mail-cap.php:406
 msgid "Retry held emails"
 msgstr ""
 
-#: includes/mail-cap.php:463
+#: includes/mail-cap.php:457
 msgid "Email sending is paused."
 msgstr ""
 
 #. translators: %s: the mail server's error message
-#: includes/mail-cap.php:466
+#: includes/mail-cap.php:460
 #, php-format
 msgid "The mail server refused an email (%s). Emails are waiting in the queue, not lost."
 msgstr ""
 
 #. translators: %s: link to Mail → Settings → Site sending
-#: includes/mail-cap.php:471
+#: includes/mail-cap.php:465
 #, php-format
 msgid "%s to resume once the mailbox works."
 msgstr ""
 
-#: includes/mail-cap.php:472
+#: includes/mail-cap.php:466
 msgid "Open Mail → Settings → Site sending"
 msgstr ""
 
-#: includes/mail-in.php:231
+#: includes/mail-in.php:219
 msgid "Incoming mail"
 msgstr ""
 
-#: includes/mail-in.php:232
+#: includes/mail-in.php:220
 msgid "Mail reads your Hostinger mailboxes live through the Mail API with the token below; nothing from the mailboxes is copied into WordPress. When mail arrives, Hostinger calls the webhook below, which refreshes the unread counts."
 msgstr ""
 
-#: includes/mail-in.php:233
+#: includes/mail-in.php:221
 msgid "Webhook URL (hPanel → Emails → each mailbox → Agentic mail → Webhooks, event \"message.received\"):"
 msgstr ""
 
-#: includes/mail-in.php:234
+#: includes/mail-in.php:222
 msgid "none yet"
 msgstr ""
 
 #. translators: %s: date and mailbox of the last webhook delivery, or "none yet".
-#: includes/mail-in.php:236
+#: includes/mail-in.php:224
 #, php-format
 msgid "Last webhook delivery: %s"
 msgstr ""
 
-#: includes/mail-in.php:245
+#: includes/mail-in.php:233
 #: includes/smtp.php:98
 msgid "Set in wp-config or the server environment."
 msgstr ""
 
-#: includes/mail-in.php:247
+#: includes/mail-in.php:235
 #: includes/smtp.php:101
 msgid "Saved. Leave empty to keep it."
 msgstr ""
 
-#: includes/mail-in.php:251
+#: includes/mail-in.php:239
 msgid "Mail API token"
 msgstr ""
 
-#: includes/mail-in.php:251
+#: includes/mail-in.php:239
 msgid "hPanel → Emails → Agentic mail → API. Its scope decides which mailboxes Mail can read. Or set MAILWEB_API_TOKEN in wp-config."
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/mail-in.php:254
+#: includes/mail-in.php:242
 #, php-format
 msgid "Webhook secret — %s"
 msgstr ""
 
 #. translators: %s: wp-config constant name.
-#: includes/mail-in.php:256
+#: includes/mail-in.php:244
 #, php-format
 msgid "Shown once when the webhook is created on this mailbox. Or set %s in wp-config."
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/mail-in.php:261
+#: includes/mail-in.php:249
 #, php-format
 msgid "Mailbox ID — %s"
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/mail-in.php:261
+#: includes/mail-in.php:249
 msgid "Read from the token (read only)."
 msgstr ""
 
-#: includes/mail-in.php:265
+#: includes/mail-in.php:253
 msgid "Save the token first: the mailboxes it can see, and a secret field for each, then appear here."
 msgstr ""
 
-#: includes/mailboxes.php:81
+#: includes/mailboxes.php:72
 msgid "Mailboxes and aliases"
 msgstr ""
 
-#: includes/mailboxes.php:86
+#: includes/mailboxes.php:77
 msgid "No mailboxes yet: save the Mail API token above."
 msgstr ""
 
-#: includes/mailboxes.php:94
-#: includes/mailboxes.php:109
-msgid "Aliases"
-msgstr ""
-
-#: includes/mailboxes.php:94
-msgid "Send from it"
-msgstr ""
-
-#: includes/mailboxes.php:94
-msgid "Default From"
-msgstr ""
-
 #. translators: %s: mailbox address.
-#: includes/mailboxes.php:100
+#: includes/mailboxes.php:93
 #, php-format
 msgid "Send from %s"
 msgstr ""
 
 #. translators: %s: mailbox address.
-#: includes/mailboxes.php:102
+#: includes/mailboxes.php:95
 #, php-format
 msgid "Default From: %s"
 msgstr ""
 
-#: includes/mailboxes.php:111
+#: includes/mailboxes.php:98
+#: includes/mailboxes.php:103
+msgid "Aliases"
+msgstr ""
+
+#: includes/mailboxes.php:98
+msgid "Send from it"
+msgstr ""
+
+#: includes/mailboxes.php:98
+msgid "Default From"
+msgstr ""
+
+#: includes/mailboxes.php:105
 msgid "One per line: alias = mailbox (as in hPanel → Emails → Email Alias). The Mail API does not list aliases, so keep this in step when one is added or removed there."
 msgstr ""
 
-#: includes/mailboxes.php:112
+#: includes/mailboxes.php:106
 msgid "Save mailboxes and aliases"
 msgstr ""
 
@@ -760,55 +927,64 @@ msgstr ""
 msgid "No messages in the Inbox."
 msgstr ""
 
-#: includes/overview.php:115
+#: includes/overview.php:117
 msgid "Webmail"
 msgstr ""
 
-#: includes/overview.php:119
+#: includes/overview.php:125
 msgid "(unread)"
 msgstr ""
 
-#: includes/profiles.php:160
-msgid "Profiles"
+#: includes/overview.php:148
+msgid "Mail overview"
 msgstr ""
 
-#: includes/profiles.php:162
-msgid "Profiles saved."
+#: includes/overview.php:149
+#: includes/settings-tab.php:22
+msgid "Mail settings"
 msgstr ""
 
 #: includes/profiles.php:164
+msgid "Profiles"
+msgstr ""
+
+#: includes/profiles.php:166
+msgid "Profiles saved."
+msgstr ""
+
+#: includes/profiles.php:168
 msgid "Each mailbox's display name, signature and picture, as set in Hostinger webmail (Settings → Identities / Signature). The Mail page shows them; an email the site sends from that address uses the name and ends with the signature (FluentCRM emails excepted)."
 msgstr ""
 
-#: includes/profiles.php:171
+#: includes/profiles.php:175
 msgid "Display name"
 msgstr ""
 
-#: includes/profiles.php:172
+#: includes/profiles.php:176
 msgid "Signature (HTML)"
 msgstr ""
 
-#: includes/profiles.php:173
+#: includes/profiles.php:177
 msgid "Picture"
 msgstr ""
 
-#: includes/profiles.php:173
+#: includes/profiles.php:177
 msgid "Choose from Media"
 msgstr ""
 
-#: includes/profiles.php:173
+#: includes/profiles.php:177
 msgid "Media library item (0 = none)."
 msgstr ""
 
-#: includes/profiles.php:176
+#: includes/profiles.php:180
 msgid "Save profiles"
 msgstr ""
 
-#: includes/settings-tab.php:22
+#: includes/settings-tab.php:25
 msgid "Incoming mail, mailboxes, profiles"
 msgstr ""
 
-#: includes/settings-tab.php:24
+#: includes/settings-tab.php:27
 msgid "Site sending (SMTP, daily limit)"
 msgstr ""
 
@@ -892,4 +1068,8 @@ msgstr ""
 
 #: includes/smtp.php:138
 msgid "unknown error"
+msgstr ""
+
+#: mailweb.php:40
+msgid "Every 5 minutes"
 msgstr ""
