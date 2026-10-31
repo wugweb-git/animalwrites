@@ -411,7 +411,7 @@ $press = c2sec(
 	'',
 	c2html( '<header class="kit-ed-head"><div><h2>On social media</h2><p class="aw-camp-lede">What people are posting about Animal Writes campaigns.</p></div><a class="kit-ed-more" href="/press-coverage/">See all ' . c2i( 'arrow-right' ) . '</a></header>' )
 	. c2q( <<<'HTML'
-<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false},"className":"aw-camp-row aw-camp-row-q"} -->
+<!-- wp:query {"queryId":85,"query":{"perPage":12,"pages":0,"offset":0,"postType":"aw_press","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-row aw-camp-row-q"} -->
 <div class="wp-block-query aw-camp-row aw-camp-row-q"><!-- wp:post-template -->
 <!-- wp:group {"tagName":"article","className":"kit-card kit-card--block-md","layout":{"type":"default"}} -->
 <article class="wp-block-group kit-card kit-card--block-md"><!-- wp:post-featured-image {"isLink":false,"className":"kit-card-media"} /-->
@@ -461,7 +461,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--lab-rule
 	. c2slot( 'context', $what )
 	. c2slot( 'why-it-matters', $rules . $pain . $compare )
 	. c2slot( 'how-to-help', $send . $share, 'aw-camp-open' ) // Other ways to send removed (owner, 21 Oct 2026)
-	. c2slot( 'press', $press ) // On social media (owner, 31 Oct 2026; was a second What's happening): people's social posts, after the share ask
+	. c2slot( 'press', $press, 'aw-camp-if-items' ) // On social media: posts linked to this campaign by its keywords (31 Oct 2026); hidden while there are none. (owner, 31 Oct 2026; was a second What's happening): people's social posts, after the share ask
 	. c2slot( 'news', $updates )
 	. c2slot( 'library', $read )
 	. c2slot( 'faq', $faq )
