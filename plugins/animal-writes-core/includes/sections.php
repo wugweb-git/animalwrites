@@ -181,7 +181,7 @@ function aw_block_section_head( $a ) {
 			'crumbs'      => $crumbs,
 			'title'       => wp_strip_all_tags( get_the_title() ),
 			'title_class' => $hub ? 'wp-block-query-title wp-block-post-title' : 'wp-block-post-title',
-			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '',
+			'desc'        => $hub && function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : trim( (string) get_post_meta( get_the_ID(), 'aw_page_intro', true ) ), // a Page's own intro (meta aw_page_intro), as a section's
 			'filters'     => (string) $filt,
 			'count'       => $hub && 'aw_listing' !== $type && aw_list_page( $type, false ) && function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '', // the Directory's count stays with its results
 			'compact'     => 'aw_listing' === $type,

@@ -427,6 +427,8 @@ body { background: var(--kit-color-canvas); }
 .kit-sidebar .aw-vol-banner-photo img { height: 140px; min-height: 0; }
 .kit-sidebar .aw-vol-banner-body { padding: var(--kit-space-4); }
 .kit-sidebar .aw-vol-banner-title { font-size: var(--kit-type-lg, 1.125rem); }
+.aw-vol-side-photo { margin: 0; overflow: hidden; border-radius: var(--r-4); }
+.aw-vol-side-photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; object-position: 72% 68%; } /* the volunteer page's picture, in its sidebar (31 Oct 2026) */
 /* Directory profile: Activity (stored Google and Instagram figures), In the press, Opportunities */
 .aw-activity { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 @media (min-width: 768px) { .aw-activity { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

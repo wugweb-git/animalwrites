@@ -191,3 +191,27 @@ add_action(
 	10,
 	2
 );
+
+/*
+ * /volunteer/ (owner, 31 Oct 2026; template page-volunteer.html): the form starts under the head band, beside the
+ * sidebar. In the sidebar the page's picture comes first, and its own "Help animals near you" card is left out (the
+ * page is that card). The sidebar shows from 1200 px; below that there is no picture.
+ */
+add_filter(
+	'render_block_core/pattern',
+	fn( $html, $block ) => is_page( 'volunteer' ) && 'animal-writes/volunteer-banner' === ( $block['attrs']['slug'] ?? '' ) ? '' : $html,
+	10,
+	2
+);
+add_filter(
+	'render_block_core/template-part',
+	function ( $html, $block ) {
+		if ( ! is_page( 'volunteer' ) || 'sidebar' !== ( $block['attrs']['slug'] ?? '' ) || ! has_post_thumbnail( get_queried_object_id() ) ) {
+			return $html;
+		}
+		$pic = '<figure class="aw-vol-side-photo">' . get_the_post_thumbnail( get_queried_object_id(), 'large', array( 'loading' => 'lazy' ) ) . '</figure>';
+		return (string) preg_replace( '/^(\s*<aside\b[^>]*>)/', '$1' . $pic, $html, 1 );
+	},
+	10,
+	2
+);
