@@ -83,7 +83,12 @@ add_filter(
  * @return string
  */
 function aw_faq_legal_question( $tpl, $id, $doc, $key ) {
-	$q = sprintf( $tpl, $doc, 'date' === $key ? aw_faq_legal_verb( $id ) : '' );
+	$verb = 'date' === $key ? aw_faq_legal_verb( $id ) : '';
+	if ( aw_faq_is_topic_name( $doc ) ) { // "the press release on …": "When was it issued?", "the PDF of the …"
+		$verb = 'released' === $verb ? 'issued' : $verb;
+		$tpl  = 'pdf' === $key ? 'Where can I download the PDF of the %s?' : $tpl;
+	}
+	$q = sprintf( $tpl, $doc, $verb );
 	return aw_faq_plural( $doc ) ? preg_replace( array( '/^Is the /', '/^When was the /' ), array( 'Are the ', 'When were the ' ), $q ) : $q;
 }
 
@@ -130,6 +135,9 @@ function aw_faq_doc_name( $id ) {
 
 /** Whether a document name is plural ("ABC Rules 2023", "… Amendment Rules, 2026"): "Are … in force?", "were notified". */
 function aw_faq_plural( $name ) {
+	if ( aw_faq_is_topic_name( $name ) ) {
+		return false; // "the circular on ABC guidelines" is one circular
+	}
 	return (bool) preg_match( '/\b(Rules|Acts|Regulations|Guidelines|Orders|Judgments)\b/iu', (string) $name );
 }
 
@@ -140,15 +148,25 @@ function aw_faq_be( $name, $past = false ) {
 
 /**
  * A document's short name, the way people search it (owner, 20 Oct 2026): the "Short name" field ("PCA Act 1960", "ABC
- * Rules 2023"), else the primary focus keyphrase, else the title. Questions use it; the first answer gives the full
+ * Rules 2023"), else the primary focus keyphrase (for an official release or a circular, "press release on <keyphrase>" /
+ * "circular on <keyphrase>"), else the title. Questions use it; the first answer gives the full
  * official title once.
  */
 function aw_faq_doc_short( $id ) {
 	$s = aw_faq_plain( get_post_meta( $id, 'aw_short_name', true ) );
 	if ( '' === $s ) {
 		$s = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
+		$k = '' !== $s ? aw_faq_legal_kind( $id ) : '';
+		if ( ( 'official-release' === $k || 'circular' === $k ) && ! preg_match( '/\b(?:circular|release)\b/iu', $s ) ) { // a release's or circular's keyphrase is its topic, not its name ("awbi world animal day circular" is a name)
+			$s = ( 'circular' === $k ? 'circular on ' : 'press release on ' ) . $s;
+		}
 	}
 	return '' !== $s ? $s : aw_faq_doc_name( $id );
+}
+
+/** Whether a document name is a topic name from aw_faq_doc_short() ("press release on …", "circular on …"). */
+function aw_faq_is_topic_name( $name ) {
+	return (bool) preg_match( '/^(?:press release|circular) on /u', (string) $name );
 }
 /* ---------- A. Directory listings ---------- */
 
@@ -324,7 +342,8 @@ function aw_faq_legal_pdf( $id, $doc ) {
 		return null;
 	}
 	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
-	return array( 'Download the official ' . esc_html( $doc ) . ' PDF ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( $iss->name ) . ')' : '' ) . '.', 'pdf' );
+	$what = aw_faq_is_topic_name( $doc ) ? 'PDF of the ' . esc_html( $doc ) : esc_html( $doc ) . ' PDF';
+	return array( 'Download the official ' . $what . ' ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( $iss->name ) . ')' : '' ) . '.', 'pdf' );
 }
 
 function aw_faq_legal_force( $id, $doc ) {
@@ -361,7 +380,10 @@ function aw_faq_legal_date( $id, $doc ) {
 		if ( ! $iss || ! in_array( aw_faq_legal_kind( $id ), array( 'official-release', 'circular' ), true ) ) {
 			return null;
 		}
-		return array( esc_html( $iss->name ) . ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ) . ' on ' . aw_date( $d ) . '.', 'date' );
+		$src  = (string) get_post_meta( $id, 'aw_source_url', true );
+		$who  = ucfirst( esc_html( aw_faq_the( $iss->name ) ) );
+		$what = aw_faq_is_topic_name( $doc ) ? ' issued it' : ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ); // not "released the press release on …"
+		return array( $who . $what . ' on ' . aw_date( $d ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' ), 'date' );
 	}
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
 	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
@@ -375,7 +397,7 @@ function aw_faq_legal_issuer( $id, $doc ) {
 	}
 	$act = aw_faq_plain( get_post_meta( $id, 'aw_legal_act', true ) );
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( $iss->name ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
+	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( aw_faq_the( $iss->name ) ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
 	return array( $a, 'issuer' );
 }
 
