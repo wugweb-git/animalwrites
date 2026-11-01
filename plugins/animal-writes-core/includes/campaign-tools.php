@@ -265,7 +265,9 @@ add_shortcode(
 		}
 		$out .= '<p class="aw-rule-chip-src">' . esc_html( get_the_title( $doc ) ) . ( $link ? ' <a href="' . esc_url( $link ) . '">Read the full text</a>' : '' ) . '</p>';
 		$out .= '<button type="button" class="aw-rule-chip-close" data-close>Close</button></dialog>';
-		aw_camp_dialogs( $out ); // printed at the end of the page: a dialog holds paragraphs, so it cannot sit inside one
+		// Printed at the end of the page (a dialog holds paragraphs, so it cannot sit inside one), inside a template: the
+		// page's own tree stays small, and campaign.js puts the dialog in the page on the chip's first tap.
+		aw_camp_dialogs( '<template id="' . esc_attr( $dlg ) . '-tpl">' . $out . '</template>' );
 		return $btn;
 	}
 );

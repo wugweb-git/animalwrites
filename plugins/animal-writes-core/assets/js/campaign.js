@@ -16,16 +16,40 @@
 		}
 	}
 
-	/* Rule chips: the clause in a dialog. */
+	/* The same event, sent once the tap has painted (Core Web Vitals, INP): the analytics handlers no longer sit inside the
+	   tap's own frame. Only for taps that stay on the page; a send or a link keeps tracking at once, before the page leaves. */
+	function trackLater(name, params) {
+		var go = function () { track(name, params); };
+		if (typeof requestAnimationFrame === 'function') requestAnimationFrame(function () { setTimeout(go, 0); });
+		else setTimeout(go, 0);
+	}
+
+	/* Rule chips: the clause in a dialog. Each dialog waits in a <template> (campaign-tools.php) and joins the page on the
+	   chip's first tap, so the page's tree stays small. */
 	document.querySelectorAll('.aw-rule-chip[aria-controls]').forEach(function (btn) {
-		var dlg = document.getElementById(btn.getAttribute('aria-controls'));
-		if (!dlg || typeof dlg.showModal !== 'function') return;
+		var id = btn.getAttribute('aria-controls'), dlg = null;
+		function dialog() {
+			if (dlg) return dlg;
+			var d = document.getElementById(id);
+			if (!d) {
+				var tpl = document.getElementById(id + '-tpl');
+				if (!tpl || !tpl.content || !tpl.content.firstElementChild) return null;
+				d = tpl.content.firstElementChild;
+				document.body.appendChild(d);
+				tpl.remove();
+			}
+			if (typeof d.showModal !== 'function') return null;
+			d.addEventListener('click', function (e) {
+				if (e.target === d || e.target.hasAttribute('data-close')) d.close();
+			});
+			dlg = d;
+			return d;
+		}
 		btn.addEventListener('click', function () {
-			dlg.showModal();
-			track('rule_card_open', { rule: btn.dataset.rule || '' });
-		});
-		dlg.addEventListener('click', function (e) {
-			if (e.target === dlg || e.target.hasAttribute('data-close')) dlg.close();
+			var d = dialog();
+			if (!d) return;
+			d.showModal();
+			trackLater('rule_card_open', { rule: btn.dataset.rule || '' });
 		});
 	});
 
@@ -35,7 +59,7 @@
 	var source = shareRow && shareRow.dataset.source || 'campaign';
 	document.addEventListener('click', function (e) {
 		var b = e.target.closest && e.target.closest('button[data-kit-share]');
-		if (b) track('share_click', { network: b.dataset.kitShare });
+		if (b) trackLater('share_click', { network: b.dataset.kitShare });
 	});
 	/* Share: the phone's own share sheet (Instagram, WhatsApp, Telegram, Snapchat...) plus the story and post images,
 	   which go straight to Instagram or Facebook stories through the same sheet; on a computer the images download. */
@@ -182,7 +206,7 @@
 			row.appendChild(label);
 			holder.appendChild(row);
 			grounds.push({ box: box, text: li.textContent.replace(/\s+/g, ' ').trim() });
-			box.addEventListener('change', function () { track('ground_toggle', { ground: n, on: box.checked }); render(); });
+			box.addEventListener('change', function () { render(); trackLater('ground_toggle', { ground: n, on: box.checked }); });
 		});
 		source.hidden = true; // the list stays in the page for readers without JavaScript
 	}
@@ -213,7 +237,7 @@
 	function render() { preview.textContent = letter(); }
 
 	var opened = false, openedAt = 0;
-	form.addEventListener('focusin', function () { if (!opened) { opened = true; openedAt = Date.now(); track('letter_open'); } });
+	form.addEventListener('focusin', function () { if (!opened) { opened = true; openedAt = Date.now(); trackLater('letter_open'); } });
 	form.addEventListener('input', render);
 	form.addEventListener('submit', function (e) { e.preventDefault(); });
 	render();
