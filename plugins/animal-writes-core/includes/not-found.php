@@ -130,7 +130,7 @@ add_shortcode(
 			}
 		}
 
-		$links = array( '/directory/' => array( 'Directory', 'directory' ), '/news/' => array( 'News', 'news' ), '/resources/' => array( 'Resources', 'resources' ), '/library/' => array( 'Library', 'legal' ), '/opportunities/' => array( 'Opportunities', 'opportunities' ), '/contact/' => array( 'Contact', 'mail' ), '/' => array( 'Home', 'home' ) );
+		$links = array( '/directory/' => array( 'Directory', 'directory' ), '/news/' => array( 'News', 'news' ), '/resources/' => array( 'Resources', 'knowledge' ), '/library/' => array( 'Library', 'legal' ), '/opportunities/' => array( 'Opportunities', 'opportunities' ), '/contact/' => array( 'Contact', 'mail' ), '/' => array( 'Home', 'home' ) );
 		$html .= '<nav class="kit-error-links" aria-label="Sections"><ul>';
 		foreach ( $links as $href => $l ) {
 			$html .= '<li><a href="' . esc_url( $href ) . '"><span class="kit-ico kit-ico--' . esc_attr( $l[1] ) . '" aria-hidden="true"></span>' . esc_html( $l[0] ) . '</a></li>';

@@ -1075,7 +1075,7 @@ body { background: var(--kit-surface-page); }
 .kit-list-count { text-align: center; margin: var(--kit-space-6) 0 var(--kit-space-3); font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
 /* Error and empty pages (404, no results) */
 .kit-error-page > * { max-width: 40rem; }
-.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-bold); line-height: 1; color: var(--kit-color-muted); }
+.kit-error-code { margin: 0; font-size: var(--kit-type-display) !important; font-weight: var(--kit-weight-bold); line-height: 1; color: var(--kit-color-ink); }
 .kit-error-lead { font-size: var(--kit-type-lead); color: var(--kit-color-text); }
 .kit-error-search { display: flex; gap: var(--kit-space-2); margin: var(--kit-space-5) 0; max-width: 100%; }
 .kit-error-search .kit-btn { flex: 0 0 auto; }
@@ -1098,6 +1098,8 @@ body { background: var(--kit-surface-page); }
 	.kit-error-page > .kit-error-media { position: absolute; inset: 0; z-index: -1; max-width: none !important; margin: 0 !important; }
 	.kit-error-page > .kit-error-media :is(picture, img) { width: 100%; height: 100%; }
 	.kit-error-page > .kit-error-media img { aspect-ratio: auto; object-position: right bottom; }
+	/* the page colour fades in from the left over any photo, so the text keeps its contrast whatever the picture */
+	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 35%, transparent 65%); }
 	/* the text column starts where the header's logo does, on the left of the wide width, not centred over the photo */
 	.kit-error-page:has(> .kit-error-media) > :not(.kit-error-media) { max-width: 40rem; margin-left: max(0px, (100% - var(--kit-width-wide)) / 2) !important; margin-right: auto !important; }
 	.kit-error-page:has(> .kit-error-media) .kit-error-links a, .kit-error-page:has(> .kit-error-media) .kit-error-field input { background: var(--kit-color-raised); }

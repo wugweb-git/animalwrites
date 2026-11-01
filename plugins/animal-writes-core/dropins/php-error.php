@@ -78,11 +78,11 @@ $aw_pic     = $aw_wide || $aw_phone;
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--kit-color-canvas);color:var(--kit-color-text);font:400 var(--kit-type-base)/var(--kit-leading-body) "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:var(--kit-tracking-body)}
 /* As the 404 page: one text column; the photo after the lead below 1200px, behind the text from 1200px (reference 7) */
-main{position:relative;isolation:isolate;min-height:max(var(--kit-hero-min),100vh);padding:var(--kit-space-section) var(--kit-space-gutter)}
-.text{max-width:var(--kit-width-wide);margin:0 auto}
+main{position:relative;isolation:isolate;display:grid;align-content:center;min-height:var(--kit-hero-min);padding:var(--kit-space-section) var(--kit-space-gutter)}
+.text{width:100%;max-width:var(--kit-width-wide);margin:0 auto}
 .text>*{max-width:40rem}
 .mark{display:block;height:var(--kit-size-target);width:auto;margin:0 0 var(--kit-space-6);color:var(--kit-color-ink)}
-.code{margin:0;font-size:var(--kit-type-display);font-weight:var(--kit-weight-bold);line-height:1;color:var(--kit-color-muted)}
+.code{margin:0;font-size:var(--kit-type-display);font-weight:var(--kit-weight-bold);line-height:1;color:var(--kit-color-ink)}
 h1{margin:var(--kit-space-4) 0;color:var(--kit-color-ink);font-size:var(--kit-type-h1);font-weight:var(--kit-weight-bold);line-height:var(--kit-leading-display);letter-spacing:var(--kit-tracking-display)}
 p{margin:0}
 .lead{font-size:var(--kit-type-lead);color:var(--kit-color-text)}
@@ -96,7 +96,7 @@ p{margin:0}
 a:focus-visible{outline:var(--kit-focus-width) solid var(--kit-color-focus);outline-offset:var(--kit-focus-offset)}
 figure{margin:var(--kit-space-5) 0}
 figure img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
-@media (min-width:1200px){figure{position:absolute;inset:0;z-index:-1;max-width:none!important;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}}
+@media (min-width:1200px){figure{position:absolute;inset:0;z-index:-1;max-width:none!important;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}figure::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 35%,transparent 65%)}}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
 </head>
