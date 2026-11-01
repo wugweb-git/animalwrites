@@ -16,7 +16,7 @@ Every site form is built in **Fluent Forms** (free) and reaches **FluentCRM** (f
 | Remove my data (inactive since 31 Oct 2026: now a Contact reason) | 8 | `forms/8-remove-my-data.json` | AW-D-… | none |
 | Newsletter (full) | 9 | `forms/9-newsletter-full.json` | – | everyone → Newsletter, `newsletter`; each topic ticked → `topic-…` |
 
-**Email me updates (owner, 31 Oct 2026):** on Contact, Volunteer sign-up and Claim, ticked → the form's FluentCRM link (Newsletter, subscribed); unticked → the same contact on the Newsletter list with the same fields and tags (not `newsletter`) (`aw_crm_unticked()`, fluentcrm.php). The box sets the status for new and existing contacts alike, also on the /update/ link: ticked = subscribed, unticked = unsubscribed (`aw_crm_nl_status()`; bounced or complained addresses are left as they are); 1/0 is recorded (`aw_crm_nl_box()`). Remove my data never reaches FluentCRM; the Campaign form is unchanged.
+**Email me updates (owner, 31 Oct 2026):** on Contact, Volunteer sign-up and Claim, ticked → the form's FluentCRM link (Newsletter, subscribed); unticked → the same contact on the Newsletter list with the same fields and tags (not `newsletter`) (`aw_crm_unticked()`, fluentcrm.php). The box is only recorded as 1/0 (`aw_crm_nl_box()`); no form changes a contact's status (owner, 1 Nov 2026). Remove my data never reaches FluentCRM; the Campaign form is unchanged.
 
 A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 0). Each contact also gets "Newsletter box (last form)" 1/0 with the form and its consent wording.
 

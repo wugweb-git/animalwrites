@@ -648,9 +648,9 @@ add_action(
  * After each form's FluentCRM link (it runs at priority 10, only when "Email me updates" is ticked): what a link cannot
  * do. A link only makes "subscribed" contacts and cannot add a note, so: every Contact, Claim and Volunteer sender
  * (and the /update/ link, which uses the Volunteer form) becomes a contact (tags contact-form, claimant, volunteer),
- * the message or the claim as a note, and the newsletter box as 1/0. The box sets the status for new and existing
- * contacts (owner, 31 Oct 2026): ticked = subscribed, unticked = unsubscribed, on the Newsletter list either way
- * (aw_crm_nl_status(); unticked also gets everything the link would have saved, aw_crm_unticked()). A Contact send
+ * the message or the claim as a note, and the newsletter box as 1/0. The box is only recorded as 1/0; no form changes
+ * a contact's status (owner, 1 Nov 2026). Unticked senders are on the Newsletter list all the same, with everything
+ * the link would have saved (aw_crm_unticked()). A Contact send
  * with the reason Remove my data never reaches FluentCRM (owner, 31 Oct 2026),
  * whatever is ticked; its entry is kept like any other. Also counts the submission for the per-connection limit.
  */
@@ -678,7 +678,6 @@ add_action(
 		if ( ! aw_ff_ticked( $data, 'nl_optin' ) ) {
 			aw_crm_unticked( $c, (int) $form->id, $data );
 		}
-		aw_crm_nl_status( $c, aw_ff_ticked( $data, 'nl_optin' ) );
 		aw_crm_nl_box( $c, aw_ff_ticked( $data, 'nl_optin' ), AW_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
 		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
 			$st = ! empty( $data['state'] ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;

@@ -30,6 +30,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_CRM_LIST = 'newsletter';
 
+/**
+ * Block list (owner, 1 Nov 2026): addresses deleted from FluentCRM as junk that must never come back as contacts.
+ * SHA-256 of the lowercased, trimmed address, so the code holds no copy of it. Checked by aw_crm_subscribe(),
+ * aw_crm_contact_for(), Mailweb's inbox sync and the Fluent Forms → FluentCRM feed (below).
+ * Add a hash with: php -r 'echo hash("sha256","name@example.com");'
+ */
+const AW_CRM_BLOCKED_EMAILS = array(
+	'8b600ae0de9fda16c7aea7c0daf03ee9ef9d54c8b7861a9da0f140555a206d15',
+	'c5d30eda4914993eaabded86416e212400abdc3a0f15eb05b7d85ec0defbc445',
+	'1f88974f397859a9d3d4030c7cb7a87dde909e4960014743ad4cf518b9911dcd',
+	'907d7bf93d60cbe6565458bb0fe7e8fac60dffe3561e27cce320947f1a13ef8b',
+	'1d2da3c794ec0b0c4e2017b9ff3ea4ddacb88793fd3f89bd78b537141f29a715',
+	'831cb478c3fff5a97b54cf9419ba3862f304a25458288949db3c9cfed3f711a0',
+	'f4b83dfa3e0820c4332493dd1230f0a162a98cced8150d5c1c58f94db0fc2055',
+);
+
+/** Whether an email address is on the block list. */
+function aw_crm_blocked( $email ) {
+	$email = strtolower( trim( (string) $email ) );
+	return '' !== $email && in_array( hash( 'sha256', $email ), (array) apply_filters( 'aw_crm_blocked_emails', AW_CRM_BLOCKED_EMAILS ), true );
+}
+
+add_filter(
+	'mailweb_crm_skip_email',
+	function ( $skip, $email ) {
+		return $skip || aw_crm_blocked( $email );
+	},
+	10,
+	2
+);
+
+/*
+ * Fluent Forms → FluentCRM feeds create contacts inside FluentCRM, which has no hook before it creates one. For a
+ * blocked address the feed's handler (priority 10) is taken off for that one run and put back straight after.
+ */
+add_action(
+	'fluentform/integration_notify_fluentcrm_feeds',
+	function ( $feed, $form_data ) {
+		$email = (string) ( $feed['processedValues']['email'] ?? '' );
+		if ( ! is_email( $email ) ) {
+			$email = (string) ( is_array( $form_data ) ? ( $form_data[ $email ] ?? '' ) : '' );
+		}
+		if ( ! aw_crm_blocked( $email ) ) {
+			return;
+		}
+		global $wp_filter;
+		$hook = 'fluentform/integration_notify_fluentcrm_feeds';
+		$cbs  = isset( $wp_filter[ $hook ] ) ? (array) ( $wp_filter[ $hook ]->callbacks[10] ?? array() ) : array();
+		foreach ( $cbs as $cb ) {
+			$fn = $cb['function'];
+			if ( ! is_array( $fn ) || ! is_object( $fn[0] ) || 'notify' !== $fn[1] || ! str_starts_with( get_class( $fn[0] ), 'FluentCrm\\' ) ) {
+				continue;
+			}
+			remove_action( $hook, $fn, 10 );
+			$restore = function () use ( $hook, $fn, &$restore ) {
+				add_action( $hook, $fn, 10, 4 );
+				remove_action( $hook, $restore, 11 );
+			};
+			add_action( $hook, $restore, 11, 0 );
+		}
+	},
+	9,
+	2
+);
+
 function aw_crm_on() {
 	return function_exists( 'FluentCrmApi' );
 }
@@ -89,7 +154,7 @@ function aw_crm_tag_ids( $slugs ) {
 function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array() ) {
 	$email = strtolower( trim( (string) $email ) );
 	$list  = aw_crm_list_id();
-	if ( ! $list || ! is_email( $email ) ) {
+	if ( ! $list || ! is_email( $email ) || aw_crm_blocked( $email ) ) {
 		return 0;
 	}
 	$parts = preg_split( '/\s+/', trim( (string) $name ), 2 );
@@ -113,30 +178,12 @@ function aw_crm_subscribe( $email, $name = '', $extra = array(), $tags = array()
 	return $c ? (int) $c->id : 0;
 }
 
-/* ---------- Unticked: on the list, unsubscribed (owner, 31 Oct 2026) ---------- */
-
-/**
- * "Email me updates" decides the status, for new and existing contacts alike (owner, 31 Oct 2026): ticked = subscribed,
- * unticked = unsubscribed. The contact stays on the Newsletter list either way and the box is recorded as 1/0
- * (aw_crm_nl_box()). A bounced or complained address is left as it is. FluentCRM's own status change runs its hooks.
- *
- * @param object $c      FluentCRM contact.
- * @param bool   $ticked The box.
- */
-function aw_crm_nl_status( $c, $ticked ) {
-	if ( ! $c || in_array( (string) $c->status, array( 'bounced', 'complained' ), true ) ) {
-		return;
-	}
-	$want = $ticked ? 'subscribed' : 'unsubscribed';
-	if ( $want !== (string) $c->status && method_exists( $c, 'updateStatus' ) ) {
-		$c->updateStatus( $want );
-	}
-}
+/* ---------- Unticked: on the list all the same (owner, 31 Oct 2026) ---------- */
 
 /**
  * A sender who left "Email me updates" unticked: on the Newsletter list all the same, with everything the form's
- * FluentCRM link would have saved (the link itself runs only when the box is ticked); the status is set by
- * aw_crm_nl_status().
+ * FluentCRM link would have saved (the link itself runs only when the box is ticked). The box is recorded as 1/0
+ * (aw_crm_nl_box()); no form changes a contact's status (owner, 1 Nov 2026).
  *
  * @param object $c    FluentCRM contact (aw_crm_contact_for()).
  * @param int    $form Fluent Forms form ID.
@@ -229,7 +276,7 @@ function aw_crm_claim_note( $c, $entry, $data, $form, $ref ) {
  */
 function aw_crm_contact_for( $email, $name, $tags, $source ) {
 	$email = strtolower( trim( (string) $email ) );
-	if ( ! aw_crm_on() || ! is_email( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
+	if ( ! aw_crm_on() || ! is_email( $email ) || aw_crm_blocked( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
 		return null;
 	}
 	$c = FluentCrmApi( 'contacts' )->getContact( $email );

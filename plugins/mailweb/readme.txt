@@ -39,6 +39,7 @@ Mailweb puts a site's Hostinger mailboxes inside WordPress, so the team reads an
 = FluentCRM =
 
 * Incoming email from people is noted on their FluentCRM contact (found, or made as "transactional" so they get no marketing), with a tag you choose, the full text and an "Open in Mail" link; replies sent from Mail are noted as "Reply sent". Choose the mailboxes in Mail → Settings.
+* A site can keep a sender out of FluentCRM with the `mailweb_crm_skip_email` filter (return true for that address).
 
 = Who can use it =
 

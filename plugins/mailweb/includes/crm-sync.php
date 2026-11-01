@@ -118,7 +118,7 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 	$from  = $m['from'] ?? array();
 	$from  = is_array( $from ) && isset( $from[0] ) ? $from[0] : $from;
 	$email = strtolower( (string) ( $from['address'] ?? '' ) );
-	if ( ! mailweb_crm_person( $email ) ) {
+	if ( ! mailweb_crm_person( $email ) || apply_filters( 'mailweb_crm_skip_email', false, $email ) ) {
 		return 'skipped'; // not stored as done: this check is cheap and keeps the list for noted mail
 	}
 	$c = mailweb_crm_contact_for( $email, (string) ( $from['name'] ?? '' ) );
