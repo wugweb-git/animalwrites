@@ -2800,7 +2800,7 @@
     "aw-ed-hero-help"
    ],
    "states": [
-    "campaign 13848 published (open or closed; owner, 1 Nov 2026): the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
+    "campaign 13848 published (open or closed): the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
     "campaign not published: the Hero pattern (animal-writes/hero)"
    ],
    "tokens": [],

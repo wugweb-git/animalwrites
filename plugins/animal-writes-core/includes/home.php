@@ -46,11 +46,11 @@ add_filter(
 
 /* ---------- Hero ---------- */
 
-/** The campaign the home hero shows (the draft lab animal rules, 2026), until the owner changes it (owner, 1 Nov 2026). */
+/** The campaign the home hero shows (the draft lab animal rules, 2026). */
 const AW_HOME_CAMPAIGN = 13848;
 
 /**
- * Whether the home hero is the campaign's: whenever it is published, open or closed (owner, 1 Nov 2026: no automatic
+ * Whether the home hero is the campaign's: whenever it is published, open or closed (no automatic
  * switch when it closes). Its own state is read, never changed.
  */
 function aw_home_hero_is_campaign() {
