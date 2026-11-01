@@ -322,8 +322,11 @@ add_action(
 			echo '<br>' . esc_html( implode( '; ', $flags ) );
 		}
 		$attached = get_attached_file( $post_id );
-		if ( $attached && is_file( $attached . '.webp' ) ) {
-			echo '<br>WebP copy: yes';
+		if ( $attached && 'webp' !== strtolower( pathinfo( $attached, PATHINFO_EXTENSION ) ) ) {
+			$parts = pathinfo( $attached );
+			if ( is_file( $attached . '.webp' ) || is_file( $parts['dirname'] . '/' . $parts['filename'] . '.webp' ) ) {
+				echo '<br>WebP copy: yes';
+			}
 		}
 	},
 	10,
