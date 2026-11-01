@@ -46,6 +46,12 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **On hold (owner, 26 Oct):** "update the campaign and email the old volunteers" — meaning to be confirmed; nothing drafted or sent.
 
 ### Next work
+- **Edit screens: later (1 Nov 2026):**
+  - **Same idea, different keys:** `aw_organiser` → `aw_organisation`, `aw_campaign_partners` → `aw_participant`, `aw_paid_listing` → `aw_sponsored`, term `aw_campaign_short` → `aw_short_name`. Needs its own plan and the owner's OK (data migration).
+  - **Opportunity Organisation box:** waits until Opportunities resume.
+  - **Opportunity group text:** it still says "Place: the Place box" (copy, needs the owner's yes).
+  - **Government data fields:** 6 listing fields with no box (AWBI dropped / listed on, Darpan blacklisted by / on, gov verified by / on), filled by imports; showing them read-only in Claimed and sources is the owner's call.
+  - **aw-ship.sh live check:** reads the server commit as empty, so it says "NOT deployed" and skips the purge although the deploy went through; check by hand and purge until it is fixed.
 - **404 page (PR #88, open since 26 Oct):** 410 for trashed News and Library items, and a more helpful missing-address page; not merged.
 - **Site-wide CSS audit (31 Oct): findings parked, not scheduled.** Bugs found on item pages, hubs and the site chrome, kept for later, nothing built: footer social icons overlap the email on phones; 404 search bar wider than its column from 1200; Opportunity and "More organisations" logos cropped or stretched; the small section headings (Sources, More, Listing) at full H2 size; FAQ questions at body size; header/footer edge 28px off the content edge from 1200 (hard-coded 20px); a stray date and calendar icon in Library excerpts; Contact and Privacy wider than 720px; undefined tokens (`--kit-type-h`, `--kit-type-h5`, `--kit-color-warning-text`). Layout rules for any later fix: no sidebar on list pages or content pages (About, Adoption, Contact, Privacy and similar); About and Adoption keep their banded layout; sidebar only on single item pages and /volunteer/.
 - **Volunteer welcome newsletter (owner, 31 Oct): plan, not built.** A FluentCRM email campaign welcoming people who sign up on /volunteer/ (5 sign-ups 28–31 Oct, none contacted yet). To plan with the owner: who gets it (the owner decides; 1 Nov: the email-updates box is recorded as 1/0 only), from noreply@ with Reply-To contact@, what it says (what happens next, matching, links to the Directory, Resources and the open campaign), a one-off send for existing sign-ups vs. a repeat send for new ones (no automations on live so far; FluentCRM free only). Copy shown to the owner before anything is sent.
@@ -109,6 +115,17 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (1 Nov 2026)
+- **Edit-screen boxes (1 Nov 2026):** every value is kept and every save handler is unchanged.
+  - **Duplicates:** the campaign closing date and document are edited in one box only.
+  - **Collapsed by default:** LiteSpeed, Link Whisper, Rank Math Link Suggestions, Custom Fields, Slug and Linked from, until a user opens or closes a box on that screen.
+  - **Library item:** two boxes, Source and Document; Document holds Issued by, short name, issued under and key sections.
+  - **Directory listing:** 8 boxes (Contact, Address and place incl. the Place fields, Opening hours, Registrations, About and services, Online, Photos and support, Claimed and sources incl. the source list).
+  - **Campaign:** 6 boxes (Event, Dates and state, Document, Organisations, Outcome incl. real-world impact, Letters and share); the save only runs when all five campaign boxes are on the screen.
+  - **Side boxes removed:** Place on non-listing types (places still auto-detected and shown); Issued by on Resources.
+  - **SCF:** stays on while Animal Writes core is on.
+  - **Schema:** mentions capped at 5 organisations, hand-picked first.
+  - **Edit screens page** (Animal Writes → Edit screens): tabs Mapping (our boxes × modules), Schema and Third-party boxes; the map also covers wp-admin page widgets.
+  - **Checked on live:** `wp aw-edit-screens` reports 0 not mapped and 0 edited in two places; Library 118 and sample listing 9003 saved without changes and their values compared; campaigns 8 and 13848 opened, not saved.
 - **Media Library work (1 Nov 2026):** list columns (file, group, slug, caption, description, keyphrase, alt, image context, used-in, optimisation); autofill of the empty fields on upload; media groups (12) on all images; WebP conversion for new uploads and the Make WebP screen (heaviest files first); duplicate-files merge tool (Media → Duplicate files, 160 groups, merged in batches, Undo available); name, slug, caption, description, alt, image context and focus keyphrase rewritten for the whole library, limits name, slug and caption 100, alt, description and image context 160.
 
 ## Done (31 Oct 2026)
