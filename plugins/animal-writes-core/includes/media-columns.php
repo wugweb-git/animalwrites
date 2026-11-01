@@ -154,6 +154,8 @@ function aw_media_seo( $post, $use ) {
 	}
 	if ( '' === $cap ) {
 		$issues[] = 'no caption (SEO title)';
+	} elseif ( mb_strlen( $cap ) > 70 ) {
+		$issues[] = 'caption over 70 characters';
 	}
 	$dl = mb_strlen( $desc );
 	if ( 0 === $dl ) {
