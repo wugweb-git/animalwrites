@@ -598,3 +598,28 @@
 		update();
 	}
 })();
+
+/* Diwali rows (campaign.css): a card row, the step row or the table that scrolls sideways is a region named by its
+   section heading and takes keyboard focus, so arrow keys scroll it (WCAG 2.1.1); a row that fits is left alone. */
+(function () {
+	var rows = document.querySelectorAll('.aw-camp--diwali :is(.aw-camp-grid, .aw-camp-steps--six, .wp-block-table)');
+	if (!rows.length) return;
+	function mark() {
+		Array.prototype.forEach.call(rows, function (r) {
+			var h = r.closest('.aw-camp-section');
+			h = h && h.querySelector('h2[id]');
+			if (r.scrollWidth > r.clientWidth + 1) {
+				r.setAttribute('tabindex', '0');
+				r.setAttribute('role', 'region');
+				if (h) r.setAttribute('aria-labelledby', h.id);
+			} else {
+				r.removeAttribute('tabindex');
+				r.removeAttribute('role');
+				r.removeAttribute('aria-labelledby');
+			}
+		});
+	}
+	mark();
+	var t;
+	window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(mark, 150); }, { passive: true });
+})();

@@ -61,6 +61,37 @@
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
+/* Section and card heights (docs/design-system.md, Layout rules 5 and 6; a card at most 600px): phones first.
+   The law cards and the five action cards are one sideways row that snaps (the theme's scroll row, kit.css
+   .kit-scroll-row): on phones one card per screen with the next card's edge showing, two to a view from 768, three
+   from 1200. Each card shows its first paragraph; the rest is in the card's fold (core Details, its heading as the
+   summary). campaign.js makes a row that scrolls a named, focusable region. */
+.aw-camp--diwali .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
+.aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex: 0 0 calc(100% - var(--kit-space-5)); margin: 0; scroll-snap-align: start; }
+@media (min-width: 768px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: calc((100% - var(--kit-space-4)) / 2); } }
+@media (min-width: 1200px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: calc((100% - 2 * var(--kit-space-4)) / 3); } }
+.aw-camp--diwali .aw-camp-card-fold { border-bottom: 0; }
+.aw-camp--diwali .aw-camp-card-fold > :not(summary) { margin: 0 0 var(--kit-space-3); }
+.aw-camp--diwali .aw-camp-grid > :first-child .aw-camp-card-fold summary { color: var(--camp-on-mark); }
+/* Tonight, in order: on phones the six steps are one sideways row (the Home story row, aw.css .aw-ed-story-figures) */
+@media (max-width: 767px) {
+	.aw-camp--diwali .aw-camp-steps--six { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(70%, 16rem); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
+	.aw-camp--diwali .aw-camp-steps--six > li { scroll-snap-align: start; }
+	/* The three dates sit side by side, so What's happening stays one block */
+	.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-3); }
+	/* Who to call: the table scrolls sideways inside its frame (kit.css .wp-block-table) at two card widths, so its
+	   rows stay short; data tables may scroll on their own (WCAG 1.4.10) */
+	.aw-camp--diwali #help { --kit-table-min: calc(2 * var(--kit-card-min)); }
+	/* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
+	   Bar height = its padding (--kit-space-2, twice) + the button (--kit-btn-height) + the safe area */
+	html:has(.aw-camp--diwali .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+	.aw-camp--diwali:has(> .aw-sticky-cta) { padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
+}
+/* Read the law: the sources list in two columns from 768 */
+@media (min-width: 768px) {
+	.aw-camp--diwali #library .aw-camp-section > .wp-block-list { columns: 2; column-gap: var(--kit-space-6); }
+	.aw-camp--diwali #library .aw-camp-section > .wp-block-list > li { break-inside: avoid; }
+}
 /* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
 .aw-camp--sc-stray-dogs {
 	--camp-primary: #3a1730;
