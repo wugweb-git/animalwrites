@@ -105,7 +105,7 @@ add_filter(
 			$kind          = aw_faq_legal_kind( $obj->ID );
 			$ctx['kind']   = 'legal';
 			$ctx['entity'] = aw_faq_doc_short( $obj->ID );
-			$ctx['full']   = aw_faq_doc_name( $obj->ID ); // the full official title, once, in the first answer
+			$ctx['full']   = aw_faq_is_topic_name( $ctx['entity'] ) ? '' : aw_faq_doc_name( $obj->ID ); // the full official title, once, in the first answer; a release or circular named by its topic keeps the topic (its title is a headline)
 			$ctx['about']  = $ctx['url'] . ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) );
 			$ctx['head']   = 'Questions about the ' . $ctx['entity'];
 		} elseif ( $obj instanceof WP_Post && 'page' === $obj->post_type && in_array( $obj->post_name, array( 'directory', 'opportunities' ), true ) ) {
@@ -155,7 +155,7 @@ function aw_faq_doc_short( $id ) {
 	if ( '' === $s ) {
 		$s = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
 		$k = '' !== $s ? aw_faq_legal_kind( $id ) : '';
-		if ( ( 'official-release' === $k || 'circular' === $k ) && ! preg_match( '/\b(?:circular|release)\b/iu', $s ) ) { // a release's or circular's keyphrase is its topic, not its name ("awbi world animal day circular" is a name)
+		if ( ( 'official-release' === $k || 'circular' === $k ) && ! preg_match( '/\b(?:circulars?|releases?)\b/iu', $s ) ) { // a release's or circular's keyphrase is its topic, not its name ("awbi world animal day circular" is a name)
 			$s = ( 'circular' === $k ? 'circular on ' : 'press release on ' ) . $s;
 		}
 	}
@@ -341,7 +341,7 @@ function aw_faq_legal_pdf( $id, $doc ) {
 	}
 	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
 	$what = aw_faq_is_topic_name( $doc ) ? 'PDF of the ' . esc_html( $doc ) : esc_html( $doc ) . ' PDF';
-	return array( 'Download the official ' . $what . ' ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( $iss->name ) . ')' : '' ) . '.', 'pdf' );
+	return array( 'Download the official ' . $what . ' ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( aw_faq_the( $iss->name ) ) . ')' : '' ) . '.', 'pdf' );
 }
 
 function aw_faq_legal_force( $id, $doc ) {
@@ -412,7 +412,7 @@ function aw_faq_legal_read( $id, $doc ) {
 	if ( '' === $src || ! $iss || 'official-release' !== aw_faq_legal_kind( $id ) || '' !== aw_faq_legal_pdf_url( $id ) ) {
 		return null;
 	}
-	return array( 'On the website of ' . esc_html( $iss->name ) . ': ' . aw_faq_a( $src, 'read the ' . esc_html( $doc ) ) . '.', 'read' );
+	return array( 'On the website of ' . esc_html( aw_faq_the( $iss->name ) ) . ': ' . aw_faq_a( $src, 'read the ' . $doc ) . '.', 'read' ); // aw_faq_a() escapes its text
 }
 
 /**
@@ -657,9 +657,10 @@ function aw_faq_tag_items( $term_id ) {
 		}
 		set_transient( 'aw_faq_tag_' . $term_id, $out, HOUR_IN_SECONDS );
 	}
-	foreach ( $out as $pt => $ids ) { // meta and categories in one query each, not one per item
+	foreach ( $out as $pt => $ids ) { // posts, meta and categories in one query each, not one per item
 		update_meta_cache( 'post', $ids );
 		if ( 'aw_listing' !== $pt ) {
+			_prime_post_caches( $ids, false, false ); // titles, content and dates for the answers
 			update_object_term_cache( $ids, $pt );
 		}
 	}
@@ -674,23 +675,63 @@ function aw_faq_tag_lc( $name ) {
 /** The tag's name in a question ("Official release" → "official release"). */
 function aw_faq_tag_question( $tpl, $id, $entity, $key ) {
 	$name = aw_faq_tag_lc( $entity );
-	if ( in_array( $key, array( 'tag-issuers', 'tag-laws', 'tag-in-force', 'tag-campaign' ), true ) ) { // "Who issues the circulars …", "Which rules are in force?"
-		$name = aw_faq_tag_plural( $name );
+	if ( in_array( $key, array( 'tag-issuers', 'tag-laws', 'tag-in-force', 'tag-campaign' ), true ) ) { // "Who issues the circulars …", "Which rules are in force?"; tag-campaign is kept for the deferred campaign question (aw_faq_tag_campaign)
+		$name = aw_faq_tag_plural( $name, $key, aw_faq_tag_slug( $id ) ) ?? $name; // null: the answer is null too, so the question is not shown
 	}
 	return sprintf( $tpl, $name );
 }
 
-/** A tag's name in the plural ("rule" → "rules", "policy" → "policies", "research" → "research summaries"; "news" stays). */
-function aw_faq_tag_plural( $name ) {
+/**
+ * A tag's name in the plural ("rule" → "rules", "policy" → "policies", "research" → "research summaries"; "news" stays).
+ * For a question that only fits some tags, null for the others: "Which … are in force?" for laws that can be in force
+ * (Acts, Rules, Notifications), "Which laws do the … explain?" for Resource types (guides, research summaries).
+ *
+ * @param string $name Tag name in a sentence.
+ * @param string $key  Registry key ('' for any tag).
+ * @param string $slug Tag slug, with $key.
+ * @return string|null
+ */
+function aw_faq_tag_plural( $name, $key = '', $slug = '' ) {
+	$only = array(
+		'tag-in-force' => array( 'act', 'rule', 'notification' ),
+		'tag-laws'     => array( 'guide', 'research' ),
+	);
+	if ( isset( $only[ $key ] ) && ! in_array( $slug, $only[ $key ], true ) ) {
+		return null;
+	}
 	if ( 'research' === $name ) {
 		return 'research summaries';
 	}
 	return preg_match( '/[^aeiou]y$/u', $name ) ? mb_substr( $name, 0, -1 ) . 'ies' : ( preg_match( '/s$/u', $name ) ? $name : $name . 's' );
 }
 
+/** A tag's slug ('' for none). */
+function aw_faq_tag_slug( $term_id ) {
+	$t = get_term( $term_id, 'post_tag' );
+	return $t instanceof WP_Term ? $t->slug : '';
+}
+
+/**
+ * "… the A, the B and the C. <link>" with as many names as fit in 50 words (at most 3, at least 1), dropped from the end.
+ *
+ * @param callable $build fn( string[] $names ) => answer html.
+ * @param string[] $names Names, most important first (escaped).
+ * @return string Answer html.
+ */
+function aw_faq_fit_names( callable $build, array $names ) {
+	$names = array_slice( array_values( $names ), 0, 3 );
+	$a     = $build( $names );
+	while ( count( $names ) > 1 && aw_faq_word_count( $a ) > 50 ) {
+		array_pop( $names );
+		$a = $build( $names );
+	}
+	return $a;
+}
+
 /** An issuer's name after "from": "the Supreme Court", "the Press Information Bureau". */
 function aw_faq_the( $name ) {
-	return preg_match( '/^the\s/iu', (string) $name ) ? (string) $name : 'the ' . $name;
+	$name = aw_faq_plain( $name ); // term names are stored with entities ("Bar &amp; Bench"); callers escape
+	return preg_match( '/^the\s/iu', $name ) ? $name : 'the ' . $name;
 }
 
 /** "A (12), B (8) and C (5)": the three largest counts. */
@@ -698,7 +739,7 @@ function aw_faq_tag_top( array $counts ) {
 	arsort( $counts );
 	$out = array();
 	foreach ( array_slice( $counts, 0, 3, true ) as $name => $n ) {
-		$out[] = esc_html( (string) $name ) . ' (' . number_format_i18n( $n ) . ')';
+		$out[] = esc_html( aw_faq_plain( (string) $name ) ) . ' (' . number_format_i18n( $n ) . ')'; // term names are stored with entities
 	}
 	return aw_faq_and( $out );
 }
@@ -762,7 +803,7 @@ function aw_faq_tag_places( $term_id, $district ) {
 	foreach ( $counts as $slug => $n ) { // by name; a district that shares its name with another gets its state ("Aurangabad, Bihar")
 		$x       = $place[ $slug ];
 		$st      = $district && $names[ $x->name ] > 1 ? aw_place_state( $x->state ) : null;
-		$label   = $x->name . ( $st ? ', ' . $st->name : '' );
+		$label   = aw_faq_plain( $x->name . ( $st ? ', ' . $st->name : '' ) ); // stored with entities; aw_faq_a() escapes
 		$named[ $label ] = $n;
 		$place[ $label ] = $x;
 	}
@@ -834,26 +875,28 @@ function aw_faq_tag_animals( $term_id, $name ) {
 }
 
 /**
- * The published Library documents an item links to: links in its text that resolve to a Library document, and its
- * aw_entities laws with an ID.
+ * The Library documents an item links to: links in its text to this site's /library/ addresses that resolve to a
+ * document, and its aw_entities laws with an ID. Whether each is still published is checked by the caller.
  *
  * @param int $id Item ID.
  * @return int[] Document IDs.
  */
 function aw_faq_item_laws( $id ) {
-	static $memo = array(); // url => document ID (0 for none), for the request
+	static $memo = array(); // normalised /library/ path => document ID (0 for none), for the request
 	$out  = array();
-	$base = (string) wp_parse_url( home_url( 'library/' ), PHP_URL_PATH );
-	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	$home = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+	$base = rtrim( $home, '/' ) . '/library/';
+	$host = preg_replace( '/^www\./', '', strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
 	if ( preg_match_all( '/href=["\']([^"\']+)["\']/i', (string) get_post_field( 'post_content', $id ), $m ) ) {
 		foreach ( array_unique( $m[1] ) as $url ) {
-			$u = wp_parse_url( html_entity_decode( $url ) );
-			if ( ! is_array( $u ) || ( isset( $u['host'] ) && strtolower( $u['host'] ) !== strtolower( $host ) ) || 0 !== strpos( (string) ( $u['path'] ?? '' ), $base ) ) {
-				continue; // only this site's Library addresses
+			$u    = wp_parse_url( html_entity_decode( $url ) );
+			$path = is_array( $u ) ? strtolower( (string) ( $u['path'] ?? '' ) ) : '';
+			if ( '' === $path || ( isset( $u['host'] ) && preg_replace( '/^www\./', '', strtolower( $u['host'] ) ) !== $host ) || 0 !== strpos( $path, $base ) || strlen( rtrim( $path, '/' ) ) < strlen( $base ) ) {
+				continue; // only this site's Library documents (absolute, with or without www, or root-relative), not the Library page itself
 			}
-			$key = strtok( $url, '#?' );
+			$key = rtrim( $path, '/' ) . '/'; // one key for "…/x", "…/x/", "https://www.…/x/#y" and "/library/x?z"
 			if ( ! isset( $memo[ $key ] ) ) {
-				$memo[ $key ] = (int) url_to_postid( $key );
+				$memo[ $key ] = (int) url_to_postid( home_url( substr( $key, strlen( rtrim( $home, '/' ) ) ) ) );
 			}
 			$out[] = $memo[ $key ];
 		}
@@ -862,42 +905,68 @@ function aw_faq_item_laws( $id ) {
 	foreach ( (array) ( $ent['laws'] ?? array() ) as $l ) {
 		$out[] = (int) ( $l['id'] ?? 0 );
 	}
-	return array_values( array_filter( array_unique( $out ), fn( $d ) => $d && $d !== (int) $id && 'aw_legal' === get_post_type( $d ) && 'publish' === get_post_status( $d ) ) );
+	return array_values( array_filter( array_unique( array_map( 'intval', $out ) ), fn( $d ) => $d && $d !== (int) $id ) );
 }
 
-/** Which Library documents the tag's Resources and news items link to most. Not for a tag with Directory listings (a service). */
+/**
+ * Which Library documents the tag's Resources and news items link to most. Only for a Resource type tag (guide,
+ * research). The item => documents map is kept for an hour beside the tag's item IDs (transient aw_faq_tag_laws_<id>).
+ */
 function aw_faq_tag_laws( $term_id, $name ) {
-	$items = aw_faq_tag_items( $term_id );
-	if ( ! empty( $items['aw_listing'] ) ) {
+	$plural = aw_faq_tag_plural( aw_faq_tag_lc( $name ), 'tag-laws', aw_faq_tag_slug( $term_id ) );
+	$items  = null !== $plural ? aw_faq_tag_items( $term_id ) : null;
+	if ( ! $items || ! empty( $items['aw_listing'] ) ) {
 		return null; // "the rescue works": a service's name is not a kind of item
 	}
+	$ids = array_merge( $items['post'] ?? array(), $items['aw_news'] ?? array() );
+	$map  = get_transient( 'aw_faq_tag_laws_' . $term_id );
+	$map  = is_array( $map ) ? $map : array();
+	$miss = array_diff( $ids, array_keys( $map ) ); // all of them on a first view; items tagged since, after that
+	foreach ( $miss as $id ) {
+		$map[ $id ] = aw_faq_item_laws( $id );
+	}
+	if ( $miss ) {
+		set_transient( 'aw_faq_tag_laws_' . $term_id, $map, HOUR_IN_SECONDS );
+	}
+	$all = array_values( array_unique( array_merge( array(), ...array_values( array_map( 'array_values', $map ) ) ) ) );
+	if ( $all ) {
+		_prime_post_caches( $all, true, true ); // the documents' status, meta and types in a few queries
+	}
+	$live   = array_flip( array_filter( $all, fn( $d ) => 'aw_legal' === get_post_type( $d ) && 'publish' === get_post_status( $d ) ) );
 	$counts = array();
 	$first  = array(); // short name => document ID
 	$n      = 0;
 	$with   = 0;
-	foreach ( array( 'post', 'aw_news' ) as $pt ) {
-		foreach ( $items[ $pt ] ?? array() as $id ) {
-			++$n;
-			$docs  = aw_faq_item_laws( $id );
-			$with += $docs ? 1 : 0;
-			foreach ( $docs as $d ) {
-				$s            = aw_faq_doc_short( $d );
-				$counts[ $s ] = ( $counts[ $s ] ?? 0 ) + 1;
-				$first[ $s ]  = $first[ $s ] ?? $d;
-			}
+	foreach ( $ids as $id ) {
+		++$n;
+		$docs  = array_filter( $map[ $id ] ?? array(), fn( $d ) => isset( $live[ $d ] ) );
+		$with += $docs ? 1 : 0;
+		foreach ( $docs as $d ) {
+			$s            = aw_faq_doc_short( $d );
+			$counts[ $s ] = ( $counts[ $s ] ?? 0 ) + 1;
+			$first[ $s ]  = $first[ $s ] ?? $d;
 		}
 	}
 	if ( $with < 3 ) {
 		return null;
 	}
 	arsort( $counts );
-	$top = (string) array_key_first( $counts );
-	$a   = number_format_i18n( $with ) . ' of the ' . number_format_i18n( $n ) . ' ' . esc_html( aw_faq_tag_plural( aw_faq_tag_lc( $name ) ) ) . ' link to Library documents, most often the ' . aw_faq_tag_top( $counts ) . '. ' . aw_faq_a( (string) get_permalink( $first[ $top ] ), 'Read the ' . $top . ' in the Library' ) . '.';
+	$top   = (string) array_key_first( $counts );
+	$link  = aw_faq_a( (string) get_permalink( $first[ $top ] ), 'Read the ' . $top . ' in the Library' );
+	$lead  = number_format_i18n( $with ) . ' of the ' . number_format_i18n( $n ) . ' ' . esc_html( $plural ) . ' link to Library documents, most often the ';
+	$names = array();
+	foreach ( array_slice( $counts, 0, 3, true ) as $s => $c ) {
+		$names[] = esc_html( (string) $s ) . ' (' . number_format_i18n( $c ) . ')';
+	}
+	$a = aw_faq_fit_names( fn( $x ) => $lead . aw_faq_and( $x ) . '. ' . $link . '.', $names );
 	return array( $a, 'tag-laws' );
 }
 
-/** Which of the tag's Library documents are in force (aw_legal_force, as aw_faq_legal_force reads it). */
-function aw_faq_tag_in_force( $term_id ) {
+/** Which of the tag's Library documents are in force (aw_legal_force, as aw_faq_legal_force reads it). Only for the act, rule and notification tags. */
+function aw_faq_tag_in_force( $term_id, $name = '' ) {
+	if ( null === aw_faq_tag_plural( aw_faq_tag_lc( $name ), 'tag-in-force', aw_faq_tag_slug( $term_id ) ) ) {
+		return null;
+	}
 	$known = 0;
 	$in    = array();
 	foreach ( aw_faq_tag_items( $term_id )['aw_legal'] ?? array() as $id ) { // newest first
@@ -912,8 +981,13 @@ function aw_faq_tag_in_force( $term_id ) {
 	if ( $known < 2 || ! $in ) {
 		return null;
 	}
-	$names = array_map( fn( $d ) => esc_html( aw_faq_doc_short( $d ) ), array_slice( $in, 0, 3 ) );
-	$a     = number_format_i18n( count( $in ) ) . ' of the ' . number_format_i18n( $known ) . ' are in force, among them the ' . aw_faq_and( $names ) . '. ' . aw_faq_a( home_url( 'library/' ), 'Browse the Library' ) . '.';
+	$link = ' ' . aw_faq_a( home_url( 'library/' ), 'Browse the Library' ) . '.';
+	$of   = number_format_i18n( count( $in ) ) . ' of the ' . number_format_i18n( $known );
+	if ( 1 === count( $in ) ) {
+		return array( $of . ' is in force: the ' . esc_html( aw_faq_doc_short( $in[0] ) ) . '.' . $link, 'tag-in-force' );
+	}
+	$names = array_map( fn( $d ) => 'the ' . esc_html( aw_faq_doc_short( $d ) ), $in );
+	$a     = aw_faq_fit_names( fn( $x ) => $of . ' are in force' . ( count( $x ) < count( $in ) ? ', among them ' : ': ' ) . aw_faq_and( $x ) . '.' . $link, $names ); // "among them" only when not all are named
 	return array( $a, 'tag-in-force' );
 }
 
@@ -978,8 +1052,9 @@ function aw_faq_tag_topics( $term_id ) {
 			$cats = get_the_terms( $id, 'category' );
 			foreach ( is_array( $cats ) ? $cats : array() as $c ) {
 				if ( 'uncategorized' !== $c->slug ) {
-					$counts[ $c->name ] = ( $counts[ $c->name ] ?? 0 ) + 1;
-					$terms[ $c->name ]  = $c;
+					$cn            = aw_faq_plain( $c->name ); // stored with entities; aw_faq_a() escapes
+					$counts[ $cn ] = ( $counts[ $cn ] ?? 0 ) + 1;
+					$terms[ $cn ]  = $c;
 				}
 			}
 		}
