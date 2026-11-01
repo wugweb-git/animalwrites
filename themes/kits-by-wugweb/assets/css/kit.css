@@ -720,9 +720,10 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 }
 
 /* Navigation: Kits shows the full menu from lg (1200px) and the menu button below it. */
+/* The .kit-site-header copies outrank core's 600px rules, which Home prints inline (assets/vendor/wp-core/home-navigation.css). */
 @media (max-width: 1199px) {
-	.wp-block-navigation__responsive-container-open:not(.always-shown) { display: flex; }
-	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) { display: none; }
+	.wp-block-navigation__responsive-container-open:not(.always-shown) ,.kit-site-header .wp-block-navigation__responsive-container-open:not(.always-shown) { display: flex; }
+	.wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) ,.kit-site-header .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) { display: none; }
 }
 
 /* Field icons (S5.3 dictionary): building, map pin, world, WhatsApp (Tabler outline, 24px, stroke 2) */
@@ -745,7 +746,7 @@ html.has-modal-open .kit-sticky-help { display: none !important; }
 .kit-footer { --kit-footer-bg: color-mix(in srgb, var(--neutral-8) 45%, var(--neutral-9)); --kit-footer-muted: color-mix(in srgb, var(--kit-color-on-ink) 72%, transparent); --kit-footer-rule: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); font-size: var(--kit-type-sm); }
 .kit-site-footer.kit-footer { display: flex; flex-direction: column; background: var(--kit-footer-bg) !important; border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); padding: var(--kit-space-7) var(--kit-space-4) var(--kit-space-4) !important; }
 @media (min-width: 768px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-6) !important; } }
-@media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: 20px !important; } }
+@media (min-width: 1200px) { .kit-site-footer.kit-footer { padding-inline: var(--kit-space-gutter) !important; } } /* same edge as the header and the page sections */
 .kit-site-footer.kit-footer > * { width: 100%; max-width: var(--kit-width-nav) !important; margin-inline: auto !important; margin-block: 0 !important; }
 
 /* Row 1 */
@@ -928,14 +929,30 @@ main.wp-block-group.kit-item-page[style*="padding-top"] { padding-top: var(--kit
 /* Layout grid utility: 4 / 8 / 12 columns, gap 16 / 24 / 32 */
 .kit-grid { display: grid; grid-template-columns: repeat(var(--kit-grid-columns), minmax(0, 1fr)); gap: var(--kit-grid-gap); }
 
-/* ---------- Header / nav: 100 tall, sticky, inner max 1280; padding 16 · 20 32 · 20 ---------- */
+/* ---------- Header / nav: 100 tall, sticky, inner max 1280; side padding 16 · 32 · gutter (48) from 1200 ---------- */
 header.wp-block-template-part:has(.kit-site-header) { position: sticky; top: calc(var(--wp-admin--admin-bar--height, 0px) - var(--kit-announce-h, 0px)); z-index: var(--kit-layer-nav); }
 .kit-site-header { min-height: var(--kit-header-height); display: flex; align-items: center; padding: var(--kit-space-4) !important; box-sizing: border-box; cursor: grab; }
 .kit-site-header :is(a, button, input, label) { cursor: pointer; }
 .kit-site-header input { cursor: text; }
 .kit-site-header > * { width: 100%; max-width: var(--kit-width-nav) !important; margin-inline: auto !important; }
 @media (min-width: 768px) { .kit-site-header { padding: var(--kit-space-3) var(--kit-space-6) !important; } }
-@media (min-width: 1200px) { .kit-site-header { padding: var(--kit-space-3) 20px !important; } }
+/* From 1200 the header sits on the page gutter (48), the same edge as the sections and the footer. It is a size container
+   so the full menu, Search and Contact always fit on one line without another breakpoint. Widths measured at 1200 (menu
+   text 12.7px Inter): wordmark 137 + 24 + menu 494 text + 7 gaps x 24 + 24 + Search 44 + 12 + Contact 129 = 1032px.
+   The container is the window less 2 x 48 (1104 at 1200, about 1088 with a 16px scroll bar).
+   Under 70rem (1120px): menu and right-group gaps 24 -> 12 (saves 84 + 12), needs 936px.
+   Under 64rem (1024px): Contact becomes a 44px icon button (saves 85; its aria-label stays), needs 851px.
+   Thresholds are in rem so they move with the reader's text size, as the menu text does. */
+@media (min-width: 1200px) {
+	.kit-site-header { padding: var(--kit-space-3) var(--kit-space-gutter) !important; container: kit-header / inline-size; }
+	@container kit-header (max-width: 70rem) {
+		.kit-site-header .wp-block-navigation__container ,.kit-site-header .kit-header-right { gap: var(--kit-space-3) !important; }
+	}
+	@container kit-header (max-width: 64rem) {
+		.kit-site-header .kit-header-contact { width: var(--kit-size-target); min-width: var(--kit-size-target); padding: 0 !important; justify-content: center; }
+		.kit-site-header .kit-header-contact-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	}
+}
 .kit-site-header :is(a, .wp-block-navigation-item__content) { transition: color var(--kit-duration-spring) var(--kit-ease-spring), background-color var(--kit-duration-spring) var(--kit-ease-spring); }
 
 /* ---------- Header search: the icon opens a field across the whole header row (every width) ---------- */
