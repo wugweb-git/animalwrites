@@ -256,6 +256,12 @@
    (aw_sc_rows_a11y), its summary the column's own heading, a 44px target with the Kits chevron; the cards keep their
    own heights so opening one does not stretch the row */
 .aw-camp--sc-stray-dogs .aw-camp-tracker tbody { align-items: flex-start; }
+/* The state cards one text column wide from 768 (--kit-width-content, so the long High Court lines wrap less), their
+   parts --kit-space-2 apart and the row's thin scrollbar under them without extra room: the tracker under 720 */
+.aw-camp--sc-stray-dogs .aw-camp-tracker { padding-bottom: 0; scrollbar-width: thin; }
+.aw-camp--sc-stray-dogs .aw-camp-tracker td { padding-bottom: var(--kit-space-2); }
+.aw-camp--sc-stray-dogs .aw-camp-tracker td:last-child { padding-bottom: 0; }
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-tracker { --aw-sc-card: min(100%, var(--kit-width-content)); } }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:has(> .aw-sc-fold)::before { content: none; }
 .aw-camp--sc-stray-dogs .aw-camp-tracker td:first-child > .aw-sc-fold { font-size: var(--kit-type-base); font-weight: var(--kit-weight-regular, 400); color: var(--kit-color-text); } /* the folded list of states reads as text; its summary keeps the fold style */
 .aw-camp--sc-stray-dogs .aw-sc-fold > summary { display: flex; align-items: center; justify-content: space-between; gap: var(--kit-space-2); min-height: var(--kit-size-target); color: var(--camp-primary); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); list-style: none; cursor: pointer; }
