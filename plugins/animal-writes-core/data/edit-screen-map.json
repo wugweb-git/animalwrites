@@ -2410,7 +2410,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Edit-screen map",
-			"file": "core/edit-screens.php:868 (aw_edit_screens_page)",
+			"file": "core/edit-screens.php:943 (aw_edit_screens_render)",
 			"screen": "admin",
 			"page": "Animal Writes: Edit screens",
 			"types": [
@@ -2421,7 +2421,7 @@
 			"reads": [
 				"data/edit-screen-map.json"
 			],
-			"limits": "Boxes read live; map-only rows from the map.",
+			"limits": "Boxes read live; map-only rows from the map. Tabs: Mapping (our own boxes, one column per module, and our admin-page widgets), Schema (fields the schema reads), Third-party boxes.",
 			"decision": "",
 			"notes": "Stores nothing."
 		},
@@ -2430,7 +2430,7 @@
 			"source": "Animal Writes core",
 			"plugin": "Animal Writes core",
 			"purpose": "Edit-screen map",
-			"file": "core/edit-screens.php:880 (aw_edit_screens_page)",
+			"file": "core/edit-screens.php:1205 (aw_edit_screens_twice_section)",
 			"screen": "admin",
 			"page": "Animal Writes: Edit screens",
 			"types": [
@@ -2441,7 +2441,7 @@
 			"reads": [
 				"data/edit-screen-map.json"
 			],
-			"limits": "",
+			"limits": "Shown under the summary only when a field is edited in two places; Not mapped yet likewise.",
 			"decision": "",
 			"notes": "Stores nothing."
 		},
