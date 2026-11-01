@@ -1,6 +1,6 @@
 <?php
 /**
- * Place box on Directory listings (AW_PLACE_EDIT_TYPES; owner, 1 Nov 2026). Other place types (AW_PLACE_TYPES in
+ * Place fields on Directory listings, inside the Address and place box (AW_PLACE_EDIT_TYPES; owner, 1 Nov 2026). Other place types (AW_PLACE_TYPES in
  * places.php) keep their stored place, found by auto-detect or set before; it is still read and counted.
  * PIN code → State and District filled from India Post, matched to the LGD file; State → District dropdowns built from the file when there is no PIN or India Post is down.
  * There is no place list in WP Admin and no way to type a place that is not in LGD. Codes that are not in the file
@@ -13,17 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Post types whose edit screen shows the Place box. */
+/** Post types whose edit screen shows the Place fields (no side box: they are rendered in the Address and place box). */
 const AW_PLACE_EDIT_TYPES = array( 'aw_listing' );
-
-add_action(
-	'add_meta_boxes',
-	function () {
-		foreach ( AW_PLACE_EDIT_TYPES as $type ) {
-			add_meta_box( 'aw-place', 'Place', 'aw_place_box', $type, 'side', 'default' );
-		}
-	}
-);
 
 /** The box. */
 function aw_place_box( $post ) {
