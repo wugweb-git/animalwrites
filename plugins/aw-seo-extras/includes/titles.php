@@ -19,6 +19,10 @@
  *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
  *   - Description: the excerpt, else the first real paragraph; listings without one get a line of their facts.
  *
+ *   - Directory places (owner, 1 Nov 2026, option A): "Animal Helpline Numbers in {District} {State} – Animal Writes" (then
+ *     without the site name, then without the state) where the district has a listing with a phone or an official number;
+ *     "Animal Helpline Numbers in {State} – Animal Writes" where any listing in the state has a phone; the earlier
+ *     "Contact Numbers" and "Animal Welfare …" titles stay for places without a number. District × type pages are unchanged.
  * Lists (section hub Pages, Directory places and type pages, filtered lists, archives) change with their contents and
  * page number, which Rank Math's templates cannot express: they are built here at run time, through Rank Math's
  * title and description filters. A title or description typed in Rank Math for a hub Page still wins.
@@ -301,9 +305,13 @@ function aw_seo_list_title() {
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ' ' . aw_place_parent_state( $place )->name;
+			// "Animal Helpline Numbers in {District} {State} – Animal Writes" where the district has a number of its own
+			// (owner, 1 Nov 2026: option A); searched as "animal helpline number {city}" (449 queries, 28 days to 31 Oct).
+			$help  = aw_seo_place_has_helpline( $place ) ? array( aw_seo_branded( 'Animal Helpline Numbers in ' . $where ), 'Animal Helpline Numbers in ' . $where, aw_seo_branded( 'Animal Helpline Numbers in ' . $place->name ), 'Animal Helpline Numbers in ' . $place->name ) : array();
 			$phone = aw_seo_has_numbers( $place ) ? array( 'Animal Rescue and NGO Contact Numbers in ' . $where, 'Animal Rescue and NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return aw_seo_fit(
 				array_merge(
+					$help,
 					$phone,
 					array(
 						'Animal Welfare NGOs Shelters and Vets in ' . $where,
@@ -322,6 +330,9 @@ function aw_seo_list_title() {
 		$in    = ' in ' . $place->name;
 		$more  = count( $types ) > 2 ? ' and More' : '';
 		$try   = array();
+		if ( aw_seo_place_has_helpline( $place ) ) { // owner, 1 Nov 2026 (option A): a state with any listing that has a phone
+			$try[] = aw_seo_branded( 'Animal Helpline Numbers' . $in );
+		}
 		if ( count( $types ) > 1 ) {
 			$try[] = 'Animal Welfare ' . $first . ' and ' . $types[1] . $in;
 		}
@@ -338,6 +349,21 @@ function aw_seo_list_title() {
 		return aw_seo_page_number() > 1 ? aw_seo_fit( array( $what, preg_replace( '/ – ' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/u', '', $what ) ), 60 - mb_strlen( aw_seo_page_suffix() ) ) : $what;
 	}
 	return AW_HUB_TITLES[ $hub ] ?? '';
+}
+
+/**
+ * Whether a place's page can be titled "Animal Helpline Numbers in …": at least one of its listings has a phone number
+ * (stored counts, programmatic.php), or, for a district, an official number is kept for it (district-helplines.php).
+ * Title only; the district helpline block has its own test.
+ *
+ * @param object $place State or district.
+ * @return bool
+ */
+function aw_seo_place_has_helpline( $place ) {
+	if ( aw_seo_dir_count( $place, '*#ph' ) >= 1 ) {
+		return true;
+	}
+	return 'district' === $place->kind && function_exists( 'aw_district_official_numbers' ) && array() !== aw_district_official_numbers( $place->code );
 }
 
 /**
