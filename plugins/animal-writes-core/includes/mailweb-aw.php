@@ -4,8 +4,8 @@
  *
  * - The Mail API token stays in wp-config as AW_HOSTINGER_MAIL_TOKEN; Mailweb reads MAILWEB_API_TOKEN.
  * - The open campaign's strip under every signature (mail-campaign-strip.php, `mailweb_after_signature`).
- * - Mail → Website forms: the Contact form's Fluent Forms entries and the older contact messages (aw_message), through
- *   `mailweb_forms_source`.
+ * - Mail → Website forms: the Contact, Volunteer, Claim and Report forms' Fluent Forms entries and the older contact
+ *   messages (aw_message), through `mailweb_forms_source`; a notice in wp-admin while any of them is unread (no email).
  *   Inbox → Contact messages opens it.
  * - The old webhook address /wp-json/aw/v1/mail-in still answers (the hPanel webhooks point there).
  * - Animal Writes → Check site: a line on email sending.
@@ -36,12 +36,21 @@ add_filter(
 
 // The one-time move of aw-mail's options, table and schedule to Mailweb ran on 20 Oct 2026 and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
-/* ---------- Mail → Website forms: Contact form entries (Fluent Forms) and older contact messages (aw_message) ---------- */
+/* ---------- Mail → Website forms: Fluent Forms entries (Contact, Volunteer, Claim, Report) and older contact messages (aw_message) ---------- */
 
-// Since 21 Oct 2026 (owner) a Contact form message is a Fluent Forms entry (form #4), not an aw_message; both show here,
-// newest first. An entry's ID in Mail is AW_MAIL_FF_ID + its entry ID (Mail passes whole numbers; post IDs stay far
-// below). Read/unread and trash are the entry's own Fluent Forms status, so both screens agree.
+// Since 21 Oct 2026 (owner) a Contact form message is a Fluent Forms entry (form #4), not an aw_message; since 1 Nov 2026
+// (owner) the Volunteer, Claim and Report forms' entries show here too. All are listed newest first. An entry's ID in
+// Mail is AW_MAIL_FF_ID + its entry ID (Mail passes whole numbers; post IDs stay far below). Read/unread and trash are
+// the entry's own Fluent Forms status, so both screens agree. Fluent Forms stores created_at in site time.
 const AW_MAIL_FF_ID = 1000000000;
+
+/** Forms shown in Mail → Website forms: key => label. */
+const AW_MAIL_FF_KEYS = array(
+	'contact'   => 'Contact',
+	'volunteer' => 'Volunteer',
+	'claim'     => 'Claim',
+	'report'    => 'Report',
+);
 
 /** aw_message items that are form messages (not old copies of emails). */
 function aw_mail_forms_where() {
@@ -59,26 +68,101 @@ function aw_mail_forms_where() {
 	);
 }
 
-/** The Contact form's Fluent Forms ID, or 0. */
-function aw_mail_ff_form() {
-	return function_exists( 'aw_ff_id' ) ? aw_ff_id( 'contact' ) : 0;
+/**
+ * The forms this user sees in Mail: Fluent Forms ID => key. Contact for everyone with Mail; Volunteer, Claim and Report
+ * only for those who may read volunteer, claim and report data (edit_aw_volunteers: administrators), as on their own screens.
+ */
+function aw_mail_ff_forms() {
+	$out = array();
+	foreach ( array_keys( AW_MAIL_FF_KEYS ) as $key ) {
+		$id = function_exists( 'aw_ff_id' ) ? aw_ff_id( $key ) : 0;
+		if ( $id && ( 'contact' === $key || current_user_can( 'edit_aw_volunteers' ) ) ) {
+			$out[ $id ] = $key;
+		}
+	}
+	return $out;
 }
 
-/** A Contact entry (not trashed), or null. */
+/** "form_id IN (…)" for these forms, prepared. */
+function aw_mail_ff_in( $forms ) {
+	global $wpdb;
+	$ids = array_map( 'intval', array_keys( $forms ) );
+	return $wpdb->prepare( 'form_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')', $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one %d per form
+}
+
+/** One of those forms' entries (not trashed), or null. */
 function aw_mail_ff_entry( $id ) {
 	global $wpdb;
-	$form = aw_mail_ff_form();
-	if ( ! $form || $id <= AW_MAIL_FF_ID ) {
+	$forms = aw_mail_ff_forms();
+	if ( ! $forms || $id <= AW_MAIL_FF_ID ) {
 		return null;
 	}
-	return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND form_id = %d AND status <> 'trashed'", $id - AW_MAIL_FF_ID, $form ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$sql = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND status <> 'trashed' AND ", $id - AW_MAIL_FF_ID ) . aw_mail_ff_in( $forms );
+	return $wpdb->get_row( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- both parts prepared
 }
 
-/** An entry's subject: its reason and reference ("List your organisation (AW-12)"). */
+/** An entry's form key (contact, volunteer, claim, report). */
+function aw_mail_ff_key( $e ) {
+	return aw_mail_ff_forms()[ (int) $e->form_id ] ?? 'contact';
+}
+
+/** An entry's reference (AW-12, AW-V-3, AW-C-2, AW-R-1), as aw_ff_ref() makes them. */
+function aw_mail_ff_ref( $e ) {
+	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-' );
+	return ( $prefix[ aw_mail_ff_key( $e ) ] ?? 'AW-' ) . (int) $e->serial_number;
+}
+
+/** An entry's subject, led by its form: "Contact: List your organisation (AW-12)", "Claim: {listing} (AW-C-2)". */
 function aw_mail_ff_subject( $e, $r ) {
-	$about = (string) ( $r['about'] ?? '' );
-	$label = defined( 'AW_CONTACT_ABOUT' ) ? ( AW_CONTACT_ABOUT[ $about ] ?? $about ) : $about;
-	return trim( $label . ' (AW-' . (int) $e->serial_number . ')' );
+	$key  = aw_mail_ff_key( $e );
+	$what = '';
+	if ( 'contact' === $key ) {
+		$about = (string) ( $r['about'] ?? '' );
+		$what  = defined( 'AW_CONTACT_ABOUT' ) ? ( AW_CONTACT_ABOUT[ $about ] ?? $about ) : $about;
+	} elseif ( 'claim' === $key && (int) ( $r['listing'] ?? 0 ) ) {
+		$what = get_the_title( (int) $r['listing'] );
+	} elseif ( 'report' === $key && (int) ( $r['item'] ?? 0 ) ) {
+		$what = get_the_title( (int) $r['item'] );
+	}
+	$what = trim( (string) $what );
+	return AW_MAIL_FF_KEYS[ $key ] . ( '' !== $what ? ': ' . $what : '' ) . ' (' . aw_mail_ff_ref( $e ) . ')';
+}
+
+/** The fields shown with an entry, per form: response key => label. */
+function aw_mail_ff_fields( $key ) {
+	$map = array(
+		'contact'   => array( 'org_name' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'whatsapp' => 'WhatsApp' ),
+		'volunteer' => array( 'roles' => 'Wants to', 'phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'pincode' => 'Pincode', 'district' => 'District', 'state' => 'State', 'availability' => 'Available', 'travel_range' => 'Travels', 'skills' => 'Skills', 'languages' => 'Languages', 'org_name' => 'Organisation' ),
+		'claim'     => array( 'role' => 'Role', 'phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'aw_phone' => 'Listing phone', 'aw_whatsapp' => 'Listing WhatsApp', 'aw_email' => 'Listing email', 'aw_website' => 'Listing website', 'aw_area' => 'Area', 'aw_services' => 'Services' ),
+		'report'    => array( 'reason' => 'Reason' ),
+	);
+	return $map[ $key ] ?? array();
+}
+
+/** One field's value as text: choices by their labels where the site has them. */
+function aw_mail_ff_value( $k, $v ) {
+	$labels = array(
+		'roles'  => defined( 'AW_VOL_ROLES' ) ? AW_VOL_ROLES : array(),
+		'role'   => defined( 'AW_CLAIM_ROLES' ) ? AW_CLAIM_ROLES : array(),
+		'reason' => function_exists( 'aw_report_reasons' ) ? aw_report_reasons() : array(),
+	)[ $k ] ?? ( defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
+	return implode( ', ', array_map( fn( $x ) => $labels[ $x ] ?? (string) $x, is_array( $v ) ? $v : array( $v ) ) );
+}
+
+/** An entry's message text: the Contact message, the claim's notes, the report's details. */
+function aw_mail_ff_text( $key, $r ) {
+	$k = array( 'contact' => 'message', 'claim' => 'notes', 'report' => 'details' )[ $key ] ?? '';
+	return '' !== $k ? (string) ( $r[ $k ] ?? '' ) : '';
+}
+
+/** Unread entries per Fluent Forms form (all forms): form ID => count. Once per request. */
+function aw_mail_ff_unread_counts() {
+	static $out = null;
+	if ( null === $out ) {
+		global $wpdb;
+		$out = defined( 'FLUENTFORM' ) ? array_map( 'intval', array_column( (array) $wpdb->get_results( "SELECT form_id, COUNT(*) AS n FROM {$wpdb->prefix}fluentform_submissions WHERE status = 'unread' GROUP BY form_id", ARRAY_A ), 'n', 'form_id' ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+	return $out;
 }
 
 add_filter(
@@ -87,14 +171,15 @@ add_filter(
 		'label'   => 'Website forms',
 		'list'    => function ( $page, $per ) {
 			global $wpdb;
-			$rows = array(); // [date, id, kind]
+			$rows = array(); // [date, id]
 			foreach ( get_posts( array( 'post_type' => 'aw_message', 'post_status' => array( 'private', 'publish', 'pending', 'draft' ), 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => aw_mail_forms_where() ) ) as $pid ) { // phpcs:ignore WordPress.DB.SlowDBQuery
 				$rows[] = array( get_post_field( 'post_date', $pid ), (int) $pid );
 			}
-			$form = aw_mail_ff_form();
-			if ( $form ) {
-				foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status <> 'trashed'", $form ) ) as $e ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-					$rows[] = array( get_date_from_gmt( $e->created_at ), AW_MAIL_FF_ID + (int) $e->id );
+			$forms = aw_mail_ff_forms();
+			if ( $forms ) {
+				$sql = "SELECT id, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE status <> 'trashed' AND " . aw_mail_ff_in( $forms );
+				foreach ( (array) $wpdb->get_results( $sql ) as $e ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- aw_mail_ff_in() is prepared
+					$rows[] = array( (string) $e->created_at, AW_MAIL_FF_ID + (int) $e->id );
 				}
 			}
 			usort( $rows, fn( $a, $b ) => strcmp( $b[0], $a[0] ) );
@@ -106,12 +191,15 @@ add_filter(
 					$items[] = array( 'id' => $row[1], 'name' => (string) ( $r['name'] ?? '' ), 'email' => (string) ( $r['email'] ?? '' ), 'subject' => aw_mail_ff_subject( $e, $r ), 'date' => $row[0], 'unread' => 'unread' === $e->status );
 					continue;
 				}
-				$p       = get_post( $row[1] );
+				$p = get_post( $row[1] );
+				if ( ! $p ) {
+					continue;
+				}
 				$items[] = array(
 					'id'      => $p->ID,
 					'name'    => trim( (string) get_post_meta( $p->ID, 'aw_m_name', true ) ),
 					'email'   => trim( (string) get_post_meta( $p->ID, 'aw_m_email', true ) ),
-					'subject' => trim( preg_replace( '/^Contact form:\s*/', '', $p->post_title ) ),
+					'subject' => 'Contact: ' . trim( preg_replace( '/^Contact form:\s*/', '', $p->post_title ) ),
 					'date'    => $p->post_date,
 					'unread'  => '' === (string) get_post_meta( $p->ID, 'aw_read', true ),
 				);
@@ -121,28 +209,41 @@ add_filter(
 				'total' => count( $rows ),
 			);
 		},
-		'unread'  => function () {
+		'unread'  => function () { // unread messages to handle: the folder count and the Mail menu badge; marking read clears them
 			global $wpdb;
-			$old = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_m_about' LEFT JOIN {$wpdb->postmeta} r ON r.post_id = p.ID AND r.meta_key = 'aw_read' WHERE p.post_type = 'aw_message' AND p.post_status NOT IN ('trash','auto-draft') AND ( a.meta_value IS NULL OR a.meta_value <> 'email' ) AND r.meta_id IS NULL" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$new = aw_mail_ff_form() ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d AND status = 'unread'", aw_mail_ff_form() ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			return $old + $new;
+			$old    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_m_about' LEFT JOIN {$wpdb->postmeta} r ON r.post_id = p.ID AND r.meta_key = 'aw_read' WHERE p.post_type = 'aw_message' AND p.post_status NOT IN ('trash','auto-draft') AND ( a.meta_value IS NULL OR a.meta_value <> 'email' ) AND r.meta_id IS NULL" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$counts = aw_mail_ff_unread_counts();
+			return $old + array_sum( array_map( fn( $id ) => $counts[ $id ] ?? 0, array_keys( aw_mail_ff_forms() ) ) );
 		},
 		'get'     => function ( $id ) {
 			$e = aw_mail_ff_entry( (int) $id );
 			if ( $e ) {
 				$r      = (array) json_decode( (string) $e->response, true );
-				$fields = array( 'From' => trim( ( $r['name'] ?? '' ) . ( ! empty( $r['email'] ) ? ' <' . $r['email'] . '>' : '' ) ), 'Reference' => 'AW-' . (int) $e->serial_number );
-				foreach ( array( 'org_name' => 'Organisation', 'org_district' => 'District', 'org_phone' => 'Phone', 'org_services' => 'Services', 'org_website' => 'Website', 'opp_title' => 'Opportunity', 'opp_type' => 'Type', 'opp_ongoing' => 'Ongoing', 'opp_start' => 'Starts', 'opp_end' => 'Ends', 'opp_link' => 'Link', 'whatsapp' => 'WhatsApp' ) as $k => $label ) {
-					$v = $r[ $k ] ?? '';
-					$v = is_array( $v ) ? implode( ', ', array_map( fn( $x ) => AW_SERVICES[ $x ] ?? (string) $x, $v ) ) : (string) $v;
+				$key    = aw_mail_ff_key( $e );
+				$fields = array(
+					'Form'      => AW_MAIL_FF_KEYS[ $key ],
+					'From'      => trim( ( $r['name'] ?? '' ) . ( ! empty( $r['email'] ) ? ' <' . $r['email'] . '>' : '' ) ),
+					'Reference' => aw_mail_ff_ref( $e ),
+				);
+				$about  = (int) ( 'claim' === $key ? ( $r['listing'] ?? 0 ) : ( 'report' === $key ? ( $r['item'] ?? 0 ) : 0 ) );
+				if ( $about ) {
+					$fields[ 'claim' === $key ? 'Listing' : 'About' ] = get_the_title( $about ) . ' (' . get_permalink( $about ) . ')';
+				}
+				foreach ( aw_mail_ff_fields( $key ) as $k => $label ) {
+					$v = aw_mail_ff_value( $k, $r[ $k ] ?? '' );
 					if ( '' !== trim( $v ) ) {
 						$fields[ $label ] = 'opp_ongoing' === $k ? 'yes' : $v;
 					}
 				}
-				$fields['OK on WhatsApp'] = ! empty( $r['whatsapp'] ) ? ( empty( array_filter( (array) ( $r['wa_optin'] ?? array() ) ) ) ? '0' : '1' ) : '';
-				$fields['Page']           = (string) ( $r['v_page_title'] ?? $e->source_url );
-				$fields['Newsletter']     = empty( array_filter( (array) ( $r['nl_optin'] ?? array() ) ) ) ? '0' : '1';
-				return array( 'subject' => aw_mail_ff_subject( $e, $r ), 'email' => (string) ( $r['email'] ?? '' ), 'date' => get_date_from_gmt( $e->created_at ), 'text' => (string) ( $r['message'] ?? '' ), 'fields' => array_filter( $fields, fn( $v ) => '' !== (string) $v ) );
+				if ( 'contact' === $key ) {
+					$fields['OK on WhatsApp'] = ! empty( $r['whatsapp'] ) ? ( empty( array_filter( (array) ( $r['wa_optin'] ?? array() ) ) ) ? '0' : '1' ) : '';
+				}
+				$fields['Page'] = (string) ( $r['v_page_title'] ?? $e->source_url );
+				if ( 'report' !== $key ) {
+					$fields['Newsletter'] = empty( array_filter( (array) ( $r['nl_optin'] ?? array() ) ) ) ? '0' : '1';
+				}
+				$fields['Entry'] = admin_url( 'admin.php?page=fluent_forms&route=entries&form_id=' . (int) $e->form_id . '#/entries/' . (int) $e->id );
+				return array( 'subject' => aw_mail_ff_subject( $e, $r ), 'email' => (string) ( $r['email'] ?? '' ), 'date' => (string) $e->created_at, 'text' => aw_mail_ff_text( $key, $r ), 'fields' => array_filter( $fields, fn( $v ) => '' !== (string) $v ) );
 			}
 			if ( 'aw_message' !== get_post_type( $id ) ) {
 				return null;
@@ -189,6 +290,41 @@ add_filter(
 			return 'aw_message' === get_post_type( $id ) && update_post_meta( $id, 'aw_m_replied', current_time( 'mysql' ) );
 		},
 	)
+);
+
+/* ---------- New form entries: a notice in wp-admin (owner, 1 Nov 2026: no email; form emails stay off) ---------- */
+
+// For Mail users while Contact, Volunteer, Claim or Report entries they can read are unread (the same count as the
+// Mail menu badge); other forms' unread entries are counted in the same line. Marking an entry read clears it.
+add_action(
+	'admin_notices',
+	function () {
+		if ( ! defined( 'MAILWEB_CAP' ) || ! current_user_can( MAILWEB_CAP ) || ! function_exists( 'mailweb_forms' ) || ! mailweb_forms() ) {
+			return;
+		}
+		$counts = aw_mail_ff_unread_counts();
+		$forms  = aw_mail_ff_forms();
+		$parts  = array();
+		foreach ( $forms as $id => $key ) {
+			if ( ! empty( $counts[ $id ] ) ) {
+				$parts[] = AW_MAIL_FF_KEYS[ $key ] . ' ' . (int) $counts[ $id ];
+			}
+		}
+		if ( ! $parts ) {
+			return;
+		}
+		$shown = array_merge( array_keys( $forms ), array_map( 'aw_ff_id', array_keys( AW_MAIL_FF_KEYS ) ) );
+		$other = array_diff_key( $counts, array_flip( $shown ) );
+		if ( $other && current_user_can( 'manage_options' ) ) {
+			global $wpdb;
+			$titles = array_column( (array) $wpdb->get_results( "SELECT id, title FROM {$wpdb->prefix}fluentform_forms", ARRAY_A ), 'title', 'id' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			foreach ( $other as $id => $n ) {
+				$parts[] = ( $titles[ $id ] ?? 'Form ' . (int) $id ) . ' ' . (int) $n;
+			}
+		}
+		$url = add_query_arg( array( 'page' => 'mailweb', 'folder' => 'forms' ), admin_url( 'admin.php' ) );
+		echo '<div class="notice notice-info"><p><strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Mail → Website forms</a></p></div>';
+	}
 );
 
 /* ---------- The old webhook address ---------- */

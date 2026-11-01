@@ -194,7 +194,7 @@ A standalone product since 20 Oct 2026 (was `aw-mail`): nothing Animal Writes-on
 | `languages/`, `composer.json` | Translation template (`mailweb.pot`), coding-standard and make-pot scripts. |
 | `uninstall.php` | Deletes nothing. |
 
-Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-campaign-strip.php`): `MAILWEB_API_TOKEN` from wp-config `AW_HOSTINGER_MAIL_TOKEN`; the campaign countdown strip under signatures; Website forms = Contact form messages (`aw_message`); Inbox → Contact messages redirects there; the old webhook address; the Check site line. The one-time move from aw-mail (20 Oct 2026: options copied, secrets encrypted, table renamed, old options kept; send from support@ only, contact@ → vedanshu@, FluentCRM for vedanshu@ and support@, tag "Emailed us") ran and was removed (audit 16, 25 Oct 2026).
+Animal Writes' side (`animal-writes-core/includes/mailweb-aw.php`, with `mail-campaign-strip.php`): `MAILWEB_API_TOKEN` from wp-config `AW_HOSTINGER_MAIL_TOKEN`; the campaign countdown strip under signatures; Website forms = Contact, Volunteer, Claim and Report entries (Fluent Forms) and the older Contact messages (`aw_message`), with a wp-admin notice while any is unread (no email); Inbox → Contact messages redirects there; the old webhook address; the Check site line. The one-time move from aw-mail (20 Oct 2026: options copied, secrets encrypted, table renamed, old options kept; send from support@ only, contact@ → vedanshu@, FluentCRM for vedanshu@ and support@, tag "Emailed us") ran and was removed (audit 16, 25 Oct 2026).
 
 ## kits-core
 

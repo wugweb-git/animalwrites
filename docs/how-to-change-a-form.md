@@ -34,7 +34,7 @@ A tick box Fluent Forms saves as `1` when ticked and nothing when not (empty is 
 
 **The update link's token** stays private: GA4 gets `/update/` without `t` (GTM variables, `docs/gtm`), the page sends no referrer (`Referrer-Policy: no-referrer`), is never cached, and Microsoft Clarity masks the whole page.
 
-**Mail → Website forms** lists the Contact form's entries (read/unread and trash are the entry's own) with the older contact messages.
+**Mail → Website forms** lists the Contact, Volunteer, Claim and Report forms' entries, each subject led by its form (read/unread and trash are the entry's own), with the older contact messages. Volunteer, Claim and Report entries show only to administrators (`edit_aw_volunteers`). While any of them is unread, Mail's menu badge counts them and a notice in wp-admin names the forms; no email is sent. New entries of every form stay unread until someone reads them (nothing is marked read on arrival since 1 Nov 2026). The Dashboard box **Form entries (last 7 days)** counts every form's entries by date.
 
 **Volunteers on a listing page** (`[aw_org_people]` in the listing template): contacts tagged `org-approved` whose organisation matches the listing and who ticked "Show my name".
 

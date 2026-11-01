@@ -202,6 +202,7 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (1 Nov 2026, technical)
+- **Form entries in Mail:** Mail → Website forms also lists Volunteer, Claim and Report, with the badge and a wp-admin notice while any is unread (no email; form emails stay off). Entry dates show in site time.
 - **Tag FAQ subject:** tags have a Subject field in their FAQ box (term meta `aw_faq_subject`, also over REST as `meta.aw_faq_subject` on /wp/v2/tags); empty keeps the tag's name. A change purges that tag page.
 - **GA4 test events, 1 Nov:** about 17 admin test events (rule_card_open, ground_toggle, campaign_action) reached live GA4 from the lab campaign check; they can be told apart by the date and the admin's client.
 - **Footer folds on phones:** closed by an inline script before the first paint (no jump when kit.js runs). /about/ measured CLS 0 at 360, 375 and 412px in the browser; Site Kit's lab 0.105 is unexplained (footer is below the first screen), recheck the next PageSpeed rows.
