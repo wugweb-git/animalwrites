@@ -35,7 +35,6 @@
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap { box-shadow: inset 0 0 0 2px var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
 /* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
 .aw-camp--diwali {
 	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
@@ -212,28 +211,38 @@
    Card lists scroll sideways in one snapping row (as .aw-camp-row); boxes have the card padding, --kit-space-5 (docs/card-sizes.md). */
 .aw-camp--lab-rules :is(.aw-camp-gap, .aw-camp-doc-strip, .aw-letter-ground, .aw-letter-meta, .aw-letter-preview) { padding: var(--kit-space-5); }
 .aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) {
-	display: grid; grid-auto-flow: column; grid-template-columns: none; gap: var(--kit-space-grid);
-	overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); scrollbar-width: thin;
+	display: flex; gap: var(--kit-space-grid); overflow-x: auto; overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); scrollbar-width: thin;
 }
-.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template) { grid-auto-columns: var(--kit-card-min); }
-.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) > * { grid-column: auto; scroll-snap-align: start; }
-.aw-camp--lab-rules .aw-camp-grid > :first-child { width: min(calc(2 * var(--kit-card-min)), 85vw); } /* the main change: two cards wide, inside a phone screen */
+.aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) > * { flex: 0 0 var(--kit-card-min); scroll-snap-align: start; }
+.aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: min(calc(2 * var(--kit-card-min)), 100%); } /* the main change: two cards wide, one screen wide on phones */
 .aw-camp--lab-rules .aw-camp-docs-q li > .kit-card { height: 100%; }
-/* Grounds: two rows that scroll sideways; every ground is a checkbox, so Tab reaches each one and scrolls it into view */
-.aw-camp--lab-rules .aw-letter-ground-list { grid-template-rows: repeat(2, auto); grid-auto-columns: var(--kit-card-min); }
-.aw-camp--lab-rules .aw-letter-preview { max-height: 14rem; } /* the letter scrolls inside its box (focusable, labelled): the phone value at every width, so step 3 stays under 600px */
+/* Grounds: each is a checkbox card, so Tab reaches every one and scrolls it into view; the fieldset legend names the row */
+.aw-camp--lab-rules .aw-letter-preview { box-sizing: border-box; max-height: 14rem; } /* the letter scrolls inside its box (focusable, labelled): the phone value at every width */
 .aw-camp--lab-rules .aw-letter-share-pic img { height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md); widths from the image ratios */
+/* The pain bar: one 12px bar (--kit-space-3) at every width, filled left to right */
+.aw-camp--lab-rules .aw-camp-tier-bar { height: var(--kit-space-3); border-radius: var(--kit-radius-pill); }
 @media (min-width: 768px) {
-	.aw-camp--lab-rules .aw-camp-art { max-height: var(--kit-card-media-max); } /* 22.5rem (docs/card-sizes.md): the picture is cropped, never the text */
+	/* Two columns from 768 (core columns stack below 782): the hero text beside its poster, a section's opening beside its art */
+	.aw-camp--lab-rules :is(.aw-camp-hero-cols, .aw-camp-split) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.aw-camp--lab-rules .aw-camp-art { max-height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md): the picture is cropped, never the text */
+	.aw-camp--lab-rules .aw-camp-ladder { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	/* Step 3: the sign-up box and the WhatsApp field side by side */
+	.aw-camp--lab-rules .aw-letter-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-content: start; }
+	.aw-camp--lab-rules .aw-letter-out > * { grid-column: 1 / -1; }
+	.aw-camp--lab-rules .aw-letter-out > :is(.aw-letter-optin, .aw-letter-field) { grid-column: auto; }
 	/* Share: the two pictures under the buttons, the link preview beside both */
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-rows: auto 1fr; }
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 2; grid-row: 1 / span 2; }
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 1; grid-row: 2; }
 }
-.aw-camp--lab-rules .aw-camp-tier-bar { height: var(--kit-space-3); } /* the pain bar: 12px, 6rem from 1200 (the same values, as tokens) */
-@media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-tier-bar { height: var(--kit-space-9); } }
+@media (min-width: 1200px) {
+	/* Share: buttons, pictures and preview in three columns */
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: none; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 2; grid-row: 1; padding-top: 0; border-top: 0; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 3; grid-row: 1; }
+}
 .aw-camp.aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { flex-basis: var(--kit-card-min); }
-@media (prefers-reduced-motion: reduce) { .aw-camp--lab-rules :is(.aw-camp-grid, .aw-camp-docs-q .wp-block-post-template, .aw-letter-ground-list) { scroll-behavior: auto; } }
 /* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
    Bar height = its button (--kit-btn-height) + the bar's own padding (--kit-space-2 above and below) + the safe area. */
 @media (max-width: 767px) {
