@@ -7,9 +7,18 @@ set -e
 cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 sha=$(git rev-parse HEAD)
 git push -q origin "HEAD:refs/heads/wordpress-dev"
-sleep 8
-run=$(gh run list --workflow deploy-check.yml --branch wordpress-dev -L 5 --json databaseId,headSha -q ".[] | select(.headSha==\"$sha\") | .databaseId" | head -1)
-[ -n "$run" ] || { echo "REFUSING to deploy: no Deploy check run found for $sha"; exit 1; }
+# GitHub can take a while to create the run, and it may sit queued behind another run: look it up by this commit and
+# wait for it (up to 10 minutes) instead of giving up. A newer push to wordpress-dev still stops the ship.
+run=""
+for i in $(seq 1 60); do
+  sleep 10
+  run=$(gh run list --workflow deploy-check.yml --commit "$sha" -L 5 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)
+  [ -n "$run" ] && break
+  git fetch -q origin
+  [ "$(git rev-parse origin/wordpress-dev)" = "$sha" ] || { echo "REFUSING to deploy: wordpress-dev moved on from $sha"; exit 1; }
+  [ $((i % 6)) -eq 0 ] && echo "waiting for the Deploy check run for ${sha:0:7} ($((i * 10))s)"
+done
+[ -n "$run" ] || { echo "REFUSING to deploy: no Deploy check run found for $sha after 10 minutes"; exit 1; }
 gh run watch "$run" --exit-status >/dev/null || { echo "REFUSING to deploy: the Deploy check failed for $sha"; exit 1; }
 # Admins bypass branch protection on direct pushes, so the status is checked here too: the commit's "check" must be success.
 status=$(gh api "repos/wugweb-git/animalwrites/commits/$sha/check-runs" -q '[.check_runs[] | select(.name=="check")] | map(.conclusion) | unique | join(",")')
