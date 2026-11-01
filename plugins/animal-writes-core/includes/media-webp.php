@@ -82,16 +82,31 @@ function aw_media_webp_original_rel( $rel, $dir ) {
  * Keep the full-size file as it was uploaded (JPEG/PNG): if conversion repointed the attachment at a WebP full-size
  * file, point it back and drop the WebP "full" size entry. The WebP file stays on disk.
  *
- * @param array $meta Attachment metadata.
- * @param int   $id   Attachment ID.
+ * A big upload is saved by core as photo-scaled.webp with the upload photo.jpg recorded in 'original_image' and no
+ * photo-scaled.jpg beside it: then the attachment goes back to the recorded original and 'original_image' is removed
+ * (the scaled WebP stays on disk, unused).
+ *
+ * @param array  $meta Attachment metadata.
+ * @param int    $id   Attachment ID.
+ * @param string $err  Set to the reason when the recorded original is missing on disk (the metadata is then unchanged).
  * @return array Metadata (changed only when it was repointed).
  */
-function aw_media_webp_keep_full( $meta, $id ) {
-	if ( ! is_array( $meta ) || empty( $meta['file'] ) ) {
+function aw_media_webp_keep_full( $meta, $id, &$err = '' ) {
+	$err = '';
+	if ( ! is_array( $meta ) || empty( $meta['file'] ) || ! preg_match( '/\.webp$/i', (string) $meta['file'] ) ) {
 		return $meta;
 	}
 	$up   = wp_get_upload_dir();
 	$orig = aw_media_webp_original_rel( (string) $meta['file'], (string) $up['basedir'] );
+	if ( '' === $orig && preg_match( '/-scaled\.webp$/i', (string) $meta['file'] ) && ! empty( $meta['original_image'] ) ) {
+		$dir  = dirname( (string) $meta['file'] );
+		$orig = ( '.' === $dir ? '' : $dir . '/' ) . basename( (string) $meta['original_image'] );
+		if ( ! file_exists( rtrim( (string) $up['basedir'], '/' ) . '/' . $orig ) ) {
+			$err = 'The uploaded original ' . basename( $orig ) . ' is missing on disk';
+			return $meta;
+		}
+		unset( $meta['original_image'] );
+	}
 	if ( '' === $orig || aw_media_webp_is_share_file( $orig ) ) {
 		return $meta;
 	}
@@ -257,10 +272,10 @@ function aw_media_webp_convert( $id ) {
 		if ( is_wp_error( $new ) ) {
 			$why = $new->get_error_message();
 		} else {
-			$new = aw_media_webp_keep_full( $new, $id );
+			$new = aw_media_webp_keep_full( $new, $id, $why );
 			wp_update_attachment_metadata( $id, $new );
 			// Core leaves out a size it could not make, and may pick an image library that cannot write WebP.
-			$why = aw_media_webp_check_sizes(
+			$why = '' !== $why ? $why : aw_media_webp_check_sizes(
 				(array) $meta['sizes'],
 				(array) ( $new['sizes'] ?? array() ),
 				dirname( $file ),
