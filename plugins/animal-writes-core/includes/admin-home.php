@@ -4,7 +4,7 @@
  * overview of every feature and where it lives, links from the Plugins screen).
  *
  * Animal Writes → Overview (this file), Dates (team-dates.php), Check site (site-check.php), Contact links (pages.php),
- * Keys (keys.php).
+ * Keys (keys.php), Edit screens (edit-screens.php).
  * Content menus (Directory, News, Resources, Library, Opportunities, Campaigns, Press coverage), Classification and
  * Inbox stay where the content is. Core WordPress only.
  *
@@ -115,6 +115,7 @@ function aw_core_overview_page() {
 			array( 'Check site', 'Loads one page of every kind and reports any that do not open cleanly; also in the admin bar.', $admin ? aw_core_link( 'Animal Writes → Check site', 'admin.php?page=aw-site-check' ) : 'Administrators', $st['check'] ),
 			array( 'Contact links', 'The "Elsewhere" links on the Contact page.', aw_core_link( 'Animal Writes → Contact links', 'admin.php?page=aw-elsewhere' ), $auto ),
 			array( 'Keys', 'Service keys the plugins use (Clarity, Bing Webmaster, PageSpeed): paste once, never shown again; a wp-config.php constant wins.', $admin ? aw_core_link( 'Animal Writes → Keys', 'admin.php?page=aw-keys' ) : 'Administrators', $auto ),
+			array( 'Edit screens', 'Every box on each edit screen (WordPress, plugins and ours), the keys it stores and where each key is used.', $admin ? aw_core_link( 'Animal Writes → Edit screens', 'admin.php?page=aw-edit-screens' ) : 'Administrators', $auto ),
 			array( 'To review', 'Items waiting for a person (from AW Sourcing).', aw_core_link( 'Sourcing → To review', 'admin.php?page=aw-review' ), $st['review'] ),
 			array( 'Scheduled tasks', 'Who triggers WP-Cron (Hostinger, GitHub, UptimeRobot) and the longest gap; dashboard widget.', aw_core_link( 'Dashboard', 'index.php' ), $st['cron'] ),
 			array( 'Daily backup', 'Database and deployed code into ~/backups on the server, kept 14 days.', $admin ? aw_core_link( 'Check site', 'admin.php?page=aw-site-check' ) : '—', $st['backup'] ),
@@ -162,6 +163,7 @@ function aw_core_overview_page() {
 			array( 'cmd' => '<code>wp aw sort-dates</code>', 'what' => 'News and Library sort dates' ),
 			array( 'cmd' => '<code>wp aw redirects-import</code>', 'what' => 'Old addresses into Rank Math Redirections' ),
 			array( 'cmd' => '<code>wp aw raw-export</code>', 'what' => 'Campaign form sign-ups as CSV' ),
+			array( 'cmd' => '<code>wp aw-edit-screens</code>', 'what' => 'Edit-screen boxes, their fields and where they are used (read-only)' ),
 			array( 'cmd' => '<code>wp aw-featured scan</code>', 'what' => '"Featured in" links between organisations and items' ),
 			array( 'cmd' => '<code>wp aw-places detect</code>, <code>mark-auto</code>', 'what' => 'Places found in items' ),
 		),
