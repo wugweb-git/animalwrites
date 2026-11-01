@@ -11,8 +11,13 @@
  * requests for public pages answered 200 without a query string. Never on: wp-admin, logged-in/commenter/password
  * cookies, REST, feeds, 404, search, previews, forms and nonce pages, crisis guides, anything that sets a cookie.
  *
- * Off by default. Option aw_cdn_ttl (seconds, 0 = off; 60 to 900). For a test, any public URL with ?cdnprobe=1 gets the
+ * Off by default. Option aw_cdn_ttl (seconds, 0 = off; 60 to 3600). For a test, any public URL with ?cdnprobe=1 gets the
  * header while the option is 0.
+ *
+ * Pages that change rarely (1 Nov 2026): Directory listings, Library items and Resources get the longer lifetime of option
+ * aw_cdn_ttl_long (default 3600 s; 0 = the same as aw_cdn_ttl), plus `stale-while-revalidate=600`, so an edge serves its
+ * copy while it fetches a new one. Home, News, hubs, Directory places and campaigns keep aw_cdn_ttl: they change with
+ * every sourcing run.
  *
  * @package animal-writes-core
  */
@@ -38,7 +43,7 @@ function aw_cdn_ttl() {
 	if ( $ttl <= 0 ) {
 		return 0;
 	}
-	$ttl = max( 60, min( 900, $ttl ) );
+	$ttl = max( 60, min( 3600, $ttl ) );
 
 	if ( 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || is_admin() || is_user_logged_in() || is_404() || is_search() || is_feed() || is_preview() || is_embed() || is_customize_preview() || is_robots() || post_password_required() || wp_doing_ajax() || wp_is_json_request() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return 0;
@@ -65,7 +70,16 @@ function aw_cdn_ttl() {
 	if ( headers_sent() || preg_grep( '/^set-cookie:/i', headers_list() ) ) {
 		return 0;
 	}
+	if ( aw_cdn_is_long_lived() ) {
+		$long = (int) get_option( 'aw_cdn_ttl_long', 3600 );
+		$ttl  = $long > 0 ? max( $ttl, min( 3600, $long ) ) : $ttl;
+	}
 	return (int) apply_filters( 'aw_cdn_ttl', $ttl );
+}
+
+/** Whether this page changes rarely: a Directory listing, a Library item or a Resource (not a hub, not a crisis guide). */
+function aw_cdn_is_long_lived() {
+	return is_singular( array( 'aw_listing', 'aw_legal', 'post' ) ) && ! ( function_exists( 'aw_hub_type' ) && aw_hub_type() );
 }
 
 add_action(
@@ -73,8 +87,9 @@ add_action(
 	function () {
 		$ttl = aw_cdn_ttl();
 		if ( $ttl > 0 ) {
-			header( 'Cache-Control: public, s-maxage=' . $ttl, true );
-			header( 'X-AW-CDN: s-maxage=' . $ttl, true );
+			$swr = aw_cdn_is_long_lived() ? ', stale-while-revalidate=600' : '';
+			header( 'Cache-Control: public, s-maxage=' . $ttl . $swr, true );
+			header( 'X-AW-CDN: s-maxage=' . $ttl . $swr, true );
 		}
 	},
 	99999

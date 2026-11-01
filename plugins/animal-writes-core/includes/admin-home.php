@@ -60,8 +60,10 @@ function aw_core_overview_status(): array {
 	$s['cron']   = $last ? aw_core_status( $last > time() - HOUR_IN_SECONDS, 'Last run ' . wp_date( 'j M Y, g:i a', $last ) . '.' ) : esc_html( 'No run recorded.' );
 	$head        = (string) get_option( 'aw_deployed_head', '' );
 	$s['deploy'] = $head ? esc_html( 'Deployed commit ' . substr( $head, 0, 7 ) . '; cache purged once for it.' ) : esc_html( 'No deploy recorded.' );
-	$ttl         = function_exists( 'aw_cdn_ttl' ) ? (int) aw_cdn_ttl() : 0;
-	$s['cdn']    = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s.' : 'CDN caching off.' );
+	$ttl         = (int) get_option( 'aw_cdn_ttl', 0 ); // aw_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
+	$ttl         = $ttl > 0 ? max( 60, min( 3600, $ttl ) ) : 0;
+	$long        = (int) get_option( 'aw_cdn_ttl_long', 3600 );
+	$s['cdn']    = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );
 	$s['stage']  = esc_html( function_exists( 'aw_is_staging' ) && aw_is_staging() ? 'This is the staging site.' : 'Live site.' );
 	$next        = '';
 	if ( function_exists( 'aw_team_dates' ) ) {
