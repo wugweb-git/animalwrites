@@ -102,13 +102,3 @@ add_action(
 	},
 	PHP_INT_MAX
 );
-
-		if ( ! $form_id || ! in_array( $form_id, aw_ff_autoread_ids(), true ) ) {
-			return;
-		}
-		global $wpdb;
-		$wpdb->update( $wpdb->prefix . 'fluentform_submissions', array( 'status' => 'read' ), array( 'id' => (int) $entry_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	},
-	99,
-	3
-);
