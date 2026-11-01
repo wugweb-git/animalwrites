@@ -148,15 +148,19 @@ function aw_faq_hub_pages() {
 	return $out;
 }
 
+/** Post types whose FAQ heading can name a subject of its own (the FAQ box's Subject field): pages and posts. */
+const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post' );
+
 /**
  * The subject a post's FAQ heading names ("Questions about <subject>") and where it came from: the FAQ box's Subject
- * field (meta aw_faq_subject), the pages map (Settings → FAQ), the site's name on the front page, else the title.
+ * field (meta aw_faq_subject; pages and posts), the pages map (Settings → FAQ), the site's name on the front page, else
+ * the title.
  *
  * @param WP_Post $post Post.
  * @return array [ subject, 'meta' | 'map' | 'front' | 'title' ]
  */
 function aw_faq_subject( $post ) {
-	$meta = aw_faq_plain( (string) get_post_meta( $post->ID, 'aw_faq_subject', true ) );
+	$meta = in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ? aw_faq_plain( (string) get_post_meta( $post->ID, 'aw_faq_subject', true ) ) : '';
 	if ( '' !== $meta ) {
 		return array( $meta, 'meta' );
 	}
@@ -171,14 +175,34 @@ function aw_faq_subject( $post ) {
 }
 
 /**
- * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ]. The link is
- * left out on the page it points to.
+ * The FAQ head's supporting line and its "see all" link (filter aw_faq_head_parts): [ line, url, label ]. Both are
+ * left out on the page the link points to.
  *
  * @return array
  */
 function aw_faq_head_parts() {
-	return (array) apply_filters( 'aw_faq_head_parts', array( 'Quick answers. More in the full FAQ.', home_url( '/resources/animal-welfare-faqs/' ), 'All questions' ) );
+	return array_values( (array) apply_filters( 'aw_faq_head_parts', array( 'Quick answers. More in the full FAQ.', home_url( '/resources/animal-welfare-faqs/' ), 'All questions' ) ) );
 }
+
+// The FAQ subject (FAQ box → Subject): a plain line, editable by whoever may edit the page or post.
+add_action(
+	'init',
+	function () {
+		foreach ( AW_FAQ_SUBJECT_TYPES as $pt ) {
+			register_post_meta(
+				$pt,
+				'aw_faq_subject',
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'sanitize_callback' => 'sanitize_text_field',
+					'auth_callback'     => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_post', (int) $post_id ),
+				)
+			);
+		}
+	}
+);
 
 /**
  * Whether a page shows its FAQ after its content here: page 1, and no search or filter in the address (tracking
@@ -217,6 +241,7 @@ function aw_faq_context( $obj = null ) {
 		$url     = (string) get_permalink( $obj );
 		$title   = aw_faq_plain( get_the_title( $obj ) );
 		$subject = aw_faq_subject( $obj );
+		$hubs    = 'page' === $obj->post_type ? aw_faq_hub_pages() : array();
 		$ctx     = array(
 			'kind'            => 'post' === $obj->post_type ? 'guide' : $obj->post_type,
 			'store'           => 'post',
@@ -228,11 +253,11 @@ function aw_faq_context( $obj = null ) {
 			'page_id'         => $url . '#webpage',
 			'about'           => $url . '#webpage',
 			'head'            => 'Questions about ' . $subject[0],
-			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, array( 'page', 'post' ), true ),
+			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ),
 		);
-		if ( 'map' === $subject[1] ) {
+		if ( isset( $hubs[ (int) $obj->ID ] ) ) { // a hub page by the map, whatever its Subject field says
 			$ctx['kind']   = 'hub';
-			$ctx['entity'] = $subject[0];
+			$ctx['entity'] = $hubs[ (int) $obj->ID ];
 		}
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
 		$url  = (string) kits_term_url( $obj );
@@ -515,6 +540,7 @@ function aw_faq_html( $faq = null ) {
 	// parsed from is the text the page shows; texturizing it again later changes nothing.
 	list( $line, $all, $label ) = array_pad( aw_faq_head_parts(), 3, '' );
 	$here = untrailingslashit( (string) strtok( (string) $faq['ctx']['url'], '?#' ) ) === untrailingslashit( (string) strtok( (string) $all, '?#' ) );
+	$line = $here ? '' : $line; // on the full FAQ page itself: neither the line that points to it nor the link
 	$head = '<div class="kit-sec-head"><div><h2 id="kit-faq-h">' . esc_html( $faq['ctx']['head'] ) . '</h2>' . ( '' !== $line ? '<p>' . esc_html( $line ) . '</p>' : '' ) . '</div>'
 		. ( '' !== $all && '' !== $label && ! $here ? '<a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $all ) . '">' . esc_html( $label ) . '</a>' : '' ) . '</div>';
 	return $html[ $key ] = wptexturize( '<section class="kit-faq" id="faq" aria-labelledby="kit-faq-h" data-faq="' . esc_attr( $faq['ctx']['kind'] ) . '">' . $head . $body . '</section>' );
@@ -689,11 +715,10 @@ function aw_faq_editor( $ctx ) {
 	$r    = aw_faq_rows( $ctx, false );
 	$rows = $r['rows'];
 	wp_nonce_field( 'aw_faq_items', 'aw_faq_items_nonce' );
-	if ( 'post' === $ctx['store'] ) {
-		$post = get_post( $ctx['id'] );
-		$fall = $post ? aw_faq_subject( $post ) : array( '', 'title' );
+	if ( 'post' === $ctx['store'] && in_array( $ctx['type'], AW_FAQ_SUBJECT_TYPES, true ) ) { // the field only where the heading uses it
 		$own  = (string) get_post_meta( $ctx['id'], 'aw_faq_subject', true );
-		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “Questions about …”)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( 'meta' === $fall[1] ? '' : $fall[0] ) . '"></p>';
+		$fall = '' === $own ? (string) preg_replace( '/^Questions about /', '', (string) $ctx['head'] ) : ''; // the heading as shown (after the aw_faq_context filters)
+		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “Questions about …”)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( $fall ) . '"></p>';
 		if ( '' === $own && ! empty( $ctx['subject_missing'] ) ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( 'No subject: the heading uses the page title, “' . $ctx['head'] . '”.' ) . '</p></div>';
 		}
@@ -874,7 +899,7 @@ add_action(
 		if ( absint( wp_unslash( $_POST['post_ID'] ?? 0 ) ) !== (int) $post_id || ! current_user_can( 'edit_post', $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
 			return; // only the post whose edit screen sent the box (not another post saved in the same request)
 		}
-		if ( isset( $_POST['aw_faq_subject'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+		if ( isset( $_POST['aw_faq_subject'] ) && in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
 			$subject = sanitize_text_field( wp_unslash( $_POST['aw_faq_subject'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
 			if ( '' === $subject ) {
 				delete_post_meta( $post_id, 'aw_faq_subject' );
@@ -895,12 +920,12 @@ add_action(
 
 /**
  * The FAQ subject column on the Pages and Posts lists: the subject the heading names, "Missing: uses the title" when a
- * page or post shows an FAQ without one, a dash when it shows no FAQ.
+ * page or post shows an FAQ without one, a dash when it shows no FAQ (as of the hourly FAQ overview, aw_faq_index()).
  */
 add_action(
 	'admin_init',
 	function () {
-		foreach ( array_intersect( array( 'page', 'post' ), aw_faq_post_types() ) as $pt ) {
+		foreach ( array_intersect( AW_FAQ_SUBJECT_TYPES, aw_faq_post_types() ) as $pt ) {
 			add_filter( "manage_{$pt}_posts_columns", fn( $cols ) => array_merge( $cols, array( 'aw_faq_subject' => 'FAQ subject' ) ) );
 			add_action(
 				"manage_{$pt}_posts_custom_column",
@@ -908,9 +933,18 @@ add_action(
 					if ( 'aw_faq_subject' !== $col ) {
 						return;
 					}
-					$post = get_post( $post_id );
+					static $shown = null; // posts that show an FAQ, from the cached overview (faq-overview.php), not a build per row
+					if ( null === $shown ) {
+						$shown = array();
+						foreach ( function_exists( 'aw_faq_index' ) ? aw_faq_index()['rows'] : array() as $row ) {
+							if ( 'post' === $row['store'] && $row['shown'] ) {
+								$shown[ (int) $row['id'] ] = true;
+							}
+						}
+					}
+					$post = isset( $shown[ (int) $post_id ] ) ? get_post( $post_id ) : null;
 					$ctx  = $post ? aw_faq_context( $post ) : null;
-					if ( ! $ctx || ! aw_faq_build( $ctx ) ) {
+					if ( ! $ctx ) {
 						echo '—';
 						return;
 					}
