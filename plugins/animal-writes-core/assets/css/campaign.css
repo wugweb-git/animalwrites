@@ -72,6 +72,7 @@
 .aw-camp--diwali .aw-camp-hl::after { content: ""; position: absolute; left: 0.05em; right: 0.05em; bottom: -0.08em; height: 0.12em; border-radius: 1em; background: var(--kit-color-accent); transform: rotate(-1.5deg); }
 .aw-camp-hero-tips { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2); margin: 0 0 var(--kit-space-5); padding: 0; }
 .aw-camp-hero-tips a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--kit-space-2); min-height: 6.5rem; padding: var(--kit-space-3) var(--kit-space-2); border: 1px solid color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-dark) 55%, transparent); color: var(--kit-color-on-ink); text-align: center; text-decoration: none; font-size: var(--kit-type-sm); line-height: 1.25; }
+.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-tips a { color: var(--kit-color-on-ink); text-decoration: none; }
 .aw-camp-hero-tips a:hover { border-color: var(--kit-color-accent); }
 .aw-camp-hero-tips .kit-ico { font-size: 1.75rem; color: var(--kit-color-accent); }
 @media (min-width: 768px) { .aw-camp-hero-tips { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -79,8 +80,9 @@
 	.aw-camp--diwali .aw-camp-hero--photo { justify-content: center; min-height: min(56.25vw, 900px); padding-bottom: var(--wp--preset--spacing--60) !important; }
 	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { position: absolute; inset: 0; z-index: 0; width: auto; margin: 0 !important; }
 	.aw-camp--diwali .aw-camp-hero-photo img { height: 100%; object-fit: cover; object-position: right center; }
-	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 80%, transparent) 0, color-mix(in srgb, var(--camp-dark) 35%, transparent) 42%, transparent 58%); } /* keeps the text readable whatever the crop */
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; width: 100%; }
+	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 85%, transparent) 0, color-mix(in srgb, var(--camp-dark) 50%, transparent) 36%, transparent 52%); } /* keeps the text readable whatever the crop */
+	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; max-width: none; width: 100%; margin-left: 0 !important; margin-right: 0 !important; padding-left: clamp(1.5rem, 5vw, 6rem); box-sizing: border-box; } /* the text sits on the photo's dark left side, clear of the woman (about 38% across) */
+	.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > *, .aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: min(30rem, 33vw); }
 }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
