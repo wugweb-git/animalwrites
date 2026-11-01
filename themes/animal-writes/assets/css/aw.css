@@ -1625,6 +1625,15 @@ section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; min-height: 
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
 .home .kit-sec-head > .wp-block-buttons { margin: 0; }
+/* Latest news and Guides on phones: the short "All ..." button on the heading's row when it fits (it wraps under the
+   heading when the text is enlarged) and the lede under both, so each section fits one 375x812 screen with all three
+   cards. The button stays after the lede in the reading and focus order. */
+@media (max-width: 767px) {
+	.home :is(.aw-ed-news, .aw-ed-learn) .kit-sec-head:has(> .wp-block-buttons) { align-items: center; column-gap: var(--kit-space-4); }
+	.home :is(.aw-ed-news, .aw-ed-learn) .kit-sec-head:has(> .wp-block-buttons) > .wp-block-group { display: contents; }
+	.home :is(.aw-ed-news, .aw-ed-learn) .kit-sec-head:has(> .wp-block-buttons) > .wp-block-group > h2 { flex: 1 1 0; min-width: min-content; }
+	.home :is(.aw-ed-news, .aw-ed-learn) .kit-sec-head:has(> .wp-block-buttons) > .wp-block-group > p { order: 1; flex: 0 0 100%; margin-top: 0; } /* the row gap (--kit-space-4) is the space above it, as before */
+}
 .aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
 
 /* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
