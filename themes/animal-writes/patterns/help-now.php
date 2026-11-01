@@ -13,11 +13,11 @@
 <section id="need-help" class="wp-block-group alignfull kit-section aw-ed-help has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading {"anchor":"aw-help-h"} -->
-<h2 class="wp-block-heading" id="aw-help-h">Need help now?</h2>
+<h2 class="wp-block-heading" id="aw-help-h">Animal in trouble?</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>For an animal in danger, call first. Then find the right people near you.</p>
+<p>Call first. Then get the right help nearby.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
