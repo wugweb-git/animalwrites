@@ -1550,24 +1550,26 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
    Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
    From 1200: four columns, 112 two by two, the injured-animal and organisation tiles two wide. */
-.aw-bento { display: grid; gap: calc(var(--kit-space-4) + var(--kit-space-1)); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
+.aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
 .aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
 .aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
 @media (min-width: 768px) {
-	.aw-bento { gap: var(--kit-space-5); grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
+	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
 }
 @media (min-width: 1200px) {
 	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos sos injured injured" "sos sos vet1962 awbi" "cruelty vets orgs orgs"; }
 }
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
-   border, a light line along the top edge and a soft top-to-bottom shade; on hover the tile lifts 2px. */
-.aw-bento-tile { container-type: inline-size; position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); border-radius: var(--kit-radius-card); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 7%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 4%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); color: var(--kit-color-on-ink); transition: transform var(--kit-motion-base) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+   border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
+   (Kits' lift) with a stronger border and shadow. Pressed: it shrinks slightly, so a tap on a phone shows. */
+.aw-bento-tile { container-type: inline-size; position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 8%, transparent); border-radius: var(--kit-radius-card); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 7%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 4%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent), 0 1px 2px rgb(0 0 0 / 30%); color: var(--kit-color-on-ink); transition: transform 240ms var(--kit-motion-ease), border-color 240ms var(--kit-motion-ease), box-shadow 240ms var(--kit-motion-ease); }
 @media (min-width: 768px) { .aw-bento-tile { padding: var(--kit-space-5); } }
-.aw-bento-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--kit-color-on-ink) 22%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 9%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 5%, transparent)); }
+.aw-bento-tile:hover { transform: translateY(var(--kit-motion-lift)); border-color: color-mix(in srgb, var(--kit-color-on-ink) 28%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 9%, transparent), color-mix(in srgb, var(--kit-color-on-ink) 5%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 12%, transparent), 0 14px 30px -12px rgb(0 0 0 / 70%); }
+.aw-bento-tile:active { transform: scale(.98); transition-duration: 90ms; }
 /* Focus: the ring goes round the whole tile (yellow on the dark band, from Kits' dark-surface focus colour) */
 .aw-bento-tile:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-heading); }
-.aw-bento-tile h3 a { color: inherit !important; text-decoration: none; } /* beats the site rule that makes heading links ink */
+.aw-bento-tile h3 a, .aw-bento-tile h3 a:hover { color: inherit !important; text-decoration: none; } /* beats the site rule that makes heading links ink */
 .aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole tile is the link */
 .aw-bento-tile h3 a:focus-visible { outline: none; }
 .aw-bento-tile p { margin: 0; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
@@ -1582,17 +1584,23 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* In a row stretched by a taller tile, the icon or label stays at the top and the title and line go to the bottom, so
    the text in one row ends level and no tile has a gap under its text */
 .aw-bento-tile > :first-child { margin-bottom: auto; }
-/* 112: yellow, a shade lighter at the top, with a soft yellow glow; it lifts and grows a little on hover. The label at
+/* 112: yellow, a shade lighter at the top, with a soft yellow glow and a larger siren. On hover it lifts higher than
+   the other tiles, turns brighter and glows more; the Call 112 pill grows and darkens, and shrinks when pressed. The label at
    the top; the large number, its line and a dark "Call 112" pill at the bottom. */
 .aw-bento-tile.aw-bento--sos { border-color: transparent; background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 82%, var(--kit-color-on-ink)), color-mix(in srgb, var(--kit-color-accent) 90%, var(--color-peach))); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 10px 30px -8px color-mix(in srgb, var(--kit-color-accent) 45%, transparent); color: var(--kit-color-on-accent); }
-.aw-bento-tile.aw-bento--sos:hover { transform: translateY(-2px) scale(1.01); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 16px 40px -10px color-mix(in srgb, var(--kit-color-accent) 60%, transparent); }
+.aw-bento-tile.aw-bento--sos:hover { transform: translateY(calc(var(--kit-motion-lift) - 2px)) scale(1.01); background: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-accent) 74%, var(--kit-color-on-ink)), var(--kit-color-accent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent), 0 20px 48px -12px color-mix(in srgb, var(--kit-color-accent) 70%, transparent); }
+.aw-bento-tile.aw-bento--sos:active { transform: scale(.98); }
+.aw-bento-tile.aw-bento--sos .aw-bento-eyebrow { gap: var(--kit-space-3); }
+.aw-bento--sos .aw-bento-eyebrow .kit-ico { --kit-ico-size: calc(var(--kit-icon-xl) + var(--kit-space-1)); }
 .aw-bento--sos p, .aw-bento-tile.aw-bento--sos .aw-bento-eyebrow { color: var(--kit-color-on-accent); }
 .aw-bento--sos p:not(.aw-bento-eyebrow) { font-size: var(--kit-type-base); max-width: 34ch; }
 .aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); font-weight: 900; }
 .aw-bento--sos:has(a:focus-visible) { outline-color: var(--kit-color-on-ink); } /* a yellow ring would merge into the tile */
-.aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-on-accent); color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); box-shadow: var(--kit-elevation-1); }
+.aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-on-accent); color: var(--kit-color-accent); font-weight: var(--kit-weight-strong); box-shadow: var(--kit-elevation-1); transition: transform var(--kit-motion-base) var(--kit-motion-ease), background-color var(--kit-motion-base) var(--kit-motion-ease), box-shadow var(--kit-motion-base) var(--kit-motion-ease); }
+.aw-bento--sos:hover .aw-bento-cta { transform: scale(1.04); background: color-mix(in srgb, var(--kit-color-on-accent) 60%, black); box-shadow: 0 6px 16px -4px rgb(20 20 20 / 45%); }
+.aw-bento--sos:active .aw-bento-cta { transform: scale(.96); box-shadow: none; }
 .aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
-@media (prefers-reduced-motion: reduce) { .aw-bento-tile { transition: none; } .aw-bento-tile:hover, .aw-bento-tile.aw-bento--sos:hover { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .aw-bento-tile, .aw-bento-cta { transition: none; } .aw-bento-tile:hover, .aw-bento-tile:active, .aw-bento-tile.aw-bento--sos:hover, .aw-bento-tile.aw-bento--sos:active, .aw-bento--sos:hover .aw-bento-cta, .aw-bento--sos:active .aw-bento-cta { transform: none; } }
 
 /* Find help near you (compact, [aw_find_help compact="1"]). Kits components carry their own states: kit-field (the
    name and state fields), kit-btn (Search, Use my location, the two buttons), kit-filter-pill (Quick filters). This block
