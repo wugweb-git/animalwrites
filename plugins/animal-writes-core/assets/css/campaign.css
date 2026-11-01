@@ -224,18 +224,19 @@
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
-/* What you can do and the Library: one sideways row below 1200 (two cards to the view from 768); from 1200 the three
-   action cards side by side and the Library three to a row */
+/* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
+   What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
+.aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 @media (max-width: 1199px) {
-	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid, #read .wp-block-post-template) { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
-	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex: 0 0 82%; margin: 0; scroll-snap-align: start; }
+	.aw-camp--sc-stray-dogs #act .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 }
-@media (min-width: 768px) and (max-width: 1199px) {
+.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex: 0 0 82%; margin: 0; scroll-snap-align: start; }
+@media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex-basis: calc((100% - var(--kit-space-4)) / 2); }
 }
 @media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; margin: 0; }
-	.aw-camp--sc-stray-dogs #read .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp--sc-stray-dogs #read .wp-block-post-template > li { flex-basis: calc((100% - 2 * var(--kit-space-4)) / 3); }
+	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; }
 }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
