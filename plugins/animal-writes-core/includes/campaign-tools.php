@@ -607,9 +607,28 @@ foreach ( AW_CAMP_BOXES as $aw_camp_key => $aw_camp_fn ) {
 }
 unset( $aw_camp_key, $aw_camp_fn );
 
+/**
+ * Are all five campaign groups on? The save below writes every field, so it may only run when every box is on the
+ * screen: a group switched off in SCF would otherwise save its fields as empty or default.
+ */
+function aw_camp_boxes_all_on() {
+	if ( ! function_exists( 'acf_get_field_group' ) ) {
+		return false;
+	}
+	foreach ( array( 'dates', 'document', 'orgs', 'outcome', 'share' ) as $g ) {
+		$group = acf_get_field_group( 'group_aw_campaign_' . $g );
+		if ( ! $group || empty( $group['active'] ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /** Dates and state: now, opens on, closes on, the override and its reason. Holds the nonce of the save below. */
 function aw_camp_dates_box( $post ) {
-	wp_nonce_field( 'aw_camp_details', 'aw_camp_details_nonce' );
+	if ( aw_camp_boxes_all_on() ) { // without the nonce nothing is saved, so no field is emptied
+		wp_nonce_field( 'aw_camp_details', 'aw_camp_details_nonce' );
+	}
 	$m     = fn( $k ) => (string) get_post_meta( $post->ID, $k, true );
 	$state = array( 'pre' => 'Pre (upcoming)', 'active' => 'Active (open)', 'post' => 'Post (closed)' );
 	$win   = array( 'upcoming' => 'Upcoming', 'open' => 'Open', 'last-day' => 'Last day', 'closed' => 'Closed' );
