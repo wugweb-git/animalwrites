@@ -944,3 +944,24 @@ add_filter(
 	10,
 	2
 );
+
+// A Share section on a campaign without a letter tool: the share bar from the server (the letter tool's script fills the
+// holder on campaigns that have one), so the section is never empty.
+add_filter(
+	'the_content',
+	function ( $html ) {
+		if ( ! is_singular( 'aw_campaign' ) || ! function_exists( 'aw_share_html' ) || false === strpos( $html, 'data-aw-share' ) || false !== strpos( $html, 'class="aw-letter"' ) ) {
+			return $html;
+		}
+		$bar = aw_share_html( get_the_ID() );
+		return preg_replace_callback(
+			'#(<div class="aw-camp-share-kit" data-aw-share="[^"]*">)\s*(</div>)#',
+			function ( $m ) use ( $bar ) {
+				return $m[1] . $bar . $m[2];
+			},
+			$html,
+			1
+		);
+	},
+	99
+);

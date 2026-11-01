@@ -145,6 +145,36 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
+/* Page sections (owner, 1 Nov 2026: fix every section). Text keeps the site's 720px measure, left-aligned (the constrained
+   layout centres narrow children, so the measure is a right padding); tables and card grids keep the full width. */
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) > :is(p, h2, h3, ul:not([class]), ol:not([class])) { box-sizing: border-box; padding-right: max(0px, calc(100% - 720px)); } }
+/* The date strip: three to a row, no calendar marks inside the big dates */
+@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aw-camp--sc-stray-dogs .aw-camp-dates-when .kit-ico { display: none; }
+/* Notes with links and dates inside run as one paragraph (only the icon notes are a row) */
+.aw-camp--sc-stray-dogs .aw-camp-note:not(:has(> .kit-ico)) { display: block; }
+/* Links on the plum card read in white */
+.aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
+/* The share bar under the share message */
+.aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
+/* Phones: the court orders and the state tracker as one card per row, each part under its column heading */
+@media (max-width: 767px) {
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { overflow: visible; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; min-width: 0; border: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) :is(tbody, tr, td) { display: block; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { padding: 0 0 var(--kit-space-3); border: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: 800; color: var(--camp-primary); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(2)::before { content: "Bench"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(3)::before { content: "What was ordered"; }
+	.aw-camp--sc-stray-dogs .aw-camp-timeline td:nth-child(4)::before { content: "Document"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(2)::before { content: "High Court and case"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(3)::before { content: "Latest public order, and what is due"; }
+	.aw-camp--sc-stray-dogs .aw-camp-tracker td:nth-child(4)::before { content: "Source"; }
+}
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
