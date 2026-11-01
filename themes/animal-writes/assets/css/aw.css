@@ -1568,37 +1568,32 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 /* Home: Supreme Court campaign card (home.php, pattern aw-sc), the campaign hero in small: cream and deep plum, the
    campaign's portrait photograph (the dog before the Supreme Court) as the card's background at every width, faded into
-   the cream behind the text at the top, the status pill with its dot, the yellow marker on "first compliance", and the
+   the cream at the top (an overlay: the text sits over the photo), the status pill with its dot, the yellow marker on "first compliance", and the
    hero's white poster (scales mark, case number, day count, date pill) at the foot. Its height is its text and the card
    padding (--kit-space-5); the photo covers whatever height that is. */
 .aw-sc { --aw-sc-line: rgb(58 23 48 / .18); justify-content: flex-start; background: #fbeee7; color: #3a1730; --kit-color-focus: #3a1730; --kit-btn-brand-bg: #3a1730; --kit-btn-brand-fg: #fff; }
-.aw-sc::before { background: linear-gradient(180deg, #fbeee7 0%, rgb(251 238 231 / .92) 45%, rgb(251 238 231 / 0) 65%); } /* the text sits on cream; the photo shows below it */
+.aw-sc::before { background: linear-gradient(180deg, #fbeee7 0%, rgb(251 238 231 / .92) 22%, rgb(251 238 231 / 0) 42%); } /* overlay: the text over the photo, the sky faded into the cream at the top */
 .aw-sc .aw-content-bg { object-position: 72% 100%; } /* the photo fills the card (.aw-content-bg); the dog at the foot */
 .aw-sc .aw-content-body { display: flex; flex: 1; flex-direction: column; padding-top: 0; }
 .aw-sc-status { align-self: flex-start; margin: 0 0 var(--kit-space-2); padding: var(--kit-space-1) var(--kit-space-3); border-radius: var(--kit-radius-pill); background: #fde9b0; color: #3a1730; font-size: var(--kit-type-xs); font-weight: 600; }
 .aw-sc-status::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; border-radius: 50%; background: #b06a10; vertical-align: .1em; }
 .aw-sc h2 mark { background: linear-gradient(100deg, rgb(255 190 26 / 0) .2em, rgb(255 190 26 / .9) .5em, rgb(255 190 26 / .75) calc(100% - .4em), rgb(255 190 26 / 0) 100%) 0 60% / 100% 62% no-repeat; color: inherit; padding: 0 .2em; margin: 0 -.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.aw-sc-line { margin: 0; color: #5c4654; font-size: var(--kit-type-sm); }
+.aw-sc-line { margin: 0; color: #5c4654; }
 .aw-sc-poster { max-width: var(--kit-card-min); margin-top: var(--kit-space-4); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: rgb(255 252 249 / .96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / .45); color: #3a1730; }
 .aw-sc-eyebrow { display: flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-2); padding: 0 0 var(--kit-space-2); border-bottom: 1px solid var(--aw-sc-line); font-weight: 700; }
 .aw-sc-eyebrow::before { content: ""; flex: none; width: 1.6em; height: 1.6em; background: #b06a10; -webkit-mask: var(--aw-sc-scales) center / contain no-repeat; mask: var(--aw-sc-scales) center / contain no-repeat; }
 .aw-sc { --aw-sc-scales: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22m2%2016%203-8%203%208c-.87.65-1.92%201-3%201s-2.13-.35-3-1Z%22/%3E%3Cpath%20d%3D%22M7%2021h10%22/%3E%3Cpath%20d%3D%22M12%203v18%22/%3E%3Cpath%20d%3D%22M3%207h2c2%200%205-1%207-2%202%201%205%202%207%202h2%22/%3E%3C/svg%3E"); }
 .aw-sc .aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-3); margin: 0; padding: 0; background: none; color: #3a1730; }
-.aw-sc .aw-cd-num { font-size: var(--kit-type-h3); font-weight: 800; line-height: 1; letter-spacing: -.03em; color: #3a1730; }
+.aw-sc .aw-cd-num { font-size: var(--kit-type-h2); font-weight: 800; line-height: 1; letter-spacing: -.03em; color: #3a1730; }
 .aw-sc .aw-cd-unit { font-weight: 600; }
-.aw-sc .aw-cd-when { flex-basis: 100%; padding-top: var(--kit-space-2); border-top: 1px solid var(--aw-sc-line); font-weight: 700; color: #3a1730; }
-.aw-sc .aw-cd-when .aw-date { display: inline-block; padding: .1em .6em; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: #3a1730; }
-.aw-sc h2 { margin-bottom: var(--kit-space-2); font-size: var(--kit-type-h3); } /* the card title size (kit.css .kit-card--block-lg .kit-card-title) */
-.aw-sc .aw-content-actions { flex-flow: row wrap; gap: var(--kit-space-2); padding-top: var(--kit-space-4); } /* the two buttons in one row when they fit */
+.aw-sc .aw-content-actions { margin-top: auto; padding-top: var(--kit-space-4); } /* one button, at the foot of the card */
 .aw-sc .aw-content-actions .kit-btn { flex: 1 1 auto; width: auto; }
-.aw-sc .aw-content-actions .kit-btn--secondary { background: rgb(251 238 231 / .9); color: #3a1730; border: 1px solid #3a1730; }
-.aw-sc .aw-content-actions .kit-btn--secondary:hover { background: #3a1730; color: #fff; }
 
 /* Home: the campaign row (pattern aw-pair; owner, 2 Nov 2026): two photo cards, the text over the campaign photograph:
    the Supreme Court card (aw-sc) and AW_Festive (a kit-photo-card Cover). Stacked while the row is narrower than 800px,
    side by side from 800 (a container query on the row, design-system.md "Breakpoints"), both the same height. Each card's
    height is its text and the card padding (--kit-space-5): at most 500px (design-system.md "Section heights"). */
-.aw-pair { container: aw-pair / inline-size; --aw-pair-card-h: 600px; } /* one round card height at every width (owner, 2 Nov 2026: within the 500/600 cap); 500px once the shorter Supreme Court text is in */
+.aw-pair { container: aw-pair / inline-size; --aw-pair-card-h: 500px; } /* one round card height at every width (owner, 2 Nov 2026: "500 for all") */
 .aw-pair-grid { display: grid; gap: var(--kit-space-grid); }
 .aw-pair-grid > * { box-sizing: border-box; min-height: var(--aw-pair-card-h); } /* a minimum, so text is never cut off */
 .aw-pair-grid > .wp-block-cover { margin: 0; }
