@@ -1548,7 +1548,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Focus: the ring goes round the whole tile (yellow on the dark band, from Kits' dark-surface focus colour) */
 .aw-bento-tile:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
 .aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
-.aw-bento-tile h3 a { color: inherit; text-decoration: none; }
+.aw-bento-tile h3 a { color: inherit !important; text-decoration: none; } /* beats the site rule that makes heading links ink */
 .aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole tile is the link */
 .aw-bento-tile h3 a:focus-visible { outline: none; }
 .aw-bento-tile p { margin: 0; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
