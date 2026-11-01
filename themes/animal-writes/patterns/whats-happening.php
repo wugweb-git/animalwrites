@@ -13,11 +13,11 @@
 <section class="wp-block-group alignfull kit-section kit-bg-canvas aw-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
-<h2 class="wp-block-heading">What’s happening</h2>
+<h2 class="wp-block-heading">Latest news</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Animal welfare news from across India, summarised and credited to the original report.</p>
+<p>What’s happening for animals across India, with every source linked.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

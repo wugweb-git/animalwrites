@@ -324,7 +324,7 @@ add_shortcode(
 				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t[0], $dir ) ) . '">' . esc_html( $t[1] ) . '</a></li>';
 			}
 			return '<div class="kit-sec-head"><div><h2 class="wp-block-heading" id="aw-find-h">Find help near you</h2>'
-				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' animal welfare organisations, vets and gaushalas in ' . (int) $with . ' states and union territories.</p></div>'
+				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' vets, shelters and rescue groups in ' . (int) $with . ' states.</p></div>'
 				. '<div class="aw-findhelp-all"><a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a></div></div>'
 				. $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form>'
 				. ( $chips ? '<ul class="kit-tags aw-findhelp-types" aria-label="Organisation types">' . $chips . '</ul>' : '' );

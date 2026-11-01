@@ -13,11 +13,11 @@
 <section class="wp-block-group alignfull kit-section kit-surface-section aw-ed-law"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
 <div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
 <div class="wp-block-group"><!-- wp:heading -->
-<h2 class="wp-block-heading">From the Library</h2>
+<h2 class="wp-block-heading">The law, in plain words</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Laws, court orders and government notices, explained in plain words and linked to the original.</p>
+<p>Acts, court orders and notices, each with the original document.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

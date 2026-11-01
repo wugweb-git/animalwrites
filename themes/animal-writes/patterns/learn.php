@@ -17,7 +17,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Step-by-step help for real situations: an injured animal, a cruelty case, feeding community dogs.</p>
+<p>What to do, step by step, when an animal needs you.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 
