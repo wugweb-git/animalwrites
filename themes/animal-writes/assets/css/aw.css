@@ -1512,24 +1512,40 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .home .kit-sec-head > .wp-block-buttons { margin: 0; }
 .aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
 
-/* Need help now: the three national helplines as large tap-to-call rows (one under the other on phones, three across from
-   768; 112 filled), then the four tiles two by two at every width. Phones: no icon square or arrow in the tiles, so the
-   section stays one screen tall. */
-.aw-ed-helplines { list-style: none; margin: 0 0 var(--kit-space-4); padding: 0; display: grid; gap: var(--kit-space-2); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-ed-helplines { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); margin-bottom: var(--kit-space-grid); } }
-.aw-ed-helpline { display: flex; align-items: center; gap: var(--kit-space-2) var(--kit-space-3); flex-wrap: wrap; box-sizing: border-box; height: 100%; min-height: var(--kit-size-control-lg); padding: var(--kit-space-2) var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 30%, transparent); border-radius: var(--kit-radius-card); color: var(--kit-color-on-ink) !important; text-decoration: none; }
-.aw-ed-helpline strong { font-size: var(--kit-type-h3); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-display); font-variant-numeric: tabular-nums; }
-.aw-ed-helpline > span:last-child { flex: 1 1 10rem; font-size: var(--kit-type-sm); line-height: var(--kit-leading-heading); }
-.aw-ed-helpline .kit-ico { --kit-ico-size: var(--kit-icon-md); flex: none; }
-.aw-ed-helplines > li:first-child .aw-ed-helpline { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent) !important; }
-.aw-ed-helpline:hover { border-color: var(--kit-color-on-ink); }
-.aw-ed-helpline:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.aw-ed-help .aw-ed-help-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: var(--kit-space-2); }
-@media (min-width: 768px) { .aw-ed-help .aw-ed-help-tiles { gap: var(--kit-space-grid); } }
-@media (max-width: 767px) {
-	.aw-ed-help .aw-ed-help-tiles > .kit-tile { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "desc"; padding: var(--kit-space-3); }
-	.aw-ed-help .aw-ed-help-tiles > .kit-tile::before, .aw-ed-help .aw-ed-help-tiles > .kit-tile::after { content: none; }
+/* Need help now: a bento grid on the dark band. 112 is the large filled tile; the injured-animal and organisation
+   tiles are wide. Each tile is one link (its heading's link covers the tile); phone numbers are tap to call.
+   Phones: one column, 112 first. From 768: two columns (112 and the wide tiles across both). From 1200: four columns,
+   112 two by two. */
+.aw-bento { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
+.aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
+.aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
+@media (min-width: 768px) {
+	.aw-bento { gap: var(--kit-space-grid); grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos sos" "injured injured" "vet1962 awbi" "cruelty vets" "orgs orgs"; }
 }
+@media (min-width: 1200px) {
+	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos sos injured injured" "sos sos vet1962 awbi" "cruelty vets orgs orgs"; }
+}
+.aw-bento-tile { position: relative; display: flex; flex-direction: column; gap: var(--kit-space-2); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-5); border: var(--kit-border-width, 1px) solid color-mix(in srgb, var(--kit-color-on-ink) 18%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-on-ink) 6%, transparent); color: var(--kit-color-on-ink); transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), background-color var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-bento-tile:hover { border-color: var(--kit-color-on-ink); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); }
+.aw-bento-tile:focus-within { outline: var(--kit-focus-width) solid var(--kit-color-accent); outline-offset: var(--kit-focus-offset); }
+.aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+.aw-bento-tile h3 a { color: inherit; text-decoration: none; }
+.aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole tile is the link */
+.aw-bento-tile h3 a:focus-visible { outline: none; }
+.aw-bento-tile p { margin: 0; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+.aw-bento-tile .aw-bento-eyebrow { display: flex; align-items: center; gap: var(--kit-space-2); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); text-transform: uppercase; color: inherit; }
+.aw-bento-eyebrow .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
+.aw-bento-ico { --kit-ico-size: var(--kit-icon-lg); margin-bottom: var(--kit-space-2); color: var(--kit-color-accent); }
+.aw-bento-tile .aw-bento-num { font-size: var(--kit-type-h2); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-display); font-variant-numeric: tabular-nums; }
+.aw-bento-tile:is(.aw-bento--injured, .aw-bento--orgs) { justify-content: center; }
+/* 112: filled, the number large, a "Call 112" pill at the bottom */
+.aw-bento-tile.aw-bento--sos { justify-content: space-between; background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+.aw-bento--sos p { color: var(--kit-color-on-accent); font-size: var(--kit-type-base); max-width: 34ch; }
+.aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); }
+.aw-bento--sos:hover { background: var(--kit-color-accent); border-color: var(--kit-color-on-ink); }
+.aw-bento--sos:focus-within { outline-color: var(--kit-color-on-ink); }
+.aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-strong); }
+.aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
 
 /* Find help near you (compact, [aw_find_help compact="1"]): the search row with Use my location, then the six most-used
    organisation types as chips. Nothing else. */

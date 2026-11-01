@@ -3,7 +3,7 @@
  * Title: Need help now
  * Slug: animal-writes/help-now
  * Categories: animal-writes, system
- * Description: Dark band: section head, the three national helplines as large tap-to-call rows, then four Kits tiles two by two (title, one line): injured animal, report cruelty, veterinary care, find an organisation.
+ * Description: Dark band: section head, then a bento grid: a large 112 emergency tile, a wide injured-animal tile, the 1962 and AWBI helplines, report cruelty, find a vet and a wide find-an-organisation tile. Each tile is one link; phone numbers are tap to call.
  * Inserter: yes
  *
  * @package animal-writes
@@ -17,54 +17,20 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>For an animal in danger, call first. Then find the right people near you.</p>
+<p>If an animal is in danger, call first. Then find a vet, rescue group or shelter near you.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
-<!-- wp:html {"metadata":{"name":"Helplines (tap to call)"}} -->
-<ul class="aw-ed-helplines" aria-label="National helplines"><li><a class="aw-ed-helpline" href="tel:112" aria-label="Call 112, danger to people or animals right now"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>112</strong><span>danger to people or animals right now</span></a></li><li><a class="aw-ed-helpline" href="tel:1962" aria-label="Call 1962, vet at your door for livestock and animals (most states)"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>1962</strong><span>vet at your door for livestock and animals (most states)</span></a></li><li><a class="aw-ed-helpline" href="tel:01292555700" aria-label="Call 0129-2555700, AWBI, cruelty complaints (office hours)"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span><strong>0129-2555700</strong><span>AWBI, cruelty complaints (office hours)</span></a></li></ul>
-<!-- /wp:html -->
-
-<!-- wp:group {"className":"kit-stack aw-ed-help-tiles","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
-<div class="wp-block-group kit-stack aw-ed-help-tiles"><!-- wp:group {"className":"kit-tile kit-ico--injured","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--injured"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Find a rescue group or vet, and what to do first.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--alert","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--alert"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/resources/how-to-report-animal-cruelty/">Report cruelty</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Know where to report it and how to record evidence.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--building","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--building"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/directory/?tag=veterinary">Find veterinary care</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Government vet hospitals, dispensaries and mobile units near you.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"kit-tile kit-ico--directory","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-tile kit-ico--directory"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><a href="/directory/">Find an organisation</a></h3>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Animal welfare groups, Gaushalas and ABC centres, by state and district.</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group --></section>
+<!-- wp:html {"metadata":{"name":"Help bento"}} -->
+<div class="aw-bento">
+<div class="aw-bento-tile aw-bento--sos"><p class="aw-bento-eyebrow"><span class="kit-ico kit-ico--siren" aria-hidden="true"></span>Emergency</p><h3 class="aw-bento-num"><a href="tel:112">112</a></h3><p>An animal or a person in danger right now. One free number for police, fire and ambulance.</p><span class="aw-bento-cta" aria-hidden="true"><span class="kit-ico kit-ico--phone"></span>Call 112</span></div>
+<div class="aw-bento-tile aw-bento--injured"><span class="kit-ico kit-ico--injured aw-bento-ico" aria-hidden="true"></span><h3><a href="/resources/found-an-injured-animal-what-to-do/">Found an injured animal?</a></h3><p>Keep it safe and calm, then reach a rescue group or vet. What to do, step by step.</p></div>
+<div class="aw-bento-tile aw-bento--vet1962"><p class="aw-bento-eyebrow"><span class="kit-ico kit-ico--helpline" aria-hidden="true"></span>Mobile vet</p><h3 class="aw-bento-num"><a href="tel:1962">1962</a></h3><p>A vet at your door for livestock and animals, in most states.</p></div>
+<div class="aw-bento-tile aw-bento--awbi"><p class="aw-bento-eyebrow"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span>Cruelty complaints</p><h3 class="aw-bento-num"><a href="tel:01292555700">0129-2555700</a></h3><p>Animal Welfare Board of India, office hours.</p></div>
+<div class="aw-bento-tile aw-bento--cruelty"><span class="kit-ico kit-ico--alert aw-bento-ico" aria-hidden="true"></span><h3><a href="/resources/how-to-report-animal-cruelty/">Report cruelty</a></h3><p>Where to complain, and how to record evidence.</p></div>
+<div class="aw-bento-tile aw-bento--vets"><span class="kit-ico kit-ico--briefcase-medical aw-bento-ico" aria-hidden="true"></span><h3><a href="/directory/?tag=veterinary">Find a vet</a></h3><p>Government vet hospitals, dispensaries and mobile units near you.</p></div>
+<div class="aw-bento-tile aw-bento--orgs"><span class="kit-ico kit-ico--directory aw-bento-ico" aria-hidden="true"></span><h3><a href="/directory/">Find an organisation</a></h3><p>Animal welfare groups, gaushalas and ABC centres, by state and district.</p></div>
+</div>
+<!-- /wp:html --></section>
 <!-- /wp:group -->
