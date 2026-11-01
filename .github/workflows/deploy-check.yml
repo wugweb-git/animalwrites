@@ -82,6 +82,8 @@ jobs:
         run: python3 tools/ci/footer_check.py
       - name: Breakpoints only 767/768 and 1199/1200 (media queries and matchMedia)
         run: python3 tools/ci/breakpoint_check.py
+      - name: Section heights from the theme (no new fixed heights, vertical % padding or !important over section padding)
+        run: python3 tools/ci/theme_rules_check.py
       - name: Colour contrast (text 4.5:1, non-text 3:1; every campaign palette)
         run: python3 tools/ci/contrast_check.py
       - name: No picture used twice on the live site
