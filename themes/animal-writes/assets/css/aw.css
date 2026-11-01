@@ -1510,40 +1510,49 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }
 .home .kit-sec-head > .wp-block-buttons { margin: 0; }
+.aw-ed-help .kit-sec-head p { color: inherit; } /* on the dark band */
 
-/* Need help now: the dark band, a faint top edge and glow so it isn't flat. One H2 and one muted line; no H3s inside.
-   Then three call links (112 filled yellow, 1962, AWBI), then four action cards (Kits tiles), two by two at every width.
-   Each call link and each card is one link and one Tab stop; reading order = markup order. */
-.aw-ed-help { border-top: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); background-image: linear-gradient(180deg, color-mix(in srgb, var(--kit-color-on-ink) 6%, transparent), transparent 60%); }
-.aw-ed-help .kit-sec-head p { color: color-mix(in srgb, var(--kit-color-on-ink) 78%, transparent); font-size: var(--kit-type-base); } /* on the dark band */
-.aw-help-calls, .aw-help-cards { list-style: none; margin: 0; padding: 0; }
-:is(.aw-help-calls, .aw-help-cards) > li { display: flex; max-width: none; margin: 0; }
-/* Calls: one column on phones, three equal columns from 768. Each is a size container, so the number scales to the
-   column and never wraps (0129-2555700 at 768). The number and phone icon on one line, what it is for under it. */
-.aw-help-calls { display: grid; gap: var(--kit-space-3); grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 768px) { .aw-help-calls { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
-.aw-help-call { container-type: inline-size; flex: 1; display: flex; flex-direction: column; gap: var(--kit-space-1); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-on-ink) 6%, transparent); color: var(--kit-color-on-ink); text-decoration: none; transition: transform var(--kit-motion-base) var(--kit-motion-ease), border-color var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-help-num { display: flex; align-items: center; gap: var(--kit-space-2); font-size: min(var(--kit-type-h2), 11cqi); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-display); letter-spacing: var(--kit-tracking-heading); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.aw-help-num .kit-ico { --kit-ico-size: 1em; } /* the icon grows with the number */
-.aw-help-what { font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
-.aw-help-call:hover { transform: translateY(var(--kit-motion-lift)); border-color: var(--kit-color-on-ink); }
-.aw-help-call:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); } /* yellow on the dark band (Kits) */
-/* 112 first and strongest: filled yellow, dark text; its ring and hover border in on-ink (a yellow ring would merge into it) */
-.aw-help-call--sos { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
-.aw-help-call--sos .aw-help-what { color: var(--kit-color-on-accent); font-weight: var(--kit-weight-medium); }
-.aw-help-call--sos:focus-visible { outline-color: var(--kit-color-on-ink); }
-/* Cards: Kits tiles (icon, title, line, arrow; lift and shadow on hover, focus ring) on the dark band, two by two at
-   every width, a row's cards one height. Phones: the icon above the title with the arrow beside it, tighter padding. */
-.kit-tiles.aw-help-cards { margin-top: var(--kit-space-6); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-3); }
-@media (min-width: 768px) { .kit-tiles.aw-help-cards { gap: var(--kit-space-grid); } }
-.aw-help-cards .kit-tile { min-width: 0; min-height: var(--kit-size-target); }
-.aw-help-cards .kit-tile:hover { border-color: var(--kit-color-accent); }
-@media (max-width: 767px) {
-	.aw-help-cards .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; padding: var(--kit-space-3); }
-	.aw-help-cards .kit-tile > .kit-ico:first-child { justify-self: start; margin-bottom: var(--kit-space-2); }
-	.aw-help-cards .kit-tile strong { font-size: var(--kit-type-base); }
+/* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
+   are tap to call. The reading order (and Tab order) is the markup order at every width: 112, injured animal, 1962,
+   AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
+   Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
+   From 1200: four columns, 112 two by two, the injured-animal and organisation tiles two wide. */
+.aw-bento { display: grid; gap: var(--kit-space-grid); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
+.aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
+.aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
+@media (min-width: 768px) {
+	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
 }
-@media (prefers-reduced-motion: reduce) { .aw-help-call { transition: none; } .aw-help-call:hover { transform: none; } }
+@media (min-width: 1200px) {
+	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos sos injured injured" "sos sos vet1962 awbi" "cruelty vets orgs orgs"; }
+}
+/* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. */
+.aw-bento-tile { container-type: inline-size; position: relative; display: flex; flex-direction: column; gap: var(--kit-space-3); min-width: 0; min-height: var(--kit-size-target); padding: var(--kit-space-4); border: var(--kit-border-width) solid color-mix(in srgb, var(--kit-color-on-ink) 18%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--kit-color-on-ink) 6%, transparent); color: var(--kit-color-on-ink); transition: border-color var(--kit-motion-fast) var(--kit-motion-ease), background-color var(--kit-motion-fast) var(--kit-motion-ease); }
+@media (min-width: 768px) { .aw-bento-tile { padding: var(--kit-space-5); } }
+.aw-bento-tile:hover { border-color: var(--kit-color-on-ink); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); }
+/* Focus: the ring goes round the whole tile (yellow on the dark band, from Kits' dark-surface focus colour) */
+.aw-bento-tile:has(a:focus-visible) { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
+.aw-bento-tile h3 { margin: 0; font-size: var(--kit-type-h4); line-height: var(--kit-leading-heading); }
+.aw-bento-tile h3 a { color: inherit !important; text-decoration: none; } /* beats the site rule that makes heading links ink */
+.aw-bento-tile h3 a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; } /* the whole tile is the link */
+.aw-bento-tile h3 a:focus-visible { outline: none; }
+.aw-bento-tile p { margin: 0; font-size: var(--kit-type-sm); line-height: var(--kit-leading-body); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+.aw-bento-tile .aw-bento-eyebrow { display: flex; align-items: center; gap: var(--kit-space-2); font-size: var(--kit-type-xs); font-weight: var(--kit-weight-strong); text-transform: uppercase; color: inherit; }
+.aw-bento-eyebrow .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
+.aw-bento-ico { --kit-ico-size: var(--kit-icon-lg); flex: none; color: var(--kit-color-accent); }
+.aw-bento-tile .aw-bento-num { font-size: min(var(--kit-type-h2), 12cqi); font-weight: var(--kit-weight-bold); line-height: var(--kit-leading-display); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* In a row stretched by a taller tile, the icon or label stays at the top and the title and line go to the bottom, so
+   the text in one row ends level and no tile has a gap under its text */
+.aw-bento-tile > :first-child { margin-bottom: auto; }
+/* 112: filled yellow, the label at the top; the large number, its line and a "Call 112" pill at the bottom */
+.aw-bento-tile.aw-bento--sos { background: var(--kit-color-accent); border-color: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+.aw-bento--sos p { color: var(--kit-color-on-accent); font-size: var(--kit-type-base); max-width: 34ch; }
+.aw-bento-tile.aw-bento--sos .aw-bento-num { font-size: var(--kit-type-display); }
+.aw-bento--sos:hover { background: var(--kit-color-accent); border-color: var(--kit-color-on-ink); }
+.aw-bento--sos:has(a:focus-visible) { outline-color: var(--kit-color-on-ink); } /* a yellow ring would merge into the tile */
+.aw-bento-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: var(--kit-space-2); min-height: var(--kit-size-target); padding: 0 var(--kit-space-5); border-radius: var(--kit-radius-pill); background: var(--kit-color-ink); color: var(--kit-color-on-ink); font-weight: var(--kit-weight-strong); }
+.aw-bento-cta .kit-ico { --kit-ico-size: var(--kit-icon-sm); }
+@media (prefers-reduced-motion: reduce) { .aw-bento-tile { transition: none; } }
 
 /* Find help near you (compact, [aw_find_help compact="1"]): the search row with Use my location, then the six most-used
    organisation types as chips. Nothing else. */
