@@ -267,6 +267,21 @@ WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link con
 Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
 `hero` (standard home hero; not shown on Home while campaign 13848 is published), `help-now` (Need help now: tap-to-call helplines and four tiles), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search, Use my location and type chips), `aw1-story` (India Writes for Its Community Dogs, full story), `take-action` (volunteer and claim your listing: two photo blocks, an H2 each, no section heading), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
 
+### Layout rules (owner, 2 Nov 2026)
+These hold on every page. Section heights below gives the detail.
+
+1. **Sizes only from tokens and docs.** Every size is a `--kit-*` token or a value written in this file, `docs/card-sizes.md`, `docs/component-map.md` or `themes/animal-writes/kits-registry.json`. No invented heights or card sizes.
+2. **Padding.** Every card and block has at least 24px (`--kit-space-5`) on every side, at every width.
+3. **No height tricks.** No fixed heights, no vertical percentage padding, no `!important` over section padding, no `aspect-ratio` on a text box to make room. A picture's height comes from the picture's own shape.
+4. **Hero.** A page or campaign hero uses `--kit-hero-min` (560px below 1200, 660px from 1200). Owner: "hero banner can have max 720 px height".
+5. **Desktop height.** From 1024 wide, every section and every hero is at most 720px tall, padding included, and at most one viewport height. 800px is the ceiling nothing may pass. Content that does not fit uses the patterns we have: one sideways card row, folds (`<details>`, the first open), the tabs or steps pattern from the registry, or the first row plus "See all". Text is never cut off and never set below the theme sizes. A list page's results and an article's body are the page's reading, not a section.
+6. **Phones.** Only Home has a height limit: each Home section fits one 375×812 screen (card rows scroll sideways). Owner, for other pages: "not on phone".
+7. **Home campaign cards.** 500px each (`--aw-pair-card-h`), stacked below 800px, side by side from 800.
+8. **One button per card.**
+9. **Headings.** Only the theme H1, H2 and H3 sizes (`--kit-type-h1`, `--kit-type-h2`, `--kit-type-h3`). No page-level heading font-size overrides.
+
+Checks: `tools/ci/theme_rules_check.py` in the Deploy check catches rules 3 and 9 and padding under 24px (2) in CSS. `tools/ci/section_heights_audit.js`, pasted into the browser console, measures rules 4 to 7 on the page: OVER above 720, FAIL above 800.
+
 ### Section heights
 A section's height is its content plus the theme's section padding: `.kit-section` sets `padding-block: var(--kit-space-section)` (48px under 768, 70px to 1199, 96px from 1200). Inside a section, cards and gaps use `--kit-space-*` tokens. A page hero (`.kit-hero`) is the one fixed shape: `--kit-hero-min`.
 
@@ -274,7 +289,7 @@ A section's height is its content plus the theme's section padding: `.kit-sectio
 - No percentage padding-top or padding-bottom (it ties a height to the width); keep room for a picture with the picture itself, as a block with its own `aspect-ratio`.
 - No `!important` over `.kit-section` padding, and no `.kit-section` inside a `.kit-section`: a card in a section is a card, with card padding.
 - Home on phones: every Home section fits one 375×812 screen, heading and padding included. Card lists scroll sideways in one row instead of stacking (Library tiles, story figures and dates, Take action photo cards); the page itself never scrolls sideways (`scrollWidth` = viewport width). Exception (owner, 2 Nov 2026): the campaign cards row stacks below 800px, so on phones that one section is two cards tall.
-- Desktop (owner, 2 Nov 2026: "why the section height on desktop exceed more than Vh or 720 px? it must not"): from 1024 wide, every section, the hero and every band, is at most 720px tall and at most one viewport height, whichever is smaller. The hero's `--kit-hero-min` (660 from 1200) fits. Content that does not fit uses the patterns we have: a sideways card row, a fold (`<details>`), fewer items or a "See all" link. Never text below the theme heading sizes and never cut-off text. A list page's results and an article's body are the page's reading, not a band.
+- Desktop: see Layout rules 5 (at most 720px, ceiling 800px, from 1024 wide).
 - Home campaign row (`aw-pair`, Supreme Court and AW_Festive cards, owner 2 Nov 2026): two photo cards (text over the campaign photograph). Stacked while the row is narrower than 800px, side by side from 800 (a container query on `.aw-pair`, no new media query), each card one round height at every width, `--aw-pair-card-h` on `.aw-pair` (owner, 2 Nov 2026: "500 for all"; one button per card); it is a min-height, so text is never cut off, and it is the one fixed card height allowed.
 
 `tools/ci/theme_rules_check.py` (Deploy check) fails on a new fixed height (200px / 12.5rem / 20vh or more), a vertical percentage padding or an `!important` padding on a section-level selector; rules that existed on 2 Nov 2026 are in `tools/ci/theme_rules_baseline.txt`. The phone-screen, desktop and 500px rules are measured on the page with `tools/ci/section_heights_audit.js` (paste it into the browser console): phones at 375×812, desktop at 1024×768, 1280×800 and 1440×900, plus 412, 768 and 1024 for the campaign row (section and card heights, `document.documentElement.scrollWidth`).

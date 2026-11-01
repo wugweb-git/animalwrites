@@ -29,3 +29,15 @@ themes/animal-writes/assets/css/aw.css | pad | .aw-ed-learn .aw-tasks.is-three .
 themes/animal-writes/assets/css/aw.css | pad | .aw-camp-docs-q li:has(> .kit-card) | padding: 0  # list item wrapper, no box; the kit-card inside is padded
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-card[class*="kit-card--stacked"] > .kit-card-body | padding: 0  # body inside a stacked card padded 24px
 themes/kits-by-wugweb/assets/css/kit.css | pad | .kit-toc ol | padding: 0 var(--kit-space-5) var(--kit-space-5) var(--kit-space-7)  # list under the summary, which has 24px below it
+# Heading sizes (kind type, 2 Nov 2026): page-level H1/H2/H3 sizes that existed on 2 Nov; campaign ones are being moved to the theme sizes, Community dogs is frozen.
+plugins/animal-writes-core/assets/css/campaign-home.css | type | .aw-camp :is(h2, h3.aw-camp-mod-h) | font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign-home.css | type | .aw-camp-band h2.aw-camp-band-title | font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign-record.css | type | .aw-camp.aw-camp--community-dogs .aw-camp-section > h2, .aw-camp.aw-camp--community-dogs .kit-ed-head h2 | font-size: var(--dg-h2) !important  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign-record.css | type | .aw-camp.aw-camp--community-dogs .aw-camp-section h3:not(.wp-block-post-title) | font-size: clamp(1.1875rem, 1.1rem + 0.35vw, 1.375rem) !important  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign-record.css | type | .aw-camp.aw-camp--community-dogs .aw-camp-hero h1 | font-size: clamp(2.75rem, 1.5rem + 4.6vw, 4.75rem) !important  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign-record.css | type | .aw-camp.aw-camp--community-dogs #why-it-matters .aw-card:nth-child(4) h3 | font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.125rem) !important  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp h1 | font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp :is(h2, h3.aw-camp-mod-h) | font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 | font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem)  # existed 2 Nov 2026
+plugins/animal-writes-core/assets/css/campaign.css | type | .aw-camp-band h2.aw-camp-band-title | font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4rem)  # existed 2 Nov 2026
+themes/animal-writes/assets/css/aw.css | type | .aw-contact-row h3 | font-size: var(--fluid-h5)  # existed 2 Nov 2026

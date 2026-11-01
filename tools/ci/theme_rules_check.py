@@ -15,6 +15,8 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
           (owner, 2 Nov 2026; docs/card-sizes.md). var(--kit-space-1..4), var(--s-1..4), the gutter/head/grid tokens,
           numbers under 24px (1rem = 16px) and 0 are under; var(--kit-space-5..9) and --kit-space-section are fine.
           A child reset to 0 inside a padded box (.kit-card-body in a padded stacked card) is listed in the baseline.
+  type    sets font-size on an h1, h2 or h3 to anything but the theme's own sizes (var(--kit-type-*), inherit), so
+          headings keep the theme H1/H2/H3 sizes (owner, 2 Nov 2026).
 
 Rules that existed on 2 Nov 2026 are listed in tools/ci/theme_rules_baseline.txt and still pass; remove a line there
 when its rule is fixed. A new exception needs the owner's word and a line in the baseline with the reason.
@@ -22,10 +24,10 @@ when its rule is fixed. A new exception needs the owner's word and a line in the
     python3 tools/ci/theme_rules_check.py            # check
     python3 tools/ci/theme_rules_check.py --baseline # print today's findings in baseline form
 
-The page rules are measured on the page with tools/ci/section_heights_audit.js, not here (docs/design-system.md):
-every Home section fits one 375x812 screen on phones (card rows scroll sideways), and from 1024 wide every section is
-at most min(720px, one viewport height). A fixed height that could break the desktop rule already fails here as
-"height".
+The page rules are measured on the page with tools/ci/section_heights_audit.js, not here (docs/design-system.md,
+Layout rules): from 1024 wide every section and hero is at most 720px with its padding and one viewport height (OVER),
+and never above 800px (FAIL); on phones only Home sections have a limit (one 375x812 screen). A fixed height that
+could break the desktop rule already fails here as "height".
 """
 import pathlib
 import re
@@ -203,6 +205,10 @@ def thin(k, v):
     return any(p is not None and p < PAD_MIN for p in map(px, vals))
 
 
+HEADING = re.compile(r"(^|[\s>+~,(])h[1-3](?![\w-])")
+TYPE_OK = re.compile(r"^\s*(var\(--kit-type-[\w-]+(,[^()]*)?\)|inherit)\s*(!important)?\s*$")
+
+
 def findings():
     out = []
     for f in sorted(css_files()):
@@ -223,6 +229,8 @@ def findings():
                     kinds.append("imp")
                 if k in PAD_PROPS and any(BLOCKS.search(last) or BLOCK_PARTS.search(whole) for whole, last in subjects(sel)) and thin(k, v):
                     kinds.append("pad")
+                if k == "font-size" and any(HEADING.search(last) for _, last in subjects(sel)) and not TYPE_OK.match(v):
+                    kinds.append("type")
                 for kind in kinds:
                     out.append((rel, line, kind, sel, f"{k}: {v}"))
     return out
