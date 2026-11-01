@@ -105,12 +105,25 @@ function aw_media_webp_keep_full( $meta, $id, &$err = '' ) {
 			$err = 'The uploaded original ' . basename( $orig ) . ' is missing on disk';
 			return $meta;
 		}
-		unset( $meta['original_image'] );
+		$drop_original = true;
 	}
 	if ( '' === $orig || aw_media_webp_is_share_file( $orig ) ) {
 		return $meta;
 	}
-	$meta['file'] = $orig;
+	// The attachment is the unscaled/JPEG-PNG file again: width, height and size describe that file.
+	$path = rtrim( (string) $up['basedir'], '/' ) . '/' . $orig;
+	$info = file_exists( $path ) ? wp_getimagesize( $path ) : false;
+	if ( ! is_array( $info ) || empty( $info[0] ) || empty( $info[1] ) ) {
+		$err = 'Cannot read the original ' . basename( $orig );
+		return $meta;
+	}
+	$meta['width']    = (int) $info[0];
+	$meta['height']   = (int) $info[1];
+	$meta['filesize'] = (int) filesize( $path );
+	$meta['file']     = $orig;
+	if ( ! empty( $drop_original ) ) {
+		unset( $meta['original_image'] );
+	}
 	if ( isset( $meta['sizes']['full'] ) && preg_match( '/\.webp$/i', (string) ( $meta['sizes']['full']['file'] ?? '' ) ) ) {
 		unset( $meta['sizes']['full'] );
 	}
@@ -189,6 +202,20 @@ function aw_media_webp_pick( array $ids, array $log, $limit = 0 ) {
 	return $limit ? array_slice( $out, 0, $limit ) : $out;
 }
 
+/**
+ * Put the old 'original_image' (the uploaded file of a big image) back after the sizes were made again.
+ *
+ * @param array       $meta Metadata after regeneration.
+ * @param string|null $old  Old 'original_image' value (null when there was none).
+ * @return array
+ */
+function aw_media_webp_set_original( $meta, $old ) {
+	if ( null !== $old && '' !== $old ) {
+		$meta['original_image'] = $old;
+	}
+	return $meta;
+}
+
 /** The conversion log: attachment ID => array( sizes (the old list), time, status converted|failed|undone, why ). */
 function aw_media_webp_log() {
 	$log = get_option( 'aw_media_webp_log', array() );
@@ -257,7 +284,11 @@ function aw_media_webp_convert( $id ) {
 	if ( ! is_array( $meta ) || empty( $meta['sizes'] ) || ! $file || ! file_exists( $file ) ) {
 		return false;
 	}
+	$old_orig   = isset( $meta['original_image'] ) ? (string) $meta['original_image'] : null;
 	$log[ $id ] = array( 'sizes' => $meta['sizes'], 'time' => time(), 'status' => 'failed', 'why' => 'Stopped before it finished' );
+	if ( null !== $old_orig ) {
+		$log[ $id ]['original_image'] = $old_orig; // kept with the old sizes so Undo restores both
+	}
 	if ( ! aw_media_webp_log_save( $log ) ) {
 		return false; // nothing is changed without the old list saved
 	}
@@ -273,6 +304,7 @@ function aw_media_webp_convert( $id ) {
 			$why = $new->get_error_message();
 		} else {
 			$new = aw_media_webp_keep_full( $new, $id, $why );
+			$new = aw_media_webp_set_original( $new, $old_orig ); // core records the scaled copy's name; keep the upload's
 			wp_update_attachment_metadata( $id, $new );
 			// Core leaves out a size it could not make, and may pick an image library that cannot write WebP.
 			$why = '' !== $why ? $why : aw_media_webp_check_sizes(
@@ -307,6 +339,7 @@ function aw_media_webp_undo( $id ) {
 		return false;
 	}
 	$meta['sizes'] = $log[ $id ]['sizes'];
+	$meta          = aw_media_webp_set_original( $meta, $log[ $id ]['original_image'] ?? null );
 	wp_update_attachment_metadata( $id, $meta );
 	$back = wp_get_attachment_metadata( $id );
 	if ( ! is_array( $back ) || ( $back['sizes'] ?? null ) !== $log[ $id ]['sizes'] ) {
