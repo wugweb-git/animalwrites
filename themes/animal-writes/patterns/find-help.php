@@ -3,7 +3,7 @@
  * Title: Find help
  * Slug: animal-writes/find-help
  * Categories: animal-writes
- * Description: Section head with the live organisation and state counts and Browse all states, the Directory search row (name, every state, Search, Use my location) and the six organisation types with the most listings as chips.
+ * Description: Section head with the live organisation and state counts, the Directory search bar (name, every state, Search, Use my location), the six organisation types with the most listings as Quick filters, then Browse all states and Claim or update your listing.
  * Inserter: yes
  *
  * @package animal-writes

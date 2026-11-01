@@ -293,8 +293,8 @@ add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_find_help_type
  * a search box whose state picker lists every state and union territory, and the twelve states with the most
  * organisations in the Directory's own state index style, with a link to all of them (owner, 18 Oct 2026).
  *
- * [aw_find_help compact="1"] the home section as one block: its section head (H2, the live counts, Browse all states),
- * the search row with Use my location, and the six organisation types with the most listings as chips.
+ * [aw_find_help compact="1"] the home section as one block: its section head (H2 and the live counts), the search bar with
+ * Use my location, the six organisation types with the most listings as Quick filters, then Browse all states and Claim.
  */
 add_shortcode(
 	'aw_find_help',
@@ -324,10 +324,11 @@ add_shortcode(
 				$chips .= '<li><a class="kit-chip" href="' . esc_url( add_query_arg( 'tag', $t[0], $dir ) ) . '">' . esc_html( $t[1] ) . '</a></li>';
 			}
 			return '<div class="kit-sec-head"><div><h2 class="wp-block-heading" id="aw-find-h">Find help near you</h2>'
-				. '<p>' . esc_html( number_format_i18n( $total ) ) . ' vets, shelters and rescue groups in ' . (int) $with . ' states.</p></div>'
-				. '<div class="aw-findhelp-all"><a class="kit-btn kit-btn--ghost kit-btn--sm" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a></div></div>'
-				. $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form>'
-				. ( $chips ? '<ul class="kit-tags aw-findhelp-types" aria-label="Organisation types">' . $chips . '</ul>' : '' );
+				. '<p><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> vets, shelters and rescue groups in <strong>' . (int) $with . '</strong> states.</p></div></div>'
+				. '<div class="aw-findhelp-bar">' . $form . '<a class="aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a></form></div>'
+				. ( $chips ? '<div class="aw-findhelp-filters"><p class="aw-findhelp-label" id="aw-findhelp-filters-h">Quick filters</p><ul class="kit-tags aw-findhelp-types" aria-labelledby="aw-findhelp-filters-h">' . $chips . '</ul></div>' : '' )
+				. '<div class="aw-findhelp-actions"><a class="kit-btn kit-btn--secondary" href="' . esc_url( $dir ) . '#aw-browse-states-h">Browse all states</a>'
+				. '<a class="kit-btn" href="' . esc_url( home_url( '/claim/' ) ) . '">Claim or update your listing</a></div>';
 		}
 		usort( $counts, fn( $a, $b ) => $b[1] <=> $a[1] );
 		$top = '';
