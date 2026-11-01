@@ -218,6 +218,7 @@
 .aw-camp--lab-rules .aw-camp-grid > :first-child { flex-basis: min(calc(2 * var(--kit-card-min)), 100%); } /* the main change: two cards wide, one screen wide on phones */
 .aw-camp--lab-rules .aw-camp-docs-q li > .kit-card { height: 100%; }
 /* Grounds: each is a checkbox card, so Tab reaches every one and scrolls it into view; the fieldset legend names the row */
+.aw-camp--lab-rules .aw-letter-to { font-size: var(--kit-type-h3); } /* the recipient at the theme H3 size, not a literal clamp */
 .aw-camp--lab-rules .aw-letter-preview { box-sizing: border-box; max-height: 14rem; } /* the letter scrolls inside its box (focusable, labelled): the phone value at every width */
 .aw-camp--lab-rules .aw-letter-share-pic img { height: var(--kit-thumb-max); } /* 15rem (docs/card-sizes.md); widths from the image ratios */
 /* The pain bar: one 12px bar (--kit-space-3) at every width, filled left to right */
