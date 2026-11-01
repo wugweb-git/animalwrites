@@ -1,6 +1,6 @@
 <?php
 /**
- * The duplicate-file groups the Media Library audit of 31 Oct 2026 found safe to merge (same file hash, extra copies used
+ * The duplicate-file groups the Media Library audit found safe to merge (same file hash, extra copies used
  * by at most one post). Each entry: keep ID => extra IDs. Live data decides: the tool re-checks every group (same file,
  * same type, every reference known) before it changes anything.
  *

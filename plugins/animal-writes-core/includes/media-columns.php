@@ -1,6 +1,6 @@
 <?php
 /**
- * Media Library list columns (owner, 31 Oct 2026): name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
+ * Media Library list columns: name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
  *
  * - No Author column (the site has one author).
  * - "Uploaded to" stays as WordPress has it (with Attach / Detach); "Also used in" sits beside it and lists every other

@@ -1,6 +1,6 @@
 <?php
 /**
- * Media → Duplicate files (owner, 1 Nov 2026): merges the duplicate copies of a file that the Media Library audit found.
+ * Media → Duplicate files: merges the duplicate copies of a file that the Media Library audit found.
  *
  * Trash is off on this site (MEDIA_TRASH), so deleting an attachment would be permanent. This tool never deletes: for each
  * group it repoints every reference from the extra copies to one kept copy, checks that nothing still points at them, and
@@ -104,7 +104,9 @@ function aw_media_merge_check( $keep, array $extras ) {
 	$in      = implode( ',', array_fill( 0, count( $extras ), '%d' ) );
 	$allowed = aw_media_merge_meta_keys();
 	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the IN list is only %d placeholders built with array_fill
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN ($in) AND meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment'", $extras ) );
+	$known = function_exists( 'aw_media_post_meta_uses' ) ? array_keys( aw_media_post_meta_uses() ) : array();
+	$kin   = $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''";
+	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN ($in) AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment' OR meta_key IN ($kin) )", array_merge( $extras, $known ) ) );
 	$meta = array();
 	foreach ( (array) $rows as $r ) {
 		if ( in_array( $r->meta_key, array( '_wp_attachment_context' ), true ) ) {
@@ -186,7 +188,7 @@ function aw_media_merge_group( $keep ) {
 			$new = preg_replace( '/wp-image-' . (int) $id . '\b/', 'wp-image-' . (int) $keep, $new );
 		}
 		if ( $new !== $post->post_content ) {
-			$entry['content'][ $pid ] = $post->post_content;
+			$entry['content'][ $pid ] = array( 'old' => $post->post_content, 'hash' => md5( $new ) );
 			$wpdb->update( $wpdb->posts, array( 'post_content' => $new ), array( 'ID' => $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			clean_post_cache( $pid );
 		}
@@ -224,17 +226,30 @@ function aw_media_merge_group( $keep ) {
 	return array( 'status' => 'merged', 'why' => '' );
 }
 
-/** Put the references and post content of a log entry back as they were. */
+/**
+ * Put the references and post content of a log entry back as they were. A post whose content was edited since the merge
+ * is left alone (its text is no longer the merged text), so a later edit is never overwritten.
+ *
+ * @param array $entry Log entry.
+ * @return int[] Post IDs left as they are because they were edited after the merge.
+ */
 function aw_media_merge_restore( array $entry ) {
 	global $wpdb;
+	$skipped = array();
 	foreach ( (array) ( $entry['meta'] ?? array() ) as $m ) {
 		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['old'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		wp_cache_delete( $m['post_id'], 'post_meta' );
 	}
-	foreach ( (array) ( $entry['content'] ?? array() ) as $pid => $old ) {
-		$wpdb->update( $wpdb->posts, array( 'post_content' => $old ), array( 'ID' => (int) $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( (array) ( $entry['content'] ?? array() ) as $pid => $c ) {
+		$now = (string) get_post_field( 'post_content', (int) $pid );
+		if ( md5( $now ) !== $c['hash'] ) {
+			$skipped[] = (int) $pid;
+			continue;
+		}
+		$wpdb->update( $wpdb->posts, array( 'post_content' => $c['old'] ), array( 'ID' => (int) $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		clean_post_cache( (int) $pid );
 	}
+	return $skipped;
 }
 
 /** Undo a merged group: references, content and the copies come back. */
@@ -244,7 +259,7 @@ function aw_media_merge_undo( $keep ) {
 	if ( empty( $log[ $keep ] ) || 'merged' !== $log[ $keep ]['status'] ) {
 		return false;
 	}
-	aw_media_merge_restore( $log[ $keep ] );
+	$log[ $keep ]['skipped'] = aw_media_merge_restore( $log[ $keep ] );
 	foreach ( (array) $log[ $keep ]['extras'] as $id ) {
 		$wpdb->update( $wpdb->posts, array( 'post_status' => 'inherit' ), array( 'ID' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		delete_post_meta( $id, '_wp_trash_meta_status' );
@@ -269,7 +284,7 @@ add_action(
 	'admin_post_aw_media_merge',
 	function () {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Not allowed.', '', array( 'response' => 403 ) );
+			wp_die( esc_html( 'Not allowed.' ), '', array( 'response' => 403 ) );
 		}
 		check_admin_referer( 'aw_media_merge' );
 		$do   = sanitize_text_field( wp_unslash( $_POST['do'] ?? '' ) );
@@ -291,9 +306,15 @@ add_action(
 			$args['aw_mm'] = $done;
 		} elseif ( preg_match( '/^(merge|undo|retry):(\d+)$/', $do, $m ) ) {
 			$keep = (int) $m[2];
+			if ( ! isset( aw_media_merge_groups()[ $keep ] ) ) {
+				wp_safe_redirect( add_query_arg( $args, admin_url( 'upload.php' ) ) );
+				exit;
+			}
 			if ( 'undo' === $m[1] ) {
 				aw_media_merge_undo( $keep );
 				$args['aw_mm_undo'] = $keep;
+				$after              = aw_media_merge_log();
+				$args['aw_mm_skip'] = count( (array) ( $after[ $keep ]['skipped'] ?? array() ) );
 			} else {
 				if ( 'retry' === $m[1] ) {
 					$log = aw_media_merge_log();
@@ -317,11 +338,11 @@ function aw_media_merge_screen() {
 	$groups = aw_media_merge_groups();
 	$log    = aw_media_merge_log();
 	echo '<div class="wrap"><h1>Duplicate files</h1>';
-	if ( isset( $_GET['aw_mm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+	if ( isset( $_GET['aw_mm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended.Recommended
+		echo '<div class="notice notice-success is-dismissible"><p>Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended.Recommended
 	}
-	if ( isset( $_GET['aw_mm_undo'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		echo '<div class="notice notice-success is-dismissible"><p>Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification
+	if ( isset( $_GET['aw_mm_undo'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended.Recommended
+		echo '<div class="notice notice-success is-dismissible"><p>Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.' . ( ! empty( $_GET['aw_mm_skip'] ) ? ' ' . (int) $_GET['aw_mm_skip'] . ' post(s) were edited after the merge and keep their new text.' : '' ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended.Recommended
 	}
 	echo '<p>The same picture uploaded more than once. A merge points every use at one copy and gives the extra copies the Trash status; files stay on disk and nothing is deleted. Undo puts everything back. A group is blocked when an extra is a featured image, hosted file, category photo or named in an option.</p>';
 	$merged  = 0;
