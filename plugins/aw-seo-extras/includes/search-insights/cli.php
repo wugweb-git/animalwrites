@@ -1,6 +1,6 @@
 <?php
 /**
- * WP-CLI: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rollup | delete-data --yes
+ * WP-CLI: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rollup | keyphrase-guard | delete-data --yes
  *
  * `dry-run` writes nothing: it reads the seed, Rank Math, Sourcing and one day of Search Console (through Site Kit, as
  * the module's owner) and reports what phase 1 would store.
@@ -256,6 +256,57 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 */
 			public function rollup( $args, $assoc ) {
 				WP_CLI::log( wp_json_encode( aw_si_rollup( ! empty( $assoc['dry'] ) ) ) );
+			}
+
+			/**
+			 * Read-only: replays the one-page-per-keyphrase rule (focus-keywords.php) over today's conflicts. For each keyword
+			 * with status conflict, the pages that own it: the first (an evergreen page, else the oldest) keeps it and every
+			 * later one would have been refused by /aw/v1/seo-focus. Writes nothing.
+			 *
+			 * [--list]
+			 * : One line per keyword: the page kept and the pages refused.
+			 *
+			 * @subcommand keyphrase-guard
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function keyphrase_guard( $args, $assoc ) {
+				global $wpdb;
+				if ( ! aw_si_ready() || ! function_exists( 'aw_seo_kp_replay' ) ) {
+					WP_CLI::error( 'Search Insights tables or the focus-keyword module are not loaded.' );
+				}
+				$k    = aw_si_table( 'keywords' );
+				$pg   = aw_si_table( 'kw_pages' );
+				$rows = (array) $wpdb->get_results( "SELECT k.id, k.label, k.impr28, l.obj_type, l.obj_id, p.post_type, p.post_date FROM {$k} k JOIN {$pg} l ON l.kw_id = k.id AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 LEFT JOIN {$wpdb->posts} p ON l.obj_type = 'post' AND p.ID = l.obj_id WHERE k.status = 'conflict' ORDER BY k.impr28 DESC, k.id" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+				$by   = array();
+				foreach ( $rows as $r ) {
+					$by[ (int) $r->id ]['label']   = (string) $r->label;
+					$by[ (int) $r->id ]['impr']    = (int) $r->impr28;
+					$by[ (int) $r->id ]['pages'][] = array(
+						'type' => 'term' === $r->obj_type ? 'term' : (string) $r->post_type,
+						'id'   => (int) $r->obj_id,
+						'date' => 'term' === $r->obj_type ? '0000' : (string) $r->post_date,
+					);
+				}
+				$all       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$k} WHERE status = 'conflict'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$prevented = 0;
+				$refused   = 0;
+				$news      = 0;
+				foreach ( $by as $kw ) {
+					if ( count( $kw['pages'] ) < 2 ) {
+						continue; // one owner: a conflict only because Google shows another page; the guard cannot prevent that
+					}
+					$r = aw_seo_kp_replay( $kw['pages'] );
+					++$prevented;
+					$refused += count( $r['refused'] );
+					$news    += count( array_filter( $r['refused'], fn( $x ) => 'aw_news' === $x['type'] ) );
+					if ( ! empty( $assoc['list'] ) ) {
+						WP_CLI::log( sprintf( '%s (%d impr): keep %s %d; refuse %s', $kw['label'], $kw['impr'], $r['keep']['type'], $r['keep']['id'], implode( ', ', array_map( fn( $x ) => $x['type'] . ' ' . $x['id'], $r['refused'] ) ) ) );
+					}
+				}
+				WP_CLI::log( sprintf( 'Conflict keywords: %d. With two or more owner pages (the guard would have prevented them): %d. Keyphrase writes it would have refused: %d (News items: %d). The other %d are conflicts because Google shows a page that does not own the keyword.', $all, $prevented, $refused, $news, $all - $prevented ) );
+				WP_CLI::success( 'Dry run. Nothing was written.' );
 			}
 
 			/**

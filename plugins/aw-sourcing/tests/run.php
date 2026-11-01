@@ -410,6 +410,18 @@ aw_t( false === strpos( $policy, "array( 'publishers' => 'sources', 'library' =>
 aw_t( false !== strpos( $rules, 'aw_rules_live()' ) && false !== strpos( $rules, "wp_safe_redirect( aw_rules_url( \$tab, array_map( 'rawurlencode', \$q ) ) ); // 302" ), 'the phase 3 switch (old tabs to Rules, 302) stays' );
 aw_t( false !== strpos( $rules, "'admin.php' !== \$pagenow" ), 'the phase 3 switch works on the page\'s new address' );
 
+// ---- one page per keyphrase (aw-seo-extras keyphrase-model.php) ----
+require dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/keyphrase-model.php';
+aw_t( '' === aw_seo_kp_refusal( 'aw_news', array() ), 'a keyphrase nobody has is allowed' );
+aw_t( 0 === strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'post', 'id' => 7 ) ) ), 'an evergreen page owns' ), 'News never takes a phrase a guide owns' );
+aw_t( false !== strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'aw_news', 'id' => 3 ), array( 'type' => 'aw_legal', 'id' => 9 ) ) ), 'aw_legal 9' ), 'the reason names the evergreen owner before a News item' );
+aw_t( 0 === strpos( aw_seo_kp_refusal( 'post', array( array( 'type' => 'aw_news', 'id' => 3 ) ) ), 'another page owns' ), 'a guide is refused a phrase a News item has' );
+aw_t( '' === aw_seo_kp_refusal( 'post', array( array( 'type' => 'post', 'id' => 0 ) ) ), 'an owner without an ID is ignored' );
+$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 1, 'date' => '2026-01-01' ), array( 'type' => 'post', 'id' => 2, 'date' => '2026-05-01' ), array( 'type' => 'aw_news', 'id' => 3, 'date' => '2026-02-01' ) ) );
+aw_t( 2 === $kp['keep']['id'] && 2 === count( $kp['refused'] ), 'the replay keeps the guide over older News items' );
+$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 5, 'date' => '2026-03-01' ), array( 'type' => 'aw_news', 'id' => 4, 'date' => '2026-02-01' ) ) );
+aw_t( 4 === $kp['keep']['id'] && 5 === $kp['refused'][0]['id'], 'between News items the oldest keeps it' );
+
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
 

@@ -9,7 +9,10 @@
  * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}], replace: false}
  *      → writes the keyword where the field is empty and it passes aw_seo_clean_keyword() and is a phrase of the item's
  *        SEO title (aw_seo_keyword_in_title); with replace, also over a keyword that is not in the SEO title.
- *        {written, skipped: [{id, why}]}
+ *        A keyphrase another published page already has (its focus keyphrase, or the owner of the keyword record in
+ *        Search Insights) is refused, and a News item never takes one an evergreen page owns (keyphrase-model.php).
+ *        With dry: true, nothing is written and `written` counts what would be.
+ *        {written, skipped: [{id, why, owner?}], dry}
  *
  * The SEO title is the source of truth (owner, 15 Oct 2026): the primary focus keyword is words that stand together in
  * it, never a title changed to fit a keyword.
@@ -22,6 +25,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+require_once __DIR__ . '/keyphrase-model.php';
 
 /** Words that alone make no search phrase ("save animals", "animal welfare india"). */
 // AW_SEO_GENERIC_WORDS: AW SEO Plus → Settings (settings.php).
@@ -119,6 +124,48 @@ function aw_seo_keyword_text( $post ) {
 	return aw_seo_plain( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
 }
 
+/**
+ * Other published pages that already have this keyphrase: as their primary Rank Math focus keyphrase (posts and
+ * terms), or as the owner of its keyword record in Search Insights (wp_aw_si_kw_pages, role owner).
+ *
+ * @param string $kw Keyphrase, as aw_seo_clean_keyword() returns it.
+ * @param int    $id The page asking for it (never in the list).
+ * @return array Each [ 'type' => post type or 'term', 'id' => int ].
+ */
+function aw_seo_keyphrase_owners( $kw, $id ) {
+	global $wpdb;
+	$kw  = mb_strtolower( trim( (string) $kw ) );
+	$out = array();
+	if ( '' === $kw ) {
+		return $out;
+	}
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery
+	$posts = (array) $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, p.post_type FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = 'rank_math_focus_keyword' AND p.post_status = 'publish' AND p.ID <> %d AND LOWER( TRIM( SUBSTRING_INDEX( m.meta_value, ',', 1 ) ) ) = %s LIMIT 5", (int) $id, $kw ) );
+	foreach ( $posts as $p ) {
+		$out[ 'post' . $p->ID ] = array( 'type' => (string) $p->post_type, 'id' => (int) $p->ID );
+	}
+	$terms = (array) $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = 'rank_math_focus_keyword' AND LOWER( TRIM( SUBSTRING_INDEX( meta_value, ',', 1 ) ) ) = %s LIMIT 5", $kw ) );
+	foreach ( $terms as $t ) {
+		$out[ 'term' . $t ] = array( 'type' => 'term', 'id' => (int) $t );
+	}
+	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() && function_exists( 'aw_si_norm' ) ) {
+		$k    = aw_si_table( 'keywords' );
+		$pg   = aw_si_table( 'kw_pages' );
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.obj_type, l.obj_id FROM {$pg} l JOIN {$k} k ON k.id = l.kw_id WHERE k.norm = %s AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 AND NOT ( l.obj_type = 'post' AND l.obj_id = %d ) LIMIT 5", aw_si_norm( $kw ), (int) $id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+		foreach ( $rows as $r ) {
+			if ( 'post' === $r->obj_type ) {
+				if ( 'publish' === get_post_status( (int) $r->obj_id ) ) {
+					$out[ 'post' . $r->obj_id ] = array( 'type' => (string) get_post_type( (int) $r->obj_id ), 'id' => (int) $r->obj_id );
+				}
+			} else {
+				$out[ 'term' . $r->obj_id ] = array( 'type' => 'term', 'id' => (int) $r->obj_id );
+			}
+		}
+	}
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery
+	return array_values( $out );
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -183,6 +230,7 @@ add_action(
 					$written = 0;
 					$skipped = array();
 					$replace = (bool) $req->get_param( 'replace' );
+					$dry     = (bool) $req->get_param( 'dry' );
 					foreach ( array_slice( (array) $req->get_param( 'items' ), 0, 200 ) as $it ) {
 						$id   = absint( $it['id'] ?? 0 );
 						$post = $id ? get_post( $id ) : null;
@@ -210,6 +258,16 @@ add_action(
 							$skipped[] = array( 'id' => $id, 'why' => 'not a phrase of the SEO title' );
 							continue;
 						}
+						$owners = aw_seo_keyphrase_owners( $kw, $id );
+						$why    = aw_seo_kp_refusal( $post->post_type, $owners );
+						if ( '' !== $why ) {
+							$skipped[] = array( 'id' => $id, 'why' => $why, 'owner' => $owners );
+							continue;
+						}
+						if ( $dry ) {
+							++$written;
+							continue;
+						}
 						if ( '' !== $have ) {
 							$hist = (array) get_post_meta( $id, '_aw_focus_history', true );
 							$hist[] = array( 'keyword' => $have, 'replaced' => gmdate( 'c' ) );
@@ -218,7 +276,7 @@ add_action(
 						update_post_meta( $id, 'rank_math_focus_keyword', wp_slash( '' !== $rest ? $kw . ', ' . $rest : $kw ) );
 						++$written;
 					}
-					return array( 'written' => $written, 'skipped' => $skipped );
+					return array( 'written' => $written, 'skipped' => $skipped, 'dry' => $dry );
 				},
 			)
 		);
