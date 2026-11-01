@@ -1009,9 +1009,10 @@ function aw_sc_rows_a11y( $html ) {
 }
 
 /**
- * The state tracker's long cell folded: in every state card the third cell (the latest public order, and what is due)
- * goes inside a details element whose summary is that column's own heading, closed, so each card stays short (Layout
- * rules 5 and 10). The words are the table's own; without the heading the cell is left as it is.
+ * The state tracker's long cells folded: in every state card the third cell (the latest public order, and what is due),
+ * and in a card for several states its list of states, go inside a details element whose summary is that column's own
+ * heading, closed, so each card stays short (Layout rules 5 and 10). The words are the table's own; without the
+ * headings the cells are left as they are.
  *
  * @param string $html The rendered content.
  * @return string
@@ -1024,12 +1025,17 @@ function aw_sc_tracker_folds( $html ) {
 				return $f[0];
 			}
 			$label = trim( wp_strip_all_tags( $th[1][2] ) );
-			$cell  = function ( $tr ) use ( $label ) {
+			$first = trim( wp_strip_all_tags( $th[1][0] ) );
+			$cell  = function ( $tr ) use ( $label, $first ) {
 				$n = 0;
 				return preg_replace_callback(
 					'#(<td\b[^>]*>)(.*?)(</td>)#s',
-					function ( $td ) use ( &$n, $label ) {
-						return 3 === ++$n && '' !== trim( $td[2] ) ? $td[1] . '<details class="aw-sc-fold"><summary>' . esc_html( $label ) . '</summary>' . $td[2] . '</details>' . $td[3] : $td[0];
+					function ( $td ) use ( &$n, $label, $first ) {
+						++$n;
+						if ( 1 === $n && '' !== $first && false !== strpos( wp_strip_all_tags( $td[2] ), ',' ) ) { // a card for several states: its list folded under the column's own heading
+							return $td[1] . '<details class="aw-sc-fold aw-sc-fold--states"><summary>' . esc_html( $first ) . '</summary>' . $td[2] . '</details>' . $td[3];
+						}
+						return 3 === $n && '' !== trim( $td[2] ) ? $td[1] . '<details class="aw-sc-fold"><summary>' . esc_html( $label ) . '</summary>' . $td[2] . '</details>' . $td[3] : $td[0];
 					},
 					$tr[0]
 				);
