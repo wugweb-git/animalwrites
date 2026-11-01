@@ -128,11 +128,89 @@ add_action(
 );
 
 /**
- * A line under a News item's summary that links to its campaign (owner, 1 Nov 2026). Only campaigns listed here get a
- * line; the words are the owner's. Keyed by the campaign link's slug: [campaign post ID, text before the link, link words].
+ * A line under a News item's summary that links to its campaign (owner, 1 Nov 2026). Works for every campaign: the words
+ * are the campaign link's own fields (Linked campaigns → Edit: "News line" and "News line link words"), the link is the
+ * term's campaign page (aw_campaign_page). No words, no line, so a campaign shows one only once its words are set.
+ * Lines set before the fields existed stay here, keyed by slug: [campaign post ID, text before the link, link words].
  */
 const AW_CAMPAIGN_NEWS_LINES = array(
 	'campaign-supreme-court-stray-dogs' => array( 23225, 'This is part of the Supreme Court stray dogs case: see what every state has done in ', 'our tracker' ),
+);
+
+add_action(
+	'init',
+	function () {
+		foreach ( array( 'aw_news_line', 'aw_news_line_link' ) as $key ) {
+			register_term_meta(
+				AW_CAMPAIGN_LINK,
+				$key,
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'default'           => '',
+					'sanitize_callback' => 'sanitize_text_field',
+					'show_in_rest'      => true,
+					'auth_callback'     => function () {
+						return current_user_can( 'manage_categories' );
+					},
+				)
+			);
+		}
+	},
+	6
+);
+
+/**
+ * A campaign link's News line: [campaign post ID, text before the link, link words], or null.
+ *
+ * @param WP_Term $t Campaign link term.
+ * @return array|null
+ */
+function aw_campaign_news_line( $t ) {
+	$text = trim( (string) get_term_meta( $t->term_id, 'aw_news_line', true ) );
+	$page = (int) get_term_meta( $t->term_id, 'aw_campaign_page', true );
+	if ( '' !== $text && $page ) {
+		$words = trim( (string) get_term_meta( $t->term_id, 'aw_news_line_link', true ) );
+		return array( $page, rtrim( $text ) . ' ', '' !== $words ? $words : get_the_title( $page ) );
+	}
+	return AW_CAMPAIGN_NEWS_LINES[ $t->slug ] ?? null;
+}
+
+// The two fields on Linked campaigns → Edit (core form table, no custom CSS).
+add_action(
+	AW_CAMPAIGN_LINK . '_edit_form_fields',
+	function ( $term ) {
+		wp_nonce_field( 'aw_news_line', 'aw_news_line_nonce' );
+		$rows = array(
+			'aw_news_line'      => array( 'News line', 'Shown under the summary of this campaign\'s News items, before the link. Empty: no line.' ),
+			'aw_news_line_link' => array( 'News line link words', 'The words that link to the campaign page. Empty: the campaign\'s title.' ),
+		);
+		foreach ( $rows as $key => $label ) {
+			printf(
+				'<tr class="form-field"><th scope="row"><label for="%1$s">%2$s</label></th><td><input name="%1$s" id="%1$s" type="text" value="%3$s"><p class="description">%4$s</p></td></tr>',
+				esc_attr( $key ),
+				esc_html( $label[0] ),
+				esc_attr( (string) get_term_meta( $term->term_id, $key, true ) ),
+				esc_html( $label[1] )
+			);
+		}
+	}
+);
+add_action(
+	'edited_' . AW_CAMPAIGN_LINK,
+	function ( $term_id ) {
+		if ( ! isset( $_POST['aw_news_line_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['aw_news_line_nonce'] ) ), 'aw_news_line' ) || ! current_user_can( 'manage_categories' ) ) {
+			return;
+		}
+		foreach ( array( 'aw_news_line', 'aw_news_line_link' ) as $key ) {
+			$v = isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+			if ( '' === $v ) {
+				delete_term_meta( $term_id, $key );
+			} else {
+				update_term_meta( $term_id, $key, $v );
+			}
+		}
+	}
 );
 
 // The News item's own summary (not a card's): its campaign line after it.
@@ -144,7 +222,7 @@ add_filter(
 			return $html;
 		}
 		foreach ( aw_campaign_links( $id ) as $t ) {
-			$line = AW_CAMPAIGN_NEWS_LINES[ $t->slug ] ?? null;
+			$line = aw_campaign_news_line( $t );
 			if ( $line && 'publish' === get_post_status( $line[0] ) ) {
 				return $html . '<p>' . esc_html( $line[1] ) . '<a href="' . esc_url( get_permalink( $line[0] ) ) . '">' . esc_html( $line[2] ) . '</a>.</p>';
 			}
