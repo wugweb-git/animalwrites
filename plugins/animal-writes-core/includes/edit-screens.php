@@ -955,7 +955,7 @@ function aw_edit_screens_render( array $all ): void {
 	$admin   = 0;
 	foreach ( $all as $r ) {
 		if ( 'admin' === $r['screen'] ) {
-			++$admin;
+			$admin += in_array( aw_edit_screen_row_about( $r )['plugin'], aw_edit_screen_own_plugins(), true ) ? 1 : 0; // ours only, as in Admin pages under Mapping
 			continue;
 		}
 		$screens[ $r['type'] ] = $r['screen'];
