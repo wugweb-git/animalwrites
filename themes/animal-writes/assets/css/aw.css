@@ -1742,6 +1742,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 :is(.aw-festive, .kit-hero) .aw-festive-tips li { display: flex; align-items: center; gap: var(--kit-space-3); max-width: none; margin: 0; color: var(--kit-color-on-ink); font-weight: 500; }
 :is(.aw-festive, .kit-hero) .aw-festive-ico { flex: 0 0 36px; height: 36px; display: grid; place-items: center; border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 10%, transparent); color: var(--kit-color-accent); }
 :is(.aw-festive, .kit-hero) .aw-festive-ico .kit-ico { --kit-ico-size: 20px; }
+@media (min-width: 768px) { .kit-hero .aw-festive-tips { grid-template-columns: repeat(2, max-content); column-gap: var(--kit-space-6); } } /* in a page hero the tips sit two across, so the hero keeps its height */
 .aw-festive .aw-festive-art { order: -1; display: grid; grid-template-columns: 1.2fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; aspect-ratio: 3 / 2; }
 .aw-festive .aw-festive-art > figure { margin: 0; min-height: 0; overflow: hidden; border-radius: var(--kit-radius-media); }
 .aw-festive .aw-festive-art > figure:first-child { grid-row: 1 / 3; }

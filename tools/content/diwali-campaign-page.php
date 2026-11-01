@@ -164,7 +164,7 @@ $cover = array(
 	'anchor'          => 'top',
 	'className'       => 'kit-hero aw-camp-hero aw-camp-open',
 	'align'           => 'full',
-	'style'           => array( 'spacing' => array( 'padding' => array( 'right' => 'var(--wp--style--root--padding-right)', 'left' => 'var(--wp--style--root--padding-left)' ) ) ),
+	'style'           => array( 'spacing' => array( 'padding' => array( 'right' => '0', 'left' => '0' ) ) ),
 	'layout'          => array( 'type' => 'constrained', 'contentSize' => '1120px' ),
 );
 $tips = '<!-- wp:list {"className":"aw-festive-tips"} -->' . "\n" . '<ul class="wp-block-list aw-festive-tips">';
@@ -173,15 +173,14 @@ foreach ( array( array( 'home', 'Keep pets indoors' ), array( 'paw', 'Keep water
 }
 $tips .= '</ul>' . "\n" . '<!-- /wp:list -->' . "\n\n";
 $hero = '<!-- wp:cover ' . wp_json_encode( $cover, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . ' -->' . "\n"
-	. '<div id="top" class="wp-block-cover alignfull is-dark has-custom-content-position is-position-center-left kit-hero aw-camp-hero aw-camp-open" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:660px">'
+	. '<div id="top" class="wp-block-cover alignfull is-dark has-custom-content-position is-position-center-left kit-hero aw-camp-hero aw-camp-open" style="padding-right:0;padding-left:0;min-height:660px">'
 	. '<span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-50 has-background-dim"></span>'
 	. '<img class="wp-block-cover__image-background wp-image-' . DW_PHOTO . '" alt="' . esc_attr( $cover['alt'] ) . '" src="' . esc_url( $cover['url'] ) . '" style="object-position:70% 60%" data-object-fit="cover" data-object-position="70% 60%"/>'
 	. '<div class="wp-block-cover__inner-container">'
-	. '<!-- wp:group {"layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->' . "\n" . '<div class="wp-block-group">'
+	. '<!-- wp:group {"style":{"spacing":{"padding":{"right":"0","left":"0"}}},"layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->' . "\n" . '<div class="wp-block-group" style="padding-right:0;padding-left:0">'
 	. dwsc( '[aw_camp_status]' )
 	. dwh( 'Diwali is loud. Keep pets and street dogs safe.', 1 )
-	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.' )
-	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
+	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds.' )
 	. $tips
 	. '<!-- wp:buttons -->' . "\n" . '<div class="wp-block-buttons">'
 	. '<!-- wp:button {"className":"is-style-kits-brand"} -->' . "\n" . '<div class="wp-block-button is-style-kits-brand"><a class="wp-block-button__link wp-element-button" href="#tonight">What to do tonight</a></div>' . "\n" . '<!-- /wp:button -->' . "\n\n"
