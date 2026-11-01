@@ -63,22 +63,37 @@
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* Section and card heights (docs/design-system.md, Layout rules 5 and 6; a card at most 600px): phones first.
    The law cards and the five action cards are one sideways row that snaps (the theme's scroll row, kit.css
-   .kit-scroll-row): on phones one card per screen with the next card's edge showing, two to a view from 768, three
-   from 1200. Each card shows its first paragraph; the rest is in the card's fold (core Details, its heading as the
+   .kit-scroll-row): on phones one card per screen with the next card's edge showing, from 768 one card of the content width
+   (--kit-width-content) with the next one showing. Each card shows its first paragraph; the rest is in the card's fold (core Details, its heading as the
    summary). campaign.js makes a row that scrolls a named, focusable region. */
 .aw-camp--diwali .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
 .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex: 0 0 calc(100% - var(--kit-space-5)); margin: 0; scroll-snap-align: start; }
-@media (min-width: 768px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: calc((100% - var(--kit-space-4)) / 2); } }
-@media (min-width: 1200px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: calc((100% - 2 * var(--kit-space-4)) / 3); } }
+@media (min-width: 768px) { .aw-camp--diwali .aw-camp-grid > .aw-camp-card { flex-basis: min(calc(100% - var(--kit-space-5)), var(--kit-width-content)); } }
+/* Who to call from 1200: the table on the left, the Directory buttons, the 1962 note and the two guides beside it */
+@media (min-width: 1200px) {
+	.aw-camp--diwali #help.aw-camp-section { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); column-gap: var(--kit-space-6); align-content: start; padding-inline: max(var(--kit-space-gutter), (100% - 1120px) / 2); } /* the 1120px text column of .aw-camp-section > * */
+	.aw-camp--diwali #help.aw-camp-section > * { grid-column: 2; max-width: none; margin-inline: 0; }
+	.aw-camp--diwali #help.aw-camp-section > h2 { grid-column: 1 / -1; grid-row: 1; }
+	.aw-camp--diwali #help.aw-camp-section > .wp-block-table { grid-column: 1; grid-row: 2 / span 3; margin-top: 0; }
+	.aw-camp--diwali #help.aw-camp-section > .wp-block-buttons { grid-row: 2; margin-top: 0; align-self: start; }
+	.aw-camp--diwali #help.aw-camp-section > .aw-camp-note { grid-row: 3; }
+	.aw-camp--diwali #help.aw-camp-section > :last-child { grid-row: 4; }
+}
+/* What the law says from 768: the line after the cards and its guide link share one line when they fit */
+@media (min-width: 768px) {
+	.aw-camp--diwali #law.aw-camp-section { padding-inline: max(var(--kit-space-gutter), (100% - 1120px) / 2); } /* the 1120px text column of .aw-camp-section > * */
+	.aw-camp--diwali #law.aw-camp-section > p:nth-last-child(-n+2) { display: inline-block; max-width: none; margin-inline: 0 var(--kit-space-4); }
+}
 .aw-camp--diwali .aw-camp-card-fold { border-bottom: 0; }
+.aw-camp--diwali .aw-camp-card-fold > summary { padding-block: 0; } /* the row is the 44px target (--kit-size-target), no extra band */
 .aw-camp--diwali .aw-camp-card-fold > :not(summary) { margin: 0 0 var(--kit-space-3); }
 .aw-camp--diwali .aw-camp-grid > :first-child .aw-camp-card-fold summary { color: var(--camp-on-mark); }
+/* The three dates sit side by side at every width, so What's happening stays one block (one column beside the photo from 768) */
+.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-3); }
 /* Tonight, in order: on phones the six steps are one sideways row (the Home story row, aw.css .aw-ed-story-figures) */
 @media (max-width: 767px) {
 	.aw-camp--diwali .aw-camp-steps--six { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(70%, 16rem); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--kit-space-3); }
 	.aw-camp--diwali .aw-camp-steps--six > li { scroll-snap-align: start; }
-	/* The three dates sit side by side, so What's happening stays one block */
-	.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-3); }
 	/* Who to call: the table scrolls sideways inside its frame (kit.css .wp-block-table) at two card widths, so its
 	   rows stay short; data tables may scroll on their own (WCAG 1.4.10) */
 	.aw-camp--diwali #help { --kit-table-min: calc(2 * var(--kit-card-min)); }
