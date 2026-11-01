@@ -312,7 +312,7 @@ $news = dwsec(
 $library = dwsec(
 	'read',
 	dwh( 'Read the law' )
-	. dwp( 'The Prevention of Cruelty to Animals Act, 1960 and the Wild Life (Protection) Act, 1972, in full in our Library.', 'aw-camp-lede' )
+	. dwp( 'The Prevention of Cruelty to Animals Act, 1960, in full in our Library.', 'aw-camp-lede' )
 	. dwq(
 		'<!-- wp:query {"queryId":93,"query":{"perPage":6,"pages":0,"offset":0,"postType":"aw_legal","order":"desc","orderBy":"date","inherit":false,%TQ%},"className":"aw-camp-docs-q kit-ico--file"} -->
 <div class="wp-block-query aw-camp-docs-q kit-ico--file"><!-- wp:post-template -->
