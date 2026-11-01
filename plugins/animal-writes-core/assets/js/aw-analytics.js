@@ -195,9 +195,9 @@
 			if (b && b.getAttribute('aria-expanded') === 'true') campaign('faq_open', { link_text: text(b) });
 		});
 	}
-	// The home band (and any campaign promo elsewhere): data-campaign-slug on the band (campaign-tools.php).
+	// The home hero and any campaign promo: data-campaign-slug on the band (home.php, campaign-tools.php). In-page links (#need-help) are not campaign clicks.
 	document.addEventListener('click', function (e) {
-		var a = e.target.closest && e.target.closest('[data-campaign-slug] a[href]');
+		var a = e.target.closest && e.target.closest('[data-campaign-slug] a[href]:not([href^="#"])');
 		if (!a || page.campaign_slug) return;
 		var band = a.closest('[data-campaign-slug]');
 		campaign('promo_click', { link_text: text(a) }, band.getAttribute('data-campaign-slug'), band.getAttribute('data-campaign-title'));

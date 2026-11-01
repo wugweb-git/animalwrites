@@ -2765,8 +2765,8 @@
    "status": "live",
    "classes": [],
    "states": [
-    "campaign open: the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
-    "otherwise: the Hero pattern (animal-writes/hero)"
+    "campaign 13848 published (open or closed; owner, 1 Nov 2026): the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
+    "campaign not published: the Hero pattern (animal-writes/hero)"
    ],
    "tokens": [],
    "a11y": {

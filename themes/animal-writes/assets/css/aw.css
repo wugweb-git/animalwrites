@@ -1484,18 +1484,13 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    block gap between them, as in page content); one H1, in the hero. Breakpoints 767/768 and 1199/1200 only. */
 .home main.kit-static > * { margin-block: 0; }
 
-/* Hero, standard: at most 70% of the screen; the text on the left, 60% of the column from 768 */
-.wp-block-cover.kit-hero.aw-ed-hero { min-height: min(var(--kit-hero-min), 70svh) !important; }
-.aw-ed-hero-text > * { margin-block: 0 var(--kit-space-4); }
-.aw-ed-hero-text > :last-child { margin-bottom: 0; }
-.aw-ed-hero-text > .aw-ed-hero-label { margin-bottom: var(--kit-space-3); }
-@media (min-width: 768px) { .aw-ed-hero-text > * { max-width: 60%; } }
-
-/* Hero, campaign open: the campaign band's design (campaign-home.css), as the page head. Less padding than a section,
-   so it stays under 70% of the screen at 1200; on phones the label, H1, line, countdown and main button come first. */
+/* Home hero: campaign 13848 while it is published, open or closed (home.php; owner, 1 Nov 2026). The campaign band's
+   design (campaign-home.css), as the page head. Less padding than a section, so it stays under 70% of the screen at
+   1200; on phones the label, H1, line, countdown and main button come first. The H1 has the lab-rules heading weight. */
 .aw-camp-band.aw-ed-hero--campaign { padding-top: var(--kit-space-7); }
 @media (min-width: 1200px) { .aw-camp-band.aw-ed-hero--campaign { padding-bottom: var(--kit-space-7); } }
 .aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-3); max-width: 18ch; font-size: var(--kit-type-display); color: var(--camp-on-mark); }
+.aw-camp--lab-rules.aw-ed-hero--campaign h1.aw-camp-band-title { font-weight: var(--kit-weight-bold); letter-spacing: normal; line-height: var(--kit-leading-heading); } /* as .aw-camp--lab-rules h2 (campaign.css) */
 .aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-4); }
 .aw-camp-band.aw-ed-hero--campaign .aw-countdown { margin: var(--kit-space-5) 0 var(--kit-space-2); }
 .aw-camp-band.aw-ed-hero--campaign .aw-cd-num { font-size: var(--kit-type-h1); }

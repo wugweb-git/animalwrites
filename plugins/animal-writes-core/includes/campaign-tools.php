@@ -124,13 +124,15 @@ add_filter(
 );
 
 /*
- * The switch at closing time, cache-safe: while a campaign is open, its page (and the home page with its band) is cached
- * only until the moment it closes (LiteSpeed TTL), and a one-off cron event purges the whole cache at that moment.
+ * The switch at closing time, cache-safe: while a campaign is open, its page (and the home page with its hero) is cached
+ * only until the moment it closes (LiteSpeed TTL), and a one-off cron event purges the whole cache at that moment. The
+ * TTL is also capped at the next midnight in India, so the countdown's day count never stays a day behind in the cache.
  */
 function aw_camp_cache_until( $id ) {
 	$ts = aw_camp_open_ts( $id ) > time() ? aw_camp_open_ts( $id ) : aw_camp_close_ts( $id );
 	if ( $ts && time() < $ts ) {
-		do_action( 'litespeed_control_set_ttl', max( 60, $ts - time() ) );
+		$midnight = ( new DateTimeImmutable( 'tomorrow', new DateTimeZone( 'Asia/Kolkata' ) ) )->getTimestamp();
+		do_action( 'litespeed_control_set_ttl', max( 60, min( $ts, $midnight ) - time() ) );
 	}
 }
 function aw_camp_schedule_close( $id ) {
@@ -545,7 +547,7 @@ add_action(
 	'wp_enqueue_scripts',
 	function () {
 		$id   = aw_camp_id( get_queried_object_id() );
-		$band = is_front_page() && function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign(); // the home hero is the open campaign (home.php)
+		$band = is_front_page() && function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign(); // the home hero is the campaign's, open or closed (home.php)
 		if ( ! ( is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true ) ) && ! $band ) {
 			return;
 		}

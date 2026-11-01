@@ -25,14 +25,17 @@ add_filter(
 
 /* ---------- Hero ---------- */
 
-/** The campaign that takes the hero's place while it is open (the draft lab animal rules, 2026). */
+/** The campaign the home hero shows (the draft lab animal rules, 2026), until the owner changes it (owner, 1 Nov 2026). */
 const AW_HOME_CAMPAIGN = 13848;
 
-/** Whether the home hero is the campaign's (published and open). Its own state is read, never changed. */
+/**
+ * Whether the home hero is the campaign's: whenever it is published, open or closed (owner, 1 Nov 2026: no automatic
+ * switch when it closes). Its own state is read, never changed.
+ */
 function aw_home_hero_is_campaign() {
 	static $on = null;
 	if ( null === $on ) {
-		$on = function_exists( 'aw_camp_is_open' ) && 'publish' === get_post_status( AW_HOME_CAMPAIGN ) && aw_camp_is_open( AW_HOME_CAMPAIGN );
+		$on = function_exists( 'aw_camp_open_ts' ) && 'publish' === get_post_status( AW_HOME_CAMPAIGN );
 	}
 	return $on;
 }
@@ -53,9 +56,10 @@ function aw_home_band_atts() {
 }
 
 /**
- * Home: hero block. While the campaign is open: its hero (the campaign band's design and colours, the page's H1, the
- * countdown and the two buttons). Otherwise the standard hero (pattern animal-writes/hero). The page cache keeps the
- * campaign hero only until the campaign closes, and the closing job purges the cache (campaign-tools.php).
+ * Home: hero block. While campaign 13848 is published (open or closed): its hero (the campaign band's design and
+ * colours, the page's H1, the countdown and the two buttons); after it closes the countdown shows what it shows, nothing
+ * is added. Only if the campaign is not published: the Hero pattern (animal-writes/hero). The page cache keeps the hero
+ * at most until the next midnight in India, so the day count moves (aw_camp_cache_until, campaign-tools.php).
  *
  * @return string
  */
@@ -68,17 +72,19 @@ function aw_block_home_hero() {
 	$band  = aw_home_band_atts();
 	$theme = sanitize_html_class( (string) ( $band['theme'] ?? 'lab-rules' ) );
 	$day   = (string) get_post_meta( $id, 'aw_campaign_close', true );
+	$day   = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : '';
 	$open  = aw_camp_open_ts( $id );
 	aw_camp_cache_until( $id );
 
+	// The band's own artwork only (no featured image: it is not drawn for the band). The phone picture only when it is an image with sizes.
 	$art = (int) ( $band['art'] ?? 0 );
-	$art = $art ? $art : (int) get_post_thumbnail_id( $id );
 	$pic = '';
 	if ( $art && wp_attachment_is_image( $art ) ) {
-		$phone = (int) ( $band['art_phone'] ?? 0 );
-		$meta  = $phone ? wp_get_attachment_metadata( $phone ) : array();
-		$pic   = '<picture class="aw-camp-band-art">'
-			. ( $phone ? '<source media="(max-width: 767px)" srcset="' . esc_attr( (string) wp_get_attachment_image_srcset( $phone, 'full' ) ) . '" sizes="100vw" width="' . (int) ( $meta['width'] ?? 0 ) . '" height="' . (int) ( $meta['height'] ?? 0 ) . '">' : '' )
+		$phone  = (int) ( $band['art_phone'] ?? 0 );
+		$srcset = $phone && wp_attachment_is_image( $phone ) ? (string) wp_get_attachment_image_srcset( $phone, 'full' ) : '';
+		$meta   = $srcset ? wp_get_attachment_metadata( $phone ) : array();
+		$pic    = '<picture class="aw-camp-band-art">'
+			. ( $srcset ? '<source media="(max-width: 767px)" srcset="' . esc_attr( $srcset ) . '" sizes="100vw" width="' . (int) ( $meta['width'] ?? 0 ) . '" height="' . (int) ( $meta['height'] ?? 0 ) . '">' : '' )
 			. wp_get_attachment_image( $art, 'full', false, array( 'alt' => '', 'sizes' => '100vw', 'loading' => 'eager', 'fetchpriority' => 'high', 'decoding' => 'async' ) )
 			. '</picture>';
 	}
@@ -88,7 +94,7 @@ function aw_block_home_hero() {
 	$out .= '<p class="aw-camp-band-pill">Draft rules G.S.R. 864(E) · objections close 5 Nov 2026</p>';
 	$out .= '<h1 id="aw-hero-t" class="aw-camp-band-title">Object to the draft lab animal rules</h1>';
 	$out .= '<p>Labs could approve most animal experiments themselves. Your objection counts until 5 November.</p>';
-	$out .= do_shortcode( '[aw_countdown date="' . esc_attr( $day ) . '" label="Last day"]' );
+	$out .= $day ? do_shortcode( '[aw_countdown date="' . $day . '" label="Last day"]' ) : ''; // $day is Y-m-d (checked above)
 	if ( $open && $day ) {
 		$out .= '<p class="aw-camp-band-range kit-meta-row"><span class="kit-meta-item">Opened ' . aw_date( $open ) . '</span><span class="kit-meta-item">Last day ' . aw_date( $day ) . '</span></p>'; // aw_date() escapes
 	}

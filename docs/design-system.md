@@ -265,12 +265,12 @@ WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link con
 
 ### Reusable sections (patterns)
 Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
-`hero` (standard home hero), `help-now` (Need help now: tap-to-call helplines and four tiles), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search, Use my location and type chips), `aw1-story` (India Writes for Its Community Dogs, full story), `aw1-story-home` (the same story as one compact band, for Home), `take-action` (volunteer and claim your listing, as two cards), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
+`hero` (standard home hero; not shown on Home while campaign 13848 is published), `help-now` (Need help now: tap-to-call helplines and four tiles), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search, Use my location and type chips), `aw1-story` (India Writes for Its Community Dogs, full story), `aw1-story-home` (the same story as one compact band, for Home), `take-action` (volunteer and claim your listing, as two cards), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
 
 ### Home layout
 The home page's sections and their order live in the theme template `themes/animal-writes/templates/front-page.html`, not in the front page's content:
 
-1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published and open, it shows the campaign hero; otherwise the standard hero (pattern `hero`).
+1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published it shows the campaign hero, open or closed: no automatic switch when it closes, and nothing is added after it closes (owner, 1 Nov 2026). The standard hero (pattern `hero`) is not shown on Home; the block falls back to it only if the campaign is not published.
 2. Need help now? (`help-now`).
 3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
 4. What's happening (`whats-happening`: Query Loop 41, four items as a mosaic).
