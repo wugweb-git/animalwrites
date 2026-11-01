@@ -236,11 +236,11 @@ function aw_seo_overview_page() {
 			),
 			array(
 				'screen' => 'Library documents',
-				'box'    => 'FAQ fields box: Short name, Hindi version link, Issued under, Key sections.',
+				'box'    => 'FAQ box: the questions. Library item box: Short name, Issued under, Key sections (document fields the questions use).',
 			),
 			array(
-				'screen' => 'Organisation types, services, categories',
-				'box'    => 'FAQ fields on the term screen.',
+				'screen' => 'Tags, categories, organisation types, services',
+				'box'    => 'FAQ box on the term screen: automatic questions (tags) and the term’s own questions.',
 			),
 		),
 		array( 'primary' => 'screen' )
