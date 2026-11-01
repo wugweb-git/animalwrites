@@ -1,0 +1,317 @@
+{
+    "key": "group_aw_listing_registrations",
+    "title": "Registrations",
+    "fields": [
+        {
+            "key": "field_aw_listing_registration",
+            "label": "Registration",
+            "name": "aw_registration",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Trust or Society registration number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_12a",
+            "label": "12A",
+            "name": "aw_reg_12a",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "12A registration number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_80g",
+            "label": "80G",
+            "name": "aw_reg_80g",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "80G registration number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_darpan_id",
+            "label": "NGO Darpan ID",
+            "name": "aw_darpan_id",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. KL/2017/0123456",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_type",
+            "label": "Registered as",
+            "name": "aw_reg_type",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Trust, Society or Section 8 company.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_fcra",
+            "label": "FCRA",
+            "name": "aw_fcra",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "FCRA registration number.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_awbi_code",
+            "label": "AWBI recognition code",
+            "name": "aw_awbi_code",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "From the AWBI list (import). Read only.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": "",
+            "readonly": 1
+        },
+        {
+            "key": "field_aw_listing_awbi_valid",
+            "label": "AWBI valid until",
+            "name": "aw_awbi_valid",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_listing_reg_date",
+            "label": "Registration date",
+            "name": "aw_reg_date",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "display_format": "j M Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_listing_msg_reg_unused",
+            "label": "Not used on the site",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_listing_reg_authority",
+            "label": "Registration authority",
+            "name": "aw_reg_authority",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_reg_act",
+            "label": "Registered under (Act)",
+            "name": "aw_reg_act",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As NGO Darpan lists it. Shown on the listing as Incorporated (Organisation group).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_sectors",
+            "label": "Sectors (NGO Darpan)",
+            "name": "aw_sectors",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Sectors of work as NGO Darpan lists them, comma separated. Not shown on the listing.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_awbi_recognised",
+            "label": "AWBI recognised on",
+            "name": "aw_awbi_recognised",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_listing_awbi_renewed",
+            "label": "AWBI renewed on",
+            "name": "aw_awbi_renewed",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 3,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}

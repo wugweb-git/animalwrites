@@ -1,0 +1,217 @@
+{
+    "key": "group_aw_listing_about",
+    "title": "About and services",
+    "fields": [
+        {
+            "key": "field_aw_listing_aliases",
+            "label": "Also known as",
+            "name": "aw_aliases",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Other names people use for this organisation, comma separated (e.g. CUPA, Compassion Unlimited). Each is matched as a whole word in News, Library, Resources, Campaigns and Media & PR for \"In the press\"; set by an editor only.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_founded",
+            "label": "Year established",
+            "name": "aw_founded",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Four digits, e.g. 2014.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_head",
+            "label": "Head of the organisation",
+            "name": "aw_head",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Name and role, as the organisation publishes it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_animals",
+            "label": "Animals helped",
+            "name": "aw_animals",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Comma separated, e.g. dogs, cats, cattle, birds.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_areas_served",
+            "label": "Areas served",
+            "name": "aw_areas_served",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Comma separated.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_services",
+            "label": "Services (as stated)",
+            "name": "aw_services",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Comma separated, in the organisation's own words. The services tags are set under Tags.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_services_source",
+            "label": "Stated by",
+            "name": "aw_services_source",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "\"organisation\", or the name of the list.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_aw_listing_services",
+                        "operator": "!=empty"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_services_on",
+            "label": "Stated on",
+            "name": "aw_services_on",
+            "aria-label": "",
+            "type": "date_picker",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_aw_listing_services",
+                        "operator": "!=empty"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "j F Y",
+            "return_format": "Y-m-d",
+            "first_day": 1
+        },
+        {
+            "key": "field_aw_listing_languages",
+            "label": "Languages",
+            "name": "aw_languages",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Comma separated.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 4,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}

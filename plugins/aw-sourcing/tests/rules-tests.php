@@ -11,7 +11,8 @@
 
 $p3     = json_decode( file_get_contents( __DIR__ . '/fixtures/phase3_live_sample.json' ), true );
 $seedfx = json_decode( file_get_contents( __DIR__ . '/fixtures/enrich_field_rules_seed.json' ), true );
-$acf    = json_decode( file_get_contents( dirname( __DIR__, 2 ) . '/animal-writes-core/acf-json/group_aw_listing.json' ), true );
+$acf_gs = array_map( fn( $f ) => json_decode( file_get_contents( $f ), true ), glob( dirname( __DIR__, 2 ) . '/animal-writes-core/acf-json/group_aw_listing*.json' ) );
+$acf    = array( 'fields' => aw_enrich_listing_groups_fields( $acf_gs, 'group_aw_listing' ) );
 $fields = array_keys( $p3['enrich_fields'] );
 $p3_order = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' ); // The order of aw_post_types().
 
@@ -140,7 +141,12 @@ $own = $plan['summary']['sections'] + array(
 $by2 = aw_rules_summary_resolve( $v1, $own, $labels );
 aw_t( '' === $by2['aw_campaign']['inherit'] && 80 === $by2['aw_campaign']['max_words'] && $by2['aw_campaign']['structure'] === $v1['news']['structure'], 'a section with its own rule: its values, the rest from News' );
 
-// ---- the Directory schema from the listing field group ----
+// ---- the Directory schema from the listing field groups ----
+$orders = array_map( fn( $g ) => (int) $g['menu_order'], $acf_gs );
+sort( $orders );
+aw_t( 8 === count( $acf_gs ) && range( 0, 7 ) === $orders && $acf['fields'] === aw_enrich_listing_groups_fields( array_reverse( $acf_gs ), 'group_aw_listing' ), 'listing fields: 8 groups, read in menu_order whatever the file order' );
+aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_provenance' === end( $acf['fields'] )['key'] && 65 === count( $acf['fields'] ), 'listing fields: Contact first, the provenance message last, 61 fields and 4 messages' );
+aw_t( array( 'x' ) === array_column( aw_enrich_listing_groups_fields( array( array( 'key' => 'group_aw_news', 'fields' => array( array( 'name' => 'n' ) ) ), array( 'key' => 'group_aw_listing_b', 'menu_order' => 1, 'fields' => array( array( 'name' => 'x' ) ) ) ), 'group_aw_listing' ), 'name' ), 'listing fields: other groups left out' );
 $schema = aw_enrich_schema_build( $acf['fields'], $p3['enrich_fields'], 'group_aw_listing', $p3['sections']['aw_listing']['tags'], array( 'rescue' => 'Rescue' ) );
 $mapped = array_filter( $schema['fields'], fn( $f ) => (bool) $f['enrich'] );
 $direct = array_filter( $p3['enrich_fields'], fn( $e ) => in_array( $e[1], array_column( $schema['fields'], 'name' ), true ) );

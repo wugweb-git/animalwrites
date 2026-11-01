@@ -1,0 +1,154 @@
+{
+    "key": "group_aw_listing_hours",
+    "title": "Opening hours",
+    "fields": [
+        {
+            "key": "field_aw_listing_opening_hours",
+            "label": "Opening hours by day",
+            "name": "aw_opening_hours",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "What visitors and search engines see: one row per day (two rows for a split day). Open all day: 00:00 to 23:59. Days with no row are not stated.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "pagination": 0,
+            "min": 0,
+            "max": 14,
+            "collapsed": "",
+            "button_label": "Add a day",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_aw_listing_opening_hours_day",
+                    "label": "Day",
+                    "name": "day",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "Monday": "Monday",
+                        "Tuesday": "Tuesday",
+                        "Wednesday": "Wednesday",
+                        "Thursday": "Thursday",
+                        "Friday": "Friday",
+                        "Saturday": "Saturday",
+                        "Sunday": "Sunday"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": "",
+                    "parent_repeater": "field_aw_listing_opening_hours"
+                },
+                {
+                    "key": "field_aw_listing_opening_hours_open",
+                    "label": "Opens",
+                    "name": "open",
+                    "aria-label": "",
+                    "type": "time_picker",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_aw_listing_opening_hours_closed",
+                                "operator": "!=",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "H:i",
+                    "return_format": "H:i",
+                    "parent_repeater": "field_aw_listing_opening_hours"
+                },
+                {
+                    "key": "field_aw_listing_opening_hours_close",
+                    "label": "Closes",
+                    "name": "close",
+                    "aria-label": "",
+                    "type": "time_picker",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_aw_listing_opening_hours_closed",
+                                "operator": "!=",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "display_format": "H:i",
+                    "return_format": "H:i",
+                    "parent_repeater": "field_aw_listing_opening_hours"
+                },
+                {
+                    "key": "field_aw_listing_opening_hours_closed",
+                    "label": "Closed",
+                    "name": "closed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "Yes",
+                    "ui_off_text": "No",
+                    "parent_repeater": "field_aw_listing_opening_hours"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 2,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}

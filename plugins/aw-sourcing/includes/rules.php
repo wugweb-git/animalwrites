@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The option holding the Directory enrichment field rules and trust order. */
 const AW_ENRICH_RULES_OPTION = 'aw_enrich_field_rules';
 
-/** The ACF field group of a listing's details. */
+/** The listing's first ACF field group; every group whose key starts with it is a listing group (one box each). */
 const AW_ENRICH_LISTING_GROUP = 'group_aw_listing';
 
 // Media & PR is a section (owner's decision 12): it is not public, so it opts in. After press.php registers it.
@@ -168,21 +168,35 @@ function aw_enrich_field_rule( $field ) {
 }
 
 /**
- * The listing field group's fields: from ACF (Secure Custom Fields) when it is active, so a field added in wp-admin is
- * there; else from the group's local JSON.
+ * The listing's fields across its field groups (group_aw_listing, group_aw_listing_address, …; one box each), in
+ * menu_order: from ACF (Secure Custom Fields) when it is active, so a field added in wp-admin is there; else from the
+ * groups' local JSON.
  *
  * @return array
  */
 function aw_enrich_listing_acf_fields() {
-	if ( function_exists( 'acf_get_fields' ) ) {
-		$f = acf_get_fields( AW_ENRICH_LISTING_GROUP );
-		if ( is_array( $f ) && $f ) {
+	if ( function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' ) ) {
+		$groups = array();
+		foreach ( (array) acf_get_field_groups() as $g ) {
+			if ( is_array( $g ) && 0 === strpos( (string) ( $g['key'] ?? '' ), AW_ENRICH_LISTING_GROUP ) ) {
+				$g['fields'] = (array) acf_get_fields( $g['key'] );
+				$groups[]    = $g;
+			}
+		}
+		$f = aw_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
+		if ( $f ) {
 			return $f;
 		}
 	}
-	$file = ( defined( 'AW_CORE_DIR' ) ? AW_CORE_DIR : WP_PLUGIN_DIR . '/animal-writes-core/' ) . 'acf-json/' . AW_ENRICH_LISTING_GROUP . '.json';
-	$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions -- a local file
-	return is_array( $json ) ? (array) ( $json['fields'] ?? array() ) : array();
+	$groups = array();
+	$dir    = ( defined( 'AW_CORE_DIR' ) ? AW_CORE_DIR : WP_PLUGIN_DIR . '/animal-writes-core/' ) . 'acf-json/';
+	foreach ( (array) glob( $dir . AW_ENRICH_LISTING_GROUP . '*.json' ) as $file ) {
+		$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions -- a local file
+		if ( is_array( $json ) ) {
+			$groups[] = $json;
+		}
+	}
+	return aw_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
 }
 
 /** The Directory schema (rules-model.php aw_enrich_schema_build) for enrich/config; built once per request. */

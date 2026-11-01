@@ -1,0 +1,301 @@
+{
+    "key": "group_aw_listing_online",
+    "title": "Online",
+    "fields": [
+        {
+            "key": "field_aw_listing_website",
+            "label": "Website",
+            "name": "aw_website",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_instagram",
+            "label": "Instagram",
+            "name": "aw_instagram",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_facebook",
+            "label": "Facebook",
+            "name": "aw_facebook",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_x",
+            "label": "X (Twitter)",
+            "name": "aw_x",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_youtube",
+            "label": "YouTube",
+            "name": "aw_youtube",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_linkedin",
+            "label": "LinkedIn",
+            "name": "aw_linkedin",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_listing_wikidata",
+            "label": "Wikidata ID",
+            "name": "aw_wikidata",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. Q4929028.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_ig_followers",
+            "label": "Instagram followers",
+            "name": "aw_ig_followers",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_ig_posts",
+            "label": "Instagram posts",
+            "name": "aw_ig_posts",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_last_post",
+            "label": "Latest social post",
+            "name": "aw_last_post",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "YYYY-MM-DD.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_ngobase_url",
+            "label": "ngobase.org profile",
+            "name": "aw_ngobase_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_g_profile",
+            "label": "Google Business Profile link",
+            "name": "aw_g_profile",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "The share.google link.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_g_category",
+            "label": "Google category",
+            "name": "aw_g_category",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As on the Google profile, e.g. Animal shelter.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_g_rating",
+            "label": "Google rating",
+            "name": "aw_g_rating",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Out of 5, e.g. 4.6",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_g_reviews",
+            "label": "Google reviews",
+            "name": "aw_g_reviews",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "How many reviews.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 5,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}
