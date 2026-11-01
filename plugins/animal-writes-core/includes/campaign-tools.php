@@ -955,7 +955,7 @@ add_filter(
 		}
 		$bar = aw_share_html( get_the_ID() );
 		return preg_replace_callback(
-			'#(<div class="aw-camp-share-kit" data-aw-share="[^"]*">)\s*(</div>)#',
+			'#(<div class="aw-camp-share-kit"[^>]*\sdata-aw-share[^>]*>)\s*(</div>)#',
 			function ( $m ) use ( $bar ) {
 				return $m[1] . $bar . $m[2];
 			},
