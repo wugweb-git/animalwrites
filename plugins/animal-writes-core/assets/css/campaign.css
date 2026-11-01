@@ -192,7 +192,7 @@
 
 /* Type: the artwork's heavy, tight headlines, in the site face (Inter) */
 .aw-camp :is(h1, h2, h3.aw-camp-mod-h) { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
-.aw-camp h1 { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem); margin: 0 0 var(--kit-space-4); }
+.aw-camp h1 { font-size: var(--kit-type-h1); margin: 0 0 var(--kit-space-4); } /* the theme H1 */
 .aw-camp :is(h2, h3.aw-camp-mod-h) { font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); margin: 0 0 var(--kit-space-4); }
 /* A module (H3) with its own band reads like a section: the site's H2 level (aw.css text levels are !important) */
 .aw-camp h3.aw-camp-mod-h { font-size: var(--kit-type-h2) !important; font-weight: var(--kit-weight-bold) !important; line-height: 1.2 !important; }
@@ -213,7 +213,16 @@
 
 /* Campaign artwork beside a section's opening (c2split): a 4:3 crop of the artwork's busy side */
 .aw-camp-split { margin-bottom: var(--kit-space-5); }
-.aw-camp-art { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--kit-radius-card); background: var(--camp-mark); }
+/* Campaign columns side by side from 768, the theme's breakpoint (core stacks them below 782); each column keeps its block width as its share */
+@media (min-width: 768px) {
+	.aw-camp :is(.aw-camp-split, .aw-camp-faq-cols).wp-block-columns { flex-wrap: nowrap !important; }
+	.aw-camp :is(.aw-camp-split, .aw-camp-faq-cols) > .wp-block-column { flex-basis: 0 !important; }
+	.aw-camp .aw-camp-split > .wp-block-column:first-child { flex-grow: 58; }
+	.aw-camp .aw-camp-split > .wp-block-column:last-child { flex-grow: 42; }
+	.aw-camp .aw-camp-faq-cols > .wp-block-column:first-child { flex-grow: 34; }
+	.aw-camp .aw-camp-faq-cols > .wp-block-column:last-child { flex-grow: 66; }
+}
+.aw-camp-art { margin: 0; aspect-ratio: var(--kit-card-media-ratio); overflow: hidden; border-radius: var(--kit-radius-card); background: var(--camp-mark); }
 .aw-camp-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 /* Status (hero): the action window, and after closing the outcome beside it as its own label */
@@ -281,11 +290,10 @@
 .aw-camp-card > * { margin: 0 0 var(--kit-space-3); }
 .aw-camp-card h3 { font-size: var(--kit-type-h3); }
 .aw-camp-card-chips { margin: auto 0 0; padding-top: var(--kit-space-2); }
-.aw-camp-card-ico { display: inline-grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--camp-surface); color: var(--camp-mark); }
-.aw-camp-card-ico .kit-ico { --kit-ico-size: 1.5rem; }
+.aw-camp-card-ico { display: inline-grid; place-items: center; width: var(--kit-size-control); height: var(--kit-size-control); border-radius: 50%; background: var(--camp-surface); color: var(--camp-mark); }
+.aw-camp-card-ico .kit-ico { --kit-ico-size: var(--kit-size-check); }
 .aw-camp-grid > :first-child { background: var(--camp-mark); color: var(--camp-on-mark); box-shadow: none; }
 .aw-camp-grid > :first-child :is(h3, p) { color: var(--camp-on-mark); }
-.aw-camp .aw-camp-grid > .aw-camp-card:first-child h3 { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem); font-weight: 800; letter-spacing: -0.02em; }
 .aw-camp .aw-camp-grid > .aw-camp-card:first-child p:not(.aw-camp-card-chips) { font-size: var(--kit-type-lead); max-width: 52ch; }
 .aw-camp-grid > :first-child .aw-camp-card-ico { background: rgb(255 255 255 / 0.15); color: var(--camp-on-mark); }
 .aw-camp-grid > :first-child .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
@@ -349,10 +357,10 @@
 .aw-camp-docs-q .wp-block-post-template { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
 .aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
-.aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+.aw-camp-docs-q li::before { content: ""; width: var(--kit-size-check); height: var(--kit-size-check); background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 /* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
-.aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-base) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
+.aw-camp .aw-camp-docs-q .wp-block-post-title { margin: 0 !important; font-size: var(--kit-type-h3) !important; font-weight: var(--kit-weight-strong); letter-spacing: 0; line-height: 1.4; }
 .aw-camp .aw-camp-docs-q .wp-block-post-title a { color: var(--kit-color-text); text-decoration: none; }
 .aw-camp .aw-camp-docs-q .wp-block-post-title a::after { content: ""; position: absolute; inset: 0; } /* the whole card is the link */
 .aw-camp .aw-camp-docs-q .wp-block-post-title a:focus-visible { outline: none; }
@@ -361,9 +369,9 @@
 /* What happens next: a step line */
 .aw-camp-steps { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; counter-reset: aw-step; display: grid; gap: var(--kit-space-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-steps { grid-template-columns: repeat(4, 1fr); } }
-.aw-camp-steps li { counter-increment: aw-step; position: relative; padding-top: 3.25rem; }
-.aw-camp-steps li::before { content: counter(aw-step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); font-weight: 800; }
-@media (min-width: 768px) { .aw-camp-steps li:not(:last-child)::after { content: ""; position: absolute; top: 1.2rem; left: 3rem; right: calc(-1 * var(--kit-space-4) + 0.5rem); height: 2px; background: var(--camp-mark); opacity: 0.35; } }
+.aw-camp-steps li { counter-increment: aw-step; position: relative; padding-top: calc(var(--kit-size-target) + var(--kit-space-2)); }
+.aw-camp-steps li::before { content: counter(aw-step); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: var(--kit-size-target); height: var(--kit-size-target); border-radius: 50%; background: var(--camp-mark); color: var(--camp-on-mark); font-weight: 800; }
+@media (min-width: 768px) { .aw-camp-steps li:not(:last-child)::after { content: ""; position: absolute; top: calc(var(--kit-size-target) / 2); left: calc(var(--kit-size-target) + var(--kit-space-2)); right: calc(-1 * var(--kit-space-4) + var(--kit-space-2)); height: 2px; background: var(--camp-mark); opacity: 0.35; } }
 .aw-camp-steps strong { display: block; font-size: var(--kit-type-h4, 1.125rem); }
 .aw-camp-steps span { color: var(--camp-meta); }
 
@@ -558,7 +566,7 @@
 /* One row that scrolls sideways (News and guides, What's happening; owner, 21 Oct 2026): each card a fixed width, snapping */
 .aw-camp .aw-camp-row { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; padding-bottom: var(--kit-space-3); scrollbar-width: thin; }
 .aw-camp .aw-camp-row :is(.aw-camp-row-q, .wp-block-post-template) { display: contents !important; }
-.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 clamp(15rem, 78vw, 18.5rem); margin: 0 !important; scroll-snap-align: start; list-style: none; }
+.aw-camp .aw-camp-row .wp-block-post-template > li { flex: 0 0 var(--kit-card-min); margin: 0 !important; scroll-snap-align: start; list-style: none; }
 .aw-camp .aw-camp-row .kit-card { height: 100%; }
 /* Very light campaign tone (owner, 19 Oct 2026: brand, very light brand, white, grey or black): the Share section */
 .aw-camp-tint { background: color-mix(in srgb, var(--camp-primary) 7%, #fff); --camp-tile: var(--kit-color-raised); }

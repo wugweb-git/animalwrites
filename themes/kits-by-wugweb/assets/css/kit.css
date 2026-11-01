@@ -1293,6 +1293,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > * { margin-block: 0 var(--kit-space-3); }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }
 .wp-block-cover.kit-photo-card .wp-block-buttons { margin: var(--kit-space-4) 0 0 !important; }
+.kit-stack > .wp-block-cover.kit-photo-card { min-height: auto; aspect-ratio: var(--kit-card-media-ratio); } /* photo cards in a stack (Take action): the picture's shape, growing with the text; no fixed height */
 @media (prefers-reduced-motion: reduce) { .kit-ed-more::after { transition: none; } }
 
 /* Contents list (kit-toc): a collapsible list of a long document's headings, before its text. Closed by default. */
