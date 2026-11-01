@@ -1547,3 +1547,15 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-act-ico { --kit-ico-size: var(--kit-icon-xl); color: var(--kit-color-ink); }
 .kit-card.aw-ed-act .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-act .kit-card-body > .wp-block-buttons { margin-top: auto !important; padding-top: var(--kit-space-2); }
+
+/* India Writes for Its Community Dogs on Home (pattern aw1-story-home): one band about half the full story's height.
+   Phones: title, line and button, then the figure. From 768: the 2.5 lakh figure on the left, the text on the right. */
+@media (min-width: 768px) { .wp-block-cover.kit-section.aw-ed-story--home { padding-block: var(--kit-space-7) !important; } }
+.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { gap: var(--kit-space-5); align-items: center; }
+@media (min-width: 768px) {
+	.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--kit-space-7); }
+	.aw-ed-story--home .aw-ed-story-fig { order: -1; }
+}
+.aw-ed-story--home .aw-ed-story-fig > * { margin: 0 !important; }
+.aw-ed-story.aw-camp--community-dogs.aw-ed-story--home .aw-ed-story-num { font-size: var(--kit-type-display) !important; color: var(--camp-primary); }
+.aw-ed-story--home .aw-ed-story-fig .has-small-font-size { margin-top: var(--kit-space-1) !important; color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
