@@ -158,7 +158,7 @@ function aw_media_merge_check( $keep, array $extras ) {
 		$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => $r->meta_key, 'old' => (string) $r->meta_value, 'new' => (string) $keep );
 	}
 	// Listing photo lists (aw_gallery, comma-separated IDs): each extra becomes the kept copy, without repeats.
-	$grows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'aw_gallery' AND meta_value REGEXP %s", '(^|,)(' . implode( '|', $ids ) . ')(,|$)' ) );
+	$grows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'aw_gallery' AND meta_value REGEXP %s", '(^|,)[[:space:]]*(' . implode( '|', $ids ) . ')[[:space:]]*(,|$)' ) );
 	foreach ( (array) $grows as $r ) {
 		$list = array();
 		foreach ( explode( ',', (string) $r->meta_value ) as $one ) {
