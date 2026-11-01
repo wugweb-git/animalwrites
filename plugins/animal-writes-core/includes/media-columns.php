@@ -185,22 +185,31 @@ function aw_media_seo( $post, $use ) {
 add_filter(
 	'manage_media_columns',
 	function ( $columns ) {
-		unset( $columns['author'] );
-		$out = array();
-		foreach ( $columns as $key => $label ) {
-			$out[ $key ] = $label;
-			if ( 'title' === $key ) {
-				$out['aw_slug']    = 'Slug';
-				$out['aw_caption'] = 'SEO title';
-			}
-			if ( 'parent' === $key ) {
-				$out['aw_used'] = 'Also used in';
+		$ours   = array(
+			'aw_slug'    => 'Slug',
+			'aw_caption' => 'SEO title',
+			'aw_used'    => 'Also used in',
+			'aw_seo'     => 'SEO',
+			'aw_opt'     => 'Optimisation',
+		);
+		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'rank_math_image_alt', 'parent', 'aw_used', 'aw_seo', 'aw_opt', 'date' );
+		$remove = array( 'author', 'rank_math_image_title', 'imgoptm' );
+		$out    = array();
+		foreach ( $order as $key ) {
+			if ( isset( $columns[ $key ] ) ) {
+				$out[ $key ] = $columns[ $key ];
+			} elseif ( isset( $ours[ $key ] ) ) {
+				$out[ $key ] = $ours[ $key ];
 			}
 		}
-		$out['aw_seo'] = 'SEO';
-		$out['aw_opt'] = 'Optimisation';
+		foreach ( $columns as $key => $label ) {
+			if ( ! isset( $out[ $key ] ) && ! in_array( $key, $remove, true ) ) {
+				$out[ $key ] = $label;
+			}
+		}
 		return $out;
-	}
+	},
+	99
 );
 
 add_action(
@@ -298,6 +307,10 @@ add_action(
 		}
 		if ( $flags ) {
 			echo '<br>' . esc_html( implode( '; ', $flags ) );
+		}
+		$attached = get_attached_file( $post_id );
+		if ( $attached && is_file( $attached . '.webp' ) ) {
+			echo '<br>WebP copy: yes';
 		}
 	},
 	10,
