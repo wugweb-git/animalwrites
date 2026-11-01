@@ -190,7 +190,8 @@ add_filter(
 		foreach ( $columns as $key => $label ) {
 			$out[ $key ] = $label;
 			if ( 'title' === $key ) {
-				$out['aw_slug'] = 'Slug';
+				$out['aw_slug']    = 'Slug';
+				$out['aw_caption'] = 'SEO title';
 			}
 			if ( 'parent' === $key ) {
 				$out['aw_used'] = 'Also used in';
@@ -205,7 +206,7 @@ add_filter(
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_slug', 'aw_used', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_used', 'aw_seo', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -214,6 +215,11 @@ add_action(
 		}
 		if ( 'aw_slug' === $column ) {
 			echo esc_html( $post->post_name );
+			return;
+		}
+		if ( 'aw_caption' === $column ) {
+			$caption = trim( wp_strip_all_tags( (string) $post->post_excerpt ) );
+			echo '' !== $caption ? esc_html( $caption ) : '—';
 			return;
 		}
 		$page_ids = ! empty( $GLOBALS['wp_query']->posts ) ? wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) : array( $post_id );
@@ -269,7 +275,14 @@ add_action(
 		if ( ! empty( $meta['filesize'] ) ) {
 			$bits[] = size_format( (int) $meta['filesize'] );
 		}
-		$bits[] = strtoupper( (string) preg_replace( '#^image/#', '', (string) $post->post_mime_type ) );
+		$format = strtoupper( pathinfo( (string) get_attached_file( $post_id ), PATHINFO_EXTENSION ) );
+		if ( 'JPG' === $format ) {
+			$format = 'JPEG';
+		}
+		if ( '' === $format ) {
+			$format = strtoupper( (string) preg_replace( '#^image/#', '', (string) $post->post_mime_type ) );
+		}
+		$bits[] = $format;
 		echo esc_html( implode( ' · ', $bits ) );
 		$flags = array();
 		if ( ! empty( $meta['filesize'] ) && (int) $meta['filesize'] > 1000000 ) {
