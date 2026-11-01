@@ -512,17 +512,18 @@ function aw_block_listing_opportunities( $a, $id ) {
 
 /* ---------- Campaigns with {organisation} (owner, 20 Oct 2026): role chip, up to 3 ---------- */
 
-/** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organiser; Partner = aw_campaign_partners or aw_participant; Supporter = aw_campaign_supporters (owner, 20 Oct 2026). */
+/** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organisation, else the older aw_organiser; Partner = aw_campaign_partners plus older aw_participant rows; Supporter = aw_campaign_supporters (owner, 20 Oct 2026). */
 function aw_listing_campaigns( $id, $max = 3 ) {
 	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
 	$roles = array();
-	foreach ( get_posts( $base + array( 'meta_key' => 'aw_organiser', 'meta_value' => (string) $id ) ) as $c ) { // phpcs:ignore WordPress.DB.SlowDBQuery
-		$roles[ $c ] = __( 'Organiser', 'animal-writes-core' );
+	foreach ( get_posts( $base + array( 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_organisation', 'value' => (string) $id ), array( 'key' => 'aw_organiser', 'value' => (string) $id ) ) ) ) as $c ) { // phpcs:ignore WordPress.DB.SlowDBQuery
+		if ( (int) $id === aw_campaign_organiser( $c ) ) { // an older aw_organiser row counts only while aw_organisation is empty
+			$roles[ $c ] = __( 'Organiser', 'animal-writes-core' );
+		}
 	}
 	$partners = get_posts( $base + array( 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_participant', 'value' => (string) $id ), array( 'key' => 'aw_campaign_partners', 'value' => (string) $id, 'compare' => 'LIKE' ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 	foreach ( $partners as $c ) {
-		$listed = array_map( 'intval', explode( ',', (string) get_post_meta( $c, 'aw_campaign_partners', true ) ) );
-		if ( ! isset( $roles[ $c ] ) && ( in_array( (int) $id, $listed, true ) || (string) $id === (string) get_post_meta( $c, 'aw_participant', true ) ) ) {
+		if ( ! isset( $roles[ $c ] ) && in_array( (int) $id, aw_campaign_partner_ids( $c ), true ) ) {
 			$roles[ $c ] = __( 'Partner', 'animal-writes-core' );
 		}
 	}

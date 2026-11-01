@@ -224,9 +224,9 @@
             "placeholder": ""
         },
         {
-            "key": "field_aw_opportunity_paid_listing",
-            "label": "Paid listing",
-            "name": "aw_paid_listing",
+            "key": "field_aw_opportunity_sponsored",
+            "label": "Sponsored",
+            "name": "aw_sponsored",
             "aria-label": "",
             "type": "true_false",
             "instructions": "",
@@ -335,5 +335,5 @@
     "active": true,
     "description": "Opportunity details on the existing meta keys.",
     "show_in_rest": 0,
-    "modified": 1792224000
+    "modified": 1793491200
 }

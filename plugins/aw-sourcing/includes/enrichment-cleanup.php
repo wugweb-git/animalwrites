@@ -191,8 +191,8 @@ function aw_enrich_merge( $from, $into, $rid ) {
 		wp_add_object_terms( $into, $add, 'post_tag' );
 		$undo['tags'] = $add;
 	}
-	// Links from other items (Featured in, organiser).
-	foreach ( array( 'aw_rel_org', 'aw_rel_org_auto', 'aw_rel_org_not', 'aw_organiser' ) as $rel ) {
+	// Links from other items (Featured in, organiser and organisation).
+	foreach ( array( 'aw_rel_org', 'aw_rel_org_auto', 'aw_rel_org_not', 'aw_organiser', 'aw_organisation' ) as $rel ) {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s", $rel, (string) $from ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( $rows as $m ) {
 			$pid = (int) $m['post_id'];

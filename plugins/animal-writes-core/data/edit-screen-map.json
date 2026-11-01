@@ -3304,7 +3304,7 @@
 				{
 					"kind": "schema",
 					"where": "jobLocation / Place",
-					"file": "seo/schema.php:820"
+					"file": "seo/schema.php:821"
 				},
 				{
 					"kind": "filter",
@@ -3394,7 +3394,7 @@
 				{
 					"kind": "schema",
 					"where": "job addressLocality",
-					"file": "seo/schema.php:768"
+					"file": "seo/schema.php:769"
 				},
 				{
 					"kind": "admin",
@@ -3520,35 +3520,36 @@
 			"store": "post_meta",
 			"label": "Organiser",
 			"type": "aw_listing ID (max 1)",
-			"boxes": [
-				"aw_related"
-			],
+			"boxes": [],
 			"types": [
 				"aw_campaign"
 			],
 			"uses": [
 				{
 					"kind": "display",
-					"where": "listing \"Campaigns\" (Organiser)",
+					"where": "listing \"Campaigns\" (Organiser), when aw_organisation is empty",
 					"file": "core/listing-template.php:519"
 				},
 				{
 					"kind": "schema",
-					"where": "Event organizer",
+					"where": "Event organizer, when aw_organisation is empty",
 					"file": "seo/schema.php:582"
+				},
+				{
+					"kind": "sourcing",
+					"where": "repointed when listings are merged",
+					"file": "src/enrichment-cleanup.php:195"
 				}
 			],
 			"notes": [
-				"Overlaps with Partners (aw_campaign_partners) in the Organisations box."
+				"Older key: no field. Campaigns set the organiser in Related → Organiser (aw_organisation); rows here are still read when that is empty. 0 rows on live (1 Nov 2026)."
 			]
 		},
 		"aw_participant": {
 			"store": "post_meta",
 			"label": "Participating organisations",
 			"type": "aw_listing IDs",
-			"boxes": [
-				"aw_related"
-			],
+			"boxes": [],
 			"types": [
 				"aw_campaign"
 			],
@@ -3556,22 +3557,28 @@
 				{
 					"kind": "display",
 					"where": "listing \"Campaigns\" (Partner)",
-					"file": "core/listing-template.php:522"
+					"file": "core/listing-template.php:526"
+				},
+				{
+					"kind": "display",
+					"where": "[aw_campaign_partners] cards",
+					"file": "core/campaign-tools.php:428"
 				}
 			],
 			"notes": [
-				"Same role as aw_campaign_partners in the Organisations box."
+				"Older key: no field. Partners are edited in the Organisations box (aw_campaign_partners); rows here are still read and merged with that list, no repeats (aw_campaign_partner_ids() in core/model.php). 0 rows on live (1 Nov 2026)."
 			]
 		},
 		"aw_organisation": {
 			"store": "post_meta",
-			"label": "Organisation",
+			"label": "Organisation (on campaigns: Organiser)",
 			"type": "aw_listing ID (max 1)",
 			"boxes": [
 				"aw_related"
 			],
 			"types": [
-				"aw_opportunity"
+				"aw_opportunity",
+				"aw_campaign"
 			],
 			"uses": [
 				{
@@ -3587,16 +3594,32 @@
 				{
 					"kind": "schema",
 					"where": "hiring organisation url / address",
-					"file": "seo/schema.php:770"
+					"file": "seo/schema.php:771"
 				},
 				{
 					"kind": "sourcing",
 					"where": "set by ingest",
 					"file": "src/ingest.php:565"
+				},
+				{
+					"kind": "display",
+					"where": "listing \"Campaigns\" (Organiser)",
+					"file": "core/listing-template.php:519"
+				},
+				{
+					"kind": "schema",
+					"where": "campaign Event organizer",
+					"file": "seo/schema.php:582"
+				},
+				{
+					"kind": "sourcing",
+					"where": "repointed when listings are merged",
+					"file": "src/enrichment-cleanup.php:195"
 				}
 			],
 			"notes": [
-				"Overlaps with the SCF field \"Organisation\" (aw_org_name)."
+				"Overlaps with the SCF field \"Organisation\" (aw_org_name).",
+				"On campaigns it replaces aw_organiser (read when this is empty): aw_campaign_organiser() in core/model.php."
 			]
 		},
 		"aw_rel_resource": {
@@ -3706,7 +3729,7 @@
 				{
 					"kind": "admin",
 					"where": "tag screen \"Guides linking here\"",
-					"file": "core/model.php:291"
+					"file": "core/model.php:320"
 				}
 			],
 			"notes": [
@@ -3741,7 +3764,7 @@
 				{
 					"kind": "schema",
 					"where": "FAQPage",
-					"file": "seo/schema.php:1344"
+					"file": "seo/schema.php:1345"
 				},
 				{
 					"kind": "faq",
@@ -3771,6 +3794,9 @@
 					"where": "the name questions use",
 					"file": "core/faq-data.php:154"
 				}
+			],
+			"notes": [
+				"Also term meta on aw_campaign_link terms (the campaign label's short name, core/hub-blocks.php:625), read first, then the older term meta aw_campaign_short (2 rows on live). No term field."
 			]
 		},
 		"aw_legal_act": {
@@ -4053,10 +4079,12 @@
 			"type": "true/false",
 			"boxes": [
 				"acf-group_aw_resource",
-				"aw-sponsored"
+				"aw-sponsored",
+				"acf-group_aw_opportunity"
 			],
 			"types": [
-				"post"
+				"post",
+				"aw_opportunity"
 			],
 			"uses": [
 				{
@@ -4256,7 +4284,7 @@
 				{
 					"kind": "schema",
 					"where": "JobPosting hiringOrganization",
-					"file": "seo/schema.php:773"
+					"file": "seo/schema.php:774"
 				},
 				{
 					"kind": "sourcing",
@@ -4287,7 +4315,7 @@
 				{
 					"kind": "schema",
 					"where": "validThrough",
-					"file": "seo/schema.php:779"
+					"file": "seo/schema.php:780"
 				},
 				{
 					"kind": "filter",
@@ -4335,7 +4363,7 @@
 				{
 					"kind": "schema",
 					"where": "Event startDate",
-					"file": "seo/schema.php:585"
+					"file": "seo/schema.php:586"
 				}
 			],
 			"notes": [
@@ -4356,7 +4384,7 @@
 				{
 					"kind": "schema",
 					"where": "repeat schedule (aw_opportunity_repeat)",
-					"file": "seo/schema.php:884"
+					"file": "seo/schema.php:885"
 				}
 			]
 		},
@@ -4432,7 +4460,7 @@
 				{
 					"kind": "schema",
 					"where": "employmentType",
-					"file": "seo/schema.php:795"
+					"file": "seo/schema.php:796"
 				},
 				{
 					"kind": "sourcing",
@@ -4445,15 +4473,13 @@
 			"store": "post_meta",
 			"label": "Paid listing",
 			"type": "true/false",
-			"boxes": [
-				"acf-group_aw_opportunity"
-			],
+			"boxes": [],
 			"types": [
 				"aw_opportunity"
 			],
 			"uses": [],
 			"notes": [
-				"Saved but never read; 0 rows."
+				"Older key: no field (registered in core/meta.php). The Opportunity's Sponsored field (aw_sponsored) replaces it. Never read; 0 rows."
 			]
 		},
 		"aw_campaign_open": {
@@ -4526,7 +4552,7 @@
 				{
 					"kind": "schema",
 					"where": "campaign about the Legislation",
-					"file": "seo/schema.php:595"
+					"file": "seo/schema.php:596"
 				}
 			]
 		},
@@ -4544,16 +4570,16 @@
 				{
 					"kind": "display",
 					"where": "[aw_campaign_partners] cards",
-					"file": "core/campaign-tools.php:418"
+					"file": "core/campaign-tools.php:428"
 				},
 				{
 					"kind": "display",
 					"where": "listing \"Campaigns\" (Partner)",
-					"file": "core/listing-template.php:522"
+					"file": "core/listing-template.php:526"
 				}
 			],
 			"notes": [
-				"Same role as Related → Participating organisations (aw_participant)."
+				"The one editor for partners. Readers add any older aw_participant rows, no repeats (aw_campaign_partner_ids() in core/model.php)."
 			]
 		},
 		"aw_campaign_supporters": {
@@ -4570,7 +4596,7 @@
 				{
 					"kind": "display",
 					"where": "\"Supported by\"; listing \"Campaigns\" (Supporter)",
-					"file": "core/listing-template.php:529"
+					"file": "core/listing-template.php:530"
 				}
 			]
 		},
@@ -4701,7 +4727,7 @@
 				{
 					"kind": "display",
 					"where": "Share button data",
-					"file": "core/campaign-tools.php:565"
+					"file": "core/campaign-tools.php:566"
 				}
 			]
 		},
@@ -4719,7 +4745,7 @@
 				{
 					"kind": "display",
 					"where": "Share button data",
-					"file": "core/campaign-tools.php:579"
+					"file": "core/campaign-tools.php:580"
 				},
 				{
 					"kind": "admin",
@@ -4742,7 +4768,7 @@
 				{
 					"kind": "display",
 					"where": "Share button data",
-					"file": "core/campaign-tools.php:579"
+					"file": "core/campaign-tools.php:580"
 				},
 				{
 					"kind": "admin",
@@ -4787,7 +4813,7 @@
 				{
 					"kind": "schema",
 					"where": "Event location",
-					"file": "seo/schema.php:586"
+					"file": "seo/schema.php:587"
 				}
 			]
 		},
@@ -4810,7 +4836,7 @@
 				{
 					"kind": "schema",
 					"where": "campaign record",
-					"file": "seo/schema.php:671"
+					"file": "seo/schema.php:672"
 				}
 			]
 		},
@@ -4833,7 +4859,7 @@
 				{
 					"kind": "schema",
 					"where": "campaign record",
-					"file": "seo/schema.php:671"
+					"file": "seo/schema.php:672"
 				}
 			]
 		},
@@ -4856,7 +4882,7 @@
 				{
 					"kind": "schema",
 					"where": "campaign record",
-					"file": "seo/schema.php:671"
+					"file": "seo/schema.php:672"
 				}
 			],
 			"notes": [
@@ -6310,12 +6336,12 @@
 				{
 					"kind": "schema",
 					"where": "url",
-					"file": "seo/schema.php:1278"
+					"file": "seo/schema.php:1279"
 				},
 				{
 					"kind": "admin",
 					"where": "duplicates check, campaign links",
-					"file": "core/campaign-tools.php:814"
+					"file": "core/campaign-tools.php:815"
 				}
 			]
 		},
@@ -6338,7 +6364,7 @@
 				{
 					"kind": "schema",
 					"where": "publisher",
-					"file": "seo/schema.php:1280"
+					"file": "seo/schema.php:1281"
 				}
 			]
 		},
@@ -6356,12 +6382,12 @@
 				{
 					"kind": "display",
 					"where": "card image fallback",
-					"file": "core/hub-blocks.php:724"
+					"file": "core/hub-blocks.php:727"
 				},
 				{
 					"kind": "schema",
 					"where": "image",
-					"file": "seo/schema.php:1256"
+					"file": "seo/schema.php:1257"
 				}
 			]
 		},
@@ -6389,7 +6415,7 @@
 				{
 					"kind": "schema",
 					"where": "datePublished",
-					"file": "seo/schema.php:1279"
+					"file": "seo/schema.php:1280"
 				}
 			]
 		},
@@ -6407,7 +6433,7 @@
 				{
 					"kind": "display",
 					"where": "card chip",
-					"file": "core/hub-blocks.php:657"
+					"file": "core/hub-blocks.php:660"
 				}
 			]
 		},
@@ -6900,7 +6926,7 @@
 				{
 					"kind": "display",
 					"where": "card fallback",
-					"file": "core/hub-blocks.php:682"
+					"file": "core/hub-blocks.php:685"
 				}
 			]
 		},
@@ -6939,7 +6965,7 @@
 				{
 					"kind": "display",
 					"where": "\"Find help\" on the category page",
-					"file": "core/model.php:289"
+					"file": "core/model.php:318"
 				}
 			]
 		},

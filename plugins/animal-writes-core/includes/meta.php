@@ -83,7 +83,7 @@ function aw_meta_schema() {
 		'aw_apply_url'       => array( 'string', array( 'aw_opportunity' ), 'Apply URL' ),
 		'aw_deadline'        => array( 'string', array( 'aw_opportunity' ), 'Deadline (Y-m-d)' ),
 		'aw_review_until'    => array( 'string', array( 'aw_opportunity' ), 'Review date (Y-m-d): with no deadline, the listing closes after this date unless renewed' ),
-		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ),
+		'aw_paid_listing'    => array( 'boolean', array( 'aw_opportunity' ), 'Paid listing' ), // older key, no field: the Opportunity's Sponsored field (aw_sponsored, registered above for every type) replaces it
 		'aw_employment_type' => array( 'string', array( 'aw_opportunity' ), 'Employment type as the source states it: FULL_TIME, PART_TIME, CONTRACTOR, TEMPORARY, PER_DIEM, INTERN, VOLUNTEER or OTHER (empty when not stated)' ),
 
 		// Campaigns (read by the Event schema in aw-seo-extras).

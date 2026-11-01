@@ -416,15 +416,16 @@ add_shortcode(
 /*
  * ---------- Campaign partners ----------
  * Campaigns can have partners (owner, 17 Oct 2026; the site itself has none). [aw_campaign_partners title="Partners"]
- * prints the campaign's partners, Directory listings named in aw_campaign_partners (IDs, comma-separated), as cards
- * linking to their profiles; with no partners it prints nothing, heading included.
+ * prints the campaign's partners, Directory listings named in aw_campaign_partners (IDs, comma-separated) plus any
+ * older aw_participant rows (aw_campaign_partner_ids(), model.php), as cards linking to their profiles; with no
+ * partners it prints nothing, heading included.
  */
 add_shortcode(
 	'aw_campaign_partners',
 	function ( $atts ) {
 		$a   = shortcode_atts( array( 'title' => 'Partners' ), $atts );
 		$id  = aw_camp_id();
-		$ids = $id ? array_filter( array_map( 'intval', explode( ',', (string) get_post_meta( $id, 'aw_campaign_partners', true ) ) ) ) : array();
+		$ids = $id ? aw_campaign_partner_ids( $id ) : array();
 		$out = '';
 		foreach ( $ids as $pid ) {
 			if ( 'aw_listing' !== get_post_type( $pid ) || 'publish' !== get_post_status( $pid ) ) {
