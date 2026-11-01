@@ -1528,9 +1528,11 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* From the Library on Home: the mosaic above (What's happening's), then the four type tiles four across from 1200 */
 @media (min-width: 1200px) { .aw-ed-law > .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; } }
 
-/* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom */
+/* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.
+   The card is not a link (its button is), so it does not lift on hover. */
 .aw-ed-acts { gap: var(--kit-space-grid); }
-.aw-ed-act > .kit-card-body { padding: var(--kit-space-5); gap: var(--kit-space-3); }
+.kit-card[class*="kit-card--"].aw-ed-act > .kit-card-body { padding: var(--kit-space-5); gap: var(--kit-space-3); }
+.kit-card[class*="kit-card--"].aw-ed-act:hover { box-shadow: none; }
 .aw-ed-act-ico { --kit-ico-size: var(--kit-icon-xl); color: var(--kit-color-ink); }
 .kit-card.aw-ed-act .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .aw-ed-act .kit-card-body > .wp-block-buttons { margin-top: auto !important; padding-top: var(--kit-space-2); }

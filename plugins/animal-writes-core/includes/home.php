@@ -10,11 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The FAQ section prints nothing when the home page has too few questions for an FAQ.
+// The FAQ section prints nothing when the home page has too few questions for an FAQ (front page only; the class itself).
 add_filter(
 	'render_block_core/group',
 	function ( $html, $block ) {
-		if ( false === strpos( (string) ( $block['attrs']['className'] ?? '' ), 'aw-ed-faq' ) || false !== strpos( $html, 'kit-faq' ) ) {
+		if ( ! is_front_page() || ! in_array( 'aw-ed-faq', preg_split( '/\s+/', (string) ( $block['attrs']['className'] ?? '' ) ), true ) || false !== strpos( $html, 'kit-faq' ) ) {
 			return $html;
 		}
 		return '';

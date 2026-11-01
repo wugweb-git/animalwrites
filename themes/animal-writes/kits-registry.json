@@ -1540,24 +1540,33 @@
    "name": "Take action",
    "type": "pattern",
    "status": "live",
-   "classes": [],
-   "states": [
-    "default"
+   "classes": [
+    "aw-ed-acts",
+    "aw-ed-act",
+    "aw-ed-act-ico"
    ],
-   "tokens": [],
+   "states": [
+    "default: section head (H2, one line), then two Kits cards (kit-card--block-md: icon, H3, one line, button at the bottom), side by side from 768, one under the other on phones; no hover lift (the card is not a link)"
+   ],
+   "tokens": [
+    "--kit-space-grid",
+    "--kit-space-5",
+    "--kit-icon-xl",
+    "--kit-type-h3"
+   ],
    "a11y": {
-    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "none",
-    "keyboard": "not interactive",
-    "focus": "n/a",
-    "target": "n/a",
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); each card an <article>",
+    "aria": "icons aria-hidden",
+    "keyboard": "Tab to the two buttons",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons",
     "motion": "none",
     "sr": "visible text"
    },
    "seo": {
-    "heading": "H2 per section (H1 only in the hero)",
-    "link": "descriptive",
-    "alt": "photos described or empty",
+    "heading": "H2, an H3 per card",
+    "link": "Register as a volunteer (/volunteer/); Claim your listing (/claim/)",
+    "alt": "n/a (no pictures)",
     "schema": "none"
    },
    "block": "animal-writes/take-action"
