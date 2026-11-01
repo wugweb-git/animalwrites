@@ -1476,22 +1476,46 @@
    "status": "live",
    "classes": [
     "aw-ed-help",
-    "aw-ed-helplines",
-    "aw-ed-helpline",
-    "aw-ed-help-tiles"
+    "aw-bento",
+    "aw-bento-tile",
+    "aw-bento-eyebrow",
+    "aw-bento-num",
+    "aw-bento-ico",
+    "aw-bento-cta"
    ],
    "states": [
-    "default: section head (H2, one line), three tap-to-call helplines (112 filled; one under the other on phones, three across from 768), then four tiles two by two at every width"
+    "default: section head (H2, one line), then a bento grid of seven tiles (aw-bento--sos, --injured, --vet1962, --awbi, --cruelty, --vets, --orgs), each one link with an H3; reading order = markup order",
+    "phones: one column",
+    "768–1199: two columns; 112 two rows tall beside injured animal and 1962; then AWBI + report cruelty, find a vet + find an organisation",
+    "1200 and up: four columns; 112 two by two; injured animal two wide; 1962 + AWBI; report cruelty, find a vet, find an organisation two wide",
+    "hover: tile border full on-ink"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "section aria-labelledby its H2 (home.php); helplines list aria-label \"National helplines\"; each call link has an aria-label",
-    "keyboard": "not interactive",
-    "focus": "3px ring in --kit-color-focus (light on the dark band), 2px offset (:focus-visible)",
-    "target": "44px rows and tile links",
-    "motion": "none",
-    "sr": "visible text"
+    "aria": "section aria-labelledby its H2 (home.php); each tile's H3 link covers the tile; each call link has an aria-label",
+    "keyboard": "one Tab stop per tile",
+    "focus": "3px ring round the tile in --kit-color-focus (yellow on the dark band; on-ink round the yellow 112 tile), 2px offset (:has(a:focus-visible))",
+    "target": "whole tile (at least 44px); Call 112 pill 44px",
+    "motion": "border and background fade, off with prefers-reduced-motion",
+    "sr": "visible text; call links named \"Call {number}, {what}\"",
+    "contrast_pairs": [
+     [
+      "kit-color-on-ink",
+      "kit-color-ink",
+      "tile text on the dark band"
+     ],
+     [
+      "kit-color-on-accent",
+      "kit-color-accent",
+      "112 tile text"
+     ],
+     [
+      "kit-color-on-ink",
+      "kit-color-ink",
+      "Call 112 pill"
+     ]
+    ]
    },
    "seo": {
     "heading": "H2 per section (H1 only in the hero)",
