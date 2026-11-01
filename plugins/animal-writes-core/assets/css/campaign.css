@@ -201,6 +201,11 @@
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
+/* Share (from the Technical session's 27e4d5e3): from 768 the share buttons and the two share pictures side by side, not one under the other */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--kit-space-grid); align-items: start; }
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
+}
 /* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
    row a card with its parts under their column headings, snapping. Phones show one card and the edge of the next
    (--aw-carousel-item, 82%); from 768 two cards to the view (--aw-card-columns md). The server names each row and
