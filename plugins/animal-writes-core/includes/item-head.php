@@ -502,7 +502,7 @@ function aw_block_item_more( $a, $id ) {
 	$out = '';
 	foreach ( aw_item_more_groups( $id ) as $n => $g ) {
 		$hid  = 'aw-more-' . $n;
-		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="aw-more-list">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
+		$out .= '<section class="aw-more-group" aria-labelledby="' . $hid . '"><h2 class="aw-more-head has-x-large-font-size" id="' . $hid . '">' . esc_html( $g[0] ) . '</h2><ul class="aw-more-list" tabindex="0" aria-labelledby="' . $hid . '">' . implode( '', array_map( 'aw_item_more_card', $g[1] ) ) . '</ul></section>';
 	}
 	return '' !== $out ? '<div class="aw-more">' . $out . '</div>' : '';
 }

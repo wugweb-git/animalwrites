@@ -152,6 +152,7 @@
 .aw-browse-states { margin: var(--kit-space-7) 0 0; }
 .aw-browse-states ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 var(--kit-space-5); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 1200px) { .aw-browse-states ul { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 768px) and (max-width: 1199px) { .aw-browse-states--all ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* the Directory hub's full state list: three columns on tablets keep the band under 720px (two columns ran to 868px) */
 .aw-browse-states a { display: flex; justify-content: space-between; gap: var(--kit-space-2); align-items: center; min-height: var(--kit-size-target); border-bottom: var(--kit-border-width) solid var(--kit-color-line); color: var(--kit-color-ink); text-decoration: none; }
 @media (hover: hover) { .aw-browse-states a:hover { color: var(--kit-color-link); } }
 /* Find help near you (find-help.php): the last part of More on item pages (a list, or one line), a band on campaign pages */
@@ -350,6 +351,12 @@ body { background: var(--kit-color-canvas); }
 .aw-more-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-4); margin: 0; padding: 0; list-style: none; }
 @media (min-width: 768px) { .aw-more-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 .aw-more-list > li { margin: 0; }
+/* More below an item (owner, 2 Nov 2026: a section at most 720px on tablet and desktop, no card list taller than one row): each group is one row
+   that scrolls sideways (the Kits scroll row, kit.css "Sideways scroll row"); three cards across from 768 as before, so a group of six
+   organisations shows three and scrolls to the rest. The list is focusable (tabindex, named by its heading) so keys scroll it too. */
+.aw-more > .aw-more-group > .aw-more-list { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding-bottom: var(--kit-space-3); }
+.aw-more > .aw-more-group > .aw-more-list > li { flex: 0 0 var(--kit-carousel-item); scroll-snap-align: start; }
+@media (min-width: 768px) { .aw-more > .aw-more-group > .aw-more-list > li { flex-basis: calc((100% - 2 * var(--kit-space-grid)) / 3); } }
 .aw-more-card { height: 100%; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
 .aw-more-card .aw-more-media { margin: 0; aspect-ratio: 4 / 3; border-radius: 0; }
 .aw-more-card .aw-more-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -416,7 +423,8 @@ body { background: var(--kit-color-canvas); }
 /* ---------- Sidebar (1200+): the current campaign, Register as a volunteer, the sidebar ad (parts/sidebar.html) ---------- */
 .kit-sidebar { display: grid; gap: var(--kit-space-6); align-content: start; }
 .aw-side-camp { overflow: hidden; border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.aw-side-camp-media img { display: block; width: 100%; height: auto; } /* whole, never cropped: campaign pictures carry text */
+.aw-side-camp-media { aspect-ratio: var(--kit-card-media-ratio); background: var(--kit-color-raised); border-bottom: var(--kit-border-width) solid var(--kit-color-line); } /* the 4:3 card picture box (like .aw-more-logo), so the card stays under 600px with a tall poster */
+.aw-side-camp-media img { display: block; width: 100%; height: 100%; object-fit: contain; } /* whole, never cropped: campaign pictures carry text */
 .aw-side-camp-body { padding: var(--kit-space-5); }
 .aw-side-camp-meta { margin: 0 0 var(--kit-space-2); }
 .aw-side-camp-title { margin: 0 0 var(--kit-space-2); font-size: var(--kit-type-lg, 1.125rem); line-height: 1.3; }
