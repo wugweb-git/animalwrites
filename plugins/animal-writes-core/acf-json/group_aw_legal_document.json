@@ -1,0 +1,183 @@
+{
+    "key": "group_aw_legal_document",
+    "title": "Document",
+    "fields": [
+        {
+            "key": "field_aw_legal_file_id",
+            "label": "Document file",
+            "name": "aw_file_id",
+            "aria-label": "",
+            "type": "file",
+            "instructions": "The PDF in the Media Library.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "library": "all",
+            "min_size": "",
+            "max_size": "",
+            "mime_types": "pdf,doc,docx"
+        },
+        {
+            "key": "field_aw_legal_file_url",
+            "label": "Document link",
+            "name": "aw_file_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "A link to the document elsewhere, when there is no file.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_legal_legal_number",
+            "label": "Official number",
+            "name": "aw_legal_number",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. G.S.R. 864(E)",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_legal_legal_force",
+            "label": "In force",
+            "name": "aw_legal_force",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "InForce": "In force",
+                "PartiallyInForce": "Partly in force",
+                "NotInForce": "Not in force"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_aw_legal_msg_item",
+            "label": "",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_legal_msg_issued_by",
+            "label": "Issued by",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_legal_msg_unused",
+            "label": "Not used on the site",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_legal_requires_email",
+            "label": "Ask for an email before download",
+            "name": "aw_requires_email",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "ui": 1,
+            "ui_on_text": "Yes",
+            "ui_off_text": "No"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_legal"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Library item document: file, official number, short name, parent Act, key sections and issuer.",
+    "show_in_rest": 0,
+    "modified": 1792108800
+}

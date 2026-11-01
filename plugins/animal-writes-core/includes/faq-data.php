@@ -640,7 +640,7 @@ function aw_faq_legal_sections( $id, $doc ) {
 	}
 	return $out ? $out : null;
 }
-/* ---------- Library documents: the "Library item" box (document fields the FAQ also reads) ---------- */
+/* ---------- Library documents: the Library item fields, in the SCF "Document" box (document fields the FAQ also reads) ---------- */
 
 add_action(
 	'init',
@@ -654,23 +654,35 @@ add_action(
 	}
 );
 
+/**
+ * The Library item fields (short name, parent Act, key sections), shown inside the SCF "Document" box.
+ *
+ * @param WP_Post $post Library item.
+ */
+function aw_legal_item_fields( $post ) {
+	wp_nonce_field( 'aw_faq_legal', 'aw_faq_legal_nonce' );
+	echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
+	echo '<p><label for="aw-legal-act">Issued under (the parent Act, as the document states it)</label><br><input type="text" class="large-text" id="aw-legal-act" name="aw_legal_act" value="' . esc_attr( get_post_meta( $post->ID, 'aw_legal_act', true ) ) . '"></p>';
+	echo '<p><label for="aw-key-sections">Key sections (Acts and Rules only): one per line, "number | one-line plain summary | link"</label><br><textarea class="large-text" rows="4" id="aw-key-sections" name="aw_key_sections" placeholder="11 | punishment for treating animals cruelly | https://…">' . esc_textarea( get_post_meta( $post->ID, 'aw_key_sections', true ) ) . '</textarea></p>';
+}
+
+// SCF "Document" box (acf-json/group_aw_legal_document.json): the Library item fields and the issuer, each in its message field.
 add_action(
-	'add_meta_boxes_aw_legal',
+	'acf/render_field/key=field_aw_legal_msg_item',
 	function () {
-		add_meta_box(
-			'aw-legal-item',
-			'Library item',
-			function ( $post ) {
-				wp_nonce_field( 'aw_faq_legal', 'aw_faq_legal_nonce' );
-				echo '<h3>Details</h3>';
-				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
-				echo '<p><label for="aw-legal-act">Issued under (the parent Act, as the document states it)</label><br><input type="text" class="large-text" id="aw-legal-act" name="aw_legal_act" value="' . esc_attr( get_post_meta( $post->ID, 'aw_legal_act', true ) ) . '"></p>';
-				echo '<p><label for="aw-key-sections">Key sections (Acts and Rules only): one per line, "number | one-line plain summary | link"</label><br><textarea class="large-text" rows="4" id="aw-key-sections" name="aw_key_sections" placeholder="11 | punishment for treating animals cruelly | https://…">' . esc_textarea( get_post_meta( $post->ID, 'aw_key_sections', true ) ) . '</textarea></p>';
-			},
-			'aw_legal',
-			'normal',
-			'low'
-		);
+		global $post;
+		if ( $post instanceof WP_Post && 'aw_legal' === $post->post_type ) {
+			aw_legal_item_fields( $post );
+		}
+	}
+);
+add_action(
+	'acf/render_field/key=field_aw_legal_msg_issued_by',
+	function () {
+		global $post;
+		if ( $post instanceof WP_Post && 'aw_legal' === $post->post_type && function_exists( 'aw_issuer_box' ) ) {
+			aw_issuer_box( $post );
+		}
 	}
 );
 add_action(
