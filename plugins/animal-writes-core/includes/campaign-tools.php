@@ -545,14 +545,14 @@ add_action(
 	'wp_enqueue_scripts',
 	function () {
 		$id   = aw_camp_id( get_queried_object_id() );
-		$band = is_front_page() && has_shortcode( (string) get_post_field( 'post_content', get_queried_object_id() ), 'aw_campaign_band' );
+		$band = is_front_page() && function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign(); // the home hero is the open campaign (home.php)
 		if ( ! ( is_singular( 'aw_campaign' ) && $id && get_post_meta( $id, 'aw_campaign_close', true ) ) && ! $band ) {
 			return;
 		}
 		$v    = fn( $f ) => (string) filemtime( AW_CORE_DIR . $f );
-		$slug = $band && preg_match( '/\[aw_campaign_band[^\]]*\bcampaign="([^"]+)"/', (string) get_post_field( 'post_content', get_queried_object_id() ), $m ) ? sanitize_title( $m[1] ) : '';
+		$slug = $band ? (string) get_post_field( 'post_name', AW_HOME_CAMPAIGN ) : '';
 		if ( $band && ! is_singular( 'aw_campaign' ) && AW_CAMP_HOME_CSS_FOR === $slug && is_readable( AW_CORE_DIR . 'assets/css/campaign-home.css' ) ) {
-			// Home: only the band's rules (campaign-home.css), inline in campaign.css's place, so nothing blocks the first paint
+			// Home: only the band's rules (campaign-home.css; the campaign hero uses them), inline in campaign.css's place, so nothing blocks the first paint
 			// and the cascade order stays the same (owner, 22 Oct 2026). Any other campaign in the band: the full file.
 			wp_register_style( 'aw-campaign', false, array(), $v( 'assets/css/campaign-home.css' ) );
 			wp_enqueue_style( 'aw-campaign' );

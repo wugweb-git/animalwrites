@@ -2758,6 +2758,33 @@
     "heading": "none",
     "link": "listing names link to their pages; nothing is indexed from the map or Near me"
    }
+  },
+  {
+   "name": "Home: hero",
+   "type": "block",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "campaign open: the campaign band's design (aw-camp-band, campaign palette), label, H1, line, countdown and dates, two buttons, link to Need help now",
+    "otherwise: the Hero pattern (animal-writes/hero)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section> labelled by its H1 (campaign) or the Cover",
+    "aria": "aria-labelledby the H1; artwork alt=\"\"",
+    "keyboard": "Tab to the buttons and the link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 (the page's only one)",
+    "link": "campaign page #send and #rules; #need-help",
+    "alt": "empty (decorative artwork)",
+    "schema": "none"
+   },
+   "block": "animal-writes/home-hero"
   }
  ],
  "nav_status": {

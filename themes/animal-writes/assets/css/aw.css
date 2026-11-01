@@ -1475,3 +1475,28 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
 	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; }
 }
+
+/* Home (templates/front-page.html): each section is a pattern in the template, in the page's main. Sections touch (no
+   block gap between them, as in page content); one H1, in the hero. Breakpoints 767/768 and 1199/1200 only. */
+.home main.kit-static > * { margin-block: 0; }
+
+/* Hero, standard: at most 70% of the screen; the text on the left, 60% of the column from 768 */
+.wp-block-cover.kit-hero.aw-ed-hero { min-height: min(var(--kit-hero-min), 70svh) !important; }
+.aw-ed-hero-text > * { margin-block: 0 var(--kit-space-4); }
+.aw-ed-hero-text > :last-child { margin-bottom: 0; }
+.aw-ed-hero-text > .aw-ed-hero-label { margin-bottom: var(--kit-space-3); }
+@media (min-width: 768px) { .aw-ed-hero-text > * { max-width: 60%; } }
+
+/* Hero, campaign open: the campaign band's design (campaign-home.css), as the page head. Less padding than a section,
+   so it stays under 70% of the screen at 1200; on phones the label, H1, line, countdown and main button come first. */
+.aw-camp-band.aw-ed-hero--campaign { padding-top: var(--kit-space-7); }
+@media (min-width: 1200px) { .aw-camp-band.aw-ed-hero--campaign { padding-bottom: var(--kit-space-7); } }
+.aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin: 0 0 var(--kit-space-3); max-width: 18ch; font-size: var(--kit-type-display); color: var(--camp-on-mark); }
+.aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-4); }
+.aw-camp-band.aw-ed-hero--campaign .aw-countdown { margin: var(--kit-space-5) 0 var(--kit-space-2); }
+.aw-camp-band.aw-ed-hero--campaign .aw-cd-num { font-size: var(--kit-type-h1); }
+.aw-ed-hero--campaign .aw-cd-when { display: none; } /* the dates are in the row under it */
+.aw-ed-hero--campaign .aw-camp-band-range { justify-content: flex-start; gap: var(--kit-space-4); margin-top: 0; }
+.aw-camp-band.aw-ed-hero--campaign .aw-camp-band-actions { margin-top: var(--kit-space-5); }
+.aw-camp-band.aw-ed-hero--campaign .aw-ed-hero-help { margin: var(--kit-space-4) 0 0; font-size: var(--kit-type-sm); }
+.aw-ed-hero-help a { color: inherit; font-weight: var(--kit-weight-strong); text-decoration: underline; text-underline-offset: var(--kit-underline-offset); }

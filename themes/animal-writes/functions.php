@@ -43,7 +43,7 @@ add_action(
 add_action(
 	'wp_head',
 	function () {
-		if ( ! is_front_page() ) {
+		if ( ! is_front_page() || ( function_exists( 'aw_home_hero_is_campaign' ) && aw_home_hero_is_campaign() ) ) { // the campaign hero has its own artwork
 			return;
 		}
 		$base = '/wp-content/uploads/2026/10/aw1-im5-';
