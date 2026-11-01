@@ -380,7 +380,7 @@ add_filter(
 		}
 		$done   = true;
 		$states = aw_findhelp_states_window( $id );
-		return $states ? '<section class="wp-block-group alignfull aw-camp-section aw-camp-tint aw-findhelp-band has-global-padding is-layout-constrained" id="find-help" style="padding-top:var(--wp--preset--spacing--60);padding-bottom:var(--wp--preset--spacing--60)">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>' . $html : $html;
+		return $states ? '<section class="wp-block-group alignfull aw-camp-section aw-camp-tint aw-findhelp-band kit-section has-global-padding is-layout-constrained" id="find-help">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>' . $html : $html;
 	},
 	10,
 	2
