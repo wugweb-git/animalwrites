@@ -200,16 +200,22 @@
 .aw-camp--sc-stray-dogs .aw-camp-grid > :first-child a:not(.wp-element-button) { color: var(--camp-on-mark); }
 /* The share bar under the share message */
 .aw-camp--sc-stray-dogs .aw-camp-share-kit { margin: var(--kit-space-4) 0; }
+/* Share (from the Technical session's 27e4d5e3): from 768 the share buttons and the two share pictures side by side, not one under the other */
+@media (min-width: 768px) {
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--kit-space-grid); align-items: start; }
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit .aw-letter-share-pics { grid-column: auto; padding-top: 0; border-top: 0; }
+	.aw-camp--sc-stray-dogs #share .aw-camp-share-kit + .aw-camp-note { margin-top: var(--kit-space-4); } /* the note sits as close to the share row as the row to the text above */
+}
 /* The court orders and the state tracker: one sideways row of cards at every width (Layout rules 5, 6 and 10), each
-   row a card with its parts under their column headings, snapping. Phones show one card and the edge of the next
-   (--aw-carousel-item, 82%); from 768 two cards to the view (--aw-card-columns md). The server names each row and
+   row a card with its parts under their column headings, snapping. Phones show one card to the screen (narrower
+   cards would pass 600px); from 768 two cards to the view (--aw-card-columns md). The server names each row and
    makes it focusable, and gives the table its roles back (campaign-tools.php, aw_sc_rows_a11y). */
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 82%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: 100%; margin: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; width: auto; min-width: 0; border: 0; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tbody { display: flex; gap: var(--kit-space-4); }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { display: block; flex: 0 0 var(--aw-sc-card); margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); scroll-snap-align: start; }
-.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { display: block; padding: 0 0 var(--kit-space-3); border: 0; background: none; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { display: block; box-sizing: border-box; flex: 0 0 var(--aw-sc-card); min-width: 0; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); scroll-snap-align: start; }
+.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { display: block; padding: 0 0 var(--kit-space-3); border: 0; background: none; overflow-wrap: anywhere; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: var(--kit-weight-bold); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:not(:first-child)::before { display: block; margin-bottom: var(--kit-space-1); color: var(--camp-meta); font-size: var(--kit-type-sm); font-weight: var(--kit-weight-bold); }
@@ -223,18 +229,19 @@
 @media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) { --aw-sc-card: calc((100% - var(--kit-space-4)) / 2); }
 }
-/* What you can do and the Library: one sideways row below 1200 (two cards to the view from 768); from 1200 the three
-   action cards side by side and the Library three to a row */
+/* The Library: one sideways row at every width (82% of the view on phones, two to the view from 768, three from 1200).
+   What you can do: the same row below 1200; from 1200 the three cards side by side, none spanning the row. */
+.aw-camp--sc-stray-dogs #read .wp-block-post-template { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 @media (max-width: 1199px) {
-	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid, #read .wp-block-post-template) { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
-	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex: 0 0 82%; margin: 0; scroll-snap-align: start; }
+	.aw-camp--sc-stray-dogs #act .aw-camp-grid { display: flex; gap: var(--kit-space-4); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding-bottom: var(--kit-space-3); }
 }
-@media (min-width: 768px) and (max-width: 1199px) {
+.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { box-sizing: border-box; flex: 0 0 82%; min-width: 0; margin: 0; scroll-snap-align: start; }
+@media (min-width: 768px) {
 	.aw-camp--sc-stray-dogs :is(#act .aw-camp-grid > *, #read .wp-block-post-template > li) { flex-basis: calc((100% - var(--kit-space-4)) / 2); }
 }
 @media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; margin: 0; }
-	.aw-camp--sc-stray-dogs #read .wp-block-post-template { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp--sc-stray-dogs #read .wp-block-post-template > li { flex-basis: calc((100% - 2 * var(--kit-space-4)) / 3); }
+	.aw-camp--sc-stray-dogs #act .aw-camp-grid > .aw-camp-card { grid-column: auto; }
 }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
