@@ -1558,7 +1558,7 @@
    "type": "pattern",
    "status": "live",
    "classes": ["kit-photo-card"],
-   "states": ["default: section head (H2, one line), then two photo blocks (core Cover, dark overlay) side by side from 768, one under the other on phones, each with an H3, one line and a Brand button"],
+   "states": ["default: two photo blocks (core Cover, dark overlay) side by side from 768, one under the other on phones, each with its own H2, one line and a Brand button; no section heading"],
    "tokens": ["--kit-space-grid"],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\"); two core Cover blocks",
@@ -1570,7 +1570,7 @@
     "sr": "visible text"
    },
    "seo": {
-    "heading": "H2, an H3 per card",
+    "heading": "an H2 per card (no section heading)",
     "link": "Register as a volunteer (/volunteer/); Claim your listing (/claim/)",
     "alt": "photos described (alt on each Cover image)",
     "schema": "none"
