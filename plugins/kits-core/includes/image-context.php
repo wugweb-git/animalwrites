@@ -30,3 +30,21 @@ add_filter(
 	2
 );
 
+add_action(
+	'init',
+	function () {
+		register_post_meta(
+			'attachment',
+			'kits_image_context',
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_textarea_field',
+				'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+					return current_user_can( 'edit_post', $post_id );
+				},
+			)
+		);
+	}
+);
