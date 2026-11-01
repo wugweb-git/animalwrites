@@ -76,19 +76,24 @@
 }
 /* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
-/* Above the theme's full-width group padding rule. Phones: the 4:5 photo under the card, its sky faded into the cream */
-.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
+/* The hero keeps the theme's section padding (no override). Phones and tablets: the photo is its own block under the
+   card, as wide as the screen, its height set by its shape (no padding kept free for it); its top fades into the cream.
+   Phones show the lower 4:5 part of the tall photo; tablets the wide photo on the right. */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream); }
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull::after {
+	content: ""; display: block; aspect-ratio: 5 / 4;
+	margin: var(--kit-space-5) calc(-1 * var(--kit-shell-gutter)) calc(-1 * var(--kit-section-y));
 	background:
-		linear-gradient(to bottom, var(--camp-cream) calc(100% - 125vw), rgb(251 238 231 / 0) calc(100% - 100vw)),
-		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
-		var(--camp-cream);
-	padding-bottom: 80vw !important;
+		linear-gradient(to bottom, var(--camp-cream), rgb(251 238 231 / 0) 30%),
+		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat;
 }
-/* Tablets: the wide photo along the bottom, under the card */
-@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
+@media (min-width: 768px) {
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull::after { aspect-ratio: 3 / 1; background: url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") right bottom / auto 100% no-repeat; }
+}
 /* Desktops: the photo at full height on the right; text and card at the top, so the dog lies clear below the card */
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 100%; min-height: var(--kit-hero-min); padding-bottom: var(--kit-space-6) !important; }
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; min-height: var(--kit-hero-min); }
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull::after { content: none; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
 }
@@ -127,8 +132,8 @@
 /* The share band in the hero's cream; from 1200 a photo from the Library on the right (Media 15534, unused elsewhere), faded into the cream, the text clear of it */
 .aw-camp--sc-stray-dogs #share.aw-camp-section { background: var(--camp-cream); }
 @media (min-width: 1200px) {
-	.aw-camp--sc-stray-dogs #share.aw-camp-section { min-height: 26rem; background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
-	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { box-sizing: border-box; padding-right: 40%; }
+	.aw-camp--sc-stray-dogs #share.aw-camp-section { background: linear-gradient(to right, var(--camp-cream) 56%, transparent 70%), url("/wp-content/uploads/2026/10/photo-1626648701445-1f67aeb6e49c.avif") right center / auto 100% no-repeat, var(--camp-cream); }
+	.aw-camp--sc-stray-dogs #share.aw-camp-section > * { max-width: 42rem; margin-left: max(0px, calc((100% - 1120px) / 2)) !important; margin-right: auto !important; } /* the text in the left 60% of the 1120px column, clear of the photo; height = content + the section padding */
 }
 /* Section headings in the campaign plum */
 .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) :is(h2, h3) { color: var(--camp-primary); }
