@@ -1445,12 +1445,15 @@
    "classes": [
     "aw-ed-find",
     "aw-ed-search",
-    "aw-findhelp-all",
+    "aw-findhelp-actions",
+    "aw-findhelp-bar",
+    "aw-findhelp-filters",
+    "aw-findhelp-label",
     "aw-findhelp-near",
     "aw-findhelp-types"
    ],
    "states": [
-    "default ([aw_find_help compact=\"1\"]): section head (H2, live counts, Browse all states), search row (name, state, Search, Use my location), six type chips counted on published listings"
+    "default ([aw_find_help compact=\"1\"]): section head (H2, live counts), search bar (name, state, Search, Use my location), Quick filters (six types counted on published listings), Browse all states and Claim buttons"
    ],
    "tokens": [],
    "a11y": {
