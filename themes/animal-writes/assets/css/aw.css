@@ -1322,6 +1322,21 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
+/* Guides on Home (owner, 1 Nov 2026): no sideways row, no 2 + 1 orphan. The list is a size container, so the layout
+   follows the room it has, not the screen: three equal block-md cards in one row once three cards of 18rem
+   (--kit-card-min) and the two 24px gaps fit (57rem = 912px: 1000 up, so 1200 and 1440 too); the cards in the row are
+   one height (the grid stretches the card, its content keeps its natural height: title 3 lines, summary 2). Narrower
+   (phones and 768 to about 960) the three cards are one column of compact rows, the stacked-md look: thumbnail left,
+   meta and title right, no summary, as in the What's happening rows. */
+.aw-ed-learn .aw-hub-list { container: aw-guides / inline-size; }
+.aw-ed-learn .aw-tasks.is-three { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
+@container aw-guides (max-width: 911px) {
+	.aw-ed-learn .aw-tasks.is-three .kit-card { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-4); }
+	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { width: var(--kit-thumb-lg); max-width: 40%; border-radius: var(--kit-radius-media); }
+	.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-body { flex: 1 1 0; padding: 0; }
+	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
+}
+@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
 /* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
    the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
    included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
@@ -1421,27 +1436,17 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-hub-directory > .aw-toolbar { max-width: var(--kit-width-content); }
 
 /* Home on phones (owner, 25 Oct 2026; was 9 Oct, 32f3f4c, lost in the 18 Oct rebuild): every section fits one screen at
-   375×812. Under 768 the card lists (What's happening, From the Library, Guides), the Library tiles, the story's figures
+   375×812. Under 768 the Library tiles, the story's figures
    and dates and the two Take action photo cards scroll sideways in one row (the Kits sideways row); the states list scrolls
    sideways in three rows. Nothing is removed: every card, tile and link stays in the row, in reading and Tab order
    (a focused card scrolls into view). From 768 nothing here applies. */
 @media (max-width: 767px) {
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template,
 	.home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card)) {
 		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4) !important;
 		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
 		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
 	}
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
 	.home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card))::-webkit-scrollbar { display: none; }
-	/* Cards: one size in the row (the lead and the compact rows alike), a 2:1 picture, title and a two-line summary */
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
-	.home .aw-ed-learn .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
 	/* Library tiles, story figures and dates, Take action photo cards */
 	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
 	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 min(88%, 24rem); padding: var(--kit-space-4); column-gap: var(--kit-space-3); scroll-snap-align: start; margin: 0 !important; }
@@ -1454,28 +1459,18 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 }
 
 /* Home on tablets (owner, 25 Oct 2026): every section fits one screen at 768×1024 and 800×1280, the phone approach above.
-   From 768 up to desktop (1024) the What's happening, From the Library and Guides card lists and the Library tiles scroll
-   sideways in one row, two cards and a part of the next in view (cards one size, 2:1 picture, two-line summary). Nothing
+   From 768 up to desktop (1024) the Library tiles scroll sideways in one row, two tiles and a part of the next in view. Nothing
    is removed; the Tab order is the reading order. Only 767/768 and 1199/1200 are media widths (breakpoint_check.py), so
    the page is a size container from 768 to 1199 and the rows apply while it is narrower than 1008px: under 1024 with
    a desktop scroll bar of up to 16px, so a 1024px desktop window is never changed. 1024 and up: nothing here applies. */
 @media (min-width: 768px) and (max-width: 1199px) { .home .wp-site-blocks { container: aw-home / inline-size; } }
 @container aw-home (max-width: 1007px) {
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template,
 	.home .aw-ed-law > .kit-stack {
 		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-grid) !important;
 		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
 		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
 	}
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
 	.home .aw-ed-law > .kit-stack::-webkit-scrollbar { display: none; }
-	.home .aw-ed-learn .aw-hub-list .wp-block-post-template > li { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
-	.home .aw-ed-learn .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
-	.home .aw-ed-learn .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
-	.home .aw-ed-learn .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
 	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
 	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; }
 }
