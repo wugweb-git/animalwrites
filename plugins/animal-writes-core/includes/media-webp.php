@@ -9,6 +9,11 @@
  * aw_seo_share_jpeg_build()) is not a registered image size, so it is only recognised by its file name, and no
  * mapping is added when the file being read or written is named -og.jpg or -og.jpeg.
  *
+ * Only the resized copies change. Core also asks the format filter about the full-size file and would repoint the
+ * attachment to a WebP full-size image, so a late wp_generate_attachment_metadata filter (aw_media_webp_keep_full())
+ * puts the attachment's file back to the JPEG/PNG that sits beside it on disk and drops a WebP "full" size entry. A
+ * converted full-size file left on disk is never deleted.
+ *
  * Media → Make WebP converts the existing images in batches of 20: only their resized copies are made again (through
  * core), the old copies stay on disk, and the old list of sizes is kept in option aw_media_webp_log so Undo can put it
  * back. Admin screen: core list table and core notices only (no CSS, no scripts).
@@ -53,6 +58,122 @@ add_filter(
 	3
 );
 
+/**
+ * The JPEG or PNG that belongs to a file name core switched to WebP (same name, same folder, still on disk).
+ *
+ * @param string $rel Relative file ("2026/11/a.webp").
+ * @param string $dir Uploads base directory.
+ * @return string Relative JPEG/PNG file, '' when there is none.
+ */
+function aw_media_webp_original_rel( $rel, $dir ) {
+	if ( ! preg_match( '/\.webp$/i', (string) $rel ) ) {
+		return '';
+	}
+	$stem = preg_replace( '/\.webp$/i', '', (string) $rel );
+	foreach ( array( 'jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG' ) as $ext ) {
+		if ( file_exists( rtrim( $dir, '/' ) . '/' . $stem . '.' . $ext ) ) {
+			return $stem . '.' . $ext;
+		}
+	}
+	return '';
+}
+
+/**
+ * Keep the full-size file as it was uploaded (JPEG/PNG): if conversion repointed the attachment at a WebP full-size
+ * file, point it back and drop the WebP "full" size entry. The WebP file stays on disk.
+ *
+ * @param array $meta Attachment metadata.
+ * @param int   $id   Attachment ID.
+ * @return array Metadata (changed only when it was repointed).
+ */
+function aw_media_webp_keep_full( $meta, $id ) {
+	if ( ! is_array( $meta ) || empty( $meta['file'] ) ) {
+		return $meta;
+	}
+	$up   = wp_get_upload_dir();
+	$orig = aw_media_webp_original_rel( (string) $meta['file'], (string) $up['basedir'] );
+	if ( '' === $orig || aw_media_webp_is_share_file( $orig ) ) {
+		return $meta;
+	}
+	$meta['file'] = $orig;
+	if ( isset( $meta['sizes']['full'] ) && preg_match( '/\.webp$/i', (string) ( $meta['sizes']['full']['file'] ?? '' ) ) ) {
+		unset( $meta['sizes']['full'] );
+	}
+	update_attached_file( (int) $id, $orig );
+	return $meta;
+}
+
+add_filter(
+	'wp_generate_attachment_metadata',
+	function ( $meta, $id ) {
+		return aw_media_webp_keep_full( $meta, (int) $id );
+	},
+	50,
+	2
+);
+
+/**
+ * True when every size the old list had (and that is still a registered size) is in the new list as an existing WebP file.
+ *
+ * @param array         $old     Old sizes.
+ * @param array         $new     New sizes.
+ * @param string        $dir     Folder of the files.
+ * @param string[]|null $allowed Size names still registered (null = all).
+ * @param callable      $is_webp Takes a path, true when the file really is WebP.
+ * @return string '' when fine, else the reason.
+ */
+function aw_media_webp_check_sizes( array $old, array $new, $dir, $allowed, $is_webp ) {
+	foreach ( array_keys( $old ) as $key ) {
+		if ( is_array( $allowed ) && ! in_array( $key, $allowed, true ) ) {
+			continue;
+		}
+		$file = is_array( $new[ $key ] ?? null ) ? (string) ( $new[ $key ]['file'] ?? '' ) : '';
+		if ( '' === $file ) {
+			return 'Size ' . $key . ' was not made';
+		}
+		$path = rtrim( $dir, '/' ) . '/' . $file;
+		if ( ! file_exists( $path ) ) {
+			return 'Size ' . $key . ' is missing on disk';
+		}
+		if ( ! preg_match( '/\.webp$/i', $file ) || ! call_user_func( $is_webp, $path ) ) {
+			return 'Size ' . $key . ' is not WebP (this server\'s image library cannot write it)';
+		}
+	}
+	return '';
+}
+
+/** True when the file really is WebP (checked by content, not by its name). */
+function aw_media_webp_file_is_webp( $path ) {
+	$mime = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $path ) : false;
+	return 'image/webp' === $mime;
+}
+
+/**
+ * Which attachments to convert next: not yet tried first, then earlier failures (retried), never converted or undone ones.
+ *
+ * @param int[] $ids   Candidate IDs with old-style sizes, ascending.
+ * @param array $log   The conversion log.
+ * @param int   $limit 0 = all.
+ * @return int[] Each ID once.
+ */
+function aw_media_webp_pick( array $ids, array $log, $limit = 0 ) {
+	$fresh  = array();
+	$failed = array();
+	foreach ( array_unique( $ids ) as $id ) {
+		$st = $log[ $id ]['status'] ?? '';
+		if ( in_array( $st, array( 'converted', 'undone' ), true ) ) {
+			continue;
+		}
+		if ( 'failed' === $st ) {
+			$failed[] = $id;
+		} else {
+			$fresh[] = $id;
+		}
+	}
+	$out = array_merge( $fresh, $failed );
+	return $limit ? array_slice( $out, 0, $limit ) : $out;
+}
+
 /** The conversion log: attachment ID => array( sizes (the old list), time, status converted|failed|undone, why ). */
 function aw_media_webp_log() {
 	$log = get_option( 'aw_media_webp_log', array() );
@@ -74,9 +195,10 @@ function aw_media_webp_old_size( $size ) {
 }
 
 /**
- * JPEG and PNG attachments whose sizes still point at JPEG or PNG files, not yet in the log.
+ * JPEG and PNG attachments whose sizes still point at JPEG or PNG files, except converted and undone ones (earlier
+ * failures are tried again, after the ones never tried).
  *
- * @param int $limit Stop after this many (0 = all, for the counter).
+ * @param int $limit Return at most this many (0 = all, for the counter).
  * @return int[]
  */
 function aw_media_webp_pending( $limit = 0 ) {
@@ -87,7 +209,7 @@ function aw_media_webp_pending( $limit = 0 ) {
 	foreach ( array_chunk( array_map( 'intval', (array) $ids ), 200 ) as $chunk ) {
 		update_meta_cache( 'post', $chunk );
 		foreach ( $chunk as $id ) {
-			if ( isset( $log[ $id ] ) ) {
+			if ( in_array( $log[ $id ]['status'] ?? '', array( 'converted', 'undone' ), true ) ) {
 				continue;
 			}
 			$file = (string) get_post_meta( $id, '_wp_attached_file', true );
@@ -101,12 +223,9 @@ function aw_media_webp_pending( $limit = 0 ) {
 					break;
 				}
 			}
-			if ( $limit && count( $out ) >= $limit ) {
-				return $out;
-			}
 		}
 	}
-	return $out;
+	return aw_media_webp_pick( $out, $log, $limit );
 }
 
 /**
@@ -137,14 +256,24 @@ function aw_media_webp_convert( $id ) {
 		$new = wp_create_image_subsizes( $file, $id );
 		if ( is_wp_error( $new ) ) {
 			$why = $new->get_error_message();
-		} elseif ( empty( $new['sizes'] ) ) {
-			$why = 'No resized copies were made';
+		} else {
+			$new = aw_media_webp_keep_full( $new, $id );
+			wp_update_attachment_metadata( $id, $new );
+			// Core leaves out a size it could not make, and may pick an image library that cannot write WebP.
+			$why = aw_media_webp_check_sizes(
+				(array) $meta['sizes'],
+				(array) ( $new['sizes'] ?? array() ),
+				dirname( $file ),
+				array_keys( wp_get_registered_image_subsizes() ),
+				'aw_media_webp_file_is_webp'
+			);
 		}
 	} catch ( Throwable $e ) {
 		$why = $e->getMessage();
 	}
 	if ( '' !== $why ) {
-		wp_update_attachment_metadata( $id, $meta ); // put the old list back
+		wp_update_attachment_metadata( $id, $meta ); // put the old metadata back
+		update_attached_file( $id, $file );
 		$log[ $id ]['why'] = $why;
 		aw_media_webp_log_save( $log );
 		return false;
@@ -244,7 +373,11 @@ function aw_media_webp_screen() {
 	$pending   = count( aw_media_webp_pending() );
 	$log       = aw_media_webp_log();
 	echo '<p>New JPEG and PNG uploads get WebP resized copies. The uploaded file is never changed and no file is deleted: converting an existing image makes its resized copies again as WebP and keeps the old ones on disk. Undo puts the old list of sizes back.</p>';
-	echo '<p>' . (int) $pending . ' JPEG/PNG images still have JPEG/PNG sizes.' . ( $supported ? '' : ' This server cannot write WebP.' ) . '</p>';
+	$failed = 0;
+	foreach ( $log as $e ) {
+		$failed += 'failed' === ( $e['status'] ?? '' ) ? 1 : 0;
+	}
+	echo '<p>' . (int) $pending . ' JPEG/PNG images still have JPEG/PNG sizes' . ( $failed ? ' (' . (int) $failed . ' failed earlier and are tried again)' : '' ) . '.' . ( $supported ? '' : ' This server cannot write WebP.' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'aw_media_webp' );
 	echo '<input type="hidden" name="action" value="aw_media_webp">';
