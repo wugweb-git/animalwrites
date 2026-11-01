@@ -703,8 +703,14 @@ function aw_faq_study_name( $s ) {
 		return $s;
 	}
 	$small = array( 'a', 'an', 'and', 'as', 'at', 'by', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'with' );
-	$words = explode( ' ', mb_strtolower( $s ) );
+	$acro  = array( 'ABC', 'APCRI', 'AWBI', 'BMC', 'CCSEA', 'CPCSEA', 'ICMR', 'IJLR', 'NGO', 'NGT', 'PCA', 'PFA', 'SPCA', 'WHO', 'WWF' ); // kept in capitals
+	$words = explode( ' ', $s );
 	foreach ( $words as $i => $w ) {
+		$bare = preg_replace( '/[^\p{L}]/u', '', $w );
+		if ( in_array( $bare, $acro, true ) || ( mb_strlen( $bare ) > 1 && ! preg_match( '/[AEIOUY]/u', $bare ) ) ) { // a listed acronym, or capitals with no vowel ("BMC")
+			continue;
+		}
+		$w           = mb_strtolower( $w );
 		$words[ $i ] = $i && in_array( $w, $small, true ) ? $w : mb_strtoupper( mb_substr( $w, 0, 1 ) ) . mb_substr( $w, 1 );
 	}
 	return preg_replace_callback( '/\(([^)]+)\)/u', fn( $m ) => '(' . mb_strtoupper( $m[1] ) . ')', implode( ' ', $words ) ); // "(IJLR)" stays an acronym
