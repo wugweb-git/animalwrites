@@ -118,9 +118,7 @@
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date { display: inline-block; margin-top: var(--kit-space-1); padding: 0.1em 0.6em; border-radius: 999px; background: var(--kit-color-accent); color: var(--camp-primary); }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when .aw-date .kit-ico { display: none; }
 .aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-poster-note { padding-top: var(--kit-space-3); border-top: 1px solid var(--camp-line); font-size: var(--kit-type-sm); }
-/* Page sections (owner, 1 Nov 2026: fix every section). Text keeps the site's 720px measure, left-aligned (the constrained
-   layout centres narrow children, so the measure is a right padding); tables and card grids keep the full width. */
-@media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-section:not(.aw-camp-hero) > :is(p, h2, h3, ul:not([class]), ol:not([class])) { box-sizing: border-box; padding-right: max(0px, calc(100% - 720px)); } }
+/* Page sections (owner, 1 Nov 2026: fix every section). A campaign is a landing page: text runs the full band width. */
 /* The date strip: three to a row, no calendar marks inside the big dates */
 @media (min-width: 768px) { .aw-camp--sc-stray-dogs .aw-camp-dates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .aw-camp--sc-stray-dogs .aw-camp-dates-when .kit-ico { display: none; }
