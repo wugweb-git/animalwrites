@@ -328,12 +328,59 @@ function aw_doc_preview_html( $post_id ) {
  * @return bool
  */
 function aw_doc_hostable( $post_id, $url ) {
-	if ( has_term( array( 'act', 'rule', 'judgment', 'order' ), 'post_tag', $post_id ) ) {
+	if ( has_term( array( 'act', 'rule', 'judgment', 'order' ), 'post_tag', $post_id ) || '1' === (string) get_post_meta( $post_id, 'aw_doc_host_ok', true ) ) { // aw_doc_host_ok: hosted by the owner's decision (AWBI items 142 to 145, 2 Nov 2026)
 		return true;
 	}
 	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
 	return (bool) preg_match( '/(^|\.)(sci\.gov\.in|egazette\.gov\.in|egazette\.nic\.in|indiacode\.nic\.in|indiacode\.gov\.in|ecourts\.gov\.in)$|^indian-(supreme|high)-court-judgments\.s3\.ap-south-1\.amazonaws\.com$/i', $host );
 }
+
+/**
+ * Fetch the PDF of a document the owner allows us to host (aw_doc_host_ok set to 1). When the item keeps an archived
+ * attachment whose file is missing (aw_file_archived), the file is put back under that attachment, so no second
+ * media item is made; otherwise the PDF is mirrored as a new attachment.
+ *
+ * @param int $post_id Library item.
+ * @return int Attachment ID or 0.
+ */
+function aw_doc_refetch( $post_id ) {
+	$fid = (int) get_post_meta( $post_id, 'aw_file_id', true );
+	if ( $fid && file_exists( (string) get_attached_file( $fid ) ) ) {
+		return $fid;
+	}
+	$url  = (string) get_post_meta( $post_id, 'aw_source_url', true );
+	$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! preg_match( '/\.pdf($|\?)/i', $url ) || ! preg_match( '/(^|\.)(gov\.in|nic\.in)$/i', $host ) ) {
+		return 0;
+	}
+	$old  = (int) get_post_meta( $post_id, 'aw_file_archived', true );
+	$path = ( $old && 'application/pdf' === get_post_mime_type( $old ) && (int) wp_get_post_parent_id( $old ) === (int) $post_id ) ? (string) get_attached_file( $old ) : '';
+	if ( '' === $path || file_exists( $path ) ) {
+		return aw_mirror_gov_pdf( $post_id, $url );
+	}
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	$tmp = download_url( $url, 60 );
+	if ( is_wp_error( $tmp ) ) {
+		return 0;
+	}
+	$ok = '%PDF-' === file_get_contents( $tmp, false, null, 0, 5 ) && wp_mkdir_p( dirname( $path ) ) && copy( $tmp, $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	wp_delete_file( $tmp );
+	if ( ! $ok ) {
+		return 0;
+	}
+	update_post_meta( $post_id, 'aw_file_id', $old );
+	clean_post_cache( $post_id );
+	return $old;
+}
+
+/** Setting aw_doc_host_ok to 1 (REST or the edit screen) fetches the PDF at once. */
+function aw_doc_host_ok_changed( $meta_id, $post_id, $key, $value ) {
+	if ( 'aw_doc_host_ok' === $key && '1' === (string) $value && 'aw_legal' === get_post_type( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+		aw_doc_refetch( (int) $post_id );
+	}
+}
+add_action( 'added_post_meta', 'aw_doc_host_ok_changed', 10, 4 );
+add_action( 'updated_post_meta', 'aw_doc_host_ok_changed', 10, 4 );
 
 /**
  * Letter templates: a print button and a clean printed page.

@@ -111,6 +111,7 @@ function aw_meta_schema() {
 		// Resources.
 		'aw_file_url'        => array( 'string', array( 'aw_legal' ), 'Downloadable file URL' ),
 		'aw_file_id'         => array( 'string', array( 'aw_legal' ), 'Document file (attachment ID)' ),
+		'aw_doc_host_ok'     => array( 'string', array( 'aw_legal' ), 'Host this document here (1 = the owner allows a copy)' ),
 		'aw_requires_email'  => array( 'boolean', array( 'aw_legal' ), 'Gate download behind newsletter signup' ),
 		'aw_legal_number'    => array( 'string', array( 'aw_legal' ), 'Official number of the text (e.g. G.S.R. 864(E))' ),
 		'aw_legal_force'     => array( 'string', array( 'aw_legal' ), 'In force: InForce, NotInForce or PartiallyInForce' ),
