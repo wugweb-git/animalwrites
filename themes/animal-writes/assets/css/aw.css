@@ -1365,6 +1365,7 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: 4 / 3; }
 .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+@container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: var(--kit-placard-ratio); } } /* 16:9 (--kit-placard-ratio from 768) in the row of three: the 4:3 picture made the section 758px at 1280 (limit 720) */
 /* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
    the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
    included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
@@ -1403,6 +1404,19 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-md) !important; }
 }
 @media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
+/* Phones (owner, 2 Nov 2026: each Home section one screen): the lead is a row like the other two (112px 4:3 picture,
+   date and source, h4 title, no summary); the section went from 1329px (four items, block lead) to 829px. */
+@media (max-width: 767px) {
+	.aw-ed-news .aw-news-mosaic > li > .kit-card { gap: var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; align-items: flex-start; }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] { gap: 0; } /* a block card: no card padding, its body padded 24px; the picture gets the same room */
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media { flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; border-radius: var(--kit-radius-media); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
+	.aw-ed-news .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; }
+	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-sum { display: none; }
+	.aw-ed-news .aw-news-mosaic > li:first-child .kit-card-title { font-size: var(--kit-type-h4) !important; }
+}
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
 .aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
@@ -1504,9 +1518,11 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .home main.kit-static > * { margin-block: 0; }
 
 /* Home hero: campaign 13848 while it is published, open or closed (home.php). The campaign band's
-   design (campaign-home.css), as the page head, at full section height (owner, 1 Nov: it may be 800px or more): the
-   section padding top and bottom from 768, the display-size H1 from 1200 (the H1 size below, where the display size
-   wraps to four lines beside the artwork), generous space between the parts. The H1 has the lab-rules heading weight.
+   design (campaign-home.css), as the page head. From 768 it is the theme hero (owner, 2 Nov 2026: no section taller
+   than 720px or one screen): at least --kit-hero-min (560, 660 from 1200; design-system.md "Section heights"), the
+   section padding top and bottom, the text centred in it; the H1 at the theme H1 size at every width (the display
+   size wrapped to four lines and pushed the hero to 877px) and the phone spacing between the parts. The H1 has the
+   lab-rules heading weight.
    On phones the label, H1, line, countdown and main button come first, the artwork under the text. */
 .aw-camp-band:not(.aw-camp-band--closed) { --kit-color-focus: var(--camp-on-mark); } /* the focus ring in the band's text colour: the Kits blue is 1.3:1 on the campaign colour (the closed band is light) */
 .aw-camp-band.aw-ed-hero--campaign { padding-block: var(--kit-space-6) var(--kit-space-section); }
@@ -1529,18 +1545,13 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* From 768: the artwork right of the text, as in the band. A 10:9 box, centred on the hero's height, shows the
    picture's right half (the papers, stamp and mouse) whatever the hero's height; the text keeps clear of it. */
 @media (min-width: 768px) {
-	section.aw-camp-band.aw-ed-hero--campaign { padding-block: var(--kit-space-section); } /* outranks the band's art padding under 1200 */
+	section.aw-camp-band.aw-ed-hero--campaign { box-sizing: border-box; display: grid; align-content: center; min-height: var(--kit-hero-min); padding-block: var(--kit-space-section); } /* the theme hero height; padding outranks the band's art padding under 1200 */
+	.aw-ed-hero--campaign > .aw-camp-band-inner { width: 100%; } /* a grid item with auto margins would shrink to its text */
 	.aw-camp-band.aw-ed-hero--campaign.has-art .aw-camp-band-text { max-width: calc(55% - var(--kit-space-grid)); }
-	.aw-ed-hero--campaign .aw-camp-band-pill { margin-bottom: var(--kit-space-6); }
-	.aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { margin-bottom: var(--kit-space-5); }
-	.aw-camp-band.aw-ed-hero--campaign .aw-countdown { margin: var(--kit-space-6) 0 var(--kit-space-3); }
-	.aw-camp-band.aw-ed-hero--campaign .aw-camp-band-actions { margin-top: var(--kit-space-6); }
-	.aw-camp-band.aw-ed-hero--campaign .aw-ed-hero-help { margin-top: var(--kit-space-4); }
 	.aw-ed-hero--campaign .aw-camp-band-art { inset: 50% 0 auto auto; width: 45%; height: auto; aspect-ratio: 10 / 9; translate: 0 -50%; }
 	.aw-ed-hero--campaign .aw-camp-band-art img { height: 100%; object-fit: cover; object-position: right center; }
 }
 @media (min-width: 1200px) {
-	.aw-camp-band.aw-ed-hero--campaign h1.aw-camp-band-title { font-size: var(--kit-type-display); }
 	.aw-camp-band.aw-ed-hero--campaign.has-art .aw-camp-band-text { max-width: calc(50% - var(--kit-space-grid)); }
 	.aw-ed-hero--campaign .aw-camp-band-art { width: 50%; }
 }
@@ -1609,16 +1620,23 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 /* Need help now: a bento grid on the dark band. Each tile is one link (its H3's link covers the tile); phone numbers
    are tap to call. The reading order (and Tab order) is the markup order at every width: 112, injured animal, 1962,
    AWBI, report cruelty, find a vet, find an organisation. Grid rows stretch, so tiles in one row end level.
-   Phones: one column. From 768: two columns, 112 two rows tall beside the injured-animal and 1962 tiles.
-   From 1200: four columns, 112 two by two, the injured-animal and organisation tiles two wide. */
+   The section is a size container (owner, 2 Nov 2026: no section taller than 720px or one screen):
+   - narrower than 56.5rem (phones, tablets): one sideways row (the Kits sideways row, as .kit-scroll-row in kit.css:
+     min(82%, 22rem) per tile), 112 first, the next tile showing at the edge; every tile is a link, so Tab reaches
+     each one and scrolls it into view (it was one column, 1597px tall on a 375 phone, 974px at 768);
+   - from 56.5rem (four tiles of --kit-body-min text plus their --kit-space-5 padding and three --kit-space-5 gaps:
+     4 x (10rem + 3rem) + 4.5rem; 1024 and up): four columns, two rows, 112 two rows tall in the first column. */
+.aw-ed-help { container: aw-help / inline-size; }
 .aw-bento { display: grid; gap: var(--kit-space-5); grid-template-columns: minmax(0, 1fr); grid-template-areas: "sos" "injured" "vet1962" "awbi" "cruelty" "vets" "orgs"; }
 .aw-bento--sos { grid-area: sos; } .aw-bento--injured { grid-area: injured; } .aw-bento--vet1962 { grid-area: vet1962; } .aw-bento--awbi { grid-area: awbi; }
 .aw-bento--cruelty { grid-area: cruelty; } .aw-bento--vets { grid-area: vets; } .aw-bento--orgs { grid-area: orgs; }
-@media (min-width: 768px) {
-	.aw-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "sos injured" "sos vet1962" "awbi cruelty" "vets orgs"; }
+@container aw-help (max-width: 56.49rem) {
+	.aw-bento { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; } /* top padding: room for the focus ring and the hover lift */
+	.aw-bento::-webkit-scrollbar { display: none; }
+	.aw-bento > .aw-bento-tile { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; }
 }
-@media (min-width: 1200px) {
-	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos sos injured injured" "sos sos vet1962 awbi" "cruelty vets orgs orgs"; }
+@container aw-help (min-width: 56.5rem) {
+	.aw-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "sos injured vet1962 awbi" "sos cruelty vets orgs"; }
 }
 /* Each tile is a size container, so the phone numbers scale to the tile and never wrap or overflow. Depth: a faint
    border, a light line along the top edge, a soft top-to-bottom shade and a small shadow. Hover: the tile lifts
@@ -1696,42 +1714,68 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-findhelp-actions .kit-btn { flex: 1 1 100%; justify-content: center; }
 }
 
-/* From the Library on Home: the mosaic above (What's happening's), then the four type tiles. Phones: the sideways row
-   (Home on phones, above). From 768: two by two, every tile one height, the mosaic's column gap. From 1200: four across,
-   the icon square on top with the arrow beside it and the title and line under them full width (a 4-across tile is
-   too narrow for the icon, text and arrow side by side). */
+/* From the Library on Home (owner, 2 Nov 2026: no section taller than 720px or one screen; it was 1049px at 1280):
+   the three items, then the four type tiles, each one row.
+   - Items: the What's happening mosaic markup, every item (the lead too) as a stacked-md row card: the 112px
+     (--kit-thumb-lg) 4:3 picture left, date and publisher, title (h4); no summary. The list is a size container: three
+     across from 68.5rem (three cards whose text column keeps --kit-body-min: 3 x (7rem picture + 1.5rem gap + 10rem
+     text + 3rem padding) + two 2rem gaps), else one sideways row (the Kits sideways row: min(82%, 22rem) per card, as
+     .kit-scroll-row in kit.css). Every card is a link, so Tab reaches each one and scrolls it into view.
+   - Tiles: phones and 768 to 1199 the sideways row (Home on phones, above, and below); from 1200 four across, the icon
+     square on top with the arrow beside it and the title and line under them full width (a 4-across tile is too
+     narrow for the icon, text and arrow side by side). The section head's "See all" button is the way to the rest. */
 @media (min-width: 768px) { .aw-ed-law > .kit-stack { gap: var(--kit-space-grid); grid-auto-rows: 1fr; } }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.home .aw-ed-law > .kit-stack {
+		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4) !important;
+		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
+		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
+	}
+	.home .aw-ed-law > .kit-stack::-webkit-scrollbar { display: none; }
+	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 min(88%, 24rem); scroll-snap-align: start; margin: 0 !important; }
+}
 @media (min-width: 1200px) {
 	.aw-ed-law > .kit-stack { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 	.aw-ed-law > .kit-stack > .kit-tile { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "ico arrow" "title title" "desc desc"; grid-template-rows: auto auto 1fr; }
 	.aw-ed-law > .kit-stack > .kit-tile::before { justify-self: start; margin-bottom: var(--kit-space-3); }
 	.aw-ed-law > .kit-stack > .kit-tile::after { align-self: start; margin-top: 0.625rem; } /* centred on the icon square */
 }
-/* From the Library items (1 Nov 2026): three, the lead and two more. Meta row is the date and the publisher (no place, no
-   type chip); the two rows have a bigger title and a 4:3 picture. 768 to 1199: the lead runs full width (picture left,
-   4:3, text right) with the two rows side by side under it. From 1200: lead 5fr on the left, the two rows 7fr on the
-   right, each row half the lead's height with a 45% wide 4:3 picture, so both columns end level. */
+.aw-ed-law .aw-hub-list { container: aw-library / inline-size; }
 .aw-ed-law .aw-news-mosaic :is(.kit-meta-row .kit-meta-item:not(.aw-date), .kit-tag:not(.kit-tag--source)) { display: none; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h4) !important; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
-.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
-@media (min-width: 768px) {
-	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) { align-self: stretch; display: flex; }
-	.aw-ed-law .aw-news-mosaic > li:nth-child(n+2) > .kit-card { flex: 1 1 auto; align-items: center; }
+.aw-ed-law .aw-news-mosaic > li { grid-column: auto !important; grid-row: auto !important; display: flex; } /* over the shared mosaic placement (:has, higher specificity) */
+.aw-ed-law .aw-news-mosaic > li > .kit-card { flex: 1 1 auto; flex-direction: row; align-items: flex-start; gap: var(--kit-space-5); }
+.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-media { position: static; flex: none; width: var(--kit-thumb-lg) !important; max-width: 40%; aspect-ratio: 4 / 3; min-height: 0; margin: 0; border-radius: var(--kit-radius-media); }
+.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-media img { position: static; height: 100%; object-fit: cover; }
+.aw-ed-law .aw-news-mosaic > li > .kit-card > .kit-card-body { flex: 1 1 0; align-self: auto; }
+/* The lead is a block card (no card padding, its body padded 24px): its picture gets the same 24px room, so it lines up with the stacked rows */
+.aw-ed-law .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] { gap: 0; }
+.aw-ed-law .aw-news-mosaic > li > .kit-card[class*="kit-card--block"] > .kit-card-media { margin: var(--kit-space-5) 0 var(--kit-space-5) var(--kit-space-5); }
+.aw-ed-law .aw-news-mosaic .kit-card-sum { display: none; }
+.aw-ed-law .aw-news-mosaic .kit-card-title { font-size: var(--kit-type-h4) !important; }
+@container aw-library (min-width: 68.5rem) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: none; gap: var(--kit-space-grid); }
 }
+@container aw-library (max-width: 68.49rem) {
+	.aw-ed-law .aw-news-list.aw-news-mosaic { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4); margin-inline: calc(-1 * var(--kit-space-gutter)); padding: var(--kit-space-2) var(--kit-space-gutter) var(--kit-space-3); scroll-padding-inline: var(--kit-space-gutter); scrollbar-width: none; overscroll-behavior-x: contain; }
+	.aw-ed-law .aw-news-list.aw-news-mosaic::-webkit-scrollbar { display: none; }
+	.aw-ed-law .aw-news-mosaic > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; }
+}
+
+/* India Writes for Its Community Dogs on Home (pattern aw1-story; the band's own rules are in campaign-record.css).
+   768 to 1199 (owner, 2 Nov 2026: no section taller than 720px; stacked it was 873px at 1024 and 819 at 768): the
+   heading and line with the figures (two by two) under them on the left, the four photographs two by two on the right
+   beside both, then the dates and the button full width. The story text group is display: contents so its parts sit in
+   the band's grid; the reading and Tab order stays the markup order. Phones and from 1200: campaign-record.css. */
 @media (min-width: 768px) and (max-width: 1199px) {
-	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-	.aw-ed-law .aw-news-mosaic > li:first-child { grid-column: 1 / -1 !important; grid-row: 1 !important; } /* over the shared three-item rule (:has, higher specificity) */
-	.aw-ed-law .aw-news-mosaic > li:nth-child(2) { grid-column: 1; grid-row: 2; }
-	.aw-ed-law .aw-news-mosaic > li:nth-child(3) { grid-column: 2; grid-row: 2; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card { flex-direction: row; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media { position: static; flex: 0 0 45%; aspect-ratio: 4 / 3; min-height: 0; }
-	.aw-ed-law .aw-news-mosaic > li:first-child .kit-card-media img { position: static; height: 100%; object-fit: cover; }
-	.aw-ed-law .aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: 1 1 0; align-self: center; }
-}
-@media (min-width: 1200px) {
-	.aw-ed-law .aw-news-list.aw-news-mosaic { grid-template-rows: 1fr 1fr; }
-	.aw-ed-law .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 45% !important; max-width: 45%; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-areas: "head media" "figures media" "dates dates" "actions actions"; column-gap: var(--kit-space-grid); row-gap: var(--kit-space-5); align-items: center; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text { display: contents; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > * { margin: 0 !important; min-width: 0; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-text > :first-child { grid-area: head; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-figures { grid-area: figures; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-dates { grid-area: dates; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-actions { grid-area: actions; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-media { grid-area: media; }
+	.home .aw-ed-story.aw-camp--community-dogs .aw-ed-story-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Take action on Home: two Kits cards (icon, title, one line, button), side by side from 768; the button at the bottom.

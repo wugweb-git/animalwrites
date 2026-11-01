@@ -23,7 +23,7 @@
 <!-- /wp:group -->
 
 <!-- wp:html {"metadata":{"name":"Help bento"}} -->
-<div class="aw-bento">
+<div class="aw-bento" role="group" aria-labelledby="aw-help-h">
 <div class="aw-bento-tile aw-bento--sos"><p class="aw-bento-eyebrow"><span class="kit-ico kit-ico--siren" aria-hidden="true"></span>Emergency</p><h3 class="aw-bento-num"><a href="tel:112" aria-label="Call 112, emergency">112</a></h3><p>Danger right now. Police, fire and ambulance, free.</p><span class="aw-bento-cta" aria-hidden="true"><span class="kit-ico kit-ico--phone-call"></span>Call 112</span></div>
 <div class="aw-bento-tile aw-bento--injured"><span class="aw-bento-ico aw-bento-ico--accent" aria-hidden="true"><span class="kit-ico kit-ico--paw"></span></span><h3><a href="/resources/found-an-injured-animal-what-to-do/">Found an injured animal?</a></h3><p>Keep it safe and calm. What to do, step by step.</p></div>
 <div class="aw-bento-tile aw-bento--vet1962"><div class="aw-bento-head"><span class="aw-bento-ico aw-bento-ico--accent" aria-hidden="true"><span class="kit-ico kit-ico--ambulance"></span></span><p class="aw-bento-eyebrow">Mobile vet</p></div><h3 class="aw-bento-num"><a href="tel:1962" aria-label="Call 1962, mobile vet">1962</a></h3><p>A vet at your door, in most states.</p></div>
