@@ -1545,58 +1545,47 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-hero--campaign .aw-camp-band-art { width: 50%; }
 }
 
-/* Home: AW Content (home.php, pattern aw-content). Dark section over a photograph (85% ink overlay; from 1200 a
-   gradient, darker on the text side), H2, four items with icon tiles (one column on phones, two from 768), two
-   buttons (full width on phones), three check points. */
-.aw-content { position: relative; isolation: isolate; box-sizing: border-box; padding: var(--kit-space-section) var(--wp--style--root--padding-right) var(--kit-space-section) var(--wp--style--root--padding-left); background: var(--kit-color-ink); color: var(--kit-color-on-ink); --kit-color-focus: var(--kit-color-on-ink); }
-.aw-content::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--kit-color-ink) 85%, transparent); }
-.aw-content-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-.aw-content-inner { max-width: 1200px; margin-inline: auto; }
-.aw-content h2 { margin: 0; font-size: var(--kit-type-h1); line-height: var(--kit-leading-heading); color: inherit; }
-.aw-content-offers { display: grid; gap: var(--kit-space-3); margin: var(--kit-space-5) 0 0; padding: 0; list-style: none; }
-.aw-content-offers li { display: flex; align-items: center; gap: var(--kit-space-3); font-weight: var(--kit-weight-strong); line-height: var(--kit-leading-heading); }
-.aw-content-tile { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--kit-radius-control); background: color-mix(in srgb, var(--kit-color-on-ink) 14%, transparent); }
-.aw-content-tile .kit-ico { --kit-ico-size: 20px; background-color: var(--kit-color-accent); }
-.aw-content-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); margin: var(--kit-space-6) 0 0; }
+/* Home: AW Content (home.php, pattern aw-content). A light card: the photograph on top (16:9), H2, one line, two
+   buttons (stacked full width until 1200), the trust line; the buttons sit at the bottom of the card. */
+.aw-content { display: flex; flex-direction: column; box-sizing: border-box; padding: var(--kit-space-5); border: 1px solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); color: var(--kit-color-ink); }
+.aw-content-img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--kit-radius-media); margin-bottom: var(--kit-space-5); }
+.aw-content-body { display: flex; flex: 1; flex-direction: column; }
+.aw-content h2 { margin: 0 0 var(--kit-space-3); font-size: var(--kit-type-h2); line-height: var(--kit-leading-heading); color: inherit; }
+.aw-content-lead { margin: 0; color: var(--kit-color-muted); }
+.aw-content-actions { display: flex; flex-direction: column; gap: var(--kit-space-3); margin: auto 0 0; padding-top: var(--kit-space-6); }
 .aw-content-actions .kit-btn { width: 100%; justify-content: center; }
-.aw-content-trust { margin-top: var(--kit-space-4); }
-.aw-content-trust, .aw-content-trust .kit-meta-item { color: var(--kit-color-on-ink); }
-.aw-content-trust .kit-ico { color: var(--kit-color-accent); }
-@media (min-width: 768px) {
-	.aw-content-offers { grid-template-columns: 1fr 1fr; column-gap: var(--kit-space-6); }
+.aw-content-trust { margin: var(--kit-space-3) 0 0; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+@media (min-width: 1200px) {
+	.aw-content { padding: var(--kit-space-6); }
 	.aw-content-actions { flex-direction: row; flex-wrap: wrap; }
 	.aw-content-actions .kit-btn { width: auto; }
 }
-@media (min-width: 1200px) {
-	.aw-content-inner > * { max-width: 720px; }
-	.aw-content::before { background: linear-gradient(90deg, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 80%, transparent) 55%, color-mix(in srgb, var(--kit-color-ink) 45%, transparent) 100%); }
-}
 
-/* Home: AW Content and AW_Festive in one row (pattern aw-pair). A canvas band with two dark cards: stacked on phones,
-   two equal columns from 768, equal height. Inside the row both cards take the same padding, radius and H2 size; the
-   festive pictures stay on top of its copy, the AW Content text sits at the bottom of its photograph. Card padding 24,
-   32 from 1200; the AW Content buttons stacked full width until 1200 (the cards are narrow). */
+/* Home: AW Content and AW_Festive in one row (pattern aw-pair). Two cards, each its own design (AW Content light,
+   AW_Festive dark): stacked on phones, two equal columns of equal height from 768, the same padding and radius. In the
+   row the festive pictures sit on top (2:1), the AW Content photograph takes the spare height, and both cards end with
+   their buttons and lines at the bottom. */
 .aw-pair-grid { display: grid; gap: var(--kit-space-grid); }
-.aw-pair-grid > :is(.aw-content, .aw-festive) { margin: 0; max-width: none; width: auto; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); overflow: hidden; }
+.aw-pair-grid > .aw-festive { display: flex; flex-direction: column; margin: 0; max-width: none; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); }
 .aw-pair-grid > .aw-festive { padding-block: var(--kit-space-5) !important; } /* over .kit-section's own !important section padding */
-.aw-pair-grid > .aw-content { display: flex; flex-direction: column; justify-content: flex-end; }
-.aw-pair-grid > .aw-content::before { background: color-mix(in srgb, var(--kit-color-ink) 85%, transparent); }
-.aw-pair-grid > .aw-content .aw-content-inner { width: 100%; }
-.aw-pair-grid > .aw-content .aw-content-inner > * { max-width: none; }
-.aw-pair-grid > .aw-content .aw-content-offers { grid-template-columns: 1fr; }
-.aw-pair-grid > .aw-festive .aw-festive-in { grid-template-columns: 1fr; gap: var(--kit-space-5); }
-.aw-pair-grid > .aw-festive .aw-festive-art { order: -1; aspect-ratio: 2 / 1; }
-.aw-pair-grid :is(.aw-content, .aw-festive) h2 { font-size: var(--kit-type-h2); }
-.aw-pair-grid .aw-content-actions { flex-direction: column; }
-.aw-pair-grid .aw-content-actions .kit-btn { width: 100%; }
+.aw-pair-grid > .aw-festive .aw-festive-in { display: flex; flex: 1; flex-direction: column; gap: 0; max-width: none; margin: 0 !important; } /* over the constrained layout's auto margins */
+.aw-pair-grid > .aw-festive .aw-festive-art { order: -1; width: 100%; min-width: 0; aspect-ratio: 2 / 1; margin-bottom: var(--kit-space-5); }
+.aw-pair-grid > .aw-festive .aw-festive-copy { display: flex; flex: 1; flex-direction: column; }
+.aw-pair-grid > .aw-festive .aw-festive-copy > * { max-width: none; margin-inline: 0; }
+.aw-pair-grid > .aw-festive .aw-festive-eyebrow { align-self: flex-start; }
+.aw-pair-grid > .aw-festive h2 { font-size: var(--kit-type-h2); }
+.aw-pair-grid > .aw-festive .aw-festive-tips { margin-bottom: 0; }
+.aw-pair-grid > .aw-festive .wp-block-buttons { margin-top: auto; padding-top: var(--kit-space-6); }
 @media (min-width: 768px) {
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
+	.aw-pair-grid > .aw-content .aw-content-img { flex: 1 1 auto; height: 0; min-height: 12rem; aspect-ratio: auto; } /* the photograph fills the card's spare height */
+	.aw-pair-grid > .aw-content .aw-content-body { flex: none; }
 }
 @media (min-width: 1200px) {
-	.aw-pair-grid > :is(.aw-content, .aw-festive) { padding: var(--kit-space-6); }
+	.aw-pair-grid > .aw-festive { padding: var(--kit-space-6); }
 	.aw-pair-grid > .aw-festive { padding-block: var(--kit-space-6) !important; }
-	.aw-pair-grid .aw-content-actions { flex-direction: row; }
-	.aw-pair-grid .aw-content-actions .kit-btn { width: auto; }
+	.aw-pair-grid > .aw-festive .aw-festive-in { grid-template-columns: none; }
+	.aw-pair-grid > .aw-festive .aw-festive-art { order: -1; aspect-ratio: 2 / 1; }
 }
 
 /* Section heads on Home: H2, one supporting line, a small ghost "see all"; 16px between them and to the content */

@@ -3,7 +3,7 @@
  * Title: AW Content
  * Slug: animal-writes/aw-content
  * Categories: animal-writes
- * Description: Dark section over the community dogs letter drive photograph: H2, the four things Animal Writes offers with icons, Find help near you and Claim buttons, and three check points (live organisation count, free to search and claim, source-linked). Two columns of items from 768; the text on the left 720px from 1200.
+ * Description: Light card: the community dogs letter drive photograph on top, H2, one line, Find help near you and Claim buttons, and the trust line with the live organisation count.
  * Inserter: yes
  *
  * @package animal-writes
