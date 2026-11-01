@@ -311,6 +311,8 @@
 			var bad = f[0] === 'email' ? !emailOk() : !val(f[0]);
 			var el = form.elements[f[0]];
 			if (el) el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+			var line = el && document.getElementById(el.id + '-error'); // the field's own error line (step 2), seen when the form goes back to it
+			if (line) line.textContent = bad ? 'Add ' + f[1] + ' to send your objection.' : ''; // the same words as the message by the send buttons
 			if (bad) miss.push(f);
 		});
 		var ok = !miss.length;
