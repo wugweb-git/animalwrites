@@ -53,6 +53,10 @@
 .aw-camp--diwali :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
 .aw-camp--diwali .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
 .aw-camp--diwali .aw-camp-dark .kit-ico { color: var(--camp-line); }
+/* The poster carries a photo, not a document: full colour, centred */
+.aw-camp--diwali .aw-camp-poster-doc img { filter: none; opacity: 1; object-position: center; }
+/* Six night-time steps sit three to a row */
+@media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
