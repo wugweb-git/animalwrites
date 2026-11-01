@@ -36,6 +36,23 @@
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-gap > .kit-ico { color: var(--camp-line); }
 .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to right, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); }
 @media (min-width: 1200px) { .aw-camp--lab-rules .aw-camp-dark .aw-camp-tier-bar { background: linear-gradient(to top, var(--camp-line) var(--fill), rgb(255 255 255 / 0.12) var(--fill)); } }
+/* Diwali 2026 (firecrackers and animals): marigold on paper, a night-sky dark band. */
+.aw-camp--diwali {
+	--camp-primary: #a14a05; /* marigold, deepened so white text on it passes 4.5:1 */
+	--camp-primary-ink: #ffffff;
+	--camp-surface: var(--kit-color-bg);
+	--camp-accent: #6e3203;
+	--camp-mark: var(--camp-primary);
+	--camp-on-mark: #ffffff;
+	--camp-deep: var(--camp-accent);
+	--camp-dark: #1b1636; /* night sky */
+	--camp-meta: #5a4a3e;
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}
+/* Marigold on the night band is under 3:1, so rules, outlines and icons there are white */
+.aw-camp--diwali :is(.aw-camp-poster, .aw-camp-dark) { --camp-line: var(--kit-color-on-ink); }
+.aw-camp--diwali .aw-camp-poster :is(.aw-camp-stamp, .aw-cd-when) { border-color: var(--camp-line); }
+.aw-camp--diwali .aw-camp-dark .kit-ico { color: var(--camp-line); }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
