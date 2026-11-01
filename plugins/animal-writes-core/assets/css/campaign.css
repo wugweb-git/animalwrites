@@ -76,19 +76,19 @@
 }
 /* Hero: cream with plum ink and a community dog before the Supreme Court (owner's reference design, 1 Nov 2026) */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); --camp-line: rgb(58 23 48 / 0.18); }
-/* Above the theme's full-width group padding rule. Phones: the 4:5 photo under the card, its sky faded into the cream */
+/* The theme hero (owner, 2 Nov 2026: the same size as the other heroes): at least --kit-hero-min (560px, 660px from
+   1200) with the theme section padding, no override. The photo is the hero's background at every width; below 1200 the
+   tall photo with its top faded into the cream behind the text, from 1200 the wide photo on the right. The hero is
+   taller than --kit-hero-min only while its text and poster need more room. */
 .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
+	min-height: var(--kit-hero-min);
 	background:
-		linear-gradient(to bottom, var(--camp-cream) calc(100% - 125vw), rgb(251 238 231 / 0) calc(100% - 100vw)),
-		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / 100% auto no-repeat,
+		linear-gradient(to bottom, var(--camp-cream) 0%, rgb(251 238 231 / .92) 40%, rgb(251 238 231 / 0) 70%),
+		url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-phone.webp") center bottom / cover no-repeat,
 		var(--camp-cream);
-	padding-bottom: 80vw !important;
 }
-/* Tablets: the wide photo along the bottom, under the card */
-@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
-/* Desktops: the photo at full height on the right; text and card at the top, so the dog lies clear below the card */
 @media (min-width: 1200px) {
-	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 100%; min-height: var(--kit-hero-min); padding-bottom: var(--kit-space-6) !important; }
+	.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 100%; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero-cols > .wp-block-column { align-self: flex-start; }
 	.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-poster { max-width: 26rem; }
 }
