@@ -341,7 +341,13 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => 'mailweb_webhook_permission',
-				'callback'            => 'mailweb_in',
+				'callback'            => function ( WP_REST_Request $req ) {
+					// Which mailboxes still call the old address, and when (2 Nov 2026): once this stays empty, the route can go.
+					$seen = (array) get_option( 'aw_mail_in_old_seen', array() );
+					$seen[ (string) $req->get_param( '_mailweb_box' ) ] = current_time( 'mysql' );
+					update_option( 'aw_mail_in_old_seen', $seen, false );
+					return mailweb_in( $req );
+				},
 			)
 		);
 		register_rest_route(
