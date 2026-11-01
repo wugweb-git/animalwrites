@@ -957,3 +957,76 @@ add_filter(
 	},
 	99
 );
+
+/**
+ * The Supreme Court stray dogs campaign's sideways rows (campaign.css: the court orders and state tracker tables, the
+ * action cards and the Library list) made usable without a pointer (Layout rules 11, WCAG 2.2 AA): each row can take
+ * keyboard focus and is named by the heading just before it (which gets an id when it has none). The two tables keep
+ * their table roles, which some browsers drop once the rows are shown as cards.
+ *
+ * @param string $html The rendered content.
+ * @return string
+ */
+function aw_sc_rows_a11y( $html ) {
+	if ( false === strpos( $html, 'aw-camp--sc-stray-dogs' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $html;
+	}
+	$p     = new WP_HTML_Tag_Processor( $html );
+	$head  = '';
+	$n     = 0;
+	$table = false; // inside one of the two tables
+	$list  = false; // the next post list is the Library row
+	$roles = array( 'TABLE' => 'table', 'THEAD' => 'rowgroup', 'TBODY' => 'rowgroup', 'TR' => 'row', 'TH' => 'columnheader', 'TD' => 'cell' );
+	while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+		$tag = $p->get_tag();
+		if ( $p->is_tag_closer() ) {
+			$table = 'TABLE' === $tag ? false : $table;
+			continue;
+		}
+		if ( 'H2' === $tag || 'H3' === $tag ) {
+			$id = (string) $p->get_attribute( 'id' );
+			if ( '' === $id ) {
+				$id = 'aw-sc-h-' . ( ++$n );
+				$p->set_attribute( 'id', $id );
+			}
+			$head = $id;
+		} elseif ( 'FIGURE' === $tag && ( $p->has_class( 'aw-camp-timeline' ) || $p->has_class( 'aw-camp-tracker' ) ) ) {
+			aw_sc_row_attrs( $p, $head );
+			$table = true;
+		} elseif ( $table && isset( $roles[ $tag ] ) ) {
+			$p->set_attribute( 'role', $roles[ $tag ] );
+		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-grid' ) ) {
+			aw_sc_row_attrs( $p, $head );
+		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-docs-q' ) ) {
+			$list = true;
+		} elseif ( $list && 'UL' === $tag && $p->has_class( 'wp-block-post-template' ) ) {
+			aw_sc_row_attrs( $p, $head );
+			$list = false;
+		} elseif ( 'DIV' === $tag && $p->has_class( 'aw-camp-row' ) && '' !== $head ) {
+			$p->set_attribute( 'aria-labelledby', $head ); // the news row: its cards are links, so only the name is added
+		}
+	}
+	return $p->get_updated_html();
+}
+
+/**
+ * A sideways row: a named region that takes keyboard focus.
+ *
+ * @param WP_HTML_Tag_Processor $p    At the row's opening tag.
+ * @param string                $head Id of the heading that names it ('' = none).
+ */
+function aw_sc_row_attrs( $p, $head ) {
+	$p->set_attribute( 'tabindex', '0' );
+	$p->set_attribute( 'role', 'region' );
+	if ( '' !== $head ) {
+		$p->set_attribute( 'aria-labelledby', $head );
+	}
+}
+
+add_filter(
+	'the_content',
+	function ( $html ) {
+		return is_singular( 'aw_campaign' ) ? aw_sc_rows_a11y( $html ) : $html;
+	},
+	100
+);
