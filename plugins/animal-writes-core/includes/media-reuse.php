@@ -361,7 +361,7 @@ function aw_media_reuse_screen() {
 	foreach ( $log as $e ) {
 		$applied += 'applied' === $e['status'] ? 1 : 0;
 	}
-	echo '<p>Pictures already in the Media Library, offered as the cover of a page. Apply sets the cover and, on a news item (or a Library item or post that shows the publisher image), switches the publisher image off so the cover shows; the weekly check does not switch it back on. Undo puts the old cover back, as long as the page still has what Apply set. Nothing is applied by itself, and no picture is deleted or edited. A picture used by another page, or a page that no longer exists, is refused.</p>';
+	echo '<p>Pictures already in the Media Library, offered as the cover of a page. Apply sets the cover and, on a news item (or a Library item or post that shows the publisher image), switches the publisher image off so the cover shows; the weekly check does not switch it back on. Undo puts the old cover back, as long as the page still has what Apply set. Nothing is applied by itself, and no picture is deleted or edited, except that setting a cover lets the site fill the empty image context and keyphrase fields of the picture (it never overwrites a filled one). A picture used by another page, or a page that no longer exists, is refused.</p>';
 	echo '<p>' . count( $plan ) . ' pictures offered: ' . (int) $applied . ' applied.</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'aw_media_reuse' );
