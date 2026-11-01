@@ -223,14 +223,19 @@ add_action(
 			'kw'    => '',
 		);
 		if ( 'aw_used' === $column ) {
-			if ( ! $use['uses'] ) {
+			// The core "Uploaded to" column already shows the parent post, so leave its lines out here.
+			$uses = $use['uses'];
+			if ( (int) $post->post_parent > 0 ) {
+				$uses = array_diff_key( $uses, array_flip( preg_grep( '/^p' . (int) $post->post_parent . '(?!\d)/', array_map( 'strval', array_keys( $uses ) ) ) ) );
+			}
+			if ( ! $uses ) {
 				echo '—';
 				return;
 			}
-			$shown = array_slice( array_values( $use['uses'] ), 0, 5 );
+			$shown = array_slice( array_values( $uses ), 0, 5 );
 			echo wp_kses( implode( '<br>', $shown ), array( 'a' => array( 'href' => array() ), 'br' => array() ) );
-			if ( count( $use['uses'] ) > 5 ) {
-				echo '<br>+' . (int) ( count( $use['uses'] ) - 5 ) . ' more';
+			if ( count( $uses ) > 5 ) {
+				echo '<br>+' . (int) ( count( $uses ) - 5 ) . ' more';
 			}
 			return;
 		}
