@@ -1083,6 +1083,11 @@ body { background: var(--kit-surface-page); }
 .kit-error-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--kit-space-2); }
 .kit-error-links a { display: inline-flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-pill); text-decoration: none; color: var(--kit-color-ink); }
 .kit-error-links a:hover { background: var(--kit-color-ink); color: var(--kit-color-on-ink); }
+/* With a picture (aw_error_picture): the home hero's grid and picture (aw.css .aw-hero-grid, .aw-hero-media), the page hero's height */
+.kit-error-page > .kit-error-hero { max-width: var(--kit-width-wide); min-height: var(--kit-hero-min); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1200px) { .kit-error-page > .kit-error-hero { grid-template-columns: 1.25fr 0.75fr; } }
+.kit-error-hero .kit-error-text > * { max-width: 40rem; }
+.kit-error-media img { height: auto; } /* the width and height attributes only reserve the space; the hero picture sets the shape */
 
 /* The menu button only below 1200px (from 1200px the full menu shows on one row). */
 @media (max-width: 1199px) { .kit-site-header .wp-block-navigation__responsive-container-open { display: inline-flex !important; } }

@@ -128,6 +128,27 @@ add_shortcode(
 			}
 		}
 
-		return $html . '<nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li><li><a href="/contact/">Contact</a></li><li><a href="/">Home</a></li></ul></nav>';
+		$html .= '<nav class="kit-error-links" aria-label="Sections"><ul><li><a href="/directory/">Directory</a></li><li><a href="/news/">News</a></li><li><a href="/resources/">Resources</a></li><li><a href="/library/">Library</a></li><li><a href="/opportunities/">Opportunities</a></li><li><a href="/contact/">Contact</a></li><li><a href="/">Home</a></li></ul></nav>';
+		$media = aw_error_picture( '404' );
+		return '' === $media ? $html : '<div class="aw-hero-grid kit-error-hero"><div class="kit-error-text">' . $html . '</div>' . $media . '</div>';
 	}
 );
+
+/**
+ * The picture beside an error page's text, as the home hero's (aw-hero-media: 4:3 below 1200px, 4:5 from 1200px).
+ * Two files per page in assets/error/: {name}-wide.webp (4:3, 1600 × 1200) and {name}-tall.webp (4:5, 1080 × 1350).
+ * '' while the wide file is missing: the page then keeps its one text column. Decorative (empty alt): the words beside
+ * it say everything.
+ *
+ * @param string $name 404, 500 or 503.
+ * @return string
+ */
+function aw_error_picture( $name ) {
+	$dir = AW_CORE_DIR . 'assets/error/';
+	if ( ! is_readable( $dir . $name . '-wide.webp' ) ) {
+		return '';
+	}
+	$url  = plugins_url( 'assets/error/', AW_CORE_DIR . 'animal-writes-core.php' );
+	$tall = is_readable( $dir . $name . '-tall.webp' ) ? '<source media="(min-width: 1200px)" srcset="' . esc_url( $url . $name . '-tall.webp' ) . '" width="1080" height="1350">' : '';
+	return '<figure class="aw-hero-media kit-error-media"><picture>' . $tall . '<img src="' . esc_url( $url . $name . '-wide.webp' ) . '" width="1600" height="1200" alt="" decoding="async" fetchpriority="high"></picture></figure>';
+}
