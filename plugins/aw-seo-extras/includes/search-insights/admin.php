@@ -123,6 +123,7 @@ function aw_si_load(): void {
 		add_meta_box( 'aw-si-brand', __( 'Brand', 'aw-seo-extras' ), 'aw_si_box_brand', $screen, 'normal' );
 		add_meta_box( 'aw-si-ai', __( 'AI referrals (GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_ai', $screen, 'normal' );
 		add_meta_box( 'aw-si-referrers', __( 'Top referrers (GA4)', 'aw-seo-extras' ), 'aw_si_box_referrers', $screen, 'normal' );
+		add_meta_box( 'aw-si-nf', __( 'Not found (404s, GA4, 28 days)', 'aw-seo-extras' ), 'aw_si_box_nf', $screen, 'normal' );
 		add_meta_box( 'aw-si-site-search', __( 'Searches on our site (28 days, minimum)', 'aw-seo-extras' ), 'aw_si_box_site_search', $screen, 'normal' );
 		add_meta_box( 'aw-si-gaps', __( 'Content gaps (keyword map gaps and P2)', 'aw-seo-extras' ), 'aw_si_box_gaps', $screen, 'normal' );
 		add_meta_box( 'aw-si-crawl', __( 'Crawler access (weekly)', 'aw-seo-extras' ), 'aw_si_box_crawl', $screen, 'normal' );
@@ -493,6 +494,38 @@ function aw_si_box_referrers(): void {
 	echo '<p class="description">' . esc_html__( 'Referral and social sessions by source (GA4 channels Referral, Organic Social and Paid Social, plus Instagram, Facebook, X, LinkedIn, Reddit, WhatsApp, Telegram and Linktree). 22 Oct 2026 is left out (GA4 test events). GA4 page views changed on 25 Oct 2026, when the site moved to one GA4 tag (#80).', 'aw-seo-extras' ) . '</p>';
 }
 
+/** Overview box: the 20 paths with the most 404_view events in the stored 28-day window, and where each goes now. */
+function aw_si_box_nf(): void {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		echo '<p>' . esc_html__( 'Nothing yet.', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	$o = aw_si_table( 'obs' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$rows = (array) $wpdb->get_results( "SELECT txt, value, d FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 20" );
+	if ( ! $rows ) {
+		echo '<p>' . esc_html__( 'No 404s recorded yet (GA4 runs daily at 07:20 IST).', 'aw-seo-extras' ) . '</p>';
+		return;
+	}
+	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Path', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Views', 'aw-seo-extras' ) . '</th><th scope="col">' . esc_html__( 'Status', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	foreach ( $rows as $r ) {
+		$to = aw_si_final_path( (string) $r->txt );
+		if ( untrailingslashit( $to ) !== untrailingslashit( (string) $r->txt ) ) {
+			/* translators: %s: path the redirect ends at. */
+			$status = sprintf( esc_html__( 'Redirects to %s', 'aw-seo-extras' ), '<a href="' . esc_url( home_url( $to ) ) . '" target="_blank" rel="noopener">' . esc_html( $to ) . '</a>' );
+		} else {
+			$status = esc_html__( 'Still 404', 'aw-seo-extras' );
+		}
+		echo '<tr><td>' . esc_html( $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->value ) ) . '</td><td>' . $status . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+	}
+	echo '</tbody></table>';
+	$info = aw_si_runs()['ga4']['info']['nf'] ?? array();
+	$dim  = 'pagePath' === ( $info['dim'] ?? '' ) ? __( 'page path (the custom dimension "path" is not registered in GA4 yet)', 'aw-seo-extras' ) : __( 'the event\'s path parameter', 'aw-seo-extras' );
+	/* translators: 1: last day of the window, 2: what the path comes from. */
+	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 is left out (GA4 test events). Status follows Rank Math redirects (exact and regex) and old slugs; "Still 404" means no redirect, not that the address was checked again.', 'aw-seo-extras' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
+}
+
 /** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
 function aw_si_box_gaps(): void {
 	$gaps = aw_si_searches_gaps();
@@ -534,7 +567,7 @@ function aw_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Mondays at 08:45 IST: crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'aw-seo-extras' ) . '</th><td><p>' . esc_html__( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until 90 days are stored), keyword roles from Rank Math and Sourcing, then priorities. Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s for the last 28 days). Sundays at 06:00 IST: PageSpeed for the 16 key pages, a few at a time. Mondays at 08:45 IST: crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than 90 days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set). Searches on the site are counted as they happen.', 'aw-seo-extras' ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keys', 'aw-seo-extras' ) . '</th><td><ul>';
 	foreach ( array( 'AW_CLARITY_TOKEN' => __( 'Clarity', 'aw-seo-extras' ), 'AW_BING_WEBMASTER_KEY' => __( 'Bing Webmaster', 'aw-seo-extras' ), 'AW_PSI_KEY' => __( 'PageSpeed (optional)', 'aw-seo-extras' ) ) as $const => $label ) {
 		$set = '' !== aw_si_key( $const );

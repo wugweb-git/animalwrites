@@ -177,6 +177,7 @@ These use the call that already works in `aw_sd_sitekit()` / `aw_sd_query()`: sw
 | GA4: `view_search_results` by `search_term` | `analytics-4` → `report` | daily 07:20 | Site Kit quota; read only |
 | GA4: sessions by session source (chatgpt.com, perplexity.ai, gemini.google.com, copilot) × landing page | `analytics-4` → `report` | daily 07:20 | read only; no events sent |
 | GA4: landing pages by organic sessions | `analytics-4` → `report` | daily 07:20 | read only |
+| GA4: `404_view` events by `path` (custom dimension `customEvent:path`, else `pagePath`), last 28 days (1 Nov 2026) | `analytics-4` → `report` | daily 07:20 | read only; Overview box "Not found (404s, GA4, 28 days)", top 20 with redirect status |
 | PageSpeed: mobile + desktop for the 16 key pages | `pagespeed-insights` → `pagespeed` | weekly, Sunday 06:00 | 32 calls a week. Fallback if the module is off: a free PSI API key in `wp-config.php` (`AW_PSI_KEY`, 25,000 calls a day) |
 
 "Not ranking" means a tracked keyword with no GSC impressions in 28 days.

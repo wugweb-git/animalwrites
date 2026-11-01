@@ -7,11 +7,16 @@
  * - ai: sessions from AI assistants (chatgpt.com, perplexity.ai, gemini.google.com, copilot …) by landing page;
  * - organic: sessions from Organic Search by landing page;
  * - ref, social: every referral (channel Referral, Organic Social, Paid Social) and the social sources below, by source
- *   and landing page, with sessions, engaged sessions and key events (owner, 31 Oct 2026).
+ *   and landing page, with sessions, engaged sessions and key events (owner, 31 Oct 2026);
+ * - nf: 404_view events by path for the last 28 days, one report per run (1 Nov 2026). The path is the event's own
+ *   parameter (custom dimension customEvent:path); while that dimension is not registered in GA4 the report falls back
+ *   to pagePath, which is the same address on a 404 page.
  *
  * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
  * txt = source), organic (page = landing path), ref / ref_eng / ref_key (page = landing path, txt = source). value =
- * events or sessions. Referral counts leave out AW_SI_GA4_SKIP_DAYS (22 Oct 2026: test events).
+ * events or sessions. Referral counts leave out AW_SI_GA4_SKIP_DAYS (22 Oct 2026: test events). nf rows: period 28d,
+ * d = the last day of the window, page = txt = path, value = events; each run replaces the earlier window, and a failed
+ * report keeps it.
  *
  * @package aw-seo-extras
  */
@@ -186,6 +191,69 @@ function aw_si_ga4_obs_rows( array $data ): array {
 }
 
 /**
+ * 404_view events by path for the 28 days up to $end, without AW_SI_GA4_SKIP_DAYS.
+ *
+ * @param object $module Site Kit's analytics-4 module.
+ * @param string $end    Last day (Y-m-d).
+ * @return array|WP_Error array{dim: string, rows: array<string, float>} Path => events.
+ */
+function aw_si_ga4_fetch_nf( $module, string $end ) {
+	$args = array(
+		'startDate'        => ( new DateTimeImmutable( $end, wp_timezone() ) )->modify( '-27 days' )->format( 'Y-m-d' ),
+		'endDate'          => $end,
+		'metrics'          => array( 'eventCount' ),
+		'dimensionFilters' => array( 'eventName' => '404_view' ),
+	);
+	$err  = null;
+	foreach ( array( 'customEvent:path', 'pagePath' ) as $dim ) {
+		$res = aw_si_ga4_report( $module, $args + array( 'dimensions' => array( $dim, 'date' ) ) );
+		if ( ! is_wp_error( $res ) ) {
+			break;
+		}
+		$err = $res; // Most often: the custom dimension is not registered yet. Try pagePath.
+	}
+	if ( is_wp_error( $res ) ) {
+		return $err;
+	}
+	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), AW_SI_GA4_SKIP_DAYS );
+	$out  = array();
+	foreach ( $res as $r ) {
+		$path = aw_si_landing_path( (string) ( $r[0][0] ?? '' ) );
+		if ( '' === $path || in_array( (string) ( $r[0][1] ?? '' ), $skip, true ) ) {
+			continue;
+		}
+		$path         = mb_substr( $path, 0, 255 );
+		$out[ $path ] = ( $out[ $path ] ?? 0 ) + (float) ( $r[1][0] ?? 0 );
+	}
+	return array(
+		'dim'       => $dim,
+		'rows'      => $out,
+		'truncated' => count( $res ) >= AW_SI_GA4_ROWS,
+	);
+}
+
+/**
+ * Store a 28-day 404 window, replacing the earlier one.
+ *
+ * @param string $end  Last day of the window (Y-m-d).
+ * @param array  $rows Path => events.
+ * @return int|WP_Error Rows written.
+ */
+function aw_si_ga4_store_nf( string $end, array $rows ) {
+	global $wpdb;
+	$obs = array();
+	foreach ( $rows as $path => $n ) {
+		$obs[] = array( 0, (string) $path, md5( 'nf|' . $path ), 'nf', (float) $n, (string) $path );
+	}
+	$n = aw_si_obs_replace_day( 'ga4', $end, $obs, '28d' );
+	if ( ! is_wp_error( $n ) ) {
+		$o = aw_si_table( 'obs' );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' AND d <> %s", $end ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	}
+	return $n;
+}
+
+/**
  * A day's new GA4 rows without referral rows, plus the referral rows already stored for that day (a referral report
  * failed, so the day's replace must not delete them).
  *
@@ -218,23 +286,24 @@ function aw_si_landing_path( string $lp ): string {
 /**
  * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows).
  *
- * @param string $src  Source key in obs.
- * @param string $day  Date (Y-m-d).
- * @param array  $rows Each [kw_id, page, page_key, metric, value, txt].
+ * @param string $src    Source key in obs.
+ * @param string $day    Date (Y-m-d).
+ * @param array  $rows   Each [kw_id, page, page_key, metric, value, txt].
+ * @param string $period Period of the rows: day, or 28d for a 28-day window ending on $day.
  * @return int|WP_Error Rows written.
  */
-function aw_si_obs_replace_day( string $src, string $day, array $rows ) {
+function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day' ) {
 	global $wpdb;
 	$o   = aw_si_table( 'obs' );
 	$now = aw_si_now();
 	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = 'day' AND d = %s", $src, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM {$o} WHERE src = %s AND period = %s AND d = %s", $src, $period, $day ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	foreach ( array_chunk( $rows, 300 ) as $chunk ) {
 		$place = array();
 		$args  = array();
 		foreach ( $chunk as $v ) {
-			$place[] = "(%d, %s, %s, %s, %s, 'day', %s, %f, %s, %s)";
-			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $day, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
+			$place[] = '(%d, %s, %s, %s, %s, %s, %s, %f, %s, %s)';
+			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $period, $day, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one placeholder group per row, built above.
 		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO {$o} (kw_id, page, page_key, src, metric, period, d, value, txt, fetched) VALUES " . implode( ', ', $place ), $args ) );
@@ -307,6 +376,27 @@ function aw_si_ga4_run( array $args = array() ): array {
 					$rep['sample'][ $day ] = array_slice( $rows, 0, 5 );
 				}
 			}
+			if ( '' === $rep['error'] ) {
+				// 404s, 28 days to yesterday. A failure is a warning: the earlier window stays.
+				$end = ( new DateTimeImmutable( 'yesterday', wp_timezone() ) )->format( 'Y-m-d' );
+				$nf  = aw_si_ga4_fetch_nf( $module, $end );
+				if ( ! is_wp_error( $nf ) && ! $dry ) {
+					$w  = aw_si_ga4_store_nf( $end, $nf['rows'] );
+					$nf = is_wp_error( $w ) ? $w : $nf;
+				}
+				if ( is_wp_error( $nf ) ) {
+					$rep['nf_error'] = $nf->get_error_message();
+				} else {
+					$rep['nf'] = array(
+						'dim'       => $nf['dim'],
+						'paths'     => count( $nf['rows'] ),
+						'truncated' => $nf['truncated'],
+					);
+					if ( $dry ) {
+						$rep['sample']['nf'] = array_slice( $nf['rows'], 0, 5, true );
+					}
+				}
+			}
 			return $rep;
 		}
 	);
@@ -324,11 +414,16 @@ function aw_si_ga4_run( array $args = array() ): array {
 					'truncated' => $rep['truncated'] ?? array(),
 					'warnings'  => $rep['warnings'] ?? array(),
 					'up_to'     => $rep['days'] ? max( array_keys( $rep['days'] ) ) : '',
+					'nf'        => $rep['nf'] ?? array(),
 				)
 			);
 			if ( ! empty( $rep['warnings'] ) ) {
 				/* translators: 1: dates, 2: GA4's error. */
 				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 referral figures could not be read for %1$s (the earlier figures were kept): %2$s', 'aw-seo-extras' ), implode( ', ', array_keys( $rep['warnings'] ) ), (string) reset( $rep['warnings'] )[0] ) );
+			}
+			if ( ! empty( $rep['nf_error'] ) ) {
+				/* translators: %s: GA4's error. */
+				aw_si_run_fail( 'ga4', sprintf( __( 'GA4 404 figures could not be read (the earlier figures were kept): %s', 'aw-seo-extras' ), $rep['nf_error'] ) );
 			}
 		}
 	}
