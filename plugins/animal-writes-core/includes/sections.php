@@ -24,7 +24,8 @@ const AW_SECTION_DESC = array(
  * button to it, labelled with the page's own title (1 Nov 2026: /tag/faq/ ranked above the FAQ page).
  */
 const AW_TAG_MAIN_PAGES = array(
-	'faq' => 'animal-welfare-faqs',
+	'faq'                    => 'animal-welfare-faqs',
+	'mobile-veterinary-unit' => '1962-helpline-mobile-veterinary-units', // the 1962 guide owns "mobile veterinary unit" (1 Nov 2026)
 );
 
 /** The button from a tag page to its topic's own page, or ''. */

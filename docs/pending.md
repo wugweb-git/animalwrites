@@ -13,6 +13,20 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Home FAQ data:** set the front page's (post 57) `aw_faq` to the six questions and answers written for Home. Until then the FAQ section prints nothing if there are too few questions.
 - **Guide FAQ subjects:** draft the FAQ Subject (`aw_faq_subject`) for the guides that fall back to their title (FAQ subject column on Pages and Posts, or `wp aw-faq report`), then review before they go live.
 
+### Search quick fixes: content and keyphrases (1 Nov 2026)
+- **Keyphrase owners, done (1 Nov 2026):** one page per query, set in Rank Math's focus keyword (old values kept below).
+  - "animal welfare board of india" stays on the AWBI guide (13800). It moved off the public notice (145, now "animal welfare board of india public notice") and the 5 Oct 2026 circular (13505, now "animal welfare board of india directive"). The guide's Related box lists both, so each shows the guide as a Resource.
+  - "animal shelter" is owned by /tag/animal-shelter/ (the Directory's shelter list). It moved off the Chandigarh News item (11508, now "chandigarh animal shelter cruelty").
+  - "animal ambulance" is owned by /tag/animal-ambulance/. /tag/ambulance/ (1057, canonical to it) is now "ambulance service".
+  - "mobile veterinary unit" is owned by the 1962 guide (13798). It moved off the Library release 11758 (now "doorstep veterinary care") and /tag/mobile-veterinary-unit/ (1028, now "1962 mobile veterinary units by state"). The tag page gets a button to the guide.
+  - "animal writes" moved to Home (57, now "animal welfare in india, animal writes"). About (58) is now "about animal writes, citizen letter campaign, animal welfare".
+  - World Animal Day: the guide keeps it; the Library circular (142) keeps its own keyword and already shows the guide.
+  - Old values: 145, 13505 and 11508 had the head term alone; 11758 "mobile veterinary units"; 1028 "1962 mobile veterinary units, 1962 mobile veterinary unit, 1962 animal ambulance"; 1057 "ambulance, animal ambulance, animal ambulance number"; 57 "animal welfare in india"; 58 "animal writes, citizen letter campaign, animal welfare".
+- **Keyphrase owners, still open:** the Library release 11758 has no link to the 1962 guide yet (it needs the guide's Related box). "animal birth control": the Library ABC Rules item owns the legal query; the two ABC guides are to be merged into one (URL and 301 for the owner's yes).
+- **Titles and short answers, drafted for the owner (1 Nov 2026):** CPCSEA, IAEC, AWBI, World Animal Day, NGO Darpan, the FAQ page (title with "animal welfare FAQ"), and PDF titles for three Library items (the draft lab animal rules, the PCA Act and the ABC Rules 2023; the Supreme Court judgment title already says PDF). Nothing changed live until approved.
+- **"Who regulates animal welfare in India" hub:** outline drafted; the owner decides whether to build it.
+- **AWBI facts (awbi.gov.in, read 1 Nov 2026):** 0129-2555700 is the Board's office line at Ballabhgarh (Monday to Friday, 9:00 AM to 5:30 PM). It is not an emergency line. Complaints go through the online Grievance form (sign-in needed). The site lists no separate grievance number and no recruitment page: its notice says vacancies are advertised publicly and offers come only from its official email or registered post.
+
 ### Media (owner to decide, 1 Nov 2026)
 - **Duplicates:** 185 groups (262 extra files, about 24 MB): 160 safe to merge, 3 need review, 22 are favicon/logo copies to leave. The merge tool (Media → Duplicate files) is live and merging the 160 in batches, Undo available; nothing deleted, extras only get the Trash status.
 - **Media, still open (1 Nov 2026):**
