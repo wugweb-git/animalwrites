@@ -151,6 +151,19 @@ function aw_faq_hub_pages() {
 /** Post types whose FAQ heading can name a subject of its own (the FAQ box's Subject field): pages, posts and campaigns. */
 const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post', 'aw_campaign' );
 
+/** Taxonomies whose FAQ heading can name a subject of its own (term meta aw_faq_subject; else the term's name). */
+const AW_FAQ_SUBJECT_TAXONOMIES = array( 'post_tag' );
+
+/**
+ * A term's own FAQ subject (the FAQ box's Subject field), '' when it has none or its taxonomy has no field.
+ *
+ * @param WP_Term $term Term.
+ * @return string
+ */
+function aw_faq_term_subject( $term ) {
+	return in_array( $term->taxonomy, AW_FAQ_SUBJECT_TAXONOMIES, true ) ? aw_faq_plain( (string) get_term_meta( $term->term_id, 'aw_faq_subject', true ) ) : '';
+}
+
 /**
  * The subject a post's FAQ heading names (aw_faq_heading(): "Questions about <subject>") and where it came from: the FAQ box's Subject
  * field (meta aw_faq_subject; pages and posts), the pages map (Settings → FAQ), the site's name on the front page, else
@@ -266,8 +279,41 @@ add_action(
 				)
 			);
 		}
+		foreach ( AW_FAQ_SUBJECT_TAXONOMIES as $tax ) { // a tag's FAQ subject (FAQ box → Subject; REST: meta.aw_faq_subject)
+			register_term_meta(
+				$tax,
+				'aw_faq_subject',
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'sanitize_callback' => 'sanitize_text_field',
+					'auth_callback'     => fn( $allowed, $key, $term_id ) => current_user_can( 'edit_term', (int) $term_id ),
+				)
+			);
+		}
 	}
 );
+
+// A tag's subject changed (box or REST meta): its page shows the new heading at once (LiteSpeed; the edge keeps it up
+// to aw_cdn_ttl). The REST API saves meta alone without edited_term, so the purge follows the meta, not the term.
+foreach ( array( 'added_term_meta', 'updated_term_meta', 'deleted_term_meta' ) as $aw_faq_hook ) {
+	add_action(
+		$aw_faq_hook,
+		function ( $meta_id, $term_id, $key ) {
+			if ( 'aw_faq_subject' !== $key ) {
+				return;
+			}
+			$link = get_term_link( (int) $term_id );
+			if ( is_string( $link ) ) {
+				do_action( 'litespeed_purge_url', $link );
+			}
+			delete_transient( 'aw_faq_index' );
+		},
+		10,
+		3
+	);
+}
 
 /**
  * Whether a page shows its FAQ after its content here: page 1, and no search or filter in the address (tracking
@@ -330,7 +376,9 @@ function aw_faq_context( $obj = null ) {
 	} elseif ( $obj instanceof WP_Term && in_array( $obj->taxonomy, aw_faq_taxonomies(), true ) ) {
 		$url  = (string) kits_term_url( $obj );
 		$name = aw_faq_plain( $obj->name );
-		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'subject' => $name, 'head' => aw_faq_heading( $name ), 'line' => '', 'subject_missing' => false );
+		$own  = aw_faq_term_subject( $obj );
+		$subj = '' !== $own ? $own : $name;
+		$ctx  = array( 'kind' => 'term', 'store' => 'term', 'id' => (int) $obj->term_id, 'type' => $obj->taxonomy, 'entity' => $name, 'full' => '', 'url' => $url, 'page_id' => $url . '#webpage', 'about' => $url . '#webpage', 'subject' => $subj, 'head' => aw_faq_heading( $subj ), 'line' => '', 'subject_missing' => false );
 	}
 	return null === $ctx ? null : apply_filters( 'aw_faq_context', $ctx, $obj );
 }
@@ -794,6 +842,9 @@ function aw_faq_editor( $ctx ) {
 		}
 		$line = (string) get_post_meta( $ctx['id'], 'aw_faq_line', true );
 		echo '<p><label for="aw-faq-line"><strong>Subtitle</strong> (one line under the heading; leave empty for none)</label><br><input type="text" class="large-text" id="aw-faq-line" name="aw_faq_line" value="' . esc_attr( $line ) . '"></p>';
+	} elseif ( 'term' === $ctx['store'] && in_array( $ctx['type'], AW_FAQ_SUBJECT_TAXONOMIES, true ) ) { // a tag: the subject only (empty = the tag's name)
+		$own = (string) get_term_meta( $ctx['id'], 'aw_faq_subject', true );
+		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “' . esc_html( aw_faq_heading( 'Subject' ) ) . '”; leave empty for the tag\'s name)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="aw_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( '' === $own ? $ctx['entity'] : '' ) . '"></p>';
 	}
 	// The default order as rendered (no automatic rows stored): saving it unchanged stores none, even when the item's
 	// own fields changed in the same save (they are saved first, so the questions now may differ from these).
@@ -1050,7 +1101,16 @@ function aw_faq_term_box( $term ) {
 /** Save a term's FAQ box. */
 function aw_faq_term_save( $term_id ) {
 	$term = get_term( $term_id );
-	$ctx  = $term instanceof WP_Term && aw_faq_editor_posted() && current_user_can( 'edit_term', $term_id ) ? aw_faq_context( $term ) : null;
+	$ok   = $term instanceof WP_Term && aw_faq_editor_posted() && current_user_can( 'edit_term', $term_id );
+	if ( $ok && isset( $_POST['aw_faq_subject'] ) && in_array( $term->taxonomy, AW_FAQ_SUBJECT_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+		$subject = sanitize_text_field( wp_unslash( $_POST['aw_faq_subject'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in aw_faq_editor_posted()
+		if ( '' === $subject ) {
+			delete_term_meta( $term_id, 'aw_faq_subject' );
+		} else {
+			update_term_meta( $term_id, 'aw_faq_subject', $subject );
+		}
+	}
+	$ctx = $ok ? aw_faq_context( $term ) : null;
 	if ( $ctx ) {
 		aw_faq_editor_save( $ctx );
 	}
