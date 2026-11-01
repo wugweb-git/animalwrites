@@ -146,6 +146,9 @@ function aw_media_reuse_why_not( array $row ) {
 	if ( ! $picture || 'attachment' !== $picture->post_type ) {
 		return 'picture ' . $row['picture'] . ' is missing';
 	}
+	if ( 'inherit' !== $picture->post_status ) {
+		return 'picture ' . $row['picture'] . ' is not an available file (status ' . $picture->post_status . ')';
+	}
 	if ( ! wp_attachment_is_image( $picture ) ) {
 		return 'picture ' . $row['picture'] . ' is not an image';
 	}
