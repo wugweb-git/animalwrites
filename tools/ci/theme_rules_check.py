@@ -25,7 +25,7 @@ when its rule is fixed. A new exception needs the owner's word and a line in the
     python3 tools/ci/theme_rules_check.py --baseline # print today's findings in baseline form
 
 The page rules are measured on the page with tools/ci/section_heights_audit.js, not here (docs/design-system.md,
-Layout rules): from 1024 wide every section and hero is at most 720px with its padding and one viewport height (OVER),
+Layout rules): from 768 wide (tablet and desktop) every section and hero is at most 720px with its padding and one viewport height (OVER),
 and never above 800px (FAIL); on phones only Home sections have a limit (one 375x812 screen). A fixed height that
 could break the desktop rule already fails here as "height".
 """
