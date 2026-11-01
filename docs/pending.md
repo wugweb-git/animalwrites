@@ -143,7 +143,7 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Feeding guides:** merge live (the "what the law says" URL 301s to the RWA guide). Sources links done 1 Nov. Open: a Bombay High Court feeding order on the News needs its official copy before it is cited.
 
 ### FIR state pages: background (not tasks)
-- Uttarakhand and Chhattisgarh stay rows in 127's state table; an Uttarakhand page only if its police portal is ever verified from an Indian network (a draft exists).
+- Uttarakhand and Chhattisgarh stay rows in 127's state table; an Uttarakhand page only if its police portal is ever verified from an Indian network (a draft exists). Confirmed 1 Nov 2026 (owner left it to the recommendation): Uttarakhand, Delhi, Uttar Pradesh and West Bengal stay rows; none has three facts verified on official sources (Uttar Pradesh is one India Code check of its Cow Slaughter Act 1955 away).
 - Delhi, Uttar Pradesh, West Bengal, Tripura, Odisha, Karnataka, Andhra Pradesh, Madhya Pradesh and Himachal Pradesh stay rows (sources not verified live).
 - Goa Police site carries injected links; our Goa page doesn't link to it. Nothing for us to do.
 
