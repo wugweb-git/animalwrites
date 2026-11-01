@@ -210,10 +210,11 @@ function aw_faq_context( $obj = null ) {
 }
 
 /**
- * The automatic question registry: post type => entries. Each entry: key, priority (1 = most searched), q (question
- * template, %s = the entity), needs (fields; documentation), pattern (the search it answers), answer (callable: ($id,
- * $entity) → [answer HTML, fact key, counts?], a list of [q, a, fact] for several questions, or null when the fields are
- * empty), question (optional callable: ($q, $id, $entity, $key) → the question). Empty here: the site adds its own.
+ * The automatic question registry: post type or taxonomy => entries. Each entry: key, priority (1 = most searched), q
+ * (question template, %s = the entity), needs (fields; documentation), pattern (the search it answers), answer
+ * (callable: ($id, $entity) → [answer HTML, fact key, counts?], a list of [q, a, fact] for several questions, or null
+ * when the fields are empty; $id is the term ID for a taxonomy), question (optional callable: ($q, $id, $entity, $key)
+ * → the question). Empty here: the site adds its own.
  *
  * @return array
  */
@@ -229,10 +230,7 @@ function aw_faq_registry() {
  */
 function aw_faq_auto( $ctx ) {
 	$out = array();
-	if ( 'post' !== $ctx['store'] ) {
-		return $out;
-	}
-	foreach ( aw_faq_registry()[ $ctx['type'] ] ?? array() as $e ) {
+	foreach ( aw_faq_registry()[ $ctx['type'] ] ?? array() as $e ) { // keyed by post type or taxonomy
 		$r = call_user_func( $e['answer'], $ctx['id'], $ctx['entity'] );
 		if ( ! $r ) {
 			continue;
@@ -542,14 +540,14 @@ function aw_faq_schema() {
 /* ---------- Placement ---------- */
 
 /**
- * Whether the current view shows the item's FAQ where it is placed: term pages and item templates always; the
+ * Whether the current view shows the item's FAQ where it is placed: term pages on page 1, item templates always; the
  * after-content position only on page 1 with no filters (aw_faq_show_here). Used by the schema and analytics.
  *
  * @param array $ctx aw_faq_context().
  * @return bool
  */
 function aw_faq_visible_here( $ctx ) {
-	return 'term' === $ctx['store'] || aw_faq_template_has_block() || aw_faq_show_here();
+	return ( 'term' === $ctx['store'] && ! is_paged() ) || aw_faq_template_has_block() || aw_faq_show_here(); // a term's FAQ: page 1 of its list only
 }
 
 /** The page's FAQ accordion the first time it is asked for, '' after (one FAQ per page). */
@@ -656,7 +654,7 @@ function aw_faq_editor( $ctx ) {
 		'<p class="description">%s</p>',
 		esc_html(
 			sprintf(
-				'The page shows these questions in this order: at least %1$d, at most %2$d (fewer than %1$d: no FAQ and no FAQ schema). Auto questions come from this page’s own fields and follow them; edit one and it is kept as written (Back to automatic undoes that). Remove hides a question; Order moves it. Your own questions show once Approved. First sentence answers and names the subject; at most %3$d words; one link (the source or a section of the site); dates as 4 Oct 2026. Answers may use links, bold and italic. Sources: one per line, "Name | URL".',
+				'The page shows these questions in this order: at least %1$d, at most %2$d (fewer than %1$d: no FAQ and no FAQ schema). Auto questions come from this page’s own fields (on a tag: from the items tagged) and follow them; edit one and it is kept as written (Back to automatic undoes that). Remove hides a question; Order moves it. Your own questions show once Approved. First sentence answers and names the subject; at most %3$d words; one link (the source or a section of the site); dates as 4 Oct 2026. Answers may use links, bold and italic. Sources: one per line, "Name | URL".',
 				$r['min'],
 				AW_FAQ_MAX,
 				AW_FAQ_WORDS

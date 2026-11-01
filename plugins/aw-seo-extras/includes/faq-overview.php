@@ -71,7 +71,11 @@ function aw_faq_index( $fresh = false ) {
 	}
 	foreach ( aw_faq_taxonomies() as $tax ) {
 		$c     = array( 'store' => 'term', 'published' => (int) wp_count_terms( array( 'taxonomy' => $tax, 'hide_empty' => false ) ), 'faq' => 0, 'below' => 0, 'drafts' => 0 );
-		$terms = get_terms( array( 'taxonomy' => $tax, 'hide_empty' => false, 'meta_key' => 'aw_faq' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery -- hourly count
+		$targs = array( 'taxonomy' => $tax, 'hide_empty' => false );
+		if ( empty( $reg[ $tax ] ) ) {
+			$targs['meta_key'] = 'aw_faq'; // phpcs:ignore WordPress.DB.SlowDBQuery -- hourly count; a taxonomy without automatic questions has an FAQ only from its box
+		}
+		$terms = get_terms( $targs );
 		foreach ( is_wp_error( $terms ) ? array() : $terms as $t ) {
 			$ctx = aw_faq_context( $t );
 			if ( $ctx ) {

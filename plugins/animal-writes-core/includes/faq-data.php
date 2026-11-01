@@ -45,6 +45,25 @@ add_filter(
 			array( 'key' => 'read', 'priority' => 7, 'q' => 'Where can I read the %s?', 'needs' => array( 'aw_source_url (not a PDF)', 'aw_issuer', 'official release' ), 'pattern' => '<doc> press release', 'answer' => 'aw_faq_legal_read', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'sections', 'priority' => 6, 'q' => 'What does section %2$s of the %1$s say?', 'needs' => array( 'aw_key_sections (Acts and Rules)' ), 'pattern' => 'pca act section 11 / punishment', 'answer' => 'aw_faq_legal_sections' ),
 		);
+		// Resources research summaries (the "research" tag): from the study's own fields. Guides get none from here.
+		$r['post']     = array(
+			array( 'key' => 'study-authors', 'priority' => 1, 'q' => 'Who carried out %s?', 'needs' => array( 'aw_authors', 'aw_source_url', 'focus keyphrase' ), 'pattern' => '<topic> study <place>', 'answer' => 'aw_faq_study_authors', 'question' => 'aw_faq_study_question' ),
+			array( 'key' => 'study-journal', 'priority' => 2, 'q' => 'Where was %s published?', 'needs' => array( 'aw_journal or aw_source_name', 'aw_source_date', 'aw_source_url' ), 'pattern' => '<topic> study journal', 'answer' => 'aw_faq_study_journal', 'question' => 'aw_faq_study_question' ),
+			array( 'key' => 'study-about', 'priority' => 3, 'q' => 'What is %s about?', 'needs' => array( 'excerpt (first sentences, up to 35 words)', 'aw_source_url' ), 'pattern' => '<topic> study findings', 'answer' => 'aw_faq_study_about', 'question' => 'aw_faq_study_question' ),
+			array( 'key' => 'study-law', 'priority' => 4, 'q' => 'Which law does %s discuss?', 'needs' => array( 'aw_entities laws (a Library document)' ), 'pattern' => '<law> study', 'answer' => 'aw_faq_study_law', 'question' => 'aw_faq_study_question' ),
+		);
+		// Tags: from the items tagged. None for a Directory listing type or a tag with written questions of its own
+		// (those keep only theirs), nor for a tag with fewer than 4 items. Opportunities are left out (paused).
+		$r['post_tag'] = array(
+			array( 'key' => 'tag-news', 'priority' => 1, 'q' => 'What is the latest news on %s?', 'needs' => array( 'News items' ), 'pattern' => '<tag> news', 'answer' => 'aw_faq_tag_news', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-library', 'priority' => 1.1, 'q' => 'What is the latest %s in the Library?', 'needs' => array( 'Library documents' ), 'pattern' => 'latest <tag>', 'answer' => 'aw_faq_tag_library', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-resource', 'priority' => 1.2, 'q' => 'What is the newest %s on Animal Writes?', 'needs' => array( 'Resources' ), 'pattern' => '<tag>', 'answer' => 'aw_faq_tag_resource', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-directory', 'priority' => 2, 'q' => 'Which organisations offer %s in India?', 'needs' => array( '3 Directory listings with a state' ), 'pattern' => '<tag> near me', 'answer' => 'aw_faq_tag_directory', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-issuers', 'priority' => 3, 'q' => 'Who issues the %s in the Library?', 'needs' => array( '2 Library documents with an issuer (not Acts, Rules, templates)' ), 'pattern' => '<issuer> <tag>', 'answer' => 'aw_faq_tag_issuers', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-topics', 'priority' => 3.1, 'q' => 'Which topics come up most under %s?', 'needs' => array( '3 items (not listings) with a category' ), 'pattern' => '<tag> <topic>', 'answer' => 'aw_faq_tag_topics', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-districts', 'priority' => 4, 'q' => 'Which districts have the most %s listings?', 'needs' => array( '3 Directory listings with a district' ), 'pattern' => '<tag> <district>', 'answer' => 'aw_faq_tag_districts', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-journals', 'priority' => 5, 'q' => 'Which journals published the %s studies?', 'needs' => array( '3 Resources with aw_journal' ), 'pattern' => '<tag> journal', 'answer' => 'aw_faq_tag_journals', 'question' => 'aw_faq_tag_question' ),
+		);
 		return $r;
 	}
 );
@@ -455,3 +474,354 @@ add_action(
 		}
 	}
 );
+
+/* ---------- C. Resources research summaries ---------- */
+
+/** Whether a post is a research summary (a Resource tagged "research"). */
+function aw_faq_is_study( $id ) {
+	return 'post' === get_post_type( $id ) && has_term( 'research', 'post_tag', $id );
+}
+
+/**
+ * A title or journal name for a sentence: quotes trimmed, an all-capitals name in title case ("INDIAN JOURNAL OF LEGAL
+ * REVIEW" → "Indian Journal of Legal Review").
+ */
+function aw_faq_study_name( $s ) {
+	$s = trim( aw_faq_plain( $s ), " \t\n\"'“”‘’" );
+	if ( '' === $s || preg_match( '/\p{Ll}/u', $s ) ) {
+		return $s;
+	}
+	$small = array( 'a', 'an', 'and', 'as', 'at', 'by', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'with' );
+	$words = explode( ' ', mb_strtolower( $s ) );
+	foreach ( $words as $i => $w ) {
+		$words[ $i ] = $i && in_array( $w, $small, true ) ? $w : mb_strtoupper( mb_substr( $w, 0, 1 ) ) . mb_substr( $w, 1 );
+	}
+	return preg_replace_callback( '/\(([^)]+)\)/u', fn( $m ) => '(' . mb_strtoupper( $m[1] ) . ')', implode( ' ', $words ) ); // "(IJLR)" stays an acronym
+}
+
+/**
+ * The study the questions name: "the <focus keyphrase> study", plus its place ("the rabies knowledge study in Lucknow"),
+ * the district when it has one. '' without a focus keyphrase.
+ */
+function aw_faq_study_subject( $id ) {
+	$kw = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
+	if ( '' === $kw ) {
+		return '';
+	}
+	$ent   = json_decode( (string) get_post_meta( $id, 'aw_entities', true ), true );
+	$title = aw_faq_plain( get_the_title( $id ) );
+	$best  = array( -1, '' ); // the place the title names, else the first district, else the first state
+	foreach ( (array) ( $ent['places'] ?? array() ) as $p ) {
+		$name  = aw_faq_plain( $p['name'] ?? '' );
+		$score = '' === $name ? -1 : ( false !== mb_stripos( $title, $name ) ? 2 : 0 ) + ( empty( $p['district'] ) ? 0 : 1 );
+		if ( $score > $best[0] ) {
+			$best = array( $score, $name );
+		}
+	}
+	$place = $best[1];
+	$kw = preg_replace( '/\s+stud(y|ies)$/iu', '', $kw );
+	return 'the ' . $kw . ' study' . ( '' !== $place && false === mb_stripos( $kw, $place ) ? ' in ' . $place : '' );
+}
+
+/** A research summary's question: the template with the study's name. */
+function aw_faq_study_question( $tpl, $id, $entity, $key ) {
+	$q = sprintf( $tpl, aw_faq_study_subject( $id ) );
+	return 'study-law' === $key && count( aw_faq_study_laws( $id ) ) > 1 ? str_replace( 'Which law does', 'Which laws does', $q ) : $q;
+}
+
+/** The study's link (its DOI or source), or '' — every research answer links to it, so none is built without it. */
+function aw_faq_study_url( $id ) {
+	return aw_faq_is_study( $id ) && '' !== aw_faq_study_subject( $id ) ? (string) get_post_meta( $id, 'aw_source_url', true ) : '';
+}
+
+function aw_faq_study_authors( $id ) {
+	$url     = aw_faq_study_url( $id );
+	$authors = get_post_meta( $id, 'aw_authors', true );
+	$authors = array_values( array_filter( array_map( 'aw_faq_plain', is_array( $authors ) ? $authors : explode( ';', (string) $authors ) ), 'strlen' ) );
+	if ( '' === $url || ! $authors ) {
+		return null;
+	}
+	$who   = count( $authors ) > 3 ? implode( ', ', array_slice( $authors, 0, 3 ) ) . ' and others' : aw_faq_and( $authors );
+	$title = aw_faq_study_name( get_post_meta( $id, 'aw_study_title', true ) );
+	$named = ', titled “' . esc_html( $title ) . '”';
+	$a     = esc_html( $who ) . ' carried out the study' . ( '' !== $title && aw_faq_word_count( $who . $named ) <= 40 ? $named : '' ) . '. ' . aw_faq_a( $url, 'Read the study' ) . '.';
+	return array( $a, 'study-authors' );
+}
+
+function aw_faq_study_journal( $id ) {
+	$url = aw_faq_study_url( $id );
+	$jn  = aw_faq_study_name( get_post_meta( $id, 'aw_journal', true ) );
+	$jn  = '' !== $jn ? $jn : aw_faq_study_name( get_post_meta( $id, 'aw_source_name', true ) );
+	$d   = (string) get_post_meta( $id, 'aw_source_date', true );
+	if ( '' === $url || '' === $jn ) {
+		return null;
+	}
+	$a = 'The study was published in ' . esc_html( $jn ) . ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) && $d > '1900' ? ' on ' . aw_date( $d ) : '' ) . '. ' . aw_faq_a( $url, 'See it in the journal' ) . '.';
+	return array( $a, 'study-journal' );
+}
+
+function aw_faq_study_about( $id ) {
+	$url = aw_faq_study_url( $id );
+	$txt = aw_faq_plain( get_post_field( 'post_excerpt', $id ) );
+	if ( '' === $url || '' === $txt ) {
+		return null;
+	}
+	$out = '';
+	foreach ( preg_split( '/(?<=[.!?])\s+(?=\p{Lu})/u', $txt ) as $sent ) { // whole sentences, up to 35 words
+		if ( str_word_count( trim( $out . ' ' . $sent ) ) > 35 ) {
+			break;
+		}
+		$out = trim( $out . ' ' . $sent );
+	}
+	if ( '' === $out ) {
+		return null;
+	}
+	return array( esc_html( $out ) . ' ' . aw_faq_a( $url, 'Read the full study' ) . '.', 'study-about' );
+}
+
+/** The published Library documents a study names (aw_entities laws). */
+function aw_faq_study_laws( $id ) {
+	$ent = json_decode( (string) get_post_meta( $id, 'aw_entities', true ), true );
+	$out = array();
+	foreach ( (array) ( $ent['laws'] ?? array() ) as $l ) {
+		$lid = (int) ( $l['id'] ?? 0 );
+		if ( $lid && 'aw_legal' === get_post_type( $lid ) && 'publish' === get_post_status( $lid ) ) {
+			$out[ $lid ] = aw_faq_doc_name( $lid );
+		}
+	}
+	return $out;
+}
+
+function aw_faq_study_law( $id ) {
+	$laws = aw_faq_study_laws( $id );
+	if ( '' === aw_faq_study_url( $id ) || ! $laws ) {
+		return null;
+	}
+	$names = array_map( fn( $n ) => 'the ' . esc_html( $n ), array_values( $laws ) );
+	$a     = 'It discusses ' . aw_faq_and( $names ) . '. ' . aw_faq_a( (string) get_permalink( array_key_first( $laws ) ), 'Read the ' . aw_faq_doc_short( array_key_first( $laws ) ) . ' in the Library' ) . '.';
+	return array( $a, 'study-law' );
+}
+
+/* ---------- D. Content tags ---------- */
+
+/**
+ * The published items with a tag, by type, newest first: news, Library, Resources, listings. Null for a Directory
+ * listing type, for a tag with written questions of its own (it keeps only those) and for a tag with fewer than 4 items.
+ *
+ * @param int $term_id Tag ID.
+ * @return array|null type => IDs
+ */
+function aw_faq_tag_items( $term_id ) {
+	static $memo = array();
+	if ( array_key_exists( $term_id, $memo ) ) {
+		return $memo[ $term_id ];
+	}
+	$t     = get_term( $term_id, 'post_tag' );
+	$types = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
+	$own   = $t instanceof WP_Term ? array_filter( aw_faq_items( 'term', $term_id ), fn( $x ) => '' === ( $x['auto'] ?? '' ) && 'approved' === ( $x['status'] ?? '' ) ) : array();
+	if ( ! $t instanceof WP_Term || in_array( $t->slug, $types, true ) || count( $own ) >= AW_FAQ_MIN ) { // a written FAQ of its own: kept as it is
+		return $memo[ $term_id ] = null;
+	}
+	$out = get_transient( 'aw_faq_tag_' . $term_id ); // the IDs, for an hour: a tag page would otherwise query every item on each view
+	if ( ! is_array( $out ) ) {
+		$out = array();
+		foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_listing' ) as $pt ) {
+			$ids = get_posts( array( 'post_type' => $pt, 'post_status' => 'publish', 'tag_id' => $term_id, 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true, 'suppress_filters' => true ) );
+			if ( $ids && 'aw_listing' !== $pt ) {
+				update_meta_cache( 'post', $ids );
+				usort( $ids, fn( $a, $b ) => aw_item_date_ts( $b ) <=> aw_item_date_ts( $a ) );
+			}
+			if ( $ids ) {
+				$out[ $pt ] = array_map( 'intval', $ids );
+			}
+		}
+		set_transient( 'aw_faq_tag_' . $term_id, $out, HOUR_IN_SECONDS );
+	}
+	foreach ( $out as $pt => $ids ) { // meta and categories in one query each, not one per item
+		update_meta_cache( 'post', $ids );
+		if ( 'aw_listing' !== $pt ) {
+			update_object_term_cache( $ids, $pt );
+		}
+	}
+	return $memo[ $term_id ] = array_sum( array_map( 'count', $out ) ) >= 4 ? $out : null;
+}
+
+/** A tag's name in a sentence: each capitalised word in lower case, acronyms kept ("Treatment and Vet Care" → "treatment and vet care", "Sterilisation (ABC)" → "sterilisation (ABC)"). */
+function aw_faq_tag_lc( $name ) {
+	return preg_replace_callback( '/\b\p{Lu}\p{Ll}+\b/u', fn( $m ) => mb_strtolower( $m[0] ), aw_faq_plain( $name ) );
+}
+
+/** The tag's name in a question ("Official release" → "official release"). */
+function aw_faq_tag_question( $tpl, $id, $entity, $key ) {
+	$name = aw_faq_tag_lc( $entity );
+	if ( 'tag-issuers' === $key ) { // "Who issues the circulars …"
+		$name = preg_match( '/[^aeiou]y$/u', $name ) ? mb_substr( $name, 0, -1 ) . 'ies' : ( preg_match( '/s$/u', $name ) ? $name : $name . 's' );
+	}
+	return sprintf( $tpl, $name );
+}
+
+/** An issuer's name after "from": "the Supreme Court", "the Press Information Bureau". */
+function aw_faq_the( $name ) {
+	return preg_match( '/^the\s/iu', (string) $name ) ? (string) $name : 'the ' . $name;
+}
+
+/** "A (12), B (8) and C (5)": the three largest counts. */
+function aw_faq_tag_top( array $counts ) {
+	arsort( $counts );
+	$out = array();
+	foreach ( array_slice( $counts, 0, 3, true ) as $name => $n ) {
+		$out[] = esc_html( (string) $name ) . ' (' . number_format_i18n( $n ) . ')';
+	}
+	return aw_faq_and( $out );
+}
+
+/** An item's title, quoted, with its date: "“Title” (4 Oct 2026)". */
+function aw_faq_tag_item_text( $id ) {
+	$ts = aw_item_date_ts( $id );
+	return '“' . esc_html( aw_faq_plain( get_the_title( $id ) ) ) . '”' . ( $ts ? ' (' . aw_date( $ts ) . ')' : '' );
+}
+
+function aw_faq_tag_news( $term_id ) {
+	$ids = aw_faq_tag_items( $term_id )['aw_news'] ?? array();
+	if ( ! $ids ) {
+		return null;
+	}
+	$src = aw_faq_plain( get_post_meta( $ids[0], 'aw_source_name', true ) );
+	$a   = 'The latest is ' . aw_faq_tag_item_text( $ids[0] ) . ( '' !== $src ? ', from ' . esc_html( $src ) : '' ) . '. ' . aw_faq_a( (string) get_permalink( $ids[0] ), 'Read it' ) . '.';
+	return array( $a, 'tag-news' );
+}
+
+function aw_faq_tag_library( $term_id ) {
+	$ids = aw_faq_tag_items( $term_id )['aw_legal'] ?? array();
+	if ( ! $ids ) {
+		return null;
+	}
+	$iss = function_exists( 'aw_item_issuer' ) && ! in_array( aw_faq_legal_kind( $ids[0] ), array( 'act', 'rule', 'template' ), true ) ? aw_item_issuer( $ids[0] ) : null;
+	$a   = 'The latest is ' . aw_faq_tag_item_text( $ids[0] ) . ( $iss ? ', from ' . esc_html( aw_faq_the( $iss->name ) ) : '' ) . '. ' . aw_faq_a( (string) get_permalink( $ids[0] ), 'Read it' ) . '.';
+	return array( $a, 'tag-library' );
+}
+
+function aw_faq_tag_resource( $term_id ) {
+	$ids = aw_faq_tag_items( $term_id )['post'] ?? array();
+	if ( ! $ids ) {
+		return null;
+	}
+	$a = 'The newest is ' . aw_faq_tag_item_text( $ids[0] ) . '. ' . aw_faq_a( (string) get_permalink( $ids[0] ), 'Read it' ) . '.';
+	return array( $a, 'tag-resource' );
+}
+
+/** Listing counts by state (or district) name, and each name's place, for the listings with the tag. */
+function aw_faq_tag_places( $term_id, $district ) {
+	$counts = array();
+	$place  = array();
+	foreach ( aw_faq_tag_items( $term_id )['aw_listing'] ?? array() as $id ) {
+		$p = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+		if ( ! $p ) {
+			continue;
+		}
+		if ( $district && 'district' !== $p->kind ) {
+			continue;
+		}
+		$s = $district ? $p : ( 'district' === $p->kind ? aw_place_state( $p->state ) : $p );
+		if ( ! $s ) {
+			continue;
+		}
+		$counts[ $s->slug ] = ( $counts[ $s->slug ] ?? 0 ) + 1;
+		$place[ $s->slug ]  = $s;
+	}
+	$names = array_count_values( array_map( fn( $x ) => $x->name, $place ) );
+	$named = array();
+	foreach ( $counts as $slug => $n ) { // by name; a district that shares its name with another gets its state ("Aurangabad, Bihar")
+		$x       = $place[ $slug ];
+		$st      = $district && $names[ $x->name ] > 1 ? aw_place_state( $x->state ) : null;
+		$label   = $x->name . ( $st ? ', ' . $st->name : '' );
+		$named[ $label ] = $n;
+		$place[ $label ] = $x;
+	}
+	return array( $named, $place );
+}
+
+function aw_faq_tag_directory( $term_id, $name ) {
+	list( $counts, $place ) = aw_faq_tag_places( $term_id, false );
+	$t                      = get_term( $term_id, 'post_tag' );
+	if ( array_sum( $counts ) < 3 || ! $t instanceof WP_Term || ! function_exists( 'aw_directory_url' ) ) {
+		return null;
+	}
+	arsort( $counts );
+	$top    = (string) array_key_first( $counts );
+	$n      = count( aw_faq_tag_items( $term_id )['aw_listing'] );
+	$lc     = aw_faq_tag_lc( $name );
+	$filter = function_exists( 'aw_service_slugs' ) && in_array( $t->slug, (array) aw_service_slugs(), true ); // the Directory filters by services (?tag=); any other tag: the top state's page
+	$link   = $filter ? aw_faq_a( add_query_arg( 'tag', $t->slug, home_url( 'directory/' ) ), 'Find ' . $lc . ' in the Directory' ) : aw_faq_a( aw_directory_url( $place[ $top ]->slug ), 'Browse the Directory in ' . $top );
+	$a      = 'The Directory lists ' . number_format_i18n( $n ) . ' organisations offering ' . esc_html( $lc ) . ', most of them in ' . aw_faq_tag_top( $counts ) . '. ' . $link . '.';
+	return array( $a, 'tag-directory' );
+}
+
+function aw_faq_tag_districts( $term_id ) {
+	list( $counts, $place ) = aw_faq_tag_places( $term_id, true );
+	if ( array_sum( $counts ) < 3 || count( $counts ) < 2 || ! function_exists( 'aw_directory_url' ) ) {
+		return null;
+	}
+	arsort( $counts );
+	$top = (string) array_key_first( $counts );
+	$a   = aw_faq_tag_top( $counts ) . ', of ' . number_format_i18n( array_sum( $counts ) ) . ' listings with a district. ' . aw_faq_a( aw_directory_url( $place[ $top ]->slug ), 'See ' . $top ) . '.';
+	return array( $a, 'tag-districts' );
+}
+
+function aw_faq_tag_issuers( $term_id ) {
+	$counts = array();
+	foreach ( aw_faq_tag_items( $term_id )['aw_legal'] ?? array() as $id ) {
+		$iss = function_exists( 'aw_item_issuer' ) && ! in_array( aw_faq_legal_kind( $id ), array( 'act', 'rule', 'template' ), true ) ? aw_item_issuer( $id ) : null; // an Act's or Rule's stored issuer is whose copy it is
+		if ( $iss ) {
+			$counts[ aw_faq_the( $iss->name ) ] = ( $counts[ aw_faq_the( $iss->name ) ] ?? 0 ) + 1;
+		}
+	}
+	if ( array_sum( $counts ) < 2 ) {
+		return null;
+	}
+	$n = number_format_i18n( array_sum( $counts ) );
+	$a = ( 1 === count( $counts ) ? 'All ' . $n . ' come from ' . esc_html( (string) array_key_first( $counts ) ) : 'Most come from ' . aw_faq_tag_top( $counts ) . ', of ' . $n . ' with a known issuer' ) . '. ' . aw_faq_a( home_url( 'library/' ), 'Browse the Library' ) . '.';
+	return array( $a, 'tag-issuers' );
+}
+
+function aw_faq_tag_topics( $term_id ) {
+	$items  = aw_faq_tag_items( $term_id );
+	$counts = array();
+	$terms  = array();
+	$n      = 0;
+	foreach ( array( 'aw_news', 'aw_legal', 'post' ) as $pt ) {
+		foreach ( $items[ $pt ] ?? array() as $id ) {
+			++$n;
+			$cats = get_the_terms( $id, 'category' );
+			foreach ( is_array( $cats ) ? $cats : array() as $c ) {
+				if ( 'uncategorized' !== $c->slug ) {
+					$counts[ $c->name ] = ( $counts[ $c->name ] ?? 0 ) + 1;
+					$terms[ $c->name ]  = $c;
+				}
+			}
+		}
+	}
+	if ( array_sum( $counts ) < 3 ) {
+		return null;
+	}
+	arsort( $counts );
+	$top = (string) array_key_first( $counts );
+	$url = function_exists( 'kits_term_url' ) ? kits_term_url( $terms[ $top ] ) : get_term_link( $terms[ $top ] );
+	$a   = aw_faq_tag_top( $counts ) . ', across ' . number_format_i18n( $n ) . ' items. ' . aw_faq_a( (string) $url, 'See ' . $top ) . '.';
+	return array( $a, 'tag-topics' );
+}
+
+function aw_faq_tag_journals( $term_id ) {
+	$counts = array();
+	foreach ( aw_faq_tag_items( $term_id )['post'] ?? array() as $id ) {
+		$jn = aw_faq_study_name( get_post_meta( $id, 'aw_journal', true ) );
+		if ( '' !== $jn ) {
+			$counts[ $jn ] = ( $counts[ $jn ] ?? 0 ) + 1;
+		}
+	}
+	if ( array_sum( $counts ) < 3 ) {
+		return null;
+	}
+	$a = aw_faq_tag_top( $counts ) . ', of ' . number_format_i18n( array_sum( $counts ) ) . ' studies with a journal. ' . aw_faq_a( home_url( 'resources/' ), 'Browse Resources' ) . '.';
+	return array( $a, 'tag-journals' );
+}
