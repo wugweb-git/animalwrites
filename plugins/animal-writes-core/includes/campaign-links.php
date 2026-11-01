@@ -126,3 +126,31 @@ add_action(
 	30, // after press.php's fetch (10) has filled the title
 	2
 );
+
+/**
+ * A line under a News item's summary that links to its campaign (owner, 1 Nov 2026). Only campaigns listed here get a
+ * line; the words are the owner's. Keyed by the campaign link's slug: [campaign post ID, text before the link, link words].
+ */
+const AW_CAMPAIGN_NEWS_LINES = array(
+	'campaign-supreme-court-stray-dogs' => array( 23225, 'This is part of the Supreme Court stray dogs case: see what every state has done in ', 'our tracker' ),
+);
+
+// The News item's own summary (not a card's): its campaign line after it.
+add_filter(
+	'render_block_core/post-excerpt',
+	function ( $html, $block, $instance ) {
+		$id = get_queried_object_id();
+		if ( '' === trim( (string) $html ) || ! is_singular( 'aw_news' ) || isset( $instance->context['queryId'] ) || (int) ( $instance->context['postId'] ?? 0 ) !== (int) $id ) {
+			return $html;
+		}
+		foreach ( aw_campaign_links( $id ) as $t ) {
+			$line = AW_CAMPAIGN_NEWS_LINES[ $t->slug ] ?? null;
+			if ( $line && 'publish' === get_post_status( $line[0] ) ) {
+				return $html . '<p class="aw-campaign-line">' . esc_html( $line[1] ) . '<a href="' . esc_url( get_permalink( $line[0] ) ) . '">' . esc_html( $line[2] ) . '</a>.</p>';
+			}
+		}
+		return $html;
+	},
+	20,
+	3
+);
