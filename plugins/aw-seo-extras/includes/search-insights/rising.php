@@ -82,6 +82,25 @@ function aw_si_rising_sources(): array {
 	);
 }
 
+/**
+ * Whether the GDELT source is used (1 Nov 2026: off by default). GDELT answers HTTP 429 to the workers' and the site's
+ * addresses alike (its own throttling), so while it is off its runs are not stored and it is neither late nor failing.
+ * Settings → News (GDELT) switches it back on (option aw_si_gdelt_on).
+ */
+function aw_si_gdelt_on(): bool {
+	return (bool) get_option( 'aw_si_gdelt_on', 0 );
+}
+
+/** Whether the last Trends interest run failed with nothing stored after it (the Keywords list then says "source failed"). */
+function aw_si_trends_failed(): bool {
+	static $f = null;
+	if ( null === $f ) {
+		$r = aw_si_runs()['rising_trends_interest'] ?? array();
+		$f = ! empty( $r['error'] ) && (int) ( $r['error']['time'] ?? 0 ) >= (int) ( $r['ok'] ?? 0 );
+	}
+	return $f;
+}
+
 // Each rising source has its own entry in the run log, the notices and Site Health ("rising_" keeps them apart). A source
 // that has not reported yet joins once twice its schedule has passed since this code first loaded, so a deploy does not
 // show seven sources "late" against the date phase 1 was installed.
@@ -97,6 +116,9 @@ add_filter(
 		foreach ( aw_si_rising_sources() as $key => $s ) {
 			if ( empty( $runs[ 'rising_' . $key ] ) && time() - $since <= 2 * $s['every'] ) {
 				continue;
+			}
+			if ( 'gdelt' === $key && ! aw_si_gdelt_on() ) {
+				continue; // switched off: not late, not failing (Settings → News (GDELT))
 			}
 			$sources[ 'rising_' . $key ] = array(
 				'label' => $s['label'],
@@ -325,6 +347,15 @@ function aw_si_rising_receive( array $body ): array {
 	if ( ! isset( $sources[ $source ] ) || ! $sources[ $source ]['worker'] ) {
 		return array( 'error' => 'unknown source' );
 	}
+	if ( 'gdelt' === $source && ! aw_si_gdelt_on() ) {
+		return array(
+			'source'  => $source,
+			'off'     => true, // answered without an error, so the worker does not report a failure
+			'rising'  => array(),
+			'figures' => 0,
+			'skipped' => 0,
+		);
+	}
 	$rising = array_slice( array_values( array_filter( (array) ( $body['rising'] ?? array() ), 'is_array' ) ), 0, AW_SI_RISING_MAX_ROWS );
 	$obs    = array_slice( array_values( array_filter( (array) ( $body['obs'] ?? array() ), 'is_array' ) ), 0, AW_SI_RISING_MAX_OBS );
 	$error  = sanitize_text_field( (string) ( $body['error'] ?? '' ) );
@@ -398,6 +429,9 @@ function aw_si_rising_receive( array $body ): array {
 		'figures' => $out['figures'],
 		'worker'  => array_map( 'sanitize_text_field', array_filter( (array) ( $body['info'] ?? array() ), 'is_scalar' ) ),
 	);
+	// What 0 rows means (1 Nov 2026): the source refused ("source failed"), the run only recorded the usual level of each
+	// term ("baseline"), or the source answered and nothing passed the filters ("no rows"). Never "no demand".
+	$info['status'] = $info['rows'] ? 'ok' : ( $error ? 'source failed' : ( (int) ( $info['worker']['baseline'] ?? 0 ) > 0 ? 'baseline' : 'no rows' ) );
 	if ( $error && ! $rising && ! $out['figures'] ) {
 		aw_si_run_fail( $key, $error ); // Nothing came back: the last good data stays.
 	} else {
@@ -895,3 +929,29 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	);
 }
+
+add_action(
+	'aw_si_settings_rows',
+	function () {
+		$on = aw_si_gdelt_on();
+		echo '<tr><th scope="row">' . esc_html__( 'News (GDELT)', 'aw-seo-extras' ) . '</th><td>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_gdelt">';
+		wp_nonce_field( 'aw_si_gdelt' );
+		echo '<label><input type="checkbox" name="on" value="1"' . checked( $on, true, false ) . '> ' . esc_html__( 'Use GDELT for Rising (Indian news counts, daily)', 'aw-seo-extras' ) . '</label> ';
+		submit_button( __( 'Save', 'aw-seo-extras' ), 'secondary', 'submit', false );
+		echo '</form>';
+		echo '<p class="description">' . esc_html__( 'Off by default: GDELT refuses requests from the workers\' and the site\'s addresses (HTTP 429). While it is off its results are not stored, and it is not shown as late or failing.', 'aw-seo-extras' ) . '</p></td></tr>';
+	}
+);
+
+add_action(
+	'admin_post_aw_si_gdelt',
+	function () {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_gdelt' ) ) {
+			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		}
+		update_option( 'aw_si_gdelt_on', empty( $_POST['on'] ) ? 0 : 1, false );
+		wp_safe_redirect( aw_si_url( 'settings' ) );
+		exit;
+	}
+);

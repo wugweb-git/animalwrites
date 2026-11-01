@@ -417,3 +417,87 @@ add_action(
 		wp_schedule_single_event( aw_si_bing_next(), AW_SI_BING_CRON );
 	}
 );
+
+/**
+ * Bing searches without a keyword record (1 Nov 2026): Bing's figures are stored only for searches that already have a
+ * record, so its own searches were skipped (46 of 57 on 1 Nov). Settings → Bing searches counts them first, then adds a
+ * record for each (role "seen in search") and stores Bing's figures for them at once.
+ *
+ * @return array{labels: string[], error: string} Searches Bing reported that have no record.
+ */
+function aw_si_bing_missing(): array {
+	$q = aw_si_bing_call( 'GetQueryStats' );
+	if ( is_wp_error( $q ) ) {
+		return array( 'labels' => array(), 'error' => $q->get_error_message() );
+	}
+	$map  = aw_si_kw_map();
+	$want = array();
+	foreach ( (array) $q as $r ) {
+		$label = trim( (string) ( $r['Query'] ?? '' ) );
+		$norm  = aw_si_norm( $label );
+		if ( '' === $norm || isset( $map[ $norm ] ) || mb_strlen( $label ) < 3 || mb_strlen( $label ) > 100 || preg_match( '/^(?:site|inurl|url):/i', $label ) ) {
+			continue;
+		}
+		$want[ $norm ] = $label;
+	}
+	return array( 'labels' => array_values( $want ), 'error' => '' );
+}
+
+add_action(
+	'aw_si_settings_rows',
+	function () {
+		if ( ! aw_si_bing_on() ) {
+			return;
+		}
+		echo '<tr><th scope="row">' . esc_html__( 'Bing searches', 'aw-seo-extras' ) . '</th><td>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_bing_kw">';
+		wp_nonce_field( 'aw_si_bing_kw' );
+		echo '<p><button type="submit" name="what" value="count" class="button">' . esc_html__( 'Count Bing searches without a keyword record', 'aw-seo-extras' ) . '</button> ';
+		echo '<button type="submit" name="what" value="add" class="button">' . esc_html__( 'Add keyword records for them', 'aw-seo-extras' ) . '</button></p>';
+		echo '</form>';
+		echo '<p class="description">' . esc_html__( 'Bing\'s figures are stored only for searches that have a keyword record. Adding records (role: seen in search) runs Bing Webmaster again, so their figures are stored too. Nothing is added to Rank Math or Sourcing.', 'aw-seo-extras' ) . '</p></td></tr>';
+	}
+);
+
+add_action(
+	'admin_post_aw_si_bing_kw',
+	function () {
+		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_bing_kw' ) ) {
+			wp_die( esc_html__( 'Not allowed.', 'aw-seo-extras' ), 403 );
+		}
+		$what = isset( $_POST['what'] ) ? sanitize_key( wp_unslash( $_POST['what'] ) ) : 'count';
+		$miss = aw_si_bing_missing();
+		$res  = array(
+			'error' => $miss['error'],
+			'count' => count( $miss['labels'] ),
+			'added' => 0,
+			'list'  => array_slice( $miss['labels'], 0, 60 ),
+		);
+		if ( '' === $miss['error'] && 'add' === $what && $miss['labels'] && ! get_option( 'aw_si_off' ) ) {
+			$res['added'] = count( aw_si_kw_ids( $miss['labels'], AW_SI_ROLE_SEARCHED ) );
+			aw_si_bing_run();
+		}
+		set_transient( 'aw_si_bing_kw_' . get_current_user_id(), $res, 10 * MINUTE_IN_SECONDS );
+		wp_safe_redirect( add_query_arg( 'bingkw', 1, aw_si_url( 'settings' ) ) );
+		exit;
+	}
+);
+
+add_action(
+	'aw_si_settings_notices',
+	function () {
+		if ( ! isset( $_GET['bingkw'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+			return;
+		}
+		$r = get_transient( 'aw_si_bing_kw_' . get_current_user_id() );
+		if ( ! is_array( $r ) ) {
+			return;
+		}
+		if ( '' !== $r['error'] ) {
+			echo '<div class="notice notice-error inline"><p>' . esc_html( $r['error'] ) . '</p></div>';
+			return;
+		}
+		/* translators: 1: searches without a record, 2: records written, 3: the searches. */
+		echo '<div class="notice notice-success inline"><p>' . esc_html( sprintf( __( 'Bing searches without a keyword record: %1$s. Records written: %2$s. %3$s', 'aw-seo-extras' ), number_format_i18n( (int) $r['count'] ), number_format_i18n( (int) $r['added'] ), implode( ', ', (array) $r['list'] ) ) ) . '</p></div>';
+	}
+);

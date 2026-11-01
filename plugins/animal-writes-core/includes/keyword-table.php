@@ -12,6 +12,8 @@
  * - src_note: where the migration found it (JSON: list => [[position, spelling], ...]), so the old lists can be
  *   rebuilt exactly as they were (read-only mirrors until phase 4).
  * and a map table, wp_aw_si_kw_map: (kw_id, kind, value), kind "category" (a category slug) or "section" (a post type).
+ * Version 3 (1 Nov 2026) adds quick_win: 1 when Search Insights' daily calculation finds the keyword at position 8–20
+ * with enough impressions (aw_si_quick_win), so the Quick wins view, the weekly read and exports count the same rows.
  *
  * @package animal-writes-core
  */
@@ -22,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/keyword-model.php';
 
-const AW_KW_DB_VERSION = '2';
+const AW_KW_DB_VERSION = '3';
 const AW_KW_DB_OPTION  = 'aw_kw_db';
 
 /**
@@ -103,6 +105,7 @@ function aw_kw_install(): void {
 		feed_id varchar(100) NOT NULL DEFAULT '',
 		search_on tinyint(1) NOT NULL DEFAULT 1,
 		dismissed tinyint(1) NOT NULL DEFAULT 0,
+		quick_win tinyint(1) NOT NULL DEFAULT 0,
 		src_note text NULL,
 		created datetime NOT NULL,
 		updated datetime NOT NULL,
@@ -129,7 +132,7 @@ function aw_kw_install(): void {
 }
 add_action( 'admin_init', 'aw_kw_install', 1 ); // Also called by WP-CLI (wp aw-sourcing migrate) and Search Insights.
 
-/** Whether the table is at version 2 (the install may not have run yet). */
+/** Whether the table is at the current version (the install may not have run yet). */
 function aw_kw_ready(): bool {
 	return get_option( AW_KW_DB_OPTION ) === AW_KW_DB_VERSION;
 }

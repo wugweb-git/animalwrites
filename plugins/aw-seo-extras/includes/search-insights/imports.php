@@ -309,3 +309,36 @@ add_filter(
 		return $s;
 	}
 );
+
+/**
+ * The 21 Oct rankings seed stored live results (src live, 22 Oct 2026) without a run in the log, so the Live Google check
+ * read "not run yet" beside its own figures. Once, the newest stored live result counts as the source's last run, marked
+ * as the seed; the bookmarklet's own runs replace it (1 Nov 2026, flag aw_si_live_seed_run).
+ */
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'aw_si_live_seed_run' ) || ! aw_si_ready() || ! empty( aw_si_runs()['live']['ok'] ) ) {
+			return;
+		}
+		global $wpdb;
+		$o   = aw_si_table( 'obs' );
+		$row = $wpdb->get_row( "SELECT MAX(d) d, COUNT(*) n FROM {$o} WHERE src = 'live' AND metric = 'position'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+		if ( $row && $row->d && (int) $row->n > 0 ) {
+			$r         = aw_si_runs();
+			$r['live'] = array(
+				'ok'      => (int) strtotime( $row->d . ' 12:00:00' ),
+				'error'   => null,
+				'info'    => array(
+					'rows'   => (int) $row->n,
+					'up_to'  => (string) $row->d,
+					'seed'   => true,
+					'status' => 'ok',
+				),
+				'started' => 0,
+			);
+			update_option( AW_SI_RUNS, $r, false );
+		}
+		update_option( 'aw_si_live_seed_run', time(), false );
+	}
+);

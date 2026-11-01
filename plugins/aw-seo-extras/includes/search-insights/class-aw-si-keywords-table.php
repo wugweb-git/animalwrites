@@ -124,7 +124,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			'p3'        => "{$eff} = 'P3'",
 			'gap'       => "status = 'gap'",
 			'conflict'  => "status = 'conflict'",
-			'quick'     => 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN,
+			'quick'     => aw_si_quick_sql(),
 			'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0',
 			'entity'    => 'entity = 1',
 		);
@@ -529,6 +529,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			case 'pos28':
 				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
 			case 'trends':
+				if ( null === $item->trends && aw_si_trends_failed() ) {
+					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'aw-seo-extras' ) . '">' . esc_html__( 'source failed', 'aw-seo-extras' ) . '</span>';
+				}
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
 			case 'volume':
 				$v = $item->volume ?? null;

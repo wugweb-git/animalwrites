@@ -172,6 +172,11 @@ function aw_si_quick_win( ?float $pos, int $impr ): bool {
 	return null !== $pos && $pos >= 8 && $pos <= 20 && $impr >= AW_SI_QUICK_MIN;
 }
 
+/** SQL condition of a quick win: the stored flag (keyword table version 3), else the same rule on the stored figures. */
+function aw_si_quick_sql(): string {
+	return function_exists( 'aw_kw_ready' ) && aw_kw_ready() ? 'quick_win = 1' : 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN;
+}
+
 /**
  * Priority, status and suggested action of one keyword (used by the daily calculation and by the dry run).
  *
@@ -257,7 +262,8 @@ function aw_si_compute(): array {
 	$live  = $wpdb->get_results( "SELECT o.kw_id, o.value, o.txt, o.d FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", OBJECT_K );
 	$trend = $wpdb->get_results( "SELECT o.kw_id, o.value FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", OBJECT_K );
 	$links = $wpdb->get_results( "SELECT kw_id, path, role, src FROM {$p}" );
-	$rows  = $wpdb->get_results( "SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends FROM {$k}" );
+	$qw    = function_exists( 'aw_kw_ready' ) && aw_kw_ready(); // the quick_win column (keyword table version 3)
+	$rows  = $wpdb->get_results( "SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends" . ( $qw ? ', quick_win' : '' ) . " FROM {$k}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
 	// phpcs:enable
 
 	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.
@@ -313,6 +319,9 @@ function aw_si_compute(): array {
 			'live_date' => $lv ? $lv->d : null,
 			'trends'    => $trends,
 		);
+		if ( $qw ) {
+			$set['quick_win'] = aw_si_quick_win( $d['pos'], $impr ) ? 1 : 0;
+		}
 		$changed  = false;
 		foreach ( $set as $col => $val ) {
 			$old = $r->$col;

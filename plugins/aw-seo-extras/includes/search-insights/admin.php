@@ -190,6 +190,13 @@ function aw_si_source_notices(): void {
 			/* translators: 1: source, 2: the problem, 3: date of the data still shown. */
 			$msg = sprintf( __( '%1$s: %2$s The figures shown are from %3$s.', 'aw-seo-extras' ), $s['label'], $err, $ok ? wp_date( 'j M, H:i', $ok ) : __( 'no earlier run', 'aw-seo-extras' ) );
 			echo '<div class="notice notice-error inline"><p><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html( $msg ) . '</p></div>';
+		} elseif ( $ok && in_array( $r['info']['status'] ?? '', array( 'baseline', 'no rows' ), true ) ) {
+			$msg = 'baseline' === $r['info']['status']
+				/* translators: 1: source, 2: date and time. */
+				? __( '%1$s ran on %2$s and recorded the usual level of each term (a baseline): rising terms show from its next run.', 'aw-seo-extras' )
+				/* translators: 1: source, 2: date and time. */
+				: __( '%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters.', 'aw-seo-extras' );
+			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( $msg, $s['label'], wp_date( 'j M, H:i', $ok ) ) ) . '</p></div>';
 		} elseif ( $ok && aw_si_stale( $src ) ) {
 			/* translators: %s: source. */
 			echo '<div class="notice notice-warning inline"><p><span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html( sprintf( __( '%s has not updated on schedule.', 'aw-seo-extras' ), $s['label'] ) ) . '</p></div>';
@@ -203,6 +210,9 @@ function aw_si_source_notices(): void {
 				: __( 'GA4 returned its row maximum on %s, so the smallest pages or terms of those days may be missing.', 'aw-seo-extras' );
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( sprintf( $msg, $days ) ) . '</p></div>';
 		}
+	}
+	if ( function_exists( 'aw_si_gdelt_on' ) && ! aw_si_gdelt_on() ) {
+		echo '<div class="notice notice-info inline"><p>' . esc_html__( 'News (GDELT) is switched off (Settings): GDELT refuses our requests (HTTP 429), so Rising uses the other sources.', 'aw-seo-extras' ) . '</p></div>';
 	}
 	echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Last updated', 'aw-seo-extras' ) . ' — ' . esc_html( implode( ' · ', $parts ) ) . '</p></div>';
 }
@@ -358,7 +368,7 @@ function aw_si_box_priorities(): void {
 		'p1'        => array( 'P1', "{$eff} = 'P1'" ),
 		'p2'        => array( __( 'P2 (gaps)', 'aw-seo-extras' ), "{$eff} = 'P2'" ),
 		'conflict'  => array( __( 'Conflicts', 'aw-seo-extras' ), "status = 'conflict'" ),
-		'quick'     => array( __( 'Quick wins', 'aw-seo-extras' ), 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN ),
+		'quick'     => array( __( 'Quick wins', 'aw-seo-extras' ), aw_si_quick_sql() ),
 		'notranked' => array( __( 'Tracked, not ranking', 'aw-seo-extras' ), 'roles & ' . (int) AW_SI_ROLE_TRACKED . ' AND impr28 = 0' ),
 		'all'       => array( __( 'All keywords', 'aw-seo-extras' ), '1=1' ),
 	);
