@@ -3,9 +3,9 @@
  * Media Library list columns: name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
  *
  * - No Author column (the site has one author).
- * - "Uploaded to" stays as WordPress has it (with Attach / Detach); "Also used in" sits beside it and lists every other
- *   place the file is used: featured image, source image, document preview, logos, social image, a category or tag photo,
- *   the site icon, and the source a favicon or logo belongs to. A file used more than once shows all of them.
+ * - "Uploaded to" keeps what WordPress prints (parent post, Attach / Detach) and lists every other place the file is used
+ *   as extra rows below it: featured image, source image, document preview, logos, social image, a category or tag
+ *   photo, the site icon, and the source a favicon or logo belongs to. Sorting still goes through the core parent order.
  * - SEO: the Rank Math score of the pages that use the file (Rank Math does not score attachments, so no score of our
  *   own is made up), and what is missing on the file itself, from the fields already on the attachment: Alternative Text,
  *   Caption = SEO title, Description = SEO description, Image context, the focus keyword of the pages that use it.
@@ -188,12 +188,12 @@ add_filter(
 		$ours   = array(
 			'aw_slug'    => 'Slug',
 			'aw_caption' => 'SEO title',
-			'aw_used'    => 'Also used in',
+			'aw_parent'  => 'Uploaded to',
 			'aw_seo'     => 'SEO',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'rank_math_image_alt', 'parent', 'aw_used', 'aw_seo', 'aw_opt', 'date' );
-		$remove = array( 'author', 'rank_math_image_title', 'imgoptm' );
+		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'rank_math_image_alt', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$remove = array( 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
 			if ( isset( $columns[ $key ] ) ) {
@@ -212,10 +212,18 @@ add_filter(
 	99
 );
 
+add_filter(
+	'manage_upload_sortable_columns',
+	function ( $columns ) {
+		$columns['aw_parent'] = 'parent';
+		return $columns;
+	}
+);
+
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_used', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -237,20 +245,25 @@ add_action(
 			'pages' => array(),
 			'kw'    => '',
 		);
-		if ( 'aw_used' === $column ) {
-			// The core "Uploaded to" column already shows the parent post, so leave its lines out here.
+		if ( 'aw_parent' === $column ) {
+			if ( isset( $GLOBALS['wp_list_table'] ) && is_object( $GLOBALS['wp_list_table'] ) && method_exists( $GLOBALS['wp_list_table'], 'column_parent' ) ) {
+				$GLOBALS['wp_list_table']->column_parent( $post );
+			} elseif ( (int) $post->post_parent > 0 ) {
+				echo '<a href="' . esc_url( get_edit_post_link( (int) $post->post_parent ) ) . '">' . esc_html( get_the_title( (int) $post->post_parent ) ) . '</a>';
+			} else {
+				echo '(Unattached)';
+			}
+			// Every other use, one row each; the parent post is already shown above.
 			$uses = $use['uses'];
 			if ( (int) $post->post_parent > 0 ) {
 				$uses = array_diff_key( $uses, array_flip( preg_grep( '/^p' . (int) $post->post_parent . '(?!\d)/', array_map( 'strval', array_keys( $uses ) ) ) ) );
 			}
-			if ( ! $uses ) {
-				echo '—';
-				return;
-			}
-			$shown = array_slice( array_values( $uses ), 0, 5 );
-			echo wp_kses( implode( '<br>', $shown ), array( 'a' => array( 'href' => array() ), 'br' => array() ) );
-			if ( count( $uses ) > 5 ) {
-				echo '<br>+' . (int) ( count( $uses ) - 5 ) . ' more';
+			if ( $uses ) {
+				$shown = array_slice( array_values( $uses ), 0, 5 );
+				echo '<br>' . wp_kses( implode( '<br>', $shown ), array( 'a' => array( 'href' => array() ), 'br' => array() ) );
+				if ( count( $uses ) > 5 ) {
+					echo '<br>+' . (int) ( count( $uses ) - 5 ) . ' more';
+				}
 			}
 			return;
 		}
