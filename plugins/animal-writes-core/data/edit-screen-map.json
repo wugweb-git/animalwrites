@@ -1146,6 +1146,1763 @@
 				],
 				"priority": 1
 			}
+		},
+		"ap-src-overview-features": {
+			"title": "Features (Waiting for a person, What the workers fetch, Rules, AI and workers, Reports, Settings, Elsewhere)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Sourcing overview",
+			"file": "src/admin-menu.php:289 (aw_sourcing_overview_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Overview",
+			"types": [
+				"aw-sourcing-menu"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_publishers",
+				"option:aw_relevance",
+				"option:aw_sources",
+				"option:aw_ai_models",
+				"option:aw_ai_keys",
+				"option:aw_ingest_heartbeat",
+				"option:aw_relevance_rejected",
+				"option:aw_relay_log",
+				"option:kits_sourcing_log",
+				"option:aw_sourcing_phase",
+				"table:aw_enrich",
+				"transient:aw_review_count",
+				"aw_enrich_checked"
+			],
+			"limits": "One table per group; AI, Workers and Rejected status only for administrators",
+			"decision": "One Sourcing menu with an Overview of every feature (owner, 25 Oct 2026).",
+			"notes": "Status per feature from the checks that already run. Stores nothing."
+		},
+		"ap-src-overview-runs": {
+			"title": "Last runs",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Workers status",
+			"file": "src/admin-menu.php:350 (aw_sourcing_overview_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Overview",
+			"types": [
+				"aw-sourcing-menu"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_worker_runs_*",
+				"option:aw_workers_meta",
+				"option:aw_workers_groups"
+			],
+			"limits": "Administrators only; one row per worker, newest report",
+			"decision": "",
+			"notes": "Last report, result and next due time per worker. Stores nothing."
+		},
+		"ap-src-overview-commands": {
+			"title": "Commands (WP-CLI on the server)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Command list",
+			"file": "src/admin-menu.php:370 (aw_sourcing_overview_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Overview",
+			"types": [
+				"aw-sourcing-menu"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [],
+			"limits": "Fixed list of three commands",
+			"decision": "",
+			"notes": "Static list. Stores nothing."
+		},
+		"ap-src-review-list": {
+			"title": "To review list (AW_Sourcing_Review_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Review queue",
+			"file": "src/class-aw-sourcing-review-table.php:15 (AW_Sourcing_Review_Table), shown at src/review-queue.php:197",
+			"screen": "admin",
+			"page": "AW Sourcing: To review",
+			"types": [
+				"aw-review"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"post_status pending/draft of aw_news, aw_legal, aw_opportunity, aw_press, research posts",
+				"aw_review",
+				"aw_source_url",
+				"aw_press_url"
+			],
+			"limits": "50 per page (screen option aw_review_per_page); newest received first, sortable by title, type, received; views per type; search",
+			"decision": "",
+			"notes": "Bulk Publish or Reject (to Drafts), and Publish all in this view; changes post status only."
+		},
+		"ap-src-review-notice": {
+			"title": "Result notice (published / moved to Drafts)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Action result",
+			"file": "src/review-queue.php:180 (aw_review_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: To review",
+			"types": [
+				"aw-review"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [],
+			"limits": "After a bulk action only",
+			"decision": "",
+			"notes": "Core notice after a bulk action. Stores nothing."
+		},
+		"ap-src-enrich-progress": {
+			"title": "Progress line (listings checked, proposals waiting)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Enrichment progress",
+			"file": "src/enrichment-admin.php:312 (aw_enrich_review_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Enrichment review",
+			"types": [
+				"aw-enrich-review"
+			],
+			"runtime": "map-only",
+			"kind": "panel",
+			"reads": [
+				"table:aw_enrich",
+				"aw_enrich_checked",
+				"option:aw_enrich_db"
+			],
+			"limits": "Published listings only",
+			"decision": "",
+			"notes": "Counts from the enrichment table and listing meta. Stores nothing."
+		},
+		"ap-src-enrich-filters": {
+			"title": "Status views and filters (source, confidence, state, field, flag)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Queue filters",
+			"file": "src/enrichment-admin.php:320 (aw_enrich_review_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Enrichment review",
+			"types": [
+				"aw-enrich-review"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_enrich_sources",
+				"table:aw_places"
+			],
+			"limits": "Views Waiting, Applied, Rejected, Failed, Undone, All; GET filter only",
+			"decision": "",
+			"notes": "Filters the list. Stores nothing."
+		},
+		"ap-src-enrich-list": {
+			"title": "Proposals list (AW_Sourcing_Enrichment_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Enrichment proposals",
+			"file": "src/class-aw-sourcing-enrichment-table.php:18 (AW_Sourcing_Enrichment_Table), shown at src/enrichment-admin.php:384",
+			"screen": "admin",
+			"page": "AW Sourcing: Enrichment review",
+			"types": [
+				"aw-enrich-review"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:aw_enrich",
+				"listing fields named in each proposal (SCF group group_aw_listing)"
+			],
+			"limits": "50 per page; high confidence first, then by listing, newest first",
+			"decision": "",
+			"notes": "Approve, reject or undo proposals; approving writes the proposed value to the listing field."
+		},
+		"ap-src-sources-list": {
+			"title": "Sources list (AW_Sourcing_Publishers_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Publisher list",
+			"file": "src/class-aw-sourcing-publishers-table.php:27 (AW_Sourcing_Publishers_Table), shown at src/source-sites.php:476",
+			"screen": "admin",
+			"page": "AW Sourcing: Sources",
+			"types": [
+				"aw-sourcing-sources"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_publishers",
+				"option:aw_sources",
+				"option:aw_source_site_meta",
+				"option:aw_relay_log",
+				"transient:aw_sourcing_host_stats",
+				"table:aw_si_pages (Search value)"
+			],
+			"limits": "50 per page (screen option aw_publishers_per_page); views by status; search; sortable",
+			"decision": "",
+			"notes": "Row actions Edit, Allow, Neutral, Block save option aw_publishers; every change goes to the Change log."
+		},
+		"ap-src-sources-notices": {
+			"title": "Search value and relay notices",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Status notes",
+			"file": "src/source-sites.php:466 (aw_sourcing_sources_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Sources",
+			"types": [
+				"aw-sourcing-sources"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [
+				"option:aw_sourcing_phase"
+			],
+			"limits": "Shown when Search Console has not run within 28 days, or before phase 1",
+			"decision": "",
+			"notes": "Inline notes above the list. Stores nothing."
+		},
+		"ap-src-sources-feeds": {
+			"title": "Feeds view (AW_Sourcing_Sources_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Feed list",
+			"file": "src/class-aw-sourcing-sources-table.php:18 (AW_Sourcing_Sources_Table), shown at src/source-sites.php:461",
+			"screen": "admin",
+			"page": "AW Sourcing: Sources",
+			"types": [
+				"aw-sourcing-sources"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_sources"
+			],
+			"limits": "Sources → Feeds view; per type News, Library, Opportunity",
+			"decision": "",
+			"notes": "Feeds on and off, add and delete; saves option aw_sources."
+		},
+		"ap-src-sources-edit": {
+			"title": "Add New Source / Edit Source form",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Source edit",
+			"file": "src/source-sites.php:486 (aw_sourcing_source_form)",
+			"screen": "admin",
+			"page": "AW Sourcing: Sources",
+			"types": [
+				"aw-sourcing-sources"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_publishers",
+				"option:aw_sources",
+				"option:aw_source_site_meta"
+			],
+			"limits": "One source per screen, with its feeds below",
+			"decision": "",
+			"notes": "Saves the source in option aw_publishers (and its feeds in aw_sources) through admin-post."
+		},
+		"ap-src-kw-add": {
+			"title": "Add New Keyword",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Add keywords",
+			"file": "src/keywords-admin.php:497 (aw_sourcing_kw_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Keywords",
+			"types": [
+				"aw-sourcing-keywords"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:aw_si_keywords"
+			],
+			"limits": "One word per line",
+			"decision": "",
+			"notes": "Adds rows to the keyword table with their roles."
+		},
+		"ap-src-kw-list": {
+			"title": "Keywords list (AW_Sourcing_Keywords_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Keyword list",
+			"file": "src/class-aw-sourcing-keywords-table.php:21 (AW_Sourcing_Keywords_Table), shown at src/keywords-admin.php:519",
+			"screen": "admin",
+			"page": "AW Sourcing: Keywords",
+			"types": [
+				"aw-sourcing-keywords"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:aw_si_keywords",
+				"table:aw_si_kw_* (category and feed maps)"
+			],
+			"limits": "100 per page (screen option aw_keywords_per_page); views per role (include, animal, context, exclude, search, press, category); search",
+			"decision": "",
+			"notes": "Bulk role changes and row edits save to the keyword table."
+		},
+		"ap-src-kw-test": {
+			"title": "Test a headline",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Relevance test",
+			"file": "src/keywords-admin.php:523 (aw_sourcing_kw_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Keywords",
+			"types": [
+				"aw-sourcing-keywords"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:aw_si_keywords",
+				"option:aw_relevance"
+			],
+			"limits": "One headline at a time (GET)",
+			"decision": "",
+			"notes": "Shows Kept or Dropped and why. Stores nothing."
+		},
+		"ap-src-kw-suggestions": {
+			"title": "Suggestions from Search Insights (AW_Sourcing_Suggestions_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Keyword suggestions",
+			"file": "src/keyword-suggestions.php:191 (aw_sourcing_keywords_tab_end), table src/class-aw-sourcing-suggestions-table.php:13",
+			"screen": "admin",
+			"page": "AW Sourcing: Keywords",
+			"types": [
+				"aw-sourcing-keywords"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:aw_si_keywords",
+				"option:aw_sourcing_dismissed",
+				"transient:aw_sourcing_kw_stats_30"
+			],
+			"limits": "20 per page (screen option aw_suggestions_per_page, 1–200); English only; at least 20 impressions in 28 days",
+			"decision": "",
+			"notes": "Add a suggestion as a keyword or dismiss it (dismissed flag in the keyword table)."
+		},
+		"ap-src-rules-sections": {
+			"title": "Section rules (AW_Sourcing_Sections_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Section rules",
+			"file": "src/class-aw-sourcing-sections-table.php:16 (AW_Sourcing_Sections_Table), shown at src/rules-admin.php:123",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_sources (sections)",
+				"category",
+				"post_tag"
+			],
+			"limits": "One row per section; up to 8 tag names before \"…\"",
+			"decision": "",
+			"notes": "Read-only list; Edit opens the section checklists, which save option aw_sources."
+		},
+		"ap-src-rules-tags": {
+			"title": "Tag rules (Add New Rule and list)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Tag rules",
+			"file": "src/rules-admin.php:125 (aw_rules_tab), list src/rules-admin.php:187 (aw_rules_tag_table)",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_sources (topic_tags)",
+				"post_tag",
+				"aw_campaign_link"
+			],
+			"limits": "One row per tag rule",
+			"decision": "",
+			"notes": "Add, edit and delete save option aw_sources (topic_tags)."
+		},
+		"ap-src-rules-summary": {
+			"title": "Summary rules",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Summary rules",
+			"file": "src/summary-rules-admin.php:237 (aw_summary_rules_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_summary_rules"
+			],
+			"limits": "One rule set, with a rule per section",
+			"decision": "",
+			"notes": "Settings API form; saves option aw_summary_rules."
+		},
+		"ap-src-rules-enrich-settings": {
+			"title": "Directory enrichment (sources, Google key, monthly cap)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Enrichment settings",
+			"file": "src/enrichment-admin.php:449 (aw_enrich_settings_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_enrich_sources",
+				"option:aw_enrich_google_key",
+				"option:aw_enrich_live_cap"
+			],
+			"limits": "Live Google block cap default 20 a month",
+			"decision": "",
+			"notes": "Settings API form; saves those three options (the key is never shown back)."
+		},
+		"ap-src-rules-trust-order": {
+			"title": "Trust order",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Source priority",
+			"file": "src/rules-admin.php:399 (aw_rules_priority_form)",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_enrich_field_rules (priority)",
+				"option:aw_enrich_sources"
+			],
+			"limits": "Positions 1–99; empty ranks last",
+			"decision": "",
+			"notes": "Saves the priority in option aw_enrich_field_rules."
+		},
+		"ap-src-rules-field-rules": {
+			"title": "Field rules table",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Field rules",
+			"file": "src/rules-admin.php:444 (aw_rules_field_rules_table)",
+			"screen": "admin",
+			"page": "AW Sourcing: Rules",
+			"types": [
+				"aw-sourcing-rules"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_enrich_field_rules",
+				"SCF group group_aw_listing"
+			],
+			"limits": "One row per listing field; Edit opens one field",
+			"decision": "",
+			"notes": "Each field form saves option aw_enrich_field_rules."
+		},
+		"ap-src-ai-keys-list": {
+			"title": "Keys (AW_Sourcing_AI_Keys_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "AI keys",
+			"file": "src/class-aw-sourcing-ai-keys-table.php:18 (AW_Sourcing_AI_Keys_Table), shown at src/ai-keys.php:1069",
+			"screen": "admin",
+			"page": "AW Sourcing: AI models",
+			"types": [
+				"aw-sourcing-ai"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_ai_models",
+				"option:aw_ai_free_caps",
+				"option:aw_ai_provider_icons",
+				"option:aw_workers_meta"
+			],
+			"limits": "100 per page (screen option aw_ai_keys_per_page); views works, waiting, broken, secrets; in the order the workers try them",
+			"decision": "Free AI models only, never paid (owner, 25 Oct 2026).",
+			"notes": "Attach, detach, reorder and remove keys; saves option aw_ai_models. Only the last 4 characters of a key are shown."
+		},
+		"ap-src-ai-key-form": {
+			"title": "Add New Key / Edit key",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "AI key edit",
+			"file": "src/ai-keys.php:1109 (aw_ai_key_add_screen, aw_ai_key_edit_screen)",
+			"screen": "admin",
+			"page": "AW Sourcing: AI models",
+			"types": [
+				"aw-sourcing-ai"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_ai_models"
+			],
+			"limits": "One key per screen",
+			"decision": "",
+			"notes": "Saves the key row in option aw_ai_models."
+		},
+		"ap-src-ai-overview": {
+			"title": "Keys overview (keys, usable keys per worker)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "AI keys summary",
+			"file": "src/ai-keys.php:1078 (aw_ai_keys_overview_screen)",
+			"screen": "admin",
+			"page": "AW Sourcing: AI models",
+			"types": [
+				"aw-sourcing-ai"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_ai_models",
+				"option:aw_workers_meta",
+				"option:aw_workers_groups"
+			],
+			"limits": "Read-only; never more than the last 4 characters of a key",
+			"decision": "",
+			"notes": "Two tables. Stores nothing."
+		},
+		"ap-src-workers-list": {
+			"title": "Workers (AW_Workers_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Workflow list",
+			"file": "src/class-aw-workers-table.php:17 (AW_Workers_Table), shown at src/workers-admin.php:91",
+			"screen": "admin",
+			"page": "AW Sourcing: Workers",
+			"types": [
+				"aw-sourcing-workers"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_workers_meta",
+				"option:aw_workers_groups",
+				"option:aw_worker_runs_*",
+				"option:aw_workers_tick"
+			],
+			"limits": "20 per page (screen option aw_workers_per_page); late or failing first",
+			"decision": "",
+			"notes": "Edit, Run now (GitHub dispatch) and Delete for a planned worker; saves option aw_workers_meta."
+		},
+		"ap-src-workers-runlog": {
+			"title": "Run now log",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Dispatch log",
+			"file": "src/workers-admin.php:94 (aw_workers_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Workers",
+			"types": [
+				"aw-sourcing-workers"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_worker_dispatch_log"
+			],
+			"limits": "Newest first",
+			"decision": "",
+			"notes": "Who started which worker and the result. Stores nothing."
+		},
+		"ap-src-workers-runs": {
+			"title": "Runs: one worker",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Run history",
+			"file": "src/workers-admin.php:109 (aw_workers_runs_screen)",
+			"screen": "admin",
+			"page": "AW Sourcing: Workers",
+			"types": [
+				"aw-sourcing-workers"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_worker_runs_*"
+			],
+			"limits": "One worker per screen",
+			"decision": "",
+			"notes": "Start and end reports of one worker. Stores nothing."
+		},
+		"ap-src-workers-notices": {
+			"title": "Run now and token notices",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Status notes",
+			"file": "src/workers-admin.php:79 (aw_workers_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Workers",
+			"types": [
+				"aw-sourcing-workers"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [
+				"option:aw_worker_dispatch_log"
+			],
+			"limits": "After Run now, or when the GitHub token is missing",
+			"decision": "",
+			"notes": "Core notices. Stores nothing."
+		},
+		"ap-src-rejected": {
+			"title": "Rejected",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Relevance log",
+			"file": "src/relevance.php:426 (aw_relevance_rejected_tab)",
+			"screen": "admin",
+			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"types": [
+				"aw-sourcing-reports"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_relevance_rejected"
+			],
+			"limits": "50 per page; at most 500 kept; sortable by type, found, date; search",
+			"decision": "",
+			"notes": "Items the relevance check refused. Stores nothing."
+		},
+		"ap-src-relay-log": {
+			"title": "Relay log",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Relay requests",
+			"file": "src/relay.php:259 (aw_relay_log_view)",
+			"screen": "admin",
+			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"types": [
+				"aw-sourcing-reports"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_relay_log"
+			],
+			"limits": "50 per page; last 200 requests kept; newest first; sortable; search",
+			"decision": "",
+			"notes": "Requests the workers made through this site. Stores nothing."
+		},
+		"ap-src-change-log": {
+			"title": "Change log",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Change history",
+			"file": "src/sourcing-policy.php:645 (aw_sourcing_page)",
+			"screen": "admin",
+			"page": "AW Sourcing: Reports (Rejected, Relay log, Change log)",
+			"types": [
+				"aw-sourcing-reports"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:kits_sourcing_log"
+			],
+			"limits": "50 per page; sortable by date, user, tab; search",
+			"decision": "",
+			"notes": "Who changed what on the Sourcing screens, before and after. Stores nothing."
+		},
+		"ap-src-settings-switch": {
+			"title": "Workers use these lists (switch)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Workers switch",
+			"file": "src/sourcing-lists.php:121 (aw_sources_live_switch)",
+			"screen": "admin",
+			"page": "AW Sourcing: Settings",
+			"types": [
+				"aw-sourcing-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_sources (live)"
+			],
+			"limits": "One on/off switch",
+			"decision": "",
+			"notes": "Saves the live flag in option aw_sources."
+		},
+		"ap-src-si-sourcing-keywords": {
+			"title": "Sourcing keywords (AW_Sourcing_SI_Keywords_Table)",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Search value",
+			"file": "src/search-insights-tab.php:23 (aw_si_tab_sourcing), table src/class-aw-sourcing-si-keywords-table.php:14",
+			"screen": "admin",
+			"page": "Search Insights: Sourcing keywords tab",
+			"types": [
+				"aw-search-insights-sourcing"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"transient:aw_sourcing_kw_stats_30",
+				"table:aw_si_keywords",
+				"table:aw_si_pages",
+				"aw_feed"
+			],
+			"limits": "Items over 30 days per Google News search; page figures for 28 days and 3 months",
+			"decision": "",
+			"notes": "Tab added to Search Insights by AW Sourcing. Stores nothing."
+		},
+		"ap-src-notice-ingest": {
+			"title": "Ingestion needs attention",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Ingest watchdog",
+			"file": "src/relevance.php:585 (admin_notices)",
+			"screen": "admin",
+			"page": "AW Sourcing: Notices (admin pages)",
+			"types": [
+				"aw-sourcing-notices"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [
+				"option:aw_ingest_heartbeat"
+			],
+			"limits": "Administrators; every admin page while a problem lasts",
+			"decision": "",
+			"notes": "No News for 12 hours, no worker report for 8 hours, or failed sources. Stores nothing."
+		},
+		"ap-src-notice-relevance": {
+			"title": "Relevance check could not run",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Relevance alert",
+			"file": "src/relevance.php:436 (admin_notices)",
+			"screen": "admin",
+			"page": "AW Sourcing: Notices (admin pages)",
+			"types": [
+				"aw-sourcing-notices"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [
+				"option:aw_relevance_alert_notice"
+			],
+			"limits": "Every admin page while items are held",
+			"decision": "",
+			"notes": "Items held because no AI service answered. Stores nothing."
+		},
+		"ap-src-notice-workers": {
+			"title": "Workers need attention",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Workers alert",
+			"file": "src/workers.php:411 (admin_notices)",
+			"screen": "admin",
+			"page": "AW Sourcing: Notices (admin pages)",
+			"types": [
+				"aw-sourcing-notices"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [
+				"option:aw_worker_runs_*",
+				"option:aw_workers_meta"
+			],
+			"limits": "Administrators; Dashboard and the Sourcing page only",
+			"decision": "",
+			"notes": "Late or failing workflows. Stores nothing."
+		},
+		"ap-src-notice-blocked": {
+			"title": "Blocked publisher notice",
+			"source": "AW Sourcing",
+			"plugin": "AW Sourcing",
+			"purpose": "Action result",
+			"file": "src/sourcing-policy.php:593 (admin_notices)",
+			"screen": "admin",
+			"page": "AW Sourcing: Notices (admin pages)",
+			"types": [
+				"aw-sourcing-notices"
+			],
+			"runtime": "map-only",
+			"kind": "notice",
+			"reads": [],
+			"limits": "After blocking a publisher from a list row",
+			"decision": "",
+			"notes": "Core notice. Stores nothing."
+		},
+		"ap-seo-overview-modules": {
+			"title": "Modules",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO overview",
+			"file": "seo/overview.php:213 (aw_seo_overview_page)",
+			"screen": "admin",
+			"page": "AW SEO Plus: Overview",
+			"types": [
+				"aw-seo-plus"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_seo_settings",
+				"option:aw_seo_endpoints_last",
+				"transient:aw_faq_index"
+			],
+			"limits": "One row per module; status from the checks that already run.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-seo-overview-boxes": {
+			"title": "On edit screens",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO overview",
+			"file": "seo/overview.php:226 (aw_seo_overview_page)",
+			"screen": "admin",
+			"page": "AW SEO Plus: Overview",
+			"types": [
+				"aw-seo-plus"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-seo-overview-commands": {
+			"title": "Commands (WP-CLI on the server)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO overview",
+			"file": "seo/overview.php:250 (aw_seo_overview_page)",
+			"screen": "admin",
+			"page": "AW SEO Plus: Overview",
+			"types": [
+				"aw-seo-plus"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-seo-settings": {
+			"title": "Module settings (one tab per module)",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO settings",
+			"file": "seo/settings.php:421 (aw_seo_settings_page)",
+			"screen": "admin",
+			"page": "AW SEO Plus: Settings",
+			"types": [
+				"aw-seo-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_seo_settings"
+			],
+			"limits": "Tabs: General, Titles and descriptions, Canonicals, Robots rules, Filtered lists, Schema, FAQ, Search Insights, Rank Math schema, Open Graph. Administrators only.",
+			"decision": "",
+			"notes": "Saves the tab's fields and module switch in option aw_seo_settings (only values changed from the defaults)."
+		},
+		"ap-seo-faq-types": {
+			"title": "FAQ box on",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "FAQ",
+			"file": "seo/faq-overview.php:170 (aw_faq_types_form)",
+			"screen": "admin",
+			"page": "AW SEO Plus: FAQ",
+			"types": [
+				"aw-faq"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_faq_off_types"
+			],
+			"limits": "Administrators only can change it.",
+			"decision": "",
+			"notes": "Saves the unticked types in option aw_faq_off_types."
+		},
+		"ap-seo-faq-list": {
+			"title": "Pages with an FAQ",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "FAQ",
+			"file": "seo/faq-overview.php:232 (AW_FAQ_List_Table, class-aw-faq-list-table.php)",
+			"screen": "admin",
+			"page": "AW SEO Plus: FAQ",
+			"types": [
+				"aw-faq"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"transient:aw_faq_index",
+				"aw_faq"
+			],
+			"limits": "Views: with an FAQ, draft questions waiting; search and type filter; index counted hourly.",
+			"decision": "",
+			"notes": "Approve marks draft questions approved in the item's aw_faq."
+		},
+		"ap-seo-faq-counts": {
+			"title": "Counts",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "FAQ",
+			"file": "seo/faq-overview.php:242 (aw_faq_admin_page)",
+			"screen": "admin",
+			"page": "AW SEO Plus: FAQ",
+			"types": [
+				"aw-faq"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"transient:aw_faq_index"
+			],
+			"limits": "Per type; Recount rebuilds the hourly index.",
+			"decision": "",
+			"notes": "Stores nothing (Recount refreshes the transient)."
+		},
+		"ap-seo-si-keywords": {
+			"title": "Keywords",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:241 (AW_SI_Keywords_Table)",
+			"screen": "admin",
+			"page": "Search Insights: Keywords",
+			"types": [
+				"aw-search-insights-keywords"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:wp_aw_si_keywords",
+				"table:wp_aw_si_obs",
+				"option:aw_si_seeded",
+				"user option:aw_si_keywords_per_page"
+			],
+			"limits": "50 per page (screen option 10–500).",
+			"decision": "",
+			"notes": "Row and bulk priority overrides write only to wp_aw_si_keywords."
+		},
+		"ap-seo-si-rising": {
+			"title": "Rising terms",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/rising.php:728 (aw_si_rising_tab, AW_SI_Rising_Table)",
+			"screen": "admin",
+			"page": "Search Insights: Rising",
+			"types": [
+				"aw-search-insights-rising"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:wp_aw_si_rising",
+				"table:wp_aw_si_keywords",
+				"option:aw_si_rising_since",
+				"option:aw_si_off"
+			],
+			"limits": "50 per page.",
+			"decision": "",
+			"notes": "Row actions change a term's state in wp_aw_si_rising."
+		},
+		"ap-seo-si-rising-paste": {
+			"title": "Paste Trends figures",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/rising.php:745 (aw_si_rising_tab)",
+			"screen": "admin",
+			"page": "Search Insights: Rising",
+			"types": [
+				"aw-search-insights-rising"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:wp_aw_si_rising"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Saves the pasted Trends lines into wp_aw_si_rising."
+		},
+		"ap-seo-si-pages": {
+			"title": "Pages",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/pages.php:144 (AW_SI_Pages_Table)",
+			"screen": "admin",
+			"page": "Search Insights: Pages",
+			"types": [
+				"aw-search-insights-pages"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:wp_aw_si_kw_pages",
+				"table:wp_aw_si_keywords",
+				"table:wp_aw_si_obs"
+			],
+			"limits": "50 per page.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-seo-si-clarity-note": {
+			"title": "Clarity note",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/pages.php:134 (aw_si_clarity_note_save, clarity.php:261)",
+			"screen": "admin",
+			"page": "Search Insights: Pages",
+			"types": [
+				"aw-search-insights-pages"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:wp_aw_si_obs"
+			],
+			"limits": "Up to 255 characters, dated today.",
+			"decision": "",
+			"notes": "Saves a dated note for one page in wp_aw_si_obs (metric clarity-note)."
+		},
+		"ap-seo-si-live-check": {
+			"title": "Live Google check / Monthly live check",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/checklist.php:302, :368",
+			"screen": "admin",
+			"page": "Search Insights: Check list",
+			"types": [
+				"aw-search-insights-checklist"
+			],
+			"runtime": "map-only",
+			"kind": "panel",
+			"reads": [
+				"option:aw_si_checklist",
+				"transient:aw_si_live_new_{user}",
+				"table:wp_aw_si_obs"
+			],
+			"limits": "Once a month; one token per user.",
+			"decision": "",
+			"notes": "Saves the positions it finds in wp_aw_si_obs."
+		},
+		"ap-seo-si-checklist": {
+			"title": "Check list",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/checklist.php:390 (AW_SI_Checklist_Table)",
+			"screen": "admin",
+			"page": "Search Insights: Check list",
+			"types": [
+				"aw-search-insights-checklist"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:aw_si_checklist",
+				"table:wp_aw_si_keywords",
+				"table:wp_aw_si_obs"
+			],
+			"limits": "At most 500 keywords; 50 per page.",
+			"decision": "",
+			"notes": "Remove takes a keyword off option aw_si_checklist."
+		},
+		"ap-seo-si-links": {
+			"title": "Links to us",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/links.php:188 (aw_si_links_tab, AW_SI_Links_Table)",
+			"screen": "admin",
+			"page": "Search Insights: Links",
+			"types": [
+				"aw-search-insights-links"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"table:wp_aw_si_links",
+				"option:aw_si_links_seeded"
+			],
+			"limits": "Views All, Press, Organisation, Social, Directory, Copy, Spam, Unsorted, Hidden; 50 per page.",
+			"decision": "Links tab (owner, 31 Oct 2026): spam is hidden, never deleted (docs/plugin-map.md).",
+			"notes": "Hide, Unhide and Set type change a row in wp_aw_si_links; nothing is deleted."
+		},
+		"ap-seo-si-settings": {
+			"title": "Schedule, keys, seed, run now",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:523 (aw_si_settings_tab)",
+			"screen": "admin",
+			"page": "Search Insights: Settings",
+			"types": [
+				"aw-search-insights-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_si_seeded",
+				"option:aw_si_off",
+				"option:aw_keys"
+			],
+			"limits": "Key values are never shown.",
+			"decision": "",
+			"notes": "Run now starts the jobs; stores nothing itself."
+		},
+		"ap-seo-si-imports": {
+			"title": "Imports",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/imports.php:209 (aw_si_import_rows)",
+			"screen": "admin",
+			"page": "Search Insights: Settings",
+			"types": [
+				"aw-search-insights-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:wp_aw_si_obs",
+				"table:wp_aw_si_keywords"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Saves the uploaded or pasted figures in the Search Insights tables."
+		},
+		"ap-seo-si-delete": {
+			"title": "Delete Search Insights data",
+			"source": "AW SEO Plus",
+			"plugin": "AW SEO Plus",
+			"purpose": "SEO report",
+			"file": "seo/search-insights/admin.php:562 (aw_si_settings_tab)",
+			"screen": "admin",
+			"page": "Search Insights: Settings",
+			"types": [
+				"aw-search-insights-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [],
+			"limits": "Type DELETE to confirm.",
+			"decision": "",
+			"notes": "Drops the Search Insights tables and settings."
+		},
+		"ap-core-overview-features": {
+			"title": "Features (Content and pages, Directory, Campaigns, People, forms and mail, Pictures and media, Running the site)",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Overview",
+			"file": "core/admin-home.php:140 (aw_core_overview_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Overview",
+			"types": [
+				"animal-writes"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_backup_last",
+				"option:aw_site_check_last",
+				"option:aw_deployed_head",
+				"option:aw_team_dates"
+			],
+			"limits": "One table per group.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-overview-dashboard": {
+			"title": "On the dashboard",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Overview",
+			"file": "core/admin-home.php:144 (aw_core_overview_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Overview",
+			"types": [
+				"animal-writes"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-overview-commands": {
+			"title": "Commands (WP-CLI on the server)",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Overview",
+			"file": "core/admin-home.php:156 (aw_core_overview_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Overview",
+			"types": [
+				"animal-writes"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-keys": {
+			"title": "Keys",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Service keys",
+			"file": "core/keys.php:58 (aw_keys_screen)",
+			"screen": "admin",
+			"page": "Animal Writes: Keys",
+			"types": [
+				"aw-keys"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_keys"
+			],
+			"limits": "wp-config.php constants win; values are never shown; AI keys are not here.",
+			"decision": "",
+			"notes": "Saves changed keys in option aw_keys."
+		},
+		"ap-core-edit-screens": {
+			"title": "Boxes on edit screens",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Edit-screen map",
+			"file": "core/edit-screens.php:868 (aw_edit_screens_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Edit screens",
+			"types": [
+				"aw-edit-screens"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"data/edit-screen-map.json"
+			],
+			"limits": "Boxes read live; map-only rows from the map.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-edit-screens-twice": {
+			"title": "Edited in two places",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Edit-screen map",
+			"file": "core/edit-screens.php:880 (aw_edit_screens_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Edit screens",
+			"types": [
+				"aw-edit-screens"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"data/edit-screen-map.json"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-dates-month": {
+			"title": "Month calendar",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Team dates",
+			"file": "core/team-dates.php:126 (aw_team_dates_screen)",
+			"screen": "admin",
+			"page": "Animal Writes: Dates",
+			"types": [
+				"aw-dates"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_team_dates"
+			],
+			"limits": "One month, previous and next buttons.",
+			"decision": "Animal Writes → Dates (owner, 21 Oct 2026): one-off dates only (docs/plugin-map.md).",
+			"notes": "Stores nothing."
+		},
+		"ap-core-dates-list": {
+			"title": "All dates",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Team dates",
+			"file": "core/team-dates.php:162 (aw_team_dates_screen)",
+			"screen": "admin",
+			"page": "Animal Writes: Dates",
+			"types": [
+				"aw-dates"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_team_dates"
+			],
+			"limits": "",
+			"decision": "Animal Writes → Dates (owner, 21 Oct 2026).",
+			"notes": "Remove takes a date off option aw_team_dates."
+		},
+		"ap-core-dates-add": {
+			"title": "Add a date",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Team dates",
+			"file": "core/team-dates.php:164 (aw_team_dates_screen)",
+			"screen": "admin",
+			"page": "Animal Writes: Dates",
+			"types": [
+				"aw-dates"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_team_dates"
+			],
+			"limits": "",
+			"decision": "Animal Writes → Dates (owner, 21 Oct 2026).",
+			"notes": "Saves a date in option aw_team_dates."
+		},
+		"ap-core-site-check": {
+			"title": "Check site",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Site check",
+			"file": "core/site-check.php:85 (aw_site_check_page)",
+			"screen": "admin",
+			"page": "Animal Writes: Check site",
+			"types": [
+				"aw-site-check"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_site_check_last",
+				"option:aw_backup_last"
+			],
+			"limits": "Fixed list of key pages; result notice on top.",
+			"decision": "",
+			"notes": "Check now saves the result in option aw_site_check_last."
+		},
+		"ap-core-elsewhere": {
+			"title": "Contact links",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Contact links",
+			"file": "core/pages.php:394 (aw_elsewhere_screen)",
+			"screen": "admin",
+			"page": "Animal Writes: Contact links",
+			"types": [
+				"aw-elsewhere"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:aw_elsewhere"
+			],
+			"limits": "Rows without a label and address are dropped.",
+			"decision": "",
+			"notes": "Saves the links in option aw_elsewhere (shown by [aw_elsewhere])."
+		},
+		"ap-core-claims-list": {
+			"title": "Claims",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Claim review",
+			"file": "core/claims-review.php:343 (aw_claims_screen)",
+			"screen": "admin",
+			"page": "Directory: Claims",
+			"types": [
+				"aw-claims"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"table:wp_fluentform_submissions",
+				"aw_claim_review"
+			],
+			"limits": "20 per page, newest first; trashed entries left out.",
+			"decision": "Claim form #6 (owner, 31 Oct 2026): nothing a claimant sends is published until approved (docs/plugin-map.md).",
+			"notes": "Stores nothing."
+		},
+		"ap-core-claims-review": {
+			"title": "Changes (one claim)",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Claim review",
+			"file": "core/claims-review.php:377 (aw_claim_review_screen)",
+			"screen": "admin",
+			"page": "Directory: Claims",
+			"types": [
+				"aw-claims"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:wp_fluentform_submissions",
+				"aw_claim_review",
+				"aw_gallery",
+				"aw_verified",
+				"aw_verified_on"
+			],
+			"limits": "Only fields that differ from the listing; each has its own tick.",
+			"decision": "Claim form #6 (owner, 31 Oct 2026).",
+			"notes": "Approve writes the ticked fields to the listing (logged with Undo in Enrichment review) and sets aw_verified, aw_verified_on."
+		},
+		"ap-core-letter-report": {
+			"title": "Letter report",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Campaign letters",
+			"file": "core/campaign-letters.php:280 (aw_cl_report_page)",
+			"screen": "admin",
+			"page": "Campaigns: Letter report",
+			"types": [
+				"aw-letter-report"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"table:wp_aw_camp_letters"
+			],
+			"limits": "One campaign at a time (picker); totals and one table per breakdown.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-core-media-duplicates": {
+			"title": "Duplicate files",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Media merge",
+			"file": "core/media-merge.php:437 (aw_media_merge_screen)",
+			"screen": "admin",
+			"page": "Media: Duplicate files",
+			"types": [
+				"aw-media-duplicates"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"data/media-duplicate-groups.php",
+				"option:aw_media_merge_log",
+				"option:aw_media_merge_data_{id}",
+				"aw_gallery"
+			],
+			"limits": "Merges the next 10 groups per click; Undo per group.",
+			"decision": "",
+			"notes": "Merge points the items' image keys at the kept file and logs it in aw_media_merge_log; Undo puts it back."
+		},
+		"ap-core-media-webp": {
+			"title": "Make WebP",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Media WebP",
+			"file": "core/media-webp.php:410 (aw_media_webp_screen)",
+			"screen": "admin",
+			"page": "Media: Make WebP",
+			"types": [
+				"aw-media-webp"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:aw_media_webp_log",
+				"_wp_attached_file",
+				"_wp_attachment_metadata"
+			],
+			"limits": "Batches; Undo per image.",
+			"decision": "",
+			"notes": "Converts resized copies to WebP and logs them in aw_media_webp_log."
+		},
+		"ap-mail-inbox": {
+			"title": "Inbox (mailbox picker and message list)",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail",
+			"file": "plugins/mailweb/includes/inbox.php:354 (mailweb_inbox_page, Mailweb_List_Table)",
+			"screen": "admin",
+			"page": "Mailweb: Inbox",
+			"types": [
+				"mailweb"
+			],
+			"runtime": "map-only",
+			"kind": "list-table",
+			"reads": [
+				"option:mailweb_box_addresses",
+				"option:mailweb_box_ids",
+				"IMAP mailboxes"
+			],
+			"limits": "25 per page; folders incl. Website forms.",
+			"decision": "",
+			"notes": "Moves and flags change the message on the mail server."
+		},
+		"ap-mail-message": {
+			"title": "Message (Attachments, Reply, Message boxes)",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail",
+			"file": "plugins/mailweb/includes/inbox.php:405 (mailweb_inbox_page)",
+			"screen": "admin",
+			"page": "Mailweb: Inbox",
+			"types": [
+				"mailweb"
+			],
+			"runtime": "map-only",
+			"kind": "postbox",
+			"reads": [
+				"IMAP mailboxes"
+			],
+			"limits": "Pictures from the internet hidden until asked.",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-mail-compose": {
+			"title": "Write, reply, forward (Send, Attachments boxes)",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail",
+			"file": "plugins/mailweb/includes/inbox.php:510 (mailweb_inbox_page)",
+			"screen": "admin",
+			"page": "Mailweb: Inbox",
+			"types": [
+				"mailweb"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_mailboxes",
+				"option:mailweb_aliases",
+				"option:mailweb_default_from",
+				"option:mailweb_profiles"
+			],
+			"limits": "Attachments up to 10 MB in total.",
+			"decision": "",
+			"notes": "Sends through wp_mail (the queue)."
+		},
+		"ap-mail-overview": {
+			"title": "Features",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail overview",
+			"file": "plugins/mailweb/includes/home.php:123 (mailweb_home_page)",
+			"screen": "admin",
+			"page": "Mailweb: Overview",
+			"types": [
+				"mailweb-overview"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"option:mailweb_box_addresses",
+				"option:mailweb_smtp",
+				"option:mailweb_cap"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Stores nothing."
+		},
+		"ap-mail-incoming": {
+			"title": "Incoming mail",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/mail-in.php:232 (mailweb_in_screen)",
+			"screen": "admin",
+			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"types": [
+				"mailweb-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_box_ids",
+				"option:mailweb_box_addresses",
+				"option:mailweb_{key} (encrypted)"
+			],
+			"limits": "Passwords are stored encrypted and never shown.",
+			"decision": "",
+			"notes": "Saves the mail server settings."
+		},
+		"ap-mail-mailboxes": {
+			"title": "Mailboxes and aliases",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/mailboxes.php:72",
+			"screen": "admin",
+			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"types": [
+				"mailweb-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_mailboxes",
+				"option:mailweb_aliases",
+				"option:mailweb_default_from"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Saves mailboxes, aliases and the default From."
+		},
+		"ap-mail-profiles": {
+			"title": "Profiles",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/profiles.php:164",
+			"screen": "admin",
+			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"types": [
+				"mailweb-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_profiles"
+			],
+			"limits": "",
+			"decision": "",
+			"notes": "Saves the sender profiles in option mailweb_profiles."
+		},
+		"ap-mail-crm": {
+			"title": "FluentCRM",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/crm-sync.php:314",
+			"screen": "admin",
+			"page": "Mailweb: Settings (incoming mail, mailboxes, profiles)",
+			"types": [
+				"mailweb-settings"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_crm",
+				"option:mailweb_crm_done"
+			],
+			"limits": "Done list keeps the last 5000.",
+			"decision": "",
+			"notes": "Saves the FluentCRM feed settings in option mailweb_crm."
+		},
+		"ap-mail-smtp": {
+			"title": "Site sending (SMTP)",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/smtp.php:66 (mailweb_smtp_screen)",
+			"screen": "admin",
+			"page": "Mailweb: Settings (site sending)",
+			"types": [
+				"mailweb-settings-sending"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"option:mailweb_smtp"
+			],
+			"limits": "Test email goes to the admin address.",
+			"decision": "",
+			"notes": "Saves SMTP settings in option mailweb_smtp."
+		},
+		"ap-mail-cap": {
+			"title": "Daily sending limit",
+			"source": "Mailweb",
+			"plugin": "Mailweb",
+			"purpose": "Mail settings",
+			"file": "plugins/mailweb/includes/mail-cap.php:384",
+			"screen": "admin",
+			"page": "Mailweb: Settings (site sending)",
+			"types": [
+				"mailweb-settings-sending"
+			],
+			"runtime": "map-only",
+			"kind": "form",
+			"reads": [
+				"table:wp_mailweb_queue",
+				"option:mailweb_cap",
+				"option:mailweb_stats",
+				"option:mailweb_last_error",
+				"option:mailweb_pause"
+			],
+			"limits": "Default 90 a day with 10 held back; 4 tries before an email is held.",
+			"decision": "",
+			"notes": "Saves budget and reserve in option mailweb_cap."
+		},
+		"ap-core-media-reuse": {
+			"title": "Reuse pictures",
+			"source": "Animal Writes core",
+			"plugin": "Animal Writes core",
+			"purpose": "Media reuse",
+			"file": "core/media-reuse.php:353 (aw_media_reuse_screen)",
+			"screen": "admin",
+			"page": "Media: Reuse pictures",
+			"types": [
+				"aw-media-reuse"
+			],
+			"runtime": "map-only",
+			"kind": "table",
+			"reads": [
+				"data/media-reuse-plan.php",
+				"option:aw_media_reuse_log",
+				"option:aw_thumb_map",
+				"option:aw_category_images",
+				"transient:aw_media_reuse_notice_{user}",
+				"_thumbnail_id",
+				"aw_cover_reused",
+				"aw_source_image_off"
+			],
+			"sets": [
+				"_thumbnail_id",
+				"aw_cover_reused",
+				"aw_source_image_off"
+			],
+			"limits": "One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only.",
+			"decision": "",
+			"notes": "Apply sets the page's cover (_thumbnail_id), aw_cover_reused (keeps the PDF cover job from replacing it) and, on news, Library items and posts, aw_source_image_off; Undo puts them back. These keys are set from Reuse pictures, not from an edit-screen box."
 		}
 	},
 	"keys": {

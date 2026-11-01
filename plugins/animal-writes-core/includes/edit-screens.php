@@ -481,11 +481,22 @@ function aw_edit_screen_rows(): array {
 		}
 	}
 
-	// Admin pages that are not edit screens (Dashboard widgets, report pages): listed from the map, one row per page in "types".
+	// Admin pages that are not edit screens (Dashboard widgets, report and settings pages): listed from the map, one row per
+	// page in "types". What a widget reads, sets and its limits go in the notes, never in fields: these rows edit no box key.
 	foreach ( $boxes as $id => $b ) {
 		if ( 'admin' === ( $b['screen'] ?? '' ) ) {
+			$notes = array( 'Listed from the map, not read live.' );
+			if ( ! empty( $b['reads'] ) ) {
+				$notes[] = 'Reads: ' . implode( ', ', array_map( 'strval', (array) $b['reads'] ) ) . '.';
+			}
+			if ( ! empty( $b['sets'] ) ) {
+				$notes[] = 'Sets from this page (not from an edit-screen box): ' . implode( ', ', array_map( 'strval', (array) $b['sets'] ) ) . '.';
+			}
+			if ( ! empty( $b['limits'] ) ) {
+				$notes[] = 'Limits: ' . (string) $b['limits'];
+			}
 			foreach ( (array) $b['types'] as $page ) {
-				$add( 'admin', (string) $page, $id, array( 'shows_on' => (string) ( $b['page'] ?? $page ) ), array(), array( 'Listed from the map, not read live.' ) );
+				$add( 'admin', (string) $page, $id, array( 'shows_on' => (string) ( $b['page'] ?? $page ) ), array(), $notes );
 			}
 		}
 	}
@@ -792,7 +803,7 @@ add_action(
 
 /** The note on rows that are listed from the map, not read live (page and command). */
 function aw_edit_screen_map_only_note(): string {
-	return 'Sidebar panels that plugins add with JavaScript in the block editor, and Dashboard widgets and report-page boxes, are listed from the map, not read live.';
+	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (AW Sourcing, AW SEO Plus and Search Insights, Animal Writes, Mailweb) are listed from the map, not read live.';
 }
 
 /** Animal Writes → Edit screens. */

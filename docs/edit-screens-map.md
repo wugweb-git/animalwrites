@@ -736,3 +736,284 @@ SCF adds no Dashboard widget (checked in SCF 6.9.6 code). There are no classic w
 | aw-si-crawl | Crawler access (weekly) |
 
 Purpose "SEO report". They read Search Insights data and store no post meta.
+
+---
+
+## 9. Admin page widgets
+
+The panels, boxes and tables on the admin pages of AW Sourcing, AW SEO Plus (with Search Insights), Animal Writes and Mailweb. Listed on Animal Writes → Edit screens with one heading per page (`"screen": "admin"`, `types` = the page id below), from the map, never read live and never counted as not mapped or as edited in two places. What each one reads, sets and its limits are in the row's notes (map fields `reads`, `sets`, `limits`); `option:`, `table:` and `transient:` mark options, custom tables and transients, other names are post meta. The ten Search Insights Overview boxes are in §8. Kits Core pages are not included.
+
+### AW Sourcing
+
+**AW Sourcing: Overview** (`aw-sourcing-menu`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-overview-features | Features (Waiting for a person, What the workers fetch, Rules, AI and workers, Reports, Settings, Elsewhere) | table | `option:aw_publishers`, `option:aw_relevance`, `option:aw_sources`, `option:aw_ai_models`, `option:aw_ai_keys`, `option:aw_ingest_heartbeat`, `option:aw_relevance_rejected`, `option:aw_relay_log`, `option:kits_sourcing_log`, `option:aw_sourcing_phase`, `table:aw_enrich`, `transient:aw_review_count`, `aw_enrich_checked` | One table per group; AI, Workers and Rejected status only for administrators | `src/admin-menu.php:289 (aw_sourcing_overview_page)` |
+| ap-src-overview-runs | Last runs | table | `option:aw_worker_runs_*`, `option:aw_workers_meta`, `option:aw_workers_groups` | Administrators only; one row per worker, newest report | `src/admin-menu.php:350 (aw_sourcing_overview_page)` |
+| ap-src-overview-commands | Commands (WP-CLI on the server) | table | — | Fixed list of three commands | `src/admin-menu.php:370 (aw_sourcing_overview_page)` |
+
+**AW Sourcing: To review** (`aw-review`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-review-list | To review list (AW_Sourcing_Review_Table) | list-table | `post_status pending/draft of aw_news, aw_legal, aw_opportunity, aw_press, research posts`, `aw_review`, `aw_source_url`, `aw_press_url` | 50 per page (screen option aw_review_per_page); newest received first, sortable by title, type, received; views per type; search | `src/class-aw-sourcing-review-table.php:15 (AW_Sourcing_Review_Table), shown at src/review-queue.php:197` |
+| ap-src-review-notice | Result notice (published / moved to Drafts) | notice | — | After a bulk action only | `src/review-queue.php:180 (aw_review_page)` |
+
+**AW Sourcing: Enrichment review** (`aw-enrich-review`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-enrich-progress | Progress line (listings checked, proposals waiting) | panel | `table:aw_enrich`, `aw_enrich_checked`, `option:aw_enrich_db` | Published listings only | `src/enrichment-admin.php:312 (aw_enrich_review_page)` |
+| ap-src-enrich-filters | Status views and filters (source, confidence, state, field, flag) | form | `option:aw_enrich_sources`, `table:aw_places` | Views Waiting, Applied, Rejected, Failed, Undone, All; GET filter only | `src/enrichment-admin.php:320 (aw_enrich_review_page)` |
+| ap-src-enrich-list | Proposals list (AW_Sourcing_Enrichment_Table) | list-table | `table:aw_enrich`, `listing fields named in each proposal (SCF group group_aw_listing)` | 50 per page; high confidence first, then by listing, newest first | `src/class-aw-sourcing-enrichment-table.php:18 (AW_Sourcing_Enrichment_Table), shown at src/enrichment-admin.php:384` |
+
+**AW Sourcing: Sources** (`aw-sourcing-sources`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-sources-list | Sources list (AW_Sourcing_Publishers_Table) | list-table | `option:aw_publishers`, `option:aw_sources`, `option:aw_source_site_meta`, `option:aw_relay_log`, `transient:aw_sourcing_host_stats`, `table:aw_si_pages (Search value)` | 50 per page (screen option aw_publishers_per_page); views by status; search; sortable | `src/class-aw-sourcing-publishers-table.php:27 (AW_Sourcing_Publishers_Table), shown at src/source-sites.php:476` |
+| ap-src-sources-notices | Search value and relay notices | notice | `option:aw_sourcing_phase` | Shown when Search Console has not run within 28 days, or before phase 1 | `src/source-sites.php:466 (aw_sourcing_sources_tab)` |
+| ap-src-sources-feeds | Feeds view (AW_Sourcing_Sources_Table) | list-table | `option:aw_sources` | Sources → Feeds view; per type News, Library, Opportunity | `src/class-aw-sourcing-sources-table.php:18 (AW_Sourcing_Sources_Table), shown at src/source-sites.php:461` |
+| ap-src-sources-edit | Add New Source / Edit Source form | form | `option:aw_publishers`, `option:aw_sources`, `option:aw_source_site_meta` | One source per screen, with its feeds below | `src/source-sites.php:486 (aw_sourcing_source_form)` |
+
+**AW Sourcing: Keywords** (`aw-sourcing-keywords`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-kw-add | Add New Keyword | form | `table:aw_si_keywords` | One word per line | `src/keywords-admin.php:497 (aw_sourcing_kw_tab)` |
+| ap-src-kw-list | Keywords list (AW_Sourcing_Keywords_Table) | list-table | `table:aw_si_keywords`, `table:aw_si_kw_* (category and feed maps)` | 100 per page (screen option aw_keywords_per_page); views per role (include, animal, context, exclude, search, press, category); search | `src/class-aw-sourcing-keywords-table.php:21 (AW_Sourcing_Keywords_Table), shown at src/keywords-admin.php:519` |
+| ap-src-kw-test | Test a headline | form | `table:aw_si_keywords`, `option:aw_relevance` | One headline at a time (GET) | `src/keywords-admin.php:523 (aw_sourcing_kw_tab)` |
+| ap-src-kw-suggestions | Suggestions from Search Insights (AW_Sourcing_Suggestions_Table) | list-table | `table:aw_si_keywords`, `option:aw_sourcing_dismissed`, `transient:aw_sourcing_kw_stats_30` | 20 per page (screen option aw_suggestions_per_page, 1–200); English only; at least 20 impressions in 28 days | `src/keyword-suggestions.php:191 (aw_sourcing_keywords_tab_end), table src/class-aw-sourcing-suggestions-table.php:13` |
+
+**AW Sourcing: Rules** (`aw-sourcing-rules`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-rules-sections | Section rules (AW_Sourcing_Sections_Table) | list-table | `option:aw_sources (sections)`, `category`, `post_tag` | One row per section; up to 8 tag names before "…" | `src/class-aw-sourcing-sections-table.php:16 (AW_Sourcing_Sections_Table), shown at src/rules-admin.php:123` |
+| ap-src-rules-tags | Tag rules (Add New Rule and list) | table | `option:aw_sources (topic_tags)`, `post_tag`, `aw_campaign_link` | One row per tag rule | `src/rules-admin.php:125 (aw_rules_tab), list src/rules-admin.php:187 (aw_rules_tag_table)` |
+| ap-src-rules-summary | Summary rules | form | `option:aw_summary_rules` | One rule set, with a rule per section | `src/summary-rules-admin.php:237 (aw_summary_rules_tab)` |
+| ap-src-rules-enrich-settings | Directory enrichment (sources, Google key, monthly cap) | form | `option:aw_enrich_sources`, `option:aw_enrich_google_key`, `option:aw_enrich_live_cap` | Live Google block cap default 20 a month | `src/enrichment-admin.php:449 (aw_enrich_settings_tab)` |
+| ap-src-rules-trust-order | Trust order | form | `option:aw_enrich_field_rules (priority)`, `option:aw_enrich_sources` | Positions 1–99; empty ranks last | `src/rules-admin.php:399 (aw_rules_priority_form)` |
+| ap-src-rules-field-rules | Field rules table | table | `option:aw_enrich_field_rules`, `SCF group group_aw_listing` | One row per listing field; Edit opens one field | `src/rules-admin.php:444 (aw_rules_field_rules_table)` |
+
+**AW Sourcing: AI models** (`aw-sourcing-ai`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-ai-keys-list | Keys (AW_Sourcing_AI_Keys_Table) | list-table | `option:aw_ai_models`, `option:aw_ai_free_caps`, `option:aw_ai_provider_icons`, `option:aw_workers_meta` | 100 per page (screen option aw_ai_keys_per_page); views works, waiting, broken, secrets; in the order the workers try them | `src/class-aw-sourcing-ai-keys-table.php:18 (AW_Sourcing_AI_Keys_Table), shown at src/ai-keys.php:1069` |
+| ap-src-ai-key-form | Add New Key / Edit key | form | `option:aw_ai_models` | One key per screen | `src/ai-keys.php:1109 (aw_ai_key_add_screen, aw_ai_key_edit_screen)` |
+| ap-src-ai-overview | Keys overview (keys, usable keys per worker) | table | `option:aw_ai_models`, `option:aw_workers_meta`, `option:aw_workers_groups` | Read-only; never more than the last 4 characters of a key | `src/ai-keys.php:1078 (aw_ai_keys_overview_screen)` |
+
+**AW Sourcing: Workers** (`aw-sourcing-workers`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-workers-list | Workers (AW_Workers_Table) | list-table | `option:aw_workers_meta`, `option:aw_workers_groups`, `option:aw_worker_runs_*`, `option:aw_workers_tick` | 20 per page (screen option aw_workers_per_page); late or failing first | `src/class-aw-workers-table.php:17 (AW_Workers_Table), shown at src/workers-admin.php:91` |
+| ap-src-workers-runlog | Run now log | table | `option:aw_worker_dispatch_log` | Newest first | `src/workers-admin.php:94 (aw_workers_tab)` |
+| ap-src-workers-runs | Runs: one worker | table | `option:aw_worker_runs_*` | One worker per screen | `src/workers-admin.php:109 (aw_workers_runs_screen)` |
+| ap-src-workers-notices | Run now and token notices | notice | `option:aw_worker_dispatch_log` | After Run now, or when the GitHub token is missing | `src/workers-admin.php:79 (aw_workers_tab)` |
+
+**AW Sourcing: Reports (Rejected, Relay log, Change log)** (`aw-sourcing-reports`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-rejected | Rejected | table | `option:aw_relevance_rejected` | 50 per page; at most 500 kept; sortable by type, found, date; search | `src/relevance.php:426 (aw_relevance_rejected_tab)` |
+| ap-src-relay-log | Relay log | table | `option:aw_relay_log` | 50 per page; last 200 requests kept; newest first; sortable; search | `src/relay.php:259 (aw_relay_log_view)` |
+| ap-src-change-log | Change log | table | `option:kits_sourcing_log` | 50 per page; sortable by date, user, tab; search | `src/sourcing-policy.php:645 (aw_sourcing_page)` |
+
+**AW Sourcing: Settings** (`aw-sourcing-settings`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-settings-switch | Workers use these lists (switch) | form | `option:aw_sources (live)` | One on/off switch | `src/sourcing-lists.php:121 (aw_sources_live_switch)` |
+
+**Search Insights: Sourcing keywords tab** (`aw-search-insights-sourcing`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-si-sourcing-keywords | Sourcing keywords (AW_Sourcing_SI_Keywords_Table) | list-table | `transient:aw_sourcing_kw_stats_30`, `table:aw_si_keywords`, `table:aw_si_pages`, `aw_feed` | Items over 30 days per Google News search; page figures for 28 days and 3 months | `src/search-insights-tab.php:23 (aw_si_tab_sourcing), table src/class-aw-sourcing-si-keywords-table.php:14` |
+
+**AW Sourcing: Notices (admin pages)** (`aw-sourcing-notices`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-src-notice-ingest | Ingestion needs attention | notice | `option:aw_ingest_heartbeat` | Administrators; every admin page while a problem lasts | `src/relevance.php:585 (admin_notices)` |
+| ap-src-notice-relevance | Relevance check could not run | notice | `option:aw_relevance_alert_notice` | Every admin page while items are held | `src/relevance.php:436 (admin_notices)` |
+| ap-src-notice-workers | Workers need attention | notice | `option:aw_worker_runs_*`, `option:aw_workers_meta` | Administrators; Dashboard and the Sourcing page only | `src/workers.php:411 (admin_notices)` |
+| ap-src-notice-blocked | Blocked publisher notice | notice | — | After blocking a publisher from a list row | `src/sourcing-policy.php:593 (admin_notices)` |
+
+### AW SEO Plus
+
+**AW SEO Plus: Overview** (`aw-seo-plus`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-overview-modules | Modules | table | `option:aw_seo_settings`, `option:aw_seo_endpoints_last`, `transient:aw_faq_index` | One row per module; status from the checks that already run. | `seo/overview.php:213 (aw_seo_overview_page)` |
+| ap-seo-overview-boxes | On edit screens | table | — | — | `seo/overview.php:226 (aw_seo_overview_page)` |
+| ap-seo-overview-commands | Commands (WP-CLI on the server) | table | — | — | `seo/overview.php:250 (aw_seo_overview_page)` |
+
+**AW SEO Plus: Settings** (`aw-seo-settings`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-settings | Module settings (one tab per module) | form | `option:aw_seo_settings` | Tabs: General, Titles and descriptions, Canonicals, Robots rules, Filtered lists, Schema, FAQ, Search Insights, Rank Math schema, Open Graph. Administrators only. | `seo/settings.php:421 (aw_seo_settings_page)` |
+
+**AW SEO Plus: FAQ** (`aw-faq`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-faq-types | FAQ box on | form | `option:aw_faq_off_types` | Administrators only can change it. | `seo/faq-overview.php:170 (aw_faq_types_form)` |
+| ap-seo-faq-list | Pages with an FAQ | list-table | `transient:aw_faq_index`, `aw_faq` | Views: with an FAQ, draft questions waiting; search and type filter; index counted hourly. | `seo/faq-overview.php:232 (AW_FAQ_List_Table, class-aw-faq-list-table.php)` |
+| ap-seo-faq-counts | Counts | table | `transient:aw_faq_index` | Per type; Recount rebuilds the hourly index. | `seo/faq-overview.php:242 (aw_faq_admin_page)` |
+
+**Search Insights: Keywords** (`aw-search-insights-keywords`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-keywords | Keywords | list-table | `table:wp_aw_si_keywords`, `table:wp_aw_si_obs`, `option:aw_si_seeded`, `user option:aw_si_keywords_per_page` | 50 per page (screen option 10–500). | `seo/search-insights/admin.php:241 (AW_SI_Keywords_Table)` |
+
+**Search Insights: Rising** (`aw-search-insights-rising`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-rising | Rising terms | list-table | `table:wp_aw_si_rising`, `table:wp_aw_si_keywords`, `option:aw_si_rising_since`, `option:aw_si_off` | 50 per page. | `seo/search-insights/rising.php:728 (aw_si_rising_tab, AW_SI_Rising_Table)` |
+| ap-seo-si-rising-paste | Paste Trends figures | form | `table:wp_aw_si_rising` | — | `seo/search-insights/rising.php:745 (aw_si_rising_tab)` |
+
+**Search Insights: Pages** (`aw-search-insights-pages`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-pages | Pages | list-table | `table:wp_aw_si_kw_pages`, `table:wp_aw_si_keywords`, `table:wp_aw_si_obs` | 50 per page. | `seo/search-insights/pages.php:144 (AW_SI_Pages_Table)` |
+| ap-seo-si-clarity-note | Clarity note | form | `table:wp_aw_si_obs` | Up to 255 characters, dated today. | `seo/search-insights/pages.php:134 (aw_si_clarity_note_save, clarity.php:261)` |
+
+**Search Insights: Check list** (`aw-search-insights-checklist`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-live-check | Live Google check / Monthly live check | panel | `option:aw_si_checklist`, `transient:aw_si_live_new_{user}`, `table:wp_aw_si_obs` | Once a month; one token per user. | `seo/search-insights/checklist.php:302, :368` |
+| ap-seo-si-checklist | Check list | list-table | `option:aw_si_checklist`, `table:wp_aw_si_keywords`, `table:wp_aw_si_obs` | At most 500 keywords; 50 per page. | `seo/search-insights/checklist.php:390 (AW_SI_Checklist_Table)` |
+
+**Search Insights: Links** (`aw-search-insights-links`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-links | Links to us | list-table | `table:wp_aw_si_links`, `option:aw_si_links_seeded` | Views All, Press, Organisation, Social, Directory, Copy, Spam, Unsorted, Hidden; 50 per page. | `seo/search-insights/links.php:188 (aw_si_links_tab, AW_SI_Links_Table)` |
+
+**Search Insights: Settings** (`aw-search-insights-settings`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-seo-si-settings | Schedule, keys, seed, run now | form | `option:aw_si_seeded`, `option:aw_si_off`, `option:aw_keys` | Key values are never shown. | `seo/search-insights/admin.php:523 (aw_si_settings_tab)` |
+| ap-seo-si-imports | Imports | form | `table:wp_aw_si_obs`, `table:wp_aw_si_keywords` | — | `seo/search-insights/imports.php:209 (aw_si_import_rows)` |
+| ap-seo-si-delete | Delete Search Insights data | form | — | Type DELETE to confirm. | `seo/search-insights/admin.php:562 (aw_si_settings_tab)` |
+
+### Animal Writes core
+
+**Animal Writes: Overview** (`animal-writes`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-overview-features | Features (Content and pages, Directory, Campaigns, People, forms and mail, Pictures and media, Running the site) | table | `option:aw_backup_last`, `option:aw_site_check_last`, `option:aw_deployed_head`, `option:aw_team_dates` | One table per group. | `core/admin-home.php:140 (aw_core_overview_page)` |
+| ap-core-overview-dashboard | On the dashboard | table | — | — | `core/admin-home.php:144 (aw_core_overview_page)` |
+| ap-core-overview-commands | Commands (WP-CLI on the server) | table | — | — | `core/admin-home.php:156 (aw_core_overview_page)` |
+
+**Animal Writes: Keys** (`aw-keys`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-keys | Keys | form | `option:aw_keys` | wp-config.php constants win; values are never shown; AI keys are not here. | `core/keys.php:58 (aw_keys_screen)` |
+
+**Animal Writes: Edit screens** (`aw-edit-screens`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-edit-screens | Boxes on edit screens | table | `data/edit-screen-map.json` | Boxes read live; map-only rows from the map. | `core/edit-screens.php:868 (aw_edit_screens_page)` |
+| ap-core-edit-screens-twice | Edited in two places | table | `data/edit-screen-map.json` | — | `core/edit-screens.php:880 (aw_edit_screens_page)` |
+
+**Animal Writes: Dates** (`aw-dates`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-dates-month | Month calendar | table | `option:aw_team_dates` | One month, previous and next buttons. | `core/team-dates.php:126 (aw_team_dates_screen)` |
+| ap-core-dates-list | All dates | table | `option:aw_team_dates` | — | `core/team-dates.php:162 (aw_team_dates_screen)` |
+| ap-core-dates-add | Add a date | form | `option:aw_team_dates` | — | `core/team-dates.php:164 (aw_team_dates_screen)` |
+
+**Animal Writes: Check site** (`aw-site-check`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-site-check | Check site | table | `option:aw_site_check_last`, `option:aw_backup_last` | Fixed list of key pages; result notice on top. | `core/site-check.php:85 (aw_site_check_page)` |
+
+**Animal Writes: Contact links** (`aw-elsewhere`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-elsewhere | Contact links | form | `option:aw_elsewhere` | Rows without a label and address are dropped. | `core/pages.php:394 (aw_elsewhere_screen)` |
+
+**Directory: Claims** (`aw-claims`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-claims-list | Claims | table | `table:wp_fluentform_submissions`, `aw_claim_review` | 20 per page, newest first; trashed entries left out. | `core/claims-review.php:343 (aw_claims_screen)` |
+| ap-core-claims-review | Changes (one claim) | form | `table:wp_fluentform_submissions`, `aw_claim_review`, `aw_gallery`, `aw_verified`, `aw_verified_on` | Only fields that differ from the listing; each has its own tick. | `core/claims-review.php:377 (aw_claim_review_screen)` |
+
+**Campaigns: Letter report** (`aw-letter-report`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-letter-report | Letter report | table | `table:wp_aw_camp_letters` | One campaign at a time (picker); totals and one table per breakdown. | `core/campaign-letters.php:280 (aw_cl_report_page)` |
+
+**Media: Duplicate files** (`aw-media-duplicates`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-media-duplicates | Duplicate files | table | `data/media-duplicate-groups.php`, `option:aw_media_merge_log`, `option:aw_media_merge_data_{id}`, `aw_gallery` | Merges the next 10 groups per click; Undo per group. | `core/media-merge.php:437 (aw_media_merge_screen)` |
+
+**Media: Make WebP** (`aw-media-webp`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-media-webp | Make WebP | table | `option:aw_media_webp_log`, `_wp_attached_file`, `_wp_attachment_metadata` | Batches; Undo per image. | `core/media-webp.php:410 (aw_media_webp_screen)` |
+
+**Media: Reuse pictures** (`aw-media-reuse`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-core-media-reuse | Reuse pictures | table | `data/media-reuse-plan.php`, `option:aw_media_reuse_log`, `option:aw_thumb_map`, `option:aw_category_images`, `transient:aw_media_reuse_notice_{user}`, `_thumbnail_id`, `aw_cover_reused`, `aw_source_image_off` | One row per offered picture (the plan file); Apply, Undo and Check again one picture at a time; news, Library items, listings and posts only. | `core/media-reuse.php:353 (aw_media_reuse_screen)` |
+
+### Mailweb
+
+**Mailweb: Inbox** (`mailweb`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-mail-inbox | Inbox (mailbox picker and message list) | list-table | `option:mailweb_box_addresses`, `option:mailweb_box_ids`, `IMAP mailboxes` | 25 per page; folders incl. Website forms. | `plugins/mailweb/includes/inbox.php:354 (mailweb_inbox_page, Mailweb_List_Table)` |
+| ap-mail-message | Message (Attachments, Reply, Message boxes) | postbox | `IMAP mailboxes` | Pictures from the internet hidden until asked. | `plugins/mailweb/includes/inbox.php:405 (mailweb_inbox_page)` |
+| ap-mail-compose | Write, reply, forward (Send, Attachments boxes) | form | `option:mailweb_mailboxes`, `option:mailweb_aliases`, `option:mailweb_default_from`, `option:mailweb_profiles` | Attachments up to 10 MB in total. | `plugins/mailweb/includes/inbox.php:510 (mailweb_inbox_page)` |
+
+**Mailweb: Overview** (`mailweb-overview`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-mail-overview | Features | table | `option:mailweb_box_addresses`, `option:mailweb_smtp`, `option:mailweb_cap` | — | `plugins/mailweb/includes/home.php:123 (mailweb_home_page)` |
+
+**Mailweb: Settings (incoming mail, mailboxes, profiles)** (`mailweb-settings`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-mail-incoming | Incoming mail | form | `option:mailweb_box_ids`, `option:mailweb_box_addresses`, `option:mailweb_{key} (encrypted)` | Passwords are stored encrypted and never shown. | `plugins/mailweb/includes/mail-in.php:232 (mailweb_in_screen)` |
+| ap-mail-mailboxes | Mailboxes and aliases | form | `option:mailweb_mailboxes`, `option:mailweb_aliases`, `option:mailweb_default_from` | — | `plugins/mailweb/includes/mailboxes.php:72` |
+| ap-mail-profiles | Profiles | form | `option:mailweb_profiles` | — | `plugins/mailweb/includes/profiles.php:164` |
+| ap-mail-crm | FluentCRM | form | `option:mailweb_crm`, `option:mailweb_crm_done` | Done list keeps the last 5000. | `plugins/mailweb/includes/crm-sync.php:314` |
+
+**Mailweb: Settings (site sending)** (`mailweb-settings-sending`)
+
+| id | widget | kind | reads | limits | file |
+|---|---|---|---|---|---|
+| ap-mail-smtp | Site sending (SMTP) | form | `option:mailweb_smtp` | Test email goes to the admin address. | `plugins/mailweb/includes/smtp.php:66 (mailweb_smtp_screen)` |
+| ap-mail-cap | Daily sending limit | form | `table:wp_mailweb_queue`, `option:mailweb_cap`, `option:mailweb_stats`, `option:mailweb_last_error`, `option:mailweb_pause` | Default 90 a day with 10 held back; 4 tries before an email is held. | `plugins/mailweb/includes/mail-cap.php:384` |
+
+**Keys set from an admin page, not from an edit-screen box**
+
+- `_thumbnail_id` (the cover), `aw_cover_reused`, `aw_source_image_off`: set by Apply on Media → Reuse pictures (`core/media-reuse.php:255–258`) and put back by Undo. `aw_cover_reused` keeps the PDF cover job (`core/cc0-images.php`) from replacing the chosen cover; `aw_source_image_off` switches the publisher image off so the cover shows. Featured image on the edit screen still edits the cover.
