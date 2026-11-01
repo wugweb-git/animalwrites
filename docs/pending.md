@@ -111,6 +111,7 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (1 Nov 2026)
+- **Sponsored hidden (owner, 1 Nov 2026):** removed from the Resource and Opportunity Details boxes (not offered now). Stored values kept (only sample listing 9003 has one); the site's readers unchanged.
 - **Edit-screen follow-ups (1 Nov 2026):**
   - **Same-idea keys unified, no data moved:** `aw_organiser` → `aw_organisation` (campaign Organiser in Related); partners read from `aw_campaign_partners` plus any `aw_participant` rows, edited only in Organisations; `aw_paid_listing` → `aw_sponsored` on Opportunities; term `aw_campaign_short` → `aw_short_name` (read with fallback). Old keys stay stored and are read as fallbacks.
   - **Government records:** listings show the badge state read-only at the end of Claimed and sources.

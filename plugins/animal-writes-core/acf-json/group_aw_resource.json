@@ -110,72 +110,6 @@
             "display_format": "j F Y",
             "return_format": "Y-m-d",
             "first_day": 1
-        },
-        {
-            "key": "field_aw_resource_tab_sponsored",
-            "label": "Sponsored",
-            "name": "",
-            "aria-label": "",
-            "type": "tab",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "placement": "top",
-            "endpoint": 0,
-            "selected": 0
-        },
-        {
-            "key": "field_aw_resource_sponsored",
-            "label": "Sponsored",
-            "name": "aw_sponsored",
-            "aria-label": "",
-            "type": "true_false",
-            "instructions": "Marks the guide Sponsored; outbound links get rel=\"sponsored\".",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "message": "",
-            "default_value": 0,
-            "ui": 1,
-            "ui_on_text": "Yes",
-            "ui_off_text": "No"
-        },
-        {
-            "key": "field_aw_resource_sponsor_name",
-            "label": "Sponsor name",
-            "name": "aw_sponsor_name",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": [
-                [
-                    {
-                        "field": "field_aw_resource_sponsored",
-                        "operator": "==",
-                        "value": "1"
-                    }
-                ]
-            ],
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
         }
     ],
     "location": [
@@ -196,5 +130,5 @@
     "active": true,
     "description": "Resources: review date, source and sponsorship.",
     "show_in_rest": 0,
-    "modified": 1792108800
+    "modified": 1793514517
 }

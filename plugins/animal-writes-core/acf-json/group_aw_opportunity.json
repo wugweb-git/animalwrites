@@ -224,26 +224,6 @@
             "placeholder": ""
         },
         {
-            "key": "field_aw_opportunity_sponsored",
-            "label": "Sponsored",
-            "name": "aw_sponsored",
-            "aria-label": "",
-            "type": "true_false",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "message": "",
-            "default_value": 0,
-            "ui": 1,
-            "ui_on_text": "Yes",
-            "ui_off_text": "No"
-        },
-        {
             "key": "field_aw_opportunity_tab_source",
             "label": "Source",
             "name": "",
@@ -335,5 +315,5 @@
     "active": true,
     "description": "Opportunity details on the existing meta keys.",
     "show_in_rest": 0,
-    "modified": 1793512615
+    "modified": 1793514517
 }

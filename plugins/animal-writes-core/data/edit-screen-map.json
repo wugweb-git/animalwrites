@@ -4078,9 +4078,7 @@
 			"label": "Sponsored",
 			"type": "true/false",
 			"boxes": [
-				"acf-group_aw_resource",
-				"aw-sponsored",
-				"acf-group_aw_opportunity"
+				"aw-sponsored"
 			],
 			"types": [
 				"post",
@@ -4107,6 +4105,9 @@
 					"where": "dataLayer sponsor",
 					"file": "core/kits-config.php:109"
 				}
+			],
+			"notes": [
+				"Hidden from the edit screens (owner, 1 Nov 2026): sponsorship is not offered now. Stored values are kept and still read; only the fallback box (when SCF is off) could edit it."
 			]
 		},
 		"aw_sponsor_name": {
@@ -4114,7 +4115,6 @@
 			"label": "Sponsor name",
 			"type": "text",
 			"boxes": [
-				"acf-group_aw_resource",
 				"aw-sponsored"
 			],
 			"types": [
@@ -4136,6 +4136,9 @@
 					"where": "dataLayer sponsor",
 					"file": "core/kits-config.php:109"
 				}
+			],
+			"notes": [
+				"Hidden from the edit screens (owner, 1 Nov 2026): sponsorship is not offered now. Stored values are kept and still read; only the fallback box (when SCF is off) could edit it."
 			]
 		},
 		"aw_file_id": {
