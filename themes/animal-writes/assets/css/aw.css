@@ -1327,7 +1327,9 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
    the right, at their natural height, with the normal gap; the lead on the left takes the same height, and its picture
    is the part that gives (it fills what the title and summary leave, cropped like every card picture, at least 8rem), so
-   both columns end level with no empty gap and nothing stretched. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
+   both columns end level with no empty gap and nothing stretched. The lead's text keeps its natural height (only the
+   picture grows), and from 1200, where the lead is the narrow column, its summary is cut at 2 lines so the picture stays
+   about 2:1 rather than a strip. 7fr / 5fr from 768, 5fr / 7fr from 1200. */
 .aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-3); }
 .aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
 .aw-news-mosaic .kit-card--stacked-md { height: auto; }
@@ -1338,10 +1340,14 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-news-mosaic:has(> li:nth-child(2):last-child) > li:first-child { grid-row: 1; }
 	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; align-self: start; }
 	.aw-news-mosaic > li:first-child > .kit-card { flex: 1 1 auto; height: auto; }
+	.aw-news-mosaic > li:first-child > .kit-card > .kit-card-body { flex: none; }
 	.aw-news-mosaic > li:first-child .kit-card-media { position: relative; flex: 1 1 0; min-height: 8rem; aspect-ratio: auto; margin: 0; }
 	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
 }
-@media (min-width: 1200px) { .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+@media (min-width: 1200px) {
+	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
+}
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
 .aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
