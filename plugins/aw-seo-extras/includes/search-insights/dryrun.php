@@ -25,6 +25,7 @@ function aw_si_dry_report( string $day ): array {
 	global $wpdb;
 	$rec   = array(); // norm => record.
 	$pages = 0;       // kw_pages rows.
+	$arch  = array(); // term archive paths => true.
 	$obs   = array(
 		'trends' => 0,
 		'live'   => 0,
@@ -42,6 +43,7 @@ function aw_si_dry_report( string $day ): array {
 				'trends'   => null,
 				'live'     => null,
 				'owners'   => array(),
+				'main'     => array(),
 				'has_page' => false,
 				'entity'   => 0,
 				'impr'     => 0,
@@ -61,11 +63,17 @@ function aw_si_dry_report( string $day ): array {
 		if ( '' === $n ) {
 			continue;
 		}
-		$rec[ $n ]['has_page'] = true;
-		$rec[ $n ]['entity']   = '{organisation name}' === $row['keyword'] ? 1 : $rec[ $n ]['entity'];
-		list( , , $path )      = aw_si_resolve_page( (array) $row['page'], (string) $row['page_type'] );
+		$rec[ $n ]['has_page']  = true;
+		$rec[ $n ]['entity']    = '{organisation name}' === $row['keyword'] ? 1 : $rec[ $n ]['entity'];
+		list( $otype, , $path ) = aw_si_resolve_page( (array) $row['page'], (string) $row['page_type'] );
+		if ( 'term' === $otype && '' !== $path ) {
+			$arch[ untrailingslashit( $path ) ] = true;
+		}
 		if ( 'primary' === $row['kind'] && 0 === strpos( $path, '/' ) && false === strpos( $path, '{' ) ) {
 			$rec[ $n ]['owners'][ $path ] = true;
+			if ( 'term' !== $otype ) {
+				$rec[ $n ]['main'][ $path ] = true; // News items are left out when the record is decided.
+			}
 		}
 		++$pages;
 		if ( null !== $row['trends'] ) {
@@ -125,6 +133,11 @@ function aw_si_dry_report( string $day ): array {
 					$path = aw_si_object_path( $type, (int) $r->ID );
 					if ( '' !== $path ) {
 						$rec[ $n ]['owners'][ $path ] = true;
+						if ( 'term' === $type ) {
+							$arch[ untrailingslashit( $path ) ] = true;
+						} else {
+							$rec[ $n ]['main'][ $path ] = true;
+						}
 					}
 				}
 				++$links;
@@ -233,7 +246,13 @@ function aw_si_dry_report( string $day ): array {
 	$brand = array();
 	$acts  = array();
 	foreach ( $rec as $r ) {
-		$d = aw_si_decide( $r['trends'], $r['impr'], $r['pos'], $r['live'], array_keys( $r['owners'] ), $r['has_page'], $r['top'], aw_si_ctx( $r, array() ) );
+		// The same owner split as the daily calculation: News items and archives do not count as two owners.
+		$main = array_values( array_filter( array_keys( $r['main'] ), fn( $m ) => ! aw_si_is_minor_path( $m, $arch ) ) );
+		$ctx  = aw_si_ctx( $r, array() ) + array(
+			'main'        => $main,
+			'shown_minor' => aw_si_is_minor_path( (string) $r['top'][0], $arch ),
+		);
+		$d    = aw_si_decide( $r['trends'], $r['impr'], $r['pos'], $r['live'], array_keys( $r['owners'] ), $r['has_page'], $r['top'], $ctx );
 		++$views['all'];
 		++$views[ $d['priority'] ];
 		$views['gap']       += 'gap' === $d['status'] ? 1 : 0;

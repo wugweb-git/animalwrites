@@ -157,6 +157,7 @@ function aw_si_drop_all(): void {
 		delete_option( $opt );
 	}
 	delete_transient( 'aw_si_redirects' );
+	delete_transient( 'aw_si_redirects_rx' );
 	update_option( 'aw_si_off', time(), false );
 	foreach ( aw_si_cron_hooks() as $hook ) {
 		wp_clear_scheduled_hook( $hook );

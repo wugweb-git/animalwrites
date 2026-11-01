@@ -86,6 +86,8 @@ A conflict is either of:
 - two pages with the same focus keyphrase;
 - GSC sending the keyword to a page that is not its owner.
 
+News items and term archives (tag, category) still own keywords, but they do not count towards "two pages". When only News items or archives own a keyword, GSC showing another News item or archive is no conflict either. Old addresses count as the page they redirect to: Rank Math exact and regex redirections and old slugs.
+
 ### `wp_aw_si_obs`
 Every measurement, in long format: `keyword_id` or `page`, `source`, `metric`, `value`, `period` (day / week / month), `date`, `fetched_at`.
 

@@ -110,23 +110,77 @@ function aw_si_redirect_map(): array {
 }
 
 /**
- * Where an address leads now: its redirect target (following up to 5 hops), or the address itself.
+ * Active Rank Math redirections with a regex source, in their order. Cached for 12 hours like the exact map.
+ *
+ * @return array<int, array{0: string, 1: string}> [PHP pattern, target path with $1 …].
+ */
+function aw_si_redirect_rules(): array {
+	$rules = get_transient( 'aw_si_redirects_rx' );
+	if ( is_array( $rules ) ) {
+		return $rules;
+	}
+	global $wpdb;
+	$rules = array();
+	$table = $wpdb->prefix . 'rank_math_redirections';
+	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( (array) $wpdb->get_results( "SELECT sources, url_to FROM {$table} WHERE status = 'active' AND header_code IN (301, 302, 307, 308) AND sources LIKE '%regex%' ORDER BY id" ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+			$to = aw_si_path( (string) $r->url_to );
+			foreach ( (array) maybe_unserialize( $r->sources ) as $s ) {
+				$pattern = (string) ( $s['pattern'] ?? '' );
+				// Rank Math matches the path without its leading slash; "ignore case" is the source's own option.
+				$rx = '@' . str_replace( '@', '\\@', $pattern ) . '@' . ( 'case' === ( $s['ignore'] ?? '' ) ? 'i' : '' );
+				// A pattern PHP cannot compile is skipped here, so the lookups never hit it.
+				if ( 'regex' === ( $s['comparison'] ?? '' ) && '' !== $pattern && '' !== $to && false !== @preg_match( $rx, '' ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- an invalid pattern only returns false.
+					$rules[] = array( $rx, $to );
+				}
+			}
+		}
+	}
+	set_transient( 'aw_si_redirects_rx', $rules, 12 * HOUR_IN_SECONDS );
+	return $rules;
+}
+
+/**
+ * Where an address leads now: its redirect target (following up to 5 hops), or the address itself. Exact redirections
+ * and old slugs come first, then regex redirections ($1 … filled from the match).
  *
  * @param string $path Site path.
  */
 function aw_si_final_path( string $path ): string {
-	static $map = null;
+	static $map   = null;
+	static $rules = null;
 	if ( null === $map ) {
-		$map = aw_si_redirect_map();
+		$map   = aw_si_redirect_map();
+		$rules = aw_si_redirect_rules();
 	}
 	$seen = array();
 	$key  = untrailingslashit( $path );
 	$hops = 0;
-	while ( '' !== $key && isset( $map[ $key ] ) && ! isset( $seen[ $key ] ) && $hops < 5 ) {
-		++$hops;
+	while ( '' !== $key && ! isset( $seen[ $key ] ) && $hops < 5 ) {
 		$seen[ $key ] = true;
-		$path         = $map[ $key ];
-		$key          = untrailingslashit( $path );
+		$next         = $map[ $key ] ?? '';
+		if ( '' === $next ) {
+			$subject = trim( $key, '/' );
+			foreach ( $rules as $rule ) {
+				if ( @preg_match( $rule[0], $subject, $m ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- checked when cached; false means no match.
+					$next = preg_replace_callback(
+						'/\$(\d)/',
+						function ( $d ) use ( $m ) {
+							return trim( (string) ( $m[ (int) $d[1] ] ?? '' ), '/' );
+						},
+						$rule[1]
+					);
+					$next = (string) preg_replace( '#/{2,}#', '/', $next );
+					break;
+				}
+			}
+		}
+		if ( '' === $next ) {
+			break;
+		}
+		++$hops;
+		$path = $next;
+		$key  = untrailingslashit( $path );
 	}
 	return $path;
 }

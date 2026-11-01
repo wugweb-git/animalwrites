@@ -188,15 +188,20 @@ function aw_si_quick_sql(): string {
  * @param bool       $has_page Some page owns or carries it.
  * @param array      $top      [path, impressions] of the page Google showed most.
  * @param array      $ctx      label (search phrase), lang, sourcing (already a Sourcing keyword), quality (paths
- *                             flagged for page quality, as path => true).
+ *                             flagged for page quality, as path => true), main (the owners that are not News items
+ *                             or archives; all owners when missing), shown_minor (the shown page is a News item or
+ *                             an archive).
  * @return array{priority: string, status: string, action: string, conflict: bool, pos: float|null, owners: string[], shown: string}
  */
 function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, array $owners, bool $has_page, array $top, array $ctx = array() ): array {
 	// Position: the live check, or Search Console when it has figures newer than the check (plan §7).
-	$pos      = null !== $pos28 ? $pos28 : $live;
-	$shown    = (string) ( $top[0] ?? '' );
-	$conflict = count( $owners ) > 1
-		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) );
+	$pos   = null !== $pos28 ? $pos28 : $live;
+	$shown = (string) ( $top[0] ?? '' );
+	$main  = (array) ( $ctx['main'] ?? $owners );
+	// News items and archives share topic phrases by nature, so only other pages count as two owners. When only News
+	// items or archives own it, Google showing another News item or archive is no conflict either.
+	$conflict = count( $main ) > 1
+		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) );
 	$priority = aw_si_priority( $trends, $impr, $pos, $has_page );
 	$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
 	$label    = (string) ( $ctx['label'] ?? '' );
@@ -219,6 +224,16 @@ function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, arr
 		$action = 'sourcing'; // Our news items already show for it: more of them would help. Never for Hindi or Hinglish.
 	}
 	return compact( 'priority', 'status', 'action', 'conflict', 'pos', 'owners', 'shown' );
+}
+
+/**
+ * Whether a path is a News item or a term archive (tag, category, or another archive in $archives).
+ *
+ * @param string $path     Site path.
+ * @param array  $archives Term archive paths without a trailing slash, as path => true.
+ */
+function aw_si_is_minor_path( string $path, array $archives ): bool {
+	return 0 === strpos( $path, '/news/' ) || 0 === strpos( $path, '/tag/' ) || 0 === strpos( $path, '/category/' ) || isset( $archives[ untrailingslashit( $path ) ] );
 }
 
 /**
@@ -261,7 +276,7 @@ function aw_si_compute(): array {
 	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i FROM {$o} WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $s28, $e28 ) );
 	$live  = $wpdb->get_results( "SELECT o.kw_id, o.value, o.txt, o.d FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", OBJECT_K );
 	$trend = $wpdb->get_results( "SELECT o.kw_id, o.value FROM {$o} o JOIN (SELECT kw_id, MAX(d) d FROM {$o} WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", OBJECT_K );
-	$links = $wpdb->get_results( "SELECT kw_id, path, role, src FROM {$p}" );
+	$links = $wpdb->get_results( "SELECT kw_id, obj_type, path, role, src FROM {$p}" );
 	$qw    = function_exists( 'aw_kw_ready' ) && aw_kw_ready(); // the quick_win column (keyword table version 3)
 	$rows  = $wpdb->get_results( "SELECT id, label, lang, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends" . ( $qw ? ', quick_win' : '' ) . " FROM {$k}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
 	// phpcs:enable
@@ -277,14 +292,25 @@ function aw_si_compute(): array {
 		arsort( $pages );
 		$top_page[ $kw ] = array( (string) key( $pages ), (int) current( $pages ) );
 	}
-	$owners = array(); // kw_id => owning paths (focus primaries and keyword-map pages).
-	$fits   = array(); // kw_id => true when some page owns or carries it.
+	$owners   = array(); // kw_id => owning paths (focus primaries and keyword-map pages).
+	$main     = array(); // kw_id => owning paths that are not News items or archives.
+	$fits     = array(); // kw_id => true when some page owns or carries it.
+	$archives = array(); // term archive paths => true.
+	foreach ( (array) $links as $l ) {
+		if ( 'term' === $l->obj_type && '' !== $l->path ) {
+			$archives[ untrailingslashit( aw_si_final_path( $l->path ) ) ] = true;
+		}
+	}
 	foreach ( (array) $links as $l ) {
 		if ( in_array( $l->role, array( 'owner', 'secondary' ), true ) ) {
 			$fits[ $l->kw_id ] = true;
 		}
 		if ( 'owner' === $l->role && 0 === strpos( $l->path, '/' ) && false === strpos( $l->path, '{' ) ) { // Real paths only: map labels and patterns are not compared.
-			$owners[ $l->kw_id ][ aw_si_final_path( $l->path ) ] = true;
+			$final                         = aw_si_final_path( $l->path );
+			$owners[ $l->kw_id ][ $final ] = true;
+			if ( 'term' !== $l->obj_type && ! aw_si_is_minor_path( $final, $archives ) ) {
+				$main[ $l->kw_id ][ $final ] = true;
+			}
 		}
 	}
 
@@ -298,7 +324,12 @@ function aw_si_compute(): array {
 		$posprev  = isset( $prev[ $id ] ) && null !== $prev[ $id ]->p ? round( (float) $prev[ $id ]->p, 1 ) : null;
 		$lv       = $live[ $id ] ?? null;
 		$trends   = isset( $trend[ $id ] ) ? (int) $trend[ $id ]->value : null;
-		$d        = aw_si_decide( $trends, $impr, $pos28, $lv && null !== $lv->value ? (float) $lv->value : null, array_keys( $owners[ $id ] ?? array() ), ! empty( $fits[ $id ] ), $top_page[ $id ] ?? array( '', 0 ), aw_si_ctx( $r, $quality ) );
+		$tp       = $top_page[ $id ] ?? array( '', 0 );
+		$ctx      = aw_si_ctx( $r, $quality ) + array(
+			'main'        => array_keys( $main[ $id ] ?? array() ),
+			'shown_minor' => aw_si_is_minor_path( $tp[0], $archives ),
+		);
+		$d        = aw_si_decide( $trends, $impr, $pos28, $lv && null !== $lv->value ? (float) $lv->value : null, array_keys( $owners[ $id ] ?? array() ), ! empty( $fits[ $id ] ), $tp, $ctx );
 		$priority = $d['priority'];
 		$status   = $d['status'];
 		$action   = $d['action'];
