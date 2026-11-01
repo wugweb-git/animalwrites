@@ -1363,6 +1363,18 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
 	.aw-news-mosaic > li:first-child .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2; }
 }
+/* Latest news on Home only (1 Nov 2026): the meta row is the date and the source (no place, no topic chip); the rows have
+   a bigger title and a 4:3 thumbnail. 768 to 1199: two equal columns and the small thumbnail, so date and source stay
+   on one line. From 1200: a 10rem thumbnail, so the three rows are about as tall as a lead card with a 4:3 picture. */
+.aw-ed-news .kit-meta-row .kit-meta-item:not(.aw-date), .aw-ed-news .kit-tag--category { display: none; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md .kit-card-title { font-size: var(--kit-type-h4) !important; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media img { height: 100%; object-fit: cover; }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-ed-news .aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: var(--kit-thumb-md) !important; }
+}
+@media (min-width: 1200px) { .aw-ed-news .aw-news-mosaic .kit-card--stacked-md > .kit-card-media { width: 10rem !important; } }
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
 .aw-cases:has(> li > .kit-card[class*="kit-card--"]) { display: grid !important; gap: var(--kit-space-4); border-top: 0; }
