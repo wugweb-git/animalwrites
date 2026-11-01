@@ -616,6 +616,11 @@
 /* Rule chips: the one Kits chip (kit-primitives.css), tinted with the campaign's own colours (owner, 20 Oct 2026) */
 .aw-rule-chip { --kit-chip-bg: transparent; --kit-chip-fg: currentColor; --kit-chip-border: var(--camp-meta, var(--kit-color-line)); --kit-chip-border-strong: currentColor; --kit-chip-hover: color-mix(in srgb, currentColor 10%, transparent); margin: var(--kit-space-1) var(--kit-space-1) 0 0; font-variant-numeric: tabular-nums; cursor: pointer; }
 .aw-camp-hero .aw-rule-chip { --kit-chip-border: var(--camp-on-mark); }
+.aw-rule-chip::after { inset: calc((100% - var(--kit-size-target)) / 2) 0; } /* the theme's 44px hit area (kit-primitives), from the chip's own height */
+@media (max-width: 1199px) { /* where the poster's chips wrap, the rows sit far enough apart that the 44px hit areas never overlap */
+	.aw-camp-poster-chips { display: flex; flex-wrap: wrap; gap: var(--kit-space-4) var(--kit-space-2); }
+	.aw-camp-poster-chips > .aw-camp-poster-label { flex-basis: 100%; margin-bottom: calc(-1 * var(--kit-space-2)); }
+}
 .aw-rule-chip--plain { cursor: default; }
 .aw-rule-chip-dialog {
 	width: min(40rem, calc(100vw - 2 * var(--kit-space-4))); max-height: 80vh; overflow: auto;
