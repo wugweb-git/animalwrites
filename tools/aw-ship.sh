@@ -15,24 +15,26 @@ gh run watch "$run" --exit-status >/dev/null || { echo "REFUSING to deploy: the 
 status=$(gh api "repos/wugweb-git/animalwrites/commits/$sha/check-runs" -q '[.check_runs[] | select(.name=="check")] | map(.conclusion) | unique | join(",")')
 [ "$status" = "success" ] || { echo "REFUSING to deploy: check status for $sha is '${status:-none}', not success"; exit 1; }
 git fetch -q origin
-short=$(git rev-parse --short "$sha")
+# Compare full shas: "--short" is 8 characters here and 7 on the server, so short shas never matched (1 Nov 2026).
+short=${sha:0:7}
+server=(ssh -i ~/.ssh/hostinger_aw -p 65002 -o LogLevel=ERROR -o BatchMode=yes -o ConnectTimeout=15 u544169507@46.28.45.135)
 for i in $(seq 1 12); do
-  live=$(ssh -i ~/.ssh/hostinger_aw -p 65002 u544169507@46.28.45.135 'cd ~/domains/animalwrites.in/public_html && git -C aw_deploy rev-parse --short HEAD' 2>/dev/null | tail -1)
-  [ "$live" = "$short" ] && break
+  live=$("${server[@]}" 'cd ~/domains/animalwrites.in/public_html && git -C aw_deploy rev-parse HEAD' 2>/dev/null | tail -1)
+  [ "$live" = "$sha" ] && break
   sleep 10
 done
 # Hostinger's auto-deploy stopped pulling on 20 Oct 2026 (last fetch 05:45 UTC). If it has not pulled within 2 minutes,
 # check out the gated commit on the server ourselves: only when the deploy branch is exactly this commit and the
 # server's copy has no local changes.
-if [ "$live" != "$short" ]; then
-  gated=$(git rev-parse --short origin/wordpress)
-  if [ "$gated" = "$short" ]; then
-    live=$(ssh -i ~/.ssh/hostinger_aw -p 65002 u544169507@46.28.45.135 "cd ~/domains/animalwrites.in/public_html/aw_deploy && test -z \"\$(git status --short)\" && git fetch -q origin wordpress && test \"\$(git rev-parse --short FETCH_HEAD)\" = $short && git checkout -q --detach FETCH_HEAD && git rev-parse --short HEAD" 2>/dev/null | tail -1)
-    echo "Hostinger did not pull; checked out on the server: $live"
+if [ "$live" != "$sha" ]; then
+  gated=$(git rev-parse origin/wordpress)
+  if [ "$gated" = "$sha" ]; then
+    live=$("${server[@]}" "cd ~/domains/animalwrites.in/public_html/aw_deploy && test -z \"\$(git status --short)\" && git fetch -q origin wordpress && test \"\$(git rev-parse FETCH_HEAD)\" = $sha && git checkout -q --detach FETCH_HEAD && git rev-parse HEAD" 2>/dev/null | tail -1)
+    echo "Hostinger did not pull; checked out on the server: ${live:0:7}"
   fi
 fi
-[ "$live" = "$short" ] || { echo "NOT deployed: server is at $live, wanted $short"; exit 1; }
-echo "deployed $live"
+[ "$live" = "$sha" ] || { echo "NOT deployed: server is at ${live:0:7}, wanted $short"; exit 1; }
+echo "deployed $short"
 # Purge through the site, not WP-CLI: "wp litespeed-purge all" cannot notify the web server on this host (24 Oct 2026).
 # A one-off home URL is a cache miss, so deploy-purge.php (animal-writes-core) runs and purges once for the new commit.
 code=$(curl -s -o /dev/null -m 30 -w "%{http_code}" "https://animalwrites.in/?aw_deploy_nudge=ship-$short-$(date +%s)" || true)
