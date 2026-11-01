@@ -1608,14 +1608,14 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 .aw-sc .aw-content-actions .kit-btn { flex: 1 1 auto; width: auto; }
 
 /* Home: the campaign row (pattern aw-pair; owner, 2 Nov 2026): two photo cards, the text over the campaign photograph:
-   the Supreme Court card (aw-sc) and AW_Festive (a kit-photo-card Cover). Stacked while the row is narrower than 800px,
-   side by side from 800 (a container query on the row, design-system.md "Breakpoints"), both the same height. Each card's
-   height is its text and the card padding (--kit-space-5): at most 500px (design-system.md "Section heights"). */
-.aw-pair { container: aw-pair / inline-size; --aw-pair-card-h: 500px; } /* one round card height at every width (owner, 2 Nov 2026: "500 for all") */
+   the Supreme Court card (aw-sc) and AW_Festive (a kit-photo-card Cover). Stacked on phones, side by side from the theme
+   breakpoint 768, so the row is at most 720px on tablet and desktop (design-system.md "Layout rules" 5 and 7). Each card is
+   one round height: --aw-pair-card-h, a minimum, so text is never cut off. */
+.aw-pair { --aw-pair-card-h: 500px; } /* one round card height at every width (owner, 2 Nov 2026: "500 for all") */
 .aw-pair-grid { display: grid; gap: var(--kit-space-grid); }
 .aw-pair-grid > * { box-sizing: border-box; min-height: var(--aw-pair-card-h); } /* a minimum, so text is never cut off */
 .aw-pair-grid > .wp-block-cover { margin: 0; }
-@container aw-pair (min-width: 800px) {
+@media (min-width: 768px) {
 	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
 }
 
