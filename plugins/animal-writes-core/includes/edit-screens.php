@@ -578,6 +578,173 @@ add_action(
 	}
 );
 
+/**
+ * Plugin and purpose of a row's box, from the map's optional 'plugin' and 'purpose' fields. Without them: the row's
+ * source and '—'.
+ *
+ * @param array $r Row.
+ */
+function aw_edit_screen_row_about( array $r ): array {
+	static $boxes = null;
+	if ( null === $boxes ) {
+		$boxes = aw_edit_screen_boxes();
+	}
+	$b       = $r['mapped'] ? (array) ( $boxes[ $r['id'] ] ?? array() ) : array();
+	$plugin  = trim( (string) ( $b['plugin'] ?? '' ) );
+	$purpose = trim( (string) ( $b['purpose'] ?? '' ) );
+	return array(
+		'plugin'  => '' !== $plugin ? $plugin : (string) $r['source'],
+		'purpose' => '' !== $purpose ? $purpose : '—',
+	);
+}
+
+/**
+ * Is the row a WordPress core box (mapped, source "WordPress")? These are shown once, in "General (all types)".
+ *
+ * @param array $r Row.
+ */
+function aw_edit_screen_is_core( array $r ): bool {
+	return $r['mapped'] && 'WordPress' === $r['source'];
+}
+
+/**
+ * Box ids shown as one row across all their types: group => ids.
+ */
+function aw_edit_screen_merged_boxes(): array {
+	return array( 'faq' => array( 'aw-faq', 'term-faq' ) );
+}
+
+/**
+ * Rows as listed: one "General (all types)" row for the WordPress core boxes first, then the rest in order, with each
+ * merged box (FAQ) as one row across its types. Each row also has label (Type column), types, plugin and purpose.
+ *
+ * @param array $rows Rows.
+ */
+function aw_edit_screen_display_rows( array $rows ): array {
+	$merge = array();
+	foreach ( aw_edit_screen_merged_boxes() as $group => $ids ) {
+		foreach ( $ids as $id ) {
+			$merge[ $id ] = $group;
+		}
+	}
+	$general = array();
+	$out     = array();
+	$at      = array(); // group => index in $out
+	foreach ( $rows as $r ) {
+		$r += aw_edit_screen_row_about( $r );
+		if ( aw_edit_screen_is_core( $r ) ) {
+			$general[] = $r;
+			continue;
+		}
+		$group = $r['mapped'] && isset( $merge[ $r['id'] ] ) ? $merge[ $r['id'] ] : '';
+		if ( '' === $group ) {
+			$out[] = $r + array( 'label' => $r['type'], 'types' => array( $r['type'] ) );
+			continue;
+		}
+		if ( ! isset( $at[ $group ] ) ) {
+			$at[ $group ] = count( $out );
+			$out[]        = $r + array( 'label' => '', 'types' => array(), 'ids' => array() );
+		}
+		$out[ $at[ $group ] ] = aw_edit_screen_join_row( $out[ $at[ $group ] ], $r );
+	}
+	foreach ( $at as $i ) {
+		$out[ $i ]['label'] = implode( ', ', $out[ $i ]['types'] );
+		$out[ $i ]['id']    = implode( ', ', $out[ $i ]['ids'] );
+	}
+	if ( $general ) {
+		$row = array(
+			'screen'   => 'general',
+			'type'     => '',
+			'label'    => 'General (all types)',
+			'types'    => array(),
+			'ids'      => array(),
+			'title'    => '',
+			'titles'   => array(),
+			'plugin'   => 'WordPress',
+			'purpose'  => '—',
+			'source'   => 'WordPress',
+			'file'     => 'wp-admin/includes/meta-boxes.php, wp-admin/edit-tag-form.php',
+			'shows_on' => 'Each type that supports the box',
+			'mapped'   => true,
+			'fields'   => array(),
+			'uses'     => array(),
+			'notes'    => array(),
+		);
+		foreach ( $general as $r ) {
+			if ( ! in_array( $r['id'], $row['ids'], true ) ) {
+				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : '' );
+				foreach ( $r['notes'] as $n ) {
+					$row['notes'][] = $r['title'] . ': ' . $n;
+				}
+			}
+			$row = aw_edit_screen_join_row( $row, $r, false );
+		}
+		$row['title'] = implode( ', ', $row['titles'] );
+		$row['id']    = implode( ', ', $row['ids'] );
+		array_unshift( $out, $row );
+	}
+	return $out;
+}
+
+/**
+ * Adds a row's types, ids, fields, uses and (optionally) notes to a merged row.
+ *
+ * @param array $into  Merged row (types, ids, fields, uses, notes).
+ * @param array $r     Row.
+ * @param bool  $notes Also join the notes.
+ */
+function aw_edit_screen_join_row( array $into, array $r, bool $notes = true ): array {
+	if ( ! in_array( $r['type'], $into['types'], true ) ) {
+		$into['types'][] = $r['type'];
+	}
+	if ( ! in_array( $r['id'], $into['ids'], true ) ) {
+		$into['ids'][] = $r['id'];
+	}
+	foreach ( $r['fields'] as $k => $t ) {
+		$into['fields'][ $k ] = $into['fields'][ $k ] ?? $t;
+		$into['uses'][ $k ]   = $into['uses'][ $k ] ?? (array) ( $r['uses'][ $k ] ?? array() );
+	}
+	if ( $notes ) {
+		$into['notes'] = array_values( array_unique( array_merge( $into['notes'], $r['notes'] ) ) );
+	}
+	return $into;
+}
+
+/**
+ * Keys editable from more than one box on one type's screen: list of type, key, boxes ("Title [id]"). Custom Fields (it can
+ * edit any key) and boxes or keys the map marks "readonly" are left out.
+ *
+ * @param array $rows Rows.
+ */
+function aw_edit_screen_twice( array $rows ): array {
+	$boxes = aw_edit_screen_boxes();
+	$map   = aw_edit_screen_map();
+	$by    = array();
+	foreach ( $rows as $r ) {
+		if ( 'postcustom' === $r['id'] || ( $r['mapped'] && ! empty( $boxes[ $r['id'] ]['readonly'] ) ) ) {
+			continue;
+		}
+		foreach ( array_keys( $r['fields'] ) as $k ) {
+			if ( empty( $map[ $k ]['readonly'] ) ) {
+				$by[ $r['type'] ][ (string) $k ][ $r['id'] ] = $r['title'] . ' [' . $r['id'] . ']';
+			}
+		}
+	}
+	$out = array();
+	foreach ( $by as $type => $keys ) {
+		foreach ( $keys as $k => $list ) {
+			if ( count( $list ) > 1 ) {
+				$out[] = array(
+					'type'  => (string) $type,
+					'key'   => $k,
+					'boxes' => array_values( $list ),
+				);
+			}
+		}
+	}
+	return $out;
+}
+
 add_action(
 	'admin_menu',
 	function () {
@@ -633,7 +800,7 @@ function aw_edit_screens_page(): void {
 	echo '<ul class="subsubsub"><li>' . implode( ' |</li><li>', $links ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each link is escaped above.
 
 	$cells = array();
-	foreach ( $rows as $r ) {
+	foreach ( aw_edit_screen_display_rows( $rows ) as $r ) {
 		$fields = array();
 		$used   = array();
 		foreach ( $r['fields'] as $k => $t ) {
@@ -645,29 +812,52 @@ function aw_edit_screens_page(): void {
 			$used[] = '<code>' . esc_html( $k ) . '</code>: ' . ( $parts ? implode( '; ', $parts ) : 'not used' );
 		}
 		$cells[] = array(
-			'type'   => esc_html( $r['type'] ),
-			'box'    => '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>',
-			'source' => esc_html( $r['source'] ) . ( '' === $r['file'] ? '' : '<br><code>' . esc_html( $r['file'] ) . '</code>' ),
-			'shows'  => esc_html( $r['shows_on'] ),
-			'fields' => $fields ? implode( '<br>', $fields ) : '—',
-			'used'   => $used ? implode( '<br>', $used ) : '—',
-			'notes'  => $r['notes'] ? implode( '<br>', array_map( 'esc_html', $r['notes'] ) ) : '—',
+			'type'    => 'general' === $r['screen'] ? '<strong>' . esc_html( $r['label'] ) . '</strong>' : esc_html( $r['label'] ),
+			'box'     => '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>',
+			'plugin'  => esc_html( $r['plugin'] ) . ( '' === $r['file'] ? '' : '<br><code>' . esc_html( $r['file'] ) . '</code>' ),
+			'purpose' => esc_html( $r['purpose'] ),
+			'shows'   => esc_html( $r['shows_on'] ),
+			'fields'  => $fields ? implode( '<br>', $fields ) : '—',
+			'used'    => $used ? implode( '<br>', $used ) : '—',
+			'notes'   => $r['notes'] ? implode( '<br>', array_map( 'esc_html', $r['notes'] ) ) : '—',
 		);
 	}
 	$cols = array(
-		'type'   => 'Type',
-		'box'    => 'Box',
-		'source' => 'Source',
-		'shows'  => 'Shows on',
-		'fields' => 'Fields',
-		'used'   => 'Used where',
-		'notes'  => 'Notes',
+		'type'    => 'Type',
+		'box'     => 'Box',
+		'plugin'  => 'Plugin',
+		'purpose' => 'Purpose',
+		'shows'   => 'Shows on',
+		'fields'  => 'Fields',
+		'used'    => 'Used where',
+		'notes'   => 'Notes',
 	);
-	if ( '' !== $type ) {
-		unset( $cols['type'] );
-	}
 	aw_core_simple_table( 'aw-edit-screens', $cols, $cells, array( 'primary' => 'box', 'empty' => 'No boxes.' ) );
+	aw_edit_screens_twice_section( $rows );
 	echo '</div>';
+}
+
+/**
+ * The "Edited in two places" section: each key editable from more than one box on one type's screen.
+ *
+ * @param array $rows Rows.
+ */
+function aw_edit_screens_twice_section( array $rows ): void {
+	$twice = aw_edit_screen_twice( $rows );
+	echo '<h2>Edited in two places</h2>';
+	if ( ! $twice ) {
+		echo '<p>None.</p>';
+		return;
+	}
+	$cells = array();
+	foreach ( $twice as $t ) {
+		$cells[] = array(
+			'type'  => esc_html( $t['type'] ),
+			'key'   => '<code>' . esc_html( $t['key'] ) . '</code>',
+			'boxes' => esc_html( implode( ', ', $t['boxes'] ) ),
+		);
+	}
+	aw_core_simple_table( 'aw-edit-screens-twice', array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells, array( 'primary' => 'key' ) );
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -699,7 +889,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				return;
 			}
 			$out = array();
-			foreach ( $rows as $r ) {
+			foreach ( aw_edit_screen_display_rows( $rows ) as $r ) {
 				$kinds = array();
 				foreach ( $r['uses'] as $list ) {
 					foreach ( $list as $u ) {
@@ -711,20 +901,28 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$f[] = $k . '=' . $t;
 				}
 				$out[] = array(
-					'type'     => $r['type'],
+					'type'     => $r['label'],
 					'box'      => $r['title'] . ' [' . $r['id'] . ']',
-					'source'   => $r['source'],
+					'plugin'   => $r['plugin'],
+					'purpose'  => $r['purpose'],
 					'shows_on' => $r['shows_on'],
 					'fields'   => implode( ', ', $f ),
 					'used'     => implode( ',', array_keys( $kinds ) ),
 					'notes'    => implode( ' | ', $r['notes'] ),
 				);
 			}
-			WP_CLI\Utils\format_items( 'table', $out, array( 'type', 'box', 'source', 'shows_on', 'fields', 'used', 'notes' ) );
+			WP_CLI\Utils\format_items( 'table', $out, array( 'type', 'box', 'plugin', 'purpose', 'shows_on', 'fields', 'used', 'notes' ) );
 			if ( ! is_admin() ) {
 				WP_CLI::log( 'Some plugins add their boxes only in WP admin (for example LiteSpeed); they show on Animal Writes → Edit screens.' );
 			}
-			WP_CLI::log( sprintf( '%d rows, %d not mapped yet.', count( $rows ), aw_edit_screen_unmapped( $rows ) ) );
+			$twice = aw_edit_screen_twice( $rows );
+			WP_CLI::log( 'Edited in two places:' );
+			if ( $twice ) {
+				WP_CLI\Utils\format_items( 'table', array_map( fn( $t ) => array( 'type' => $t['type'], 'key' => $t['key'], 'boxes' => implode( ', ', $t['boxes'] ) ), $twice ), array( 'type', 'key', 'boxes' ) );
+			} else {
+				WP_CLI::log( 'None.' );
+			}
+			WP_CLI::log( sprintf( '%d rows, %d not mapped yet, %d edited in two places.', count( $rows ), aw_edit_screen_unmapped( $rows ), count( $twice ) ) );
 		}
 	);
 }
