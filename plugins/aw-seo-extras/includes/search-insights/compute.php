@@ -124,6 +124,8 @@ function aw_si_gap_action( string $label ): string {
 /**
  * Pages flagged for quality in the last 28 days (plan §5.2: Clarity rage or dead clicks, quick-backs; PageSpeed).
  * Phase 2 writes these as obs rows src clarity or psi, metric flag, value 1. Filter aw_si_quality_pages adds more.
+ * Clarity counts a page only when it was flagged on at least 3 different days (filter aw_si_quality_min_days), so one
+ * bad day no longer marks a page for 28 days; a PageSpeed flag counts at once.
  *
  * @return array<string, true> path => true.
  */
@@ -131,8 +133,12 @@ function aw_si_quality_pages(): array {
 	global $wpdb;
 	$o     = aw_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
+	$days  = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
-	$paths = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM {$o} WHERE src IN ('clarity', 'psi') AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $since ) );
+	$clarity = (array) $wpdb->get_col( $wpdb->prepare( "SELECT page FROM {$o} WHERE src = 'clarity' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d", $since, $days ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
+	$psi   = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM {$o} WHERE src = 'psi' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $since ) );
+	$paths = array_values( array_unique( array_merge( $clarity, $psi ) ) );
 	$paths = (array) apply_filters( 'aw_si_quality_pages', $paths );
 	return array_fill_keys( array_map( 'strval', $paths ), true );
 }
