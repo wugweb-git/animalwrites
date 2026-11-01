@@ -1567,6 +1567,18 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-content-actions .kit-btn { flex: 1 1 auto; width: auto; }
 }
 
+/* Home: Supreme Court campaign card (home.php, pattern aw-sc). Uses the AW Content card (photograph under a dark fade);
+   adds the case number pill, one line and the campaign's countdown. */
+.aw-sc .aw-content-body { padding-top: 34%; }
+.aw-sc .aw-content-bg { object-position: 80% 30%; } /* the dog, on the right of the photograph */
+.aw-sc-eyebrow { display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); padding: 4px 12px; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-size: .8125rem; font-weight: 600; line-height: 1.4; }
+.aw-sc-eyebrow .kit-ico { --kit-ico-size: 16px; }
+.aw-sc-line { margin: 0; color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+.aw-sc .aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-2); margin: var(--kit-space-5) 0 0; padding: 0; background: none; color: var(--kit-color-on-ink); }
+.aw-sc .aw-cd-num { font-size: var(--kit-type-h2); font-weight: 700; line-height: 1; color: var(--kit-color-accent); }
+.aw-sc .aw-cd-unit { font-weight: 600; }
+.aw-sc .aw-cd-when { flex-basis: 100%; font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+
 /* Home: AW Content and AW_Festive in one row (pattern aw-pair). Two cards, each its own design: stacked on phones, two
    equal columns of equal height from 768, the same padding and radius. In the row the festive pictures sit on top at
    2:1 (sized by the shape, not the pictures) and its button at the bottom. */

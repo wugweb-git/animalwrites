@@ -1508,14 +1508,42 @@
    "block": "animal-writes/aw-content"
   },
   {
-   "name": "AW Content and AW_Festive row",
+   "name": "Supreme Court campaign card",
+   "type": "pattern",
+   "status": "live",
+   "classes": [
+    "aw-sc"
+   ],
+   "states": [
+    "default (block animal-writes/home-sc): the AW Content card design over the campaign's featured photograph; case number pill, campaign title as H2, its summary, countdown to the compliance reports, Check your state and What the court ordered buttons; empty when the campaign is not published"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
+    "aria": "section aria-labelledby its H2; photograph alt=\"\"; icon aria-hidden",
+    "keyboard": "Tab through the two buttons",
+    "focus": "3px ring in the on-ink focus colour, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H2 (H1 only in the hero)",
+    "link": "the campaign page (#tracker, #orders)",
+    "alt": "empty (decorative photograph)",
+    "schema": "none"
+   },
+   "block": "animal-writes/aw-sc"
+  },
+  {
+   "name": "Campaign cards row",
    "type": "pattern",
    "status": "live",
    "classes": [
     "aw-pair"
    ],
    "states": [
-    "default: canvas band with the AW Content (photograph overlay) and AW_Festive (pictures on top) cards, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius"
+    "default: canvas band with the Supreme Court campaign (photograph overlay) and AW_Festive (pictures on top) cards, each its own design; stacked on phones, two equal columns of equal height from 768; same padding and radius"
    ],
    "tokens": [],
    "a11y": {
