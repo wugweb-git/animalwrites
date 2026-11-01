@@ -76,10 +76,10 @@ function dwslot( $slug, $inner, $cls = '' ) {
 }
 function dwbuttons( $btns ) {
 	$b = '';
-	foreach ( $btns as $i => $x ) {
-		$ghost = $i > 0 && ! empty( $x[2] );
-		$b    .= $ghost
-			? "<!-- wp:button {\"className\":\"is-style-outline aw-camp-ghost\"} -->\n<div class=\"wp-block-button is-style-outline aw-camp-ghost\"><a class=\"wp-block-button__link wp-element-button\" href=\"{$x[1]}\">{$x[0]}</a></div>\n<!-- /wp:button -->\n"
+	foreach ( $btns as $i => $x ) { // $x[2]: 'ghost' (on the hero's colour) or 'outline' (on a white or grey band)
+		$cls = $i > 0 && ! empty( $x[2] ) ? ( 'ghost' === $x[2] ? 'is-style-outline aw-camp-ghost' : 'is-style-outline' ) : '';
+		$b  .= $cls
+			? "<!-- wp:button {\"className\":\"$cls\"} -->\n<div class=\"wp-block-button $cls\"><a class=\"wp-block-button__link wp-element-button\" href=\"{$x[1]}\">{$x[0]}</a></div>\n<!-- /wp:button -->\n"
 			: "<!-- wp:button -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\" href=\"{$x[1]}\">{$x[0]}</a></div>\n<!-- /wp:button -->\n";
 	}
 	return "<!-- wp:buttons -->\n<div class=\"wp-block-buttons\">$b</div>\n<!-- /wp:buttons -->\n\n";
@@ -156,7 +156,7 @@ $hero = dwsec(
 	. dwh( 'Diwali is loud. Keep the animals around you safe.', 1 )
 	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. A safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
 	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
-	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', true ) ) )
+	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', 'ghost' ) ) )
 	. '</div>' . "\n" . '<!-- /wp:column -->' . "\n\n"
 	. '<!-- wp:column {"verticalAlignment":"center","width":"42%"} -->' . "\n" . '<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:42%">'
 	. dwhtml( $poster )
@@ -169,7 +169,7 @@ $hero_closed = dwsec(
 	. dwh( 'Diwali has passed. Burnt, lost and frightened animals still need you.', 1 )
 	. dwp( 'The days after Diwali bring burnt paws, stunned birds and pets that bolted. Here is who to call and what to do first.', 'aw-camp-hero-summary' )
 	. dwp( 'Our aim was no animal near you hurt, lost or left without help this Diwali.' )
-	. dwbuttons( array( array( 'Who to call', '#help' ), array( 'Lost or injured animal', '#after', true ) ) ),
+	. dwbuttons( array( array( 'Who to call', '#help' ), array( 'Lost or injured animal', '#after', 'ghost' ) ) ),
 	'aw-camp-hero aw-camp-closed'
 );
 
@@ -263,9 +263,9 @@ $help = dwsec(
 	. dwbuttons(
 		array(
 			array( 'Vets near you', '/directory/?tag=veterinary' ),
-			array( 'Animal ambulances', '/directory/?tag=animal-ambulance', true ),
-			array( 'Rescue groups', '/directory/?tag=rescue-group', true ),
-			array( 'Gaushalas', '/directory/?tag=gaushala', true ),
+			array( 'Animal ambulances', '/directory/?tag=animal-ambulance', 'outline' ),
+			array( 'Rescue groups', '/directory/?tag=rescue-group', 'outline' ),
+			array( 'Gaushalas', '/directory/?tag=gaushala', 'outline' ),
 		)
 	)
 	. dwp( dwi( 'helpline' ) . '1962 is a state service for animals, not a national number, and in several states it answers only in the day. Call a vet or rescue group in the Directory if it does not answer.', 'aw-camp-note' )
