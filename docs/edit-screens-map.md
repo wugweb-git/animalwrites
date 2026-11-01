@@ -570,7 +570,7 @@ No other key is edited by two boxes on the same screen (checked every box/field 
 - **SCF fields never read on the front end or in schema:** `aw_requires_email` (Library), `aw_paid_listing` (Opportunity), `aw_donate_url`, `aw_upi`, `aw_sectors`, `aw_reg_authority`, `aw_reg_act`, `aw_awbi_recognised`, `aw_awbi_renewed` (Listing). Details in §6.
 - **Coverage → Video embed URL** (`aw_press_video`): never read.
 - Fallback boxes `aw-listing-details` and `aw-sponsored` are not registered while SCF is active (correct; listed for completeness).
-- **Since 1 Nov 2026** LiteSpeed, Link Whisper Suggested Links, Rank Math Link Suggestions, Custom Fields, Slug and Linked from start collapsed on every post edit screen (`core/edit-screens.php`, `aw_edit_screen_collapsed_boxes()`; core `postbox_classes_{screen}_{box}` filter, adds `closed` only). Not removed.
+- **Since 1 Nov 2026** LiteSpeed, Link Whisper Suggested Links, Rank Math Link Suggestions, Custom Fields, Slug and Linked from start collapsed on every post edit screen (`core/edit-screens.php`, `aw_edit_screen_collapsed_boxes()`; core `postbox_classes_{screen}_{box}` filter, adds `closed` only, and only while the user has no saved open/closed choice on that screen). Not removed.
 - Stale ids in the admin account's saved order: `aw-faq-legal` (now `aw-legal-item`), `kits_seo` (page; no longer registered), a Rank Math content box.
 
 ---

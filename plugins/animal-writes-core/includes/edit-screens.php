@@ -540,7 +540,8 @@ function aw_edit_screen_unmapped( array $rows ): int {
 
 /**
  * Boxes that start collapsed on every post edit screen (owner, 1 Nov 2026): plugin boxes and rarely used ones.
- * Only core's postbox_classes_{screen_id}_{box_id} filter is used; the user can still open, drag and hide them.
+ * Only core's postbox_classes_{screen_id}_{box_id} filter is used, and only until the user opens or closes a box on
+ * that screen (core then saves closedpostboxes_{screen}, which wins). The user can still open, drag and hide them.
  */
 function aw_edit_screen_collapsed_boxes(): array {
 	return array( 'litespeed_meta_boxes', 'wpil_link-articles', 'rank_math_metabox_link_suggestions', 'postcustom', 'slugdiv', 'aw_linked_from' );
@@ -564,6 +565,9 @@ add_action(
 	function ( $screen ) {
 		if ( ! is_admin() || ! $screen instanceof WP_Screen || 'post' !== $screen->base || ! in_array( $screen->post_type, aw_edit_screen_post_types(), true ) ) {
 			return;
+		}
+		if ( false !== get_user_option( 'closedpostboxes_' . $screen->id ) ) {
+			return; // the user has opened or closed a box on this screen: their own choice wins
 		}
 		foreach ( aw_edit_screen_collapsed_boxes() as $box ) {
 			$hook = 'postbox_classes_' . $screen->id . '_' . $box;
