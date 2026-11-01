@@ -14,6 +14,44 @@ Snapshot of live, 1 Nov 2026.
 
 **How to read the order.** WordPress prints contexts side, normal, advanced; inside each, priority high → core → default → low; then the user's saved order (`meta-box-order_{type}`) overrides. Block-editor types (post, page, aw_legal, aw_campaign, aw_opportunity, aw_listing) replace every core box flagged `__back_compat_meta_box` with a sidebar panel; Custom Fields shows only when switched on in Preferences → Panels; all other boxes (ours, SCF, LiteSpeed, Link Whisper) show in the meta-box area (normal/advanced at the bottom, side in the Settings sidebar). Classic-editor types: aw_news, aw_press, aw_message, aw_claim, aw_report, attachment.
 
+**Boxes by plugin**
+
+General (all types, WordPress): Publish, Categories, Tags, Linked campaigns, Excerpt, Featured image, Author, Slug, Revisions, Attributes, Discussion, Custom Fields.
+
+The SCF groups ship in Animal Writes core (`acf-json/`); SCF only renders them.
+
+| Plugin | Box | Purpose |
+|---|---|---|
+| Animal Writes core | Issued by | Issuer |
+| Animal Writes core | Place | Place |
+| Animal Writes core | Related | Links |
+| Animal Writes core | Linked from | Links |
+| Animal Writes core | Library item | Details |
+| Animal Writes core | Campaign details (side box) | Details |
+| Animal Writes core | Real-world impact | Campaign outcome |
+| Animal Writes core | Volunteers | People |
+| Animal Writes core | Coverage | Details |
+| Animal Writes core | Review (claims) | Review |
+| Animal Writes core | Report | Report |
+| Animal Writes core | Organisation details (fallback) | Details |
+| Animal Writes core | Sponsored (fallback) | Details |
+| Animal Writes core | Resource details (SCF) | Details |
+| Animal Writes core | Source (SCF, News) | Sources |
+| Animal Writes core | Library details (SCF) | Details |
+| Animal Writes core | Campaign details (SCF) | Details |
+| Animal Writes core | Opportunity details (SCF) | Details |
+| Animal Writes core | Organisation details (SCF) | Details |
+| Animal Writes core | Photo, Banner image (category, tag) | Image |
+| Animal Writes core | Find help: listing types (tag) | Find help |
+| Animal Writes core | Guides linking here (tag) | Links |
+| AW SEO Plus | FAQ (post screens, category and tag screens) | FAQ |
+| AW Sourcing | Where these details come from | Sources |
+| Kits Core | Image context, Focus keyphrase (media) | Image |
+| Rank Math SEO | Rank Math SEO (posts, terms) | SEO |
+| Rank Math SEO | Link Suggestions | Links |
+| LiteSpeed Cache | LiteSpeed | Image / cache |
+| Link Whisper | Link Whisper Suggested Links | Links |
+
 ---
 
 ## 1. Boxes per post type, screen order
