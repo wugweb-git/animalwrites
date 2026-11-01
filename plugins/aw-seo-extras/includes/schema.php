@@ -1333,6 +1333,17 @@ add_filter(
 				unset( $data['WebPage'], $data['primaryImage'] );
 			}
 		}
+		foreach ( $nodes as $node ) {
+			if ( 'NewsArticle' === ( $node['@type'] ?? '' ) && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
+				// One date for the story (1 Nov 2026): the page shows the day it was reported, as the NewsArticle does, not
+				// the hour the item was published here.
+				foreach ( array( 'datePublished', 'dateModified' ) as $k ) {
+					if ( ! empty( $node[ $k ] ) ) {
+						$data['WebPage'][ $k ] = $node[ $k ];
+					}
+				}
+			}
+		}
 		foreach ( $nodes as $i => $node ) {
 			if ( 'AboutPage' === ( $node['@type'] ?? '' ) && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 				$data['WebPage'] = array_merge( $data['WebPage'], array( '@type' => 'AboutPage', 'mainEntity' => $node['mainEntity'] ) ); // Rank Math's page, as an About page

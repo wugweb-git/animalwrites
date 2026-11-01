@@ -91,6 +91,39 @@ function aw_team_dates_add_1101() {
 add_action( 'admin_init', 'aw_team_dates_add_1101' );
 
 /**
+ * Dates follow-up of 1 Nov 2026, once (flag aw_team_dates_1101b): the 17 Nov entry names what the 19 May 2026 judgment
+ * set (compliance reports due, not a hearing); a cause-list check on 12 Nov; the Search Insights thresholds review on
+ * 25 Nov. A date already on the calendar under the same title is not added again.
+ */
+function aw_team_dates_add_1101b() {
+	if ( get_option( 'aw_team_dates_1101b' ) ) {
+		return;
+	}
+	$all = aw_team_dates();
+	foreach ( $all as $i => $d ) {
+		if ( '2026-11-17' === $d['date'] && 'Supreme Court stray-dog compliance hearing (press-reported)' === $d['title'] ) {
+			$all[ $i ]['title'] = 'Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment)';
+		}
+	}
+	$add  = array(
+		array( 'date' => '2026-11-12', 'title' => 'Cause-list check for 17 Nov', 'note' => 'Check the Supreme Court cause list for the stray-dog case before the 17 Nov entry is relied on.' ),
+		array( 'date' => '2026-11-25', 'title' => 'Search Insights thresholds review (Wikipedia 2×, GDELT 3×)', 'note' => 'Review the Rising thresholds: Wikipedia pageviews at 2× the usual level, GDELT at 3× (GDELT is off while it refuses our requests).' ),
+	);
+	$have = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	foreach ( $add as $d ) {
+		if ( ! isset( $have[ $d['date'] . '|' . $d['title'] ] ) ) {
+			$all[] = $d;
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_1101b', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_1101b' );
+
+/**
  * The FAQ holdout ended early (owner, 31 Oct 2026: no holdout): its 1 Dec date leaves the calendar, once (flag
  * aw_team_dates_faq_holdout_off).
  */
