@@ -77,8 +77,10 @@ add_action(
  * Inter is served once. The theme's own variable file (assets/fonts/inter/inter-latin.woff2, weights 100 to 900,
  * font-display: swap) covers every weight the site uses. The Font Library copy of Inter (wp-content/uploads/fonts) also
  * declares each weight as a separate static file without swap, and as the later rules they won: extra 118 KB files
- * per page, with text hidden while they load (the campaign headings at 800 waited for one). Those overlapping upright
- * faces are left out (the variable file draws 800 at the same width as the static file); the library's italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
+ * per page, with text hidden while they load (the campaign headings at 800 waited for one). The upright library faces
+ * the theme's file covers are left out (the variable file draws 800 at the same width as the static file); the range is
+ * read as resolved, so a narrower range saved in Global Styles keeps the library file for the weights outside it. The
+ * library's italics stay. Phones do not preload the file: on a slow phone a preload would compete with the page's main picture (wide screens do, above).
  */
 add_action(
 	'init',
@@ -90,15 +92,29 @@ add_action(
 		add_action(
 			'wp_head',
 			function () {
-				$fonts = WP_Font_Face_Resolver::get_fonts_from_theme_json();
+				$fonts  = WP_Font_Face_Resolver::get_fonts_from_theme_json();
+				$is_lib = fn( $f ) => false !== strpos( implode( ' ', (array) ( $f['src'] ?? array() ) ), '/uploads/fonts/' );
+				$inter  = fn( $f ) => 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && 'normal' === ( $f['font-style'] ?? 'normal' );
+				// The weights the theme's own file is declared for, as resolved (the site's saved Global Styles can narrow
+				// theme.json's range): only those library faces are left out, so no weight is ever left without a file.
+				$lo = 1000;
+				$hi = 0;
+				foreach ( $fonts as $faces ) {
+					foreach ( $faces as $f ) {
+						if ( $inter( $f ) && ! $is_lib( $f ) ) {
+							$w  = array_map( 'intval', preg_split( '/\s+/', trim( (string) ( $f['font-weight'] ?? '400' ) ) ) );
+							$lo = min( $lo, min( $w ) );
+							$hi = max( $hi, max( $w ) );
+						}
+					}
+				}
 				foreach ( $fonts as $family => $faces ) {
 					$fonts[ $family ] = array_values(
 						array_filter(
 							$faces,
-							function ( $f ) {
-								$src    = implode( ' ', (array) ( $f['src'] ?? array() ) );
+							function ( $f ) use ( $is_lib, $inter, $lo, $hi ) {
 								$weight = (int) ( $f['font-weight'] ?? 0 );
-								return ! ( 'inter' === strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) && false !== strpos( $src, '/uploads/fonts/' ) && 'normal' === ( $f['font-style'] ?? 'normal' ) && $weight >= 100 && $weight <= 900 );
+								return ! ( $inter( $f ) && $is_lib( $f ) && $weight >= $lo && $weight <= $hi );
 							}
 						)
 					);
