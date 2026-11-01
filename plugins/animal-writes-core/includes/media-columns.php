@@ -2,6 +2,8 @@
 /**
  * Media Library list columns: name, slug, where each file is used, Rank Math page score, what is missing and what to optimise.
  *
+ * - Every SEO field of a file is visible: Caption = SEO title, Description = SEO description, Image context, and
+ *   Alternative Text (Rank Math's own column), each as its own column.
  * - No Author column (the site has one author).
  * - "Uploaded to" keeps what WordPress prints (parent post, Attach / Detach) and lists every other place the file is used
  *   as extra rows below it: featured image, source image, document preview, logos, social image, a category or tag
@@ -188,11 +190,13 @@ add_filter(
 		$ours   = array(
 			'aw_slug'    => 'Slug',
 			'aw_caption' => 'SEO title',
+			'aw_desc'    => 'SEO description',
+			'aw_context' => 'Image context',
 			'aw_parent'  => 'Uploaded to',
 			'aw_seo'     => 'SEO',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'rank_math_image_alt', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$order  = array( 'cb', 'title', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
 		$remove = array( 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
@@ -223,7 +227,7 @@ add_filter(
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
@@ -237,6 +241,16 @@ add_action(
 		if ( 'aw_caption' === $column ) {
 			$caption = trim( wp_strip_all_tags( (string) $post->post_excerpt ) );
 			echo '' !== $caption ? esc_html( $caption ) : '—';
+			return;
+		}
+		if ( 'aw_desc' === $column ) {
+			$desc = trim( wp_strip_all_tags( (string) $post->post_content ) );
+			echo '' !== $desc ? esc_html( $desc ) : '—';
+			return;
+		}
+		if ( 'aw_context' === $column ) {
+			$ctx = trim( wp_strip_all_tags( (string) get_post_meta( $post_id, 'kits_image_context', true ) ) );
+			echo '' !== $ctx ? esc_html( $ctx ) : '—';
 			return;
 		}
 		$page_ids = ! empty( $GLOBALS['wp_query']->posts ) ? wp_list_pluck( $GLOBALS['wp_query']->posts, 'ID' ) : array( $post_id );
