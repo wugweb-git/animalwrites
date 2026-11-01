@@ -516,17 +516,18 @@ function aw_seo_attachment( $att, $size = 'large' ) {
 }
 
 /**
- * A share picture every app shows (owner, 19 + 21 Oct 2026: og:image and twitter:image are never AVIF, site-wide).
- * Uploads are turned into AVIF (Modern Image Formats), which Facebook, WhatsApp and LinkedIn don't reliably show, so an
- * AVIF picture from our uploads goes out as its original upload (the WebP, JPEG or PNG kept beside it); without one, a
- * 1200x630 JPEG is made once and kept beside it ({name}-og.jpg). Anything that is not an AVIF upload passes through.
+ * A share picture every app shows (owner, 19 + 21 Oct 2026, 1 Nov 2026: og:image and twitter:image are never AVIF or
+ * WebP, site-wide). Uploads are turned into AVIF or WebP (resized copies), which Facebook, WhatsApp and LinkedIn don't
+ * reliably show, so an AVIF or WebP picture from our uploads goes out as its original upload (the JPEG or PNG kept
+ * beside it); without one, a 1200x630 JPEG is made once and kept beside it ({name}-og.jpg). Anything that is not an AVIF
+ * or WebP upload passes through.
  *
  * @param string $url Picture address.
  * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
  */
 function aw_seo_share_safe_url( $url ) {
 	$plain = strtok( (string) $url, '?' );
-	if ( ! preg_match( '/\.avif$/i', (string) $plain ) ) {
+	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $plain ) ) {
 		return array( $url, 0, 0, '' );
 	}
 	$up   = wp_get_upload_dir();
@@ -536,8 +537,8 @@ function aw_seo_share_safe_url( $url ) {
 		return array( $url, 0, 0, '' );
 	}
 	$path = $up['basedir'] . substr( $abs, strlen( $base ) );
-	$stem = preg_replace( '/(-\d+x\d+)?\.avif$/i', '', $path ); // the upload's own name, without a size or format
-	$mime = array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'webp' => 'image/webp', 'png' => 'image/png' );
+	$stem = preg_replace( '/(-\d+x\d+)?\.(avif|webp)$/i', '', $path ); // the upload's own name, without a size or format
+	$mime = array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png' ); // never WebP: it is not a share format either
 	foreach ( $mime as $ext => $type ) {
 		if ( file_exists( $stem . '.' . $ext ) ) {
 			$size = wp_getimagesize( $stem . '.' . $ext );
@@ -554,17 +555,17 @@ function aw_seo_share_safe_url( $url ) {
 }
 
 /**
- * The 1200x630 share JPEG ({name}-og.jpg) of an AVIF upload with no original kept beside it.
+ * The 1200x630 share JPEG ({name}-og.jpg) of an AVIF or WebP upload with no original kept beside it.
  *
- * @param string $path AVIF file (the full upload or one of its sizes).
+ * @param string $path AVIF or WebP file (the full upload or one of its sizes).
  * @return string The JPEG's path ('' when the file is not such an AVIF or the JPEG could not be made).
  */
 function aw_seo_share_jpeg_build( $path ) {
-	if ( ! preg_match( '/\.avif$/i', (string) $path ) || ! file_exists( $path ) ) {
+	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $path ) || ! file_exists( $path ) ) {
 		return '';
 	}
-	$stem = preg_replace( '/(-\d+x\d+)?\.avif$/i', '', $path );
-	foreach ( array( 'jpg', 'jpeg', 'webp', 'png' ) as $ext ) {
+	$stem = preg_replace( '/(-\d+x\d+)?\.(avif|webp)$/i', '', $path );
+	foreach ( array( 'jpg', 'jpeg', 'png' ) as $ext ) {
 		if ( file_exists( $stem . '.' . $ext ) ) {
 			return ''; // the original is shared as it is
 		}
