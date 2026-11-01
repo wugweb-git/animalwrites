@@ -12,6 +12,13 @@ Code: `plugins/animal-writes-core/includes/edit-screens.php`. Map: `plugins/anim
 - **The map** says what each box and key is: `boxes` by box id (title, source, file, types, notes) and `keys` by stored name (store, label, type, types, boxes, uses, notes). A box or field missing from the map shows **Not mapped yet**.
 - Some boxes are added only on the edit screen itself (Rank Math, the attachment fields); they are listed from the map with a note. LiteSpeed adds its box only in WP admin, so it is missing from the command-line rows.
 
+## What the page shows
+
+- **Plugin** and **Purpose** for each box, from the box's optional `plugin` and `purpose` in the map. Our own plugins are named like any other (Animal Writes core, AW SEO Plus, AW Sourcing). Without them the row shows the box's `source` and "—".
+- **General (all types)**: one row at the top for the WordPress core boxes (Publish, Categories, Tags, Excerpt, Featured image, Slug, Author, Revisions, Discussion, Custom Fields, the term screen's Name, Slug, Parent, Description …). The rows per type list only the other boxes. A core box that is not mapped yet stays under its type.
+- **FAQ** (`aw-faq` on posts, `term-faq` on terms) is one row listing every type and taxonomy it shows on.
+- **Edited in two places**: each key that more than one box on the same type's screen can edit (type, key, boxes), or "None.". Custom Fields is left out (it can edit any key), and so is any box or key the map marks `"readonly": true`. The command prints the same list and ends with `N rows, N not mapped yet, N edited in two places.`
+
 Notes on each row: the box's own note, a key edited in two boxes on the same screen, keys saved but never read, boxes hidden by an SCF group, not mapped yet.
 
 ## When you add or change a field
@@ -37,7 +44,7 @@ Notes on each row: the box's own note, a key edited in two boxes on the same scr
    - `types`: the post types or taxonomies it is on; empty means any.
    - `uses.kind`: `display`, `schema`, `faq`, `filter`, `sourcing`, `analytics` or `admin`. An empty `uses` list means saved but never read; say so in `notes`.
    - Short paths: `core/` = `animal-writes-core/includes/`, `seo/` = `aw-seo-extras/includes/`, `src/` = `aw-sourcing/includes/`, `kits/` = `kits-core/includes/`.
-2. A new box: add it under `boxes` with its id (the first argument of `add_meta_box()`), title, source, file and types. `runtime` is `live` (default), `scf`, `fallback` (only shown when it registers, e.g. when SCF is off) or `edit-screen-only`. Term-screen entries have `"screen": "term"` and a `match` (file, hooks, priority).
+2. A new box: add it under `boxes` with its id (the first argument of `add_meta_box()`), title, source, file, types, `plugin` and a one-line `purpose`. `runtime` is `live` (default), `scf`, `fallback` (only shown when it registers, e.g. when SCF is off) or `edit-screen-only`. Term-screen entries have `"screen": "term"` and a `match` (file, hooks, priority).
 3. Open Animal Writes → Edit screens (or run `wp aw-edit-screens --type=<type>`) and check the box shows with no "Not mapped yet".
 
 Another plugin can add entries without editing the file, with the filters `aw_edit_screen_boxes` (box id => entry) and `aw_edit_screen_map` (key => entry, boxes already resolved to id, title, source).
