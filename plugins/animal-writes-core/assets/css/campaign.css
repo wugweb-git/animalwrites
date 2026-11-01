@@ -231,16 +231,17 @@
 	.aw-camp--lab-rules .aw-letter-out { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--kit-space-5); align-content: start; }
 	.aw-camp--lab-rules .aw-letter-out > * { grid-column: 1 / -1; }
 	.aw-camp--lab-rules .aw-letter-out > :is(.aw-letter-optin, .aw-letter-field) { grid-column: auto; }
-	/* Share: the two pictures under the buttons, the link preview beside both */
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-rows: auto 1fr; }
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 2; grid-row: 1 / span 2; }
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 1; grid-row: 2; }
+	/* Share: the buttons across, then the link preview beside the two pictures */
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-copy { grid-column: 1 / -1; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 1; grid-row: 2; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 2; grid-row: 2; padding-top: 0; border-top: 0; }
 }
 @media (min-width: 1200px) {
 	/* Share: buttons, pictures and preview in three columns */
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: none; }
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-pics { grid-column: 2; grid-row: 1; padding-top: 0; border-top: 0; }
-	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 3; grid-row: 1; }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section :is(.aw-letter-share-copy, .aw-letter-share-pics, .aw-letter-share-preview) { grid-row: 1; grid-column: auto; }
+	/* Hero poster: the Gazette strip keeps the 3:1 masthead shape it has below 1200, so the hero stays under 720px */
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { aspect-ratio: 3 / 1; }
 }
 .aw-camp.aw-camp--lab-rules .aw-camp-row .wp-block-post-template > li { flex-basis: var(--kit-card-min); }
 /* The phone bar never covers text or focus (WCAG 2.4.11): the page keeps the bar's height free at the bottom.
