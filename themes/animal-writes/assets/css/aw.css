@@ -1572,6 +1572,33 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-content::before { background: linear-gradient(90deg, color-mix(in srgb, var(--kit-color-ink) 92%, transparent) 0%, color-mix(in srgb, var(--kit-color-ink) 80%, transparent) 55%, color-mix(in srgb, var(--kit-color-ink) 45%, transparent) 100%); }
 }
 
+/* Home: AW Content and AW_Festive in one row (pattern aw-pair). A canvas band with two dark cards: stacked on phones,
+   two equal columns from 768, equal height. Inside the row both cards take the same padding, radius and H2 size; the
+   festive pictures stay on top of its copy, the AW Content text sits at the bottom of its photograph. Card padding 24,
+   32 from 1200; the AW Content buttons stacked full width until 1200 (the cards are narrow). */
+.aw-pair-grid { display: grid; gap: var(--kit-space-grid); }
+.aw-pair-grid > :is(.aw-content, .aw-festive) { margin: 0; max-width: none; width: auto; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); overflow: hidden; }
+.aw-pair-grid > .aw-festive { padding-block: var(--kit-space-5) !important; } /* over .kit-section's own !important section padding */
+.aw-pair-grid > .aw-content { display: flex; flex-direction: column; justify-content: flex-end; }
+.aw-pair-grid > .aw-content::before { background: color-mix(in srgb, var(--kit-color-ink) 85%, transparent); }
+.aw-pair-grid > .aw-content .aw-content-inner { width: 100%; }
+.aw-pair-grid > .aw-content .aw-content-inner > * { max-width: none; }
+.aw-pair-grid > .aw-content .aw-content-offers { grid-template-columns: 1fr; }
+.aw-pair-grid > .aw-festive .aw-festive-in { grid-template-columns: 1fr; gap: var(--kit-space-5); }
+.aw-pair-grid > .aw-festive .aw-festive-art { order: -1; aspect-ratio: 2 / 1; }
+.aw-pair-grid :is(.aw-content, .aw-festive) h2 { font-size: var(--kit-type-h2); }
+.aw-pair-grid .aw-content-actions { flex-direction: column; }
+.aw-pair-grid .aw-content-actions .kit-btn { width: 100%; }
+@media (min-width: 768px) {
+	.aw-pair-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1200px) {
+	.aw-pair-grid > :is(.aw-content, .aw-festive) { padding: var(--kit-space-6); }
+	.aw-pair-grid > .aw-festive { padding-block: var(--kit-space-6) !important; }
+	.aw-pair-grid .aw-content-actions { flex-direction: row; }
+	.aw-pair-grid .aw-content-actions .kit-btn { width: auto; }
+}
+
 /* Section heads on Home: H2, one supporting line, a small ghost "see all"; 16px between them and to the content */
 .home .kit-sec-head { row-gap: var(--kit-space-4); margin-bottom: var(--kit-space-head); }
 .home .kit-sec-head p { margin-top: var(--kit-space-4); }

@@ -1507,6 +1507,34 @@
    "block": "animal-writes/aw-content"
   },
   {
+   "name": "AW Content and AW_Festive row",
+   "type": "pattern",
+   "status": "live",
+   "classes": [
+    "aw-pair"
+   ],
+   "states": [
+    "default: canvas band with the AW Content and AW_Festive cards; stacked on phones, two equal columns of equal height from 768; same padding, radius and H2 size in both cards"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "each card a section labelled by its H2",
+    "keyboard": "Tab through each card's buttons",
+    "focus": "3px ring in --kit-color-on-ink on the dark cards, 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "two H2s, one per card",
+    "link": "the cards' own",
+    "alt": "as in each card",
+    "schema": "none"
+   },
+   "block": "animal-writes/aw-pair"
+  },
+  {
    "name": "Need help now",
    "type": "pattern",
    "status": "live",
