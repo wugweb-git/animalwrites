@@ -1,8 +1,8 @@
 <?php
 /**
  * Pictures already in the Media Library that can serve as the cover of a page that has none worth keeping. Each row:
- * picture ID, target page ID, confidence (high, medium, low), undo-only (true when the picture is an undo copy that
- * Apply uses up). The screen Media -> Reuse pictures re-checks every row on the live site before it changes anything.
+ * picture ID, target page ID, confidence (high, medium, low), undo-only (true when the picture is a retained undo copy;
+ * once it is a cover it is in use and cannot be restored from there by name). The screen Media -> Reuse pictures re-checks every row on the live site before it changes anything.
  *
  * @package animal-writes-core
  */

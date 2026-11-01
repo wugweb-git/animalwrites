@@ -230,7 +230,7 @@ function aw_media_reuse_apply( $picture ) {
 	}
 	$log[ $picture ]['status'] = 'applied';
 	aw_media_reuse_save_log( $log );
-	aw_media_reuse_refresh();
+	aw_media_reuse_refresh( $target );
 	return '';
 }
 
@@ -295,12 +295,16 @@ function aw_media_reuse_undo( $picture ) {
 	$log[ $picture ]['status'] = 'undone';
 	$log[ $picture ]['time']   = time();
 	aw_media_reuse_save_log( $log );
-	aw_media_reuse_refresh();
+	aw_media_reuse_refresh( (int) $log[ $picture ]['target'] );
 	return '';
 }
 
 /** The public duplicate count is kept for 5 minutes and the category photos are assigned by a rebuild: refresh both. */
-function aw_media_reuse_refresh() {
+function aw_media_reuse_refresh( $target = 0 ) {
+	if ( $target ) {
+		clean_post_cache( $target );
+		do_action( 'litespeed_purge_post', $target ); // this page only
+	}
 	if ( function_exists( 'aw_thumb_rebuild' ) ) {
 		aw_thumb_rebuild(); // now, so thumb-dupes never counts a stale map
 	}
@@ -385,7 +389,7 @@ function aw_media_reuse_screen() {
 			'target'     => $target ? (int) $row['target'] . ' (' . esc_html( $target->post_type ) . ') <a href="' . esc_url( (string) get_permalink( $target ) ) . '">' . esc_html( wp_html_excerpt( (string) get_the_title( $target ), 60, '…' ) ) . '</a>' : (int) $row['target'] . ' (missing)',
 			'current'    => esc_html( $current['text'] ),
 			'confidence' => esc_html( $row['confidence'] ),
-			'note'       => $row['undo_only'] ? 'Undo-only picture: applying it removes its undo copy.' : '',
+			'note'       => $row['undo_only'] ? 'Retained undo copy: once it is a cover it is in use and can no longer be restored from there by name.' : '',
 			'state'      => esc_html( $state ),
 			'action'     => $action,
 		);
