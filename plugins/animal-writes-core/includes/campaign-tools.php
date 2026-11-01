@@ -969,6 +969,7 @@ function aw_sc_rows_a11y( $html ) {
 	if ( false === strpos( $html, 'aw-camp--sc-stray-dogs' ) || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
 		return $html;
 	}
+	$html  = aw_sc_tracker_folds( $html );
 	$p     = new WP_HTML_Tag_Processor( $html );
 	$head  = '';
 	$n     = 0;
@@ -1005,6 +1006,39 @@ function aw_sc_rows_a11y( $html ) {
 		}
 	}
 	return $p->get_updated_html();
+}
+
+/**
+ * The state tracker's long cell folded: in every state card the third cell (the latest public order, and what is due)
+ * goes inside a details element whose summary is that column's own heading, closed, so each card stays short (Layout
+ * rules 5 and 10). The words are the table's own; without the heading the cell is left as it is.
+ *
+ * @param string $html The rendered content.
+ * @return string
+ */
+function aw_sc_tracker_folds( $html ) {
+	return (string) preg_replace_callback(
+		'#(<figure\b[^>]*\baw-camp-tracker\b[^>]*>)(.*?)(</figure>)#s',
+		function ( $f ) {
+			if ( ! preg_match( '#<thead\b.*?</thead>#s', $f[2], $head ) || ! preg_match_all( '#<th\b[^>]*>(.*?)</th>#s', $head[0], $th ) || empty( $th[1][2] ) ) {
+				return $f[0];
+			}
+			$label = trim( wp_strip_all_tags( $th[1][2] ) );
+			$cell  = function ( $tr ) use ( $label ) {
+				$n = 0;
+				return preg_replace_callback(
+					'#(<td\b[^>]*>)(.*?)(</td>)#s',
+					function ( $td ) use ( &$n, $label ) {
+						return 3 === ++$n && '' !== trim( $td[2] ) ? $td[1] . '<details class="aw-sc-fold"><summary>' . esc_html( $label ) . '</summary>' . $td[2] . '</details>' . $td[3] : $td[0];
+					},
+					$tr[0]
+				);
+			};
+			$rows  = fn( $tb ) => preg_replace_callback( '#<tr\b[^>]*>.*?</tr>#s', $cell, $tb[0] );
+			return $f[1] . (string) preg_replace_callback( '#<tbody\b.*?</tbody>#s', $rows, $f[2] ) . $f[3];
+		},
+		$html
+	);
 }
 
 /**
