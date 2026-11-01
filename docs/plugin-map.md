@@ -2,6 +2,8 @@
 
 Each file in the plugins and what it does. animal-writes-core, Kits Core and AW Sourcing load from `animal-writes-core/animal-writes-core.php` (Kits Core is required first, AW Sourcing last; either may also be active on its own and is then not loaded twice); Mailweb (`mailweb`) and `aw-seo-extras` are separate plugins. Forms: see `how-to-change-a-form.md`.
 
+Edit screens (every box, its fields, stored keys and where they are used): see `edit-screens-map.md`.
+
 ## Three areas, three owners (owner, 31 Oct 2026)
 
 Search Insights, Sourcing and Classification are separate areas. A change belongs to the area that owns the screen and the logic, not to the area whose data it reads.
