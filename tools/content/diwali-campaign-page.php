@@ -142,7 +142,7 @@ if ( ! $term_id ) {
 $poster = '<div class="aw-camp-poster">'
 	. '<figure class="aw-camp-poster-doc">' . wp_get_attachment_image( DW_HERO, 'large', false, array( 'loading' => 'eager', 'decoding' => 'async' ) ) . '</figure>'
 	. '<p class="aw-camp-stamp">8 Nov 2026</p>'
-	. '[aw_countdown date="' . DW_DIWALI . '" label="Diwali"]'
+	. '[aw_countdown label="Diwali"]'
 	. '<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">If an animal is hurt</span> '
 	. '<a class="kit-chip kit-chip--on-ink" href="#help">Who to call</a> '
 	. '<a class="kit-chip kit-chip--on-ink" href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a> '
@@ -203,16 +203,14 @@ $law = dwsec(
 	. dwh( 'Owls and wildlife', 3 )
 	. dwp( 'Owls are protected under the Wild Life (Protection) Act, 1972. The barn owl, the Indian eagle owl and nine more owls are in Schedule I, its highest protection. Catching or selling an owl is an offence.' )
 	. dwp( 'Film it, note the time and place, and report it to the police or on 112.' )
-	. dwmore( 'How to report animal cruelty', '/resources/how-to-report-animal-cruelty/' ),
-	'aw-camp-grey'
-);
-$rules = dwsec(
-	'rules',
-	dwh( 'Firecracker rules' )
+	. dwmore( 'How to report animal cruelty', '/resources/how-to-report-animal-cruelty/' )
+	. "<!-- wp:group {\"anchor\":\"rules\",\"className\":\"aw-camp-open\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"rules\" class=\"wp-block-group aw-camp-open\">"
+	. dwh( 'Firecracker rules' )
 	. dwp( 'Supreme Court orders since 2018 allow only less-polluting "green" crackers, sold through licensed traders, and limit bursting on Diwali to two hours, which the states fix. Noise crackers are banned between 10 pm and 6 am, and no cracker may be louder than 125 dB at four metres.' )
 	. dwp( 'Delhi-NCR has its own orders. The Supreme Court heard the 2026 matter on 30 Sep 2026 and 29 Oct 2026 and said it would pass a balanced order; when we checked on 1 Nov 2026, it had not been published. In Odisha, the State Pollution Control Board has advised bursting only between 7 pm and 9 pm.' )
-	. dwp( 'States and district magistrates issue their own timings and bans, so check your state\'s or district\'s order before you buy or burst.' ),
-	'aw-camp-white aw-camp-open'
+	. dwp( 'States and district magistrates issue their own timings and bans, so check your state\'s or district\'s order before you buy or burst.' )
+	. "</div>\n<!-- /wp:group -->\n\n",
+	'aw-camp-grey'
 );
 
 /* how-to-help: five action cards, the night checklist, who to call. */
@@ -227,10 +225,11 @@ $cards = array(
 	array( 'after', $card( 'injured', 'After Diwali: burnt, lost or injured animals', dwp( 'Burnt fur, limping, pawing at the eyes or mouth, shaking or hiding are signs an animal needs a vet. No ointments or home remedies: get it to a vet or a rescue group. A frightened animal may bite, so approach slowly and keep your hands away from its mouth. Move it only if it is in danger where it lies.' ) . dwp( 'If your pet is missing, search nearby hiding places at dawn, tell the guards and your RWA group, post photos on local groups, call the vets and shelters near you, and update your microchip registry. Clear unburnt crackers and wrappers from streets and feeding spots: animals chew them.' ), dwmore( 'Helping an injured animal: moving it safely', '/resources/found-an-injured-animal-what-to-do/' ) ) ),
 );
 $grid = '';
-foreach ( $cards as $c ) { // each card has its own anchor, so the hero and FAQ can link to it
-	$grid .= "<!-- wp:group {\"anchor\":\"{$c[0]}\",\"className\":\"aw-camp-card\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"{$c[0]}\" class=\"wp-block-group aw-camp-card\">{$c[1]}</div>\n<!-- /wp:group -->\n\n";
+foreach ( $cards as $c ) { // each card has its own anchor, so the hero and FAQ can link to it; before and night cards hide after Diwali
+	$cls   = 'aw-camp-card' . ( in_array( $c[0], array( 'before', 'night' ), true ) ? ' aw-camp-open' : '' );
+	$grid .= "<!-- wp:group {\"anchor\":\"{$c[0]}\",\"className\":\"$cls\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"{$c[0]}\" class=\"wp-block-group $cls\">{$c[1]}</div>\n<!-- /wp:group -->\n\n";
 }
-$todo    = dwsec( 'what-to-do', dwh( 'What to do, and when' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-grey' );
+$todo    = dwsec( 'what-to-do', dwh( 'What to do, and when' ) . "<!-- wp:group {\"className\":\"aw-camp-grid\",\"layout\":{\"type\":\"default\"}} -->\n<div class=\"wp-block-group aw-camp-grid\">$grid</div>\n<!-- /wp:group -->\n\n", 'aw-camp-white' );
 $tonight = dwsec(
 	'tonight',
 	dwh( 'Tonight, in order' )
@@ -271,7 +270,7 @@ $help = dwsec(
 	. dwp( dwi( 'helpline' ) . '1962 is a state service for animals, not a national number, and in several states it answers only in the day. Call a vet or rescue group in the Directory if it does not answer.', 'aw-camp-note' )
 	. dwmore( 'What 1962 is and where it runs', '/resources/1962-helpline-mobile-veterinary-units/' )
 	. dwmore( 'Who to call for an animal emergency in India', '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ),
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 
 /* faq: six questions (FAQ rules: 3 to 6, answer first, under 50 words, one link). */
@@ -294,7 +293,7 @@ $faq = dwsec(
 		)
 	)
 	. '</div>' . "\n" . '<!-- /wp:column --></div>' . "\n" . '<!-- /wp:columns -->' . "\n\n",
-	'aw-camp-grey'
+	'aw-camp-white'
 );
 
 /* news: the newest linked News items, then the linked guides. */
@@ -305,7 +304,7 @@ $news = dwsec(
 	. dwrow( 91, 'aw_news', 6, $term_id )
 	. dwrow( 92, 'post', 8, $term_id )
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 
 /* library: the Acts linked to the campaign. */
@@ -326,7 +325,7 @@ $library = dwsec(
 <!-- /wp:query -->',
 		$term_id
 	) . "\n\n",
-	'aw-camp-grey'
+	'aw-camp-white'
 );
 
 /* press: social posts linked by the campaign's keywords; hidden while there are none. */
@@ -334,7 +333,7 @@ $press = dwsec(
 	'',
 	dwhtml( '<header class="kit-ed-head"><div><h2>On social media</h2><p class="aw-camp-lede">What people are posting about Diwali and animals.</p></div><a class="kit-ed-more" href="/press-coverage/">See all ' . dwi( 'arrow-right' ) . '</a></header>' )
 	. dwrow( 94, 'aw_press', 12, $term_id, 'aw-camp-row aw-camp-row-q' ),
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 
 /* next-steps: open and closed versions. */
@@ -349,7 +348,7 @@ $next_open = dwsec(
 		. '<li><strong>After Diwali</strong><span>We update this page</span></li>'
 		. '</ol>'
 	),
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 $next_closed = dwsec(
 	'next-closed',
@@ -362,7 +361,7 @@ $next_closed = dwsec(
 		. '<li><strong>Cracker litter</strong><span>Clear it from streets and feeding spots</span></li>'
 		. '</ol>'
 	),
-	'aw-camp-white'
+	'aw-camp-grey'
 );
 
 /* updates: sharing and the newsletter line. */
@@ -380,7 +379,7 @@ $content = '<!-- wp:group {"align":"full","className":"aw-camp aw-camp--diwali",
 	. dwslot( 'hero', $hero . $hero_closed )
 	. dwslot( 'next-steps', $next_closed, 'aw-camp-closed' )
 	. dwslot( 'context', $what )
-	. dwslot( 'why-it-matters', $law . $rules )
+	. dwslot( 'why-it-matters', $law )
 	. dwslot( 'how-to-help', $todo . $tonight . $help )
 	. dwslot( 'faq', $faq )
 	. dwslot( 'news', $news )
