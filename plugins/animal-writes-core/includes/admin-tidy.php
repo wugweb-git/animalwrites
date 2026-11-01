@@ -16,10 +16,6 @@
  * - SCF (Secure Custom Fields' field-group editor: set up once; the fields themselves stay on every edit screen).
  * - Admin bar: Rank Math SEO and UpdraftPlus shortcuts.
  *
- * Fluent Forms' unread count also counts only entries someone has to act on: campaign letters and newsletter sign-ups
- * are marked read as they arrive (they are handled in FluentCRM), so the count shows volunteers, claims, reports and
- * contact messages.
- *
  * @package animal-writes-core
  */
 
@@ -107,15 +103,6 @@ add_action(
 	PHP_INT_MAX
 );
 
-/** Fluent Forms forms whose entries need no one to read them: campaign letters and newsletter sign-ups. */
-function aw_ff_autoread_ids() {
-	return array_filter( array_map( 'intval', array( get_option( 'aw_ff_campaign_form' ), get_option( 'aw_nl_ff_form' ), get_option( 'aw_nl_ff_form_full' ) ) ) );
-}
-
-add_action(
-	'fluentform/submission_inserted',
-	function ( $entry_id, $form_data, $form ) {
-		$form_id = (int) ( is_object( $form ) ? ( $form->id ?? 0 ) : 0 );
 		if ( ! $form_id || ! in_array( $form_id, aw_ff_autoread_ids(), true ) ) {
 			return;
 		}
