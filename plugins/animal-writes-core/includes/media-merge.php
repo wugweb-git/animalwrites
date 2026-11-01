@@ -172,7 +172,7 @@ function aw_media_merge_check( $keep, array $extras ) {
 		return $fail( 'used as a category or tag photo' );
 	}
 	foreach ( $extras as $id ) {
-		$hit = $wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name NOT LIKE %s AND ( option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s ) LIMIT 1", $wpdb->esc_like( 'aw_media_merge_' ) . '%', (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%' ) );
+		$hit = $wpdb->get_var( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s ) LIMIT 1", $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%', (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%' ) );
 		if ( $hit ) {
 			return $fail( 'named in the option ' . $hit );
 		}
