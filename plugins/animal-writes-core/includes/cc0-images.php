@@ -977,3 +977,31 @@ add_action(
 		}
 	}
 );
+
+/*
+ * The per-item switch for the publisher's image (aw_publisher_image() above), editable over the REST API so an editor
+ * can let an item's own cover lead from wp-admin: '1' = the cover leads, '' = the publisher's image again. Editors of
+ * the item only; no change until a value is set.
+ */
+add_action(
+	'init',
+	function () {
+		foreach ( array( 'aw_news', 'aw_legal', 'post' ) as $type ) {
+			register_post_meta(
+				$type,
+				'aw_source_image_off',
+				array(
+					'type'              => 'string',
+					'single'            => true,
+					'show_in_rest'      => true,
+					'auth_callback'     => function ( $allowed, $key, $post_id ) {
+						return current_user_can( 'edit_post', $post_id );
+					},
+					'sanitize_callback' => function ( $v ) {
+						return '1' === (string) $v ? '1' : '';
+					},
+				)
+			);
+		}
+	}
+);

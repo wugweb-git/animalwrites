@@ -443,18 +443,16 @@ add_shortcode(
 		if ( ! $id ) {
 			return '';
 		}
-		$win = aw_camp_window( $id );
-		if ( 'open' === $win ) {
-			return ''; // no "Open" label on campaigns (owner, 2 Nov 2026)
+		// No status pills on campaigns, ever (owner, 2 Nov 2026): no Upcoming, Open, Last day or Closed. A closed campaign
+		// keeps its outcome line, as plain text.
+		if ( 'closed' !== aw_camp_window( $id ) ) {
+			return '';
 		}
-		$names = array( 'upcoming' => 'Upcoming', 'open' => 'Open', 'last-day' => 'Last day', 'closed' => 'Closed' );
-		$out   = '<p class="aw-camp-status"><span class="aw-camp-status-window is-' . esc_attr( $win ) . '">' . esc_html( $names[ $win ] ) . '</span>';
-		if ( 'closed' === $win ) {
-			list( $key, $label, $asof ) = aw_camp_outcome( $id );
-			$out .= '<span class="aw-camp-status-outcome is-' . esc_attr( $key ) . '">Outcome: ' . esc_html( $label ) . '</span>';
-			$out .= $asof ? '<span class="aw-camp-status-asof">As of ' . aw_date( $asof ) . '</span>' : '';
+		list( , $label, $asof ) = aw_camp_outcome( $id );
+		if ( '' === (string) $label ) {
+			return '';
 		}
-		return $out . '</p>';
+		return '<p class="aw-camp-status">Outcome: ' . esc_html( $label ) . ( $asof ? '. As of ' . aw_date( $asof ) : '' ) . '</p>';
 	}
 );
 
@@ -821,7 +819,7 @@ function aw_block_current_campaign( $a = array(), $id = 0 ) {
 	$img  = get_the_post_thumbnail( $c, 'medium_large', array( 'alt' => '', 'loading' => 'lazy' ) );
 	$hid  = 'aw-side-camp-' . $c;
 	/* translators: %d: days. */
-	$left = 'last-day' === aw_camp_window( $c ) ? __( 'Last day', 'animal-writes-core' ) : ( $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : '' );
+	$left = $days ? sprintf( _n( '%d day left', '%d days left', $days, 'animal-writes-core' ), $days ) : ''; // the day count only, no "Last day" status (owner, 2 Nov 2026)
 	return '<section class="kit-card aw-side-camp" aria-labelledby="' . esc_attr( $hid ) . '">'
 		. ( $img ? '<div class="aw-side-camp-media">' . $img . '</div>' : '' )
 		. '<div class="aw-side-camp-body"><p class="aw-side-camp-meta kit-meta-row"><span class="kit-meta-item">' . esc_html__( 'Current campaign', 'animal-writes-core' ) . '</span>' . ( '' !== $left ? '<span class="kit-meta-item">' . aw_i( 'clock' ) . esc_html( $left ) . '</span>' : '' ) . '</p>'
