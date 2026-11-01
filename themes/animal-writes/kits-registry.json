@@ -1557,23 +1557,12 @@
    "name": "Take action",
    "type": "pattern",
    "status": "live",
-   "classes": [
-    "aw-ed-acts",
-    "aw-ed-act",
-    "aw-ed-act-ico"
-   ],
-   "states": [
-    "default: section head (H2, one line), then two Kits cards (kit-card--block-md: icon, H3, one line, button at the bottom), side by side from 768, one under the other on phones; no hover lift (the card is not a link)"
-   ],
-   "tokens": [
-    "--kit-space-grid",
-    "--kit-space-5",
-    "--kit-icon-xl",
-    "--kit-type-h3"
-   ],
+   "classes": ["kit-photo-card"],
+   "states": ["default: section head (H2, one line), then two photo blocks (core Cover, dark overlay) side by side from 768, one under the other on phones, each with an H3, one line and a Brand button"],
+   "tokens": ["--kit-space-grid"],
    "a11y": {
-    "element": "pattern (Editor → Patterns, \"Animal Writes\"); each card an <article>",
-    "aria": "icons aria-hidden",
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); two core Cover blocks",
+    "aria": "none",
     "keyboard": "Tab to the two buttons",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px buttons",
@@ -1583,7 +1572,7 @@
    "seo": {
     "heading": "H2, an H3 per card",
     "link": "Register as a volunteer (/volunteer/); Claim your listing (/claim/)",
-    "alt": "n/a (no pictures)",
+    "alt": "photos described (alt on each Cover image)",
     "schema": "none"
    },
    "block": "animal-writes/take-action"
