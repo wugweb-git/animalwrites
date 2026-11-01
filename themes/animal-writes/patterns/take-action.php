@@ -10,9 +10,17 @@
  */
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Take action"},"align":"full","className":"kit-section kit-bg-canvas","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section class="wp-block-group alignfull kit-section kit-bg-canvas"><!-- wp:heading -->
+<section class="wp-block-group alignfull kit-section kit-bg-canvas"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">Take action</h2>
 <!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Give an hour, a skill or your organisation’s details.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
 
 <!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"18rem"}} -->
 <div class="wp-block-group kit-stack"><!-- wp:cover {"url":"/wp-content/uploads/2026/10/aw1-im2-873x1024.jpeg","id":18,"alt":"Women holding placards for community dogs in a park.","dimRatio":60,"overlayColor":"foreground","isUserOverlayColor":true,"focalPoint":{"x":0.5,"y":0.35},"minHeight":420,"contentPosition":"bottom left","isDark":true,"className":"kit-photo-card","layout":{"type":"default"}} -->

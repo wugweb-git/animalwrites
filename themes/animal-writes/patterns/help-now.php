@@ -10,9 +10,17 @@
  */
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"Need help now"},"anchor":"need-help","align":"full","className":"kit-section aw-ed-help","backgroundColor":"secondary","textColor":"background","layout":{"type":"constrained","contentSize":"1200px"}} -->
-<section id="need-help" class="wp-block-group alignfull kit-section aw-ed-help has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:heading -->
+<section id="need-help" class="wp-block-group alignfull kit-section aw-ed-help has-background-color has-secondary-background-color has-text-color has-background"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
+<div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">Need help now?</h2>
 <!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>For an animal in danger, call first. Then find the right people near you.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
 
 <!-- wp:group {"className":"kit-stack","layout":{"type":"grid","columnCount":2,"minimumColumnWidth":"16rem"}} -->
 <div class="wp-block-group kit-stack"><!-- wp:group {"className":"kit-tile kit-ico--injured","layout":{"type":"default"}} -->

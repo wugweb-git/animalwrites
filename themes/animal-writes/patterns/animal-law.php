@@ -17,7 +17,7 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>Court decisions, government notices and the rules behind them, summarised in plain words and linked to the original documents.</p>
+<p>Laws, court orders and government notices, explained in plain words and linked to the original.</p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 

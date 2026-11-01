@@ -11,9 +11,15 @@
 ?>
 <!-- wp:group {"tagName":"section","metadata":{"name":"What's happening"},"align":"full","className":"kit-section kit-bg-canvas aw-ed-news","layout":{"type":"constrained","contentSize":"1200px"}} -->
 <section class="wp-block-group alignfull kit-section kit-bg-canvas aw-ed-news"><!-- wp:group {"className":"kit-sec-head","layout":{"type":"default"}} -->
-<div class="wp-block-group kit-sec-head"><!-- wp:heading -->
+<div class="wp-block-group kit-sec-head"><!-- wp:group {"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:heading -->
 <h2 class="wp-block-heading">What’s happening</h2>
 <!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>Animal welfare news from across India, summarised and credited to the original report.</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-kits-ghost kit-btn--sm"} -->
