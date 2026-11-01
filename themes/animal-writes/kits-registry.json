@@ -1476,44 +1476,47 @@
    "status": "live",
    "classes": [
     "aw-ed-help",
-    "aw-bento",
-    "aw-bento-tile",
-    "aw-bento-eyebrow",
-    "aw-bento-num",
-    "aw-bento-ico",
-    "aw-bento-cta"
+    "aw-help-calls",
+    "aw-help-call",
+    "aw-help-num",
+    "aw-help-what",
+    "aw-help-cards"
    ],
    "states": [
-    "default: section head (H2, one line), then a bento grid of seven tiles (aw-bento--sos, --injured, --vet1962, --awbi, --cruelty, --vets, --orgs), each one link with an H3; reading order = markup order",
-    "phones: one column",
-    "768–1199: two columns; 112 two rows tall beside injured animal and 1962; then AWBI + report cruelty, find a vet + find an organisation",
-    "1200 and up: four columns; 112 two by two; injured animal two wide; 1962 + AWBI; report cruelty, find a vet, find an organisation two wide",
-    "hover: tile border full on-ink"
+    "default: section head (one H2, one muted line; no H3s), then three call links (112 filled yellow, aw-help-call--sos; 1962, AWBI: phone icon + number, what it is for under it), then four action cards (Kits kit-tile: icon, title, line, arrow); reading order = markup order",
+    "phones: calls one column, full width; cards two by two, icon above the title, tighter padding",
+    "768 and up: calls three equal columns; cards two by two, icon beside the title",
+    "hover: call lifts, border full on-ink; card lifts (Kits tile), border accent"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor → Patterns, \"Animal Writes\")",
-    "aria": "section aria-labelledby its H2 (home.php); each tile's H3 link covers the tile; each call link has an aria-label",
-    "keyboard": "one Tab stop per tile",
-    "focus": "3px ring round the tile in --kit-color-focus (yellow on the dark band; on-ink round the yellow 112 tile), 2px offset (:has(a:focus-visible))",
-    "target": "whole tile (at least 44px); Call 112 pill 44px",
-    "motion": "border and background fade, off with prefers-reduced-motion",
+    "aria": "section aria-labelledby its H2 (home.php); each call and card is one link; each call link has an aria-label",
+    "keyboard": "one Tab stop per call and per card",
+    "focus": "3px ring in --kit-color-focus (yellow on the dark band; on-ink round the yellow 112 call); calls 2px offset, cards 3px (Kits tile)",
+    "target": "whole call and whole card (at least 44px)",
+    "motion": "lift and border fade, off with prefers-reduced-motion",
     "sr": "visible text; call links named \"Call {number}, {what}\"",
     "contrast_pairs": [
      [
       "kit-color-on-ink",
       "kit-color-ink",
-      "tile text on the dark band"
+      "call text on the dark band"
      ],
      [
       "kit-color-on-accent",
       "kit-color-accent",
-      "112 tile text"
+      "112 call text"
      ],
      [
-      "kit-color-on-ink",
       "kit-color-ink",
-      "Call 112 pill"
+      "kit-color-raised",
+      "card title"
+     ],
+     [
+      "kit-color-muted",
+      "kit-color-raised",
+      "card line"
      ]
     ]
    },
