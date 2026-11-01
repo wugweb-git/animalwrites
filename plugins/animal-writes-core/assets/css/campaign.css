@@ -57,6 +57,10 @@
 .aw-camp--diwali .aw-camp-poster-doc img { filter: none; opacity: 1; object-position: center; }
 /* Six night-time steps sit three to a row */
 @media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
+/* Step lines on the night band: meta colour is for light bands */
+.aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
+/* Who to call has two columns: it fits a phone without sideways scrolling */
+.aw-camp--diwali #help { --kit-table-min: 0; }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
