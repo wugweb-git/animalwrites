@@ -87,12 +87,13 @@
 	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
 }
 /* Hero: cream with plum ink; a community dog before the Supreme Court on the right (phones: under the card) */
-.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero {
-	--camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary);
-	background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 62%;
-	padding-bottom: 60vw !important;
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { --camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary); }
+/* Above the theme's full-width group padding rule; the photo sits under the card, the dog clear of it */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull {
+	background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / 170% auto;
+	padding-bottom: 78vw !important;
 }
-@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { background-size: cover; background-position: 70% bottom; padding-bottom: var(--wp--preset--spacing--60) !important; min-height: 640px; } }
+@media (min-width: 768px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero.aw-camp-section.alignfull { background-size: auto 72%; padding-bottom: clamp(180px, 16vw, 260px) !important; } }
 .aw-camp--sc-stray-dogs .aw-camp-hero h1::after { content: ""; display: block; width: min(60%, 18rem); height: 0.35rem; margin-top: var(--kit-space-3); border-radius: 999px; background: var(--kit-color-accent); transform: rotate(-1deg); }
 .aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--camp-primary); color: var(--camp-primary-ink); }
 .aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link { background: rgb(251 238 231 / 0.85); }
