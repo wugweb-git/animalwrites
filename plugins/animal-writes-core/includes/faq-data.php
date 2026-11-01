@@ -65,6 +65,7 @@ add_filter(
 			array( 'key' => 'tag-animals', 'priority' => 6, 'q' => 'Which animals do the %s organisations help?', 'needs' => array( '3 Directory listings with aw_animals' ), 'pattern' => '<tag> for <animal>', 'answer' => 'aw_faq_tag_animals', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-laws', 'priority' => 6.1, 'q' => 'Which laws do the %s explain?', 'needs' => array( '3 Resources or news items linking to a Library document' ), 'pattern' => '<law> <tag>', 'answer' => 'aw_faq_tag_laws', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-in-force', 'priority' => 6.2, 'q' => 'Which %s are in force?', 'needs' => array( '2 Library documents with aw_legal_force' ), 'pattern' => '<tag> in force', 'answer' => 'aw_faq_tag_in_force', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-list', 'priority' => 6.3, 'q' => 'Which templates does the Library have?', 'needs' => array( 'the template tag; 3 Library documents' ), 'pattern' => '<tag> list', 'answer' => 'aw_faq_tag_list', 'question' => 'aw_faq_tag_question' ),
 		);
 		return $r;
 	}
@@ -989,6 +990,21 @@ function aw_faq_tag_in_force( $term_id, $name = '' ) {
 	$names = array_map( fn( $d ) => 'the ' . esc_html( aw_faq_doc_short( $d ) ), $in );
 	$a     = aw_faq_fit_names( fn( $x ) => $of . ' are in force' . ( count( $x ) < count( $in ) ? ', among them ' : ': ' ) . aw_faq_and( $x ) . '.' . $link, $names ); // "among them" only when not all are named
 	return array( $a, 'tag-in-force' );
+}
+
+/** The tag's Library documents, named after the newest (tag-library names it). Only for the template tag (owner, 1 Nov 2026). */
+function aw_faq_tag_list( $term_id ) {
+	if ( 'template' !== aw_faq_tag_slug( $term_id ) ) {
+		return null;
+	}
+	$ids = aw_faq_tag_items( $term_id )['aw_legal'] ?? array(); // newest first
+	if ( count( $ids ) < 3 ) {
+		return null;
+	}
+	$names = array_map( fn( $d ) => '“' . esc_html( aw_faq_plain( get_the_title( $d ) ) ) . '”', array_slice( $ids, 1 ) );
+	$link  = ' ' . aw_faq_a( home_url( 'library/' ), 'Browse the Library' ) . '.';
+	$a     = aw_faq_fit_names( fn( $x ) => number_format_i18n( count( $ids ) ) . ', among them ' . aw_faq_and( $x ) . '.' . $link, $names );
+	return array( $a, 'tag-list' );
 }
 
 // Not in the registry until the campaigns it names are open again (owner, 1 Nov 2026).
