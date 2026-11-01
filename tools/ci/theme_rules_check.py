@@ -22,8 +22,10 @@ when its rule is fixed. A new exception needs the owner's word and a line in the
     python3 tools/ci/theme_rules_check.py            # check
     python3 tools/ci/theme_rules_check.py --baseline # print today's findings in baseline form
 
-The phone rule (every Home section fits one 375x812 screen; card rows scroll sideways) is measured on the page, not
-here: see docs/design-system.md.
+The page rules are measured on the page with tools/ci/section_heights_audit.js, not here (docs/design-system.md):
+every Home section fits one 375x812 screen on phones (card rows scroll sideways), and from 1024 wide every section is
+at most min(720px, one viewport height). A fixed height that could break the desktop rule already fails here as
+"height".
 """
 import pathlib
 import re
