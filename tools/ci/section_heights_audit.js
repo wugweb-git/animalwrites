@@ -1,6 +1,6 @@
 // Section heights audit (docs/design-system.md, "Layout rules"). Paste into the browser console on a page.
 // Lists every top-level section with its height, padding included, and marks it when it breaks the rule:
-//   desktop (1024 wide and up): OVER above min(720px, viewport height); FAIL above 800px (the ceiling);
+//   tablet and desktop (768 wide and up): OVER above min(720px, viewport height); FAIL above 800px (the ceiling);
 //   phones (under 768): Home only, OVER above one screen (812 at 375x812). Other pages have no phone limit.
 // Also reports whether the page scrolls sideways.
 (() => {
@@ -8,7 +8,7 @@
   const root = document.querySelector('main') || document.body;
   const all = [...root.querySelectorAll(sel)].filter((e) => !e.closest('header, footer') && !e.parentElement.closest(sel) && e.getBoundingClientRect().height > 0);
   const w = innerWidth;
-  const desk = w >= 1024;
+  const desk = w >= 768;
   const limit = desk ? Math.min(720, innerHeight) : (w < 768 && document.body.classList.contains('home') ? innerHeight : Infinity);
   const rows = all.map((e) => {
     const h = Math.round(e.getBoundingClientRect().height);
