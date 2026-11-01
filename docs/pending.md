@@ -46,12 +46,6 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **On hold (owner, 26 Oct):** "update the campaign and email the old volunteers" — meaning to be confirmed; nothing drafted or sent.
 
 ### Next work
-- **Edit screens: later (1 Nov 2026):**
-  - **Same idea, different keys:** `aw_organiser` → `aw_organisation`, `aw_campaign_partners` → `aw_participant`, `aw_paid_listing` → `aw_sponsored`, term `aw_campaign_short` → `aw_short_name`. Needs its own plan and the owner's OK (data migration).
-  - **Opportunity Organisation box:** waits until Opportunities resume.
-  - **Opportunity group text:** it still says "Place: the Place box" (copy, needs the owner's yes).
-  - **Government data fields:** 6 listing fields with no box (AWBI dropped / listed on, Darpan blacklisted by / on, gov verified by / on), filled by imports; showing them read-only in Claimed and sources is the owner's call.
-  - **aw-ship.sh live check:** reads the server commit as empty, so it says "NOT deployed" and skips the purge although the deploy went through; check by hand and purge until it is fixed.
 - **404 page (PR #88, open since 26 Oct):** 410 for trashed News and Library items, and a more helpful missing-address page; not merged.
 - **Site-wide CSS audit (31 Oct): findings parked, not scheduled.** Bugs found on item pages, hubs and the site chrome, kept for later, nothing built: footer social icons overlap the email on phones; 404 search bar wider than its column from 1200; Opportunity and "More organisations" logos cropped or stretched; the small section headings (Sources, More, Listing) at full H2 size; FAQ questions at body size; header/footer edge 28px off the content edge from 1200 (hard-coded 20px); a stray date and calendar icon in Library excerpts; Contact and Privacy wider than 720px; undefined tokens (`--kit-type-h`, `--kit-type-h5`, `--kit-color-warning-text`). Layout rules for any later fix: no sidebar on list pages or content pages (About, Adoption, Contact, Privacy and similar); About and Adoption keep their banded layout; sidebar only on single item pages and /volunteer/.
 - **Volunteer welcome newsletter (owner, 31 Oct): plan, not built.** A FluentCRM email campaign welcoming people who sign up on /volunteer/ (5 sign-ups 28–31 Oct, none contacted yet). To plan with the owner: who gets it (the owner decides; 1 Nov: the email-updates box is recorded as 1/0 only), from noreply@ with Reply-To contact@, what it says (what happens next, matching, links to the Directory, Resources and the open campaign), a one-off send for existing sign-ups vs. a repeat send for new ones (no automations on live so far; FluentCRM free only). Copy shown to the owner before anything is sent.
@@ -115,6 +109,12 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
 
 ## Done (1 Nov 2026)
+- **Edit-screen follow-ups (1 Nov 2026):**
+  - **Same-idea keys unified, no data moved:** `aw_organiser` → `aw_organisation` (campaign Organiser in Related); partners read from `aw_campaign_partners` plus any `aw_participant` rows, edited only in Organisations; `aw_paid_listing` → `aw_sponsored` on Opportunities; term `aw_campaign_short` → `aw_short_name` (read with fallback). Old keys stay stored and are read as fallbacks.
+  - **Government records:** listings show the badge state read-only at the end of Claimed and sources.
+  - **Removed boxes:** sentences pointing to them deleted (Opportunity box, Overview, Address and place).
+  - **aw-ship.sh:** compares full commit ids, so it confirms the deploy and purges again.
+  - **Opportunity organisation:** stays as it is (owner: the stated organisation and the linked listing may differ).
 - **Edit-screen boxes (1 Nov 2026):** every value is kept and every save handler is unchanged.
   - **Duplicates:** the campaign closing date and document are edited in one box only.
   - **Collapsed by default:** LiteSpeed, Link Whisper, Rank Math Link Suggestions, Custom Fields, Slug and Linked from, until a user opens or closes a box on that screen.
