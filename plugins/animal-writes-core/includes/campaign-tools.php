@@ -581,14 +581,34 @@ add_action(
 	}
 );
 
-/* ---------- WP Admin: Campaign details box and list columns ---------- */
-add_action(
-	'add_meta_boxes_aw_campaign',
-	fn() => add_meta_box( 'aw-campaign-details', 'Campaign details', 'aw_camp_details_box', 'aw_campaign', 'side', 'high' )
+/* ---------- WP Admin: the campaign boxes and list columns ---------- */
+/*
+ * Five SCF field groups (acf-json/group_aw_campaign_*.json) are the campaign's boxes in the main column, after Event
+ * (group_aw_campaign). Each holds one message field; the box's markup is printed under that field. The inputs are
+ * plain post fields, saved by the save_post_aw_campaign handlers below and in campaign-record.php.
+ */
+const AW_CAMP_BOXES = array(
+	'field_aw_campaign_dates_box'    => 'aw_camp_dates_box',
+	'field_aw_campaign_document_box' => 'aw_camp_document_box',
+	'field_aw_campaign_orgs_box'     => 'aw_camp_orgs_box',
+	'field_aw_campaign_outcome_box'  => 'aw_camp_outcome_box',
+	'field_aw_campaign_share_box'    => 'aw_camp_share_box',
 );
+foreach ( AW_CAMP_BOXES as $aw_camp_key => $aw_camp_fn ) {
+	add_action(
+		'acf/render_field/key=' . $aw_camp_key,
+		function () use ( $aw_camp_fn ) {
+			$post = get_post();
+			if ( $post && 'aw_campaign' === $post->post_type ) {
+				$aw_camp_fn( $post );
+			}
+		}
+	);
+}
+unset( $aw_camp_key, $aw_camp_fn );
 
-/** The box: dates, status, campaign document, partners, letters sent (read-only) and how the tools work. */
-function aw_camp_details_box( $post ) {
+/** Dates and state: now, opens on, closes on, the override and its reason. Holds the nonce of the save below. */
+function aw_camp_dates_box( $post ) {
 	wp_nonce_field( 'aw_camp_details', 'aw_camp_details_nonce' );
 	$m     = fn( $k ) => (string) get_post_meta( $post->ID, $k, true );
 	$state = array( 'pre' => 'Pre (upcoming)', 'active' => 'Active (open)', 'post' => 'Post (closed)' );
@@ -596,24 +616,43 @@ function aw_camp_details_box( $post ) {
 	echo '<p><strong>Now:</strong> ' . esc_html( $state[ aw_camp_state( $post->ID ) ] . ', ' . $win[ aw_camp_window( $post->ID ) ] ) . '</p>';
 	echo '<p><label for="aw-camp-open"><strong>Opens on</strong> (first day)</label><br><input type="date" id="aw-camp-open" name="aw_campaign_open" value="' . esc_attr( $m( 'aw_campaign_open' ) ) . '"></p>';
 	$close = (string) get_post_meta( $post->ID, 'aw_campaign_close', true );
-	$doc   = (string) get_post_meta( $post->ID, 'aw_campaign_doc', true );
-	$parts = (string) get_post_meta( $post->ID, 'aw_campaign_partners', true );
-	$sups  = (string) get_post_meta( $post->ID, 'aw_campaign_supporters', true );
-	$sent  = (int) get_post_meta( $post->ID, 'aw_campaign_sent', true );
 	echo '<p><label for="aw-camp-close"><strong>Closes on</strong> (last day)</label><br><input type="date" id="aw-camp-close" name="aw_campaign_close" value="' . esc_attr( $close ) . '"></p>';
-	echo '<p><label for="aw-camp-doc"><strong>Campaign document</strong> (Library item ID)</label><br><input type="number" id="aw-camp-doc" name="aw_campaign_doc" value="' . esc_attr( $doc ) . '" class="small-text">' . ( $doc ? ' <a href="' . esc_url( get_edit_post_link( (int) $doc ) ) . '">' . esc_html( get_the_title( (int) $doc ) ) . '</a>' : '' ) . '</p>';
-	echo '<p><label for="aw-camp-partners"><strong>Partners</strong> (Directory listing IDs, comma-separated)</label><br><input type="text" id="aw-camp-partners" name="aw_campaign_partners" value="' . esc_attr( $parts ) . '" class="widefat"></p>';
-	echo '<p><label for="aw-camp-supporters"><strong>Supporters</strong> (Directory listing IDs, comma-separated; "Supported by" on the page)</label><br><input type="text" id="aw-camp-supporters" name="aw_campaign_supporters" value="' . esc_attr( $sups ) . '" class="widefat"></p>';
-	echo '<p><label for="aw-camp-outcome"><strong>Outcome</strong> (after closing)</label><br><select id="aw-camp-outcome" name="aw_campaign_outcome">';
-	foreach ( array( 'pending' => 'Pending', 'achieved' => 'Achieved', 'partial' => 'Partially achieved', 'not' => 'Not achieved', 'inconclusive' => 'Inconclusive' ) as $k => $l ) {
-		echo '<option value="' . esc_attr( $k ) . '"' . selected( $m( 'aw_campaign_outcome' ) ? $m( 'aw_campaign_outcome' ) : 'pending', $k, false ) . '>' . esc_html( $l ) . '</option>';
-	}
-	echo '</select> <label class="screen-reader-text" for="aw-camp-asof">As of</label><input type="date" id="aw-camp-asof" name="aw_campaign_outcome_asof" value="' . esc_attr( $m( 'aw_campaign_outcome_asof' ) ) . '"><br><span class="description">As of: the day the outcome was last reviewed. Don\'t infer success from activity.</span></p>';
 	echo '<p><label for="aw-camp-override"><strong>Override the state</strong></label><br><select id="aw-camp-override" name="aw_campaign_state_override"><option value="">No, follow the dates</option>';
 	foreach ( $state as $k => $l ) {
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $m( 'aw_campaign_state_override' ), $k, false ) . '>' . esc_html( $l ) . '</option>';
 	}
 	echo '</select><br><label for="aw-camp-override-note">Reason (required for an override)</label><input type="text" id="aw-camp-override-note" name="aw_campaign_override_note" value="' . esc_attr( $m( 'aw_campaign_override_note' ) ) . '" class="widefat"></p>';
+}
+
+/** Document: the campaign document (Library item ID) and its edit link. */
+function aw_camp_document_box( $post ) {
+	$doc = (string) get_post_meta( $post->ID, 'aw_campaign_doc', true );
+	echo '<p><label for="aw-camp-doc"><strong>Campaign document</strong> (Library item ID)</label><br><input type="number" id="aw-camp-doc" name="aw_campaign_doc" value="' . esc_attr( $doc ) . '" class="small-text">' . ( $doc ? ' <a href="' . esc_url( get_edit_post_link( (int) $doc ) ) . '">' . esc_html( get_the_title( (int) $doc ) ) . '</a>' : '' ) . '</p>';
+}
+
+/** Organisations: partners and supporters. */
+function aw_camp_orgs_box( $post ) {
+	$parts = (string) get_post_meta( $post->ID, 'aw_campaign_partners', true );
+	$sups  = (string) get_post_meta( $post->ID, 'aw_campaign_supporters', true );
+	echo '<p><label for="aw-camp-partners"><strong>Partners</strong> (Directory listing IDs, comma-separated)</label><br><input type="text" id="aw-camp-partners" name="aw_campaign_partners" value="' . esc_attr( $parts ) . '" class="widefat"></p>';
+	echo '<p><label for="aw-camp-supporters"><strong>Supporters</strong> (Directory listing IDs, comma-separated; "Supported by" on the page)</label><br><input type="text" id="aw-camp-supporters" name="aw_campaign_supporters" value="' . esc_attr( $sups ) . '" class="widefat"></p>';
+}
+
+/** Outcome: the outcome and its date, then the real-world impact (campaign-record.php). */
+function aw_camp_outcome_box( $post ) {
+	$m = fn( $k ) => (string) get_post_meta( $post->ID, $k, true );
+	echo '<p><label for="aw-camp-outcome"><strong>Outcome</strong> (after closing)</label><br><select id="aw-camp-outcome" name="aw_campaign_outcome">';
+	foreach ( array( 'pending' => 'Pending', 'achieved' => 'Achieved', 'partial' => 'Partially achieved', 'not' => 'Not achieved', 'inconclusive' => 'Inconclusive' ) as $k => $l ) {
+		echo '<option value="' . esc_attr( $k ) . '"' . selected( $m( 'aw_campaign_outcome' ) ? $m( 'aw_campaign_outcome' ) : 'pending', $k, false ) . '>' . esc_html( $l ) . '</option>';
+	}
+	echo '</select> <label class="screen-reader-text" for="aw-camp-asof">As of</label><input type="date" id="aw-camp-asof" name="aw_campaign_outcome_asof" value="' . esc_attr( $m( 'aw_campaign_outcome_asof' ) ) . '"><br><span class="description">As of: the day the outcome was last reviewed. Don\'t infer success from activity.</span></p>';
+	aw_camp_record_box( $post );
+}
+
+/** Letters and share: when the count shows, the share line and images, letters sent (read-only) and how the tools work. */
+function aw_camp_share_box( $post ) {
+	$m    = fn( $k ) => (string) get_post_meta( $post->ID, $k, true );
+	$sent = (int) get_post_meta( $post->ID, 'aw_campaign_sent', true );
 	echo '<p><label for="aw-camp-min"><strong>Show the count from</strong></label> <input type="number" min="0" id="aw-camp-min" name="aw_campaign_metric_min" value="' . esc_attr( $m( 'aw_campaign_metric_min' ) ? $m( 'aw_campaign_metric_min' ) : '100' ) . '" class="small-text"><br><label for="aw-camp-stale">"As of" date after</label> <input type="number" min="1" id="aw-camp-stale" name="aw_campaign_metric_stale" value="' . esc_attr( $m( 'aw_campaign_metric_stale' ) ? $m( 'aw_campaign_metric_stale' ) : '1' ) . '" class="small-text"> days without a new letter</p>';
 	echo '<p><label for="aw-camp-share-text"><strong>Share line</strong> (sent with the link)</label><input type="text" id="aw-camp-share-text" name="aw_campaign_share_text" value="' . esc_attr( $m( 'aw_campaign_share_text' ) ) . '" class="widefat"><br><label for="aw-camp-share-story">Story image ID (1080×1920)</label> <input type="number" id="aw-camp-share-story" name="aw_campaign_share_story" value="' . esc_attr( $m( 'aw_campaign_share_story' ) ) . '" class="small-text"><br><label for="aw-camp-share-post">Post image ID (1080×1080)</label> <input type="number" id="aw-camp-share-post" name="aw_campaign_share_post" value="' . esc_attr( $m( 'aw_campaign_share_post' ) ) . '" class="small-text"></p>';
 	echo '<p><strong>Letters sent:</strong> ' . esc_html( number_format_i18n( $sent ) ) . '<br><span class="description">"Yes, I sent it" clicks, at most one a minute per visitor. Shown on the page from 100.</span></p>';

@@ -211,21 +211,16 @@ add_action(
 	30
 );
 
-/* ---------- WP Admin: Real-world impact ---------- */
-add_action(
-	'add_meta_boxes_aw_campaign',
-	fn() => add_meta_box( 'aw-campaign-record', 'Real-world impact', 'aw_camp_record_box', 'aw_campaign', 'side', 'default' )
-);
-
+/* ---------- WP Admin: Real-world impact (in the Outcome box, campaign-tools.php) ---------- */
 function aw_camp_record_box( $post ) {
 	wp_nonce_field( 'aw_camp_record', 'aw_camp_record_nonce' );
 	$cur = (string) get_post_meta( $post->ID, 'aw_campaign_impact_state', true );
-	echo '<p><label for="aw-camp-impact">State</label><br><select id="aw-camp-impact" name="aw_campaign_impact_state" style="width:100%"><option value="">—</option>';
+	echo '<p><label for="aw-camp-impact">Real-world impact</label><br><select id="aw-camp-impact" name="aw_campaign_impact_state" style="width:100%"><option value="">—</option>';
 	foreach ( AW_CAMP_IMPACT as $k => $l ) {
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $cur, $k, false ) . '>' . esc_html( $l ) . '</option>';
 	}
 	echo '</select></p>';
-	echo '<p><label for="aw-camp-evidence">Evidence (item ID)</label><br><input type="number" id="aw-camp-evidence" name="aw_campaign_impact_evidence" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_campaign_impact_evidence', true ) ) . '" style="width:100%"></p>';
+	echo '<p><label for="aw-camp-evidence">Impact evidence (item ID)</label><br><input type="number" id="aw-camp-evidence" name="aw_campaign_impact_evidence" value="' . esc_attr( (string) get_post_meta( $post->ID, 'aw_campaign_impact_evidence', true ) ) . '" style="width:100%"></p>';
 	echo '<p class="description">Verified change only with evidence that the intended change happened (policy, a court decision, practice or conditions); No change (verified) when the evidence shows it did not. Never results (letters, events, coverage). Metrics: aw_campaign_metrics (campaign-record.php).</p>';
 }
 
