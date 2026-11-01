@@ -1515,14 +1515,14 @@
     "aw-sc"
    ],
    "states": [
-    "default (block animal-writes/home-sc): the AW Content card design over the campaign's featured photograph; case number pill, campaign title as H2, its summary, countdown to the compliance reports, Check your state and What the court ordered buttons; empty when the campaign is not published"
+    "default (block animal-writes/home-sc): the campaign hero in small, in the campaign's brand: cream card, the campaign's portrait photograph (theme asset) as the background from 1200 and under the text below 1200, the status pill (Open, Last day, ...) from the campaign's dates, campaign title as H2 with the marker on \"first compliance\", its summary, a white poster with the scales mark, case number, countdown and the date in a yellow pill, Check your state and What the court ordered buttons; empty when the campaign is not published"
    ],
    "tokens": [],
    "a11y": {
     "element": "pattern (Editor \u2192 Patterns, \"Animal Writes\")",
     "aria": "section aria-labelledby its H2; photograph alt=\"\"; icon aria-hidden",
     "keyboard": "Tab through the two buttons",
-    "focus": "3px ring in the on-ink focus colour, 2px offset (:focus-visible)",
+    "focus": "3px ring in plum, 2px offset (:focus-visible)",
     "target": "44px buttons",
     "motion": "none",
     "sr": "visible text"
@@ -1702,13 +1702,13 @@
    "name": "AW_Festive",
    "type": "pattern",
    "status": "live",
-   "classes": ["aw-festive"],
-   "states": ["default: dark band (--kit-color-ink), eyebrow, H2, one line, four tips with Kits icons, one Brand button; three-picture collage beside the copy from 1200, on top below 1200"],
-   "tokens": ["--kit-color-accent", "--kit-color-on-ink", "--kit-radius-media", "--kit-type-h1"],
+   "classes": ["aw-festive", "kit-photo-card"],
+   "states": ["default: the Diwali 2026 campaign card on Home: photo card (core Cover, dim 50) on the portrait campaign photo, H2, one line, Brand and secondary buttons at the top; its height is its text and the card padding (no fixed height)"],
+   "tokens": ["--kit-btn-brand-bg", "--kit-color-on-ink", "--kit-radius-card"],
    "a11y": {
-    "element": "pattern (Editor → Patterns, \"Animal Writes\"); section with H2, list and one button",
+    "element": "pattern (Editor → Patterns, \"Animal Writes\"); card with H2, one line and two buttons",
     "aria": "icons aria-hidden",
-    "keyboard": "Tab to the button",
+    "keyboard": "Tab to the two buttons",
     "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
     "target": "44px button",
     "motion": "none",
@@ -1716,8 +1716,8 @@
    },
    "seo": {
     "heading": "H2",
-    "link": "one button, no target yet",
-    "alt": "each picture described",
+    "link": "two buttons to the Diwali campaign (#tonight, #help)",
+    "alt": "the photo described",
     "schema": "none"
    },
    "block": "animal-writes/festive"

@@ -1290,7 +1290,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
    either, and every full-width section with its own padding uses the one section padding (owner, 19 Oct 2026) */
 .wp-block-post-content .wp-block-group.alignfull { margin-block: 0; }
 .wp-block-post-content .wp-block-group.alignfull[style*="padding-top"] { padding-top: var(--kit-section-y) !important; padding-bottom: var(--kit-section-y) !important; }
-.wp-block-cover.kit-photo-card { border-radius: var(--kit-radius-card); overflow: hidden; }
+.wp-block-cover.kit-photo-card { padding: var(--kit-space-5); border-radius: var(--kit-radius-card); overflow: hidden; } /* the card padding on every side (owner, 2 Nov 2026; core Cover has 1em) */
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > * { margin-block: 0 var(--kit-space-3); }
 .wp-block-cover.kit-photo-card .wp-block-cover__inner-container > p { max-width: 40ch; }
 .wp-block-cover.kit-photo-card .wp-block-buttons { margin: var(--kit-space-4) 0 0 !important; }
