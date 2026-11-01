@@ -265,7 +265,24 @@ WhatsApp, X, Copy link (pills). Inside `<main>` after the content. Copy link con
 
 ### Reusable sections (patterns)
 Theme patterns in `themes/animal-writes/patterns/`, listed under **Animal Writes sections** in the block inserter. The homepage references them, so one edit to a file updates every page using it:
-`hero` (home hero), `help-now` (Need help now: four tiles and the helplines), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search and states), `aw1-story` (India Writes for Its Community Dogs), `take-action` (volunteer and claim your listing, above the footer), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
+`hero` (standard home hero), `help-now` (Need help now: tap-to-call helplines and four tiles), `whats-happening` (newest news), `animal-law` (From the Library), `learn` (Guides), `find-help` (Directory search, Use my location and type chips), `aw1-story` (India Writes for Its Community Dogs, full story), `aw1-story-home` (the same story as one compact band, for Home), `take-action` (volunteer and claim your listing, as two cards), `volunteer-banner`, `guide-cta` (end of a campaign guide), `campaign` (campaign kit layout). Slugs are `animal-writes/<name>`; the Kits theme's own patterns are in `themes/kits-by-wugweb/patterns/`.
+
+### Home layout
+The home page's sections and their order live in the theme template `themes/animal-writes/templates/front-page.html`, not in the front page's content:
+
+1. Hero: block `animal-writes/home-hero`. While campaign 13848 is published and open, it shows the campaign hero; otherwise the standard hero (pattern `hero`).
+2. Need help now? (`help-now`).
+3. Find help near you (`find-help`: `[aw_find_help compact="1"]`).
+4. What's happening (`whats-happening`: Query Loop 41, four items as a mosaic).
+5. Guides (`learn`: Query Loop 44, at most one state cruelty guide).
+6. From the Library (`animal-law`: Query Loop 43, the law first).
+7. Take action (`take-action`).
+8. India Writes for Its Community Dogs (`aw1-story-home`).
+9. FAQ (block `animal-writes/item-faq`).
+
+The front page (post 57) keeps its content, but it is not shown. Its FAQ box (meta `aw_faq`) still feeds the FAQ section; with too few questions the section prints nothing. Item picks for Query Loops 43 and 44 are in `animal-writes-core/includes/home.php`.
+
+Every home section head is the Kits section head (`kit-sec-head`): an H2, one supporting line and a ghost button.
 
 ### Directory states panel
 The directory home's header visual: the nine states with the most organisations, set as type (count in Tiro, name below), each linking to its state page. Real counts from the taxonomy; no map. Busiest state in ink, the rest raised; hover lifts, reduced motion respected.

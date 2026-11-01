@@ -6,6 +6,12 @@ Check this list against git and the live site before acting on it. Refer to item
 
 Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (7 Nov); the High Court judgments source stays off (revisit 6 Nov); Opportunities workers stay paused; the Community dogs campaign stays exactly as it is (new community-dog developments become new campaigns or content).
 
+### Home redo (1 Nov 2026)
+- **Home redo: steps built:** sections and order in `templates/front-page.html` (front page content no longer shown); hero block (campaign hero while campaign 13848 is open, else the standard hero with a new H1); one section head everywhere (H2, line, ghost button); Need help now with tap-to-call helplines; compact Find help near you; What's happening as a four-story mosaic; Guides with at most one state cruelty guide; From the Library led by the law; Take action as two cards; the compact story band; every FAQ heading names its subject ("Questions about …"). Layout: `design-system.md` → Home layout.
+- **Home redo: live checks after deploy:** all nine sections in order at 375, 768 and 1200, with no sideways scroll; one H1; the hero matches the campaign's state; Find help counts and type chips are live numbers and Use my location works; the What's happening and Library mosaics end level; Guides shows at most one state cruelty guide; the Library lead is an Act, rule, order or judgment; FAQPage schema still valid on Home and on a guide; Deploy check green.
+- **Home FAQ data:** set the front page's (post 57) `aw_faq` to the six questions and answers written for Home. Until then the FAQ section prints nothing if there are too few questions.
+- **Guide FAQ subjects:** draft the FAQ Subject (`aw_faq_subject`) for the guides that fall back to their title (FAQ subject column on Pages and Posts, or `wp aw-faq report`), then review before they go live.
+
 ### Media (owner to decide, 1 Nov 2026)
 - **Duplicates:** 185 groups (262 extra files, about 24 MB): 160 safe to merge, 3 need review, 22 are favicon/logo copies to leave. The merge tool (Media → Duplicate files) is live and merging the 160 in batches, Undo available; nothing deleted, extras only get the Trash status.
 - **Media, still open (1 Nov 2026):**
