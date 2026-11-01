@@ -89,7 +89,8 @@ function aw_gtm_enabled() {
  */
 function kits_sitekit_gtm_id() {
 	$s = get_option( 'googlesitekit_tagmanager_settings' );
-	if ( is_admin() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
+	// Logged-in staff get no container either (aw_analytics_skip_user(), as for the site's own GTM and Clarity).
+	if ( is_admin() || aw_analytics_skip_user() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
 		return '';
 	}
 	return (string) $s['containerID'];
