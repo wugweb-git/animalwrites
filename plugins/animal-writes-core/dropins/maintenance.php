@@ -74,8 +74,7 @@ p{margin:0}
 a:focus-visible{outline:var(--kit-focus-width) solid var(--kit-color-focus);outline-offset:var(--kit-focus-offset)}
 figure{margin:var(--kit-space-5) 0}
 figure img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
-@media (min-width:768px){.text>figure{position:absolute;inset:0;z-index:-1;max-width:none;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}figure::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 60%,transparent 90%)}}
-@media (min-width:1200px){figure::after{background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) 35%,transparent 65%)}}
+@media (min-width:768px){.text>figure{position:absolute;inset:0;z-index:-1;max-width:none;margin:0}figure picture,figure img{width:100%;height:100%}figure img{aspect-ratio:auto;object-position:right bottom}figure{--col:calc(var(--kit-space-gutter) + max(0px,(100% - 2 * var(--kit-space-gutter) - var(--kit-width-wide)) / 2) + 40rem)}figure::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--kit-color-canvas) 0%,var(--kit-color-canvas) var(--col),transparent calc(var(--col) + 20%))}}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
 </head>

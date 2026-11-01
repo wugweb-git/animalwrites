@@ -1086,7 +1086,7 @@ body { background: var(--kit-surface-page); }
 /* Search field with its icon inside; section chips with their icons */
 .kit-error-field { position: relative; display: flex; flex: 1 1 auto; min-width: 0; }
 .kit-error-field > .kit-ico { position: absolute; left: var(--kit-space-4); top: 50%; transform: translateY(-50%); --kit-ico-size: var(--kit-icon-md); color: var(--kit-color-muted); pointer-events: none; }
-.kit-error-search .kit-error-field input { width: 100%; padding-left: calc(var(--kit-space-4) + var(--kit-icon-md) + var(--kit-space-2)); }
+.kit-error-search .kit-error-field input { width: 100%; padding-left: calc(var(--kit-space-4) + var(--kit-icon-md) + var(--kit-space-2)); border-color: var(--kit-color-muted); } /* the field's edge at 3:1 or more (WCAG 1.4.11) */
 .kit-error-links a { gap: var(--kit-space-2); }
 .kit-error-links a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
 /* The photo (aw_error_picture): on phones after the lead, the column's width, no frame. From 768px it fills the section
@@ -1100,13 +1100,12 @@ body { background: var(--kit-surface-page); }
 	.kit-error-page > .kit-error-media { position: absolute; inset: 0; z-index: -1; max-width: none; margin: 0 !important; } /* !important: WordPress's constrained layout sets its child margins with !important */
 	.kit-error-page > .kit-error-media :is(picture, img) { width: 100%; height: 100%; }
 	.kit-error-page > .kit-error-media img { aspect-ratio: auto; object-position: right bottom; }
-	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 60%, transparent 90%); }
+	/* solid to the text column's right edge (it grows with the text size, so 200% text never reaches the photo), then clear over 20% */
+	.kit-error-page > .kit-error-media { --kit-error-col: calc(var(--kit-space-gutter) + max(0px, (100% - 2 * var(--kit-space-gutter) - var(--kit-width-wide)) / 2) + 40rem); }
+	.kit-error-page > .kit-error-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) var(--kit-error-col), transparent calc(var(--kit-error-col) + 20%)); }
 	/* the text column starts where the header's logo does, on the left of the wide width, not centred over the photo */
 	.kit-error-page:has(> .kit-error-media) > :not(.kit-error-media) { max-width: 40rem; margin-left: max(0px, (100% - var(--kit-width-wide)) / 2) !important; margin-right: auto !important; }
 	.kit-error-page:has(> .kit-error-media) .kit-error-links a, .kit-error-page:has(> .kit-error-media) .kit-error-field input { background: var(--kit-color-raised); }
-}
-@media (min-width: 1200px) {
-	.kit-error-page > .kit-error-media::after { background: linear-gradient(90deg, var(--kit-color-canvas) 0%, var(--kit-color-canvas) 35%, transparent 65%); }
 }
 
 /* The menu button only below 1200px (from 1200px the full menu shows on one row). */
