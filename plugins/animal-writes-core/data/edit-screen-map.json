@@ -86,7 +86,7 @@
 			"screen": "post",
 			"types": [],
 			"runtime": "live",
-			"notes": "Block editor: only when switched on in Preferences → Panels. The only editor for aw_campaign_metrics, aw_legal_dated and aw_file_hi_url."
+			"notes": "Block editor: only when switched on in Preferences → Panels. The only editor for aw_campaign_metrics, aw_legal_dated and aw_file_hi_url. Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"slugdiv": {
 			"title": "Slug",
@@ -95,7 +95,7 @@
 			"screen": "post",
 			"types": [],
 			"runtime": "live",
-			"notes": "Adds nothing on types without a public address (aw_press, aw_claim, aw_report, aw_message)."
+			"notes": "Adds nothing on types without a public address (aw_press, aw_claim, aw_report, aw_message). Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"authordiv": {
 			"title": "Author",
@@ -182,7 +182,7 @@
 				"aw_listing"
 			],
 			"runtime": "live",
-			"notes": "Read-only list of items that point here; stores nothing."
+			"notes": "Read-only list of items that point here; stores nothing. Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"aw-faq": {
 			"title": "FAQ",
@@ -405,7 +405,7 @@
 				"aw_news"
 			],
 			"runtime": "edit-screen-only",
-			"notes": "Classic editor only."
+			"notes": "Classic editor only. Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"litespeed_meta_boxes": {
 			"title": "LiteSpeed",
@@ -414,7 +414,7 @@
 			"screen": "post",
 			"types": [],
 			"runtime": "live",
-			"notes": "No litespeed_* rows on live: adds nothing so far."
+			"notes": "No litespeed_* rows on live: adds nothing so far. Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"wpil_link-articles": {
 			"title": "Link Whisper Suggested Links",
@@ -426,7 +426,7 @@
 				"page"
 			],
 			"runtime": "live",
-			"notes": "Rendering this box deletes wpil_links on that post (Link Whisper)."
+			"notes": "Rendering this box deletes wpil_links on that post (Link Whisper). Collapsed by default (core/edit-screens.php, aw_edit_screen_collapsed_boxes)."
 		},
 		"term-core": {
 			"title": "Name, Slug, Parent, Description",

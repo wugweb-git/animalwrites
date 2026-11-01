@@ -12,6 +12,8 @@ Code: `plugins/animal-writes-core/includes/edit-screens.php`. Map: `plugins/anim
 - **The map** says what each box and key is: `boxes` by box id (title, source, file, types, notes) and `keys` by stored name (store, label, type, types, boxes, uses, notes). A box or field missing from the map shows **Not mapped yet**.
 - Some boxes are added only on the edit screen itself (Rank Math, the attachment fields); they are listed from the map with a note. LiteSpeed adds its box only in WP admin, so it is missing from the command-line rows.
 
+**Collapsed by default:** LiteSpeed, Link Whisper Suggested Links, Rank Math Link Suggestions, Custom Fields, Slug and Linked from start collapsed on every post edit screen (`aw_edit_screen_collapsed_boxes()`, through core's `postbox_classes_{screen}_{box}` filter, which only adds the `closed` class). They are still there: click the title to open one, drag or hide it in Screen Options as before. A box opened this way starts collapsed again on the next load. Nothing is written to the user's saved box settings.
+
 Notes on each row: the box's own note, a key edited in two boxes on the same screen, keys saved but never read, boxes hidden by an SCF group, not mapped yet.
 
 ## When you add or change a field

@@ -8,6 +8,7 @@
  * read live: for each post type the screen is set up on an in-memory post (ID 0, never saved), add_meta_boxes runs,
  * $wp_meta_boxes is read and put back. No box callback is rendered. SCF field groups come from acf_get_field_groups().
  * Term screens: the callbacks on each taxonomy's form hooks. A box or field the map does not know shows "Not mapped yet".
+ * Also here: the boxes that start collapsed on post edit screens (aw_edit_screen_collapsed_boxes(), core filter only).
  *
  * Screen: Animal Writes → Edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>] [--format=table|json].
  * How to add an entry: docs/edit-screens.md.
@@ -536,6 +537,42 @@ function aw_edit_screen_unmapped( array $rows ): int {
 	}
 	return $n;
 }
+
+/**
+ * Boxes that start collapsed on every post edit screen (owner, 1 Nov 2026): plugin boxes and rarely used ones.
+ * Only core's postbox_classes_{screen_id}_{box_id} filter is used; the user can still open, drag and hide them.
+ */
+function aw_edit_screen_collapsed_boxes(): array {
+	return array( 'litespeed_meta_boxes', 'wpil_link-articles', 'rank_math_metabox_link_suggestions', 'postcustom', 'slugdiv', 'aw_linked_from' );
+}
+
+/**
+ * Adds core's "closed" class to a box; never removes a class.
+ *
+ * @param mixed $classes Classes from postbox_classes().
+ */
+function aw_edit_screen_box_closed( $classes ): array {
+	$classes = is_array( $classes ) ? $classes : array();
+	if ( ! in_array( 'closed', $classes, true ) ) {
+		$classes[] = 'closed';
+	}
+	return $classes;
+}
+
+add_action(
+	'current_screen',
+	function ( $screen ) {
+		if ( ! is_admin() || ! $screen instanceof WP_Screen || 'post' !== $screen->base || ! in_array( $screen->post_type, aw_edit_screen_post_types(), true ) ) {
+			return;
+		}
+		foreach ( aw_edit_screen_collapsed_boxes() as $box ) {
+			$hook = 'postbox_classes_' . $screen->id . '_' . $box;
+			if ( false === has_filter( $hook, 'aw_edit_screen_box_closed' ) ) {
+				add_filter( $hook, 'aw_edit_screen_box_closed' );
+			}
+		}
+	}
+);
 
 add_action(
 	'admin_menu',
