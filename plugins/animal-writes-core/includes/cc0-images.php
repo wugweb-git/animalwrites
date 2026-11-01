@@ -509,6 +509,7 @@ function aw_source_localise_run( $limit = 25, $budget = 60 ) {
 			LEFT JOIN {$wpdb->postmeta} ok ON ok.post_id = p.ID AND ok.meta_key = 'aw_source_image_ok'
 			LEFT JOIN {$wpdb->postmeta} lt ON lt.post_id = p.ID AND lt.meta_key = 'aw_source_localise_tried'
 			WHERE p.post_status = 'publish' AND ( ok.meta_value IS NULL OR ok.meta_value <> '0' ) AND ( lt.meta_value IS NULL OR lt.meta_value < %s )
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 			ORDER BY p.post_date DESC LIMIT %d",
 			'%' . $wpdb->esc_like( $host ) . '%',
 			gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
