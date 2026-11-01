@@ -1323,26 +1323,30 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 
 .aw-tasks.is-three { margin-bottom: 0; } /* a section preview: the section padding ends it */
 @media (min-width: 768px) { :is(.aw-news-list, .aw-tasks).is-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } } /* News or Resources cards, three across (no orphan in a row of three) */
-/* Mosaic, compact (owner, 18 Oct 2026: no huge cards): one lead story, then four rows with a small 4:3 thumbnail.
-   Phones: the lead as a card, rows under it. From 768: the lead on the left, the four rows beside it. */
-.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
-.aw-news-mosaic > li { margin: 0 !important; }
-.aw-news-mosaic > li:first-child { padding-bottom: var(--kit-space-4) !important; }
-.aw-news-mosaic > li:first-child .aw-story-body > :first-child { margin-top: var(--kit-space-3); }
-.aw-news-mosaic > li:first-child .aw-story-title { font-size: var(--kit-type-h3) !important; line-height: 1.25 !important; }
-.aw-news-mosaic > li:nth-child(n+2) > .aw-story { display: grid; grid-template-columns: minmax(0, 1fr) 6rem; gap: var(--kit-space-4); align-items: start; padding: var(--kit-space-4) 0; border-top: var(--kit-border-width) solid var(--kit-color-line); }
-.aw-news-mosaic > li:nth-child(n+2) > .aw-story .kit-story-media { order: 2; }
-.aw-news-mosaic > li:nth-child(n+2) .aw-story-body > :first-child { margin-top: 0; }
-.aw-news-mosaic > li:nth-child(n+2) .aw-story-title { -webkit-line-clamp: 2 !important; margin-bottom: 0 !important; }
-@media (min-width: 768px) {
-	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: repeat(4, auto); column-gap: var(--kit-space-6); align-items: start; }
-	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 4; padding-bottom: 0 !important; }
-	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; }
-	.aw-news-mosaic > li:nth-child(2) > .aw-story { border-top: 0; padding-top: 0; }
+/* Mosaic (What's happening, From the Library): the lead card (block-lg, hubs.php picks the state by place) and the next
+   two or three as stacked-md rows. Phones: the lead (2:1 picture), then the rows (no thumbnail, two-line titles). From 768:
+   the lead on the left spans the rows on the right, which keep their natural height; the lead's picture fills what its
+   text leaves (at least 10rem), so both columns end level. No summary (is-brief). */
+.aw-news-list.aw-news-mosaic { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--kit-space-2); align-items: start; }
+.aw-news-mosaic > li { margin: 0 !important; min-width: 0; }
+.aw-news-mosaic.is-brief .kit-card-sum { display: none; }
+.aw-news-mosaic .kit-card--block-lg > .kit-card-media { --kit-card-media-ratio: 2 / 1; }
+.aw-news-mosaic .kit-card--block-lg > .kit-card-body { padding: var(--kit-space-4); }
+.aw-news-mosaic .kit-card--stacked-md { height: auto; }
+@media (max-width: 767px) {
+	.aw-news-mosaic .kit-card--stacked-md { padding: var(--kit-space-3); }
+	.aw-news-mosaic .kit-card--stacked-md > .kit-card-media { display: none; }
+	.aw-news-mosaic .kit-card .kit-card-title a { -webkit-line-clamp: 2; }
 }
-@media (min-width: 1200px) {
-	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--kit-space-7); }
-	.aw-news-mosaic > li:nth-child(n+2) > .aw-story { grid-template-columns: minmax(0, 1fr) 7.5rem; }
+@media (min-width: 768px) {
+	.aw-news-list.aw-news-mosaic { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--kit-space-grid); row-gap: var(--kit-space-3); }
+	.aw-news-mosaic > li:first-child { grid-column: 1; grid-row: 1 / span 3; align-self: stretch; }
+	.aw-news-mosaic:has(> li:nth-child(3):last-child) > li:first-child { grid-row: 1 / span 2; }
+	.aw-news-mosaic > li:nth-child(n+2) { grid-column: 2; }
+	.aw-news-mosaic > li:first-child > .kit-card { height: 100%; }
+	.aw-news-mosaic > li:first-child .kit-card-media { flex: 1 1 0; aspect-ratio: auto; min-height: 10rem; max-height: none; }
+	.aw-news-mosaic > li:first-child .kit-card-media img { position: absolute; inset: 0; }
+	.aw-news-mosaic > li:first-child .kit-card-title a { -webkit-line-clamp: 4; }
 }
 
 /* Card lists (kit-card states, kit.css): the list item is only a wrapper; a one-column list (Library) keeps a gap. */
@@ -1422,22 +1426,22 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    sideways in three rows. Nothing is removed: every card, tile and link stays in the row, in reading and Tab order
    (a focused card scrolls into view). From 768 nothing here applies. */
 @media (max-width: 767px) {
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template,
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template,
 	.home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card)) {
 		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-4) !important;
 		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
 		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
 	}
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
 	.home :is(.aw-ed-law > .kit-stack, .aw-ed-story-figures, .aw-ed-story-dates, .kit-section > .kit-stack:has(> .kit-photo-card))::-webkit-scrollbar { display: none; }
 	/* Cards: one size in the row (the lead and the compact rows alike), a 2:1 picture, title and a two-line summary */
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template > li { flex: 0 0 min(82%, 22rem); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
 	/* Library tiles, story figures and dates, Take action photo cards */
 	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
 	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 min(88%, 24rem); padding: var(--kit-space-4); column-gap: var(--kit-space-3); scroll-snap-align: start; margin: 0 !important; }
@@ -1457,21 +1461,21 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
    a desktop scroll bar of up to 16px, so a 1024px desktop window is never changed. 1024 and up: nothing here applies. */
 @media (min-width: 768px) and (max-width: 1199px) { .home .wp-site-blocks { container: aw-home / inline-size; } }
 @container aw-home (max-width: 1007px) {
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template,
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template,
 	.home .aw-ed-law > .kit-stack {
 		display: flex !important; flex-direction: row !important; align-items: stretch; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--kit-space-grid) !important;
 		margin-inline: calc(-1 * var(--kit-space-gutter)) !important; padding: 0 var(--kit-space-gutter) var(--kit-space-3) !important; scroll-padding-inline: var(--kit-space-gutter);
 		max-width: none !important; width: auto !important; scrollbar-width: none; overscroll-behavior-x: contain;
 	}
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template::-webkit-scrollbar,
 	.home .aw-ed-law > .kit-stack::-webkit-scrollbar { display: none; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template > li { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
-	.home :is(.aw-ed-news, .aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .wp-block-post-template > li { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card { height: 100%; flex-direction: column !important; align-items: stretch !important; gap: 0 !important; padding: 0 !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media { width: 100% !important; max-width: none !important; height: auto !important; aspect-ratio: 2 / 1 !important; flex: none !important; border-radius: 0; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-media img { width: 100%; height: 100% !important; object-fit: cover; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card > .kit-card-body { padding: var(--kit-space-4) !important; min-width: 0; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card-title { font-size: var(--kit-type-h4) !important; }
+	.home :is(.aw-ed-law, .aw-ed-learn) .aw-hub-list .kit-card .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 2 !important; }
 	.home .aw-ed-law > .kit-stack { margin-top: var(--kit-space-4) !important; }
 	.home .aw-ed-law > .kit-stack > .kit-tile { flex: 0 0 calc((100% - var(--kit-space-grid)) / 2.2); scroll-snap-align: start; margin: 0 !important; }
 }
