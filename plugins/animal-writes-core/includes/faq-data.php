@@ -2,7 +2,7 @@
 /**
  * Animal Writes' FAQ data for AW SEO Plus (owner, 31 Oct 2026: the plugin's FAQ is a generic feature; the site's own
  * rules live here, through its filters). Nothing here runs unless AW SEO Plus calls its filters, except the Library
- * "FAQ fields" box and its meta, which are Library fields.
+ * "Library item" box and its meta, which are Library fields.
  *
  * - aw_faq_registry: the questions built from a Directory listing's and a Library document's own fields (each entry a
  *   question template, the fields it needs, an answer builder, a priority in Search Insights demand order).
@@ -41,7 +41,6 @@ add_filter(
 			array( 'key' => 'force', 'priority' => 2, 'q' => 'Is the %s in force?', 'needs' => array( 'aw_legal_force' ), 'pattern' => '<doc> latest / today', 'answer' => 'aw_faq_legal_force', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'date', 'priority' => 3, 'q' => 'When was the %s %s?', 'needs' => array( 'aw_source_date', 'aw_legal_number (not needed for official releases and circulars)' ), 'pattern' => '<doc> gazette / notification', 'answer' => 'aw_faq_legal_date', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'issuer', 'priority' => 4, 'q' => 'Who issued the %s?', 'needs' => array( 'aw_issuer (not for Acts and Rules: the stored issuer is whose copy it is)' ), 'pattern' => '—', 'answer' => 'aw_faq_legal_issuer', 'question' => 'aw_faq_legal_question' ),
-			array( 'key' => 'hindi', 'priority' => 5, 'q' => 'Is the %s available in Hindi?', 'needs' => array( 'aw_file_hi_url' ), 'pattern' => '<doc> in hindi', 'answer' => 'aw_faq_legal_hindi', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'read', 'priority' => 7, 'q' => 'Where can I read the %s?', 'needs' => array( 'aw_source_url (not a PDF)', 'aw_issuer', 'official release' ), 'pattern' => '<doc> press release', 'answer' => 'aw_faq_legal_read', 'question' => 'aw_faq_legal_question' ),
 			array( 'key' => 'sections', 'priority' => 6, 'q' => 'What does section %2$s of the %1$s say?', 'needs' => array( 'aw_key_sections (Acts and Rules)' ), 'pattern' => 'pca act section 11 / punishment', 'answer' => 'aw_faq_legal_sections' ),
 		);
@@ -63,6 +62,10 @@ add_filter(
 			array( 'key' => 'tag-topics', 'priority' => 3.1, 'q' => 'Which topics come up most under %s?', 'needs' => array( '3 items (not listings) with a category' ), 'pattern' => '<tag> <topic>', 'answer' => 'aw_faq_tag_topics', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-districts', 'priority' => 4, 'q' => 'Which districts have the most %s listings?', 'needs' => array( '3 Directory listings with a district' ), 'pattern' => '<tag> <district>', 'answer' => 'aw_faq_tag_districts', 'question' => 'aw_faq_tag_question' ),
 			array( 'key' => 'tag-journals', 'priority' => 5, 'q' => 'Which journals published the %s studies?', 'needs' => array( '3 Resources with aw_journal' ), 'pattern' => '<tag> journal', 'answer' => 'aw_faq_tag_journals', 'question' => 'aw_faq_tag_question' ),
+			// After every question above, so a tag that already shows 6 keeps them.
+			array( 'key' => 'tag-animals', 'priority' => 6, 'q' => 'Which animals do the %s organisations help?', 'needs' => array( '3 Directory listings with aw_animals' ), 'pattern' => '<tag> for <animal>', 'answer' => 'aw_faq_tag_animals', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-laws', 'priority' => 6.1, 'q' => 'Which laws do the %s explain?', 'needs' => array( '3 Resources or news items linking to a Library document' ), 'pattern' => '<law> <tag>', 'answer' => 'aw_faq_tag_laws', 'question' => 'aw_faq_tag_question' ),
+			array( 'key' => 'tag-in-force', 'priority' => 6.2, 'q' => 'Which %s are in force?', 'needs' => array( '2 Library documents with aw_legal_force' ), 'pattern' => '<tag> in force', 'answer' => 'aw_faq_tag_in_force', 'question' => 'aw_faq_tag_question' ),
 		);
 		return $r;
 	}
@@ -78,7 +81,12 @@ add_filter(
  * @return string
  */
 function aw_faq_legal_question( $tpl, $id, $doc, $key ) {
-	$q = sprintf( $tpl, $doc, 'date' === $key ? aw_faq_legal_verb( $id ) : '' );
+	$verb = 'date' === $key ? aw_faq_legal_verb( $id ) : '';
+	if ( aw_faq_is_topic_name( $doc ) ) { // "the press release on …": "When was it issued?", "the PDF of the …"
+		$verb = 'released' === $verb ? 'issued' : $verb;
+		$tpl  = 'pdf' === $key ? 'Where can I download the PDF of the %s?' : $tpl;
+	}
+	$q = sprintf( $tpl, $doc, $verb );
 	return aw_faq_plural( $doc ) ? preg_replace( array( '/^Is the /', '/^When was the /' ), array( 'Are the ', 'When were the ' ), $q ) : $q;
 }
 
@@ -125,6 +133,9 @@ function aw_faq_doc_name( $id ) {
 
 /** Whether a document name is plural ("ABC Rules 2023", "… Amendment Rules, 2026"): "Are … in force?", "were notified". */
 function aw_faq_plural( $name ) {
+	if ( aw_faq_is_topic_name( $name ) ) {
+		return false; // "the circular on ABC guidelines" is one circular
+	}
 	return (bool) preg_match( '/\b(Rules|Acts|Regulations|Guidelines|Orders|Judgments)\b/iu', (string) $name );
 }
 
@@ -135,15 +146,25 @@ function aw_faq_be( $name, $past = false ) {
 
 /**
  * A document's short name, the way people search it (owner, 20 Oct 2026): the "Short name" field ("PCA Act 1960", "ABC
- * Rules 2023"), else the primary focus keyphrase, else the title. Questions use it; the first answer gives the full
+ * Rules 2023"), else the primary focus keyphrase (for an official release or a circular, "press release on <keyphrase>" /
+ * "circular on <keyphrase>"), else the title. Questions use it; the first answer gives the full
  * official title once.
  */
 function aw_faq_doc_short( $id ) {
 	$s = aw_faq_plain( get_post_meta( $id, 'aw_short_name', true ) );
 	if ( '' === $s ) {
 		$s = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
+		$k = '' !== $s ? aw_faq_legal_kind( $id ) : '';
+		if ( ( 'official-release' === $k || 'circular' === $k ) && ! preg_match( '/\b(?:circular|release)\b/iu', $s ) ) { // a release's or circular's keyphrase is its topic, not its name ("awbi world animal day circular" is a name)
+			$s = ( 'circular' === $k ? 'circular on ' : 'press release on ' ) . $s;
+		}
 	}
 	return '' !== $s ? $s : aw_faq_doc_name( $id );
+}
+
+/** Whether a document name is a topic name from aw_faq_doc_short() ("press release on …", "circular on …"). */
+function aw_faq_is_topic_name( $name ) {
+	return (bool) preg_match( '/^(?:press release|circular) on /u', (string) $name );
 }
 /* ---------- A. Directory listings ---------- */
 
@@ -319,7 +340,8 @@ function aw_faq_legal_pdf( $id, $doc ) {
 		return null;
 	}
 	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
-	return array( 'Download the official ' . esc_html( $doc ) . ' PDF ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( $iss->name ) . ')' : '' ) . '.', 'pdf' );
+	$what = aw_faq_is_topic_name( $doc ) ? 'PDF of the ' . esc_html( $doc ) : esc_html( $doc ) . ' PDF';
+	return array( 'Download the official ' . $what . ' ' . aw_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( $iss->name ) . ')' : '' ) . '.', 'pdf' );
 }
 
 function aw_faq_legal_force( $id, $doc ) {
@@ -356,7 +378,10 @@ function aw_faq_legal_date( $id, $doc ) {
 		if ( ! $iss || ! in_array( aw_faq_legal_kind( $id ), array( 'official-release', 'circular' ), true ) ) {
 			return null;
 		}
-		return array( esc_html( $iss->name ) . ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ) . ' on ' . aw_date( $d ) . '.', 'date' );
+		$src  = (string) get_post_meta( $id, 'aw_source_url', true );
+		$who  = ucfirst( esc_html( aw_faq_the( $iss->name ) ) );
+		$what = aw_faq_is_topic_name( $doc ) ? ' issued it' : ' ' . aw_faq_legal_verb( $id ) . ' the ' . esc_html( $doc ); // not "released the press release on …"
+		return array( $who . $what . ' on ' . aw_date( $d ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' ), 'date' );
 	}
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
 	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' ' . aw_faq_legal_verb( $id ) . ' on ' . aw_date( $d ) . ' as ' . ( $src ? aw_faq_a( $src, $no ) : esc_html( $no ) ) . '.';
@@ -370,7 +395,7 @@ function aw_faq_legal_issuer( $id, $doc ) {
 	}
 	$act = aw_faq_plain( get_post_meta( $id, 'aw_legal_act', true ) );
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( $iss->name ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
+	$a   = 'The ' . esc_html( $doc ) . ' ' . aw_faq_be( $doc, true ) . ' issued by ' . esc_html( aw_faq_the( $iss->name ) ) . ( '' !== $act ? ' under the ' . esc_html( preg_replace( '/^The\s+/u', '', $act ) ) : '' ) . '.' . ( $src ? ' ' . aw_faq_a( $src, 'See the original' ) . '.' : '' );
 	return array( $a, 'issuer' );
 }
 
@@ -388,11 +413,6 @@ function aw_faq_legal_read( $id, $doc ) {
 		return null;
 	}
 	return array( 'On the website of ' . esc_html( $iss->name ) . ': ' . aw_faq_a( $src, 'read the ' . esc_html( $doc ) ) . '.', 'read' );
-}
-
-function aw_faq_legal_hindi( $id, $doc ) {
-	$url = trim( (string) get_post_meta( $id, 'aw_file_hi_url', true ) );
-	return $url ? array( 'Yes. The Hindi version of the ' . esc_html( $doc ) . ' is ' . aw_faq_a( $url, 'here' ) . '.', 'hindi' ) : null;
 }
 
 /**
@@ -429,13 +449,14 @@ function aw_faq_legal_sections( $id, $doc ) {
 	}
 	return $out ? $out : null;
 }
-/* ---------- Library documents: the fields the FAQ reads that had no home ---------- */
+/* ---------- Library documents: the "Library item" box (document fields the FAQ also reads) ---------- */
 
 add_action(
 	'init',
 	function () {
 		$auth = fn() => current_user_can( 'edit_posts' );
-		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960); used in FAQ questions', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
+		register_post_meta( 'aw_legal', 'aw_short_name', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Short name, as people search it (PCA Act 1960)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
+		// The Hindi version link is no longer edited or asked about (owner, 1 Nov 2026); stored values are kept.
 		register_post_meta( 'aw_legal', 'aw_file_hi_url', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Hindi version (link to the official Hindi text)', 'sanitize_callback' => 'esc_url_raw', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_legal_act', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Issued under (the parent Act, as the document states it)', 'sanitize_callback' => 'sanitize_text_field', 'auth_callback' => $auth ) );
 		register_post_meta( 'aw_legal', 'aw_key_sections', array( 'type' => 'string', 'single' => true, 'show_in_rest' => true, 'description' => 'Key sections (Acts and Rules): one per line, "number | one-line plain summary | link"', 'sanitize_callback' => 'sanitize_textarea_field', 'auth_callback' => $auth ) );
@@ -446,13 +467,12 @@ add_action(
 	'add_meta_boxes_aw_legal',
 	function () {
 		add_meta_box(
-			'aw-faq-legal',
-			'FAQ fields',
+			'aw-legal-item',
+			'Library item',
 			function ( $post ) {
 				wp_nonce_field( 'aw_faq_legal', 'aw_faq_legal_nonce' );
-				echo '<p class="description">Questions on this page come from its own fields (PDF, in force, date and number, issuer). These add more when filled.</p>';
-				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Questions use it; empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
-				echo '<p><label for="aw-file-hi">Hindi version (link to the official Hindi text)</label><br><input type="url" class="large-text" id="aw-file-hi" name="aw_file_hi_url" value="' . esc_attr( get_post_meta( $post->ID, 'aw_file_hi_url', true ) ) . '"></p>';
+				echo '<h3>Details</h3>';
+				echo '<p><label for="aw-short-name">Short name, as people search it (e.g. PCA Act 1960, ABC Rules 2023). Empty = the focus keyphrase</label><br><input type="text" class="large-text" id="aw-short-name" name="aw_short_name" value="' . esc_attr( get_post_meta( $post->ID, 'aw_short_name', true ) ) . '"></p>';
 				echo '<p><label for="aw-legal-act">Issued under (the parent Act, as the document states it)</label><br><input type="text" class="large-text" id="aw-legal-act" name="aw_legal_act" value="' . esc_attr( get_post_meta( $post->ID, 'aw_legal_act', true ) ) . '"></p>';
 				echo '<p><label for="aw-key-sections">Key sections (Acts and Rules only): one per line, "number | one-line plain summary | link"</label><br><textarea class="large-text" rows="4" id="aw-key-sections" name="aw_key_sections" placeholder="11 | punishment for treating animals cruelly | https://…">' . esc_textarea( get_post_meta( $post->ID, 'aw_key_sections', true ) ) . '</textarea></p>';
 			},
@@ -468,7 +488,7 @@ add_action(
 		if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['aw_faq_legal_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['aw_faq_legal_nonce'] ) ), 'aw_faq_legal' ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		foreach ( array( 'aw_short_name' => 'sanitize_text_field', 'aw_file_hi_url' => 'esc_url_raw', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
+		foreach ( array( 'aw_short_name' => 'sanitize_text_field', 'aw_legal_act' => 'sanitize_text_field', 'aw_key_sections' => 'sanitize_textarea_field' ) as $k => $clean ) {
 			$v = call_user_func( $clean, wp_unslash( (string) ( $_POST[ $k ] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			'' !== trim( $v ) ? update_post_meta( $post_id, $k, $v ) : delete_post_meta( $post_id, $k );
 		}
@@ -654,10 +674,18 @@ function aw_faq_tag_lc( $name ) {
 /** The tag's name in a question ("Official release" → "official release"). */
 function aw_faq_tag_question( $tpl, $id, $entity, $key ) {
 	$name = aw_faq_tag_lc( $entity );
-	if ( 'tag-issuers' === $key ) { // "Who issues the circulars …"
-		$name = preg_match( '/[^aeiou]y$/u', $name ) ? mb_substr( $name, 0, -1 ) . 'ies' : ( preg_match( '/s$/u', $name ) ? $name : $name . 's' );
+	if ( in_array( $key, array( 'tag-issuers', 'tag-laws', 'tag-in-force', 'tag-campaign' ), true ) ) { // "Who issues the circulars …", "Which rules are in force?"
+		$name = aw_faq_tag_plural( $name );
 	}
 	return sprintf( $tpl, $name );
+}
+
+/** A tag's name in the plural ("rule" → "rules", "policy" → "policies", "research" → "research summaries"; "news" stays). */
+function aw_faq_tag_plural( $name ) {
+	if ( 'research' === $name ) {
+		return 'research summaries';
+	}
+	return preg_match( '/[^aeiou]y$/u', $name ) ? mb_substr( $name, 0, -1 ) . 'ies' : ( preg_match( '/s$/u', $name ) ? $name : $name . 's' );
 }
 
 /** An issuer's name after "from": "the Supreme Court", "the Press Information Bureau". */
@@ -741,20 +769,175 @@ function aw_faq_tag_places( $term_id, $district ) {
 	return array( $named, $place );
 }
 
+/**
+ * The Directory link for a tag's listings: the Directory filtered by the tag when it is a service (?tag=), else the page
+ * of the state with the most of them. '' when there is neither.
+ *
+ * @param int    $term_id Tag ID.
+ * @param string $name    Tag name.
+ * @param array  $counts  aw_faq_tag_places() counts by state, sorted largest first.
+ * @param array  $place   aw_faq_tag_places() places by name.
+ * @return string Link HTML.
+ */
+function aw_faq_tag_directory_link( $term_id, $name, array $counts, array $place ) {
+	$t = get_term( $term_id, 'post_tag' );
+	if ( ! $t instanceof WP_Term ) {
+		return '';
+	}
+	if ( function_exists( 'aw_service_slugs' ) && in_array( $t->slug, (array) aw_service_slugs(), true ) ) {
+		return aw_faq_a( add_query_arg( 'tag', $t->slug, home_url( 'directory/' ) ), 'Find ' . aw_faq_tag_lc( $name ) . ' in the Directory' );
+	}
+	$top = (string) array_key_first( $counts );
+	return '' !== $top && function_exists( 'aw_directory_url' ) ? aw_faq_a( aw_directory_url( $place[ $top ]->slug ), 'Browse the Directory in ' . $top ) : '';
+}
+
 function aw_faq_tag_directory( $term_id, $name ) {
 	list( $counts, $place ) = aw_faq_tag_places( $term_id, false );
-	$t                      = get_term( $term_id, 'post_tag' );
-	if ( array_sum( $counts ) < 3 || ! $t instanceof WP_Term || ! function_exists( 'aw_directory_url' ) ) {
+	if ( array_sum( $counts ) < 3 ) {
 		return null;
 	}
 	arsort( $counts );
-	$top    = (string) array_key_first( $counts );
-	$n      = count( aw_faq_tag_items( $term_id )['aw_listing'] );
-	$lc     = aw_faq_tag_lc( $name );
-	$filter = function_exists( 'aw_service_slugs' ) && in_array( $t->slug, (array) aw_service_slugs(), true ); // the Directory filters by services (?tag=); any other tag: the top state's page
-	$link   = $filter ? aw_faq_a( add_query_arg( 'tag', $t->slug, home_url( 'directory/' ) ), 'Find ' . $lc . ' in the Directory' ) : aw_faq_a( aw_directory_url( $place[ $top ]->slug ), 'Browse the Directory in ' . $top );
-	$a      = 'The Directory lists ' . number_format_i18n( $n ) . ' organisations offering ' . esc_html( $lc ) . ', most of them in ' . aw_faq_tag_top( $counts ) . '. ' . $link . '.';
+	$link = aw_faq_tag_directory_link( $term_id, $name, $counts, $place );
+	if ( '' === $link ) {
+		return null;
+	}
+	$n = count( aw_faq_tag_items( $term_id )['aw_listing'] );
+	$a = 'The Directory lists ' . number_format_i18n( $n ) . ' organisations offering ' . esc_html( aw_faq_tag_lc( $name ) ) . ', most of them in ' . aw_faq_tag_top( $counts ) . '. ' . $link . '.';
 	return array( $a, 'tag-directory' );
+}
+
+/** Which animals the tag's listings help (aw_animals, comma separated; "others" left out). */
+function aw_faq_tag_animals( $term_id, $name ) {
+	$counts = array();
+	$n      = 0;
+	foreach ( aw_faq_tag_items( $term_id )['aw_listing'] ?? array() as $id ) {
+		$an = array_unique( array_filter( array_map( fn( $x ) => mb_strtolower( trim( $x ) ), explode( ',', aw_lf( $id, 'aw_animals' ) ) ), fn( $x ) => '' !== $x && ! in_array( $x, array( 'other', 'others' ), true ) ) );
+		if ( ! $an ) {
+			continue;
+		}
+		++$n;
+		foreach ( $an as $x ) {
+			$counts[ $x ] = ( $counts[ $x ] ?? 0 ) + 1;
+		}
+	}
+	if ( $n < 3 ) {
+		return null;
+	}
+	list( $states, $place ) = aw_faq_tag_places( $term_id, false );
+	arsort( $states );
+	$link = aw_faq_tag_directory_link( $term_id, $name, $states, $place );
+	if ( '' === $link ) {
+		return null;
+	}
+	$a = 'Of ' . number_format_i18n( $n ) . ' listings that name the animals they help, most help ' . aw_faq_tag_top( $counts ) . '. ' . $link . '.';
+	return array( $a, 'tag-animals' );
+}
+
+/**
+ * The published Library documents an item links to: links in its text that resolve to a Library document, and its
+ * aw_entities laws with an ID.
+ *
+ * @param int $id Item ID.
+ * @return int[] Document IDs.
+ */
+function aw_faq_item_laws( $id ) {
+	static $memo = array(); // url => document ID (0 for none), for the request
+	$out  = array();
+	$base = (string) wp_parse_url( home_url( 'library/' ), PHP_URL_PATH );
+	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	if ( preg_match_all( '/href=["\']([^"\']+)["\']/i', (string) get_post_field( 'post_content', $id ), $m ) ) {
+		foreach ( array_unique( $m[1] ) as $url ) {
+			$u = wp_parse_url( html_entity_decode( $url ) );
+			if ( ! is_array( $u ) || ( isset( $u['host'] ) && strtolower( $u['host'] ) !== strtolower( $host ) ) || 0 !== strpos( (string) ( $u['path'] ?? '' ), $base ) ) {
+				continue; // only this site's Library addresses
+			}
+			$key = strtok( $url, '#?' );
+			if ( ! isset( $memo[ $key ] ) ) {
+				$memo[ $key ] = (int) url_to_postid( $key );
+			}
+			$out[] = $memo[ $key ];
+		}
+	}
+	$ent = json_decode( (string) get_post_meta( $id, 'aw_entities', true ), true );
+	foreach ( (array) ( $ent['laws'] ?? array() ) as $l ) {
+		$out[] = (int) ( $l['id'] ?? 0 );
+	}
+	return array_values( array_filter( array_unique( $out ), fn( $d ) => $d && $d !== (int) $id && 'aw_legal' === get_post_type( $d ) && 'publish' === get_post_status( $d ) ) );
+}
+
+/** Which Library documents the tag's Resources and news items link to most. Not for a tag with Directory listings (a service). */
+function aw_faq_tag_laws( $term_id, $name ) {
+	$items = aw_faq_tag_items( $term_id );
+	if ( ! empty( $items['aw_listing'] ) ) {
+		return null; // "the rescue works": a service's name is not a kind of item
+	}
+	$counts = array();
+	$first  = array(); // short name => document ID
+	$n      = 0;
+	$with   = 0;
+	foreach ( array( 'post', 'aw_news' ) as $pt ) {
+		foreach ( $items[ $pt ] ?? array() as $id ) {
+			++$n;
+			$docs  = aw_faq_item_laws( $id );
+			$with += $docs ? 1 : 0;
+			foreach ( $docs as $d ) {
+				$s            = aw_faq_doc_short( $d );
+				$counts[ $s ] = ( $counts[ $s ] ?? 0 ) + 1;
+				$first[ $s ]  = $first[ $s ] ?? $d;
+			}
+		}
+	}
+	if ( $with < 3 ) {
+		return null;
+	}
+	arsort( $counts );
+	$top = (string) array_key_first( $counts );
+	$a   = number_format_i18n( $with ) . ' of the ' . number_format_i18n( $n ) . ' ' . esc_html( aw_faq_tag_plural( aw_faq_tag_lc( $name ) ) ) . ' link to Library documents, most often the ' . aw_faq_tag_top( $counts ) . '. ' . aw_faq_a( (string) get_permalink( $first[ $top ] ), 'Read the ' . $top . ' in the Library' ) . '.';
+	return array( $a, 'tag-laws' );
+}
+
+/** Which of the tag's Library documents are in force (aw_legal_force, as aw_faq_legal_force reads it). */
+function aw_faq_tag_in_force( $term_id ) {
+	$known = 0;
+	$in    = array();
+	foreach ( aw_faq_tag_items( $term_id )['aw_legal'] ?? array() as $id ) { // newest first
+		$f = (string) get_post_meta( $id, 'aw_legal_force', true );
+		if ( in_array( $f, array( 'InForce', 'PartiallyInForce', 'NotInForce' ), true ) ) {
+			++$known;
+			if ( 'InForce' === $f ) {
+				$in[] = $id;
+			}
+		}
+	}
+	if ( $known < 2 || ! $in ) {
+		return null;
+	}
+	$names = array_map( fn( $d ) => esc_html( aw_faq_doc_short( $d ) ), array_slice( $in, 0, 3 ) );
+	$a     = number_format_i18n( count( $in ) ) . ' of the ' . number_format_i18n( $known ) . ' are in force, among them the ' . aw_faq_and( $names ) . '. ' . aw_faq_a( home_url( 'library/' ), 'Browse the Library' ) . '.';
+	return array( $a, 'tag-in-force' );
+}
+
+// Not in the registry until the campaigns it names are open again (owner, 1 Nov 2026).
+/** The campaign most of the tag's Library documents are linked to (aw_campaign_link; its term meta aw_campaign_page). */
+function aw_faq_tag_campaign( $term_id, $name ) {
+	$ids    = aw_faq_tag_items( $term_id )['aw_legal'] ?? array();
+	$counts = array();
+	foreach ( $ids as $id ) {
+		foreach ( function_exists( 'aw_campaign_links' ) ? aw_campaign_links( $id ) : array() as $t ) {
+			$counts[ $t->term_id ] = ( $counts[ $t->term_id ] ?? 0 ) + 1;
+		}
+	}
+	if ( ! $counts ) {
+		return null;
+	}
+	arsort( $counts );
+	$tid  = (int) array_key_first( $counts );
+	$page = (int) get_term_meta( $tid, 'aw_campaign_page', true );
+	if ( $counts[ $tid ] < 2 || ! $page || 'publish' !== get_post_status( $page ) ) {
+		return null;
+	}
+	$a = number_format_i18n( $counts[ $tid ] ) . ' of the ' . number_format_i18n( count( $ids ) ) . ' ' . esc_html( aw_faq_tag_plural( aw_faq_tag_lc( $name ) ) ) . ' are for the ' . esc_html( aw_faq_plain( get_the_title( $page ) ) ) . ' campaign. ' . aw_faq_a( (string) get_permalink( $page ), 'See the campaign' ) . '.';
+	return array( $a, 'tag-campaign' );
 }
 
 function aw_faq_tag_districts( $term_id ) {
