@@ -35,6 +35,11 @@ add_filter(
 			array( 'key' => 'adoption', 'priority' => 8, 'q' => 'Does %s offer adoption?', 'needs' => array( 'aw_adopt_url', 'Adoption Service' ), 'pattern' => '<org> adoption', 'answer' => 'aw_faq_listing_adoption' ),
 			array( 'key' => 'registration', 'priority' => 9, 'q' => 'What is the registration number or NGO Darpan ID of %s?', 'needs' => array( 'aw_registration', 'aw_darpan_id' ), 'pattern' => '<org> registration', 'answer' => 'aw_faq_listing_registration' ),
 			array( 'key' => 'animals', 'priority' => 10, 'q' => 'Which animals does %s help?', 'needs' => array( 'aw_animals' ), 'pattern' => '—', 'answer' => 'aw_faq_listing_animals' ),
+			// After the questions above (owner, 1 Nov 2026), from fields the listing page shows.
+			array( 'key' => 'type', 'priority' => 11, 'q' => 'What kind of organisation is %s?', 'needs' => array( 'listing type tag' ), 'pattern' => '<org> / <type> <district>', 'answer' => 'aw_faq_listing_type' ),
+			array( 'key' => 'website', 'priority' => 12, 'q' => 'What is the website of %s?', 'needs' => array( 'aw_website (not marked unverified; not nofollow)' ), 'pattern' => '<org> website', 'answer' => 'aw_faq_listing_website' ),
+			array( 'key' => 'email', 'priority' => 13, 'q' => 'What is the email address of %s?', 'needs' => array( 'aw_email (not marked unverified)' ), 'pattern' => '<org> email', 'answer' => 'aw_faq_listing_email' ),
+			array( 'key' => 'nearby', 'priority' => 14, 'q' => 'Which other organisations are in %s?', 'needs' => array( 'district (else state)', '1 other listing there' ), 'pattern' => 'animal ngo <district>', 'answer' => 'aw_faq_listing_nearby', 'question' => 'aw_faq_listing_nearby_question' ),
 		);
 		$r['aw_legal']   = array(
 			array( 'key' => 'pdf', 'priority' => 1, 'q' => 'Where can I download the %s PDF?', 'needs' => array( 'aw_file_id (PDF)', 'aw_source_url (.pdf)' ), 'pattern' => '<doc> pdf / pdf download', 'answer' => 'aw_faq_legal_pdf', 'question' => 'aw_faq_legal_question' ),
@@ -260,6 +265,9 @@ function aw_faq_listing_services( $id, $name ) {
 		$names = array_map( 'trim', explode( ',', aw_lf( $id, 'aw_services' ) ) );
 	}
 	if ( ! $names ) {
+		if ( aw_faq_listing_type( $id, $name ) && aw_faq_listing_type_fits( $id, $name ) ) {
+			return null; // the type answer says what kind of organisation it is; services read off the type would repeat it
+		}
 		$names = aw_listing_type_services( $id );
 		$typed = true;
 	}
@@ -271,6 +279,31 @@ function aw_faq_listing_services( $id, $name ) {
 	$list  = aw_faq_and( array_map( 'aw_faq_lc', array_slice( $names, 0, 8 ) ) ) . ( $extra ? ' and ' . $extra . ' more' : '' );
 	$a     = esc_html( $name ) . ' offers ' . esc_html( $list ) . ( $typed ? ' (based on type)' : '' ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'services' ), 'See its services' ) . '.';
 	return array( $a, 'services', ! $typed ); // "based on type" is shown but does not count toward the 3 (owner, 20 Oct 2026)
+}
+
+/**
+ * Whether the type question makes the FAQ when "services based on type" gives way to it: fewer than AW_FAQ_MAX
+ * questions shown before it, counting the listing's other answers of a higher priority in the default order (hidden
+ * and repeated facts left out, as the FAQ box does). Otherwise the services answer stays, so one of the two shows.
+ */
+function aw_faq_listing_type_fits( $id, $name ) {
+	$reg  = (array) ( apply_filters( 'aw_faq_registry', array() )['aw_listing'] ?? array() );
+	$prio = (float) ( array_column( $reg, 'priority', 'key' )['type'] ?? 0 );
+	$seen = array();
+	foreach ( $reg as $e ) {
+		if ( in_array( $e['key'], array( 'services', 'type' ), true ) || $e['priority'] >= $prio ) {
+			continue;
+		}
+		$h = $e['hidden'] ?? false;
+		if ( is_callable( $h ) ? call_user_func( $h, $id, $name ) : (bool) $h ) {
+			continue;
+		}
+		$r = call_user_func( $e['answer'], $id, $name );
+		if ( $r && isset( $r[0] ) && is_string( $r[0] ) ) {
+			$seen[ (string) $r[1] ] = true;
+		}
+	}
+	return count( $seen ) < ( defined( 'AW_FAQ_MAX' ) ? AW_FAQ_MAX : 6 );
 }
 
 function aw_faq_listing_awbi( $id, $name ) {
@@ -326,6 +359,155 @@ function aw_faq_listing_registration( $id, $name ) {
 function aw_faq_listing_animals( $id, $name ) {
 	$an = aw_lf( $id, 'aw_animals' );
 	return $an ? array( esc_html( $name ) . ' helps ' . esc_html( aw_faq_and( array_map( 'aw_faq_lc', explode( ',', $an ) ) ) ) . '. ' . aw_faq_a( aw_faq_section_url( $id, 'services' ), 'See its services' ) . '.', 'animals' ) : null;
+}
+
+/**
+ * How a listing type reads in a sentence: slug => [ singular with its article, plural ]. A type not here reads as its
+ * tag name in lower case.
+ */
+const AW_FAQ_TYPE_WORDS = array(
+	'abc-centre'                  => array( 'an ABC centre', 'ABC centres' ),
+	'adoption-network'            => array( 'an adoption network', 'adoption networks' ),
+	'animal-ambulance'            => array( 'an animal ambulance service', 'animal ambulance services' ),
+	'animal-shelter'              => array( 'an animal shelter', 'animal shelters' ),
+	'animal-welfare-organisation' => array( 'an animal welfare NGO', 'animal welfare NGOs' ),
+	'bird-hospital'               => array( 'a bird hospital', 'bird hospitals' ),
+	'emergency-rescue'            => array( 'an emergency rescue service', 'emergency rescue services' ),
+	'feeder-network'              => array( 'a feeder network', 'feeder networks' ),
+	'gaushala'                    => array( 'a gaushala', 'gaushalas' ),
+	'legal-aid'                   => array( 'a legal aid organisation', 'legal aid organisations' ),
+	'mobile-veterinary-unit'      => array( 'a mobile veterinary unit', 'mobile veterinary units' ),
+	'rescue-group'                => array( 'a rescue group', 'rescue groups' ),
+	'sanctuary'                   => array( 'an animal sanctuary', 'animal sanctuaries' ),
+	'veterinary-clinic'           => array( 'a veterinary clinic', 'veterinary clinics' ),
+	'veterinary-dispensary'       => array( 'a veterinary dispensary', 'veterinary dispensaries' ),
+	'veterinary-hospital'         => array( 'a veterinary hospital', 'veterinary hospitals' ),
+	'veterinary-office'           => array( 'a government veterinary office', 'government veterinary offices' ),
+	'wildlife-rescue'             => array( 'a wildlife rescue group', 'wildlife rescue groups' ),
+);
+
+/** [ singular with its article, plural ] for a listing type tag. */
+function aw_faq_type_words( $t ) {
+	if ( isset( AW_FAQ_TYPE_WORDS[ $t->slug ] ) ) {
+		return AW_FAQ_TYPE_WORDS[ $t->slug ];
+	}
+	$n = aw_faq_lc( aw_faq_plain( $t->name ) );
+	return array( ( preg_match( '/^[aeiou]/i', $n ) ? 'an ' : 'a ' ) . $n, $n . 's' );
+}
+
+/**
+ * Published listings of each type by district code (aw_place_counts() pairs) and by state code (counted on the state
+ * code, so listings with a state and no district are in it, as on the state pages).
+ *
+ * @return array{district: array, state: array}
+ */
+function aw_faq_type_counts() {
+	static $idx = null;
+	if ( null !== $idx ) {
+		return $idx;
+	}
+	$idx = array( 'district' => array(), 'state' => array() );
+	foreach ( function_exists( 'aw_place_counts' ) ? (array) ( aw_place_counts()['pairs'] ?? array() ) : array() as $p ) {
+		list( $code, $type, , $n ) = $p;
+		$idx['district'][ $code ][ $type ] = $n;
+	}
+	$state = get_transient( 'aw_faq_state_type_counts' );
+	if ( ! is_array( $state ) ) {
+		global $wpdb;
+		$state = array();
+		$slugs = function_exists( 'aw_listing_type_slugs' ) ? (array) aw_listing_type_slugs() : array();
+		$skip  = function_exists( 'kits_preview_only_ids' ) && kits_preview_only_ids() ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', kits_preview_only_ids() ) ) . ')' : ''; // preview-only items
+		$types = "'" . implode( "','", array_map( 'esc_sql', $slugs ) ) . "'";
+		$rows  = $slugs ? $wpdb->get_results( "SELECT sm.meta_value code, t.slug type, COUNT(DISTINCT p.ID) n FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} sm ON sm.post_id = p.ID AND sm.meta_key = 'aw_state_code' JOIN {$wpdb->term_relationships} rt ON rt.object_id = p.ID JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = rt.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ({$types}) WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'{$skip} GROUP BY sm.meta_value, t.slug", ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( (array) $rows as $r ) {
+			$state[ (int) $r['code'] ][ $r['type'] ] = (int) $r['n'];
+		}
+		set_transient( 'aw_faq_state_type_counts', $state, HOUR_IN_SECONDS );
+	}
+	$idx['state'] = $state;
+	return $idx;
+}
+
+add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_faq_state_type_counts' ) ); // fresh state counts after a listing is saved
+
+/** Whether a listing value is shown marked unverified (kept next to another value). */
+function aw_faq_unverified( $id, $value ) {
+	return function_exists( 'aw_unverified_list' ) && in_array( aw_unverified_norm( $value ), aw_unverified_list( $id ), true );
+}
+
+function aw_faq_listing_type( $id, $name ) {
+	$types = array_slice( aw_listing_types( $id ), 0, 3 ); // the type chips the page shows, in their order
+	if ( ! $types ) {
+		return null;
+	}
+	$words = array_map( 'aw_faq_type_words', $types );
+	$place = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+	list( $state, $district ) = aw_listing_place( $id );
+	$where = implode( ', ', array_filter( array( $district, $state ) ) );
+	$a     = esc_html( $name ) . ' is ' . esc_html( aw_faq_and( array_column( $words, 0 ) ) ) . ( '' !== $where ? ' in ' . esc_html( $where ) : '' ) . '. ';
+	$slug  = $types[0]->slug;
+	$plur  = $words[0][1];
+	$cnt   = aw_faq_type_counts();
+	$self  = 'publish' === get_post_status( $id ) ? 1 : 0; // the counts include the listing itself once published
+	if ( $place && 'district' === $place->kind && ( $cnt['district'][ $place->code ][ $slug ] ?? 0 ) > $self ) { // others of its type in its district
+		$link = aw_faq_a( aw_directory_url( $place->slug, $slug ), 'See other ' . $plur . ' in ' . $place->name );
+	} elseif ( $place && ( $cnt['state'][ 'district' === $place->kind ? $place->state : $place->code ][ $slug ] ?? 0 ) > $self ) { // else in its state
+		$st   = 'district' === $place->kind ? aw_place_state( $place->state ) : $place;
+		$link = aw_faq_a( aw_directory_url( $st->slug, $slug ), 'See other ' . $plur . ' in ' . $st->name );
+	} else {
+		$link = aw_faq_a( kits_term_url( $types[0] ), 'See ' . $plur . ' in India' );
+	}
+	return array( $a . $link . '.', 'type' );
+}
+
+function aw_faq_listing_website( $id, $name ) {
+	$url  = aw_lf( $id, 'aw_website' );
+	$host = preg_replace( '/^www\./i', '', (string) wp_parse_url( $url, PHP_URL_HOST ) );
+	if ( '' === $host || aw_faq_unverified( $id, $url ) || false !== strpos( aw_listing_rel( $id ), 'nofollow' ) ) {
+		return null; // an answer link carries no rel: a nofollow or sponsored listing keeps its website on the page only
+	}
+	return array( esc_html( $name ) . '’s website is ' . aw_faq_a( $url, $host ) . '.', 'website' );
+}
+
+function aw_faq_listing_email( $id, $name ) {
+	$email = aw_lf( $id, 'aw_email' );
+	if ( ! is_email( $email ) || aw_faq_unverified( $id, $email ) ) {
+		return null;
+	}
+	return array( 'You can email ' . esc_html( $name ) . ' at ' . aw_faq_a( 'mailto:' . $email, $email ) . '.', 'email' );
+}
+
+/** The listing's district, else its state, and how many other published listings it has. */
+function aw_faq_listing_nearby_place( $id ) {
+	$place = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null;
+	if ( ! $place ) {
+		return null;
+	}
+	$self = 'publish' === get_post_status( $id ) ? 1 : 0;
+	foreach ( array( $place, 'district' === $place->kind ? aw_place_state( $place->state ) : null ) as $p ) { // the district, else its state
+		$others = $p ? (int) aw_place_count( $p ) - $self : 0;
+		if ( $others > 0 ) {
+			return array( $p, $others );
+		}
+	}
+	return null;
+}
+
+function aw_faq_listing_nearby_question( $tpl, $id ) {
+	$p = aw_faq_listing_nearby_place( $id );
+	return sprintf( $tpl, $p ? $p[0]->name : '' );
+}
+
+function aw_faq_listing_nearby( $id ) {
+	$p = aw_faq_listing_nearby_place( $id );
+	if ( ! $p ) {
+		return null;
+	}
+	list( $place, $others ) = $p;
+	$st    = 'district' === $place->kind ? aw_place_state( $place->state ) : null;
+	$where = $st ? $place->name . ', ' . $st->name : $place->name;
+	$a = sprintf( 1 === $others ? 'The Directory lists %1$d other organisation in %2$s.' : 'The Directory lists %1$d other organisations in %2$s.', $others, esc_html( $where ) );
+	return array( $a . ' ' . aw_faq_a( aw_directory_url( $place->slug ), 'See the organisations in ' . $place->name ) . '.', 'nearby', false ); // about other organisations, not this one: shown, not counted
 }
 /* ---------- B. Library documents ---------- */
 
