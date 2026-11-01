@@ -584,3 +584,34 @@
 		update();
 	}
 })();
+
+/* Swipe rows on the Supreme Court page (campaign.css): a row that scrolls sideways takes keyboard focus (arrow keys
+   scroll it) and is named by its section's heading, so nothing is reachable by swiping only (WCAG 2.1.1, 4.1.2). A link
+   to a part inside a closed fold, or to the fold itself (the hero's "#orders"), opens that fold first. */
+(function () {
+	var page = document.querySelector('.aw-camp--sc-stray-dogs');
+	if (!page) return;
+	page.querySelectorAll('.aw-camp-dates, .aw-camp-timeline, .aw-camp-tracker, .aw-camp-grid').forEach(function (row) {
+		if (getComputedStyle(row).overflowX !== 'auto') return; // a row only where it scrolls (the actions: phones)
+		var box = row.closest('details, .aw-camp-module, .aw-camp-section');
+		var head = box && box.querySelector('summary, h2, h3');
+		if (!row.hasAttribute('tabindex')) row.tabIndex = 0;
+		if (!head) return;
+		if (!head.id) head.id = 'aw-sc-row-' + Math.random().toString(36).slice(2, 8);
+		if (row.matches('div') && !row.hasAttribute('role')) row.setAttribute('role', 'group'); // a list or a figure keeps its own role
+		row.setAttribute('aria-labelledby', head.id);
+	});
+	function open(hash) {
+		if (!hash || hash.length < 2) return;
+		var el;
+		try { el = document.querySelector(hash); } catch (e) { return; }
+		var fold = el && (el.matches('details') ? el : el.closest('details'));
+		if (fold && !fold.open) fold.open = true;
+	}
+	open(location.hash);
+	window.addEventListener('hashchange', function () { open(location.hash); });
+	document.addEventListener('click', function (ev) {
+		var a = ev.target.closest && ev.target.closest('a[href^="#"]');
+		if (a) open(a.getAttribute('href'));
+	});
+})();
