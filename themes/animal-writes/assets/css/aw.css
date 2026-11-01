@@ -1567,17 +1567,24 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-content-actions .kit-btn { flex: 1 1 auto; width: auto; }
 }
 
-/* Home: Supreme Court campaign card (home.php, pattern aw-sc). Uses the AW Content card (photograph under a dark fade);
-   adds the case number pill, one line and the campaign's countdown. */
-.aw-sc .aw-content-body { padding-top: 34%; }
-.aw-sc .aw-content-bg { object-position: 80% 30%; } /* the dog, on the right of the photograph */
-.aw-sc-eyebrow { display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); padding: 4px 12px; border-radius: var(--kit-radius-pill); background: var(--kit-color-accent); color: var(--kit-color-on-accent); font-size: .8125rem; font-weight: 600; line-height: 1.4; }
+/* Home: Supreme Court campaign card (home.php, pattern aw-sc), in the campaign's own brand: cream card, deep plum text
+   and buttons, the campaign photograph on top (as the festive card's pictures), the case number on pale yellow with a
+   scales mark, a yellow marker on "first compliance" as in the campaign hero, the day count in plum. */
+.aw-sc { justify-content: flex-start; background: #fbeee7; color: #3a1730; --kit-color-focus: #3a1730; --kit-btn-brand-bg: #3a1730; --kit-btn-brand-fg: #fff; }
+.aw-sc::before { content: none; }
+.aw-sc .aw-content-bg { position: static; z-index: auto; flex: none; height: auto; aspect-ratio: 2 / 1; object-position: 70% 40%; margin-bottom: var(--kit-space-5); border-radius: var(--kit-radius-control); }
+.aw-sc .aw-content-body { display: flex; flex: 1; flex-direction: column; padding-top: 0; }
+.aw-sc-eyebrow { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--kit-space-2); margin: 0 0 var(--kit-space-3); padding: 4px 12px; border-radius: var(--kit-radius-pill); background: #fde9b0; color: #3a1730; font-size: .8125rem; font-weight: 600; line-height: 1.4; }
 .aw-sc-eyebrow .kit-ico { --kit-ico-size: 16px; }
-.aw-sc-line { margin: 0; color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
-.aw-sc .aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-2); margin: var(--kit-space-5) 0 0; padding: 0; background: none; color: var(--kit-color-on-ink); }
-.aw-sc .aw-cd-num { font-size: var(--kit-type-h2); font-weight: 700; line-height: 1; color: var(--kit-color-accent); }
+.aw-sc h2 mark { background: linear-gradient(100deg, rgb(255 190 26 / 0) .2em, rgb(255 190 26 / .9) .5em, rgb(255 190 26 / .75) calc(100% - .4em), rgb(255 190 26 / 0) 100%) 0 60% / 100% 62% no-repeat; color: inherit; padding: 0 .2em; margin: 0 -.2em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.aw-sc-line { margin: 0; color: #5c4654; }
+.aw-sc .aw-countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--kit-space-2); margin: var(--kit-space-5) 0 0; padding: 0; background: none; color: #3a1730; }
+.aw-sc .aw-cd-num { font-size: var(--kit-type-h2); font-weight: 700; line-height: 1; color: #3a1730; }
 .aw-sc .aw-cd-unit { font-weight: 600; }
-.aw-sc .aw-cd-when { flex-basis: 100%; font-size: var(--kit-type-sm); color: color-mix(in srgb, var(--kit-color-on-ink) 82%, transparent); }
+.aw-sc .aw-cd-when { flex-basis: 100%; padding-top: var(--kit-space-2); border-top: 1px solid rgb(58 23 48 / .18); font-size: var(--kit-type-sm); font-weight: 600; color: #3a1730; }
+.aw-sc .aw-content-actions { margin-top: auto; }
+.aw-sc .aw-content-actions .kit-btn--secondary { background: transparent; color: #3a1730; border: 1px solid #3a1730; }
+.aw-sc .aw-content-actions .kit-btn--secondary:hover { background: #3a1730; color: #fff; }
 
 /* Home: AW Content and AW_Festive in one row (pattern aw-pair). Two cards, each its own design: stacked on phones, two
    equal columns of equal height from 768, the same padding and radius. In the row the festive pictures sit on top at
