@@ -599,9 +599,53 @@ add_action(
 		}
 		$font = get_theme_file_uri( 'assets/fonts/inter/inter-latin.woff2' );
 		echo '<link rel="preload" href="' . esc_url( $font ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
+		$heavy = aw_camp_inter_file( 800 ); // the heading's own file when the theme's Inter does not cover 800 (Global Styles keep it at 400 to 700)
+		if ( $heavy && $heavy !== $font ) {
+			echo '<link rel="preload" href="' . esc_url( $heavy ) . '" as="font" type="font/woff2" crossorigin media="(max-width: 1199px)">' . "\n";
+		}
 	},
 	2
 );
+
+/**
+ * The file the browser uses for upright Inter at this weight, from the font faces as WordPress resolves them: the
+ * theme's own file when its declared range covers the weight, else the Font Library's file for that weight. '' when
+ * none is found.
+ *
+ * @param int $weight Font weight, e.g. 800.
+ * @return string
+ */
+function aw_camp_inter_file( $weight ) {
+	if ( ! class_exists( 'WP_Font_Face_Resolver' ) ) {
+		return '';
+	}
+	$theme = '';
+	$lib   = '';
+	foreach ( WP_Font_Face_Resolver::get_fonts_from_theme_json() as $faces ) {
+		foreach ( (array) $faces as $f ) {
+			if ( 'inter' !== strtolower( trim( (string) ( $f['font-family'] ?? '' ), '"\' ' ) ) || 'normal' !== ( $f['font-style'] ?? 'normal' ) ) {
+				continue;
+			}
+			$src = '';
+			foreach ( (array) ( $f['src'] ?? array() ) as $u ) {
+				if ( preg_match( '/\.woff2(\?|$)/', (string) $u ) ) {
+					$src = (string) $u;
+					break;
+				}
+			}
+			$w = array_map( 'intval', preg_split( '/\s+/', trim( (string) ( $f['font-weight'] ?? '400' ) ) ) );
+			if ( '' === $src || $weight < min( $w ) || $weight > max( $w ) ) {
+				continue;
+			}
+			if ( false !== strpos( $src, '/uploads/fonts/' ) ) {
+				$lib = $lib ? $lib : $src;
+			} else {
+				$theme = $theme ? $theme : $src;
+			}
+		}
+	}
+	return $theme ? $theme : $lib;
+}
 
 /* ---------- WP Admin: the campaign boxes and list columns ---------- */
 /*
