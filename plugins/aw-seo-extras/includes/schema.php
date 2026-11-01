@@ -111,7 +111,7 @@ function aw_listing_schema( $id ) {
 	if ( $wa ) {
 		$org['contactPoint'] = 1 === count( $wa ) ? $wa[0] : $wa;
 	}
-	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ), $m( 'aw_linkedin' ), $m( 'aw_wikidata' ) ? 'https://www.wikidata.org/wiki/' . $m( 'aw_wikidata' ) : '', $m( 'aw_ngobase_url' ) ) ) );
+	$same = array_values( array_filter( array( $site, $m( 'aw_g_profile' ), $m( 'aw_instagram' ), $m( 'aw_facebook' ), $m( 'aw_x' ), $m( 'aw_youtube' ), $m( 'aw_linkedin' ), $m( 'aw_wikidata' ) ? 'https://www.wikidata.org/wiki/' . $m( 'aw_wikidata' ) : '' ) ) );
 	if ( $same ) {
 		$org['sameAs'] = $same;
 	}

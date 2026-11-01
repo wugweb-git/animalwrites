@@ -123,6 +123,9 @@ function aw_source_labels( $id, $full = false ) {
 	);
 	$html    = '';
 	foreach ( aw_listing_sources( $id ) as list( $slug, $mark, $label, $on, $link ) ) {
+		if ( 'ngobase' === $slug ) {
+			continue; // kept as a source in the data, not shown on the site
+		}
 		$title = $label . ( $on ? ', as on ' . wp_date( 'j M Y', strtotime( $on ) ) : '' );
 		$tag   = '<span class="kit-tag aw-datasrc' . ( ! empty( $variant[ $slug ] ) ? ' kit-tag--' . $variant[ $slug ] : '' ) . '" title="' . esc_attr( $title ) . '"><span class="aw-datasrc-mark" aria-hidden="true">' . ( $marks[ $slug ] ?? esc_html( $mark ) ) . '</span><span class="screen-reader-text">' . esc_html( 'Source: ' . $title ) . '</span></span>';
 		if ( $full ) { // "Details from": the source's logo, like publishers on News
