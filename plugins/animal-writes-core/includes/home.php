@@ -106,10 +106,14 @@ add_filter(
 	}
 );
 
-/* ---------- Guides ---------- */
+/* ---------- Guides and From the Library ---------- */
 
-/** Query Loop ID of the home Guides section (pattern learn.php). */
-const AW_HOME_GUIDES_QUERY = 44;
+/** Query Loop IDs of the home sections that pick their items (patterns learn.php and animal-law.php). */
+const AW_HOME_GUIDES_QUERY  = 44;
+const AW_HOME_LIBRARY_QUERY = 43;
+
+/** Library types that can lead the home Library section: the law itself and what the courts ordered. */
+const AW_HOME_LIBRARY_LEAD = array( 'act', 'rule', 'order', 'judgment' );
 
 /**
  * Guides on Home: the three newest guides, with at most one state "report cruelty" guide
@@ -136,14 +140,37 @@ function aw_home_guide_ids( $q ) {
 	return $out;
 }
 
+/**
+ * From the Library on Home: the newest Act, rule, order or judgment leads, then the two newest other items, an official
+ * release after the rest.
+ *
+ * @param array $q The Query Loop's query vars.
+ * @return int[]
+ */
+function aw_home_library_ids( $q ) {
+	$ids  = array_map( 'intval', get_posts( array_merge( $q, array( 'posts_per_page' => 20, 'paged' => 1, 'offset' => 0, 'fields' => 'ids', 'no_found_rows' => true ) ) ) );
+	$kind = fn( $id ) => function_exists( 'aw_legal_kinds' ) ? wp_list_pluck( aw_legal_kinds( $id ), 'slug' ) : array();
+	$lead = 0;
+	foreach ( $ids as $id ) {
+		if ( array_intersect( $kind( $id ), AW_HOME_LIBRARY_LEAD ) ) {
+			$lead = $id;
+			break;
+		}
+	}
+	$lead = $lead ? $lead : (int) ( $ids[0] ?? 0 );
+	$rest = array_slice( array_values( array_diff( $ids, array( $lead ) ) ), 0, 2 );
+	usort( $rest, fn( $a, $b ) => (int) in_array( 'official-release', $kind( $a ), true ) <=> (int) in_array( 'official-release', $kind( $b ), true ) ); // stable (PHP 8): newest first otherwise
+	return $lead ? array_merge( array( $lead ), $rest ) : array();
+}
+
 add_filter(
 	'query_loop_block_query_vars',
 	function ( $q, $block ) {
 		$qid = (int) ( $block->context['queryId'] ?? 0 );
-		if ( ! is_front_page() || AW_HOME_GUIDES_QUERY !== $qid ) {
+		if ( ! is_front_page() || ! in_array( $qid, array( AW_HOME_GUIDES_QUERY, AW_HOME_LIBRARY_QUERY ), true ) ) {
 			return $q;
 		}
-		$ids = aw_home_guide_ids( $q );
+		$ids = AW_HOME_GUIDES_QUERY === $qid ? aw_home_guide_ids( $q ) : aw_home_library_ids( $q );
 		if ( $ids ) {
 			$q['post__in']       = $ids;
 			$q['orderby']        = 'post__in';
