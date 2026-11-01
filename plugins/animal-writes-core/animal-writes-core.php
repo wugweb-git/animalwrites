@@ -66,7 +66,8 @@ require_once AW_CORE_DIR . 'includes/category-images.php';
 require_once AW_CORE_DIR . 'includes/cron.php';
 require_once AW_CORE_DIR . 'includes/display.php';
 require_once AW_CORE_DIR . 'includes/media.php';
-require_once AW_CORE_DIR . 'includes/media-columns.php'; // Media Library columns: slug, also used in, SEO score, optimisation; no Author
+require_once AW_CORE_DIR . 'includes/media-autofill.php'; // New image uploads: fill empty name, alt, caption, description and image context
+require_once AW_CORE_DIR . 'includes/media-columns.php'; // Media Library columns: slug, also used in, SEO score, optimisation; no Author (owner, 31 Oct 2026)
 require_once AW_CORE_DIR . 'includes/media-merge.php'; // Media → Duplicate files: merge duplicate copies with Undo
 require_once AW_CORE_DIR . 'includes/volunteers-db.php';
 require_once AW_CORE_DIR . 'includes/volunteers.php';
