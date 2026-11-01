@@ -1479,6 +1479,34 @@
    "block": "animal-writes/find-help"
   },
   {
+   "name": "AW Content",
+   "type": "pattern",
+   "status": "live",
+   "classes": [
+    "aw-content"
+   ],
+   "states": [
+    "default (block animal-writes/home-content): dark section over a photograph, H2, four items with icon tiles, two buttons (no destination yet), three check points (live organisation count to the nearest hundred, free to search and claim, source-linked)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "pattern (Editor → Patterns, \"Animal Writes\")",
+    "aria": "section aria-labelledby its H2; icons aria-hidden; photograph alt=\"\"",
+    "keyboard": "Tab to the two buttons",
+    "focus": "3px ring in --kit-color-on-ink (white on the dark overlay), 2px offset (:focus-visible)",
+    "target": "44px buttons",
+    "motion": "none",
+    "sr": "visible text; the four items a list"
+   },
+   "seo": {
+    "heading": "H2 (H1 only in the hero)",
+    "link": "none yet (#)",
+    "alt": "empty (decorative photograph)",
+    "schema": "none"
+   },
+   "block": "animal-writes/aw-content"
+  },
+  {
    "name": "Need help now",
    "type": "pattern",
    "status": "live",

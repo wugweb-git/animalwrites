@@ -133,6 +133,42 @@ add_filter(
 	}
 );
 
+/* ---------- AW Content ---------- */
+
+/** Photograph for the AW Content section: the community dogs letter drive (aw1-im4), not used elsewhere on Home. A wide
+ * strip (1280x499), so phones, where the section is taller than wide, take the full width file. */
+const AW_CONTENT_PHOTO = 20;
+
+/**
+ * Home: AW Content block (pattern animal-writes/aw-content). A dark section over a photograph: H2, the four things the
+ * site offers with icons, two buttons and three check points, the first one the live organisation count to the nearest
+ * hundred. The buttons have no destination yet (#).
+ *
+ * @return string
+ */
+function aw_block_home_content() {
+	$n     = function_exists( 'aw_listing_public_count' ) ? aw_listing_public_count() : 0;
+	$n     = $n >= 100 ? number_format_i18n( round( $n / 100 ) * 100 ) . '+' : ( $n ? number_format_i18n( $n ) : '' ); // 6,796 shows 6,800+
+	$img   = wp_attachment_is_image( AW_CONTENT_PHOTO ) ? wp_get_attachment_image( AW_CONTENT_PHOTO, 'full', false, array( 'class' => 'aw-content-bg', 'alt' => '', 'sizes' => '(max-width: 767px) 1280px, 100vw', 'loading' => 'lazy', 'decoding' => 'async' ) ) : '';
+	$item  = fn( $ico, $label ) => '<li><span class="aw-content-tile" aria-hidden="true"><span class="kit-ico kit-ico--' . $ico . '"></span></span>' . $label . '</li>';
+	$check = fn( $label ) => '<span class="kit-meta-item"><span class="kit-ico kit-ico--check" aria-hidden="true"></span>' . $label . '</span>';
+
+	$out  = '<section class="alignfull aw-content kit-dark" aria-labelledby="aw-content-t">' . $img . '<div class="aw-content-inner">';
+	$out .= '<h2 id="aw-content-t">Animal welfare information and help across India</h2>';
+	$out .= '<ul class="aw-content-offers">' . $item( 'directory', 'Directory of organisations &amp; vets' ) . $item( 'knowledge', 'Practical guides' ) . $item( 'legal', 'Laws &amp; news' ) . $item( 'megaphone', 'Ways to act' ) . '</ul>';
+	$out .= '<p class="aw-content-actions"><a class="kit-btn kit-btn--brand kit-btn--ico-map-pin" href="#">Find help near you</a><a class="kit-btn kit-btn--secondary" href="#">Claim or update your organisation</a></p>';
+	$out .= '<p class="kit-meta-row aw-content-trust">' . ( $n ? $check( esc_html( $n ) . ' organisations' ) : '' ) . $check( 'Free to search and claim' ) . $check( 'Source-linked' ) . '</p>';
+	return $out . '</div></section>';
+}
+
+add_filter(
+	'aw_hub_blocks',
+	function ( $blocks ) {
+		$blocks['home-content'] = array( 'Home: AW Content', 'aw_block_home_content', array() );
+		return $blocks;
+	}
+);
+
 /* ---------- Guides and From the Library ---------- */
 
 /** Query Loop IDs of the home sections that pick their items (patterns learn.php and animal-law.php). */
