@@ -101,10 +101,36 @@
 	html:has(.aw-camp--diwali .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 	.aw-camp--diwali:has(> .aw-sticky-cta) { padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
+/* The hero is fixed at --kit-hero-h (720px, or one screen when shorter) at every width, phones too (owner, 2 Nov 2026);
+   the text fits inside, and the hero grows only if a screen is too short for it (never cut off) */
+.aw-camp--diwali .wp-block-cover.kit-hero { min-height: var(--kit-hero-h) !important; }
+/* Sections at most 720px from 768 (owner, 2 Nov 2026), from content, tokens and the theme breakpoints only */
+/* What the law says: 16px (--kit-space-4) from the opening line to the cards */
+.aw-camp--diwali #law.aw-camp-section > .aw-camp-lede + * { margin-top: var(--kit-space-4); }
+/* Who to call: the table's own space --kit-space-4; the 1962 note and the two guide links stay with the buttons
+   (--kit-space-3); 768 to 1199 the four buttons sit in one row (button side padding --kit-space-4, gap --kit-space-2) */
+.aw-camp--diwali #help > .wp-block-table { margin-block: var(--kit-space-4); }
+.aw-camp--diwali #help > :is(.aw-camp-note, .aw-camp-note + *) { margin-top: var(--kit-space-3); }
+@media (min-width: 768px) and (max-width: 1199px) {
+	.aw-camp--diwali #help > .wp-block-buttons { flex-wrap: nowrap; gap: var(--kit-space-2); }
+	.aw-camp--diwali #help .wp-block-table table { min-width: calc(3 * var(--kit-card-min)); } /* rows on one line; the table scrolls sideways in its frame where it is wider (a named, focusable row: campaign.js) */
+	.aw-camp--diwali #help > .wp-block-buttons .wp-block-button__link { padding-inline: var(--kit-space-4); }
+}
+/* Share band: with the story and post pictures (1a24a0e1) the band's artwork is the same picture twice, so it goes;
+   from 768 the pictures stand beside the heading, line, share row and note */
+.aw-camp--diwali #share .wp-block-columns:has(.aw-letter-share-pics) > .wp-block-column:has(> .aw-camp-art) { display: none; }
+@media (min-width: 768px) {
+	.aw-camp--diwali #share .wp-block-column:has(.aw-letter-share-pics) { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: repeat(4, auto) 1fr; column-gap: var(--kit-space-6); align-content: start; }
+	.aw-camp--diwali #share .wp-block-column:has(.aw-letter-share-pics) > * { grid-column: 1; }
+	.aw-camp--diwali #share .aw-camp-share-kit:has(.aw-letter-share-pics) { display: contents; }
+	.aw-camp--diwali #share .aw-letter-share-pics { grid-column: 2; grid-row: 1 / -1; margin-top: 0; }
+}
+/* Read the law: the sources list is a fold under the word "Sources" (build script, class aw-camp-fold) */
+.aw-camp--diwali .aw-camp-fold > :not(summary) { margin: 0 0 var(--kit-space-3); }
 /* Read the law: the sources list in two columns from 768 */
 @media (min-width: 768px) {
-	.aw-camp--diwali #library .aw-camp-section > .wp-block-list { columns: 2; column-gap: var(--kit-space-6); }
-	.aw-camp--diwali #library .aw-camp-section > .wp-block-list > li { break-inside: avoid; }
+	.aw-camp--diwali #library .aw-camp-section > .wp-block-list, .aw-camp--diwali #library .aw-camp-section > .aw-camp-fold > .wp-block-list { columns: 2; column-gap: var(--kit-space-6); }
+	.aw-camp--diwali #library .aw-camp-section > .wp-block-list > li, .aw-camp--diwali #library .aw-camp-section > .aw-camp-fold > .wp-block-list > li { break-inside: avoid; }
 }
 /* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
 .aw-camp--sc-stray-dogs {
