@@ -174,6 +174,40 @@
 		a.addEventListener('click', function () { track(a.dataset.track, { link_text: a.textContent.trim() }); });
 	});
 
+	/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer).
+	   In the letter tool's share box, and under the page's own share row on campaigns without a letter tool (2 Nov 2026). */
+	function sharePics(box, row) {
+		var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
+		if (!pics.length) return;
+		var wrap = document.createElement('div');
+		wrap.className = 'aw-letter-share-pics';
+		wrap.innerHTML = '<p class="aw-letter-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
+		var list = document.createElement('div');
+		list.className = 'aw-letter-share-pics-list';
+		pics.forEach(function (k) {
+			var b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'aw-letter-share-pic aw-letter-share-pic--' + k[0];
+			b.dataset.kitShare = k[0] + '_image';
+			var img = document.createElement('img');
+			img.src = sh[k[0]];
+			img.alt = '';
+			img.loading = 'lazy';
+			img.decoding = 'async';
+			b.appendChild(img);
+			b.insertAdjacentHTML('beforeend', '<span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>');
+			b.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
+			b.addEventListener('click', function () { shareImage(k[0], row); });
+			list.appendChild(b);
+		});
+		wrap.appendChild(list);
+		box.appendChild(wrap);
+	}
+	if (!document.querySelector('.aw-letter')) {
+		var pageKit = document.querySelector('.aw-camp-share-kit');
+		if (pageKit) sharePics(pageKit, pageKit);
+	}
+
 	/* Letter tool. */
 	var form = document.querySelector('.aw-letter');
 	if (!form) return;
@@ -457,27 +491,7 @@
 			else confirmBox.parentNode.insertBefore(sendShare, confirmBox);
 			var row = sendShare.querySelector('.aw-letter-share');
 			shareKit(row);
-			/* The story (9:16) and post (4:5) pictures, shown as they are: a tap shares the picture (phone) or saves it (computer). */
-			var pics = [['story', 'Instagram or Facebook story', 'Story, 9:16'], ['post', 'Instagram or Facebook post', 'Post, 4:5']].filter(function (k) { return sh[k[0]]; });
-			if (pics.length) {
-				var wrap = document.createElement('div');
-				wrap.className = 'aw-letter-share-pics';
-				wrap.innerHTML = '<p class="aw-letter-share-pics-head"><strong>Or share a picture</strong> ' + (canShare ? 'Tap one to share it. The link is copied for the Link sticker.' : 'Click one to save it. The link is copied too.') + '</p>';
-				var list = document.createElement('div');
-				list.className = 'aw-letter-share-pics-list';
-				pics.forEach(function (k) {
-					var b = document.createElement('button');
-					b.type = 'button';
-					b.className = 'aw-letter-share-pic aw-letter-share-pic--' + k[0];
-					b.dataset.kitShare = k[0] + '_image';
-					b.innerHTML = '<img src="' + esc(sh[k[0]]) + '" alt="" loading="lazy" decoding="async"><span><span class="kit-ico kit-ico--' + (canShare ? 'share' : 'download') + '" aria-hidden="true"></span>' + k[2] + '</span>';
-					b.setAttribute('aria-label', (canShare ? 'Share the ' : 'Save the ') + k[1] + ' picture');
-					b.addEventListener('click', function () { shareImage(k[0], row); });
-					list.appendChild(b);
-				});
-				wrap.appendChild(list);
-				sendShare.appendChild(wrap);
-			}
+			sharePics(sendShare, row);
 		}
 		if (shareHead) shareHead.textContent = sent ? 'Sent? Now get three more letters in.' : 'Get three more letters in.';
 		if (sent && sendShare.classList.contains('is-in-section') && !form.querySelector('.aw-letter-next')) { // a pointer from the letter tool to the Share section
