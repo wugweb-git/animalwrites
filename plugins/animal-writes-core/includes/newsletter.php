@@ -77,7 +77,7 @@ add_action(
 			$note = 'nl_unsub';
 		}
 		nocache_headers();
-		wp_safe_redirect( add_query_arg( 'aw_done', $note, home_url( '/' ) ) . '#newsletter' ); // the sign-up sits in the footer of every page
+		wp_safe_redirect( add_query_arg( 'aw_done', $note, home_url( '/' ) ) . '#newsletter' ); // the sign-up sits just above the footer on every page
 		exit;
 	}
 );

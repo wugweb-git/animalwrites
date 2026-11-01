@@ -802,15 +802,30 @@ body { background: var(--kit-color-canvas); }
 .aw-newsletter-form .ff-message-success { margin: 0; padding: var(--kit-space-4) var(--kit-space-5); border: 0; border-left: var(--kit-border-accent) solid var(--kit-color-accent); border-radius: var(--kit-radius-card); background: transparent; color: inherit; box-shadow: none; }
 .aw-newsletter-form .ff-message-success p { margin: 0; }
 .aw-newsletter-form .ff-errors-in-stack { color: var(--kit-color-accent); }
-/* Footer on phones (owner, 25 Oct 2026: the Newsletter stays open, the footer within one screen at 375×812): email and
-   name side by side with small labels, 44px fields, then Subscribe and the consent line across. Same order, nothing removed. */
-@media (max-width: 767px) {
-	.kit-footer-newsletter .aw-newsletter-form .frm-fluent-form fieldset { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2) var(--kit-space-3); }
-	.kit-footer-newsletter .aw-newsletter-form :is(.ff_submit_btn_wrapper, .ff-custom_html) { grid-column: 1 / -1; }
-	.kit-footer-newsletter .aw-newsletter-form .ff-el-input--label { margin-bottom: var(--kit-space-1); }
-	.kit-footer-newsletter .aw-newsletter-form .ff-el-input--label label { font-size: var(--kit-type-xs); }
-	.kit-footer-newsletter .aw-newsletter-form .ff-el-form-control { height: var(--kit-size-target); min-height: var(--kit-size-target); }
-	.kit-footer-newsletter .aw-newsletter-form .ff-btn-submit.kit-btn { min-height: var(--kit-size-target); }
+/* Newsletter band (1 Nov 2026): its own block above the footer on every page (parts/footer.html), #newsletter.
+   Heading and line, then the form: from 768 email, name and Subscribe in one row, the consent line under them; from
+   1200 the text on the left and the form on the right. Phones: email and name side by side, then Subscribe and the
+   consent line across. Same fields and order as the form itself; nothing removed. */
+.aw-nl-band { background: var(--kit-color-raised); border-top: var(--kit-border-width) solid var(--kit-color-line); padding: var(--kit-space-6) var(--kit-space-4); }
+@media (min-width: 768px) { .aw-nl-band { padding-inline: var(--kit-space-6); } }
+@media (min-width: 1200px) { .aw-nl-band { padding: var(--kit-space-7) var(--kit-space-gutter); } }
+.aw-nl-band-inner { display: grid; gap: var(--kit-space-4); max-width: var(--kit-width-nav); margin: 0 auto; }
+@media (min-width: 1200px) { .aw-nl-band-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: center; column-gap: var(--kit-space-7); } }
+.aw-nl-band-head { margin: 0; font-size: var(--kit-type-h4); font-weight: var(--kit-weight-strong); line-height: 1.25; color: var(--kit-color-ink); }
+.aw-nl-band-line { margin: var(--kit-space-1) 0 0; max-width: 46ch; font-size: var(--kit-type-sm); color: var(--kit-color-muted); }
+.aw-nl-band .aw-newsletter-form .ff-el-input--label { margin-bottom: var(--kit-space-1); }
+.aw-nl-band .aw-newsletter-form .ff-el-input--label label { font-size: var(--kit-type-xs); color: var(--kit-color-text); }
+.aw-nl-band .aw-newsletter-form .ff-custom_html p { color: var(--kit-color-muted); }
+.aw-nl-band .aw-newsletter-form :is(.ff-el-is-error .text-danger, .ff-errors-in-stack) { color: var(--kit-color-danger); }
+.aw-nl-band .aw-newsletter-form .ff-message-success { border-left-color: var(--kit-color-success); }
+.aw-nl-band .aw-newsletter-form .frm-fluent-form fieldset { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: var(--kit-space-2) var(--kit-space-3); }
+.aw-nl-band .aw-newsletter-form :is(.ff_submit_btn_wrapper, .ff-custom_html) { grid-column: 1 / -1; }
+.aw-nl-band .aw-newsletter-form .ff-el-form-control { height: var(--kit-size-target); min-height: var(--kit-size-target); }
+.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn { min-height: var(--kit-size-target); }
+@media (min-width: 768px) {
+	.aw-nl-band .aw-newsletter-form .frm-fluent-form fieldset { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; }
+	.aw-nl-band .aw-newsletter-form .ff_submit_btn_wrapper { grid-column: auto; }
+	.aw-nl-band .aw-newsletter-form .ff-btn-submit.kit-btn { width: auto; }
 }
 /* Contact, Volunteer, Claim, Report and Remove my data in Fluent Forms (16 Oct 2026): the site's form look (kit-field),
  * in tokens. Fluent Forms' markup: .ff-el-group > .ff-el-input--label + .ff-el-input--content; errors in div.error. */
@@ -1027,9 +1042,8 @@ body { background: var(--kit-color-canvas); }
 @media (max-width: 767px) {
 	.aw-ed-mosaic { height: 7.5rem; margin-bottom: var(--kit-space-5) !important; }
 }
-/* Footer column titles are paragraphs (not headings, SEO audit 10 Oct 2026): they keep the look they had as h2. */
-.kit-footer :is(p.kit-footer-head, p.kit-footer-nl-head) { max-width: none; text-wrap: balance; }
-.kit-footer p.kit-footer-nl-head { letter-spacing: var(--kit-tracking-heading); }
+/* Footer column labels are paragraphs, not headings (SEO audit 10 Oct 2026): each list is a nav named by aria-label. */
+.kit-footer p.kit-footer-head { max-width: none; text-wrap: balance; }
 /* /claim/ without a listing: find your organisation (12 Oct 2026). */
 .aw-claim-find { max-width: 36rem; }
 .aw-claim-results { list-style: none; margin: var(--kit-space-4) 0 var(--kit-space-5); padding: 0; display: grid; gap: var(--kit-space-2); }
