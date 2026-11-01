@@ -50,8 +50,8 @@
 <!-- /wp:group -->
 
 <!-- wp:group {"className":"aw-festive-art","layout":{"type":"default"}} -->
-<div class="wp-block-group aw-festive-art"><!-- wp:image {"id":19910,"sizeSlug":"medium_large","linkDestination":"none"} -->
-<figure class="wp-block-image size-medium_large"><img src="/wp-content/uploads/2026/10/diwali-with-pets-a-guide-to-keep-your-furry-friends-safe-and-comfortable-during-source-768x432.avif" alt="Old dog sleeping on a cushion wearing a red outfit" class="wp-image-19910"/></figure>
+<div class="wp-block-group aw-festive-art"><!-- wp:image {"id":23400,"sizeSlug":"medium_large","linkDestination":"none"} -->
+<figure class="wp-block-image size-medium_large"><img src="/wp-content/uploads/2026/11/woman-holding-water-bowl-for-street-dog-by-diya-steps-768x960.avif" alt="A woman holds out a bowl of water for a street dog beside steps lit with diyas and marigolds on Diwali night." class="wp-image-23400"/></figure>
 <!-- /wp:image -->
 
 <!-- wp:image {"id":20922,"sizeSlug":"medium_large","linkDestination":"none"} -->

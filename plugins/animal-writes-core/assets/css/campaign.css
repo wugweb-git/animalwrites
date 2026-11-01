@@ -59,19 +59,28 @@
 @media (min-width: 768px) { .aw-camp--diwali .aw-camp-steps--six { grid-template-columns: repeat(3, 1fr); } }
 /* Step lines on the night band: meta colour is for light bands */
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
-/* Photo hero: the text on the night band with the photo beside it from 1200 (tall crop); below 1200 the text, then the photo
-   full width (tall crop on phones, wide on tablets). The picture is alignfull so the constrained layout leaves its margins alone. */
-.aw-camp--diwali .aw-camp-hero--photo { display: flex; flex-direction: column; overflow: hidden; background: var(--camp-dark); padding-bottom: 0 !important; }
-.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > * { max-width: 36rem; }
-.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: 36rem; }
+/* Photo hero: the night photo full width behind the text from 1200 (its dark left side holds the text); below 1200 the
+   text on the night band, then the photo full width (tall crop on phones, wide on tablets). The picture is alignfull so
+   the constrained layout leaves its margins alone. Four tip tiles under the summary. */
+.aw-camp--diwali .aw-camp-hero--photo { position: relative; display: flex; flex-direction: column; overflow: hidden; background: var(--camp-dark); padding-bottom: 0 !important; }
+.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > * { max-width: 38rem; }
+.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: 38rem; }
 .aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { order: 2; display: block; max-width: none; width: 100vw; margin: var(--kit-space-6) calc(50% - 50vw) 0; }
 .aw-camp--diwali .aw-camp-hero-photo img { display: block; width: 100%; height: auto; }
-/* the main button in the site's own yellow so it shows on the night band */
 .aw-camp--diwali .aw-camp-hero--photo .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+.aw-camp--diwali .aw-camp-hl { position: relative; color: var(--kit-color-accent); white-space: nowrap; }
+.aw-camp--diwali .aw-camp-hl::after { content: ""; position: absolute; left: 0.05em; right: 0.05em; bottom: -0.08em; height: 0.12em; border-radius: 1em; background: var(--kit-color-accent); transform: rotate(-1.5deg); }
+.aw-camp-hero-tips { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kit-space-2); margin: 0 0 var(--kit-space-5); padding: 0; }
+.aw-camp-hero-tips a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--kit-space-2); min-height: 6.5rem; padding: var(--kit-space-3) var(--kit-space-2); border: 1px solid color-mix(in srgb, var(--kit-color-on-ink) 45%, transparent); border-radius: var(--kit-radius-card); background: color-mix(in srgb, var(--camp-dark) 55%, transparent); color: var(--kit-color-on-ink); text-align: center; text-decoration: none; font-size: var(--kit-type-sm); line-height: 1.25; }
+.aw-camp-hero-tips a:hover { border-color: var(--kit-color-accent); }
+.aw-camp-hero-tips .kit-ico { font-size: 1.75rem; color: var(--kit-color-accent); }
+@media (min-width: 768px) { .aw-camp-hero-tips { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 1200px) {
-	.aw-camp--diwali .aw-camp-hero--photo { flex-direction: row; align-items: center; justify-content: center; gap: var(--kit-space-7); padding-bottom: var(--wp--preset--spacing--60) !important; }
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { flex: 0 1 40rem; margin-left: 0 !important; margin-right: 0 !important; }
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { flex: 0 0 27rem; width: auto; margin: 0 !important; overflow: hidden; border-radius: var(--kit-radius-card); box-shadow: 0 1.5rem 3rem -1.5rem #000; }
+	.aw-camp--diwali .aw-camp-hero--photo { justify-content: center; min-height: min(56.25vw, 900px); padding-bottom: var(--wp--preset--spacing--60) !important; }
+	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { position: absolute; inset: 0; z-index: 0; width: auto; margin: 0 !important; }
+	.aw-camp--diwali .aw-camp-hero-photo img { height: 100%; object-fit: cover; object-position: right center; }
+	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 80%, transparent) 0, color-mix(in srgb, var(--camp-dark) 35%, transparent) 42%, transparent 58%); } /* keeps the text readable whatever the crop */
+	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; width: 100%; }
 }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }

@@ -14,9 +14,9 @@
 const DW_SLUG  = 'diwali-firecrackers-animals-2026';
 const DW_TERM  = 'campaign-diwali-firecrackers-2026';
 const DW_HERO  = 14272; // a person feeding two street dogs by the roadside (the featured image)
-const DW_PHOTO = 23348; // hero photo, wide (tablets): a dog resting calmly at home on Diwali evening
-const DW_PHOTO_TALL = 23347; // the same scene, 4:5 (phones, and beside the text from 1200)
-const DW_ART   = 8771;  // a woman feeding cows on a street in India
+const DW_PHOTO = 23397; // hero photo, wide: a woman sets down water for a street dog on Diwali night
+const DW_PHOTO_TALL = 23398; // the same scene, tall (phones)
+const DW_ART   = 23348; // a dog resting calmly at home on Diwali evening
 const DW_DIWALI = '2026-11-08';
 
 if ( getenv( 'AW_RENDER' ) ) {
@@ -147,27 +147,27 @@ if ( ! $term_id ) {
 	exit( 1 );
 }
 
-/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. The open hero is the text on the night band and a photo
-   (beside it from 1200, below it under 1200); no countdown. */
+/* hero: open (until 8 Nov) and closed (from 9 Nov); one shows. The open hero is the night photo with the text over its
+   dark side (from 1200) or above it (below 1200), four tip tiles and no countdown. */
 $photo = '<picture class="aw-camp-hero-photo alignfull">'
-	. '<source media="(max-width: 767px), (min-width: 1200px)" srcset="' . esc_url( wp_get_attachment_image_url( DW_PHOTO_TALL, 'large' ) ) . '" width="819" height="1024">'
-	. '<img src="' . esc_url( wp_get_attachment_image_url( DW_PHOTO, '1536x1536' ) ) . '" alt="' . esc_attr( get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ) ) . '" width="1536" height="864" fetchpriority="high" decoding="async">'
+	. '<source media="(max-width: 767px)" srcset="' . esc_url( wp_get_attachment_image_url( DW_PHOTO_TALL, 'large' ) ) . '" width="768" height="1024">'
+	. '<img src="' . esc_url( wp_get_attachment_image_url( DW_PHOTO, 'full' ) ) . '" alt="' . esc_attr( get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ) ) . '" width="1672" height="941" fetchpriority="high" decoding="async">'
 	. '</picture>';
+$tips  = '<ul class="aw-camp-hero-tips">';
+foreach ( array( array( 'home', 'Keep pets indoors', '#before' ), array( 'paw', 'Keep water outside', '#street' ), array( 'name', 'Use an ID tag', '#before' ), array( 'phone', 'Know who to call', '#help' ) ) as $t ) {
+	$tips .= '<li><a href="' . $t[2] . '">' . dwi( $t[0] ) . $t[1] . '</a></li>';
+}
+$tips .= '</ul>';
 $hero = dwsec(
 	'top',
 	dwhtml( $photo )
 	. '<!-- wp:group {"className":"aw-camp-hero-copy","layout":{"type":"default"}} -->' . "\n" . '<div class="wp-block-group aw-camp-hero-copy">'
 	. dwsc( '[aw_camp_status]' )
-	. dwh( 'Diwali is loud. Keep pets and street dogs safe.', 1 )
+	. dwh( 'Diwali is loud. Keep pets and street dogs <span class="aw-camp-hl">safe.</span>', 1 )
 	. dwp( 'Firecrackers frighten and hurt pets, street animals and birds. Keeping dogs during Diwali safe takes a safe room and an ID tag for your pet, a quiet corner and water for the dogs outside, and the right number to call if an animal is hurt.', 'aw-camp-hero-summary' )
 	. dwp( 'Our aim: no animal near you hurt, lost or left without help this Diwali.' )
+	. dwhtml( $tips )
 	. dwbuttons( array( array( 'What to do tonight', '#tonight' ), array( 'Who to call', '#help', 'ghost' ) ) )
-	. dwhtml(
-		'<p class="aw-camp-poster-chips"><span class="aw-camp-poster-label">If an animal is hurt</span> '
-		. '<a class="kit-chip kit-chip--on-ink" href="#help">Who to call</a> '
-		. '<a class="kit-chip kit-chip--on-ink" href="/resources/found-an-injured-animal-what-to-do/">Injured animal</a> '
-		. '<a class="kit-chip kit-chip--on-ink" href="/resources/injured-bird-helpline-numbers-by-city/">Bird helplines</a></p>'
-	)
 	. '</div>' . "\n" . '<!-- /wp:group -->' . "\n\n",
 	'aw-camp-hero aw-camp-hero--photo aw-camp-open'
 );
