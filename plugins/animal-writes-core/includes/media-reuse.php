@@ -240,7 +240,7 @@ function aw_media_reuse_apply( $picture ) {
 	}
 	$target   = $row['target'];
 	$old_off  = metadata_exists( 'post', $target, 'aw_source_image_off' ) ? (string) get_post_meta( $target, 'aw_source_image_off', true ) : null;
-	$set_off  = 'aw_news' === get_post_type( $target ) || 'publisher' === aw_media_reuse_current( $target )['kind']; // a news item always gets the flag, so no later fetch can bring back a publisher image over the cover
+	$set_off  = in_array( get_post_type( $target ), array( 'aw_news', 'aw_legal', 'post' ), true ) || 'publisher' === aw_media_reuse_current( $target )['kind']; // pages that can take a publisher image always get the flag, so no later fetch can bring one back over the cover
 	$entry    = array(
 		'status'    => 'pending',
 		'time'      => time(),
