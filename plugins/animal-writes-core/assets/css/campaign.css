@@ -79,11 +79,21 @@
 @media (min-width: 1200px) {
 	.aw-camp--diwali .aw-camp-hero--photo { justify-content: center; min-height: min(56.25vw, 900px); padding-bottom: var(--wp--preset--spacing--60) !important; }
 	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-photo { position: absolute; inset: 0; z-index: 0; width: auto; margin: 0 !important; }
-	.aw-camp--diwali .aw-camp-hero-photo img { height: 100%; object-fit: cover; object-position: right center; }
-	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 85%, transparent) 0, color-mix(in srgb, var(--camp-dark) 50%, transparent) 36%, transparent 52%); } /* keeps the text readable whatever the crop */
-	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; max-width: none; width: 100%; margin-left: 0 !important; margin-right: 0 !important; padding-left: clamp(1.5rem, 5vw, 6rem); box-sizing: border-box; } /* the text sits on the photo's dark left side, clear of the woman (about 38% across) */
-	.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > *, .aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: min(30rem, 33vw); }
+	.aw-camp--diwali .aw-camp-hero-photo img { position: absolute; right: 0; bottom: 0; width: 100%; height: auto; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18%); mask-image: linear-gradient(180deg, transparent 0, #000 18%); } /* full width at its own shape, from the bottom: the people stay where the photo has them; the top fades into the night band */
+	.aw-camp--diwali .aw-camp-hero-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--camp-dark) 85%, transparent) 0, color-mix(in srgb, var(--camp-dark) 50%, transparent) 34%, transparent 48%); } /* keeps the text readable whatever the crop */
+	.aw-camp--diwali .aw-camp-hero--photo > .aw-camp-hero-copy { position: relative; z-index: 1; max-width: none; width: 100%; margin-left: 0 !important; margin-right: 0 !important; padding-left: clamp(0px, 2vw, 2rem); box-sizing: border-box; } /* the text sits on the photo's dark left side, clear of the woman (about 38% across) */
+	.aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-copy > *, .aw-camp--diwali .aw-camp-hero--photo .aw-camp-hero-summary { max-width: min(31rem, 35vw); }
+	.aw-camp--diwali .aw-camp-hero--photo h1 { font-size: clamp(2.75rem, 3.9vw, 4.5rem); }
+	.aw-camp-hero-tips a { min-height: 5.25rem; }
 }
+/* Reading width: text in the bands stays in the 720px column, on the left of the 1120px band (tables, cards and rows keep the band) */
+.aw-camp--diwali .aw-camp-section:not(.aw-camp-hero) > :is(p, h2, h3, ul.wp-block-list, ol.wp-block-list) { max-width: var(--kit-width-content, 720px); margin-left: max(0px, calc((100% - 1120px) / 2)) !important; margin-right: auto !important; }
+/* Date strip: sized to fit three across beside the photo */
+.aw-camp--diwali .aw-camp-dates { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); }
+.aw-camp--diwali .aw-camp-dates-when { font-size: clamp(1.25rem, 1rem + 0.8vw, 1.6rem); white-space: nowrap; }
+/* "More" links: the same space above and below; two in a row sit together */
+.aw-camp--diwali p:has(> .aw-camp-more) { margin-top: var(--kit-space-4); margin-bottom: var(--kit-space-5); }
+.aw-camp--diwali p:has(> .aw-camp-more) + p:has(> .aw-camp-more) { margin-top: var(--kit-space-2); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
 /* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
