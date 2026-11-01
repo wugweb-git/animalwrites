@@ -80,6 +80,8 @@ const AW_PLACE_DETECT_CITIES = array(
 	'siliguri'     => 'Darjeeling',
 	'durgapur'     => 'Paschim Bardhaman',
 	'asansol'      => 'Paschim Bardhaman',
+	// Towns people search the Directory for (site searches, 1 Nov 2026).
+	'pusad'        => 'Yavatmal',
 	'shillong'     => 'East Khasi Hills',
 	'itanagar'     => 'Papum Pare',
 	'panaji'       => 'North Goa',

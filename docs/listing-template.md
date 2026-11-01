@@ -2,7 +2,7 @@
 
 `themes/animal-writes/templates/single-aw_listing.html` (post type `aw_listing`), owner 20 Oct 2026. It is built from the
 item template's shared blocks (see `item-template.md`) and the listing groups in
-`plugins/animal-writes-core/includes/listing-template.php`. Every block prints nothing when it has nothing. In the
+`plugins/animal-writes-core/includes/listing-template.php`. Every block prints nothing when it has nothing. Since 1 Nov 2026 Contact, Online profiles and Location come before the logo and description, so the phone and opening hours are above the fold (row numbers below are the blocks' original numbers). In the
 Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF group "Organisation details"
 (`acf-json/group_aw_listing.json`). No stored data or wording is changed by the page.
 
@@ -11,11 +11,11 @@ Site Editor they are listed as "Listing: …" (category Widgets). Fields: SCF gr
 | 1 | Breadcrumb | `animal-writes/breadcrumb` | Home › Directory › State › District (each a link); the BreadcrumbList is the same trail. |
 | 2 | H1 | `core/post-title` | The organisation's name. No tick (the meta row says Verified). |
 | 3 | Meta row | `animal-writes/item-meta` | Up to 3 type chips (primary first) · place chip · status: "Verified on {date}" (aw_verified, aw_verified_on), or "Needs re-check" (aw_needs_reverify), "Blacklisted on NGO Darpan". No other date. |
-| 4–5 | Logo and description | `animal-writes/listing-about` | The featured image (fixed square, left; 64px phone, 96px from 768) and the description (post content, else the excerpt; the excerpt, e.g. the enriched About, also replaces a body that is only an import's one-line intro, aw_listing_is_template_intro()) beside it. No logo: the text full width. |
-| 6 | Registrations | `animal-writes/listing-registrations` | AWBI number (aw_awbi_code, "valid until" / "expired" from aw_awbi_valid; "not on the current AWBI list" from aw_awbi_dropped) · Registration ({aw_reg_type}) · 12A · 80G · FCRA · NGO Darpan ID. 12A, 80G, FCRA and Darpan have no valid-until field, so they show the number only. Expiry is worked out at render time from today in India. |
 | 7 | Contact | `animal-writes/listing-contact` | Labelled buttons: Call {first number} · WhatsApp (first number marked WhatsApp) · Email · Website ↗ · Directions (aw_maps_url; greyed out without it). Then the other numbers, one per line: "{label}: {number}" (+ WhatsApp link). Contact data appears only here. |
 | 7b | Online profiles | `animal-writes/listing-profiles` | Right after Contact (owner, 20 Oct 2026): small icon links, only those present. |
 | 8 | Location | `animal-writes/listing-location` | Address (aw_address, else aw_area with district, state, PIN) · District (place chip) · Opening hours (one line per day; split days on one line; "Closed"; days with no row not shown). |
+| 4–5 | Logo and description | `animal-writes/listing-about` | The featured image (fixed square, left; 64px phone, 96px from 768) and the description (post content, else the excerpt; the excerpt, e.g. the enriched About, also replaces a body that is only an import's one-line intro, aw_listing_is_template_intro()) beside it. No logo: the text full width. |
+| 6 | Registrations | `animal-writes/listing-registrations` | AWBI number (aw_awbi_code, "valid until" / "expired" from aw_awbi_valid; "not on the current AWBI list" from aw_awbi_dropped) · Registration ({aw_reg_type}) · 12A · 80G · FCRA · NGO Darpan ID. 12A, 80G, FCRA and Darpan have no valid-until field, so they show the number only. Expiry is worked out at render time from today in India. |
 | 9 | Services | `animal-writes/listing-services` | Services (service tags, else aw_services; "Stated by …" aw_services_source, aw_services_on; nothing stated: the services its type(s) imply, combined, marked "Based on type" — AW_TYPE_SERVICES, Notion "Page templates: items and listings" §3) · Animals helped · Areas served · Languages. |
 | 10 | Organisation | `animal-writes/listing-organisation` | Established · Incorporated (aw_reg_date, the registration date as NGO Darpan lists it) · Head of the organisation. |
 | 11 | Ad 1 | `advads/gblock` "place_profile" | The "Directory profile" Advanced Ads placement. Prints nothing while Advanced Ads is off (as on live). |

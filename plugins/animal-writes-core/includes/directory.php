@@ -351,6 +351,12 @@ add_action(
 				$g['aw_filter'] = 1;
 			}
 		} elseif ( '' === sanitize_title( $g['state'] ?? '' ) && '' === sanitize_title( $g['district'] ?? '' ) ) {
+			// A name typed another way ("bluecross", "blue-cross") is searched as the name the listings carry.
+			$alias = aw_search_name_alias( (string) ( $g['q'] ?? '' ) );
+			if ( '' !== $alias ) {
+				$g['q']         = $alias;
+				$g['aw_filter'] = 1;
+			}
 			// A district, state or known city name in the search box ("Jhansi", "Kerala", "Kochi") opens that place's list.
 			$place = aw_search_place( (string) ( $g['q'] ?? '' ) );
 			if ( $place ) {
@@ -384,6 +390,32 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * Organisation names people type as one word, with a hyphen or as initials, and the words the listings' names carry:
+ * a search for the key is run as a search for the value (site searches, 1 Nov 2026). Keys are letters and digits only,
+ * lower case; the value is searched as typed-in words (every word must be in the name).
+ */
+const AW_SEARCH_NAME_ALIASES = array(
+	'bluecross' => 'blue cross', // initials such as "pfa" are left alone: listings carry them in their names ("PFA Faridabad")
+);
+
+/**
+ * The search the listings' names answer for a term typed another way, '' when the term is searched as it is. The term
+ * is compared without spaces, hyphens, dots or case ("Blue-Cross", "blue cross" and "bluecross" are one key); a term
+ * that already matches its alias's words is left alone, so the redirect never loops.
+ *
+ * @param string $text The search box text.
+ * @return string
+ */
+function aw_search_name_alias( $text ) {
+	$key = preg_replace( '/[^a-z0-9]/', '', strtolower( (string) $text ) );
+	if ( '' === $key || empty( AW_SEARCH_NAME_ALIASES[ $key ] ) ) {
+		return '';
+	}
+	$to = AW_SEARCH_NAME_ALIASES[ $key ];
+	return trim( preg_replace( '/\s+/', ' ', strtolower( (string) $text ) ) ) === $to ? '' : $to;
+}
 
 /**
  * The place a search term names: a district or state by its LGD or common name (places.php), or a city or
