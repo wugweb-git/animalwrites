@@ -188,6 +188,7 @@ add_filter(
 	'manage_media_columns',
 	function ( $columns ) {
 		$ours   = array(
+			'aw_file'    => isset( $columns['title'] ) ? $columns['title'] : 'File',
 			'aw_slug'    => 'Slug',
 			'aw_caption' => 'SEO title',
 			'aw_desc'    => 'SEO description',
@@ -196,8 +197,8 @@ add_filter(
 			'aw_seo'     => 'SEO',
 			'aw_opt'     => 'Optimisation',
 		);
-		$order  = array( 'cb', 'title', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
-		$remove = array( 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
+		$order  = array( 'cb', 'aw_file', 'taxonomy-aw_media_group', 'aw_slug', 'aw_caption', 'aw_desc', 'rank_math_image_alt', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt', 'date' );
+		$remove = array( 'title', 'author', 'rank_math_image_title', 'imgoptm', 'parent' );
 		$out    = array();
 		foreach ( $order as $key ) {
 			if ( isset( $columns[ $key ] ) ) {
@@ -220,18 +221,41 @@ add_filter(
 	'manage_upload_sortable_columns',
 	function ( $columns ) {
 		$columns['aw_parent'] = 'parent';
+		$columns['aw_file']   = 'title';
 		return $columns;
 	}
+);
+
+// The File column is the primary column, so the row actions (Edit, Delete Permanently, View) print under it.
+add_filter(
+	'list_table_primary_column',
+	function ( $default, $screen_id ) {
+		return 'upload' === $screen_id ? 'aw_file' : $default;
+	},
+	10,
+	2
 );
 
 add_action(
 	'manage_media_custom_column',
 	function ( $column, $post_id ) {
-		if ( ! in_array( $column, array( 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
+		if ( ! in_array( $column, array( 'aw_file', 'aw_slug', 'aw_caption', 'aw_desc', 'aw_context', 'aw_parent', 'aw_seo', 'aw_opt' ), true ) ) {
 			return;
 		}
 		$post = get_post( $post_id );
 		if ( ! $post ) {
+			return;
+		}
+		if ( 'aw_file' === $column ) {
+			// WordPress's own File cell (thumbnail, name link, states) without the file-name line, which the Slug column repeats.
+			if ( isset( $GLOBALS['wp_list_table'] ) && is_object( $GLOBALS['wp_list_table'] ) && method_exists( $GLOBALS['wp_list_table'], 'column_title' ) ) {
+				ob_start();
+				$GLOBALS['wp_list_table']->column_title( $post );
+				$html = ob_get_clean();
+				echo preg_replace( '#<p class="filename">.*?</p>#s', '', $html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core's own escaped markup
+			} else {
+				echo '<a href="' . esc_url( get_edit_post_link( $post ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a>';
+			}
 			return;
 		}
 		if ( 'aw_slug' === $column ) {
