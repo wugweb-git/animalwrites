@@ -86,7 +86,7 @@ function aw_media_reuse_is_document( $id ) {
  */
 function aw_media_reuse_current( $id ) {
 	$cover  = (int) get_post_meta( $id, '_thumbnail_id', true );
-	$source = in_array( get_post_type( $id ), aw_media_reuse_source_types(), true ) && function_exists( 'aw_publisher_image' ) && aw_is_ingested( $id ) && '' !== aw_publisher_image( $id );
+	$source = in_array( get_post_type( $id ), aw_media_reuse_source_types(), true ) && function_exists( 'aw_publisher_image' ) && function_exists( 'aw_is_ingested' ) && aw_is_ingested( $id ) && '' !== aw_publisher_image( $id );
 	if ( aw_media_reuse_is_document( $id ) ) {
 		return array( 'kind' => 'document', 'cover' => $cover, 'text' => 'Its own document page' );
 	}
