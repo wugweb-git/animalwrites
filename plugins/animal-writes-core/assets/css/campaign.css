@@ -239,6 +239,7 @@
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section .aw-letter-share-preview { grid-column: 2; grid-row: 2; }
 }
 @media (min-width: 1200px) {
+	.aw-camp--lab-rules .aw-letter { grid-template-columns: 1fr 2fr; } /* step 3 a third wider than 5fr 7fr, so it stays under 600px */
 	/* Share: buttons, pictures and preview in three columns */
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 	.aw-camp--lab-rules .aw-letter-share-box.is-in-section :is(.aw-letter-share-copy, .aw-letter-share-pics, .aw-letter-share-preview) { grid-row: 1; grid-column: auto; }
