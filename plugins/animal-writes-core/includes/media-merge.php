@@ -11,8 +11,8 @@
  *
  * A group is blocked, with the reason shown, when an extra is the featured image of a post, a hosted file or document
  * preview, a category or tag photo, the site icon, named in an option, or the two files differ. Only the source image,
- * social image and share image of a post (with the matching Rank Math address), and the image addresses and block image
- * IDs written in post content, are repointed.
+ * social image and share image of a post (with the matching Rank Math address), a campaign's share images, a listing's
+ * photo list, and the image addresses and block image IDs written in post content, are repointed.
  * Admin screen: core list table and core notices only (no CSS, no scripts).
  *
  * @package animal-writes-core
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Post meta keys that hold an attachment ID and may be repointed (the same picture; nothing is "used once"). */
 function aw_media_merge_meta_keys() {
-	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image' );
+	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image', 'aw_campaign_share_story', 'aw_campaign_share_post' );
 }
 
 /** Post meta keys that hold the address of the picture next to an ID key above (repointed with it). */
@@ -143,7 +143,7 @@ function aw_media_merge_check( $keep, array $extras ) {
 	$ids     = array_map( 'strval', $extras ); // Exact text match, so '14468abc' or '14468.5' never counts as an ID.
 	$in      = implode( ',', array_fill( 0, count( $ids ), '%s' ) );
 	$allowed = aw_media_merge_meta_keys();
-	$known   = function_exists( 'aw_media_post_meta_uses' ) ? array_keys( aw_media_post_meta_uses() ) : array();
+	$known   = array_values( array_unique( array_merge( function_exists( 'aw_media_post_meta_uses' ) ? array_keys( aw_media_post_meta_uses() ) : array(), $allowed ) ) );
 	$kin     = $known ? implode( ',', array_fill( 0, count( $known ), '%s' ) ) : "''";
 	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- the lists are only %s placeholders joined with implode or array_fill; every value is bound through prepare()
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value IN ($in) AND ( meta_key REGEXP 'image|img|logo|thumb|icon|photo|file|preview|_att|banner|picture|attachment|hero|cover|poster|avatar|_id$|_og' OR meta_key IN ($kin) )", array_merge( $ids, $known ) ) );
@@ -156,6 +156,22 @@ function aw_media_merge_check( $keep, array $extras ) {
 			return $fail( 'used by ' . $r->meta_key . ' on post ' . (int) $r->post_id );
 		}
 		$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => $r->meta_key, 'old' => (string) $r->meta_value, 'new' => (string) $keep );
+	}
+	// Listing photo lists (aw_gallery, comma-separated IDs): each extra becomes the kept copy, without repeats.
+	$grows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'aw_gallery' AND meta_value REGEXP %s", '(^|,)(' . implode( '|', $ids ) . ')(,|$)' ) );
+	foreach ( (array) $grows as $r ) {
+		$list = array();
+		foreach ( explode( ',', (string) $r->meta_value ) as $one ) {
+			$one = trim( $one );
+			if ( '' === $one ) {
+				continue;
+			}
+			$one = in_array( $one, $ids, true ) ? (string) $keep : $one;
+			if ( ! in_array( $one, $list, true ) ) {
+				$list[] = $one;
+			}
+		}
+		$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => 'aw_gallery', 'old' => (string) $r->meta_value, 'new' => implode( ',', $list ) );
 	}
 	// The picture addresses Rank Math keeps beside its ID keys.
 	$kurls = aw_media_merge_urls( $keep );
