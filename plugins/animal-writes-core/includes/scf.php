@@ -23,7 +23,7 @@ function aw_scf_active() {
 }
 
 /** Our field groups (keys of the files in acf-json/). */
-const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_campaign', 'group_aw_resource' );
+const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_resource' );
 
 add_filter(
 	'acf/settings/load_json',

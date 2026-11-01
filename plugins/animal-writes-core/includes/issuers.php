@@ -69,13 +69,7 @@ function aw_set_issuer( $id, $value ) {
 
 /* ---------- Editing ---------- */
 
-add_action(
-	'add_meta_boxes',
-	function () {
-		add_meta_box( 'aw-issuer', 'Issued by', 'aw_issuer_box', 'aw_legal', 'side', 'default' ); // Library only (owner, 1 Nov 2026); issuers stored on Resources are kept and still read
-	}
-);
-
+// No side box: on Library items the picker is inside the Document box (faq-data.php). Issuers stored on other types are kept and still read.
 function aw_issuer_box( $post ) {
 	wp_nonce_field( 'aw_issuer_save', 'aw_issuer_nonce' );
 	$cur = (string) get_post_meta( $post->ID, 'aw_issuer', true );
