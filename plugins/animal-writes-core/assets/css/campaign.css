@@ -156,7 +156,7 @@
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) table { display: block; min-width: 0; border: 0; }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) :is(tbody, tr, td) { display: block; }
-	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
+	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) tr { margin: 0 0 var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--camp-tile, var(--kit-color-raised)); box-shadow: inset 0 0 0 1px var(--kit-color-line); }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td { padding: 0 0 var(--kit-space-3); border: 0; }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:last-child { padding-bottom: 0; }
 	.aw-camp--sc-stray-dogs :is(.aw-camp-timeline, .aw-camp-tracker) td:first-child { font-size: var(--kit-type-lead); font-weight: 800; color: var(--camp-primary); }
@@ -348,7 +348,7 @@
 /* Library documents with the campaign tag (query loop): file icon from the theme's --i on the wrapper */
 .aw-camp-docs-q .wp-block-post-template { list-style: none; margin: var(--kit-space-4) 0 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .aw-camp-docs-q .wp-block-post-template { grid-template-columns: repeat(2, 1fr); } }
-.aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-4); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
+.aw-camp-docs-q li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: var(--kit-space-3); align-items: start; margin: 0; padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); transition: box-shadow var(--kit-motion-fast) var(--kit-motion-ease); }
 .aw-camp-docs-q li::before { content: ""; width: 1.5rem; height: 1.5rem; background: var(--camp-mark); -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
 .aw-camp-docs-q li:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 /* aw.css sets card titles to h3 size with !important, and Kits gives card children inline margins; these are list rows */
@@ -543,7 +543,7 @@
 .aw-camp-press { margin-top: var(--kit-space-4); }
 .aw-camp-partners { margin-top: var(--kit-space-7); }
 .aw-camp-partners ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--kit-space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
-.aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-3); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
+.aw-camp-partners a { display: flex; align-items: center; gap: var(--kit-space-3); padding: var(--kit-space-5); border-radius: var(--kit-radius-card); background: var(--kit-color-bg); box-shadow: inset 0 0 0 1px var(--kit-color-line); color: var(--kit-color-text); font-weight: var(--kit-weight-strong); text-decoration: none; }
 .aw-camp-partners a:hover { box-shadow: inset 0 0 0 2px var(--camp-mark); }
 .aw-camp-partners img { width: 3rem; height: 3rem; object-fit: contain; border-radius: var(--kit-radius-control); }
 

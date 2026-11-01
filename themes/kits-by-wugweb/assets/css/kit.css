@@ -188,12 +188,12 @@ body.single-aw_research .kit-lead-media { display: none; }
 .kit-hp { position: absolute !important; left: -9999px; }
 .kit-form-summary {
 	border-left: var(--kit-border-accent) solid var(--kit-color-danger); background: var(--kit-color-danger-soft);
-	padding: var(--kit-space-3) var(--kit-space-4); border-radius: var(--kit-radius-control); margin-bottom: var(--kit-space-4);
+	padding: var(--kit-space-5); border-radius: var(--kit-radius-control); margin-bottom: var(--kit-space-4);
 }
 .kit-form-summary ul { margin: var(--kit-space-2) 0 0; padding-left: var(--kit-space-5); }
 .kit-form-done {
 	border-left: var(--kit-border-accent) solid var(--kit-color-success); background: var(--kit-color-success-soft);
-	padding: var(--kit-space-4) var(--kit-space-5); border-radius: var(--kit-radius-card);
+	padding: var(--kit-space-5); border-radius: var(--kit-radius-card);
 	animation: kit-rise var(--kit-motion-slow) var(--kit-motion-ease) both;
 }
 
@@ -1154,7 +1154,7 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card-media > .kit-card-label { position: absolute; top: var(--kit-space-2); left: var(--kit-space-2); z-index: 1; max-width: calc(100% - 2 * var(--kit-space-2)); overflow: hidden; text-overflow: ellipsis; }
 .kit-tag.kit-card-label--icon { justify-content: center; width: 1.75rem; min-height: 1.75rem; height: 1.75rem; padding: 0; border-radius: 50%; }
 .kit-card-label--icon .kit-ico { --kit-ico-size: 0.95rem; }
-.kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: var(--kit-space-4); }
+.kit-card[class*="kit-card--"] > .kit-card-body { display: flex; flex-direction: column; gap: var(--kit-space-2); flex: 1 1 auto; min-width: 0; margin: 0 !important; padding: var(--kit-space-5); }
 .kit-card-body > * { margin: 0 !important; max-width: none; }
 .kit-card-meta { flex-wrap: nowrap !important; overflow: hidden; white-space: nowrap; }
 .kit-card-meta > .kit-meta-item { flex: none; }
@@ -1182,12 +1182,11 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 .kit-card .kit-card-sum .wp-block-post-excerpt__more-text { display: none; }
 .kit-card-body > .aw-opp-actions { position: relative; z-index: 1; margin-top: auto !important; padding-top: var(--kit-space-2); }
 /* Block: picture on top */
-.kit-card--block-lg > .kit-card-body { padding: var(--kit-space-5); }
 .kit-card--block-lg .kit-card-title { font-size: var(--kit-type-h3) !important; }
 .kit-card.kit-card--block-lg .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 3; }
 .kit-card--block-sm .kit-card-title { font-size: var(--kit-type-sm) !important; }
 /* Stacked: picture left, or none */
-.kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-4); }
+.kit-card[class*="kit-card--stacked"] { flex-direction: row; align-items: flex-start; gap: var(--kit-space-4); padding: var(--kit-space-5); }
 .kit-card[class*="kit-card--stacked"] > .kit-card-body { padding: 0; }
 .kit-card[class*="kit-card--stacked"] > .kit-card-media { border-radius: var(--kit-radius-media); }
 .kit-card--stacked-lg { gap: var(--kit-space-5) !important; padding: var(--kit-space-5) !important; }
@@ -1298,8 +1297,8 @@ header.wp-block-template-part.kit-header-hidden { transform: translateY(calc(-10
 
 /* Contents list (kit-toc): a collapsible list of a long document's headings, before its text. Closed by default. */
 .kit-toc { margin: 0 0 var(--kit-space-5); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); background: var(--kit-color-raised); }
-.kit-toc > summary { display: flex; align-items: center; min-height: var(--kit-size-target); padding: 0 var(--kit-space-4); font-weight: var(--kit-weight-medium); cursor: pointer; }
+.kit-toc > summary { display: flex; align-items: center; min-height: var(--kit-size-target); padding: var(--kit-space-5); font-weight: var(--kit-weight-medium); cursor: pointer; }
 .kit-toc > summary:focus-visible { outline: var(--kit-focus-width) solid var(--kit-color-focus); outline-offset: var(--kit-focus-offset); }
-.kit-toc ol { margin: 0; padding: 0 var(--kit-space-4) var(--kit-space-4) var(--kit-space-7); font-size: var(--kit-type-sm); }
+.kit-toc ol { margin: 0; padding: 0 var(--kit-space-5) var(--kit-space-5) var(--kit-space-7); font-size: var(--kit-type-sm); }
 .kit-toc li { margin: var(--kit-space-1) 0; }
 .kit-toc li.is-sub { margin-left: var(--kit-space-4); list-style-type: lower-alpha; }
