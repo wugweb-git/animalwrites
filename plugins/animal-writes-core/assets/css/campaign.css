@@ -321,6 +321,23 @@
 	.aw-camp--lab-rules:has(> .aw-sticky-cta) { --aw-bar-h: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); padding-bottom: var(--aw-bar-h); }
 	html:has(.aw-camp--lab-rules > .aw-sticky-cta) { scroll-padding-bottom: calc(var(--kit-btn-height) + 2 * var(--kit-space-2) + env(safe-area-inset-bottom)); }
 }
+/* The fixed hero (--kit-hero-h) holds its content at every width (owner, 2 Nov 2026): one call to action, and on phones
+   the poster without the Gazette strip, its G.S.R. stamp beside the countdown */
+.aw-camp--lab-rules .aw-camp-hero .aw-camp-ghost { display: none; }
+@media (max-width: 767px) {
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster { position: relative; }
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-poster-doc { display: none; }
+	.aw-camp--lab-rules .aw-camp-hero .aw-camp-stamp { position: absolute; top: var(--kit-space-5); right: var(--kit-space-5); margin: 0; }
+	.aw-camp--lab-rules .aw-camp-hero .aw-cd-num { font-size: var(--kit-type-h1); line-height: 1; }
+}
+/* Share from 768: buttons, pictures and link preview in three columns, so the band stays under 720px; below 1200 the
+   pictures are sized by width (their shape sets the height) to fit their column */
+.aw-camp--lab-rules .aw-camp-share-kit > .aw-letter-share-box.is-in-section { margin-top: 0; }
+@media (min-width: 768px) {
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.aw-camp--lab-rules .aw-letter-share-box.is-in-section :is(.aw-letter-share-copy, .aw-letter-share-pics, .aw-letter-share-preview) { grid-row: 1; grid-column: auto; }
+}
+@media (min-width: 768px) and (max-width: 1199px) { .aw-camp--lab-rules .aw-letter-share-pic img { height: auto; width: var(--kit-space-8); } }
 
 /* Campaign artwork beside a section's opening (c2split): a 4:3 crop of the artwork's busy side */
 .aw-camp-split { margin-bottom: var(--kit-space-5); }
