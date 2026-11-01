@@ -315,7 +315,7 @@ add_shortcode(
 		$dir  = aw_hub_url( 'aw_listing' );
 		$form = '<form class="aw-ed-search" role="search" method="get" action="' . esc_url( $dir ) . '">'
 			. '<input type="hidden" name="aw_filter" value="1">'
-			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">'
+			. '<label class="screen-reader-text" for="aw-ed-q">Organisation name</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name">'
 			. '<label class="screen-reader-text" for="aw-ed-state">State or union territory</label><select id="aw-ed-state" name="state">' . $opts . '</select>'
 			. '<button type="submit" class="kit-btn">Search</button>';
 		if ( wp_validate_boolean( $atts['compact'] ) ) {
@@ -328,7 +328,7 @@ add_shortcode(
 				. '<p><strong>' . esc_html( number_format_i18n( $total ) ) . '</strong> vets, shelters and rescue groups in <strong>' . (int) $with . '</strong> states.</p></div></div>'
 				. '<div class="aw-findhelp-bar"><form class="aw-ed-search aw-findhelp-form" role="search" method="get" action="' . esc_url( $dir ) . '">'
 				. '<input type="hidden" name="aw_filter" value="1">'
-				. $field( 'q', 'aw-ed-q', 'Organisation name', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name, for example Blue Cross">' )
+				. $field( 'q', 'aw-ed-q', 'Organisation name', '<span class="kit-ico kit-ico--search kit-field-icon" aria-hidden="true"></span><input id="aw-ed-q" type="search" name="q" placeholder="Search by name">' )
 				. $field( 'state', 'aw-ed-state', 'State or union territory', '<select id="aw-ed-state" name="state">' . $opts . '</select>' )
 				. '<button type="submit" class="kit-btn aw-findhelp-go">Search</button>'
 				. '<a class="kit-btn kit-btn--ghost aw-findhelp-near" href="' . esc_url( $dir ) . '#near-me"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>Use my location</a>'
