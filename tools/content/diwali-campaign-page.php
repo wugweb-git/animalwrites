@@ -214,7 +214,7 @@ $law = dwsec(
 	. "<!-- wp:group {\"anchor\":\"rules\",\"className\":\"aw-camp-open\",\"layout\":{\"type\":\"default\"}} -->\n<div id=\"rules\" class=\"wp-block-group aw-camp-open\">"
 	. dwh( 'Firecracker rules' )
 	. dwp( 'Supreme Court orders since 2018 allow only less-polluting "green" crackers, sold through licensed traders, and limit bursting on Diwali to two hours, which the states fix. Noise crackers are banned between 10 pm and 6 am, and no cracker may be louder than 125 dB at four metres.' )
-	. dwp( 'Delhi-NCR has its own orders. The Supreme Court heard the 2026 matter on 30 Sep 2026 and 29 Oct 2026 and said it would pass a balanced order; when we checked on 1 Nov 2026, it had not been published. In Odisha, the State Pollution Control Board has advised bursting only between 7 pm and 9 pm.' )
+	. dwp( 'Delhi-NCR has its own orders. The Supreme Court heard the 2026 matter on 30 Sep 2026 and 29 Oct 2026 and said it would pass a balanced order; when we checked on 1 Nov 2026, it had not been published. In Odisha, the State Pollution Control Board\'s guidelines restrict bursting to 7 pm to 9 pm.' )
 	. dwp( 'States and district magistrates issue their own timings and bans, so check your state\'s or district\'s order before you buy or burst.' )
 	. "</div>\n<!-- /wp:group -->\n\n",
 	'aw-camp-grey'
