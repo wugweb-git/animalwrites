@@ -8,7 +8,10 @@
  *   copy. Saving keeps each key's stored format (aw_value_guard below): dates stay Y-m-d, photos stay "1,2,3", flags
  *   stay '1', empty fields are removed as before, and values pass meta.php's sanitising.
  * - Fields marked read only are shown and never saved.
- * - Without SCF the former boxes come back (listing-profile.php, pages.php), so editing never depends on the plugin.
+ * - SCF stays on while Animal Writes core is on (owner, 1 Nov 2026): no Deactivate link for it in WP Admin and any
+ *   deactivation from WP Admin is stopped, because the edit screens' boxes are SCF field groups. Deactivate Animal
+ *   Writes core first and SCF can be deactivated as usual. listing-profile.php and pages.php still keep a box for
+ *   the case SCF is missing.
  *
  * @package animal-writes-core
  */
@@ -21,6 +24,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aw_scf_active() {
 	return function_exists( 'acf_add_local_field_group' );
 }
+
+/** SCF's plugin file (plugins screen and WP-CLI name it so). */
+const AW_SCF_PLUGIN = 'secure-custom-fields/secure-custom-fields.php';
+
+// No Deactivate link for SCF while this plugin is on.
+add_filter(
+	'plugin_action_links_' . AW_SCF_PLUGIN,
+	function ( $links ) {
+		unset( $links['deactivate'] );
+		return $links;
+	}
+);
+
+// Stop SCF being deactivated (bulk action, WP-CLI, any caller) unless Animal Writes core is deactivated first or in
+// the same request: the plugins list is in name order, so core comes before SCF in a bulk deactivation.
+add_action(
+	'deactivate_plugin',
+	function ( $plugin ) {
+		static $core_off = false;
+		if ( plugin_basename( AW_CORE_DIR . 'animal-writes-core.php' ) === $plugin ) {
+			$core_off = true;
+			return;
+		}
+		if ( AW_SCF_PLUGIN === $plugin && ! $core_off ) {
+			wp_die(
+				esc_html__( 'Secure Custom Fields stays on while Animal Writes core is on: the edit screens use it. Deactivate Animal Writes core first.', 'animal-writes-core' ),
+				esc_html__( 'Secure Custom Fields stays on', 'animal-writes-core' ),
+				array(
+					'response'  => 403,
+					'back_link' => true,
+				)
+			);
+		}
+	}
+);
 
 /** Our field groups (keys of the files in acf-json/). */
 const AW_SCF_GROUPS = array( 'group_aw_listing', 'group_aw_listing_address', 'group_aw_listing_hours', 'group_aw_listing_registrations', 'group_aw_listing_about', 'group_aw_listing_online', 'group_aw_listing_photos', 'group_aw_listing_claimed', 'group_aw_opportunity', 'group_aw_news', 'group_aw_legal', 'group_aw_legal_document', 'group_aw_campaign', 'group_aw_campaign_dates', 'group_aw_campaign_document', 'group_aw_campaign_orgs', 'group_aw_campaign_outcome', 'group_aw_campaign_share', 'group_aw_resource' );
