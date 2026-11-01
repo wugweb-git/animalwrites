@@ -78,9 +78,9 @@ Legend: **src** = where the box comes from. **cond** = when it shows. SCF box id
 | 9 | Excerpt | postexcerpt | core | normal/core | panel |
 | 10 | Custom Fields | postcustom | core | normal/core | only if enabled in Preferences |
 | 11 | Slug | slugdiv | core | normal/core | panel |
-| 12 | Related | aw_related | ours, `core/model.php:124` (cb :144) | normal/default | type has a relation in `aw_relations()`, or is post |
+| 12 | Related | aw_related | ours, `core/model.php:126` (cb :166) | normal/default | type has a relation in `aw_relations()`, or is post |
 | 13 | Resource details | acf-group_aw_resource | SCF `acf-json/group_aw_resource.json` | normal | location post_type == post |
-| 14 | Linked from | aw_linked_from | ours, `core/model.php:128` (cb :173) | normal/low | type is a relation target (aw_rel_guide → post) |
+| 14 | Linked from | aw_linked_from | ours, `core/model.php:130` (cb :195) | normal/low | type is a relation target (aw_rel_guide → post) |
 | 15 | FAQ | aw-faq | ours, `seo/faq.php:797` (closure :800) | normal/low | `aw_faq_post_types()` (public types minus `aw_faq_off_types`, which is empty on live) |
 | 16 | Link Whisper Suggested Links | wpil_link-articles | Link Whisper `core/Wpil/Base.php:764` | advanced/default | `manage_categories` cap; types from Link Whisper settings (post, page) |
 | — | Rank Math SEO | rank_math_metabox (sidebar plugin in block editor) | Rank Math `includes/admin/metabox/class-metabox.php:161` | normal (back-compat → sidebar) | `titles.pt_post_add_meta_box` = on. Not captured at runtime (Rank Math's Screen loads only on post.php); found by code + options |
@@ -126,7 +126,7 @@ No SCF group, no Related box. The admin account's saved order still lists a `kit
 | 11 | Excerpt | postexcerpt | core | normal/core | |
 | 12 | Custom Fields | postcustom | core | normal/core | supports custom-fields |
 | 13 | Slug | slugdiv | core | normal/core | |
-| 14 | Related | aw_related | ours `core/model.php:124` | normal/default | relations aw_rel_legal, aw_rel_org |
+| 14 | Related | aw_related | ours `core/model.php:126` | normal/default | relations aw_rel_legal, aw_rel_org |
 | 15 | Source | acf-group_aw_news | SCF `acf-json/group_aw_news.json` | normal | post_type == aw_news |
 | 16 | FAQ | aw-faq | ours | normal/low | |
 
@@ -160,9 +160,9 @@ Issued by is inside the Document box (Library items only); issuers stored on Res
 | 2 | LiteSpeed | litespeed_meta_boxes | LiteSpeed | side/core | |
 | 3 | Featured image | postimagediv | core | side/low | panel |
 | 4 | Revisions / Excerpt / Custom Fields / Slug | core | core | normal/core | panels / pref |
-| 5 | Related | aw_related | ours | normal/default | relations aw_rel_org, aw_organiser, aw_participant |
+| 5 | Related | aw_related | ours | normal/default | relations aw_rel_org, aw_organisation ("Organiser", max 1) |
 | 6 | Event | acf-group_aw_campaign | SCF `acf-json/group_aw_campaign.json` | normal | post_type == aw_campaign |
-| 7 | Dates and state | acf-group_aw_campaign_dates | SCF; drawn by `aw_camp_dates_box` (`core/campaign-tools.php:628`) | normal | |
+| 7 | Dates and state | acf-group_aw_campaign_dates | SCF; drawn by `aw_camp_dates_box` (`core/campaign-tools.php:629`) | normal | |
 | 8 | Document | acf-group_aw_campaign_document | SCF; `aw_camp_document_box` (:647) | normal | |
 | 9 | Organisations | acf-group_aw_campaign_orgs | SCF; `aw_camp_orgs_box` (:653) | normal | |
 | 10 | Outcome | acf-group_aw_campaign_outcome | SCF; `aw_camp_outcome_box` (:661) + `aw_camp_record_box` (`core/campaign-record.php:215`) | normal | |
@@ -170,7 +170,7 @@ Issued by is inside the Document box (Library items only); issuers stored on Res
 | 12 | FAQ | aw-faq | ours | normal/low | |
 | — | Rank Math SEO | rank_math_metabox | Rank Math | sidebar | |
 
-The five campaign groups (7–11) hold one message field each; the fields inside are drawn by `acf/render_field` and saved by our own `save_post_aw_campaign` (`core/campaign-tools.php:688`, `core/campaign-record.php:228`), which runs only when all five groups are active (`aw_camp_boxes_all_on()`). Not checked live yet.
+The five campaign groups (7–11) hold one message field each; the fields inside are drawn by `acf/render_field` and saved by our own `save_post_aw_campaign` (`core/campaign-tools.php:689`, `core/campaign-record.php:228`), which runs only when all five groups are active (`aw_camp_boxes_all_on()`). Not checked live yet.
 
 ### aw_opportunity — block editor
 
@@ -274,23 +274,23 @@ Nonce `aw_issuer_save`; save_post prio 10. Issuers stored on other types are kep
 
 Invalid input → transient `aw_place_error_{user}` notice, place kept. PIN lookup AJAX `wp_ajax_aw_pin_lookup`.
 
-**Related** (`core/model.php:144–220`; relations `aw_relations()` `core/model.php:31–41`)
+**Related** (`core/model.php:166–249`; relations `aw_relations()` `core/model.php:33–43`)
 
 | row | stored as (multiple rows, one listing/post ID each) | on types | max |
 |---|---|---|---|
 | Legal Watch items in this story | `aw_rel_legal` → aw_legal | aw_news | ∞ |
 | Organisations featured | `aw_rel_org` → aw_listing | aw_news, aw_legal, post, aw_press, aw_campaign | ∞ |
-| Organiser | `aw_organiser` → aw_listing | aw_campaign | 1 |
-| Participating organisations | `aw_participant` → aw_listing | aw_campaign | ∞ |
-| Organisation | `aw_organisation` → aw_listing | aw_opportunity | 1 |
+| Organisation (on campaigns: Organiser) | `aw_organisation` → aw_listing | aw_opportunity, aw_campaign | 1 |
 | Library items | `aw_rel_resource` → aw_legal | post | ∞ |
 | Guides on this | `aw_rel_guide` → post | post | ∞ |
 | Found in the text (ticks) | `aw_rel_org_auto` (found on save, `core/featured.php:253–300`); unticked → `aw_rel_org_not` (`core/featured.php:353–354`) | AW_FEATURED_TYPES (`core/featured.php:23`): aw_news, aw_legal, post, aw_press, aw_campaign | |
 | Listing types (post only) | `aw_rel_listing_type` (post_tag term IDs, multiple rows) | post | |
 
-Sanitising: `absint`, target post type checked, not self, cut to max. Search via REST `wp.apiFetch` (`core/model.php:224–245`). None REST-registered.
+Older keys, no longer offered and never written by the box (their rows stay and are still read): `aw_organiser` (campaign organiser; read when `aw_organisation` is empty, `aw_campaign_organiser()`) and `aw_participant` (campaign partners; merged with the Organisations box's Partners, no repeats, `aw_campaign_partner_ids()`). Both still show in "Linked from" on the listing, `aw_organiser` on the same "Campaigns organised" line as `aw_organisation`.
 
-**Linked from** (`core/model.php:173–188`): read-only list of items whose `aw_rel_*` points here (`aw_rel_back`, 100 max). Stores nothing.
+Sanitising: `absint`, target post type checked, not self, cut to max. Search via REST `wp.apiFetch` (`core/model.php:253–274`). None REST-registered.
+
+**Linked from** (`core/model.php:195–217`): read-only list of items whose `aw_rel_*` points here (`aw_rel_back`, 100 max). Stores nothing.
 
 **FAQ** (`seo/faq.php:793–830`; editor `aw_faq_editor` :644; save `aw_faq_editor_save` → `aw_faq_items_save` :309–318)
 
@@ -310,7 +310,7 @@ Automatic rows are generated from each type's own fields (`core/faq-data.php`), 
 
 Empty → delete. Not in any box but registered on aw_legal: `aw_file_hi_url` ("no longer edited", 15 rows), `aw_legal_dated` (`core/item-head.php:134`, 1 row) — editable only through Custom Fields / REST.
 
-**Campaign fields** (inside the five SCF campaign groups, one message field each; `core/campaign-tools.php:590–686`, save on `save_post_aw_campaign` :688, only when all five groups are active)
+**Campaign fields** (inside the five SCF campaign groups, one message field each; `core/campaign-tools.php:591–687`, save on `save_post_aw_campaign` :689, only when all five groups are active)
 
 | box | field | stored as | type | sanitising | REST |
 |---|---|---|---|---|---|
@@ -320,7 +320,7 @@ Empty → delete. Not in any box but registered on aw_legal: `aw_file_hi_url` ("
 | Dates and state | Override the state | `aw_campaign_state_override` | pre/active/post | kept only with a reason | yes |
 | Dates and state | Reason | `aw_campaign_override_note` | text | `sanitize_text_field` | yes |
 | Document | Campaign document | `aw_campaign_doc` | Library post ID | `absint` | yes |
-| Organisations | Partners | `aw_campaign_partners` | CSV listing IDs | `absint` list | yes |
+| Organisations | Partners (the one editor for partners; older `aw_participant` rows are added by readers) | `aw_campaign_partners` | CSV listing IDs | `absint` list | yes |
 | Organisations | Supporters | `aw_campaign_supporters` | CSV listing IDs | `absint` list | yes |
 | Outcome | Outcome | `aw_campaign_outcome` | pending/achieved/partial/not/inconclusive | whitelist, default pending | yes |
 | Outcome | As of | `aw_campaign_outcome_asof` | Y-m-d | regex | yes |
@@ -421,7 +421,7 @@ Saving goes through `aw_value_guard()` (`core/scf.php:62–113`, filter `acf/pre
 | Dates | Repeats | `aw_event_schedule` | text | | yes |
 | Apply | Apply URL / Website | `aw_apply_url`, `aw_website` | url | | yes |
 | Apply | Employment type | `aw_employment_type` | select (8 Google values) | | yes |
-| Apply | Paid listing | `aw_paid_listing` | true_false | | yes |
+| Apply | Sponsored (replaces Paid listing `aw_paid_listing`, which stays registered with no field) | `aw_sponsored` | true_false | | yes |
 | Source | Source URL / name / date | `aw_source_*` | | | yes |
 
 **group_aw_campaign "Event"** (aw_campaign): `aw_event_date` date, `aw_event_place` text. REST yes.
@@ -466,17 +466,17 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 | `aw_source_name` | binding `source_meta`/`source_link_label` `core/bindings.php:83,87`; item head by-line `core/item-head.php:341,359`; card source `core/hub-blocks.php:603` | Article publisher name `seo/schema.php:427`, Periodical name :546 | study journal `core/faq-data.php:574, 758` | title cleanup `seo/titles.php:80` | ingest `src/ingest.php:241` | relevance, summary rewrite |
 | `aw_source_date` | shown date: Post Date block filter `core/display.php:38–58`, meta row `core/item-head.php:124`; card ts `core/hub-blocks.php:253` | `datePublished` of the original `seo/schema.php:428`; Legislation `legislationDate` :481 | `core/faq-data.php:370,575` | News sort key `core/display.php:60–219` (filled from post date when missing, :155–158) | ingest `src/ingest.php:247` | review queue, gov-verified watch list `core/gov-verified.php:48,72` |
 | `aw_issuer` | Library meta/issuer line `core/item-head.php:329`; card source `core/hub-blocks.php:604`; placard `core/media.php:308` | `GovernmentOrganization` (`aw_schema_issuer` `seo/schema.php:373–376`; court types :502) | issuer/read questions `core/faq-data.php:43–44, 342–411, 768, 1031` | — | `aw_set_issuer()` (imports) | dataLayer `issuer` `core/kits-config.php:67–68`; relevance/auto-review |
-| `aw_state_code`, `aw_district_code` | place chips `core/item-head.php` (via `aw_item_places`), related-by-place `core/related.php:93,171` | job/opportunity `jobLocation`/`Place` (`aw_schema_place` `seo/schema.php:344`, :820–835) | listing location answers via `aw_item_place_names` | place pages & counts `core/places.php:296–353`, `seo/programmatic.php:48`, near opportunities `core/near-opps.php:27`, district helplines `core/district-helplines.php:50`, filters `core/systems.php:160,306`, filtered views `seo/filtered-views.php:347` | auto-detect `core/find-help.php:257, 444–447`; merges `src/enrichment-cleanup.php:72–78` | dataLayer `state`/`district` `core/kits-config.php:62–63`; enrichment admin filter |
-| `aw_pincode` | listing location text `core/listing-template.php:217` | `PostalAddress.postalCode` listing `seo/schema.php:87`, jobs :820–824, :910–913 | location answer `core/faq-data.php:235` | — | geocoder input `core/geocode.php:79,91` | enrichment cleanup |
-| `aw_place_city` | place text binding `core/bindings.php:111` | job `addressLocality` `seo/schema.php:768, 835` | — | featured matching `core/featured.php:92` | — | — |
+| `aw_state_code`, `aw_district_code` | place chips `core/item-head.php` (via `aw_item_places`), related-by-place `core/related.php:93,171` | job/opportunity `jobLocation`/`Place` (`aw_schema_place` `seo/schema.php:344`, :821–836) | listing location answers via `aw_item_place_names` | place pages & counts `core/places.php:296–353`, `seo/programmatic.php:48`, near opportunities `core/near-opps.php:27`, district helplines `core/district-helplines.php:50`, filters `core/systems.php:160,306`, filtered views `seo/filtered-views.php:347` | auto-detect `core/find-help.php:257, 444–447`; merges `src/enrichment-cleanup.php:72–78` | dataLayer `state`/`district` `core/kits-config.php:62–63`; enrichment admin filter |
+| `aw_pincode` | listing location text `core/listing-template.php:217` | `PostalAddress.postalCode` listing `seo/schema.php:87`, jobs :821–825, :911–914 | location answer `core/faq-data.php:235` | — | geocoder input `core/geocode.php:79,91` | enrichment cleanup |
+| `aw_place_city` | place text binding `core/bindings.php:111` | job `addressLocality` `seo/schema.php:769, 836` | — | featured matching `core/featured.php:92` | — | — |
 | `aw_place_source`, `aw_place_auto` | — | — | — | — | detector `core/find-help.php:257–258, 422–495` | admin/CLI only (who set the place) |
-| `aw_faq` | FAQ block (`seo/faq.php` rows → `animal-writes/item-faq`) | `FAQPage` (`seo/schema.php:1344, 1424`) | is the FAQ | FAQ overview counts `seo/faq-overview.php:60,76` | conversion undo `seo/faq.php:916–993` | — |
+| `aw_faq` | FAQ block (`seo/faq.php` rows → `animal-writes/item-faq`) | `FAQPage` (`seo/schema.php:1345, 1425`) | is the FAQ | FAQ overview counts `seo/faq-overview.php:60,76` | conversion undo `seo/faq.php:916–993` | — |
 | `aw_rel_org` | "Featured in" on the listing `core/featured.php:372–395`; "News from" `core/related.php:264` | listing `subjectOf` (`aw_featured_subject_schema` `core/featured.php:461`) | — | — | merges `src/enrichment-cleanup.php:195` | 0 rows on live |
 | `aw_rel_org_auto` / `aw_rel_org_not` | same as aw_rel_org (`core/featured.php:270–395`) | same | — | — | `aw_featured_scan` on save | 252 news, 8 campaign rows |
 | `aw_rel_legal` | "From the Library" / "News about this" `core/related.php:240,244`; `core/item-head.php:431,435` | — | — | — | — | 2 rows |
 | `aw_rel_resource` | "Guides on this" / "From the Library" `core/related.php:245,249`; `core/item-head.php:436,442` | — | — | — | — | 1 row |
 | `aw_rel_guide` | "Guides on this" at the end of a research post `core/item-head.php:443` | — | — | — | — | 9 rows |
-| `aw_rel_listing_type` | **none** | — | — | — | — | admin only: post_tag screen "Guides linking here" `core/model.php:291–303`; 0 rows |
+| `aw_rel_listing_type` | **none** | — | — | — | — | admin only: post_tag screen "Guides linking here" `core/model.php:320–332`; 0 rows |
 
 ### 3.2 aw_legal
 
@@ -498,42 +498,43 @@ R = reads, W = writes. "Display" = front-end block/output. Only box-edited (or b
 | key | display / behaviour | JSON-LD | other |
 |---|---|---|---|
 | `aw_campaign_open` | Pre/Upcoming window `core/campaign-tools.php:54` | — | mail strip window `core/mail-campaign-strip.php:36` |
-| `aw_campaign_close` | open/closed state, days left, sidebar card, share data `core/campaign-tools.php:48, 91, 488, 548, 579`; list column :667 | (via state) | schedules the close cron on change :144; mail strip :32–46; dataLayer `campaign_status` `core/kits-config.php:103–106` |
-| `aw_campaign_doc` | rule chips quote this Library item `core/campaign-tools.php:247–256` | campaign `about` the Legislation node `seo/schema.php:595–596` | — |
-| `aw_campaign_partners` | `[aw_campaign_partners]` cards `core/campaign-tools.php:418–427`; listing "Campaigns" (Partner) `core/listing-template.php:522–524` | — | — |
-| `aw_campaign_supporters` | "Supported by"; listing "Campaigns" (Supporter) `core/listing-template.php:529–531` | — | — |
+| `aw_campaign_close` | open/closed state, days left, sidebar card, share data `core/campaign-tools.php:48, 91, 488, 548, 579`; list column :668 | (via state) | schedules the close cron on change :144; mail strip :32–46; dataLayer `campaign_status` `core/kits-config.php:103–106` |
+| `aw_campaign_doc` | rule chips quote this Library item `core/campaign-tools.php:247–256` | campaign `about` the Legislation node `seo/schema.php:596–597` | — |
+| `aw_campaign_partners` | `[aw_campaign_partners]` cards `core/campaign-tools.php:418–428`; listing "Campaigns" (Partner) `core/listing-template.php:524–526`; both through `aw_campaign_partner_ids()` (`core/model.php:156`), which adds older `aw_participant` rows, no repeats | — | — |
+| `aw_campaign_supporters` | "Supported by"; listing "Campaigns" (Supporter) `core/listing-template.php:530–532` | — | — |
 | `aw_campaign_outcome`, `_asof` | `[aw_campaign_outcome]` etc. `core/campaign-tools.php:98–100`, `core/campaign-record.php:127` | — | asof auto-set at close :148–149 |
 | `aw_campaign_state_override`, `_override_note` | state override `core/campaign-tools.php:60–61` | — | — |
 | `aw_campaign_metric_min`, `_metric_stale` | when the letter count shows / gets an as-of date `core/campaign-tools.php:170, 403, 410` | — | — |
-| `aw_campaign_share_text`, `_share_story`, `_share_post` | Share button data `window.awCampShare` `core/campaign-tools.php:565, 579` | — | media merge keeps the IDs `core/media-merge.php:27` |
+| `aw_campaign_share_text`, `_share_story`, `_share_post` | Share button data `window.awCampShare` `core/campaign-tools.php:566, 579` | — | media merge keeps the IDs `core/media-merge.php:27` |
 | `aw_campaign_sent` (+`_sent_at`) | count `[aw_campaign_count]` `core/campaign-tools.php:171, 386–410` | — | written by the "sent" endpoint |
-| `aw_campaign_impact_state`, `_evidence` | Real-world impact module `core/campaign-record.php:116–120` | `aw_campaign_record_schema` `seo/schema.php:671ff` | — |
+| `aw_campaign_impact_state`, `_evidence` | Real-world impact module `core/campaign-record.php:116–120` | `aw_campaign_record_schema` `seo/schema.php:672ff` | — |
 | `aw_campaign_metrics` | metric records `core/campaign-record.php:73` | record schema | no box |
-| `aw_event_date` | — (no front-end display found) | Event `startDate` `seo/schema.php:585` | — |
-| `aw_event_place` | — | Event `location` `seo/schema.php:586` | — |
-| `aw_organiser` | listing "Campaigns" (Organiser) `core/listing-template.php:519` | Event `organizer` `seo/schema.php:582` | 0 rows |
-| `aw_participant` | listing "Campaigns" (Partner) `core/listing-template.php:522–525` | — | 0 rows |
+| `aw_event_date` | — (no front-end display found) | Event `startDate` `seo/schema.php:586` | — |
+| `aw_event_place` | — | Event `location` `seo/schema.php:587` | — |
+| `aw_organisation` (campaigns) | listing "Campaigns" (Organiser) `core/listing-template.php:519–522` | Event `organizer` `seo/schema.php:582` | 0 rows; read first (`aw_campaign_organiser()`, `core/model.php:147`) |
+| `aw_organiser` | the same two, only when `aw_organisation` is empty | same | older key, no field; 0 rows |
+| `aw_participant` | listing "Campaigns" (Partner) `core/listing-template.php:526`; `[aw_campaign_partners]` cards `core/campaign-tools.php:428` (merged with `aw_campaign_partners`) | — | older key, no field; 0 rows |
 
 ### 3.4 aw_opportunity
 
 | key | display | JSON-LD | other |
 |---|---|---|---|
-| `aw_org_name` | binding `org_name` `core/bindings.php:141`; posted-by `core/hub-blocks.php:306`; card source :598; placard `core/media.php:125,147` | JobPosting `hiringOrganization` `seo/schema.php:773`; opportunity org :943 | ingest `src/ingest.php:298`, auto-link `src/ingest.php:559–565` |
-| `aw_organisation` | posted-by link `core/hub-blocks.php:307`; listing "Opportunities" `core/listing-template.php:500` | org url / address `seo/schema.php:770, 941`, `aw_opportunity_org_address` :905 | ingest sets it `src/ingest.php:565` |
-| `aw_deadline` | "Apply by" / Closed bindings `core/bindings.php:145–151` | `validThrough` `seo/schema.php:779, 957` | open/closed `core/retention.php:41–95`; ingest `src/ingest.php:303` |
+| `aw_org_name` | binding `org_name` `core/bindings.php:141`; posted-by `core/hub-blocks.php:306`; card source :598; placard `core/media.php:125,147` | JobPosting `hiringOrganization` `seo/schema.php:774`; opportunity org :944 | ingest `src/ingest.php:298`, auto-link `src/ingest.php:559–565` |
+| `aw_organisation` | posted-by link `core/hub-blocks.php:307`; listing "Opportunities" `core/listing-template.php:500` | org url / address `seo/schema.php:771, 942`, `aw_opportunity_org_address` :906 | ingest sets it `src/ingest.php:565` |
+| `aw_deadline` | "Apply by" / Closed bindings `core/bindings.php:145–151` | `validThrough` `seo/schema.php:780, 958` | open/closed `core/retention.php:41–95`; ingest `src/ingest.php:303` |
 | `aw_review_until` | (closes the listing) | — | `core/retention.php:42–100`, auto-set :50 |
-| `aw_event_date`, `aw_event_schedule` | — | Event `startDate`, repeat `aw_opportunity_repeat` `seo/schema.php:884, 954` | — |
+| `aw_event_date`, `aw_event_schedule` | — | Event `startDate`, repeat `aw_opportunity_repeat` `seo/schema.php:885, 955` | — |
 | `aw_apply_url` | Apply button binding `core/bindings.php:143` (empty once closed); actions `core/hub-blocks.php:300`; item sources `core/item-head.php:372` | — | ingest `src/ingest.php:300` |
-| `aw_website` | — on opportunities | org `url` fallback `seo/schema.php:775–777, 945` | — |
-| `aw_employment_type` | — | `employmentType` `seo/schema.php:795` | ingest `src/ingest.php:308` |
-| `aw_paid_listing` | **none** | — | **never read**; 0 rows |
+| `aw_website` | — on opportunities | org `url` fallback `seo/schema.php:776–778, 946` | — |
+| `aw_employment_type` | — | `employmentType` `seo/schema.php:796` | ingest `src/ingest.php:308` |
+| `aw_paid_listing` | **none** | — | **never read**; 0 rows; no field (the Opportunity's Sponsored field `aw_sponsored` replaces it) |
 
 ### 3.5 post (Resources)
 
 | key | display | JSON-LD | other |
 |---|---|---|---|
 | `kits_last_reviewed` | — | Article `lastReviewed` `seo/schema.php:429` | 7 rows |
-| `aw_sponsored` | "Sponsored" tag in the meta row `core/item-head.php:159`; binding `sponsored_label` `core/bindings.php:89`; nofollow on listing links `core/listing-template.php:34` | — | sponsored filter `core/systems.php:169, 234`; editor list `core/sponsored-blocks.php:94`; dataLayer `sponsor` `core/kits-config.php:109–110` |
+| `aw_sponsored` (also the Opportunity's Sponsored field) | "Sponsored" tag in the meta row `core/item-head.php:159`; binding `sponsored_label` `core/bindings.php:89`; nofollow on listing links `core/listing-template.php:34` | — | sponsored filter `core/systems.php:169, 234`; editor list `core/sponsored-blocks.php:94`; dataLayer `sponsor` `core/kits-config.php:109–110` |
 | `aw_sponsor_name` | "Sponsored by X" `core/bindings.php:92`; sponsored item block `core/sponsored-blocks.php:30` | — | dataLayer `sponsor` |
 | `aw_source_*` | research/source attribution (see 3.1) | — | — |
 
@@ -545,7 +546,7 @@ Live listing page = theme template `single-aw_listing.html` (blocks listing-abou
 |---|---|---|---|---|
 | `aw_email` | Contact :176–186 | `email` :102–103 | — | contact score `core/directory.php:482` |
 | `aw_phones` (repeater) | Contact via `aw_listing_phones` `core/meta.php:237` | `telephone`, WhatsApp `contactPoint` :96–112 | phone answers :29 | district helplines, programmatic counts; claims/enrichment write via `aw_set_listing_list` `core/meta.php:289–312` |
-| `aw_area` | Location :217 | `streetAddress` fallback :82 | :234–235 | jobs address `seo/schema.php:823, 912` |
+| `aw_area` | Location :217 | `streetAddress` fallback :82 | :234–235 | jobs address `seo/schema.php:824, 913` |
 | `aw_address` | Location :216 | `streetAddress` :82 | :30, 229 | geocoder `core/geocode.php:76` |
 | `aw_maps_url` | Contact (directions) :182–183 | `hasMap` :118 | :242 | sources `core/data-sources.php:102` |
 | `aw_lat`, `aw_lng` | map points (`core/geocode.php:126–147`) | `geo` :121–122 | — | geocoder |
@@ -587,11 +588,11 @@ Live listing page = theme template `single-aw_listing.html` (blocks listing-abou
 
 | key | display | JSON-LD | other |
 |---|---|---|---|
-| `aw_press_url` | press card link `core/hub-blocks.php:432, 596`; permalink filter `core/campaign-tools.php:814` | `url` `seo/schema.php:1278` | dupes check, campaign links by keyword, relevance |
-| `aw_press_publisher` | card source `core/hub-blocks.php:595` | `publisher` :1280 | admin column |
-| `aw_press_logo` | card image fallback `core/hub-blocks.php:724` | image `aw_press_image_schema` :1256 | — |
-| `aw_press_date` | card date `core/hub-blocks.php:516`; list sort `core/press.php:342`, hub query `core/hubs.php:217` | `datePublished` :1279 | — |
-| `aw_press_format` | card chip `core/hub-blocks.php:657`; group sync `core/press.php:51` | — | — |
+| `aw_press_url` | press card link `core/hub-blocks.php:432, 596`; permalink filter `core/campaign-tools.php:815` | `url` `seo/schema.php:1279` | dupes check, campaign links by keyword, relevance |
+| `aw_press_publisher` | card source `core/hub-blocks.php:595` | `publisher` :1281 | admin column |
+| `aw_press_logo` | card image fallback `core/hub-blocks.php:727` | image `aw_press_image_schema` :1257 | — |
+| `aw_press_date` | card date `core/hub-blocks.php:516`; list sort `core/press.php:342`, hub query `core/hubs.php:217` | `datePublished` :1280 | — |
+| `aw_press_format` | card chip `core/hub-blocks.php:660`; group sync `core/press.php:51` | — | — |
 | `aw_press_platform`, `aw_press_account` | — | — | admin column `core/press.php:439–442`; sideload naming :94 |
 | `aw_press_thumb_src` | — | — | fetch/ingest bookkeeping only |
 | `aw_press_video` | **none** | — | **never read** (written by fetch :264); 2 rows |
@@ -612,8 +613,8 @@ None. Every key has one box per type: the Place, Issued by, Library item, proven
 
 ### 4.2 Same subject, different keys (overlap, not a key duplicate)
 
-- **aw_campaign partners:** "Partners" `aw_campaign_partners` (Organisations box, CSV) vs Related → "Participating organisations" `aw_participant` (meta rows). Both are read as role "Partner" on the listing's Campaigns block (`core/listing-template.php:515–525`). Also Related → "Organiser" `aw_organiser`. Live: partners stored on 1 campaign (empty value); `aw_participant`, `aw_organiser` 0 rows.
-- **aw_opportunity organisation:** SCF "Organisation" `aw_org_name` (+ "Website" `aw_website`) vs Related → "Organisation" `aw_organisation` (listing link). Schema and display use both (`seo/schema.php:770–777, 941–945`).
+- **aw_campaign partners (settled 1 Nov 2026):** "Partners" `aw_campaign_partners` (Organisations box, CSV) is the one editor; Related no longer offers "Participating organisations" (`aw_participant`). Readers merge both, no repeats (`aw_campaign_partner_ids()`). The campaign organiser is Related → "Organiser", stored as `aw_organisation` (the key opportunities use); older `aw_organiser` rows are read when it is empty. Live: partners stored on 1 campaign (empty value); `aw_participant`, `aw_organiser` 0 rows.
+- **aw_opportunity organisation:** SCF "Organisation" `aw_org_name` (+ "Website" `aw_website`) vs Related → "Organisation" `aw_organisation` (listing link). Schema and display use both (`seo/schema.php:771–778, 942–946`).
 - **aw_listing provenance:** "Where these details come from" (end of Claimed and sources) lists the same per-field sources the SCF fields show as a "Source:" line. Display only.
 - **aw_listing "Claimed":** `aw_verified` / `aw_verified_on` are labelled Claimed / Claimed on and shown as "Claimed on {date}" (`core/bindings.php`); government verification is `aw_gov_verified_on/_by`, shown read-only under "From government records" in the same box.
 - **aw_listing gallery limit:** SCF save keeps 4 photos (`core/scf.php:92`); `aw_sanitize_meta` and the meta description say up to 6 (`core/meta.php:62, 136–138`).
@@ -625,10 +626,10 @@ None. Every key has one box per type: the Place, Issued by, Library item, proven
 - **Slug** on aw_claim, aw_report, aw_message, aw_press: types are not public (no URL); the admin account already hides it on aw_press.
 - **Custom Fields** on block-editor types: off unless enabled; it is the only editor for `aw_campaign_metrics`, `aw_legal_dated`, `aw_file_hi_url`.
 - **Linked from** on aw_legal/aw_listing/post: read-only; mostly "Nothing links here yet." (live: aw_rel_legal 2, aw_rel_resource 1, aw_rel_guide 9, aw_rel_org 0, aw_organisation 15 rows).
-- **Related on aw_campaign:** its three hand rows (aw_rel_org, aw_organiser, aw_participant) have 0 rows on live; only the "Found in the text" ticks hold data (8).
+- **Related on aw_campaign:** its two hand rows (aw_rel_org, aw_organisation as "Organiser") have 0 rows on live (older aw_organiser, aw_participant: 0 rows too); only the "Found in the text" ticks hold data (8).
 - **Related → Listing types (post):** saved to `aw_rel_listing_type`, read only on the tag screen; 0 rows.
 - **SCF read-only fields:** `aw_awbi_code` (listing), `aw_publisher` (news) — shown, never saved. The government-record keys of a listing are shown as text under "From government records" (no fields).
-- **SCF fields never read on the front end or in schema:** `aw_requires_email` (Library), `aw_paid_listing` (Opportunity), `aw_donate_url`, `aw_upi`, `aw_sectors`, `aw_reg_authority`, `aw_reg_act`, `aw_awbi_recognised`, `aw_awbi_renewed` (Listing). Details in §6.
+- **SCF fields never read on the front end or in schema:** `aw_requires_email` (Library), `aw_donate_url`, `aw_upi`, `aw_sectors`, `aw_reg_authority`, `aw_reg_act`, `aw_awbi_recognised`, `aw_awbi_renewed` (Listing). Details in §6.
 - **Coverage → Video embed URL** (`aw_press_video`): never read.
 - Fallback boxes `aw-listing-details` and `aw-sponsored` are not registered while SCF is active (correct; listed for completeness).
 - **Since 1 Nov 2026** LiteSpeed, Link Whisper Suggested Links, Rank Math Link Suggestions, Custom Fields, Slug and Linked from start collapsed on every post edit screen (`core/edit-screens.php`, `aw_edit_screen_collapsed_boxes()`; core `postbox_classes_{screen}_{box}` filter, adds `closed` only, and only while the user has no saved open/closed choice on that screen). Not removed.
@@ -646,8 +647,8 @@ Taxonomies with UI: category, post_tag (public), aw_campaign_link (`show_ui`, no
 |---|---|---|---|---|---|
 | Name, Slug, Parent, Description | term fields | core | core | WordPress | everywhere |
 | Description (Rank Math editor, edit) | core term description | HTML | Rank Math `category_description_editor` replaces the core field | Rank Math | category page description |
-| Photo (add + edit) | term meta `aw_category_image` (attachment ID); fallback option `aw_category_images` kept in step | int | `absint`, must be an image; `manage_categories`; `created_/edited_category` (`core/category-images.php:47–85`) | ours | category page head and News/Library items in the category (`aw_category_image_id` :20–31; `core/media.php:118`; card fallback `core/hub-blocks.php:682`); 18 rows |
-| Find help: listing types (add + edit) | term meta `aw_help_types` (array of post_tag IDs) | array | `absint`, `term_exists`; `manage_categories` (`core/model.php:248–286`) | ours | "Find help" on the category page (`aw_category_help_types` :289); 9 rows |
+| Photo (add + edit) | term meta `aw_category_image` (attachment ID); fallback option `aw_category_images` kept in step | int | `absint`, must be an image; `manage_categories`; `created_/edited_category` (`core/category-images.php:47–85`) | ours | category page head and News/Library items in the category (`aw_category_image_id` :20–31; `core/media.php:118`; card fallback `core/hub-blocks.php:685`); 18 rows |
+| Find help: listing types (add + edit) | term meta `aw_help_types` (array of post_tag IDs) | array | `absint`, `term_exists`; `manage_categories` (`core/model.php:277–315`) | ours | "Find help" on the category page (`aw_category_help_types` :318); 9 rows |
 | Banner image (edit, prio 20) | term meta `aw_banner_image` | attachment ID | `absint`, image check (`core/category-images.php:122–141`) | ours | category banner `aw_category_banner_html` :144ff; 0 rows on live |
 | FAQ (edit) | term meta `aw_faq` (JSON) | JSON | as post FAQ (`seo/faq.php:834–860`) | ours | FAQ block + FAQPage on the category page; 19 rows |
 | Rank Math SEO (edit) | term meta `rank_math_title`, `_description`, `_focus_keyword`, `_robots`, `_breadcrumb_title`, `_facebook_image(_id)`, `_twitter_use_facebook`, `_seo_score` | | Rank Math `save_term_meta` (edit_term) | Rank Math (`tax_category_add_meta_box` on) | `rank_math_breadcrumb_title` read by our breadcrumbs `seo/breadcrumbs.php:30`; title/description filled by `aw_seo_sync_categories` `seo/programmatic.php:661–691` (`_aw_seo_auto` bookkeeping) |
@@ -662,13 +663,13 @@ Category term meta with **no field** on the screen: `aw_category_card` (18, read
 | Name, Slug, Description | term fields | WordPress | |
 | Description (Rank Math editor, edit) | core term description | Rank Math | tag page description |
 | Photo (add + edit) | `aw_category_image` | ours `core/category-images.php:47–64` | tag page head; 0 tag rows on live |
-| Guides linking here (edit, prio 20, listing-type tags only) | read-only (posts with `aw_rel_listing_type`) | ours `core/model.php:291–303` | — |
+| Guides linking here (edit, prio 20, listing-type tags only) | read-only (posts with `aw_rel_listing_type`) | ours `core/model.php:320–332` | — |
 | FAQ (edit) | `aw_faq` | ours | tag FAQ; 19 rows |
 | Rank Math SEO (edit) | `rank_math_title/description/focus_keyword/robots/canonical_url/breadcrumb_title/facebook_image/twitter_use_facebook/seo_score` | Rank Math (`tax_post_tag_add_meta_box` on) | `aw_seo_sync_tags` `seo/programmatic.php:933–960` writes title/description/robots |
 
 ### aw_campaign_link, aw_media_group, link_category, wp_pattern_category
 
-Core fields only (name, slug, description). `aw_campaign_link` terms carry `aw_campaign_page` (2) and `aw_campaign_short` (2) with **no field** on the screen; read by campaign cards `core/hub-blocks.php:622–625` and `core/faq-data.php:1009`.
+Core fields only (name, slug, description). `aw_campaign_link` terms carry `aw_campaign_page` (2) and the short name with **no field** on the screen: term meta `aw_short_name` (0) is read first, then the older `aw_campaign_short` (2); read by campaign cards `core/hub-blocks.php:622–628` and `core/faq-data.php:1009`.
 
 ---
 
@@ -679,7 +680,7 @@ Keys edited in (or registered for) an edit screen with no reader outside the box
 | key | type | edited in | live rows | note |
 |---|---|---|---|---|
 | `aw_requires_email` | aw_legal | SCF Document | 0 | only `core/meta.php:114` |
-| `aw_paid_listing` | aw_opportunity | SCF Opportunity details | 0 | only `core/meta.php:86` |
+| `aw_paid_listing` | aw_opportunity | none (field replaced by Sponsored `aw_sponsored`, 1 Nov 2026) | 0 | only `core/meta.php:86` |
 | `aw_file_hi_url` | aw_legal | none (Custom Fields/REST) | 15 | registered `core/faq-data.php:460`, "no longer edited" |
 | `aw_donate_url` | aw_listing | SCF | 221 | removed from display 31 Oct (`core/listing-template.php:336`) |
 | `aw_upi` | aw_listing | SCF | 18 | same |

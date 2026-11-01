@@ -579,7 +579,8 @@ function aw_court_document_url( $id ) {
  * @return array
  */
 function aw_campaign_schema( $id ) {
-	$org     = (int) get_post_meta( $id, 'aw_organiser', true );
+	$org     = function_exists( 'aw_campaign_organiser' ) ? aw_campaign_organiser( $id ) : (int) get_post_meta( $id, 'aw_organisation', true );
+	$org     = $org ? $org : (int) get_post_meta( $id, 'aw_organiser', true ); // the older key, read when aw_organisation is empty
 	$image   = (string) get_the_post_thumbnail_url( $id, 'large' );
 	$by      = $org && 'publish' === get_post_status( $org ) ? array( '@type' => 'NGO', 'name' => aw_seo_plain( get_the_title( $org ) ), 'url' => get_permalink( $org ) ) : array( '@id' => home_url( '/#organization' ) );
 	$day     = (string) get_post_meta( $id, 'aw_event_date', true );

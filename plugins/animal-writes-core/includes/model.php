@@ -26,15 +26,17 @@ const AW_LEGAL_KINDS = array( 'act' => 'Act', 'rule' => 'Rule', 'order' => 'Orde
 const AW_SERVICES = array( 'rescue' => 'Rescue Work', 'treatment' => 'Treatment and Vet Care', 'shelter' => 'Sheltering', 'adoption' => 'Adoption Service', 'feeding' => 'Feeding', 'sterilisation' => 'Sterilisation (ABC)', 'vaccination' => 'Vaccination', 'ambulance' => 'Ambulance Service', 'boarding-foster' => 'Boarding and Fostering', 'wildlife-rescue' => 'Wildlife Rescue', 'legal-help' => 'Legal Help', 'cattle-care' => 'Cattle Care', 'animal-welfare' => 'Animal Welfare', 'bird-treatment' => 'Bird Treatment', 'emergency-rescue' => 'Emergency Rescue' ); // Animal welfare, Bird treatment: added 20 Oct 2026 for services implied by type; Emergency rescue (the existing type tag, owner 20 Oct 2026)
 
 /**
- * Post-to-post relations: meta key => from types, target post type, label, label on the other side, max links (0 = any).
+ * Post-to-post relations: meta key => from types, target post type, label, label on the other side, max links (0 = any),
+ * labels per from type ( type => [ label, label on the other side ] ), and true for an older key that is only read:
+ * the Related box no longer offers it and saving leaves its rows as they are; "Linked from" still lists them.
  */
 function aw_relations() {
 	return array(
 		'aw_rel_legal'    => array( array( 'aw_news' ), 'aw_legal', 'Legal Watch items in this story', 'News about this', 0 ),
 		'aw_rel_org'      => array( array( 'aw_news', 'aw_legal', 'post', 'aw_press', 'aw_campaign' ), 'aw_listing', 'Organisations featured', 'Featured in', 0 ), // "Featured in" on the organisation's page (featured.php)
-		'aw_organiser'    => array( array( 'aw_campaign' ), 'aw_listing', 'Organiser', 'Campaigns organised', 1 ),
-		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0 ),
-		'aw_organisation' => array( array( 'aw_opportunity' ), 'aw_listing', 'Organisation', 'Opportunities', 1 ),
+		'aw_organiser'    => array( array( 'aw_campaign' ), 'aw_listing', 'Organiser', 'Campaigns organised', 1, array(), true ), // older key: a campaign's organiser is aw_organisation, this is read when that is empty
+		'aw_participant'  => array( array( 'aw_campaign' ), 'aw_listing', 'Participating organisations', 'Campaigns joined', 0, array(), true ), // older key: partners are edited in the Organisations box (aw_campaign_partners); rows here are still read
+		'aw_organisation' => array( array( 'aw_opportunity', 'aw_campaign' ), 'aw_listing', 'Organisation', 'Opportunities', 1, array( 'aw_campaign' => array( 'Organiser', 'Campaigns organised' ) ) ),
 		'aw_rel_resource' => array( array( 'post' ), 'aw_legal', 'Library items (templates, documents)', 'Guides using this', 0 ),
 		'aw_rel_guide'    => array( array( 'post' ), 'post', 'Guides on this (shown at the end of the page)', 'Linked from (research)', 0 ), // e.g. dog-bite studies → the dog-bite guide (owner, 22 Oct 2026)
 	);
@@ -136,6 +138,26 @@ function aw_rel_ids( $post_id, $key ) {
 	return array_values( array_filter( array_map( 'intval', (array) get_post_meta( $post_id, $key, false ) ) ) );
 }
 
+/** A relation's label for a from type: 2 = this side, 3 = the other side. */
+function aw_rel_label( $r, $type, $side = 2 ) {
+	return (string) ( $r[5][ $type ][ 2 === $side ? 0 : 1 ] ?? $r[ $side ] );
+}
+
+/** A campaign's organiser (listing ID, 0 for none): aw_organisation, else the older aw_organiser. */
+function aw_campaign_organiser( $id ) {
+	$org = aw_rel_ids( $id, 'aw_organisation' );
+	if ( ! $org ) {
+		$org = aw_rel_ids( $id, 'aw_organiser' );
+	}
+	return $org ? $org[0] : 0;
+}
+
+/** A campaign's partners (listing IDs, in order, no repeats): the Partners list (aw_campaign_partners), then any older aw_participant rows. */
+function aw_campaign_partner_ids( $id ) {
+	$csv = array_map( 'intval', explode( ',', (string) get_post_meta( $id, 'aw_campaign_partners', true ) ) );
+	return array_values( array_unique( array_filter( array_merge( $csv, aw_rel_ids( $id, 'aw_participant' ) ) ) ) );
+}
+
 /** IDs of items that link to $post_id through $key. */
 function aw_rel_back( $post_id, $key, $types ) {
 	return get_posts( array( 'post_type' => $types, 'post_status' => 'any', 'numberposts' => 100, 'fields' => 'ids', 'meta_key' => $key, 'meta_value' => (string) $post_id ) ); // phpcs:ignore
@@ -145,11 +167,11 @@ function aw_related_box( $post ) {
 	wp_nonce_field( 'aw_model_' . $post->ID, '_aw_model' );
 	echo '<table class="form-table">';
 	foreach ( aw_relations() as $key => $r ) {
-		if ( ! in_array( $post->post_type, $r[0], true ) ) {
+		if ( ! in_array( $post->post_type, $r[0], true ) || ! empty( $r[6] ) ) {
 			continue;
 		}
 		$ids = aw_rel_ids( $post->ID, $key );
-		echo '<tr><th>' . esc_html( $r[2] ) . '</th><td><div class="aw-rel" data-type="' . esc_attr( rest_get_route_for_post_type_items( $r[1] ) ) . '" data-max="' . (int) $r[4] . '">';
+		echo '<tr><th>' . esc_html( aw_rel_label( $r, $post->post_type ) ) . '</th><td><div class="aw-rel" data-type="' . esc_attr( rest_get_route_for_post_type_items( $r[1] ) ) . '" data-max="' . (int) $r[4] . '">';
 		echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( implode( ',', $ids ) ) . '"><ul class="aw-rel-list">';
 		foreach ( $ids as $id ) {
 			echo '<li data-id="' . (int) $id . '">' . esc_html( get_post_field( 'post_title', $id ) ) . ' <a href="#" class="aw-rel-x">Remove</a></li>';
@@ -171,20 +193,27 @@ function aw_related_box( $post ) {
 }
 
 function aw_linked_from_box( $post ) {
-	$any = false;
+	$lines = array(); // label on this side => linking IDs (an older key and its newer one share a line)
 	foreach ( aw_relations() as $key => $r ) {
 		if ( $r[1] !== $post->post_type ) {
 			continue;
 		}
-		$ids = aw_rel_back( $post->ID, $key, $r[0] );
-		if ( ! $ids ) {
-			continue;
+		$groups = empty( $r[5] ) ? array( $r[3] => $r[0] ) : array();
+		foreach ( empty( $r[5] ) ? array() : $r[0] as $type ) {
+			$groups[ aw_rel_label( $r, $type, 3 ) ][] = $type;
 		}
-		$any = true;
-		echo '<p><strong>' . esc_html( $r[3] ) . ':</strong> ';
+		foreach ( $groups as $label => $types ) {
+			$ids = aw_rel_back( $post->ID, $key, $types );
+			if ( $ids ) {
+				$lines[ $label ] = array_values( array_unique( array_merge( $lines[ $label ] ?? array(), $ids ) ) );
+			}
+		}
+	}
+	foreach ( $lines as $label => $ids ) {
+		echo '<p><strong>' . esc_html( $label ) . ':</strong> ';
 		echo implode( ', ', array_map( fn( $id ) => '<a href="' . esc_url( get_edit_post_link( $id ) ) . '">' . esc_html( get_post_field( 'post_title', $id ) ) . '</a>', $ids ) ) . '</p>'; // phpcs:ignore
 	}
-	if ( ! $any ) {
+	if ( ! $lines ) {
 		echo '<p class="description">Nothing links here yet.</p>';
 	}
 }
@@ -196,7 +225,7 @@ add_action(
 			return;
 		}
 		foreach ( aw_relations() as $key => $r ) {
-			if ( ! in_array( $post->post_type, $r[0], true ) || ! isset( $_POST[ $key ] ) ) {
+			if ( ! in_array( $post->post_type, $r[0], true ) || ! empty( $r[6] ) || ! isset( $_POST[ $key ] ) ) { // an older key is never written
 				continue;
 			}
 			$ids = array_values( array_unique( array_filter( array_map( 'absint', explode( ',', sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) ) ) ) );

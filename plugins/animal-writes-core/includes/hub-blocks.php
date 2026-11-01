@@ -622,7 +622,10 @@ function aw_card_campaign( $id ) {
 	$page  = (int) get_term_meta( $t[0]->term_id, 'aw_campaign_page', true );
 	$slug  = $page ? (string) get_post_field( 'post_name', $page ) : '';
 	$look  = defined( 'AW_MAIL_CAMPAIGN_LOOKS' ) ? ( AW_MAIL_CAMPAIGN_LOOKS[ $slug ] ?? null ) : null;
-	$short = (string) get_term_meta( $t[0]->term_id, 'aw_campaign_short', true );
+	$short = (string) get_term_meta( $t[0]->term_id, 'aw_short_name', true );
+	if ( '' === $short ) {
+		$short = (string) get_term_meta( $t[0]->term_id, 'aw_campaign_short', true ); // older key
+	}
 	return array( '' !== $short ? $short : $t[0]->name, $look ? $look[0] : '#141414', '#ffffff' );
 }
 

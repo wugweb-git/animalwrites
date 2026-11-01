@@ -224,9 +224,9 @@
             "placeholder": ""
         },
         {
-            "key": "field_aw_opportunity_paid_listing",
-            "label": "Paid listing",
-            "name": "aw_paid_listing",
+            "key": "field_aw_opportunity_sponsored",
+            "label": "Sponsored",
+            "name": "aw_sponsored",
             "aria-label": "",
             "type": "true_false",
             "instructions": "",
