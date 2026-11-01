@@ -1337,6 +1337,13 @@ main .aw-adopt-soon-band .aw-adopt-soon > h2.wp-block-heading { font-size: var(-
 	.aw-ed-learn .aw-tasks.is-three .kit-card-sum { display: none; }
 }
 @container aw-guides (min-width: 912px) { .aw-ed-learn .aw-tasks.is-three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kit-space-grid); } }
+/* Guides on Home: meta row is the date, read time and the Guide badge (no topic chip); bigger title, a one-line
+   summary, 4:3 pictures in both layouts. */
+.aw-ed-learn .kit-tag--category { display: none; }
+.aw-ed-learn .aw-tasks.is-three .kit-card .kit-card-title { font-size: var(--kit-type-h4) !important; }
+.aw-ed-learn .aw-tasks.is-three .kit-card[class*="kit-card--"] .kit-card-sum .wp-block-post-excerpt__excerpt { -webkit-line-clamp: 1; }
+.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media { aspect-ratio: 4 / 3; }
+.aw-ed-learn .aw-tasks.is-three .kit-card > .kit-card-media img { height: 100%; object-fit: cover; }
 /* Mosaic (What's happening, From the Library on Home): the lead card (block-lg: picture, title, summary; hubs.php picks
    the state by place) and the next three as stacked-md rows (thumbnail and the title clamp of every card, phones
    included). Phones: the lead, then the rows, each at its natural height. From 768: the rows sit one under the other on
