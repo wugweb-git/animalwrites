@@ -8,7 +8,7 @@
  *   tags, aw_sources['topic_tags']) in the edit-tags layout: "Add New Rule" on the left, the list on the right.
  * - Summary rules (&part=summary): the Settings API form of summary-rules-admin.php, one row per section.
  * - Directory enrichment (&part=enrich): the source switches, Google key and cap (enrichment-admin.php), the trust order,
- *   and Field rules: one row per enrichment field and per listing field (the ACF group group_aw_listing), each with
+ *   and Field rules: one row per enrichment field and per listing field (the ACF groups group_aw_listing*), each with
  *   its rule; Edit (&field=<key>) is a form-table screen.
  *
  * Core parts only: WP_List_Table (AW_Sourcing_Sections_Table, AW_Sourcing_Simple_Table), form-table forms posting to

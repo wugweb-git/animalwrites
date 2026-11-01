@@ -107,7 +107,7 @@ function aw_enrich_prov_line( $lid, $field ) {
 	return '<p class="aw-enrich-prov">Source: ' . aw_enrich_sources_html( $p['sources'], $lid ) . ' <span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $p['confidence'] ) . '">' . esc_html( $p['confidence'] ) . '</span> · ' . esc_html( 'approved' === $p['status'] ? 'approved' : 'applied automatically' ) . '</p>';
 }
 
-// SCF fields (Organisation details group): the line under the field.
+// SCF fields (the listing groups): the line under the field.
 add_action(
 	'acf/render_field',
 	function ( $field ) {
@@ -123,11 +123,15 @@ add_action(
 	}
 );
 
-// Every field the worker set, with its source, in one box (also covers the short bio, logo, services and the box without SCF).
+// Every field the worker set, with its source, in one place (also covers the short bio, logo, services): a message
+// field at the end of SCF's "Claimed and sources" group.
 add_action(
-	'add_meta_boxes_aw_listing',
+	'acf/render_field/key=field_aw_listing_msg_provenance',
 	function () {
-		add_meta_box( 'aw-enrich-prov', 'Where these details come from', 'aw_enrich_prov_box', 'aw_listing', 'side', 'default' );
+		$post = get_post();
+		if ( $post && 'aw_listing' === $post->post_type ) {
+			aw_enrich_prov_box( $post );
+		}
 	}
 );
 

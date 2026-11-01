@@ -429,10 +429,30 @@ function aw_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_
 }
 
 /**
- * The Directory schema the workers get with enrich/config: the listing field group's fields (from ACF), the enrichment
+ * The listing's fields across its field groups (one box each on the edit screen): the groups whose key starts with
+ * $prefix, in menu_order (then key), their fields one after another.
+ *
+ * @param array  $groups Field groups (acf_get_field_groups or the local JSON files): key, menu_order, fields.
+ * @param string $prefix Key prefix of the listing groups.
+ * @return array
+ */
+function aw_enrich_listing_groups_fields( array $groups, $prefix ) {
+	$own = array_values( array_filter( $groups, fn( $g ) => is_array( $g ) && 0 === strpos( (string) ( $g['key'] ?? '' ), (string) $prefix ) ) );
+	usort( $own, fn( $a, $b ) => array( (int) ( $a['menu_order'] ?? 0 ), (string) $a['key'] ) <=> array( (int) ( $b['menu_order'] ?? 0 ), (string) $b['key'] ) );
+	$out = array();
+	foreach ( $own as $g ) {
+		foreach ( (array) ( $g['fields'] ?? array() ) as $f ) {
+			$out[] = $f;
+		}
+	}
+	return $out;
+}
+
+/**
+ * The Directory schema the workers get with enrich/config: the listing field groups' fields (from ACF), the enrichment
  * fields kept in special stores, listing types and services.
  *
- * @param array  $acf_fields The group's fields (acf_get_fields or the local JSON): name, label, type, sub_fields.
+ * @param array  $acf_fields The groups' fields (aw_enrich_listing_groups_fields): name, label, type, sub_fields.
  * @param array  $enrich     aw_enrich_fields(): key => [label, store, group].
  * @param string $group      Field group key.
  * @param array  $types      Listing types (tag slugs allowed for aw_listing).

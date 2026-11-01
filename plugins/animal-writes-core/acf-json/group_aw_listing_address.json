@@ -1,0 +1,160 @@
+{
+    "key": "group_aw_listing_address",
+    "title": "Address and place",
+    "fields": [
+        {
+            "key": "field_aw_listing_msg_place",
+            "label": "",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_aw_listing_area",
+            "label": "Area or landmark",
+            "name": "aw_area",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "No full street address. State, district and PIN code are in the Place box.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_address",
+            "label": "Full address",
+            "name": "aw_address",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "As the organisation or a named source publishes it.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "maxlength": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_maps_url",
+            "label": "Google Maps link",
+            "name": "aw_maps_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Share, then Copy link in Google Maps. Without it, Directions shows greyed out.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://"
+        },
+        {
+            "key": "field_aw_listing_lat",
+            "label": "Latitude",
+            "name": "aw_lat",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Decimal degrees from Google Maps, e.g. 28.5797",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_lng",
+            "label": "Longitude",
+            "name": "aw_lng",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "e.g. 77.3167",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_place_id",
+            "label": "Google place ID",
+            "name": "aw_place_id",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}

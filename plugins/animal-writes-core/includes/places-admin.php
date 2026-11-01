@@ -78,6 +78,17 @@ function aw_place_box( $post ) {
 	echo '<p class="description">States and districts: Local Government Directory, ' . esc_html( aw_lgd()['version'] ) . '.</p>';
 }
 
+// On a listing the box is inside SCF's "Address and place" group (a message field); same markup, nonce and save.
+add_action(
+	'acf/render_field/key=field_aw_listing_msg_place',
+	function () {
+		$post = get_post();
+		if ( $post && 'aw_listing' === $post->post_type ) {
+			aw_place_box( $post );
+		}
+	}
+);
+
 /** Save: codes must be in the LGD file, a district inside its state, a PIN 6 digits. Otherwise nothing changes. */
 add_action(
 	'save_post',
