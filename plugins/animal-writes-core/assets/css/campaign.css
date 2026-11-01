@@ -61,8 +61,35 @@
 .aw-camp--diwali .aw-camp-dark .aw-camp-steps span { color: color-mix(in srgb, var(--kit-color-on-ink) 80%, transparent); }
 /* Who to call has two columns: it fits a phone without sideways scrolling */
 .aw-camp--diwali #help { --kit-table-min: 0; }
-/* Supreme Court stray dogs (2026): the default ink hero; its main button in the site's own yellow so it shows on ink. */
-.aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--kit-color-accent); color: var(--kit-color-on-accent); }
+/* Supreme Court stray dogs (2026): deep plum and the site yellow, no black (owner, 1 Nov 2026). Plum on cream 14:1, white on plum 15.6:1. */
+.aw-camp--sc-stray-dogs {
+	--camp-primary: #3a1730;
+	--camp-primary-ink: #ffffff;
+	--camp-accent: #3a1730;
+	--camp-mark: #3a1730;
+	--camp-on-mark: #ffffff;
+	--camp-deep: #3a1730;
+	--camp-dark: #3a1730;
+	--camp-meta: #5c4654;
+	--camp-cream: #fbeee7; /* the photo's own sky, so its edge meets the band with no line */
+	--kit-btn-brand-bg: var(--camp-primary); --kit-btn-brand-fg: var(--camp-primary-ink);
+}
+/* Hero: cream with plum ink; a community dog before the Supreme Court on the right (phones: under the card) */
+.aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero {
+	--camp-mark: var(--camp-cream); --camp-on-mark: var(--camp-primary);
+	background: var(--camp-cream) url("/wp-content/themes/animal-writes/assets/img/campaigns/supreme-court-stray-dog-hero.webp") no-repeat right bottom / auto 62%;
+	padding-bottom: 60vw !important;
+}
+@media (min-width: 782px) { .aw-camp.aw-camp--sc-stray-dogs .aw-camp-hero { background-size: cover; background-position: 70% bottom; padding-bottom: var(--wp--preset--spacing--60) !important; min-height: 640px; } }
+.aw-camp--sc-stray-dogs .aw-camp-hero h1::after { content: ""; display: block; width: min(60%, 18rem); height: 0.35rem; margin-top: var(--kit-space-3); border-radius: 999px; background: var(--kit-color-accent); transform: rotate(-1deg); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .wp-block-button:not(.aw-camp-ghost) .wp-block-button__link { background: var(--camp-primary); color: var(--camp-primary-ink); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link { background: rgb(251 238 231 / 0.85); }
+.aw-camp--sc-stray-dogs .aw-camp-hero .aw-camp-ghost .wp-block-button__link:hover { background: var(--camp-primary); color: var(--camp-primary-ink); }
+/* The fact card: white paper, plum ink, a yellow rule above the date */
+.aw-camp--sc-stray-dogs .aw-camp-poster { background: rgb(255 252 249 / 0.96); box-shadow: 0 1.5rem 3rem -1.5rem rgb(58 23 48 / 0.45); }
+.aw-camp--sc-stray-dogs .aw-camp-poster :is(p, .aw-cd-num, .aw-cd-unit, .aw-cd-when) { color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-camp-stamp { border-color: var(--camp-primary); }
+.aw-camp--sc-stray-dogs .aw-camp-poster .aw-cd-when { border-top-color: var(--kit-color-accent); }
 /* The hero is the primary colour behind its ink, on every campaign; marks inside it use the same pair. */
 .aw-camp .aw-camp-hero { --camp-mark: var(--camp-primary); --camp-on-mark: var(--camp-primary-ink); }
 
