@@ -116,6 +116,13 @@ add_filter(
 			$ctx['about']  = $ctx['url'] . ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) );
 			$ctx['subject'] = $ctx['entity'];
 			$ctx['head']    = function_exists( 'aw_faq_heading' ) ? aw_faq_heading( $ctx['entity'] ) : 'FAQs'; // the site's FAQ head style (aw-seo-extras)
+		} elseif ( $obj instanceof WP_Post && 'post' === $obj->post_type && '' === aw_faq_plain( (string) get_post_meta( $obj->ID, 'aw_faq_subject', true ) ) && aw_faq_is_study( $obj->ID ) ) {
+			$study = aw_faq_study_subject( $obj->ID ); // a research summary's heading names the study its questions name
+			if ( '' !== $study ) {
+				$ctx['subject']         = $study;
+				$ctx['head']            = function_exists( 'aw_faq_heading' ) ? aw_faq_heading( $study ) : 'FAQs';
+				$ctx['subject_missing'] = false;
+			}
 		} elseif ( $obj instanceof WP_Post && 'page' === $obj->post_type && in_array( $obj->post_name, array( 'directory', 'opportunities' ), true ) ) {
 			$ctx['page_id'] = $ctx['url'] . '#page'; // the list pages' CollectionPage (aw_hub_schema_nodes)
 			$ctx['about']   = $ctx['page_id'];
@@ -731,28 +738,331 @@ function aw_faq_study_name( $s ) {
 	return preg_replace_callback( '/\(([^)]+)\)/u', fn( $m ) => '(' . mb_strtoupper( $m[1] ) . ')', implode( ' ', $words ) ); // "(IJLR)" stays an acronym
 }
 
+/** Direction words that start a place or come before one ("North India", "eastern India", "southern Odisha"). */
+const AW_FAQ_STUDY_DIRECTIONS = 'north|south|east|west|central|northern|southern|eastern|western|northeast|north-east|northeastern|north-eastern|northwest|north-west|southeast|south-east|southwest|south-west';
+
+/** Lower-case words after a place that belong to it ("the Ajodhya hills", "Sohagibarwa sanctuary"). */
+const AW_FAQ_STUDY_PLACE_NOUNS = 'hills|sanctuary|reserve|plain|plains|foothills|valley|forest|forests|delta|coast|national park|tiger reserve';
+
+/** Cities a title can name that are not district names ("Bangalore", "Guwahati"). */
+const AW_FAQ_STUDY_CITIES = array( 'Bangalore', 'Bengaluru', 'Guwahati', 'Delhi', 'Kolkata', 'Gurugram', 'Gurgaon', 'Noida' );
+
+/** Title words never used to tell two studies apart (nor are AW_FAQ_STUDY_PLACE_NOUNS): small words, verbs, plain adjectives. */
+const AW_FAQ_STUDY_PLAIN_WORDS = 'a an the and or of in on at to for by with from into over after among around near across about between than that this these those its it is are was were be been has have had do does did can may not no only more most less few many much some all both each every other others own same such very far also still just how what why when where who which whose new old high higher low lower likely large small rare first last one two three four five six seven eight nine ten needs need finds find shows show lift lifts help helps works work rise rises grows grow cuts cut faces face pose poses stays stay brings bring eases ease keep keeps look looks report reports think thinks know knows view views send sends finish finishes take takes dies die raise raises hurts hurt varies vary shapes shape treat treats treated mapped mapping compared tested built found killed turn turns wear wears fall falls feed feeds guide live lives give gives make makes made used using use taught confirmed suspected safe effective lasting solid weakly enforced short unusual silent humane positively fatal fake rural urban since years cases case people india indian revised organised';
+
 /**
- * The study the questions name: "the <focus keyphrase> study", plus its place ("the rabies knowledge study in Lucknow"),
- * the district when it has one. '' without a focus keyphrase.
+ * The parts of a study's name, from its title, focus keyphrase, summary and the places the summary names (aw_entities
+ * 'places'): the topic (the keyphrase, with the capitals the title or summary gives its words: "cowpox in Sahiwal
+ * cattle"), the place and its preposition, and whether the study covers India as a whole. The place is the one the
+ * title names, whole ("West Bengal", "North India", "Jammu and Kashmir", "the Eastern Ghats"); a title that names only
+ * India gets none; a title that names no place takes the summary's place when there is only one. Null without a
+ * keyphrase.
+ *
+ * @param string $title   Post title, plain.
+ * @param string $kw      Focus keyphrase (the first, when there are several).
+ * @param string $excerpt Summary, plain.
+ * @param array  $places  aw_entities 'places': [ name, state, district ].
+ * @param array  $gazette State and district names as keys (aw_lgd()): a run of capitals in the title that is one is a place.
+ * @return array|null [ topic, place, prep (in, at, around, near), india, title ]
  */
-function aw_faq_study_subject( $id ) {
-	$kw = trim( explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) )[0] );
+function aw_faq_study_parts( $title, $kw, $excerpt, array $places, array $gazette = array() ) {
+	$kw = trim( (string) preg_replace( '/\s+stud(y|ies)$/iu', '', trim( explode( ',', (string) $kw )[0] ) ) );
 	if ( '' === $kw ) {
-		return '';
+		return null;
 	}
-	$ent   = json_decode( (string) get_post_meta( $id, 'aw_entities', true ), true );
-	$title = aw_faq_plain( get_the_title( $id ) );
-	$best  = array( -1, '' ); // the place the title names, else the first district, else the first state
-	foreach ( (array) ( $ent['places'] ?? array() ) as $p ) {
-		$name  = aw_faq_plain( $p['name'] ?? '' );
-		$score = '' === $name ? -1 : ( false !== mb_stripos( $title, $name ) ? 2 : 0 ) + ( empty( $p['district'] ) ? 0 : 1 );
-		if ( $score > $best[0] ) {
-			$best = array( $score, $name );
+	$title = (string) $title;
+	$words = preg_split( '/\s+/u', mb_strtolower( $kw ) );
+	foreach ( $words as $i => $w ) { // each word as the title writes it mid-sentence, else as the summary always does; lower case when either has it so
+		$q    = '/(?<![\p{L}\p{N}])' . preg_quote( $w, '/' ) . '(?![\p{L}\p{N}])/iu';
+		$caps = array( array(), array() );
+		foreach ( array( $title, (string) $excerpt ) as $n => $text ) {
+			preg_match_all( $q, $text, $m, PREG_OFFSET_CAPTURE );
+			foreach ( $m[0] as $hit ) {
+				$start = 0 === $hit[1] || preg_match( '/[.!?:“"‘\'(]\s*$/u', substr( $text, 0, $hit[1] ) ); // a sentence's or a quoted title's first word has a capital anyway
+				if ( $hit[0] === $w && ! $start ) {
+					continue 3;
+				}
+				$named = $n && ( preg_match( '/\p{Lu}[\p{L}]*[\s\-–]+$/u', substr( $text, 0, $hit[1] ) ) || preg_match( '/^[\s\-–]+\p{Lu}/u', substr( $text, $hit[1] + strlen( $hit[0] ) ) ) ); // the summary's "National Action Plan for Rabies Elimination", "Human–Elephant Conflict": a name's capitals, not the word's
+				if ( $hit[0] !== $w && ! $named && ( ! $start || preg_match( '/^\p{Lu}{2,}$/u', $hit[0] ) ) ) {
+					$caps[ $n ][] = $hit[0];
+				}
+			}
+		}
+		$words[ $i ] = $caps[0][0] ?? ( $caps[1][0] ?? $w );
+	}
+	$topic = implode( ' ', $words );
+	$lower = array_map( 'mb_strtolower', $words );
+
+	$names = array(); // the summary's places, by name
+	foreach ( $places as $p ) {
+		$name = trim( (string) ( $p['name'] ?? '' ) );
+		if ( '' !== $name ) {
+			$names[ $name ] = array( (int) ( $p['state'] ?? 0 ), (int) ( $p['district'] ?? 0 ) );
 		}
 	}
-	$place = $best[1];
-	$kw = preg_replace( '/\s+stud(y|ies)$/iu', '', $kw );
-	return 'the ' . $kw . ' study' . ( '' !== $place && false === mb_stripos( $kw, $place ) ? ' in ' . $place : '' );
+	$known = array_merge( array_keys( $names ), AW_FAQ_STUDY_CITIES );
+	$dirs  = AW_FAQ_STUDY_DIRECTIONS;
+	$is    = fn( $s ) => (bool) array_filter( $known, fn( $k ) => preg_match( '/(?<![\p{L}])' . preg_quote( $k, '/' ) . '(?![\p{L}])/u', $s ) ) || ( isset( $gazette[ $s ] ) && ! preg_match( '/^(?:' . $dirs . ')(?:\s+(?:' . $dirs . '))?$/iu', $s ) );
+	$india = false;
+	$found = array(); // [ place, prep, after a preposition ]
+	preg_match_all( '/(?<![\p{L}\p{N}’\'])\p{Lu}[\p{L}\-]*(?:\s+(?:and\s+)?\p{Lu}[\p{L}\-]*)*/u', $title, $runs, PREG_OFFSET_CAPTURE );
+	foreach ( $runs[0] as $r ) {
+		list( $run, $at ) = $r;
+		if ( 0 === $at ) { // the title's first word has a capital anyway: a place only when it is one
+			$first = (string) strtok( $run, ' ' );
+			if ( ! $is( $first ) && ! preg_match( '/^\p{Lu}{2,}$/u', $first ) ) {
+				$rest = (string) preg_replace( '/^\S+\s+(?:and\s+)?/u', '', $run, 1 );
+				if ( $rest === $run ) {
+					continue;
+				}
+				$at  += strlen( $run ) - strlen( $rest );
+				$run  = $rest;
+			}
+		}
+		if ( array_intersect( array_map( 'mb_strtolower', preg_split( '/\s+/u', $run ) ), $lower ) ) {
+			continue; // part of the topic ("Sahiwal cattle", "large Indian civet")
+		}
+		$before = substr( $title, 0, $at );
+		$after  = substr( $title, $at + strlen( $run ) );
+		$prep   = preg_match( '/(?:^|\s)(in|at|around|near|across|from)\s+(?:(the)\s+|(a|an)\s+)?(?:(?:rural|urban)\s+)?(?:(?:' . $dirs . ')\s+)?$/iu', $before, $pm ) ? $pm : null;
+		$dir    = preg_match( '/(?:^|\s)(' . $dirs . ')\s+$/iu', $before, $dm ) ? $dm[1] . ' ' : '';
+		$noun   = preg_match( '/^\s+(' . AW_FAQ_STUDY_PLACE_NOUNS . ')(?![\p{L}])/u', $after, $nm ) ? ' ' . $nm[1] : '';
+		if ( preg_match( '/^(India|Indian)$/u', $run ) ) {
+			if ( '' === $dir ) {
+				$india = true;
+				continue;
+			}
+			$run = 'India'; // a region: "central India"
+		} elseif ( ( ! $prep && '' === $noun && ! $is( $run ) ) || preg_match( '/^(?:' . $dirs . ')(?:\s+(?:' . $dirs . '))?$/iu', $run ) || ( ! $is( $run ) && preg_match( '/^[\p{Lu}\s]+$|(?<![\p{L}])(?:Rules?|Acts?|Court|Tribunal|Board|Committee|Ministry|Department|Council|Commission|Society|Trust|Foundation|Organi[sz]ation|Plan|Programme|Mission)(?![\p{L}])/u', $run ) ) ) {
+			continue; // a capital that names no place ("TwinRab", "the National Green Tribunal", "ABC Rules", "WHO")
+		}
+		$word    = $prep && in_array( mb_strtolower( $pm[1] ), array( 'at', 'around', 'near' ), true ) && empty( $pm[3] ) ? mb_strtolower( $pm[1] ) : 'in'; // "at KIMS Bangalore", "near Valmiki reserve"; "at a … gaushala" → "in"
+		$found[] = array( ( $prep && ! empty( $pm[2] ) ? 'the ' : '' ) . $dir . $run . $noun, $word, (bool) $prep );
+	}
+	$india = $india || preg_match( '/(?<![\p{L}])Indian?(?![\p{L}])/u', (string) preg_replace( '/(?<![\p{L}])' . preg_quote( $topic, '/' ) . '(?![\p{L}])/iu', '', $title ) ); // "India" as the title's first word, "five Indian states"; not "large Indian civet"
+	usort( $found, fn( $a, $b ) => (int) $b[2] - (int) $a[2] ); // one after "in", "at" … first; usort keeps the title's order otherwise
+	list( $place, $prep ) = $found ? $found[0] : array( '', 'in' );
+
+	if ( '' === $place && ! $india ) { // the title names no place: the summary's, when it names one
+		$keep = array();
+		foreach ( $names as $name => $codes ) {
+			$inside = array_filter( array_keys( $names ), fn( $o ) => $o !== $name && preg_match( '/(?<![\p{L}])' . preg_quote( $name, '/' ) . '(?![\p{L}])/u', $o ) );
+			if ( ! $inside && ! preg_match( '/^(?:' . $dirs . ')(?:\s+(?:' . $dirs . '))?$/iu', $name ) ) { // not "West" (in "West Bengal"), not a direction alone
+				$keep[ $name ] = $codes;
+			}
+		}
+		$districts = array_filter( $keep, fn( $c ) => $c[1] > 0 );
+		if ( 1 === count( $keep ) ) {
+			$place = (string) array_key_first( $keep );
+		} elseif ( 1 === count( $districts ) && count( array_unique( array_column( $keep, 0 ) ) ) === 1 ) { // a district and its own state
+			$place = (string) array_key_first( $districts );
+		}
+	}
+	if ( '' !== $place && ( preg_match( '/(?<![\p{L}])' . preg_quote( (string) preg_replace( '/^the\s+/u', '', $place ), '/' ) . '(?![\p{L}])/iu', $topic ) || preg_match( '/\bin\s+\p{Lu}[\p{L}\-]*$/u', $topic ) ) ) {
+		$place = ''; // the topic names it already ("leopards in Gautala")
+	}
+	$prep = '' === $place ? 'in' : $prep;
+	if ( mb_strlen( 'the ' . $topic . ' study ' . $prep . ' ' . $place ) > 60 ) { // short: "around Sohagibarwa", not "around Sohagibarwa sanctuary"
+		$place = (string) preg_replace( '/\s+(?:' . AW_FAQ_STUDY_PLACE_NOUNS . ')$/u', '', $place );
+	}
+	return array( 'topic' => $topic, 'place' => $place, 'prep' => $prep, 'india' => (bool) $india, 'title' => $title );
+}
+
+/**
+ * One phrase per study ("the dog bites study in Bidar"), each different from the others where it can be: studies that
+ * would share one get "in India" (when only one of them covers India), else a word from the title that the others'
+ * titles do not have ("the human elephant conflict hotspots study in Assam").
+ *
+ * @param array $rows ID => aw_faq_study_parts().
+ * @return array ID => phrase
+ */
+function aw_faq_study_phrases( array $rows ) {
+	$plain = array_flip( explode( ' ', AW_FAQ_STUDY_PLAIN_WORDS ) );
+	$name  = fn( $r, $extra = '' ) => 'the ' . $r['topic'] . ( '' !== $extra ? ' ' . $extra : '' ) . ' study' . ( '' !== $r['place'] ? ' ' . $r['prep'] . ' ' . $r['place'] : '' );
+	$out   = array_map( $name, $rows );
+	$same  = function () use ( &$out ) {
+		$groups = array();
+		foreach ( $out as $id => $p ) {
+			$groups[ mb_strtolower( $p ) ][] = $id;
+		}
+		return array_filter( $groups, fn( $g ) => count( $g ) > 1 );
+	};
+	foreach ( $same() as $ids ) { // one study of India among studies with no place
+		$wide = array_values( array_filter( $ids, fn( $id ) => '' === $rows[ $id ]['place'] && $rows[ $id ]['india'] ) );
+		if ( 1 === count( $wide ) ) {
+			$rows[ $wide[0] ]['place'] = 'India';
+			$out[ $wide[0] ]           = $name( $rows[ $wide[0] ] );
+		}
+	}
+	$tokens = fn( $s ) => preg_match_all( '/[\p{L}\p{N}][\p{L}\p{N}\-]*/u', (string) $s, $m, PREG_OFFSET_CAPTURE ) ? $m[0] : array();
+	foreach ( $same() as $ids ) {
+		$seen = array(); // word => how many of these titles have it
+		foreach ( $ids as $id ) {
+			foreach ( array_unique( array_map( fn( $t ) => mb_strtolower( $t[0] ), $tokens( $rows[ $id ]['title'] ) ) ) as $w ) {
+				$seen[ $w ] = ( $seen[ $w ] ?? 0 ) + 1;
+			}
+		}
+		foreach ( $ids as $id ) {
+			$r    = $rows[ $id ];
+			$skip = preg_split( '/\s+/u', mb_strtolower( $r['topic'] . ' ' . $r['place'] ) );
+			$toks = $tokens( $r['title'] );
+			$fit  = array(); // token index => score: 3 a name ("Brahmaputra"), 2 a noun by its ending ("hotspots"), 1 any other word
+			foreach ( $toks as $k => $t ) {
+				list( $w, $at ) = $t;
+				$low            = mb_strtolower( $w );
+				if ( isset( $plain[ $low ] ) || 1 !== ( $seen[ $low ] ?? 0 ) || mb_strlen( $w ) < 4 || preg_match( '/\d/u', $w ) || preg_match( '/^(?:' . AW_FAQ_STUDY_PLACE_NOUNS . ')$/u', $low ) ) {
+					continue;
+				}
+				foreach ( $skip as $sk ) {
+					if ( '' !== $sk && mb_substr( $sk, 0, 5 ) === mb_substr( $low, 0, 5 ) ) {
+						continue 2; // the topic's or place's own word ("eliminating" beside "elimination")
+					}
+				}
+				$fit[ $k ] = preg_match( '/^\p{Lu}/u', $w ) && ( $at > 0 || preg_match( '/^\p{Lu}{2,}$/u', $w ) ) ? 3 : ( preg_match( '/(?:[^s]s|tion|ment|ing|ness|ity|ure|ogy|ance|ence|ism)$/u', $low ) ? 2 : 1 );
+			}
+			$best = array( 0, '' );
+			if ( $fit ) {
+				$k    = array_search( max( $fit ), $fit, true );
+				$pick = array( $k );
+				if ( 3 === $fit[ $k ] ) { // a name, whole: "National Green Tribunal"
+					for ( $j = $k + 1; isset( $toks[ $j ] ) && preg_match( '/^\p{Lu}/u', $toks[ $j ][0] ) && preg_match( '/^\s+$/u', substr( $r['title'], $toks[ $j - 1 ][1] + strlen( $toks[ $j - 1 ][0] ), $toks[ $j ][1] - $toks[ $j - 1 ][1] - strlen( $toks[ $j - 1 ][0] ) ) ); $j++ ) {
+						$pick[] = $j;
+					}
+				} elseif ( isset( $fit[ $k - 1 ] ) && 1 === $fit[ $k - 1 ] ) { // with the word before it: "legal gaps", "bounty hunting"
+					array_unshift( $pick, $k - 1 );
+				}
+				$words = array_map( fn( $j ) => 3 === $fit[ $k ] || ( $toks[ $j ][1] > 0 && preg_match( '/^\p{Lu}/u', $toks[ $j ][0] ) ) ? $toks[ $j ][0] : mb_strtolower( $toks[ $j ][0] ), $pick );
+				$best  = array( max( $fit ), implode( ' ', $words ) );
+				if ( count( $pick ) > 1 && mb_strlen( $name( $r, $best[1] ) ) > 60 ) {
+					$best[1] = 3 === $fit[ $k ] ? $words[0] : end( $words ); // too long with both: the one word
+				}
+			}
+			if ( '' !== $best[1] ) {
+				$out[ $id ] = $name( $r, $best[1] );
+			}
+		}
+	}
+	return $out;
+}
+
+/** State and district names (aw_lgd()) as keys, for aw_faq_study_parts(). */
+function aw_faq_study_gazette() {
+	static $g = null;
+	if ( null === $g ) {
+		$g   = array();
+		$lgd = function_exists( 'aw_lgd' ) ? aw_lgd() : array();
+		foreach ( array_merge( (array) ( $lgd['states'] ?? array() ), (array) ( $lgd['districts'] ?? array() ) ) as $p ) {
+			$g[ (string) $p->name ] = true;
+		}
+	}
+	return $g;
+}
+
+/** A research summary's name parts (aw_faq_study_parts()) from its fields, or null. */
+function aw_faq_study_row( $id ) {
+	$ent = json_decode( (string) get_post_meta( $id, 'aw_entities', true ), true );
+	return aw_faq_study_parts( aw_faq_plain( get_the_title( $id ) ), (string) get_post_meta( $id, 'rank_math_focus_keyword', true ), aw_faq_plain( get_post_field( 'post_excerpt', $id ) ), (array) ( $ent['places'] ?? array() ), aw_faq_study_gazette() );
+}
+
+/**
+ * Every published research summary's name parts and phrase: [ rows => ID => aw_faq_study_parts(), phrases => ID =>
+ * phrase ], kept for a day (transient aw_faq_study_subjects) and built again after a research summary changes.
+ *
+ * @param bool $flush Drop the list (after a change).
+ * @return array
+ */
+function aw_faq_study_data( $flush = false ) {
+	static $data = null;
+	if ( $flush ) {
+		$data = null;
+		delete_transient( 'aw_faq_study_subjects' );
+		return array();
+	}
+	if ( is_array( $data ) ) {
+		return $data;
+	}
+	$data = get_transient( 'aw_faq_study_subjects' );
+	if ( ! is_array( $data ) || ! isset( $data['rows'], $data['phrases'] ) ) {
+		$rows = array();
+		foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'tag' => 'research', 'numberposts' => -1 ) ) as $p ) { // posts and their meta in two queries
+			$r = aw_faq_study_row( $p->ID );
+			if ( $r ) {
+				$rows[ (int) $p->ID ] = $r;
+			}
+		}
+		$data = array( 'rows' => $rows, 'phrases' => aw_faq_study_phrases( $rows ) );
+		set_transient( 'aw_faq_study_subjects', $data, DAY_IN_SECONDS );
+	}
+	return $data;
+}
+
+/** Whether a change to a post can change the study phrases: a research summary, or one in the list now. */
+function aw_faq_study_touches( $post_id ) {
+	return 'post' === get_post_type( $post_id ) && ( has_term( 'research', 'post_tag', $post_id ) || false !== get_transient( 'aw_faq_study_subjects' ) && isset( aw_faq_study_data()['rows'][ (int) $post_id ] ) );
+}
+
+// A new phrase list after a research summary's title, summary, tags, keyphrase or places change.
+add_action(
+	'wp_after_insert_post',
+	function ( $post_id, $post ) {
+		if ( 'post' === $post->post_type && aw_faq_study_touches( $post_id ) ) {
+			aw_faq_study_data( true );
+		}
+	},
+	30, // after aw_entities is stored (priority 20)
+	2
+);
+add_action(
+	'set_object_terms',
+	function ( $post_id, $terms, $tt_ids, $taxonomy ) {
+		if ( 'post_tag' === $taxonomy && 'post' === get_post_type( $post_id ) ) {
+			aw_faq_study_data( true );
+		}
+	},
+	10,
+	4
+);
+add_action(
+	'deleted_post',
+	function ( $post_id, $post = null ) {
+		if ( $post instanceof WP_Post && 'post' === $post->post_type ) {
+			aw_faq_study_data( true );
+		}
+	},
+	10,
+	2
+);
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_faq_hook ) {
+	add_action(
+		$aw_faq_hook,
+		function ( $meta_id, $post_id, $key ) {
+			if ( in_array( $key, array( 'rank_math_focus_keyword', 'aw_entities' ), true ) && aw_faq_study_touches( $post_id ) ) {
+				aw_faq_study_data( true );
+			}
+		},
+		10,
+		3
+	);
+}
+unset( $aw_faq_hook );
+
+/**
+ * The study the questions name and its FAQ heading's subject: "the <focus keyphrase> study" with its place, different
+ * from every other study's where it can be ("the rabies knowledge study in Lucknow", "the elephant alerts study in West
+ * Bengal"). '' without a focus keyphrase. A study not yet published is named against the published ones.
+ */
+function aw_faq_study_subject( $id ) {
+	static $drafts = array();
+	$id   = (int) $id;
+	$data = aw_faq_study_data();
+	if ( isset( $data['phrases'][ $id ] ) ) {
+		return $data['phrases'][ $id ];
+	}
+	if ( ! isset( $drafts[ $id ] ) ) {
+		$own           = aw_faq_study_row( $id );
+		$drafts[ $id ] = $own ? (string) aw_faq_study_phrases( $data['rows'] + array( $id => $own ) )[ $id ] : '';
+	}
+	return $drafts[ $id ];
 }
 
 /** A research summary's question: the template with the study's name. */

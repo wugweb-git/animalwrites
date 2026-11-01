@@ -1028,7 +1028,7 @@ add_action(
 						echo '—';
 						return;
 					}
-					echo esc_html( ! empty( $ctx['subject_missing'] ) ? 'Missing: uses the title' : aw_faq_subject( $post )[0] );
+					echo esc_html( ! empty( $ctx['subject_missing'] ) ? 'Missing: uses the title' : $ctx['subject'] ); // the subject the heading uses (after the aw_faq_context filters)
 				},
 				10,
 				2
