@@ -154,7 +154,7 @@ $cover = array(
 	'url'             => wp_get_attachment_image_url( DW_PHOTO, 'full' ),
 	'id'              => DW_PHOTO,
 	'alt'             => get_post_meta( DW_PHOTO, '_wp_attachment_image_alt', true ),
-	'dimRatio'        => 30,
+	'dimRatio'        => 50,
 	'overlayColor'    => 'foreground',
 	'isUserOverlayColor' => true,
 	'focalPoint'      => array( 'x' => 0.7, 'y' => 0.6 ),
@@ -174,7 +174,7 @@ foreach ( array( array( 'home', 'Keep pets indoors' ), array( 'paw', 'Keep water
 $tips .= '</ul>' . "\n" . '<!-- /wp:list -->' . "\n\n";
 $hero = '<!-- wp:cover ' . wp_json_encode( $cover, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . ' -->' . "\n"
 	. '<div id="top" class="wp-block-cover alignfull is-dark has-custom-content-position is-position-center-left kit-hero aw-camp-hero aw-camp-open" style="padding-right:var(--wp--style--root--padding-right);padding-left:var(--wp--style--root--padding-left);min-height:660px">'
-	. '<span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-30 has-background-dim"></span>'
+	. '<span aria-hidden="true" class="wp-block-cover__background has-foreground-background-color has-background-dim-50 has-background-dim"></span>'
 	. '<img class="wp-block-cover__image-background wp-image-' . DW_PHOTO . '" alt="' . esc_attr( $cover['alt'] ) . '" src="' . esc_url( $cover['url'] ) . '" style="object-position:70% 60%" data-object-fit="cover" data-object-position="70% 60%"/>'
 	. '<div class="wp-block-cover__inner-container">'
 	. '<!-- wp:group {"layout":{"type":"constrained","contentSize":"560px","justifyContent":"left"}} -->' . "\n" . '<div class="wp-block-group">'
