@@ -72,7 +72,7 @@ Owner, 25 Oct — not to be raised until their dates: the Lab rules Post phase (
 - **Links reminder:** Animal Writes → Dates has the monthly "Search Console Links read" reminder on the 1st of each month, Nov 2026–Oct 2027; add more before 1 Nov 2027. Each read: `wp aw-si links add` (the source stays "Search Console Links"; the read date is --seen).
 
 ### Sourcing
-- **GDELT rate limit (31 Oct):** GDELT answered 429 to the server too at ~12:00 UTC 31 Oct ("one request every 5 seconds"), so Search Insights may still fail and email; if it keeps failing, decide whether to take GDELT out of the daily sources.
+- **GDELT rate limit (31 Oct; 1 Nov):** GDELT answers 429 to the workers and the site alike. 1 Nov: off by default (Search Insights → Settings → News (GDELT)); while off it is not stored, not late and not failing. **Workers suggestion (repo out of scope):** a Google News RSS (hl=en-IN) count per Rising topic in place of GDELT, and an autocomplete fallback (the 26 Oct autocomplete run was a baseline: 28 asked, 0 rows by design; weekly, next 2 Nov).
 - **OpenStreetMap in enrichment (31 Oct):** switched off in the enrichment sources; the owner decides whether it comes back. The off-site backup copy stays off: backups are UpdraftPlus's job (owner, 31 Oct).
 
 ### Decisions waiting on the owner (recommendation in brackets)
@@ -151,7 +151,10 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 
 - **5 Nov 2026**: lab rules objections close (campaign 13848).
 - **7 Nov 2026**: owner decides the lab rules Post phase. Until then no closed-state or Post content, and no FAQ visibility changes, on 13848.
+- **12 Nov 2026**: cause-list check for 17 Nov (Supreme Court stray-dog case).
 - **17 Nov 2026**: Directory thin-page indexing re-check (10:00) and the 8 tracked keyword positions (11:00); both are scheduled tasks.
+- **17 Nov 2026**: Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment). Was titled "compliance hearing".
+- **25 Nov 2026**: Search Insights thresholds review (Wikipedia 2×, GDELT 3×).
 
 ## Notes to keep
 - **FluentCRM: everyone on the Newsletter list (owner, 31 Oct 2026):** Contact, Volunteer sign-up and Claim senders are all on the Newsletter list; "Email me updates" is only recorded as 1/0; no form changes a contact's status (owner, 1 Nov 2026). Remove my data never reaches FluentCRM; the Campaign form is unchanged. No automations on live; any future FluentCRM automation or campaign must target subscribed contacts only.
@@ -159,6 +162,17 @@ These live in WordPress: **Animal Writes → Dates** (month calendar, add and re
 - **Search Console (22 to 24 Oct).** Validation started for the 2 sitemap redirects, the 1 sitemap canonical, Events and the 26 district × type pages that were noindex on 9–10 Oct. Intended, do not re-validate: redirect 15, canonical 14, 404 2, duplicate 1. Job Postings warnings stay (Decided: never).
 - **404 and error tracking (31 Oct):** the 404 page answers with status 404 and sends `404_view` with the path; form errors are tracked as `form_error`; 500 and 503 cannot be tracked in GA4, so they are covered by the branded error pages and the daily count of PHP fatal errors.
 - **Rollback:** a rollback to a release older than 24 Oct must be purged by hand (rollback.yml warns); newer releases are purged by `deploy-purge.php`.
+
+## Done (1 Nov 2026, technical)
+- **Footer folds on phones:** closed by an inline script before the first paint (no jump when kit.js runs). /about/ measured CLS 0 at 360, 375 and 412px in the browser; Site Kit's lab 0.105 is unexplained (footer is below the first screen), recheck the next PageSpeed rows.
+- **CDN lifetime:** clamp 60–3600 s; listings, Library items and Resources 3600 s with stale-while-revalidate=600 (option aw_cdn_ttl_long); everything else, campaigns included, keeps aw_cdn_ttl (300). Overview now shows the real lifetime (it read "off" in wp-admin). hPanel proposal: `docs/cdn.md`.
+- **Keyphrase ownership guard (T11):** /aw/v1/seo-focus refuses a keyphrase another published page or term has, or whose keyword record another page owns; News never takes an evergreen page's phrase; `dry: true` counts only. Replay over today's 129 conflicts (read-only): 124 would have been prevented, 314 writes refused (about 221 of them News items); 5 are conflicts only because Google shows a page that does not own the phrase. `wp aw-si keyphrase-guard --list`. Hand edits in the editor are not guarded.
+- **Modified dates (T37):** the 281 posts saved on 1 Nov 14:00–15:00 IST were real edits made in wp-admin: titles and excerpts rewritten (each has a revision; e.g. "Application Fess" → "Fees", study titles reworded) and 280 Rank Math titles and descriptions written. Their "modified 1 Nov" is true; nothing re-stamped. From now on technical saves keep the date: `aw_keep_modified()` in PHP, `?aw_keep_modified=1` or header `X-AW-Keep-Modified: 1` on REST updates (FAQ block conversions and the News letter-case fix use it).
+- **Search Insights sources (T16):** GDELT off by default; a run's info says baseline, no rows or source failed; the Keywords list shows "source failed" for Trends while Trends refuses; the 22 Oct seed counts as the Live Google check's run (133 results); Settings → Bing searches counts and adds keyword records for Bing searches without one; stored quick_win flag (keyword table version 3) behind the Quick wins view and box.
+- **Dates (T18):** 17 Nov retitled, 12 Nov cause-list check, 25 Nov thresholds review (once, flag aw_team_dates_1101b).
+- **Schema (T29/T44):** a News item's WebPage carries the NewsArticle's dates (story date, not the hour it was published here). Already right: Library acts, rules and notifications are Legislation with legislationIdentifier (14 of 14); district ItemList numberOfItems is the real total (Mumbai 94); listing phones E.164 (other session, 69d32683). IndexNow (T50): Rank Math Instant Indexing on, key set, key file answers 200; nothing to change.
+- **FAQ subjects:** the "North" place and "large indian civet" capitals were already right on live (the 1 Nov titles); `wp aw-faq check` now warns for every page and guide whose heading falls back to its title.
+- **Reading cadence (T52):** `docs/seo/monitoring-cadence.md`.
 
 ## Done (1 Nov 2026)
 - **Ladakh state cruelty page: Board line (owner, 1 Nov 2026, live):** /resources/animal-cruelty-complaint-ladakh/ (20475). The heading "Ladakh Animal Welfare Board / animal husbandry department" became "Animal husbandry department in Ladakh", with a first line "State Animal Welfare Board: "Not Yet constituted"" linking AWBI's list of State Animal Welfare Boards (Sep 2022). Old text kept as revision 22607. Checked live: 200, index, self-canonical, in the sitemap.
