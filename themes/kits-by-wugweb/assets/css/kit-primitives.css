@@ -420,7 +420,7 @@ a:where(.kit-btn, .wp-block-button__link, .wp-element-button)[aria-disabled=true
 
 /* ---------- 13. Form status ---------- */
 .kit-form-status:empty { display: none; }
-.kit-form-status { margin: 0 0 var(--s-4); padding: var(--s-3) var(--s-4); border-radius: var(--kit-radius-control); border-left: var(--s-1) solid var(--kit-color-danger); background: var(--kit-color-danger-soft); color: var(--kit-color-ink); }
+.kit-form-status { margin: 0 0 var(--s-4); padding: var(--kit-space-5); border-radius: var(--kit-radius-control); border-left: var(--s-1) solid var(--kit-color-danger); background: var(--kit-color-danger-soft); color: var(--kit-color-ink); }
 .kit-form-status.is-success { border-left-color: var(--kit-color-success); background: var(--kit-color-success-soft); }
 
 /* ---------- 14. Banner (pattern kits-by-wugweb/banner): 16:5 wide, 4:3 on phones ---------- */

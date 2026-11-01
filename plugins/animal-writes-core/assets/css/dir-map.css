@@ -1,6 +1,6 @@
 /* Directory: List / Map switch, Near me and the map (directory-map.php, dir-map.js). */
 .aw-dir-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); width: 100%; margin-top: var(--s-2, .5rem); }
-.aw-near { box-sizing: border-box; width: 100%; max-width: var(--kit-width-content); margin: var(--s-3, .75rem) 0; padding: var(--s-4, 1rem); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); }
+.aw-near { box-sizing: border-box; width: 100%; max-width: var(--kit-width-content); margin: var(--s-3, .75rem) 0; padding: var(--kit-space-5); background: var(--kit-color-raised); border: 1px solid var(--kit-color-line); border-radius: var(--radius-md, 8px); }
 .aw-near-form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2, .5rem); }
 .aw-near-or { color: var(--kit-color-muted); }
 .aw-near-pin { width: 8.5em; }

@@ -9,7 +9,12 @@ This check fails on a NEW rule in our CSS (themes/, plugins/*/assets/, not vendo
   height  sets a fixed height or min-height of 200px, 12.5rem/em or 20vh (or svh/dvh/lvh) or more;
   imp     sets padding / padding-block / padding-top / padding-bottom with !important on a section-level selector
           (.kit-section, .alignfull, section, .aw-camp-section, .kit-section-band, .kit-hero), unless the value is the
-          theme's own section padding (var(--kit-space-section) or var(--kit-section-y)).
+          theme's own section padding (var(--kit-space-section) or var(--kit-section-y));
+  pad     sets padding (or padding-top/right/bottom/left/block/inline) on a card or block (BLOCKS below, the selector's
+          last part) to under 24px on any side: the card padding is var(--kit-space-5) on every side at every width
+          (owner, 2 Nov 2026; docs/card-sizes.md). var(--kit-space-1..4), var(--s-1..4), the gutter/head/grid tokens,
+          numbers under 24px (1rem = 16px) and 0 are under; var(--kit-space-5..9) and --kit-space-section are fine.
+          A child reset to 0 inside a padded box (.kit-card-body in a padded stacked card) is listed in the baseline.
 
 Rules that existed on 2 Nov 2026 are listed in tools/ci/theme_rules_baseline.txt and still pass; remove a line there
 when its rule is fixed. A new exception needs the owner's word and a line in the baseline with the reason.
@@ -28,6 +33,21 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "tools/ci/theme_rules_baseline.txt"
 SKIP = re.compile(r"/vendor/|\.min\.|/node_modules/|/dropins/")
 SECTIONISH = re.compile(r"\.kit-section\b(?!-)|\.alignfull\b|(^|[\s>+~,(])section\b|\.aw-camp-section\b|\.kit-section-band\b|\.kit-hero\b")
+BLOCKS = re.compile(
+    r"\.(kit-card|kit-card-body|kit-tile|kit-photo-card|is-style-kits-card|aw-more-card|aw-more-body|aw-story--card|aw-bento-tile"
+    r"|aw-org|aw-org-facts|aw-vol-banner|aw-vol-banner-body|kit-share|aw-camp-share-kit|aw-content|aw-festive|kit-claim|aw-report"
+    r"|aw-side-camp|aw-side-camp-body|aw-side-claim|aw-activity-box|aw-helpline|aw-emergency|aw-form-for|aw-claim-summary"
+    r"|aw-sponsored-item|aw-about-act|kit-form-summary|kit-form-done|kit-form-status|kit-toc|aw-near"
+    r"|aw-camp-card|aw-camp-way|aw-listing-help|aw-local-card|ff-message-success)(--[\w-]+)?(?![\w-])"
+)
+# Boxes drawn on a list's items or a box's parts (the wrapper has no box): matched on the whole selector.
+BLOCK_PARTS = re.compile(
+    r"(\.aw-camp-docs-q li|\.aw-categories-index a|\.aw-camp-partners a|\.kit-toc > summary|\.kit-toc ol"
+    r"|:is\(\.aw-camp-timeline, \.aw-camp-tracker\) tr)$"
+)
+PAD_PROPS = ("padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-block", "padding-inline",
+             "padding-block-start", "padding-block-end", "padding-inline-start", "padding-inline-end")
+PAD_MIN = 24
 THEME_PAD = re.compile(r"^\s*var\(--kit-(space-section|section-y)\)(\s+var\(--kit-(space-section|section-y)\))?\s*!important\s*$")
 
 
@@ -90,6 +110,97 @@ def big(v):
     return False
 
 
+def subjects(sel):
+    """The last compound of each selector in a list (what the rule styles), without :has()/:not() arguments."""
+    out, depth, cur = [], 0, ""
+    for c in sel:
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth -= 1
+        if c == "," and depth == 0:
+            out.append(cur)
+            cur = ""
+        else:
+            cur += c
+    out.append(cur)
+    res = []
+    for s in out:
+        s = s.strip()
+        while True:
+            m = re.search(r":(has|not)\(", s)
+            if not m:
+                break
+            d, j = 1, m.end()
+            while j < len(s) and d:
+                d += {"(": 1, ")": -1}.get(s[j], 0)
+                j += 1
+            s = s[:m.start()] + s[j:]
+        parts, depth, cur = [], 0, ""
+        for c in s:
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            if depth == 0 and c in " >+~":
+                if cur:
+                    parts.append(cur)
+                cur = ""
+            else:
+                cur += c
+        if cur:
+            parts.append(cur)
+        if parts and "::" not in parts[-1]:
+            res.append((" ".join(s.split()), parts[-1]))
+    return res
+
+
+def split_values(v):
+    out, depth, cur = [], 0, ""
+    for c in v:
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth -= 1
+        if c.isspace() and depth == 0:
+            if cur:
+                out.append(cur)
+            cur = ""
+        else:
+            cur += c
+    if cur:
+        out.append(cur)
+    return out
+
+
+def px(tok):
+    """A padding value in px at its smallest (phones), or None when it cannot be told (unknown variable, calc, percent)."""
+    tok = tok.strip()
+    m = re.fullmatch(r"var\(\s*--(kit-space|s)-(\d+)\s*(?:,.*)?\)", tok)
+    if m:
+        n = int(m.group(2))
+        return 0 if n < (5 if m.group(1) == "kit-space" else 6) else PAD_MIN
+    if re.fullmatch(r"var\(\s*--kit-space-(section|band-gap)\s*(?:,.*)?\)", tok):
+        return PAD_MIN
+    if re.fullmatch(r"var\(\s*--kit-space-(gutter|grid|head|head-meta|collection)\s*(?:,.*)?\)", tok):
+        return 16
+    m = re.fullmatch(r"clamp\(([^,]+),.*\)", tok)
+    if m:
+        return px(m.group(1))
+    m = re.fullmatch(r"(\d*\.?\d+)(px|rem|em)?", tok)
+    if m:
+        x = float(m.group(1))
+        return x * 16 if m.group(2) in ("rem", "em") else x
+    return None
+
+
+def thin(k, v):
+    vals = split_values(v.replace("!important", ""))
+    if not vals or len(vals) > 4:
+        return False
+    return any(p is not None and p < PAD_MIN for p in map(px, vals))
+
+
 def findings():
     out = []
     for f in sorted(css_files()):
@@ -108,6 +219,8 @@ def findings():
                     kinds.append("height")
                 if k in ("padding", "padding-block", "padding-top", "padding-bottom") and "!important" in v and SECTIONISH.search(sel) and not THEME_PAD.match(v):
                     kinds.append("imp")
+                if k in PAD_PROPS and any(BLOCKS.search(last) or BLOCK_PARTS.search(whole) for whole, last in subjects(sel)) and thin(k, v):
+                    kinds.append("pad")
                 for kind in kinds:
                     out.append((rel, line, kind, sel, f"{k}: {v}"))
     return out
@@ -131,7 +244,8 @@ def main():
                 allowed.add(l)
     new = [x for x in found if key(x[0], x[2], x[3], x[4]) not in allowed]
     if new:
-        print("New section-height rules break the theme (docs/design-system.md, Section heights):")
+        print("New section-height or card-padding rules break the theme (docs/design-system.md, Section heights;"
+              " docs/card-sizes.md, 24px card padding):")
         for rel, line, kind, sel, decl in new:
             print(f"  {rel}:{line}: [{kind}] {sel} {{ {decl} }}")
         sys.exit(1)
