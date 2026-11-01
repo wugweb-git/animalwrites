@@ -75,6 +75,7 @@
   --kit-space-section: 48px;
   --kit-space-band-gap: var(--s-6); /* head band › a list toolbar under it: 24 / 32 / 40 */
   --kit-hero-min: 560px;
+  --kit-photo-card-h: 250px; /* photo card in a stack (Take action): 250 on phones, 350 from 768 (owner, 2 Nov 2026) */
   --kit-space-gutter: 16px;
   --kit-space-grid: 16px;
   --kit-width-content: 720px;
@@ -200,6 +201,7 @@
 }
 @media (min-width: 768px) {
   :root {
+    --kit-photo-card-h: 350px;
     --kit-space-section: 70px;
     --kit-space-band-gap: var(--s-8);
     --kit-space-gutter: 32px;
