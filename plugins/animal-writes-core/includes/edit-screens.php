@@ -700,9 +700,9 @@ function aw_edit_screen_display_rows( array $rows ): array {
 		foreach ( $general as $r ) {
 			if ( ! in_array( $r['id'], $row['ids'], true ) ) {
 				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : ( 'admin' === $r['screen'] ? ' — ' . aw_edit_screen_type_label( $r['type'], 'admin' ) : '' ) );
-				foreach ( $r['notes'] as $n ) {
-					$row['notes'][] = $r['title'] . ': ' . $n;
-				}
+			}
+			foreach ( $r['notes'] as $n ) { // every type's notes, not only the first type's
+				$row['notes'][] = $r['title'] . ( '' !== (string) $r['type'] ? ' (' . $r['type'] . ')' : '' ) . ': ' . $n;
 			}
 			$row = aw_edit_screen_join_row( $row, $r, false );
 		}
