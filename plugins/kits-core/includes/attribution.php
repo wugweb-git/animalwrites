@@ -55,7 +55,7 @@ function aw_source_row_html( $id, $link = false ) {
 	}
 	$icon = $host ? aw_favicon_url( $host ) : '';
 	$mark = $icon
-		? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="" width="16" height="16" loading="lazy" decoding="async">'
+		? '<img class="aw-src-icon" src="' . esc_url( $icon ) . '" alt="' . esc_attr( $name ) . '" width="16" height="16" loading="lazy" decoding="async">'
 		: '<span class="aw-src-icon aw-src-icon--letter" aria-hidden="true">' . esc_html( mb_strtoupper( mb_substr( $name, 0, 1 ) ) ) . '</span>';
 	$url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$text = '<span class="aw-src-name">' . esc_html( $name ) . '</span>';
